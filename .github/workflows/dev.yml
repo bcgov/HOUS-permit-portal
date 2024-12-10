@@ -22,6 +22,8 @@ jobs:
           sudo apt-get update
           sudo apt-get install git-lfs
           git lfs install
+      - name: Confirm branch to deploy
+        run: echo "Deploying branch ${{ github.event.inputs.branch }} to Dev"
       - name: Checkout Code
         uses: actions/checkout@v3
         with:
