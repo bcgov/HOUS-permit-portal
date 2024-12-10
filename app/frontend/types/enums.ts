@@ -151,6 +151,7 @@ export enum EPermitApplicationReviewerSortFields {
   submittedAt = "submitted_at",
 }
 
+
 export enum ESortDirection {
   ascending = "asc",
   descending = "desc",
