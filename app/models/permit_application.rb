@@ -210,6 +210,7 @@ class PermitApplication < ApplicationRecord
           collaboration_type: :review,
           collaborator_type: :delegatee
         ).first&.name,
+      has_collaborator: has_collaborator?,
       sandbox_id: sandbox_id
     }
   end
@@ -219,6 +220,10 @@ class PermitApplication < ApplicationRecord
       collaboration_type:,
       collaborator_type:
     ).exists?(id: user_id)
+  end
+
+  def has_collaborator?
+    collaborators.any?
   end
 
   def submission_requirement_block_edit_permissions(user_id:)
