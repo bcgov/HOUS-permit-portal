@@ -118,6 +118,12 @@ export const Part3StepCodeChecklistModel = types
     get electricity(): IFuelType {
       return self.fuelTypes.find((ft) => ft.key == EFuelType.electricity)
     },
+    get fuelTypeIdsToFuelType(): Record<string, IFuelType> {
+      return self.fuelTypes.reduce((acc, fuelType) => {
+        acc[fuelType.id] = fuelType
+        return acc
+      }, {})
+    },
   }))
   .views((self) => ({
     get totalElectricityUse(): number {

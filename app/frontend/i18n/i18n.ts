@@ -1297,6 +1297,8 @@ const options = {
                   other: "Other",
                 },
                 addUseType: "Add use type",
+                totalAnnualEnergy: "Total annual energy",
+                totalEmissions: "Total annual emissions",
               },
             },
           },
