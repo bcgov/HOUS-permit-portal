@@ -1152,6 +1152,25 @@ const options = {
                 label: "Do you need to add any other fuel types?",
               },
             },
+            baselinePerformance: {
+              heading: "Baseline energy model performance",
+              refAnnualThermalEnergyDemand: {
+                label: "Total annual thermal energy demand for baseline building",
+                units: "kWh",
+                hint: "Results for the baseline or reference building or building portion",
+                error: "Enter the total annual thermal energy demand for the baseline buidling",
+              },
+              refEnergyOutputs: {
+                label: "In the table, enter the annual energy demand for each fuel type",
+                fuelType: "Fuel type",
+                annualEnergy: "Annual energy (kWh)",
+                emissionsFactor: "Emissions factor (kgCO<sub>2e</sub>/kWh)",
+                emissions: "Emissions (kgCO<sub>2e</sub>)",
+                totalAnnualEnergy: "Total annual energy",
+                totalAnnualEmissions: "Total annual emissions",
+                hint: "Need to change an emissions factor or add a fuel type? Go to <link>fuel types</link>",
+              },
+            },
           },
           title: "Step code auto-compliance tool",
           subTitle:
