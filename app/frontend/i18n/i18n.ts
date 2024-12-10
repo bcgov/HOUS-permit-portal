@@ -1297,6 +1297,8 @@ const options = {
                   other: "Other",
                 },
                 addUseType: "Add use type",
+                totalByFuelType: "Total <1>{{fuelType}}</1>",
+                totalByFuelTypeOther: "Total <1>{{fuelTypeDescription}}</1> (Other)",
                 totalAnnualEnergy: "Total annual energy",
                 totalEmissions: "Total annual emissions",
               },
