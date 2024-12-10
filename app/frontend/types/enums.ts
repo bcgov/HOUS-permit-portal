@@ -589,3 +589,21 @@ export enum EFuelType {
   woodFuel = "wood_fuel",
   other = "other",
 }
+
+export enum EEnergyOutputUseType {
+  interiorLighting = "interior_lighting",
+  exteriorLighting = "exterior_lighting",
+  heatingGeneral = "heating_general",
+  cooling = "cooling",
+  pumps = "pumps",
+  fans = "fans",
+  domesticHotWater = "domestic_hot_water",
+  plugLoads = "plug_loads",
+  heatingGas = "heating_gas",
+  other = "other",
+}
+
+export enum EEnergyOutputSource {
+  modelled = "modelled",
+  reference = "reference",
+}
