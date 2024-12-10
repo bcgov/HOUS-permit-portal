@@ -26,6 +26,7 @@ class Api::Part3Building::ChecklistsController < Api::ApplicationController
       :building_height,
       :heating_degree_days,
       :climate_zone,
+      :ref_annual_thermal_energy_demand,
       section_completion_status: {
       },
       baseline_occupancies_attributes: %i[
@@ -44,7 +45,8 @@ class Api::Part3Building::ChecklistsController < Api::ApplicationController
         description
         emissions_factor
         source
-      ]
+      ],
+      reference_energy_outputs_attributes: %i[id fuel_type_id annual_energy]
     )
   end
 end
