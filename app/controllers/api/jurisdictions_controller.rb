@@ -17,7 +17,9 @@ class Api::JurisdictionsController < Api::ApplicationController
                      only: %i[show index jurisdiction_options]
 
   def index
-    perform_search
+    perform_search(
+      allow_admin_fields: current_user && current_user.super_admin?
+    )
     authorized_results = apply_search_authorization(@search.results)
     render_success authorized_results,
                    nil,
