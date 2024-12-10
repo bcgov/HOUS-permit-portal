@@ -4,7 +4,7 @@ import { computed } from "mobx"
 import { isEmpty } from "ramda"
 import React, { useCallback, useMemo } from "react"
 import { FieldArrayWithId, useController, useFieldArray, useFormContext } from "react-hook-form"
-import { useTranslation } from "react-i18next"
+import { Trans, useTranslation } from "react-i18next"
 import { IMpdelledEnergyOutputChecklistForm } from "."
 import { usePart3StepCode } from "../../../../../../hooks/resources/use-part-3-step-code"
 import { EFuelType } from "../../../../../../types/enums"
@@ -125,18 +125,69 @@ export const ModelledEnergyOutputsGrid = ({ ...rest }: IProps) => {
         </Button>
       </GridData>
 
+      {/* Total by fuel type rows */}
+      {Object.values(fuelTypeIdsToFuelType).map((fuelType) => {
+        const fuelTypeLabel = t(`${i18nPrefix}.fuelTypes.${fuelType.key as EFuelType}`)
+        const isOther = fuelType.key === "other"
+        return (
+          <React.Fragment key={fuelType.id}>
+            <GridRowHeader colSpan={1} fontSize="md">
+              <Trans
+                i18nKey={isOther ? `${i18nPrefix}.totalByFuelTypeOther` : `${i18nPrefix}.totalByFuelType`}
+                components={{ 1: <Text as="span" textTransform="lowercase" /> }}
+                values={{
+                  fuelType: isOther ? undefined : fuelTypeLabel,
+                  fuelTypeDescription: isOther ? fuelType.description : undefined,
+                }}
+              />
+            </GridRowHeader>
+            <GridData colSpan={2}>
+              <Input
+                value={
+                  fuelTypeIdsToAnnualEnergy[fuelType.id]?.toLocaleString?.("en-CA", { maximumFractionDigits: 3 }) ?? ""
+                }
+                isReadOnly
+                isDisabled
+                textAlign="center"
+                w="114.5px"
+              />
+            </GridData>
+            <GridData colSpan={1}>
+              <Input
+                value={getFuelTypeById(fuelType.id)?.emissionsFactor ?? ""}
+                isReadOnly
+                isDisabled
+                textAlign="center"
+                w="114.5px"
+              />
+            </GridData>
+            <GridData colSpan={1}>
+              <Input
+                value={
+                  fuelTypeIdsToEmissions[fuelType.id]?.toLocaleString?.("en-CA", { maximumFractionDigits: 3 }) ?? ""
+                }
+                isReadOnly
+                isDisabled
+                textAlign="center"
+                w="114.5px"
+              />
+            </GridData>
+          </React.Fragment>
+        )
+      })}
+
       {/* Totals Row */}
       <GridRowHeader colSpan={1} fontWeight="bold" fontSize="sm">
         {t(`${i18nPrefix}.totalAnnualEnergy`)}
       </GridRowHeader>
       <GridData colSpan={2}>
-        <Text textAlign="right">{formattedTotalAnnualEnergy}</Text>
+        <Input value={formattedTotalAnnualEnergy} isReadOnly isDisabled textAlign="center" w="114.5px" />
       </GridData>
       <GridRowHeader colSpan={1} fontWeight="bold" fontSize="sm">
         {t(`${i18nPrefix}.totalEmissions`)}
       </GridRowHeader>
       <GridData colSpan={1} borderRightWidth={1}>
-        <Text textAlign="right">{formattedTotalEmissions}</Text>
+        <Input value={formattedTotalEmissions} isReadOnly isDisabled textAlign="center" w="114.5px" />
       </GridData>
     </Grid>
   )
@@ -175,7 +226,7 @@ const ModelledEnergyOutputRow = ({
       const baseFuelTypeLabel = t(`${i18nPrefix}.fuelTypes.${fuelType.key as EFuelType}`)
 
       return {
-        label: fuelType.key === "other" ? `${baseFuelTypeLabel} - ${fuelType.key}` : baseFuelTypeLabel,
+        label: fuelType.key === "other" ? `${baseFuelTypeLabel} - ${fuelType.description}` : baseFuelTypeLabel,
         value: fuelType,
       }
     })
@@ -230,20 +281,34 @@ const ModelledEnergyOutputRow = ({
         <Text>{t(`${i18nPrefix}.useTypes.${field.useType}`)}</Text>
       </GridData>
       <GridData>
-        <Input value={formattedAnnualEnergy} onChange={handleChangeAnnualEnergy} textAlign="right" min={0} />
+        <Input value={formattedAnnualEnergy} onChange={handleChangeAnnualEnergy} textAlign="center" min={0} />
       </GridData>
       <GridData>
-        <FuelTypeSelect options={fuelTypeOptions} onChange={handleChangeFuelType} value={selectedFuelType} />
+        <FuelTypeSelect
+          options={fuelTypeOptions}
+          onChange={handleChangeFuelType}
+          value={selectedFuelType}
+          selectProps={{
+            isClearable: true,
+            styles: {
+              container: (base) => ({
+                ...base,
+                width: "100%",
+              }),
+            },
+          }}
+        />
       </GridData>
       <GridData>
         <Input
           value={emissionFactor?.toLocaleString("en-CA", { maximumFractionDigits: 3 }) ?? ""}
+          textAlign="center"
           isReadOnly
           isDisabled
         />
       </GridData>
       <GridData borderRightWidth={1}>
-        <Input value={calculatedEmissionsText ?? ""} isReadOnly isDisabled />
+        <Input value={calculatedEmissionsText ?? ""} isReadOnly isDisabled textAlign="center" />
       </GridData>
     </React.Fragment>
   )
