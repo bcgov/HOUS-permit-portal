@@ -13,11 +13,11 @@ interface ICustomMessageBoxProps
 }
 
 const iconMap = {
-  success: <CheckCircle size={24} aria-label={"success icon"} />,
-  warning: <Warning size={24} aria-label={"warning icon"} />,
-  error: <WarningCircle size={24} aria-label={"error icon"} />,
-  info: <Info size={24} aria-label={"info icon"} />,
-  spacial: <Info size={24} aria-label={"info icon"} />,
+  success: <CheckCircle size={20} aria-label={"success icon"} />,
+  warning: <Warning size={20} aria-label={"warning icon"} />,
+  error: <WarningCircle size={20} aria-label={"error icon"} />,
+  info: <Info size={20} aria-label={"info icon"} />,
+  spacial: <Info size={20} aria-label={"info icon"} />,
 }
 
 export const CustomMessageBox = ({
@@ -43,7 +43,7 @@ export const CustomMessageBox = ({
         <Box color={`semantic.${status}`}>{iconMap[status]}</Box>
         <Flex direction="column" gap={2}>
           {title && (
-            <Heading as="h3" fontSize="md" {...headingProps}>
+            <Heading as="h3" fontSize="md" m={0} lineHeight={5} {...headingProps}>
               {title}
             </Heading>
           )}

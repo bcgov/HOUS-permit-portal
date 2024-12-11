@@ -3,16 +3,39 @@ class Part3StepCode::Checklist < ApplicationRecord
 
   belongs_to :step_code, optional: true
 
-  has_many :occupancy_classifications
-  has_many :fuel_types
+  has_many :occupancy_classifications, dependent: :destroy
+  has_many :baseline_occupancies,
+           -> { where(occupancy_type: :baseline) },
+           class_name: "Part3StepCode::OccupancyClassification"
+  accepts_nested_attributes_for :baseline_occupancies, allow_destroy: true
+  has_many :step_code_occupancies,
+           -> { where(occupancy_type: :step_code) },
+           class_name: "Part3StepCode::OccupancyClassification"
+  accepts_nested_attributes_for :step_code_occupancies, allow_destroy: true
+
+  has_many :fuel_types, dependent: :destroy
+  accepts_nested_attributes_for :fuel_types, allow_destroy: true
+
   has_many :make_up_air_fuels
   has_many :document_references
   has_many :reference_energy_outputs,
            -> { where(source: :reference) },
-           class_name: "Part3StepCode::EnergyOutput"
+           class_name: "Part3StepCode::EnergyOutput",
+           dependent: :destroy
+  accepts_nested_attributes_for :reference_energy_outputs
+
   has_many :modelled_energy_outputs,
            -> { where(source: :modelled) },
            class_name: "Part3StepCode::EnergyOutput"
+
+  delegate :building_permit_number,
+           :nickname,
+           :jurisdiction_name,
+           :full_address,
+           :pid,
+           :status,
+           :newly_submitted_at,
+           to: :step_code
 
   enum building_code_version: %i[
          revision_1
@@ -43,7 +66,7 @@ class Part3StepCode::Checklist < ApplicationRecord
          air_source_vrf
          ground_source_vrf
          gas_boiler
-         district_sytem
+         district_system
          other
        ],
        _prefix: :heating_plant
@@ -106,5 +129,10 @@ class Part3StepCode::Checklist < ApplicationRecord
     else
       [:total_energy]
     end
+  end
+
+  def heating_degree_days
+    self[:heating_degree_days].presence ||
+      step_code.jurisdiction_heating_degree_days
   end
 end
