@@ -8,6 +8,7 @@ import { DistrictEnergy } from "./district-energy"
 import { FuelTypes } from "./fuel-types"
 import { AdditionalFuelTypes } from "./fuel-types/additional-fuel-types"
 import { LocationDetails } from "./location-details"
+import { OverheatingRequirements } from "./overheating-requirements"
 import { ProjectDetails } from "./project-details"
 import { RenewableEnergy } from "./renewable-energy"
 import { StartPage } from "./start-page"
@@ -42,5 +43,7 @@ export const FormSection = observer(function Part3StepCodeFormSection() {
       return <StepCodeOccupanciesPerformanceRequirements />
     case "renewable-energy":
       return <RenewableEnergy />
+    case "overheating-requirements":
+      return <OverheatingRequirements />
   }
 })
