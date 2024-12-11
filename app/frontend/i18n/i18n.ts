@@ -1306,6 +1306,7 @@ const options = {
                 totalByFuelTypeOther: "Total <1>{{fuelTypeDescription}}</1> (Other)",
                 totalAnnualEnergy: "Total annual energy",
                 totalEmissions: "Total annual emissions",
+                fuelTypeRequired: "To add an energy use type, select a fuel type first.",
               },
               annualEnergyWholeBuildingTable: {
                 tableHeader: "Annual energy for calculations (whole building)",
