@@ -584,7 +584,8 @@ export interface IFuelType {
 }
 
 export interface IEnergyOutput {
-  fuelType: string
+  id?: string
+  fuelTypeId: string
   annualEnergy: string
   name: string
 }

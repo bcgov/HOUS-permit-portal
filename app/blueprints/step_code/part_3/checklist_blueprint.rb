@@ -3,7 +3,10 @@ class StepCode::Part3::ChecklistBlueprint < Blueprinter::Base
 
   fields :section_completion_status
 
-  fields :jurisdiction_name, :building_height, :heating_degree_days
+  fields :jurisdiction_name,
+         :building_height,
+         :heating_degree_days,
+         :ref_annual_thermal_energy_demand
   field :pid, name: :project_identifier
   field :nickname, name: :project_name
   field :full_address, name: :project_address
@@ -40,4 +43,6 @@ class StepCode::Part3::ChecklistBlueprint < Blueprinter::Base
                 StepCode::Part3::FuelTypeBlueprint do |checklist, _options|
     checklist.fuel_types + Part3StepCode::FuelType.defaults
   end
+  association :reference_energy_outputs,
+              blueprint: StepCode::Part3::EnergyOutputBlueprint
 end

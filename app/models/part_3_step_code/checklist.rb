@@ -21,6 +21,8 @@ class Part3StepCode::Checklist < ApplicationRecord
   has_many :reference_energy_outputs,
            -> { where(source: :reference) },
            class_name: "Part3StepCode::EnergyOutput"
+  accepts_nested_attributes_for :reference_energy_outputs
+
   has_many :modelled_energy_outputs,
            -> { where(source: :modelled) },
            class_name: "Part3StepCode::EnergyOutput"

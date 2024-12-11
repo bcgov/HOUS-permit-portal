@@ -49,6 +49,7 @@ export const Part3StepCodeChecklistModel = types
     // user input fields
     fuelTypes: types.array(types.frozen<IFuelType>()),
     baselineOccupancies: types.array(types.frozen<IBaselineOccupancy>()),
+    refAnnualThermalEnergyDemand: types.maybeNull(types.string),
     referenceEnergyOutputs: types.array(types.frozen<IEnergyOutput>()),
     stepCodeOccupancies: types.array(types.frozen<IStepCodeOccupancy>()),
     generatedElectricity: types.maybeNull(types.string),
@@ -103,6 +104,9 @@ export const Part3StepCodeChecklistModel = types
     },
     isRelevant(key: TPart3NavLinkKey): boolean {
       return self.sectionCompletionStatus[key]?.relevant
+    },
+    fuelType(id: string): IFuelType {
+      return self.fuelTypes.find((ft) => ft.id == id)
     },
     get districtEnergyFuelType(): IFuelType | undefined {
       return self.fuelTypes.find((ft) => ft.key == EFuelType.districtEnergy)
