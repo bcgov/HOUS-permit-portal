@@ -57,6 +57,7 @@ class StepCode::Part3::ChecklistBlueprint < Blueprinter::Base
     checklist.fuel_types + Part3StepCode::FuelType.defaults
   end
   association :reference_energy_outputs,
+              blueprint: StepCode::Part3::EnergyOutputBlueprint
   association :modelled_energy_outputs,
               blueprint: StepCode::Part3::EnergyOutputBlueprint
 end
