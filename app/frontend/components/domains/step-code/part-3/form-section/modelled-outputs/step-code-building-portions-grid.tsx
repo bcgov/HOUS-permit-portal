@@ -4,6 +4,7 @@ import React, { useCallback, useMemo } from "react"
 import { useController, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { IMpdelledEnergyOutputChecklistForm } from "."
+import { usePart3StepCode } from "../../../../../../hooks/resources/use-part-3-step-code"
 import { formattedStringToNumber, numberToFormattedString } from "../../../../../../utils/utility-functions"
 import { GridColumnHeader } from "../../../part-9/checklist/shared/grid/column-header"
 import { GridData } from "../../../part-9/checklist/shared/grid/data"
@@ -13,9 +14,16 @@ const sharedInputProps: Partial<InputProps> = {
   textAlign: "center",
 }
 
+const disabledInputProps: Partial<InputProps> = {
+  ...sharedInputProps,
+  isDisabled: true,
+}
+
 export const StepCodeBuildingPortionsGrid = observer(function StepCodeBuildingPortionGrid() {
   const { t } = useTranslation()
   const i18nPrefix = "stepCode.part3.modelledOutputs.stepCodeBuildingPortionsTable"
+  const { checklist } = usePart3StepCode()
+  const totalStepCodeOccupancyFloorArea = Number(checklist?.totalStepCodeOccupancyFloorArea ?? "0")
   const { control } = useFormContext<IMpdelledEnergyOutputChecklistForm>()
   const {
     field: { value: stepCodeAnnualThermalEnergyDemand, onChange: onChangeStepCodeAnnualThermalEnergyDemand },
@@ -31,6 +39,16 @@ export const StepCodeBuildingPortionsGrid = observer(function StepCodeBuildingPo
     },
     [onChangeStepCodeAnnualThermalEnergyDemand]
   )
+
+  const formattedStepCodeAnnualThermalEnergyDemandPerSquareMeter = useMemo(() => {
+    if (totalStepCodeOccupancyFloorArea === 0) return ""
+
+    return numberToFormattedString(stepCodeAnnualThermalEnergyDemand / totalStepCodeOccupancyFloorArea)
+  }, [stepCodeAnnualThermalEnergyDemand, totalStepCodeOccupancyFloorArea])
+
+  const editableInputProps = useMemo(() => {
+    return totalStepCodeOccupancyFloorArea > 0 ? sharedInputProps : disabledInputProps
+  }, [totalStepCodeOccupancyFloorArea])
 
   return (
     <Grid
@@ -49,14 +67,14 @@ export const StepCodeBuildingPortionsGrid = observer(function StepCodeBuildingPo
         <Input
           value={formattedStepCodeAnnualThermalEnergyDemand}
           onChange={handleChangeStepCodeAnnualThermalEnergyDemand}
-          {...sharedInputProps}
+          {...editableInputProps}
         />
       </GridData>
 
       {/* kWh/m2 */}
       <GridRowHeader>{t(`${i18nPrefix}.kwhM2`)}</GridRowHeader>
       <GridData borderRightWidth={1}>
-        <Input {...sharedInputProps} isDisabled isReadOnly />
+        <Input value={formattedStepCodeAnnualThermalEnergyDemandPerSquareMeter} isReadOnly {...disabledInputProps} />
       </GridData>
     </Grid>
   )

@@ -56,6 +56,8 @@ export const Part3StepCodeChecklistModel = types
     modelledEnergyOutputs: types.array(types.frozen<IEnergyOutput>()),
     totalAnnualThermalEnergyDemand: types.maybeNull(types.string),
     totalAnnualCoolingEnergyDemand: types.maybeNull(types.string),
+    totalOccupancyFloorArea: types.maybeNull(types.string),
+    totalStepCodeOccupancyFloorArea: types.maybeNull(types.string),
     stepCodeAnnualThermalEnergyDemand: types.maybeNull(types.string),
     overheatingHoursLimit: types.maybeNull(types.number),
     overheatingHours: types.maybeNull(types.string),

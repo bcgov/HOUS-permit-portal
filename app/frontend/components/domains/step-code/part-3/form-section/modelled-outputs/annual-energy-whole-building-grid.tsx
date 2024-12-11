@@ -4,6 +4,7 @@ import React, { useCallback, useMemo } from "react"
 import { useController, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { IMpdelledEnergyOutputChecklistForm } from "."
+import { usePart3StepCode } from "../../../../../../hooks/resources/use-part-3-step-code"
 import { formattedStringToNumber, numberToFormattedString } from "../../../../../../utils/utility-functions"
 import { GridColumnHeader } from "../../../part-9/checklist/shared/grid/column-header"
 import { GridData } from "../../../part-9/checklist/shared/grid/data"
@@ -14,9 +15,18 @@ const i18nPrefix = "stepCode.part3.modelledOutputs.annualEnergyWholeBuildingTabl
 const sharedInputProps: Partial<InputProps> = {
   textAlign: "center",
 }
+
+const disabledInputProps: Partial<InputProps> = {
+  isDisabled: true,
+  ...sharedInputProps,
+}
+
 export const AnnualEnergyWholeBuildingGrid = observer(function AnnualEnergyWholeBuildingGrid() {
   const { t } = useTranslation()
+  const { checklist } = usePart3StepCode()
+  const totalOccupancyFloorArea = Number(checklist?.totalOccupancyFloorArea ?? 0)
   const { control } = useFormContext<IMpdelledEnergyOutputChecklistForm>()
+
   const {
     field: { value: totalAnnualThermalEnergyDemand, onChange: onChangeTotalAnnualThermalEnergyDemand },
   } = useController({
@@ -36,6 +46,17 @@ export const AnnualEnergyWholeBuildingGrid = observer(function AnnualEnergyWhole
   const formattedTotalAnnualCoolingEnergyDemand = useMemo(() => {
     return numberToFormattedString(totalAnnualCoolingEnergyDemand)
   }, [totalAnnualCoolingEnergyDemand])
+  const formattedThermalEnergyDemandPerSquareMeter = useMemo(() => {
+    if (totalOccupancyFloorArea === 0) return ""
+
+    return numberToFormattedString(totalAnnualThermalEnergyDemand / totalOccupancyFloorArea)
+  }, [totalAnnualThermalEnergyDemand, totalOccupancyFloorArea])
+
+  const formattedCoolingEnergyDemandPerSquareMeter = useMemo(() => {
+    if (totalOccupancyFloorArea === 0) return ""
+
+    return numberToFormattedString(totalAnnualCoolingEnergyDemand / totalOccupancyFloorArea)
+  }, [totalAnnualCoolingEnergyDemand, totalOccupancyFloorArea])
 
   const handleChangeTotalAnnualThermalEnergyDemand = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -50,6 +71,10 @@ export const AnnualEnergyWholeBuildingGrid = observer(function AnnualEnergyWhole
     },
     [onChangeTotalAnnualCoolingEnergyDemand]
   )
+
+  const editableInputProps = useMemo(() => {
+    return totalOccupancyFloorArea > 0 ? sharedInputProps : disabledInputProps
+  }, [totalOccupancyFloorArea])
 
   return (
     <Grid
@@ -67,11 +92,11 @@ export const AnnualEnergyWholeBuildingGrid = observer(function AnnualEnergyWhole
         <Input
           value={formattedTotalAnnualThermalEnergyDemand}
           onChange={handleChangeTotalAnnualThermalEnergyDemand}
-          {...sharedInputProps}
+          {...editableInputProps}
         />
       </GridData>
       <GridData borderRightWidth={1}>
-        <Input isDisabled isReadOnly />
+        <Input value={formattedThermalEnergyDemandPerSquareMeter} isReadOnly {...disabledInputProps} />
       </GridData>
       {/* Cooling energy demand row */}
       <GridRowHeader>{t(`${i18nPrefix}.annualCoolingEnergyDemand`)}</GridRowHeader>
@@ -79,11 +104,11 @@ export const AnnualEnergyWholeBuildingGrid = observer(function AnnualEnergyWhole
         <Input
           value={formattedTotalAnnualCoolingEnergyDemand}
           onChange={handleChangeTotalAnnualCoolingEnergyDemand}
-          {...sharedInputProps}
+          {...editableInputProps}
         />
       </GridData>
       <GridData borderRightWidth={1}>
-        <Input isDisabled isReadOnly {...sharedInputProps} />
+        <Input value={formattedCoolingEnergyDemandPerSquareMeter} isReadOnly {...disabledInputProps} />
       </GridData>
     </Grid>
   )

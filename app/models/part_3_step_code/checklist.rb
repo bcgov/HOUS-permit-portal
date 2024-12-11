@@ -137,4 +137,12 @@ class Part3StepCode::Checklist < ApplicationRecord
     self[:heating_degree_days].presence ||
       step_code.jurisdiction_heating_degree_days
   end
+
+  def total_occupancy_floor_area
+    occupancy_classifications.sum(:modelled_floor_area) || 0
+  end
+
+  def total_step_code_occupancy_floor_area
+    step_code_occupancies.sum(:modelled_floor_area) || 0
+  end
 end
