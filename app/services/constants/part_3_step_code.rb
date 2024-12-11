@@ -1,5 +1,7 @@
 module Constants
   module Part3StepCode
+    OVERHEATING_HOURS_LIMIT = 200
+
     OCCUPANCIES_LOOKUP = {
       performing_arts_assembly: {
         type: :baseline

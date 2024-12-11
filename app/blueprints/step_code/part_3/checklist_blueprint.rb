@@ -7,10 +7,15 @@ class StepCode::Part3::ChecklistBlueprint < Blueprinter::Base
          :building_height,
          :heating_degree_days,
          :ref_annual_thermal_energy_demand,
-         :generated_electricity
+         :generated_electricity,
+         :overheating_hours
   field :pid, name: :project_identifier
   field :nickname, name: :project_name
   field :full_address, name: :project_address
+
+  field :overheating_hours_limit do |_checklist, _options|
+    Constants::Part3StepCode::OVERHEATING_HOURS_LIMIT
+  end
 
   field :permit_date do |checklist, _options|
     checklist.newly_submitted_at&.strftime("%b%e, %Y")

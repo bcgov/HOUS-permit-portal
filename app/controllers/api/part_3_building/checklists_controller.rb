@@ -28,6 +28,7 @@ class Api::Part3Building::ChecklistsController < Api::ApplicationController
       :climate_zone,
       :ref_annual_thermal_energy_demand,
       :generated_electricity,
+      :overheating_hours,
       section_completion_status: {
       },
       baseline_occupancies_attributes: %i[
