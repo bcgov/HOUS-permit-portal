@@ -1,5 +1,6 @@
-import { Box, Button, Grid, GridProps, Input, InputProps, Text, Tooltip } from "@chakra-ui/react"
+import { Box, Button, Grid, GridProps, Input, InputProps, Stack, Text, Tooltip } from "@chakra-ui/react"
 import { Plus } from "@phosphor-icons/react"
+import { Info } from "@phosphor-icons/react/dist/ssr"
 import { computed } from "mobx"
 import { observer } from "mobx-react-lite"
 import { path } from "ramda"
@@ -29,16 +30,18 @@ const disabledInputProps: Partial<InputProps> = {
   ...sharedInputProps,
 }
 
+const sharedGridDataProps = {
+  justifyContent: "center",
+  pt: 6,
+}
+
 /**
  * Grid component for displaying modelled energy outputs and emissions calculations
  */
 export const ModelledEnergyOutputsGrid = observer(({ ...rest }: IProps) => {
   const { t } = useTranslation()
-  const { stepCode } = usePart3StepCode()
-  const availableFuelTypes = useMemo(
-    () => computed(() => stepCode?.checklist?.fuelTypes || []),
-    [stepCode?.checklist?.fuelTypes]
-  ).get()
+  const { checklist } = usePart3StepCode()
+  const availableFuelTypes = useMemo(() => computed(() => checklist?.fuelTypes || []), [checklist?.fuelTypes]).get()
 
   const { control, watch } = useFormContext<IMpdelledEnergyOutputChecklistForm>()
   const { fields } = useFieldArray({
@@ -48,8 +51,8 @@ export const ModelledEnergyOutputsGrid = observer(({ ...rest }: IProps) => {
   const watchedModelledEnergyOutputs = watch("modelledEnergyOutputsAttributes")
   const stringifiedWatchedModelledEnergyOutputs = JSON.stringify(watchedModelledEnergyOutputs)
   const fuelTypeIdsToFuelType = useMemo(
-    () => stepCode?.checklist?.fuelTypeIdsToFuelType ?? {},
-    [stepCode?.checklist?.fuelTypeIdsToFuelType]
+    () => checklist?.fuelTypeIdsToFuelType ?? {},
+    [checklist?.fuelTypeIdsToFuelType]
   )
   const fuelTypeIdsToAnnualEnergy = useMemo(() => {
     return watchedModelledEnergyOutputs.reduce<Record<string, number>>((acc, curr) => {
@@ -249,7 +252,7 @@ const ModelledEnergyOutputRow = ({
           : false,
     },
   })
-  const selectedFuelType = useMemo(() => getFuelTypeById(fuelTypeId), [fuelTypeId, getFuelTypeById])
+  const selectedFuelType = useMemo(() => getFuelTypeById(fuelTypeId) ?? null, [fuelTypeId, getFuelTypeById])
 
   const formattedAnnualEnergy = useMemo(() => {
     return numberToFormattedString(annualEnergy)
@@ -264,7 +267,7 @@ const ModelledEnergyOutputRow = ({
 
   const handleChangeFuelType = useCallback(
     (fuelType: IFuelType | null) => {
-      onChangeFuelTypeId(fuelType?.id)
+      onChangeFuelTypeId(fuelType?.id ?? null)
     },
     [onChangeFuelTypeId]
   )
@@ -290,12 +293,13 @@ const ModelledEnergyOutputRow = ({
       onChangeAnnualEnergy(0)
     }
   }, [fuelTypeId])
+
   return (
     <React.Fragment>
-      <GridData px={3} justifyContent={"center"}>
+      <GridData {...sharedGridDataProps}>
         <Text>{t(`${i18nPrefix}.useTypes.${field.useType}`)}</Text>
       </GridData>
-      <GridData>
+      <GridData {...sharedGridDataProps}>
         <Input
           isDisabled={!fuelTypeId}
           value={formattedAnnualEnergy}
@@ -304,44 +308,47 @@ const ModelledEnergyOutputRow = ({
           {...sharedInputProps}
         />
       </GridData>
-      <GridData>
-        <Tooltip label={fuelTypeId ? t(`${i18nPrefix}.fuelTypeClearHelpText`) : t(`${i18nPrefix}.fuelTypeRequired`)}>
-          <Box>
-            <FuelTypeSelect
-              options={fuelTypeOptions}
-              onChange={handleChangeFuelType}
-              value={selectedFuelType}
-              selectProps={{
-                isClearable: true,
-                "aria-errormessage": fuelTypeErrorMessage,
-                styles: {
-                  container: (base) => ({
-                    ...base,
-                    width: "100%",
-                    boxShadow: "none",
-                  }),
-                  control: (base) => ({
-                    ...base,
-                    "&, &:hover, &:focus, &:active": {
-                      boxShadow: fuelTypeErrorMessage
-                        ? "0 0 0 1px var(--chakra-colors-semantic-errorLight)"
-                        : undefined,
-                      borderColor: fuelTypeErrorMessage ? "var(--chakra-colors-semantic-error)" : undefined,
-                    },
-                  }),
-                },
-              }}
-            />
+      <GridData {...sharedGridDataProps} pt={1}>
+        <Stack spacing={0.5} flexDirection={"column"}>
+          <Box alignSelf={"flex-end"}>
+            <Tooltip
+              label={fuelTypeId ? t(`${i18nPrefix}.fuelTypeClearHelpText`) : t(`${i18nPrefix}.fuelTypeRequired`)}
+            >
+              <Info size={16} />
+            </Tooltip>
           </Box>
-        </Tooltip>
+          <FuelTypeSelect
+            options={fuelTypeOptions}
+            onChange={handleChangeFuelType}
+            value={selectedFuelType}
+            selectProps={{
+              "aria-errormessage": fuelTypeErrorMessage,
+              isClearable: true,
+              styles: {
+                container: (base) => ({
+                  ...base,
+                  width: "100%",
+                  boxShadow: "none",
+                }),
+                control: (base) => ({
+                  ...base,
+                  "&, &:hover, &:focus, &:active": {
+                    boxShadow: fuelTypeErrorMessage ? "0 0 0 1px var(--chakra-colors-semantic-errorLight)" : undefined,
+                    borderColor: fuelTypeErrorMessage ? "var(--chakra-colors-semantic-error)" : undefined,
+                  },
+                }),
+              },
+            }}
+          />
+        </Stack>
       </GridData>
-      <GridData>
+      <GridData {...sharedGridDataProps}>
         <Input
           value={emissionFactor?.toLocaleString("en-CA", { maximumFractionDigits: 3 }) ?? ""}
           {...disabledInputProps}
         />
       </GridData>
-      <GridData borderRightWidth={1}>
+      <GridData borderRightWidth={1} {...sharedGridDataProps}>
         <Input value={calculatedEmissionsText ?? ""} {...disabledInputProps} />
       </GridData>
     </React.Fragment>
