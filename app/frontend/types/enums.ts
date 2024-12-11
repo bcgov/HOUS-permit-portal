@@ -285,6 +285,7 @@ export enum EFossilFuelsPresence {
 }
 
 export enum EEnergyStep {
+  two = "2",
   three = "3",
   four = "4",
   five = "5",
@@ -483,6 +484,14 @@ export enum EBaselineOccupancyKey {
   highHazardindustrial = "high_hazard_industrial",
   mediumHazardIndustrial = "medium_hazard_industrial",
   lowHazardIndustrial = "low_hazard_industrial",
+}
+
+export enum EStepCodeOccupancyKey {
+  hotelMotel = "hotel_motel",
+  residential = "residential",
+  office = "office",
+  other = "other",
+  mercantile = "mercantile",
 }
 
 export enum EBaselinePerformanceRequirement {

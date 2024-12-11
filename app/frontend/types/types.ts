@@ -30,6 +30,7 @@ import {
   EStepCodeBuildingType,
   EStepCodeCompliancePath,
   EStepCodeEPCTestingTargetType,
+  EStepCodeOccupancyKey,
   ETemplateVersionStatus,
   EUserRoles,
   EVisibility,
@@ -570,6 +571,7 @@ export interface IBaselineOccupancy {
 }
 export interface IStepCodeOccupancy {
   id?: string
+  key: EStepCodeOccupancyKey
   modelledFloorArea: string
   energyStepRequired: EEnergyStep
   zeroCarbonStepRequired: EZeroCarbonStep

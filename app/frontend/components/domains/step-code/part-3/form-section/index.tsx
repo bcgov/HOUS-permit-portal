@@ -10,6 +10,8 @@ import { AdditionalFuelTypes } from "./fuel-types/additional-fuel-types"
 import { LocationDetails } from "./location-details"
 import { ProjectDetails } from "./project-details"
 import { StartPage } from "./start-page"
+import { StepCodeOccupancies } from "./step-code-occupancies"
+import { StepCodeOccupanciesPerformanceRequirements } from "./step-code-occupancies/performance-requirements"
 
 export const FormSection = observer(function Part3StepCodeFormSection() {
   const { section } = useParams()
@@ -33,5 +35,9 @@ export const FormSection = observer(function Part3StepCodeFormSection() {
       return <AdditionalFuelTypes />
     case "baseline-performance":
       return <BaselinePerformance />
+    case "step-code-occupancies":
+      return <StepCodeOccupancies />
+    case "step-code-performance-requirements":
+      return <StepCodeOccupanciesPerformanceRequirements />
   }
 })

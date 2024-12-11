@@ -4,14 +4,15 @@ import React from "react"
 import { i18nPrefix } from "./i18n-prefix"
 
 import { IStepCodeEnergyComplianceReport } from "../../../../../../models/step-code-energy-compliance-report"
-import { EEnergyStep } from "../../../../../../types/enums"
+import { useMst } from "../../../../../../setup/root"
 
 interface IProps {
   compliance: IStepCodeEnergyComplianceReport
 }
 
 export const EnergySteps = function EnergySteps({ compliance }: IProps) {
-  const steps = Object.values(EEnergyStep)
+  const { stepCodeStore } = useMst()
+  const steps = stepCodeStore.getEnergyStepOptions()
   const numSteps = steps.length
 
   return (

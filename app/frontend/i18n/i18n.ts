@@ -1166,7 +1166,69 @@ const options = {
                 hint: "Need to change an emissions factor or add a fuel type? Go to <link>fuel types</link>",
               },
             },
+            stepCodeOccupancies: {
+              heading: "Occupancies subject to Steps 2, 3, or 4",
+              instructions:
+                "If there are occupancies subject to Steps 2, 3, or 4 (not including Step 2 with a reference building) in your project, this form will collect additional details.<br/><br/>These occupancies are:<ul><li>Group C Hotel and motel</li><li>Group C Other residential</li><li>Group D Office</li><li>Group D Other</li><li>Group E Mercantile</li>",
+              isRelevant: "Does your project include any of the these occupancies?",
+              disabledCtaTooltip: "Please select an occupancy",
+              occupancies: {
+                label: "Which occupancies apply to this building? Select all that apply:",
+                error: "Select the occupancies from the list that apply to this building.",
+              },
+              occupancyKeys: {
+                hotel_motel: "<strong>Group C</strong> Hotel and motel",
+                residential: "<strong>Group C</strong> Other residential",
+                office: "<strong>Group D</strong> Office",
+                other: "<strong>Group D</strong> Other",
+                mercantile: "<strong>Group E</strong> Mercantile",
+              },
+            },
+            stepCodeOccupancyKeys: {
+              hotel_motel: "Group C Hotel and motel",
+              residential: "Group C Other residential",
+              office: "Group D Office",
+              other: "Group D Other",
+              mercantile: "Group E Mercantile",
+            },
+            stepCodePerformanceRequirements: {
+              heading: "Performance requirements for Step 2, 3, and 4 Buildings",
+              instructions:
+                "If there are occupancies subject to Steps 2, 3, or 4 (not including Step 2 with a reference building) in your project, this section will collect additional details.",
+              stepCodeRequirement: {
+                isCustom: {
+                  label:
+                    "Does the authority having jurisdiction require higher performance than BC building code minimums for {{occupancyName}}?",
+                  hint: "Although this form is for Step Code compliance, some AHJs require higher performance than BCBC minimums",
+                },
+                energyStepRequired: {
+                  label: "Energy step required",
+                  error: "Select energy step required",
+                },
+                source: {
+                  label: "What determines this performance requirement for {{occupancyName}}?",
+                  hint: "Enter the bylaw, policy, rezoning condition, etc. from the authority having jurisdiction (AHJ)",
+                  error: "Enter the performance requirement source",
+                },
+              },
+              occupanciesTable: {
+                headers: {
+                  occupancy: "Occupancy",
+                  modelledFloorArea: "Modelled floor area (m<sup>2</sup>)",
+                  ghg: "GHG emissions level",
+                },
+              },
+              modelledFloorArea: {
+                label: "What is the modelled floor area for {{occupancyName}} in square metres?",
+                units: "m<sup>2</sup>",
+                error: "Enter the modelled floor area",
+              },
+              zeroCarbonStepRequired: {
+                error: "Select GHG emissions level",
+              },
+            },
           },
+
           title: "Step code auto-compliance tool",
           subTitle:
             "You can use this tool to generate your BC Energy Step Code Compliance Report. Approval is not automatic. After you've submitted your application, local officials will review it. They may ask you to fix issues or show that your application meets requirements before approving it.",
@@ -1302,6 +1364,7 @@ const options = {
                 stepRequired: "Step required",
                 stepProposed: "Proposed step achieved",
                 steps: {
+                  "2": "2",
                   "3": "3",
                   "4": "4",
                   "5": "5",
@@ -1591,6 +1654,7 @@ const options = {
                 energy: {
                   title: "Energy Step Code Level",
                   options: {
+                    "2": "2",
                     "3": "3",
                     "4": "4",
                     "5": "5",
