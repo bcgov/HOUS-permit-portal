@@ -2,7 +2,7 @@ import { Flex, Text, VStack } from "@chakra-ui/react"
 import { t } from "i18next"
 import React from "react"
 import { IStepCodeZeroCarbonComplianceReport } from "../../../../../../models/step-code-zero-carbon-compliance-report"
-import { EZeroCarbonStep } from "../../../../../../types/enums"
+import { useMst } from "../../../../../../setup/root"
 import { i18nPrefix } from "./i18n-prefix"
 
 interface IProps {
@@ -10,7 +10,8 @@ interface IProps {
 }
 
 export const ZeroCarbonSteps = function ZeroCarbonSteps({ compliance }: IProps) {
-  const steps = Object.values(EZeroCarbonStep)
+  const { stepCodeStore } = useMst()
+  const steps = stepCodeStore.getZeroCarbonStepOptions()
   const numSteps = steps.length
   return (
     <Flex align="end" w="full">
