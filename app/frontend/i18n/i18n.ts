@@ -294,6 +294,7 @@ const options = {
         jurisdiction: {
           edit: {
             displayDescriptionLabel: "Jurisdiction description (public)",
+            title: "Rename jurisdiction",
             addDescription: "Click to add a description",
             displayChecklistLabel: "Permit application checklist (public)",
             addChecklist: "Click to add a permit application checklist",
@@ -326,6 +327,7 @@ const options = {
               energyStepRequired: "Energy step code required",
               zeroCarbonStepRequired: "Zero carbon step required",
             },
+            updateButton: "Update jurisdiction",
           },
           new: {
             title: "Create new jurisdiction",
@@ -344,6 +346,7 @@ const options = {
             externalApiKeys: "API settings",
             exportTemplates: "Export templates",
             about: "About",
+            rename: "Rename",
           },
           fields: {
             reverseQualifiedName: "Name",
@@ -2017,6 +2020,7 @@ const options = {
             acceptInvitation: "Accept invitation",
             eula: "End user license agreement",
             earlyAccess: "Early access",
+            update: "Update",
           },
         },
         automatedCompliance: {
