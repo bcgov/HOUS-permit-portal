@@ -1,4 +1,4 @@
-import { Button, Grid, GridProps, Input, InputProps, Text } from "@chakra-ui/react"
+import { Box, Button, Grid, GridProps, Input, InputProps, Text, Tooltip } from "@chakra-ui/react"
 import { Plus } from "@phosphor-icons/react"
 import { computed } from "mobx"
 import { observer } from "mobx-react-lite"
@@ -12,7 +12,6 @@ import { EFuelType } from "../../../../../../types/enums"
 import { IFuelType } from "../../../../../../types/types"
 import { formattedStringToNumber, numberToFormattedString } from "../../../../../../utils/utility-functions"
 import FuelTypeSelect from "../../../../../shared/select/selectors/fuel-type-select"
-import { WithConditionalTooltip } from "../../../../../shared/with-conditional-tooltip"
 import { GridColumnHeader } from "../../../part-9/checklist/shared/grid/column-header"
 import { GridData } from "../../../part-9/checklist/shared/grid/data"
 import { GridRowHeader } from "../../../part-9/checklist/shared/grid/row-header"
@@ -306,31 +305,35 @@ const ModelledEnergyOutputRow = ({
         />
       </GridData>
       <GridData>
-        <WithConditionalTooltip passesCondition={!!fuelTypeErrorMessage} tooltipProps={{ label: fuelTypeErrorMessage }}>
-          <FuelTypeSelect
-            options={fuelTypeOptions}
-            onChange={handleChangeFuelType}
-            value={selectedFuelType}
-            selectProps={{
-              isClearable: true,
-              "aria-errormessage": fuelTypeErrorMessage,
-              styles: {
-                container: (base) => ({
-                  ...base,
-                  width: "100%",
-                  boxShadow: "none",
-                }),
-                control: (base) => ({
-                  ...base,
-                  "&, &:hover, &:focus, &:active": {
-                    boxShadow: fuelTypeErrorMessage ? "0 0 0 1px var(--chakra-colors-semantic-errorLight)" : undefined,
-                    borderColor: fuelTypeErrorMessage ? "var(--chakra-colors-semantic-error)" : undefined,
-                  },
-                }),
-              },
-            }}
-          />
-        </WithConditionalTooltip>
+        <Tooltip label={fuelTypeId ? t(`${i18nPrefix}.fuelTypeClearHelpText`) : t(`${i18nPrefix}.fuelTypeRequired`)}>
+          <Box>
+            <FuelTypeSelect
+              options={fuelTypeOptions}
+              onChange={handleChangeFuelType}
+              value={selectedFuelType}
+              selectProps={{
+                isClearable: true,
+                "aria-errormessage": fuelTypeErrorMessage,
+                styles: {
+                  container: (base) => ({
+                    ...base,
+                    width: "100%",
+                    boxShadow: "none",
+                  }),
+                  control: (base) => ({
+                    ...base,
+                    "&, &:hover, &:focus, &:active": {
+                      boxShadow: fuelTypeErrorMessage
+                        ? "0 0 0 1px var(--chakra-colors-semantic-errorLight)"
+                        : undefined,
+                      borderColor: fuelTypeErrorMessage ? "var(--chakra-colors-semantic-error)" : undefined,
+                    },
+                  }),
+                },
+              }}
+            />
+          </Box>
+        </Tooltip>
       </GridData>
       <GridData>
         <Input
