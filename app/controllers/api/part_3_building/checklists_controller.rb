@@ -27,6 +27,7 @@ class Api::Part3Building::ChecklistsController < Api::ApplicationController
       :heating_degree_days,
       :climate_zone,
       :ref_annual_thermal_energy_demand,
+      :generated_electricity,
       section_completion_status: {
       },
       baseline_occupancies_attributes: %i[

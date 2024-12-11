@@ -1232,6 +1232,24 @@ const options = {
                 error: "Select GHG emissions level",
               },
             },
+            renewableEnergy: {
+              heading: "Renewable energy",
+              isRelevant: "Does this project include on-site generated renewable electricity for compliance?",
+              generatedElectricity: {
+                label: "Total electricity generated on site (kWh)",
+                error: "Enter eletricity generated on site.",
+                units: "kWh",
+              },
+              percentOfUse: {
+                label: "Percentage of total energy use",
+                hint: "Automatically calculated",
+                units: "%",
+              },
+              adjustedEF: {
+                label: "Adjusted electricity emissions factor kgCO<sub>2e</sub>/kWh",
+                hint: "Automatically calculated",
+              },
+            },
           },
 
           title: "Step code auto-compliance tool",
