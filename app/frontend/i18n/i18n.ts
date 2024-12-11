@@ -1307,6 +1307,7 @@ const options = {
                 totalAnnualEnergy: "Total annual energy",
                 totalEmissions: "Total annual emissions",
                 fuelTypeRequired: "To add an energy use type, select a fuel type first.",
+                fuelTypeClearHelpText: "To remove this energy use type entry, clear the fuel type.",
               },
               annualEnergyWholeBuildingTable: {
                 tableHeader: "Annual energy for calculations (whole building)",
