@@ -4,8 +4,8 @@ import React from "react"
 
 export function KeycloakInfoBlock({ title, description, bulletPoints, ctaText, ctaLink, infoLink = null }) {
   return (
-    <Flex direction="column" gap={2} p={6} rounded="sm" borderWidth={1} borderColor="border.light">
-      <Heading as="h3" m={0}>
+    <Flex direction="column" gap={2} p={6}>
+      <Heading as="h4" m={0}>
         {title}
       </Heading>
       <Text fontSize="sm">{description}</Text>

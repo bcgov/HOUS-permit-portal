@@ -1,5 +1,6 @@
 import { Button, Container, Flex, FormControl, FormLabel, Heading } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
+import * as R from "ramda"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { useFlashQueryParam } from "../../../hooks/use-flash-query-param"
@@ -10,6 +11,7 @@ import { IPermitApplication } from "../../../models/permit-application"
 import { useMst } from "../../../setup/root"
 import { EPermitApplicationStatusGroup, EPermitApplicationSubmitterSortFields } from "../../../types/enums"
 import { BlueTitleBar } from "../../shared/base/blue-title-bar"
+import { CustomMessageBox } from "../../shared/base/custom-message-box"
 import { Paginator } from "../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../shared/base/inputs/per-page-select"
 import { ModelSearchInput } from "../../shared/base/model-search-input"
@@ -98,6 +100,12 @@ export const PermitApplicationIndexScreen = observer(({}: IPermitApplicationInde
             <Flex py="50" w="full">
               <SharedSpinner h={50} w={50} />
             </Flex>
+          ) : R.isEmpty(tablePermitApplications) ? (
+            <CustomMessageBox
+              status="info"
+              title={t("permitApplication.noneFound")}
+              description={t("permitApplication.noneFoundExplanation")}
+            />
           ) : (
             tablePermitApplications.map((pa) => (
               <PermitApplicationCard key={pa.id} permitApplication={pa as IPermitApplication} />
