@@ -229,6 +229,7 @@ class Api::UsersController < Api::ApplicationController
       :last_name,
       :organization,
       :certified,
+      :department,
       preference_attributes: %i[
         enable_in_app_new_template_version_publish_notification
         enable_in_app_customization_update_notification

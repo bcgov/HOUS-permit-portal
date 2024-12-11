@@ -1501,6 +1501,7 @@ const options = {
               "The Super Admin is the highest-level user within the system, with overarching control over the entire permit application platform. They have the authority to manage user roles, including creating and removing user accounts, and to modify the system configuration. This role is responsible for the maintenance of the system, including updates and enhancements, and ensuring that the system meets the operational and strategic objectives of the local government or the organization.",
           },
           assignTo: "Assign to...",
+          department: "Department"
         },
         earlyAccessRequirementTemplate: {
           show: {},
