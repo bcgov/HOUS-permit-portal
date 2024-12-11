@@ -38,6 +38,8 @@ class StepCode::Part3::ChecklistBlueprint < Blueprinter::Base
 
   association :baseline_occupancies,
               blueprint: StepCode::Part3::BaselineOccupancyBlueprint
+  association :step_code_occupancies,
+              blueprint: StepCode::Part3::StepCodeOccupancyBlueprint
   association :fuel_types,
               blueprint:
                 StepCode::Part3::FuelTypeBlueprint do |checklist, _options|

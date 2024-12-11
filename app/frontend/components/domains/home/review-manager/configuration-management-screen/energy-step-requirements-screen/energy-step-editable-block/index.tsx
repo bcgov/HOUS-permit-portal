@@ -152,6 +152,7 @@ export const EnergyStepEditableBlock = observer(function EnergyStepEditableBlock
                         onChange={onChange}
                         value={value}
                         isDisabled={!isEditing || isCustomizing}
+                        portal
                       />
                     )
                   }}
@@ -214,6 +215,7 @@ export const EnergyStepEditableBlock = observer(function EnergyStepEditableBlock
                                   value={value}
                                   isDisabled={!isEditing}
                                   allowNull
+                                  portal
                                 />
                               )
                             }}
