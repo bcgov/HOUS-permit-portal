@@ -26,25 +26,24 @@ function initializeModelledEnergyOutputs(
 ): IMpdelledEnergyOutputChecklistForm["modelledEnergyOutputsAttributes"] {
   const otherEnergyOutputs: IMpdelledEnergyOutputChecklistForm["modelledEnergyOutputsAttributes"] =
     existingEnergyOutputs
-      .filter((output) => output.useType === EEnergyOutputUseType.other)
-      .map((output) => ({
+      ?.filter((output) => output.useType === EEnergyOutputUseType.other)
+      ?.map((output) => ({
         ...output,
         annualEnergy: parseFloat(output.annualEnergy ?? "0"),
-      }))
-  const defaultEnergyOutputs: IMpdelledEnergyOutputChecklistForm["modelledEnergyOutputsAttributes"] = Object.values(
-    EEnergyOutputUseType
-  )
-    .filter((useType) => useType !== EEnergyOutputUseType.other)
-    .map((useType) => {
-      const existingEnergyOutput = existingEnergyOutputs.find((output) => output.useType === useType)
-      return {
-        id: existingEnergyOutput?.id,
-        useType,
-        annualEnergy: parseFloat(existingEnergyOutput?.annualEnergy ?? "0"),
-        name: existingEnergyOutput?.name,
-        fuelTypeId: existingEnergyOutput?.fuelTypeId,
-      }
-    })
+      })) ?? []
+  const defaultEnergyOutputs: IMpdelledEnergyOutputChecklistForm["modelledEnergyOutputsAttributes"] =
+    Object.values(EEnergyOutputUseType)
+      ?.filter((useType) => useType !== EEnergyOutputUseType.other)
+      ?.map((useType) => {
+        const existingEnergyOutput = existingEnergyOutputs?.find((output) => output.useType === useType)
+        return {
+          id: existingEnergyOutput?.id,
+          useType,
+          annualEnergy: parseFloat(existingEnergyOutput?.annualEnergy ?? "0"),
+          name: existingEnergyOutput?.name,
+          fuelTypeId: existingEnergyOutput?.fuelTypeId,
+        }
+      }) ?? []
 
   return defaultEnergyOutputs.concat(otherEnergyOutputs)
 }
@@ -105,14 +104,16 @@ export const ModelledOutputs = observer(function Part3StepCodeFormModelledOutput
         {t(`${i18nPrefix}.description`)}
       </Text>
       <FormProvider {...formMethods}>
-        <Stack as="form" onSubmit={onSubmit} gap={8}>
-          <ModelledEnergyOutputsGrid mt={6} />
-          <AnnualEnergyWholeBuildingGrid />
-          <StepCodeBuildingPortionsGrid />
-          <Button type="submit" variant="primary">
-            {t("stepCode.part3.cta")}
-          </Button>
-        </Stack>
+        {checklist ? (
+          <Stack as="form" onSubmit={onSubmit} gap={8}>
+            <ModelledEnergyOutputsGrid mt={6} />
+            <AnnualEnergyWholeBuildingGrid />
+            <StepCodeBuildingPortionsGrid />
+            <Button type="submit" variant="primary">
+              {t("stepCode.part3.cta")}
+            </Button>
+          </Stack>
+        ) : null}
       </FormProvider>
     </Flex>
   )
