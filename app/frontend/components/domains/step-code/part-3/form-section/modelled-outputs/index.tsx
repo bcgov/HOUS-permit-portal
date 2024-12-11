@@ -55,6 +55,7 @@ export const ModelledOutputs = observer(function Part3StepCodeFormModelledOutput
   const i18nPrefix = "stepCode.part3.modelledOutputs"
   const formMethods = useForm<IMpdelledEnergyOutputChecklistForm>({
     defaultValues: createFormValues(stepCode?.checklist),
+    mode: "onSubmit",
   })
   const { reset } = formMethods
 
