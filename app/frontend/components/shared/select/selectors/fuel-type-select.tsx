@@ -16,7 +16,7 @@ const FuelTypeSelect: React.FC<IFuelTypeSelectProps> = ({ options, onChange, val
   }
 
   const selectedOption = useMemo(() => {
-    return options.find((option) => option.value.id === value?.id)
+    return options.find((option) => option.value.id === value?.id) ?? null
   }, [JSON.stringify(options), value])
 
   return (
