@@ -1245,6 +1245,22 @@ const options = {
                 hint: "Automatically calculated",
               },
             },
+            overheatingRequirements: {
+              heading: "Overheating requirements",
+              isRelevant: "Is the project subject to overheating limits?",
+              limit: {
+                label: "Overheating hours limit",
+                hint: "This value is set according to City of Vancouver Energy Modeling Guidelines, Section 4",
+              },
+              worstCase: {
+                label: "Overheating hours for worst case suite/zone",
+                error: "Enter overheating hours for worst case suite/zone",
+              },
+              compliance: {
+                pass: "This building complies with overheating criteria. Worst case suite/zone overheating hours are below the limit.",
+                fail: "This building does not comply with overheating criteria. Worst case suite/zone overheating hours are over the limit.",
+              },
+            },
           },
 
           title: "Step code auto-compliance tool",
