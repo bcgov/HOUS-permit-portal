@@ -591,7 +591,7 @@ export interface IEnergyOutput {
   id?: string
   source: EEnergyOutputSource
   useType: EEnergyOutputUseType
-  annualEnergy: number
+  annualEnergy: string
   name: string | null
   fuelTypeId: string | null
 }
