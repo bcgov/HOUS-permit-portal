@@ -114,8 +114,16 @@ export const Part3StepCodeChecklistModel = types
     get defaultFuelTypeKeys(): EFuelType[] {
       return [EFuelType.electricity, EFuelType.naturalGas, EFuelType.districtEnergy]
     },
+    get electricity(): IFuelType {
+      return self.fuelTypes.find((ft) => ft.key == EFuelType.electricity)
+    },
   }))
   .views((self) => ({
+    get totalElectricityUse(): number {
+      return self.modelledEnergyOutputs
+        .filter((eo) => eo.fuelTypeId == self.electricity.id)
+        .reduce((sum, eo) => sum + parseFloat(eo.annualEnergy), 0)
+    },
     get uncommonFuelTypeKeys(): EFuelType[] {
       return Object.values(EFuelType).filter((key) => !R.includes(key, self.defaultFuelTypeKeys))
     },

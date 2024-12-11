@@ -6,7 +6,8 @@ class StepCode::Part3::ChecklistBlueprint < Blueprinter::Base
   fields :jurisdiction_name,
          :building_height,
          :heating_degree_days,
-         :ref_annual_thermal_energy_demand
+         :ref_annual_thermal_energy_demand,
+         :generated_electricity
   field :pid, name: :project_identifier
   field :nickname, name: :project_name
   field :full_address, name: :project_address

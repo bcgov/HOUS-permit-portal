@@ -9,6 +9,7 @@ import { FuelTypes } from "./fuel-types"
 import { AdditionalFuelTypes } from "./fuel-types/additional-fuel-types"
 import { LocationDetails } from "./location-details"
 import { ProjectDetails } from "./project-details"
+import { RenewableEnergy } from "./renewable-energy"
 import { StartPage } from "./start-page"
 import { StepCodeOccupancies } from "./step-code-occupancies"
 import { StepCodeOccupanciesPerformanceRequirements } from "./step-code-occupancies/performance-requirements"
@@ -39,5 +40,7 @@ export const FormSection = observer(function Part3StepCodeFormSection() {
       return <StepCodeOccupancies />
     case "step-code-performance-requirements":
       return <StepCodeOccupanciesPerformanceRequirements />
+    case "renewable-energy":
+      return <RenewableEnergy />
   }
 })
