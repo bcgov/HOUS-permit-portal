@@ -2,7 +2,8 @@ import { Button, Grid, GridProps, Input, InputProps, Text } from "@chakra-ui/rea
 import { Plus } from "@phosphor-icons/react"
 import { computed } from "mobx"
 import { observer } from "mobx-react-lite"
-import React, { useCallback, useMemo } from "react"
+import { path } from "ramda"
+import React, { useCallback, useEffect, useMemo } from "react"
 import { FieldArrayWithId, useController, useFieldArray, useFormContext } from "react-hook-form"
 import { Trans, useTranslation } from "react-i18next"
 import { IMpdelledEnergyOutputChecklistForm } from "."
@@ -11,6 +12,7 @@ import { EFuelType } from "../../../../../../types/enums"
 import { IFuelType } from "../../../../../../types/types"
 import { formattedStringToNumber, numberToFormattedString } from "../../../../../../utils/utility-functions"
 import FuelTypeSelect from "../../../../../shared/select/selectors/fuel-type-select"
+import { WithConditionalTooltip } from "../../../../../shared/with-conditional-tooltip"
 import { GridColumnHeader } from "../../../part-9/checklist/shared/grid/column-header"
 import { GridData } from "../../../part-9/checklist/shared/grid/data"
 import { GridRowHeader } from "../../../part-9/checklist/shared/grid/row-header"
@@ -210,13 +212,11 @@ const ModelledEnergyOutputRow = ({
   getFuelTypeById,
 }: IModelledEnergyOutputRowProps) => {
   const { t } = useTranslation()
-  const { control, watch } = useFormContext<IMpdelledEnergyOutputChecklistForm>()
   const {
-    field: { value: fuelTypeId, onChange: onChangeFuelTypeId },
-  } = useController({
     control,
-    name: `modelledEnergyOutputsAttributes.${index}.fuelTypeId`,
-  })
+    formState: { errors },
+  } = useFormContext<IMpdelledEnergyOutputChecklistForm>()
+
   const fuelTypeOptions = useMemo(() => {
     return availableFuelTypes.map((fuelType) => {
       const baseFuelTypeLabel = t(`${i18nPrefix}.fuelTypes.${fuelType.key as EFuelType}`)
@@ -233,6 +233,22 @@ const ModelledEnergyOutputRow = ({
   } = useController({
     control,
     name: `modelledEnergyOutputsAttributes.${index}.annualEnergy`,
+  })
+
+  const {
+    field: { value: fuelTypeId, onChange: onChangeFuelTypeId },
+  } = useController({
+    control,
+    name: `modelledEnergyOutputsAttributes.${index}.fuelTypeId`,
+    rules: {
+      required:
+        annualEnergy > 0
+          ? {
+              value: true,
+              message: t(`${i18nPrefix}.fuelTypeRequired`),
+            }
+          : false,
+    },
   })
   const selectedFuelType = useMemo(() => getFuelTypeById(fuelTypeId), [fuelTypeId, getFuelTypeById])
 
@@ -268,29 +284,53 @@ const ModelledEnergyOutputRow = ({
     return fixed
   }, [emissionFactor, annualEnergy])
 
+  const fuelTypeErrorMessage = path(["modelledEnergyOutputsAttributes", index, "fuelTypeId", "message"], errors)
+
+  useEffect(() => {
+    if (!fuelTypeId) {
+      onChangeAnnualEnergy(0)
+    }
+  }, [fuelTypeId])
   return (
     <React.Fragment>
       <GridData px={3} justifyContent={"center"}>
         <Text>{t(`${i18nPrefix}.useTypes.${field.useType}`)}</Text>
       </GridData>
       <GridData>
-        <Input value={formattedAnnualEnergy} onChange={handleChangeAnnualEnergy} min={0} {...sharedInputProps} />
+        <Input
+          isDisabled={!fuelTypeId}
+          value={formattedAnnualEnergy}
+          onChange={handleChangeAnnualEnergy}
+          min={0}
+          {...sharedInputProps}
+        />
       </GridData>
       <GridData>
-        <FuelTypeSelect
-          options={fuelTypeOptions}
-          onChange={handleChangeFuelType}
-          value={selectedFuelType}
-          selectProps={{
-            isClearable: true,
-            styles: {
-              container: (base) => ({
-                ...base,
-                width: "100%",
-              }),
-            },
-          }}
-        />
+        <WithConditionalTooltip passesCondition={!!fuelTypeErrorMessage} tooltipProps={{ label: fuelTypeErrorMessage }}>
+          <FuelTypeSelect
+            options={fuelTypeOptions}
+            onChange={handleChangeFuelType}
+            value={selectedFuelType}
+            selectProps={{
+              isClearable: true,
+              "aria-errormessage": fuelTypeErrorMessage,
+              styles: {
+                container: (base) => ({
+                  ...base,
+                  width: "100%",
+                  boxShadow: "none",
+                }),
+                control: (base) => ({
+                  ...base,
+                  "&, &:hover, &:focus, &:active": {
+                    boxShadow: fuelTypeErrorMessage ? "0 0 0 1px var(--chakra-colors-semantic-errorLight)" : undefined,
+                    borderColor: fuelTypeErrorMessage ? "var(--chakra-colors-semantic-error)" : undefined,
+                  },
+                }),
+              },
+            }}
+          />
+        </WithConditionalTooltip>
       </GridData>
       <GridData>
         <Input
