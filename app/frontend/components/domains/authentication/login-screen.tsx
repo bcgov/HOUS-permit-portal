@@ -1,12 +1,30 @@
-import { Button, Divider, Flex, Grid, GridItem, Heading, Link, Text } from "@chakra-ui/react"
+import {
+  Accordion,
+  AccordionButton,
+  AccordionIcon,
+  AccordionItem,
+  AccordionPanel,
+  Box,
+  Button,
+  Divider,
+  Flex,
+  Grid,
+  GridItem,
+  Heading,
+  Link,
+  Text,
+} from "@chakra-ui/react"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { OMNIAUTH_PROVIDERS } from "../../../models/user"
 import { CenterContainer } from "../../shared/containers/center-container"
 import { HelpDrawer } from "../../shared/help-drawer"
-import { BasicBCeIDInfo } from "../../shared/keycloak/basicbceid"
+import { EntityBasicBCeIDInfo } from "../../shared/keycloak/basicbceid/entity-basic-bceid-info"
+import { LgBasicBCeIDInfo } from "../../shared/keycloak/basicbceid/lg-basic-bceid-info"
+import { SubmitterBasicBCeIDInfo } from "../../shared/keycloak/basicbceid/submitter-basic-bceid-info"
 import { BCSCInfo } from "../../shared/keycloak/bcsc-info"
-import { BusinessBCeIDInfo } from "../../shared/keycloak/businessbceid"
+import { EntityBusinessBCeIDInfo } from "../../shared/keycloak/businessbceid/entity-business-bceid-info copy"
+import { LgBusinessBCeIDInfo } from "../../shared/keycloak/businessbceid/lg-business-bceid-info"
 
 interface ILoginScreenProps {
   isAdmin?: boolean
@@ -30,8 +48,7 @@ export const LoginScreen = ({ isAdmin }: ILoginScreenProps) => {
       >
         <Heading as="h1">{t("auth.loginTitle")}</Heading>
 
-        {/* Replace VStack with Flex */}
-        <Flex direction="column" flex={1}>
+        <Flex direction="column" flex={1} gap={12}>
           {isAdmin ? (
             <>
               <Heading as="h2">{t("auth.adminLogin")}</Heading>
@@ -42,14 +59,13 @@ export const LoginScreen = ({ isAdmin }: ILoginScreenProps) => {
               templateColumns={{ base: "1fr", md: "1fr auto 1fr" }} // Single column on small screens, three columns on md and up
               gap={6}
               width="100%"
-              padding={4}
               alignItems="start"
             >
               <GridItem>
                 <Heading as="h2">{t("auth.publicLogin")}</Heading>
               </GridItem>
 
-              <GridItem rowSpan={7} h="full">
+              <GridItem rowSpan={3} h="full">
                 <Divider orientation="vertical" height="100%" borderColor="border.light" mx={12} />
               </GridItem>
 
@@ -75,48 +91,62 @@ export const LoginScreen = ({ isAdmin }: ILoginScreenProps) => {
               <GridItem>
                 <BceidLoginForm />
               </GridItem>
-
-              <GridItem>
-                <Divider my={4} borderColor="border.light" />
-              </GridItem>
-
-              <GridItem>
-                <Divider my={4} borderColor="border.light" />
-              </GridItem>
-
-              <GridItem>
-                <Heading as="h2">{t("auth.chooseLogin")}</Heading>
-                <Text>{t("auth.matchLogin")}</Text>
-              </GridItem>
-
-              <GridItem>
-                <Heading as="h2">{t("auth.chooseLogin")}</Heading>
-                <Text>{t("auth.matchLogin")}</Text>
-              </GridItem>
-
-              <GridItem>
-                <Flex direction="column" gap={6}>
-                  <BasicBCeIDInfo />
-                  <BusinessBCeIDInfo />
-                  <BCSCInfo />
-                </Flex>
-              </GridItem>
-
-              <GridItem>
-                <Flex direction="column" gap={6}>
-                  <BusinessBCeIDInfo />
-                  <BasicBCeIDInfo />
-                </Flex>
-              </GridItem>
             </Grid>
           )}
+          <Flex direction="column">
+            <Heading>{t("auth.firstTime")}</Heading>
+            <Text>{t("auth.chooseSituation")}</Text>
+            <Accordion mt={8} allowToggle allowMultiple>
+              <AccordionItem>
+                <AccordionButton>
+                  <Box as="span" py={2} textAlign="left">
+                    <Heading as="h3">{t("auth.submitterAccordion")}</Heading>
+                  </Box>
+                  <AccordionIcon />
+                </AccordionButton>
+                <AccordionPanel pb={4}>
+                  <SubmitterBasicBCeIDInfo />
+                  <BCSCInfo />
+                </AccordionPanel>
+              </AccordionItem>
+
+              <AccordionItem>
+                <AccordionButton>
+                  <Box as="span" py={2} textAlign="left">
+                    <Heading as="h3">{t("auth.entityAccordion")}</Heading>
+                  </Box>
+                  <AccordionIcon />
+                </AccordionButton>
+                <AccordionPanel pb={4}>
+                  <EntityBasicBCeIDInfo />
+                  <EntityBusinessBCeIDInfo />
+                </AccordionPanel>
+              </AccordionItem>
+
+              <AccordionItem>
+                <AccordionButton>
+                  <Box as="span" py={2} textAlign="left">
+                    <Heading as="h3">{t("auth.lgAccordion")}</Heading>
+                  </Box>
+                  <AccordionIcon />
+                </AccordionButton>
+                <AccordionPanel pb={4}>
+                  <LgBusinessBCeIDInfo />
+                  <LgBasicBCeIDInfo />
+                </AccordionPanel>
+              </AccordionItem>
+            </Accordion>
+          </Flex>
         </Flex>
         {isAdmin ? (
           <Text>{t("auth.adminAccountAccess")}</Text>
         ) : (
           <>
             <Text>
-              {t("auth.loginHelp")}
+              <Text as="span" fontWeight="bold">
+                {t("auth.loginHelp")}{" "}
+              </Text>
+              <Text as="span">{t("auth.goToPartners")} </Text>
               <Link href="https://www.bceid.ca/clp/account_recovery.aspx" isExternal>
                 {t("auth.bceid")}
               </Link>{" "}

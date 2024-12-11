@@ -11,7 +11,7 @@ import { EUserRoles } from "../../../types/enums"
 import { LoadingScreen } from "../../shared/base/loading-screen"
 import { CenterContainer } from "../../shared/containers/center-container"
 import { HelpDrawer } from "../../shared/help-drawer"
-import { BusinessBCeIDInfo } from "../../shared/keycloak/businessbceid"
+import { BusinessBCeIDInfo } from "../../shared/keycloak/businessbceid/lg-business-bceid-info"
 import { RouterLink } from "../../shared/navigation/router-link"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 
