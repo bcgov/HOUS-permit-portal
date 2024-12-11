@@ -38,14 +38,16 @@ class Api::Part3Building::ChecklistsController < Api::ApplicationController
         percent_better_requirement
         requirement_source
       ],
-      fuel_types_attributes: %i[
+      step_code_occupancies_attributes: %i[
         _destroy
         id
         key
-        description
-        emissions_factor
-        source
+        modelled_floor_area
+        energy_step_required
+        zero_carbon_step_required
+        requirement_source
       ],
+      fuel_types_attributes: %i[_destroy id key description emissions_factor],
       reference_energy_outputs_attributes: %i[id fuel_type_id annual_energy]
     )
   end
