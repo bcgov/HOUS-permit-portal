@@ -4,7 +4,9 @@ class StepCode::Part3::ChecklistBlueprint < Blueprinter::Base
   fields :section_completion_status,
          :total_annual_thermal_energy_demand,
          :total_annual_cooling_energy_demand,
-         :step_code_annual_thermal_energy_demand
+         :step_code_annual_thermal_energy_demand,
+         :total_occupancy_floor_area,
+         :total_step_code_occupancy_floor_area
 
   fields :jurisdiction_name,
          :building_height,

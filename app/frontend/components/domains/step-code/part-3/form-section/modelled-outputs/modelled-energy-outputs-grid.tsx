@@ -77,8 +77,6 @@ export const ModelledEnergyOutputsGrid = observer(({ ...rest }: IProps) => {
     }, {})
   }, [stringifiedWatchedModelledEnergyOutputs, fuelTypeIdsToFuelType])
   const formattedTotalAnnualEnergy = useMemo(() => {
-    const total = watchedModelledEnergyOutputs.reduce((acc, curr) => acc + curr.annualEnergy, 0)
-
     return watchedModelledEnergyOutputs
       .reduce((acc, curr) => acc + curr.annualEnergy, 0)
       .toLocaleString("en-CA", {
