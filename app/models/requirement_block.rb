@@ -43,9 +43,9 @@ class RequirementBlock < ApplicationRecord
 
   def allowed_in(requirement_template)
     if requirement_template.early_access?
-      %i[any early_access].include?(visibility)
+      %i[any early_access].include?(visibility.to_sym)
     else
-      %i[any live].include?(visibility)
+      %i[any live].include?(visibility.to_sym)
     end
   end
 

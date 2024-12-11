@@ -174,7 +174,7 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
                   {pinMode ? t("permitApplication.new.dontHavePin") : t("permitApplication.new.onlyHavePin")}
                 </Button>
               </Flex>
-              {jurisdictionIdWatch && (pidWatch || pinWatch) && (
+              {jurisdictionIdWatch && (
                 <Flex as="section" direction="column" gap={8}>
                   {jurisdiction?.sandboxOptions && (
                     <Can action="jurisdiction:create">
@@ -301,10 +301,10 @@ interface IPinModeInputsProps {
   disabled?: boolean
 }
 
-export const PinModeInputs = ({ disabled }: IPinModeInputsProps) => {
+export const PinModeInputs = observer(({ disabled }: IPinModeInputsProps) => {
   const { register, control, setValue } = useFormContext()
   const { jurisdictionStore, geocoderStore } = useMst()
-  const { addJurisdiction } = jurisdictionStore
+  const { addJurisdiction, getJurisdictionById } = jurisdictionStore
   const { fetchPinVerification } = geocoderStore
   const { t } = useTranslation()
 
@@ -335,7 +335,7 @@ export const PinModeInputs = ({ disabled }: IPinModeInputsProps) => {
         </FormControl>
 
         <Controller
-          name="jurisdiction"
+          name="jurisdictionId"
           control={control}
           render={({ field: { onChange, value } }) => {
             return (
@@ -343,12 +343,12 @@ export const PinModeInputs = ({ disabled }: IPinModeInputsProps) => {
                 <FormLabel>{t("jurisdiction.index.title")}</FormLabel>
                 <InputGroup w="full">
                   <JurisdictionSelect
-                    onChange={(value) => {
-                      if (value) addJurisdiction(value)
-                      onChange(value)
+                    onChange={(selectValue) => {
+                      if (selectValue) addJurisdiction(selectValue)
+                      onChange(selectValue.id)
                     }}
-                    onFetch={() => setValue("jurisdiction", null)}
-                    selectedOption={value ? { label: value?.reverseQualifiedName, value } : null}
+                    onFetch={() => setValue("jurisdictionId", null)}
+                    selectedOption={value ? { label: getJurisdictionById(value)?.reverseQualifiedName, value } : null}
                     menuPortalTarget={document.body}
                   />
                 </InputGroup>
@@ -359,7 +359,7 @@ export const PinModeInputs = ({ disabled }: IPinModeInputsProps) => {
       </Flex>
     </Flex>
   )
-}
+})
 
 const DisclaimerInfo = () => {
   const { t } = useTranslation()

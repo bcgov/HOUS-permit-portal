@@ -69,7 +69,7 @@ class User < ApplicationRecord
   validate :single_jurisdiction, unless: :regional_review_manager?
 
   after_commit :refresh_search_index, if: :saved_change_to_discarded_at
-  after_commit :reindex_jurisdiction_user_size
+  after_commit :reindex_jurisdiction_user_size, :reindex_jurisdiction_review_manager_email
   before_save :create_default_preference
 
   # Stub this for now since we do not want to use IP Tracking at the moment - Jan 30, 2024
@@ -196,6 +196,12 @@ class User < ApplicationRecord
 
     # TODO: if jurisdictions changed?
     jurisdictions.reindex if saved_change_to_role? || destroyed? || new_record?
+  end
+
+  def reindex_jurisdiction_review_manager_email
+    return unless jurisdictions.any?
+
+    jurisdictions.reindex if (saved_change_to_role? || destroyed? || new_record? || saved_change_to_email?) && (review_manager? || regional_review_manager?)
   end
 
   def refresh_search_index

@@ -214,6 +214,20 @@ export function getCsrfToken() {
     ?.split("=")[1]
 }
 
+export function getCurrentSandboxId() {
+  const sandboxStore = localStorage.getItem("SandboxStore")
+  if (!sandboxStore) return null // Return null if SandboxStore is not found
+
+  try {
+    const parsedStore = JSON.parse(sandboxStore)
+    // Return currentSandboxId or null if not set
+    return parsedStore.currentSandboxId || null
+  } catch (error) {
+    console.error("Failed to parse SandboxStore from localStorage:", error)
+    return null
+  }
+}
+
 export function convertToDate(property: any) {
   if (!(property instanceof Date)) {
     return new Date(property)

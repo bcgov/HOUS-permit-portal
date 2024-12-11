@@ -2,7 +2,7 @@ import {
   FILE_UPLOAD_CHUNK_SIZE_IN_BYTES,
   MAX_NUMBER_OF_PARTS,
 } from "../components/shared/chefs/additional-formio/constant"
-import { getCsrfToken } from "./utility-functions"
+import { getCsrfToken, getCurrentSandboxId } from "./utility-functions"
 
 const sleep = (delay) => new Promise((resolve) => setTimeout(resolve, delay))
 
@@ -235,6 +235,7 @@ export const persistFileUpload = async (persistFileUploadAction, persistFileUplo
       method: persistFileUploadAction,
       headers: {
         "X-CSRF-Token": getCsrfToken(),
+        "X-Sandbox-ID": getCurrentSandboxId(),
         "Content-Type": "application/json",
         Accept: "application/json",
       },
