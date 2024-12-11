@@ -9,9 +9,10 @@ import { FieldArrayWithId, useController, useFieldArray, useFormContext } from "
 import { Trans, useTranslation } from "react-i18next"
 import { IMpdelledEnergyOutputChecklistForm } from "."
 import { usePart3StepCode } from "../../../../../../hooks/resources/use-part-3-step-code"
-import { EFuelType } from "../../../../../../types/enums"
+import { EEnergyOutputUseType, EFuelType } from "../../../../../../types/enums"
 import { IFuelType } from "../../../../../../types/types"
 import { formattedStringToNumber, numberToFormattedString } from "../../../../../../utils/utility-functions"
+import { TextFormControl } from "../../../../../shared/form/input-form-control"
 import FuelTypeSelect from "../../../../../shared/select/selectors/fuel-type-select"
 import { GridColumnHeader } from "../../../part-9/checklist/shared/grid/column-header"
 import { GridData } from "../../../part-9/checklist/shared/grid/data"
@@ -44,7 +45,7 @@ export const ModelledEnergyOutputsGrid = observer(({ ...rest }: IProps) => {
   const availableFuelTypes = useMemo(() => computed(() => checklist?.fuelTypes || []), [checklist?.fuelTypes]).get()
 
   const { control, watch } = useFormContext<IMpdelledEnergyOutputChecklistForm>()
-  const { fields } = useFieldArray({
+  const { fields, append, remove } = useFieldArray({
     control: control,
     name: "modelledEnergyOutputsAttributes",
   })
@@ -132,7 +133,7 @@ export const ModelledEnergyOutputsGrid = observer(({ ...rest }: IProps) => {
 
       {/* Add Row Button */}
       <GridData colSpan={5} borderRightWidth={1} pb={9}>
-        <Button leftIcon={<Plus />} variant="link" size="sm" fontSize={"sm"} onClick={handleAddUseType} isDisabled>
+        <Button leftIcon={<Plus />} variant="link" size="sm" fontSize={"sm"} onClick={handleAddUseType}>
           {t(`${i18nPrefix}.addUseType`)}
         </Button>
       </GridData>
@@ -193,7 +194,12 @@ export const ModelledEnergyOutputsGrid = observer(({ ...rest }: IProps) => {
   )
 
   function handleAddUseType() {
-    console.log("add use type")
+    append({
+      useType: EEnergyOutputUseType.other,
+      name: "",
+      annualEnergy: 0,
+      fuelTypeId: null,
+    })
   }
 })
 
@@ -230,6 +236,8 @@ const ModelledEnergyOutputRow = ({
     })
   }, [availableFuelTypes, t])
 
+  const isUseTypeOther = field.useType === EEnergyOutputUseType.other
+
   const {
     field: { value: annualEnergy, onChange: onChangeAnnualEnergy },
   } = useController({
@@ -243,13 +251,7 @@ const ModelledEnergyOutputRow = ({
     control,
     name: `modelledEnergyOutputsAttributes.${index}.fuelTypeId`,
     rules: {
-      required:
-        annualEnergy > 0
-          ? {
-              value: true,
-              message: t(`${i18nPrefix}.fuelTypeRequired`),
-            }
-          : false,
+      required: annualEnergy > 0 || isUseTypeOther ? t("ui.isRequired", { field: undefined }) : false,
     },
   })
   const selectedFuelType = useMemo(() => getFuelTypeById(fuelTypeId) ?? null, [fuelTypeId, getFuelTypeById])
@@ -297,7 +299,11 @@ const ModelledEnergyOutputRow = ({
   return (
     <React.Fragment>
       <GridData {...sharedGridDataProps}>
-        <Text>{t(`${i18nPrefix}.useTypes.${field.useType}`)}</Text>
+        {isUseTypeOther ? (
+          <TextFormControl fieldName={`modelledEnergyOutputsAttributes.${index}.name`} required />
+        ) : (
+          <Text>{t(`${i18nPrefix}.useTypes.${field.useType}`)}</Text>
+        )}
       </GridData>
       <GridData {...sharedGridDataProps}>
         <Input
@@ -335,11 +341,17 @@ const ModelledEnergyOutputRow = ({
                   "&, &:hover, &:focus, &:active": {
                     boxShadow: fuelTypeErrorMessage ? "0 0 0 1px var(--chakra-colors-semantic-errorLight)" : undefined,
                     borderColor: fuelTypeErrorMessage ? "var(--chakra-colors-semantic-error)" : undefined,
+                    borderWidth: fuelTypeErrorMessage ? "2px" : undefined,
                   },
                 }),
               },
             }}
           />
+          {fuelTypeErrorMessage && (
+            <Text color="semantic.error" fontSize="sm">
+              {fuelTypeErrorMessage}
+            </Text>
+          )}
         </Stack>
       </GridData>
       <GridData {...sharedGridDataProps}>
