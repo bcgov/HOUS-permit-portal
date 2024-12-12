@@ -1,5 +1,6 @@
 import { Button, Heading, Radio, RadioGroup, Stack, StackProps, Text } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
+import { path } from "ramda"
 import React, { useEffect, useMemo } from "react"
 import { FormProvider, useController, useForm, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
@@ -50,6 +51,7 @@ export const HVAC = observer(() => {
   const navigate = useNavigate()
   const location = useLocation()
   const formMethods = useForm<IStepcodeHvacFormProps>({
+    mode: "onSubmit",
     defaultValues: initializeFormValues(checklist),
   })
   const { handleSubmit } = formMethods
@@ -239,10 +241,20 @@ export const OptionsSection = observer(
     ...props
   }: IOptionsSectionProps) => {
     const { t } = useTranslation()
-    const { control, setValue } = useFormContext<IStepcodeHvacFormProps>()
+    const {
+      control,
+      setValue,
+      formState: { errors },
+    } = useFormContext<IStepcodeHvacFormProps>()
     const {
       field: { value: optionValue, onChange: onOptionChange },
-    } = useController({ control, name: optionFieldName })
+    } = useController({
+      control,
+      name: optionFieldName,
+      rules: {
+        required: t("ui.isRequired", { field: undefined }),
+      },
+    })
 
     const handleOptionChange = (option: (typeof options)[number]) => {
       onOptionChange(option)
@@ -266,10 +278,17 @@ export const OptionsSection = observer(
       }
     }, [storeOtherDescriptionValue])
 
+    const optionErrorMessage = path([optionFieldName, "message"], errors)
+
     return (
       <Stack spacing={3.25} {...props}>
-        <Heading as="h3" fontSize="md">
+        <Heading as="h3" fontSize="md" display="flex" alignItems="center">
           {t(`${i18nPrefix}.${optionFieldName as TOptionFieldName}.heading`)}
+          {optionErrorMessage && (
+            <Text color="semantic.error" fontSize="sm" fontWeight="normal" ml={2}>
+              {optionErrorMessage}
+            </Text>
+          )}
         </Heading>
         <RadioGroup
           display="grid"
