@@ -36,6 +36,16 @@ class Api::Part3Building::ChecklistsController < Api::ApplicationController
       :pressurized_corridors_area,
       :is_suite_sub_metered,
       :suite_heating_energy,
+      :heating_system_plant,
+      :heating_system_type,
+      :heating_system_plant_description,
+      :heating_system_type_description,
+      :cooling_system_plant,
+      :cooling_system_type,
+      :cooling_system_plant_description,
+      :cooling_system_type_description,
+      :dhw_system_type,
+      :dhw_system_description,
       section_completion_status: {
       },
       baseline_occupancies_attributes: %i[

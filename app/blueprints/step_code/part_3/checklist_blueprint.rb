@@ -18,7 +18,17 @@ class StepCode::Part3::ChecklistBlueprint < Blueprinter::Base
          :pressurization_airflow_per_door,
          :pressurized_corridors_area,
          :is_suite_sub_metered,
-         :suite_heating_energy
+         :suite_heating_energy,
+         :heating_system_plant,
+         :heating_system_type,
+         :heating_system_plant_description,
+         :heating_system_type_description,
+         :cooling_system_plant,
+         :cooling_system_type,
+         :cooling_system_plant_description,
+         :cooling_system_type_description,
+         :dhw_system_type,
+         :dhw_system_description
   field :pid, name: :project_identifier
   field :nickname, name: :project_name
   field :full_address, name: :project_address
