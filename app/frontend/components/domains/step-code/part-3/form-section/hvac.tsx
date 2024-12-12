@@ -1,8 +1,9 @@
-import { Heading, Radio, RadioGroup, Stack, StackProps, Text } from "@chakra-ui/react"
+import { Button, Heading, Radio, RadioGroup, Stack, StackProps, Text } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useMemo } from "react"
 import { FormProvider, useController, useForm, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
+import { useLocation, useNavigate } from "react-router-dom"
 import { usePart3StepCode } from "../../../../../hooks/resources/use-part-3-step-code"
 import {
   ECoolingSystemPlant,
@@ -46,9 +47,12 @@ function initializeFormValues(formValues?: IStepcodeHvacFormProps): IStepcodeHva
 export const HVAC = observer(() => {
   const { t } = useTranslation()
   const { checklist } = usePart3StepCode()
+  const navigate = useNavigate()
+  const location = useLocation()
   const formMethods = useForm<IStepcodeHvacFormProps>({
     defaultValues: initializeFormValues(checklist),
   })
+  const { handleSubmit } = formMethods
 
   const orderedHeatingSystemPlantOptions = useMemo(
     () => [
@@ -175,6 +179,13 @@ export const HVAC = observer(() => {
     ]
   )
 
+  const onSubmit = handleSubmit(async (data) => {
+    const updated = await checklist?.update(data)
+    if (updated) {
+      await checklist?.completeSection("hvac")
+      navigate(location.pathname.replace("hvac", "contact"))
+    }
+  })
   return (
     <Stack direction="column" w="full">
       <Heading as="h2" fontSize="2xl" variant="yellowline">
@@ -183,7 +194,7 @@ export const HVAC = observer(() => {
       <Text fontSize="md">{t(`${i18nPrefix}.description`)}</Text>
 
       <FormProvider {...formMethods}>
-        <Stack as="form" spacing={7} mt={3}>
+        <Stack as="form" onSubmit={onSubmit} spacing={7} mt={3}>
           {optionSections.map((section) => (
             <OptionsSection
               key={section.optionFieldName}
@@ -192,6 +203,9 @@ export const HVAC = observer(() => {
               otherDescriptionFieldName={section.otherDescriptionFieldName as TDescriptionFieldName}
             />
           ))}
+          <Button type="submit" variant="primary" mt={5}>
+            {t("stepCode.part3.cta")}
+          </Button>
         </Stack>
       </FormProvider>
     </Stack>
@@ -286,6 +300,7 @@ export const OptionsSection = observer(
                     }}
                     fieldName={otherDescriptionFieldName}
                     maxW="180px"
+                    required={otherSelected}
                   />
                 )}
               </Container>
