@@ -12,6 +12,8 @@ import {
   ECollaboratorType,
   EDoorsPerformanceType,
   EEnabledElectiveFieldReason,
+  EEnergyOutputSource,
+  EEnergyOutputUseType,
   EEnergyStep,
   EFossilFuelsPresence,
   EFuelType,
@@ -587,9 +589,11 @@ export interface IFuelType {
 
 export interface IEnergyOutput {
   id?: string
-  fuelTypeId: string
+  source: EEnergyOutputSource
+  useType: EEnergyOutputUseType
   annualEnergy: string
-  name: string
+  name: string | null
+  fuelTypeId: string | null
 }
 
 export interface IMakeUpAirFuel {

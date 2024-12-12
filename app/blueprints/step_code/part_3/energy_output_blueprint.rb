@@ -1,5 +1,5 @@
 class StepCode::Part3::EnergyOutputBlueprint < Blueprinter::Base
   identifier :id
 
-  fields :fuel_type_id, :annual_energy
+  fields :use_type, :name, :annual_energy, :source, :fuel_type_id
 end

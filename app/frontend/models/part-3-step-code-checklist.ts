@@ -56,6 +56,8 @@ export const Part3StepCodeChecklistModel = types
     modelledEnergyOutputs: types.array(types.frozen<IEnergyOutput>()),
     totalAnnualThermalEnergyDemand: types.maybeNull(types.string),
     totalAnnualCoolingEnergyDemand: types.maybeNull(types.string),
+    totalOccupancyFloorArea: types.maybeNull(types.string),
+    totalStepCodeOccupancyFloorArea: types.maybeNull(types.string),
     stepCodeAnnualThermalEnergyDemand: types.maybeNull(types.string),
     overheatingHoursLimit: types.maybeNull(types.number),
     overheatingHours: types.maybeNull(types.string),
@@ -117,6 +119,12 @@ export const Part3StepCodeChecklistModel = types
     },
     get electricity(): IFuelType {
       return self.fuelTypes.find((ft) => ft.key == EFuelType.electricity)
+    },
+    get fuelTypeIdsToFuelType(): Record<string, IFuelType> {
+      return self.fuelTypes.reduce((acc, fuelType) => {
+        acc[fuelType.id] = fuelType
+        return acc
+      }, {})
     },
   }))
   .views((self) => ({

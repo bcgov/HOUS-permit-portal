@@ -26,7 +26,9 @@ class Part3StepCode::Checklist < ApplicationRecord
 
   has_many :modelled_energy_outputs,
            -> { where(source: :modelled) },
-           class_name: "Part3StepCode::EnergyOutput"
+           class_name: "Part3StepCode::EnergyOutput",
+           dependent: :destroy
+  accepts_nested_attributes_for :modelled_energy_outputs, allow_destroy: true
 
   delegate :building_permit_number,
            :nickname,
@@ -134,5 +136,13 @@ class Part3StepCode::Checklist < ApplicationRecord
   def heating_degree_days
     self[:heating_degree_days].presence ||
       step_code.jurisdiction_heating_degree_days
+  end
+
+  def total_occupancy_floor_area
+    occupancy_classifications.sum(:modelled_floor_area) || 0
+  end
+
+  def total_step_code_occupancy_floor_area
+    step_code_occupancies.sum(:modelled_floor_area) || 0
   end
 end

@@ -1,7 +1,12 @@
 class StepCode::Part3::ChecklistBlueprint < Blueprinter::Base
   identifier :id
 
-  fields :section_completion_status
+  fields :section_completion_status,
+         :total_annual_thermal_energy_demand,
+         :total_annual_cooling_energy_demand,
+         :step_code_annual_thermal_energy_demand,
+         :total_occupancy_floor_area,
+         :total_step_code_occupancy_floor_area
 
   fields :jurisdiction_name,
          :building_height,
@@ -52,5 +57,7 @@ class StepCode::Part3::ChecklistBlueprint < Blueprinter::Base
     checklist.fuel_types + Part3StepCode::FuelType.defaults
   end
   association :reference_energy_outputs,
+              blueprint: StepCode::Part3::EnergyOutputBlueprint
+  association :modelled_energy_outputs,
               blueprint: StepCode::Part3::EnergyOutputBlueprint
 end

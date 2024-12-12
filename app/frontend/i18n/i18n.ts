@@ -1261,8 +1261,76 @@ const options = {
                 fail: "This building does not comply with overheating criteria. Worst case suite/zone overheating hours are over the limit.",
               },
             },
+            modelledOutputs: {
+              heading: "Modelled outputs for entire building",
+              description:
+                "Enter the annual energy consumption by end use and fuel type in kWh. For end uses served by multiple fuels or fuel mixtures, enter as separate end uses. If you need additional use types, you can add additional rows to the table.",
+              useInfoIconLabel: "Use info",
+              infoDescriptions: {
+                generalHeating:
+                  "If project includes heating provided by multiple fuel types these must be entered separately in this section. This includes systems that use supplementary fuel sources\n\n(e.g. air source heat pump with auxiliary natural gas heating below a minimum ambient temperature)",
+                domesticHotWater:
+                  "If project includes DHW heating provided by multiple fuel types these must be entered separately in this section. This includes systems that use supplementary fuel sources\n\n(e.g. air source heat pump with auxiliary natural gas heating below a minimum ambient temperature)",
+                totalAnnualEnergy:
+                  "For Step 2 (NECB) compliance, please refer to cell B39 for the 'Total Energy Use' for the Reference Case. The 'Total Energy Use' of the Design Case is not to exceed the Reference Case.",
+                wholeBuildingAnnualThermalEnergyDemand:
+                  "Note this is total kWh, not kWh/m2; it is used to calculate TEDI along with the MFA.",
+                wholeBuildingAnnualCoolingEnergyDemand:
+                  "Note this is total kWh, not kWh/m2; it is used to calculate cooling energy demand intensity along with the MFA.\n\nThis is not a compliance metric and is used for information purposes only. The definition is the same as TEDI, but for cooling rather than heating.",
+                stepCodeAnnualThermalEnergyDemand:
+                  "Portions of building with TEDI requirements must comply with those targets prior to being averaged with non-Step Code building results.\n\nIf the building only contains Step 2 (NECB) occupancies (reported in Section B), this entry is not required.",
+              },
+              energyOutputsTable: {
+                column: {
+                  use: "Use",
+                  annualEnergy: "Annual energy (kWh)",
+                  fuelType: "Fuel type",
+                  emissionsFactor: "Emissions factor (kgCO2e/kWh)",
+                  emissions: "Emissions (kgCO2e)",
+                },
+                useTypes: {
+                  interior_lighting: "Interior lighting",
+                  exterior_lighting: "Exterior lighting",
+                  heating_general: "Heating",
+                  cooling: "Cooling",
+                  pumps: "Pumps",
+                  fans: "Fans",
+                  domestic_hot_water: "Domestic hot water",
+                  plug_loads: "Plug loads",
+                  heating_gas: "Heating (gas)",
+                  other: "Other",
+                },
+                fuelTypes: {
+                  electricity: "Electricity",
+                  natural_gas: "Natural gas",
+                  district_energy: "District energy",
+                  propane: "Propane",
+                  light_fuel_oil: "Light fuel oil",
+                  heavy_fuel_oil: "Heavy fuel oil",
+                  diesel_fuel: "Diesel fuel",
+                  wood_fuel: "Wood fuel",
+                  other: "Other",
+                },
+                addUseType: "Add use type",
+                totalByFuelType: "Total <1>{{fuelType}}</1>",
+                totalByFuelTypeOther: "Total <1>{{fuelTypeDescription}}</1> (Other)",
+                totalAnnualEnergy: "Total annual energy",
+                totalEmissions: "Total annual emissions",
+                fuelTypeRequired: "To add an energy use type, select a fuel type first.",
+                fuelTypeClearHelpText: "To remove this energy use type entry, clear the fuel type.",
+              },
+              annualEnergyWholeBuildingTable: {
+                tableHeader: "Annual energy for calculations (whole building)",
+                annualThermalEnergyDemand: "Annual thermal energy demand for TEDI (kWh)",
+                annualCoolingEnergyDemand: "Annual cooling energy demand for CEDI (kWh)",
+              },
+              stepCodeBuildingPortionsTable: {
+                tableHeader: "Step code building portions",
+                annualThermalEnergyDemand: "Annual thermal energy demand for TEDI",
+                kwhM2: "(kWh/(m2⋅year))",
+              },
+            },
           },
-
           title: "Step code auto-compliance tool",
           subTitle:
             "You can use this tool to generate your BC Energy Step Code Compliance Report. Approval is not automatic. After you've submitted your application, local officials will review it. They may ask you to fix issues or show that your application meets requirements before approving it.",
