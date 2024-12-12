@@ -13,7 +13,12 @@ class StepCode::Part3::ChecklistBlueprint < Blueprinter::Base
          :heating_degree_days,
          :ref_annual_thermal_energy_demand,
          :generated_electricity,
-         :overheating_hours
+         :overheating_hours,
+         :pressurized_doors_count,
+         :pressurization_airflow_per_door,
+         :pressurized_corridors_area,
+         :is_suite_sub_metered,
+         :suite_heating_energy
   field :pid, name: :project_identifier
   field :nickname, name: :project_name
   field :full_address, name: :project_address
@@ -60,4 +65,6 @@ class StepCode::Part3::ChecklistBlueprint < Blueprinter::Base
               blueprint: StepCode::Part3::EnergyOutputBlueprint
   association :modelled_energy_outputs,
               blueprint: StepCode::Part3::EnergyOutputBlueprint
+  association :make_up_air_fuels,
+              blueprint: StepCode::Part3::MakeUpAirFuelBlueprint
 end

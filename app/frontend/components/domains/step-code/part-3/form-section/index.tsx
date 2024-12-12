@@ -12,6 +12,7 @@ import { ModelledOutputs } from "./modelled-outputs"
 import { OverheatingRequirements } from "./overheating-requirements"
 import { ProjectDetails } from "./project-details"
 import { RenewableEnergy } from "./renewable-energy"
+import { ResidentialAdjustments } from "./residential-adjustments"
 import { StartPage } from "./start-page"
 import { StepCodeOccupancies } from "./step-code-occupancies"
 import { StepCodeOccupanciesPerformanceRequirements } from "./step-code-occupancies/performance-requirements"
@@ -42,11 +43,13 @@ export const FormSection = observer(function Part3StepCodeFormSection() {
       return <StepCodeOccupancies />
     case "step-code-performance-requirements":
       return <StepCodeOccupanciesPerformanceRequirements />
+    case "modelled-outputs":
+      return <ModelledOutputs />
     case "renewable-energy":
       return <RenewableEnergy />
     case "overheating-requirements":
       return <OverheatingRequirements />
-    case "modelled-outputs":
-      return <ModelledOutputs />
+    case "residential-adjustments":
+      return <ResidentialAdjustments />
   }
 })

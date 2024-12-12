@@ -501,6 +501,11 @@ export enum EBaselinePerformanceRequirement {
   NECB = "necb",
   percentBetterNECB = "%_better_necb",
 }
+export enum EIsSuiteSubMetered {
+  yes = "yes",
+  no = "no",
+  notApplicable = "not_applicable",
+}
 
 export enum EPart3StepCodeSoftware {
   IESVE = "ies_ve",

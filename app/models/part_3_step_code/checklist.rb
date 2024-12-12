@@ -16,7 +16,9 @@ class Part3StepCode::Checklist < ApplicationRecord
   has_many :fuel_types, dependent: :destroy
   accepts_nested_attributes_for :fuel_types, allow_destroy: true
 
-  has_many :make_up_air_fuels
+  has_many :make_up_air_fuels, dependent: :destroy
+  accepts_nested_attributes_for :make_up_air_fuels, allow_destroy: true
+
   has_many :document_references
   has_many :reference_energy_outputs,
            -> { where(source: :reference) },
@@ -47,6 +49,8 @@ class Part3StepCode::Checklist < ApplicationRecord
          revision_5
        ],
        _default: "BCBC 2018 Revision 5"
+
+  enum is_suite_sub_metered: %i[yes no not_applicable]
 
   enum software: %i[
          ies_ve
