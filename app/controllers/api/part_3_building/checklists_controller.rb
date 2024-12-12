@@ -31,6 +31,11 @@ class Api::Part3Building::ChecklistsController < Api::ApplicationController
       :overheating_hours,
       :total_annual_thermal_energy_demand,
       :step_code_annual_thermal_energy_demand,
+      :pressurized_doors_count,
+      :pressurization_airflow_per_door,
+      :pressurized_corridors_area,
+      :is_suite_sub_metered,
+      :suite_heating_energy,
       section_completion_status: {
       },
       baseline_occupancies_attributes: %i[
@@ -60,7 +65,8 @@ class Api::Part3Building::ChecklistsController < Api::ApplicationController
         use_type
         name
         annual_energy
-      ]
+      ],
+      make_up_air_fuels_attributes: %i[_destroy id fuel_type_id percent_of_load]
     )
   end
 end
