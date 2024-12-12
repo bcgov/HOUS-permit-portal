@@ -361,7 +361,7 @@ const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
 
       <Portal>
         <Box color="text.primary" className={isMenuOpen && "show-menu-overlay-background"}>
-          <MenuList zIndex={99} boxShadow="2xl">
+          <MenuList zIndex={99} boxShadow="2xl" pb={0}>
             {loggedIn && !currentUser.isUnconfirmed ? (
               <>
                 <Text fontSize="xs" fontStyle="italic" px={3} mb={-1} color="greys.grey01">
@@ -429,6 +429,18 @@ const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
               <Link textDecoration="none" w="full" href={"mailto:" + t("site.contactEmail")} isExternal>
                 {t("site.giveFeedback")} <Envelope size={16} style={{ display: "inline", color: "inherit" }} />
               </Link>
+            </MenuItem>
+            <MenuItem h={6} bg="greys.grey03" _hover={{ cursor: "auto" }}>
+              <Text
+                textAlign="center"
+                w="full"
+                color="greys.grey90"
+                fontWeight={"thin"}
+                fontStyle="italic"
+                fontSize="sm"
+              >
+                {import.meta.env.VITE_RELEASE_VERSION}
+              </Text>
             </MenuItem>
           </MenuList>
         </Box>
