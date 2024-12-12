@@ -1,4 +1,4 @@
-import { Button, Flex, Grid, GridProps, IconButton, Input, InputProps, Stack, Text } from "@chakra-ui/react"
+import { Box, Button, Flex, Grid, GridProps, IconButton, Input, InputProps, Stack, Text } from "@chakra-ui/react"
 import { Plus, X } from "@phosphor-icons/react"
 import { computed } from "mobx"
 import { observer } from "mobx-react-lite"
@@ -12,7 +12,9 @@ import { EEnergyOutputUseType, EFuelType } from "../../../../../../types/enums"
 import { IFuelType } from "../../../../../../types/types"
 import { formattedStringToNumber, numberToFormattedString } from "../../../../../../utils/utility-functions"
 import { TextFormControl } from "../../../../../shared/form/input-form-control"
+import { InfoTooltip } from "../../../../../shared/info-tooltip"
 import FuelTypeSelect from "../../../../../shared/select/selectors/fuel-type-select"
+import { HStack } from "../../../part-9/checklist/pdf-content/shared/h-stack"
 import { GridColumnHeader } from "../../../part-9/checklist/shared/grid/column-header"
 import { GridData } from "../../../part-9/checklist/shared/grid/data"
 import { GridRowHeader } from "../../../part-9/checklist/shared/grid/row-header"
@@ -179,7 +181,16 @@ export const ModelledEnergyOutputsGrid = observer(({ ...rest }: IProps) => {
 
       {/* Totals Row */}
       <GridRowHeader colSpan={1} fontWeight="bold" fontSize="sm">
-        {t(`${i18nPrefix}.totalAnnualEnergy`)}
+        <HStack>
+          {t(`${i18nPrefix}.totalAnnualEnergy`)}
+          <Box>
+            <InfoTooltip
+              whiteSpace={"pre-line"}
+              ariaLabel={t("stepCode.part3.modelledOutputs.useInfoIconLabel")}
+              label={t("stepCode.part3.modelledOutputs.infoDescriptions.totalAnnualEnergy") as string}
+            />
+          </Box>
+        </HStack>
       </GridRowHeader>
       <GridData colSpan={2}>
         <Input value={formattedTotalAnnualEnergy} {...disabledInputProps} />
@@ -307,6 +318,15 @@ const ModelledEnergyOutputRow = ({
     }
   }, [fuelTypeId])
 
+  const useTypeInfoTanslationKey = useMemo(() => {
+    const typeToKey = {
+      [EEnergyOutputUseType.heatingGeneral]: "stepCode.part3.modelledOutputs.infoDescriptions.generalHeating",
+      [EEnergyOutputUseType.domesticHotWater]: "stepCode.part3.modelledOutputs.infoDescriptions.domesticHotWater",
+    } as const
+
+    return typeToKey[field.useType]
+  }, [field.useType])
+
   return (
     <React.Fragment>
       <GridData {...sharedGridDataProps} pl={2}>
@@ -321,11 +341,23 @@ const ModelledEnergyOutputRow = ({
             visibility={fuelTypeId || isUseTypeOther ? "visible" : "hidden"}
             onClick={handleRemoveUseType}
           />
-          {isUseTypeOther ? (
-            <TextFormControl fieldName={`modelledEnergyOutputsAttributes.${index}.name`} required />
-          ) : (
-            <Text>{t(`${i18nPrefix}.useTypes.${field.useType}`)}</Text>
-          )}
+          <HStack>
+            {isUseTypeOther ? (
+              <TextFormControl flex={1} fieldName={`modelledEnergyOutputsAttributes.${index}.name`} required />
+            ) : (
+              <Text flex={1}>{t(`${i18nPrefix}.useTypes.${field.useType}`)}</Text>
+            )}
+            {useTypeInfoTanslationKey && (
+              <Box>
+                <InfoTooltip
+                  whiteSpace={"pre-line"}
+                  ariaLabel={t("stepCode.part3.modelledOutputs.useInfoIconLabel")}
+                  iconSize={14}
+                  label={t(useTypeInfoTanslationKey) as string}
+                />
+              </Box>
+            )}
+          </HStack>
         </Flex>
       </GridData>
       <GridData {...sharedGridDataProps}>

@@ -1270,6 +1270,21 @@ const options = {
               heading: "Modelled outputs for entire building",
               description:
                 "Enter the annual energy consumption by end use and fuel type in kWh. For end uses served by multiple fuels or fuel mixtures, enter as separate end uses. If you need additional use types, you can add additional rows to the table.",
+              useInfoIconLabel: "Use info",
+              infoDescriptions: {
+                generalHeating:
+                  "If project includes heating provided by multiple fuel types these must be entered separately in this section. This includes systems that use supplementary fuel sources\n\n(e.g. air source heat pump with auxiliary natural gas heating below a minimum ambient temperature)",
+                domesticHotWater:
+                  "If project includes DHW heating provided by multiple fuel types these must be entered separately in this section. This includes systems that use supplementary fuel sources\n\n(e.g. air source heat pump with auxiliary natural gas heating below a minimum ambient temperature)",
+                totalAnnualEnergy:
+                  "For Step 2 (NECB) compliance, please refer to cell B39 for the 'Total Energy Use' for the Reference Case. The 'Total Energy Use' of the Design Case is not to exceed the Reference Case.",
+                wholeBuildingAnnualThermalEnergyDemand:
+                  "Note this is total kWh, not kWh/m2; it is used to calculate TEDI along with the MFA.",
+                wholeBuildingAnnualCoolingEnergyDemand:
+                  "Note this is total kWh, not kWh/m2; it is used to calculate cooling energy demand intensity along with the MFA.\n\nThis is not a compliance metric and is used for information purposes only. The definition is the same as TEDI, but for cooling rather than heating.",
+                stepCodeAnnualThermalEnergyDemand:
+                  "Portions of building with TEDI requirements must comply with those targets prior to being averaged with non-Step Code building results.\n\nIf the building only contains Step 2 (NECB) occupancies (reported in Section B), this entry is not required.",
+              },
               energyOutputsTable: {
                 column: {
                   use: "Use",
