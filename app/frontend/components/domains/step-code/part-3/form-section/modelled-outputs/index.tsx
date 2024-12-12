@@ -8,6 +8,7 @@ import { usePart3StepCode } from "../../../../../../hooks/resources/use-part-3-s
 import { IPart3StepCodeChecklist } from "../../../../../../models/part-3-step-code-checklist"
 import { EEnergyOutputUseType } from "../../../../../../types/enums"
 import { IEnergyOutput } from "../../../../../../types/types"
+import { SharedSpinner } from "../../../../../shared/base/shared-spinner"
 import { AnnualEnergyWholeBuildingGrid } from "./annual-energy-whole-building-grid"
 import { ModelledEnergyOutputsGrid } from "./modelled-energy-outputs-grid"
 import { StepCodeBuildingPortionsGrid } from "./step-code-building-portions-grid"
@@ -124,7 +125,9 @@ export const ModelledOutputs = observer(function Part3StepCodeFormModelledOutput
               {t("stepCode.part3.cta")}
             </Button>
           </Stack>
-        ) : null}
+        ) : (
+          <SharedSpinner mt={16} />
+        )}
       </FormProvider>
     </Flex>
   )
