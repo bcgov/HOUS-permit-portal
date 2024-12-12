@@ -66,7 +66,6 @@ class Part3StepCode::Checklist < ApplicationRecord
 
   enum heating_system_plant: %i[
          none
-         no_central_plant
          air_source_heat_pump
          ground_source_heat_pump
          air_source_vrf
@@ -110,7 +109,7 @@ class Part3StepCode::Checklist < ApplicationRecord
          hydronic_baseboards
          vrf_units
          radiant_floor_ceiling
-         not_applicable
+         none
          other
        ],
        _prefix: :cooling_type
