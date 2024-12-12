@@ -1449,7 +1449,7 @@ const options = {
               dhwSystemType: {
                 heading: "DHW system",
                 options: {
-                  heat_pump_spacerheating: "Heat pump integrated with space heating",
+                  heat_pump_space_heating: "Heat pump integrated with space heating",
                   air_source_heat_pump: "Dedicated heat pump (air source)",
                   ground_source_heat_pump: "Dedicated heat pump (ground source)",
                   gas_space_heating: "Gas integrated with space heating",

@@ -140,7 +140,7 @@ class Part3StepCode::Checklist < ApplicationRecord
   validates :cooling_system_type_description,
             presence: true,
             if: :cooling_type_other?
-  validates :dhw_system_description, presence: true, if: :dhw_system_other?
+  validates :dhw_system_description, presence: true, if: :dhw_other?
 
   def compliance_metrics
     if occupancy_classifications.step_code_occupancy.any?
