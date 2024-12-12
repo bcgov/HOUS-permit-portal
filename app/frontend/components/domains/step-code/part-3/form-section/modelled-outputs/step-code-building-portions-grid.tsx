@@ -1,4 +1,4 @@
-import { Grid, Input, InputProps } from "@chakra-ui/react"
+import { Box, Grid, HStack, Input, InputProps, Text } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useCallback, useMemo } from "react"
 import { useController, useFormContext } from "react-hook-form"
@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next"
 import { IMpdelledEnergyOutputChecklistForm } from "."
 import { usePart3StepCode } from "../../../../../../hooks/resources/use-part-3-step-code"
 import { formattedStringToNumber, numberToFormattedString } from "../../../../../../utils/utility-functions"
+import { InfoTooltip } from "../../../../../shared/info-tooltip"
 import { GridColumnHeader } from "../../../part-9/checklist/shared/grid/column-header"
 import { GridData } from "../../../part-9/checklist/shared/grid/data"
 import { GridRowHeader } from "../../../part-9/checklist/shared/grid/row-header"
@@ -62,7 +63,18 @@ export const StepCodeBuildingPortionsGrid = observer(function StepCodeBuildingPo
       <GridColumnHeader colSpan={2}>{t(`${i18nPrefix}.tableHeader`)}</GridColumnHeader>
 
       {/* Annual thermal energy demand row   */}
-      <GridRowHeader>{t(`${i18nPrefix}.annualThermalEnergyDemand`)}</GridRowHeader>
+      <GridRowHeader>
+        <HStack>
+          <Text>{t(`${i18nPrefix}.annualThermalEnergyDemand`)}</Text>
+          <Box>
+            <InfoTooltip
+              whiteSpace={"pre-line"}
+              ariaLabel={t("stepCode.part3.modelledOutputs.useInfoIconLabel")}
+              label={t("stepCode.part3.modelledOutputs.infoDescriptions.stepCodeAnnualThermalEnergyDemand") as string}
+            />
+          </Box>
+        </HStack>
+      </GridRowHeader>
       <GridData borderRightWidth={1}>
         <Input
           value={formattedStepCodeAnnualThermalEnergyDemand}
