@@ -34,7 +34,10 @@ export interface ICollaboratorSearchResponse extends IApiResponse<ICollaborator[
 export interface IAcceptInvitationResponse extends IApiResponse<{}, { redirectUrl: string }> {}
 
 export interface IInvitationResponse
-  extends IApiResponse<{ invited: IUser[]; reinvited: IUser[]; emailTaken: IUser[] }, {}> {}
+  extends IApiResponse<
+    { invited: IUser[]; reinvited: IUser[]; emailTaken: IUser[]; failed: { email: string }[] },
+    {}
+  > {}
 
 export interface IOptionResponse<T = string> extends IApiResponse<IOption<T>[], IPageMeta> {}
 
