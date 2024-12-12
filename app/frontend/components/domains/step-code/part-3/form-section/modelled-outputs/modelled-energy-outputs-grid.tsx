@@ -1,6 +1,5 @@
-import { Box, Button, Grid, GridProps, Input, InputProps, Stack, Text, Tooltip } from "@chakra-ui/react"
-import { Plus } from "@phosphor-icons/react"
-import { Info } from "@phosphor-icons/react/dist/ssr"
+import { Button, Flex, Grid, GridProps, IconButton, Input, InputProps, Stack, Text } from "@chakra-ui/react"
+import { Plus, X } from "@phosphor-icons/react"
 import { computed } from "mobx"
 import { observer } from "mobx-react-lite"
 import { path } from "ramda"
@@ -33,7 +32,7 @@ const disabledInputProps: Partial<InputProps> = {
 
 const sharedGridDataProps = {
   justifyContent: "center",
-  pt: 6,
+  py: 6,
 }
 
 /**
@@ -128,6 +127,7 @@ export const ModelledEnergyOutputsGrid = observer(({ ...rest }: IProps) => {
           field={field}
           availableFuelTypes={availableFuelTypes}
           getFuelTypeById={getFuelTypeById}
+          removeRow={remove}
         />
       ))}
 
@@ -208,6 +208,7 @@ interface IModelledEnergyOutputRowProps {
   field: FieldArrayWithId<IMpdelledEnergyOutputChecklistForm, "modelledEnergyOutputsAttributes", "id">
   availableFuelTypes: IFuelType[]
   getFuelTypeById: (id: string) => IFuelType | undefined
+  removeRow: (index: number) => void
 }
 
 /**
@@ -218,6 +219,7 @@ const ModelledEnergyOutputRow = ({
   field,
   availableFuelTypes,
   getFuelTypeById,
+  removeRow,
 }: IModelledEnergyOutputRowProps) => {
   const { t } = useTranslation()
   const {
@@ -274,6 +276,15 @@ const ModelledEnergyOutputRow = ({
     [onChangeFuelTypeId]
   )
 
+  const handleRemoveUseType = useCallback(() => {
+    if (isUseTypeOther) {
+      removeRow(index)
+      return
+    }
+
+    onChangeFuelTypeId(null)
+  }, [removeRow, index, isUseTypeOther, onChangeFuelTypeId])
+
   const emissionFactor = useMemo(() => {
     return typeof selectedFuelType?.emissionsFactor === "string" ||
       typeof selectedFuelType?.emissionsFactor === "number"
@@ -298,12 +309,24 @@ const ModelledEnergyOutputRow = ({
 
   return (
     <React.Fragment>
-      <GridData {...sharedGridDataProps}>
-        {isUseTypeOther ? (
-          <TextFormControl fieldName={`modelledEnergyOutputsAttributes.${index}.name`} required />
-        ) : (
-          <Text>{t(`${i18nPrefix}.useTypes.${field.useType}`)}</Text>
-        )}
+      <GridData {...sharedGridDataProps} pl={2}>
+        <Flex>
+          <IconButton
+            mr={1}
+            icon={<X />}
+            variant="link"
+            size="sm"
+            color="semantic.error"
+            aria-label={t("ui.remove")}
+            visibility={fuelTypeId || isUseTypeOther ? "visible" : "hidden"}
+            onClick={handleRemoveUseType}
+          />
+          {isUseTypeOther ? (
+            <TextFormControl fieldName={`modelledEnergyOutputsAttributes.${index}.name`} required />
+          ) : (
+            <Text>{t(`${i18nPrefix}.useTypes.${field.useType}`)}</Text>
+          )}
+        </Flex>
       </GridData>
       <GridData {...sharedGridDataProps}>
         <Input
@@ -314,22 +337,14 @@ const ModelledEnergyOutputRow = ({
           {...sharedInputProps}
         />
       </GridData>
-      <GridData {...sharedGridDataProps} pt={1}>
+      <GridData {...sharedGridDataProps}>
         <Stack spacing={0.5} flexDirection={"column"}>
-          <Box alignSelf={"flex-end"}>
-            <Tooltip
-              label={fuelTypeId ? t(`${i18nPrefix}.fuelTypeClearHelpText`) : t(`${i18nPrefix}.fuelTypeRequired`)}
-            >
-              <Info size={16} />
-            </Tooltip>
-          </Box>
           <FuelTypeSelect
             options={fuelTypeOptions}
             onChange={handleChangeFuelType}
             value={selectedFuelType}
             selectProps={{
               "aria-errormessage": fuelTypeErrorMessage,
-              isClearable: true,
               styles: {
                 container: (base) => ({
                   ...base,
