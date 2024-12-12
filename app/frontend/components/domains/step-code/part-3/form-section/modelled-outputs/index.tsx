@@ -87,7 +87,18 @@ export const ModelledOutputs = observer(function Part3StepCodeFormModelledOutput
     const createdOrUpdatedEnergyOutputsAttributes = data.modelledEnergyOutputsAttributes.filter(
       (output) => output.fuelTypeId
     )
-    const energyOutputs = [...deletedEnergyOutputsAttributes, ...createdOrUpdatedEnergyOutputsAttributes]
+    const deletedOtherEnergyOutputsAttributes = (checklist?.modelledEnergyOutputs ?? [])
+      .filter(
+        (output) =>
+          output.useType === EEnergyOutputUseType.other &&
+          !data.modelledEnergyOutputsAttributes.some((o) => o.id === output.id)
+      )
+      .map((output) => ({ id: output.id, _destroy: true }))
+    const energyOutputs = [
+      ...deletedEnergyOutputsAttributes,
+      ...createdOrUpdatedEnergyOutputsAttributes,
+      ...deletedOtherEnergyOutputsAttributes,
+    ]
     const updated = await checklist?.update({ ...data, modelledEnergyOutputsAttributes: energyOutputs })
     if (updated) {
       await checklist?.completeSection("modelledOutputs")
