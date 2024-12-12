@@ -42,6 +42,7 @@ en:
           invalid_email: "Invalid email format"
         jurisdiction:
           no_sandboxes: "Jurisdiction must have at least one sandbox."
+          enabled_inbox_requires_setup: "can only be toggled on once all emails are set up."
         jurisdiction_template_version_customizations:
           uniqueness: "already exists for this jurisdiction and template version."
         site_configuration:
@@ -59,6 +60,7 @@ en:
               incorrect_role: "must have the submitter role"
             jurisdiction:
               no_contact: "is not ready to accept applications through this tool yet. Please check with your local jurisdiction."
+              inbox_not_enabled: "inbox for this permit application is not enabled"
             pid_or_pin: "must have a PID or PIN."
         requirement_template:
           step_code_package_required: '"Energy step code" is required to have the Design package energy step code file'
@@ -493,7 +495,7 @@ en:
         message: "%{error_message}"
       submit_state_error:
         title: Error
-        message: "This application has already been submitted"
+        message: "This application cannot be submitted or re-submitted"
       outdated_error:
         title: Error
         message: "Please refresh the page. A new template version is available."

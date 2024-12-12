@@ -1,5 +1,5 @@
 import { t } from "i18next"
-import { Instance, applySnapshot, flow, toGenerator, types } from "mobx-state-tree"
+import { Instance, flow, toGenerator, types } from "mobx-state-tree"
 import * as R from "ramda"
 import { withEnvironment } from "../lib/with-environment"
 import { withMerge } from "../lib/with-merge"
@@ -18,6 +18,7 @@ export const JurisdictionModel = types
     name: types.maybeNull(types.string),
     submissionEmail: types.maybeNull(types.string),
     qualifiedName: types.string,
+    inboxEnabled: types.boolean,
     reverseQualifiedName: types.maybeNull(types.string),
     regionalDistrictName: types.maybeNull(types.string),
     localityType: types.maybeNull(types.string),
@@ -107,7 +108,7 @@ export const JurisdictionModel = types
     update: flow(function* (params) {
       const { ok, data: response } = yield* toGenerator(self.environment.api.updateJurisdiction(self.id, params))
       if (ok) {
-        applySnapshot(self, response.data)
+        self.rootStore.jurisdictionStore.mergeUpdate(response.data, "jurisdictionMap")
       }
       return ok
     }),

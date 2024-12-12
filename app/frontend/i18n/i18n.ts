@@ -624,6 +624,9 @@ const options = {
             versionDiffContactWarning:
               "A new version of the permit is available. Please ask author or designated submitter to review and acknowledge changes to proceed.",
             contactsSummary: "Contacts summary",
+            inboxDisabledTitle: "Inbox disabled",
+            inboxDisabled:
+              "Submissions for this local jurisdictions are currently disabled. You will be able to make edits to this permit application but will not be able to submit until this jurisdiction's is accepting submissions again.",
             downloadApplication: "Download application",
             fetchingMissingPdf: "Fetching {{missingPdf}}...",
             missingPdfLabels: {
@@ -1322,6 +1325,7 @@ const options = {
             submissionsInboxSetup: {
               title: "Submissions inbox setup",
               description: "Specify email addresses that should receive applications.",
+              inboxEnabled: "Enable inbox",
               permitTypes: {
                 label: "Send permit applications for",
                 low_residential: "1-4 Unit detached housing",
@@ -1504,7 +1508,7 @@ const options = {
               "The Super Admin is the highest-level user within the system, with overarching control over the entire permit application platform. They have the authority to manage user roles, including creating and removing user accounts, and to modify the system configuration. This role is responsible for the maintenance of the system, including updates and enhancements, and ensuring that the system meets the operational and strategic objectives of the local government or the organization.",
           },
           assignTo: "Assign to...",
-          department: "Department"
+          department: "Department",
         },
         earlyAccessRequirementTemplate: {
           show: {},
