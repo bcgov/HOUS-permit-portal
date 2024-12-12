@@ -60,6 +60,7 @@ class PermitApplication < ApplicationRecord
   delegate :code, :name, to: :permit_type, prefix: true
   delegate :code, :name, to: :activity, prefix: true
   delegate :published_template_version, to: :template_version
+  delegate :inbox_enabled, to: :jurisdiction
 
   before_validation :assign_default_nickname, on: :create
   before_validation :assign_unique_number, on: :create
