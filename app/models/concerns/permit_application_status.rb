@@ -99,6 +99,8 @@ module PermitApplicationStatus
     def inbox_must_be_enabled_on_non_sandboxed_when_submitted
       return unless sandbox.nil?
 
+      return unless jurisdiction.present?
+
       return if jurisdiction.inbox_enabled?
 
       return unless PermitApplication.submitted_statuses.include?(status)
