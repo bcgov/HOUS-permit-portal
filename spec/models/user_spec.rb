@@ -21,7 +21,8 @@ RSpec.describe User, type: :model do
                review_manager: 1,
                reviewer: 2,
                super_admin: 3,
-               regional_review_manager: 4
+               regional_review_manager: 4,
+               technical_support: 5
              )
     end
 
