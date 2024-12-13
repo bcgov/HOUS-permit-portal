@@ -95,7 +95,6 @@ export const ConfigurationManagementScreen = observer(function ConfigurationMana
                   icon={<SlidersHorizontal size={24} />}
                   href={`/jurisdictions/${currentJurisdiction.slug}/api-settings`}
                   h="full"
-                  markForSandbox
                 />
               </GridItem>
             </Grid>
