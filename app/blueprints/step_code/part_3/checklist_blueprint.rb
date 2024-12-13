@@ -1,12 +1,26 @@
 class StepCode::Part3::ChecklistBlueprint < Blueprinter::Base
   identifier :id
 
-  fields :section_completion_status
+  fields :section_completion_status,
+         :total_annual_thermal_energy_demand,
+         :total_annual_cooling_energy_demand,
+         :step_code_annual_thermal_energy_demand,
+         :total_occupancy_floor_area,
+         :total_step_code_occupancy_floor_area
 
-  fields :jurisdiction_name, :building_height, :heating_degree_days
+  fields :jurisdiction_name,
+         :building_height,
+         :heating_degree_days,
+         :ref_annual_thermal_energy_demand,
+         :generated_electricity,
+         :overheating_hours
   field :pid, name: :project_identifier
   field :nickname, name: :project_name
   field :full_address, name: :project_address
+
+  field :overheating_hours_limit do |_checklist, _options|
+    Constants::Part3StepCode::OVERHEATING_HOURS_LIMIT
+  end
 
   field :permit_date do |checklist, _options|
     checklist.newly_submitted_at&.strftime("%b%e, %Y")
@@ -35,9 +49,15 @@ class StepCode::Part3::ChecklistBlueprint < Blueprinter::Base
 
   association :baseline_occupancies,
               blueprint: StepCode::Part3::BaselineOccupancyBlueprint
+  association :step_code_occupancies,
+              blueprint: StepCode::Part3::StepCodeOccupancyBlueprint
   association :fuel_types,
               blueprint:
                 StepCode::Part3::FuelTypeBlueprint do |checklist, _options|
     checklist.fuel_types + Part3StepCode::FuelType.defaults
   end
+  association :reference_energy_outputs,
+              blueprint: StepCode::Part3::EnergyOutputBlueprint
+  association :modelled_energy_outputs,
+              blueprint: StepCode::Part3::EnergyOutputBlueprint
 end

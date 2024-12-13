@@ -12,6 +12,8 @@ import {
   ECollaboratorType,
   EDoorsPerformanceType,
   EEnabledElectiveFieldReason,
+  EEnergyOutputSource,
+  EEnergyOutputUseType,
   EEnergyStep,
   EFossilFuelsPresence,
   EFuelType,
@@ -30,6 +32,7 @@ import {
   EStepCodeBuildingType,
   EStepCodeCompliancePath,
   EStepCodeEPCTestingTargetType,
+  EStepCodeOccupancyKey,
   ETemplateVersionStatus,
   EUserRoles,
   EVisibility,
@@ -570,6 +573,7 @@ export interface IBaselineOccupancy {
 }
 export interface IStepCodeOccupancy {
   id?: string
+  key: EStepCodeOccupancyKey
   modelledFloorArea: string
   energyStepRequired: EEnergyStep
   zeroCarbonStepRequired: EZeroCarbonStep
@@ -584,9 +588,12 @@ export interface IFuelType {
 }
 
 export interface IEnergyOutput {
-  fuelType: string
+  id?: string
+  source: EEnergyOutputSource
+  useType: EEnergyOutputUseType
   annualEnergy: string
-  name: string
+  name: string | null
+  fuelTypeId: string | null
 }
 
 export interface IMakeUpAirFuel {

@@ -285,6 +285,7 @@ export enum EFossilFuelsPresence {
 }
 
 export enum EEnergyStep {
+  two = "2",
   three = "3",
   four = "4",
   five = "5",
@@ -485,6 +486,14 @@ export enum EBaselineOccupancyKey {
   lowHazardIndustrial = "low_hazard_industrial",
 }
 
+export enum EStepCodeOccupancyKey {
+  hotelMotel = "hotel_motel",
+  residential = "residential",
+  office = "office",
+  other = "other",
+  mercantile = "mercantile",
+}
+
 export enum EBaselinePerformanceRequirement {
   step2NECB = "step_2_necb",
   ASHRAE = "ashrae",
@@ -572,4 +581,22 @@ export enum EFuelType {
   dieselFuel = "diesel_fuel",
   woodFuel = "wood_fuel",
   other = "other",
+}
+
+export enum EEnergyOutputUseType {
+  interiorLighting = "interior_lighting",
+  exteriorLighting = "exterior_lighting",
+  heatingGeneral = "heating_general",
+  cooling = "cooling",
+  pumps = "pumps",
+  fans = "fans",
+  domesticHotWater = "domestic_hot_water",
+  plugLoads = "plug_loads",
+  heatingGas = "heating_gas",
+  other = "other",
+}
+
+export enum EEnergyOutputSource {
+  modelled = "modelled",
+  reference = "reference",
 }

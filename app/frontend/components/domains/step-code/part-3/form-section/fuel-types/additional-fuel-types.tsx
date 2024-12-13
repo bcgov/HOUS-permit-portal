@@ -47,7 +47,7 @@ export const AdditionalFuelTypes = observer(function Part3StepCodeFormAdditional
 
   const { isSubmitting, isValid, isSubmitted } = formState
 
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append } = useFieldArray({
     control,
     name: "fuelTypesAttributes",
   })

@@ -47,11 +47,11 @@ export const StepCodeStoreModel = types
       return self.stepCodesMap.get(id)
     },
     getEnergyStepOptions(allowNull: boolean = false): EEnergyStep[] {
-      const { energySteps } = self.selectOptions
+      const energySteps = self.currentStepCode?.energySteps || self.selectOptions.energySteps
       return (allowNull ? [...energySteps, null] : energySteps) as EEnergyStep[]
     },
     getZeroCarbonStepOptions(allowNull: boolean = false): EZeroCarbonStep[] {
-      const { zeroCarbonSteps } = self.selectOptions
+      const zeroCarbonSteps = self.currentStepCode?.zeroCarbonSteps || self.selectOptions.zeroCarbonSteps
       return (allowNull ? [...zeroCarbonSteps, null] : zeroCarbonSteps) as EZeroCarbonStep[]
     },
   }))

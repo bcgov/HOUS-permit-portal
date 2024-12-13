@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_12_07_001055) do
+ActiveRecord::Schema[7.1].define(version: 2024_12_09_182856) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -80,12 +80,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_12_07_001055) do
             name: "index_contacts_on_contactable"
   end
 
-  create_table "data_migrations",
-               primary_key: "version",
-               id: :string,
-               force: :cascade do |t|
-  end
-
   create_table "document_references",
                id: :uuid,
                default: -> { "gen_random_uuid()" },
@@ -139,8 +133,10 @@ ActiveRecord::Schema[7.1].define(version: 2024_12_07_001055) do
     t.decimal "annual_energy"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "use_type", default: 0
     t.index ["checklist_id"], name: "index_energy_outputs_on_checklist_id"
     t.index ["fuel_type_id"], name: "index_energy_outputs_on_fuel_type_id"
+    t.index ["use_type"], name: "index_energy_outputs_on_use_type"
   end
 
   create_table "external_api_keys",

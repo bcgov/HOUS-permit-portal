@@ -1147,6 +1147,189 @@ const options = {
                 label: "Do you need to add any other fuel types?",
               },
             },
+            baselinePerformance: {
+              heading: "Baseline energy model performance",
+              refAnnualThermalEnergyDemand: {
+                label: "Total annual thermal energy demand for baseline building",
+                units: "kWh",
+                hint: "Results for the baseline or reference building or building portion",
+                error: "Enter the total annual thermal energy demand for the baseline buidling",
+              },
+              refEnergyOutputs: {
+                label: "In the table, enter the annual energy demand for each fuel type",
+                fuelType: "Fuel type",
+                annualEnergy: "Annual energy (kWh)",
+                emissionsFactor: "Emissions factor (kgCO<sub>2e</sub>/kWh)",
+                emissions: "Emissions (kgCO<sub>2e</sub>)",
+                totalAnnualEnergy: "Total annual energy",
+                totalAnnualEmissions: "Total annual emissions",
+                hint: "Need to change an emissions factor or add a fuel type? Go to <link>fuel types</link>",
+              },
+            },
+            stepCodeOccupancies: {
+              heading: "Occupancies subject to Steps 2, 3, or 4",
+              instructions:
+                "If there are occupancies subject to Steps 2, 3, or 4 (not including Step 2 with a reference building) in your project, this form will collect additional details.<br/><br/>These occupancies are:<ul><li>Group C Hotel and motel</li><li>Group C Other residential</li><li>Group D Office</li><li>Group D Other</li><li>Group E Mercantile</li>",
+              isRelevant: "Does your project include any of the these occupancies?",
+              disabledCtaTooltip: "Please select an occupancy",
+              occupancies: {
+                label: "Which occupancies apply to this building? Select all that apply:",
+                error: "Select the occupancies from the list that apply to this building.",
+              },
+              occupancyKeys: {
+                hotel_motel: "<strong>Group C</strong> Hotel and motel",
+                residential: "<strong>Group C</strong> Other residential",
+                office: "<strong>Group D</strong> Office",
+                other: "<strong>Group D</strong> Other",
+                mercantile: "<strong>Group E</strong> Mercantile",
+              },
+            },
+            stepCodeOccupancyKeys: {
+              hotel_motel: "Group C Hotel and motel",
+              residential: "Group C Other residential",
+              office: "Group D Office",
+              other: "Group D Other",
+              mercantile: "Group E Mercantile",
+            },
+            stepCodePerformanceRequirements: {
+              heading: "Performance requirements for Step 2, 3, and 4 Buildings",
+              instructions:
+                "If there are occupancies subject to Steps 2, 3, or 4 (not including Step 2 with a reference building) in your project, this section will collect additional details.",
+              stepCodeRequirement: {
+                isCustom: {
+                  label:
+                    "Does the authority having jurisdiction require higher performance than BC building code minimums for {{occupancyName}}?",
+                  hint: "Although this form is for Step Code compliance, some AHJs require higher performance than BCBC minimums",
+                },
+                energyStepRequired: {
+                  label: "Energy step required",
+                  error: "Select energy step required",
+                },
+                source: {
+                  label: "What determines this performance requirement for {{occupancyName}}?",
+                  hint: "Enter the bylaw, policy, rezoning condition, etc. from the authority having jurisdiction (AHJ)",
+                  error: "Enter the performance requirement source",
+                },
+              },
+              occupanciesTable: {
+                headers: {
+                  occupancy: "Occupancy",
+                  modelledFloorArea: "Modelled floor area (m<sup>2</sup>)",
+                  ghg: "GHG emissions level",
+                },
+              },
+              modelledFloorArea: {
+                label: "What is the modelled floor area for {{occupancyName}} in square metres?",
+                units: "m<sup>2</sup>",
+                error: "Enter the modelled floor area",
+              },
+              zeroCarbonStepRequired: {
+                error: "Select GHG emissions level",
+              },
+            },
+            renewableEnergy: {
+              heading: "Renewable energy",
+              isRelevant: "Does this project include on-site generated renewable electricity for compliance?",
+              generatedElectricity: {
+                label: "Total electricity generated on site (kWh)",
+                error: "Enter eletricity generated on site.",
+                units: "kWh",
+              },
+              percentOfUse: {
+                label: "Percentage of total energy use",
+                hint: "Automatically calculated",
+                units: "%",
+              },
+              adjustedEF: {
+                label: "Adjusted electricity emissions factor kgCO<sub>2e</sub>/kWh",
+                hint: "Automatically calculated",
+              },
+            },
+            overheatingRequirements: {
+              heading: "Overheating requirements",
+              isRelevant: "Is the project subject to overheating limits?",
+              limit: {
+                label: "Overheating hours limit",
+                hint: "This value is set according to City of Vancouver Energy Modeling Guidelines, Section 4",
+              },
+              worstCase: {
+                label: "Overheating hours for worst case suite/zone",
+                error: "Enter overheating hours for worst case suite/zone",
+              },
+              compliance: {
+                pass: "This building complies with overheating criteria. Worst case suite/zone overheating hours are below the limit.",
+                fail: "This building does not comply with overheating criteria. Worst case suite/zone overheating hours are over the limit.",
+              },
+            },
+            modelledOutputs: {
+              heading: "Modelled outputs for entire building",
+              description:
+                "Enter the annual energy consumption by end use and fuel type in kWh. For end uses served by multiple fuels or fuel mixtures, enter as separate end uses. If you need additional use types, you can add additional rows to the table.",
+              useInfoIconLabel: "Use info",
+              infoDescriptions: {
+                generalHeating:
+                  "If project includes heating provided by multiple fuel types these must be entered separately in this section. This includes systems that use supplementary fuel sources\n\n(e.g. air source heat pump with auxiliary natural gas heating below a minimum ambient temperature)",
+                domesticHotWater:
+                  "If project includes DHW heating provided by multiple fuel types these must be entered separately in this section. This includes systems that use supplementary fuel sources\n\n(e.g. air source heat pump with auxiliary natural gas heating below a minimum ambient temperature)",
+                totalAnnualEnergy:
+                  "For Step 2 (NECB) compliance, please refer to cell B39 for the 'Total Energy Use' for the Reference Case. The 'Total Energy Use' of the Design Case is not to exceed the Reference Case.",
+                wholeBuildingAnnualThermalEnergyDemand:
+                  "Note this is total kWh, not kWh/m2; it is used to calculate TEDI along with the MFA.",
+                wholeBuildingAnnualCoolingEnergyDemand:
+                  "Note this is total kWh, not kWh/m2; it is used to calculate cooling energy demand intensity along with the MFA.\n\nThis is not a compliance metric and is used for information purposes only. The definition is the same as TEDI, but for cooling rather than heating.",
+                stepCodeAnnualThermalEnergyDemand:
+                  "Portions of building with TEDI requirements must comply with those targets prior to being averaged with non-Step Code building results.\n\nIf the building only contains Step 2 (NECB) occupancies (reported in Section B), this entry is not required.",
+              },
+              energyOutputsTable: {
+                column: {
+                  use: "Use",
+                  annualEnergy: "Annual energy (kWh)",
+                  fuelType: "Fuel type",
+                  emissionsFactor: "Emissions factor (kgCO2e/kWh)",
+                  emissions: "Emissions (kgCO2e)",
+                },
+                useTypes: {
+                  interior_lighting: "Interior lighting",
+                  exterior_lighting: "Exterior lighting",
+                  heating_general: "Heating",
+                  cooling: "Cooling",
+                  pumps: "Pumps",
+                  fans: "Fans",
+                  domestic_hot_water: "Domestic hot water",
+                  plug_loads: "Plug loads",
+                  heating_gas: "Heating (gas)",
+                  other: "Other",
+                },
+                fuelTypes: {
+                  electricity: "Electricity",
+                  natural_gas: "Natural gas",
+                  district_energy: "District energy",
+                  propane: "Propane",
+                  light_fuel_oil: "Light fuel oil",
+                  heavy_fuel_oil: "Heavy fuel oil",
+                  diesel_fuel: "Diesel fuel",
+                  wood_fuel: "Wood fuel",
+                  other: "Other",
+                },
+                addUseType: "Add use type",
+                totalByFuelType: "Total <1>{{fuelType}}</1>",
+                totalByFuelTypeOther: "Total <1>{{fuelTypeDescription}}</1> (Other)",
+                totalAnnualEnergy: "Total annual energy",
+                totalEmissions: "Total annual emissions",
+                fuelTypeRequired: "To add an energy use type, select a fuel type first.",
+                fuelTypeClearHelpText: "To remove this energy use type entry, clear the fuel type.",
+              },
+              annualEnergyWholeBuildingTable: {
+                tableHeader: "Annual energy for calculations (whole building)",
+                annualThermalEnergyDemand: "Annual thermal energy demand for TEDI (kWh)",
+                annualCoolingEnergyDemand: "Annual cooling energy demand for CEDI (kWh)",
+              },
+              stepCodeBuildingPortionsTable: {
+                tableHeader: "Step code building portions",
+                annualThermalEnergyDemand: "Annual thermal energy demand for TEDI",
+                kwhM2: "(kWh/(m2⋅year))",
+              },
+            },
           },
           title: "Step code auto-compliance tool",
           subTitle:
@@ -1283,6 +1466,7 @@ const options = {
                 stepRequired: "Step required",
                 stepProposed: "Proposed step achieved",
                 steps: {
+                  "2": "2",
                   "3": "3",
                   "4": "4",
                   "5": "5",
@@ -1572,6 +1756,7 @@ const options = {
                 energy: {
                   title: "Energy Step Code Level",
                   options: {
+                    "2": "2",
                     "3": "3",
                     "4": "4",
                     "5": "5",

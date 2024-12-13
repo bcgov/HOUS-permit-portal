@@ -49,13 +49,17 @@ export const Part3StepCodeChecklistModel = types
     // user input fields
     fuelTypes: types.array(types.frozen<IFuelType>()),
     baselineOccupancies: types.array(types.frozen<IBaselineOccupancy>()),
+    refAnnualThermalEnergyDemand: types.maybeNull(types.string),
     referenceEnergyOutputs: types.array(types.frozen<IEnergyOutput>()),
     stepCodeOccupancies: types.array(types.frozen<IStepCodeOccupancy>()),
     generatedElectricity: types.maybeNull(types.string),
     modelledEnergyOutputs: types.array(types.frozen<IEnergyOutput>()),
     totalAnnualThermalEnergyDemand: types.maybeNull(types.string),
     totalAnnualCoolingEnergyDemand: types.maybeNull(types.string),
+    totalOccupancyFloorArea: types.maybeNull(types.string),
+    totalStepCodeOccupancyFloorArea: types.maybeNull(types.string),
     stepCodeAnnualThermalEnergyDemand: types.maybeNull(types.string),
+    overheatingHoursLimit: types.maybeNull(types.number),
     overheatingHours: types.maybeNull(types.string),
     pressurizedDoorsCount: types.maybeNull(types.string),
     pressurizationAirflowPerDoor: types.maybeNull(types.string),
@@ -104,14 +108,31 @@ export const Part3StepCodeChecklistModel = types
     isRelevant(key: TPart3NavLinkKey): boolean {
       return self.sectionCompletionStatus[key]?.relevant
     },
+    fuelType(id: string): IFuelType {
+      return self.fuelTypes.find((ft) => ft.id == id)
+    },
     get districtEnergyFuelType(): IFuelType | undefined {
       return self.fuelTypes.find((ft) => ft.key == EFuelType.districtEnergy)
     },
     get defaultFuelTypeKeys(): EFuelType[] {
       return [EFuelType.electricity, EFuelType.naturalGas, EFuelType.districtEnergy]
     },
+    get electricity(): IFuelType {
+      return self.fuelTypes.find((ft) => ft.key == EFuelType.electricity)
+    },
+    get fuelTypeIdsToFuelType(): Record<string, IFuelType> {
+      return self.fuelTypes.reduce((acc, fuelType) => {
+        acc[fuelType.id] = fuelType
+        return acc
+      }, {})
+    },
   }))
   .views((self) => ({
+    get totalElectricityUse(): number {
+      return self.modelledEnergyOutputs
+        .filter((eo) => eo.fuelTypeId == self.electricity.id)
+        .reduce((sum, eo) => sum + parseFloat(eo.annualEnergy), 0)
+    },
     get uncommonFuelTypeKeys(): EFuelType[] {
       return Object.values(EFuelType).filter((key) => !R.includes(key, self.defaultFuelTypeKeys))
     },
