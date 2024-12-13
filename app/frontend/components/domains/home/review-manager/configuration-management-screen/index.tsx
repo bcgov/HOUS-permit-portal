@@ -73,7 +73,7 @@ export const ConfigurationManagementScreen = observer(function ConfigurationMana
                   icon={<FileText size="24px" color="var(--chakra-colors-text-primary)" />}
                   href="energy-step"
                   h="full"
-                  markForSandbox
+                  disableForSandbox
                 />
               </GridItem>
               <GridItem>

@@ -157,7 +157,8 @@ const options = {
             left: "See helpful tips from your local jurisdictions to streamline your digital building permit applications",
             mid: "Preview the Small-scale/Multi-unit housing checklist",
             midSub: "(Part 9 BC Building Code)",
-            viewTemplate: "View requirements",
+            viewTemplate: "View",
+            midDownload: "Checklist",
             end: "Accurately fill out your permit application online with ease",
             endButton: "Get started now",
           },
@@ -794,7 +795,7 @@ const options = {
                 "Make sure you are ready to promote/demote this, any other previews or templates using this specific block will also reflect this change.",
               listItem1: "<strong>All</strong>: The requirement block may exist in any preview or template",
               listItem2:
-                "<strong>Exclude preview</strong>: The requirement block may not exist in previews, and only in templates",
+                "<strong>Preview omitted</strong>: The requirement block may not exist in previews, and only in templates",
               listItem3:
                 "<strong>Preview only</strong>: The requirement block may not exist in templates, and only in previews",
             },
@@ -1614,7 +1615,7 @@ const options = {
           edit: {
             requirementsLibraryTab: "Requirements Library",
             earlyAccessRequirementsLibraryTab: "Early Access Requirements Library",
-            earlyAccessTabDescription: "Early access previews cannot add 'Exclude preview' blocks ",
+            earlyAccessTabDescription: "Early access previews cannot add 'Preview omitted' blocks ",
             options: {
               button: "Options",
               copyTips: "Import tips from ({{ templateLabel }})",
