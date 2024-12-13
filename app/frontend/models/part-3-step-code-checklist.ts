@@ -1,3 +1,4 @@
+import { t } from "i18next"
 import { Instance, applySnapshot, flow, types } from "mobx-state-tree"
 import * as R from "ramda"
 import { navLinks } from "../components/domains/step-code/part-3/sidebar/nav-sections"
@@ -11,6 +12,7 @@ import {
   EFuelType,
   EHeatingSystemPlant,
   EHeatingSystemType,
+  EIsSuiteSubMetered,
   EPart3StepCodeSoftware,
   EProjectStage,
 } from "../types/enums"
@@ -21,6 +23,7 @@ import {
   IEnergyOutput,
   IFuelType,
   IMakeUpAirFuel,
+  IOption,
   IPart3NavLink,
   IPart3SectionCompletionStatus,
   IStepCodeOccupancy,
@@ -61,10 +64,11 @@ export const Part3StepCodeChecklistModel = types
     stepCodeAnnualThermalEnergyDemand: types.maybeNull(types.string),
     overheatingHoursLimit: types.maybeNull(types.number),
     overheatingHours: types.maybeNull(types.string),
-    pressurizedDoorsCount: types.maybeNull(types.string),
+    pressurizedDoorsCount: types.maybeNull(types.number),
     pressurizationAirflowPerDoor: types.maybeNull(types.string),
     pressurizedCorridorsArea: types.maybeNull(types.string),
     makeUpAirFuels: types.array(types.frozen<IMakeUpAirFuel>()),
+    isSuiteSubMetered: types.maybeNull(types.enumeration<EIsSuiteSubMetered[]>(Object.values(EIsSuiteSubMetered))),
     suiteHeatingEnergy: types.maybeNull(types.string),
     documentReferences: types.array(types.frozen<IDocumentReference>()),
     software: types.maybeNull(types.enumeration<EPart3StepCodeSoftware[]>(Object.values(EPart3StepCodeSoftware))),
@@ -125,6 +129,12 @@ export const Part3StepCodeChecklistModel = types
         acc[fuelType.id] = fuelType
         return acc
       }, {})
+    },
+    get fuelTypeSelectOptions(): IOption[] {
+      return self.fuelTypes.map((ft) => ({
+        label: ft.key == EFuelType.other ? ft.description : t(`stepCode.part3.fuelTypes.fuelTypeKeys.${ft.key}`),
+        value: ft.id,
+      }))
     },
   }))
   .views((self) => ({

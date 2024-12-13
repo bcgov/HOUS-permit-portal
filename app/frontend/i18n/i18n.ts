@@ -943,7 +943,7 @@ const options = {
               modelledOutputs: "Modelled outputs for entire building",
               renewableEnergy: "Renewable Energy",
               overheatingRequirements: "Overheating requirements",
-              projectAdjustments: "Residential project adjustments",
+              residentialAdjustments: "Residential project adjustments",
               documentReferences: "Document references",
               performanceCharacteristics: "Summary of building performance characteristics",
               hvac: "HVAC",
@@ -1227,40 +1227,6 @@ const options = {
                 error: "Select GHG emissions level",
               },
             },
-            renewableEnergy: {
-              heading: "Renewable energy",
-              isRelevant: "Does this project include on-site generated renewable electricity for compliance?",
-              generatedElectricity: {
-                label: "Total electricity generated on site (kWh)",
-                error: "Enter eletricity generated on site.",
-                units: "kWh",
-              },
-              percentOfUse: {
-                label: "Percentage of total energy use",
-                hint: "Automatically calculated",
-                units: "%",
-              },
-              adjustedEF: {
-                label: "Adjusted electricity emissions factor kgCO<sub>2e</sub>/kWh",
-                hint: "Automatically calculated",
-              },
-            },
-            overheatingRequirements: {
-              heading: "Overheating requirements",
-              isRelevant: "Is the project subject to overheating limits?",
-              limit: {
-                label: "Overheating hours limit",
-                hint: "This value is set according to City of Vancouver Energy Modeling Guidelines, Section 4",
-              },
-              worstCase: {
-                label: "Overheating hours for worst case suite/zone",
-                error: "Enter overheating hours for worst case suite/zone",
-              },
-              compliance: {
-                pass: "This building complies with overheating criteria. Worst case suite/zone overheating hours are below the limit.",
-                fail: "This building does not comply with overheating criteria. Worst case suite/zone overheating hours are over the limit.",
-              },
-            },
             modelledOutputs: {
               heading: "Modelled outputs for entire building",
               description:
@@ -1328,6 +1294,98 @@ const options = {
                 tableHeader: "Step code building portions",
                 annualThermalEnergyDemand: "Annual thermal energy demand for TEDI",
                 kwhM2: "(kWh/(m2⋅year))",
+              },
+            },
+            renewableEnergy: {
+              heading: "Renewable energy",
+              isRelevant: "Does this project include on-site generated renewable electricity for compliance?",
+              generatedElectricity: {
+                label: "Total electricity generated on site (kWh)",
+                error: "Enter eletricity generated on site.",
+                units: "kWh",
+              },
+              percentOfUse: {
+                label: "Percentage of total energy use",
+                hint: "Automatically calculated",
+                units: "%",
+              },
+              adjustedEF: {
+                label: "Adjusted electricity emissions factor kgCO<sub>2e</sub>/kWh",
+                hint: "Automatically calculated",
+              },
+            },
+            overheatingRequirements: {
+              heading: "Overheating requirements",
+              isRelevant: "Is the project subject to overheating limits?",
+              limit: {
+                label: "Overheating hours limit",
+                hint: "This value is set according to City of Vancouver Energy Modeling Guidelines, Section 4",
+              },
+              worstCase: {
+                label: "Overheating hours for worst case suite/zone",
+                error: "Enter overheating hours for worst case suite/zone",
+              },
+              compliance: {
+                pass: "This building complies with overheating criteria. Worst case suite/zone overheating hours are below the limit.",
+                fail: "This building does not comply with overheating criteria. Worst case suite/zone overheating hours are over the limit.",
+              },
+            },
+            residentialAdjustments: {
+              heading: "Residential project adjustments",
+              hdd: {
+                label: "Heating degree days",
+                hint: "Provided during project set-up section",
+              },
+              pressurizedDoors: {
+                label: "Number of suite doors pressurized",
+                error: "Enter number of suite doors pressurized",
+              },
+              airflow: {
+                label: "Airflow for pressurization per door (L/s/door)",
+                error: "Enter airflow ",
+              },
+              area: {
+                label: "Area of corridors pressurized (m<sup>2</sup>)",
+                hint: "Provide only corridor area related to pressurizing corridors that lead to suites",
+                units: "m<sup>2</sup>",
+                error: "Enter area of corridors pressurized",
+              },
+              muaFuel: {
+                label: "Make-up air fuel type",
+                error: "Select make-up air fuel type",
+                mixture: {
+                  option: "Make-up air (MUA) fuel mixture",
+                  fuelType: { label: "MUA fuel type", error: "Select MUA fuel type" },
+                  emissionsFactor: "Emissions factor (kgCO<sub>2e</sub>/kWh)",
+                  required: "Select MUA fuel mixture",
+                  percentOfLoad: {
+                    label: "% of annual load",
+                    units: "%",
+                    error: "Enter % of load",
+                  },
+                  totalPercentOfLoad: {
+                    error: "Percent of load must add up to 100",
+                  },
+                  add: "Add line",
+                },
+              },
+              suiteSubMetering: {
+                isRelevant: {
+                  label: "Is suite hydronic heating sub-metered?",
+                  hint: "Select no if sub-metering is required per City of Vancouver Energy Modelling Guidelines Section 2.7",
+                  error: "Select option",
+                  options: {
+                    yes: "Yes",
+                    no: "No",
+                    not_applicable: "Not applicable",
+                  },
+                },
+                heatingEnergy: {
+                  label: "Residential occupancies heating energy (kWh)",
+                  hint: "The 15% adjustment per City of Vancouver Modelling Guidelines section 2.7 only applies to this portion of the heating energy and not the inputs for the whole building",
+                  units: "kWh",
+                  error: "Enter residential occupancies heating energy",
+                },
               },
             },
           },

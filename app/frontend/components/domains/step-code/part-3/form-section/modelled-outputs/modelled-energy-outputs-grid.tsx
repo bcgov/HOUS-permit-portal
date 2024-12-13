@@ -115,11 +115,13 @@ export const ModelledEnergyOutputsGrid = observer(({ ...rest }: IProps) => {
       {...rest}
     >
       {/* Header Row */}
-      <GridColumnHeader>{t(`${i18nPrefix}.column.use`)}</GridColumnHeader>
-      <GridColumnHeader>{t(`${i18nPrefix}.column.annualEnergy`)}</GridColumnHeader>
-      <GridColumnHeader>{t(`${i18nPrefix}.column.fuelType`)}</GridColumnHeader>
-      <GridColumnHeader>{t(`${i18nPrefix}.column.emissionsFactor`)}</GridColumnHeader>
-      <GridColumnHeader borderRightWidth={1}>{t(`${i18nPrefix}.column.emissions`)}</GridColumnHeader>
+      <GridColumnHeader textAlign="left">{t(`${i18nPrefix}.column.use`)}</GridColumnHeader>
+      <GridColumnHeader textAlign="left">{t(`${i18nPrefix}.column.annualEnergy`)}</GridColumnHeader>
+      <GridColumnHeader textAlign="left">{t(`${i18nPrefix}.column.fuelType`)}</GridColumnHeader>
+      <GridColumnHeader textAlign="left">{t(`${i18nPrefix}.column.emissionsFactor`)}</GridColumnHeader>
+      <GridColumnHeader textAlign="left" borderRightWidth={1}>
+        {t(`${i18nPrefix}.column.emissions`)}
+      </GridColumnHeader>
 
       {/* Data Rows */}
       {fields.map((field, index) => (
@@ -232,6 +234,7 @@ const ModelledEnergyOutputRow = ({
   getFuelTypeById,
   removeRow,
 }: IModelledEnergyOutputRowProps) => {
+  const { checklist } = usePart3StepCode()
   const { t } = useTranslation()
   const {
     control,
@@ -278,13 +281,6 @@ const ModelledEnergyOutputRow = ({
       onChangeAnnualEnergy(formattedStringToNumber(e.target.value))
     },
     [onChangeAnnualEnergy]
-  )
-
-  const handleChangeFuelType = useCallback(
-    (fuelType: IFuelType | null) => {
-      onChangeFuelTypeId(fuelType?.id ?? null)
-    },
-    [onChangeFuelTypeId]
   )
 
   const handleRemoveUseType = useCallback(() => {
@@ -372,9 +368,9 @@ const ModelledEnergyOutputRow = ({
       <GridData {...sharedGridDataProps}>
         <Stack spacing={0.5} flexDirection={"column"}>
           <FuelTypeSelect
-            options={fuelTypeOptions}
-            onChange={handleChangeFuelType}
-            value={selectedFuelType}
+            options={checklist.fuelTypeSelectOptions}
+            onChange={onChangeFuelTypeId}
+            value={fuelTypeId}
             selectProps={{
               "aria-errormessage": fuelTypeErrorMessage,
               styles: {

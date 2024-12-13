@@ -597,8 +597,9 @@ export interface IEnergyOutput {
 }
 
 export interface IMakeUpAirFuel {
-  fuelType: string
-  percentOfLoad: number
+  id?: string
+  fuelTypeId: string
+  percentOfLoad: string | number // string if its coming from the API, number if it's a form field
 }
 
 export interface IDocumentReference {
@@ -639,7 +640,7 @@ export interface IPart3SectionCompletionStatus {
   modelledOutputs: IPart3SectionCompletionStatusEntry
   renewableEnergy: IPart3SectionCompletionStatusEntry
   overheatingRequirements: IPart3SectionCompletionStatusEntry
-  projectAdjustments: IPart3SectionCompletionStatusEntry
+  residentialAdjustments: IPart3SectionCompletionStatusEntry
   documentReferences: IPart3SectionCompletionStatusEntry
   performanceCharacteristics: IPart3SectionCompletionStatusEntry
   hvac: IPart3SectionCompletionStatusEntry

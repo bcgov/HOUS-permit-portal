@@ -1,22 +1,22 @@
 import React, { useMemo } from "react"
 import Select from "react-select"
-import { IFuelType, IOption } from "../../../../types/types"
+import { IOption } from "../../../../types/types"
 import { TAsyncSelectProps } from "../async-select"
 
 interface IFuelTypeSelectProps {
-  options: IOption<IFuelType>[]
-  onChange: (selectedValue: IFuelType | null) => void
-  value: IFuelType | null
+  options: IOption[]
+  onChange: (fuelTypeId: string | null) => void
+  value: string | null
   selectProps?: Partial<Omit<TAsyncSelectProps, "stylesToMerge">>
 }
 
 const FuelTypeSelect: React.FC<IFuelTypeSelectProps> = ({ options, onChange, value, selectProps }) => {
-  const handleChange = (option: IOption<IFuelType> | null) => {
+  const handleChange = (option: IOption | null) => {
     onChange(option ? option.value : null)
   }
 
   const selectedOption = useMemo(() => {
-    return options.find((option) => option.value.id === value?.id) ?? null
+    return options.find((option) => option.value === value) ?? null
   }, [JSON.stringify(options), value])
 
   return (
