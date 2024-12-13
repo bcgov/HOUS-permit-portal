@@ -12,7 +12,7 @@ export const OMNIAUTH_PROVIDERS = {
   bceid: "bceidboth",
   basicBceid: "bceidbasic",
   businessBceid: "bceidbusiness",
-  bcsc: import.meta.env.VITE_BCSC_PROVIDER_KEY,
+  bcsc: "digital-building-permit-5120",
 } as const
 
 export const UserModel = types
@@ -90,7 +90,7 @@ export const UserModel = types
         idir: "idir",
         bceidbasic: "bceidbasic",
         bceidbusiness: "bceidbusiness",
-        [import.meta.env.VITE_BCSC_PROVIDER_KEY]: "bcsc",
+        "digital-building-permit-5120": "bcsc",
       }
       // @ts-ignore
       return t(`user.omniauthProviders.${keys[self.omniauthProvider]}`)
