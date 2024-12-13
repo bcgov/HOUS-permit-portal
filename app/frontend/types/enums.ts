@@ -617,3 +617,10 @@ export enum EEnergyOutputSource {
   modelled = "modelled",
   reference = "reference",
 }
+
+export enum EDocumentReferenceDocumentType {
+  architecturalDrawing = "architectural_drawing",
+  mechanicalDrawing = "mechanical_drawing",
+  electricalDrawing = "electrical_drawing",
+  other = "other",
+}

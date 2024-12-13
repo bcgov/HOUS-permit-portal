@@ -5,6 +5,7 @@ import { BaselineOccupancies } from "./baseline-occupancies"
 import { BaselineDetails } from "./baseline-occupancies/baseline-details"
 import { BaselinePerformance } from "./baseline-performance"
 import { DistrictEnergy } from "./district-energy"
+import { DocumentReferences } from "./document-references"
 import { FuelTypes } from "./fuel-types"
 import { AdditionalFuelTypes } from "./fuel-types/additional-fuel-types"
 import { HVAC } from "./hvac"
@@ -60,5 +61,7 @@ export const FormSection = observer(function Part3StepCodeFormSection() {
       return <HVAC />
     case "requirements-summary":
       return <RequirementsSummary />
+    case "document-references":
+      return <DocumentReferences />
   }
 })
