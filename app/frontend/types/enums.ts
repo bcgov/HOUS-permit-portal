@@ -63,6 +63,7 @@ export enum EUserRoles {
   reviewManager = "review_manager",
   reviewer = "reviewer",
   superAdmin = "super_admin",
+  technicalSupportLocalJurisdiction = "technical_support_local_jurisdiction",
 }
 
 export enum ERequirementLibrarySortFields {

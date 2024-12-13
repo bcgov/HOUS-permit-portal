@@ -50,6 +50,7 @@ class Jurisdiction::UserInviter
         user.invite!(inviter) if !user.confirmed?
         self.results[:invited] << user
       else
+        
         reinvited = user.present?
         is_invitable_role =
           inviter.invitable_roles.include?(user_params[:role].to_s)
