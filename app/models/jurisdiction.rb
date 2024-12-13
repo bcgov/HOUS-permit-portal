@@ -301,12 +301,13 @@ class Jurisdiction < ApplicationRecord
   end
 
   def set_type_based_on_locality
-    case locality_type
-    when RegionalDistrict.locality_type
-      self.type = "RegionalDistrict"
-    else
-      self.type = "SubDistrict"
-    end
+    self.type =
+      case locality_type
+      when RegionalDistrict.locality_type
+        "RegionalDistrict"
+      else
+        "SubDistrict"
+      end
   end
 
   def normalize_name

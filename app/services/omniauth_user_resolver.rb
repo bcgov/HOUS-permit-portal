@@ -20,7 +20,8 @@ class OmniauthUserResolver
     idir: "idir",
     bceid: "bceidboth",
     bceid_business: "bceidbusiness",
-    bceid_basic: "bceidbasic"
+    bceid_basic: "bceidbasic",
+    bcsc: ENV["VITE_BCSC_PROVIDER_KEY"]
   }
 
   def resolve_user
@@ -37,22 +38,27 @@ class OmniauthUserResolver
 
   def should_promote_user?
     return unless promotable_user?
+
     existing_user.id != invited_user.id
   end
 
   def promotable_user?
     return unless existing_user.present? && invited_user.present?
+
     existing_user.submitter? || invited_user.regional_review_manager?
   end
 
   def create_user
     return if omniauth_provider == OMNIAUTH_PROVIDERS[:idir]
+
     u =
       User.new(
         password: Devise.friendly_token[0, 20],
         omniauth_provider:,
         omniauth_uid:,
         omniauth_email:,
+        first_name:,
+        last_name:,
         omniauth_username:
       )
     # skip confirmation until user has a chance to add/verify their notification email
@@ -77,6 +83,7 @@ class OmniauthUserResolver
   def error_message_key
     return "omniauth.unavailable" if user.blank?
     return "omniauth.idir_failure_with_message" if user.super_admin?
+
     "omniauth.bceid_failure_with_message"
   end
 
@@ -85,7 +92,7 @@ class OmniauthUserResolver
   end
 
   def omniauth_provider
-    @provider ||=
+    @omniauth_provider ||=
       case raw_info.identity_provider
       when OMNIAUTH_PROVIDERS[:bceid]
         if raw_info.bceid_business_guid
@@ -98,15 +105,26 @@ class OmniauthUserResolver
       end
   end
 
+  def first_name
+    @first_name ||= auth.info.first_name
+  end
+
+  def last_name
+    @last_name ||= auth.info.last_name
+  end
+
   def omniauth_uid
-    @uid ||= raw_info.bceid_user_guid || raw_info.idir_user_guid
+    @omniauth_uid ||=
+      raw_info.bceid_user_guid || raw_info.idir_user_guid || raw_info.sub
   end
 
   def omniauth_email
-    @email ||= auth.info.email
+    @omniauth_email ||= auth.info.email
   end
 
   def omniauth_username
-    @username ||= raw_info.bceid_username || raw_info.idir_username
+    @omniauth_username ||=
+      raw_info.bceid_username || raw_info.idir_username ||
+        raw_info.preferred_username
   end
 end
