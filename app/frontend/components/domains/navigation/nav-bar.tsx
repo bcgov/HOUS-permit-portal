@@ -430,18 +430,20 @@ const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
                 {t("site.giveFeedback")} <Envelope size={16} style={{ display: "inline", color: "inherit" }} />
               </Link>
             </MenuItem>
-            <MenuItem h={6} bg="greys.grey03" _hover={{ cursor: "auto" }}>
-              <Text
-                textAlign="center"
-                w="full"
-                color="greys.grey90"
-                fontWeight={"thin"}
-                fontStyle="italic"
-                fontSize="sm"
-              >
-                {import.meta.env.VITE_RELEASE_VERSION}
-              </Text>
-            </MenuItem>
+            {import.meta.env.VITE_RELEASE_VERSION && (
+              <MenuItem h={6} bg="greys.grey03" _hover={{ cursor: "auto" }}>
+                <Text
+                  textAlign="center"
+                  w="full"
+                  color="greys.grey90"
+                  fontWeight={"thin"}
+                  fontStyle="italic"
+                  fontSize="sm"
+                >
+                  {import.meta.env.VITE_RELEASE_VERSION}
+                </Text>
+              </MenuItem>
+            )}
           </MenuList>
         </Box>
       </Portal>
