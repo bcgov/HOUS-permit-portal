@@ -23,7 +23,8 @@ class User < ApplicationRecord
          review_manager: 1,
          reviewer: 2,
          super_admin: 3,
-         regional_review_manager: 4
+         regional_review_manager: 4,
+         technical_support: 5
        },
        _default: 0
 
@@ -120,9 +121,9 @@ class User < ApplicationRecord
   def invitable_roles
     case role
     when "super_admin"
-      %w[reviewer review_manager super_admin regional_review_manager]
+      %w[reviewer review_manager super_admin regional_review_manager technical_support]
     when "review_manager", "regional_review_manager"
-      %w[reviewer review_manager]
+      %w[reviewer review_manager technical_support]
     else
       []
     end
@@ -221,7 +222,7 @@ class User < ApplicationRecord
   end
 
   def jurisdiction_must_belong_to_correct_roles
-    if jurisdictions.any? && !review_staff?
+    if jurisdictions.any? && !review_staff? && !technical_support?
       errors.add(:jurisdictions, :reviewers_only)
     end
   end
