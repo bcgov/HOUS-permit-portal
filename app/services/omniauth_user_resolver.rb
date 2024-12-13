@@ -21,7 +21,7 @@ class OmniauthUserResolver
     bceid: "bceidboth",
     bceid_business: "bceidbusiness",
     bceid_basic: "bceidbasic",
-    bcsc: ENV["VITE_BCSC_PROVIDER_KEY"]
+    bcsc: "digital-building-permit-5120"
   }
 
   def resolve_user
