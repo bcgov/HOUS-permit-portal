@@ -1460,6 +1460,27 @@ const options = {
                 },
               },
             },
+            documentReferences: {
+              heading: "Document references",
+              documentTypes: {
+                architectural_drawing: "Architectural drawing",
+                mechanical_drawing: "Mechanical drawing",
+                electrical_drawing: "Electrical drawing",
+                other: "Other",
+              },
+              otherDocumentQuestion: "Do you need to add any other documents?",
+              otherDocumentAnswers: {
+                yes: "Yes",
+                no: "No",
+              },
+              documentFields: {
+                documentName: "Name of document(s)",
+                issuedFor: "Issued for",
+                documentTypeDescription: "Type of document",
+                dateIssued: "Date issued",
+                preparedBy: "Company name of preparer",
+              },
+            },
           },
           title: "Step code auto-compliance tool",
           subTitle:
