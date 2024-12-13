@@ -12,4 +12,14 @@ class Part3StepCode::DocumentReference < ApplicationRecord
 
   validates :document_type_description, presence: true, if: :other?
   validates :issued_for, presence: true, if: :other?
+  validates :document_type,
+            uniqueness: {
+              scope: :checklist_id
+            },
+            unless: :other?
+  validates :document_type_description,
+            uniqueness: {
+              scope: :checklist_id
+            },
+            if: :other?
 end
