@@ -52,7 +52,7 @@ export const UserInput = observer(({ index, remove, adminOnly }: IUserInputProps
                         <option value={EUserRoles.regionalReviewManager}>
                           {t(`user.roles.${EUserRoles.regionalReviewManager}`)}
                         </option>
-                        <option value={EUserRoles.technicalSupportLocalJurisdiction}>{t(`user.roles.${EUserRoles.technicalSupportLocalJurisdiction}`)}</option>
+                        <option value={EUserRoles.technicalSupport}>{t(`user.roles.${EUserRoles.technicalSupport}`)}</option>
                       </>
                     )}
                   </Select>

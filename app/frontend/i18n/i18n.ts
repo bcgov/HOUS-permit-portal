@@ -1495,7 +1495,7 @@ const options = {
             review_manager: "review manager",
             reviewer: "reviewer",
             super_admin: "super admin",
-            technical_support_local_jurisdiction: "Technical Support - LJ",
+            technical_support: "Technical Support - LJ",
           },
           rolesExplanation: {
             submitter:
