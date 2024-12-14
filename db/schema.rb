@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_12_12_225225) do
+ActiveRecord::Schema[7.1].define(version: 2024_12_14_000444) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -264,7 +264,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_12_12_225225) do
     t.integer "software"
     t.string "software_name"
     t.string "simulation_weather_file"
-    t.decimal "above_grade_wall_area"
+    t.decimal "above_ground_wall_area"
     t.decimal "window_to_wall_area_ratio"
     t.decimal "design_airtightness"
     t.decimal "tested_airtightness"
@@ -281,7 +281,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_12_12_225225) do
     t.decimal "average_ventilation_rate"
     t.decimal "dhw_low_flow_savings"
     t.boolean "is_demand_control_ventilation_used"
-    t.decimal "sensible_recovery_efficient"
+    t.decimal "sensible_recovery_efficiency"
     t.integer "heating_system_plant"
     t.integer "heating_system_type"
     t.string "heating_system_type_description"

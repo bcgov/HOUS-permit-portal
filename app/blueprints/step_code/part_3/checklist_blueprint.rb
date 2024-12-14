@@ -6,9 +6,8 @@ class StepCode::Part3::ChecklistBlueprint < Blueprinter::Base
          :total_annual_cooling_energy_demand,
          :step_code_annual_thermal_energy_demand,
          :total_occupancy_floor_area,
-         :total_step_code_occupancy_floor_area
-
-  fields :jurisdiction_name,
+         :total_step_code_occupancy_floor_area,
+         :jurisdiction_name,
          :building_height,
          :heating_degree_days,
          :ref_annual_thermal_energy_demand,
@@ -28,7 +27,28 @@ class StepCode::Part3::ChecklistBlueprint < Blueprinter::Base
          :cooling_system_plant_description,
          :cooling_system_type_description,
          :dhw_system_type,
-         :dhw_system_description
+         :dhw_system_description,
+         :software,
+         :software_name,
+         :simulation_weather_file,
+         :above_ground_wall_area,
+         :window_to_wall_area_ratio,
+         :design_airtightness,
+         :tested_airtightness,
+         :modelled_infiltration_rate,
+         :as_built_infiltration_rate,
+         :average_wall_clear_field_r_value,
+         :average_wall_effective_r_value,
+         :average_roof_clear_field_r_value,
+         :average_roof_effective_r_value,
+         :average_window_effective_u_value,
+         :average_window_solar_heat_gain_coefficient,
+         :average_occupant_density,
+         :average_lighting_power_density,
+         :average_ventilation_rate,
+         :dhw_low_flow_savings,
+         :is_demand_control_ventilation_used,
+         :sensible_recovery_efficiency
   field :pid, name: :project_identifier
   field :nickname, name: :project_name
   field :full_address, name: :project_address

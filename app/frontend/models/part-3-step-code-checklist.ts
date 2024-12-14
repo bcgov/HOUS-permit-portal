@@ -74,7 +74,7 @@ export const Part3StepCodeChecklistModel = types
     software: types.maybeNull(types.enumeration<EPart3StepCodeSoftware[]>(Object.values(EPart3StepCodeSoftware))),
     softwareName: types.maybeNull(types.string),
     simulationWeatherFile: types.maybeNull(types.string),
-    aboveGradeWallArea: types.maybeNull(types.string),
+    aboveGroundWallArea: types.maybeNull(types.string),
     windowToWallAreaRatio: types.maybeNull(types.string),
     designAirtightness: types.maybeNull(types.string),
     modelledInfiltrationRate: types.maybeNull(types.string),
@@ -89,7 +89,7 @@ export const Part3StepCodeChecklistModel = types
     averageVentilationRate: types.maybeNull(types.string),
     dhwLowFlowSavings: types.maybeNull(types.string),
     isDemandControlVentilationUsed: types.maybeNull(types.boolean),
-    sensibleRecoveryCoefficient: types.maybeNull(types.string),
+    sensibleRecoveryEfficiency: types.maybeNull(types.string),
     heatingSystemPlant: types.maybeNull(types.enumeration<EHeatingSystemPlant[]>(Object.values(EHeatingSystemPlant))),
     heatingSystemType: types.maybeNull(types.enumeration<EHeatingSystemType[]>(Object.values(EHeatingSystemType))),
     heatingSystemTypeDescription: types.maybeNull(types.string),
@@ -138,6 +138,12 @@ export const Part3StepCodeChecklistModel = types
         value: ft.id,
       }))
     },
+    get baselineMFA() {
+      return R.reduce((sum, oc) => sum + parseFloat(oc.modelledFloorArea), 0, self.baselineOccupancies)
+    },
+    get stepCodeMFA() {
+      return R.reduce((sum, oc) => sum + parseFloat(oc.modelledFloorArea), 0, self.stepCodeOccupancies)
+    },
   }))
   .views((self) => ({
     get totalElectricityUse(): number {
@@ -156,6 +162,9 @@ export const Part3StepCodeChecklistModel = types
     },
     get currentNavLink(): IPart3NavLink | undefined {
       return navLinks.find((l) => !self.isComplete(l.key))
+    },
+    get totalMFA(): number {
+      return self.baselineMFA + self.stepCodeMFA
     },
   }))
   .actions((self) => ({
