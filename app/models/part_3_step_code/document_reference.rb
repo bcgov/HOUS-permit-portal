@@ -17,9 +17,4 @@ class Part3StepCode::DocumentReference < ApplicationRecord
               scope: :checklist_id
             },
             unless: :other?
-  validates :document_type_description,
-            uniqueness: {
-              scope: :checklist_id
-            },
-            if: :other?
 end

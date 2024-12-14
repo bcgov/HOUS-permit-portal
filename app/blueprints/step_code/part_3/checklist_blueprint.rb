@@ -97,6 +97,8 @@ class StepCode::Part3::ChecklistBlueprint < Blueprinter::Base
               blueprint: StepCode::Part3::EnergyOutputBlueprint
   association :make_up_air_fuels,
               blueprint: StepCode::Part3::MakeUpAirFuelBlueprint
+  association :document_references,
+              blueprint: StepCode::Part3::DocumentReferenceBlueprint
 
   field :compliance_report do |checklist, _options|
     StepCode::Part3::ComplianceReportBlueprint.render_as_hash(
