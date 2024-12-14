@@ -25,7 +25,7 @@ class Part3StepCode::Checklist < ApplicationRecord
            class_name: "Part3StepCode::EnergyOutput",
            dependent: :destroy
   accepts_nested_attributes_for :reference_energy_outputs
-  accepts_nested_attributes_for :document_references
+  accepts_nested_attributes_for :document_references, allow_destroy: true
 
   has_many :modelled_energy_outputs,
            -> { where(source: :modelled) },

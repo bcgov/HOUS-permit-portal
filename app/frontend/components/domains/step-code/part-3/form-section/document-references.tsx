@@ -6,6 +6,7 @@ import {
   AccordionItemProps,
   AccordionPanel,
   Box,
+  Button,
   Flex,
   FormControl,
   FormLabel,
@@ -15,14 +16,15 @@ import {
   Stack,
 } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
-import React, { forwardRef, useCallback, useMemo } from "react"
+import React, { forwardRef, useCallback, useEffect, useMemo, useState } from "react"
 import { FormProvider, useFieldArray, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
+import { useLocation, useNavigate } from "react-router-dom"
 import { v4 as uuidv4 } from "uuid"
+import { usePart3StepCode } from "../../../../../hooks/resources/use-part-3-step-code"
 import { EDocumentReferenceDocumentType } from "../../../../../types/enums"
 import { IDocumentReference } from "../../../../../types/types"
 import { DatePickerFormControl, TextFormControl } from "../../../../shared/form/input-form-control"
-import { HStack } from "../../part-9/checklist/pdf-content/shared/h-stack"
 
 const i18nPrefix = "stepCode.part3.documentReferences"
 
@@ -31,9 +33,11 @@ type TOtherDocumentReferenceAnswer = "yes" | "no"
 interface IDocumentReferenceStepCodeForm {
   defaultDocumentReferencesAttributes: (Exclude<IDocumentReference, "documentType"> & {
     documentType: TDefaultDocumentType
+    _destroy?: boolean
   })[]
   otherDocumentReferencesAttributes: (Exclude<IDocumentReference, "documentType"> & {
     documentType: EDocumentReferenceDocumentType.other
+    _destroy?: boolean
   })[]
 }
 
@@ -77,9 +81,13 @@ function initializeDocumentReferenceForm(
 
 export const DocumentReferences = observer(function DocumentaReferences() {
   const { t } = useTranslation()
+  const { checklist } = usePart3StepCode()
+  const navigate = useNavigate()
+  const location = useLocation()
+  const [openAccordionIndexes, setOpenAccordionIndexes] = useState<number[]>([])
   const formMethods = useForm<IDocumentReferenceStepCodeForm>({
-    mode: "onChange",
-    defaultValues: initializeDocumentReferenceForm(undefined),
+    mode: "onSubmit",
+    defaultValues: initializeDocumentReferenceForm(checklist?.documentReferences),
   })
   const { fields: defaultDocumentReferencesAttributes } = useFieldArray({
     control: formMethods.control,
@@ -110,6 +118,46 @@ export const DocumentReferences = observer(function DocumentaReferences() {
     [remove]
   )
 
+  const onSubmit = formMethods.handleSubmit(
+    async ({ defaultDocumentReferencesAttributes, otherDocumentReferencesAttributes }) => {
+      const documentReferences = [...defaultDocumentReferencesAttributes, ...otherDocumentReferencesAttributes]
+      const deletedDocumentReferences = (checklist?.documentReferences ?? [])
+        .filter((documentReference) => !documentReferences.some((d) => d.id === documentReference.id))
+        .map((documentReference) => ({ id: documentReference.id, _destroy: true }))
+
+      const updated = await checklist?.update({
+        documentReferencesAttributes: documentReferences.concat(
+          deletedDocumentReferences as IDocumentReferenceStepCodeForm["otherDocumentReferencesAttributes"]
+        ),
+      })
+
+      if (updated) {
+        await checklist?.completeSection("documentReferences")
+        navigate(location.pathname.replace("document-references", "performance-characteristics"))
+      }
+    }
+  )
+
+  useEffect(() => {
+    formMethods.reset(initializeDocumentReferenceForm(checklist?.documentReferences))
+  }, [checklist?.documentReferences])
+
+  useEffect(() => {
+    const indexesWithErrors = formMethods.formState.errors?.defaultDocumentReferencesAttributes?.reduce(
+      (acc, error, index) => {
+        if (Object.keys(error).length > 0) {
+          acc.push(index)
+        }
+        return acc
+      },
+      []
+    )
+
+    if (indexesWithErrors?.length > 0) {
+      setOpenAccordionIndexes((pastState) => [...pastState, ...indexesWithErrors])
+    }
+  }, [formMethods.formState.errors?.defaultDocumentReferencesAttributes])
+
   return (
     <Stack direction="column" w="full">
       <Heading as="h2" fontSize="2xl" variant="yellowline">
@@ -117,13 +165,19 @@ export const DocumentReferences = observer(function DocumentaReferences() {
       </Heading>
 
       <FormProvider {...formMethods}>
-        <Stack as="form" spacing={7} mt={3}>
-          <Accordion as={Stack} spacing={2} allowToggle allowMultiple>
+        <Box as="form" onSubmit={onSubmit}>
+          <Accordion
+            index={openAccordionIndexes}
+            onChange={setOpenAccordionIndexes}
+            as={Stack}
+            spacing={2}
+            allowMultiple
+          >
             {defaultDocumentReferencesAttributes.map((field, index) => (
               <DocumentReferenceAccordionItem key={field.id} documentType={field.documentType} index={index} />
             ))}
           </Accordion>
-          <Stack spacing={"1.844rem"}>
+          <Stack spacing={"1.844rem"} mt={"1.844rem"}>
             {otherDocumentReferencesAttributes.map((field, index) => (
               <OtherDocumentReferenceFormFields
                 key={field.id}
@@ -133,7 +187,10 @@ export const DocumentReferences = observer(function DocumentaReferences() {
             ))}
             <AdditionalDocumentsQuestion value="no" onChange={handleAddOtherDocumentReferenceAnswer} />
           </Stack>
-        </Stack>
+          <Button type="submit" variant="primary" mt={6}>
+            {t("stepCode.part3.cta")}
+          </Button>
+        </Box>
       </FormProvider>
     </Stack>
   )
@@ -172,7 +229,6 @@ export const DocumentReferenceAccordionItem = observer(
             maxW={largeInputWidth}
             fieldName={`defaultDocumentReferencesAttributes.${index}.documentName`}
             label={t(`${i18nPrefix}.documentFields.documentName`)}
-            showOptional={false}
             required
           />
 
@@ -194,7 +250,6 @@ export const DocumentReferenceAccordionItem = observer(
             maxW={largeInputWidth}
             fieldName={`defaultDocumentReferencesAttributes.${index}.preparedBy`}
             label={t(`${i18nPrefix}.documentFields.preparedBy`)}
-            showOptional={false}
             required
           />
         </AccordionPanel>
@@ -233,32 +288,32 @@ function OtherDocumentReferenceFormFields({ index, onRemove }: IOtherDocumentRef
         <TextFormControl
           maxW={largeInputWidth}
           label={t(`${i18nPrefix}.documentFields.documentTypeDescription`)}
-          fieldName={`otherDocumentReferencesAttributes.${index}}.documentName`}
+          fieldName={`otherDocumentReferencesAttributes.${index}.documentTypeDescription`}
           required
         />
         <TextFormControl
           maxW={largeInputWidth}
           label={t(`${i18nPrefix}.documentFields.documentName`)}
-          fieldName={`otherDocumentReferencesAttributes.${index}}.documentName`}
+          fieldName={`otherDocumentReferencesAttributes.${index}.documentName`}
           required
         />
         <TextFormControl
           maxW={largeInputWidth}
           label={t(`${i18nPrefix}.documentFields.issuedFor`)}
-          fieldName={`otherDocumentReferencesAttributes.${index}}.issuedFor`}
+          fieldName={`otherDocumentReferencesAttributes.${index}.issuedFor`}
           required
         />
         {/* The date picker portal is needed to ensure the date picker is not cut off by the accordion */}
         <Box id={datePickerPortalId}>
           <DatePickerFormControl
             maxW={smallInputWidth}
-            fieldName={`otherDocumentReferencesAttributes.${index}}.dateIssued`}
+            fieldName={`otherDocumentReferencesAttributes.${index}.dateIssued`}
             label={t(`${i18nPrefix}.documentFields.dateIssued`)}
-            showOptional={false}
             inputProps={{
               portalId: datePickerPortalId,
               isClearable: true,
             }}
+            required
           />
         </Box>
       </Stack>
@@ -296,7 +351,7 @@ export function AdditionalDocumentsQuestion({ value = "no", onChange }: IAdditio
   return (
     <FormControl>
       <FormLabel>{t(`${i18nPrefix}.otherDocumentQuestion`)}</FormLabel>
-      <RadioGroup value={value} onChange={onChange} as={HStack} gap={"1rem !important"} mt={3}>
+      <RadioGroup value={value} onChange={onChange} display="flex" flexDirection="row" gap={"1rem !important"} mt={3}>
         <Flex
           justifyContent="center"
           alignItems="center"
