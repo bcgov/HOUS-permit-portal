@@ -520,7 +520,6 @@ export enum EPart3StepCodeSoftware {
 
 export enum EHeatingSystemPlant {
   none = "none",
-  noCentralPlant = "no_central_plant",
   airSourceHeatPump = "air_source_heat_pump",
   groundSourceHeatPump = "ground_source_heat_pump",
   airSourceVRF = "air_source_vrf",
@@ -561,7 +560,7 @@ export enum ECoolingSystemType {
   hydronicBaseboards = "hydronic_baseboards",
   VRFUnits = "vrf_units",
   radiantFloorCeiling = "radiant_floor_ceiling",
-  notApplicable = "not_applicable",
+  none = "none",
   other = "other",
 }
 

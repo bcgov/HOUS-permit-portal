@@ -66,7 +66,6 @@ class Part3StepCode::Checklist < ApplicationRecord
 
   enum heating_system_plant: %i[
          none
-         no_central_plant
          air_source_heat_pump
          ground_source_heat_pump
          air_source_vrf
@@ -110,7 +109,7 @@ class Part3StepCode::Checklist < ApplicationRecord
          hydronic_baseboards
          vrf_units
          radiant_floor_ceiling
-         not_applicable
+         none
          other
        ],
        _prefix: :cooling_type
@@ -128,6 +127,20 @@ class Part3StepCode::Checklist < ApplicationRecord
        _prefix: :dhw
 
   enum climate_zone: %i[zone_4 zone_5 zone_6 zone_7a zone_7b zone_8]
+
+  validates :heating_system_plant_description,
+            presence: true,
+            if: :heating_plant_other?
+  validates :cooling_system_plant_description,
+            presence: true,
+            if: :cooling_plant_other?
+  validates :heating_system_type_description,
+            presence: true,
+            if: :heating_type_other?
+  validates :cooling_system_type_description,
+            presence: true,
+            if: :cooling_type_other?
+  validates :dhw_system_description, presence: true, if: :dhw_other?
 
   def compliance_metrics
     if occupancy_classifications.step_code_occupancy.any?

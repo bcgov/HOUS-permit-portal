@@ -284,10 +284,10 @@ ActiveRecord::Schema[7.1].define(version: 2024_12_12_225225) do
     t.decimal "sensible_recovery_efficient"
     t.integer "heating_system_plant"
     t.integer "heating_system_type"
-    t.string "heating_system_description"
+    t.string "heating_system_type_description"
     t.integer "cooling_system_plant"
     t.integer "cooling_system_type"
-    t.string "cooling_system_description"
+    t.string "cooling_system_type_description"
     t.integer "dhw_system_type"
     t.string "dhw_system_description"
     t.string "completed_by_name"
@@ -300,6 +300,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_12_12_225225) do
     t.datetime "updated_at", null: false
     t.jsonb "section_completion_status"
     t.integer "is_suite_sub_metered"
+    t.string "heating_system_plant_description"
+    t.string "cooling_system_plant_description"
     t.index ["step_code_id"], name: "index_part_3_step_code_checklists_on_step_code_id"
   end
 

@@ -7,6 +7,7 @@ import { BaselinePerformance } from "./baseline-performance"
 import { DistrictEnergy } from "./district-energy"
 import { FuelTypes } from "./fuel-types"
 import { AdditionalFuelTypes } from "./fuel-types/additional-fuel-types"
+import { HVAC } from "./hvac"
 import { LocationDetails } from "./location-details"
 import { ModelledOutputs } from "./modelled-outputs"
 import { OverheatingRequirements } from "./overheating-requirements"
@@ -51,5 +52,7 @@ export const FormSection = observer(function Part3StepCodeFormSection() {
       return <OverheatingRequirements />
     case "residential-adjustments":
       return <ResidentialAdjustments />
+    case "hvac":
+      return <HVAC />
   }
 })
