@@ -28,7 +28,12 @@ class StepCode::Part3::ChecklistBlueprint < Blueprinter::Base
          :cooling_system_plant_description,
          :cooling_system_type_description,
          :dhw_system_type,
-         :dhw_system_description
+         :dhw_system_description,
+         :completed_by_name,
+         :completed_by_title,
+         :completed_by_email,
+         :completed_by_phone_number,
+         :completed_by_organization_name
   field :pid, name: :project_identifier
   field :nickname, name: :project_name
   field :full_address, name: :project_address

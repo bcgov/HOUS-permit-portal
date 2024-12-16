@@ -46,6 +46,10 @@ class Api::Part3Building::ChecklistsController < Api::ApplicationController
       :cooling_system_type_description,
       :dhw_system_type,
       :dhw_system_description,
+      :completed_by_name,
+      :completed_by_title,
+      :completed_by_email,
+      :completed_by_organization_name,
       section_completion_status: {
       },
       baseline_occupancies_attributes: %i[
