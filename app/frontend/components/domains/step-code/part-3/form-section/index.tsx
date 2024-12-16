@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom"
 import { BaselineOccupancies } from "./baseline-occupancies"
 import { BaselineDetails } from "./baseline-occupancies/baseline-details"
 import { BaselinePerformance } from "./baseline-performance"
+import { Contact } from "./contact"
 import { DistrictEnergy } from "./district-energy"
 import { DocumentReferences } from "./document-references"
 import { FuelTypes } from "./fuel-types"
@@ -63,5 +64,7 @@ export const FormSection = observer(function Part3StepCodeFormSection() {
       return <RequirementsSummary />
     case "document-references":
       return <DocumentReferences />
+    case "contact":
+      return <Contact />
   }
 })
