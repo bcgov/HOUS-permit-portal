@@ -141,6 +141,11 @@ class Part3StepCode::Checklist < ApplicationRecord
             presence: true,
             if: :cooling_type_other?
   validates :dhw_system_description, presence: true, if: :dhw_other?
+  validates :completed_by_email,
+            format: {
+              with: URI::MailTo::EMAIL_REGEXP
+            },
+            allow_blank: true
 
   def compliance_metrics
     if occupancy_classifications.step_code_occupancy.any?
