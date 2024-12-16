@@ -84,6 +84,7 @@ export const BaselineOccupancies = observer(function Part3StepCodeFormBaselineOc
         await checklist.bulkUpdateCompletionStatus({
           baselineOccupancies: { complete: true },
           baselineDetails: { relevant: true },
+          baselinePerformance: { relevant: true },
         })
       } else {
         return

@@ -43,7 +43,7 @@ export const StepCodeOccupanciesPerformanceRequirements = observer(
         stepCodeOccupanciesAttributes: checklist.stepCodeOccupancies.map((oc) => ({
           id: oc.id,
           key: oc.key,
-          modelledFloorArea: oc.modelledFloorArea,
+          modelledFloorArea: parseFloat(oc.modelledFloorArea),
           energyStepRequired: oc.energyStepRequired || undefined,
           zeroCarbonStepRequired: oc.zeroCarbonStepRequired || undefined,
           requirementSource: oc.requirementSource,
@@ -196,6 +196,7 @@ const OccupancyEnergyStep = observer(function OccupancyEnergyStep({ field, idx }
               <ErrorMessage errors={errors} name={`stepCodeOccupanciesAttributes.${idx}.requirementSource`} />
             </FormHelperText>
             <Input
+              textAlign="left"
               maxW={"430px"}
               {...register(`stepCodeOccupanciesAttributes.${idx}.requirementSource`, {
                 required: t(`${i18nPrefix}.stepCodeRequirement.source.error`),

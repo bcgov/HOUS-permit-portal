@@ -154,7 +154,7 @@ export const defaultSectionCompletionStatus = {
   districtEnergy: { complete: false, relevant: true },
   fuelTypes: { complete: false, relevant: true },
   additionalFuelTypes: { complete: false, relevant: false },
-  baselinePerformance: { complete: false, relevant: true },
+  baselinePerformance: { complete: false, relevant: false },
   stepCodeOccupancies: { complete: false, relevant: true },
   stepCodePerformanceRequirements: { complete: false, relevant: false },
   modelledOutputs: { complete: false, relevant: true },

@@ -609,11 +609,13 @@ export interface IDocumentReference {
   preparedBy: string
 }
 
+type TNavLinkSection = "overview" | "compliance" | "results"
+
 export interface IPart3NavLink {
   key: TPart3NavLinkKey
   location: string
   subLinks: IPart3NavLink[]
-  section?: string
+  section?: TNavLinkSection
 }
 export interface IPart3NavSection {
   key: TPart3NavSectionKey
@@ -651,3 +653,26 @@ export interface IPart3SectionCompletionStatus {
 
 export type TPart3NavLinkKey = keyof IPart3SectionCompletionStatus
 export type TPart3NavSectionKey = "overview" | "compliance" | "results"
+
+interface IPart3ComplianceMetrics {
+  modelled_floor_area: string
+  tedi: string
+  teui: string
+  ghgi: string
+  totalEnergy?: string
+  occupancy?: EStepCodeOccupancyKey
+}
+
+interface IPart3StepCodeComplianceRequirements {
+  areaWeightedTotals: IPart3ComplianceMetrics
+  occupanciesRequirements: IPart3ComplianceMetrics[]
+}
+interface IPart3ComplianceReportRequirements {
+  baselinePortions: IPart3ComplianceMetrics
+  stepCodePortions: IPart3StepCodeComplianceRequirements
+  wholeBuilding: IPart3ComplianceMetrics
+}
+
+export interface IPart3ComplianceReport {
+  requirements: IPart3ComplianceReportRequirements
+}

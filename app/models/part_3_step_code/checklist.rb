@@ -142,6 +142,8 @@ class Part3StepCode::Checklist < ApplicationRecord
             if: :cooling_type_other?
   validates :dhw_system_description, presence: true, if: :dhw_other?
 
+  before_create :set_climate_info
+
   def compliance_metrics
     if occupancy_classifications.step_code_occupancy.any?
       %i[teui tedi ghgi]
@@ -150,16 +152,25 @@ class Part3StepCode::Checklist < ApplicationRecord
     end
   end
 
-  def heating_degree_days
-    self[:heating_degree_days].presence ||
-      step_code.jurisdiction_heating_degree_days
-  end
-
   def total_occupancy_floor_area
     occupancy_classifications.sum(:modelled_floor_area) || 0
   end
 
   def total_step_code_occupancy_floor_area
     step_code_occupancies.sum(:modelled_floor_area) || 0
+  end
+
+  def compliance_report
+    StepCode::Part3::V1::GenerateReport.new(checklist: self).call
+  end
+
+  private
+
+  def set_climate_info
+    self.heating_degree_days ||= step_code.jurisdiction_heating_degree_days
+    self.climate_zone ||=
+      StepCode::Part3::V0::Requirements::References::ClimateZone.value(
+        step_code.jurisdiction_heating_degree_days
+      )
   end
 end

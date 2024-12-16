@@ -525,6 +525,12 @@ export enum EPart3StepCodeSoftware {
   other = "other",
 }
 
+export enum EPart3BuildingType {
+  mixedUse = "mixedUse",
+  stepCode = "stepCode",
+  baseline = "baseline",
+}
+
 export enum EHeatingSystemPlant {
   none = "none",
   airSourceHeatPump = "air_source_heat_pump",

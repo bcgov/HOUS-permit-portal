@@ -1,4 +1,4 @@
-class StepCode::Part3::V1::GenerateReports < StepCode::Part3::V0::GenerateReports
+class StepCode::Part3::V1::GenerateReport < StepCode::Part3::V0::GenerateReport
   attr_reader :checklist, :requirements, :performance, :reports
   attr_accessor :results
 
