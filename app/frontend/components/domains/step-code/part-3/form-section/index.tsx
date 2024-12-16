@@ -14,6 +14,7 @@ import { OverheatingRequirements } from "./overheating-requirements"
 import { PerformanceCharacteristics } from "./performance-characteristics"
 import { ProjectDetails } from "./project-details"
 import { RenewableEnergy } from "./renewable-energy"
+import { RequirementsSummary } from "./requirements-summary"
 import { ResidentialAdjustments } from "./residential-adjustments"
 import { StartPage } from "./start-page"
 import { StepCodeOccupancies } from "./step-code-occupancies"
@@ -57,5 +58,7 @@ export const FormSection = observer(function Part3StepCodeFormSection() {
       return <PerformanceCharacteristics />
     case "hvac":
       return <HVAC />
+    case "requirements-summary":
+      return <RequirementsSummary />
   }
 })

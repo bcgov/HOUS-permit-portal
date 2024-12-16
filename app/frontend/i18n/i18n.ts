@@ -1574,6 +1574,60 @@ const options = {
                 hint: "Use SRE (sensible recovery efficiency) per CoV EMG v2 2.6.1.",
               },
             },
+            requirementsSummary: {
+              heading: "Performance requirements summary",
+              missingInfo: {
+                title: "You haven't entered any relevant performance details",
+                message:
+                  "Performance requirements will appear here after you have entered information in <baselineOccupanciesLink>Baseline energy performance requirements</baselineOccupanciesLink> and <stepCodeOccupanciesLink>Performance requirements for Step 2, 3, and 4 Buildings</stepCodeOccupanciesLink>.",
+              },
+              buildingType: {
+                label: "Building type summary",
+                hint: "A summary of your building determined by your responses ",
+                options: {
+                  stepCode: "Single-occupancy building with a Step 2, 3, or 4 occupancy class",
+                  baseline: "Single-occupancy building with no Step 2, 3, or 4 occupancy classes",
+                  mixedUse: "Mixed-use building",
+                },
+              },
+              requirementMetrics: {
+                totalEnergy: { label: "Total energy", units: "kWh" },
+                teui: { label: "TEUI", units: "kWh/m<sup>2</sup>/year" },
+                tedi: { label: "TEDI", units: "kWh/m<sup>2</sup>/year" },
+                ghgi: { label: "GHGI", units: "kgCO<sub>2</sub>/m<sup>2</sup>/year" },
+              },
+              baselineRequirements: {
+                title: "Baseline performance requirements results",
+                hint: {
+                  singleOccupancy:
+                    "This value is calculated from inputs in <baselinePerformanceLink>Baseline energy performance requirements</baselinePerformanceLink>",
+                  mixedUse:
+                    "These values are calculated from inputs in <baselinePerformanceLink>Baseline energy performance requirements</baselinePerformanceLink><br /><br /><strong>Note:</strong> GHGI is to be reported in all cases, but will only be taken into account for compliance if GHGI is a requirements of the local government.",
+                },
+              },
+              stepCodeRequirements: {
+                title: "Step Code performance requirements results for Step 2, 3, and 4 Buildings",
+                occupancy: "Occupancy classification",
+                hint: "These values are calculated from inputs in <stepCodePerformanceLink>Performance requirements for Step 2, 3, and 4 Buildings</stepCodePerformanceLink><br /><br /><strong>Note:</strong> GHGI is to be reported in all cases, but will only be taken into account for compliance if GHGI is a requirements of the local government.",
+              },
+              residentialAdjustments: {
+                title: "Residential project adjustments",
+                wholeBuilding: { label: "Whole building adjustment", units: "kWh/m<sup>2</sup>/year" },
+                stepCodePortion: { label: "Step Code portion adjustment", units: "kWh/m<sup>2</sup>/year" },
+                hint: "Step Code portion adjustment is used in buildings where the Step Code portion of the building needs to meet TEDI on its own.",
+              },
+              wholeBuildingRequirements: {
+                title: "Whole building performance requirements",
+                hint: {
+                  singleOccupancy:
+                    "This value is calculated from inputs in <baselinePerformanceLink>Baseline energy performance requirements</baselinePerformanceLink> and <stepCodePerformanceLink>Performance requirements for Step 2, 3, and 4 Buildings</stepCodePerformanceLink><br /><br />Note: GHGI is to be reported in all cases, but will only be taken into account for compliance if GHGI is a requirements of the local government.<br /><br />Note: If the building has GHGI target as indicated in <stepCodePerformanceLink>Performance requirements for Step 2, 3, and 4 Buildings</stepCodePerformanceLink>, the value is determined as the area weighted average between the baseline/reference building GHGI from <baselinePerformanceLink>Baseline energy performance requirements</baselinePerformanceLink> and GHGI from <stepCodePerformanceLink>Performance requirements for Step 2, 3, and 4 Buildings</stepCodePerformanceLink> (if applicable)",
+                  mixedUse:
+                    "These values are calculated from inputs in <baselinePerformanceLink>Baseline energy performance requirements</baselinePerformanceLink> and <stepCodePerformanceLink>Performance requirements for Step 2, 3, and 4 Buildings</stepCodePerformanceLink><br /><br /><strong>Note:</strong> GHGI is to be reported in all cases, but will only be taken into account for compliance if GHGI is a requirements of the local government.<br /><br /><strong>Note:</strong> If the building has GHGI target as indicated in <stepCodePerformanceLink>Performance requirements for Step 2, 3, and 4 Buildings</stepCodePerformanceLink>, the value is determined as the area weighted average between the baseline/reference building GHGI from <baselinePerformanceLink>Baseline energy performance requirements</baselinePerformanceLink> and GHGI from <stepCodePerformanceLink>Performance requirements for Step 2, 3, and 4 Buildings</stepCodePerformanceLink> (if applicable)",
+                },
+              },
+              confirm: { label: "Does everything look correct?", cta: "Yes, create report" },
+              help: "Incorrect or missing information? Go to the relevant section to make corrections.",
+            },
           },
           title: "Step code auto-compliance tool",
           subTitle:
@@ -2549,7 +2603,7 @@ const options = {
             sandbox: "Sandbox",
           },
           notificationEmailHint:
-            "This email will be used to notify your local integration partner about upcoming changes to API mappings. Note: Jurisdiction review managers will be notified via their registered email irrespective of this field",
+            "This email will be used to notify your local integration partner about upcoming changes to API mappings. <strong>Note:</strong> Jurisdiction review managers will be notified via their registered email irrespective of this field",
           fieldPlaceholders: {
             webhookUrl: "https://example.com/webhook",
           },

@@ -13,6 +13,7 @@ import {
   EHeatingSystemPlant,
   EHeatingSystemType,
   EIsSuiteSubMetered,
+  EPart3BuildingType,
   EPart3StepCodeSoftware,
   EProjectStage,
 } from "../types/enums"
@@ -24,6 +25,7 @@ import {
   IFuelType,
   IMakeUpAirFuel,
   IOption,
+  IPart3ComplianceReport,
   IPart3NavLink,
   IPart3SectionCompletionStatus,
   IStepCodeOccupancy,
@@ -105,6 +107,7 @@ export const Part3StepCodeChecklistModel = types
     completedByPhoneNumber: types.maybeNull(types.string),
     completedByEmail: types.maybeNull(types.string),
     completedByOrganizationName: types.maybeNull(types.string),
+    complianceReport: types.maybeNull(types.frozen<IPart3ComplianceReport>()),
   })
   .extend(withEnvironment())
   .views((self) => ({
@@ -144,6 +147,15 @@ export const Part3StepCodeChecklistModel = types
     get stepCodeMFA() {
       return R.reduce((sum, oc) => sum + parseFloat(oc.modelledFloorArea), 0, self.stepCodeOccupancies)
     },
+    get buildingType(): EPart3BuildingType {
+      if (R.isEmpty(self.stepCodeOccupancies)) {
+        return EPart3BuildingType.baseline
+      } else if (R.isEmpty(self.baselineOccupancies)) {
+        return EPart3BuildingType.stepCode
+      } else {
+        return EPart3BuildingType.mixedUse
+      }
+    },
   }))
   .views((self) => ({
     get totalElectricityUse(): number {
@@ -165,6 +177,20 @@ export const Part3StepCodeChecklistModel = types
     },
     get totalMFA(): number {
       return self.baselineMFA + self.stepCodeMFA
+    },
+  }))
+  .views((self) => ({
+    get canShowResults() {
+      const baselineIsComplete =
+        self.isComplete("baselineOccupancies") &&
+        (self.isComplete("baselineDetails") || !self.isRelevant("baselineDetails")) &&
+        (self.isComplete("baselinePerformance") || !self.isRelevant("baselinePerformance"))
+
+      const stepCodeIsComplete =
+        self.isComplete("stepCodeOccupancies") &&
+        (self.isComplete("stepCodePerformanceRequirements") || !self.isRelevant("stepCodePerformanceRequirements"))
+
+      return baselineIsComplete && stepCodeIsComplete //&& self.isComplete("modelledOutputs")
     },
   }))
   .actions((self) => ({

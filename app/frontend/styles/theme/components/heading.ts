@@ -21,5 +21,9 @@ export const Heading = {
         borderColor: "theme.yellow",
       },
     },
+    heading4: {
+      as: "h4",
+      fontSize: "lg",
+    },
   },
 }
