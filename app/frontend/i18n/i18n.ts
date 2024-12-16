@@ -1654,6 +1654,19 @@ const options = {
                 preparedBy: "Company name of preparer",
               },
             },
+            completedByContact: {
+              heading: "Contact information",
+              description: "Enter contact information for the individual who completed this form.",
+              disclaimer:
+                "This form is not intended to be professionally sealed. The design professional responsible for energy modelling must document energy modelling information in an Energy Modelling Report as described by the Joint Architectural Institute of BC and Engineers and Geoscientists BC Professional Practice Guidelines – Whole Building Energy Modelling Services.",
+              fields: {
+                completedByName: "Name",
+                completedByTitle: "Job title",
+                completedByEmail: "Email",
+                completedByOrganization: "Organization or company name",
+                completedByPhoneNumber: "Phone",
+              },
+            },
           },
           title: "Step code auto-compliance tool",
           subTitle:
