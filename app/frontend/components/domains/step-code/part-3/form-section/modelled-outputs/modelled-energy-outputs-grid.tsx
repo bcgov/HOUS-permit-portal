@@ -334,7 +334,7 @@ const ModelledEnergyOutputRow = ({
             size="sm"
             color="semantic.error"
             aria-label={t("ui.remove")}
-            visibility={fuelTypeId || isUseTypeOther ? "visible" : "hidden"}
+            visibility={fuelTypeId || annualEnergy > 0 || isUseTypeOther ? "visible" : "hidden"}
             onClick={handleRemoveUseType}
           />
           <HStack>
@@ -357,13 +357,7 @@ const ModelledEnergyOutputRow = ({
         </Flex>
       </GridData>
       <GridData {...sharedGridDataProps}>
-        <Input
-          isDisabled={!fuelTypeId}
-          value={formattedAnnualEnergy}
-          onChange={handleChangeAnnualEnergy}
-          min={0}
-          {...sharedInputProps}
-        />
+        <Input value={formattedAnnualEnergy} onChange={handleChangeAnnualEnergy} min={0} {...sharedInputProps} />
       </GridData>
       <GridData {...sharedGridDataProps}>
         <Stack spacing={0.5} flexDirection={"column"}>
