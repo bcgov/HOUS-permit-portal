@@ -932,6 +932,7 @@ const options = {
             errorTitle: "There is a problem",
             cta: "Save and continue",
             sidebar: {
+              responsiveButton: "Sections",
               overview: "Overview",
               start: "Start page",
               projectDetails: "Project details",
