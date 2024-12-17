@@ -25,6 +25,7 @@ Rails.application.routes.draw do
   get "up" => "rails/health#show", :as => :rails_health_check
 
   scope module: :api, path: :api do
+    mount Shrine.presign_endpoint(:cache) => "/s3/params"
     devise_for :users,
                defaults: {
                  format: :json
