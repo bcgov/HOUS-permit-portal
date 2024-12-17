@@ -15,4 +15,8 @@ class SupportingDocumentPolicy < ApplicationPolicy
   def delete?
     destroy?
   end
+
+  def upload?
+    true
+  end
 end

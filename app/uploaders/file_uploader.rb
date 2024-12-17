@@ -7,11 +7,19 @@ class FileUploader < Shrine
   end
 
   def generate_location(io, derivative: nil, **options)
+    binding.pry
     record = options[:record]
     if record
-      #The default is (supporting document) model, but we want to ignore it: model = record.class.name.underscore
-      parent_model = record.permit_application.class.name.underscore #permit application nesting
-      parent_id = record.permit_application.id
+      # If the record is a FileUploadAttachment or its subclass, use the attached_to interface
+      if record.is_a?(FileUploadAttachment) && record.respond_to?(:attached_to)
+        parent_model = record.attached_to_model_name
+        parent_id = record.attached_to_id
+      else
+        # Fallback for any other models
+        parent_model = record.class.name.underscore
+        parent_id = record.id
+      end
+
       identifier = record.id || "temp" # Use 'temp' if record ID is nil
       # Construct the path with support for derivatives
       path = [parent_model, parent_id, identifier]

@@ -903,6 +903,7 @@ const options = {
             formFields: "Form fields",
             updatedAt: "Updated at",
             requirementSku: "Requirement SKU",
+            requirementDocuments: "Documents",
           },
           configurationsColumn: "Configurations",
           fieldDescriptions: {

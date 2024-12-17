@@ -243,6 +243,24 @@ export interface IStepCodeSelectOptions {
   zeroCarbonSteps: EZeroCarbonStep[]
 }
 
+export interface IFileData {
+  id: string
+  storage: string
+  metadata: {
+    size: number
+    filename: string
+    // please excuse uncamelized key from uppy
+    mimeType: string
+  }
+}
+
+export interface IRequirementDocument {
+  id?: string
+  requirementBlockId: string
+  file: IFileData
+  createdAt?: Date
+}
+
 export interface IRequirementBlockCustomization {
   tip?: string
   helpLink?: string

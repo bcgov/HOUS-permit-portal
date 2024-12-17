@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_12_13_062923) do
+ActiveRecord::Schema[7.1].define(version: 2025_03_24_191650) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -424,6 +424,18 @@ ActiveRecord::Schema[7.1].define(version: 2024_12_13_062923) do
             name: "index_requirement_blocks_on_name_and_first_nations",
             unique: true
     t.index ["sku"], name: "index_requirement_blocks_on_sku", unique: true
+  end
+
+  create_table "requirement_documents",
+               id: :uuid,
+               default: -> { "gen_random_uuid()" },
+               force: :cascade do |t|
+    t.uuid "requirement_block_id", null: false
+    t.jsonb "file_data"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["requirement_block_id"],
+            name: "index_requirement_documents_on_requirement_block_id"
   end
 
   create_table "requirement_template_sections",
@@ -972,6 +984,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_12_13_062923) do
                   "permit_classifications",
                   column: "permit_type_id"
   add_foreign_key "preferences", "users"
+  add_foreign_key "requirement_documents", "requirement_blocks"
   add_foreign_key "requirement_template_sections",
                   "requirement_template_sections",
                   column: "copied_from_id"

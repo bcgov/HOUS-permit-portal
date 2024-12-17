@@ -79,7 +79,7 @@ const s3custom = function Provider(formio) {
           const params = new URLSearchParams({
             id: fileInfo.id,
           })
-          const response = await fetch(`/api/storage/s3/delete?${params.toString()}`, {
+          const response = await fetch(`/api/s3/params/delete?${params.toString()}`, {
             method: "DELETE",
             headers: {
               "Content-Type": "application/json",
@@ -107,7 +107,7 @@ const s3custom = function Provider(formio) {
           ...(fileInfo.modelId && { model_id: fileInfo.modelId }),
         })
 
-        const response = await fetch(`/api/storage/s3/download?${params.toString()}`, {
+        const response = await fetch(`/api/s3/params/download?${params.toString()}`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
