@@ -11,6 +11,7 @@ import { HVAC } from "./hvac"
 import { LocationDetails } from "./location-details"
 import { ModelledOutputs } from "./modelled-outputs"
 import { OverheatingRequirements } from "./overheating-requirements"
+import { PerformanceCharacteristics } from "./performance-characteristics"
 import { ProjectDetails } from "./project-details"
 import { RenewableEnergy } from "./renewable-energy"
 import { ResidentialAdjustments } from "./residential-adjustments"
@@ -52,6 +53,8 @@ export const FormSection = observer(function Part3StepCodeFormSection() {
       return <OverheatingRequirements />
     case "residential-adjustments":
       return <ResidentialAdjustments />
+    case "performance-characteristics":
+      return <PerformanceCharacteristics />
     case "hvac":
       return <HVAC />
   }

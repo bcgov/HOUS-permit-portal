@@ -1460,6 +1460,120 @@ const options = {
                 },
               },
             },
+            performanceCharacteristics: {
+              heading: "Summary of building performance characteristics",
+              software: {
+                label: "Software used to create energy modelling report for this project",
+                error: "Select software used",
+                options: {
+                  ies_ve: "IES VE",
+                  energy_plus: "EnergyPlus",
+                  design_builder: "DesignBuilder",
+                  open_studio: "OpenStudio",
+                  e_quest: "eQuest",
+                  doe_2_other: "DOE-2 Other",
+                  phpp: "PHPP",
+                  other: "Other",
+                },
+              },
+              softwareName: {
+                label: "Software Name",
+                error: "Enter software name",
+              },
+              weatherFile: {
+                label: "Name of simulation weather file",
+                error: "Enter simulation weather file name",
+              },
+              ventilation: {
+                label: "Is demand control ventilation used?",
+                error: "Select option",
+              },
+              buildingCharacteristics: {
+                description: "Description",
+                value: "Value",
+                result: "Result",
+              },
+              aboveGroundWallArea: {
+                label: "Modelled above-ground wall area (m<sup>2</sup>)",
+                error: "Enter above-ground wall area",
+                hint: "Gross vertical façade area, includes glazed and opaque vertical surfaces.<br /><br />Report for spaces within MFA (e.g. if above-grade parkade, exlude those walls).",
+              },
+              vfar: { label: "Vertical facade-to-floor area ratio (VFAR)" },
+              wwr: { label: "Window-to-wall area ratio (WWR)", units: "%", error: "Enter window-to-wall area ratio" },
+              wfr: {
+                label: "Window-to-floor area ratio (WFR)",
+                hint: "Calculated value for informational purposes, based on MFA, WWR and wall area values entered.",
+              },
+              airtightness: {
+                label: "Assumed design airtightness (L/S⋅m<sup>2</sup> @ 75 Pa)",
+                error: "Enter design airtightness",
+                hint: "This is the q75Pa described in CoV EMG v2 Section 2.4.1.",
+              },
+              infiltrationRate: {
+                label: "Modelled infiltration rate (L/s/m<sup>2</sup> facade)",
+                error: "Enter infiltration rate",
+                hint: "This is the IAGW described in CoV EMG v2 Section 2.4.1",
+              },
+              wallClearField: {
+                label: "Average wall clear field R-value (m<sup>2</sup>K/w)",
+                error: "Enter average wall clear field R-value",
+                hint: "Above grade walls only - includes uniformly distributed thermal bridges only.<br /><br />Report for spaces within MFA (e.g. if above-grade parkade, exlude those walls).",
+                conversionUnits: "ft<sup>2</sup>hr°F/Btu",
+              },
+              wallEffectiveField: {
+                label: "Average wall effective field R-value (m<sup>2</sup>K/w)",
+                error: "Enter average wall effective field R-value",
+                hint: "Above grade walls only - includes all thermal bridging.<br /><br />Report for spaces within MFA (e.g. if above-grade parkade, exlude those walls).",
+              },
+              roofClearField: {
+                label: "Average roof clear field R-value (m<sup>2</sup>K/w)",
+                error: "Enter average roof clear field R-value",
+                hint: "Includes uniformly distributed thermal bridges only.",
+                conversionUnits: "ft<sup>2</sup>hr°F/Btu",
+              },
+              roofEffectiveField: {
+                label: "Average roof effective field R-value (m<sup>2</sup>K/w)",
+                error: "Enter average roof effective field R-value",
+                hint: "Includes all thermal bridging.",
+              },
+              windowEffective: {
+                label: "Average window effective U-value (W/m<sup>2</sup>K)",
+                hint: "Value should be area-weighted based on all windows on project.",
+                error: "Enter average window effective U-value",
+                conversionUnits: "Btu/ft<sup>2</sup>hr°F",
+              },
+              windowSolar: {
+                label: "Average window solar heat gain coefficient",
+                error: "Enter average window solar heat gain coefficient",
+                hint: "Value should be area-weighted based on all windows on project.",
+              },
+              occupantDensity: {
+                label: "Average occupant density (m<sup>2</sup>/person)",
+                error: "Enter average occupant density",
+                hint: "Use the MFA and the total building occupancy from energy model for spaces within the MFA.",
+              },
+              lightingDensity: {
+                label: "Average lighting power density (W/m<sup>2</sup>)",
+                error: "Enter average lighting power density",
+                hint: "Use the total lighting power load, not considering operating schedules and control schemes, for spaces within the MFA (e.g. ignore parkade lighting) and the MFA.",
+              },
+              ventilationRate: {
+                label: "Average ventilation rate (L/s/m<sup>2</sup>)",
+                error: "Enter average ventilation rate",
+                hint: "Use peak building ventilation, not considering operating schedules, servings spaces within the MFA, and the MFA.",
+              },
+              dhwSavings: {
+                label: "Total building DHW low-flow savings (%)",
+                error: "Enter total building DHW low-flow savings",
+                hint: "% savings is intended to represent reduction over code minimum flow rates, if a rate below the peak hourly is being used, per CoV EMG v2 2.2.1.",
+                units: "%",
+              },
+              hrvErvEfficiency: {
+                label: "Average HRV/ERV sensible efficiency",
+                error: "Enter average HRV/ERV sensible efficiency",
+                hint: "Use SRE (sensible recovery efficiency) per CoV EMG v2 2.6.1.",
+              },
+            },
           },
           title: "Step code auto-compliance tool",
           subTitle:
