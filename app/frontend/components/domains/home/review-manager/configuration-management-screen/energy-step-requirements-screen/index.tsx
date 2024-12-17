@@ -13,13 +13,13 @@ import { i18nPrefix } from "./i18n-prefix"
 
 export const EnergyStepRequirementsScreen = observer(function EnergyStepRequirementsScreen() {
   const {
-    stepCodeStore: { isLoaded, fetchStepCodes },
+    stepCodeStore: { isLoaded, fetchPart9StepCodes },
   } = useMst()
 
   const { isLoaded: isClassificationsLoaded } = usePermitClassificationsLoad()
 
   useEffect(() => {
-    const fetch = async () => await fetchStepCodes()
+    const fetch = async () => await fetchPart9StepCodes()
     !isLoaded && fetch()
   }, [isLoaded])
 

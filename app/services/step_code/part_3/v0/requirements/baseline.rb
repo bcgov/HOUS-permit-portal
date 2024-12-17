@@ -7,8 +7,6 @@ class StepCode::Part3::V0::Requirements::Baseline
   end
 
   def call
-    return {} if occupancies.empty?
-
     {
       teui: teui,
       tedi: tedi,
@@ -29,16 +27,24 @@ class StepCode::Part3::V0::Requirements::Baseline
       end
 
     total_energy / total_mfa * (1 - adjustment_factor / total_mfa)
+  rescue StandardError
+    nil
   end
 
   def tedi
     checklist.ref_annual_thermal_energy_demand / total_mfa
+  rescue StandardError
+    nil
   end
 
   def ghgi
+    return unless total_mfa > 0 && reference_energy_outputs.present?
+
     reference_energy_outputs.inject(0) do |sum, output|
       sum + output.annual_energy * output.fuel_type.emissions_factor
     end / total_mfa
+  rescue StandardError
+    nil
   end
 
   def total_energy
