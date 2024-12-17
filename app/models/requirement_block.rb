@@ -12,11 +12,13 @@ class RequirementBlock < ApplicationRecord
              word_start: %i[name requirement_labels associations configurations]
 
   has_many :requirements, -> { order(position: :asc) }, dependent: :destroy
+  has_many :requirement_documents, dependent: :destroy
 
   has_many :template_section_blocks, dependent: :destroy
   has_many :requirement_template_sections, through: :template_section_blocks
 
   accepts_nested_attributes_for :requirements, allow_destroy: true
+  accepts_nested_attributes_for :requirement_documents, allow_destroy: true
 
   enum sign_off_role: { any: 0 }, _prefix: true
   enum reviewer_role: { any: 0 }, _prefix: true

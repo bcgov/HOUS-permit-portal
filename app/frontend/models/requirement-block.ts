@@ -9,6 +9,7 @@ import {
   ERequirementType,
   EVisibility,
 } from "../types/enums"
+import { IRequirementDocument } from "../types/types"
 import { RequirementModel } from "./requirement"
 
 export const RequirementBlockModel = types
@@ -26,6 +27,7 @@ export const RequirementBlockModel = types
     createdAt: types.Date,
     updatedAt: types.Date,
     discardedAt: types.maybeNull(types.Date),
+    requirementDocuments: types.array(types.frozen<IRequirementDocument>()),
   })
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -122,6 +124,18 @@ export const RequirementBlockModel = types
       if (response.ok) applySnapshot(self, response.data.data)
       return response.ok
     }),
+    addDocument(document: IRequirementDocument) {
+      self.requirementDocuments.push(document)
+    },
+    removeDocument(documentId: string) {
+      const index = self.requirementDocuments.findIndex((doc) => doc.id === documentId)
+      if (index !== -1) {
+        self.requirementDocuments.splice(index, 1)
+      }
+    },
+    clearDocuments() {
+      self.requirementDocuments.clear()
+    },
   }))
 
 export interface IRequirementBlock extends Instance<typeof RequirementBlockModel> {}
