@@ -1,4 +1,4 @@
-RSpec.describe StepCode::Part3::V1::GenerateReports do
+RSpec.describe StepCode::Part3::V1::GenerateReport do
   let(:reference_energy_outputs) { [] }
 
   let(:electricity) { build(:fuel_type, :electricity) }
@@ -22,7 +22,7 @@ RSpec.describe StepCode::Part3::V1::GenerateReports do
   end
 
   subject(:compliance_checker) do
-    StepCode::Part3::V1::GenerateReports.new(checklist: checklist)
+    StepCode::Part3::V1::GenerateReport.new(checklist: checklist)
   end
 
   context "when the building is single use" do
@@ -129,6 +129,11 @@ RSpec.describe StepCode::Part3::V1::GenerateReports do
         let(:expected_requirements_metrics) do
           {
             baseline_portions: {
+              ghgi: nil,
+              modelled_floor_area: 0.0,
+              tedi: nil,
+              teui: nil,
+              total_energy: 0.0
             },
             step_code_portions: {
               occupancies_requirements: [

@@ -1,4 +1,4 @@
-RSpec.describe StepCode::Part3::V0::GenerateReports do
+RSpec.describe StepCode::Part3::V0::GenerateReport do
   let(:reference_energy_outputs) { [] }
   let(:checklist) do
     create(
@@ -17,7 +17,7 @@ RSpec.describe StepCode::Part3::V0::GenerateReports do
 
     it "fails in predefined failure case" do
       step_code_report_generator =
-        StepCode::Part3::V0::GenerateReports.new(checklist)
+        StepCode::Part3::V0::GenerateReport.new(checklist)
       result = step_code_report_generator.call
 
       expect(result[:occupancies]).to eq(
@@ -40,7 +40,7 @@ RSpec.describe StepCode::Part3::V0::GenerateReports do
 
     it "fails on passing example" do
       step_code_report_generator =
-        StepCode::Part3::V0::GenerateReports.new(checklist)
+        StepCode::Part3::V0::GenerateReport.new(checklist)
       result = step_code_report_generator.call
 
       expect(result[:occupancies]).to eq(
@@ -96,7 +96,7 @@ RSpec.describe StepCode::Part3::V0::GenerateReports do
 
     it "fails in predefined failure case" do
       step_code_report_generator =
-        StepCode::Part3::V0::GenerateReports.new(checklist)
+        StepCode::Part3::V0::GenerateReport.new(checklist)
       result = step_code_report_generator.call
 
       expect(result[:occupancies]).to eq(
@@ -119,7 +119,7 @@ RSpec.describe StepCode::Part3::V0::GenerateReports do
 
     it "fails on passing example" do
       step_code_report_generator =
-        StepCode::Part3::V0::GenerateReports.new(checklist)
+        StepCode::Part3::V0::GenerateReport.new(checklist)
       result = step_code_report_generator.call
 
       expect(result[:occupancies]).to eq(
