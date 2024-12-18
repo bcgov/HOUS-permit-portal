@@ -47,7 +47,7 @@ export const StepCodeChecklistForm = observer(function StepCodeChecklistForm() {
     if (result) navigate(`/permit-applications/${permitApplicationId}/edit`)
   }
 
-  const i18nPrefix = "stepCodeChecklist.edit"
+  const i18nPrefix = "stepCodeChecklist.part9.edit"
 
   const scrollToEnergyCompliance = () => scrollToRef(energyComplianceRef.current, 5)
   const scrollToZeroCarbonCompliance = () => scrollToRef(zeroCarbonComplianceRef.current, 6)

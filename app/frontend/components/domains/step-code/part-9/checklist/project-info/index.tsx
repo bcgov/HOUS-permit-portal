@@ -4,14 +4,14 @@ import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { Controller, useFormContext } from "react-hook-form"
-import { IStepCodeChecklist } from "../../../../../../models/part-9-step-code-checklist"
+import { IPart9StepCodeChecklist } from "../../../../../../models/part-9-step-code-checklist"
 import { TextFormControl } from "../../../../../shared/form/input-form-control"
 import { ChecklistSection } from "../shared/checklist-section"
 import { BuildingTypeSelect } from "./building-type-select"
 import { i18nPrefix } from "./i18n-prefix"
 
 interface IProps {
-  checklist: IStepCodeChecklist
+  checklist: IPart9StepCodeChecklist
 }
 
 export const ProjectInfo = observer(function ProjectInfo({ checklist }: IProps) {

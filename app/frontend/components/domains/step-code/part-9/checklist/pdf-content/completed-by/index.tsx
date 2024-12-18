@@ -3,7 +3,7 @@ import { format } from "date-fns"
 import { t } from "i18next"
 import React from "react"
 import { datefnsAppDateFormat } from "../../../../../../../constants"
-import { IStepCodeChecklist } from "../../../../../../../models/part-9-step-code-checklist"
+import { IPart9StepCodeChecklist } from "../../../../../../../models/part-9-step-code-checklist"
 import { theme } from "../../../../../../../styles/theme"
 import { i18nPrefix } from "../../completed-by/i18n-prefix"
 import { CheckBox } from "../shared/check-box"
@@ -13,7 +13,7 @@ import { Panel } from "../shared/panel"
 import { VStack } from "../shared/v-stack"
 
 interface IProps {
-  checklist: IStepCodeChecklist
+  checklist: IPart9StepCodeChecklist
 }
 
 export const CompletedBy = function StepCodeChecklistPDFCompletedBy({ checklist }: IProps) {

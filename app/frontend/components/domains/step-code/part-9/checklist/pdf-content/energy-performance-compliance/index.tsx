@@ -2,7 +2,7 @@ import { Text } from "@react-pdf/renderer"
 import { t } from "i18next"
 import * as R from "ramda"
 import React from "react"
-import { IStepCodeChecklist } from "../../../../../../../models/part-9-step-code-checklist"
+import { IPart9StepCodeChecklist } from "../../../../../../../models/part-9-step-code-checklist"
 import { theme } from "../../../../../../../styles/theme"
 import { i18nPrefix } from "../../energy-performance-compliance/i18n-prefix"
 import { CheckBox } from "../shared/check-box"
@@ -12,7 +12,7 @@ import { HStack } from "../shared/h-stack"
 import { Panel } from "../shared/panel"
 
 interface IProps {
-  checklist: IStepCodeChecklist
+  checklist: IPart9StepCodeChecklist
 }
 export const EnergyPerformanceCompliance = function StepCodeChecklistPDFEnergyPerformanceCompliance({
   checklist,

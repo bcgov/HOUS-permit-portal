@@ -1,2 +1,2 @@
-type TPrefix = "stepCodeChecklist.edit.codeComplianceSummary"
-export const i18nPrefix: TPrefix = "stepCodeChecklist.edit.codeComplianceSummary"
+type TPrefix = "stepCodeChecklist.part9.edit.codeComplianceSummary"
+export const i18nPrefix: TPrefix = "stepCodeChecklist.part9.edit.codeComplianceSummary"
