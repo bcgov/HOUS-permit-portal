@@ -3,7 +3,7 @@ import { observer } from "mobx-react-lite"
 import React, { Suspense, useEffect } from "react"
 import { PDFContent } from "."
 import { usePermitApplication } from "../../../../../../hooks/resources/use-permit-application"
-import { IPart9StepCodeChecklist } from "../../../../../../models/part-9-step-code-checklist"
+import { IPart3StepCodeChecklist } from "../../../../../../models/part-3-step-code-checklist"
 import { IPermitApplication } from "../../../../../../models/permit-application"
 import { LoadingScreen } from "../../../../../shared/base/loading-screen"
 
@@ -32,7 +32,7 @@ export const StepCodeChecklistPDFViewer = observer(function StepCodeChecklistPDF
 
 interface IContentProps {
   permitApplication: IPermitApplication
-  checklist: IPart9StepCodeChecklist
+  checklist: IPart3StepCodeChecklist
 }
 
 function Content({ permitApplication, checklist }: IContentProps) {

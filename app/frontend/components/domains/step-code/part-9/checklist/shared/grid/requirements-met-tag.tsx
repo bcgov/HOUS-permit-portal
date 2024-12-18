@@ -7,7 +7,7 @@ interface IProps {
   success: boolean
 }
 export const RequirementsMetTag = function RequirementsMetTag({ success }: IProps) {
-  const i18nPrefix = "stepCodeChecklist.edit.complianceGrid.requirementsMetTag"
+  const i18nPrefix = "stepCodeChecklist.part9.edit.complianceGrid.requirementsMetTag"
   return (
     <Tag
       bg={success ? "semantic.successLight" : "semantic.errorLight"}

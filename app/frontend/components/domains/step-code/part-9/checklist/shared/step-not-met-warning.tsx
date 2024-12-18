@@ -23,7 +23,7 @@ export function StepNotMetWarning({ i18nKey, scrollToSection, ...rest }: IProps)
       <WarningCircle color="var(--chakra-colors-semantic-error)" />
       <Box>
         <Trans
-          i18nKey={`stepCodeChecklist.edit.${i18nKey}`}
+          i18nKey={`stepCodeChecklist.part9.edit.${i18nKey}`}
           components={{
             1: <Button variant="link" onClick={scrollToSection} />,
           }}

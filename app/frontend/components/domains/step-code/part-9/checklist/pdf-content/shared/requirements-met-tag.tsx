@@ -4,7 +4,7 @@ import React from "react"
 import { theme } from "../../../../../../../styles/theme"
 
 export function RequirementsMetTag({ success }) {
-  const i18nPrefix = "stepCodeChecklist.edit.complianceGrid.requirementsMetTag"
+  const i18nPrefix = "stepCodeChecklist.part9.edit.complianceGrid.requirementsMetTag"
   return (
     <View
       style={{
