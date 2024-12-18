@@ -1482,6 +1482,7 @@ const options = {
             applicationRevisionsRequested: "Revisions requested by jurisdiction",
             collaboration: "Collaboration",
             integrationMapping: "API integration mapping",
+            unmappedApiNotification: "Unmapped API Notification",
           },
           emailConfirmed: {
             heading: "Email confirmed!",

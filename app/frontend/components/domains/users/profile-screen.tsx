@@ -119,6 +119,11 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
       inAppControl: "preferenceAttributes.enableInAppIntegrationMappingNotification",
       emailControl: "preferenceAttributes.enableEmailIntegrationMappingNotification",
     },
+    {
+      event: t("user.notifications.unmappedApiNotification"),
+      inAppControl: "preferenceAttributes.enableInAppUnmappedApiNotification",
+      emailControl: "preferenceAttributes.enableEmailUnmappedApiNotification",
+    },
   ]
 
   return (
