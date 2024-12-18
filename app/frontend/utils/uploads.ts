@@ -59,7 +59,7 @@ export const requestPresignedUrl = async (file, fileName) => {
       // checksum: file.checksum,
     })
 
-    return fetch(`/api/storage/s3?${params.toString()}`, {
+    return fetch(`/api/s3/params?${params.toString()}`, {
       method: "GET",
       credentials: "same-origin",
       headers: {
@@ -101,7 +101,7 @@ export const requestMultipart = async (file, fileName) => {
       size: file.size,
     })
 
-    return fetch(`/api/storage/s3/multipart`, {
+    return fetch(`/api/s3/params/multipart`, {
       method: "POST",
       credentials: "same-origin",
       headers: {
@@ -118,7 +118,7 @@ export const requestMultipart = async (file, fileName) => {
 
 export const getMultipartProgress = async (uploadId) => {
   try {
-    return fetch(`/api/storage/s3/multipart/${uploadId}`, {
+    return fetch(`/api/s3/params/multipart/${uploadId}`, {
       method: "GET",
       credentials: "same-origin",
       headers: {
@@ -137,7 +137,7 @@ export const getMultipartSignedUrls = async (uploadId, key, partNumbers) => {
       key: key,
       partNumbers: partNumbers,
     })
-    return fetch(`/api/storage/s3/multipart/${uploadId}/batch?${params.toString()}`, {
+    return fetch(`/api/s3/params/multipart/${uploadId}/batch?${params.toString()}`, {
       method: "GET",
       credentials: "same-origin",
       headers: {
@@ -156,7 +156,7 @@ export const completeMultipart = async (uploadId, key, parts) => {
       key: key,
       parts: parts,
     })
-    return fetch(`/api/storage/s3/multipart/${uploadId}/complete`, {
+    return fetch(`/api/s3/params/multipart/${uploadId}/complete`, {
       method: "POST",
       credentials: "same-origin",
       headers: {
