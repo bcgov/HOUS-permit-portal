@@ -345,7 +345,7 @@ export const PinModeInputs = observer(({ disabled }: IPinModeInputsProps) => {
                   <JurisdictionSelect
                     onChange={(selectValue) => {
                       if (selectValue) addJurisdiction(selectValue)
-                      onChange(selectValue.id)
+                      onChange(selectValue?.id)
                     }}
                     onFetch={() => setValue("jurisdictionId", null)}
                     selectedOption={value ? { label: getJurisdictionById(value)?.reverseQualifiedName, value } : null}
