@@ -1,4 +1,4 @@
-import { Center, Flex, FormLabel, Show } from "@chakra-ui/react"
+import { Center, Flex, FormLabel, Hide, Show } from "@chakra-ui/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React, { Suspense, useEffect } from "react"
@@ -14,6 +14,7 @@ import { Part3NavLinks } from "../nav-bar/part-3-nav-links"
 import { FormSection } from "./form-section"
 import { Sidebar } from "./sidebar"
 import { defaultSectionCompletionStatus } from "./sidebar/nav-sections"
+import { SideBarDrawer } from "./sidebar/side-bar-drawer"
 
 export const Part3StepCodeForm = observer(function Part3StepCodeForm() {
   const { permitApplicationId, section } = useParams()
@@ -78,7 +79,7 @@ export const Part3StepCodeForm = observer(function Part3StepCodeForm() {
           }
         >
           {stepCode && (
-            <Flex flex={1} w="full" id="stepCodeScroll" overflow="auto">
+            <Flex flex={1} w="full" id="stepCodeScroll" overflow="auto" position="relative">
               <Show above="lg">
                 <Flex
                   w={"sidebar.width"}
@@ -97,9 +98,13 @@ export const Part3StepCodeForm = observer(function Part3StepCodeForm() {
                 overflow="auto"
                 top={0}
                 pl={{ base: 0, xl: 20 }}
-                pt={20}
+                pt={10}
                 pb={10}
               >
+                <Hide above="lg">
+                  <SideBarDrawer triggerProps={{ ml: 6, size: "md" }} />
+                </Hide>
+
                 <FloatingHelpDrawer top="24" zIndex={1} />
                 <Flex direction="column" flex={1} maxW="780px" px={6} py={3}>
                   <FormSection />
