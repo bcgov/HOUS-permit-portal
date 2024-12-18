@@ -306,7 +306,6 @@ const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
         label={t("site.breadcrumb.configurationManagement")}
         to={`/jurisdictions/${currentUser?.jurisdiction?.slug}/configuration-management`}
       />
-      <NavMenuItem label={t("site.breadcrumb.users")} to={`/jurisdictions/${currentUser?.jurisdiction?.slug}/users`} />
       <NavMenuItem
         label={t("site.breadcrumb.apiSettings")}
         to={`/jurisdictions/${currentUser?.jurisdiction?.slug}/api-settings`}
