@@ -1357,6 +1357,10 @@ const options = {
               description:
                 "Customize the informational page that submitters will see when they are in the Building Permit Hub.",
             },
+            users: {
+              title: "Users",
+              description: "Manage and invite reviewers and other staff for this jurisdiciton",
+            },
             submissionsInboxSetup: {
               title: "Submissions inbox setup",
               description: "Specify email addresses that should receive applications.",
