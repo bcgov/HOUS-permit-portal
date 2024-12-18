@@ -185,7 +185,7 @@ class User < ApplicationRecord
     return unless omniauth_provider.present?
 
     valid_providers = {
-      submitter: ["bceidbasic", "bceidbusiness", ENV["VITE_BCSC_PROVIDER_KEY"]],
+      submitter: %w[bceidbasic bceidbusiness digital-building-permit-5120],
       super_admin: ["idir"],
       reviewer: %w[bceidbasic bceidbusiness],
       review_manager: %w[bceidbasic bceidbusiness],
