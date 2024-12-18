@@ -73,7 +73,7 @@ export const ConfigurationManagementScreen = observer(function ConfigurationMana
                   icon={<FileText size="24px" color="var(--chakra-colors-text-primary)" />}
                   href="energy-step"
                   h="full"
-                  markForSandbox
+                  disableForSandbox
                 />
               </GridItem>
               <GridItem>
@@ -95,7 +95,6 @@ export const ConfigurationManagementScreen = observer(function ConfigurationMana
                   icon={<SlidersHorizontal size={24} />}
                   href={`/jurisdictions/${currentJurisdiction.slug}/api-settings`}
                   h="full"
-                  markForSandbox
                 />
               </GridItem>
             </Grid>
