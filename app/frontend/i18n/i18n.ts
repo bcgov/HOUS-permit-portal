@@ -19,7 +19,7 @@ const options = {
         auth: {
           login: "Login",
           loginTitle: "Log in to Building Permit Hub",
-          firstTime: "First time here? You need a BCeID or BC Services Card to log in",
+          firstTime: "First time here? You need a BCeID or BC Services Card Account to log in",
           publicLogin: "I am applying for a permit",
           publicLoginDescription: "Create, submit, collaborate, and manage building permit applications",
           localGovLogin: "I represent a local government or First Nation",
@@ -29,7 +29,7 @@ const options = {
           lgPrompt:
             "You must have a BCeID account to use this system. If you don’t have one yet, please register for one based on your use case.",
           publicPrompt:
-            "You must have either a BC Services Card or BCeID account to use this system. If you don’t have one yet, please register for one based on your use case. <br/><br/> <strong>Please note that BCeID and BC Services Card logins will act as two separate accounts, and you must consistently use the same method for all future logins.</strong>",
+            "You must have either a BC Services Card Account or BCeID account to use this system. If you don’t have one yet, please register for one based on your use case. <br/><br/> <strong>Please note that BCeID and BC Services Card logins will act as two separate accounts, and you must consistently use the same method for all future logins.</strong>",
           chooseSituation: "Choose the situation that best matches your own to learn more about your login choices.",
           loginHelp: "Having trouble logging in?",
           goToPartners: "Go to our login partners",
@@ -44,12 +44,12 @@ const options = {
           goToGovLogin: "Go to local government login",
           goToPublicLogin: "Go to general public login",
           bceid: "BCeID",
-          bcsc: "BC Services Card",
+          bcsc: "BC Services Card Account",
           keycloakinfo: {
             heading: "Which BCeID should I use?",
             useIf: "You can use this option if:",
             bcsc: {
-              title: "BC Services Card",
+              title: "BC Services Card Account",
               canadianResident: "You're a resident of Canada",
               register: "Set up BC Services Card Account",
             },
@@ -77,7 +77,7 @@ const options = {
           submit: "Submit",
           or: "or",
           bceidLogin: "Login with BCeID",
-          bcscLogin: "Login with BC Services Card",
+          bcscLogin: "Login with BC Services Card Account",
           idirLogin: "Login with IDIR",
           role: "Role",
           emailLabel: "Email address",
@@ -482,7 +482,7 @@ const options = {
         permitApplication: {
           noneFound: "No draft permits found",
           noneFoundExplanation:
-            "Missing draft permits? You might have used a login option different from the one you used to create the permits. Log out and try logging back in with the BCeID or BC Services Card you used to create them.",
+            "Missing draft permits? You might have used a login option different from the one you used to create the permits. Log out and try logging back in with the BCeID or BC Services Card Account you used to create them.",
           submissionBlockModal: {
             title: "Trying to submit this application?",
             description:
@@ -1473,7 +1473,7 @@ const options = {
             idir: "IDIR",
             bceidbasic: "Basic BCeID",
             bceidbusiness: "Business BCeID",
-            bcsc: "BC Services Card",
+            bcsc: "BC Services Card Account",
           },
           changeBceid: "If you want to change your BCeID information, please go to ",
           changeBceidLinkText: "bceid.ca",
@@ -1540,7 +1540,7 @@ const options = {
               "The Super Admin is the highest-level user within the system, with overarching control over the entire permit application platform. They have the authority to manage user roles, including creating and removing user accounts, and to modify the system configuration. This role is responsible for the maintenance of the system, including updates and enhancements, and ensuring that the system meets the operational and strategic objectives of the local government or the organization.",
           },
           assignTo: "Assign to...",
-          department: "Department"
+          department: "Department",
         },
         earlyAccessRequirementTemplate: {
           show: {},
