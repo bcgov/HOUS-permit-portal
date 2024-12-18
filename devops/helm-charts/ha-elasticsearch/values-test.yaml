@@ -6,9 +6,6 @@ elasticsearch:
       requests:
         cpu: "50m"
         memory: "512Mi"
-      limits:
-        cpu: "150m"
-        memory: "1024Mi"
     persistence:
       enabled: true
       accessModes:
@@ -21,9 +18,6 @@ elasticsearch:
       requests:
         cpu: "200m"
         memory: "1024Mi"
-      limits:
-        cpu: "400m"
-        memory: "1.5Gi"
     persistence:
       enabled: true
       accessModes:
