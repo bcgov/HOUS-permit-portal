@@ -27,7 +27,6 @@ const useUppyS3 = ({ onUploadSuccess, maxNumberOfFiles = 1, autoProceed = false 
         endpoint: "/api",
       })
       .on("upload-success", (file, response) => {
-        debugger
         import.meta.env.DEV && console.log("Upload successful for file:", file.name)
         import.meta.env.DEV && console.log("Server response:", response)
 
