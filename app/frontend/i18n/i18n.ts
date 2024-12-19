@@ -157,7 +157,8 @@ const options = {
             left: "See helpful tips from your local jurisdictions to streamline your digital building permit applications",
             mid: "Preview the Small-scale/Multi-unit housing checklist",
             midSub: "(Part 9 BC Building Code)",
-            viewTemplate: "View requirements",
+            viewTemplate: "View",
+            midDownload: "Checklist",
             end: "Accurately fill out your permit application online with ease",
             endButton: "Get started now",
           },
@@ -658,6 +659,9 @@ const options = {
             versionDiffContactWarning:
               "A new version of the permit is available. Please ask author or designated submitter to review and acknowledge changes to proceed.",
             contactsSummary: "Contacts summary",
+            inboxDisabledTitle: "Inbox disabled",
+            inboxDisabled:
+              "Submissions for this local jurisdictions are currently disabled. You will be able to make edits to this permit application but will not be able to submit until this jurisdiction's is accepting submissions again.",
             downloadApplication: "Download application",
             fetchingMissingPdf: "Fetching {{missingPdf}}...",
             missingPdfLabels: {
@@ -791,7 +795,7 @@ const options = {
                 "Make sure you are ready to promote/demote this, any other previews or templates using this specific block will also reflect this change.",
               listItem1: "<strong>All</strong>: The requirement block may exist in any preview or template",
               listItem2:
-                "<strong>Exclude preview</strong>: The requirement block may not exist in previews, and only in templates",
+                "<strong>Preview omitted</strong>: The requirement block may not exist in previews, and only in templates",
               listItem3:
                 "<strong>Preview only</strong>: The requirement block may not exist in templates, and only in previews",
             },
@@ -1353,9 +1357,14 @@ const options = {
               description:
                 "Customize the informational page that submitters will see when they are in the Building Permit Hub.",
             },
+            users: {
+              title: "Users",
+              description: "Manage and invite reviewers and other staff for this jurisdiciton",
+            },
             submissionsInboxSetup: {
               title: "Submissions inbox setup",
               description: "Specify email addresses that should receive applications.",
+              inboxEnabled: "Enable inbox",
               permitTypes: {
                 label: "Send permit applications for",
                 low_residential: "1-4 Unit detached housing",
@@ -1609,7 +1618,7 @@ const options = {
           edit: {
             requirementsLibraryTab: "Requirements Library",
             earlyAccessRequirementsLibraryTab: "Early Access Requirements Library",
-            earlyAccessTabDescription: "Early access previews cannot add 'Exclude preview' blocks ",
+            earlyAccessTabDescription: "Early access previews cannot add 'Preview omitted' blocks ",
             options: {
               button: "Options",
               copyTips: "Import tips from ({{ templateLabel }})",

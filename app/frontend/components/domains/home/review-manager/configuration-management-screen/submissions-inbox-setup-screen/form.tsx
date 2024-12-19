@@ -1,4 +1,4 @@
-import { VStack } from "@chakra-ui/react"
+import { FormLabel, HStack, Switch, VStack } from "@chakra-ui/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
@@ -17,10 +17,11 @@ export const Form = observer(function SubmissionInboxSetupForm({ jurisdiction }:
   const {
     permitClassificationStore: { permitTypes },
   } = useMst()
-  const { permitTypeSubmissionContacts: submissionContacts } = jurisdiction
+  const { permitTypeSubmissionContacts: submissionContacts, inboxEnabled } = jurisdiction
 
   const getDefaultValues = () => ({
     permitTypeSubmissionContactsAttributes: [...submissionContacts, ...defaults()],
+    inboxEnabled: inboxEnabled, // Default value for the toggle
   })
 
   const defaults = () => {
@@ -38,11 +39,13 @@ export const Form = observer(function SubmissionInboxSetupForm({ jurisdiction }:
     mode: "onChange",
     defaultValues: getDefaultValues(),
   })
-  const { handleSubmit, reset, control, setValue } = formMethods
+  const { handleSubmit, reset, control, setValue, watch } = formMethods
   const { fields, append, remove, update } = useFieldArray({
     control,
     name: fieldArrayName,
   })
+
+  const inboxEnabledWatch = watch("inboxEnabled")
 
   const getIndex = (field) => R.findIndex((f) => f.id == field.id, fields)
 
@@ -57,12 +60,19 @@ export const Form = observer(function SubmissionInboxSetupForm({ jurisdiction }:
   useEffect(() => {
     jurisdiction &&
       setValue("permitTypeSubmissionContactsAttributes", [...jurisdiction.permitTypeSubmissionContacts, ...defaults()])
+    setValue("inboxEnabled", inboxEnabled) // Update inboxEnabled value
   }, [jurisdiction?.id])
+
+  useEffect(() => {
+    if (inboxEnabledWatch === jurisdiction.inboxEnabled) return
+    handleSubmit(onSubmit)()
+  }, [inboxEnabledWatch])
 
   return (
     <FormProvider {...formMethods}>
       <form onSubmit={handleSubmit(onSubmit)} style={{ width: "100%" }}>
         <VStack spacing={5}>
+          {/* Editable Blocks */}
           {permitTypes.map((permitType) => {
             const permitTypeFields = R.filter((f) => f.permitTypeId == permitType.id, fields)
             return (
@@ -81,6 +91,19 @@ export const Form = observer(function SubmissionInboxSetupForm({ jurisdiction }:
               />
             )
           })}
+          {/* Inbox Enabled Switch */}
+          <HStack width="100%" align="center">
+            <FormLabel htmlFor="inbox-enabled-switch" mb="0">
+              {t(`${i18nPrefix}.inboxEnabled`)}
+            </FormLabel>
+            <Switch
+              id="inbox-enabled-switch"
+              isChecked={jurisdiction.inboxEnabled}
+              onChange={(e) => {
+                jurisdiction.update({ inboxEnabled: e.target.checked })
+              }}
+            />
+          </HStack>
         </VStack>
       </form>
     </FormProvider>

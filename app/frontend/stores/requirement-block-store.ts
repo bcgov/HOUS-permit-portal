@@ -195,7 +195,7 @@ export const RequirementBlockStoreModel = types
         name: requirementBlock.name,
         visibility: toEarlyAccess ? EVisibility.earlyAccess : requirementBlock.visibility,
         replaceBlockId: requirementBlock.id,
-        replaceOnTemplateId: replaceOn.id,
+        replaceOnTemplateId: replaceOn?.id,
       }
 
       return yield self.createRequirementBlock(clonedParams)

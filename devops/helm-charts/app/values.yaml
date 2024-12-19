@@ -18,9 +18,6 @@ deployments:
           requests:
             cpu: 50m
             memory: 64Mi
-          limits:
-            cpu: 200m
-            memory: 256Mi
   - process: worker
     replicaCount: 1
     spec:
@@ -33,9 +30,6 @@ deployments:
           requests:
             cpu: 50m
             memory: 64Mi
-          limits:
-            cpu: 200m
-            memory: 256Mi
   - process: anycable-rpc
     replicaCount: 1
     spec:
@@ -48,6 +42,3 @@ deployments:
           requests:
             cpu: 50m
             memory: 64Mi
-          limits:
-            cpu: 200m
-            memory: 256Mi

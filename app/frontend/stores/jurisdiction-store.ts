@@ -50,7 +50,6 @@ export const JurisdictionStoreModel = types
       if (!R.isEmpty(jurisdiction.sandboxes)) {
         self.rootStore.sandboxStore.mergeUpdateAll(jurisdiction.sandboxes, "sandboxMap")
       }
-
       return "sandboxes" in jurisdiction
         ? R.mergeRight(jurisdiction, {
             sandboxes: jurisdiction.sandboxes?.map((sandbox) => sandbox.id),
