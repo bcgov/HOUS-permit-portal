@@ -5,12 +5,12 @@ import React from "react"
 import { datefnsAppDateFormat } from "../../../../../../../constants"
 import { IPart9StepCodeChecklist } from "../../../../../../../models/part-9-step-code-checklist"
 import { theme } from "../../../../../../../styles/theme"
+import { CheckBox } from "../../../../step-generic/pdf-content/shared/check-box"
+import { Field, Input } from "../../../../step-generic/pdf-content/shared/field"
+import { HStack } from "../../../../step-generic/pdf-content/shared/h-stack"
+import { Panel } from "../../../../step-generic/pdf-content/shared/panel"
+import { VStack } from "../../../../step-generic/pdf-content/shared/v-stack"
 import { i18nPrefix } from "../../completed-by/i18n-prefix"
-import { CheckBox } from "../shared/check-box"
-import { Field, Input } from "../shared/field"
-import { HStack } from "../shared/h-stack"
-import { Panel } from "../shared/panel"
-import { VStack } from "../shared/v-stack"
 
 interface IProps {
   checklist: IPart9StepCodeChecklist

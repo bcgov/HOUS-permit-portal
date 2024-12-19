@@ -6,7 +6,7 @@ import React from "react"
 import { Controller, useFormContext } from "react-hook-form"
 import { IPart9StepCodeChecklist } from "../../../../../../models/part-9-step-code-checklist"
 import { TextFormControl } from "../../../../../shared/form/input-form-control"
-import { ChecklistSection } from "../shared/checklist-section"
+import { ChecklistSection } from "../../../step-generic/shared/checklist-section"
 import { BuildingTypeSelect } from "./building-type-select"
 import { i18nPrefix } from "./i18n-prefix"
 

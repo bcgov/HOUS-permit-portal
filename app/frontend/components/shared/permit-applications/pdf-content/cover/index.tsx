@@ -4,7 +4,7 @@ import { t } from "i18next"
 import React from "react"
 import { IPermitApplication } from "../../../../../models/permit-application"
 import { theme } from "../../../../../styles/theme"
-import { Divider } from "../../../../domains/step-code/part-9/checklist/pdf-content/shared/divider"
+import { Divider } from "../../../../domains/step-code/step-generic/pdf-content/shared/divider"
 import { page } from "../shared/styles/page"
 
 interface IProps {

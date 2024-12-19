@@ -4,12 +4,12 @@ import * as R from "ramda"
 import React from "react"
 import { IPart9StepCodeChecklist } from "../../../../../../../models/part-9-step-code-checklist"
 import { theme } from "../../../../../../../styles/theme"
+import { CheckBox } from "../../../../step-generic/pdf-content/shared/check-box"
+import { Divider } from "../../../../step-generic/pdf-content/shared/divider"
+import { Field } from "../../../../step-generic/pdf-content/shared/field"
+import { HStack } from "../../../../step-generic/pdf-content/shared/h-stack"
+import { Panel } from "../../../../step-generic/pdf-content/shared/panel"
 import { i18nPrefix } from "../../energy-performance-compliance/i18n-prefix"
-import { CheckBox } from "../shared/check-box"
-import { Divider } from "../shared/divider"
-import { Field } from "../shared/field"
-import { HStack } from "../shared/h-stack"
-import { Panel } from "../shared/panel"
 
 interface IProps {
   checklist: IPart9StepCodeChecklist

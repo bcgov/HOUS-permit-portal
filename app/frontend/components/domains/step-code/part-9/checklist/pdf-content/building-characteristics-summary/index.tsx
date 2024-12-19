@@ -1,8 +1,8 @@
 import { t } from "i18next"
 import React from "react"
 import { IPart9StepCodeChecklist } from "../../../../../../../models/part-9-step-code-checklist"
-import { Panel } from "../shared/panel"
-import { VStack } from "../shared/v-stack"
+import { Panel } from "../../../../step-generic/pdf-content/shared/panel"
+import { VStack } from "../../../../step-generic/pdf-content/shared/v-stack"
 import { DynamicCharacteristicsGrid } from "./dynamic-characteristics-grid"
 import { StaticCharacteristicsGrid } from "./static-characteristics-grid"
 

@@ -19,22 +19,24 @@ Font.registerHyphenationCallback((word) => [word])
 
 interface IProps {
   checklist: IPart9StepCodeChecklist
-  permitApplication: IPermitApplication
+  permitApplication?: IPermitApplication
   assetDirectoryPath?: string
 }
 
-export const PDFContent = function StepCodeChecklistPDFContent({
+export const Part9PDFContent = function StepCodeChecklistPDFContent({
   checklist,
   permitApplication,
   assetDirectoryPath,
 }: IProps) {
   return (
     <PDFDocument assetDirectoryPath={assetDirectoryPath}>
-      <CoverPage
-        permitApplication={permitApplication}
-        subTitle={t("stepCodeChecklist.part9.pdf.for")}
-        assetDirectoryPath={assetDirectoryPath}
-      />
+      {permitApplication && (
+        <CoverPage
+          permitApplication={permitApplication}
+          subTitle={t("stepCodeChecklist.part9.pdf.for")}
+          assetDirectoryPath={assetDirectoryPath}
+        />
+      )}
       <Page size="LETTER" style={page}>
         <ProjectInfo checklist={checklist} />
         <ComplianceSummary checklist={checklist} />
@@ -43,7 +45,7 @@ export const PDFContent = function StepCodeChecklistPDFContent({
         <EnergyPerformanceCompliance checklist={checklist} />
         <EnergyStepCompliance report={checklist.selectedReport.energy} />
         <ZeroCarbonStepCompliance report={checklist.selectedReport.zeroCarbon} />
-        <Footer permitApplication={permitApplication} />
+        {permitApplication && <Footer permitApplication={permitApplication} />}
       </Page>
     </PDFDocument>
   )

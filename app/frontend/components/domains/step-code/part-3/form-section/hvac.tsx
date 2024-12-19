@@ -14,7 +14,7 @@ import {
   EHeatingSystemType,
 } from "../../../../../types/enums"
 import { TextFormControl } from "../../../../shared/form/input-form-control"
-import { HStack } from "../../part-9/checklist/pdf-content/shared/h-stack"
+import { HStack } from "../../step-generic/pdf-content/shared/h-stack"
 
 const i18nPrefix = "stepCode.part3.hvac"
 

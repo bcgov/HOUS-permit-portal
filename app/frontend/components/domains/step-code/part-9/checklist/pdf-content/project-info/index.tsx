@@ -2,9 +2,9 @@ import { Text, View } from "@react-pdf/renderer"
 import { t } from "i18next"
 import React from "react"
 import { IPart9StepCodeChecklist } from "../../../../../../../models/part-9-step-code-checklist"
+import { Field } from "../../../../step-generic/pdf-content/shared/field"
+import { Panel } from "../../../../step-generic/pdf-content/shared/panel"
 import { i18nPrefix } from "../../project-info/i18n-prefix"
-import { Field } from "../shared/field"
-import { Panel } from "../shared/panel"
 
 interface IProps {
   checklist: IPart9StepCodeChecklist
