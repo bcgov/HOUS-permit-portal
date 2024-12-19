@@ -1,6 +1,14 @@
 require "sidekiq-cron"
 require "sidekiq-unique-jobs"
 
+SIDEKIQ_QUEUES = %w[
+  file_processing
+  webhooks
+  websocket
+  model_callbacks
+  default
+].freeze
+
 # in production mode we use redis-sentinel for HA Redis, locally / test just fallback to default (ENV['REDIS_URL'])
 if Rails.env.production? && ENV["IS_DOCKER_BUILD"].blank? # skip this during precompilation in the docker build stage
   redis_cfg = {
@@ -18,13 +26,7 @@ if Rails.env.production? && ENV["IS_DOCKER_BUILD"].blank? # skip this during pre
 
   Sidekiq.configure_server do |config|
     config.redis = redis_cfg
-    config.queues = %w[
-      file_processing
-      webhooks
-      websocket
-      model_callbacks
-      default
-    ]
+    config.queues = SIDEKIQ_QUEUES
     config.concurrency = ENV["SIDEKIQ_CONCURRENCY"].to_i
 
     config.client_middleware do |chain|
@@ -51,4 +53,6 @@ if Rails.env.production? && ENV["IS_DOCKER_BUILD"].blank? # skip this during pre
   if File.exist?(schedule_file)
     Sidekiq::Cron::Job.load_from_hash YAML.load_file(schedule_file)
   end
+else
+  Sidekiq.configure_server { |config| config.queues = SIDEKIQ_QUEUES }
 end
