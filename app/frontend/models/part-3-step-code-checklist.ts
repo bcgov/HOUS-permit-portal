@@ -223,6 +223,11 @@ export const Part3StepCodeChecklistModel = types
         return true
       }
     }),
+    load: flow(function* () {
+      //stubbed - we may not need this
+      yield Promise.resolve()
+      self.isLoaded = true
+    }),
   }))
 
 export interface IPart3StepCodeChecklist extends Instance<typeof Part3StepCodeChecklistModel> {}

@@ -8,13 +8,13 @@ import { FormProvider, useForm } from "react-hook-form"
 import { useNavigate, useParams } from "react-router-dom"
 import { usePart9StepCode } from "../../../../../hooks/resources/use-part-9-step-code"
 import { SharedSpinner } from "../../../../shared/base/shared-spinner"
+import { StepNotMetWarning } from "../../step-generic/shared/step-not-met-warning"
 import { BuildingCharacteristicsSummary } from "./building-characteristics-summary"
 import { CompletedBy } from "./completed-by"
 import { ComplianceSummary } from "./compliance-summary"
 import { EnergyPerformanceCompliance } from "./energy-performance-compliance"
 import { EnergyStepCodeCompliance } from "./energy-step-code-compliance"
 import { ProjectInfo } from "./project-info"
-import { StepNotMetWarning } from "./shared/step-not-met-warning"
 import { ZeroCarbonStepCodeCompliance } from "./zero-carbon-step-code-compliance"
 
 export const StepCodeChecklistForm = observer(function StepCodeChecklistForm() {
@@ -47,7 +47,7 @@ export const StepCodeChecklistForm = observer(function StepCodeChecklistForm() {
     if (result) navigate(`/permit-applications/${permitApplicationId}/edit`)
   }
 
-  const i18nPrefix = "stepCodeChecklist.edit"
+  const i18nPrefix = "stepCodeChecklist.part9.edit"
 
   const scrollToEnergyCompliance = () => scrollToRef(energyComplianceRef.current, 5)
   const scrollToZeroCarbonCompliance = () => scrollToRef(zeroCarbonComplianceRef.current, 6)

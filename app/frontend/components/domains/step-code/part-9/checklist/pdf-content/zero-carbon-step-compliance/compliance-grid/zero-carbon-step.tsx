@@ -3,10 +3,10 @@ import { t } from "i18next"
 import React from "react"
 import { IStepCodeZeroCarbonComplianceReport } from "../../../../../../../../models/step-code-zero-carbon-compliance-report"
 import { theme } from "../../../../../../../../styles/theme"
+import { Field } from "../../../../../step-generic/pdf-content/shared/field"
+import { GridItem } from "../../../../../step-generic/pdf-content/shared/grid-item"
+import { HStack } from "../../../../../step-generic/pdf-content/shared/h-stack"
 import { i18nPrefix } from "../../../zero-carbon-step-code-compliance/i18n-prefix"
-import { Field } from "../../shared/field"
-import { GridItem } from "../../shared/grid-item"
-import { HStack } from "../../shared/h-stack"
 
 interface IProps {
   report: IStepCodeZeroCarbonComplianceReport

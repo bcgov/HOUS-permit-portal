@@ -5,8 +5,8 @@ import React from "react"
 import { Trans } from "react-i18next"
 import { usePart3StepCode } from "../../../../../../hooks/resources/use-part-3-step-code"
 import { RouterLink } from "../../../../../shared/navigation/router-link"
-import { GridColumnHeader } from "../../../part-9/checklist/shared/grid/column-header"
-import { GridData } from "../../../part-9/checklist/shared/grid/data"
+import { GridColumnHeader } from "../../../step-generic/shared/grid/column-header"
+import { GridData } from "../../../step-generic/shared/grid/data"
 
 export const StepCodeRequirements = observer(function StepCodeRequirementsSummary() {
   const i18nPrefix = "stepCode.part3.requirementsSummary"

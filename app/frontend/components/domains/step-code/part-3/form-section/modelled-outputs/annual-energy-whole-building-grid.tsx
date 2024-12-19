@@ -7,9 +7,9 @@ import { IMpdelledEnergyOutputChecklistForm } from "."
 import { usePart3StepCode } from "../../../../../../hooks/resources/use-part-3-step-code"
 import { formattedStringToNumber, numberToFormattedString } from "../../../../../../utils/utility-functions"
 import { InfoTooltip } from "../../../../../shared/info-tooltip"
-import { GridColumnHeader } from "../../../part-9/checklist/shared/grid/column-header"
-import { GridData } from "../../../part-9/checklist/shared/grid/data"
-import { GridRowHeader } from "../../../part-9/checklist/shared/grid/row-header"
+import { GridColumnHeader } from "../../../step-generic/shared/grid/column-header"
+import { GridData } from "../../../step-generic/shared/grid/data"
+import { GridRowHeader } from "../../../step-generic/shared/grid/row-header"
 
 const i18nPrefix = "stepCode.part3.modelledOutputs.annualEnergyWholeBuildingTable"
 
