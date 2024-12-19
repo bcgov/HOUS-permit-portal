@@ -93,6 +93,14 @@ export const RootStoreModel = types
     },
   }))
   .actions((self) => ({
+    updatePath() {
+      Object.values(self).forEach((store) => {
+        // Check if the store exists and has a resetAll method
+        if (store && typeof store.resetAll === "function") {
+          store.syncWithUrl()
+        }
+      })
+    },
     afterCreate() {
       self.loadLocalPersistedData()
     },
@@ -121,4 +129,5 @@ export interface IRootStore extends IStateTreeNode {
   subscribeToUserChannel: () => void
   disconnectUserChannel: () => void
   loadLocalPersistedData: () => void
+  updatePath: (path: string) => void
 }

@@ -66,10 +66,12 @@ class User < ApplicationRecord
   validate :jurisdiction_must_belong_to_correct_roles
   validate :confirmed_user_has_fields
   validate :unique_omniauth_uid
+  validate :omniauth_provider_appropriate_for_role
   validate :single_jurisdiction, unless: :regional_review_manager?
 
   after_commit :refresh_search_index, if: :saved_change_to_discarded_at
-  after_commit :reindex_jurisdiction_user_size, :reindex_jurisdiction_review_manager_email
+  after_commit :reindex_jurisdiction_user_size,
+               :reindex_jurisdiction_review_manager_email
   before_save :create_default_preference
 
   # Stub this for now since we do not want to use IP Tracking at the moment - Jan 30, 2024
@@ -166,7 +168,32 @@ class User < ApplicationRecord
     end
   end
 
+  def promotable_to_regional_rm?
+    # may double-promote existing RRMs with more jurisdictions
+    manager?
+  end
+
+  # Override active_for_authentication? to check if the user is discarded
+  def active_for_authentication?
+    super && !discarded?
+  end
+
   private
+
+  def omniauth_provider_appropriate_for_role
+    return unless omniauth_provider.present?
+
+    valid_providers = {
+      submitter: %w[bceidbasic bceidbusiness digital-building-permit-5120],
+      super_admin: ["idir"],
+      reviewer: %w[bceidbasic bceidbusiness],
+      review_manager: %w[bceidbasic bceidbusiness],
+      regional_review_manager: %w[bceidbasic bceidbusiness]
+    }
+    return if valid_providers[role.to_sym].include?(omniauth_provider)
+
+    errors.add(:omniauth_provider, "Invalid for role")
+  end
 
   def destroy_jurisdiction_collaborator
     return unless discarded?
@@ -201,7 +228,12 @@ class User < ApplicationRecord
   def reindex_jurisdiction_review_manager_email
     return unless jurisdictions.any?
 
-    jurisdictions.reindex if (saved_change_to_role? || destroyed? || new_record? || saved_change_to_email?) && (review_manager? || regional_review_manager?)
+    if (
+         saved_change_to_role? || destroyed? || new_record? ||
+           saved_change_to_email?
+       ) && (review_manager? || regional_review_manager?)
+      jurisdictions.reindex
+    end
   end
 
   def refresh_search_index
@@ -228,11 +260,13 @@ class User < ApplicationRecord
 
   def unique_omniauth_uid
     return unless omniauth_uid.present?
+
     existing_user =
       User
         .where.not(omniauth_uid: nil)
         .find_by(omniauth_uid:, omniauth_provider:)
     return unless existing_user && existing_user != self
+
     if !super_admin?
       errors.add(
         :base,
@@ -246,6 +280,7 @@ class User < ApplicationRecord
 
   def single_jurisdiction
     return if jurisdictions.count <= 1
+
     errors.add(:base, :single_jurisdiction)
   end
 
