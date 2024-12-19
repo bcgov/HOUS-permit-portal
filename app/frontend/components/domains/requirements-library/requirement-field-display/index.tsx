@@ -247,6 +247,10 @@ const requirementsComponentMap = {
     return <GenericFieldDisplay inputDisplay={<DummyStepCodeInput />} {...props} />
   },
 
+  [ERequirementType.energyStepCodePart3](props: TRequirementFieldDisplayProps) {
+    return <GenericFieldDisplay inputDisplay={<DummyStepCodeInput />} {...props} />
+  },
+
   [ERequirementType.pidInfo](props: TRequirementFieldDisplayProps) {
     const pidInfoFieldItemTypes: Array<{
       type: ERequirementType

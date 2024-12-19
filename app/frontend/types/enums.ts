@@ -179,6 +179,7 @@ export enum ERequirementType {
   email = "email",
   generalContact = "general_contact",
   professionalContact = "professional_contact",
+  energyStepCodePart3 = "energy_step_code_part_3",
 }
 
 export enum ENumberUnit {
@@ -363,6 +364,12 @@ export enum EEnergyStepCodeDependencyRequirementCode {
   energyStepCodeToolPart9 = "energy_step_code_tool_part_9",
   energyStepCodeReportFile = "energy_step_code_report_file",
   energyStepCodeH2000File = "energy_step_code_h2000_file",
+}
+
+export enum EEnergyStepCodePart3DependencyRequirementCode {
+  energyStepCodeMethod = "energy_step_code_method",
+  energyStepCodeToolPart3 = "energy_step_code_tool_part_3",
+  energyStepCodeReportFile = "energy_step_code_report_file",
 }
 
 export enum EOmniauthProvider {

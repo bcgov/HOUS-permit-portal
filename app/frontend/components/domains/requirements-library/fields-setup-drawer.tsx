@@ -62,6 +62,10 @@ export const FieldsSetupDrawer = observer(function FieldsSetupMenu({
     if (type === ERequirementType.energyStepCode) {
       acc.push({ requirementType: ERequirementType.file, isStepCodePackageFileRequirement: true })
     }
+    // TBD - not sure if the design package needs to be linked to part 3
+    // if (type === ERequirementType.energyStepCodePart3) {
+    //   acc.push({ requirementType: ERequirementType.file, isStepCodePackageFileRequirement: true })
+    // }
 
     return acc
   }, [])

@@ -22,7 +22,11 @@ import { useAutoComplianceModuleConfigurations } from "../../../../hooks/resourc
 import { IRequirementBlock } from "../../../../models/requirement-block"
 import { useMst } from "../../../../setup/root"
 import { IFormConditional, IRequirementAttributes, IRequirementBlockParams } from "../../../../types/api-request"
-import { EEnergyStepCodeDependencyRequirementCode, EVisibility } from "../../../../types/enums"
+import {
+  EEnergyStepCodeDependencyRequirementCode,
+  EEnergyStepCodePart3DependencyRequirementCode,
+  EVisibility,
+} from "../../../../types/enums"
 import { IDenormalizedRequirementBlock, TAutoComplianceModuleConfigurations } from "../../../../types/types"
 import { AUTO_COMPLIANCE_OPTIONS_MAP_KEY_PREFIX } from "../../../../utils"
 import { isOptionsMapperModuleConfiguration } from "../../../../utils/utility-functions"
@@ -113,9 +117,13 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
 
       const shouldAppendConditional = formConditional?.when && formConditional?.operand && formConditional?.then
 
-      const isEnergyStepCodeDependency = Object.values(EEnergyStepCodeDependencyRequirementCode).includes(
-        ra.requirementCode as EEnergyStepCodeDependencyRequirementCode
-      )
+      const isEnergyStepCodeDependency =
+        Object.values(EEnergyStepCodeDependencyRequirementCode).includes(
+          ra.requirementCode as EEnergyStepCodeDependencyRequirementCode
+        ) ||
+        Object.values(EEnergyStepCodePart3DependencyRequirementCode).includes(
+          ra.requirementCode as EEnergyStepCodePart3DependencyRequirementCode
+        )
 
       // energy step code dependency conditionals is not possible to edit from the front-end and has default values
       // and follows a slightly different structure so we make sure not to remove them or alter them
@@ -136,6 +144,7 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
       )
     })
 
+    console.log(requirementBlock)
     if (requirementBlock) {
       const removedRequirementAttributes = requirementBlock.requirements
         .filter((requirement) => !data.requirementsAttributes.find((attribute) => attribute.id === requirement.id))
