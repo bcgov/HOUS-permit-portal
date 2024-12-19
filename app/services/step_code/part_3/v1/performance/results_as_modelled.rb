@@ -7,6 +7,8 @@ class StepCode::Part3::V1::Performance::ResultsAsModelled < StepCode::Part3::V1:
 
   def teui
     super { total_energy_use / total_mfa }
+  rescue StandardError
+    nil
   end
 
   def tedi
@@ -18,10 +20,14 @@ class StepCode::Part3::V1::Performance::ResultsAsModelled < StepCode::Part3::V1:
           checklist.step_code_annual_thermal_energy_demand / step_code_mfa
       }
     end
+  rescue StandardError
+    nil
   end
 
   def ghgi
     super { total_emissions / total_mfa }
+  rescue StandardError
+    nil
   end
 
   def total_emissions
@@ -30,11 +36,15 @@ class StepCode::Part3::V1::Performance::ResultsAsModelled < StepCode::Part3::V1:
         .modelled_energy_outputs
         .joins(:fuel_type)
         .sum("annual_energy * fuel_types.emissions_factor")
+  rescue StandardError
+    nil
   end
 
   def total_energy_use
     @total_energy_use ||=
       checklist.modelled_energy_outputs.sum(:annual_energy) -
         checklist.generated_electricity
+  rescue StandardError
+    nil
   end
 end

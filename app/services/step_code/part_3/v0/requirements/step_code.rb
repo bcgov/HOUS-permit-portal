@@ -7,8 +7,6 @@ class StepCode::Part3::V0::Requirements::StepCode
   end
 
   def call
-    return {} if occupancies.empty?
-
     {
       occupancies_requirements: occupancies_requirements,
       area_weighted_totals: area_weighted_totals
@@ -22,7 +20,7 @@ class StepCode::Part3::V0::Requirements::StepCode
       occupancies.map do |oc|
         StepCode::Part3::V0::Requirements::StepCodeOccupancy.new(
           occupancy: oc,
-          climate_zone: checklist.climate_zone.to_sym
+          climate_zone: checklist.climate_zone&.to_sym
         ).call
       end
   end
@@ -37,11 +35,13 @@ class StepCode::Part3::V0::Requirements::StepCode
   end
 
   def area_weighted_total(metric)
-    return if measure_only?(metric)
+    return if measure_only?(metric) || total_mfa == 0
 
     occupancies_requirements.inject(0) do |sum, requirement|
       sum + requirement[:modelled_floor_area] * requirement[metric]
     end / total_mfa
+  rescue StandardError
+    nil
   end
 
   def measure_only?(metric)
