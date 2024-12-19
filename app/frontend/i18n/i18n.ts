@@ -1434,7 +1434,7 @@ const options = {
           fetchWorkTypeOptions: "Something went wrong fetching the work type options",
           fetchRequirementTemplate: "Something went wrong fetching the requirement template",
           fetchTemplateVersion: "Something went wrong fetching the template version",
-          fetchCurrentUserLicenseAgreements: "Something went wrong fetching license agreements",
+          fetchCurrentUserLicenseAgreements: "Please confirm your account to see license agreement",
           fetchTemplateVersions: "Something went wrong fetching template versions",
           fetchBuildingPermits: "Something went wrong fetching building permits",
           fetchBuildingPermit: "Something went wrong fetching building permit",
