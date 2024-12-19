@@ -403,20 +403,22 @@ const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
             ) : (
               <>
                 {!loggedIn && (
-                  <MenuList
-                    display="flex"
-                    flexWrap="wrap"
-                    px={2}
-                    py={0}
-                    gap={2}
-                    border="0"
-                    boxShadow="none"
-                    maxW="300px"
-                  >
-                    <NavMenuItemCTA label={t("auth.login")} to="/login" />
-                  </MenuList>
+                  <>
+                    <MenuList
+                      display="flex"
+                      flexWrap="wrap"
+                      px={2}
+                      py={3}
+                      gap={2}
+                      border="0"
+                      boxShadow="none"
+                      maxW="300px"
+                    >
+                      <NavMenuItemCTA label={t("auth.login")} to="/login" />
+                    </MenuList>
+                    <MenuDivider my={0} borderColor="border.light" />
+                  </>
                 )}
-                <MenuDivider my={0} borderColor="border.light" />
                 <NavMenuItem label={t("site.home")} to="/" />
                 <NavMenuItem label={t("home.jurisdictionsTitle")} to={"/jurisdictions"} />
                 {loggedIn && <NavMenuItem label={t("auth.logout")} onClick={handleClickLogout} />}
@@ -430,7 +432,7 @@ const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
               </Link>
             </MenuItem>
             {import.meta.env.VITE_RELEASE_VERSION && (
-              <MenuItem h={6} bg="greys.grey03" _hover={{ cursor: "auto" }}>
+              <MenuItem maxW={"250px"} bg="greys.grey03" _hover={{ cursor: "auto" }}>
                 <Text
                   textAlign="center"
                   w="full"
