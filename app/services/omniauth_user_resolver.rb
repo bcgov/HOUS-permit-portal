@@ -115,7 +115,16 @@ class OmniauthUserResolver
 
   def omniauth_uid
     @omniauth_uid ||=
-      raw_info.bceid_user_guid || raw_info.idir_user_guid || raw_info.sub
+      case omniauth_provider
+      when OMNIAUTH_PROVIDERS[:bceid_business], OMNIAUTH_PROVIDERS[:bceid_basic]
+        raw_info.bceid_user_guid
+      when OMNIAUTH_PROVIDERS[:idir]
+        raw_info.idir_user_guid
+      when OMNIAUTH_PROVIDERS[:bcsc]
+        raw_info.sub
+      else
+        raise "Unknown provider: #{omniauth_provider}"
+      end
   end
 
   def omniauth_email
@@ -124,7 +133,15 @@ class OmniauthUserResolver
 
   def omniauth_username
     @omniauth_username ||=
-      raw_info.bceid_username || raw_info.idir_username ||
+      case omniauth_provider
+      when OMNIAUTH_PROVIDERS[:bceid_business], OMNIAUTH_PROVIDERS[:bceid_basic]
+        raw_info.bceid_username
+      when OMNIAUTH_PROVIDERS[:idir]
+        raw_info.idir_username
+      when OMNIAUTH_PROVIDERS[:bcsc]
         raw_info.preferred_username
+      else
+        raise "Unknown provider: #{omniauth_provider}"
+      end
   end
 end
