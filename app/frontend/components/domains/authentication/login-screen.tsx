@@ -12,6 +12,7 @@ import {
   GridItem,
   Heading,
   Link,
+  Show,
   Text,
 } from "@chakra-ui/react"
 import React from "react"
@@ -55,43 +56,82 @@ export const LoginScreen = ({ isAdmin }: ILoginScreenProps) => {
               <IdirLoginForm />
             </>
           ) : (
-            <Grid
-              templateColumns={{ base: "1fr", md: "1fr auto 1fr" }} // Single column on small screens, three columns on md and up
-              gap={6}
-              width="100%"
-              alignItems="start"
-            >
-              <GridItem>
-                <Heading as="h2">{t("auth.publicLogin")}</Heading>
-              </GridItem>
+            <>
+              <Show above="md">
+                <Grid
+                  templateColumns={"1fr auto 1fr"} // Single column on small screens, three columns on md and up
+                  gap={6}
+                  width="100%"
+                  alignItems="start"
+                >
+                  <GridItem>
+                    <Heading as="h2">{t("auth.publicLogin")}</Heading>
+                  </GridItem>
 
-              <GridItem rowSpan={3} h="full">
-                <Divider orientation="vertical" height="100%" borderColor="border.light" mx={12} />
-              </GridItem>
+                  <GridItem rowSpan={3} h="full">
+                    <Divider orientation="vertical" height="100%" borderColor="border.light" mx={12} />
+                  </GridItem>
 
-              <GridItem>
-                <Heading as="h2">{t("auth.localGovLogin")}</Heading>
-              </GridItem>
+                  <GridItem>
+                    <Heading as="h2">{t("auth.localGovLogin")}</Heading>
+                  </GridItem>
 
-              <GridItem>
-                <Text>{t("auth.publicLoginDescription")}</Text>
-              </GridItem>
+                  <GridItem>
+                    <Text>{t("auth.publicLoginDescription")}</Text>
+                  </GridItem>
 
-              <GridItem>
-                <Text>{t("auth.localGovLoginDescription")}</Text>
-              </GridItem>
+                  <GridItem>
+                    <Text>{t("auth.localGovLoginDescription")}</Text>
+                  </GridItem>
 
-              <GridItem>
-                <Flex direction="column" gap={6}>
-                  <BcscLoginForm />
-                  <BceidLoginForm />
-                </Flex>
-              </GridItem>
+                  <GridItem>
+                    <Flex direction="column" gap={6}>
+                      <BcscLoginForm />
+                      <BceidLoginForm />
+                    </Flex>
+                  </GridItem>
 
-              <GridItem>
-                <BceidLoginForm />
-              </GridItem>
-            </Grid>
+                  <GridItem>
+                    <BceidLoginForm />
+                  </GridItem>
+                </Grid>
+              </Show>
+              <Show below="md">
+                <Grid
+                  templateColumns={"1fr"} // Single column on small screens, three columns on md and up
+                  gap={6}
+                  width="100%"
+                  alignItems="start"
+                >
+                  <GridItem>
+                    <Heading as="h2">{t("auth.publicLogin")}</Heading>
+                  </GridItem>
+
+                  <GridItem>
+                    <Text>{t("auth.publicLoginDescription")}</Text>
+                  </GridItem>
+
+                  <GridItem>
+                    <Flex direction="column" gap={6}>
+                      <BcscLoginForm />
+                      <BceidLoginForm />
+                    </Flex>
+                  </GridItem>
+
+                  <GridItem>
+                    <Heading as="h2">{t("auth.localGovLogin")}</Heading>
+                  </GridItem>
+
+                  <GridItem>
+                    <Text>{t("auth.localGovLoginDescription")}</Text>
+                  </GridItem>
+
+                  <GridItem>
+                    <BceidLoginForm />
+                  </GridItem>
+                </Grid>
+              </Show>
+            </>
           )}
           <Flex direction="column">
             <Heading>{t("auth.firstTime")}</Heading>
