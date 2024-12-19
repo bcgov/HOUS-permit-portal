@@ -97,7 +97,22 @@ class Api::Part3Building::ChecklistsController < Api::ApplicationController
         name
         annual_energy
       ],
-      make_up_air_fuels_attributes: %i[_destroy id fuel_type_id percent_of_load]
+      make_up_air_fuels_attributes: %i[
+        _destroy
+        id
+        fuel_type_id
+        percent_of_load
+      ],
+      document_references_attributes: %i[
+        _destroy
+        id
+        document_type
+        document_type_description
+        issued_for
+        document_name
+        date_issued
+        prepared_by
+      ]
     )
   end
 end

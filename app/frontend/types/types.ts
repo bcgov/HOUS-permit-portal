@@ -10,6 +10,7 @@ import {
   EBaselinePerformanceRequirement,
   ECollaborationType,
   ECollaboratorType,
+  EDocumentReferenceDocumentType,
   EDoorsPerformanceType,
   EEnabledElectiveFieldReason,
   EEnergyOutputSource,
@@ -603,10 +604,13 @@ export interface IMakeUpAirFuel {
 }
 
 export interface IDocumentReference {
-  name: string
-  documentName: string
-  dateIssued: string
-  preparedBy: string
+  id?: string
+  documentType: EDocumentReferenceDocumentType
+  documentTypeDescription?: string | null
+  issuedFor?: string | null
+  documentName?: string | null
+  dateIssued?: number | null | Date
+  preparedBy?: string | null
 }
 
 type TNavLinkSection = "overview" | "compliance" | "results"
