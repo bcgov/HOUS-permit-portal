@@ -7,7 +7,12 @@ import { PDFDocument } from "../../../../../shared/pdf"
 import { CoverPage } from "../../../../../shared/permit-applications/pdf-content/cover"
 import { Footer } from "../../../../../shared/permit-applications/pdf-content/shared/footer"
 import { page } from "../../../../../shared/permit-applications/pdf-content/shared/styles/page"
+import { BaselineOccupancy } from "./baseline-occupancies"
+import { BaselinePerformance } from "./baseline-performance"
+import { DistrictEnergy } from "./district-energy"
+import { FuelTypes } from "./fuel-types"
 import { ProjectInfo } from "./project-info"
+import { StepCodeOccupancies } from "./step-code-occupancies"
 
 Font.registerHyphenationCallback((word) => [word])
 
@@ -33,12 +38,11 @@ export const Part3PDFContent = function StepCodeChecklistPDFContent({
       )}
       <Page size="LETTER" style={page}>
         <ProjectInfo checklist={checklist} />
-        {/* <ComplianceSummary checklist={checklist} />
-        <CompletedBy checklist={checklist} />
-        <BuildingCharacteristicsSummary checklist={checklist} />
-        <EnergyPerformanceCompliance checklist={checklist} />
-        <EnergyStepCompliance report={checklist.selectedReport.energy} />
-        <ZeroCarbonStepCompliance report={checklist.selectedReport.zeroCarbon} /> */}
+        <BaselineOccupancy checklist={checklist} />
+        <DistrictEnergy checklist={checklist} />
+        <FuelTypes checklist={checklist} />
+        <BaselinePerformance checklist={checklist} />
+        <StepCodeOccupancies checklist={checklist} />
         {permitApplication && <Footer permitApplication={permitApplication} />}
       </Page>
     </PDFDocument>

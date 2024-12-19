@@ -9,7 +9,7 @@ import { i18nPrefix } from "../../project-info/i18n-prefix"
 interface IProps {
   checklist: IPart3StepCodeChecklist
 }
-export const ProjectInfo = function StepCodeChecklistPDFProjectInfo({ checklist }: IProps) {
+export const ProjectInfo = ({ checklist }: IProps) => {
   const i18nPrefixDetails = `${i18nPrefix}.projectDetails`
   const i18nlocationDetails = `${i18nPrefix}.locationDetails`
   return (
@@ -29,7 +29,7 @@ export const ProjectInfo = function StepCodeChecklistPDFProjectInfo({ checklist 
         <Field label={t(`${i18nPrefixDetails}.version`)} value={checklist.buildingCodeVersion} />
       </Panel>
       <Panel heading={t(`${i18nlocationDetails}.heading`)}>
-        <Field label={t(`${i18nlocationDetails}.buildingHeight`)} value={checklist.buildingHeight} />
+        <Field label={t(`${i18nlocationDetails}.aboveGradeStories.label`)} value={checklist.buildingHeight} />
         <Field label={t(`${i18nlocationDetails}.hdd.label`)} value={checklist.heatingDegreeDays} />
         <Field
           label={t(`${i18nlocationDetails}.climateZone.label`)}
