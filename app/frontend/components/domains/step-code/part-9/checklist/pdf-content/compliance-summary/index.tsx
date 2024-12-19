@@ -3,10 +3,10 @@ import { t } from "i18next"
 import React from "react"
 import { IPart9StepCodeChecklist } from "../../../../../../../models/part-9-step-code-checklist"
 import { theme } from "../../../../../../../styles/theme"
+import { Divider } from "../../../../step-generic/pdf-content/shared/divider"
+import { Field, Input } from "../../../../step-generic/pdf-content/shared/field"
+import { Panel } from "../../../../step-generic/pdf-content/shared/panel"
 import { i18nPrefix } from "../../compliance-summary/i18n-prefix"
-import { Divider } from "../shared/divider"
-import { Field, Input } from "../shared/field"
-import { Panel } from "../shared/panel"
 
 interface IProps {
   checklist: IPart9StepCodeChecklist

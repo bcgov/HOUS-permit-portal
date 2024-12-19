@@ -165,7 +165,7 @@ const Part3StepCodeForm = lazy(() =>
   import("../step-code/part-3").then((module) => ({ default: module.Part3StepCodeForm }))
 )
 const StepCodeChecklistPDFViewer = lazy(() =>
-  import("../step-code/part-9/checklist/pdf-content/viewer").then((module) => ({
+  import("../step-code/step-generic/viewer").then((module) => ({
     default: module.StepCodeChecklistPDFViewer,
   }))
 )

@@ -2,9 +2,9 @@ import { t } from "i18next"
 import React from "react"
 import { IStepCodeEnergyComplianceReport } from "../../../../../../../models/step-code-energy-compliance-report"
 import { TextFormControl } from "../../../../../../shared/form/input-form-control"
-import { GridData } from "../../shared/grid/data"
-import { GridPlaceholder } from "../../shared/grid/placeholder"
-import { GridRowHeader } from "../../shared/grid/row-header"
+import { GridData } from "../../../../step-generic/shared/grid/data"
+import { GridPlaceholder } from "../../../../step-generic/shared/grid/placeholder"
+import { GridRowHeader } from "../../../../step-generic/shared/grid/row-header"
 import { i18nPrefix } from "../i18n-prefix"
 
 interface IProps {

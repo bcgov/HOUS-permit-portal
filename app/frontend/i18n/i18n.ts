@@ -2018,12 +2018,6 @@ const options = {
               },
             },
           },
-          part3: {
-            pdf: {
-              for: "Step code pre-construction checklist for",
-            },
-            edit: {},
-          },
         },
         home: {
           jurisdictionsTitle: "Jurisdictions",

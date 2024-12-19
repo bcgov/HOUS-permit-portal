@@ -33,8 +33,8 @@ import { EPart3StepCodeSoftware } from "../../../../../types/enums"
 import { generateUUID } from "../../../../../utils/utility-functions"
 import { CustomMessageBox } from "../../../../shared/base/custom-message-box"
 import { RowHeader } from "../../part-9/checklist/building-characteristics-summary/row-header"
-import { GridColumnHeader } from "../../part-9/checklist/shared/grid/column-header"
-import { GridData } from "../../part-9/checklist/shared/grid/data"
+import { GridColumnHeader } from "../../step-generic/shared/grid/column-header"
+import { GridData } from "../../step-generic/shared/grid/data"
 import { SectionHeading } from "./shared/section-heading"
 
 export const PerformanceCharacteristics = observer(function Part3StepCodeFormPerformanceCharacteristics() {

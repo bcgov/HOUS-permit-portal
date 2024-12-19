@@ -2,7 +2,7 @@ import React from "react"
 import { useFieldArray, useFormContext } from "react-hook-form"
 import { generateUUID } from "../../../../../../../utils/utility-functions"
 import { TextFormControl } from "../../../../../../shared/form/input-form-control"
-import { GridData } from "../../shared/grid/data"
+import { GridData } from "../../../../step-generic/shared/grid/data"
 import { DetailsInput } from "../details-input"
 import { RowHeader } from "../row-header"
 

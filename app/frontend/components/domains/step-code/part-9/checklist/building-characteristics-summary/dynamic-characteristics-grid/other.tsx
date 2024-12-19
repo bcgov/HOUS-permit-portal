@@ -1,8 +1,8 @@
 import { t } from "i18next"
 import React from "react"
 import { useFieldArray, useFormContext } from "react-hook-form"
-import { GridColumnHeader } from "../../shared/grid/column-header"
-import { GridData } from "../../shared/grid/data"
+import { GridColumnHeader } from "../../../../step-generic/shared/grid/column-header"
+import { GridData } from "../../../../step-generic/shared/grid/data"
 import { DetailsInput } from "../details-input"
 import { i18nPrefix } from "../i18n-prefix"
 

@@ -20,8 +20,8 @@ import { Trans } from "react-i18next"
 import { useLocation, useNavigate } from "react-router-dom"
 import { usePart3StepCode } from "../../../../../hooks/resources/use-part-3-step-code"
 import { CustomMessageBox } from "../../../../shared/base/custom-message-box"
-import { GridColumnHeader } from "../../part-9/checklist/shared/grid/column-header"
-import { GridData } from "../../part-9/checklist/shared/grid/data"
+import { GridColumnHeader } from "../../step-generic/shared/grid/column-header"
+import { GridData } from "../../step-generic/shared/grid/data"
 import { SectionHeading } from "./shared/section-heading"
 
 export const BaselinePerformance = observer(function Part3StepCodeFormBaselinePerformance() {

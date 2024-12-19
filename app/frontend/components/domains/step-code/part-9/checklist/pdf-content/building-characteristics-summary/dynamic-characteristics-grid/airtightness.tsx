@@ -3,11 +3,11 @@ import { t } from "i18next"
 import React from "react"
 import { IPart9StepCodeChecklist } from "../../../../../../../../models/part-9-step-code-checklist"
 import { theme } from "../../../../../../../../styles/theme"
+import { Field, Input } from "../../../../../step-generic/pdf-content/shared/field"
+import { GridItem } from "../../../../../step-generic/pdf-content/shared/grid-item"
+import { HStack } from "../../../../../step-generic/pdf-content/shared/h-stack"
+import { VStack } from "../../../../../step-generic/pdf-content/shared/v-stack"
 import { i18nPrefix } from "../../../building-characteristics-summary/i18n-prefix"
-import { Field, Input } from "../../shared/field"
-import { GridItem } from "../../shared/grid-item"
-import { HStack } from "../../shared/h-stack"
-import { VStack } from "../../shared/v-stack"
 
 interface IProps {
   checklist: IPart9StepCodeChecklist

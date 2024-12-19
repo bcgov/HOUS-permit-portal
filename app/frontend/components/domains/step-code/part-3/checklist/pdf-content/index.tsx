@@ -7,43 +7,39 @@ import { PDFDocument } from "../../../../../shared/pdf"
 import { CoverPage } from "../../../../../shared/permit-applications/pdf-content/cover"
 import { Footer } from "../../../../../shared/permit-applications/pdf-content/shared/footer"
 import { page } from "../../../../../shared/permit-applications/pdf-content/shared/styles/page"
-// import { BuildingCharacteristicsSummary } from "./building-characteristics-summary"
-// import { CompletedBy } from "./completed-by"
-// import { ComplianceSummary } from "./compliance-summary"
-// import { EnergyPerformanceCompliance } from "./energy-performance-compliance"
-// import { EnergyStepCompliance } from "./energy-step-compliance"
-// import { ProjectInfo } from "./project-info"
-// import { ZeroCarbonStepCompliance } from "./zero-carbon-step-compliance"
+import { ProjectInfo } from "./project-info"
 
 Font.registerHyphenationCallback((word) => [word])
 
 interface IProps {
   checklist: IPart3StepCodeChecklist
-  permitApplication: IPermitApplication
+  permitApplication?: IPermitApplication
   assetDirectoryPath?: string
 }
 
-export const PDFContent = function StepCodeChecklistPDFContent({
+export const Part3PDFContent = function StepCodeChecklistPDFContent({
   checklist,
   permitApplication,
   assetDirectoryPath,
 }: IProps) {
   return (
     <PDFDocument assetDirectoryPath={assetDirectoryPath}>
-      <CoverPage
-        permitApplication={permitApplication}
-        subTitle={t("stepCodeChecklist.part9.pdf.for")}
-        assetDirectoryPath={assetDirectoryPath}
-      />
+      {permitApplication && (
+        <CoverPage
+          permitApplication={permitApplication}
+          subTitle={t("stepCodeChecklist.part3.pdf.for")}
+          assetDirectoryPath={assetDirectoryPath}
+        />
+      )}
       <Page size="LETTER" style={page}>
-        {/* <ProjectInfo checklist={checklist} />
-        <ComplianceSummary checklist={checklist} />
+        <ProjectInfo checklist={checklist} />
+        {/* <ComplianceSummary checklist={checklist} />
         <CompletedBy checklist={checklist} />
         <BuildingCharacteristicsSummary checklist={checklist} />
         <EnergyPerformanceCompliance checklist={checklist} />
         <EnergyStepCompliance report={checklist.selectedReport.energy} />
         <ZeroCarbonStepCompliance report={checklist.selectedReport.zeroCarbon} /> */}
-        <Footer permitApplication={permitApplication} />
+        {permitApplication && <Footer permitApplication={permitApplication} />}
       </Page>
     </PDFDocument>
   )

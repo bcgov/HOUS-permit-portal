@@ -9,7 +9,7 @@ import { IContact, IOption } from "../../../../../../types/types"
 import { ContactModal } from "../../../../../shared/contact/contact-modal"
 import { DatePicker } from "../../../../../shared/date-picker"
 import { PhoneFormControl, TextFormControl } from "../../../../../shared/form/input-form-control"
-import { ChecklistSection } from "../shared/checklist-section"
+import { ChecklistSection } from "../../../step-generic/shared/checklist-section"
 import { i18nPrefix } from "./i18n-prefix"
 
 interface IProps {

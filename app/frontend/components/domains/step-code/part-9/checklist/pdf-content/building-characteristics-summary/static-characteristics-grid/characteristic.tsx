@@ -2,9 +2,9 @@ import { Text } from "@react-pdf/renderer"
 import React from "react"
 import { theme } from "../../../../../../../../styles/theme"
 import { generateUUID } from "../../../../../../../../utils/utility-functions"
-import { Field } from "../../shared/field"
-import { GridItem } from "../../shared/grid-item"
-import { HStack } from "../../shared/h-stack"
+import { Field } from "../../../../../step-generic/pdf-content/shared/field"
+import { GridItem } from "../../../../../step-generic/pdf-content/shared/grid-item"
+import { HStack } from "../../../../../step-generic/pdf-content/shared/h-stack"
 
 export function Characteristic({ rowName, lines, isLast = null }) {
   return (

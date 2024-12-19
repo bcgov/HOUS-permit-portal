@@ -3,10 +3,10 @@ import { t } from "i18next"
 import React from "react"
 import { IStepCodeEnergyComplianceReport } from "../../../../../../../models/step-code-energy-compliance-report"
 import { theme } from "../../../../../../../styles/theme"
+import { GridItem } from "../../../../step-generic/pdf-content/shared/grid-item"
+import { HStack } from "../../../../step-generic/pdf-content/shared/h-stack"
+import { VStack } from "../../../../step-generic/pdf-content/shared/v-stack"
 import { i18nPrefix } from "../../energy-step-code-compliance/i18n-prefix"
-import { GridItem } from "../shared/grid-item"
-import { HStack } from "../shared/h-stack"
-import { VStack } from "../shared/v-stack"
 
 interface IProps {
   report: IStepCodeEnergyComplianceReport

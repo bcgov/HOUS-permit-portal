@@ -8,7 +8,7 @@ import { Controller, UseFieldArrayRemove, useFormContext } from "react-hook-form
 import { usePart3StepCode } from "../../../../../../hooks/resources/use-part-3-step-code"
 import { IMakeUpAirFuel } from "../../../../../../types/types"
 import FuelTypeSelect from "../../../../../shared/select/selectors/fuel-type-select"
-import { GridData } from "../../../part-9/checklist/shared/grid/data"
+import { GridData } from "../../../step-generic/shared/grid/data"
 
 interface IMUAFuelProps {
   field: IMakeUpAirFuel
