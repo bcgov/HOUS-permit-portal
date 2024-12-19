@@ -48,7 +48,12 @@ class StepCode::Part3::ChecklistBlueprint < Blueprinter::Base
          :average_ventilation_rate,
          :dhw_low_flow_savings,
          :is_demand_control_ventilation_used,
-         :sensible_recovery_efficiency
+         :sensible_recovery_efficiency,
+         :completed_by_name,
+         :completed_by_title,
+         :completed_by_email,
+         :completed_by_phone_number,
+         :completed_by_organization_name
   field :pid, name: :project_identifier
   field :nickname, name: :project_name
   field :full_address, name: :project_address
