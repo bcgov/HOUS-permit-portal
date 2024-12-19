@@ -222,12 +222,12 @@ Rails.application.routes.draw do
 
     post "tags/search", to: "tags#index", as: :tags_search
 
-    get "storage/s3" => "storage#upload" # use a storage controller instead of shrine mount since we want api authentication before being able to access
-    get "storage/s3/download" => "storage#download"
-    delete "storage/s3/delete" => "storage#delete"
+    get "s3/params" => "storage#upload" # use a storage controller instead of shrine mount since we want api authentication before being able to access
+    get "s3/params/download" => "storage#download"
+    delete "s3/params/delete" => "storage#delete"
 
     if SHRINE_USE_S3
-      mount Shrine.uppy_s3_multipart(:cache) => "/storage/s3/multipart"
+      mount Shrine.uppy_s3_multipart(:cache) => "/s3/params/multipart"
     end
     resources :site_configuration, only: [] do
       get :show, on: :collection
