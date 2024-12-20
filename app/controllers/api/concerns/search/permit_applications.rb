@@ -40,7 +40,13 @@ module Api::Concerns::Search::PermitApplications
       :query,
       :page,
       :per_page,
-      filters: [:requirement_template_id, :template_version_id, { status: [] }],
+      :hasCollaborator,
+      filters: [
+        :requirement_template_id,
+        :template_version_id,
+        { status: [] },
+        :has_collaborator
+      ],
       sort: %i[field direction]
     )
   end
@@ -65,7 +71,6 @@ module Api::Concerns::Search::PermitApplications
 
   def permit_application_where_clause
     filters = permit_application_search_params[:filters]
-
     # Add the submitter ID if the user is a submitter. Necessary even with search auth filtering for consisent pagination
     # Only add the jurisdiction_id condition if @jurisdiction is present
     where =

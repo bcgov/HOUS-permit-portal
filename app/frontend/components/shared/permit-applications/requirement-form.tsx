@@ -57,6 +57,8 @@ export const RequirementForm = observer(
       previousSubmissionVersion,
       selectedPastSubmissionVersion,
       isViewingPastRequests,
+      inboxEnabled,
+      sandbox,
     } = permitApplication
 
     const shouldShowDiff = permitApplication?.shouldShowApplicationDiff(isEditing)
@@ -366,6 +368,13 @@ export const RequirementForm = observer(
           {showVersionDiffContactWarning && (
             <CustomMessageBox description={t("permitApplication.show.versionDiffContactWarning")} status="warning" />
           )}
+          {!inboxEnabled && !sandbox && (
+            <CustomMessageBox
+              title={t("permitApplication.show.inboxDisabledTitle")}
+              description={t("permitApplication.show.inboxDisabled")}
+              status="error"
+            />
+          )}
           {permitApplication?.isSubmitted ? (
             <CustomMessageBox
               description={t("permitApplication.show.wasSubmitted", {
@@ -407,11 +416,6 @@ export const RequirementForm = observer(
                 />
               }
               status="info"
-              headingProps={{
-                fontSize: "md !important",
-                mb: 0,
-              }}
-              fontSize={"sm"}
             />
           )}
           <Box bg="greys.grey03" p={3} borderRadius="sm">

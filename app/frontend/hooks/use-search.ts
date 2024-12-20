@@ -42,6 +42,7 @@ export const useSearch = (searchModel: ISearch, dependencyArray: any[] = []) => 
     if (countPerPage) searchModel.setCountPerPage(parseInt(decodeURIComponent(countPerPage)))
     if (showArchived) searchModel.setShowArchived(parseBoolean(showArchived))
     if (visibility) searchModel.setVisibility(visibility)
+
     if (sortDirection && sortField) {
       searchModel.applySort({ direction: sortDirection, field: sortField })
     } else {

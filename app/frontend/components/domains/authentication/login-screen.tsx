@@ -1,10 +1,31 @@
-import { Button, Divider, Flex, Heading, Link, Text, VStack } from "@chakra-ui/react"
+import {
+  Accordion,
+  AccordionButton,
+  AccordionIcon,
+  AccordionItem,
+  AccordionPanel,
+  Box,
+  Button,
+  Divider,
+  Flex,
+  Grid,
+  GridItem,
+  Heading,
+  Link,
+  Show,
+  Text,
+} from "@chakra-ui/react"
 import React from "react"
 import { useTranslation } from "react-i18next"
-import { BasicBCeIDInfo } from "../../shared/bceid/basic"
-import { BusinessBCeIDInfo } from "../../shared/bceid/business"
+import { OMNIAUTH_PROVIDERS } from "../../../models/user"
 import { CenterContainer } from "../../shared/containers/center-container"
 import { HelpDrawer } from "../../shared/help-drawer"
+import { EntityBasicBCeIDInfo } from "../../shared/keycloak/basicbceid/entity-basic-bceid-info"
+import { LgBasicBCeIDInfo } from "../../shared/keycloak/basicbceid/lg-basic-bceid-info"
+import { SubmitterBasicBCeIDInfo } from "../../shared/keycloak/basicbceid/submitter-basic-bceid-info"
+import { BCSCInfo } from "../../shared/keycloak/bcsc-info"
+import { EntityBusinessBCeIDInfo } from "../../shared/keycloak/businessbceid/entity-business-bceid-info copy"
+import { LgBusinessBCeIDInfo } from "../../shared/keycloak/businessbceid/lg-business-bceid-info"
 
 interface ILoginScreenProps {
   isAdmin?: boolean
@@ -12,51 +33,171 @@ interface ILoginScreenProps {
 
 export const LoginScreen = ({ isAdmin }: ILoginScreenProps) => {
   const { t } = useTranslation()
+  // const isMdOrLarger = useBreakpointValue({ base: false, md: true })
 
   return (
-    <CenterContainer h="full">
+    <CenterContainer h="full" maxW={isAdmin ? "container.md" : "container.lg"}>
       <Flex
         direction="column"
-        maxW="500px"
         gap={6}
         w="full"
         flex={1}
-        p={10}
+        p={12}
         border="solid 1px"
         borderColor="border.light"
         bg="greys.white"
       >
-        <VStack spacing={2} align="start">
-          <Heading as="h1" mb={0}>
-            {isAdmin ? t("auth.adminLogin") : t("auth.login")}
-          </Heading>
-          {!isAdmin && <Text fontSize="md">{t("auth.prompt")}</Text>}
-        </VStack>
-        <form action="/api/auth/keycloak" method="post">
-          <input type="hidden" name="kc_idp_hint" value={isAdmin ? "idir" : "bceidboth"} />
-          {/* @ts-ignore */}
-          <input type="hidden" name="authenticity_token" value={document.querySelector("[name=csrf-token]").content} />
-          <Button variant="primary" w="full" type="submit">
-            {isAdmin ? t("auth.idir_login") : t("auth.bceid_login")}
-          </Button>
-        </form>
+        <Heading as="h1">{t("auth.loginTitle")}</Heading>
+
+        <Flex direction="column" flex={1} gap={12}>
+          {isAdmin ? (
+            <>
+              <Heading as="h2">{t("auth.adminLogin")}</Heading>
+              <IdirLoginForm />
+            </>
+          ) : (
+            <>
+              <Show above="md">
+                <Grid
+                  templateColumns={"1fr auto 1fr"} // Single column on small screens, three columns on md and up
+                  gap={6}
+                  width="100%"
+                  alignItems="start"
+                >
+                  <GridItem>
+                    <Heading as="h2">{t("auth.publicLogin")}</Heading>
+                  </GridItem>
+
+                  <GridItem rowSpan={3} h="full">
+                    <Divider orientation="vertical" height="100%" borderColor="border.light" mx={12} />
+                  </GridItem>
+
+                  <GridItem>
+                    <Heading as="h2">{t("auth.localGovLogin")}</Heading>
+                  </GridItem>
+
+                  <GridItem>
+                    <Text>{t("auth.publicLoginDescription")}</Text>
+                  </GridItem>
+
+                  <GridItem>
+                    <Text>{t("auth.localGovLoginDescription")}</Text>
+                  </GridItem>
+
+                  <GridItem>
+                    <Flex direction="column" gap={6}>
+                      <BcscLoginForm />
+                      <BceidLoginForm />
+                    </Flex>
+                  </GridItem>
+
+                  <GridItem>
+                    <BceidLoginForm />
+                  </GridItem>
+                </Grid>
+              </Show>
+              <Show below="md">
+                <Grid
+                  templateColumns={"1fr"} // Single column on small screens, three columns on md and up
+                  gap={6}
+                  width="100%"
+                  alignItems="start"
+                >
+                  <GridItem>
+                    <Heading as="h2">{t("auth.publicLogin")}</Heading>
+                  </GridItem>
+
+                  <GridItem>
+                    <Text>{t("auth.publicLoginDescription")}</Text>
+                  </GridItem>
+
+                  <GridItem>
+                    <Flex direction="column" gap={6}>
+                      <BcscLoginForm />
+                      <BceidLoginForm />
+                    </Flex>
+                  </GridItem>
+
+                  <GridItem>
+                    <Heading as="h2">{t("auth.localGovLogin")}</Heading>
+                  </GridItem>
+
+                  <GridItem>
+                    <Text>{t("auth.localGovLoginDescription")}</Text>
+                  </GridItem>
+
+                  <GridItem>
+                    <BceidLoginForm />
+                  </GridItem>
+                </Grid>
+              </Show>
+            </>
+          )}
+          <Flex direction="column">
+            <Heading>{t("auth.firstTime")}</Heading>
+            <Text>{t("auth.chooseSituation")}</Text>
+            <Accordion mt={8} allowToggle allowMultiple>
+              <AccordionItem>
+                <AccordionButton>
+                  <Box as="span" py={2} textAlign="left">
+                    <Heading as="h3">{t("auth.submitterAccordion")}</Heading>
+                  </Box>
+                  <AccordionIcon />
+                </AccordionButton>
+                <AccordionPanel pb={4}>
+                  <SubmitterBasicBCeIDInfo />
+                  <BCSCInfo />
+                </AccordionPanel>
+              </AccordionItem>
+
+              <AccordionItem>
+                <AccordionButton>
+                  <Box as="span" py={2} textAlign="left">
+                    <Heading as="h3">{t("auth.entityAccordion")}</Heading>
+                  </Box>
+                  <AccordionIcon />
+                </AccordionButton>
+                <AccordionPanel pb={4}>
+                  <EntityBasicBCeIDInfo />
+                  <EntityBusinessBCeIDInfo />
+                </AccordionPanel>
+              </AccordionItem>
+
+              <AccordionItem>
+                <AccordionButton>
+                  <Box as="span" py={2} textAlign="left">
+                    <Heading as="h3">{t("auth.lgAccordion")}</Heading>
+                  </Box>
+                  <AccordionIcon />
+                </AccordionButton>
+                <AccordionPanel pb={4}>
+                  <LgBusinessBCeIDInfo />
+                  <LgBasicBCeIDInfo />
+                </AccordionPanel>
+              </AccordionItem>
+            </Accordion>
+          </Flex>
+        </Flex>
         {isAdmin ? (
           <Text>{t("auth.adminAccountAccess")}</Text>
         ) : (
           <>
             <Text>
-              {t("auth.loginHelp")}
+              <Text as="span" fontWeight="bold">
+                {t("auth.loginHelp")}{" "}
+              </Text>
+              <Text as="span">{t("auth.goToPartners")} </Text>
               <Link href="https://www.bceid.ca/clp/account_recovery.aspx" isExternal>
-                {t("ui.clickHere")}
+                {t("auth.bceid")}
+              </Link>{" "}
+              {t("ui.or")}{" "}
+              <Link
+                href="https://www2.gov.bc.ca/gov/content/governments/government-id/bcservicescardapp#setup"
+                isExternal
+              >
+                {t("auth.bcsc")}
               </Link>
             </Text>
-            <Divider my={4} />
-            <Heading as="h2" m={0}>
-              {t("auth.bceidInfo.heading")}
-            </Heading>
-
-            <BasicBCeIDInfo />
-            <BusinessBCeIDInfo />
 
             <HelpDrawer
               renderTriggerButton={({ onClick }) => (
@@ -69,5 +210,52 @@ export const LoginScreen = ({ isAdmin }: ILoginScreenProps) => {
         )}
       </Flex>
     </CenterContainer>
+  )
+}
+
+const IdirLoginForm: React.FC = () => {
+  // @ts-ignore
+  const csrfToken = document.querySelector("[name=csrf-token]")?.content
+  const { t } = useTranslation()
+
+  return (
+    <form action="/api/auth/keycloak" method="post">
+      <input type="hidden" name="kc_idp_hint" value={OMNIAUTH_PROVIDERS.idir} />
+      <input type="hidden" name="authenticity_token" value={csrfToken} />
+      <Button variant="primary" w="full" type="submit">
+        {t("auth.idirLogin")}
+      </Button>
+    </form>
+  )
+}
+
+const BcscLoginForm: React.FC = () => {
+  // @ts-ignore
+  const csrfToken = document.querySelector("[name=csrf-token]")?.content
+  const { t } = useTranslation()
+
+  return (
+    <form action="/api/auth/keycloak" method="post">
+      <input type="hidden" name="kc_idp_hint" value={OMNIAUTH_PROVIDERS.bcsc} />
+      <input type="hidden" name="authenticity_token" value={csrfToken} />
+      <Button variant="primary" w="full" type="submit">
+        {t("auth.bcscLogin")}
+      </Button>
+    </form>
+  )
+}
+const BceidLoginForm: React.FC = () => {
+  // @ts-ignore
+  const csrfToken = document.querySelector("[name=csrf-token]")?.content
+  const { t } = useTranslation()
+
+  return (
+    <form action="/api/auth/keycloak" method="post">
+      <input type="hidden" name="kc_idp_hint" value={OMNIAUTH_PROVIDERS.bceid} />
+      <input type="hidden" name="authenticity_token" value={csrfToken} />
+      <Button variant="primary" w="full" type="submit">
+        {t("auth.bceidLogin")}
+      </Button>
+    </form>
   )
 }

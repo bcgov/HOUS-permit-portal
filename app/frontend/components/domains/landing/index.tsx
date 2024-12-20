@@ -22,6 +22,7 @@ import {
   CaretRight,
   CheckCircle,
   ClipboardText,
+  Download,
   FileArrowUp,
   Info,
   MapPin,
@@ -196,14 +197,26 @@ export const LandingScreen = observer(({}: ILandingScreenProps) => {
                 {t("landing.additionalContent.midSub")}
               </Text>
 
-              <RouterLinkButton
-                variant={"primary"}
-                mt={2}
-                leftIcon={<ArrowSquareOut />}
-                to={`/early-access/requirement-templates/${smallScaleRequirementTemplateId}`}
-              >
-                {t("landing.additionalContent.viewTemplate")}
-              </RouterLinkButton>
+              <HStack>
+                <Button
+                  as="a"
+                  variant={"primary"}
+                  href={"/pdfs/BPH-Standardized List of Requirements V.2024.09.01 - SEP 2024.pdf"}
+                  download={"BPH-Standardized List of Requirements V.2024.09.01 - SEP 2024.pdf"}
+                  mt={2}
+                  leftIcon={<Download />}
+                >
+                  {t("landing.additionalContent.midDownload")}
+                </Button>
+                <RouterLinkButton
+                  variant={"primary"}
+                  mt={2}
+                  leftIcon={<ArrowSquareOut />}
+                  to={`/early-access/requirement-templates/${smallScaleRequirementTemplateId}`}
+                >
+                  {t("landing.additionalContent.viewTemplate")}
+                </RouterLinkButton>
+              </HStack>
             </BareBox>
 
             <BareBox n={"3"}>

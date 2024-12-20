@@ -14,6 +14,7 @@ class TemplateVersion < ApplicationRecord
   delegate :published_template_version, to: :requirement_template
   delegate :first_nations, to: :requirement_template
   delegate :early_access?, to: :requirement_template
+  delegate :live?, to: :requirement_template
   delegate :public?, to: :requirement_template
 
   enum status: { scheduled: 0, published: 1, deprecated: 2 }, _default: 0
@@ -79,7 +80,7 @@ class TemplateVersion < ApplicationRecord
         "#{I18n.t("notification.template_version.new_version_notification", template_label: label)}",
       "object_data" => {
         "template_version_id" => id,
-        "previous_template_version_id" => previous_version.id,
+        "previous_template_version_id" => previous_version&.id,
         "requirement_template_id" => requirement_template_id,
         "permit_application_id" => recent_permit_application&.id
       }

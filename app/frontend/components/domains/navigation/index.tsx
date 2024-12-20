@@ -3,6 +3,7 @@ import { observer } from "mobx-react-lite"
 import React, { Suspense, lazy, useEffect } from "react"
 import { useTranslation } from "react-i18next"
 import { BrowserRouter, Route, Routes, useLocation, useNavigate } from "react-router-dom"
+import useSyncPathWithStore from "../../../hooks/use-sync-path-with-root-store"
 import { useMst } from "../../../setup/root"
 import { EFlashMessageStatus } from "../../../types/enums"
 import { FlashMessage } from "../../shared/base/flash-message"
@@ -79,6 +80,9 @@ const JurisdictionSubmissionInboxScreen = lazy(() =>
 )
 const JurisdictionUserIndexScreen = lazy(() =>
   import("../jurisdictions/users").then((module) => ({ default: module.JurisdictionUserIndexScreen }))
+)
+const EditJurisdictionScreen = lazy(() =>
+  import("../jurisdictions/edit-jurisdiction-screen").then((module) => ({ default: module.EditJurisdictionScreen }))
 )
 const LandingScreen = lazy(() => import("../landing").then((module) => ({ default: module.LandingScreen })))
 const ContactScreen = lazy(() => import("../misc/contact-screen").then((module) => ({ default: module.ContactScreen })))
@@ -337,6 +341,8 @@ const AppRoutes = observer(() => {
     }
   }, [afterLoginPath, loggedIn])
 
+  useSyncPathWithStore()
+
   const superAdminOnlyRoutes = (
     <>
       <Route path="/jurisdictions/new" element={<NewJurisdictionScreen />} />
@@ -368,6 +374,7 @@ const AppRoutes = observer(() => {
   const adminOrManagerRoutes = (
     <>
       <Route path="/jurisdictions/:jurisdictionId/users" element={<JurisdictionUserIndexScreen />} />
+      <Route path="/jurisdictions/:jurisdictionId/update" element={<EditJurisdictionScreen />} />
       <Route path="/jurisdictions/:jurisdictionId/users/invite" element={<InviteScreen />} />
       <Route path="/jurisdictions/:jurisdictionId/export-templates" element={<ExportTemplatesScreen />} />
       <Route path="/jurisdictions/:jurisdictionId/api-settings" element={<ExternalApiKeysIndexScreen />}>

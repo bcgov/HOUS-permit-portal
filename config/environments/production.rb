@@ -110,19 +110,25 @@ Rails.application.configure do
       Rails.application.config.action_mailer.default_url_options
   end
 
-  # Change the logger to Multilogger in production so we can write both to a file (compliance) and to STDOUT for openshift
+  # Use Multilogger in production so we can write both to a file (compliance) and to STDOUT for openshift
   # Rotate the logs daily
-  file_logger =
-    Logger.new(
-      Rails.root.join(
-        "log",
-        "#{ENV["HOSTNAME"]}-#{Time.now.strftime("%m-%d-%y")}.log"
-      ),
-      "daily"
-    )
   stdout_logger = Logger.new(STDOUT)
-
-  config.logger = MultiLogger.new(stdout_logger, file_logger)
+  config.logger =
+    (
+      if ENV["IS_DOCKER_BUILD"].blank?
+        file_logger =
+          Logger.new(
+            Rails.root.join(
+              "log",
+              "#{ENV["HOSTNAME"]}-#{Time.now.strftime("%m-%d-%y")}.log"
+            ),
+            "daily"
+          )
+        MultiLogger.new(stdout_logger, file_logger)
+      else
+        stdout_logger
+      end
+    )
   # Ensure ActiveRecord uses the same logger
   ActiveRecord::Base.logger = config.logger
 

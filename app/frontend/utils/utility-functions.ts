@@ -63,7 +63,8 @@ export function setQueryParam(key: string, value: string | string[]) {
     searchParams.set(key, value)
   }
   const stringParams = searchParams.toString()
-  window.history.replaceState({}, "", `${window.location.pathname}${stringParams ? "?" + stringParams : ""}`)
+  const newUrl = `${window.location.pathname}${stringParams ? "?" + stringParams : ""}`
+  window.history.replaceState({}, "", newUrl)
 }
 
 export function isMultiOptionRequirement(requirementType: ERequirementType): boolean {
@@ -212,6 +213,20 @@ export function getCsrfToken() {
     .split("; ")
     .find((row) => row.startsWith("CSRF-TOKEN="))
     ?.split("=")[1]
+}
+
+export function getCurrentSandboxId() {
+  const sandboxStore = localStorage.getItem("SandboxStore")
+  if (!sandboxStore) return null // Return null if SandboxStore is not found
+
+  try {
+    const parsedStore = JSON.parse(sandboxStore)
+    // Return currentSandboxId or null if not set
+    return parsedStore.currentSandboxId || null
+  } catch (error) {
+    console.error("Failed to parse SandboxStore from localStorage:", error)
+    return null
+  }
 }
 
 export function convertToDate(property: any) {

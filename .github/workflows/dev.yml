@@ -42,10 +42,12 @@ jobs:
             VITE_ENABLE_TEMPLATE_FORCE_PUBLISH=${{ vars.VITE_ENABLE_TEMPLATE_FORCE_PUBLISH }}
             VITE_BASIC_BCEID_REGISTRATION_URL=${{ vars.VITE_BASIC_BCEID_REGISTRATION_URL }}
             VITE_BUSINESS_BCEID_REGISTRATION_URL=${{ vars.VITE_BUSINESS_BCEID_REGISTRATION_URL }}
+            VITE_BCSC_REGISTRATION_URL=${{ vars.VITE_BCSC_REGISTRATION_URL }}
             VITE_BCEID_URL=${{ vars.VITE_BCEID_URL }}
             VITE_SITEMINDER_LOGOUT_URL=${{ vars.VITE_SITEMINDER_LOGOUT_URL }}
             VITE_KEYCLOAK_LOGOUT_URL=${{ vars.VITE_KEYCLOAK_LOGOUT_URL }}
             VITE_POST_LOGOUT_REDIRECT_URL=${{ vars.VITE_POST_LOGOUT_REDIRECT_URL }}
+            VITE_RELEASE_VERSION=dev-${{ github.event.inputs.branch }}-${{ github.sha }}
       - name: Push to Openshift Registry using Service Account
         uses: redhat-actions/push-to-registry@v2.7
         with:

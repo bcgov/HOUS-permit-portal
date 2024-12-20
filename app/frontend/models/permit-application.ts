@@ -171,6 +171,9 @@ export const PermitApplicationModel = types.snapshotProcessor(
       get latestRevisionRequests() {
         return (self.latestSubmissionVersion?.revisionRequests || []).slice().sort((a, b) => a.createdAt - b.createdAt)
       },
+      get inboxEnabled() {
+        return self.jurisdiction?.inboxEnabled
+      },
     }))
     .views((self) => ({
       get pastSubmissionVersionOptions() {

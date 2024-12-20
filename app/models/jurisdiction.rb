@@ -15,7 +15,7 @@ class Jurisdiction < ApplicationRecord
                reverse_qualified_name
                qualified_name
                manager_emails
-              ],
+             ],
              word_start: %i[
                name
                reverse_qualified_name
@@ -64,6 +64,7 @@ class Jurisdiction < ApplicationRecord
 
   validates :name, uniqueness: { scope: :locality_type, case_sensitive: false }
   validates :locality_type, presence: true
+  validate :inbox_enabled_requires_inbox_setup
 
   # Validation to ensure at least one sandbox exists
   validate :must_have_one_sandbox
@@ -105,7 +106,10 @@ class Jurisdiction < ApplicationRecord
   end
 
   def manager_emails
-    [review_managers&.pluck(:email), regional_review_manager_emails].flatten.compact
+    [
+      review_managers&.pluck(:email),
+      regional_review_manager_emails
+    ].flatten.compact
   end
 
   def regional_review_manager_emails
@@ -301,12 +305,13 @@ class Jurisdiction < ApplicationRecord
   end
 
   def set_type_based_on_locality
-    case locality_type
-    when RegionalDistrict.locality_type
-      self.type = "RegionalDistrict"
-    else
-      self.type = "SubDistrict"
-    end
+    self.type =
+      case locality_type
+      when RegionalDistrict.locality_type
+        "RegionalDistrict"
+      else
+        "SubDistrict"
+      end
   end
 
   def normalize_name
@@ -366,6 +371,17 @@ class Jurisdiction < ApplicationRecord
       errors.add(
         :base,
         I18n.t("activerecord.errors.models.jurisdiction.no_sandboxes")
+      )
+    end
+  end
+
+  def inbox_enabled_requires_inbox_setup
+    if inbox_enabled && !submission_inbox_set_up
+      errors.add(
+        :inbox_enabled,
+        I18n.t(
+          "activerecord.errors.models.jurisdiction.enabled_inbox_requires_setup"
+        )
       )
     end
   end

@@ -18,24 +18,54 @@ const options = {
       translation: {
         auth: {
           login: "Login",
+          loginTitle: "Log in to Building Permit Hub",
+          firstTime: "First time here? You need a BCeID or BC Services Card Account to log in",
+          publicLogin: "I am applying for a permit",
+          publicLoginDescription: "Create, submit, collaborate, and manage building permit applications",
+          localGovLogin: "I represent a local government or First Nation",
+          localGovLoginDescription: "Manage and approve building permit applications",
           adminLogin: "Admin login",
           adminAccountAccess: "If you cannot login with your IDIR, please contact your administrator to gain access.",
-          prompt:
+          lgPrompt:
             "You must have a BCeID account to use this system. If you don’t have one yet, please register for one based on your use case.",
-          loginHelp: "Having trouble logging in? ",
-          bceidInfo: {
+          publicPrompt:
+            "You must have either a BC Services Card Account or BCeID account to use this system. If you don’t have one yet, please register for one based on your use case. <br/><br/> <strong>Please note that BCeID and BC Services Card logins will act as two separate accounts, and you must consistently use the same method for all future logins.</strong>",
+          chooseSituation: "Choose the situation that best matches your own to learn more about your login choices.",
+          loginHelp: "Having trouble logging in?",
+          goToPartners: "Go to our login partners",
+          submitterAccordion: "I’m an individual submitter, such as a homeowner or agent",
+          lgAccordion: "I’m logging in as a representative of a local government or First Nation ",
+          entityAccordion:
+            "I’m logging in on behalf of a legal entity, such as a company, partnership, or educational institution ",
+          localGov: "Are you a member of local government?",
+          chooseLogin: "Choosing the right option",
+          matchLogin: "Choose the option that best matches your situation to access this service",
+          notLocalGov: "Are you not a member of local government?",
+          goToGovLogin: "Go to local government login",
+          goToPublicLogin: "Go to general public login",
+          bceid: "BCeID",
+          bcsc: "BC Services Card Account",
+          keycloakinfo: {
             heading: "Which BCeID should I use?",
+            useIf: "You can use this option if:",
+            bcsc: {
+              title: "BC Services Card Account",
+              canadianResident: "You're a resident of Canada",
+              register: "Set up BC Services Card Account",
+            },
             basic: {
               title: "Basic BCeID",
-              description: "Use when accessing a service in a personal capacity.",
-              homeownerAgent: "homeowner, agent",
-              architectContractor: "architect or contractor may use Basic BCeID or Business BCeID",
+              residentOrNon: "You’re a resident or non-resident of Canada",
+              repOrg: "You’re representing a company or organization, but your company doesn’t have a Business BCeID",
+              lgReviewManager: "You’re a regional review manager who is also an individual submitter",
+              lgJurisdiction: "You’re representing a jurisdiction, but your jurisdiction doesn’t have a Business BCeID",
               register: "Register for Basic BCeID",
             },
             business: {
               title: "Business BCeID",
-              description: "Use when representing a legal entity, such as a:",
-              localGov: "Local government(s) or local jurisdiction(s)",
+              entityDescription: "You can use this option if you’re logging in on behalf of a legal entity, such as:",
+              lgDescription:
+                "Most people representing a local government or jurisdiction will use a Business BCeID to log in",
               company: "Company or partnership or sole proprietorship",
               nonProfit: "Not-for-profit or charitable organization",
               education: "Educational institution like a university or college",
@@ -46,8 +76,9 @@ const options = {
           logout: "Logout",
           submit: "Submit",
           or: "or",
-          bceid_login: "Login with BCeID",
-          idir_login: "Login with IDIR",
+          bceidLogin: "Login with BCeID",
+          bcscLogin: "Login with BC Services Card Account",
+          idirLogin: "Login with IDIR",
           role: "Role",
           emailLabel: "Email address",
           userFirstNameLabel: "First name",
@@ -126,13 +157,15 @@ const options = {
             left: "See helpful tips from your local jurisdictions to streamline your digital building permit applications",
             mid: "Preview the Small-scale/Multi-unit housing checklist",
             midSub: "(Part 9 BC Building Code)",
-            viewTemplate: "View requirements",
+            viewTemplate: "View",
+            midDownload: "Checklist",
             end: "Accurately fill out your permit application online with ease",
             endButton: "Get started now",
           },
         },
         ui: {
           okay: "Okay",
+          filter: "Filter",
           until: "til",
           reorder: "Reorder",
           delete: "Delete",
@@ -294,6 +327,7 @@ const options = {
         jurisdiction: {
           edit: {
             displayDescriptionLabel: "Jurisdiction description (public)",
+            title: "Rename jurisdiction",
             addDescription: "Click to add a description",
             displayChecklistLabel: "Permit application checklist (public)",
             addChecklist: "Click to add a permit application checklist",
@@ -326,6 +360,7 @@ const options = {
               energyStepRequired: "Energy step code required",
               zeroCarbonStepRequired: "Zero carbon step required",
             },
+            updateButton: "Update jurisdiction",
           },
           new: {
             title: "Create new jurisdiction",
@@ -344,6 +379,7 @@ const options = {
             externalApiKeys: "API settings",
             exportTemplates: "Export templates",
             about: "About",
+            rename: "Rename",
           },
           fields: {
             reverseQualifiedName: "Name",
@@ -446,6 +482,9 @@ const options = {
           },
         },
         permitApplication: {
+          noneFound: "No draft permits found",
+          noneFoundExplanation:
+            "Missing draft permits? You might have used a login option different from the one you used to create the permits. Log out and try logging back in with the BCeID or BC Services Card Account you used to create them.",
           submissionBlockModal: {
             title: "Trying to submit this application?",
             description:
@@ -537,13 +576,16 @@ const options = {
             pin: "PIN",
             jurisdiction: "Jurisdiction",
           },
+          filterMenu: {
+            collaborating: "Collaborating",
+          },
           new: {
             locationHeading: "Location for permit",
             submitToOwn:
               "Make sure you are submitting to a jurisdiction that you have inbox access to so that you can see it.",
             sandboxIdHeading: "Submit into Sandbox",
-            onlyHavePin: "I only have a PIN",
-            dontHavePin: "I don't have a PIN",
+            onlyHavePin: "I don't have a PID or address",
+            dontHavePin: "Hide",
             selectSandboxLabel: "Select a sandbox to submit into",
             firstNationsTitle: "First Nations",
             permitTypeHeading: "Permit type",
@@ -591,7 +633,7 @@ const options = {
               "Upon receipt by the local jurisdiction, you will be notified via email or phone of any updates to your application's status or if additional documentation is required.",
             emailed:
               "A confirmation email has also been sent to the applicant and the {{ jurisdictionName }} building permit office",
-            pinRequired: "PID not found or unavailable. Please select a PIN and jurisdiction below:",
+            pinRequired: "PID not found or unavailable. Please optionally select a PIN and jurisdiction below:",
             pinVerified: "PIN is verified.",
             pinUnableToVerify: "Unable to verify PIN, please confirm and proceed as applicable.",
             needToKnow: "What you need to know",
@@ -618,6 +660,9 @@ const options = {
             versionDiffContactWarning:
               "A new version of the permit is available. Please ask author or designated submitter to review and acknowledge changes to proceed.",
             contactsSummary: "Contacts summary",
+            inboxDisabledTitle: "Inbox disabled",
+            inboxDisabled:
+              "Submissions for this local jurisdictions are currently disabled. You will be able to make edits to this permit application but will not be able to submit until this jurisdiction's is accepting submissions again.",
             downloadApplication: "Download application",
             fetchingMissingPdf: "Fetching {{missingPdf}}...",
             missingPdfLabels: {
@@ -751,7 +796,7 @@ const options = {
                 "Make sure you are ready to promote/demote this, any other previews or templates using this specific block will also reflect this change.",
               listItem1: "<strong>All</strong>: The requirement block may exist in any preview or template",
               listItem2:
-                "<strong>Exclude preview</strong>: The requirement block may not exist in previews, and only in templates",
+                "<strong>Preview omitted</strong>: The requirement block may not exist in previews, and only in templates",
               listItem3:
                 "<strong>Preview only</strong>: The requirement block may not exist in templates, and only in previews",
             },
@@ -2127,9 +2172,14 @@ const options = {
               description:
                 "Customize the informational page that submitters will see when they are in the Building Permit Hub.",
             },
+            users: {
+              title: "Users",
+              description: "Manage and invite reviewers and other staff for this jurisdiciton",
+            },
             submissionsInboxSetup: {
               title: "Submissions inbox setup",
               description: "Specify email addresses that should receive applications.",
+              inboxEnabled: "Enable inbox",
               permitTypes: {
                 label: "Send permit applications for",
                 low_residential: "1-4 Unit detached housing",
@@ -2206,7 +2256,7 @@ const options = {
           fetchWorkTypeOptions: "Something went wrong fetching the work type options",
           fetchRequirementTemplate: "Something went wrong fetching the requirement template",
           fetchTemplateVersion: "Something went wrong fetching the template version",
-          fetchCurrentUserLicenseAgreements: "Something went wrong fetching license agreements",
+          fetchCurrentUserLicenseAgreements: "Please confirm your account to see license agreement",
           fetchTemplateVersions: "Something went wrong fetching template versions",
           fetchBuildingPermits: "Something went wrong fetching building permits",
           fetchBuildingPermit: "Something went wrong fetching building permit",
@@ -2249,6 +2299,7 @@ const options = {
             idir: "IDIR",
             bceidbasic: "Basic BCeID",
             bceidbusiness: "Business BCeID",
+            bcsc: "BC Services Card Account",
           },
           changeBceid: "If you want to change your BCeID information, please go to ",
           changeBceidLinkText: "bceid.ca",
@@ -2266,7 +2317,8 @@ const options = {
           inviteSuccess: "Invite sent!",
           reinvite: "Re-invite",
           reinviteSuccess: "Invite re-sent!",
-          inviteError: "Email taken",
+          inviteTakenError: "Email taken",
+          inviteError: "Invite error",
           takenErrorTitle: "Some of these emails already belong to existing users",
           takenErrorDescription:
             "One or more of the requested users have an existing account. Please ask them to change their email on their current account. You can then re-invite them into your local jurisdiction.",
@@ -2314,6 +2366,7 @@ const options = {
               "The Super Admin is the highest-level user within the system, with overarching control over the entire permit application platform. They have the authority to manage user roles, including creating and removing user accounts, and to modify the system configuration. This role is responsible for the maintenance of the system, including updates and enhancements, and ensuring that the system meets the operational and strategic objectives of the local government or the organization.",
           },
           assignTo: "Assign to...",
+          department: "Department",
         },
         earlyAccessRequirementTemplate: {
           show: {},
@@ -2382,7 +2435,7 @@ const options = {
           edit: {
             requirementsLibraryTab: "Requirements Library",
             earlyAccessRequirementsLibraryTab: "Early Access Requirements Library",
-            earlyAccessTabDescription: "Early access previews cannot add 'Exclude preview' blocks ",
+            earlyAccessTabDescription: "Early access previews cannot add 'Preview omitted' blocks ",
             options: {
               button: "Options",
               copyTips: "Import tips from ({{ templateLabel }})",
@@ -2829,6 +2882,7 @@ const options = {
             acceptInvitation: "Accept invitation",
             eula: "End user license agreement",
             earlyAccess: "Early access",
+            update: "Update",
           },
         },
         automatedCompliance: {

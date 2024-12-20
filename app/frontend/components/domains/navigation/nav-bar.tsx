@@ -306,7 +306,6 @@ const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
         label={t("site.breadcrumb.configurationManagement")}
         to={`/jurisdictions/${currentUser?.jurisdiction?.slug}/configuration-management`}
       />
-      <NavMenuItem label={t("site.breadcrumb.users")} to={`/jurisdictions/${currentUser?.jurisdiction?.slug}/users`} />
       <NavMenuItem
         label={t("site.breadcrumb.apiSettings")}
         to={`/jurisdictions/${currentUser?.jurisdiction?.slug}/api-settings`}
@@ -361,7 +360,7 @@ const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
 
       <Portal>
         <Box color="text.primary" className={isMenuOpen && "show-menu-overlay-background"}>
-          <MenuList zIndex={99} boxShadow="2xl">
+          <MenuList zIndex={99} boxShadow="2xl" pb={0}>
             {loggedIn && !currentUser.isUnconfirmed ? (
               <>
                 <Text fontSize="xs" fontStyle="italic" px={3} mb={-1} color="greys.grey01">
@@ -404,20 +403,22 @@ const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
             ) : (
               <>
                 {!loggedIn && (
-                  <MenuList
-                    display="flex"
-                    flexWrap="wrap"
-                    px={2}
-                    py={0}
-                    gap={2}
-                    border="0"
-                    boxShadow="none"
-                    maxW="300px"
-                  >
-                    <NavMenuItemCTA label={t("auth.login")} to="/login" />
-                  </MenuList>
+                  <>
+                    <MenuList
+                      display="flex"
+                      flexWrap="wrap"
+                      px={2}
+                      py={3}
+                      gap={2}
+                      border="0"
+                      boxShadow="none"
+                      maxW="300px"
+                    >
+                      <NavMenuItemCTA label={t("auth.login")} to="/login" />
+                    </MenuList>
+                    <MenuDivider my={0} borderColor="border.light" />
+                  </>
                 )}
-                <MenuDivider my={0} borderColor="border.light" />
                 <NavMenuItem label={t("site.home")} to="/" />
                 <NavMenuItem label={t("home.jurisdictionsTitle")} to={"/jurisdictions"} />
                 {loggedIn && <NavMenuItem label={t("auth.logout")} onClick={handleClickLogout} />}
@@ -430,6 +431,20 @@ const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
                 {t("site.giveFeedback")} <Envelope size={16} style={{ display: "inline", color: "inherit" }} />
               </Link>
             </MenuItem>
+            {import.meta.env.VITE_RELEASE_VERSION && (
+              <MenuItem maxW={"250px"} bg="greys.grey03" _hover={{ cursor: "auto" }}>
+                <Text
+                  textAlign="center"
+                  w="full"
+                  color="greys.grey90"
+                  fontWeight={"thin"}
+                  fontStyle="italic"
+                  fontSize="sm"
+                >
+                  {import.meta.env.VITE_RELEASE_VERSION}
+                </Text>
+              </MenuItem>
+            )}
           </MenuList>
         </Box>
       </Portal>

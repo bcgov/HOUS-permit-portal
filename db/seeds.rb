@@ -97,28 +97,20 @@ permit_type2 = PermitType.find_by_code("medium_residential")
 
 puts "Seeding contacts..."
 Jurisdiction.all.each do |j|
-  j
-    .permit_type_submission_contacts
-    .where(
-      email: "#{j.name.parameterize}@laterolabs.com",
-      permit_type: permit_type1
-    )
-    .first_or_create!(
-      email: "#{j.name.parameterize}@laterolabs.com",
-      confirmed_at: Time.now,
-      permit_type: permit_type1
-    )
-  j
-    .permit_type_submission_contacts
-    .where(
-      email: "#{j.name.parameterize}@laterolabs.com",
-      permit_type: permit_type2
-    )
-    .first_or_create!(
-      email: "#{j.name.parameterize}@laterolabs.com",
-      confirmed_at: Time.now,
-      permit_type: permit_type2
-    )
+  PermitType.find_each do |permit_type|
+    j
+      .permit_type_submission_contacts
+      .where(
+        email: "#{j.name.parameterize}@laterolabs.com",
+        permit_type: permit_type
+      )
+      .first_or_create!(
+        email: "#{j.name.parameterize}@laterolabs.com",
+        confirmed_at: Time.now,
+        permit_type: permit_type
+      )
+  end
+  j.update(inbox_enabled: true)
 end
 if PermitApplication.first.blank?
   jurisdictions
