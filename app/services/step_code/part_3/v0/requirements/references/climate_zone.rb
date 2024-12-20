@@ -9,6 +9,8 @@ class StepCode::Part3::V0::Requirements::References::ClimateZone
   }
 
   def self.value(hdd)
+    return unless hdd
+
     LOOKUP.find { |_zone, hdd_limit| hdd <= hdd_limit }&.first
   end
 end
