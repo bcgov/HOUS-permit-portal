@@ -17,7 +17,16 @@ import {
   UnorderedList,
   VStack,
 } from "@chakra-ui/react"
-import { CaretRight, CheckCircle, ClipboardText, Download, FileArrowUp, Info, MapPin } from "@phosphor-icons/react"
+import {
+  ArrowSquareOut,
+  CaretRight,
+  CheckCircle,
+  ClipboardText,
+  Download,
+  FileArrowUp,
+  Info,
+  MapPin,
+} from "@phosphor-icons/react"
 import i18next from "i18next"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
@@ -39,7 +48,8 @@ export const LandingScreen = observer(({}: ILandingScreenProps) => {
   const { t } = useTranslation()
   const mailto = "mailto:" + t("site.contactEmail")
   const iNeedRef = useRef<HTMLDivElement>(null)
-  const { sessionStore, userStore } = useMst()
+  const { sessionStore, userStore, siteConfigurationStore } = useMst()
+  const { smallScaleRequirementTemplateId } = siteConfigurationStore
   const { loggedIn } = sessionStore
   const { currentUser } = userStore
 
@@ -187,16 +197,26 @@ export const LandingScreen = observer(({}: ILandingScreenProps) => {
                 {t("landing.additionalContent.midSub")}
               </Text>
 
-              <Button
-                as="a"
-                variant={"primary"}
-                href={"/pdfs/BPH-Standardized List of Requirements V.2024.09.01 - SEP 2024.pdf"}
-                download={"BPH-Standardized List of Requirements V.2024.09.01 - SEP 2024.pdf"}
-                mt={2}
-                leftIcon={<Download />}
-              >
-                {t("landing.additionalContent.midDownload")}
-              </Button>
+              <HStack>
+                <Button
+                  as="a"
+                  variant={"primary"}
+                  href={"/pdfs/BPH-Standardized List of Requirements V.2024.09.01 - SEP 2024.pdf"}
+                  download={"BPH-Standardized List of Requirements V.2024.09.01 - SEP 2024.pdf"}
+                  mt={2}
+                  leftIcon={<Download />}
+                >
+                  {t("landing.additionalContent.midDownload")}
+                </Button>
+                <RouterLinkButton
+                  variant={"primary"}
+                  mt={2}
+                  leftIcon={<ArrowSquareOut />}
+                  to={`/early-access/requirement-templates/${smallScaleRequirementTemplateId}`}
+                >
+                  {t("landing.additionalContent.viewTemplate")}
+                </RouterLinkButton>
+              </HStack>
             </BareBox>
 
             <BareBox n={"3"}>

@@ -10,30 +10,37 @@ import { ModelSearchInput } from "../../shared/base/model-search-input"
 import { GridHeader } from "../../shared/grid/grid-header"
 import { SortIcon } from "../../shared/sort-icon"
 
-export const GridHeaders = observer(function GridHeaders() {
-  const { requirementBlockStore } = useMst()
-  const { sort, getSortColumnHeader, toggleSort } = requirementBlockStore
+interface IProps {
+  forEarlyAccess?: boolean
+}
+
+export const GridHeaders = observer(function GridHeaders({ forEarlyAccess }: IProps) {
+  const { requirementBlockStore, earlyAccessRequirementBlockStore } = useMst()
+  const searchModel = forEarlyAccess ? earlyAccessRequirementBlockStore : requirementBlockStore
+
+  const { sort, getSortColumnHeader, toggleSort } = searchModel
   const { t } = useTranslation()
 
-  console.log()
   return (
-    <Box display={"contents"} role={"rowgroup"}>
+    <Box display={"contents"} role={"rowgroup"} position="fixed">
       <Box display={"contents"} role={"row"}>
         <GridItem
           as={Flex}
           gridColumn={"span 7"}
           p={6}
-          bg={"greys.grey10"}
+          bg={forEarlyAccess ? "semantic.warningLight" : "greys.grey10"}
           justifyContent={"space-between"}
           align="center"
         >
-          <Text role={"heading"}>{t("requirementsLibrary.index.tableHeading")}</Text>
+          <Text role={"heading"}>
+            {t(`${forEarlyAccess ? "earlyAccessRequirementsLibrary" : "requirementsLibrary"}.index.tableHeading`)}
+          </Text>
           <ModelSearchInput
             inputGroupProps={{
               position: "sticky",
               right: 6,
             }}
-            searchModel={requirementBlockStore as ISearch}
+            searchModel={searchModel as ISearch}
           />
         </GridItem>
       </Box>

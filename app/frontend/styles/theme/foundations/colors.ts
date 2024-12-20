@@ -18,6 +18,10 @@ export const colors = {
       100: "#F5FFF8",
     },
   },
+  background: {
+    sandboxBase: "#FFC6CB",
+    sandboxStripe: "rgba(0, 0, 0, 0.1)",
+  },
   greys: {
     overlay: "rgba(150, 150, 150, 0.35)",
     white: "#FFFFFF",
@@ -58,5 +62,7 @@ export const colors = {
     infoLight: "#DFECF9",
     warning: "#FCBA19",
     warningLight: "#FEF2D6",
+    special: "#8000FF",
+    specialLight: "#F0DCFF",
   },
 }

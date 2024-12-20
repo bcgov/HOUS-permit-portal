@@ -7,7 +7,8 @@ import { isUUID } from "../../utils/utility-functions"
 export const useTemplateVersion = ({ customErrorMessage }: { customErrorMessage?: string } = {}) => {
   const { templateVersionId } = useParams()
   const { pathname } = useLocation()
-  const { templateVersionStore } = useMst()
+  const { templateVersionStore, sandboxStore } = useMst()
+  const { currentSandbox } = sandboxStore
   const templateVersion = templateVersionStore.getTemplateVersionById(templateVersionId)
   const [error, setError] = useState<Error | undefined>(undefined)
   const { t } = useTranslation()
@@ -19,18 +20,17 @@ export const useTemplateVersion = ({ customErrorMessage }: { customErrorMessage?
       return
     }
 
-    if (!templateVersion || !templateVersion.isFullyLoaded) {
-      ;(async () => {
-        try {
-          const isSuccess = await templateVersionStore.fetchTemplateVersion(templateVersionId)
+    ;(async () => {
+      try {
+        const isSuccess = await templateVersionStore.fetchTemplateVersion(templateVersionId)
+        setError(null)
 
-          !isSuccess && setError(new Error(customErrorMessage ?? t("errors.fetchTemplateVersion")))
-        } catch (e) {
-          setError(e instanceof Error ? e : new Error(customErrorMessage ?? t("errors.fetchTemplateVersion")))
-        }
-      })()
-    }
-  }, [templateVersionId, templateVersion, pathname])
+        !isSuccess && setError(new Error(customErrorMessage ?? t("errors.fetchTemplateVersion")))
+      } catch (e) {
+        setError(e instanceof Error ? e : new Error(customErrorMessage ?? t("errors.fetchTemplateVersion")))
+      }
+    })()
+  }, [templateVersionId, templateVersion, pathname, currentSandbox?.id])
 
   return { templateVersion, error }
 }

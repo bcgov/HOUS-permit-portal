@@ -16,6 +16,7 @@ class JurisdictionBlueprint < Blueprinter::Base
            :reviewers_size,
            :permit_applications_size,
            :map_position,
+           :inbox_enabled,
            :map_zoom,
            :regional_district_name,
            :created_at,
@@ -28,7 +29,11 @@ class JurisdictionBlueprint < Blueprinter::Base
     end
     association :contacts, blueprint: ContactBlueprint
     association :permit_type_submission_contacts,
-                blueprint: PermitTypeSubmissionContactBlueprint
+                blueprint: PermitTypeSubmissionContactBlueprint,
+                if: ->(_field_name, jurisdiction, options) do
+                  options[:current_user]&.jurisdictions&.include?(jurisdiction)
+                end
+    association :sandboxes, blueprint: SandboxBlueprint
     association :permit_type_required_steps,
                 blueprint: PermitTypeRequiredStepBlueprint
 
@@ -40,7 +45,10 @@ class JurisdictionBlueprint < Blueprinter::Base
   end
 
   view :minimal do
-    fields :qualified_name, :submission_inbox_set_up, :external_api_state
+    fields :qualified_name,
+           :submission_inbox_set_up,
+           :external_api_state,
+           :inbox_enabled
 
     field :external_api_enabled do |jurisdiction, options|
       jurisdiction.external_api_enabled?

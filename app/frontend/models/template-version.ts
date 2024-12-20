@@ -5,7 +5,7 @@ import { IJurisdictionTemplateVersionCustomizationForm } from "../components/dom
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
 import { EDeprecationReason, EExportFormat, ETemplateVersionStatus } from "../types/enums"
-import { IDenormalizedRequirementBlock, IDenormalizedTemplate, ITemplateVersionUpdate } from "../types/types"
+import { IDenormalizedRequirementBlock, IDenormalizedTemplate, IFormJson, ITemplateVersionUpdate } from "../types/types"
 import { startBlobDownload } from "../utils/utility-functions"
 import { IIntegrationMapping, IntegrationMappingModel } from "./integration-mapping"
 import { JurisdictionTemplateVersionCustomizationModel } from "./jurisdiction-template-version-customization"
@@ -25,7 +25,11 @@ export const TemplateVersionModel = types
     templateVersionCustomizationsByJurisdiction: types.map(JurisdictionTemplateVersionCustomizationModel),
     integrationMappingByJurisdiction: types.map(IntegrationMappingModel),
     latestVersionId: types.maybeNull(types.string),
+    formJson: types.maybeNull(types.frozen<IFormJson>()),
     isFullyLoaded: types.optional(types.boolean, false),
+    public: types.boolean,
+    earlyAccess: types.boolean,
+    requirementTemplateId: types.string,
   })
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -159,6 +163,22 @@ export const TemplateVersionModel = types
     ) {
       const response = yield* toGenerator(
         self.environment.api.createOrUpdateJurisdictionTemplateVersionCustomization(self.id, jurisdictionId, params)
+      )
+      if (!response.ok) {
+        return response.ok
+      }
+
+      const customization = response.data.data
+
+      if (customization) {
+        self.setJurisdictionTemplateVersionCustomization(jurisdictionId, customization)
+      }
+
+      return self.getJurisdictionTemplateVersionCustomization(jurisdictionId)
+    }),
+    promoteJurisdictionTemplateVersionCustomization: flow(function* (jurisdictionId: string) {
+      const response = yield* toGenerator(
+        self.environment.api.promoteJurisdictionTemplateVersionCustomization(self.id, jurisdictionId)
       )
       if (!response.ok) {
         return response.ok

@@ -29,14 +29,15 @@ import { GridHeaders } from "./grid-header"
 
 export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionSubmissionInbox() {
   const { t } = useTranslation()
-  const { permitApplicationStore } = useMst()
+  const { permitApplicationStore, sandboxStore } = useMst()
   const { currentJurisdiction, error } = useJurisdiction()
   const { isLoaded: isPermitClassificationsLoaded } = usePermitClassificationsLoad()
 
   const { currentPage, totalPages, totalCount, countPerPage, handleCountPerPageChange, handlePageChange, isSearching } =
     permitApplicationStore
 
-  useSearch(permitApplicationStore, [currentJurisdiction?.id])
+  const { currentSandboxId } = sandboxStore
+  useSearch(permitApplicationStore, [currentJurisdiction?.id, JSON.stringify(currentSandboxId)])
 
   if (error) return <ErrorScreen error={error} />
   if (!currentJurisdiction || !isPermitClassificationsLoaded) return <LoadingScreen />

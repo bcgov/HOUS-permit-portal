@@ -13,12 +13,13 @@ class Api::PermitClassificationsController < Api::ApplicationController
         if classification_option_params[:published].present?
           query =
             RequirementTemplate
-              .with_published_version
+              .for_sandbox(current_sandbox)
               .joins(:permit_type)
               .joins(:activity)
               .where(permit_classifications: { enabled: true })
 
-          if classification_option_params[:jurisdiction_id].present?
+          if classification_option_params[:jurisdiction_id].present? &&
+               current_sandbox.blank?
             jurisdiction =
               Jurisdiction.find(classification_option_params[:jurisdiction_id])
             permit_type_ids =

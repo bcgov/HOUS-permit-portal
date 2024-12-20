@@ -16,9 +16,9 @@ crunchy-postgres:
     requests:
       cpu: 10m
       memory: 256Mi
-    limits:
-      cpu: 100m
-      memory: 512Mi
+    limits: # wanted to just leave limits blank here, but the underlying chart speciffies it, so instead just specify a large number
+      cpu: 1
+      memory: 4Gi
     replicaCertCopy:
       requests:
         cpu: 10m
@@ -46,15 +46,15 @@ crunchy-postgres:
         cpu: 1m
         memory: 64Mi
       limits:
-        cpu: 50m
-        memory: 128Mi
+        cpu: 200m
+        memory: 512Mi
     sidecars:
       requests:
         cpu: 1m
         memory: 64Mi
       limits:
-        cpu: 50m
-        memory: 128Mi
+        cpu: 200m
+        memory: 256Mi
     s3:
       enabled: false
       createS3Secret: true
@@ -96,8 +96,8 @@ crunchy-postgres:
         cpu: 50m
         memory: 64Mi
       limits:
-        cpu: 100m
-        memory: 128Mi
+        cpu: 500m
+        memory: 256Mi
 
   # Postgres Cluster resource values:
   pgmonitor:
@@ -108,5 +108,5 @@ crunchy-postgres:
         cpu: 1m
         memory: 64Mi
       limits:
-        cpu: 50m
-        memory: 128Mi
+        cpu: 200m
+        memory: 256Mi

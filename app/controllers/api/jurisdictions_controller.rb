@@ -17,7 +17,9 @@ class Api::JurisdictionsController < Api::ApplicationController
                      only: %i[show index jurisdiction_options]
 
   def index
-    perform_search
+    perform_search(
+      allow_admin_fields: current_user && current_user.super_admin?
+    )
     authorized_results = apply_search_authorization(@search.results)
     render_success authorized_results,
                    nil,
@@ -29,7 +31,8 @@ class Api::JurisdictionsController < Api::ApplicationController
                      },
                      blueprint: JurisdictionBlueprint,
                      blueprint_opts: {
-                       view: :base
+                       view: :base,
+                       current_user: current_user
                      }
                    }
   end
@@ -53,7 +56,8 @@ class Api::JurisdictionsController < Api::ApplicationController
                      {
                        blueprint: JurisdictionBlueprint,
                        blueprint_opts: {
-                         view: :base
+                         view: :base,
+                         current_user: current_user
                        }
                      }
     else
@@ -105,7 +109,14 @@ class Api::JurisdictionsController < Api::ApplicationController
   # GET /api/jurisdictions/:id
   def show
     authorize @jurisdiction
-    render_success(@jurisdiction, nil, blueprint_opts: { view: :base })
+    render_success(
+      @jurisdiction,
+      nil,
+      blueprint_opts: {
+        view: :base,
+        current_user: current_user
+      }
+    )
   end
 
   # POST /api/jurisdiction
@@ -123,7 +134,8 @@ class Api::JurisdictionsController < Api::ApplicationController
                      {
                        blueprint: JurisdictionBlueprint,
                        blueprint_opts: {
-                         view: :base
+                         view: :base,
+                         current_user: current_user
                        }
                      }
     else
@@ -223,6 +235,7 @@ class Api::JurisdictionsController < Api::ApplicationController
       :look_out_html,
       :contact_summary_html,
       :map_zoom,
+      :inbox_enabled,
       map_position: [],
       users_attributes: %i[first_name last_name role email],
       contacts_attributes: %i[

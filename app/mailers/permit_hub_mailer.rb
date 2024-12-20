@@ -41,6 +41,13 @@ class PermitHubMailer < ApplicationMailer
     )
   end
 
+  def notify_preview(early_access_preview:)
+    @early_access_preview = early_access_preview
+    @user = early_access_preview.previewer
+
+    send_user_mail(email: @user.email, template_key: :notify_preview)
+  end
+
   def notify_block_status_ready(permit_block_status:, user:, status_set_by: nil)
     @permit_block_status = permit_block_status
     @user = user
@@ -75,6 +82,27 @@ class PermitHubMailer < ApplicationMailer
     send_mail(
       email: @user.email,
       template_key: :notify_new_or_unconfirmed_permit_collaboration
+    )
+  end
+
+  def notify_new_or_unconfirmed_preview(early_access_preview:, user:)
+    @early_access_preview = early_access_preview
+    @user = user
+
+    return unless @early_access_preview.early_access_requirement_template
+
+    if !@user.discarded? && @user.submitter?
+      @user.skip_confirmation_notification!
+      @user.skip_invitation = true
+      @user.invite!
+      @user.invitation_sent_at = Time.now
+
+      @user.save!
+    end
+
+    send_mail(
+      email: @user.email,
+      template_key: :notify_new_or_unconfirmed_preview
     )
   end
 

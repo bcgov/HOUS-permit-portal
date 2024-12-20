@@ -8,6 +8,7 @@ import { ErrorScreen } from "../../shared/base/error-screen"
 import { LoadingScreen } from "../../shared/base/loading-screen"
 import { ContactCard } from "../../shared/jurisdiction/contact-card"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
+import SandboxHeader from "../../shared/sandbox/sandbox-header"
 
 export const SuccessfulSubmissionScreen = observer(() => {
   const { t } = useTranslation()
@@ -22,6 +23,7 @@ export const SuccessfulSubmissionScreen = observer(() => {
     <Container maxW="container.lg">
       <Flex direction="column" align="center" my={24} gap={8}>
         <Icon as={CheckCircle} boxSize="14" color="semantic.success" />
+
         <VStack>
           <Heading as="h1">{t("permitApplication.new.submitted")}</Heading>
           <Text>{t("permitApplication.new.emailed", { jurisdictionName: qualifiedName })}</Text>
@@ -29,12 +31,15 @@ export const SuccessfulSubmissionScreen = observer(() => {
             {t("permitApplication.new.yourReference", { number })}
           </Tag>
         </VStack>
-        <Flex direction="column" bg="greys.grey04" w="full" p={8} gap={8} borderRadius="md">
+        <Flex direction="column" bg="greys.grey04" w="full" p={8} gap={8} borderRadius="md" position="relative">
+          {currentPermitApplication.sandbox && (
+            <SandboxHeader borderTopRadius={0} override sandbox={currentPermitApplication.sandbox} />
+          )}
           <Heading variant="yellowline">{t("permitApplication.new.whatsNextTitle")}</Heading>
           <Text fontSize="lg">{t("permitApplication.new.whatsNext")}</Text>
           <Image
             src="/images/timeline/timeline-graphic-4.png"
-            alt="thumbnail for timeline"
+            alt="graphic for timeline"
             w="950px"
             h="425px"
             bg="semantic.infoLight"

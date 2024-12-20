@@ -7,13 +7,13 @@ RSpec.describe Api::TemplateVersionsController, type: :controller do
   end
 
   let!(:non_first_nations_template) do
-    create(:requirement_template, first_nations: false)
+    create(:live_requirement_template, first_nations: false)
   end
   let!(:non_first_nations_version) do
     create(:template_version, requirement_template: non_first_nations_template)
   end
   let!(:first_nations_template) do
-    create(:requirement_template, first_nations: true)
+    create(:live_requirement_template, first_nations: true)
   end
   let!(:first_nations_version) do
     create(:template_version, requirement_template: first_nations_template)
@@ -55,7 +55,6 @@ RSpec.describe Api::TemplateVersionsController, type: :controller do
                from_non_first_nations: true,
                include_electives: true
              }
-
         expect(response).to have_http_status(:success)
         new_customization =
           JurisdictionTemplateVersionCustomization.order(

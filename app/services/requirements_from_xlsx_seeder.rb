@@ -74,7 +74,7 @@ class RequirementsFromXlsxSeeder
     activity = Activity.find_by_code!(activity)
     permit_type = PermitType.find_by_code!(permit_type)
     requirement_template =
-      RequirementTemplate.where(
+      LiveRequirementTemplate.where(
         activity: activity,
         permit_type: permit_type
       ).first_or_create(activity: activity, permit_type: permit_type)

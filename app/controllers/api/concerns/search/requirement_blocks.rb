@@ -8,7 +8,8 @@ module Api::Concerns::Search::RequirementBlocks
         order: order,
         match: :word_start,
         where: {
-          discarded: discarded
+          discarded: discarded,
+          visibility: visibility
         },
         page: search_params[:page],
         per_page:
@@ -30,6 +31,7 @@ module Api::Concerns::Search::RequirementBlocks
       :query,
       :page,
       :show_archived,
+      :visibility,
       :per_page,
       sort: %i[field direction]
     )
@@ -41,6 +43,10 @@ module Api::Concerns::Search::RequirementBlocks
 
   def discarded
     search_params[:show_archived].present?
+  end
+
+  def visibility
+    search_params[:visibility]&.split(",") || %w[live any]
   end
 
   def order

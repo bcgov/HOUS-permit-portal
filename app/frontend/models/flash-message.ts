@@ -30,20 +30,20 @@ export const FlashMessageModel = types
       status: EFlashMessageStatus,
       title: string | null,
       description: string | null,
-      duration: number | null = null,
+      duration: number = 5000,
       isClosable: boolean = true,
       position: ToastPositionWithLogical = "top"
     ) {
-      const timeout = 5000
+      self.isVisible = true
+
       self.status = status
       self.title = title
       self.description = description
-      self.isVisible = true
-      self.duration = timeout
+      self.duration = duration
       self.isClosable = isClosable
       self.position = position
 
-      setTimeout(() => self.reset(), timeout)
+      setTimeout(() => self.reset(), duration)
     },
   }))
 

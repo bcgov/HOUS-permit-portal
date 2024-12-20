@@ -18,6 +18,7 @@ export const SessionStoreModel = types
     resetAuth: flow(function* () {
       self.loggedIn = false
       self.tokenExpired = false
+      self.rootStore.sandboxStore.clearSandboxId()
       self.rootStore.userStore.unsetCurrentUser()
       self.rootStore.disconnectUserChannel()
     }),
@@ -31,13 +32,19 @@ export const SessionStoreModel = types
         const user = response.data.data
         self.loggedIn = true
         self.rootStore.userStore.setCurrentUser(user)
-
+        // activate persisted data
+        self.rootStore.loadLocalPersistedData()
         // connect websocket
         self.rootStore.subscribeToUserChannel()
 
         if (opts.redirectToRoot) window.location.replace("/")
+
         return true
       }
+      // if the response is not OK, reset the auth as if we logged out
+      // The sandbox ID should be cleared even if the user did not log
+      // out explicitly (ie their token expired)
+      self.resetAuth()
       return false
     },
   }))

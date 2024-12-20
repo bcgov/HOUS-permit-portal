@@ -1,7 +1,7 @@
 require "rails_helper"
 
 RSpec.describe RequirementTemplateSection, type: :model do
-  let(:requirement_template) { create(:requirement_template, id: "a") }
+  let(:requirement_template) { create(:live_requirement_template, id: "a") }
 
   describe "associations" do
     it { should belong_to(:requirement_template) }

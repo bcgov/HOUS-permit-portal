@@ -40,7 +40,7 @@ class Api::ExternalApiKeysController < Api::ApplicationController
   end
 
   def create
-    @external_api_key = ExternalApiKey.build(external_api_key_params)
+    @external_api_key = ExternalApiKey.build(external_api_key_create_params)
 
     authorize @external_api_key
 
@@ -65,7 +65,7 @@ class Api::ExternalApiKeysController < Api::ApplicationController
   def update
     authorize @external_api_key
 
-    if @external_api_key.update(external_api_key_params)
+    if @external_api_key.update(external_api_key_update_params)
       render_success @external_api_key,
                      "external_api_key.update_success",
                      {
@@ -124,7 +124,19 @@ class Api::ExternalApiKeysController < Api::ApplicationController
     @external_api_key = ExternalApiKey.find(params[:id])
   end
 
-  def external_api_key_params
+  def external_api_key_create_params
+    params.require(:external_api_key).permit(
+      :name,
+      :expired_at,
+      :connecting_application,
+      :notification_email,
+      :jurisdiction_id,
+      :webhook_url,
+      :sandbox_id
+    )
+  end
+
+  def external_api_key_update_params
     params.require(:external_api_key).permit(
       :name,
       :expired_at,

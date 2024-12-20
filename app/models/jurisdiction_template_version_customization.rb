@@ -9,15 +9,24 @@ class JurisdictionTemplateVersionCustomization < ApplicationRecord
   # Where the key to requirement_block_changes object is the id of the requirement_block affected.
   # Where the elective_fields are the ids of the requirement_fields that are elective and have been
   # enabled
+  belongs_to :sandbox, optional: true
   belongs_to :jurisdiction
   belongs_to :template_version
 
   before_save :sanitize_tip
-  validates_uniqueness_of :template_version_id, scope: :jurisdiction_id
+  # Ensure that there is no two customizations with the same sandbox, jurisdiction, and template_version
+
+  validate :unique_combination_of_jurisdiction_sandbox_and_template_version
+
   after_commit :reindex_jurisdiction_templates_used_size
   after_commit :publish_customization_event, on: %i[update]
 
   validate :ensure_reason_set_for_enabled_elective_fields
+  validate :sandbox_belongs_to_jurisdiction
+
+  scope :sandboxed, -> { where.not(sandbox_id: nil) }
+  scope :live, -> { where(sandbox_id: nil) }
+  scope :for_sandbox, ->(sandbox) { where(sandbox_id: sandbox&.id) }
 
   ACCEPTED_ENABLED_ELECTIVE_FIELD_REASONS = %w[bylaw policy zoning].freeze
 
@@ -95,6 +104,18 @@ class JurisdictionTemplateVersionCustomization < ApplicationRecord
       .count
   end
 
+  def promote
+    # Find or create a record with same jurisdiction_id and template_version_id but with sandbox_id == nil
+    target_record =
+      JurisdictionTemplateVersionCustomization.find_or_create_by(
+        jurisdiction_id: jurisdiction_id,
+        template_version_id: template_version_id,
+        sandbox_id: nil
+      )
+    target_record.customizations = customizations
+    target_record.save!
+  end
+
   private
 
   def reindex_jurisdiction_templates_used_size
@@ -151,5 +172,36 @@ class JurisdictionTemplateVersionCustomization < ApplicationRecord
 
   def publish_customization_event
     NotificationService.publish_customization_update_event(self)
+  end
+
+  def unique_combination_of_jurisdiction_sandbox_and_template_version
+    # Construct the query for finding duplicates
+    existing_record =
+      JurisdictionTemplateVersionCustomization.where(
+        jurisdiction_id: jurisdiction_id,
+        template_version_id: template_version_id,
+        sandbox_id: sandbox_id
+      )
+
+    # Allow updates on the same record (ignore self)
+    existing_record = existing_record.where.not(id: id) if persisted?
+
+    # If such a record exists, add an error
+    if existing_record.exists?
+      errors.add(
+        :base,
+        I18n.t(
+          "activerecord.errors.models.jurisdiction_template_version_customizations.uniqueness"
+        )
+      )
+    end
+  end
+
+  def sandbox_belongs_to_jurisdiction
+    return unless sandbox
+
+    unless jurisdiction.sandboxes.include?(sandbox)
+      errors.add(:sandbox, "must belong to the jurisdiction")
+    end
   end
 end

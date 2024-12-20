@@ -1,6 +1,7 @@
 class ExternalApi::PermitApplicationPolicy < ExternalApi::ApplicationPolicy
   def index?
-    external_api_key.jurisdiction == record.jurisdiction && record.submitted?
+    external_api_key.jurisdiction == record.jurisdiction && record.submitted? &&
+      record.sandbox == sandbox
   end
 
   def show?
@@ -13,7 +14,7 @@ class ExternalApi::PermitApplicationPolicy < ExternalApi::ApplicationPolicy
 
   class Scope < Scope
     def resolve
-      scope.where(submitter: user)
+      scope.where(submitter: user, sandbox: sandbox)
     end
   end
 end

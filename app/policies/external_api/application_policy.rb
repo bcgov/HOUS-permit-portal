@@ -1,10 +1,11 @@
 # frozen_string_literal: true
 
 class ExternalApi::ApplicationPolicy
-  attr_reader :external_api_key, :record
+  attr_reader :external_api_key, :record, :sandbox
 
   def initialize(external_api_key, record)
     @external_api_key = external_api_key
+    @sandbox = external_api_key.sandbox
     @record = record
   end
 

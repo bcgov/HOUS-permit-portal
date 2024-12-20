@@ -34,12 +34,26 @@ import { INotification, IPermitNotificationObjectData } from "../../../types/typ
 import { HelpDrawer } from "../../shared/help-drawer"
 import { RouterLink } from "../../shared/navigation/router-link"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
+import SandboxHeader from "../../shared/sandbox/sandbox-header"
 import { NotificationsPopover } from "../home/notifications/notifications-popover"
 import { RegionalRMJurisdictionSelect } from "./regional-rm-jurisdiction-select"
+import { SandboxMenuItem } from "./sandbox-menu-item"
 import { SubNavBar } from "./sub-nav-bar"
 
 function isTemplateEditPath(path: string): boolean {
   const regex = /^\/requirement-templates\/([a-f\d-]+)\/edit$/
+
+  return regex.test(path)
+}
+
+function isEarlyAccessTemplateEditPath(path: string): boolean {
+  const regex = /^\/early-access?\/requirement-templates\/([a-f\d-]+)\/edit$/
+
+  return regex.test(path)
+}
+
+function isEarlyAccessTemplateViewPath(path: string): boolean {
+  const regex = /^\/early-access\/requirement-templates\/([a-f\d-]+)$/
 
   return regex.test(path)
 }
@@ -74,6 +88,8 @@ function shouldHideSubNavbarForPath(path: string): boolean {
   const matchers: Array<(path: string) => boolean> = [
     (path) => path === "/",
     isTemplateEditPath,
+    isEarlyAccessTemplateEditPath,
+    isEarlyAccessTemplateViewPath,
     isTemplateVersionPath,
     isPermitApplicationEditPath,
     isPermitApplicationPath,
@@ -86,7 +102,7 @@ function shouldHideSubNavbarForPath(path: string): boolean {
 
 export const NavBar = observer(function NavBar() {
   const { t } = useTranslation()
-  const { sessionStore, userStore, notificationStore, uiStore } = useMst()
+  const { sessionStore, userStore, notificationStore, uiStore, sandboxStore } = useMst()
 
   const { currentUser } = userStore
   const { loggedIn } = sessionStore
@@ -123,19 +139,32 @@ export const NavBar = observer(function NavBar() {
               </Box>
             </RouterLink>
             <Show above="md">
-              <Text fontSize="2xl" fontWeight="normal" mb="0" whiteSpace="nowrap">
-                {currentUser?.isSuperAdmin ? t("site.adminNavBarTitle") : t("site.title")}
-              </Text>
+              <Flex direction="column" w="full">
+                <HStack>
+                  <Text fontSize="2xl" fontWeight="normal" mb="0" whiteSpace="nowrap">
+                    {currentUser?.isSuperAdmin ? t("site.adminNavBarTitle") : t("site.title")}
+                  </Text>
 
-              <Text fontSize="sm" textTransform="uppercase" color="theme.yellow" fontWeight="bold" mb={2} ml={1}>
-                {t("site.beta")}
-              </Text>
+                  <Text fontSize="sm" textTransform="uppercase" color="theme.yellow" fontWeight="bold" mb={2} ml={1}>
+                    {t("site.beta")}
+                  </Text>
+                </HStack>
+                {currentUser?.isReviewStaff && (
+                  <SandboxHeader
+                    justify="center"
+                    align="center"
+                    position="static"
+                    borderTopRadius={0}
+                    mb={-2}
+                    color="text.primary"
+                    expanded
+                  />
+                )}
+              </Flex>
               <Spacer />
             </Show>
             <HStack gap={3} w="full" justify="flex-end">
               {!loggedIn && <HelpDrawer />}
-              {/* todo: navbar search? */}
-              {/* {currentUser?.isSubmitter && <NavBarSearch />} */}
               {currentUser?.isSubmitter && !currentUser.isUnconfirmed && (
                 <RouterLinkButton to="/" variant="tertiary" leftIcon={<Folders size={16} />}>
                   {t("site.myPermits")}
@@ -149,6 +178,7 @@ export const NavBar = observer(function NavBar() {
                   </Text>
                 </Flex>
               )}
+
               {currentUser?.isRegionalReviewManager && (
                 <VStack align="flex-end" gap={1}>
                   <Text color="whiteAlpha.700" textAlign="right" variant="tiny_uppercase">
@@ -253,6 +283,14 @@ const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
       <NavMenuItem label={t("home.permitTemplateCatalogueTitle")} to={"/requirement-templates"} />
       <NavMenuItem label={t("home.requirementsLibraryTitle")} to={"/requirements-library"} />
       <NavMenuItem label={t("home.configurationManagement.title")} to={"/configuration-management"} />
+      <NavMenuItem label={t("home.earlyAccess.title")} to={"/early-access"} />
+      <MenuDivider my={0} borderColor="border.light" />
+    </MenuGroup>
+  )
+
+  const reviewStaffOnlyItems = (
+    <MenuGroup>
+      <SandboxMenuItem />
       <MenuDivider my={0} borderColor="border.light" />
     </MenuGroup>
   )
@@ -268,7 +306,6 @@ const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
         label={t("site.breadcrumb.configurationManagement")}
         to={`/jurisdictions/${currentUser?.jurisdiction?.slug}/configuration-management`}
       />
-      <NavMenuItem label={t("site.breadcrumb.users")} to={`/jurisdictions/${currentUser?.jurisdiction?.slug}/users`} />
       <NavMenuItem
         label={t("site.breadcrumb.apiSettings")}
         to={`/jurisdictions/${currentUser?.jurisdiction?.slug}/api-settings`}
@@ -323,7 +360,7 @@ const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
 
       <Portal>
         <Box color="text.primary" className={isMenuOpen && "show-menu-overlay-background"}>
-          <MenuList zIndex={99} boxShadow="2xl">
+          <MenuList zIndex={99} boxShadow="2xl" pb={0}>
             {loggedIn && !currentUser.isUnconfirmed ? (
               <>
                 <Text fontSize="xs" fontStyle="italic" px={3} mb={-1} color="greys.grey01">
@@ -331,6 +368,7 @@ const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
                 </Text>
                 <MenuGroup title={currentUser.name} noOfLines={1}>
                   <MenuDivider my={0} borderColor="border.light" />
+                  <NavMenuItem label={t("site.home")} to={"/"} />
                   <MenuDivider my={0} borderColor="border.light" />
                   {!currentUser.isReviewStaff && (
                     <NavMenuItem label={t("home.jurisdictionsTitle")} to={"/jurisdictions"} />
@@ -343,6 +381,7 @@ const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
                     adminOrManagerItems}
                   {currentUser?.isReviewer && reviwerOnlyItems}
                   {currentUser?.isSubmitter && submitterOnlyItems}
+                  {currentUser?.isReviewStaff && reviewStaffOnlyItems}
                   {!currentUser?.isSubmitter && (
                     <>
                       <MenuItem bg="greys.grey03" onClick={(e) => navigate("/permit-applications/new")}>
@@ -364,20 +403,22 @@ const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
             ) : (
               <>
                 {!loggedIn && (
-                  <MenuList
-                    display="flex"
-                    flexWrap="wrap"
-                    px={2}
-                    py={0}
-                    gap={2}
-                    border="0"
-                    boxShadow="none"
-                    maxW="300px"
-                  >
-                    <NavMenuItemCTA label={t("auth.login")} to="/login" />
-                  </MenuList>
+                  <>
+                    <MenuList
+                      display="flex"
+                      flexWrap="wrap"
+                      px={2}
+                      py={3}
+                      gap={2}
+                      border="0"
+                      boxShadow="none"
+                      maxW="300px"
+                    >
+                      <NavMenuItemCTA label={t("auth.login")} to="/login" />
+                    </MenuList>
+                    <MenuDivider my={0} borderColor="border.light" />
+                  </>
                 )}
-                <MenuDivider my={0} borderColor="border.light" />
                 <NavMenuItem label={t("site.home")} to="/" />
                 <NavMenuItem label={t("home.jurisdictionsTitle")} to={"/jurisdictions"} />
                 {loggedIn && <NavMenuItem label={t("auth.logout")} onClick={handleClickLogout} />}
@@ -390,6 +431,20 @@ const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
                 {t("site.giveFeedback")} <Envelope size={16} style={{ display: "inline", color: "inherit" }} />
               </Link>
             </MenuItem>
+            {import.meta.env.VITE_RELEASE_VERSION && (
+              <MenuItem maxW={"250px"} bg="greys.grey03" _hover={{ cursor: "auto" }}>
+                <Text
+                  textAlign="center"
+                  w="full"
+                  color="greys.grey90"
+                  fontWeight={"thin"}
+                  fontStyle="italic"
+                  fontSize="sm"
+                >
+                  {import.meta.env.VITE_RELEASE_VERSION}
+                </Text>
+              </MenuItem>
+            )}
           </MenuList>
         </Box>
       </Portal>
@@ -413,7 +468,7 @@ const NavMenuItem = ({ label, to, onClick, ...rest }: INavMenuItemProps) => {
   }
 
   return (
-    <MenuItem as={"a"} py={2} px={3} onClick={handleClick} {...rest}>
+    <MenuItem as={"a"} py={2} px={3} onClick={handleClick} _hover={{ cursor: "pointer", bg: "hover.blue" }} {...rest}>
       <Text textAlign="left" w="full">
         {label}
       </Text>

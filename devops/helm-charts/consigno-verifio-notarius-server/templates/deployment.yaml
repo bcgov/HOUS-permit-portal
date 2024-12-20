@@ -54,9 +54,6 @@ spec:
           args:
             - set -a; . /vault/secrets/secrets.env; set +a; exec ./entrypoint.sh
           resources:
-            limits:
-              cpu: {{ $.Values.deployment.spec.containers.resources.limits.cpu }}
-              memory: {{ $.Values.deployment.spec.containers.resources.limits.memory }}
             requests:
               cpu: {{ $.Values.deployment.spec.containers.resources.requests.cpu }}
               memory: {{ $.Values.deployment.spec.containers.resources.requests.memory }}

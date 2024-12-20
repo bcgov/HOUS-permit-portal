@@ -105,6 +105,9 @@ export const combineComplianceHints = (
       }
     }
   })
+
+  if (!formattedComplianceData) return updatedJson
+
   //compliance data logic
   for (const [key, value] of Object.entries(formattedComplianceData)) {
     const section = key.split("|")[0].replace("formSubmissionDataRST", "")
@@ -243,7 +246,7 @@ export const combineChangeMarkers = (formJson: IFormJson, isInReview: boolean, c
     section.components.forEach((block: IFormIOBlock) => {
       for (let i = 0; i < block.components.length; i++) {
         const requirement = block.components[i]
-        requirement.disabled = isInReview
+        requirement.disabled ||= isInReview
         if (section.id === COMPLETTION_SECTION_ID || !changedKeys.includes(requirement.key)) continue
 
         const changeMarker = convertToChangeMarker(requirement)
@@ -267,7 +270,10 @@ export const getRequirementByKey = (formJson: IFormJson, requirementKey: string)
   return foundRequirement
 }
 
-export const traverseFormIORequirements = (formJson: IFormJson, callback: (requirement) => void) => {
+export const traverseFormIORequirements = (
+  formJson: IFormJson,
+  callback: (requirement: IFormIORequirement) => void
+) => {
   formJson.components.forEach((section: IFormIOSection) => {
     section.components.forEach((block: IFormIOBlock) => {
       block.components.forEach((requirement: IFormIORequirement) => {
@@ -275,4 +281,15 @@ export const traverseFormIORequirements = (formJson: IFormJson, callback: (requi
       })
     })
   })
+}
+
+export const processFieldsForEphemeral = (formJson: IFormJson) => {
+  traverseFormIORequirements(formJson, (requirement) => {
+    if (["simplefile"].includes(requirement.type) || ["submit"].includes(requirement.key)) {
+      requirement.disabled = true
+    }
+    requirement.conditional = false
+    requirement.customConditional = null
+  })
+  return formJson
 }

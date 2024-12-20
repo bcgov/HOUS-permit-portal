@@ -5,7 +5,8 @@ class PermitApplicationPolicy < ApplicationPolicy
          record.collaborator?(user_id: user.id, collaboration_type: :submission)
       true
     elsif user.review_staff?
-      user.jurisdictions.find(record.jurisdiction.id).present? && !record.draft?
+      user.jurisdictions.find(record.jurisdiction.id).present? &&
+        !record.draft? && record.sandbox == sandbox
     end
   end
 
@@ -141,7 +142,7 @@ class PermitApplicationPolicy < ApplicationPolicy
 
   class Scope < Scope
     def resolve
-      scope.where(submitter: user)
+      scope.where(submitter: user, sandbox: sandbox)
     end
   end
 end

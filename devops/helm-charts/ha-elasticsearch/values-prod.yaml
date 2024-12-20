@@ -5,26 +5,20 @@ elasticsearch:
     heapSize: "512m"
     resources:
       requests:
-        cpu: "50m"
+        cpu: "100m"
         memory: "256Mi"
-      limits:
-        cpu: "150m"
-        memory: "1024Mi"
     persistence:
       enabled: true
       accessModes:
         - ReadWriteOnce
       size: "500Mi"
   data:
-    replicaCount: 2
-    heapSize: "1024m"
+    replicaCount: 3
+    heapSize: "800m"
     resources:
       requests:
-        cpu: "50m"
-        memory: "1024Mi"
-      limits:
         cpu: "200m"
-        memory: "2048Mi"
+        memory: "800Mi"
     persistence:
       enabled: true
       accessModes:

@@ -18,8 +18,10 @@ class PermitApplicationBlueprint < Blueprinter::Base
            :resubmitted_at,
            :revisions_requested_at,
            :missing_pdfs
+
     association :permit_type, blueprint: PermitClassificationBlueprint
     association :activity, blueprint: PermitClassificationBlueprint
+    association :sandbox, blueprint: SandboxBlueprint
     association :submission_versions,
                 blueprint: SubmissionVersionBlueprint,
                 view: :base

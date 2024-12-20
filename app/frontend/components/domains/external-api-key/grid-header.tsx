@@ -9,7 +9,7 @@ import { GridHeader } from "../../shared/grid/grid-header"
 import { RemoveConfirmationModal } from "../../shared/modals/remove-confirmation-modal"
 
 export const GridHeaders = observer(function GridHeaders() {
-  const { jurisdictionStore, userStore } = useMst()
+  const { userStore } = useMst()
   const { currentUser } = userStore
 
   const { t } = useTranslation()
@@ -17,6 +17,7 @@ export const GridHeaders = observer(function GridHeaders() {
     t("externalApiKey.fieldLabels.name"),
     t("externalApiKey.fieldLabels.connectingApplication"),
     t("externalApiKey.fieldLabels.status"),
+    t("externalApiKey.fieldLabels.sandbox"),
     t("externalApiKey.fieldLabels.createdAt"),
     t("externalApiKey.fieldLabels.expiredAt"),
     t("externalApiKey.fieldLabels.revokedAt"),
@@ -27,7 +28,7 @@ export const GridHeaders = observer(function GridHeaders() {
       <Box display={"contents"} role={"row"}>
         <GridItem
           as={Flex}
-          gridColumn={"span 7"}
+          gridColumn={"span 8"}
           p={6}
           bg={"greys.grey10"}
           justifyContent={"space-between"}

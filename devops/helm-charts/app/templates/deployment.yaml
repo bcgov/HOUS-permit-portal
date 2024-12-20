@@ -55,9 +55,6 @@ spec:
             - containerPort: 3000
               protocol: TCP
           resources:
-            limits:
-              cpu: {{ .spec.containers.resources.limits.cpu }}
-              memory: {{ .spec.containers.resources.limits.memory }}
             requests:
               cpu: {{ .spec.containers.resources.requests.cpu }}
               memory: {{ .spec.containers.resources.requests.memory }}

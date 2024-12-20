@@ -36,7 +36,6 @@ Devise.setup do |config|
                     realm: "standard"
                   },
                   authorize_options: [:kc_idp_hint],
-                  scope: "openid",
                   name: :keycloak,
                   scope: "openid",
                   strategy_class: OmniAuth::Strategies::KeycloakOpenId
@@ -341,6 +340,7 @@ Devise.setup do |config|
   #
   # The "*/*" below is required to match Internet Explorer requests.
   # config.navigational_formats = ['*/*', :html, :turbo_stream]
+  config.navigational_formats = [] # This removes :html from the default formats
 
   # The default HTTP method used to sign out a resource. Default is :delete.
   config.sign_out_via = :delete

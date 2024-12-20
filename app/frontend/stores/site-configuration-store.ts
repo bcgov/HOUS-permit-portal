@@ -15,6 +15,7 @@ export const SiteConfigurationStoreModel = types.snapshotProcessor(
       sitewideMessage: types.maybeNull(types.string),
       helpLinkItems: types.frozen<IHelpLinkItems>(),
       revisionReasonsMap: types.map(RevisionReasonModel),
+      smallScaleRequirementTemplateId: types.maybeNull(types.string),
     })
     .extend(withRootStore())
     .extend(withEnvironment())

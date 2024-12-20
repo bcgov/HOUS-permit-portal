@@ -1,3 +1,14 @@
 # .dockerignore
 
 .env
+
+node_modules
+/node_modules
+.npm
+
+.git
+.gitignore
+.DS_Store
+*.log
+tmp
+log

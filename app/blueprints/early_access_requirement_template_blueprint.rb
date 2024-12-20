@@ -1,0 +1,2 @@
+class EarlyAccessRequirementTemplateBlueprint < RequirementTemplateBlueprint
+end

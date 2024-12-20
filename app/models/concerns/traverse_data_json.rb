@@ -34,6 +34,7 @@ module TraverseDataJson
     #assume the layering is template containing sections, sections containing blocks, blocks contining requirements
     #requirements may have nesting (like general contact, etc),  but in our purpose we skip this
     #TODO: explore performanc edifference to move this straight into jsonb functions
+
     data_hash["components"]
       .map do |section_json|
         section_json["components"]

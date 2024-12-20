@@ -1,10 +1,18 @@
 class Api::RequirementTemplatesController < Api::ApplicationController
   include Api::Concerns::Search::RequirementTemplates
-
   before_action :set_requirement_template,
-                only: %i[show destroy restore update schedule force_publish_now]
+                only: %i[
+                  show
+                  destroy
+                  restore
+                  update
+                  schedule
+                  force_publish_now
+                  invite_previewers
+                ]
   before_action :set_template_version, only: %i[unschedule_template_version]
   skip_after_action :verify_policy_scoped, only: [:index]
+  skip_before_action :authenticate_user!, only: [:show]
 
   def index
     perform_search
@@ -17,7 +25,10 @@ class Api::RequirementTemplatesController < Api::ApplicationController
                        total_count: @search.total_count,
                        current_page: @search.current_page
                      },
-                     blueprint: RequirementTemplateBlueprint
+                     blueprint: RequirementTemplateBlueprint,
+                     blueprint_opts: {
+                       current_user: current_user
+                     }
                    }
   end
 
@@ -29,40 +40,25 @@ class Api::RequirementTemplatesController < Api::ApplicationController
                    {
                      blueprint: RequirementTemplateBlueprint,
                      blueprint_opts: {
-                       view: :extended
+                       view: :extended,
+                       current_user: current_user
                      }
                    }
   end
 
   def create
-    copy_existing = requirement_template_params[:copy_existing]
-
-    if copy_existing
-      found_template =
-        RequirementTemplate.find_by(
-          permit_type_id: requirement_template_params[:permit_type_id],
-          activity_id: requirement_template_params[:activity_id]
-        )
-      if found_template.nil?
-        authorize :requirement_template, :create?
-        render_error("misc.not_found_error", status: :not_found) and return
-      end
-      @requirement_template =
-        RequirementTemplateCopyService.new(
-          found_template
-        ).build_requirement_template_from_existing(requirement_template_params)
-    else
-      @requirement_template =
-        RequirementTemplate.new(
-          requirement_template_params.except(:copy_existing)
-        )
-    end
-
+    @requirement_template = RequirementTemplate.new(requirement_template_params)
     authorize @requirement_template
     if @requirement_template.save
       render_success @requirement_template,
                      "requirement_template.create_success",
-                     { blueprint: RequirementTemplateBlueprint }
+                     {
+                       blueprint: RequirementTemplateBlueprint,
+                       blueprint_opts: {
+                         view: :extended,
+                         current_user: current_user
+                       }
+                     }
     else
       render_error "requirement_template.create_error",
                    message_opts: {
@@ -72,16 +68,61 @@ class Api::RequirementTemplatesController < Api::ApplicationController
     end
   end
 
-  def update
+  def copy
+    found_template =
+      if requirement_template_params[:id].present?
+        RequirementTemplate.find_by(id: requirement_template_params[:id])
+      elsif requirement_template_params[:permit_type_id].present? &&
+            requirement_template_params[:activity_id].present?
+        LiveRequirementTemplate.find_by(
+          permit_type_id: requirement_template_params[:permit_type_id],
+          activity_id: requirement_template_params[:activity_id]
+        )
+      end
+
+    if found_template.nil?
+      authorize :requirement_template, :create?
+      render_error("misc.not_found_error", status: :not_found) and return
+    end
+
+    @requirement_template =
+      RequirementTemplateCopyService.new(
+        found_template
+      ).build_requirement_template_from_existing(requirement_template_params)
     authorize @requirement_template
 
+    if @requirement_template.save
+      render_success @requirement_template,
+                     "requirement_template.copy_success",
+                     {
+                       blueprint: RequirementTemplateBlueprint,
+                       blueprint_opts: {
+                         view: :extended,
+                         current_user: current_user
+                       }
+                     }
+    else
+      render_error "requirement_template.copy_error",
+                   message_opts: {
+                     error_message:
+                       @requirement_template.errors.full_messages.join(", ")
+                   }
+    end
+  end
+
+  def update
+    authorize @requirement_template
     if @requirement_template.update(requirement_template_params)
+      # for some reason the reload is required to prevent the published_tempalte_version from being nil
+      # When it is autogenerated for early access
+      @requirement_template.reload if @requirement_template.early_access?
       render_success @requirement_template,
                      "requirement_template.update_success",
                      {
                        blueprint: RequirementTemplateBlueprint,
                        blueprint_opts: {
-                         view: :extended
+                         view: :extended,
+                         current_user: current_user
                        }
                      }
     else
@@ -222,6 +263,33 @@ class Api::RequirementTemplatesController < Api::ApplicationController
     end
   end
 
+  def invite_previewers
+    authorize @requirement_template
+
+    if previewer_invite_params[:emails].blank?
+      render_error "requirement_template.invite_previewers_error" and return
+    end
+
+    service = EarlyAccess::PreviewManagementService.new(@requirement_template)
+    result = service.invite_previewers!(previewer_invite_params[:emails])
+
+    if result[:previews].empty?
+      render_error "requirement_template.invite_previewers_error",
+                   { meta: result }
+    else
+      render_success @requirement_template,
+                     "requirement_template.invite_previewers_success",
+                     {
+                       blueprint: RequirementTemplateBlueprint,
+                       blueprint_opts: {
+                         view: :extended,
+                         current_user: current_user
+                       },
+                       meta: result
+                     }
+    end
+  end
+
   private
 
   def set_requirement_template
@@ -243,14 +311,22 @@ class Api::RequirementTemplatesController < Api::ApplicationController
     @template_version = TemplateVersion.find(params[:id])
   end
 
+  def previewer_invite_params
+    params.permit(emails: [])
+  end
+
   def requirement_template_params
     permitted_params =
       params.require(:requirement_template).permit(
+        :id,
         :description,
+        :nickname,
+        :assignee_id,
         :first_nations,
-        :copy_existing,
         :activity_id,
         :permit_type_id,
+        :type,
+        :public,
         requirement_template_sections_attributes: [
           :id,
           :name,

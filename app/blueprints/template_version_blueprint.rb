@@ -6,7 +6,16 @@ class TemplateVersionBlueprint < Blueprinter::Base
          :updated_at,
          :version_date,
          :label,
-         :first_nations
+         :first_nations,
+         :requirement_template_id
+
+  field :early_access do |template_version|
+    template_version.early_access?
+  end
+
+  field :public do |template_version|
+    template_version.public?
+  end
 
   field :version_date do |template_version|
     # Parse version date in BC time

@@ -1,10 +1,19 @@
+import { t } from "i18next"
 import { Instance, applySnapshot, flow, types } from "mobx-state-tree"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
-import { EOmniauthProvider, EUserRoles } from "../types/enums"
+import { EUserRoles } from "../types/enums"
 import { ILicenseAgreement } from "../types/types"
 import { convertToDate } from "../utils/utility-functions"
 import { IJurisdiction, JurisdictionModel } from "./jurisdiction"
+
+export const OMNIAUTH_PROVIDERS = {
+  idir: "idir",
+  bceid: "bceidboth",
+  basicBceid: "bceidbasic",
+  businessBceid: "bceidbusiness",
+  bcsc: "digital-building-permit-5120",
+} as const
 
 export const UserModel = types
   .model("UserModel")
@@ -15,7 +24,7 @@ export const UserModel = types
     role: types.enumeration(Object.values(EUserRoles)),
     omniauthEmail: types.maybeNull(types.string),
     omniauthUsername: types.maybeNull(types.string),
-    omniauthProvider: types.maybeNull(types.enumeration(Object.values(EOmniauthProvider))),
+    omniauthProvider: types.maybeNull(types.enumeration(Object.values(OMNIAUTH_PROVIDERS))),
     firstName: types.maybeNull(types.string),
     lastName: types.maybeNull(types.string),
     certified: types.maybeNull(types.boolean),
@@ -28,6 +37,7 @@ export const UserModel = types
     lastSignInAt: types.maybeNull(types.Date),
     eulaAccepted: types.maybeNull(types.boolean),
     invitedByEmail: types.maybeNull(types.string),
+    department: types.maybeNull(types.string),
     preference: types.frozen<IPreference>(),
     invitedToJurisdiction: types.maybeNull(types.frozen<IJurisdiction>()),
     licenseAgreements: types.maybeNull(types.frozen<ILicenseAgreement[]>()),
@@ -74,6 +84,16 @@ export const UserModel = types
         self.jurisdictions.find((j) => j.id == self.rootStore.uiStore.currentlySelectedJurisdictionId) ||
         self.jurisdictions[0]
       )
+    },
+    get omniauthProviderLabel() {
+      const keys = {
+        idir: "idir",
+        bceidbasic: "bceidbasic",
+        bceidbusiness: "bceidbusiness",
+        "digital-building-permit-5120": "bcsc",
+      }
+      // @ts-ignore
+      return t(`user.omniauthProviders.${keys[self.omniauthProvider]}`)
     },
   }))
   .actions((self) => ({

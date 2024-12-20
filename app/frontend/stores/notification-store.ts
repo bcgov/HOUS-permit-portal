@@ -168,15 +168,16 @@ export const NotificationStoreModel = types
       if (opts.reset) self.page = self.totalPages = undefined
       self.isLoaded = false
       const response = yield* toGenerator(self.environment.api.fetchNotifications(self.nextPage))
-      const {
-        ok,
-        data: {
-          data,
-          meta: { unreadCount, totalPages },
-        },
-      } = response
 
-      if (ok) {
+      if (response?.ok) {
+        const {
+          ok,
+          data: {
+            data,
+            meta: { unreadCount, totalPages },
+          },
+        } = response
+
         self.unreadNotificationsCount = unreadCount
         opts.reset ? self.setNotifications(data) : self.concatToNotifications(data)
         self.totalPages = totalPages

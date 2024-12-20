@@ -201,7 +201,7 @@ RSpec.describe IntegrationMapping, type: :model do
       # so we manually create a new one for this tests purposes
       let!(:different_req_template) do
         create(
-          :requirement_template,
+          :live_requirement_template,
           activity: create(:activity, code: :addition_alteration_renovation),
           permit_type: create(:permit_type, code: :demolition)
         )

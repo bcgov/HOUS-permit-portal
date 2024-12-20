@@ -5,6 +5,19 @@ class SiteConfiguration < ApplicationRecord
 
   has_many :revision_reasons
 
+  belongs_to :small_scale_requirement_template,
+             class_name: "RequirementTemplate",
+             optional: true
+
+  # In the future, add new landing page templates like so:
+  # belongs_to :medium_scale_requirement_template,
+  #            class_name: "RequirementTemplate",
+  #            optional: true
+
+  # belongs_to :large_scale_requirement_template,
+  #            class_name: "RequirementTemplate",
+  #            optional: true
+
   accepts_nested_attributes_for :revision_reasons, allow_destroy: true
   validate :max_undiscarded_revision_reasons
   validate :max_revision_reasons

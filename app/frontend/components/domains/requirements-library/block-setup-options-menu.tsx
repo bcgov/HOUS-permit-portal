@@ -2,10 +2,11 @@ import { Button, Divider, Menu, MenuButton, MenuList } from "@chakra-ui/react"
 import { Archive, CaretDown, ClockClockwise, Copy } from "@phosphor-icons/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
-import React from "react"
+import React, { useState } from "react"
 import { IRequirementBlock } from "../../../models/requirement-block"
 import { useMst } from "../../../setup/root"
 import { ManageMenuItemButton } from "../../shared/base/manage-menu-item"
+import { SharedSpinner } from "../../shared/base/shared-spinner"
 import { RemoveConfirmationModal } from "../../shared/modals/remove-confirmation-modal"
 
 interface IBlockSetupOptionsMenuProps {
@@ -15,35 +16,46 @@ interface IBlockSetupOptionsMenuProps {
 export const BlockSetupOptionsMenu = observer(function BlockSetupOptionsMenu({
   requirementBlock,
 }: IBlockSetupOptionsMenuProps) {
-  const { requirementBlockStore } = useMst()
+  const forEarlyAccess = requirementBlock.isEarlyAccess
+  const { requirementBlockStore, earlyAccessRequirementBlockStore } = useMst()
+  const searchModel = forEarlyAccess ? earlyAccessRequirementBlockStore : requirementBlockStore
+  const [isLoading, setIsLoading] = useState(false)
 
   const handleRemove = async () => {
-    if (await requirementBlock.destroy()) requirementBlockStore?.search()
+    if (await requirementBlock.destroy()) searchModel?.search()
   }
 
   const handleRestore = async () => {
-    if (await requirementBlock.restore()) requirementBlockStore?.search()
+    if (await requirementBlock.restore()) searchModel?.search()
   }
 
   const handleCopy = async () => {
-    if (await requirementBlockStore.copyRequirementBlock(requirementBlock)) requirementBlockStore?.search()
+    setIsLoading(true)
+    if (await requirementBlockStore.copyRequirementBlock(requirementBlock)) {
+      searchModel?.search()
+      setIsLoading(false)
+    }
   }
 
   return (
     <Menu>
-      <MenuButton
-        as={Button}
-        variant="link"
-        color={"text.primary"}
-        textDecoration={"none"}
-        _hover={{
-          textDecoration: "underline",
-        }}
-        rightIcon={<CaretDown />}
-        h={6}
-      >
-        {t("requirementsLibrary.modals.edit.options")}
-      </MenuButton>
+      {isLoading ? (
+        <SharedSpinner />
+      ) : (
+        <MenuButton
+          as={Button}
+          variant="link"
+          color={"text.primary"}
+          textDecoration={"none"}
+          _hover={{
+            textDecoration: "underline",
+          }}
+          rightIcon={<CaretDown />}
+          h={6}
+        >
+          {t("requirementsLibrary.modals.edit.options")}
+        </MenuButton>
+      )}
 
       <MenuList>
         <ManageMenuItemButton onClick={handleCopy} leftIcon={<Copy size={16} />}>

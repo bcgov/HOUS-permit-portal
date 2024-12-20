@@ -3,7 +3,12 @@ import { STEP_CODE_PACKAGE_FILE_REQUIREMENT_CODE } from "../constants"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
 import { IRequirementAttributes, IRequirementBlockParams } from "../types/api-request"
-import { EAutoComplianceModule, EEnergyStepCodeDependencyRequirementCode, ERequirementType } from "../types/enums"
+import {
+  EAutoComplianceModule,
+  EEnergyStepCodeDependencyRequirementCode,
+  ERequirementType,
+  EVisibility,
+} from "../types/enums"
 import { RequirementModel } from "./requirement"
 
 export const RequirementBlockModel = types
@@ -15,6 +20,7 @@ export const RequirementBlockModel = types
     requirements: types.array(RequirementModel),
     associations: types.array(types.string),
     description: types.maybeNull(types.string),
+    visibility: types.enumeration(Object.values(EVisibility)),
     displayDescription: types.maybeNull(types.string),
     sku: types.string,
     createdAt: types.Date,
@@ -49,6 +55,7 @@ export const RequirementBlockModel = types
     get hasAnyDataValidation() {
       return self.requirements.some((requirement) => !!requirement.dataValidation)
     },
+
     get requirementFormDefaults(): IRequirementAttributes[] {
       return self.requirements.map((requirement) => {
         if (!requirement.conditional) return requirement as unknown as IRequirementAttributes
@@ -90,6 +97,9 @@ export const RequirementBlockModel = types
     },
     get isDiscarded() {
       return self.discardedAt !== null
+    },
+    get isEarlyAccess() {
+      return self.visibility === EVisibility.earlyAccess
     },
   }))
   .actions((self) => ({

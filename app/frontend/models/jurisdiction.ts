@@ -1,14 +1,15 @@
 import { t } from "i18next"
-import { Instance, applySnapshot, flow, toGenerator, types } from "mobx-state-tree"
+import { Instance, flow, toGenerator, types } from "mobx-state-tree"
 import * as R from "ramda"
 import { withEnvironment } from "../lib/with-environment"
 import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
 import { IExternalApiKeyParams } from "../types/api-request"
 import { EEnergyStep, EJurisdictionExternalApiState, EZeroCarbonStep } from "../types/enums"
-import { IContact, IPermitTypeRequiredStep, IPermitTypeSubmissionContact, TLatLngTuple } from "../types/types"
+import { IContact, IOption, IPermitTypeRequiredStep, IPermitTypeSubmissionContact, TLatLngTuple } from "../types/types"
 import { ExternalApiKeyModel } from "./external-api-key"
 import { PermitApplicationModel } from "./permit-application"
+import { SandboxModel } from "./sandbox"
 
 export const JurisdictionModel = types
   .model("JurisdictionModel", {
@@ -17,6 +18,7 @@ export const JurisdictionModel = types
     name: types.maybeNull(types.string),
     submissionEmail: types.maybeNull(types.string),
     qualifiedName: types.string,
+    inboxEnabled: types.boolean,
     reverseQualifiedName: types.maybeNull(types.string),
     regionalDistrictName: types.maybeNull(types.string),
     localityType: types.maybeNull(types.string),
@@ -44,6 +46,7 @@ export const JurisdictionModel = types
     ),
     submissionInboxSetUp: types.boolean,
     permitTypeRequiredSteps: types.array(types.frozen<IPermitTypeRequiredStep>()),
+    sandboxes: types.array(types.reference(SandboxModel)),
   })
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -85,6 +88,9 @@ export const JurisdictionModel = types
         ? t(`${i18nPrefix}.stepRequired.zeroCarbon.options.${zeroCarbonStepRequired}`)
         : t(`${i18nPrefix}.notRequired`)
     },
+    get sandboxOptions(): IOption[] {
+      return self.sandboxes.map((s) => ({ label: s.name, value: s.id }))
+    },
   }))
   .views((self) => ({
     get requiredStepsByPermitType() {
@@ -102,7 +108,7 @@ export const JurisdictionModel = types
     update: flow(function* (params) {
       const { ok, data: response } = yield* toGenerator(self.environment.api.updateJurisdiction(self.id, params))
       if (ok) {
-        applySnapshot(self, response.data)
+        self.rootStore.jurisdictionStore.mergeUpdate(response.data, "jurisdictionMap")
       }
       return ok
     }),

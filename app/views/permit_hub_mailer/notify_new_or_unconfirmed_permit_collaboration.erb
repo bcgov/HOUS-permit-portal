@@ -17,7 +17,7 @@
           </p>
 
           <h2 style="color: #292929; font-family: 'Open Sans', sans-serif; font-weight: 700; line-height: 1.4; margin-top: 24px; margin-bottom: 16px; text-align: left; font-size: 22px;">Action
-            Required</h2>
+            Required #1</h2>
           <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
             To participate,
             <% if !@user.confirmed? %>
@@ -29,6 +29,8 @@
               for assistance.
             <% end %>
           </p>
+          <h2 style="color: #292929; font-family: 'Open Sans', sans-serif; font-weight: 700; line-height: 1.4; margin-top: 24px; margin-bottom: 16px; text-align: left; font-size: 22px;">Action
+            Required #2</h2>
           <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
             Once your account is set up, you can view the permit application
             <a href="<%= @permit_collaboration.permit_application.submitter_frontend_url %>" target="_blank" rel="noopener">here</a>.
