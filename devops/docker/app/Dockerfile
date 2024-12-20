@@ -36,8 +36,9 @@ RUN gem install bundler:2.5.4 && \
     bundle install
 
 # Install npm and node modules
+ENV NPM_CONFIG_IGNORE_SCRIPTS=true
 COPY package.json package-lock.json ./
-RUN npm install --legacy-peer-deps --maxsockets=50
+RUN npm ci --ignore-scripts
 
 # Copy application code
 COPY . .
@@ -59,6 +60,7 @@ RUN SECRET_KEY_BASE_DUMMY=1 IS_DOCKER_BUILD=true VITE_RUBY_SSR_BUILD_ENABLED=tru
 
 # Run and own only the runtime files as a non-root user for security
 RUN useradd rails --create-home --shell /bin/bash && \
+    mkdir -p log tmp db storage && \
     chown -R rails:rails /app && \
     chmod -R 777 log tmp db storage
 
