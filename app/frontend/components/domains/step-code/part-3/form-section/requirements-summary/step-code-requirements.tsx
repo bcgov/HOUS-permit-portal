@@ -15,7 +15,7 @@ export const StepCodeRequirements = observer(function StepCodeRequirementsSummar
   return (
     <Grid
       w="full"
-      templateColumns={`auto repeat(3, minmax(auto 170px))`}
+      templateColumns={`auto repeat(3,minmax(auto,190px)`}
       borderWidth={1}
       borderTopWidth={0}
       borderColor="borders.light"
@@ -28,16 +28,16 @@ export const StepCodeRequirements = observer(function StepCodeRequirementsSummar
         <FormLabel m={0}>{t(`${i18nPrefix}.stepCodeRequirements.occupancy`)}</FormLabel>
       </GridData>
       <GridData>
-        <FormLabel m={0}>{t(`${i18nPrefix}.requirementMetrics.teui.label`)}</FormLabel>
+        <FormLabel m={0}>{t("stepCode.part3.metrics.teui.label")}</FormLabel>
       </GridData>
       <GridData>
-        <FormLabel m={0}>{t(`${i18nPrefix}.requirementMetrics.tedi.label`)}</FormLabel>
+        <FormLabel m={0}>{t("stepCode.part3.metrics.tedi.label")}</FormLabel>
       </GridData>
       <GridData>
-        <FormLabel m={0}>{t(`${i18nPrefix}.requirementMetrics.ghgi.label`)}</FormLabel>
+        <FormLabel m={0}>{t("stepCode.part3.metrics.ghgi.label")}</FormLabel>
       </GridData>
 
-      {checklist.complianceReport.requirements.stepCodePortions.occupanciesRequirements.map((ocReq) => (
+      {checklist.complianceReport.performance.requirements.stepCodePortions.occupanciesRequirements.map((ocReq) => (
         <>
           <GridData justifyContent="flex-end" borderTop="none">
             <Tooltip label={t(`stepCode.part3.stepCodeOccupancyKeys.${ocReq.occupancy}`)}>
@@ -47,7 +47,7 @@ export const StepCodeRequirements = observer(function StepCodeRequirementsSummar
           <GridData borderTop="none">
             <FormControl>
               <FormHelperText mt={0}>
-                <Trans i18nKey={`${i18nPrefix}.requirementMetrics.teui.units`} components={{ sup: <sup /> }} />
+                <Trans i18nKey={"stepCode.part3.metrics.teui.units"} components={{ sup: <sup /> }} />
               </FormHelperText>
               <Input isDisabled value={ocReq.teui || "-"} />
             </FormControl>
@@ -55,7 +55,7 @@ export const StepCodeRequirements = observer(function StepCodeRequirementsSummar
           <GridData borderTop="none">
             <FormControl>
               <FormHelperText mt={0}>
-                <Trans i18nKey={`${i18nPrefix}.requirementMetrics.tedi.units`} components={{ sup: <sup /> }} />
+                <Trans i18nKey={"stepCode.part3.metrics.tedi.units"} components={{ sup: <sup /> }} />
               </FormHelperText>
               <Input isDisabled value={ocReq.tedi || "-"} />
             </FormControl>
@@ -63,10 +63,7 @@ export const StepCodeRequirements = observer(function StepCodeRequirementsSummar
           <GridData borderTop="none">
             <FormControl>
               <FormHelperText mt={0}>
-                <Trans
-                  i18nKey={`${i18nPrefix}.requirementMetrics.ghgi.units`}
-                  components={{ sup: <sup />, sub: <sub /> }}
-                />
+                <Trans i18nKey={"stepCode.part3.metrics.ghgi.units"} components={{ sup: <sup />, sub: <sub /> }} />
               </FormHelperText>
               <Input isDisabled value={ocReq.ghgi || "-"} />
             </FormControl>

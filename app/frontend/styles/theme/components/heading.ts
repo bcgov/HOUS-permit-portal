@@ -21,6 +21,10 @@ export const Heading = {
         borderColor: "theme.yellow",
       },
     },
+    heading3: {
+      as: "h3",
+      fontSize: "lg",
+    },
     heading4: {
       as: "h4",
       fontSize: "lg",

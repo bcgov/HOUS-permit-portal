@@ -22,8 +22,8 @@ class StepCode::Part3::V1::Performance::AdjustedResults < StepCode::Part3::V1::P
       return if results_as_modelled[:total_energy] == 0
 
       results_as_modelled[:total_energy] -
-        corridor_pressurization_adjustment[:total_energy] +
-        suite_sub_metering_adjustment[:total_energy]
+        (corridor_pressurization_adjustment[:total_energy] || 0) +
+        (suite_sub_metering_adjustment[:total_energy] || 0)
     end
   rescue StandardError
     nil

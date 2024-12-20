@@ -293,6 +293,7 @@ export enum EEnergyStep {
 }
 
 export enum EZeroCarbonStep {
+  zero = "0",
   one = "1",
   two = "2",
   three = "3",
@@ -609,7 +610,6 @@ export enum EEnergyOutputUseType {
   fans = "fans",
   domesticHotWater = "domestic_hot_water",
   plugLoads = "plug_loads",
-  heatingGas = "heating_gas",
   other = "other",
 }
 

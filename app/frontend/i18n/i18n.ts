@@ -156,6 +156,7 @@ const options = {
           backHome: "Back to home",
           yes: "Yes",
           no: "No",
+          na: "N/A",
           show: "Show",
           hide: "Hide",
           setup: "Setup",
@@ -1269,7 +1270,6 @@ const options = {
                   fans: "Fans",
                   domestic_hot_water: "Domestic hot water",
                   plug_loads: "Plug loads",
-                  heating_gas: "Heating (gas)",
                   other: "Other",
                 },
                 fuelTypes: {
@@ -1580,6 +1580,12 @@ const options = {
                 hint: "Use SRE (sensible recovery efficiency) per CoV EMG v2 2.6.1.",
               },
             },
+            metrics: {
+              totalEnergy: { label: "Total energy", units: "kWh" },
+              teui: { label: "TEUI", units: "kWh/m<sup>2</sup>/year" },
+              tedi: { label: "TEDI", units: "kWh/m<sup>2</sup>/year" },
+              ghgi: { label: "GHGI", units: "kgCO<sub>2</sub>/m<sup>2</sup>/year" },
+            },
             requirementsSummary: {
               heading: "Performance requirements summary",
               missingInfo: {
@@ -1595,12 +1601,6 @@ const options = {
                   baseline: "Single-occupancy building with no Step 2, 3, or 4 occupancy classes",
                   mixedUse: "Mixed-use building",
                 },
-              },
-              requirementMetrics: {
-                totalEnergy: { label: "Total energy", units: "kWh" },
-                teui: { label: "TEUI", units: "kWh/m<sup>2</sup>/year" },
-                tedi: { label: "TEDI", units: "kWh/m<sup>2</sup>/year" },
-                ghgi: { label: "GHGI", units: "kgCO<sub>2</sub>/m<sup>2</sup>/year" },
               },
               baselineRequirements: {
                 title: "Baseline performance requirements results",
@@ -1667,6 +1667,71 @@ const options = {
                 completedByOrganization: "Organization or company name",
                 completedByPhoneNumber: "Phone",
               },
+            },
+            stepCodeSummary: {
+              missingInfo: {
+                title: "You haven't entered any relevant performance details",
+                message:
+                  "Performance requirements will appear here after you have entered information in <baselineOccupanciesLink>Baseline energy performance requirements</baselineOccupanciesLink> and <stepCodeOccupanciesLink>Performance requirements for Step 2, 3, and 4 Buildings</stepCodeOccupanciesLink>.",
+              },
+              stepCode: {
+                heading: "Step Code summary",
+                compliancePath: "BC Building Code Performance Compliance Path: ",
+                stepCodeOccupancy: { label: "Step Code occupancy", mixedUse: "Refer to mixed-use section" },
+                required: "Required",
+                achieved: "Achieved",
+                performanceRequirement: {
+                  notAchieved: "Requirement not achieved",
+                },
+                energy: {
+                  title: "Energy Step Code",
+                  multiOccupancy:
+                    "Project has multiple Step Code occupancies. Refer to “Summary for mixed-use buildings” for compliance results.",
+                  stepRequired: "Step required",
+                  achieved: "Step achieved",
+                  notAchieved: "Step not achieved",
+                  result: {
+                    success: "Required step for Energy Step Code achieved",
+                    failure: "Required step for Energy Step Code not achieved",
+                  },
+                },
+                zeroCarbon: {
+                  title: "Zero Carbon Step Code",
+                  multiOccupancy:
+                    "Project has multiple Step Code occupancies. Refer to “Summary for mixed-use buildings” for compliance results.",
+                  levelRequired: "Level required",
+                  required: "Required",
+                  notRequired: "No Step Code requirement",
+                  achieved: "Level achieved",
+                  notAchieved: "Level not achieved",
+                  result: {
+                    success: "Required step for Zero Carbon Step Code achieved",
+                    failure: "Required step for Zero Carbon Step Code not achieved",
+                  },
+                },
+              },
+              mixedUse: {
+                heading: "Summary for mixed-use buildings",
+                wholeBuilding: {
+                  title: "Whole building requirements",
+                  requirements: "Blended requirements",
+                  performance: "Performance achieved",
+                  compliance: "Does building comply?",
+                },
+                stepCode: {
+                  title: "Step code requirements",
+                  requirement: "TEDI requirement",
+                  performance: "TEDI achieved",
+                  compliance: "Does building comply?",
+                },
+                occupancies: {
+                  title: "Step code occupancies",
+                  occupancy: "Occupancy",
+                  energy: "Energy requirement",
+                  ghgi: "Zero Carbon requirement",
+                },
+              },
+              cta: "Save and exit",
             },
           },
           title: "Step code auto-compliance tool",
@@ -1780,6 +1845,7 @@ const options = {
             codeComplianceSummary: {
               heading: "B: Code Compliance Summary",
               required: "Required",
+              achieved: "Achieved",
               notMet: "not achieved",
               stepRequirement: {
                 heading: "Step Requirements",
@@ -1815,6 +1881,7 @@ const options = {
                 stepRequired: "Level required",
                 stepProposed: "Proposed step achieved",
                 steps: {
+                  "0": "Not required",
                   "1": "EL 1",
                   "2": "EL 2",
                   "3": "EL 3",
@@ -2103,6 +2170,7 @@ const options = {
                 zeroCarbon: {
                   title: "Zero Carbon Step Code Level",
                   options: {
+                    "0": "Not required",
                     "1": "EL 1 - Measure Only",
                     "2": "EL 2 - Moderate",
                     "3": "EL 3 - Strong",

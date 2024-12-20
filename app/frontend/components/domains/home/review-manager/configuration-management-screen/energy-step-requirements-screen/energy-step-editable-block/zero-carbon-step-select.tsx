@@ -38,6 +38,7 @@ export const ZeroCarbonStepSelect = observer(function ZeroCarbonStepSelect({
   } = useMst()
 
   const options = getZeroCarbonStepOptions(allowNull)
+  console.log("*** value", value)
 
   return (
     <Popover placement="bottom-end">
@@ -56,11 +57,9 @@ export const ZeroCarbonStepSelect = observer(function ZeroCarbonStepSelect({
                 shadow="base"
                 isDisabled={isDisabled}
               >
-                {value === undefined
+                {value === undefined || value === null
                   ? t(`ui.selectPlaceholder`)
-                  : value
-                    ? t(`${i18nPrefix}.stepRequired.zeroCarbon.options.${value}`)
-                    : t(`${i18nPrefix}.notRequired`)}
+                  : t(`${i18nPrefix}.stepRequired.zeroCarbon.options.${value}`)}
               </Input>
               <InputRightElement children={<CaretDown color="gray.300" />} />
             </InputGroup>

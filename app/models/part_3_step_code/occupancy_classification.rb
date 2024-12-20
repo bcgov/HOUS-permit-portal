@@ -16,4 +16,10 @@ class Part3StepCode::OccupancyClassification < ApplicationRecord
   enum occupancy_type: %i[baseline step_code], _suffix: :occupancy
 
   validates :key, presence: true, uniqueness: { scope: :checklist_id }
+
+  def energy_step_required
+    return unless step_code_occupancy?
+
+    self[:energy_step_required].presence || ENV["PART_3_MIN_ENERGY_STEP"].to_i
+  end
 end

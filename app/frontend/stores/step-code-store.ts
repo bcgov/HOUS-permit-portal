@@ -52,7 +52,7 @@ export const StepCodeStoreModel = types
     },
     getZeroCarbonStepOptions(allowNull: boolean = false): EZeroCarbonStep[] {
       const zeroCarbonSteps = self.currentStepCode?.zeroCarbonSteps || self.selectOptions.zeroCarbonSteps
-      return (allowNull ? [...zeroCarbonSteps, null] : zeroCarbonSteps) as EZeroCarbonStep[]
+      return (allowNull ? [...zeroCarbonSteps, 0] : zeroCarbonSteps) as EZeroCarbonStep[]
     },
   }))
   .actions((self) => ({

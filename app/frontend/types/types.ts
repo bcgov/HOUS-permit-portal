@@ -659,12 +659,15 @@ export type TPart3NavLinkKey = keyof IPart3SectionCompletionStatus
 export type TPart3NavSectionKey = "overview" | "compliance" | "results"
 
 interface IPart3ComplianceMetrics {
-  modelled_floor_area: string
+  modelled_floor_area?: string
   tedi: string
   teui: string
   ghgi: string
   totalEnergy?: string
   occupancy?: EStepCodeOccupancyKey
+  energyStepAchieved?: EEnergyStep
+  zeroCarbonStepAchieved?: EZeroCarbonStep
+  performanceRequirementAchieved?: EBaselinePerformanceRequirement
 }
 
 interface IPart3StepCodeComplianceRequirements {
@@ -677,6 +680,16 @@ interface IPart3ComplianceReportRequirements {
   wholeBuilding: IPart3ComplianceMetrics
 }
 
-export interface IPart3ComplianceReport {
+interface IPart3ComplianceReportPerformance {
   requirements: IPart3ComplianceReportRequirements
+  resultsAsModelled: IPart3ComplianceMetrics
+  corridorPressurizedAdjustment: IPart3ComplianceMetrics
+  suiteSubMeteringAdjustment: IPart3ComplianceMetrics
+  adjustedResults: IPart3ComplianceMetrics
+  complianceSummary: IPart3ComplianceMetrics
+}
+
+export interface IPart3ComplianceReport {
+  // occupancies: IPart3ComplianceMetrics[]
+  performance: IPart3ComplianceReportPerformance
 }
