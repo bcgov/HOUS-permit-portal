@@ -1,7 +1,7 @@
 import { Font, Page } from "@react-pdf/renderer"
 import { t } from "i18next"
 import React from "react"
-import { IStepCodeChecklist } from "../../../../../../models/part-9-step-code-checklist"
+import { IPart9StepCodeChecklist } from "../../../../../../models/part-9-step-code-checklist"
 import { IPermitApplication } from "../../../../../../models/permit-application"
 import { PDFDocument } from "../../../../../shared/pdf"
 import { CoverPage } from "../../../../../shared/permit-applications/pdf-content/cover"
@@ -18,23 +18,25 @@ import { ZeroCarbonStepCompliance } from "./zero-carbon-step-compliance"
 Font.registerHyphenationCallback((word) => [word])
 
 interface IProps {
-  checklist: IStepCodeChecklist
-  permitApplication: IPermitApplication
+  checklist: IPart9StepCodeChecklist
+  permitApplication?: IPermitApplication
   assetDirectoryPath?: string
 }
 
-export const PDFContent = function StepCodeChecklistPDFContent({
+export const Part9PDFContent = function StepCodeChecklistPDFContent({
   checklist,
   permitApplication,
   assetDirectoryPath,
 }: IProps) {
   return (
     <PDFDocument assetDirectoryPath={assetDirectoryPath}>
-      <CoverPage
-        permitApplication={permitApplication}
-        subTitle={t("stepCodeChecklist.pdf.for")}
-        assetDirectoryPath={assetDirectoryPath}
-      />
+      {permitApplication && (
+        <CoverPage
+          permitApplication={permitApplication}
+          subTitle={t("stepCodeChecklist.part9.pdf.for")}
+          assetDirectoryPath={assetDirectoryPath}
+        />
+      )}
       <Page size="LETTER" style={page}>
         <ProjectInfo checklist={checklist} />
         <ComplianceSummary checklist={checklist} />
@@ -43,7 +45,7 @@ export const PDFContent = function StepCodeChecklistPDFContent({
         <EnergyPerformanceCompliance checklist={checklist} />
         <EnergyStepCompliance report={checklist.selectedReport.energy} />
         <ZeroCarbonStepCompliance report={checklist.selectedReport.zeroCarbon} />
-        <Footer permitApplication={permitApplication} />
+        {permitApplication && <Footer permitApplication={permitApplication} />}
       </Page>
     </PDFDocument>
   )

@@ -14,10 +14,10 @@ import { formattedStringToNumber, numberToFormattedString } from "../../../../..
 import { TextFormControl } from "../../../../../shared/form/input-form-control"
 import { InfoTooltip } from "../../../../../shared/info-tooltip"
 import FuelTypeSelect from "../../../../../shared/select/selectors/fuel-type-select"
-import { HStack } from "../../../part-9/checklist/pdf-content/shared/h-stack"
-import { GridColumnHeader } from "../../../part-9/checklist/shared/grid/column-header"
-import { GridData } from "../../../part-9/checklist/shared/grid/data"
-import { GridRowHeader } from "../../../part-9/checklist/shared/grid/row-header"
+import { HStack } from "../../../step-generic/pdf-content/shared/h-stack"
+import { GridColumnHeader } from "../../../step-generic/shared/grid/column-header"
+import { GridData } from "../../../step-generic/shared/grid/data"
+import { GridRowHeader } from "../../../step-generic/shared/grid/row-header"
 
 interface IProps extends Partial<GridProps> {}
 

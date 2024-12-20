@@ -2,9 +2,9 @@ import { Grid } from "@chakra-ui/react"
 import { t } from "i18next"
 import React from "react"
 import { IStepCodeEnergyComplianceReport } from "../../../../../../models/step-code-energy-compliance-report"
-import { GridColumnHeader } from "../shared/grid/column-header"
-import { GridData } from "../shared/grid/data"
-import { GridRowHeader } from "../shared/grid/row-header"
+import { GridColumnHeader } from "../../../step-generic/shared/grid/column-header"
+import { GridData } from "../../../step-generic/shared/grid/data"
+import { GridRowHeader } from "../../../step-generic/shared/grid/row-header"
 import { i18nPrefix } from "./i18n-prefix"
 
 interface IProps {

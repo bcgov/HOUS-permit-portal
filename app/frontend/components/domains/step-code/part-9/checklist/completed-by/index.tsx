@@ -4,16 +4,16 @@ import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { Controller, useFormContext } from "react-hook-form"
-import { IStepCodeChecklist } from "../../../../../../models/part-9-step-code-checklist"
+import { IPart9StepCodeChecklist } from "../../../../../../models/part-9-step-code-checklist"
 import { IContact, IOption } from "../../../../../../types/types"
 import { ContactModal } from "../../../../../shared/contact/contact-modal"
 import { DatePicker } from "../../../../../shared/date-picker"
 import { PhoneFormControl, TextFormControl } from "../../../../../shared/form/input-form-control"
-import { ChecklistSection } from "../shared/checklist-section"
+import { ChecklistSection } from "../../../step-generic/shared/checklist-section"
 import { i18nPrefix } from "./i18n-prefix"
 
 interface IProps {
-  checklist: IStepCodeChecklist
+  checklist: IPart9StepCodeChecklist
 }
 
 export const CompletedBy = observer(function CompletedBy({ checklist }: IProps) {

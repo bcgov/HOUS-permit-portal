@@ -2,7 +2,7 @@ import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React, { forwardRef } from "react"
 import { IStepCodeZeroCarbonComplianceReport } from "../../../../../../models/step-code-zero-carbon-compliance-report"
-import { ChecklistSection } from "../shared/checklist-section"
+import { ChecklistSection } from "../../../step-generic/shared/checklist-section"
 import { ZeroCarbonComplianceGrid } from "./compliance-grid"
 import { i18nPrefix } from "./i18n-prefix"
 

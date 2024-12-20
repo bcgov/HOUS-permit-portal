@@ -1,7 +1,7 @@
 import { View } from "@react-pdf/renderer"
 import * as R from "ramda"
 import React from "react"
-import { theme } from "../../../../../../../styles/theme"
+import { theme } from "../../../../../../styles/theme"
 
 export function GridItem({ style = {}, children = null }) {
   return (

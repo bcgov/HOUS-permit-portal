@@ -1,7 +1,7 @@
 import { Grid } from "@chakra-ui/react"
 import { t } from "i18next"
 import React from "react"
-import { GridColumnHeader } from "../../shared/grid/column-header"
+import { GridColumnHeader } from "../../../../step-generic/shared/grid/column-header"
 import { i18nPrefix } from "../i18n-prefix"
 import { Characteristic } from "./characteristic"
 

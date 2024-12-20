@@ -101,7 +101,7 @@ function EnergyAdvisor({ checklist }) {
 
   return (
     <Contact
-      title={t("stepCodeChecklist.edit.completedBy.energyAdvisor")}
+      title={t("stepCodeChecklist.part9.edit.completedBy.energyAdvisor")}
       name={completedBy}
       email={completedByEmail}
       phone={completedByPhone}
