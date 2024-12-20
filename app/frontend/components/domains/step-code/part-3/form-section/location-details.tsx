@@ -74,7 +74,8 @@ export const LocationDetails = observer(function Part3StepCodeFormLocationDetail
             <Input
               maxW={"200px"}
               type="number"
-              step={1}
+              step={0.1}
+              textAlign="left"
               {...register("buildingHeight", { required: t(`${i18nPrefix}.aboveGradeStories.error`) })}
             />
           </FormControl>
@@ -89,6 +90,7 @@ export const LocationDetails = observer(function Part3StepCodeFormLocationDetail
             <Input
               maxW={"200px"}
               type="number"
+              textAlign="left"
               {...register("heatingDegreeDays", { required: t(`${i18nPrefix}.hdd.error`) })}
             />
           </FormControl>

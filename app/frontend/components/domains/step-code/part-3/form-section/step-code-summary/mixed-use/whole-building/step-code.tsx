@@ -16,7 +16,7 @@ export const StepCodeWholeBuildingSummary = observer(function StepCodeWholeBuild
   const ghgiComplies = !!complianceSummary.ghgi
 
   return (
-    <Grid templateColumns="160px repeat(3, 1fr)" borderRightWidth={1} borderColor="borders.light">
+    <Grid templateColumns="160px repeat(3, 1fr)" borderRightWidth={1} borderBottomWidth={1} borderColor="borders.light">
       <GridItem />
 
       <GridData>

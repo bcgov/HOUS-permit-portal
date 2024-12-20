@@ -15,7 +15,7 @@ export const BaselineWholeBuildingSummary = observer(function BaselineWholeBuild
   const i18nPrefix = "stepCode.part3.stepCodeSummary.mixedUse.wholeBuilding"
 
   return (
-    <Grid templateColumns="300px 1fr" borderRightWidth={1} borderColor="borders.light">
+    <Grid templateColumns="300px 1fr" borderRightWidth={1} borderBottomWidth={1} borderColor="borders.light">
       <GridItem />
       <GridData>
         <FormControl>

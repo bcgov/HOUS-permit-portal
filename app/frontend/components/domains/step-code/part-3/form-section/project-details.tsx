@@ -108,7 +108,7 @@ const Field = function Field({ label, value, ...props }: IFieldProps) {
   return (
     <FormControl {...props}>
       <FormLabel>{label}</FormLabel>
-      <Input isDisabled value={value} textOverflow="ellipsis" />
+      <Input isDisabled value={value} textOverflow="ellipsis" textAlign="left" />
     </FormControl>
   )
 }

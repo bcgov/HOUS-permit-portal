@@ -14,7 +14,12 @@ export const StepCodePortionsPerformance = function MixedUseStepCodePortionsPerf
     <Flex direction="column" gap={2}>
       <FormLabel>{t(`${i18nPrefix}.title`)}</FormLabel>
 
-      <Grid templateColumns="160px repeat(3, 1fr)" borderRightWidth={1} borderColor="borders.light">
+      <Grid
+        templateColumns="160px repeat(3, 1fr)"
+        borderRightWidth={1}
+        borderBottomWidth={1}
+        borderColor="borders.light"
+      >
         <GridData>
           <FormLabel>{t(`${i18nPrefix}.requirement`)}</FormLabel>
         </GridData>

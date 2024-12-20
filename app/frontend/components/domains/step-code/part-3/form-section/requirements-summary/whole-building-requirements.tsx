@@ -15,6 +15,7 @@ interface IProps {
 export const WholeBuildingRequirements = observer(function WholeBuildingRequirementsSummary({ isMixedUse }: IProps) {
   const i18nPrefix = "stepCode.part3.requirementsSummary"
   const { checklist } = usePart3StepCode()
+  const { requirements } = checklist.complianceReport.performance
 
   return (
     <Grid w="full" templateColumns={`repeat(3, auto)`} borderWidth={1} borderTopWidth={0} borderColor="borders.light">
@@ -27,7 +28,10 @@ export const WholeBuildingRequirements = observer(function WholeBuildingRequirem
           <FormHelperText>
             <Trans i18nKey={"stepCode.part3.metrics.teui.units"} components={{ sup: <sup /> }} />
           </FormHelperText>
-          <Input isDisabled value={checklist.complianceReport.performance.requirements.wholeBuilding.teui || "-"} />
+          <Input
+            isDisabled
+            value={requirements.wholeBuilding.teui ? parseFloat(requirements.wholeBuilding.teui).toFixed(2) : "-"}
+          />
         </FormControl>
       </GridData>
       <GridData>
@@ -36,7 +40,10 @@ export const WholeBuildingRequirements = observer(function WholeBuildingRequirem
           <FormHelperText>
             <Trans i18nKey={"stepCode.part3.metrics.tedi.units"} components={{ sup: <sup /> }} />
           </FormHelperText>
-          <Input isDisabled value={checklist.complianceReport.performance.requirements.wholeBuilding.tedi || "-"} />
+          <Input
+            isDisabled
+            value={requirements.wholeBuilding.tedi ? parseFloat(requirements.wholeBuilding.tedi).toFixed(2) : "-"}
+          />
         </FormControl>
       </GridData>
       <GridData>
@@ -45,7 +52,10 @@ export const WholeBuildingRequirements = observer(function WholeBuildingRequirem
           <FormHelperText>
             <Trans i18nKey={"stepCode.part3.metrics.ghgi.units"} components={{ sup: <sup />, sub: <sub /> }} />
           </FormHelperText>
-          <Input isDisabled value={checklist.complianceReport.performance.requirements.wholeBuilding.ghgi || "-"} />
+          <Input
+            isDisabled
+            value={requirements.wholeBuilding.ghgi ? parseFloat(requirements.wholeBuilding.ghgi).toFixed(2) : "-"}
+          />
         </FormControl>
       </GridData>
       <GridData colSpan={3}>
