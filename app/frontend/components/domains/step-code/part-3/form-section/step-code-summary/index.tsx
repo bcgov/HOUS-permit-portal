@@ -1,4 +1,4 @@
-import { Flex, FormHelperText, Heading, Input, Text } from "@chakra-ui/react"
+import { Button, Flex, FormControl, FormHelperText, Heading, Input, Text } from "@chakra-ui/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -26,7 +26,8 @@ export const StepCodeSummary = observer(function StepCodeSummary() {
   const onSubmit = async () => {
     await checklist.completeSection("requirementsSummary")
 
-    navigate(`permit-applications/${permitApplicationId}/edit`)
+    // TODO: early access navigate?
+    permitApplicationId && navigate(`permit-applications/${permitApplicationId}/edit`)
   }
 
   const stepCodeOccupanciesPath = checklist.isComplete("stepCodeOccupancies")
@@ -68,6 +69,13 @@ export const StepCodeSummary = observer(function StepCodeSummary() {
           <MixedUsePerformance />
         </Flex>
       )}
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <FormControl>
+          <Button type="submit" variant="primary" isLoading={isSubmitting} isDisabled={isSubmitting}>
+            {t(`${i18nPrefix}.cta`)}
+          </Button>
+        </FormControl>
+      </form>
     </Flex>
   )
 })
