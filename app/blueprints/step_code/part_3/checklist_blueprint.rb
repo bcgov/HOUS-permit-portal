@@ -107,7 +107,7 @@ class StepCode::Part3::ChecklistBlueprint < Blueprinter::Base
 
   field :compliance_report do |checklist, _options|
     StepCode::Part3::ComplianceReportBlueprint.render_as_hash(
-      checklist.compliance_report
+      checklist.compliance_report.results
     )
   end
 end

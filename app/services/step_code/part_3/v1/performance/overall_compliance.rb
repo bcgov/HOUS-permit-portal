@@ -12,7 +12,8 @@ class StepCode::Part3::V1::Performance::OverallCompliance < StepCode::Part3::V1:
       self.results = {
         **results,
         energy_step_achieved:,
-        zero_carbon_step_achieved:
+        zero_carbon_step_achieved:,
+        performance_requirement_achieved:
       }
     end
   end
@@ -80,6 +81,12 @@ class StepCode::Part3::V1::Performance::OverallCompliance < StepCode::Part3::V1:
     nil
   end
 
+  def performance_requirement_achieved
+    return unless step_code_occupancies.empty? && baseline_occupancies.present?
+
+    total_energy ? baseline_occupancies.first.performance_requirement : nil
+  end
+
   def step_code_occupancy
     @step_code_occupancy ||=
       step_code_occupancies.length == 1 && step_code_occupancies.first
@@ -88,6 +95,11 @@ class StepCode::Part3::V1::Performance::OverallCompliance < StepCode::Part3::V1:
   def step_code_occupancies
     @step_code_occupancies ||=
       checklist.occupancy_classifications.step_code_occupancy
+  end
+
+  def baseline_occupancies
+    @baseline_occupancies ||=
+      checklist.occupancy_classifications.baseline_occupancy
   end
 
   def whole_building_tedi_compliance?

@@ -23,32 +23,29 @@ export const WholeBuildingRequirements = observer(function WholeBuildingRequirem
       </GridColumnHeader>
       <GridData>
         <FormControl>
-          <FormLabel>{t(`${i18nPrefix}.requirementMetrics.teui.label`)}</FormLabel>
+          <FormLabel>{t("stepCode.part3.metrics.teui.label")}</FormLabel>
           <FormHelperText>
-            <Trans i18nKey={`${i18nPrefix}.requirementMetrics.teui.units`} components={{ sup: <sup /> }} />
+            <Trans i18nKey={"stepCode.part3.metrics.teui.units"} components={{ sup: <sup /> }} />
           </FormHelperText>
-          <Input isDisabled value={checklist.complianceReport.requirements.wholeBuilding.teui || "-"} />
+          <Input isDisabled value={checklist.complianceReport.performance.requirements.wholeBuilding.teui || "-"} />
         </FormControl>
       </GridData>
       <GridData>
         <FormControl>
-          <FormLabel>{t(`${i18nPrefix}.requirementMetrics.tedi.label`)}</FormLabel>
+          <FormLabel>{t("stepCode.part3.metrics.tedi.label")}</FormLabel>
           <FormHelperText>
-            <Trans i18nKey={`${i18nPrefix}.requirementMetrics.tedi.units`} components={{ sup: <sup /> }} />
+            <Trans i18nKey={"stepCode.part3.metrics.tedi.units"} components={{ sup: <sup /> }} />
           </FormHelperText>
-          <Input isDisabled value={checklist.complianceReport.requirements.wholeBuilding.tedi || "-"} />
+          <Input isDisabled value={checklist.complianceReport.performance.requirements.wholeBuilding.tedi || "-"} />
         </FormControl>
       </GridData>
       <GridData>
         <FormControl>
-          <FormLabel>{t(`${i18nPrefix}.requirementMetrics.ghgi.label`)}</FormLabel>
+          <FormLabel>{t("stepCode.part3.metrics.ghgi.label")}</FormLabel>
           <FormHelperText>
-            <Trans
-              i18nKey={`${i18nPrefix}.requirementMetrics.ghgi.units`}
-              components={{ sup: <sup />, sub: <sub /> }}
-            />
+            <Trans i18nKey={"stepCode.part3.metrics.ghgi.units"} components={{ sup: <sup />, sub: <sub /> }} />
           </FormHelperText>
-          <Input isDisabled value={checklist.complianceReport.requirements.wholeBuilding.ghgi || "-"} />
+          <Input isDisabled value={checklist.complianceReport.performance.requirements.wholeBuilding.ghgi || "-"} />
         </FormControl>
       </GridData>
       <GridData colSpan={3}>

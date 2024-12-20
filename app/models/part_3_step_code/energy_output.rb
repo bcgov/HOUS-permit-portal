@@ -12,10 +12,11 @@ class Part3StepCode::EnergyOutput < ApplicationRecord
   # Validate use_type uniqueness within checklist, except for 'other' use type as it's user defined
   # and it's uniqueness is determined by the name instead of the use_type
   validates :use_type,
+            presence: true,
             uniqueness: {
-              scope: :checklist_id
+              scope: %i[checklist_id source]
             },
-            unless: -> { other? }
+            unless: :other?
 
   enum source: %i[modelled reference]
   enum use_type: {
@@ -27,7 +28,6 @@ class Part3StepCode::EnergyOutput < ApplicationRecord
          fans: 5,
          domestic_hot_water: 6,
          plug_loads: 7,
-         heating_gas: 8,
-         other: 9
+         other: 8
        }
 end

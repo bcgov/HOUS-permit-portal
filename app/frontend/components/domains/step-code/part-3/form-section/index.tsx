@@ -21,6 +21,7 @@ import { ResidentialAdjustments } from "./residential-adjustments"
 import { StartPage } from "./start-page"
 import { StepCodeOccupancies } from "./step-code-occupancies"
 import { StepCodeOccupanciesPerformanceRequirements } from "./step-code-occupancies/performance-requirements"
+import { StepCodeSummary } from "./step-code-summary"
 
 export const FormSection = observer(function Part3StepCodeFormSection() {
   const { section } = useParams()
@@ -66,5 +67,7 @@ export const FormSection = observer(function Part3StepCodeFormSection() {
       return <DocumentReferences />
     case "contact":
       return <Contact />
+    case "step-code-summary":
+      return <StepCodeSummary />
   }
 })

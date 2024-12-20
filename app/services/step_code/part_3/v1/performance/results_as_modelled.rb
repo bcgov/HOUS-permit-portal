@@ -43,7 +43,7 @@ class StepCode::Part3::V1::Performance::ResultsAsModelled < StepCode::Part3::V1:
   def total_energy_use
     @total_energy_use ||=
       checklist.modelled_energy_outputs.sum(:annual_energy) -
-        checklist.generated_electricity
+        (checklist.generated_electricity || 0)
   rescue StandardError
     nil
   end

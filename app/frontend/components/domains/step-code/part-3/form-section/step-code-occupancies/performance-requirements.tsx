@@ -44,8 +44,8 @@ export const StepCodeOccupanciesPerformanceRequirements = observer(
           id: oc.id,
           key: oc.key,
           modelledFloorArea: parseFloat(oc.modelledFloorArea),
-          energyStepRequired: oc.energyStepRequired || undefined,
-          zeroCarbonStepRequired: oc.zeroCarbonStepRequired || undefined,
+          energyStepRequired: oc.energyStepRequired,
+          zeroCarbonStepRequired: oc.zeroCarbonStepRequired,
           requirementSource: oc.requirementSource,
         })),
       },
@@ -240,13 +240,17 @@ const OccupancyRow = observer(function OccupancyRow({ field, idx }: IOccupancyPr
           <Controller
             control={control}
             rules={{
-              required: t(`${i18nPrefix}.zeroCarbonStepRequired.error`, {
-                occupancyName: t(`${oci18nPrefix}.${field.key}`),
-              }),
+              validate: (value, formValues) =>
+                value === undefined
+                  ? t(`${i18nPrefix}.zeroCarbonStepRequired.error`, {
+                      occupancyName: t(`${oci18nPrefix}.${field.key}`),
+                    })
+                  : true,
             }}
             name={`stepCodeOccupanciesAttributes.${idx}.zeroCarbonStepRequired`}
             render={({ field: { onChange, value } }) => {
-              return <ZeroCarbonStepSelect onChange={onChange} value={value} />
+              console.log("*** value", value)
+              return <ZeroCarbonStepSelect onChange={onChange} value={value} allowNull />
             }}
           />
           <FormHelperText color="semantic.error">

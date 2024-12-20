@@ -1,3 +1,3 @@
 class StepCode::Part3::ComplianceReportBlueprint < Blueprinter::Base
-  fields :requirements, :performance
+  fields :occupancies, :performance
 end

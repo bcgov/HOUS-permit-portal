@@ -25,7 +25,7 @@ export const RequirementsSummary = observer(function RequirementsSummary() {
   const stepCodeOccupanciesPath = checklist.isComplete("stepCodeOccupancies")
     ? "step-code-performance-requirements"
     : "step-code-occupancies"
-  const BaselineOccupanciesPath = checklist.isComplete("baselineOccupancies")
+  const baselineOccupanciesPath = checklist.isComplete("baselineOccupancies")
     ? "baseline-details"
     : "baseline-occupancies"
 

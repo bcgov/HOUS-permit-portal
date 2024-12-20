@@ -20,8 +20,7 @@ RSpec.describe Part3StepCode::EnergyOutput, type: :model do
                fans: 5,
                domestic_hot_water: 6,
                plug_loads: 7,
-               heating_gas: 8,
-               other: 9
+               other: 8
              )
     end
   end
