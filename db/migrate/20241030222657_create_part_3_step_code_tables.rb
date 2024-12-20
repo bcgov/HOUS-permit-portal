@@ -2,7 +2,7 @@ class CreatePart3StepCodeTables < ActiveRecord::Migration[7.1]
   def change
     create_table :part_3_step_code_checklists, id: :uuid do |t|
       t.references :step_code, foreign_key: :true, type: :uuid
-      t.decimal :building_height
+      t.integer :building_height
       t.integer :building_code_version
       t.integer :heating_degree_days
       t.integer :climate_zone
@@ -21,8 +21,6 @@ class CreatePart3StepCodeTables < ActiveRecord::Migration[7.1]
       t.string :simulation_weather_file
       t.decimal :above_grade_wall_area
       t.decimal :window_to_wall_area_ratio
-      t.decimal :vertical_facade_to_floor_area_ratio
-      t.decimal :window_to_floor_area_ratio
       t.decimal :design_airtightness
       t.decimal :tested_airtightness
       t.decimal :modelled_infiltration_rate

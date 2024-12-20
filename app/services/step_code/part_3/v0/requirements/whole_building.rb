@@ -19,9 +19,10 @@ class StepCode::Part3::V0::Requirements::WholeBuilding
   private
 
   def total(metric:)
-    return unless applicable?(metric: metric)
-
+    return unless applicable?(metric: metric) && total_mfa > 0
     (baseline_portion(metric) + step_code_portion(metric)) / total_mfa
+  rescue StandardError
+    nil
   end
 
   def baseline_portion(metric)

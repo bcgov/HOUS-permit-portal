@@ -22,9 +22,11 @@ class StepCode::Part3::V1::Performance::AdjustedResults < StepCode::Part3::V1::P
       return if results_as_modelled[:total_energy] == 0
 
       results_as_modelled[:total_energy] -
-        corridor_pressurization_adjustment[:total_energy] +
-        suite_sub_metering_adjustment[:total_energy]
+        (corridor_pressurization_adjustment[:total_energy] || 0) +
+        (suite_sub_metering_adjustment[:total_energy] || 0)
     end
+  rescue StandardError
+    nil
   end
 
   def teui
@@ -34,6 +36,8 @@ class StepCode::Part3::V1::Performance::AdjustedResults < StepCode::Part3::V1::P
       results_as_modelled[:teui] - corridor_pressurization_adjustment[:teui] +
         suite_sub_metering_adjustment[:teui]
     end
+  rescue StandardError
+    nil
   end
 
   def tedi
@@ -43,6 +47,8 @@ class StepCode::Part3::V1::Performance::AdjustedResults < StepCode::Part3::V1::P
         step_code_portion: tedi_for(:step_code_portion)
       }
     end
+  rescue StandardError
+    nil
   end
 
   def tedi_for(portion)
@@ -58,5 +64,7 @@ class StepCode::Part3::V1::Performance::AdjustedResults < StepCode::Part3::V1::P
 
       results_as_modelled[:ghgi] - corridor_pressurization_adjustment[:ghgi]
     end
+  rescue StandardError
+    nil
   end
 end

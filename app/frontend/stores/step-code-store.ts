@@ -4,16 +4,36 @@ import * as R from "ramda"
 import { withEnvironment } from "../lib/with-environment"
 import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
-import { IStepCode, StepCodeModel } from "../models/step-code"
+import { IPart3StepCode, Part3StepCodeModel, Part3StepCodeType } from "../models/part-3-step-code"
+import { IPart9StepCode, Part9StepCodeModel, Part9StepCodeType } from "../models/part-9-step-code"
 import { EEnergyStep, EZeroCarbonStep } from "../types/enums"
-import { IStepCodeSelectOptions } from "../types/types"
+import { IPart3ChecklistSelectOptions, IPart9ChecklistSelectOptions } from "../types/types"
 import { startBlobDownload } from "../utils/utility-functions"
+
+export const StepCodeModel = types.union(
+  {
+    dispatcher: (snapshot) => {
+      // Return the appropriate model based on the `type` field in the snapshot
+      switch (snapshot.type) {
+        case Part9StepCodeType:
+          return Part9StepCodeModel
+        case Part3StepCodeType:
+          return Part3StepCodeModel
+        default:
+          throw new Error(`Unknown type: ${snapshot.type}`)
+      }
+    },
+  },
+  // types.late is required for reference resolution
+  types.late(() => Part9StepCodeModel),
+  types.late(() => Part3StepCodeModel)
+)
 
 export const StepCodeStoreModel = types
   .model("StepCodeStore", {
     stepCodesMap: types.map(StepCodeModel),
-    selectOptions: types.frozen<IStepCodeSelectOptions>(),
     isLoaded: types.maybeNull(types.boolean),
+    selectOptions: types.frozen<Partial<IPart9ChecklistSelectOptions & IPart3ChecklistSelectOptions>>(),
     currentStepCode: types.maybeNull(types.reference(StepCodeModel)),
   })
   .extend(withEnvironment())
@@ -27,37 +47,51 @@ export const StepCodeStoreModel = types
       return self.stepCodesMap.get(id)
     },
     getEnergyStepOptions(allowNull: boolean = false): EEnergyStep[] {
-      const { energySteps } = self.selectOptions
+      const energySteps = self.currentStepCode?.energySteps || self.selectOptions.energySteps
       return (allowNull ? [...energySteps, null] : energySteps) as EEnergyStep[]
     },
     getZeroCarbonStepOptions(allowNull: boolean = false): EZeroCarbonStep[] {
-      const { zeroCarbonSteps } = self.selectOptions
-      return (allowNull ? [...zeroCarbonSteps, null] : zeroCarbonSteps) as EZeroCarbonStep[]
+      const zeroCarbonSteps = self.currentStepCode?.zeroCarbonSteps || self.selectOptions.zeroCarbonSteps
+      return (allowNull ? [...zeroCarbonSteps, 0] : zeroCarbonSteps) as EZeroCarbonStep[]
     },
   }))
   .actions((self) => ({
-    __beforeMergeUpdate(stepCode) {
-      const checklistsMap = stepCode.checklists.reduce((checklistsMap, checklist) => {
-        checklistsMap[checklist.id] = checklist
-        return checklistsMap
-      }, {})
-      return R.mergeRight(stepCode, {
-        checklistsMap,
-      })
+    __beforeMergeUpdate(stepCode: IPart9StepCode | IPart3StepCode) {
+      if (stepCode.type == Part9StepCodeType) {
+        const checklistsMap = stepCode.checklists?.reduce((checklistsMap, checklist) => {
+          checklistsMap[checklist.id] = checklist
+          return checklistsMap
+        }, {})
+        return R.mergeRight(stepCode, {
+          checklistsMap,
+        })
+      } else {
+        return stepCode
+      }
     },
-    setCurrentStepCode(stepCode?: IStepCode) {
-      self.currentStepCode = stepCode
+    setCurrentStepCode(stepCodeId) {
+      self.currentStepCode = stepCodeId
     },
-    fetchStepCodes: flow(function* () {
-      const response = yield self.environment.api.fetchStepCodes()
+    // TODO: consider restructuring this as we are only really using this endpoint to fetch the part 9 select options
+    fetchPart9StepCodes: flow(function* () {
+      const response = yield self.environment.api.fetchPart9StepCodes()
       if (response.ok) {
         self.mergeUpdateAll(response.data.data, "stepCodesMap")
         self.selectOptions = response.data.meta.selectOptions
       }
       self.isLoaded = true
     }),
-    createStepCode: flow(function* (values) {
-      const response = yield self.environment.api.createStepCode(values)
+    createPart3StepCode: flow(function* (values) {
+      const response = yield self.environment.api.createPart3StepCode(values)
+      if (response.ok) {
+        self.mergeUpdate(response.data.data, "stepCodesMap")
+        self.currentStepCode = response.data.data.id
+        return true
+      } else {
+      }
+    }),
+    createPart9StepCode: flow(function* (values) {
+      const response = yield self.environment.api.createPart9StepCode(values)
       if (response.ok) {
         self.mergeUpdate(response.data.data, "stepCodesMap")
         self.currentStepCode = response.data.data.id

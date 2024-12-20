@@ -55,8 +55,11 @@ class PermitApplication < ApplicationRecord
   validates :reference_number, length: { maximum: 300 }, allow_nil: true
   validate :sandbox_belongs_to_jurisdiction
 
-  delegate :qualified_name, to: :jurisdiction, prefix: true
-  delegate :name, to: :jurisdiction, prefix: true
+  delegate :qualified_name,
+           :heating_degree_days,
+           :name,
+           to: :jurisdiction,
+           prefix: true
   delegate :code, :name, to: :permit_type, prefix: true
   delegate :code, :name, to: :activity, prefix: true
   delegate :published_template_version, to: :template_version

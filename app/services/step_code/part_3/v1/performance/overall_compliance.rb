@@ -12,7 +12,8 @@ class StepCode::Part3::V1::Performance::OverallCompliance < StepCode::Part3::V1:
       self.results = {
         **results,
         energy_step_achieved:,
-        zero_carbon_step_achieved:
+        zero_carbon_step_achieved:,
+        performance_requirement_achieved:
       }
     end
   end
@@ -24,12 +25,16 @@ class StepCode::Part3::V1::Performance::OverallCompliance < StepCode::Part3::V1:
       adjusted_results[:total_energy] <=
         requirements.dig(:whole_building, :total_energy)
     end
+  rescue StandardError
+    nil
   end
 
   def teui
     super do
       adjusted_results[:teui] <= requirements.dig(:whole_building, :teui)
     end
+  rescue StandardError
+    nil
   end
 
   def tedi
@@ -40,6 +45,8 @@ class StepCode::Part3::V1::Performance::OverallCompliance < StepCode::Part3::V1:
         step_code_portion: step_code_portion_tedi_compliance?
       }
     end
+  rescue StandardError
+    nil
   end
 
   def energy_step_achieved
@@ -54,6 +61,8 @@ class StepCode::Part3::V1::Performance::OverallCompliance < StepCode::Part3::V1:
       )
       .call
       .step
+  rescue StandardError
+    nil
   end
 
   def zero_carbon_step_achieved
@@ -68,6 +77,14 @@ class StepCode::Part3::V1::Performance::OverallCompliance < StepCode::Part3::V1:
       )
       .call
       .step
+  rescue StandardError
+    nil
+  end
+
+  def performance_requirement_achieved
+    return unless step_code_occupancies.empty? && baseline_occupancies.present?
+
+    total_energy ? baseline_occupancies.first.performance_requirement : nil
   end
 
   def step_code_occupancy
@@ -78,6 +95,11 @@ class StepCode::Part3::V1::Performance::OverallCompliance < StepCode::Part3::V1:
   def step_code_occupancies
     @step_code_occupancies ||=
       checklist.occupancy_classifications.step_code_occupancy
+  end
+
+  def baseline_occupancies
+    @baseline_occupancies ||=
+      checklist.occupancy_classifications.baseline_occupancy
   end
 
   def whole_building_tedi_compliance?
@@ -96,5 +118,7 @@ class StepCode::Part3::V1::Performance::OverallCompliance < StepCode::Part3::V1:
     super do
       adjusted_results[:ghgi] <= requirements.dig(:whole_building, :ghgi)
     end
+  rescue StandardError
+    nil
   end
 end
