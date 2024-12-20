@@ -14,11 +14,11 @@ elasticsearch:
       size: "500Mi"
   data:
     replicaCount: 3
-    heapSize: "1024m"
+    heapSize: "800m"
     resources:
       requests:
         cpu: "200m"
-        memory: "1024Mi"
+        memory: "800Mi"
     persistence:
       enabled: true
       accessModes:
