@@ -9,11 +9,12 @@ class StepCode::Part3::V0::Seeders::JurisdictionHDD
 
       (2..xlsx.last_row).map do |i|
         row = xlsx.row(i)
-        jurisdiction_id = row[header_mapping["jurisdiction_id"]]
-        next unless jurisdiction_id
+        name = row[header_mapping["jurisdiction_name"]]
+        locality_type = row[header_mapping["locality_type"]]
+        next unless name && locality_type
 
         hdd = row[header_mapping["BCBC 2018 HDD"]]
-        j = Jurisdiction.find(jurisdiction_id)
+        j = Jurisdiction.find_by(name:, locality_type:)
         j.update!(heating_degree_days: hdd)
       end
     end
