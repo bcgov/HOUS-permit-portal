@@ -12,7 +12,7 @@ const baseStyle = definePartsStyle({
     _disabled: {
       bg: "greys.grey04",
       borderColor: "border.light",
-      color: "greys.grey01",
+      color: "text.primary",
       opacity: 1,
       _hover: {
         borderColor: "border.light",

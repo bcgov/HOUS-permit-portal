@@ -164,9 +164,14 @@ export const RequirementForm = observer(
       }
     }, [formJson, isMounted, window.innerHeight, wrapperClickCount])
 
-    const handleOpenStepCode = async (_event) => {
+    const handleOpenStepCodePart3 = async (_event) => {
       await triggerSave?.()
-      navigate("step-code", { state: { enableStepCodeRoute: true } })
+      alert("part 3 clicked")
+    }
+
+    const handleOpenStepCodePart9 = async (_event) => {
+      await triggerSave?.()
+      navigate("part-9-step-code")
     }
 
     const handleOpenContactAutofill = async (event) => {
@@ -180,11 +185,13 @@ export const RequirementForm = observer(
     }
 
     useEffect(() => {
-      document.addEventListener("openStepCode", handleOpenStepCode)
+      document.addEventListener("openStepCode", handleOpenStepCodePart9)
+      document.addEventListener("openStepCodePart3", handleOpenStepCodePart3)
       document.addEventListener("openAutofillContact", handleOpenContactAutofill)
       document.addEventListener("openPreviousSubmission", handleOpenPreviousSubmission)
       return () => {
-        document.removeEventListener("openStepCode", handleOpenStepCode)
+        document.removeEventListener("openStepCode", handleOpenStepCodePart9)
+        document.removeEventListener("openStepCodePart3", handleOpenStepCodePart3)
         document.removeEventListener("openAutofillContact", handleOpenContactAutofill)
         document.removeEventListener("openPreviousSubmission", handleOpenPreviousSubmission)
       }

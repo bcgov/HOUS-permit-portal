@@ -31,7 +31,9 @@ export const RequirementBlockModel = types
   .extend(withRootStore())
   .views((self) => ({
     get blocksWithEnergyStepCode() {
-      return self.requirements?.some((r) => r.inputType === ERequirementType.energyStepCode)
+      return self.requirements?.some(
+        (r) => r.inputType === ERequirementType.energyStepCode || r.inputType === ERequirementType.energyStepCodePart3
+      )
     },
     get blocksWithStepCodePackageFile() {
       return self.requirements?.some((r) => r.requirementCode === STEP_CODE_PACKAGE_FILE_REQUIREMENT_CODE)

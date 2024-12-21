@@ -4,6 +4,7 @@ import {
   EAutoComplianceType,
   EEnabledElectiveFieldReason,
   EEnergyStepCodeDependencyRequirementCode,
+  EEnergyStepCodePart3DependencyRequirementCode,
   EGovFeedbackResponseNoReason,
   ENumberUnit,
   ERequirementContactFieldItemType,
@@ -160,6 +161,59 @@ export function getEnergyStepCodeRequirementRequiredSchema(
           eq: "file",
           show: true,
           when: EEnergyStepCodeDependencyRequirementCode.energyStepCodeMethod,
+        },
+      },
+    },
+  }
+
+  return requirementCodeToSchema[energyRequirementCode]
+}
+
+export function getEnergyStepCodePart3RequirementRequiredSchema(
+  energyRequirementCode: EEnergyStepCodePart3DependencyRequirementCode
+) {
+  const requirementCodeToSchema: Record<EEnergyStepCodePart3DependencyRequirementCode, IRequirementAttributes> = {
+    [EEnergyStepCodePart3DependencyRequirementCode.energyStepCodeMethod]: {
+      requirementCode: EEnergyStepCodePart3DependencyRequirementCode.energyStepCodeMethod,
+      inputType: ERequirementType.select,
+      label: t("requirementsLibrary.modals.stepCodeDependencies.energyStepCodeMethod.label"),
+      inputOptions: {
+        valueOptions: [
+          {
+            label: t("requirementsLibrary.modals.stepCodeDependencies.energyStepCodeMethod.tool"),
+            value: "tool",
+          },
+          {
+            label: t("requirementsLibrary.modals.stepCodeDependencies.energyStepCodeMethod.file"),
+            value: "file",
+          },
+        ],
+      },
+    },
+    [EEnergyStepCodePart3DependencyRequirementCode.energyStepCodeToolPart3]: {
+      requirementCode: EEnergyStepCodePart3DependencyRequirementCode.energyStepCodeToolPart3,
+      inputType: ERequirementType.energyStepCodePart3,
+      label: t("requirementsLibrary.modals.stepCodeDependencies.energyStepCodeToolPart3.label"),
+      inputOptions: {
+        conditional: {
+          // @ts-ignore
+          eq: "tool",
+          show: true,
+          when: EEnergyStepCodePart3DependencyRequirementCode.energyStepCodeMethod,
+        },
+        energyStepCode: "part_3",
+      },
+    },
+    [EEnergyStepCodePart3DependencyRequirementCode.energyStepCodeReportFile]: {
+      requirementCode: EEnergyStepCodePart3DependencyRequirementCode.energyStepCodeReportFile,
+      label: t("requirementsLibrary.modals.stepCodeDependencies.energyStepCodeReportFile.label"),
+      inputType: ERequirementType.file,
+      inputOptions: {
+        conditional: {
+          // @ts-ignore
+          eq: "file",
+          show: true,
+          when: EEnergyStepCodePart3DependencyRequirementCode.energyStepCodeMethod,
         },
       },
     },

@@ -41,7 +41,12 @@ module Api::Concerns::Search::PermitApplications
       :page,
       :per_page,
       :hasCollaborator,
-      filters: [:requirement_template_id, :template_version_id, { status: [] }, :has_collaborator],
+      filters: [
+        :requirement_template_id,
+        :template_version_id,
+        { status: [] },
+        :has_collaborator
+      ],
       sort: %i[field direction]
     )
   end

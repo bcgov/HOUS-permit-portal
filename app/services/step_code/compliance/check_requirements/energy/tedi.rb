@@ -28,6 +28,7 @@ class StepCode::Compliance::CheckRequirements::Energy::TEDI < StepCode::Complian
   def tedi_hlr_percent
     reference = total(:ref_gshl)
     return 0 if reference == 0 || checklist.compliance_path == :step_code
-    ((reference - total(:proposed_gshl)) / reference * 100).round(0)
+
+    (reference - total(:proposed_gshl)) / reference * 100
   end
 end

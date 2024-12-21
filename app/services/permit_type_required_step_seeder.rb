@@ -12,7 +12,7 @@ class PermitTypeRequiredStepSeeder
               if jurisdiction.respond_to?(:energy_step_required)
                 jurisdiction.energy_step_required || 0
               else
-                ENV["MIN_ENERGY_STEP"].to_i
+                ENV["PART_9_MIN_ENERGY_STEP"].to_i
               end
             )
           ptr_step.zero_carbon_step_required =
@@ -20,7 +20,7 @@ class PermitTypeRequiredStepSeeder
               if jurisdiction.respond_to?(:zero_carbon_step_required)
                 jurisdiction.zero_carbon_step_required || 0
               else
-                ENV["MIN_ZERO_CARBON_STEP"].to_i
+                ENV["PART_9_MIN_ZERO_CARBON_STEP"].to_i
               end
             )
         end
