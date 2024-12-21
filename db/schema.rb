@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_12_14_000444) do
+ActiveRecord::Schema[7.1].define(version: 2024_12_20_235808) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -332,7 +332,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_12_14_000444) do
                default: -> { "gen_random_uuid()" },
                force: :cascade do |t|
     t.uuid "step_code_id"
-    t.integer "building_height"
+    t.decimal "building_height"
     t.integer "building_code_version"
     t.integer "heating_degree_days"
     t.integer "climate_zone"

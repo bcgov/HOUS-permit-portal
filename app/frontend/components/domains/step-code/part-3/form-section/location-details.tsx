@@ -31,7 +31,7 @@ export const LocationDetails = observer(function Part3StepCodeFormLocationDetail
 
   const { handleSubmit, formState, register, control, reset } = useForm({
     defaultValues: {
-      buildingHeight: checklist.buildingHeight,
+      buildingHeight: checklist.buildingHeight && parseFloat(checklist.buildingHeight),
       heatingDegreeDays: checklist.heatingDegreeDays,
       climateZone: checklist.climateZone,
     },

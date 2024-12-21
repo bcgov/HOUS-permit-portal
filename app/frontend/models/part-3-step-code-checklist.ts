@@ -48,7 +48,7 @@ export const Part3StepCodeChecklistModel = types
       types.enumeration<EBuildingCodeVersion[]>(Object.values(EBuildingCodeVersion))
     ),
     // location details
-    buildingHeight: types.maybeNull(types.number),
+    buildingHeight: types.maybeNull(types.string),
     heatingDegreeDays: types.maybeNull(types.number),
     climateZone: types.maybeNull(types.enumeration<EClimateZone[]>(Object.values(EClimateZone))),
     // user input fields
