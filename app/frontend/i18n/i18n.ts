@@ -481,9 +481,9 @@ const options = {
           },
         },
         permitApplication: {
-          noneFound: "No draft permits found",
+          noneFound: "No permits yet",
           noneFoundExplanation:
-            "Missing draft permits? You might have used a login option different from the one you used to create the permits. Log out and try logging back in with the BCeID or BC Services Card Account you used to create them.",
+            "Missing permits? You might have used a login option different from the one you used to create the permits. Log out and try logging back in with the BCeID or BC Services Card you used to create them.",
           submissionBlockModal: {
             title: "Trying to submit this application?",
             description:
