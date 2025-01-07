@@ -32,7 +32,7 @@ const options = {
             "You must have either a BC Services Card Account or BCeID account to use this system. If you don’t have one yet, please register for one based on your use case. <br/><br/> <strong>Please note that BCeID and BC Services Card logins will act as two separate accounts, and you must consistently use the same method for all future logins.</strong>",
           chooseSituation: "Choose the situation that best matches your own to learn more about your login choices.",
           loginHelp: "Having trouble logging in?",
-          goToPartners: "Go to our log in partners",
+          goToPartners: "Go to our login partners",
           submitterAccordion: "I’m an individual submitter, such as a homeowner or agent",
           lgAccordion: "I’m logging in as a representative of a local government or First Nation ",
           entityAccordion:
