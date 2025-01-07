@@ -19,9 +19,10 @@ import {
   Stack,
   Tag,
   Text,
+  VStack,
   useDisclosure,
 } from "@chakra-ui/react"
-import { WarningCircle } from "@phosphor-icons/react"
+import { Warning, WarningCircle } from "@phosphor-icons/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React, { useMemo } from "react"
@@ -30,7 +31,6 @@ import { useCurrentUserLicenseAgreements } from "../../hooks/resources/user-lice
 import { useMst } from "../../setup/root"
 import { colors } from "../../styles/theme/foundations/colors"
 import { ILicenseAgreement } from "../../types/types"
-import { ErrorScreen } from "./base/error-screen"
 import { SharedSpinner } from "./base/shared-spinner"
 import { Editor } from "./editor/editor"
 import { RouterLinkButton } from "./navigation/router-link-button"
@@ -52,7 +52,14 @@ export const UserEulas = observer(function UserEulas() {
     }
 
     if (error) {
-      return <ErrorScreen error={error} />
+      return (
+        <Center w="full" flex={1} color="greys.grey01">
+          <VStack>
+            <Warning size={100} />
+            <Text>{error?.message}</Text>
+          </VStack>
+        </Center>
+      )
     }
 
     const acceptedLicenseAgreement = licenseAgreements?.find((la) => la.agreement?.id === currentEula?.id)

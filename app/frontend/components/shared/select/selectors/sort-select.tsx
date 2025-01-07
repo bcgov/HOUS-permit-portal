@@ -3,7 +3,6 @@ import React, { useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import Select from "react-select"
 import { ISearch } from "../../../../lib/create-search-model"
-// import { EPermitApplicationSortFields, ESortDirection } from "../../../../types/enums"
 import { ESortDirection } from "../../../../types/enums"
 import { IOption, ISort } from "../../../../types/types"
 
