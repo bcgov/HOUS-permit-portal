@@ -1,5 +1,5 @@
 import { Container, Flex, FormControl, FormLabel, Grid, GridItem, Heading, Input, Text, VStack } from "@chakra-ui/react"
-import { FileText, Info, SlidersHorizontal, Tray } from "@phosphor-icons/react"
+import { FileText, Info, SlidersHorizontal, Tray, Users } from "@phosphor-icons/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React, { Suspense } from "react"
@@ -73,7 +73,7 @@ export const ConfigurationManagementScreen = observer(function ConfigurationMana
                   icon={<FileText size="24px" color="var(--chakra-colors-text-primary)" />}
                   href="energy-step"
                   h="full"
-                  markForSandbox
+                  disableForSandbox
                 />
               </GridItem>
               <GridItem>
@@ -95,7 +95,18 @@ export const ConfigurationManagementScreen = observer(function ConfigurationMana
                   icon={<SlidersHorizontal size={24} />}
                   href={`/jurisdictions/${currentJurisdiction.slug}/api-settings`}
                   h="full"
-                  markForSandbox
+                />
+              </GridItem>
+
+              <GridItem>
+                <HomeScreenBox
+                  title={t(`${i18nPrefix}.users.title`)}
+                  description={t(`${i18nPrefix}.users.description`)}
+                  linkText={t("ui.edit")}
+                  icon={<Users size={24} />}
+                  href={`/jurisdictions/${currentJurisdiction.slug}/users`}
+                  h="full"
+                  disableForSandbox
                 />
               </GridItem>
             </Grid>

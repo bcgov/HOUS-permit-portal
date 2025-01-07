@@ -18,24 +18,54 @@ const options = {
       translation: {
         auth: {
           login: "Login",
+          loginTitle: "Log in to Building Permit Hub",
+          firstTime: "First time here? You need a BCeID or BC Services Card Account to log in",
+          publicLogin: "I am applying for a permit",
+          publicLoginDescription: "Create, submit, collaborate, and manage building permit applications",
+          localGovLogin: "I represent a local government or First Nation",
+          localGovLoginDescription: "Manage and approve building permit applications",
           adminLogin: "Admin login",
           adminAccountAccess: "If you cannot login with your IDIR, please contact your administrator to gain access.",
-          prompt:
+          lgPrompt:
             "You must have a BCeID account to use this system. If you don’t have one yet, please register for one based on your use case.",
-          loginHelp: "Having trouble logging in? ",
-          bceidInfo: {
+          publicPrompt:
+            "You must have either a BC Services Card Account or BCeID account to use this system. If you don’t have one yet, please register for one based on your use case. <br/><br/> <strong>Please note that BCeID and BC Services Card logins will act as two separate accounts, and you must consistently use the same method for all future logins.</strong>",
+          chooseSituation: "Choose the situation that best matches your own to learn more about your login choices.",
+          loginHelp: "Having trouble logging in?",
+          goToPartners: "Go to our login partners",
+          submitterAccordion: "I’m an individual submitter, such as a homeowner or agent",
+          lgAccordion: "I’m logging in as a representative of a local government or First Nation ",
+          entityAccordion:
+            "I’m logging in on behalf of a legal entity, such as a company, partnership, or educational institution ",
+          localGov: "Are you a member of local government?",
+          chooseLogin: "Choosing the right option",
+          matchLogin: "Choose the option that best matches your situation to access this service",
+          notLocalGov: "Are you not a member of local government?",
+          goToGovLogin: "Go to local government login",
+          goToPublicLogin: "Go to general public login",
+          bceid: "BCeID",
+          bcsc: "BC Services Card Account",
+          keycloakinfo: {
             heading: "Which BCeID should I use?",
+            useIf: "You can use this option if:",
+            bcsc: {
+              title: "BC Services Card Account",
+              canadianResident: "You're a resident of Canada",
+              register: "Set up BC Services Card Account",
+            },
             basic: {
               title: "Basic BCeID",
-              description: "Use when accessing a service in a personal capacity.",
-              homeownerAgent: "homeowner, agent",
-              architectContractor: "architect or contractor may use Basic BCeID or Business BCeID",
+              residentOrNon: "You’re a resident or non-resident of Canada",
+              repOrg: "You’re representing a company or organization, but your company doesn’t have a Business BCeID",
+              lgReviewManager: "You’re a regional review manager who is also an individual submitter",
+              lgJurisdiction: "You’re representing a jurisdiction, but your jurisdiction doesn’t have a Business BCeID",
               register: "Register for Basic BCeID",
             },
             business: {
               title: "Business BCeID",
-              description: "Use when representing a legal entity, such as a:",
-              localGov: "Local government(s) or local jurisdiction(s)",
+              entityDescription: "You can use this option if you’re logging in on behalf of a legal entity, such as:",
+              lgDescription:
+                "Most people representing a local government or jurisdiction will use a Business BCeID to log in",
               company: "Company or partnership or sole proprietorship",
               nonProfit: "Not-for-profit or charitable organization",
               education: "Educational institution like a university or college",
@@ -46,8 +76,9 @@ const options = {
           logout: "Logout",
           submit: "Submit",
           or: "or",
-          bceid_login: "Login with BCeID",
-          idir_login: "Login with IDIR",
+          bceidLogin: "Login with BCeID",
+          bcscLogin: "Login with BC Services Card Account",
+          idirLogin: "Login with IDIR",
           role: "Role",
           emailLabel: "Email address",
           userFirstNameLabel: "First name",
@@ -126,7 +157,8 @@ const options = {
             left: "See helpful tips from your local jurisdictions to streamline your digital building permit applications",
             mid: "Preview the Small-scale/Multi-unit housing checklist",
             midSub: "(Part 9 BC Building Code)",
-            viewTemplate: "View requirements",
+            viewTemplate: "View",
+            midDownload: "Checklist",
             end: "Accurately fill out your permit application online with ease",
             endButton: "Get started now",
           },
@@ -449,6 +481,9 @@ const options = {
           },
         },
         permitApplication: {
+          noneFound: "No draft permits found",
+          noneFoundExplanation:
+            "Missing draft permits? You might have used a login option different from the one you used to create the permits. Log out and try logging back in with the BCeID or BC Services Card Account you used to create them.",
           submissionBlockModal: {
             title: "Trying to submit this application?",
             description:
@@ -760,7 +795,7 @@ const options = {
                 "Make sure you are ready to promote/demote this, any other previews or templates using this specific block will also reflect this change.",
               listItem1: "<strong>All</strong>: The requirement block may exist in any preview or template",
               listItem2:
-                "<strong>Exclude preview</strong>: The requirement block may not exist in previews, and only in templates",
+                "<strong>Preview omitted</strong>: The requirement block may not exist in previews, and only in templates",
               listItem3:
                 "<strong>Preview only</strong>: The requirement block may not exist in templates, and only in previews",
             },
@@ -1322,6 +1357,10 @@ const options = {
               description:
                 "Customize the informational page that submitters will see when they are in the Building Permit Hub.",
             },
+            users: {
+              title: "Users",
+              description: "Manage and invite reviewers and other staff for this jurisdiciton",
+            },
             submissionsInboxSetup: {
               title: "Submissions inbox setup",
               description: "Specify email addresses that should receive applications.",
@@ -1400,7 +1439,7 @@ const options = {
           fetchWorkTypeOptions: "Something went wrong fetching the work type options",
           fetchRequirementTemplate: "Something went wrong fetching the requirement template",
           fetchTemplateVersion: "Something went wrong fetching the template version",
-          fetchCurrentUserLicenseAgreements: "Something went wrong fetching license agreements",
+          fetchCurrentUserLicenseAgreements: "Please confirm your account to see license agreement",
           fetchTemplateVersions: "Something went wrong fetching template versions",
           fetchBuildingPermits: "Something went wrong fetching building permits",
           fetchBuildingPermit: "Something went wrong fetching building permit",
@@ -1443,6 +1482,7 @@ const options = {
             idir: "IDIR",
             bceidbasic: "Basic BCeID",
             bceidbusiness: "Business BCeID",
+            bcsc: "BC Services Card Account",
           },
           changeBceid: "If you want to change your BCeID information, please go to ",
           changeBceidLinkText: "bceid.ca",
@@ -1460,7 +1500,8 @@ const options = {
           inviteSuccess: "Invite sent!",
           reinvite: "Re-invite",
           reinviteSuccess: "Invite re-sent!",
-          inviteError: "Email taken",
+          inviteTakenError: "Email taken",
+          inviteError: "Invite error",
           takenErrorTitle: "Some of these emails already belong to existing users",
           takenErrorDescription:
             "One or more of the requested users have an existing account. Please ask them to change their email on their current account. You can then re-invite them into your local jurisdiction.",
@@ -1481,6 +1522,7 @@ const options = {
             applicationRevisionsRequested: "Revisions requested by jurisdiction",
             collaboration: "Collaboration",
             integrationMapping: "API integration mapping",
+            unmappedApiNotification: "Unmapped API Notification",
           },
           emailConfirmed: {
             heading: "Email confirmed!",
@@ -1577,7 +1619,7 @@ const options = {
           edit: {
             requirementsLibraryTab: "Requirements Library",
             earlyAccessRequirementsLibraryTab: "Early Access Requirements Library",
-            earlyAccessTabDescription: "Early access previews cannot add 'Exclude preview' blocks ",
+            earlyAccessTabDescription: "Early access previews cannot add 'Preview omitted' blocks ",
             options: {
               button: "Options",
               copyTips: "Import tips from ({{ templateLabel }})",

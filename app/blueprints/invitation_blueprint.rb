@@ -10,4 +10,8 @@ class InvitationBlueprint < Blueprinter::Base
   field :email_taken do |hash, _options|
     UserBlueprint.render_as_hash(hash[:email_taken], view: :base)
   end
+
+  field :failed do |hash, _options|
+    hash[:failed]
+  end
 end
