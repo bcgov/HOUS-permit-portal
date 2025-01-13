@@ -1,4 +1,5 @@
 import {
+  Button,
   FormControl,
   FormControlProps,
   FormErrorMessage,
@@ -51,6 +52,33 @@ export const TextFormControl = (props: IInputFormControlProps) => {
         props
       ) as IInputFormControlProps)}
     />
+  )
+}
+
+export const MaskPasswordFormControl = (props: IInputFormControlProps) => {
+  const [show, setShow] = React.useState(false)
+  const handleClick = () => setShow(!show)
+  return (
+    <InputGroup size='md'>
+      <InputFormControl
+        {...(R.mergeDeepRight(
+          {
+            inputProps: { type: show ? 'text' : 'password' },
+            validate: {
+              satisfiesLength: (str) =>
+                (!props.required && !str) || (str?.length >= 1 && str?.length < 128) || t("ui.invalidInput"),
+            },
+          },
+          props
+        ) as IInputFormControlProps)}
+        
+      />
+      <InputRightElement width='4.5rem'>
+        <Button h='1.75rem' size='sm' onClick={handleClick}>
+          {show ? 'Hide' : 'Show'}
+        </Button>
+      </InputRightElement>
+    </InputGroup>
   )
 }
 
