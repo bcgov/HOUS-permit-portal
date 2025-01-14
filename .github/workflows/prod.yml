@@ -25,6 +25,8 @@ jobs:
         with:
           ref: ${{ github.event.inputs.branch }}
           lfs: true
+      - name: Update GITHUB_SHA with checked-out commit SHA
+        run: echo "GITHUB_SHA=$(git rev-parse HEAD)" >> $GITHUB_ENV
       - name: Confirm branch and SHA to deploy
         run: |
           echo "Deploying branch: ${{ github.event.inputs.branch }} @ ${{ env.GITHUB_SHA }} to Production"
