@@ -32,7 +32,7 @@ import { useNavigate } from "react-router-dom"
 import { useMst } from "../../../setup/root"
 import { EUserRoles } from "../../../types/enums"
 import { EmailFormControl } from "../../shared/form/email-form-control"
-import { TextFormControl, MaskPasswordFormControl } from "../../shared/form/input-form-control"
+import { TextFormControl } from "../../shared/form/input-form-control"
 import { UserEulas } from "../../shared/user-eulas"
 
 interface IProfileScreenProps {}
@@ -174,13 +174,15 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
                 </>
               )}
               <Divider my={1} />
-              <MaskPasswordFormControl
-                // @ts-ignore
-                label={currentUser.omniauthProviderLabel}
-                hint={currentUser.omniauthEmail}
-                inputProps={{ value: currentUser.omniauthUsername }}
-                isDisabled
-              />
+              {currentUser.omniauthProvider !== 'bcsc' && (
+                <TextFormControl
+                  // @ts-ignore
+                  label={currentUser.omniauthProviderLabel}
+                  hint={currentUser.omniauthEmail}
+                  inputProps={{ value: currentUser.omniauthUsername }}
+                  isDisabled
+                />
+              )}
               {!currentUser.isSuperAdmin && (
                 <Alert
                   status="info"

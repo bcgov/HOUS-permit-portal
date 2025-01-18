@@ -1,5 +1,4 @@
 import {
-  Button,
   FormControl,
   FormControlProps,
   FormErrorMessage,
@@ -52,26 +51,6 @@ export const TextFormControl = (props: IInputFormControlProps) => {
         props
       ) as IInputFormControlProps)}
     />
-  )
-}
-
-export const MaskPasswordFormControl = (props: IInputFormControlProps) => {
-  return (
-    <InputGroup size='md'>
-      <InputFormControl
-        {...(R.mergeDeepRight(
-          {
-            inputProps: { type: 'password' },
-            validate: {
-              satisfiesLength: (str) =>
-                (!props.required && !str) || (str?.length >= 1 && str?.length < 128) || t("ui.invalidInput"),
-            },
-          },
-          props
-        ) as IInputFormControlProps)}
-        
-      />
-    </InputGroup>
   )
 }
 
