@@ -174,13 +174,15 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
                 </>
               )}
               <Divider my={1} />
-              <TextFormControl
-                // @ts-ignore
-                label={currentUser.omniauthProviderLabel}
-                hint={currentUser.omniauthEmail}
-                inputProps={{ value: currentUser.omniauthUsername }}
-                isDisabled
-              />
+              {currentUser.omniauthProvider !== 'bcsc' && (
+                <TextFormControl
+                  // @ts-ignore
+                  label={currentUser.omniauthProviderLabel}
+                  hint={currentUser.omniauthEmail}
+                  inputProps={{ value: currentUser.omniauthUsername }}
+                  isDisabled
+                />
+              )}
               {!currentUser.isSuperAdmin && (
                 <Alert
                   status="info"
