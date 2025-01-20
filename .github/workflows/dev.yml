@@ -17,26 +17,38 @@ jobs:
     environment: dev
 
     steps:
+      # Step to check if the user is authorized
+      - name: Check if user is authorized
+        run: |
+          AUTHORIZED_USERS="${{ secrets.AUTHORIZED_USERS }}"
+          if [[ ! ",$AUTHORIZED_USERS," =~ ",${{ github.actor }}," ]]; then
+            echo "Error: ${GITHUB_ACTOR} is not authorized to trigger this workflow"
+            exit 1
+          fi
+              
       - name: Install Git LFS
         run: |
           sudo apt-get update
           sudo apt-get install git-lfs
           git lfs install
-      - name: Confirm branch to deploy
-        run: echo "Deploying branch ${{ github.event.inputs.branch }} to Dev"
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ github.event.inputs.branch }}
           lfs: true
+      - name: Update GITHUB_SHA with checked-out commit SHA
+        run: echo "GITHUB_SHA=$(git rev-parse HEAD)" >> $GITHUB_ENV
+      - name: Confirm branch and SHA to deploy
+        run: |
+          echo "Deploying branch: ${{ github.event.inputs.branch }} @ ${{ env.GITHUB_SHA }} to Dev"
       - name: Build Docker Image
         uses: redhat-actions/buildah-build@v2
         with:
           image: dev-hous-permit-portal
-          tags: latest ${{ github.sha }}
+          tags: latest ${{ env.GITHUB_SHA }}
           labels: |
             app=dev-hous-permit-portal
-            git-sha=${{ github.sha }}
+            git-sha=${{ env.GITHUB_SHA }}
           containerfiles: ./devops/docker/app/Dockerfile
           build-args: |
             VITE_ENABLE_TEMPLATE_FORCE_PUBLISH=${{ vars.VITE_ENABLE_TEMPLATE_FORCE_PUBLISH }}
@@ -47,7 +59,7 @@ jobs:
             VITE_SITEMINDER_LOGOUT_URL=${{ vars.VITE_SITEMINDER_LOGOUT_URL }}
             VITE_KEYCLOAK_LOGOUT_URL=${{ vars.VITE_KEYCLOAK_LOGOUT_URL }}
             VITE_POST_LOGOUT_REDIRECT_URL=${{ vars.VITE_POST_LOGOUT_REDIRECT_URL }}
-            VITE_RELEASE_VERSION=dev-${{ github.event.inputs.branch }}-${{ github.sha }}
+            VITE_RELEASE_VERSION=dev-${{ github.event.inputs.branch }}@${{ env.GITHUB_SHA }}
       - name: Push to Openshift Registry using Service Account
         uses: redhat-actions/push-to-registry@v2.7
         with:

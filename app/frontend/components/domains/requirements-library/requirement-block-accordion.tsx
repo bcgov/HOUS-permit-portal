@@ -153,6 +153,7 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
               px={6}
               my={4}
               mx="-4"
+              p={2}
               pb={4}
               className="requirement-block-description"
               borderBottom="1px solid"

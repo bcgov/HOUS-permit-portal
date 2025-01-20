@@ -419,7 +419,12 @@ const requirementsComponentMap = {
         },
       },
       { type: ERequirementContactFieldItemType.professionalAssociation },
-      { type: ERequirementContactFieldItemType.professionalNumber },
+      {
+        type: ERequirementContactFieldItemType.professionalNumber,
+        containerProps: {
+          gridColumn: "1 / span 2" 
+        },
+      },
       { type: ERequirementContactFieldItemType.organization },
     ]
     return (
