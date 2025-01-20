@@ -47,6 +47,7 @@ export const NotificationStoreModel = types
     },
     generateSpecificLinkData(notification: INotification): ILinkData[] {
       const currentUser = self.rootStore.userStore.currentUser
+      const jurisdiction = currentUser.jurisdiction
       let objectData = notification.objectData
       const draftFilterUriComponent = encodeURIComponent(self.rootStore.permitApplicationStore.draftStatuses.join(","))
       if (notification.actionType === ENotificationActionType.newTemplateVersionPublish) {
@@ -60,6 +61,10 @@ export const NotificationStoreModel = types
                 message: t("permitApplication.reviewOutdatedMessage"),
               })
             )}`,
+          },
+          {
+            text: t("permitApplication.configureStepCodePageLink"),
+            href: `/jurisdictions/${jurisdiction.slug}/configuration-management/energy-step`,
           },
         ]
         if (currentUser.isManager) {

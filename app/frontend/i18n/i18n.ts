@@ -498,6 +498,7 @@ const options = {
           },
           updateToNewVersion: "Update my application",
           reviewOutdatedSubmissionLink: "View draft applications",
+          configureStepCodePageLink: "Configure Step Code(s)",
           reviewUpdatedEditLink: "View template",
           reviewOutdatedTitle: "Filters applied to show applications that are outdated",
           reviewOutdatedMessage: "Filters have been applied. Please review and acknowledge the actions required below.",
