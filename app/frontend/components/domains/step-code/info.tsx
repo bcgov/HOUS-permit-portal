@@ -1,6 +1,6 @@
 import { Flex, Heading, Link, ListItem, Text, UnorderedList, VStack } from "@chakra-ui/react"
 import { t } from "i18next"
-import ArrowSquareOut  from "@phosphor-icons/react"
+import { ArrowSquareOut }  from "@phosphor-icons/react"
 import React from "react"
 
 export const Info = function StepCodeInfo() {
