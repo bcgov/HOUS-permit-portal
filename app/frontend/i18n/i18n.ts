@@ -25,7 +25,7 @@ const options = {
           localGovLogin: "I represent a local government or First Nation",
           localGovLoginDescription: "Manage and approve building permit applications",
           adminLogin: "Admin login",
-          adminAccountAccess: "If you cannot login with your IDIR, please contact your administrator to gain access.",
+          adminAccountAccess: "If you cannot log in with your IDIR, please contact your administrator to gain access.",
           lgPrompt:
             "You must have a BCeID account to use this system. If you don’t have one yet, please register for one based on your use case.",
           publicPrompt:
@@ -76,9 +76,9 @@ const options = {
           logout: "Logout",
           submit: "Submit",
           or: "or",
-          bceidLogin: "Login with BCeID",
-          bcscLogin: "Login with BC Services Card Account",
-          idirLogin: "Login with IDIR",
+          bceidLogin: "Log in with BCeID",
+          bcscLogin: "Log in with BC Services Card Account",
+          idirLogin: "Log in with IDIR",
           role: "Role",
           emailLabel: "Email address",
           userFirstNameLabel: "First name",
@@ -481,9 +481,9 @@ const options = {
           },
         },
         permitApplication: {
-          noneFound: "No draft permits found",
+          noneFound: "No permits yet",
           noneFoundExplanation:
-            "Missing draft permits? You might have used a login option different from the one you used to create the permits. Log out and try logging back in with the BCeID or BC Services Card Account you used to create them.",
+            "Missing permits? You might have used a login option different from the one you used to create the permits. Log out and try logging back in with the BCeID or BC Services Card Account you used to create them.",
           submissionBlockModal: {
             title: "Trying to submit this application?",
             description:
@@ -498,6 +498,7 @@ const options = {
           },
           updateToNewVersion: "Update my application",
           reviewOutdatedSubmissionLink: "View draft applications",
+          configureStepCodePageLink: "Configure Step Code(s)",
           reviewUpdatedEditLink: "View template",
           reviewOutdatedTitle: "Filters applied to show applications that are outdated",
           reviewOutdatedMessage: "Filters have been applied. Please review and acknowledge the actions required below.",

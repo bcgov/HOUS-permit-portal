@@ -666,7 +666,7 @@ en:
       enabled_elective_field_reason_incorrect: "Reason required when enabling a field and must be one of {accepted_reasons}"
   notification:
     template_version:
-      new_version_notification: 'A new version of "%{template_label}" has been published'
+      new_version_notification: 'Please update the Energy Step Code and Zero Carbon Step Code requirements in your Configuration Management for  "%{template_label}"'
       new_customization_notification: "%{jurisdiction_name} has made a modification to the requirements for %{template_label}"
     permit_application:
       submission_notification: "Your application %{number} has been received by %{jurisdiction_name} and is pending review."

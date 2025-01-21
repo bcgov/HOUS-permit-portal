@@ -49,7 +49,7 @@ export const LoginScreen = ({ isAdmin }: ILoginScreenProps) => {
       >
         <Heading as="h1">{t("auth.loginTitle")}</Heading>
 
-        <Flex direction="column" flex={1} gap={12}>
+        <Flex direction="column" flex={1} gap={isAdmin ? 6 : 12}>
           {isAdmin ? (
             <>
               <Heading as="h2">{t("auth.adminLogin")}</Heading>
@@ -58,12 +58,7 @@ export const LoginScreen = ({ isAdmin }: ILoginScreenProps) => {
           ) : (
             <>
               <Show above="md">
-                <Grid
-                  templateColumns={"1fr auto 1fr"} // Single column on small screens, three columns on md and up
-                  gap={6}
-                  width="100%"
-                  alignItems="start"
-                >
+                <Grid templateColumns={"1fr auto 1fr"} gap={6} width="100%" alignItems="start">
                   <GridItem>
                     <Heading as="h2">{t("auth.publicLogin")}</Heading>
                   </GridItem>
@@ -133,50 +128,52 @@ export const LoginScreen = ({ isAdmin }: ILoginScreenProps) => {
               </Show>
             </>
           )}
-          <Flex direction="column">
-            <Heading>{t("auth.firstTime")}</Heading>
-            <Text>{t("auth.chooseSituation")}</Text>
-            <Accordion mt={8} allowToggle allowMultiple>
-              <AccordionItem>
-                <AccordionButton>
-                  <Box as="span" py={2} textAlign="left">
-                    <Heading as="h3">{t("auth.submitterAccordion")}</Heading>
-                  </Box>
-                  <AccordionIcon />
-                </AccordionButton>
-                <AccordionPanel pb={4}>
-                  <SubmitterBasicBCeIDInfo />
-                  <BCSCInfo />
-                </AccordionPanel>
-              </AccordionItem>
+          {!isAdmin && (
+            <Flex direction="column">
+              <Heading>{t("auth.firstTime")}</Heading>
+              <Text>{t("auth.chooseSituation")}</Text>
+              <Accordion mt={8} allowToggle allowMultiple>
+                <AccordionItem>
+                  <AccordionButton>
+                    <Box as="span" py={2} textAlign="left">
+                      <Heading as="h3">{t("auth.submitterAccordion")}</Heading>
+                    </Box>
+                    <AccordionIcon />
+                  </AccordionButton>
+                  <AccordionPanel pb={4}>
+                    <SubmitterBasicBCeIDInfo />
+                    <BCSCInfo />
+                  </AccordionPanel>
+                </AccordionItem>
 
-              <AccordionItem>
-                <AccordionButton>
-                  <Box as="span" py={2} textAlign="left">
-                    <Heading as="h3">{t("auth.entityAccordion")}</Heading>
-                  </Box>
-                  <AccordionIcon />
-                </AccordionButton>
-                <AccordionPanel pb={4}>
-                  <EntityBasicBCeIDInfo />
-                  <EntityBusinessBCeIDInfo />
-                </AccordionPanel>
-              </AccordionItem>
+                <AccordionItem>
+                  <AccordionButton>
+                    <Box as="span" py={2} textAlign="left">
+                      <Heading as="h3">{t("auth.entityAccordion")}</Heading>
+                    </Box>
+                    <AccordionIcon />
+                  </AccordionButton>
+                  <AccordionPanel pb={4}>
+                    <EntityBasicBCeIDInfo />
+                    <EntityBusinessBCeIDInfo />
+                  </AccordionPanel>
+                </AccordionItem>
 
-              <AccordionItem>
-                <AccordionButton>
-                  <Box as="span" py={2} textAlign="left">
-                    <Heading as="h3">{t("auth.lgAccordion")}</Heading>
-                  </Box>
-                  <AccordionIcon />
-                </AccordionButton>
-                <AccordionPanel pb={4}>
-                  <LgBusinessBCeIDInfo />
-                  <LgBasicBCeIDInfo />
-                </AccordionPanel>
-              </AccordionItem>
-            </Accordion>
-          </Flex>
+                <AccordionItem>
+                  <AccordionButton>
+                    <Box as="span" py={2} textAlign="left">
+                      <Heading as="h3">{t("auth.lgAccordion")}</Heading>
+                    </Box>
+                    <AccordionIcon />
+                  </AccordionButton>
+                  <AccordionPanel pb={4}>
+                    <LgBusinessBCeIDInfo />
+                    <LgBasicBCeIDInfo />
+                  </AccordionPanel>
+                </AccordionItem>
+              </Accordion>
+            </Flex>
+          )}
         </Flex>
         {isAdmin ? (
           <Text>{t("auth.adminAccountAccess")}</Text>

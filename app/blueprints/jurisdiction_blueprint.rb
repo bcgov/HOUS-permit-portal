@@ -29,7 +29,10 @@ class JurisdictionBlueprint < Blueprinter::Base
     end
     association :contacts, blueprint: ContactBlueprint
     association :permit_type_submission_contacts,
-                blueprint: PermitTypeSubmissionContactBlueprint
+                blueprint: PermitTypeSubmissionContactBlueprint,
+                if: ->(_field_name, jurisdiction, options) do
+                  options[:current_user]&.jurisdictions&.include?(jurisdiction)
+                end
     association :sandboxes, blueprint: SandboxBlueprint
     association :permit_type_required_steps,
                 blueprint: PermitTypeRequiredStepBlueprint
