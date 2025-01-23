@@ -62,11 +62,11 @@ jobs:
           echo "${{ secrets.ARTIFACTORY_API_KEY }}" | docker login ${{ secrets.ARTIFACTORY_URL }} -u ${{ secrets.ARTIFACTORY_USERNAME }} --password-stdin
 
           # Tag the image to push to the JFrog Artifactory
-          docker tag dev-hous-permit-portal:latest ${{ secrets.ARTIFACTORY_URL }}/bbb1-hous-permit-portal/dev:${{ env.GITHUB_SHA }}
-          docker tag dev-hous-permit-portal:latest ${{ secrets.ARTIFACTORY_URL }}/bbb1-hous-permit-portal/dev:latest
+          docker test-hous-permit-portal:latest ${{ secrets.ARTIFACTORY_URL }}/bbb1-hous-permit-portal/test:${{ env.GITHUB_SHA }}
+          docker test-hous-permit-portal:latest ${{ secrets.ARTIFACTORY_URL }}/bbb1-hous-permit-portal/test:latest
 
           # Push the image to Artifactory
-          docker push ${{ secrets.ARTIFACTORY_URL }}/bbb1-hous-permit-portal/dev:${{ env.GITHUB_SHA }}
-          docker push ${{ secrets.ARTIFACTORY_URL }}/bbb1-hous-permit-portall/dev:latest
+          docker push ${{ secrets.ARTIFACTORY_URL }}/bbb1-hous-permit-portal/test:${{ env.GITHUB_SHA }}
+          docker push ${{ secrets.ARTIFACTORY_URL }}/bbb1-hous-permit-portall/test:latest
         env:
           ARTIFACTORY_URL: ${{ secrets.ARTIFACTORY_URL }}
