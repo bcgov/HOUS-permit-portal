@@ -6,14 +6,15 @@ import { Editor } from "./editor/editor"
 
 interface IProps extends BoxProps {
   tip: string
-  link: string
+  helpLink: string
   headerProps?: Partial<HeadingProps>
 }
 
-export function RichTextTip({ tip, link, headerProps, ...containerProps }: IProps) {
+export function RichTextTip({ tip, helpLink, headerProps, ...containerProps }: IProps) {
   const { t } = useTranslation()
   return (
-    <Box
+    <>
+      <Box
       as={"section"}
       w={"full"}
       py={3}
@@ -33,7 +34,15 @@ export function RichTextTip({ tip, link, headerProps, ...containerProps }: IProp
         {t("ui.tip")}
       </Heading>
       <Editor htmlValue={tip} readonly />
-      <Link href={link}>{link}</Link>
     </Box>
+    <Link 
+        href={helpLink} 
+        target="_blank" 
+        rel="noopener noreferrer"
+        style={{ display: "block", marginTop: "1rem", color: "theme.blueAlt", textDecoration: "underline" }}
+      >
+        {helpLink}
+      </Link>
+    </>
   )
 }

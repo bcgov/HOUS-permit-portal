@@ -163,7 +163,7 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
           )}
           {!isQuillEmpty(requirementBlockCustomization?.tip) && (
             <Box px={2} my={4}>
-              <RichTextTip tip={requirementBlockCustomization.tip} link={requirementBlockCustomization.link} />
+              <RichTextTip tip={requirementBlockCustomization.tip} helpLink={requirementBlockCustomization.helpLink} />
             </Box>
           )}
           <VStack
