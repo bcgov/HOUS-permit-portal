@@ -1,4 +1,4 @@
-import { Box, BoxProps, Heading, HeadingProps } from "@chakra-ui/react"
+import { Box, BoxProps, Heading, HeadingProps, Link } from "@chakra-ui/react"
 import { SealCheck } from "@phosphor-icons/react"
 import React from "react"
 import { useTranslation } from "react-i18next"
@@ -6,10 +6,11 @@ import { Editor } from "./editor/editor"
 
 interface IProps extends BoxProps {
   tip: string
+  link: string
   headerProps?: Partial<HeadingProps>
 }
 
-export function RichTextTip({ tip, headerProps, ...containerProps }: IProps) {
+export function RichTextTip({ tip, link, headerProps, ...containerProps }: IProps) {
   const { t } = useTranslation()
   return (
     <Box
@@ -32,6 +33,7 @@ export function RichTextTip({ tip, headerProps, ...containerProps }: IProps) {
         {t("ui.tip")}
       </Heading>
       <Editor htmlValue={tip} readonly />
+      <Link href={link}>{link}</Link>
     </Box>
   )
 }
