@@ -14,6 +14,7 @@ import { theme } from "../styles/theme"
 
 import { useTranslation } from "react-i18next"
 import "../i18n/i18n"
+import "../javascripts/snowplow-tracker"
 
 const renderApp = (rootStore) => {
   const container = document.getElementById("app")
