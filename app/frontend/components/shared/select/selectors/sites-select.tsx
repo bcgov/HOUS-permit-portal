@@ -1,4 +1,4 @@
-import { Flex, FormControl, FormLabel, HStack, InputGroup, Text } from "@chakra-ui/react"
+import { Flex, FormControl, FormLabel, HStack, InputGroup, Tooltip, Text } from "@chakra-ui/react"
 import { MapPin } from "@phosphor-icons/react"
 import debounce from "lodash/debounce"
 import { observer } from "mobx-react-lite"
@@ -131,30 +131,33 @@ export const SitesSelect = observer(function ({
               }}
               render={({ field: { onChange, value } }) => {
                 return (
-                  <CreatableSelect
-                    // @ts-ignore
-                    options={pidOptions}
-                    ref={pidSelectRef}
-                    value={{
-                      label: formatPidLabel(value),
-                      value: formatPidValue(value),
-                    }}
-                    onChange={(option) => {
-                      if (!option) {
-                        setValue(siteName, null)
-                      }
-                      onChange(formatPidValue(option?.value))
-                    }}
-                    onCreateOption={(inputValue: string) => {
-                      const newValue = { label: formatPidLabel(inputValue), value: formatPidValue(inputValue) }
-                      onChange(newValue.value)
-                    }}
-                    formatCreateLabel={(inputValue: string) =>
-                      t("permitApplication.usePid", { inputValue: formatPidLabel(inputValue) })
-                    }
-                    isClearable
-                    isSearchable
-                  />
+                  <Tooltip label={t("permitApplication.pidToolTip")}>
+                      <CreatableSelect
+                        // @ts-ignore
+                        options={pidOptions}
+                        ref={pidSelectRef}
+                        title={t("permitApplication.pidToolTip")}
+                        value={{
+                          label: formatPidLabel(value),
+                          value: formatPidValue(value),
+                        }}
+                        onChange={(option) => {
+                          if (!option) {
+                            setValue(siteName, null)
+                          }
+                          onChange(formatPidValue(option?.value))
+                        }}
+                        onCreateOption={(inputValue: string) => {
+                          const newValue = { label: formatPidLabel(inputValue), value: formatPidValue(inputValue) }
+                          onChange(newValue.value)
+                        }}
+                        formatCreateLabel={(inputValue: string) =>
+                          t("permitApplication.usePid", { inputValue: formatPidLabel(inputValue) })
+                        }
+                        isClearable
+                        isSearchable
+                      />
+                  </Tooltip>
                 )
               }}
             />

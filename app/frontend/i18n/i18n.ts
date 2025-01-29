@@ -538,6 +538,7 @@ const options = {
           searchKnowledge_link:
             "https://www2.gov.bc.ca/gov/content/housing-tenancy/building-or-renovating/permits/building-permit-hub-search",
           pidLabel: "Parcel Identification (PID) No.",
+          pidToolTip: "Auto Compliance: This feature checks the entered data against predefined standards or regulatory agencies to ensure it meets a completeness check automatically. It reduces manual errors and speeds up the review process by flagging discrepancies or confirming compliance.",
           addressLabel: "Address",
           viewed: "Viewed",
           notViewed: "New",
