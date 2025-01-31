@@ -215,3 +215,6 @@ then in your User VSCode settings add:
 "solargraph.useBundler": true
 
 ensure that you are using rbenv and it is set up correctly.
+
+
+no comment
