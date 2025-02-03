@@ -9,6 +9,7 @@ import { Trans, useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { useMountStatus } from "../../../hooks/use-mount-status"
 import { IPermitApplication } from "../../../models/permit-application"
+import { useMst } from "../../../setup/root"
 import { IErrorsBoxData } from "../../../types/types"
 import { getCompletedBlocksFromForm, getRequirementByKey } from "../../../utils/formio-component-traversal"
 import { singleRequirementFormJson, singleRequirementSubmissionData } from "../../../utils/formio-helpers"
@@ -61,6 +62,8 @@ export const RequirementForm = observer(
       sandbox,
     } = permitApplication
 
+    const { userStore } = useMst()
+    const { currentUser } = userStore
     const shouldShowDiff = permitApplication?.shouldShowApplicationDiff(isEditing)
     const userShouldSeeDiff = permitApplication?.currentUserShouldSeeApplicationDiff
 
@@ -136,6 +139,13 @@ export const RequirementForm = observer(
 
       // Problems with render timing necessitates the use of this isMounted state
       if (!isMounted) return
+
+      if (!currentUser) {
+        const buttons = document.querySelectorAll(".autofill-button")
+        buttons.forEach((button) => {
+          ;(button as HTMLButtonElement).disabled = true
+        })
+      }
 
       const formComponentNodes = document.querySelectorAll(".formio-component")
 
