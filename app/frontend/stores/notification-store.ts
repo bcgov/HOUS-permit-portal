@@ -63,7 +63,7 @@ export const NotificationStoreModel = types
             )}`,
           },
         ]
-        if (jurisdiction.slug) {
+        if (currentUser?.isReviewStaff === true) {
           linkData.push({
             text: t("permitApplication.configureStepCodePageLink"),
             href: `/jurisdictions/${jurisdiction.slug}/configuration-management/energy-step`,
