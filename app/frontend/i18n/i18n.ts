@@ -987,7 +987,7 @@ const options = {
             },
           },
           info: {
-            title: "BC Step Code Compliance Checklist - Part 9 Buildings",
+            title: "BC Energy Compliance Reports",
             energy: "Energy Step Code",
             zeroCarbon: "Zero Carbon Step Code",
             performancePaths: {

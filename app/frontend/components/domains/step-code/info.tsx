@@ -1,6 +1,6 @@
 import { Flex, Heading, Link, ListItem, Text, UnorderedList, VStack } from "@chakra-ui/react"
+import { ArrowSquareOut } from "@phosphor-icons/react"
 import { t } from "i18next"
-import { ArrowSquareOut }  from "@phosphor-icons/react"
 import React from "react"
 
 export const Info = function StepCodeInfo() {
@@ -8,7 +8,10 @@ export const Info = function StepCodeInfo() {
     <VStack spacing={4} p={4} w="full" align="start" rounded="lg" bg="theme.blueLight" color="theme.blueAlt">
       <Heading as="h4" fontSize="lg">
         {t("stepCode.info.title")}
-        <Link href="https://energystepcode.ca/compliance-tools-part9/" isExternal>
+        <Link
+          href="https://www2.gov.bc.ca/gov/content/housing-tenancy/building-or-renovating/permits/building-permit-hub/29065#Reports"
+          isExternal
+        >
           <ArrowSquareOut />
         </Link>
       </Heading>
