@@ -43,6 +43,7 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
 
   const { userStore } = useMst()
   const { currentUser, updateProfile } = userStore
+  const { omniauthProvider, omniauthProviderLabel, omniauthEmail, omniauthUsername } = currentUser
 
   const confirmationRequired =
     currentUser.unconfirmedEmail || (currentUser.isUnconfirmed && currentUser.confirmationSentAt)
@@ -55,7 +56,7 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
       certified,
       organization,
       preferenceAttributes: preference,
-      department
+      department,
     }
   }
   const formMethods = useForm({
@@ -174,12 +175,11 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
                 </>
               )}
               <Divider my={1} />
-              {currentUser.omniauthProvider !== 'bcsc' && (
+              {omniauthProvider !== "bcsc" && (
                 <TextFormControl
-                  // @ts-ignore
-                  label={currentUser.omniauthProviderLabel}
-                  hint={currentUser.omniauthEmail}
-                  inputProps={{ value: currentUser.omniauthUsername }}
+                  label={omniauthProviderLabel}
+                  hint={omniauthEmail}
+                  inputProps={{ value: omniauthUsername }}
                   isDisabled
                 />
               )}
@@ -203,7 +203,7 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
                   </Text>
                 </Alert>
               )}
-              { currentUser.isReviewStaff && (
+              {currentUser.isReviewStaff && (
                 <Flex gap={{ base: 4, md: 6 }} direction={{ base: "column", md: "row" }}>
                   <TextFormControl label={t("user.department")} fieldName="department" required />
                 </Flex>
