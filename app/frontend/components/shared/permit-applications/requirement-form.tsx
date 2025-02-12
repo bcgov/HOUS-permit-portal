@@ -141,10 +141,9 @@ export const RequirementForm = observer(
       if (!isMounted) return
 
       if (!currentUser) {
-        const buttons = document.querySelectorAll(".autofill-button")
-        buttons.forEach((button) => {
+        for (const button of document.querySelectorAll(".autofill-button")) {
           ;(button as HTMLButtonElement).disabled = true
-        })
+        }
       }
 
       const formComponentNodes = document.querySelectorAll(".formio-component")
