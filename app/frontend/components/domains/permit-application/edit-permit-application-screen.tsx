@@ -112,6 +112,30 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   const nicknameWatch = watch("nickname")
   const isStepCode = R.test(/step-code/, window.location.pathname)
 
+  const label = document.querySelector("div[class*='energy_step_code_report_file'] label")
+  if (label) {
+    const anchor = document.createElement("a")
+    anchor.href =
+      "https://www2.gov.bc.ca/gov/content/housing-tenancy/building-or-renovating/permits/building-permit-hub/29065#Reports"
+    anchor.target = "_blank"
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg")
+    svg.setAttribute("width", "1em")
+    svg.setAttribute("style", "display:inline-block")
+    svg.setAttribute("height", "1em")
+    svg.setAttribute("fill", "currentColor")
+    svg.setAttribute("viewBox", "0 0 256 256")
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "path")
+    path.setAttribute(
+      "d",
+      "M224,104a8,8,0,0,1-16,0V59.32l-66.33,66.34a8,8,0,0,1-11.32-11.32L196.68,48H152a8,8,0,0,1,0-16h64a8,8,0,0,1,8,8Zm-40,24a8,8,0,0,0-8,8v72H48V80h72a8,8,0,0,0,0-16H48A16,16,0,0,0,32,80V208a16,16,0,0,0,16,16H176a16,16,0,0,0,16-16V136A8,8,0,0,0,184,128Z"
+    )
+    svg.appendChild(path)
+    anchor.textContent = label.textContent
+    anchor.appendChild(svg)
+    label.textContent = ""
+    label.appendChild(anchor)
+  }
+
   const handleSave = async ({
     autosave,
     skipPristineCheck,
