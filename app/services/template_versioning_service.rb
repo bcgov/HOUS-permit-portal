@@ -87,7 +87,6 @@ class TemplateVersioningService
     end
 
     version_date = Date.current
-
     template_version =
       requirement_template.template_versions.build(
         denormalized_template_json:
@@ -110,12 +109,13 @@ class TemplateVersioningService
     end
 
     template_version.reload
-
-    ModelCallbackJob.perform_async(
-      template_version.class.name,
-      template_version.id,
-      "force_publish_now!"
-    )
+    if template_version.published_template_version.nil?
+      ModelCallbackJob.perform_async(
+        template_version.class.name,
+        template_version.id,
+        "force_publish_now!"
+      )
+    end
 
     template_version
   end
@@ -175,23 +175,24 @@ class TemplateVersioningService
 
       previous_version = template_version.previous_version
 
-      return template_version if previous_version.blank?
-
-      previous_version
-        .jurisdiction_template_version_customizations
-        .each do |customization|
-        begin
-          copy_jurisdiction_customizations_to_template_version(
-            customization,
-            template_version
-          )
-        rescue StandardError => e
-          # we want to know if an error is happening
-          # but don't want to fail the whole publish process because of it
-          Rails.logger.error(
-            "Error copying customizations to new template version: #{e.message}"
-          )
-        end
+      if previous_version.present?
+          previous_version
+            .jurisdiction_template_version_customizations
+            .each do |customization|
+            begin
+              copy_jurisdiction_customizations_to_template_version(
+                customization,
+                template_version
+              )
+            rescue StandardError => e
+              # we want to know if an error is happening
+              # but don't want to fail the whole publish process because of it
+              Rails.logger.error(
+                "Error copying customizations to new template version: #{e.message}"
+              )
+            end
+          end
+        return template_version
       end
 
       # Publish the notification
