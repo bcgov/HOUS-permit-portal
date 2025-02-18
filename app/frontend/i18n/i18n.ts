@@ -1833,6 +1833,12 @@ const options = {
             smallScale: "Set as Small Scale New Contruction Preview on landing page",
             fourPlus: "Set as Four Plus New Construction Preview",
           },
+          globalFeatureAccess: {
+            title: "Global feature access",
+            description: "Turn system features on or off for all users",
+            submissionInbox: "Submission inbox",
+            submissionInboxDescription: "Enable review managers to accept and process permit applications. If you turn off this feature, submitters can’t submit applications, and review managers won’t receive new applications.",
+          },
           sitewideMessage: {
             title: "Site-wide message",
             description: "Enable and configure a site-wide message",
@@ -2068,6 +2074,7 @@ const options = {
             eula: "End user license agreement",
             earlyAccess: "Early access",
             update: "Update",
+            globalFeatureAccess: "Global feature access",
           },
         },
         automatedCompliance: {

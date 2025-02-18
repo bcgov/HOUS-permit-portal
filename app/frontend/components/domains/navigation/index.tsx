@@ -200,6 +200,18 @@ const AdminUserIndexScreen = lazy(() =>
   }))
 )
 
+const AdminGlobalFeatureAccessScreen = lazy(() =>
+  import("../super-admin/site-configuration-management/global-feature-access").then((module) => ({
+    default: module.AdminGlobalFeatureAccessScreen,
+  }))
+)
+
+const AdminSubmissionInboxScreen = lazy(() =>
+  import("../super-admin/site-configuration-management/submission-inbox").then((module) => ({
+    default: module.AdminSubmissionInboxScreen,
+  }))
+)
+
 const ReportingScreen = lazy(() =>
   import("../super-admin/reporting/reporting-screen").then((module) => ({ default: module.ReportingScreen }))
 )
@@ -358,6 +370,8 @@ const AppRoutes = observer(() => {
       <Route path="/configuration-management/revision-reason-setup" element={<RevisionReasonSetupScreen />} />
       <Route path="/configuration-management/landing-setup" element={<LandingSetupScreen />} />
       <Route path="/configuration-management/users" element={<AdminUserIndexScreen />} />
+      <Route path="/configuration-management/global-feature-access" element={<AdminGlobalFeatureAccessScreen />} />
+      <Route path="/configuration-management/global-feature-access/submission-inbox" element={<AdminSubmissionInboxScreen />} />
       <Route path="/configuration-management/users/invite" element={<AdminInviteScreen />} />
       <Route path="/reporting" element={<ReportingScreen />} />
       <Route path="/reporting/export-template-summary" element={<ExportTemplateSummaryScreen />} />
