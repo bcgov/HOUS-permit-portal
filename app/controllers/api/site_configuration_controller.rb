@@ -16,6 +16,19 @@ class Api::SiteConfigurationController < Api::ApplicationController
   def update
     authorize :site_configuration, :update?
     if @site_configuration.update(site_configuration_params)
+      if params[:site_configuration].key?(:inbox_enabled)
+        desired_state = ActiveModel::Type::Boolean.new.cast(params[:site_configuration][:inbox_enabled])
+        unless [true, false].include?(desired_state)
+          return render_error(
+            "site_configuration.invalid_inbox_enabled_value",
+            message_opts: { error_message: "Invalid value for inbox_enabled. Must be true or false." }
+          )
+        end
+        if @site_configuration.inbox_enabled == desired_state
+          Jurisdiction.update_all(inbox_enabled: desired_state)
+          @site_configuration.update(inbox_enabled: desired_state)
+        end
+      end
       render_success @site_configuration, "site_configuration.update_success"
     else
       return(
@@ -39,6 +52,7 @@ class Api::SiteConfigurationController < Api::ApplicationController
     params.require(:site_configuration).permit(
       :display_sitewide_message,
       :sitewide_message,
+      :inbox_enabled,
       :small_scale_requirement_template_id,
       help_link_items: [
         get_started_link_item: %i[href title description show],
