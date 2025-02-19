@@ -109,6 +109,16 @@ export const ConfigurationManagementScreen = observer(function ConfigurationMana
                   disableForSandbox
                 />
               </GridItem>
+              <GridItem>
+                <HomeScreenBox
+                  title={t(`${i18nPrefix}.globalFeatureAccess.title`)}
+                  description={t(`${i18nPrefix}.globalFeatureAccess.description`)}
+                  linkText={t("ui.edit")}
+                  icon={<SlidersHorizontal size="24px" color="var(--chakra-colors-text-link)" />}
+                  href="global-feature-access"
+                  h="full"
+                />
+              </GridItem>
             </Grid>
           </VStack>
         </Container>
