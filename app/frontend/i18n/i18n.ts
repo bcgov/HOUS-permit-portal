@@ -1837,7 +1837,10 @@ const options = {
             title: "Global feature access",
             description: "Turn system features on or off for all users",
             submissionInbox: "Submission inbox",
-            submissionInboxDescription: "Enable review managers to accept and process permit applications. If you turn off this feature, submitters can’t submit applications, and review managers won’t receive new applications.",
+            submissionInboxDescription:
+              "Enable review managers to accept and process permit applications. If you turn off this feature, submitters can’t submit applications, and review managers won’t receive new applications.",
+            toggleOn: "On",
+            toggleOff: "Off",
           },
           sitewideMessage: {
             title: "Site-wide message",

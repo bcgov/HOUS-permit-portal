@@ -1,15 +1,19 @@
 import { Box, Container, Divider, Flex, Heading, HStack, LinkOverlay, Text, VStack } from "@chakra-ui/react"
 import { ArrowRight } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
-import React, { useEffect } from "react"
+import React, { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { useSearch } from "../../../../hooks/use-search"
-import { RouterLinkButton } from "../../../shared/navigation/router-link-button"
 import { useMst } from "../../../../setup/root"
+import { RouterLinkButton } from "../../../shared/navigation/router-link-button"
 
 export const AdminGlobalFeatureAccessScreen = observer(() => {
   const i18nPrefix = "siteConfiguration.globalFeatureAccess"
   const { t } = useTranslation()
+  const { siteConfigurationStore } = useMst()
+  const [submissionInboxState, setSubmissionInboxState] = useState(false)
+  useEffect(() => {
+    setSubmissionInboxState(siteConfigurationStore?.inboxEnabled)
+  })
 
   return (
     <Container maxW="container.lg" p={8} as={"main"}>
@@ -33,10 +37,12 @@ export const AdminGlobalFeatureAccessScreen = observer(() => {
                 to="submission-inbox"
                 variant="link"
                 textDecoration="none"
-                position="relative" 
+                position="relative"
               >
-                <HStack spacing={6}> 
-                  <Text fontWeight="normal" color="black" textDecoration="none">Off</Text>
+                <HStack spacing={6}>
+                  <Text fontWeight="normal" color="black" textDecoration="none">
+                    {submissionInboxState === false ? t(`${i18nPrefix}.toggleOff`) : t(`${i18nPrefix}.toggleOn`)}
+                  </Text>
                   <ArrowRight color="black" size={16} />
                 </HStack>
               </LinkOverlay>

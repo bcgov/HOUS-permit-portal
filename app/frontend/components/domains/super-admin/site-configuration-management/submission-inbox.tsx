@@ -1,8 +1,10 @@
 import { Box, Container, Divider, Flex, Heading, HStack, Switch, Text, VStack } from "@chakra-ui/react"
+import { CaretLeft } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../../setup/root"
+import { RouterLinkButton } from "../../../shared/navigation/router-link-button"
 
 export const AdminSubmissionInboxScreen = observer(() => {
   const i18nPrefix = "siteConfiguration.globalFeatureAccess"
@@ -10,7 +12,7 @@ export const AdminSubmissionInboxScreen = observer(() => {
   const { siteConfigurationStore } = useMst()
   const { updateSiteConfiguration, configurationLoaded } = siteConfigurationStore
   const [inboxEnabled, setInboxEnabled] = useState(false)
-  
+
   const updateInboxEnabled = async (checked) => {
     setInboxEnabled(checked)
     await updateSiteConfiguration({
@@ -20,7 +22,7 @@ export const AdminSubmissionInboxScreen = observer(() => {
 
   useEffect(() => {
     if (configurationLoaded) {
-      setInboxEnabled(siteConfigurationStore.inboxEnabled || false);
+      setInboxEnabled(siteConfigurationStore.inboxEnabled || false)
     }
   }, [configurationLoaded])
 
@@ -29,6 +31,13 @@ export const AdminSubmissionInboxScreen = observer(() => {
       <VStack alignItems={"flex-start"} spacing={5} w={"full"} h={"full"}>
         <Flex justifyContent={"space-between"} w={"full"} alignItems={"flex-end"}>
           <Box>
+            <RouterLinkButton
+              variant={"link"}
+              to={`/configuration-management/global-feature-access/`}
+              leftIcon={<CaretLeft size={16} />}
+            >
+              {t("ui.back")}
+            </RouterLinkButton>
             <Heading as="h1">{t(`${i18nPrefix}.submissionInbox`)}</Heading>
             <Text color="text.secondary" my={6}>
               {t(`${i18nPrefix}.submissionInboxDescription`)}
@@ -41,13 +50,13 @@ export const AdminSubmissionInboxScreen = observer(() => {
           <Flex direction="row" justify="space-between" w="100%">
             <Text>{t(`${i18nPrefix}.submissionInbox`)}</Text>
             <HStack spacing={5} align="center">
-                <HStack spacing={6}> 
-                  <Switch
-                      id="inbox-enabled-switch"
-                      isChecked={inboxEnabled}
-                      onChange={(e) => updateInboxEnabled(e.target.checked)}
-                    />
-                </HStack>
+              <HStack spacing={6}>
+                <Switch
+                  id="inbox-enabled-switch"
+                  isChecked={inboxEnabled}
+                  onChange={(e) => updateInboxEnabled(e.target.checked)}
+                />
+              </HStack>
             </HStack>
           </Flex>
           <Divider />
