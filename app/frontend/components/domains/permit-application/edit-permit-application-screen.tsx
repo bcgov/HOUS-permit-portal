@@ -126,7 +126,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg")
     setAttributes(svg, {
       width: "1em",
-      style: "display:inline-block",
+      style: "display:inline-block; margin-left: 0.25rem",
       height: "1em",
       fill: "currentColor",
       viewBox: "0 0 256 256",
