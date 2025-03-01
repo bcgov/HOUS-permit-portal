@@ -535,6 +535,9 @@ en:
       update_success:
         title: ""
         message: "Successfully updated site configuration"
+      update_global_feature:
+        title: ""
+        message: ""
       show_error:
         tite: "Oops"
         message: "There was an error loading the site configuration"

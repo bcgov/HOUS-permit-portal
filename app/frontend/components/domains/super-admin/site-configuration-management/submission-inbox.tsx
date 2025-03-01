@@ -1,10 +1,11 @@
 import { Box, Container, Divider, Flex, Heading, HStack, Switch, Text, VStack } from "@chakra-ui/react"
-import { CaretLeft } from "@phosphor-icons/react"
+import { CaretLeft, Check, X } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../../setup/root"
 import { RouterLinkButton } from "../../../shared/navigation/router-link-button"
+import { SwitchButton } from "../../../shared/buttons/switch-button"
 
 export const AdminSubmissionInboxScreen = observer(() => {
   const i18nPrefix = "siteConfiguration.globalFeatureAccess"
@@ -34,11 +35,12 @@ export const AdminSubmissionInboxScreen = observer(() => {
             <RouterLinkButton
               variant={"link"}
               to={`/configuration-management/global-feature-access/`}
-              leftIcon={<CaretLeft size={16} />}
+              leftIcon={<CaretLeft size={20} />}
+              style={{ textDecoration: 'none' }}
             >
               {t("ui.back")}
             </RouterLinkButton>
-            <Heading as="h1">{t(`${i18nPrefix}.submissionInbox`)}</Heading>
+            <Heading as="h1" marginTop={"15px"}>{t(`${i18nPrefix}.submissionInbox`)}</Heading>
             <Text color="text.secondary" my={6}>
               {t(`${i18nPrefix}.submissionInboxDescription`)}
             </Text>
@@ -48,13 +50,13 @@ export const AdminSubmissionInboxScreen = observer(() => {
       <Flex justifyContent={"space-between"} w={"full"} alignItems={"flex-end"}>
         <VStack justifyContent={"space-between"} w={"full"} alignItems={"flex-end"}>
           <Flex direction="row" justify="space-between" w="100%">
-            <Text>{t(`${i18nPrefix}.submissionInbox`)}</Text>
+            <Text style={{ fontWeight: 'bold' }}>{t(`${i18nPrefix}.submissionInbox`)}</Text>
             <HStack spacing={5} align="center">
               <HStack spacing={6}>
-                <Switch
-                  id="inbox-enabled-switch"
-                  isChecked={inboxEnabled}
-                  onChange={(e) => updateInboxEnabled(e.target.checked)}
+                <SwitchButton
+                  enable={inboxEnabled}
+                  update={updateInboxEnabled}
+                  size={'lg'}
                 />
               </HStack>
             </HStack>
