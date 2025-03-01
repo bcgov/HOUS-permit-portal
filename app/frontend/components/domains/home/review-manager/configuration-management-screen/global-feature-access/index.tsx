@@ -21,7 +21,7 @@ export const ReviewManagerGlobalFeatureAccessScreen = observer(() => {
         <Flex justifyContent={"space-between"} w={"full"} alignItems={"flex-end"}>
           <Box>
             <Heading as="h1">{t(`${i18nPrefix}.title`)}</Heading>
-            <Text color="text.secondary" my={6}>
+            <Text color="text.secondary" my={6} fontSize={18}>
               {t(`${i18nPrefix}.description`)}
             </Text>
           </Box>
@@ -30,7 +30,7 @@ export const ReviewManagerGlobalFeatureAccessScreen = observer(() => {
       <Flex justifyContent={"space-between"} w={"full"} alignItems={"flex-end"}>
         <VStack justifyContent={"space-between"} w={"full"} alignItems={"flex-end"}>
           <Flex direction="row" justify="space-between" w="100%">
-            <Text>{t(`${i18nPrefix}.submissionInbox`)}</Text>
+            <Text fontSize={16}>{t(`${i18nPrefix}.submissionInbox`)}</Text>
             <HStack spacing={5} align="center">
               <LinkOverlay
                 as={RouterLinkButton}
