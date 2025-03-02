@@ -1,4 +1,4 @@
-import { Box, Container, Divider, Flex, Heading, HStack, LinkOverlay, Text, VStack } from "@chakra-ui/react"
+import { Box, Container, Flex, Heading, LinkOverlay, Table, Tbody, Td, Text, Tr, VStack } from "@chakra-ui/react"
 import { ArrowRight } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
@@ -11,6 +11,7 @@ export const ReviewManagerGlobalFeatureAccessScreen = observer(() => {
   const { t } = useTranslation()
   const { currentJurisdiction } = useJurisdiction()
   const [submissionInboxState, setSubmissionInboxState] = useState(false)
+  const [isHovered, setIsHovered] = useState(false)
   useEffect(() => {
     setSubmissionInboxState(currentJurisdiction?.inboxEnabled)
   })
@@ -27,30 +28,35 @@ export const ReviewManagerGlobalFeatureAccessScreen = observer(() => {
           </Box>
         </Flex>
       </VStack>
-      <Flex justifyContent={"space-between"} w={"full"} alignItems={"flex-end"}>
-        <VStack justifyContent={"space-between"} w={"full"} alignItems={"flex-end"}>
-          <Flex direction="row" justify="space-between" w="100%">
-            <Text fontSize={16}>{t(`${i18nPrefix}.submissionInbox`)}</Text>
-            <HStack spacing={5} align="center">
-              <LinkOverlay
-                as={RouterLinkButton}
-                to="submission-inbox"
-                variant="link"
-                textDecoration="none"
-                position="relative"
-              >
-                <HStack spacing={6}>
-                  <Text fontWeight="normal" color="black" textDecoration="none">
-                    {submissionInboxState === false ? t(`${i18nPrefix}.toggleOff`) : t(`${i18nPrefix}.toggleOn`)}
-                  </Text>
-                  <ArrowRight color="black" size={16} />
-                </HStack>
-              </LinkOverlay>
-            </HStack>
-          </Flex>
-          <Divider />
-        </VStack>
-      </Flex>
+      <Box w="full">
+        <Table variant="simple">
+          <Tbody>
+            <Tr borderTop="none" style={{ borderBottom: "1px solid #D9D9D9" }}>
+              <Td width="1000px" _hover={{ color: "#1A5A96" }}>
+                <Text>{t(`${i18nPrefix}.submissionInbox`)}</Text>
+              </Td>
+              <Td width="80px">
+                <Text fontWeight="bold" textAlign="end" color="black" textDecoration="none">
+                  {submissionInboxState === false ? t(`${i18nPrefix}.toggleOff`) : t(`${i18nPrefix}.toggleOn`)}
+                </Text>
+              </Td>
+              <Td width="50px" paddingLeft="0">
+                <LinkOverlay
+                  as={RouterLinkButton}
+                  to="submission-inbox"
+                  variant="link"
+                  textDecoration="none"
+                  position="relative"
+                  onMouseEnter={() => setIsHovered(true)}
+                  onMouseLeave={() => setIsHovered(false)}
+                >
+                  <ArrowRight color={isHovered ? "#1A5A96" : "black"} size={20} />
+                </LinkOverlay>
+              </Td>
+            </Tr>
+          </Tbody>
+        </Table>
+      </Box>
     </Container>
   )
 })

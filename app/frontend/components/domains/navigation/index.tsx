@@ -53,11 +53,6 @@ const EnergyStepRequirementsScreen = lazy(() =>
     default: module.EnergyStepRequirementsScreen,
   }))
 )
-const SubmissionsInboxSetupScreen = lazy(() =>
-  import("../home/review-manager/configuration-management-screen/submissions-inbox-setup-screen").then((module) => ({
-    default: module.SubmissionsInboxSetupScreen,
-  }))
-)
 const ReviewManagerGlobalFeatureAccessScreen = lazy(() =>
   import("../home/review-manager/configuration-management-screen/global-feature-access").then((module) => ({
     default: module.ReviewManagerGlobalFeatureAccessScreen,
@@ -406,10 +401,6 @@ const AppRoutes = observer(() => {
   const managerOrReviewerRoutes = (
     <>
       <Route path="/jurisdictions/:jurisdictionId/submission-inbox" element={<JurisdictionSubmissionInboxScreen />} />
-      <Route
-        path="/jurisdictions/:jurisdictionId/configuration-management/submissions-inbox-setup"
-        element={<SubmissionsInboxSetupScreen />}
-      />
       <Route
         path="/jurisdictions/:jurisdictionId/configuration-management/global-feature-access"
         element={<ReviewManagerGlobalFeatureAccessScreen />}
