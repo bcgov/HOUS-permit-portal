@@ -31,8 +31,14 @@ export const ReviewManagerGlobalFeatureAccessScreen = observer(() => {
       <Box w="full">
         <Table variant="simple">
           <Tbody>
-            <Tr borderTop="none" style={{ borderBottom: "1px solid #D9D9D9" }}>
-              <Td width="1000px" _hover={{ color: "#1A5A96" }}>
+            <Tr
+              borderTop="none"
+              style={{ borderBottom: "1px solid #D9D9D9" }}
+              _hover={{ color: "#1A5A96" }}
+              onMouseEnter={() => setIsHovered(true)}
+              onMouseLeave={() => setIsHovered(false)}
+            >
+              <Td width="1000px">
                 <Text>{t(`${i18nPrefix}.submissionInbox`)}</Text>
               </Td>
               <Td width="80px">
@@ -47,8 +53,6 @@ export const ReviewManagerGlobalFeatureAccessScreen = observer(() => {
                   variant="link"
                   textDecoration="none"
                   position="relative"
-                  onMouseEnter={() => setIsHovered(true)}
-                  onMouseLeave={() => setIsHovered(false)}
                 >
                   <ArrowRight color={isHovered ? "#1A5A96" : "black"} size={20} />
                 </LinkOverlay>
