@@ -123,6 +123,10 @@ class Api::UsersController < Api::ApplicationController
   def destroy
     authorize @user
     if @user.discard
+      if (@user.review_staff?)
+          @user.update(role: 'submitter', discarded_at: nil)
+          @user.jurisdiction_memberships.destroy_all
+      end
       render_success(
         @user,
         "user.destroy_success",

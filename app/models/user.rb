@@ -253,7 +253,7 @@ class User < ApplicationRecord
   end
 
   def jurisdiction_must_belong_to_correct_roles
-    if jurisdictions.any? && !review_staff?
+    if jurisdictions.any? && !review_staff? & !role_changed?
       errors.add(:jurisdictions, :reviewers_only)
     end
   end
