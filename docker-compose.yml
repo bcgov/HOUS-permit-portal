@@ -125,8 +125,6 @@ services:
       - "9200:9200"
     volumes:
       - elasticsearch_data:/usr/share/elasticsearch/data
-    # networks:
-    #   - backend  
 
   kibana:
     image: docker.elastic.co/kibana/kibana:8.4.3
@@ -137,14 +135,10 @@ services:
       - "5601:5601"
     depends_on:
       - elasticsearch
-    # networks:
-    #   - backend    
+        
 
 volumes:
   postgres_data:
   redis_data:
   elasticsearch_data:
 
-# networks:
-#   backend:
-#     driver: bridge
