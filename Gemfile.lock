@@ -200,6 +200,11 @@ GEM
       elasticsearch-api (= 8.11.0)
     elasticsearch-api (8.11.0)
       multi_json
+    elasticsearch-model (8.0.0)
+      activesupport (> 3)
+      elasticsearch (~> 8)
+      hashie
+    elasticsearch-rails (8.0.0)
     erubi (1.13.1)
     et-orbi (1.2.11)
       tzinfo
@@ -659,6 +664,8 @@ DEPENDENCIES
   dotenv-rails (= 2.8.1)
   dry-container (= 0.8.0)
   elasticsearch (~> 8.11.0)
+  elasticsearch-model
+  elasticsearch-rails
   exception_notification (~> 4.5.0)
   factory_bot (~> 6.4)
   factory_bot_rails (~> 6.4.2)

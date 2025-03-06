@@ -50,6 +50,7 @@ gem "image_processing", "~> 1.12.2"
 gem "acts_as_list", "~> 1.1.0"
 gem "searchkick", "~> 5.3.1"
 gem "elasticsearch", "~> 8.11.0"
+gem 'elasticsearch-model'
 gem "kaminari", "~> 1.2.2"
 gem "acts-as-taggable-on", "~> 10.0.0"
 # Assuming BC Common Object Management Service (COMS) is compatible with S3 formats:

@@ -211,6 +211,10 @@ Rails.application.routes.draw do
       post "accept_invitation", on: :member
     end
 
+    resources :user_activities, only: [] do
+      post 'index', on: :collection
+    end
+
     resources :end_user_license_agreement, only: %i[index]
 
     resources :step_codes, only: %i[index create destroy], shallow: true do

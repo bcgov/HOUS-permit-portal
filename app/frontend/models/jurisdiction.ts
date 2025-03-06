@@ -106,9 +106,11 @@ export const JurisdictionModel = types
       self.tablePermitApplications = permitApplications.map((pa) => pa.id)
     },
     update: flow(function* (params) {
+      console.log('here');
       const { ok, data: response } = yield* toGenerator(self.environment.api.updateJurisdiction(self.id, params))
       if (ok) {
         self.rootStore.jurisdictionStore.mergeUpdate(response.data, "jurisdictionMap")
+        yield* toGenerator(self.environment.api.logUserActivity('1111', 'Test', 'Jurisdiction', 'Test Action', new Date().toISOString()))
       }
       return ok
     }),

@@ -687,4 +687,20 @@ export class Api {
   async fetchCurrentUserAcceptedEulas() {
     return this.client.get<ApiResponse<IUser>>(`/users/current_user/license_agreements`)
   }
+
+  async logUserActivity(
+    userId: string,
+    featureName: string,
+    jurisdiction: string,
+    action: string,
+    timestamp: string,
+  ) {
+    return this.client.post<ApiResponse<IUser>>(`/user_activities/index`, {
+      userId,
+      featureName,
+      jurisdiction,
+      action,
+      timestamp,
+    })
+  }
 }
