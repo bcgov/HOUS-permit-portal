@@ -184,12 +184,12 @@ export const LoginScreen = ({ isAdmin }: ILoginScreenProps) => {
                 {t("auth.loginHelp")}{" "}
               </Text>
               <Text as="span">{t("auth.goToPartners")} </Text>
-              <Link href="https://www.bceid.ca/clp/account_recovery.aspx" isExternal>
+              <Link href={import.meta.env.VITE_BCEID_PARTNER_URL} isExternal>
                 {t("auth.bceid")}
               </Link>{" "}
               {t("ui.or")}{" "}
               <Link
-                href="https://www2.gov.bc.ca/gov/content/governments/government-id/bcservicescardapp#setup"
+                href={import.meta.env.VITE_BCSC_PARTNER_URL}
                 isExternal
               >
                 {t("auth.bcsc")}
