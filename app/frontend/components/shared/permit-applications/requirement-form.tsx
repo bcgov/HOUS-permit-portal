@@ -142,7 +142,12 @@ export const RequirementForm = observer(
 
       if (!currentUser) {
         document.querySelectorAll(".autofill-button").forEach((button) => {
-          ;(button as HTMLButtonElement).disabled = true
+          const anchor = document.createElement("span")
+          anchor.textContent = button.textContent
+          anchor.className = "btn btn-primary autofill-button"
+          anchor.style.cssText =
+            "cursor: default; text-decoration: none; background-color: rgba(0, 0, 0, 0.12); opacity: 1; color: rgba(0, 0, 0, 0.26);"
+          button.parentNode.replaceChild(anchor, button)
         })
       }
 
