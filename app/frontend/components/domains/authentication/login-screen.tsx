@@ -188,10 +188,7 @@ export const LoginScreen = ({ isAdmin }: ILoginScreenProps) => {
                 {t("auth.bceid")}
               </Link>{" "}
               {t("ui.or")}{" "}
-              <Link
-                href={import.meta.env.VITE_BCSC_PARTNER_URL}
-                isExternal
-              >
+              <Link href={import.meta.env.VITE_BCSC_REGISTRATION_URL} isExternal>
                 {t("auth.bcsc")}
               </Link>
             </Text>
