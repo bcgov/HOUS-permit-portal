@@ -195,6 +195,7 @@ const options = {
           search: "Search",
           loading: "Loading...",
           invalidInput: "Invalid input",
+          invalidUrl: "Invalid url",
           invalidEmail: "Invalid email",
           selectPlaceholder: "Select",
           selectApplicable: "Select applicable:",

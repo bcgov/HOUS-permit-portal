@@ -32,7 +32,7 @@ import {
   IRequirementBlockCustomization,
 } from "../../../../../types/types"
 import { Editor } from "../../../../shared/editor/editor"
-import { TextFormControl } from "../../../../shared/form/input-form-control"
+import { UrlFormControl } from "../../../../shared/form/input-form-control"
 
 interface ICustomizationForm extends IRequirementBlockCustomization {}
 
@@ -190,10 +190,9 @@ const MainView = ({
       <Box sx={{ ".ql-container": { h: "112px" } }}>
         <Text mb={1}>{t("digitalBuildingPermits.edit.requirementBlockSidebar.tipLabel")}</Text>
         <Editor htmlValue={tipValue} onChange={onTipChange} />
-        <label>{t("digitalBuildingPermits.edit.requirementBlockSidebar.helpSectionLink")}
-          <TextFormControl
-            fieldName="helpLink" 
-          />
+        <label>
+          {t("digitalBuildingPermits.edit.requirementBlockSidebar.helpSectionLink")}
+          <UrlFormControl fieldName="helpLink" />
         </label>
       </Box>
 
