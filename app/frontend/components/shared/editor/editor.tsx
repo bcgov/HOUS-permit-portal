@@ -164,22 +164,13 @@ export const Editor = observer(
         const editor = editorRef?.current?.getEditor()
         editor?.focus?.()
       }
-      const style = document.createElement("style")
-      style.innerHTML = `
-        .ql-editor {
-          word-break: break-all;
-      }`
-      document.head.appendChild(style)
-
-      return () => {
-        document.head.removeChild(style)
-      }
     }, [autoFocus])
 
     return (
       <ReactQuill
         ref={editorRef}
         theme={!readonly && richText ? "snow" : "bubble"}
+        style={{ wordBreak: "break-all" }}
         defaultValue={htmlValue}
         readOnly={readonly}
         value={htmlValue}
