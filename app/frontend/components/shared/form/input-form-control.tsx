@@ -37,6 +37,11 @@ interface IInputFormControlProps<TInputProps = Partial<InputProps>> extends Form
   showOptional?: boolean
 }
 
+const isValidUrl = (url: string) => {
+  const regex = /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i
+  return regex.test(url)
+}
+
 export const TextFormControl = (props: IInputFormControlProps) => {
   return (
     <InputFormControl
@@ -60,6 +65,9 @@ export const UrlFormControl = (props: IInputFormControlProps) => {
       {...R.mergeDeepRight(
         {
           inputProps: { type: "url" },
+          validate: {
+            validUrl: (str) => isValidUrl(str) || t("ui.invalidUrl"),
+          },
         },
         props
       )}
