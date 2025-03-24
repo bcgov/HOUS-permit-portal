@@ -7,7 +7,7 @@ import { useJurisdiction } from "../../../../../../hooks/resources/use-jurisdict
 import { SwitchButton } from "../../../../../shared/buttons/switch-button"
 import { RouterLinkButton } from "../../../../../shared/navigation/router-link-button"
 
-export const ReviewManagerSubmissionInboxScreen = observer(() => {
+export const ReviewStaffSubmissionInboxScreen = observer(() => {
   const i18nPrefix = "home.configurationManagement.globalFeatureAccess"
   const { t } = useTranslation()
   const { currentJurisdiction } = useJurisdiction()
