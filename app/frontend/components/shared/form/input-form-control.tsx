@@ -39,7 +39,8 @@ interface IInputFormControlProps<TInputProps = Partial<InputProps>> extends Form
 
 const isValidUrl = (url: string) => {
   const regex = /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i
-  return regex.test(url)
+  const wwwRegex = /^(www\.)[^\s/$.?#].[^\s]*$/i
+  return regex.test(url) || wwwRegex.test(url)
 }
 
 export const TextFormControl = (props: IInputFormControlProps) => {
