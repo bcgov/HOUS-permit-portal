@@ -33,8 +33,8 @@ export const ReviewManagerGlobalFeatureAccessScreen = observer(() => {
           <Tbody>
             <Tr
               borderTop="none"
-              style={{ borderBottom: "1px solid #D9D9D9" }}
-              _hover={{ color: "#1A5A96" }}
+              style={{ borderBottom: "1px solid var(--chakra-colors-border-light)" }}
+              _hover={{ color: "var(--chakra-colors-text-link)" }}
               onMouseEnter={() => setIsHovered(true)}
               onMouseLeave={() => setIsHovered(false)}
             >
@@ -43,7 +43,7 @@ export const ReviewManagerGlobalFeatureAccessScreen = observer(() => {
               </Td>
               <Td width="80px">
                 <Text fontWeight="bold" textAlign="end" color="black" textDecoration="none">
-                  {submissionInboxState === false ? t(`${i18nPrefix}.toggleOff`) : t(`${i18nPrefix}.toggleOn`)}
+                  {t(`${i18nPrefix}.toggle${submissionInboxState ? "On" : "Off"}`)}
                 </Text>
               </Td>
               <Td width="50px" paddingLeft="0">

@@ -58,10 +58,10 @@ const ReviewManagerGlobalFeatureAccessScreen = lazy(() =>
     default: module.ReviewManagerGlobalFeatureAccessScreen,
   }))
 )
-const ReviewManagerSubmissionInboxScreen = lazy(() =>
+const ReviewStaffSubmissionInboxScreen = lazy(() =>
   import("../home/review-manager/configuration-management-screen/global-feature-access/submission-inbox").then(
     (module) => ({
-      default: module.ReviewManagerSubmissionInboxScreen,
+      default: module.ReviewStaffSubmissionInboxScreen,
     })
   )
 )
@@ -407,7 +407,7 @@ const AppRoutes = observer(() => {
       />
       <Route
         path="/jurisdictions/:jurisdictionId/configuration-management/global-feature-access/submission-inbox"
-        element={<ReviewManagerSubmissionInboxScreen />}
+        element={<ReviewStaffSubmissionInboxScreen />}
       />
       <Route
         path="/jurisdictions/:jurisdictionId/configuration-management/energy-step"
