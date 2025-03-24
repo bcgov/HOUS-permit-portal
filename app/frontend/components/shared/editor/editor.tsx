@@ -170,7 +170,6 @@ export const Editor = observer(
       <ReactQuill
         ref={editorRef}
         theme={!readonly && richText ? "snow" : "bubble"}
-        style={{ wordBreak: "break-all" }}
         defaultValue={htmlValue}
         readOnly={readonly}
         value={htmlValue}

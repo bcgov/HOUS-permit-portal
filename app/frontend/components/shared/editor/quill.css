@@ -18,6 +18,7 @@
 .ql-editor {
   flex-grow: 1;
   border-color: transparent;
+  word-break: normal;
 }
 
 .quill .ql-toolbar.ql-snow {
