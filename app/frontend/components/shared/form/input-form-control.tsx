@@ -38,7 +38,7 @@ interface IInputFormControlProps<TInputProps = Partial<InputProps>> extends Form
 }
 
 const isValidUrl = (url: string) => {
-  const combinedRegex = /^(https?|ftp):\/\/(www\.)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,6}([\/\w .-]*)*$/i
+  const combinedRegex = /^(https?|http):\/\/(www\.)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,6}([\/\w .-]*)*$/i
   const wwwRegex = /^(www\.)[^\s/$.?#].[^\s]*$/i
   return combinedRegex.test(url) || wwwRegex.test(url)
 }
