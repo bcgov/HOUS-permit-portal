@@ -114,7 +114,7 @@ const options = {
           iNeed: "What do I need?",
           whyUseTitle: "Why use this tool?",
           whyUse:
-            "The Building Permit Hub helps you submit a building permit application through a streamlined and standardized approach across jurisdictions in B.C. This tool connects you with local government and First Nation information to support the building permit submission process.",
+            "The Building Permit Hub helps you submit a building permit application through a streamlined and standardized approach across jurisdictions in B.C. This tool connects you with local government and First Nations information to support the building permit submission process.",
           iNeedLong: "What do I need for a housing building permit?",
           reqsVary:
             "Permit requirements vary by local jurisdiction and depend on the geography of the surrounding location.",
@@ -2002,7 +2002,7 @@ const options = {
           disclaimerTitle: "Disclaimer",
           copyrightHolder: "Government of British Columbia.",
           metaDescription:
-            "The Building Permit Hub helps you submit a building permit application through a streamlined and standardized approach across jurisdictions in B.C. This tool connects you with local government and First Nation information to support the building permit submission process.",
+            "The Building Permit Hub helps you submit a building permit application through a streamlined and standardized approach across jurisdictions in B.C. This tool connects you with local government and First Nations information to support the building permit submission process.",
           metaKeywords: "BC, british columba, permit, portal, hub, permitting, permit application",
           loggedInWelcome: "Welcome back!",
           myPermits: "My permits",
