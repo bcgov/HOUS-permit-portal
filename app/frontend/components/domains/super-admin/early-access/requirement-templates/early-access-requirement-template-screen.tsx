@@ -77,6 +77,7 @@ export const EarlyAccessRequirementTemplateScreen = observer(({}: IEarlyAccessRe
 
         <Flex flex={1} direction="column" pt={8} position={"relative"} id="permitApplicationFieldsContainer">
           <RequirementForm
+            isEarlyAccess
             formRef={formRef}
             permitApplication={ephemeralPermitApplication}
             onCompletedBlocksChange={setCompletedBlocks}

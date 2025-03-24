@@ -33,6 +33,7 @@ interface IRequirementFormProps {
   isEditing?: boolean
   renderTopButtons?: () => React.ReactNode
   updateCollaborationAssignmentNodes?: () => void
+  isEarlyAccess?: boolean
 }
 
 export const RequirementForm = observer(
@@ -45,6 +46,7 @@ export const RequirementForm = observer(
     renderSaveButton,
     isEditing = false,
     updateCollaborationAssignmentNodes,
+    isEarlyAccess = false,
   }: IRequirementFormProps) => {
     const {
       jurisdiction,
@@ -139,12 +141,6 @@ export const RequirementForm = observer(
 
       // Problems with render timing necessitates the use of this isMounted state
       if (!isMounted) return
-
-      if (!currentUser) {
-        document.querySelectorAll(".autofill-button").forEach((button) => {
-          ;(button as HTMLButtonElement).disabled = true
-        })
-      }
 
       const formComponentNodes = document.querySelectorAll(".formio-component")
 
@@ -321,7 +317,7 @@ export const RequirementForm = observer(
           direction="column"
           as={"section"}
           flex={1}
-          className={`form-wrapper ${floatErrorBox ? "float-on" : "float-off"}`}
+          className={`form-wrapper ${floatErrorBox ? "float-on" : "float-off"} ${isEarlyAccess ? "early-access-requirement-form" : ""}`}
           mb="40vh"
           mx="auto"
           pl={{ base: "10" }}
