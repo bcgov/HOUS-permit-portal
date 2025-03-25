@@ -48,7 +48,6 @@ class Api::RequirementBlocksController < Api::ApplicationController
   end
 
   def update
-    binding.pry
     authorize @requirement_block
 
     if @requirement_block.update(requirement_block_params)

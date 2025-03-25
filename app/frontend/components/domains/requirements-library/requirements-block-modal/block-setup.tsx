@@ -13,7 +13,7 @@ import {
   Tooltip,
   VStack,
 } from "@chakra-ui/react"
-import { Download, Info, Trash } from "@phosphor-icons/react"
+import { ArrowCounterClockwise, Info, Trash } from "@phosphor-icons/react"
 import "@uppy/core/dist/style.min.css"
 import "@uppy/dashboard/dist/style.css"
 import "@uppy/drag-drop/dist/style.css"
@@ -28,8 +28,8 @@ import { useParams } from "react-router-dom"
 import useUppyS3 from "../../../../hooks/use-uppy-s3"
 import { IRequirementBlock } from "../../../../models/requirement-block"
 import { useMst } from "../../../../setup/root"
-import { downloadFileFromStorage } from "../../../../utils/utility-functions"
 import { ConfirmationModal } from "../../../shared/confirmation-modal"
+import { RequirementDocumentDownloadButton } from "../../../shared/requirement-template/requirement-document-download-button"
 import { BlockVisibilitySelect } from "../../../shared/select/block-visibility-select"
 import { TagsSelect } from "../../../shared/select/selectors/tags-select"
 import { BlockSetupOptionsMenu } from "../block-setup-options-menu"
@@ -78,7 +78,6 @@ export const BlockSetup = observer(function BlockSetup({
   const handleUploadSuccess = (file: UppyFile<{}, {}>, response: any) => {
     if (requirementBlock) {
       // Create a new document with the uploaded file data
-      debugger
       const parts = response.uploadURL.split("/")
       const key = parts[parts.length - 1]
       const newDocument = {
@@ -218,6 +217,28 @@ export const BlockSetup = observer(function BlockSetup({
             {t("requirementsLibrary.fieldDescriptions.requirementSku")}
           </FormHelperText>
         </FormControl>
+        <FormControl>
+          <FormLabel>{t("requirementsLibrary.fields.requirementDocuments")}</FormLabel>
+          {requirementBlock?.requirementDocuments?.map((document) => (
+            <HStack key={document.id} p={2}>
+              <RequirementDocumentDownloadButton document={document} />
+              <Button
+                size="xs"
+                variant="ghost"
+                color={document._destroy ? "semantic.info" : "semantic.error"}
+                aria-label={document._destroy ? "Revert document removal" : "Remove document"}
+                onClick={() =>
+                  document._destroy
+                    ? requirementBlock.removeDestroyOnDocument(document.id)
+                    : requirementBlock.setDestroyOnDocument(document.id)
+                }
+              >
+                {document._destroy ? <ArrowCounterClockwise size={16} /> : <Trash size={16} />}
+              </Button>
+            </HStack>
+          ))}
+          <Dashboard uppy={uppy} height={300} />
+        </FormControl>
         {withOptionsMenu
           ? requirementBlock && <BlockSetupOptionsMenu requirementBlock={requirementBlock} />
           : isEditingEarlyAccess && (
@@ -237,36 +258,6 @@ export const BlockSetup = observer(function BlockSetup({
               />
             )}
       </VStack>
-      <FormControl>
-        <FormLabel>{t("requirementsLibrary.fields.requirementDocuments")}</FormLabel>
-        {requirementBlock?.requirementDocuments?.map((document) => (
-          <HStack key={document.id} mb={2}>
-            <Button
-              size="sm"
-              variant="link"
-              leftIcon={<Download size={16} />}
-              onClick={() =>
-                downloadFileFromStorage({
-                  model: "RequirementDocument",
-                  modelId: document.id,
-                })
-              }
-            >
-              {document.fileData.metadata.filename}
-            </Button>
-            <Button
-              size="xs"
-              variant="ghost"
-              colorScheme="red"
-              aria-label="Remove document"
-              onClick={() => requirementBlock.removeDocument(document.id)}
-            >
-              <Trash size={16} />
-            </Button>
-          </HStack>
-        ))}
-        <Dashboard uppy={uppy} />
-      </FormControl>
     </Box>
   )
 })

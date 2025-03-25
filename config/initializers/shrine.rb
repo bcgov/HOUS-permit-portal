@@ -73,8 +73,8 @@ Shrine.plugin :presign_endpoint,
                     method: :put,
                     content_disposition:
                       ContentDisposition.attachment(filename),
-                    content_type: type,
-                    content_length_range: 0..(10 * 1024 * 1024) # limit upload size to 10 MB
+                    content_type: type
+                    # content_length_range: [0, 10 * 1024 * 1024] # limit upload size to 10 MB
                     # content_md5: request.params["checksum"],
                     # transfer_encoding: "chunked",
                   }

@@ -87,14 +87,52 @@ class RequirementBlock < ApplicationRecord
   end
 
   def components_form_json(section_key)
-    optional_block = requirements.all? { |req| !req.required }
+    is_optional_block = requirements.all? { |req| !req.required }
+    has_documents = requirement_documents.any?
     requirement_map = requirements.map { |r| r.to_form_json(key(section_key)) }
 
-    if optional_block
+    requirement_map.unshift(documents_component(section_key)) if has_documents
+
+    if is_optional_block
       requirement_map.push(optional_block_confirmation_requirement(section_key))
     end
 
     requirement_map
+  end
+
+  def documents_component(section_key)
+    {
+      id: "#{id}-documents",
+      key: "#{key(section_key)}|documents",
+      type: "container",
+      custom_class: "requirement-document-download-button-container",
+      components: [
+        {
+          id: "#{id}-documents-label",
+          key: "#{key(section_key)}|documents-label",
+          type: "content",
+          html: "<h4>#{I18n.t("formio.requirement_block.documents_title")}</h4>"
+        }
+      ].concat(
+        requirement_documents.map do |document|
+          {
+            id: "#{id}-document-#{document.id}",
+            key: "#{key(section_key)}|document-#{document.id}",
+            type: "button",
+            action: "custom",
+            custom_class: "requirement-document-download-button",
+            label: document.file.metadata["filename"],
+            custom:
+              "document.dispatchEvent(new CustomEvent('downloadRequirementDocument', {
+            detail: {
+              id: '#{document.id}',
+              filename: '#{document.file.metadata["filename"]}'
+            }
+          }));"
+          }
+        end
+      )
+    }
   end
 
   def optional_block_confirmation_requirement(section_key)

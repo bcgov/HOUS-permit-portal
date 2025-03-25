@@ -127,10 +127,24 @@ export const RequirementBlockModel = types
     addDocument(document: IRequirementDocument) {
       self.requirementDocuments.push(document)
     },
-    removeDocument(documentId: string) {
+    setDestroyOnDocument(documentId: string) {
       const index = self.requirementDocuments.findIndex((doc) => doc.id === documentId)
       if (index !== -1) {
-        self.requirementDocuments.splice(index, 1)
+        // Create a new document with _destroy flag
+        const document = self.requirementDocuments[index]
+        const updatedDocument = { ...document, _destroy: true }
+        // Replace the document at the index
+        self.requirementDocuments.splice(index, 1, updatedDocument)
+      }
+    },
+    removeDestroyOnDocument(documentId: string) {
+      const index = self.requirementDocuments.findIndex((doc) => doc.id === documentId)
+      if (index !== -1) {
+        // Create a new document without _destroy flag
+        const document = self.requirementDocuments[index]
+        const { _destroy, ...documentWithoutDestroy } = document
+        // Replace the document at the index
+        self.requirementDocuments.splice(index, 1, documentWithoutDestroy)
       }
     },
     clearDocuments() {
