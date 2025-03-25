@@ -900,10 +900,10 @@ const options = {
             firstNations: "First Nations",
             description: "Description",
             associations: "Associations",
-            formFields: "Form fields",
+            formFields: "Form Fields",
             updatedAt: "Updated at",
             requirementSku: "Requirement SKU",
-            requirementDocuments: "Documents",
+            requirementDocuments: "Related documents",
           },
           configurationsColumn: "Configurations",
           fieldDescriptions: {

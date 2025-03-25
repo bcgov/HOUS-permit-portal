@@ -102,7 +102,6 @@ const s3custom = function Provider(formio) {
         // import.meta.env.DEV && console.log("s3 custom download files", fileInfo, options)
         // Return a file value, the file value must have a url
         const params = new URLSearchParams({
-          id: fileInfo.id,
           ...(fileInfo.model && { model: fileInfo.model }),
           ...(fileInfo.modelId && { model_id: fileInfo.modelId }),
         })

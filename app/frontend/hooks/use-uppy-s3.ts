@@ -73,9 +73,6 @@ const useUppyS3 = ({ onUploadSuccess, maxNumberOfFiles = 1, autoProceed = false 
         }
       )
       .on("upload-success", (file: UppyFile<{}, {}>, response) => {
-        console.log("Upload successful for file:", file.name)
-        console.log("Server response:", response)
-
         if (onUploadSuccess) {
           onUploadSuccess(file, response)
         }

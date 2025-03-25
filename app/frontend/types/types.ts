@@ -181,6 +181,7 @@ export interface IDenormalizedRequirementBlock {
   displayName: string
   displayDescription?: string
   requirements: IDenormalizedRequirement[]
+  requirementDocuments: IRequirementDocument[]
 }
 
 export interface IDenormalizedTemplateSectionBlock {
@@ -249,7 +250,6 @@ export interface IFileData {
   metadata: {
     size: number
     filename: string
-    // please excuse uncamelized key from uppy
     mimeType: string
   }
 }
@@ -259,6 +259,7 @@ export interface IRequirementDocument {
   requirementBlockId: string
   file: IFileData
   createdAt?: Date
+  _destroy?: boolean
 }
 
 export interface IRequirementBlockCustomization {

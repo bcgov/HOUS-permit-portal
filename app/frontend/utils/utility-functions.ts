@@ -261,17 +261,11 @@ export function urlForPath(path: string): string {
   return `${baseUrl}${normalizedPath}`
 }
 
-export async function downloadFileFromStorage(options: {
-  id?: string
-  model: string
-  modelId?: string
-}): Promise<void> {
+export async function downloadFileFromStorage(options: { model: string; modelId?: string }): Promise<void> {
   try {
-    debugger
-    const { id, model, modelId } = options
+    const { model, modelId } = options
     const params = new URLSearchParams()
 
-    if (id) params.append("id", id)
     if (model) params.append("model", model)
     if (modelId) params.append("model_id", modelId)
 
