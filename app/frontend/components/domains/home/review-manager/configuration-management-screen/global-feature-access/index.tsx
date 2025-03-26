@@ -1,7 +1,7 @@
 import { Box, Container, Flex, Heading, LinkOverlay, Table, Tbody, Td, Text, Tr, VStack } from "@chakra-ui/react"
 import { ArrowRight } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
-import React, { useEffect, useState } from "react"
+import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useJurisdiction } from "../../../../../../hooks/resources/use-jurisdiction"
 import { RouterLinkButton } from "../../../../../shared/navigation/router-link-button"
@@ -10,12 +10,7 @@ export const ReviewManagerGlobalFeatureAccessScreen = observer(() => {
   const i18nPrefix = "home.configurationManagement.globalFeatureAccess"
   const { t } = useTranslation()
   const { currentJurisdiction } = useJurisdiction()
-  const [submissionInboxState, setSubmissionInboxState] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
-  useEffect(() => {
-    setSubmissionInboxState(currentJurisdiction?.inboxEnabled)
-  })
-
   return (
     <Container maxW="container.lg" p={8} as={"main"}>
       <VStack alignItems={"flex-start"} spacing={5} w={"full"} h={"full"}>
@@ -43,7 +38,7 @@ export const ReviewManagerGlobalFeatureAccessScreen = observer(() => {
               </Td>
               <Td width="80px">
                 <Text fontWeight="bold" textAlign="end" color="black" textDecoration="none">
-                  {t(`${i18nPrefix}.toggle${submissionInboxState ? "On" : "Off"}`)}
+                  {t(`${i18nPrefix}.toggle${currentJurisdiction?.inboxEnabled ? "On" : "Off"}`)}
                 </Text>
               </Td>
               <Td width="50px" paddingLeft="0">
@@ -54,7 +49,7 @@ export const ReviewManagerGlobalFeatureAccessScreen = observer(() => {
                   textDecoration="none"
                   position="relative"
                 >
-                  <ArrowRight color={isHovered ? "#1A5A96" : "black"} size={20} />
+                  <ArrowRight color={isHovered ? "var(--chakra-colors-text-link)" : "black"} size={20} />
                 </LinkOverlay>
               </Td>
             </Tr>
