@@ -1,7 +1,7 @@
 import { Box, Container, Flex, Heading, LinkOverlay, Table, Tbody, Td, Text, Tr, VStack } from "@chakra-ui/react"
 import { ArrowRight } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
-import React, { useEffect, useState } from "react"
+import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../../setup/root"
 import { RouterLinkButton } from "../../../shared/navigation/router-link-button"
@@ -10,12 +10,7 @@ export const AdminGlobalFeatureAccessScreen = observer(() => {
   const i18nPrefix = "siteConfiguration.globalFeatureAccess"
   const { t } = useTranslation()
   const { siteConfigurationStore } = useMst()
-  const [submissionInboxState, setSubmissionInboxState] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
-  useEffect(() => {
-    setSubmissionInboxState(siteConfigurationStore?.inboxEnabled)
-  })
-
   return (
     <Container maxW="container.lg" p={8} as={"main"} py={8} flexGrow={1}>
       <Box w="full">
@@ -31,8 +26,8 @@ export const AdminGlobalFeatureAccessScreen = observer(() => {
           <Tbody>
             <Tr
               borderTop="none"
-              style={{ borderBottom: "1px solid #D9D9D9" }}
-              _hover={{ color: "#1A5A96" }}
+              style={{ borderBottom: "1px solid var(--chakra-colors-border-light)" }}
+              _hover={{ color: "var(--chakra-colors-text-link)" }}
               onMouseEnter={() => setIsHovered(true)}
               onMouseLeave={() => setIsHovered(false)}
             >
@@ -41,7 +36,7 @@ export const AdminGlobalFeatureAccessScreen = observer(() => {
               </Td>
               <Td width="80px">
                 <Text fontWeight="bold" textAlign="end" color="black" textDecoration="none">
-                  {submissionInboxState === false ? t(`${i18nPrefix}.toggleOff`) : t(`${i18nPrefix}.toggleOn`)}
+                  {siteConfigurationStore?.inboxEnabled ? t(`${i18nPrefix}.toggleOn`) : t(`${i18nPrefix}.toggleOff`)}
                 </Text>
               </Td>
               <Td width="50px" paddingLeft="0">
@@ -52,7 +47,7 @@ export const AdminGlobalFeatureAccessScreen = observer(() => {
                   textDecoration="none"
                   position="relative"
                 >
-                  <ArrowRight color={isHovered ? "#1A5A96" : "black"} size={20} />
+                  <ArrowRight color={isHovered ? "var(--chakra-colors-text-link)" : "black"} size={20} />
                 </LinkOverlay>
               </Td>
             </Tr>

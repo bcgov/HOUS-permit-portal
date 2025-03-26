@@ -25,7 +25,7 @@ class Api::SiteConfigurationController < Api::ApplicationController
           )
         end
         if @site_configuration.inbox_enabled == desired_state
-          Jurisdiction.update_all(inbox_enabled: desired_state)
+          Jurisdiction.update_inbox_enabled(desired_state)
           @site_configuration.update(inbox_enabled: desired_state)
         end
         render_success @site_configuration, "site_configuration.update_global_feature"
