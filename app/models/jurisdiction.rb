@@ -385,4 +385,8 @@ class Jurisdiction < ApplicationRecord
       )
     end
   end
+
+  def self.update_inbox_enabled(desired_state)
+      update_all(inbox_enabled: desired_state)
+  end
 end
