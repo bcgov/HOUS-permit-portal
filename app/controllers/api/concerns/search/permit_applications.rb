@@ -68,9 +68,7 @@ module Api::Concerns::Search::PermitApplications
     filters = permit_application_search_params[:filters]
     # Add the submitter ID if the user is a submitter. Necessary even with search auth filtering for consisent pagination
     # Only add the jurisdiction_id condition if @jurisdiction is present
-    if filters && filters[:has_collaborator] == false
-      filters[:has_collaborator] = nil
-    end
+    filters[:has_collaborator] = filters[:has_collaborator] == false ? nil : filters[:has_collaborator]
     where =
       if @jurisdiction
         {
