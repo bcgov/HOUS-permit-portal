@@ -162,17 +162,25 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
               borderBottomColor="border.light"
             >
               <Editor htmlValue={requirementBlock.displayDescription} readonly />
-              {!R.isEmpty(requirementBlock.requirementDocuments) && (
-                <Flex direction={"column"} w={"full"} gap={2} mt={4}>
-                  <Text fontWeight={700}>{t("requirementsLibrary.fields.requirementDocuments")}</Text>
-                  {requirementBlock.requirementDocuments?.map((document) => (
-                    <RequirementDocumentDownloadButton key={document.id} document={document} />
-                  ))}
-                </Flex>
-              )}
             </Box>
           )}
-
+          {!R.isEmpty(requirementBlock.requirementDocuments) && (
+            <Flex
+              direction={"column"}
+              gap={2}
+              mb={4}
+              px={6}
+              pb={6}
+              mx="-4"
+              borderBottom="1px solid"
+              borderBottomColor="border.light"
+            >
+              <Text fontWeight={700}>{t("requirementsLibrary.fields.requirementDocuments")}</Text>
+              {requirementBlock.requirementDocuments?.map((document) => (
+                <RequirementDocumentDownloadButton key={document.id} document={document} />
+              ))}
+            </Flex>
+          )}
           {!isQuillEmpty(requirementBlockCustomization?.tip) && (
             <Box px={2} my={4}>
               <RichTextTip tip={requirementBlockCustomization.tip} helpLink={requirementBlockCustomization.helpLink} />
