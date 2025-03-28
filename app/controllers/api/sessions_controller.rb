@@ -5,7 +5,11 @@ class Api::SessionsController < Devise::SessionsController
   skip_before_action :verify_signed_out_user
 
   def destroy
+    # Delete the frontend-accessible id_token cookie
+    cookies.delete(:id_token, path: "/", domain: nil)
+
     Devise.sign_out_all_scopes ? sign_out : sign_out(resource_name)
+
     render_success nil, "user.logout_success"
   end
 

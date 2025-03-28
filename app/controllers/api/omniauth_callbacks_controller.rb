@@ -4,9 +4,20 @@ class Api::OmniauthCallbacksController < Devise::OmniauthCallbacksController
   def keycloak
     origin_query =
       Rack::Utils.parse_nested_query(URI(request.env["omniauth.origin"]).query)
+
+    auth = request.env["omniauth.auth"]
+    id_token = auth.extra.id_token
+    cookies[:id_token] = {
+      value: id_token,
+      expires: 6.hours.from_now,
+      httponly: false, # Allow JavaScript access
+      secure: Rails.env.production?, # Only send over HTTPS in production
+      same_site: :strict
+    }
+
     result =
       OmniauthUserResolver.new(
-        auth: request.env["omniauth.auth"],
+        auth: auth,
         invitation_token: origin_query["invitation_token"]
       ).call
     @user = result.user

@@ -57,12 +57,18 @@ export const SessionStoreModel = types
     }),
     logout: flow(function* () {
       self.isLoggingOut = true
+      const idToken =
+        document.cookie
+          .split("; ")
+          .find((row) => row.startsWith("id_token="))
+          ?.split("=")[1] || ""
       const response: any = yield self.environment.api.logout()
+
+      // logout of siteminder / keycloak as well
       if (response.ok) {
         self.resetAuth()
+        window.location.href = `${import.meta.env.VITE_LOGINPROXY_LOGOUT_URL}?post_logout_redirect_uri=${import.meta.env.VITE_POST_LOGOUT_REDIRECT_URL}&id_token_hint=${idToken}`
       }
-      // logout of siteminder / keycloak as well
-      window.location.href = `${import.meta.env.VITE_SITEMINDER_LOGOUT_URL}?retnow=1&returl=${import.meta.env.VITE_KEYCLOAK_LOGOUT_URL}?redirect_uri=${import.meta.env.VITE_POST_LOGOUT_REDIRECT_URL}`
     }),
     setTokenExpired(isExpired: boolean) {
       self.tokenExpired = isExpired
