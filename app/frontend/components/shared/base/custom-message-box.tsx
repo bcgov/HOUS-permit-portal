@@ -2,14 +2,16 @@ import { Box, Flex, FlexProps, Heading, HeadingProps, Text, ToastProps } from "@
 import { CheckCircle, Info, Warning, WarningCircle } from "@phosphor-icons/react"
 import React from "react"
 import ReactMarkdown from "react-markdown"
+import { EFlashMessageStatus } from "../../../types/enums"
 
 interface ICustomMessageBoxProps
   extends Omit<FlexProps, "id" | "title">,
-    Omit<ToastProps, "position" | "title" | "id"> {
+    Omit<ToastProps, "position" | "title" | "id" | "status"> {
   title?: React.ReactNode // Allow title to be any ReactNode
   description?: string | React.ReactNode // Allow description to be any ReactNode
   children?: React.ReactNode
   headingProps?: Partial<HeadingProps>
+  status: EFlashMessageStatus
 }
 
 const iconMap = {
@@ -17,7 +19,7 @@ const iconMap = {
   warning: <Warning size={24} aria-label={"warning icon"} />,
   error: <WarningCircle size={24} aria-label={"error icon"} />,
   info: <Info size={24} aria-label={"info icon"} />,
-  spacial: <Info size={24} aria-label={"info icon"} />,
+  special: <Info size={24} aria-label={"info icon"} />,
 }
 
 export const CustomMessageBox = ({
