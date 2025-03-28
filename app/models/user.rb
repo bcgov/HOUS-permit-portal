@@ -5,6 +5,16 @@ class User < ApplicationRecord
 
   include Devise::JWT::RevocationStrategies::Allowlist
   include Discard::Model
+  include JwtAuthenticatable
+
+  # Virtual attribute for Keycloak ID token
+  # SECURITY NOTE: This is a sensitive field containing an authentication token.
+  # It should never be:
+  # - Persisted to the database
+  # - Included in JSON serialization
+  # - Logged in plain text
+  # It is only stored temporarily in memory and in the JWT for logout purposes.
+  attr_accessor :keycloak_id_token
 
   devise :invitable,
          :database_authenticatable,

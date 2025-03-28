@@ -37,7 +37,10 @@ Devise.setup do |config|
                   },
                   authorize_options: [:kc_idp_hint],
                   name: :keycloak,
+                  # This scope does not seem to be getting passed to the strategy correctly
+                  # See hack in omniauth_keycloak_fix.rb
                   scope: "openid",
+                  # response_type: "code id_token",
                   strategy_class: OmniAuth::Strategies::KeycloakOpenId
 
   # The secret key used by Devise. Devise uses this key to generate
