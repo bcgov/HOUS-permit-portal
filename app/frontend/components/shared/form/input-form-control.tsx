@@ -38,7 +38,7 @@ interface IInputFormControlProps<TInputProps = Partial<InputProps>> extends Form
 }
 
 const isValidUrl = (url: string) => {
-  const regex = /^(https?:\/\/)?([a-z0-9-]+\.)+[a-z]{2,6}(\/[^\s]*)?$/i
+  const regex = /^(https?:\/\/)?([a-z0-9-]+\.)+[a-z]{2,6}(\/[\w.-]*)?\/?$/i
   return regex.test(url)
 }
 
