@@ -68,7 +68,7 @@ export const UrlFormControl = (props: IInputFormControlProps) => {
   const handleUrlChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     let url = event.target.value.trim()
     if (url && !url.match(/^(https?|http?):\/\//i)) {
-      url = `http://${url}`
+      url = `https://${url}`
     }
     setInputpUrl(url)
   }
