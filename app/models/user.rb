@@ -5,7 +5,7 @@ class User < ApplicationRecord
 
   include Devise::JWT::RevocationStrategies::Allowlist
   include Discard::Model
-  include JwtAuthenticatable
+  # include JwtAuthenticatableIdTokenOverride
 
   # Virtual attribute for Keycloak ID token
   # SECURITY NOTE: This is a sensitive field containing an authentication token.

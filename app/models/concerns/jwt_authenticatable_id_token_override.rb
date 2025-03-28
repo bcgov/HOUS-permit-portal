@@ -1,4 +1,4 @@
-module JwtAuthenticatable
+module JwtAuthenticatableIdTokenOverride
   extend ActiveSupport::Concern
 
   included do

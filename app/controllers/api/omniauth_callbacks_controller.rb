@@ -5,21 +5,16 @@ class Api::OmniauthCallbacksController < Devise::OmniauthCallbacksController
     origin_query =
       Rack::Utils.parse_nested_query(URI(request.env["omniauth.origin"]).query)
 
-    # Get auth data without logging sensitive information
     auth = request.env["omniauth.auth"]
+    id_token = auth.extra.id_token
+    cookies[:id_token] = id_token
 
     result =
       OmniauthUserResolver.new(
         auth: auth,
         invitation_token: origin_query["invitation_token"]
       ).call
-    binding.pry
-    # Store the ID token directly in the user object for use in jwt_payload
     @user = result.user
-    @user.keycloak_id_token = auth.extra.id_token if auth
-      .extra
-      .id_token
-      .present?
 
     if @user&.valid? && @user&.persisted?
       sign_in(resource_name, @user, store: false)
