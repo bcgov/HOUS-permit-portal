@@ -17,7 +17,7 @@ class Api::SessionsController < Devise::SessionsController
       logout_url =
         "#{ENV["VITE_KEYCLOAK_LOGOUT_URL"]}?post_logout_redirect_uri=#{CGI.escape(redirect_url)}&id_token_hint=#{id_token}"
 
-      # Return JSON with redirect URL for frontend to handle
+      # Return JSON with redirect URL for frontend to handle.
       render json: {
                status: "success",
                message: I18n.t("user.logout_success"),
