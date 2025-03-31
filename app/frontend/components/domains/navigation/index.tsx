@@ -54,16 +54,16 @@ const EnergyStepRequirementsScreen = lazy(() =>
   }))
 )
 const ReviewManagerGlobalFeatureAccessScreen = lazy(() =>
-  import("../home/review-manager/configuration-management-screen/global-feature-access").then((module) => ({
+  import("../home/review-manager/configuration-management-screen/global-feature-access-screen").then((module) => ({
     default: module.ReviewManagerGlobalFeatureAccessScreen,
   }))
 )
 const ReviewStaffSubmissionInboxScreen = lazy(() =>
-  import("../home/review-manager/configuration-management-screen/global-feature-access/submission-inbox").then(
-    (module) => ({
-      default: module.ReviewStaffSubmissionInboxScreen,
-    })
-  )
+  import(
+    "../home/review-manager/configuration-management-screen/global-feature-access-screen/inbox-feature-access"
+  ).then((module) => ({
+    default: module.ReviewStaffSubmissionInboxScreen,
+  }))
 )
 const JurisdictionIndexScreen = lazy(() =>
   import("../jurisdictions/index").then((module) => ({ default: module.JurisdictionIndexScreen }))
