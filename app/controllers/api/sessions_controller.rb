@@ -20,7 +20,7 @@ class Api::SessionsController < Devise::SessionsController
       # Return JSON with redirect URL for frontend to handle
       render json: {
                status: "success",
-               message: "user.logout_success",
+               message: I18n.t("user.logout_success"),
                logout_url: logout_url
              }
     else

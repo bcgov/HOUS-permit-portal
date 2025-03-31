@@ -7,11 +7,13 @@ class Api::OmniauthCallbacksController < Devise::OmniauthCallbacksController
 
     auth = request.env["omniauth.auth"]
     id_token = auth.extra.id_token
+
     cookies[:id_token] = {
       value: id_token,
       expires: 6.hours.from_now,
       httponly: true, # No JavaScript access
-      secure: true,
+      secure: ENV["SECURE_JWT_COOKIE"] == "true" || false,
+      domain: Rails.env.production? ? ".#{ENV["APP_DOMAIN"]}" : nil,
       same_site: :strict
     }
 
