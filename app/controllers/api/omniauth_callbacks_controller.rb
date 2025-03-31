@@ -7,13 +7,7 @@ class Api::OmniauthCallbacksController < Devise::OmniauthCallbacksController
 
     auth = request.env["omniauth.auth"]
     id_token = auth.extra.id_token
-    cookies[:id_token] = {
-      value: id_token,
-      expires: 6.hours.from_now,
-      httponly: false, # Allow JavaScript access
-      secure: Rails.env.production?, # Only send over HTTPS in production
-      same_site: :strict
-    }
+    session[:keycloak_id_token] = id_token
 
     result =
       OmniauthUserResolver.new(

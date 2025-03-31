@@ -5,12 +5,30 @@ class Api::SessionsController < Devise::SessionsController
   skip_before_action :verify_signed_out_user
 
   def destroy
-    # Delete the frontend-accessible id_token cookie
-    cookies.delete(:id_token, path: "/", domain: nil)
+    # Get the ID token from session before clearing it
+    id_token = session[:keycloak_id_token]
 
+    # Proceed with normal logout
     Devise.sign_out_all_scopes ? sign_out : sign_out(resource_name)
 
-    render_success nil, "user.logout_success"
+    # Clear the session (this removes all session data including the token)
+    reset_session
+
+    # Use the token for the Keycloak logout if available
+    if id_token.present? && ENV["LOGINPROXY_LOGOUT_URL"].present?
+      redirect_url = ENV["VITE_POST_LOGOUT_REDIRECT_URL"] || root_url
+      logout_url =
+        "#{ENV["LOGINPROXY_LOGOUT_URL"]}?post_logout_redirect_uri=#{CGI.escape(redirect_url)}&id_token_hint=#{id_token}"
+
+      # Return JSON with redirect URL for frontend to handle
+      render json: {
+               status: "success",
+               message: "user.logout_success",
+               logout_url: logout_url
+             }
+    else
+      render_error "user.logout_error"
+    end
   end
 
   def validate_token
