@@ -37,7 +37,6 @@ Devise.setup do |config|
                   },
                   authorize_options: [:kc_idp_hint],
                   name: :keycloak,
-                  # This is being overwritten, see fix in omniauth_keycloak_fix.rb
                   scope: "openid",
                   strategy_class: OmniAuth::Strategies::KeycloakOpenId
 
