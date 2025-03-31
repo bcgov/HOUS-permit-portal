@@ -41,6 +41,7 @@ import { BlockCollaboratorAssignmentManagement } from "./collaborator-management
 import { CollaboratorsSidebar } from "./collaborator-management/collaborators-sidebar"
 import { useCollaborationAssignmentNodes } from "./collaborator-management/hooks/use-collaboration-assignment-nodes"
 import { ContactSummaryModal } from "./contact-summary-modal"
+import { appendAnchorWithSvgToLabel } from "./EnergyStepCodeReportLink"
 import { RevisionSideBar } from "./revision-sidebar"
 import { SubmissionDownloadModal } from "./submission-download-modal"
 
@@ -112,36 +113,41 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   const nicknameWatch = watch("nickname")
   const isStepCode = R.test(/step-code/, window.location.pathname)
 
-  const label = document.querySelector("div[class*='energy_step_code_report_file'] label")
-  if (label) {
-    const setAttributes = (element, attributes) => {
-      Object.entries(attributes).forEach(([key, value]) => element.setAttribute(key, value))
-    }
+  const labelSelector = "div[class*='energy_step_code_report_file'] label"
+  const anchorUrl =
+    "https://www2.gov.bc.ca/gov/content/housing-tenancy/building-or-renovating/permits/building-permit-hub/29065#Reports"
 
-    const anchor = document.createElement("a")
-    anchor.href =
-      "https://www2.gov.bc.ca/gov/content/housing-tenancy/building-or-renovating/permits/building-permit-hub/29065#Reports"
-    anchor.target = "_blank"
+  appendAnchorWithSvgToLabel(labelSelector, anchorUrl)
+  // const label = document.querySelector("div[class*='energy_step_code_report_file'] label")
+  // if (label) {
+  //   const setAttributes = (element, attributes) => {
+  //     Object.entries(attributes).forEach(([key, value]) => element.setAttribute(key, value))
+  //   }
 
-    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg")
-    setAttributes(svg, {
-      width: "1em",
-      style: "display:inline-block; margin-left: 0.25rem",
-      height: "1em",
-      fill: "currentColor",
-      viewBox: "0 0 256 256",
-    })
-    const path = document.createElementNS("http://www.w3.org/2000/svg", "path")
-    path.setAttribute(
-      "d",
-      "M224,104a8,8,0,0,1-16,0V59.32l-66.33,66.34a8,8,0,0,1-11.32-11.32L196.68,48H152a8,8,0,0,1,0-16h64a8,8,0,0,1,8,8Zm-40,24a8,8,0,0,0-8,8v72H48V80h72a8,8,0,0,0,0-16H48A16,16,0,0,0,32,80V208a16,16,0,0,0,16,16H176a16,16,0,0,0,16-16V136A8,8,0,0,0,184,128Z"
-    )
-    svg.appendChild(path)
-    anchor.textContent = label.textContent
-    anchor.appendChild(svg)
-    label.textContent = ""
-    label.appendChild(anchor)
-  }
+  //   const anchor = document.createElement("a")
+  //   anchor.href =
+  //     "https://www2.gov.bc.ca/gov/content/housing-tenancy/building-or-renovating/permits/building-permit-hub/29065#Reports"
+  //   anchor.target = "_blank"
+
+  //   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg")
+  //   setAttributes(svg, {
+  //     width: "1em",
+  //     style: "display:inline-block; margin-left: 0.25rem",
+  //     height: "1em",
+  //     fill: "currentColor",
+  //     viewBox: "0 0 256 256",
+  //   })
+  //   const path = document.createElementNS("http://www.w3.org/2000/svg", "path")
+  //   path.setAttribute(
+  //     "d",
+  //     "M224,104a8,8,0,0,1-16,0V59.32l-66.33,66.34a8,8,0,0,1-11.32-11.32L196.68,48H152a8,8,0,0,1,0-16h64a8,8,0,0,1,8,8Zm-40,24a8,8,0,0,0-8,8v72H48V80h72a8,8,0,0,0,0-16H48A16,16,0,0,0,32,80V208a16,16,0,0,0,16,16H176a16,16,0,0,0,16-16V136A8,8,0,0,0,184,128Z"
+  //   )
+  //   svg.appendChild(path)
+  //   anchor.textContent = label.textContent
+  //   anchor.appendChild(svg)
+  //   label.textContent = ""
+  //   label.appendChild(anchor)
+  // }
 
   const handleSave = async ({
     autosave,
