@@ -29,11 +29,14 @@ export const FeatureToggleScreen: React.FC<FeatureToggleScreenProps> = ({
           {t("ui.back")}
         </RouterLinkButton>
         <Heading as="h1" m={0}>
+          {/* ts-ignore */}
           {t(`${i18nPrefix}.${featureKey}`)}
         </Heading>
         <Text color="text.secondary" m={0}>
+          {/* ts-ignore */}
           {t(`${i18nPrefix}.${featureKey}Description`)}
         </Text>
+        {/* ts-ignore */}
         <Flex pb={4} justify="space-between" w="100%" borderBottom="1px solid" borderColor="border.light">
           <Text fontWeight="bold">{t(`${i18nPrefix}.${featureKey}`)}</Text>
           <SwitchButton isChecked={isEnabled} onChange={(e) => onToggle(e.target.checked)} size={"lg"} />

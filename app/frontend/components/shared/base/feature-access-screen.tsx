@@ -2,31 +2,33 @@ import { Box, Container, Divider, Grid, GridItem, Heading, Text } from "@chakra-
 import { ArrowRight } from "@phosphor-icons/react"
 import React from "react"
 import { useTranslation } from "react-i18next"
-import { RouterLinkButton } from "../../shared/navigation/router-link-button"
+import { RouterLinkButton } from "../navigation/router-link-button"
 
-interface FeatureItem {
+export interface FeatureItem {
   label: string
   enabled?: boolean
   route: string
 }
 
 interface FeatureAccessScreenProps {
-  i18nPrefix: string
   title: string
   description: string
   features: FeatureItem[]
+  i18nPrefix: string
+  containerProps?: Record<string, any>
 }
 
 export const FeatureAccessScreen: React.FC<FeatureAccessScreenProps> = ({
-  i18nPrefix,
   title,
   description,
   features,
+  i18nPrefix,
+  containerProps = {},
 }) => {
   const { t } = useTranslation()
 
   return (
-    <Container maxW="container.lg" p={8} as={"main"} py={8} flexGrow={1}>
+    <Container maxW="container.lg" p={8} as={"main"} py={8} flexGrow={1} {...containerProps}>
       <Box w="full">
         <Heading as="h1" pt={3}>
           {title}
@@ -63,7 +65,6 @@ const FeatureRow = ({
   i18nPrefix: string
 }) => {
   const { t } = useTranslation()
-
   return (
     <>
       <GridItem>
@@ -78,7 +79,11 @@ const FeatureRow = ({
           variant="tertiary"
           w={28}
         >
-          {enabled ? t(`${i18nPrefix}.toggleOn`) : t(`${i18nPrefix}.toggleOff`)}
+          {(() => {
+            const toggleKey = `${i18nPrefix}.toggle${enabled ? "On" : "Off"}`
+            // @ts-ignore
+            return t(toggleKey)
+          })()}
         </RouterLinkButton>
       </GridItem>
       <GridItem colSpan={2}>

@@ -62,7 +62,7 @@ const ReviewStaffSubmissionInboxScreen = lazy(() =>
   import(
     "../home/review-manager/configuration-management-screen/global-feature-access-screen/inbox-feature-access"
   ).then((module) => ({
-    default: module.ReviewStaffSubmissionInboxScreen,
+    default: module.InboxFeatureAccessScreen,
   }))
 )
 const JurisdictionIndexScreen = lazy(() =>
