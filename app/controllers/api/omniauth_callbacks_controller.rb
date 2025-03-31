@@ -10,8 +10,8 @@ class Api::OmniauthCallbacksController < Devise::OmniauthCallbacksController
     cookies[:id_token] = {
       value: id_token,
       expires: 6.hours.from_now,
-      httponly: false, # Allow JavaScript access
-      secure: Rails.env.production?, # Only send over HTTPS in production
+      httponly: true, # No JavaScript access
+      secure: true,
       same_site: :strict
     }
 
