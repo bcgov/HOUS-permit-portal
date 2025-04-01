@@ -41,7 +41,7 @@ import { BlockCollaboratorAssignmentManagement } from "./collaborator-management
 import { CollaboratorsSidebar } from "./collaborator-management/collaborators-sidebar"
 import { useCollaborationAssignmentNodes } from "./collaborator-management/hooks/use-collaboration-assignment-nodes"
 import { ContactSummaryModal } from "./contact-summary-modal"
-import { appendAnchorWithSvgToLabel } from "./EnergyStepCodeReportLink"
+import { appendAnchorWithSvgToLabel } from "./energy-step-code-report-link"
 import { RevisionSideBar } from "./revision-sidebar"
 import { SubmissionDownloadModal } from "./submission-download-modal"
 
