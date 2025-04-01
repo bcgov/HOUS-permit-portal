@@ -54,8 +54,10 @@ export const RevisionSideBar = observer(
     const [revisionRequest, setRevisionRequest] = useState<IRevisionRequest>()
     const [revisionRequestDefault, setRevisionRequestDefault] = useState<IRevisionRequest>()
     const {
-      selectedPastSubmissionVersion,
-      setSelectedPastSubmissionVersion,
+      selectedSubmissionVersion,
+      setSelectedSubmissionVersion,
+      latestSubmissionVersion,
+      pastSubmissionVersionOptions,
       isViewingPastRequests,
       setIsViewingPastRequests,
     } = permitApplication
@@ -64,6 +66,11 @@ export const RevisionSideBar = observer(
     const handleSetTabIndex = (index: number) => {
       setTabIndex(index)
       setIsViewingPastRequests(index === 1)
+      if (index === 0) {
+        setSelectedSubmissionVersion(latestSubmissionVersion)
+      } else if (index === 1) {
+        setSelectedSubmissionVersion(pastSubmissionVersionOptions?.[0]?.value ?? null)
+      }
     }
 
     const inNewRequest = tabIndex === 0
@@ -90,6 +97,10 @@ export const RevisionSideBar = observer(
     useEffect(() => {
       reset(getDefaultRevisionRequestValues())
     }, [permitApplication?.latestRevisionRequests?.length])
+
+    useEffect(() => {
+      setSelectedSubmissionVersion(latestSubmissionVersion)
+    }, [latestSubmissionVersion, setSelectedSubmissionVersion])
 
     const onSaveRevision = (formData: IRevisionRequestForm) => {
       setTabIndex(0)
@@ -128,7 +139,7 @@ export const RevisionSideBar = observer(
 
       const finder = (rr) => rr.requirementJson?.key === event.detail.key
       const foundRevisionRequestDefault =
-        isViewingPastRequests && selectedPastSubmissionVersion?.revisionRequests?.find(finder)
+        isViewingPastRequests && selectedSubmissionVersion?.revisionRequests?.find(finder)
       const foundRevisionRequest = upToDateFields.find(finder)
       const foundRequirement = getRequirementByKey(permitApplication.formJson, event.detail.key)
       const foundSubmissionJson = getSinglePreviousSubmissionJson(permitApplication.submissionData, event.detail.key)
@@ -147,11 +158,11 @@ export const RevisionSideBar = observer(
       return () => {
         document.removeEventListener("openRequestRevision", handleOpenEvent)
       }
-    }, [fields, tabIndex, selectedPastSubmissionVersion?.id])
+    }, [fields, tabIndex, selectedSubmissionVersion?.id])
 
     const handleSelectPastVersionChange = (pastVersion: ISubmissionVersion | null) => {
       if (pastVersion) {
-        setSelectedPastSubmissionVersion(pastVersion)
+        setSelectedSubmissionVersion(pastVersion)
       }
     }
 
@@ -203,10 +214,10 @@ export const RevisionSideBar = observer(
     }
 
     const sortedPastRevisionRequests = useMemo(() => {
-      return Array.from((selectedPastSubmissionVersion?.revisionRequests as IRevisionRequest[]) ?? []).sort((a, b) => {
+      return Array.from((selectedSubmissionVersion?.revisionRequests as IRevisionRequest[]) ?? []).sort((a, b) => {
         return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
       })
-    }, [selectedPastSubmissionVersion?.revisionRequests])
+    }, [selectedSubmissionVersion?.revisionRequests])
 
     return (
       <>
@@ -260,7 +271,7 @@ export const RevisionSideBar = observer(
                 <SubmissionVersionSelect
                   options={permitApplication.pastSubmissionVersionOptions}
                   onChange={handleSelectPastVersionChange}
-                  value={selectedPastSubmissionVersion}
+                  value={selectedSubmissionVersion}
                 />
                 <OrderedList mt={4} ml={0}>
                   {sortedPastRevisionRequests.map((rr) => (

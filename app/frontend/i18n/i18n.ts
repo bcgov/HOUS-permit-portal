@@ -690,7 +690,7 @@ const options = {
             clickQuestion: "Click on the question(s) or requirement(s) you want the submitter to revise.",
             revision: {
               newRevision: "New revision",
-              pastRequests: "Past requests",
+              pastRequests: "Past submissions",
               reason: "Reason",
               reasonCode: "Reason code",
               revisionRequest: "Revision request",
