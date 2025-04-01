@@ -24,6 +24,7 @@ import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { useMountStatus } from "../../../hooks/use-mount-status"
 import { IPermitApplication } from "../../../models/permit-application"
+import { useMst } from "../../../setup/root"
 import { IRevisionRequestsAttributes } from "../../../types/api-request"
 import { IFormIORequirement, IRevisionRequest, ISubmissionVersion } from "../../../types/types"
 import { getRequirementByKey } from "../../../utils/formio-component-traversal"
@@ -352,6 +353,9 @@ interface IRevisionRequestListItemProps {
 const RevisionRequestListItem = ({ revisionRequest }: IRevisionRequestListItemProps) => {
   const { t } = useTranslation()
 
+  const { permitApplicationStore } = useMst()
+  const { currentPermitApplication } = permitApplicationStore
+
   const { requirementJson, reasonCode, comment, user } = revisionRequest
 
   const clickHandleView = () => {
@@ -360,7 +364,9 @@ const RevisionRequestListItem = ({ revisionRequest }: IRevisionRequestListItemPr
 
   return (
     <ListItem mb={4} w="full">
-      <ScrollLink to={`formio-component-${requirementJson.key}`}>{requirementJson.label}</ScrollLink>
+      <ScrollLink to={`formio-component-${requirementJson.key}`} trigger={currentPermitApplication?.formFormatKey}>
+        {requirementJson.label}
+      </ScrollLink>
       <Flex fontStyle="italic">
         {t("permitApplication.show.revision.reasonCode")}: {reasonCode}
       </Flex>
