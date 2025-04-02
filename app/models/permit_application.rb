@@ -60,7 +60,6 @@ class PermitApplication < ApplicationRecord
   delegate :code, :name, to: :permit_type, prefix: true
   delegate :code, :name, to: :activity, prefix: true
   delegate :published_template_version, to: :template_version
-  delegate :inbox_enabled, to: :jurisdiction
 
   before_validation :assign_default_nickname, on: :create
   before_validation :assign_unique_number, on: :create
@@ -82,6 +81,14 @@ class PermitApplication < ApplicationRecord
         end
 
   COMPLETION_SECTION_KEY = "section-completion-key"
+
+  def inbox_enabled?
+    jurisdiction&.inbox_enabled? && SiteConfiguration.inbox_enabled?
+  end
+
+  def inbox_enabled
+    inbox_enabled?
+  end
 
   def supporting_documents_for_submitter_based_on_user_permissions(
     supporting_documents,
