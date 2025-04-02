@@ -16,7 +16,7 @@ import {
 import { Phone } from "@phosphor-icons/react"
 import { t } from "i18next"
 import * as R from "ramda"
-import React from "react"
+import React, { useState } from "react"
 import { useController, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { DatePicker, IDatePickerProps } from "../date-picker"
@@ -37,6 +37,11 @@ interface IInputFormControlProps<TInputProps = Partial<InputProps>> extends Form
   showOptional?: boolean
 }
 
+const isValidUrl = (url: string) => {
+  const regex = /^(https?:\/\/)?([a-z0-9-]+\.)+[a-z]{2,6}(\/[\w.-]*)?\/?$/i
+  return regex.test(url)
+}
+
 export const TextFormControl = (props: IInputFormControlProps) => {
   return (
     <InputFormControl
@@ -55,11 +60,30 @@ export const TextFormControl = (props: IInputFormControlProps) => {
 }
 
 export const UrlFormControl = (props: IInputFormControlProps) => {
+  const { field } = useController({
+    name: props.fieldName,
+  })
+  const { value } = field
+  const [inputUrl, setInputpUrl] = useState(value)
+  const handleUrlChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    let url = event.target.value.trim()
+    if (url && !url.match(/^(https?|http?):\/\//i)) {
+      url = `https://${url}`
+    }
+    setInputpUrl(url)
+  }
   return (
     <InputFormControl
       {...R.mergeDeepRight(
         {
-          inputProps: { type: "url" },
+          inputProps: {
+            type: "url",
+            value: inputUrl,
+            onChange: handleUrlChange,
+          },
+          validate: {
+            validUrl: (str) => isValidUrl(str) || t("ui.invalidUrl"),
+          },
         },
         props
       )}

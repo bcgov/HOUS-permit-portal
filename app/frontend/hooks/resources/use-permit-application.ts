@@ -24,6 +24,8 @@ export const usePermitApplication = ({ review }: { review?: boolean } = {}) => {
           if (permitApplication) {
             setCurrentPermitApplication(permitApplicationId)
             setError(null)
+          } else {
+            setError(new Error(t("errors.fetchPermitApplication")))
           }
         }
       } catch (e) {

@@ -65,7 +65,6 @@ const s3custom = function Provider(formio) {
 
         return persistedResponse
       } catch (error) {
-        import.meta.env.DEV && console.log("[DEV] file upload error", error)
         throw new StorageError(error, "Failed to upload the file directly.  Please contact support.")
       }
     },

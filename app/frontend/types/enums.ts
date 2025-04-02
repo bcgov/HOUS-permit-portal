@@ -3,6 +3,7 @@ export enum EFlashMessageStatus {
   success = "success",
   warning = "warning",
   info = "info",
+  special = "special",
 }
 
 export enum EPreviewStatus {

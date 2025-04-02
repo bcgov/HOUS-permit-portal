@@ -673,6 +673,7 @@ class PermitApplication < ApplicationRecord
 
   def notify_user_reference_number_updated
     return if new_record?
+
     NotificationService.publish_application_view_event(self)
   end
 
@@ -714,7 +715,12 @@ class PermitApplication < ApplicationRecord
     return unless sandbox
 
     unless jurisdiction.sandboxes.include?(sandbox)
-      errors.add(:sandbox, "must belong to the jurisdiction")
+      errors.add(
+        :sandbox,
+        I18n.t(
+          "activerecord.errors.models.permit_application.attributes.sandbox.incorrect_jurisdiction"
+        )
+      )
     end
   end
 
@@ -722,7 +728,12 @@ class PermitApplication < ApplicationRecord
     return unless template_version.present?
 
     unless template_version.live?
-      errors.add(:template_version, "must be for a live requirement template")
+      errors.add(
+        :template_version,
+        I18n.t(
+          "activerecord.errors.models.permit_application.attributes.template_version.must_be_live"
+        )
+      )
     end
   end
 end
