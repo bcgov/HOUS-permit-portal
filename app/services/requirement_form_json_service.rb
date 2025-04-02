@@ -331,17 +331,8 @@ class RequirementFormJsonService
           get_contact_field_form_json(:business_license, parent_key, false)
         ]
       ),
-      get_columns_form_json(
-        "professional_columns",
-        [
-          get_contact_field_form_json(
-            :professional_association,
-            parent_key,
-            false
-          ),
-          get_contact_field_form_json(:professional_number, parent_key, false)
-        ]
-      )
+      get_contact_field_form_json(:professional_association, parent_key, false),
+      get_contact_field_form_json(:professional_number, parent_key, false)
     ]
   end
 

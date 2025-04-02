@@ -484,7 +484,7 @@ const options = {
         permitApplication: {
           noneFound: "No permits yet",
           noneFoundExplanation:
-            "Missing permits? You might have used a login option different from the one you used to create the permits. Log out and try logging back in with the BCeID or BC Services Card you used to create them.",
+            "Missing permits? You might have used a login option different from the one you used to create the permits. Log out and try logging back in with the BCeID or BC Services Card Account you used to create them.",
           submissionBlockModal: {
             title: "Trying to submit this application?",
             description:
@@ -499,6 +499,7 @@ const options = {
           },
           updateToNewVersion: "Update my application",
           reviewOutdatedSubmissionLink: "View draft applications",
+          configureStepCodePageLink: "Configure Step Code(s)",
           reviewUpdatedEditLink: "View template",
           reviewOutdatedTitle: "Filters applied to show applications that are outdated",
           reviewOutdatedMessage: "Filters have been applied. Please review and acknowledge the actions required below.",
@@ -1531,6 +1532,7 @@ const options = {
             applicationRevisionsRequested: "Revisions requested by jurisdiction",
             collaboration: "Collaboration",
             integrationMapping: "API integration mapping",
+            unmappedApiNotification: "Unmapped API Notification",
           },
           emailConfirmed: {
             heading: "Email confirmed!",
