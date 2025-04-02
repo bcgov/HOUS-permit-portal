@@ -53,12 +53,18 @@ const EnergyStepRequirementsScreen = lazy(() =>
     default: module.EnergyStepRequirementsScreen,
   }))
 )
-const SubmissionsInboxSetupScreen = lazy(() =>
-  import("../home/review-manager/configuration-management-screen/submissions-inbox-setup-screen").then((module) => ({
-    default: module.SubmissionsInboxSetupScreen,
+const ReviewManagerGlobalFeatureAccessScreen = lazy(() =>
+  import("../home/review-manager/configuration-management-screen/global-feature-access-screen").then((module) => ({
+    default: module.ReviewManagerGlobalFeatureAccessScreen,
   }))
 )
-
+const ReviewStaffInboxFeatureAccessScreen = lazy(() =>
+  import(
+    "../home/review-manager/configuration-management-screen/global-feature-access-screen/inbox-feature-access"
+  ).then((module) => ({
+    default: module.InboxFeatureAccessScreen,
+  }))
+)
 const JurisdictionIndexScreen = lazy(() =>
   import("../jurisdictions/index").then((module) => ({ default: module.JurisdictionIndexScreen }))
 )
@@ -197,6 +203,18 @@ const LandingSetupScreen = lazy(() =>
 const AdminUserIndexScreen = lazy(() =>
   import("../super-admin/site-configuration-management/users-screen").then((module) => ({
     default: module.AdminUserIndexScreen,
+  }))
+)
+
+const AdminGlobalFeatureAccessScreen = lazy(() =>
+  import("../super-admin/site-configuration-management/global-feature-access").then((module) => ({
+    default: module.AdminGlobalFeatureAccessScreen,
+  }))
+)
+
+const InboxFeatureAccessScreen = lazy(() =>
+  import("../super-admin/site-configuration-management/inbox-feature-access").then((module) => ({
+    default: module.InboxFeatureAccessScreen,
   }))
 )
 
@@ -358,6 +376,11 @@ const AppRoutes = observer(() => {
       <Route path="/configuration-management/revision-reason-setup" element={<RevisionReasonSetupScreen />} />
       <Route path="/configuration-management/landing-setup" element={<LandingSetupScreen />} />
       <Route path="/configuration-management/users" element={<AdminUserIndexScreen />} />
+      <Route path="/configuration-management/global-feature-access" element={<AdminGlobalFeatureAccessScreen />} />
+      <Route
+        path="/configuration-management/global-feature-access/submission-inbox"
+        element={<InboxFeatureAccessScreen />}
+      />
       <Route path="/configuration-management/users/invite" element={<AdminInviteScreen />} />
       <Route path="/reporting" element={<ReportingScreen />} />
       <Route path="/reporting/export-template-summary" element={<ExportTemplateSummaryScreen />} />
@@ -382,8 +405,12 @@ const AppRoutes = observer(() => {
     <>
       <Route path="/jurisdictions/:jurisdictionId/submission-inbox" element={<JurisdictionSubmissionInboxScreen />} />
       <Route
-        path="/jurisdictions/:jurisdictionId/configuration-management/submissions-inbox-setup"
-        element={<SubmissionsInboxSetupScreen />}
+        path="/jurisdictions/:jurisdictionId/configuration-management/global-feature-access"
+        element={<ReviewManagerGlobalFeatureAccessScreen />}
+      />
+      <Route
+        path="/jurisdictions/:jurisdictionId/configuration-management/global-feature-access/submission-inbox"
+        element={<ReviewStaffInboxFeatureAccessScreen />}
       />
       <Route
         path="/jurisdictions/:jurisdictionId/configuration-management/energy-step"

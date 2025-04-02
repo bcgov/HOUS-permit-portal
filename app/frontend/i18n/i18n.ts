@@ -563,6 +563,8 @@ const options = {
             submitted_at: "Submitted at",
             viewed_at: "Viewed at",
             status: "Status",
+            created_at: "Created at",
+            updated_at: "Updated at",
           },
           submissionInbox: {
             contactInviteWarning:
@@ -663,7 +665,7 @@ const options = {
             contactsSummary: "Contacts summary",
             inboxDisabledTitle: "Inbox disabled",
             inboxDisabled:
-              "Submissions for this local jurisdictions are currently disabled. You will be able to make edits to this permit application but will not be able to submit until this jurisdiction's is accepting submissions again.",
+              "Submissions for this local jurisdictions are currently disabled. You will be able to make edits to this permit application but will not be able to submit until this jurisdiction's is accepting submissions again and inboxes are enabled globally.",
             downloadApplication: "Download application",
             fetchingMissingPdf: "Fetching {{missingPdf}}...",
             missingPdfLabels: {
@@ -1422,6 +1424,15 @@ const options = {
                 },
               },
             },
+            globalFeatureAccess: {
+              title: "Global feature access",
+              description: "Turn system features on or off for all users system-wide.",
+              submissionInbox: "Submissions inbox",
+              submissionInboxDescription:
+                "Enable review managers to accept and process permit applications. If you turn off this feature, submitters can’t submit applications, and review managers won’t receive new applications.",
+              toggleOn: "On",
+              toggleOff: "Off",
+            },
             externalApiKeys: {
               title: "API settings",
               description: "Manage API keys for the Building Permit Hub.",
@@ -1843,6 +1854,15 @@ const options = {
             smallScale: "Set as Small Scale New Contruction Preview on landing page",
             fourPlus: "Set as Four Plus New Construction Preview",
           },
+          globalFeatureAccess: {
+            title: "Global feature access",
+            description: "Turn system features on or off for all users",
+            submissionInbox: "Submissions inbox",
+            submissionInboxDescription:
+              "Enable review managers to accept and process permit applications. If you turn off this feature, submitters can’t submit applications, and review managers won’t receive new applications.",
+            toggleOn: "On",
+            toggleOff: "Off",
+          },
           sitewideMessage: {
             title: "Site-wide message",
             description: "Enable and configure a site-wide message",
@@ -2078,6 +2098,7 @@ const options = {
             eula: "End user license agreement",
             earlyAccess: "Early access",
             update: "Update",
+            globalFeatureAccess: "Global feature access",
           },
         },
         automatedCompliance: {
