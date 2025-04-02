@@ -562,6 +562,8 @@ const options = {
             submitted_at: "Submitted at",
             viewed_at: "Viewed at",
             status: "Status",
+            created_at: "Created at",
+            updated_at: "Updated at",
           },
           submissionInbox: {
             contactInviteWarning:
@@ -662,7 +664,7 @@ const options = {
             contactsSummary: "Contacts summary",
             inboxDisabledTitle: "Inbox disabled",
             inboxDisabled:
-              "Submissions for this local jurisdictions are currently disabled. You will be able to make edits to this permit application but will not be able to submit until this jurisdiction's is accepting submissions again.",
+              "Submissions for this local jurisdictions are currently disabled. You will be able to make edits to this permit application but will not be able to submit until this jurisdiction's is accepting submissions again and inboxes are enabled globally.",
             downloadApplication: "Download application",
             fetchingMissingPdf: "Fetching {{missingPdf}}...",
             missingPdfLabels: {
