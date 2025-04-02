@@ -32,7 +32,7 @@ RUN curl -sL https://github.com/nodenv/node-build/archive/master.tar.gz | tar xz
 
 # Install Ruby gems
 COPY Gemfile Gemfile.lock ./
-RUN gem install bundler:2.5.4 && \
+RUN gem install bundler:2.5.22 && \
     bundle install
 
 # Install npm and node modules

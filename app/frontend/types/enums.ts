@@ -3,6 +3,7 @@ export enum EFlashMessageStatus {
   success = "success",
   warning = "warning",
   info = "info",
+  special = "special",
 }
 
 export enum EPreviewStatus {
@@ -140,6 +141,8 @@ export enum EPermitApplicationSubmitterSortFields {
   submittedAt = "submitted_at",
   viewedAt = "viewed_at",
   status = "status",
+  createdAt = "created_at",
+  updatedAt = "updated_at",
 }
 
 export enum EPermitApplicationReviewerSortFields {
@@ -151,7 +154,6 @@ export enum EPermitApplicationReviewerSortFields {
   viewedAt = "viewed_at",
   submittedAt = "submitted_at",
 }
-
 
 export enum ESortDirection {
   ascending = "asc",

@@ -11,7 +11,7 @@ class Api::UsersController < Api::ApplicationController
                   accept_invitation
                 ]
   skip_after_action :verify_policy_scoped, only: %i[index]
-  skip_before_action :require_confirmation, only: %i[profile]
+  skip_before_action :require_confirmation, only: %i[profile license_agreements]
   skip_before_action :require_confirmation,
                      only: %i[accept_eula resend_confirmation]
 
@@ -110,7 +110,6 @@ class Api::UsersController < Api::ApplicationController
   def license_agreements
     @user = current_user
     authorize current_user
-
     render_success @user,
                    nil,
                    {

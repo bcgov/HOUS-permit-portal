@@ -65,7 +65,6 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
     customErrorMessage: t("errors.fetchBuildingPermit"),
   })
   const denormalizedTemplate = templateVersion?.denormalizedTemplateJson
-
   const handleCopyTips = () => {
     templateVersion?.copyJurisdictionTemplateVersionTips(currentUser.jurisdiction.id)
   }
