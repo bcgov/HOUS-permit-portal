@@ -245,6 +245,7 @@ export interface IStepCodeSelectOptions {
 
 export interface IRequirementBlockCustomization {
   tip?: string
+  helpLink?: string
   enabledElectiveFieldIds?: Array<string>
   enabledElectiveFieldReasons?: Record<string, EEnabledElectiveFieldReason>
 }

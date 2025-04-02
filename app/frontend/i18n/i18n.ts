@@ -27,16 +27,16 @@ const options = {
           adminLogin: "Admin login",
           adminAccountAccess: "If you cannot log in with your IDIR, please contact your administrator to gain access.",
           lgPrompt:
-            "You must have a BCeID account to use this system. If you don’t have one yet, please register for one based on your use case.",
+            "You must have a BCeID account to use this system. If you don't have one yet, please register for one based on your use case.",
           publicPrompt:
-            "You must have either a BC Services Card Account or BCeID account to use this system. If you don’t have one yet, please register for one based on your use case. <br/><br/> <strong>Please note that BCeID and BC Services Card logins will act as two separate accounts, and you must consistently use the same method for all future logins.</strong>",
+            "You must have either a BC Services Card Account or BCeID account to use this system. If you don't have one yet, please register for one based on your use case. <br/><br/> <strong>Please note that BCeID and BC Services Card logins will act as two separate accounts, and you must consistently use the same method for all future logins.</strong>",
           chooseSituation: "Choose the situation that best matches your own to learn more about your login choices.",
           loginHelp: "Having trouble logging in?",
           goToPartners: "Go to our login partners",
-          submitterAccordion: "I’m an individual submitter, such as a homeowner or agent",
-          lgAccordion: "I’m logging in as a representative of a local government or First Nation ",
+          submitterAccordion: "I'm an individual submitter, such as a homeowner or agent",
+          lgAccordion: "I'm logging in as a representative of a local government or First Nation ",
           entityAccordion:
-            "I’m logging in on behalf of a legal entity, such as a company, partnership, or educational institution ",
+            "I'm logging in on behalf of a legal entity, such as a company, partnership, or educational institution ",
           localGov: "Are you a member of local government?",
           chooseLogin: "Choosing the right option",
           matchLogin: "Choose the option that best matches your situation to access this service",
@@ -55,15 +55,15 @@ const options = {
             },
             basic: {
               title: "Basic BCeID",
-              residentOrNon: "You’re a resident or non-resident of Canada",
-              repOrg: "You’re representing a company or organization, but your company doesn’t have a Business BCeID",
-              lgReviewManager: "You’re a regional review manager who is also an individual submitter",
-              lgJurisdiction: "You’re representing a jurisdiction, but your jurisdiction doesn’t have a Business BCeID",
+              residentOrNon: "You're a resident or non-resident of Canada",
+              repOrg: "You're representing a company or organization, but your company doesn't have a Business BCeID",
+              lgReviewManager: "You're a regional review manager who is also an individual submitter",
+              lgJurisdiction: "You're representing a jurisdiction, but your jurisdiction doesn't have a Business BCeID",
               register: "Register for Basic BCeID",
             },
             business: {
               title: "Business BCeID",
-              entityDescription: "You can use this option if you’re logging in on behalf of a legal entity, such as:",
+              entityDescription: "You can use this option if you're logging in on behalf of a legal entity, such as:",
               lgDescription:
                 "Most people representing a local government or jurisdiction will use a Business BCeID to log in",
               company: "Company or partnership or sole proprietorship",
@@ -114,7 +114,7 @@ const options = {
           iNeed: "What do I need?",
           whyUseTitle: "Why use this tool?",
           whyUse:
-            "The Building Permit Hub helps you submit a building permit application through a streamlined and standardized approach across jurisdictions in B.C. This tool connects you with local government and First Nation information to support the building permit submission process.",
+            "The Building Permit Hub helps you submit a building permit application through a streamlined and standardized approach across jurisdictions in B.C. This tool connects you with local government and First Nations information to support the building permit submission process.",
           iNeedLong: "What do I need for a housing building permit?",
           reqsVary:
             "Permit requirements vary by local jurisdiction and depend on the geography of the surrounding location.",
@@ -195,6 +195,7 @@ const options = {
           search: "Search",
           loading: "Loading...",
           invalidInput: "Invalid input",
+          invalidUrl: "Invalid url",
           invalidEmail: "Invalid email",
           selectPlaceholder: "Select",
           selectApplicable: "Select applicable:",
@@ -638,9 +639,9 @@ const options = {
             pinUnableToVerify: "Unable to verify PIN, please confirm and proceed as applicable.",
             needToKnow: "What you need to know",
             disclaimer1:
-              "You can use this website to submit a permit application for your building project. This website checks if your application meets some codes, but approval isn’t automatic.",
+              "You can use this website to submit a permit application for your building project. This website checks if your application meets some codes, but approval isn't automatic.",
             disclaimer2:
-              "After you’ve submitted your application, local officials will review it. They may ask you to fix issues or show that your application meets requirements before approving it.",
+              "After you've submitted your application, local officials will review it. They may ask you to fix issues or show that your application meets requirements before approving it.",
           },
           edit: {
             saveDraft: "Save and finish later",
@@ -713,7 +714,14 @@ const options = {
           switch: {
             label: "Sandbox mode",
             title: "Enter testing sandbox mode?",
+            leaveTitle: "Leave sandbox mode?",
+            leaveWarning:
+              "Save your work before leaving sandbox mode. Any unsaved changes to permit applications or template customizations will not be kept.",
+            warning:
+              "Save your work before entering sandbox mode. Any unsaved changes to permit applications or template customizations will not be kept.",
+            warningTitle: "Unsaved changes will be lost",
             description: "While in this mode, you will be able to:",
+            leaveDescription: "You are about to leave sandbox mode. Any unsaved changes will be lost.",
             descriptionList: [
               "make changes to a permit template without affecting what is published live.",
               "publish permit templates for testing it out as how a submitter would see it",
@@ -725,7 +733,8 @@ const options = {
               "<strong>Published sandbox:</strong> Sandbox that emulates the live mode by letting you test edits on published permit templates.",
             scheduledDescription:
               "<strong>Scheduled sandbox:</strong> Sandbox that lets you interact with scheduled permit templates.",
-            continue: "Continue to sandbox",
+            continue: "Enter sandbox mode",
+            leave: "Leave sandbox",
             superAdminAvailable: "Super Admin feature available!",
             testingPurposes: "For testing purposes, you may choose which permit applications to test.",
           },
@@ -1488,7 +1497,7 @@ const options = {
           changeBceid: "If you want to change your BCeID information, please go to ",
           changeBceidLinkText: "bceid.ca",
           confirmationRequiredWithEmail:
-            "Action required: please click the link in the verification email that was sent to you. You will continue to receive emails at <strong>{{email}}</strong> until your new email is confirmed. <br/><br/>(Didn’t receive it? <1>Resend email</1>)",
+            "Action required: please click the link in the verification email that was sent to you. You will continue to receive emails at <strong>{{email}}</strong> until your new email is confirmed. <br/><br/>(Didn't receive it? <1>Resend email</1>)",
           confirmationRequired:
             "Action required: please click the link in the verification email that was sent to you. <br/><br/>(Didn't receive it? <1>Resend email</1>)",
           receiveNotifications: "Receive notifications",
@@ -1795,6 +1804,7 @@ const options = {
               description:
                 "Local jurisdictions can change building permit applications to fit their needs by adding elective fields and offering submitters practical tips. This helps make the application forms reflect the distinct regulations, standards, and requirements of each jurisdiction, so applicants provide the correct information needed by their area.",
               tipLabel: "Tip for submitters (optional)",
+              helpSectionLink: "Help Section link",
               filterLabel: "Search electives",
               sortLabel: "Sort by",
               filterPlaceholder: "Search electives",
@@ -2002,7 +2012,7 @@ const options = {
           disclaimerTitle: "Disclaimer",
           copyrightHolder: "Government of British Columbia.",
           metaDescription:
-            "The Building Permit Hub helps you submit a building permit application through a streamlined and standardized approach across jurisdictions in B.C. This tool connects you with local government and First Nation information to support the building permit submission process.",
+            "The Building Permit Hub helps you submit a building permit application through a streamlined and standardized approach across jurisdictions in B.C. This tool connects you with local government and First Nations information to support the building permit submission process.",
           metaKeywords: "BC, british columba, permit, portal, hub, permitting, permit application",
           loggedInWelcome: "Welcome back!",
           myPermits: "My permits",

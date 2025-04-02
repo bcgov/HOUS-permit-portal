@@ -207,7 +207,7 @@ class RequirementTemplate < ApplicationRecord
       activity: activity,
       permit_type: permit_type,
       first_nations: first_nations
-    ).published_template_version
+    )&.published_template_version
   rescue NoMethodError => e
     rails.logger.error e.message
   end
