@@ -95,6 +95,27 @@ RSpec.describe Jurisdiction, type: :model do
       end
     end
   end
+  describe "validations" do
+    context "when there is at least one sandbox" do
+      it "is valid" do
+        jurisdiction =
+          Jurisdiction.new(name: "Townsville", locality_type: "city")
+        expect(jurisdiction).to be_valid
+        expect(jurisdiction.sandboxes.size).to eq(2)
+      end
+
+      it "allows multiple sandboxes with unique names" do
+        jurisdiction =
+          create(:sub_district, name: "Townsville", locality_type: "city")
+
+        # Build 3 sandboxes with unique names for this jurisdiction
+        3.times { jurisdiction.sandboxes.build(attributes_for(:sandbox)) }
+
+        expect(jurisdiction).to be_valid
+        expect(jurisdiction.sandboxes.size).to eq(5)
+      end
+    end
+  end
 
   describe "callbacks" do
     let(:super_admin) { create(:user, :super_admin) }
@@ -103,6 +124,21 @@ RSpec.describe Jurisdiction, type: :model do
     let(:enabled_jurisdiction) do
       create(:sub_district, external_api_state: "j_on")
     end
+    let!(:published_sandbox) { create(:sandbox, :published) }
+    let!(:scheduled_sandbox) { create(:sandbox, :scheduled) }
+
+    describe "before validation" do
+      it "builds two sandboxes if none exist" do
+        jurisdiction =
+          Jurisdiction.new(name: "Townsville", locality_type: "city")
+        expect { jurisdiction.valid? }.to change {
+          jurisdiction.sandboxes.size
+        }.from(0).to(2)
+        expect(jurisdiction.sandboxes.first).to be_a_new(Sandbox)
+        expect(jurisdiction.sandboxes.second).to be_a_new(Sandbox)
+      end
+    end
+
     describe "#create_integration_mappings_async" do
       context "when transitioning to j_on" do
         it "enqueues the job" do

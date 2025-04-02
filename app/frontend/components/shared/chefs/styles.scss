@@ -454,12 +454,10 @@
     display: none;
   }
 
-
   // adds optional text for non required input labels
   .col-form-label:not(.field-required):not(.formio-section-container > .col-form-label):after {
-    content: "(optional)"
+    content: "(optional)";
   }
-
 
   .compliance {
     font-size: var(--chakra-fontSizes-xs);
@@ -539,8 +537,9 @@
       font-size: var(--chakra-fontSizes-sm);
       border-radius: var(--chakra-radii-md);
       margin-bottom: 0.5rem;
-      transition: background-color 200ms ease-in-out,
-      border-color 200ms ease-in-out;
+      transition:
+        background-color 200ms ease-in-out,
+        border-color 200ms ease-in-out;
 
       a {
         color: inherit;
@@ -997,6 +996,12 @@
 
 .single-requirement-form {
   button {
+    display: none;
+  }
+}
+
+.early-access-requirement-form {
+  .autofill-button {
     display: none;
   }
 }

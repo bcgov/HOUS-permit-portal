@@ -1,0 +1,65 @@
+import { reaction } from "mobx"
+import { Instance, types } from "mobx-state-tree"
+import { withEnvironment } from "../lib/with-environment"
+import { withMerge } from "../lib/with-merge"
+import { withRootStore } from "../lib/with-root-store"
+import { SandboxModel } from "../models/sandbox"
+
+export const SandboxStoreModel = types
+  .model("SandboxStoreModel")
+  .props({
+    sandboxMap: types.map(SandboxModel),
+    currentSandboxId: types.maybeNull(types.string),
+    temporarilyPersistingSandboxId: types.optional(types.boolean, false),
+  })
+  .extend(withEnvironment())
+  .extend(withRootStore())
+  .extend(withMerge())
+  .views((self) => ({
+    get currentSandbox() {
+      return self.sandboxMap.get(self.currentSandboxId)
+    },
+    get shouldPersistSandboxId() {
+      return self.rootStore.userStore.currentUser.isReviewStaff
+    },
+    get isSandboxActive() {
+      return self.currentSandboxId !== null
+    },
+  }))
+  .views((self) => ({
+    get sandboxes() {
+      return Array.from(self.sandboxMap.values())
+    },
+  }))
+  .actions((self) => ({
+    clearSandboxId: () => {
+      self.currentSandboxId = null
+    },
+    temporarilyPersistSandboxId: () => {
+      self.temporarilyPersistingSandboxId = true
+      self.rootStore.loadLocalPersistedData()
+    },
+    resetTemporarilyPersistSandboxId: () => {
+      self.temporarilyPersistingSandboxId = false
+      localStorage.removeItem("SandboxStore")
+      self.currentSandboxId = null
+    },
+  }))
+  .actions((self) => ({
+    setCurrentSandboxId: (sandboxId: string = null) => {
+      self.currentSandboxId = sandboxId
+    },
+  }))
+  .actions((self) => ({
+    afterCreate() {
+      // Reaction to monitor jurisdiction changes
+      reaction(
+        () => self.rootStore.uiStore.currentlySelectedJurisdictionId,
+        (newJurisdictionId) => {
+          self.clearSandboxId()
+        }
+      )
+    },
+  }))
+
+export interface ISandboxStore extends Instance<typeof SandboxStoreModel> {}

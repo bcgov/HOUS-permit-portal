@@ -3,19 +3,13 @@ redis:
     resources:
       requests:
         memory: "128Mi"
-        cpu: "20m"
-      limits:
-        memory: "256Mi"
-        cpu: "50m"
+        cpu: "100m"
   replica:
-    replicaCount: 2
+    replicaCount: 3
     persistence:
       enabled: true
       size: 1Gi
     resources:
       requests:
         memory: "256Mi"
-        cpu: "50m"
-      limits:
-        memory: "512Mi"
-        cpu: "100m"
+        cpu: "200m"

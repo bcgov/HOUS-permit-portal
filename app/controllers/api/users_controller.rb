@@ -11,7 +11,7 @@ class Api::UsersController < Api::ApplicationController
                   accept_invitation
                 ]
   skip_after_action :verify_policy_scoped, only: %i[index]
-  skip_before_action :require_confirmation, only: %i[profile]
+  skip_before_action :require_confirmation, only: %i[profile license_agreements]
   skip_before_action :require_confirmation,
                      only: %i[accept_eula resend_confirmation]
 
@@ -34,6 +34,23 @@ class Api::UsersController < Api::ApplicationController
                        view: :base
                      }
                    }
+  end
+
+  def super_admins
+    authorize :user, :super_admins?
+    begin
+      super_admins = User.super_admin
+      render_success super_admins,
+                     nil,
+                     {
+                       blueprint: UserBlueprint,
+                       blueprint_opts: {
+                         view: :minimal
+                       }
+                     }
+    rescue StandardError => e
+      render_error "user.get_super_admins_error", {}, e and return
+    end
   end
 
   def update
@@ -93,7 +110,6 @@ class Api::UsersController < Api::ApplicationController
   def license_agreements
     @user = current_user
     authorize current_user
-
     render_success @user,
                    nil,
                    {
@@ -212,6 +228,7 @@ class Api::UsersController < Api::ApplicationController
       :last_name,
       :organization,
       :certified,
+      :department,
       preference_attributes: %i[
         enable_in_app_new_template_version_publish_notification
         enable_in_app_customization_update_notification

@@ -1,20 +1,31 @@
 require "rails_helper"
 
 RSpec.describe PermitApplicationPolicy do
-  subject { described_class.new(user, draft_permit_application) }
-
-  let(:resolved_scope) do
-    described_class::Scope.new(user, PermitApplication.all).resolve
+  subject do
+    described_class.new(
+      UserContext.new(user, sandbox),
+      draft_permit_application
+    )
   end
 
-  let(:user) { FactoryBot.create(:user) }
-  let(:submitter) { FactoryBot.create(:user, :submitter) }
-  let(:jurisdiction) { FactoryBot.create(:sub_district) }
-  let(:draft_permit_application) do
+  let(:resolved_scope) do
+    described_class::Scope.new(
+      UserContext.new(user, sandbox),
+      PermitApplication.all
+    ).resolve
+  end
+
+  let!(:user) { FactoryBot.create(:user) }
+  let!(:submitter) { FactoryBot.create(:user, :submitter) }
+  let!(:jurisdiction) { FactoryBot.create(:sub_district) }
+  let!(:sandbox) { jurisdiction.sandboxes.first }
+
+  let!(:draft_permit_application) do
     FactoryBot.create(
       :permit_application,
       submitter: submitter,
-      jurisdiction: jurisdiction
+      jurisdiction: jurisdiction,
+      sandbox: sandbox
     )
   end
 
@@ -42,7 +53,12 @@ RSpec.describe PermitApplicationPolicy do
     end
 
     it "only includes own permit applications in scope" do
-      other_user_application = FactoryBot.create(:permit_application)
+      other_user_application =
+        FactoryBot.create(
+          :permit_application,
+          jurisdiction: jurisdiction,
+          sandbox: sandbox
+        )
       expect(resolved_scope).to include(draft_permit_application)
       expect(resolved_scope).not_to include(other_user_application)
     end
@@ -65,17 +81,22 @@ RSpec.describe PermitApplicationPolicy do
   end
 
   context "for a submitter with a submitted permit application" do
-    let(:user) { submitter }
-
-    let(:submitted_permit_application) do
+    let!(:user) { submitter }
+    let!(:submitted_permit_application) do
       FactoryBot.create(
         :permit_application,
         :newly_submitted,
+        jurisdiction: jurisdiction,
         submitter: submitter
       )
     end
 
-    subject { described_class.new(submitter, submitted_permit_application) }
+    subject do
+      described_class.new(
+        UserContext.new(user, sandbox),
+        submitted_permit_application
+      )
+    end
 
     it "does not permit update" do
       expect(subject.update?).to be false

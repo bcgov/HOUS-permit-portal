@@ -20,20 +20,38 @@ class RequirementBlock < ApplicationRecord
 
   enum sign_off_role: { any: 0 }, _prefix: true
   enum reviewer_role: { any: 0 }, _prefix: true
+  enum visibility: { any: 0, early_access: 1, live: 2 }, _default: 0
 
   validates :sku, uniqueness: true, presence: true
   validates :name, presence: true, uniqueness: { scope: :first_nations }
   validates :display_name, presence: true
   validate :validate_step_code_dependencies
   validate :validate_requirements_conditional
+  validate :early_access_on_appropriate_template
 
   before_validation :set_sku, on: :create
+  before_validation :ensure_unique_name, on: :create
 
-  after_commit :refresh_search_index, if: :saved_change_to_discarded_at
+  after_commit :refresh_search_index,
+               if: -> do
+                 saved_change_to_discarded_at? || saved_change_to_visibility?
+               end
 
   acts_as_taggable_on :associations
 
   after_discard { template_section_blocks.destroy_all }
+
+  def allowed_in(requirement_template)
+    if requirement_template.early_access?
+      %i[any early_access].include?(visibility.to_sym)
+    else
+      %i[any live].include?(visibility.to_sym)
+    end
+  end
+
+  def sections
+    requirement_template_sections
+  end
 
   def search_data
     {
@@ -43,7 +61,9 @@ class RequirementBlock < ApplicationRecord
       requirement_labels: requirements.pluck(:label),
       associations: association_list,
       configurations: configurations_search_list,
-      discarded: discarded_at.present?
+      discarded: discarded_at.present?,
+      visibility: visibility,
+      created_at: created_at
     }
   end
 
@@ -96,6 +116,36 @@ class RequirementBlock < ApplicationRecord
   end
 
   private
+
+  def early_access_on_appropriate_template
+    # Determine the required visibility based on the current object's state
+    if early_access?
+      required_visibility = :early_access
+      error_key = "associated_requirement_templates_must_be_early_access"
+    elsif live?
+      required_visibility = :live
+      error_key = "associated_requirement_templates_must_be_live"
+    elsif any?
+      # If any, no validation is needed
+      return
+    end
+
+    # Fetch associated requirement templates through requirement_template_sections
+    associated_templates =
+      requirement_template_sections.map(&:requirement_template)
+
+    method_to_use = :"#{required_visibility}?"
+
+    # Check if all associated templates satisfy the required visibility
+    unless associated_templates.all?(&method_to_use)
+      errors.add(
+        :visibility,
+        I18n.t(
+          "activerecord.errors.models.requirement_block.attributes.visibility.#{error_key}"
+        )
+      )
+    end
+  end
 
   def refresh_search_index
     RequirementBlock.search_index.refresh
@@ -181,5 +231,36 @@ class RequirementBlock < ApplicationRecord
 
       retry_count += 1
     end
+  end
+
+  def ensure_unique_name
+    return if name.blank?
+
+    base_name = name.strip
+    new_name = base_name
+
+    # Loop to find a unique name
+    while self.class.exists?(name: new_name)
+      new_name = increment_last_word(new_name)
+    end
+
+    self.name = new_name
+  end
+
+  # Method to increment the last word if it's a number, or append " 2"
+  def increment_last_word(input)
+    words = input.split(" ")
+    last_word = words.last
+
+    if last_word.match?(/\A\d+\z/)
+      # If the last word is a number, increment it
+      incremented_number = last_word.to_i + 1
+      words[-1] = incremented_number.to_s
+    else
+      # If the last word is not a number, append "2"
+      words << "2"
+    end
+
+    words.join(" ")
   end
 end

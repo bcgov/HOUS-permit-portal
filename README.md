@@ -38,6 +38,7 @@ To make things easier to develop on various platforms locally, there is a `docke
 5. (If this is the first run of the app or seeds have changed, you can rerun the seeder). Generate seed data: `docker compose exec app bundle exec rails db:seed`
 6. Things should now be running. You can isolate / look at logs for various containers using `docker compose logs -f app` for example for the app logs (or any other service)
 7. The app should reflect changes live if you edit the files in the folder (both Ruby and JS) since its mounted live on the filesystem
+8. If you want to run a `binding.pry` or `debugger` you can do so in the code, and then run `docker compose attach app` to interact with the debugging interface.
 
 **NOTES / Caveats**
 

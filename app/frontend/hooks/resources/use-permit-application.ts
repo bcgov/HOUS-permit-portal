@@ -7,7 +7,8 @@ import { isUUID } from "../../utils/utility-functions"
 export const usePermitApplication = ({ review }: { review?: boolean } = {}) => {
   const { permitApplicationId } = useParams()
   const { pathname } = useLocation()
-  const { permitApplicationStore } = useMst()
+  const { permitApplicationStore, sandboxStore } = useMst()
+  const { currentSandbox } = sandboxStore
 
   const { currentPermitApplication, setCurrentPermitApplication, fetchPermitApplication } = permitApplicationStore
 
@@ -22,6 +23,9 @@ export const usePermitApplication = ({ review }: { review?: boolean } = {}) => {
           let permitApplication = await fetchPermitApplication(permitApplicationId, review)
           if (permitApplication) {
             setCurrentPermitApplication(permitApplicationId)
+            setError(null)
+          } else {
+            setError(new Error(t("errors.fetchPermitApplication")))
           }
         }
       } catch (e) {
@@ -29,7 +33,7 @@ export const usePermitApplication = ({ review }: { review?: boolean } = {}) => {
         setError(new Error(t("errors.fetchPermitApplication")))
       }
     })()
-  }, [pathname])
+  }, [pathname, currentSandbox?.id])
 
   return { currentPermitApplication, error }
 }

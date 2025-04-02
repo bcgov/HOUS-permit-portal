@@ -18,7 +18,7 @@ export const FlashMessage = observer(() => {
         isClosable,
         duration,
         position: position as ToastPosition,
-        render: (props) => <CustomMessageBox {...props} />,
+        render: ({ description, ...rest }) => <CustomMessageBox description={description as string} {...rest} />,
       })
     }
   }, [isVisible, status, title, description])

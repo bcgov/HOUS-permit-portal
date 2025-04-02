@@ -21,11 +21,8 @@ deployments:
         includeCommand: false
         resources:
           requests:
-            cpu: 50m
-            memory: 128Mi
-          limits:
-            cpu: 200m
-            memory: 512Mi
+            cpu: 300m
+            memory: 256Mi
   - process: worker
     replicaCount: 2
     spec:
@@ -36,11 +33,8 @@ deployments:
             set -a; . /vault/secrets/secrets.env; set +a; exec bundle exec sidekiq
         resources:
           requests:
-            cpu: 50m
-            memory: 128Mi
-          limits:
-            cpu: 200m
-            memory: 512Mi
+            cpu: 100m
+            memory: 256Mi
   - process: anycable-rpc
     replicaCount: 2
     spec:
@@ -53,6 +47,3 @@ deployments:
           requests:
             cpu: 50m
             memory: 128Mi
-          limits:
-            cpu: 100m
-            memory: 256Mi

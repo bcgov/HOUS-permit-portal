@@ -2,7 +2,9 @@ require "rails_helper"
 
 RSpec.describe AutomatedComplianceUtils do
   #permit_application uses this
-  let!(:requirement_template) { create(:requirement_template_with_compliance) }
+  let!(:requirement_template) do
+    create(:live_requirement_template_with_compliance)
+  end
   let!(:permit_application) do
     create(
       :permit_application,

@@ -1,10 +1,17 @@
 import { Box, Flex, FlexProps, Heading, HeadingProps, Text, ToastProps } from "@chakra-ui/react"
 import { CheckCircle, Info, Warning, WarningCircle } from "@phosphor-icons/react"
 import React from "react"
+import ReactMarkdown from "react-markdown"
+import { EFlashMessageStatus } from "../../../types/enums"
 
-interface ICustomMessageBoxProps extends Omit<ToastProps, "id" | "position" | "title">, FlexProps {
+interface ICustomMessageBoxProps
+  extends Omit<FlexProps, "id" | "title">,
+    Omit<ToastProps, "position" | "title" | "id" | "status"> {
+  title?: React.ReactNode // Allow title to be any ReactNode
+  description?: string | React.ReactNode // Allow description to be any ReactNode
   children?: React.ReactNode
   headingProps?: Partial<HeadingProps>
+  status: EFlashMessageStatus
 }
 
 const iconMap = {
@@ -12,6 +19,7 @@ const iconMap = {
   warning: <Warning size={24} aria-label={"warning icon"} />,
   error: <WarningCircle size={24} aria-label={"error icon"} />,
   info: <Info size={24} aria-label={"info icon"} />,
+  special: <Info size={24} aria-label={"info icon"} />,
 }
 
 export const CustomMessageBox = ({
@@ -35,13 +43,14 @@ export const CustomMessageBox = ({
     >
       <Flex align="flex-start" gap={2} whiteSpace={"normal"}>
         <Box color={`semantic.${status}`}>{iconMap[status]}</Box>
-        <Flex direction="column" gap={2}>
+        <Flex direction="column">
           {title && (
             <Heading as="h3" fontSize="md" {...headingProps}>
               {title}
             </Heading>
           )}
-          {description && <Text wordBreak={"break-word"}>{description}</Text>}
+
+          {typeof description === "string" ? <ReactMarkdown>{description}</ReactMarkdown> : <Text>{description}</Text>}
           {children}
         </Flex>
       </Flex>

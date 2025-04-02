@@ -20,6 +20,8 @@ jobs:
           sudo apt-get update
           sudo apt-get install git-lfs
           git lfs install
+      - name: Confirm branch to deploy
+        run: echo "Deploying branch ${{ github.event.inputs.branch }} to Production"
       - name: Checkout Code
         uses: actions/checkout@v3
         with:
@@ -34,13 +36,17 @@ jobs:
             app=prod-hous-permit-portal
             git-sha=${{ github.sha }}
           containerfiles: ./devops/docker/app/Dockerfile
+          # VITE_RELEASE_VERSION always blank in prod as we want to hide the banner
           build-args: |
             VITE_BASIC_BCEID_REGISTRATION_URL=${{ vars.VITE_BASIC_BCEID_REGISTRATION_URL }}
             VITE_BUSINESS_BCEID_REGISTRATION_URL=${{ vars.VITE_BUSINESS_BCEID_REGISTRATION_URL }}
+            VITE_BCSC_REGISTRATION_URL=${{ vars.VITE_BCSC_REGISTRATION_URL }}
             VITE_BCEID_URL=${{ vars.VITE_BCEID_URL }}
+            VITE_BCEID_PARTNER_URL=${{ vars.VITE_BCEID_PARTNER_URL }}
             VITE_SITEMINDER_LOGOUT_URL=${{ vars.VITE_SITEMINDER_LOGOUT_URL }}
             VITE_KEYCLOAK_LOGOUT_URL=${{ vars.VITE_KEYCLOAK_LOGOUT_URL }}
             VITE_POST_LOGOUT_REDIRECT_URL=${{ vars.VITE_POST_LOGOUT_REDIRECT_URL }}
+            VITE_RELEASE_VERSION=""
       - name: Push to Openshift Registry using Service Account
         uses: redhat-actions/push-to-registry@v2.7
         with:

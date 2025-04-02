@@ -34,7 +34,8 @@ interface INotificationsPopoverProps extends IconButtonProps {}
 export const NotificationsPopover: React.FC<INotificationsPopoverProps> = observer(function NotificationsPopover({
   ...rest
 }) {
-  const { notificationStore } = useMst()
+  const { notificationStore, sandboxStore } = useMst()
+  const { currentSandbox } = sandboxStore
   const { notifications, initialFetch, fetchNotifications, anyUnread, generateSpecificLinkData, getSemanticKey } =
     notificationStore
 
@@ -57,9 +58,10 @@ export const NotificationsPopover: React.FC<INotificationsPopoverProps> = observ
             icon={anyUnread ? <BellRinging size={24} /> : <Bell size={24} />}
             aria-label="open notifications"
             zIndex={1}
+            isDisabled={!!currentSandbox}
             {...rest}
           />
-          {anyUnread && (
+          {anyUnread && !currentSandbox && (
             <Badge
               position="absolute"
               top={0}
@@ -99,7 +101,7 @@ export const NotificationsPopover: React.FC<INotificationsPopoverProps> = observ
                   <CustomMessageBox status={getSemanticKey(n)} description={n.actionText} key={n.id}>
                     <UnorderedList pl={0} mb={0}>
                       {generateSpecificLinkData(n).map((link) => (
-                        <ListItem whiteSpace={"normal"}>
+                        <ListItem whiteSpace={"normal"} key={link.href}>
                           <RouterLinkButton
                             variant="link"
                             rightIcon={<CaretRight />}

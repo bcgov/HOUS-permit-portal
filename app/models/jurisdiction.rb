@@ -10,10 +10,40 @@ class Jurisdiction < ApplicationRecord
   ]
 
   include ActionView::Helpers::SanitizeHelper
-  searchkick searchable: %i[name reverse_qualified_name qualified_name],
-             word_start: %i[name reverse_qualified_name qualified_name],
-             text_start: %i[name reverse_qualified_name qualified_name]
+  searchkick searchable: %i[
+               name
+               reverse_qualified_name
+               qualified_name
+               manager_emails
+             ],
+             word_start: %i[
+               name
+               reverse_qualified_name
+               qualified_name
+               manager_emails
+             ],
+             text_start: %i[
+               name
+               reverse_qualified_name
+               qualified_name
+               manager_emails
+             ]
 
+  SEARCH_DATA_FIELDS = %i[
+    qualified_name
+    reverse_qualified_name
+    regional_district_name
+    name
+    type
+    updated_at
+    review_managers_size
+    reviewers_size
+    permit_applications_size
+    user_ids
+    submission_inbox_set_up
+    created_at
+  ]
+  SUPER_ADMIN_ADDITIONAL_DATA_FIELDS = %i[manager_emails]
   # Associations
   has_one :preference
   has_many :permit_applications
@@ -30,9 +60,17 @@ class Jurisdiction < ApplicationRecord
   has_many :integration_mappings
   has_many :permit_type_required_steps, dependent: :destroy
   has_many :collaborators, as: :collaboratorable, dependent: :destroy
+  has_many :sandboxes, dependent: :destroy
 
   validates :name, uniqueness: { scope: :locality_type, case_sensitive: false }
   validates :locality_type, presence: true
+  validate :inbox_enabled_requires_inbox_setup
+
+  # Validation to ensure at least one sandbox exists
+  validate :must_have_one_sandbox
+
+  # Callback to ensure default sandboxes exist
+  before_validation :ensure_default_sandboxes
 
   before_validation :normalize_locality_type
   before_validation :normalize_name
@@ -54,12 +92,28 @@ class Jurisdiction < ApplicationRecord
 
   before_create :assign_unique_prefix
 
+  def customizations
+    # Convenience method to prevent carpal tunnel syndrome
+    jurisdiction_template_version_customizations
+  end
+
   def regional_review_managers
     users&.kept&.regional_review_manager
   end
 
   def review_managers
     users&.kept&.review_manager
+  end
+
+  def manager_emails
+    [
+      review_managers&.pluck(:email),
+      regional_review_manager_emails
+    ].flatten.compact
+  end
+
+  def regional_review_manager_emails
+    regional_review_managers&.pluck(:email)
   end
 
   def reviewers
@@ -117,7 +171,9 @@ class Jurisdiction < ApplicationRecord
       reviewers_size: reviewers_size,
       permit_applications_size: permit_applications_size,
       user_ids: users.pluck(:id),
-      submission_inbox_set_up: submission_inbox_set_up
+      submission_inbox_set_up: submission_inbox_set_up,
+      created_at: created_at,
+      manager_emails: manager_emails
     }
   end
 
@@ -221,6 +277,13 @@ class Jurisdiction < ApplicationRecord
     JurisdictionBlueprint
   end
 
+  def template_version_customization(template_version, sandbox = nil)
+    jurisdiction_template_version_customizations.find_by!(
+      template_version_id: template_version.id,
+      sandbox: sandbox
+    )
+  end
+
   private
 
   def create_permit_type_required_steps
@@ -242,12 +305,13 @@ class Jurisdiction < ApplicationRecord
   end
 
   def set_type_based_on_locality
-    case locality_type
-    when RegionalDistrict.locality_type
-      self.type = "RegionalDistrict"
-    else
-      self.type = "SubDistrict"
-    end
+    self.type =
+      case locality_type
+      when RegionalDistrict.locality_type
+        "RegionalDistrict"
+      else
+        "SubDistrict"
+      end
   end
 
   def normalize_name
@@ -283,5 +347,42 @@ class Jurisdiction < ApplicationRecord
     normalized.sub!(/\s+(the|of)\z/, "")
 
     self.locality_type = normalized
+  end
+
+  # Callback method to ensure a default sandbox is created
+  def ensure_default_sandboxes
+    if sandboxes.published.empty?
+      sandboxes.build(
+        name: "Published Sandbox",
+        template_version_status_scope: :published
+      )
+    end
+    if sandboxes.scheduled.empty?
+      sandboxes.build(
+        name: "Scheduled Sandbox",
+        template_version_status_scope: :scheduled
+      )
+    end
+  end
+
+  # Custom validation method
+  def must_have_one_sandbox
+    if sandboxes.empty?
+      errors.add(
+        :base,
+        I18n.t("activerecord.errors.models.jurisdiction.no_sandboxes")
+      )
+    end
+  end
+
+  def inbox_enabled_requires_inbox_setup
+    if inbox_enabled && !submission_inbox_set_up
+      errors.add(
+        :inbox_enabled,
+        I18n.t(
+          "activerecord.errors.models.jurisdiction.enabled_inbox_requires_setup"
+        )
+      )
+    end
   end
 end

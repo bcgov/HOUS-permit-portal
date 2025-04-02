@@ -3,7 +3,7 @@ source "https://rubygems.org"
 ruby "3.2.5"
 
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
-gem "rails", "~> 7.1.4.1"
+gem "rails", "~> 7.1.5.1"
 
 # Use postgresql as the database for Active Record
 gem "pg", "~> 1.1"
@@ -69,9 +69,9 @@ gem "anycable-rails", "~> 1.4"
 gem "addressable", "~> 2.8"
 gem "friendly_id", "~> 5.5.1"
 gem "exception_notification", "~> 4.5.0"
-gem "nokogiri", ">= 1.16.5"
+gem "nokogiri", ">= 1.18.3"
 gem "rdoc", ">= 6.6.3.1"
-gem "rack", ">= 3.0.9.1"
+gem "rack", ">= 3.1.12"
 gem "uppy-s3_multipart", "~> 1.2"
 gem "simple-feed", "~> 3.2.0"
 # For external api docs
@@ -120,7 +120,7 @@ group :development do
   gem "rails-erd", "~> 1.5"
   gem "rubocop", "~> 1.67", require: false
   gem "rubocop-rails", "~> 2.26", require: false
-  gem "solargraph", "~> 0.50.0"
+  gem "solargraph", "~> 0.50.0", require: false
 end
 
 gem "faraday-multipart", "~> 1.0"

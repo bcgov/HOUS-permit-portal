@@ -97,28 +97,20 @@ permit_type2 = PermitType.find_by_code("medium_residential")
 
 puts "Seeding contacts..."
 Jurisdiction.all.each do |j|
-  j
-    .permit_type_submission_contacts
-    .where(
-      email: "#{j.name.parameterize}@laterolabs.com",
-      permit_type: permit_type1
-    )
-    .first_or_create!(
-      email: "#{j.name.parameterize}@laterolabs.com",
-      confirmed_at: Time.now,
-      permit_type: permit_type1
-    )
-  j
-    .permit_type_submission_contacts
-    .where(
-      email: "#{j.name.parameterize}@laterolabs.com",
-      permit_type: permit_type2
-    )
-    .first_or_create!(
-      email: "#{j.name.parameterize}@laterolabs.com",
-      confirmed_at: Time.now,
-      permit_type: permit_type2
-    )
+  PermitType.find_each do |permit_type|
+    j
+      .permit_type_submission_contacts
+      .where(
+        email: "#{j.name.parameterize}@laterolabs.com",
+        permit_type: permit_type
+      )
+      .first_or_create!(
+        email: "#{j.name.parameterize}@laterolabs.com",
+        confirmed_at: Time.now,
+        permit_type: permit_type
+      )
+  end
+  j.update(inbox_enabled: true)
 end
 if PermitApplication.first.blank?
   jurisdictions
@@ -168,20 +160,20 @@ if PermitApplication.first.blank?
     end
   Contact.reindex
   puts "Seeding requirement templates..."
-  # Create RequirementTemplate records
-  RequirementTemplate.find_or_create_by!(
+  # Create LiveRequirementTemplate records
+  LiveRequirementTemplate.find_or_create_by!(
     activity: activity1,
     permit_type: permit_type1
   )
-  RequirementTemplate.find_or_create_by!(
+  LiveRequirementTemplate.find_or_create_by!(
     activity: activity1,
     permit_type: permit_type2
   )
-  RequirementTemplate.find_or_create_by!(
+  LiveRequirementTemplate.find_or_create_by!(
     activity: activity2,
     permit_type: permit_type1
   )
-  RequirementTemplate.find_or_create_by!(
+  LiveRequirementTemplate.find_or_create_by!(
     activity: activity2,
     permit_type: permit_type2
   )
@@ -272,6 +264,40 @@ EulaUpdater.run
 
 puts "Seeding default revision reasons..."
 RevisionReasonSeeder.seed
+
+puts "Seeding early access requirement templates..."
+
+LiveRequirementTemplate.find_each do |lrt|
+  overrides = {
+    type: EarlyAccessRequirementTemplate.name,
+    nickname: "Early access #{lrt.label}"
+  }
+  RequirementTemplateCopyService.new(
+    lrt
+  ).build_requirement_template_from_existing(overrides)
+end
+
+# Seed some previewers for EarlyAccessRequirementTemplate instances
+puts "Seeding Early Access Invitations..."
+
+# Fetching existing EarlyAccessRequirementTemplate instances
+early_access_requirement_templates = EarlyAccessRequirementTemplate.limit(3)
+
+# Fetching existing User instances
+users = User.limit(5)
+
+# Associate some users as previewers for each template
+early_access_requirement_templates.each do |eart|
+  # Select a random subset of users to invite (between 1 and 5 users)
+  previewers = users.sample(rand(1..5))
+
+  previewers.each do |user|
+    EarlyAccessPreview.create!(
+      early_access_requirement_template: eart,
+      previewer: user
+    )
+  end
+end
 
 # invite a usable super admin
 # safeguard for development only

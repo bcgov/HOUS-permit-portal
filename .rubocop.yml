@@ -7,12 +7,41 @@ AllCops:
   Exclude:
     - "{.git,.github,.ruby-lsp,bin,coverage,doc,pkg,sorbet,spec,test/fixtures,vendor,tmp}/**/*"
     - test.rb
+    - "db/schema.rb"
+    - "**/*.erb"
+
+Style/Lambda:
+  Enabled: false
+
+Style/FetchEnvVar:
+  Enabled: false
+
+Layout/MultilineOperationIndentation:
+  Enabled: false
+
+Style/MultilineMemoization:
+  Enabled: false
+
+Style/IfUnlessModifier:
+  Enabled: false
+
+Style/RedundantBegin:
+  Enabled: false
+
+Layout/MultilineMethodCallIndentation:
+  Enabled: false
+
+Style/ClassAndModuleChildren:
+  Enabled: false
+
+Style/FrozenStringLiteralComment:
+  Enabled: false
 
 Gemspec/DevelopmentDependencies:
   Enabled: false
 
 Layout/LineLength:
-  Max: 80
+  Enabled: false
 
 Lint/AmbiguousBlockAssociation:
   Enabled: false
@@ -69,7 +98,7 @@ Naming/MethodParameterName:
   Enabled: false
 
 Naming/RescuedExceptionsVariableName:
-  PreferredName: error
+  PreferredName: e
 
 Naming/VariableNumber:
   Enabled: false

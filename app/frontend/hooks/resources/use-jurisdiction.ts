@@ -44,8 +44,18 @@ export const useJurisdiction = () => {
     if (currentUser?.isRegionalReviewManager && currentUser?.jurisdiction?.id != jurisdictionId) {
       const originalPath = findMatchingPathTemplate(pathname)
       if (!originalPath) return
+
+      // Get the existing query params
+      const existingQuery = window.location.search
+
+      // Generate the new path
       const path = generatePath(originalPath, { jurisdictionId: currentUser.jurisdiction.slug })
-      navigate(path, { replace: true })
+
+      // Append the existing query params to the new path
+      const newPathWithQuery = `${path}${existingQuery}`
+
+      // Navigate to the new path while preserving query params
+      navigate(newPathWithQuery, { replace: true })
     }
   }, [currentUser?.jurisdiction])
 
@@ -54,11 +64,17 @@ export const useJurisdiction = () => {
       try {
         if (isUUID(jurisdictionId)) {
           const jurisdiction = await fetchJurisdiction(jurisdictionId)
-          jurisdiction && setCurrentJurisdiction(jurisdictionId)
+          if (jurisdiction) {
+            setError(null)
+            setCurrentJurisdiction(jurisdictionId)
+          }
         } else {
           //assume slug
           const jurisdiction = await fetchJurisdiction(jurisdictionId)
-          jurisdiction && setCurrentJurisdictionBySlug(jurisdictionId)
+          if (jurisdiction) {
+            setError(null)
+            setCurrentJurisdictionBySlug(jurisdictionId)
+          }
         }
       } catch (e) {
         console.error(e.message)

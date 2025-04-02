@@ -4,18 +4,12 @@ crunchy-postgres:
     dataVolumeClaimSpec:
       storage: 1Gi
     requests:
-      cpu: 10m
+      cpu: 200m
       memory: 256Mi
-    limits:
-      cpu: 100m
-      memory: 512Mi
     replicaCertCopy:
       requests:
         cpu: 10m
         memory: 32Mi
-      limits:
-        cpu: 50m
-        memory: 64Mi
 
   pgBackRest:
     retention: "1"
@@ -26,16 +20,10 @@ crunchy-postgres:
       requests:
         cpu: 1m
         memory: 64Mi
-      limits:
-        cpu: 50m
-        memory: 128Mi
     sidecars:
       requests:
         cpu: 1m
         memory: 64Mi
-      limits:
-        cpu: 50m
-        memory: 128Mi
 
   patroni:
     postgresql:
@@ -52,6 +40,3 @@ crunchy-postgres:
       requests:
         cpu: 10m
         memory: 64Mi
-      limits:
-        cpu: 50m
-        memory: 128Mi

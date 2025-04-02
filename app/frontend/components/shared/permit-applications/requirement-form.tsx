@@ -9,6 +9,7 @@ import { Trans, useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { useMountStatus } from "../../../hooks/use-mount-status"
 import { IPermitApplication } from "../../../models/permit-application"
+import { useMst } from "../../../setup/root"
 import { IErrorsBoxData } from "../../../types/types"
 import { getCompletedBlocksFromForm, getRequirementByKey } from "../../../utils/formio-component-traversal"
 import { singleRequirementFormJson, singleRequirementSubmissionData } from "../../../utils/formio-helpers"
@@ -32,6 +33,7 @@ interface IRequirementFormProps {
   isEditing?: boolean
   renderTopButtons?: () => React.ReactNode
   updateCollaborationAssignmentNodes?: () => void
+  isEarlyAccess?: boolean
 }
 
 export const RequirementForm = observer(
@@ -44,6 +46,7 @@ export const RequirementForm = observer(
     renderSaveButton,
     isEditing = false,
     updateCollaborationAssignmentNodes,
+    isEarlyAccess = false,
   }: IRequirementFormProps) => {
     const {
       jurisdiction,
@@ -57,8 +60,12 @@ export const RequirementForm = observer(
       previousSubmissionVersion,
       selectedPastSubmissionVersion,
       isViewingPastRequests,
+      inboxEnabled,
+      sandbox,
     } = permitApplication
 
+    const { userStore } = useMst()
+    const { currentUser } = userStore
     const shouldShowDiff = permitApplication?.shouldShowApplicationDiff(isEditing)
     const userShouldSeeDiff = permitApplication?.currentUserShouldSeeApplicationDiff
 
@@ -310,7 +317,7 @@ export const RequirementForm = observer(
           direction="column"
           as={"section"}
           flex={1}
-          className={`form-wrapper ${floatErrorBox ? "float-on" : "float-off"}`}
+          className={`form-wrapper ${floatErrorBox ? "float-on" : "float-off"} ${isEarlyAccess ? "early-access-requirement-form" : ""}`}
           mb="40vh"
           mx="auto"
           pl={{ base: "10" }}
@@ -359,6 +366,13 @@ export const RequirementForm = observer(
           {showVersionDiffContactWarning && (
             <CustomMessageBox description={t("permitApplication.show.versionDiffContactWarning")} status="warning" />
           )}
+          {!inboxEnabled && !sandbox && (
+            <CustomMessageBox
+              title={t("permitApplication.show.inboxDisabledTitle")}
+              description={t("permitApplication.show.inboxDisabled")}
+              status="error"
+            />
+          )}
           {permitApplication?.isSubmitted ? (
             <CustomMessageBox
               description={t("permitApplication.show.wasSubmitted", {
@@ -369,7 +383,10 @@ export const RequirementForm = observer(
             />
           ) : (
             <CustomMessageBox
-              title={t("permitApplication.show.submittingTo.title", { jurisdictionName: jurisdiction.qualifiedName })}
+              title={
+                jurisdiction &&
+                t("permitApplication.show.submittingTo.title", { jurisdictionName: jurisdiction?.qualifiedName })
+              }
               description={
                 <Trans
                   t={t}
@@ -397,11 +414,6 @@ export const RequirementForm = observer(
                 />
               }
               status="info"
-              headingProps={{
-                fontSize: "md !important",
-                mb: 0,
-              }}
-              fontSize={"sm"}
             />
           )}
           <Box bg="greys.grey03" p={3} borderRadius="sm">

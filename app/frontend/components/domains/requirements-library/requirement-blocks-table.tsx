@@ -32,15 +32,18 @@ import { RequirementsBlockModal } from "./requirements-block-modal"
 
 interface IProps extends Partial<StackProps> {
   renderActionButton?: (props: ButtonProps & { requirementBlock: IRequirementBlock }) => JSX.Element
+  forEarlyAccess?: boolean
 }
 
 const ROW_CLASS_NAME = "requirements-library-grid-row"
 
 export const RequirementBlocksTable = observer(function RequirementBlocksTable({
   renderActionButton,
+  forEarlyAccess,
   ...containerProps
 }: IProps) {
-  const { requirementBlockStore } = useMst()
+  const { requirementBlockStore, earlyAccessRequirementBlockStore } = useMst()
+  const searchModel = forEarlyAccess ? earlyAccessRequirementBlockStore : requirementBlockStore
   const {
     tableRequirementBlocks,
     currentPage,
@@ -51,20 +54,20 @@ export const RequirementBlocksTable = observer(function RequirementBlocksTable({
     handlePageChange,
     isSearching,
     showArchived,
-  } = requirementBlockStore
-
-  useSearch(requirementBlockStore as ISearch, [showArchived])
+  } = searchModel
 
   useEffect(() => {
     return () => {
-      requirementBlockStore.setShowArchived(false)
+      searchModel.setShowArchived(false)
     }
   }, [])
+
+  useSearch(searchModel as ISearch, [showArchived, requirementBlockStore.isEditingEarlyAccess])
 
   return (
     <VStack as={"article"} spacing={5} {...containerProps}>
       <SearchGrid gridRowClassName={ROW_CLASS_NAME} templateColumns="repeat(7, 1fr)" pos={"relative"}>
-        <GridHeaders />
+        <GridHeaders forEarlyAccess={forEarlyAccess} />
 
         {isSearching ? (
           <Flex py={50} gridColumn={"span 6"}>
@@ -94,7 +97,7 @@ export const RequirementBlocksTable = observer(function RequirementBlocksTable({
                     ))}
                   </HStack>
                 </SearchGridItem>
-                <SearchGridItem pr={0} minW="280px">
+                <SearchGridItem pr={0} minW="273px">
                   <UnorderedList ml={0} pl={0} w={"full"}>
                     {requirementBlock.requirements.map((requirement) => {
                       return (
@@ -119,7 +122,11 @@ export const RequirementBlocksTable = observer(function RequirementBlocksTable({
                   {renderActionButton ? (
                     renderActionButton({ requirementBlock })
                   ) : (
-                    <RequirementsBlockModal withOptionsMenu requirementBlock={requirementBlock} />
+                    <RequirementsBlockModal
+                      withOptionsMenu
+                      requirementBlock={requirementBlock}
+                      forEarlyAccess={requirementBlock.isEarlyAccess}
+                    />
                   )}
                 </SearchGridItem>
               </Box>

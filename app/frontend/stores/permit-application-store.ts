@@ -9,6 +9,7 @@ import { withRootStore } from "../lib/with-root-store"
 import { IJurisdiction } from "../models/jurisdiction"
 import { IPermitApplication, PermitApplicationModel } from "../models/permit-application"
 import { IPermitBlockStatus } from "../models/permit-block-status"
+import { IRequirementTemplate } from "../models/requirement-template"
 import { IUser } from "../models/user"
 import {
   ECustomEvents,
@@ -24,7 +25,7 @@ import {
   IUserPushPayload,
   TSearchParams,
 } from "../types/types"
-import { setQueryParam } from "../utils/utility-functions"
+import { convertResourceArrayToRecord, setQueryParam } from "../utils/utility-functions"
 
 const filterableStatus = Object.values(EPermitApplicationStatus)
 export type TFilterableStatus = (typeof filterableStatus)[number]
@@ -41,6 +42,7 @@ export const PermitApplicationStoreModel = types
       ]),
       templateVersionIdFilter: types.maybeNull(types.string),
       requirementTemplateIdFilter: types.maybeNull(types.string),
+      hasCollaboratorFilter: types.maybeNull(types.boolean),
     }),
     createSearchModel<EPermitApplicationSortFields>("searchPermitApplications", "setPermitApplicationFilters")
   )
@@ -81,10 +83,38 @@ export const PermitApplicationStoreModel = types
     },
   }))
   .actions((self) => ({
+    setCurrentPermitApplication(permitApplicationId) {
+      self.currentPermitApplication = permitApplicationId
+      self.currentPermitApplication &&
+        self.rootStore.stepCodeStore.setCurrentStepCode(self.currentPermitApplication.stepCode)
+    },
+    setHasCollaboratorFilter(value: boolean) {
+      setQueryParam("hasCollaborator", value.toString())
+      self.hasCollaboratorFilter = value
+    },
+    resetFilters() {
+      self.hasCollaboratorFilter = false
+      self.templateVersionIdFilter = null
+      self.requirementTemplateIdFilter = null
+      if (typeof window !== "undefined") {
+        const url = new URL(window.location.href)
+        const staticParams = ["templateVersionId", "requirementTemplateId", "hasCollaborator"]
+        staticParams.forEach((param) => {
+          url.searchParams.delete(param)
+        })
+        window.history.replaceState(null, "", url.toString())
+      }
+      self.searchPermitApplications()
+    },
+    resetCurrentPermitApplication() {
+      self.currentPermitApplication = null
+      self.rootStore.stepCodeStore.setCurrentStepCode(null)
+    },
     __beforeMergeUpdate(permitApplicationData) {
       const pad = permitApplicationData
 
       if (!pad.skipAssociationMerges) {
+        pad.sandbox && self.rootStore.sandboxStore.mergeUpdate(pad.sandbox, "sandboxMap")
         pad.stepCode && self.rootStore.stepCodeStore.mergeUpdate(pad.stepCode, "stepCodesMap")
         pad.jurisdiction && self.rootStore.jurisdictionStore.mergeUpdate(pad.jurisdiction, "jurisdictionMap")
         pad.submitter && self.rootStore.userStore.mergeUpdate(pad.submitter, "usersMap")
@@ -101,6 +131,7 @@ export const PermitApplicationStoreModel = types
       }
 
       return R.mergeRight(pad, {
+        sandbox: pad.sandbox?.id,
         jurisdiction: pad.jurisdiction?.id,
         submitter: pad.submitter?.id,
         templateVersion: pad.templateVersion?.id,
@@ -184,6 +215,73 @@ export const PermitApplicationStoreModel = types
     },
   }))
   .actions((self) => ({
+    getEphemeralPermitApplication(
+      requirementTemplate: IRequirementTemplate,
+      overrides: Partial<IPermitApplication> = {}
+    ) {
+      if (self.currentPermitApplication?.isEphemeral) return self.currentPermitApplication
+      const permitApplication = PermitApplicationModel.create({
+        id: `ephemeral-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        nickname: overrides.nickname || "Ephemeral Application",
+        number: overrides.number || "",
+        fullAddress: overrides.fullAddress || null,
+        pin: overrides.pin || null,
+        pid: overrides.pid || null,
+        permitType: requirementTemplate.permitType || overrides.permitType || {}, // Provide default or empty objects as needed
+        activity: requirementTemplate.activity || overrides.activity || {},
+        status: overrides.status || EPermitApplicationStatus.ephemeral,
+        submitter: overrides.submitter || self.rootStore.userStore.currentUser?.id || null,
+        jurisdiction: overrides.jurisdiction || null,
+        templateVersion: requirementTemplate.publishedTemplateVersion || overrides.templateVersion || null,
+        publishedTemplateVersion:
+          requirementTemplate.publishedTemplateVersion || overrides.publishedTemplateVersion || null,
+        formJson: overrides.formJson || requirementTemplate.publishedTemplateVersion.formJson,
+        submissionData: overrides.submissionData || null,
+        formattedComplianceData: overrides.formattedComplianceData || null,
+        formCustomizations: {} || overrides.formCustomizations || null,
+        submittedAt: overrides.submittedAt || null,
+        resubmittedAt: overrides.resubmittedAt || null,
+        revisionsRequestedAt: overrides.revisionsRequestedAt || null,
+        selectedTabIndex: overrides.selectedTabIndex ?? 0,
+        createdAt: overrides.createdAt || new Date(),
+        updatedAt: overrides.updatedAt || new Date(),
+        stepCode: overrides.stepCode || null,
+        supportingDocuments: overrides.supportingDocuments || null,
+        allSubmissionVersionCompletedSupportingDocuments:
+          overrides.allSubmissionVersionCompletedSupportingDocuments || null,
+        zipfileSize: overrides.zipfileSize || null,
+        zipfileName: overrides.zipfileName || null,
+        zipfileUrl: overrides.zipfileUrl || null,
+        referenceNumber: overrides.referenceNumber || null,
+        missingPdfs: overrides.missingPdfs || null,
+        isFullyLoaded: overrides.isFullyLoaded ?? false,
+        isDirty: overrides.isDirty ?? false,
+        isLoading: overrides.isLoading ?? false,
+        indexedUsingCurrentTemplateVersion: overrides.indexedUsingCurrentTemplateVersion || null,
+        showingCompareAfter: overrides.showingCompareAfter ?? false,
+        revisionMode: overrides.revisionMode ?? false,
+        diff: overrides.diff || null,
+        submissionVersions: overrides.submissionVersions || [],
+        selectedPastSubmissionVersion: overrides.selectedPastSubmissionVersion || null,
+        permitCollaborationMap: overrides.permitCollaborationMap || {},
+        permitBlockStatusMap: overrides.permitBlockStatusMap || {},
+        isViewingPastRequests: overrides.isViewingPastRequests ?? false,
+        // Initialize maps properly if overrides provide arrays
+        ...(overrides.permitCollaborations && {
+          permitCollaborationMap: convertResourceArrayToRecord(overrides.permitCollaborations),
+        }),
+        ...(overrides.permitBlockStatuses && {
+          permitBlockStatusMap: convertResourceArrayToRecord(overrides.permitBlockStatuses),
+        }),
+      })
+
+      self.addPermitApplication(permitApplication)
+      self.setCurrentPermitApplication(permitApplication.id)
+
+      return self.currentPermitApplication
+    },
+  }))
+  .actions((self) => ({
     createPermitApplication: flow(function* (formData: TCreatePermitApplicationFormData) {
       const { ok, data: response } = yield self.environment.api.createPermitApplication(formData)
       if (ok && response.data) {
@@ -209,6 +307,7 @@ export const PermitApplicationStoreModel = types
           status: self.statusFilter,
           templateVersionId: self.templateVersionIdFilter,
           requirementTemplateId: self.requirementTemplateIdFilter,
+          hasCollaborator: self.hasCollaboratorFilter,
         },
       } as TSearchParams<EPermitApplicationSortFields, IPermitApplicationSearchFilters>
 
@@ -248,21 +347,14 @@ export const PermitApplicationStoreModel = types
       const statusFilter = queryParams.get("status")?.split(",") as TFilterableStatus[]
       const templateVersionIdFilter = queryParams.get("templateVersionId")
       const requirementTemplateIdFilter = queryParams.get("requirementTemplateId")
+      const hasCollaboratorFilter = queryParams.get("hasCollaborator") === "true"
 
       self.setStatusFilter(statusFilter)
       self.requirementTemplateIdFilter = requirementTemplateIdFilter
       self.templateVersionIdFilter = templateVersionIdFilter
+      self.hasCollaboratorFilter = hasCollaboratorFilter
     },
 
-    setCurrentPermitApplication(permitApplicationId) {
-      self.currentPermitApplication = permitApplicationId
-      self.currentPermitApplication &&
-        self.rootStore.stepCodeStore.setCurrentStepCode(self.currentPermitApplication.stepCode)
-    },
-    resetCurrentPermitApplication() {
-      self.currentPermitApplication = null
-      self.rootStore.stepCodeStore.setCurrentStepCode(null)
-    },
     processWebsocketChange: flow(function* (payload: IUserPushPayload) {
       //based on the eventType do stuff
       let payloadData

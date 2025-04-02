@@ -30,6 +30,7 @@ class PermitApplication < ApplicationRecord
   belongs_to :permit_type
   belongs_to :activity
   belongs_to :template_version
+  belongs_to :sandbox, optional: true
 
   # The front end form update provides a json paylioad of items we want to force update on the front-end since form io maintains its own state and does not 'rerender' if we send the form data back
   attr_accessor :front_end_form_update
@@ -41,19 +42,25 @@ class PermitApplication < ApplicationRecord
 
   scope :submitted, -> { joins(:submission_versions).distinct }
 
+  scope :sandboxed, -> { where.not(sandbox_id: nil) }
+  scope :live, -> { where(sandbox_id: nil) }
+  scope :for_sandbox, ->(sandbox) { where(sandbox_id: sandbox&.id) }
+
   # Custom validation
 
   validate :jurisdiction_has_matching_submission_contact
-  validate :pid_or_pin_presence
   validates :nickname, presence: true
   validates :number, presence: true
   validates :reference_number, length: { maximum: 300 }, allow_nil: true
+  validate :sandbox_belongs_to_jurisdiction
+  validate :template_version_of_live_template
 
   delegate :qualified_name, to: :jurisdiction, prefix: true
   delegate :name, to: :jurisdiction, prefix: true
   delegate :code, :name, to: :permit_type, prefix: true
   delegate :code, :name, to: :activity, prefix: true
   delegate :published_template_version, to: :template_version
+  delegate :inbox_enabled, to: :jurisdiction
 
   before_validation :assign_default_nickname, on: :create
   before_validation :assign_unique_number, on: :create
@@ -202,7 +209,9 @@ class PermitApplication < ApplicationRecord
         users_by_collaboration_options(
           collaboration_type: :review,
           collaborator_type: :delegatee
-        ).first&.name
+        ).first&.name,
+      has_collaborator: has_collaborator?,
+      sandbox_id: sandbox_id
     }
   end
 
@@ -211,6 +220,10 @@ class PermitApplication < ApplicationRecord
       collaboration_type:,
       collaborator_type:
     ).exists?(id: user_id)
+  end
+
+  def has_collaborator?
+    collaborators.any?
   end
 
   def submission_requirement_block_edit_permissions(user_id:)
@@ -249,7 +262,7 @@ class PermitApplication < ApplicationRecord
 
   def current_published_template_version
     # this will eventually be different, if there is a new version it should notify the user
-    RequirementTemplate.published_requirement_template_version(
+    LiveRequirementTemplate.published_requirement_template_version(
       activity,
       permit_type,
       first_nations
@@ -262,7 +275,7 @@ class PermitApplication < ApplicationRecord
     else
       jurisdiction
         .jurisdiction_template_version_customizations
-        .find_by(template_version: template_version)
+        .find_by(template_version: template_version, sandbox_id: sandbox_id)
         &.customizations
     end
   end
@@ -652,6 +665,7 @@ class PermitApplication < ApplicationRecord
 
   def notify_user_reference_number_updated
     return if new_record?
+
     NotificationService.publish_application_view_event(self)
   end
 
@@ -689,12 +703,27 @@ class PermitApplication < ApplicationRecord
     end
   end
 
-  def pid_or_pin_presence
-    if pin.blank? && pid.blank?
+  def sandbox_belongs_to_jurisdiction
+    return unless sandbox
+
+    unless jurisdiction.sandboxes.include?(sandbox)
       errors.add(
-        :base,
+        :sandbox,
         I18n.t(
-          "activerecord.errors.models.permit_application.attributes.pid_or_pin"
+          "activerecord.errors.models.permit_application.attributes.sandbox.incorrect_jurisdiction"
+        )
+      )
+    end
+  end
+
+  def template_version_of_live_template
+    return unless template_version.present?
+
+    unless template_version.live?
+      errors.add(
+        :template_version,
+        I18n.t(
+          "activerecord.errors.models.permit_application.attributes.template_version.must_be_live"
         )
       )
     end

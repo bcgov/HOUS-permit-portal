@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_10_02_222326) do
+ActiveRecord::Schema[7.1].define(version: 2024_12_12_180325) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -80,6 +80,23 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_02_222326) do
             name: "index_contacts_on_contactable"
   end
 
+  create_table "early_access_previews",
+               id: :uuid,
+               default: -> { "gen_random_uuid()" },
+               force: :cascade do |t|
+    t.uuid "early_access_requirement_template_id", null: false
+    t.uuid "previewer_id", null: false
+    t.datetime "expires_at", null: false
+    t.datetime "discarded_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index %w[early_access_requirement_template_id previewer_id],
+            name: "index_early_access_previews_on_template_id_and_previewer_id",
+            unique: true
+    t.index ["previewer_id"],
+            name: "index_early_access_previews_on_previewer_id"
+  end
+
   create_table "end_user_license_agreements",
                id: :uuid,
                default: -> { "gen_random_uuid()" },
@@ -105,8 +122,10 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_02_222326) do
     t.datetime "updated_at", null: false
     t.string "connecting_application", null: false
     t.string "notification_email"
+    t.uuid "sandbox_id"
     t.index ["jurisdiction_id"],
             name: "index_external_api_keys_on_jurisdiction_id"
+    t.index ["sandbox_id"], name: "index_external_api_keys_on_sandbox_id"
     t.index ["token"], name: "index_external_api_keys_on_token", unique: true
   end
 
@@ -165,7 +184,12 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_02_222326) do
     t.uuid "template_version_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.uuid "sandbox_id"
+    t.index "jurisdiction_id, template_version_id, COALESCE(sandbox_id, '00000000-0000-0000-0000-000000000000'::uuid)",
+            name: "index_jtvcs_unique_on_jurisdiction_template_sandbox",
+            unique: true
     t.index ["jurisdiction_id"], name: "idx_on_jurisdiction_id_57cd0a7ea7"
+    t.index ["sandbox_id"], name: "idx_on_sandbox_id_e5e6ef72b0"
     t.index ["template_version_id"],
             name: "idx_on_template_version_id_8359a99333"
   end
@@ -191,6 +215,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_02_222326) do
     t.string "slug"
     t.integer "map_zoom"
     t.string "external_api_state", default: "g_off", null: false
+    t.boolean "inbox_enabled", default: false, null: false
     t.index ["prefix"], name: "index_jurisdictions_on_prefix", unique: true
     t.index ["regional_district_id"],
             name: "index_jurisdictions_on_regional_district_id"
@@ -239,6 +264,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_02_222326) do
     t.jsonb "compliance_data", default: {}, null: false
     t.datetime "revisions_requested_at", precision: nil
     t.boolean "first_nations", default: false
+    t.uuid "sandbox_id"
     t.index ["activity_id"], name: "index_permit_applications_on_activity_id"
     t.index ["jurisdiction_id"],
             name: "index_permit_applications_on_jurisdiction_id"
@@ -247,6 +273,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_02_222326) do
             unique: true
     t.index ["permit_type_id"],
             name: "index_permit_applications_on_permit_type_id"
+    t.index ["sandbox_id"], name: "index_permit_applications_on_sandbox_id"
     t.index ["submitter_id"], name: "index_permit_applications_on_submitter_id"
     t.index ["template_version_id"],
             name: "index_permit_applications_on_template_version_id"
@@ -389,6 +416,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_02_222326) do
     t.string "display_description"
     t.boolean "first_nations", default: false
     t.datetime "discarded_at"
+    t.integer "visibility", default: 0, null: false
     t.index ["discarded_at"], name: "index_requirement_blocks_on_discarded_at"
     t.index %w[name first_nations],
             name: "index_requirement_blocks_on_name_and_first_nations",
@@ -405,6 +433,9 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_02_222326) do
     t.integer "position"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.uuid "copied_from_id"
+    t.index ["copied_from_id"],
+            name: "index_requirement_template_sections_on_copied_from_id"
     t.index ["requirement_template_id"],
             name:
               "index_requirement_template_sections_on_requirement_template_id"
@@ -421,11 +452,21 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_02_222326) do
     t.string "description"
     t.datetime "discarded_at"
     t.boolean "first_nations", default: false
+    t.string "type"
+    t.string "nickname"
+    t.datetime "fetched_at"
+    t.uuid "copied_from_id"
+    t.uuid "assignee_id"
+    t.boolean "public", default: false
     t.index ["activity_id"], name: "index_requirement_templates_on_activity_id"
+    t.index ["assignee_id"], name: "index_requirement_templates_on_assignee_id"
+    t.index ["copied_from_id"],
+            name: "index_requirement_templates_on_copied_from_id"
     t.index ["discarded_at"],
             name: "index_requirement_templates_on_discarded_at"
     t.index ["permit_type_id"],
             name: "index_requirement_templates_on_permit_type_id"
+    t.index ["type"], name: "index_requirement_templates_on_type"
   end
 
   create_table "requirements",
@@ -485,6 +526,18 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_02_222326) do
     t.index ["user_id"], name: "index_revision_requests_on_user_id"
   end
 
+  create_table "sandboxes",
+               id: :uuid,
+               default: -> { "gen_random_uuid()" },
+               force: :cascade do |t|
+    t.uuid "jurisdiction_id", null: false
+    t.string "name", null: false
+    t.integer "template_version_status_scope", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["jurisdiction_id"], name: "index_sandboxes_on_jurisdiction_id"
+  end
+
   create_table "site_configurations",
                id: :uuid,
                default: -> { "gen_random_uuid()" },
@@ -526,6 +579,9 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_02_222326) do
             },
             null: false
     t.jsonb "revision_reason_options"
+    t.uuid "small_scale_requirement_template_id"
+    t.index ["small_scale_requirement_template_id"],
+            name: "idx_on_small_scale_requirement_template_id_235b636c86"
   end
 
   create_table "step_code_building_characteristics_summaries",
@@ -855,6 +911,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_02_222326) do
     t.string "unconfirmed_email"
     t.string "omniauth_email"
     t.string "omniauth_username"
+    t.string "department"
     t.index ["confirmation_token"],
             name: "index_users_on_confirmation_token",
             unique: true
@@ -875,7 +932,9 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_02_222326) do
 
   add_foreign_key "allowlisted_jwts", "users", on_delete: :cascade
   add_foreign_key "collaborators", "users"
+  add_foreign_key "early_access_previews", "users", column: "previewer_id"
   add_foreign_key "external_api_keys", "jurisdictions"
+  add_foreign_key "external_api_keys", "sandboxes"
   add_foreign_key "integration_mapping_notifications", "template_versions"
   add_foreign_key "integration_mappings", "jurisdictions"
   add_foreign_key "integration_mappings", "template_versions"
@@ -883,6 +942,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_02_222326) do
   add_foreign_key "jurisdiction_memberships", "users"
   add_foreign_key "jurisdiction_template_version_customizations",
                   "jurisdictions"
+  add_foreign_key "jurisdiction_template_version_customizations", "sandboxes"
   add_foreign_key "jurisdiction_template_version_customizations",
                   "template_versions"
   add_foreign_key "jurisdictions",
@@ -895,6 +955,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_02_222326) do
   add_foreign_key "permit_applications",
                   "permit_classifications",
                   column: "permit_type_id"
+  add_foreign_key "permit_applications", "sandboxes"
   add_foreign_key "permit_applications", "template_versions"
   add_foreign_key "permit_applications", "users", column: "submitter_id"
   add_foreign_key "permit_block_statuses", "permit_applications"
@@ -909,6 +970,9 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_02_222326) do
                   "permit_classifications",
                   column: "permit_type_id"
   add_foreign_key "preferences", "users"
+  add_foreign_key "requirement_template_sections",
+                  "requirement_template_sections",
+                  column: "copied_from_id"
   add_foreign_key "requirement_template_sections", "requirement_templates"
   add_foreign_key "requirement_templates",
                   "permit_classifications",
@@ -916,10 +980,18 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_02_222326) do
   add_foreign_key "requirement_templates",
                   "permit_classifications",
                   column: "permit_type_id"
+  add_foreign_key "requirement_templates",
+                  "requirement_templates",
+                  column: "copied_from_id"
+  add_foreign_key "requirement_templates", "users", column: "assignee_id"
   add_foreign_key "requirements", "requirement_blocks"
   add_foreign_key "revision_reasons", "site_configurations"
   add_foreign_key "revision_requests", "submission_versions"
   add_foreign_key "revision_requests", "users"
+  add_foreign_key "sandboxes", "jurisdictions"
+  add_foreign_key "site_configurations",
+                  "requirement_templates",
+                  column: "small_scale_requirement_template_id"
   add_foreign_key "step_code_building_characteristics_summaries",
                   "step_code_checklists"
   add_foreign_key "step_code_checklists",

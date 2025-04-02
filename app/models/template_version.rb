@@ -3,16 +3,19 @@ class TemplateVersion < ApplicationRecord
   belongs_to :requirement_template
   belongs_to :deprecated_by, class_name: "User", optional: true
 
-  has_many :jurisdiction_template_version_customizations
-  has_many :permit_applications
+  has_many :jurisdiction_template_version_customizations, dependent: :destroy
+  has_many :permit_applications, dependent: :nullify
   has_many :submitters, through: :permit_applications
-  has_many :integration_mappings
+  has_many :integration_mappings, dependent: :destroy
 
   delegate :permit_type, to: :requirement_template
   delegate :activity, to: :requirement_template
   delegate :label, to: :requirement_template
   delegate :published_template_version, to: :requirement_template
   delegate :first_nations, to: :requirement_template
+  delegate :early_access?, to: :requirement_template
+  delegate :live?, to: :requirement_template
+  delegate :public?, to: :requirement_template
 
   enum status: { scheduled: 0, published: 1, deprecated: 2 }, _default: 0
   enum deprecation_reason: { new_publish: 0, unscheduled: 1 }, _prefix: true
@@ -25,6 +28,20 @@ class TemplateVersion < ApplicationRecord
   after_save :reindex_models_if_published, if: :saved_change_to_status?
   after_save :create_integration_mappings
   after_save :notify_users_of_missing_requirements_mappings
+
+  scope :for_sandbox,
+        ->(sandbox) do
+          if sandbox.present?
+            where(status: sandbox.template_version_status_scope)
+          else
+            all
+          end
+        end
+
+  def customizations
+    # Convenience method to prevent carpal tunnel syndrome
+    jurisdiction_template_version_customizations
+  end
 
   def version_date_in_province_time
     version_date.in_time_zone("Pacific Time (US & Canada)").to_time
@@ -63,7 +80,7 @@ class TemplateVersion < ApplicationRecord
         "#{I18n.t("notification.template_version.new_version_notification", template_label: label)}",
       "object_data" => {
         "template_version_id" => id,
-        "previous_template_version_id" => previous_version.id,
+        "previous_template_version_id" => previous_version&.id,
         "requirement_template_id" => requirement_template_id,
         "permit_application_id" => recent_permit_application&.id
       }
