@@ -20,4 +20,5 @@ class RequirementBlockBlueprint < Blueprinter::Base
   end
 
   association :requirements, blueprint: RequirementBlueprint
+  association :requirement_documents, blueprint: RequirementDocumentBlueprint
 end

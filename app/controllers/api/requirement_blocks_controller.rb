@@ -116,6 +116,12 @@ class Api::RequirementBlocksController < Api::ApplicationController
       :sign_off_role,
       :reviewer_role,
       association_list: [],
+      requirement_documents_attributes: [
+        :id,
+        :_destroy,
+        :requirement_block_id,
+        file: [:id, :storage, metadata: {}]
+      ],
       requirements_attributes: [
         :id,
         :requirement_code,

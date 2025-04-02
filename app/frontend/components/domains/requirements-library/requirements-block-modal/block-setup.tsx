@@ -13,15 +13,23 @@ import {
   Tooltip,
   VStack,
 } from "@chakra-ui/react"
-import { Info } from "@phosphor-icons/react"
+import { ArrowCounterClockwise, Info, Trash } from "@phosphor-icons/react"
+import "@uppy/core/dist/style.min.css"
+import "@uppy/dashboard/dist/style.css"
+import "@uppy/drag-drop/dist/style.css"
 import { observer } from "mobx-react-lite"
+// import DragDrop from "@uppy/react/lib/DragDrop.js"
+import { UppyFile } from "@uppy/core"
+import Dashboard from "@uppy/react/lib/Dashboard.js"
 import React, { useRef } from "react"
 import { Controller, useFormContext } from "react-hook-form"
 import { Trans, useTranslation } from "react-i18next"
 import { useParams } from "react-router-dom"
+import useUppyS3 from "../../../../hooks/use-uppy-s3"
 import { IRequirementBlock } from "../../../../models/requirement-block"
 import { useMst } from "../../../../setup/root"
 import { ConfirmationModal } from "../../../shared/confirmation-modal"
+import { RequirementDocumentDownloadButton } from "../../../shared/requirement-template/requirement-document-download-button"
 import { BlockVisibilitySelect } from "../../../shared/select/block-visibility-select"
 import { TagsSelect } from "../../../shared/select/selectors/tags-select"
 import { BlockSetupOptionsMenu } from "../block-setup-options-menu"
@@ -66,6 +74,33 @@ export const BlockSetup = observer(function BlockSetup({
     live: "semantic.infoLight",
     early_access: "semantic.warningLight",
   }
+
+  const handleUploadSuccess = (file: UppyFile<{}, {}>, response: any) => {
+    if (requirementBlock) {
+      // Create a new document with the uploaded file data
+      const parts = response.uploadURL.split("/")
+      const key = parts[parts.length - 1]
+      const newDocument = {
+        requirementBlockId: requirementBlock.id,
+        file: {
+          id: key,
+          storage: "cache",
+          metadata: {
+            size: file.size || 0,
+            filename: file.name,
+            mimeType: file.type || "application/octet-stream",
+          },
+        },
+      }
+      requirementBlock.addDocument(newDocument)
+    }
+  }
+
+  const uppy = useUppyS3({
+    onUploadSuccess: handleUploadSuccess,
+    maxNumberOfFiles: 10,
+    autoProceed: true,
+  })
 
   return (
     <Box as={"section"} w={"350px"} boxShadow={"md"} borderRadius={"xl"} bg={"greys.grey10"} ref={containerRef}>
@@ -162,7 +197,6 @@ export const BlockSetup = observer(function BlockSetup({
             {t("requirementsLibrary.fieldDescriptions.associations")}
           </FormHelperText>
         </FormControl>
-
         <FormControl>
           <Controller
             name="firstNations"
@@ -176,13 +210,34 @@ export const BlockSetup = observer(function BlockSetup({
             }}
           />
         </FormControl>
-
         <FormControl isReadOnly={true}>
           <FormLabel>{t("requirementsLibrary.fields.requirementSku")}</FormLabel>
           <Input bg={"white"} value={watch("sku")} isDisabled={true} />
           <FormHelperText {...helperTextStyles}>
             {t("requirementsLibrary.fieldDescriptions.requirementSku")}
           </FormHelperText>
+        </FormControl>
+        <FormControl>
+          <FormLabel>{t("requirementsLibrary.fields.requirementDocuments")}</FormLabel>
+          {requirementBlock?.requirementDocuments?.map((document) => (
+            <HStack key={document.id} p={2}>
+              <RequirementDocumentDownloadButton document={document} />
+              <Button
+                size="xs"
+                variant="ghost"
+                color={document._destroy ? "semantic.info" : "semantic.error"}
+                aria-label={document._destroy ? "Revert document removal" : "Remove document"}
+                onClick={() =>
+                  document._destroy
+                    ? requirementBlock.removeDestroyOnDocument(document.id)
+                    : requirementBlock.setDestroyOnDocument(document.id)
+                }
+              >
+                {document._destroy ? <ArrowCounterClockwise size={16} /> : <Trash size={16} />}
+              </Button>
+            </HStack>
+          ))}
+          <Dashboard uppy={uppy} height={300} />
         </FormControl>
         {withOptionsMenu
           ? requirementBlock && <BlockSetupOptionsMenu requirementBlock={requirementBlock} />
@@ -200,10 +255,6 @@ export const BlockSetup = observer(function BlockSetup({
                   handleCopyToEarlyAccess()
                   _onClose()
                 }}
-                // confirmButtonProps={{
-                //   isLoading: false, // Replace with your loading state if needed
-                //   isDisabled: false, // Replace with your validation logic if needed
-                // }}
               />
             )}
       </VStack>

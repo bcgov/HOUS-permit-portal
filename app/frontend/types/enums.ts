@@ -22,6 +22,11 @@ export enum ERequirementTemplateType {
   LiveRequirementTemplate = "LiveRequirementTemplate",
 }
 
+export enum EFileUploadAttachmentType {
+  RequirementDocument = "RequirementDocument",
+  SupportingDocument = "SupportingDocument",
+}
+
 export enum EPermitClassificationCode {
   lowResidential = "low_residential",
   mediumResidential = "medium_residential",
@@ -150,7 +155,6 @@ export enum EPermitApplicationReviewerSortFields {
   viewedAt = "viewed_at",
   submittedAt = "submitted_at",
 }
-
 
 export enum ESortDirection {
   ascending = "asc",

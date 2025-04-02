@@ -147,11 +147,14 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
           ...mappedRequirementAttributes,
           ...removedRequirementAttributes,
         ] as IRequirementAttributes[],
+        requirementDocumentsAttributes: (requirementBlock as IRequirementBlock).requirementDocuments,
       })
     } else {
+      // For new blocks, include any documents that were uploaded
       isSuccess = await createRequirementBlock({
         ...data,
         requirementsAttributes: [...mappedRequirementAttributes],
+        requirementDocumentsAttributes: (requirementBlock as IRequirementBlock)?.requirementDocuments || [],
       })
     }
     if (isSuccess) {

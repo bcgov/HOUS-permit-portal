@@ -9,6 +9,7 @@ import {
   ERequirementType,
   EVisibility,
 } from "../types/enums"
+import { IRequirementDocument } from "../types/types"
 import { RequirementModel } from "./requirement"
 
 export const RequirementBlockModel = types
@@ -26,6 +27,7 @@ export const RequirementBlockModel = types
     createdAt: types.Date,
     updatedAt: types.Date,
     discardedAt: types.maybeNull(types.Date),
+    requirementDocuments: types.array(types.frozen<IRequirementDocument>()),
   })
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -122,6 +124,32 @@ export const RequirementBlockModel = types
       if (response.ok) applySnapshot(self, response.data.data)
       return response.ok
     }),
+    addDocument(document: IRequirementDocument) {
+      self.requirementDocuments.push(document)
+    },
+    setDestroyOnDocument(documentId: string) {
+      const index = self.requirementDocuments.findIndex((doc) => doc.id === documentId)
+      if (index !== -1) {
+        // Create a new document with _destroy flag
+        const document = self.requirementDocuments[index]
+        const updatedDocument = { ...document, _destroy: true }
+        // Replace the document at the index
+        self.requirementDocuments.splice(index, 1, updatedDocument)
+      }
+    },
+    removeDestroyOnDocument(documentId: string) {
+      const index = self.requirementDocuments.findIndex((doc) => doc.id === documentId)
+      if (index !== -1) {
+        // Create a new document without _destroy flag
+        const document = self.requirementDocuments[index]
+        const { _destroy, ...documentWithoutDestroy } = document
+        // Replace the document at the index
+        self.requirementDocuments.splice(index, 1, documentWithoutDestroy)
+      }
+    },
+    clearDocuments() {
+      self.requirementDocuments.clear()
+    },
   }))
 
 export interface IRequirementBlock extends Instance<typeof RequirementBlockModel> {}
