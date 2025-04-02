@@ -32,6 +32,7 @@ import {
   IRequirementBlockCustomization,
 } from "../../../../../types/types"
 import { Editor } from "../../../../shared/editor/editor"
+import { UrlFormControl } from "../../../../shared/form/input-form-control"
 
 interface ICustomizationForm extends IRequirementBlockCustomization {}
 
@@ -49,6 +50,7 @@ function formFormDefaults(
 ): ICustomizationForm {
   return {
     tip: customization?.tip,
+    helpLink: customization?.helpLink,
     enabledElectiveFieldIds: customization?.enabledElectiveFieldIds?.filter(
       (id) => !!availableElectiveFields.find((f) => f.id === id)
     ),
@@ -175,6 +177,9 @@ const MainView = ({
   const {
     field: { value: tipValue, onChange: onTipChange },
   } = useController({ control, name: "tip" })
+  const {
+    field: { value: helpLinkValue, onChange: onhelpLinkChange },
+  } = useController({ control, name: "helpLink" })
   const watchedEnabledElectiveFieldIds = watch("enabledElectiveFieldIds") ?? []
 
   return (
@@ -185,6 +190,10 @@ const MainView = ({
       <Box sx={{ ".ql-container": { h: "112px" } }}>
         <Text mb={1}>{t("digitalBuildingPermits.edit.requirementBlockSidebar.tipLabel")}</Text>
         <Editor htmlValue={tipValue} onChange={onTipChange} />
+        <label>
+          {t("digitalBuildingPermits.edit.requirementBlockSidebar.helpSectionLink")}
+          <UrlFormControl fieldName="helpLink" />
+        </label>
       </Box>
 
       <Box w={"full"}>
