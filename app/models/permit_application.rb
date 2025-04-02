@@ -199,6 +199,7 @@ class PermitApplication < ApplicationRecord
       template_version_id: template_version.id,
       requirement_template_id: template_version.requirement_template.id,
       created_at: created_at,
+      updated_at: updated_at,
       using_current_template_version: using_current_template_version,
       user_ids_with_submission_edit_permissions:
         [submitter.id] +
