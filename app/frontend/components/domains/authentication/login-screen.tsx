@@ -184,7 +184,7 @@ export const LoginScreen = ({ isAdmin }: ILoginScreenProps) => {
                 {t("auth.loginHelp")}{" "}
               </Text>
               <Text as="span">{t("auth.goToPartners")} </Text>
-              <Link href={import.meta.env.VITE_BCEID_PARTNER_URL} isExternal>
+              <Link href={import.meta.env.VITE_BASIC_BCEID_REGISTRATION_URL} isExternal>
                 {t("auth.bceid")}
               </Link>{" "}
               {t("ui.or")}{" "}
