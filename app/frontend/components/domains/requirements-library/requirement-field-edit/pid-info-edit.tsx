@@ -4,8 +4,8 @@ import { ERequirementType } from "../../../../types/enums"
 import { TGenericContactDisplayProps } from "../requirement-field-display/generic-contact-display"
 import { GenericMultiDisplay } from "../requirement-field-display/generic-multi-display"
 import { EditableLabel, TEditableLabelProps } from "./editable-label"
-import { IsOptionalCheckbox, TIsOptionalCheckboxProps } from "./is-optional-checkbox"
-import { IControlProps } from "./types"
+import { IsOptionalCheckbox } from "./is-optional-checkbox"
+import { IControlProps, TIsOptionalCheckboxProps } from "./types"
 
 export type TPinInfoEditProps<TFieldValues> = {
   editableLabelProps: TEditableLabelProps<TFieldValues>
@@ -21,7 +21,6 @@ export type TPinInfoEditProps<TFieldValues> = {
   IControlProps<TFieldValues>
 
 export function PidInfoEdit<TFieldValues>({
-  controlProps,
   editableLabelProps,
   isOptionalCheckboxProps,
   fieldItems,
