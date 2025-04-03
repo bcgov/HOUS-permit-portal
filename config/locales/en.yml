@@ -636,6 +636,13 @@ en:
       preview_management:
         create_user_error: "Failed to invite user to preview: %{error_message}"
         assign_previewer_error: "Failed to assign previewer: %{error_message}"
+    template_versioning_service:
+      early_access_version_error: "Cannot create early access version for a non-early access requirement template"
+      invalid_schedule_date: "Version date must be in the future and after latest scheduled version date"
+      force_publish_disabled: "Force publish is not enabled"
+      publish_before_schedule_date: "Version cannot be published before it's scheduled date"
+      copy_customizations_error: "Old jurisdiction customizations could not be copied to new template version for jurisdiction_id:%{jurisdiction_id}"
+      copy_customizations_log_error: "Error copying customizations to new template version: %{message}"
   formio:
     requirement_template:
       completion_title: "Completion"
