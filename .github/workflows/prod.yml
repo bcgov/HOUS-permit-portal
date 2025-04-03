@@ -46,7 +46,6 @@ jobs:
             VITE_SITEMINDER_LOGOUT_URL=${{ vars.VITE_SITEMINDER_LOGOUT_URL }}
             VITE_KEYCLOAK_LOGOUT_URL=${{ vars.VITE_KEYCLOAK_LOGOUT_URL }}
             VITE_POST_LOGOUT_REDIRECT_URL=${{ vars.VITE_POST_LOGOUT_REDIRECT_URL }}
-            VITE_RELEASE_VERSION=""
       - name: Push to Openshift Registry using Service Account
         uses: redhat-actions/push-to-registry@v2.7
         with:
