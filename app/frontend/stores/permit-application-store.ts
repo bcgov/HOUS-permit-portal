@@ -96,16 +96,15 @@ export const PermitApplicationStoreModel = types
       self.hasCollaboratorFilter = false
       self.templateVersionIdFilter = null
       self.requirementTemplateIdFilter = null
-      if (typeof window !== "undefined")
-         {        
-            const url = new URL(window.location.href);
-            const staticParams = [ "templateVersionId", "requirementTemplateId", "hasCollaborator"];
-            staticParams.forEach((param) => {
-              url.searchParams.delete(param);
-            });
-            window.history.replaceState(null, "", url.toString());      
-        }
-      self.searchPermitApplications()   
+      if (typeof window !== "undefined") {
+        const url = new URL(window.location.href)
+        const staticParams = ["templateVersionId", "requirementTemplateId", "hasCollaborator"]
+        staticParams.forEach((param) => {
+          url.searchParams.delete(param)
+        })
+        window.history.replaceState(null, "", url.toString())
+      }
+      self.searchPermitApplications()
     },
     resetCurrentPermitApplication() {
       self.currentPermitApplication = null
@@ -308,7 +307,7 @@ export const PermitApplicationStoreModel = types
           status: self.statusFilter,
           templateVersionId: self.templateVersionIdFilter,
           requirementTemplateId: self.requirementTemplateIdFilter,
-          hasCollaborator: self.hasCollaboratorFilter, 
+          hasCollaborator: self.hasCollaboratorFilter,
         },
       } as TSearchParams<EPermitApplicationSortFields, IPermitApplicationSearchFilters>
 
