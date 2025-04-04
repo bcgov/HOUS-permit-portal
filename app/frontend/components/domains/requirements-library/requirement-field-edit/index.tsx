@@ -28,7 +28,7 @@ import { UnitSelect } from "../../../shared/select/selectors/unit-select"
 import { EditableGroup, TEditableGroupProps } from "./editable-group"
 import { GenericContactEdit } from "./generic-contact-edit"
 import { PidInfoEdit } from "./pid-info-edit"
-import { IControlProps } from "./types"
+import { IControlProps, TIsMultipleFilesCheckboxProps } from "./types"
 
 export type TRequirementEditProps<TFieldValues extends FieldValues> = TEditableGroupProps<TFieldValues> & {
   unitSelectProps?: IControlProps<TFieldValues>
@@ -450,7 +450,12 @@ const requirementsComponentMap = {
     )
   },
 
-  [ERequirementType.pidInfo]: function <TFieldValues>({ editableLabelProps, isOptionalCheckboxProps, ...rest }) {
+  [ERequirementType.pidInfo]: function <TFieldValues>({
+    editableLabelProps,
+    isOptionalCheckboxProps,
+    controlProps,
+    ...rest
+  }) {
     const pidInfoFieldItemTypes: Array<{
       type: ERequirementType
       key: string
@@ -479,6 +484,7 @@ const requirementsComponentMap = {
         fieldItems={pidInfoFieldItemTypes}
         editableLabelProps={editableLabelProps}
         isOptionalCheckboxProps={isOptionalCheckboxProps}
+        controlProps={controlProps}
         {...rest}
       />
     )
