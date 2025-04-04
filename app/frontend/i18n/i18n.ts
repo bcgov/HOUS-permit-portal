@@ -840,6 +840,7 @@ const options = {
             helpTextPlaceHolder: "Help text",
             optionalForSubmitters: "This field is optional for submitters",
             isAnElectiveField: "This is an elective field for local jurisdictions",
+            allowMultipleFilesLabel: "Allow multiple files",
             optionsMenu: {
               triggerButton: "Options",
               remove: "Remove",
