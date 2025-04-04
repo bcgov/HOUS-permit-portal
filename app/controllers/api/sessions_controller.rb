@@ -7,7 +7,11 @@ class Api::SessionsController < Devise::SessionsController
   def destroy
     id_token = cookies[:id_token]
     # Delete the frontend-accessible id_token cookie
-    cookies.delete(:id_token, path: "/", domain: nil)
+    cookies.delete(
+      :id_token,
+      path: "/",
+      domain: Rails.env.production? ? ".#{ENV["APP_DOMAIN"]}" : nil
+    )
 
     Devise.sign_out_all_scopes ? sign_out : sign_out(resource_name)
 
