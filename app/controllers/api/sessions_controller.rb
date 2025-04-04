@@ -16,10 +16,10 @@ class Api::SessionsController < Devise::SessionsController
     Devise.sign_out_all_scopes ? sign_out : sign_out(resource_name)
 
     # Use the token for the Keycloak logout if available
-    if id_token.present? && ENV["VITE_KEYCLOAK_LOGOUT_URL"].present?
-      redirect_url = ENV["VITE_POST_LOGOUT_REDIRECT_URL"] || root_url
+    if id_token.present? && ENV["KEYCLOAK_LOGOUT_URL"].present?
+      redirect_url = ENV["POST_LOGOUT_REDIRECT_URL"] || root_url
       logout_url =
-        "#{ENV["VITE_KEYCLOAK_LOGOUT_URL"]}?post_logout_redirect_uri=#{CGI.escape(redirect_url)}&id_token_hint=#{id_token}"
+        "#{ENV["KEYCLOAK_LOGOUT_URL"]}?post_logout_redirect_uri=#{CGI.escape(redirect_url)}&id_token_hint=#{id_token}"
 
       # Return JSON with redirect URL for frontend to handle
       render json: {
