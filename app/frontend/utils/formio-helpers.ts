@@ -33,6 +33,8 @@ export const isFieldSetKey = (key: string) => {
 export const compareSubmissionData = (beforeSubmissionData: ISubmissionData, afterSubmissionData: ISubmissionData) => {
   const changedFields: string[] = []
 
+  if (!beforeSubmissionData) return changedFields
+
   for (const sectionKey in afterSubmissionData.data) {
     if (afterSubmissionData.data.hasOwnProperty(sectionKey)) {
       const afterSection = afterSubmissionData.data[sectionKey]
