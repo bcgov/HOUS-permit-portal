@@ -1802,7 +1802,7 @@ const options = {
               description:
                 "Local jurisdictions can change building permit applications to fit their needs by adding elective fields and offering submitters practical tips. This helps make the application forms reflect the distinct regulations, standards, and requirements of each jurisdiction, so applicants provide the correct information needed by their area.",
               tipLabel: "Tip for submitters (optional)",
-              helpSectionLink: "Help Section link",
+              helpSectionLink: "Provide a URL for Submitters",
               filterLabel: "Search electives",
               sortLabel: "Sort by",
               filterPlaceholder: "Search electives",
