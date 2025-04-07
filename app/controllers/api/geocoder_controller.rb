@@ -90,7 +90,6 @@ class Api::GeocoderController < Api::ApplicationController
   end
 
   def form_bc_addresses
-    binding.pry
     authorize :geocoder, :form_bc_addresses?
     begin
       wrapper = Wrappers::Geocoder.new

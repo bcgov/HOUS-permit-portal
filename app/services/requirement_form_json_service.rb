@@ -287,14 +287,15 @@ class RequirementFormJsonService
       input: true,
       key: key,
       label: I18n.t("formio.requirement.contact.#{field_type.to_s}"),
-      type: "textfield",
       validate: {
         required: required
       },
-      **DEFAULT_FORMIO_TYPE_TO_OPTIONS[:text]
+      **(
+        DEFAULT_FORMIO_TYPE_TO_OPTIONS[field_type] ||
+          DEFAULT_FORMIO_TYPE_TO_OPTIONS[:text]
+      )
     }
 
-    # TODO: address is a text now, replace with address type when implemented
     field_to_form_json = {
       email: {
         **DEFAULT_FORMIO_TYPE_TO_OPTIONS[:email]
@@ -515,6 +516,7 @@ class RequirementFormJsonService
     required = false
   )
     return {} unless requirement.input_type_pid_info?
+
     key = "#{requirement.key(requirement_block_key)}|additional_pid_info"
     component = {
       legend: requirement.label,
@@ -544,11 +546,11 @@ class RequirementFormJsonService
           ]
         ),
         get_nested_info_component(
-          :address,
+          :bcaddress,
           requirement_block_key,
           "Address",
           false,
-          :address
+          :bcaddress
         )
       ]
     }

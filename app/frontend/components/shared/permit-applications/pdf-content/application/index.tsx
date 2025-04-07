@@ -24,6 +24,8 @@ enum EComponentType {
   phone = "simplephonenumber",
   text = "simpletextfield",
   textarea = "textarea",
+  simplebcaddress = "simplebcaddress",
+  simpleaddressadvanced = "simpleaddressadvanced",
 }
 
 export const ApplicationFields = function ApplicationFields({
@@ -54,6 +56,7 @@ const FormComponent = function ApplicationPDFFormComponent({
   component,
   dataPath,
 }: IFormComponentProps) {
+  console.log("[PDF Generation] component", component)
   const extractFields = (component) => {
     if (component.input) {
       const { isVisible } = extractFieldInfo(component)
@@ -169,31 +172,40 @@ const FormComponent = function ApplicationPDFFormComponent({
       )
     }
     case EComponentType.fieldset:
-      const numFields = fields(component.components).length
+      // Check if any descendant fields are visible (have a value and label)
+      // This prevents rendering empty fieldsets.
+      const numVisibleFields = fields(component.components).length
 
+      // If no visible fields within, don't render the fieldset at all.
+      if (numVisibleFields === 0) return null
+
+      // Render the fieldset container with border
       return (
-        numFields > 0 && (
-          <View
-            style={{
-              borderWidth: 1,
-              borderColor: theme.colors.border.light,
-              paddingLeft: 20,
-              paddingRight: 20,
-              paddingTop: 8,
-              paddingBottom: 8,
-              borderRadius: 4,
-            }}
-          >
-            {component.components.map((child) => (
-              <FormComponent
-                key={generateUUID()}
-                component={child}
-                dataPath={dataPath}
-                permitApplication={permitApplication}
-              />
-            ))}
-          </View>
-        )
+        <View
+          style={{
+            borderWidth: 1,
+            borderColor: theme.colors.border.light,
+            paddingLeft: 20,
+            paddingRight: 20,
+            paddingTop: 8,
+            paddingBottom: 8,
+            borderRadius: 4,
+            marginTop: 8, // Add some margin for spacing
+            marginBottom: 8,
+          }}
+          wrap={false} // Prevent breaking fieldset across pages if possible
+        >
+          {/* Recursively render each child component */}
+          {/* This allows nested components like 'columns' to handle their own layout */}
+          {component.components.map((child) => (
+            <FormComponent
+              key={generateUUID()} // Use a generated key for dynamic children
+              component={child}
+              dataPath={dataPath} // Pass down the current data path
+              permitApplication={permitApplication}
+            />
+          ))}
+        </View>
       )
     case EComponentType.columns:
       return (
@@ -232,6 +244,11 @@ const FormComponent = function ApplicationPDFFormComponent({
     case EComponentType.checkbox: {
       const { value, label, isVisible } = extractFieldInfo(component)
       return isVisible ? <CheckboxField value={value} label={label} /> : null
+    }
+    case EComponentType.simplebcaddress:
+    case EComponentType.simpleaddressadvanced: {
+      const { value, label, isVisible } = extractFieldInfo(component)
+      return isVisible ? <AddressField value={value} label={label} /> : null
     }
     case EComponentType.select:
     case EComponentType.text:
@@ -387,5 +404,17 @@ function Input({ value }) {
     >
       <Text>{value}</Text>
     </View>
+  )
+}
+
+// Define the AddressField component to handle address objects
+const AddressField = function ApplicationPDFAddressField({ value, label }: { value: any; label: string }) {
+  // Extract display name directly in the value prop, checking both snake_case and camelCase keys
+  console.log("value", value)
+  return (
+    <RequirementField
+      label={label}
+      value={value?.display_name ?? value?.properties?.fullAddress} // Ensure value is at least an empty string
+    />
   )
 }
