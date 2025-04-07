@@ -840,6 +840,7 @@ const options = {
             helpTextPlaceHolder: "Help text",
             optionalForSubmitters: "This field is optional for submitters",
             isAnElectiveField: "This is an elective field for local jurisdictions",
+            allowMultipleFilesLabel: "Allow multiple files",
             optionsMenu: {
               triggerButton: "Options",
               remove: "Remove",
@@ -998,7 +999,7 @@ const options = {
             },
           },
           info: {
-            title: "BC Step Code Compliance Checklist - Part 9 Buildings",
+            title: "BC Energy Compliance Reports",
             energy: "Energy Step Code",
             zeroCarbon: "Zero Carbon Step Code",
             performancePaths: {
