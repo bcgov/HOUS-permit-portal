@@ -347,7 +347,7 @@ const FileField = function ApplicationPDFFileField({ value, label }: { value: Re
   return (
     <RequirementField
       label={label}
-      value={fileExists ? R.pluck("original_name", value).join(", ") : t("permitApplication.pdf.fileNotAdded")}
+      value={fileExists ? R.pluck("originalName", value).join(", ") : t("permitApplication.pdf.fileNotAdded")}
     />
   )
 }
