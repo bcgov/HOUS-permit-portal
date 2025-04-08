@@ -128,7 +128,7 @@ export const ReviewPermitApplicationScreen = observer(() => {
                     onEdit={() => setReferenceNumberSnapshot(referenceNumber)}
                     onSubmit={() => onSaveReferenceNumber()}
                     editablePreviewProps={{
-                      mb: 4,
+                      mb: 0,
                     }}
                     editableInputProps={{
                       "aria-label": "Edit Template Description",

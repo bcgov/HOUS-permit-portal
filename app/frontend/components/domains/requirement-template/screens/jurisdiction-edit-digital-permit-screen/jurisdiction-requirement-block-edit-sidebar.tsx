@@ -190,10 +190,10 @@ const MainView = ({
       <Box sx={{ ".ql-container": { h: "112px" } }}>
         <Text mb={1}>{t("digitalBuildingPermits.edit.requirementBlockSidebar.tipLabel")}</Text>
         <Editor htmlValue={tipValue} onChange={onTipChange} />
-        <label>
+        <FormLabel mt={3}>
           {t("digitalBuildingPermits.edit.requirementBlockSidebar.helpSectionLink")}
           <UrlFormControl fieldName="helpLink" />
-        </label>
+        </FormLabel>
       </Box>
 
       <Box w={"full"}>
