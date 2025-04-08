@@ -239,6 +239,9 @@ en:
       logout_success:
         title: Successfully logged out.
         message: ""
+      logout_error:
+        title: Oops
+        message: "There was an error logging out"
       registration_error:
         title: Account could not be created.
         message: "%{error_message}"
