@@ -16,7 +16,9 @@
           <% else %> <%# :expiring %>
             <h1 style="color: #292929; font-family: 'Open Sans', sans-serif; font-weight: 700; line-height: 1.4; text-align: left; font-size: 28px; margin-top: 0; margin-bottom: 48px;">API Key Expiring Soon</h1>
             <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
-              The API key named "<%= @external_api_key.name %>" for the jurisdiction <strong><%= @jurisdiction_name %></strong> is scheduled to expire on <%= @external_api_key.expired_at.strftime('%B %d, %Y %I:%M %p %Z') %>.
+              <% expiration_date_str = @external_api_key.expired_at.strftime('%B %d, %Y') %>
+              <% interval_str = @interval_days ? " in approximately #{@interval_days} days" : "" %>
+              The API key named "<%= @external_api_key.name %>" for the jurisdiction <strong><%= @jurisdiction_name %></strong> is scheduled to expire<%= interval_str %> on <%= expiration_date_str %>.
             </p>
             <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
               Please ensure a new key is generated and configured before this date to avoid service interruption.

@@ -4,6 +4,7 @@ class ExternalApiKey < ApplicationRecord
   has_many :integration_mapping_notifications,
            as: :notifiable,
            dependent: :destroy
+  has_many :api_key_expiration_notifications, dependent: :destroy
 
   url_validatable :webhook_url
 
@@ -40,6 +41,8 @@ class ExternalApiKey < ApplicationRecord
   before_create :generate_token
   after_update :send_revocation_notification_if_revoked,
                if: :saved_change_to_revoked_at?
+  after_update :clear_expiration_notifications_if_expiry_changed,
+               if: :saved_change_to_expired_at?
 
   encrypts :token, deterministic: true
 
@@ -79,12 +82,23 @@ class ExternalApiKey < ApplicationRecord
 
   private
 
+  def clear_expiration_notifications_if_expiry_changed
+    # If expired_at date is modified, clear out any previously sent notifications
+    # as they are no longer relevant to the new expiration date.
+    api_key_expiration_notifications.destroy_all
+  end
+
   def send_revocation_notification_if_revoked
     # Send notification only if it was just revoked (revoked_at changed from nil)
     # and a notification email is present.
+    # Pass nil for interval_days for revocation emails
     if revoked_at.present? && revoked_at_before_last_save.nil? &&
          notification_email.present?
-      PermitHubMailer.notify_api_key_status_change(self, :revoked).deliver_later
+      PermitHubMailer.notify_api_key_status_change(
+        self,
+        :revoked,
+        nil
+      ).deliver_later
     end
   end
 
