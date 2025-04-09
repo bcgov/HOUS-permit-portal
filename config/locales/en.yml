@@ -150,6 +150,7 @@ en:
       notify_new_or_unconfirmed_preview: "You’re Invited to Preview a Building Permit Template"
       notify_preview: "You’re Invited to Preview a Building Permit Template"
       notify_batched_integration_mapping: "New API mappings"
+      notify_api_key_status_change: "API Key for %{jurisdiction_name} is %{status}"
   arbitrary_message_construct:
     devise:
       failure:

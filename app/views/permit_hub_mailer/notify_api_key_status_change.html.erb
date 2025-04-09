@@ -1,0 +1,67 @@
+<!-- START MAIN CONTENT AREA -->
+<tr>
+  <td class="wrapper" style="font-family: 'Open Sans', sans-serif; font-size: 16px; vertical-align: top; box-sizing: border-box; padding: 56px 32px;" valign="top">
+    <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; min-width: 100%; width: 100%;" width="100%">
+      <tr>
+      <!-- START CONTENT ROW -->
+        <td style="font-family: 'Open Sans', sans-serif; font-size: 16px; vertical-align: top;" valign="top">
+          <% if @status == :revoked %>
+            <h1 style="color: #292929; font-family: 'Open Sans', sans-serif; font-weight: 700; line-height: 1.4; text-align: left; font-size: 28px; margin-top: 0; margin-bottom: 48px;">API Key Revoked</h1>
+            <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
+              The API key named "<%= @external_api_key.name %>" for the jurisdiction <strong><%= @jurisdiction_name %></strong> has been revoked as of <%= @external_api_key.revoked_at.strftime('%B %d, %Y %I:%M %p %Z') %>.
+            </p>
+            <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
+              This key will no longer be able to access the API. If this was unexpected, please contact the jurisdiction review manager.
+            </p>
+          <% else %> <%# :expiring %>
+            <h1 style="color: #292929; font-family: 'Open Sans', sans-serif; font-weight: 700; line-height: 1.4; text-align: left; font-size: 28px; margin-top: 0; margin-bottom: 48px;">API Key Expiring Soon</h1>
+            <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
+              The API key named "<%= @external_api_key.name %>" for the jurisdiction <strong><%= @jurisdiction_name %></strong> is scheduled to expire on <%= @external_api_key.expired_at.strftime('%B %d, %Y %I:%M %p %Z') %>.
+            </p>
+            <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
+              Please ensure a new key is generated and configured before this date to avoid service interruption.
+              You can manage API keys in the <a href="<%= FrontendUrlHelper.frontend_url("/jurisdictions/#{@external_api_key.jurisdiction_id}/api-settings") %>" style="color: #1a5a96; text-decoration: underline;">Building Permit Hub configuration management</a> interface for your jurisdiction.
+            </p>
+          <% end %>
+
+          <h2 style="color: #292929; font-family: 'Open Sans', sans-serif; font-weight: 700; line-height: 1.4; margin-top: 24px; margin-bottom: 16px; text-align: left; font-size: 22px;">Key Details:</h2>
+
+            <table class="basic-table" role="presentation" border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; min-width: 100%; width: 100%; background: #f2f2f2; border: 1px solid #d9d9d9; margin-bottom: 32px;" width="100%">
+            <tr>
+              <td style="font-family: 'Open Sans', sans-serif; font-size: 16px; vertical-align: top;" valign="top">
+                <dl class="table-like" style="margin: 0;">
+                  <dt style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; font-size: 11px; text-transform: uppercase; font-weight: bold; padding-top: 10px; padding-bottom: 8px;">Jurisdiction</dt>
+                  <dd style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; margin: 0; padding-bottom: 10px; border-bottom: 1px solid #d9d9d9;"><%= @jurisdiction_name %></dd>
+
+                  <dt style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; font-size: 11px; text-transform: uppercase; font-weight: bold; padding-top: 10px; padding-bottom: 8px;">Key Name</dt>
+                  <dd style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; margin: 0; padding-bottom: 10px; border-bottom: 1px solid #d9d9d9;"><%= @external_api_key.name %></dd>
+
+                  <dt style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; font-size: 11px; text-transform: uppercase; font-weight: bold; padding-top: 10px; padding-bottom: 8px;">Connecting Application</dt>
+                  <dd style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; margin: 0; padding-bottom: 10px; border-bottom: 1px solid #d9d9d9;"><%= @external_api_key.connecting_application %></dd>
+
+                  <% if @external_api_key.sandbox.present? %>
+                    <dt style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; font-size: 11px; text-transform: uppercase; font-weight: bold; padding-top: 10px; padding-bottom: 8px;">Sandbox</dt>
+                    <dd style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; margin: 0; padding-bottom: 10px; border-bottom: 0;"><%= @external_api_key.sandbox.name %></dd>
+                  <% end %>
+                </dl>
+              </td>
+            </tr>
+          </table>
+
+          <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
+              If you have any questions, please contact the Building Permit Hub support team or your jurisdiction review manager.
+          </p>
+          <br>
+
+          <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
+              Thank you,<br><br>
+              The Building Permit Hub Team
+          </p>
+
+        </td>
+        <!-- END OF CONTENT ROW -->
+      </tr>
+    </table>
+  </td>
+</tr>
+<!-- END MAIN CONTENT AREA --> 

@@ -178,6 +178,24 @@ class PermitHubMailer < ApplicationMailer
     )
   end
 
+  def notify_api_key_status_change(external_api_key, status)
+    @external_api_key = external_api_key
+    @status = status # Will be :expiring or :revoked
+    @jurisdiction_name = @external_api_key.jurisdiction.qualified_name
+
+    # Check if notification email exists before sending
+    return unless @external_api_key.notification_email.present?
+
+    send_mail(
+      email: @external_api_key.notification_email,
+      template_key: "notify_api_key_status_change",
+      subject_i18n_params: {
+        jurisdiction_name: @jurisdiction_name,
+        status: @status == :revoked ? "revoked" : "expiring"
+      }
+    )
+  end
+
   #### PermitTypeSubmission Contact Mailer
   def permit_type_submission_contact_confirm(permit_type_submission_contact)
     @permit_type_submission_contact = permit_type_submission_contact

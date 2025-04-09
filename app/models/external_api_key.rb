@@ -15,6 +15,14 @@ class ExternalApiKey < ApplicationRecord
             Time.current
           )
         end
+  scope :expiring_soon,
+        ->(time_frame = 24.hours) do
+          where(revoked_at: nil).where(
+            "expired_at BETWEEN ? AND ?",
+            Time.current,
+            Time.current + time_frame
+          )
+        end
 
   belongs_to :jurisdiction
   belongs_to :sandbox, optional: true
@@ -30,6 +38,8 @@ class ExternalApiKey < ApplicationRecord
             allow_blank: true
 
   before_create :generate_token
+  after_update :send_revocation_notification_if_revoked,
+               if: :saved_change_to_revoked_at?
 
   encrypts :token, deterministic: true
 
@@ -68,6 +78,15 @@ class ExternalApiKey < ApplicationRecord
   end
 
   private
+
+  def send_revocation_notification_if_revoked
+    # Send notification only if it was just revoked (revoked_at changed from nil)
+    # and a notification email is present.
+    if revoked_at.present? && revoked_at_before_last_save.nil? &&
+         notification_email.present?
+      PermitHubMailer.notify_api_key_status_change(self, :revoked).deliver_later
+    end
+  end
 
   def valid_url_format
     if url.blank? || URI.parse(url).is_a?(URI::HTTP) ||
