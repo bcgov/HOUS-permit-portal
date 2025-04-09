@@ -95,6 +95,7 @@ class User < ApplicationRecord
       reviewer: "employee",
       review_manager: "employee",
       regional_review_manager: "employee",
+      technical_support: "employee",
       super_admin: nil
     }[
       role.to_sym
@@ -189,7 +190,8 @@ class User < ApplicationRecord
       super_admin: ["idir"],
       reviewer: %w[bceidbasic bceidbusiness],
       review_manager: %w[bceidbasic bceidbusiness],
-      regional_review_manager: %w[bceidbasic bceidbusiness]
+      regional_review_manager: %w[bceidbasic bceidbusiness],
+      technical_support: %w[bceidbasic bceidbusiness]
     }
     return if valid_providers[role.to_sym].include?(omniauth_provider)
 
