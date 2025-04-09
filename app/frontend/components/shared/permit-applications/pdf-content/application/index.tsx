@@ -56,7 +56,6 @@ const FormComponent = function ApplicationPDFFormComponent({
   component,
   dataPath,
 }: IFormComponentProps) {
-  console.log("[PDF Generation] component", component)
   const extractFields = (component) => {
     if (component.input) {
       const { isVisible } = extractFieldInfo(component)
@@ -190,33 +189,30 @@ const FormComponent = function ApplicationPDFFormComponent({
             paddingTop: 8,
             paddingBottom: 8,
             borderRadius: 4,
-            marginTop: 8, // Add some margin for spacing
-            marginBottom: 8,
           }}
-          wrap={false} // Prevent breaking fieldset across pages if possible
         >
-          {/* Recursively render each child component */}
-          {/* This allows nested components like 'columns' to handle their own layout */}
+          {component.label && <Label label={component.label} />}
           {component.components.map((child) => (
             <FormComponent
-              key={generateUUID()} // Use a generated key for dynamic children
+              key={generateUUID()}
               component={child}
-              dataPath={dataPath} // Pass down the current data path
+              dataPath={dataPath}
               permitApplication={permitApplication}
             />
           ))}
         </View>
       )
+
     case EComponentType.columns:
       return (
         <>
           {component.columns && (
-            <View style={{ flexDirection: "row", gap: 20, width: "100%" }}>
+            <View style={{ flexDirection: "column", width: "100%" }}>
               {component.columns.map((column, index) => {
                 return column.components
                   .map((child) => {
                     return (
-                      <View key={generateUUID()} style={{ flex: 1 }}>
+                      <View key={generateUUID()}>
                         <FormComponent
                           key={child.id}
                           component={child}
@@ -245,10 +241,15 @@ const FormComponent = function ApplicationPDFFormComponent({
       const { value, label, isVisible } = extractFieldInfo(component)
       return isVisible ? <CheckboxField value={value} label={label} /> : null
     }
-    case EComponentType.simplebcaddress:
+    case EComponentType.simplebcaddress: {
+      const { value, label, isVisible } = extractFieldInfo(component)
+      return isVisible ? (
+        <InputField label={label} value={value?.properties?.fullAddress} type={component.type} />
+      ) : null
+    }
     case EComponentType.simpleaddressadvanced: {
       const { value, label, isVisible } = extractFieldInfo(component)
-      return isVisible ? <AddressField value={value} label={label} /> : null
+      return isVisible ? <InputField value={value?.display_name} label={label} type={component.type} /> : null
     }
     case EComponentType.select:
     case EComponentType.text:
@@ -370,6 +371,7 @@ const FileField = function ApplicationPDFFileField({ value, label }: { value: Re
 }
 
 function RequirementField({ label, value }) {
+  console.log("[PDF Generation] value", value)
   return (
     <View style={{ gap: 4, paddingTop: 4 }} wrap={false}>
       <Label label={label} />
@@ -404,17 +406,5 @@ function Input({ value }) {
     >
       <Text>{value}</Text>
     </View>
-  )
-}
-
-// Define the AddressField component to handle address objects
-const AddressField = function ApplicationPDFAddressField({ value, label }: { value: any; label: string }) {
-  // Extract display name directly in the value prop, checking both snake_case and camelCase keys
-  console.log("value", value)
-  return (
-    <RequirementField
-      label={label}
-      value={value?.display_name ?? value?.properties?.fullAddress} // Ensure value is at least an empty string
-    />
   )
 }
