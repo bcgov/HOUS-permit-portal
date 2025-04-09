@@ -144,6 +144,7 @@ export const RevisionModal: React.FC<IRevisionModalProps> = ({
                   placeholder={t("ui.pleaseSelect")}
                   value={reasonCode}
                   onChange={(e) => setReasonCode(e.target.value)}
+                  isDisabled={disableInput}
                 >
                   {revisionReasonOptions.map((opt) => (
                     <option value={opt.value} key={opt.value}>
@@ -160,7 +161,7 @@ export const RevisionModal: React.FC<IRevisionModalProps> = ({
                 onChange={(e) => setComment(e.target.value)}
                 placeholder={t("permitApplication.show.revision.comment")}
                 maxLength={350}
-                isDisabled={isRevisionsRequested}
+                isDisabled={disableInput}
                 sx={{
                   _disabled: {
                     color: "text.primary",
