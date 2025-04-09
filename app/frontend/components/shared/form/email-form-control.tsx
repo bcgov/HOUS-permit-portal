@@ -106,7 +106,7 @@ export const EmailFormControl = ({
         )}
       </Flex>
       {errorMessage && !inputProps?.isDisabled && (
-        <FormErrorMessage pos="absolute" bottom={-5}>
+        <FormErrorMessage>
           {errorMessage}
         </FormErrorMessage>
       )}

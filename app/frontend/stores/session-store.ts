@@ -57,12 +57,14 @@ export const SessionStoreModel = types
     }),
     logout: flow(function* () {
       self.isLoggingOut = true
+
       const response: any = yield self.environment.api.logout()
+
+      // logout of siteminder / keycloak as well
       if (response.ok) {
         self.resetAuth()
+        window.location.href = response.data.logoutUrl
       }
-      // logout of siteminder / keycloak as well
-      window.location.href = `${import.meta.env.VITE_SITEMINDER_LOGOUT_URL}?retnow=1&returl=${import.meta.env.VITE_KEYCLOAK_LOGOUT_URL}?redirect_uri=${import.meta.env.VITE_POST_LOGOUT_REDIRECT_URL}`
     }),
     setTokenExpired(isExpired: boolean) {
       self.tokenExpired = isExpired
