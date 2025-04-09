@@ -21,6 +21,11 @@ const recursiveCamelize = (data: any, skipCamelization = false): any => {
         const value = data[key]
         let newKey: string
 
+        // This new logic is to prevent the all of the submission data from being camelized
+        // This is so that the submission data always remains in snake_case and matches is structure
+        // both upon its creation, and when it is retrieved from the database. Formio cannot adapt to
+        // the submission data camelization, so we need to ensure that it remains how it was when it was created.
+        // We no longer need to check for any SUBMISSION_DATA_PREFIX since these always exist as children of the submission data
         const skipChildren = skipCamelization || key === SUBMISSION_DATA_KEY
 
         if (key.startsWith(AUTO_COMPLIANCE_OPTIONS_MAP_KEY_PREFIX)) {
@@ -36,7 +41,7 @@ const recursiveCamelize = (data: any, skipCamelization = false): any => {
         } else {
           newKey = humps.camelize(key)
         }
-
+        // This is accomplished using a recursive function that passes down the skipCamelization flag
         newObject[newKey] = recursiveCamelize(value, skipChildren)
       }
     }

@@ -371,7 +371,6 @@ const FileField = function ApplicationPDFFileField({ value, label }: { value: Re
 }
 
 function RequirementField({ label, value }) {
-  console.log("[PDF Generation] value", value)
   return (
     <View style={{ gap: 4, paddingTop: 4 }} wrap={false}>
       <Label label={label} />

@@ -1,4 +1,4 @@
-import { Page } from "@react-pdf/renderer"
+import { Font, Page } from "@react-pdf/renderer"
 import { t } from "i18next"
 import React from "react"
 import { IPermitApplication } from "../../../../../models/permit-application"
@@ -14,6 +14,8 @@ import { EnergyPerformanceCompliance } from "./energy-performance-compliance"
 import { EnergyStepCompliance } from "./energy-step-compliance"
 import { ProjectInfo } from "./project-info"
 import { ZeroCarbonStepCompliance } from "./zero-carbon-step-compliance"
+
+Font.registerHyphenationCallback((word) => [word])
 
 interface IProps {
   checklist: IStepCodeChecklist

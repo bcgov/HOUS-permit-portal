@@ -11,7 +11,6 @@ export const AddressComponentMode = {
 const ParentComponent = Components.components.address
 const ID = "simplebcaddress"
 const DISPLAY = "Simple BC Address"
-console.log("SIMPLE BC ADDRESS", import.meta.env.VITE_CHEFS_ADVANCE_GEO_ADDRESS_APIURL)
 export default class Component extends ParentComponent {
   static schema(...extend) {
     return ParentComponent.schema(
