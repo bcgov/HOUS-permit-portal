@@ -140,6 +140,8 @@ export enum EPermitApplicationSubmitterSortFields {
   submittedAt = "submitted_at",
   viewedAt = "viewed_at",
   status = "status",
+  createdAt = "created_at",
+  updatedAt = "updated_at",
 }
 
 export enum EPermitApplicationReviewerSortFields {
