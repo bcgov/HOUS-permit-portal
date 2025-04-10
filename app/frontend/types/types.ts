@@ -181,6 +181,7 @@ export interface IDenormalizedRequirementBlock {
   displayName: string
   displayDescription?: string
   requirements: IDenormalizedRequirement[]
+  requirementDocuments: IRequirementDocument[]
 }
 
 export interface IDenormalizedTemplateSectionBlock {
@@ -241,6 +242,24 @@ export interface IStepCodeSelectOptions {
   buildingCharacteristicsSummary: IStepCodeBuildingCharacteristicSummarySelectOptions
   energySteps: EEnergyStep[]
   zeroCarbonSteps: EZeroCarbonStep[]
+}
+
+export interface IFileData {
+  id: string
+  storage: string
+  metadata: {
+    size: number
+    filename: string
+    mimeType: string
+  }
+}
+
+export interface IRequirementDocument {
+  id?: string
+  requirementBlockId: string
+  file: IFileData
+  createdAt?: Date
+  _destroy?: boolean
 }
 
 export interface IRequirementBlockCustomization {

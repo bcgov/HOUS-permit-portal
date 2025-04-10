@@ -23,6 +23,11 @@ export enum ERequirementTemplateType {
   LiveRequirementTemplate = "LiveRequirementTemplate",
 }
 
+export enum EFileUploadAttachmentType {
+  RequirementDocument = "RequirementDocument",
+  SupportingDocument = "SupportingDocument",
+}
+
 export enum EPermitClassificationCode {
   lowResidential = "low_residential",
   mediumResidential = "medium_residential",

@@ -72,11 +72,13 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
           sku: (requirementBlock as IRequirementBlock).sku,
           associationList: (requirementBlock as IRequirementBlock).associations,
           requirementsAttributes: (requirementBlock as IRequirementBlock).requirementFormDefaults,
+          requirementDocumentsAttributes: (requirementBlock as IRequirementBlock).requirementDocuments,
         }
       : {
           visibility: forEarlyAccess ? EVisibility.earlyAccess : EVisibility.any,
           associationList: [],
           requirementsAttributes: [],
+          requirementDocumentsAttributes: [],
         }
   }
   const formProps = useForm<IRequirementBlockForm>({
@@ -147,11 +149,14 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
           ...mappedRequirementAttributes,
           ...removedRequirementAttributes,
         ] as IRequirementAttributes[],
+        requirementDocumentsAttributes: data.requirementDocumentsAttributes,
       })
     } else {
+      // For new blocks, include any documents that were uploaded
       isSuccess = await createRequirementBlock({
         ...data,
         requirementsAttributes: [...mappedRequirementAttributes],
+        requirementDocumentsAttributes: data.requirementDocumentsAttributes || [],
       })
     }
     if (isSuccess) {

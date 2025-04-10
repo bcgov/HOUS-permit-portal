@@ -134,7 +134,7 @@ export const LoginScreen = ({ isAdmin }: ILoginScreenProps) => {
               <Text>{t("auth.chooseSituation")}</Text>
               <Accordion mt={8} allowToggle allowMultiple>
                 <AccordionItem>
-                  <AccordionButton>
+                  <AccordionButton display="flex" justifyContent="space-between">
                     <Box as="span" py={2} textAlign="left">
                       <Heading as="h3">{t("auth.submitterAccordion")}</Heading>
                     </Box>
@@ -147,7 +147,7 @@ export const LoginScreen = ({ isAdmin }: ILoginScreenProps) => {
                 </AccordionItem>
 
                 <AccordionItem>
-                  <AccordionButton>
+                  <AccordionButton display="flex" justifyContent="space-between">
                     <Box as="span" py={2} textAlign="left">
                       <Heading as="h3">{t("auth.entityAccordion")}</Heading>
                     </Box>
@@ -160,7 +160,7 @@ export const LoginScreen = ({ isAdmin }: ILoginScreenProps) => {
                 </AccordionItem>
 
                 <AccordionItem>
-                  <AccordionButton>
+                  <AccordionButton display="flex" justifyContent="space-between">
                     <Box as="span" py={2} textAlign="left">
                       <Heading as="h3">{t("auth.lgAccordion")}</Heading>
                     </Box>
