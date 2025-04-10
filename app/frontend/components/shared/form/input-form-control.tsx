@@ -82,7 +82,7 @@ export const UrlFormControl = (props: IInputFormControlProps) => {
             onChange: handleUrlChange,
           },
           validate: {
-            validUrl: (str) => isValidUrl(str) || t("ui.invalidUrl"),
+            validUrl: (str) => !str || isValidUrl(str) || t("ui.invalidUrl"),
           },
         },
         props
