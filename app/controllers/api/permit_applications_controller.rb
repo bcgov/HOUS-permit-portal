@@ -503,7 +503,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
         :comment,
         requirement_json: {
         },
-        submission_json: {
+        submission_data: {
         }
       ]
     )

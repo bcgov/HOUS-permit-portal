@@ -496,7 +496,7 @@ export interface IRevisionRequest {
   id: string
   reasonCode: string
   requirementJson: IFormIORequirement
-  submissionJson: any
+  submissionData: any
   comment: string
   user?: IMinimalFrozenUser
   createdAt: number

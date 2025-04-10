@@ -417,6 +417,10 @@
       a {
         text-decoration: underline;
       }
+
+      .address-autocomplete-container input {
+        max-width: var(--chakra-sizes-container-lg);
+      }
     }
   }
 

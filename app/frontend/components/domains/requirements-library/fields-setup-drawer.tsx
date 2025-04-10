@@ -94,10 +94,7 @@ export const FieldsSetupDrawer = observer(function FieldsSetupMenu({
             </Flex>
             <Flex flexDir={"column"} w={"full"}>
               {requirementTypeOptions
-                .filter(
-                  ({ requirementType }) =>
-                    hasRequirementFieldDisplayComponent(requirementType) && requirementType !== ERequirementType.address // filtering address for now because the back-end formio side of the address field is not yet implemented completely
-                )
+                .filter(({ requirementType }) => hasRequirementFieldDisplayComponent(requirementType))
                 .map(({ requirementType, isStepCodePackageFileRequirement = false }) => (
                   <HStack
                     key={`${requirementType}${isStepCodePackageFileRequirement ? "_stepCodePackage" : ""}`}

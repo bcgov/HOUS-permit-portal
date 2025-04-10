@@ -24,6 +24,8 @@ enum EComponentType {
   phone = "simplephonenumber",
   text = "simpletextfield",
   textarea = "textarea",
+  simplebcaddress = "simplebcaddress",
+  simpleaddressadvanced = "simpleaddressadvanced",
 }
 
 export const ApplicationFields = function ApplicationFields({
@@ -84,7 +86,6 @@ const FormComponent = function ApplicationPDFFormComponent({
         return { value, label, isVisible: !R.isNil(value) && !R.isNil(label) }
     }
   }
-
   switch (component.type) {
     case EComponentType.container: {
       dataPath = [component.key]
@@ -170,42 +171,48 @@ const FormComponent = function ApplicationPDFFormComponent({
       )
     }
     case EComponentType.fieldset:
-      const numFields = fields(component.components).length
+      // Check if any descendant fields are visible (have a value and label)
+      // This prevents rendering empty fieldsets.
+      const numVisibleFields = fields(component.components).length
 
+      // If no visible fields within, don't render the fieldset at all.
+      if (numVisibleFields === 0) return null
+
+      // Render the fieldset container with border
       return (
-        numFields > 0 && (
-          <View
-            style={{
-              borderWidth: 1,
-              borderColor: theme.colors.border.light,
-              paddingLeft: 20,
-              paddingRight: 20,
-              paddingTop: 8,
-              paddingBottom: 8,
-              borderRadius: 4,
-            }}
-          >
-            {component.components.map((child) => (
-              <FormComponent
-                key={generateUUID()}
-                component={child}
-                dataPath={dataPath}
-                permitApplication={permitApplication}
-              />
-            ))}
-          </View>
-        )
+        <View
+          style={{
+            borderWidth: 1,
+            borderColor: theme.colors.border.light,
+            paddingLeft: 20,
+            paddingRight: 20,
+            paddingTop: 8,
+            paddingBottom: 8,
+            borderRadius: 4,
+          }}
+        >
+          {component.label && <Label label={component.label} />}
+          {component.components.map((child) => (
+            <FormComponent
+              key={generateUUID()}
+              component={child}
+              dataPath={dataPath}
+              permitApplication={permitApplication}
+            />
+          ))}
+        </View>
       )
+
     case EComponentType.columns:
       return (
         <>
           {component.columns && (
-            <View style={{ flexDirection: "row", gap: 20, width: "100%" }}>
+            <View style={{ flexDirection: "column", width: "100%" }}>
               {component.columns.map((column, index) => {
                 return column.components
                   .map((child) => {
                     return (
-                      <View key={generateUUID()} style={{ flex: 1 }}>
+                      <View key={generateUUID()}>
                         <FormComponent
                           key={child.id}
                           component={child}
@@ -233,6 +240,16 @@ const FormComponent = function ApplicationPDFFormComponent({
     case EComponentType.checkbox: {
       const { value, label, isVisible } = extractFieldInfo(component)
       return isVisible ? <CheckboxField value={value} label={label} /> : null
+    }
+    case EComponentType.simplebcaddress: {
+      const { value, label, isVisible } = extractFieldInfo(component)
+      return isVisible ? (
+        <InputField label={label} value={value?.properties?.fullAddress} type={component.type} />
+      ) : null
+    }
+    case EComponentType.simpleaddressadvanced: {
+      const { value, label, isVisible } = extractFieldInfo(component)
+      return isVisible ? <InputField value={value?.display_name} label={label} type={component.type} /> : null
     }
     case EComponentType.select:
     case EComponentType.text:
@@ -345,7 +362,6 @@ const InputField = function ApplicationPDFInputField({ value, label, type }) {
 
 const FileField = function ApplicationPDFFileField({ value, label }: { value: Record<string, any>[]; label: string }) {
   const fileExists = value && !R.isEmpty(value)
-
   return (
     <RequirementField
       label={label}

@@ -1,7 +1,7 @@
 import * as R from "ramda"
 import { isFieldSetKey } from "./formio-helpers"
 
-export const getSinglePreviousSubmissionJson = (submissionData: any, requirementKey: string) => {
+export const getSinglePreviousSubmissionData = (submissionData: any, requirementKey: string) => {
   if (isFieldSetKey(requirementKey)) {
     const sectionKeys = Object.keys(submissionData.data)
 

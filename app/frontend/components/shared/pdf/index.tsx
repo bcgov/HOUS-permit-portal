@@ -5,11 +5,9 @@ import { theme } from "../../../styles/theme"
 const chunkSubstr = (str, size) => {
   const numChunks = Math.ceil(str.length / size)
   const chunks = new Array(numChunks)
-
   for (let i = 0, o = 0; i < numChunks; ++i, o += size) {
-    chunks[i] = str.substring(o, size)
+    chunks[i] = str.substring(o, Math.min(o + size, str.length))
   }
-
   return chunks
 }
 
@@ -54,10 +52,12 @@ export function PDFDocument({ assetDirectoryPath, children }) {
   Font.registerHyphenationCallback((word) => {
     word = word || ""
 
-    if (word.length > 16) {
-      return chunkSubstr(word, 14)
-    } else {
+    // If word contains special characters or is short, don't chunk it
+    if (word.includes("@") || word.includes("/") || word.length <= 16) {
       return [word]
+    } else {
+      // Otherwise, chunk long words
+      return chunkSubstr(word, 14)
     }
   })
 

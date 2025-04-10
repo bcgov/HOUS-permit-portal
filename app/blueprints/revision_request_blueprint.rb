@@ -5,7 +5,7 @@ class RevisionRequestBlueprint < Blueprinter::Base
     fields :comment,
            :reason_code,
            :requirement_json,
-           :submission_json,
+           :submission_data,
            :created_at
   end
 
