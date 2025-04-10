@@ -279,6 +279,7 @@ const options = {
           seeLiveButton: "See Live",
           invite: "Invite",
           public: "Public",
+          undo: "Undo",
         },
         notification: {
           title: "Notifications",

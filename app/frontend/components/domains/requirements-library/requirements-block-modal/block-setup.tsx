@@ -2,10 +2,12 @@ import {
   Box,
   Button,
   Checkbox,
+  Flex,
   FormControl,
   FormHelperText,
   FormLabel,
   HStack,
+  IconButton,
   Input,
   Text,
   Textarea,
@@ -19,17 +21,17 @@ import "@uppy/dashboard/dist/style.css"
 import "@uppy/drag-drop/dist/style.css"
 import { observer } from "mobx-react-lite"
 // import DragDrop from "@uppy/react/lib/DragDrop.js"
+import { Icon } from "@chakra-ui/react"
 import { UppyFile } from "@uppy/core"
 import Dashboard from "@uppy/react/lib/Dashboard.js"
 import React, { useRef } from "react"
-import { Controller, useFormContext } from "react-hook-form"
+import { Controller, useFieldArray, useFormContext } from "react-hook-form"
 import { Trans, useTranslation } from "react-i18next"
 import { useParams } from "react-router-dom"
 import useUppyS3 from "../../../../hooks/use-uppy-s3"
 import { IRequirementBlock } from "../../../../models/requirement-block"
 import { useMst } from "../../../../setup/root"
 import { ConfirmationModal } from "../../../shared/confirmation-modal"
-import { RequirementDocumentDownloadButton } from "../../../shared/requirement-template/requirement-document-download-button"
 import { BlockVisibilitySelect } from "../../../shared/select/block-visibility-select"
 import { TagsSelect } from "../../../shared/select/selectors/tags-select"
 import { BlockSetupOptionsMenu } from "../block-setup-options-menu"
@@ -51,7 +53,7 @@ export const BlockSetup = observer(function BlockSetup({
   const { requirementBlockStore } = useMst()
   const { isEditingEarlyAccess } = requirementBlockStore
   const { t } = useTranslation()
-  const { register, control, watch } = useFormContext<IRequirementBlockForm>()
+  const { register, control, watch, setValue } = useFormContext<IRequirementBlockForm>()
   const containerRef = useRef<HTMLDivElement>(null)
 
   const { requirementTemplateId } = useParams()
@@ -75,24 +77,48 @@ export const BlockSetup = observer(function BlockSetup({
     early_access: "semantic.warningLight",
   }
 
+  const requirementDocumentsAttributes = watch("requirementDocumentsAttributes")
+
+  const { fields, append, remove, update } = useFieldArray({
+    control,
+    name: "requirementDocumentsAttributes",
+  })
+
   const handleUploadSuccess = (file: UppyFile<{}, {}>, response: any) => {
-    if (requirementBlock) {
-      // Create a new document with the uploaded file data
-      const parts = response.uploadURL.split("/")
-      const key = parts[parts.length - 1]
-      const newDocument = {
-        requirementBlockId: requirementBlock.id,
-        file: {
-          id: key,
-          storage: "cache",
-          metadata: {
-            size: file.size || 0,
-            filename: file.name,
-            mimeType: file.type || "application/octet-stream",
-          },
+    // Create a new document with the uploaded file data
+    const parts = response.uploadURL.split("/")
+    const key = parts[parts.length - 1]
+    const newDocument = {
+      // requirementBlockId: requirementBlock?.id, // No requirementBlock ID when creating
+      file: {
+        id: key,
+        storage: "cache",
+        metadata: {
+          size: file.size || 0,
+          filename: file.name,
+          mimeType: file.type || "application/octet-stream",
         },
-      }
-      requirementBlock.addDocument(newDocument)
+      },
+    }
+    // Use append from useFieldArray
+    append(newDocument, { shouldFocus: false })
+    // Update form state instead of model directly
+    // setValue("requirementDocumentsAttributes", [...requirementDocumentsAttributes, newDocument], { shouldDirty: true })
+  }
+
+  const handleRemoveFile = (documentId: string) => {
+    const index = requirementDocumentsAttributes.findIndex((doc) => (doc.id || doc.file?.id) === documentId)
+    if (index !== -1) {
+      const doc = requirementDocumentsAttributes[index]
+      update(index, { ...doc, _destroy: true })
+    }
+  }
+
+  const handleUndoRemove = (documentId: string) => {
+    const index = requirementDocumentsAttributes.findIndex((doc) => (doc.id || doc.file?.id) === documentId)
+    if (index !== -1) {
+      const doc = requirementDocumentsAttributes[index]
+      update(index, { ...doc, _destroy: false })
     }
   }
 
@@ -219,23 +245,30 @@ export const BlockSetup = observer(function BlockSetup({
         </FormControl>
         <FormControl>
           <FormLabel>{t("requirementsLibrary.fields.requirementDocuments")}</FormLabel>
-          {requirementBlock?.requirementDocuments?.map((document) => (
-            <HStack key={document.id} p={2}>
-              <RequirementDocumentDownloadButton document={document} />
-              <Button
-                size="xs"
-                variant="ghost"
-                color={document._destroy ? "semantic.info" : "semantic.error"}
-                aria-label={document._destroy ? "Revert document removal" : "Remove document"}
-                onClick={() =>
-                  document._destroy
-                    ? requirementBlock.removeDestroyOnDocument(document.id)
-                    : requirementBlock.setDestroyOnDocument(document.id)
-                }
-              >
-                {document._destroy ? <ArrowCounterClockwise size={16} /> : <Trash size={16} />}
-              </Button>
-            </HStack>
+          {requirementDocumentsAttributes?.map((doc) => (
+            <Flex key={doc.id || doc.file?.id} justifyContent="space-between" alignItems="center" gap={2} mb={1}>
+              <Text textDecoration={doc._destroy ? "line-through" : "none"}>{doc.file?.metadata?.filename}</Text>
+              {doc._destroy ? (
+                <Button
+                  variant="link"
+                  size="sm"
+                  color="semantic.info"
+                  leftIcon={<Icon as={ArrowCounterClockwise} />}
+                  onClick={() => handleUndoRemove(doc.id || doc.file?.id)}
+                >
+                  {t("ui.undo")}
+                </Button>
+              ) : (
+                <IconButton
+                  aria-label={t("ui.remove")}
+                  color="semantic.error"
+                  icon={<Icon as={Trash} />}
+                  variant="tertiary"
+                  size="sm"
+                  onClick={() => handleRemoveFile(doc.id || doc.file?.id)}
+                />
+              )}
+            </Flex>
           ))}
           <Dashboard uppy={uppy} height={300} />
         </FormControl>
