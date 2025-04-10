@@ -2,7 +2,7 @@ FactoryBot.define do
   factory :revision_request do
     reason_code { "default_reason_code" }
     requirement_json { {} }
-    submission_json { {} }
+    submission_data { {} }
     comment { "Default comment" }
     association :submission_version
     association :user, factory: %i[user reviewer]

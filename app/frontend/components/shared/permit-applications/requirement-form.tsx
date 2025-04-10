@@ -503,7 +503,7 @@ export const RequirementForm = observer(
             requirementJson={singleRequirementFormJson(
               getRequirementByKey(pastVersion.formJson, previousSubmissionKey)
             )}
-            submissionJson={singleRequirementSubmissionData(pastVersion.submissionData, previousSubmissionKey)}
+            submissionData={singleRequirementSubmissionData(pastVersion.submissionData, previousSubmissionKey)}
           />
         )}
       </>
