@@ -249,7 +249,6 @@ const OccupancyRow = observer(function OccupancyRow({ field, idx }: IOccupancyPr
             }}
             name={`stepCodeOccupanciesAttributes.${idx}.zeroCarbonStepRequired`}
             render={({ field: { onChange, value } }) => {
-              console.log("*** value", value)
               return <ZeroCarbonStepSelect onChange={onChange} value={value} allowNull />
             }}
           />

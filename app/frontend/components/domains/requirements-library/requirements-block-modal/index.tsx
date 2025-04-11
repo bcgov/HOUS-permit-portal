@@ -115,8 +115,6 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
         } as any,
       }
 
-      const shouldAppendConditional = formConditional?.when && formConditional?.operand && formConditional?.then
-
       const isEnergyStepCodeDependency =
         Object.values(EEnergyStepCodeDependencyRequirementCode).includes(
           ra.requirementCode as EEnergyStepCodeDependencyRequirementCode
@@ -125,31 +123,29 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
           ra.requirementCode as EEnergyStepCodePart3DependencyRequirementCode
         )
 
+      const shouldAppendConditional = formConditional?.when && formConditional?.operand && formConditional?.then
       // energy step code dependency conditionals is not possible to edit from the front-end and has default values
       // and follows a slightly different structure so we make sure not to remove them or alter them
-      if (isEnergyStepCodeDependency) {
-        processedRequirementAttributes.inputOptions.conditional = conditional
-      } else if (shouldAppendConditional) {
-        const cond = ra.inputOptions.conditional as IFormConditional
+      const cond = ra.inputOptions.conditional as IFormConditional
+      if (shouldAppendConditional) {
         processedRequirementAttributes.inputOptions.conditional = {
           when: cond.when,
           eq: cond.operand,
           [cond.then]: true,
         }
+      } else if (isEnergyStepCodeDependency && cond) {
+        processedRequirementAttributes.inputOptions.conditional = cond
       }
-
       return getPrunedOptionsMapperComplianceConfiguration(
         processedRequirementAttributes,
         autoComplianceModuleConfigurations
       )
     })
 
-    console.log(requirementBlock)
     if (requirementBlock) {
       const removedRequirementAttributes = requirementBlock.requirements
         .filter((requirement) => !data.requirementsAttributes.find((attribute) => attribute.id === requirement.id))
         .map((requirement) => ({ id: requirement.id, _destroy: true }))
-
       isSuccess = await (requirementBlock as IRequirementBlock).update?.({
         ...data,
         requirementsAttributes: [

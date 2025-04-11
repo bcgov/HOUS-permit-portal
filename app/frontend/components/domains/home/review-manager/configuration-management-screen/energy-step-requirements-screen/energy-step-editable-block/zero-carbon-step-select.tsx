@@ -38,7 +38,6 @@ export const ZeroCarbonStepSelect = observer(function ZeroCarbonStepSelect({
   } = useMst()
 
   const options = getZeroCarbonStepOptions(allowNull)
-  console.log("*** value", value)
 
   return (
     <Popover placement="bottom-end">
