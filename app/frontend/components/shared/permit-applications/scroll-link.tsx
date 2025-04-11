@@ -5,10 +5,11 @@ import { useMountStatus } from "../../../hooks/use-mount-status"
 interface ScrollLinkProps {
   to: string
   children: React.ReactNode
+  trigger?: any
   [key: string]: any
 }
 
-export const ScrollLink: React.FC<ScrollLinkProps> = ({ to, children, ...props }) => {
+export const ScrollLink: React.FC<ScrollLinkProps> = ({ to, children, trigger, ...props }) => {
   const [targetElement, setTargetElement] = useState<HTMLElement | null>(null)
   const isMounted = useMountStatus()
 
@@ -21,7 +22,7 @@ export const ScrollLink: React.FC<ScrollLinkProps> = ({ to, children, ...props }
       }
     }
     setTargetElement(element)
-  }, [to, isMounted])
+  }, [to, isMounted, trigger])
 
   const handleClick = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
     event.preventDefault()
