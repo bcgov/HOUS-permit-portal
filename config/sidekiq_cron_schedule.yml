@@ -15,3 +15,9 @@ send_batched_integration_mapping_notifications:
   class: "SendBatchedIntegrationMappingNotificationsJob"
   queue: default
   active_job: false
+
+check_expiring_api_keys:
+  cron: "0 0 * * * America/Vancouver" # Runs daily at midnight
+  class: "CheckExpiringApiKeysJob"
+  queue: default
+  active_job: false
