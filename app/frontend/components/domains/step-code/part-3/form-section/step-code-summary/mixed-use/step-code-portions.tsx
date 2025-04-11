@@ -8,7 +8,7 @@ const i18nPrefix = "stepCode.part3.stepCodeSummary.mixedUse.stepCode"
 
 export const StepCodePortionsPerformance = function MixedUseStepCodePortionsPerformanceResults() {
   const { checklist } = usePart3StepCode()
-  const tediComplies = !!checklist.complianceReport.performance.complianceSummary.tedi.stepCodePortion
+  const tediComplies = !!checklist.complianceReport.performance.complianceSummary.tedi?.stepCodePortion
 
   return (
     <Flex direction="column" gap={2}>

@@ -31,6 +31,7 @@ import {
   IStepCodeOccupancy,
   TPart3NavLinkKey,
 } from "../types/types"
+import { Part3StepCodeType } from "./part-3-step-code"
 
 export const Part3StepCodeChecklistModel = types
   .model("Part3StepCodeChecklistModel", {
@@ -111,11 +112,22 @@ export const Part3StepCodeChecklistModel = types
   })
   .extend(withEnvironment())
   .views((self) => ({
+    get stepCodeType() {
+      return Part3StepCodeType
+    },
     isComplete(key: TPart3NavLinkKey): boolean {
       return self.sectionCompletionStatus[key]?.complete
     },
     isRelevant(key: TPart3NavLinkKey): boolean {
       return self.sectionCompletionStatus[key]?.relevant
+    },
+    get isBaseline(): boolean {
+      // Check if stepCodeOccupancies is empty
+      return self.stepCodeOccupancies.length === 0
+    },
+    get isMixedUse(): boolean {
+      // Check if total occupancies > 1
+      return self.stepCodeOccupancies.length + self.baselineOccupancies.length > 1
     },
     fuelType(id: string): IFuelType {
       return self.fuelTypes.find((ft) => ft.id == id)
@@ -194,6 +206,14 @@ export const Part3StepCodeChecklistModel = types
     },
   }))
   .actions((self) => ({
+    load: flow(function* () {
+      const response = yield self.environment.api.fetchPart3Checklist(self.id)
+      if (response.ok) {
+        // Assuming a similar preProcessor might be needed or that the API returns the correct snapshot structure
+        applySnapshot(self, response.data.data)
+        self.isLoaded = true
+      }
+    }),
     completeSection: flow(function* (key: TPart3NavLinkKey) {
       let updatedStatus = R.clone(self.sectionCompletionStatus)
       updatedStatus[key] = { complete: true, relevant: true }

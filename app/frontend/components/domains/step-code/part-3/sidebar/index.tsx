@@ -18,7 +18,7 @@ export const Sidebar = observer(function Part3StepCodeSidebar() {
           <SectionHeader title={t(`stepCode.part3.sidebar.${section.key}`)} />
           {section.navLinks.map(
             (navLink) =>
-              checklist.isRelevant(navLink.key) && (
+              checklist?.isRelevant(navLink.key) && (
                 <React.Fragment key={navLink.key}>
                   <SectionLink navLink={navLink} />
                   {navLink.subLinks.map(

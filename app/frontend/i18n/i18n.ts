@@ -271,7 +271,6 @@ const options = {
           copy: "Copy",
           copyNoun: "Copy",
           options: "Options",
-          na: "N/A",
           share: "Share",
           unassigned: "Unassigned",
           unassign: "Unassign",
@@ -1846,6 +1845,7 @@ const options = {
         stepCodeChecklist: {
           pdf: {
             for: "Step code pre-construction checklist for",
+            forPart3: "Part 3 Step code checklist for",
           },
           edit: {
             heading: "BC Step Code Compliance Checklist - Part 9 Buildings",

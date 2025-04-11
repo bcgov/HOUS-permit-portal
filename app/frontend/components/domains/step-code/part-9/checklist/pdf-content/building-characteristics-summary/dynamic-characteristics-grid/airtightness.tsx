@@ -1,7 +1,7 @@
 import { Text, View } from "@react-pdf/renderer"
 import { t } from "i18next"
 import React from "react"
-import { IStepCodeChecklist } from "../../../../../../../../models/part-9-step-code-checklist"
+import { IPart9StepCodeChecklist } from "../../../../../../../../models/part-9-step-code-checklist"
 import { theme } from "../../../../../../../../styles/theme"
 import { i18nPrefix } from "../../../building-characteristics-summary/i18n-prefix"
 import { Field, Input } from "../../shared/field"
@@ -10,7 +10,7 @@ import { HStack } from "../../shared/h-stack"
 import { VStack } from "../../shared/v-stack"
 
 interface IProps {
-  checklist: IStepCodeChecklist
+  checklist: IPart9StepCodeChecklist
 }
 export function Airtightness({ checklist }: IProps) {
   return (

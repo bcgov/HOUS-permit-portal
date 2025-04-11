@@ -104,13 +104,11 @@ export const OverheatingRequirements = observer(function Part3StepCodeFormOverhe
                   {...register("overheatingHours", { required: t(`${i18nPrefix}.worstCase.error`) })}
                 />
               </FormControl>
-              {parseFloat(watchOverheatingHours) > checklist.overheatingHoursLimit ? (
+              {watchOverheatingHours > checklist.overheatingHoursLimit ? (
                 <CustomMessageBox title={t(`${i18nPrefix}.compliance.fail`)} status="error" />
-              ) : (
-                watchOverheatingHours && (
-                  <CustomMessageBox title={t(`${i18nPrefix}.compliance.pass`)} status="success" />
-                )
-              )}
+              ) : watchOverheatingHours ? (
+                <CustomMessageBox title={t(`${i18nPrefix}.compliance.pass`)} status="success" />
+              ) : null}
               <FormControl>
                 <Button type="submit" variant="primary" isLoading={isSubmitting} isDisabled={isSubmitting}>
                   {t("stepCode.part3.cta")}

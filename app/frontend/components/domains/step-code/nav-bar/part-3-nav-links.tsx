@@ -3,6 +3,10 @@ import { t } from "i18next"
 import React from "react"
 
 export const Part3NavLinks = function Part3StepCodeNavLinks() {
+  const handleSave = async () => {
+    // TODO: save part 3 checklist
+  }
+
   return (
     <HStack>
       {/* TODO: digitize step code checklist guide */}

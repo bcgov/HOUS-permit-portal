@@ -17,8 +17,8 @@ export const StepCodeSummary = observer(function StepCodeSummary() {
   const { permitApplicationId } = useParams()
   const navigate = useNavigate()
   const location = useLocation()
-  const isMixedUse = checklist.stepCodeOccupancies.length + checklist.baselineOccupancies.length > 1
-  const isBaseline = checklist.stepCodeOccupancies.length == 0
+  const isMixedUse = checklist.isMixedUse
+  const isBaseline = checklist.isBaseline
 
   const { handleSubmit, formState } = useForm()
   const { isSubmitting } = formState

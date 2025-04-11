@@ -49,7 +49,6 @@ class Api::RequirementBlocksController < Api::ApplicationController
 
   def update
     authorize @requirement_block
-
     if @requirement_block.update(requirement_block_params)
       render_success @requirement_block,
                      nil,

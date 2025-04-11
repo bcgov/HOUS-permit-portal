@@ -1,7 +1,7 @@
 import { Text } from "@react-pdf/renderer"
 import { t } from "i18next"
 import React from "react"
-import { IStepCodeChecklist } from "../../../../../../../../models/part-9-step-code-checklist"
+import { IPart9StepCodeChecklist } from "../../../../../../../../models/part-9-step-code-checklist"
 import { theme } from "../../../../../../../../styles/theme"
 import { generateUUID } from "../../../../../../../../utils/utility-functions"
 import { i18nPrefix } from "../../../building-characteristics-summary/i18n-prefix"
@@ -10,7 +10,7 @@ import { GridItem } from "../../shared/grid-item"
 import { HStack } from "../../shared/h-stack"
 
 interface IProps {
-  checklist: IStepCodeChecklist
+  checklist: IPart9StepCodeChecklist
 }
 export function Other({ checklist }: IProps) {
   return (

@@ -12,7 +12,7 @@ export const StepCodeWholeBuildingSummary = observer(function StepCodeWholeBuild
   const { checklist } = usePart3StepCode()
   const { requirements, adjustedResults, complianceSummary } = checklist.complianceReport.performance
   const teuiComplies = !!complianceSummary.teui
-  const tediComplies = !!complianceSummary.tedi.wholeBuilding
+  const tediComplies = !!complianceSummary.tedi?.wholeBuilding
   const ghgiComplies = !!complianceSummary.ghgi
 
   return (
@@ -75,7 +75,7 @@ export const StepCodeWholeBuildingSummary = observer(function StepCodeWholeBuild
       <GridData justifyContent="center">
         <Input
           isDisabled
-          value={adjustedResults.tedi.wholeBuilding ? parseFloat(adjustedResults.tedi.wholeBuilding).toFixed(2) : "-"}
+          value={adjustedResults.tedi?.wholeBuilding ? parseFloat(adjustedResults.tedi?.wholeBuilding).toFixed(2) : "-"}
         />
       </GridData>
       <GridData justifyContent="center">
