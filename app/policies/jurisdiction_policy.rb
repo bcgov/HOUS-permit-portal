@@ -20,7 +20,7 @@ class JurisdictionPolicy < ApplicationPolicy
   end
 
   def update?
-    user.super_admin? || (user.staff? && user.jurisdictions.find(record.id))
+    user.super_admin? || (user.staff? && user.jurisdictions.find(record.id)) || user.technical_support
   end
 
   def update_external_api_enabled?

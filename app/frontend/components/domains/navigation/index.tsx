@@ -401,6 +401,21 @@ const AppRoutes = observer(() => {
     </>
   )
 
+  const technicalSupportRoutes = (
+    <>
+      <Route
+        path="/jurisdictions/:jurisdictionId/configuration-management"
+        element={<ConfigurationManagementScreen />}
+      />
+      <Route path="/jurisdictions/:jurisdictionId/users" element={<JurisdictionUserIndexScreen />} />
+      {/* <Route path="/jurisdictions/:jurisdictionId/users/invite" element={<InviteScreen />} />
+      <Route path="/jurisdictions/:jurisdictionId/api-settings" element={<ExternalApiKeysIndexScreen />}>
+        <Route path="create" element={<ExternalApiKeyModalSubRoute />} />
+        <Route path=":externalApiKeyId/manage" element={<ExternalApiKeyModalSubRoute />} />
+      </Route> */}
+    </>
+  )
+
   const managerOrReviewerRoutes = (
     <>
       <Route path="/jurisdictions/:jurisdictionId/submission-inbox" element={<JurisdictionSubmissionInboxScreen />} />
@@ -462,7 +477,7 @@ const AppRoutes = observer(() => {
       />
     </>
   )
-
+  
   const mustAcceptEula = loggedIn && !currentUser.eulaAccepted && !currentUser.isSuperAdmin
   return (
     <>
@@ -508,7 +523,7 @@ const AppRoutes = observer(() => {
               isAllowed={
                 loggedIn &&
                 !mustAcceptEula &&
-                (currentUser.isReviewManager || currentUser.isRegionalReviewManager || currentUser.isSuperAdmin)
+                (currentUser.isReviewManager || currentUser.isRegionalReviewManager || currentUser.isSuperAdmin || currentUser.isTechnicalSupport)
               }
               redirectPath={(mustAcceptEula && "/") || (loggedIn && "/not-found")}
             />
@@ -534,6 +549,17 @@ const AppRoutes = observer(() => {
           }
         >
           {managerOrReviewerRoutes}
+        </Route>
+
+        <Route
+          element={
+            <ProtectedRoute
+              isAllowed={loggedIn && !mustAcceptEula && currentUser.isTechnicalSupport}
+              redirectPath={(mustAcceptEula && "/") || (loggedIn && "/not-found")}
+            />
+          }
+        >
+          {technicalSupportRoutes}
         </Route>
 
         <Route
