@@ -170,7 +170,7 @@ export const NavBar = observer(function NavBar() {
                   {t("site.myPermits")}
                 </RouterLinkButton>
               )}
-              {currentUser?.isReviewStaff && !currentUser.isRegionalReviewManager && (
+              {(currentUser?.isReviewStaff || currentUser?.isTechnicalSupport) && !currentUser.isRegionalReviewManager && (
                 <Flex direction="column">
                   <Text color="greys.white">{currentUser.jurisdiction.name}</Text>
                   <Text color="whiteAlpha.700" textAlign="right" variant="tiny_uppercase">

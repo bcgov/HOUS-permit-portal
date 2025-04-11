@@ -8,11 +8,14 @@ import { ErrorScreen } from "../../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../../shared/base/loading-screen"
 import { HomeScreenBox } from "../../home-screen-box"
 import { SectionBox } from "../../section-box"
+import { useMst } from "../../../../../setup/root"
+import { EUserRoles } from "../../../../../types/enums"
 
 export const ConfigurationManagementScreen = observer(function ConfigurationManagementScreen() {
   const i18nPrefix = "home.configurationManagement"
   const { currentJurisdiction, error } = useJurisdiction()
-
+  const { userStore } = useMst()
+  const { currentUser } = userStore
   return error ? (
     <ErrorScreen error={error} />
   ) : (
@@ -23,7 +26,6 @@ export const ConfigurationManagementScreen = observer(function ConfigurationMana
             <Heading mb={0} fontSize="3xl">
               {t(`${i18nPrefix}.title`)}
             </Heading>
-
             <SectionBox>
               <Flex align="flex-end">
                 <Text mb={2} mr={2}>
@@ -52,63 +54,77 @@ export const ConfigurationManagementScreen = observer(function ConfigurationMana
             </FormControl> */}
               </Flex>
             </SectionBox>
-
-            <Grid templateColumns="repeat(2, 1fr)" gap={6}>
-              <GridItem>
-                <HomeScreenBox
-                  title={t(`${i18nPrefix}.stepCodeRequirements.title`)}
-                  description={t(`${i18nPrefix}.stepCodeRequirements.description`)}
-                  linkText={t("ui.edit")}
-                  icon={<FileText size="24px" color="var(--chakra-colors-text-primary)" />}
-                  href="energy-step"
-                  h="full"
-                  disableForSandbox
-                />
-              </GridItem>
-              <GridItem>
-                <HomeScreenBox
-                  title={t(`${i18nPrefix}.jurisdictionAbout.title`)}
-                  description={t(`${i18nPrefix}.jurisdictionAbout.description`)}
-                  linkText={t("ui.edit")}
-                  icon={<Info size="24px" color="var(--chakra-colors-text-primary)" />}
-                  href={`/jurisdictions/${currentJurisdiction.slug}`}
-                  h="full"
-                  disableForSandbox
-                />
-              </GridItem>
-              <GridItem>
-                <HomeScreenBox
-                  title={t(`${i18nPrefix}.externalApiKeys.title`)}
-                  description={t(`${i18nPrefix}.externalApiKeys.description`)}
-                  linkText={t("ui.edit")}
-                  icon={<SlidersHorizontal size={24} />}
-                  href={`/jurisdictions/${currentJurisdiction.slug}/api-settings`}
-                  h="full"
-                />
-              </GridItem>
-
-              <GridItem>
-                <HomeScreenBox
-                  title={t(`${i18nPrefix}.users.title`)}
-                  description={t(`${i18nPrefix}.users.description`)}
-                  linkText={t("ui.edit")}
-                  icon={<Users size={24} />}
-                  href={`/jurisdictions/${currentJurisdiction.slug}/users`}
-                  h="full"
-                  disableForSandbox
-                />
-              </GridItem>
-              <GridItem>
-                <HomeScreenBox
-                  title={t(`${i18nPrefix}.globalFeatureAccess.title`)}
-                  description={t(`${i18nPrefix}.globalFeatureAccess.description`)}
-                  linkText={t("ui.edit")}
-                  icon={<SlidersHorizontal size="24px" color="var(--chakra-colors-text-link)" />}
-                  href="global-feature-access"
-                  h="full"
-                />
-              </GridItem>
-            </Grid>
+            {currentUser.role == EUserRoles.technicalSupport && (
+              <Grid templateColumns="repeat(2, 1fr)" gap={6}>
+                <GridItem>
+                  <HomeScreenBox
+                    title={t(`${i18nPrefix}.externalApiKeys.title`)}
+                    description={t(`${i18nPrefix}.externalApiKeys.description`)}
+                    linkText={t("ui.edit")}
+                    icon={<SlidersHorizontal size={24} />}
+                    href={`/jurisdictions/${currentJurisdiction.slug}/api-settings`}
+                    h="full"
+                  />
+                </GridItem>
+                <GridItem>
+                  <HomeScreenBox
+                    title={t(`${i18nPrefix}.users.title`)}
+                    description={t(`${i18nPrefix}.users.description`)}
+                    linkText={t("ui.edit")}
+                    icon={<Users size={24} />}
+                    href={`/jurisdictions/${currentJurisdiction.slug}/users`}
+                    h="full"
+                    disableForSandbox
+                  />
+                </GridItem>    
+              </Grid>
+            )}
+            {currentUser.role != EUserRoles.technicalSupport && (
+              <Grid templateColumns="repeat(2, 1fr)" gap={6}>
+                <GridItem>
+                  <HomeScreenBox
+                    title={t(`${i18nPrefix}.stepCodeRequirements.title`)}
+                    description={t(`${i18nPrefix}.stepCodeRequirements.description`)}
+                    linkText={t("ui.edit")}
+                    icon={<FileText size="24px" color="var(--chakra-colors-text-primary)" />}
+                    href="energy-step"
+                    h="full"
+                    disableForSandbox
+                  />
+                </GridItem>
+                <GridItem>
+                  <HomeScreenBox
+                    title={t(`${i18nPrefix}.externalApiKeys.title`)}
+                    description={t(`${i18nPrefix}.externalApiKeys.description`)}
+                    linkText={t("ui.edit")}
+                    icon={<SlidersHorizontal size={24} />}
+                    href={`/jurisdictions/${currentJurisdiction.slug}/api-settings`}
+                    h="full"
+                  />
+                </GridItem>
+                <GridItem>
+                  <HomeScreenBox
+                    title={t(`${i18nPrefix}.users.title`)}
+                    description={t(`${i18nPrefix}.users.description`)}
+                    linkText={t("ui.edit")}
+                    icon={<Users size={24} />}
+                    href={`/jurisdictions/${currentJurisdiction.slug}/users`}
+                    h="full"
+                    disableForSandbox
+                  />
+                </GridItem>
+                <GridItem>
+                  <HomeScreenBox
+                    title={t(`${i18nPrefix}.globalFeatureAccess.title`)}
+                    description={t(`${i18nPrefix}.globalFeatureAccess.description`)}
+                    linkText={t("ui.edit")}
+                    icon={<SlidersHorizontal size="24px" color="var(--chakra-colors-text-link)" />}
+                    href="global-feature-access"
+                    h="full"
+                  />
+                </GridItem>
+              </Grid>
+            )}
           </VStack>
         </Container>
       )}

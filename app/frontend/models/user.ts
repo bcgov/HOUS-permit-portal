@@ -124,6 +124,8 @@ export const UserModel = types
         newRole = EUserRoles.reviewer
       } else if (self.role === EUserRoles.reviewer) {
         newRole = EUserRoles.reviewManager
+      } else if (self.role === EUserRoles.technicalSupport) {
+        newRole = EUserRoles.reviewer
       } else {
         return
       }

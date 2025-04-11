@@ -140,6 +140,10 @@ class User < ApplicationRecord
     review_manager? || regional_review_manager?
   end
 
+  def technical_support?
+    technical_support?
+  end
+
   def review_staff?
     reviewer? || review_manager? || regional_review_manager?
   end
@@ -256,11 +260,11 @@ class User < ApplicationRecord
   end
 
   def jurisdiction_staff?
-    !review_staff? && !technical_support?
+    !review_staff?
   end
 
   def jurisdiction_must_belong_to_correct_roles
-    if jurisdictions.any? && jurisdiction_staff?
+    if jurisdictions.any? && jurisdiction_staff? && !technical_support?
       errors.add(:jurisdictions, :reviewers_only)
     end
   end
