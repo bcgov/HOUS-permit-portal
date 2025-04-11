@@ -27,7 +27,7 @@ export const StepCodeSummary = observer(function StepCodeSummary() {
     await checklist.completeSection("requirementsSummary")
 
     // TODO: early access navigate?
-    permitApplicationId && navigate(`permit-applications/${permitApplicationId}/edit`)
+    permitApplicationId && navigate(`/permit-applications/${permitApplicationId}/edit`)
   }
 
   const stepCodeOccupanciesPath = checklist.isComplete("stepCodeOccupancies")

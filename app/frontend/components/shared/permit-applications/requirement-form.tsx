@@ -166,7 +166,7 @@ export const RequirementForm = observer(
 
     const handleOpenStepCodePart3 = async (_event) => {
       await triggerSave?.()
-      alert("part 3 clicked")
+      navigate("part-3-step-code")
     }
 
     const handleOpenStepCodePart9 = async (_event) => {

@@ -160,7 +160,7 @@ export const Part3StepCodeChecklistModel = types
   .views((self) => ({
     get totalElectricityUse(): number {
       return self.modelledEnergyOutputs
-        .filter((eo) => eo.fuelTypeId == self.electricity.id)
+        .filter((eo) => eo.fuelTypeId == self.electricity?.id)
         .reduce((sum, eo) => sum + parseFloat(eo.annualEnergy), 0)
     },
     get uncommonFuelTypeKeys(): EFuelType[] {

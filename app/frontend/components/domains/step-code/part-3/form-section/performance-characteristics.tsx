@@ -184,12 +184,11 @@ export const PerformanceCharacteristics = observer(function Part3StepCodeFormPer
               <Controller
                 name="isDemandControlVentilationUsed"
                 control={control}
-                rules={{ required: t(`${i18nPrefix}.ventilation.error`) }}
+                rules={{
+                  validate: (value) => value === true || value === false || t(`${i18nPrefix}.ventilation.error`),
+                }}
                 render={({ field: { value, onChange } }) => (
-                  <RadioGroup
-                    onChange={(value) => onChange(value == "yes")}
-                    value={value ? "yes" : value == false ? "no" : undefined}
-                  >
+                  <RadioGroup onChange={(val) => onChange(val === "yes")} value={value ? "yes" : "no"}>
                     <Stack spacing={5} direction="row">
                       <Radio variant="binary" value={"yes"}>
                         {t("ui.yes")}
