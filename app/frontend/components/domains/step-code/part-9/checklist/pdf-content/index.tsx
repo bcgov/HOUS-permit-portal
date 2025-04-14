@@ -23,7 +23,7 @@ interface IProps {
   assetDirectoryPath?: string
 }
 
-export const PDFContent = function StepCodeChecklistPDFContent({
+export const Part9PDFContent = function StepCodeChecklistPDFContent({
   checklist,
   permitApplication,
   assetDirectoryPath,

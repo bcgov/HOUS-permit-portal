@@ -110,4 +110,8 @@ class StepCode::Part3::ChecklistBlueprint < Blueprinter::Base
       checklist.compliance_report.results
     )
   end
+
+  view :extended do
+    include_view :default
+  end
 end

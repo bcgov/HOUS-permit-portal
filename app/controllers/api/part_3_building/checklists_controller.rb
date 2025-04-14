@@ -1,5 +1,16 @@
 class Api::Part3Building::ChecklistsController < Api::ApplicationController
-  before_action :set_and_authorize_checklist, only: %i[update]
+  before_action :set_and_authorize_checklist, only: %i[show update]
+
+  def show
+    render_success @checklist,
+                   nil,
+                   {
+                     blueprint: StepCode::Part3::ChecklistBlueprint,
+                     blueprint_opts: {
+                       view: :extended # Assuming Part 3 blueprint also has an extended view
+                     }
+                   }
+  end
 
   def update
     if @checklist.update(checklist_params)

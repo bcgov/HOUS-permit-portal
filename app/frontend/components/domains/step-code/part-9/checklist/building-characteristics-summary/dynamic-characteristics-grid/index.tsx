@@ -12,10 +12,10 @@ import { SpaceHeatingCooling } from "./space-heating-cooling"
 import { Ventilation } from "./ventilation"
 import { WindowsGlazedDoors } from "./windows-glazed-doors"
 
-import { IStepCodeChecklist } from "../../../../../../../models/part-9-step-code-checklist"
+import { IPart9StepCodeChecklist } from "../../../../../../../models/part-9-step-code-checklist"
 
 interface IProps {
-  checklist: IStepCodeChecklist
+  checklist: IPart9StepCodeChecklist
 }
 export const DynamicCharacteristicsGrid = function DynamicCharacteristicsGrid({ checklist }: IProps) {
   return (

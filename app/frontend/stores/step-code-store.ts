@@ -58,7 +58,7 @@ export const StepCodeStoreModel = types
   .actions((self) => ({
     __beforeMergeUpdate(stepCode: IPart9StepCode | IPart3StepCode) {
       if (stepCode.type == Part9StepCodeType) {
-        const checklistsMap = stepCode.checklists?.reduce((checklistsMap, checklist) => {
+        const checklistsMap = (stepCode as IPart9StepCode).checklists?.reduce((checklistsMap, checklist) => {
           checklistsMap[checklist.id] = checklist
           return checklistsMap
         }, {})

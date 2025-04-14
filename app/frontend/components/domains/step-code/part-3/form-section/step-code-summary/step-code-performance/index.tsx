@@ -21,9 +21,9 @@ export const StepCodePerformance = observer(function StepCodePerformanceResults(
   let occupancyName: string
   if (!isMixedUse) {
     if (isBaseline) {
-      occupancyName = t(`stepCode.part3.baselineOccupancyKeys.${checklist.baselineOccupancies[0].key}`)
+      occupancyName = t(`stepCode.part3.baselineOccupancyKeys.${checklist.baselineOccupancies?.[0]?.key}`)
     } else {
-      occupancyName = t(`stepCode.part3.stepCodeOccupancyKeys.${checklist.stepCodeOccupancies[0].key}`)
+      occupancyName = t(`stepCode.part3.stepCodeOccupancyKeys.${checklist.stepCodeOccupancies?.[0]?.key}`)
     }
   }
 

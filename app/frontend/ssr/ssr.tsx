@@ -1,13 +1,14 @@
 import ReactPDF from "@react-pdf/renderer"
 import fs from "fs"
 import React from "react"
-import { PDFContent as StepCodeChecklistPDFContent } from "../components/domains/step-code/part-9/checklist/pdf-content"
+import { Part9PDFContent as StepCodeChecklistPDFContent } from "../components/domains/step-code/part-9/checklist/pdf-content"
 import { PDFContent as PermitApplicationPDFContent } from "../components/shared/permit-applications/pdf-content"
 import "../i18n/i18n"
 import { combineComplianceHints } from "../utils/formio-component-traversal"
 
 const args = process.argv.slice(2)
 
+// TODO: ADD PART 3 PDF CONTENT
 const generatePdfs = async (filePath) => {
   try {
     const pdfJsonData = fs.readFileSync(filePath, "utf-8")

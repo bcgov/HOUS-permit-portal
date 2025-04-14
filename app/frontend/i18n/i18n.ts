@@ -1846,6 +1846,7 @@ const options = {
         stepCodeChecklist: {
           pdf: {
             for: "Step code pre-construction checklist for",
+            forPart3: "Part 3 Step code checklist for",
           },
           edit: {
             heading: "BC Step Code Compliance Checklist - Part 9 Buildings",

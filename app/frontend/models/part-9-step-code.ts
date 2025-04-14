@@ -32,6 +32,11 @@ export const Part9StepCodeModel = types
       return self.checklists[0]
     },
   }))
+  .views((self) => ({
+    get checklistForPdf() {
+      return self.preConstructionChecklist
+    },
+  }))
   .actions((self) => ({
     updateChecklist: flow(function* (id, values) {
       const response = yield self.environment.api.updatePart9Checklist(id, values)
