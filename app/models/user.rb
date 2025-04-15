@@ -124,7 +124,13 @@ class User < ApplicationRecord
   def invitable_roles
     case role
     when "super_admin"
-      %w[reviewer review_manager super_admin regional_review_manager technical_support]
+      %w[
+        reviewer
+        review_manager
+        super_admin
+        regional_review_manager
+        technical_support
+      ]
     when "review_manager", "regional_review_manager"
       %w[reviewer review_manager technical_support]
     else
@@ -138,10 +144,6 @@ class User < ApplicationRecord
 
   def manager?
     review_manager? || regional_review_manager?
-  end
-
-  def technical_support?
-    technical_support?
   end
 
   def review_staff?
