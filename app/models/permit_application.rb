@@ -377,12 +377,6 @@ class PermitApplication < ApplicationRecord
   def send_submit_notifications
     # All submission related emails and in-app notifications are handled by this method
     NotificationService.publish_application_submission_event(self)
-    confirmed_permit_type_submission_contacts.each do |permit_type_submission_contact|
-      PermitHubMailer.notify_reviewer_application_received(
-        permit_type_submission_contact,
-        self
-      ).deliver_later
-    end
   end
 
   def formatted_submission_data_for_external_use
