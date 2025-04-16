@@ -35,7 +35,6 @@ export const GenericFieldDisplay = observer(function GroupedFieldDisplay({
   editorContainerProps,
 }: IGroupedFieldProps) {
   const { t } = useTranslation()
-  const isRequired = label && required
   return (
     <FormControl w={"100%"} isReadOnly {...containerProps}>
       <FormLabel
@@ -46,7 +45,7 @@ export const GenericFieldDisplay = observer(function GroupedFieldDisplay({
           ":after": {
             content: `"${t("ui.optional")}"`,
             ml: 1.5,
-            display: !isRequired ? "inline" : "none",
+            display: !required ? "inline" : "none",
           },
         }}
       >
