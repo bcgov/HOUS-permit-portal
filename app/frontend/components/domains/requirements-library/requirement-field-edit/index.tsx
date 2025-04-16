@@ -94,6 +94,22 @@ const requirementsComponentMap = {
     )
   },
 
+  [ERequirementType.bcaddress]: function <TFieldValues>(props: TRequirementEditProps<TFieldValues>) {
+    return (
+      <EditableGroup
+        editableInput={
+          <InputGroup>
+            <InputLeftElement>
+              <MapPin />
+            </InputLeftElement>
+            <Input bg={"white"} isReadOnly />
+          </InputGroup>
+        }
+        {...props}
+      />
+    )
+  },
+
   [ERequirementType.date]: function <TFieldValues>(props: TRequirementEditProps<TFieldValues>) {
     return (
       <EditableGroup

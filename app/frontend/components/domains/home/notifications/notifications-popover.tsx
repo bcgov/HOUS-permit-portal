@@ -97,10 +97,10 @@ export const NotificationsPopover: React.FC<INotificationsPopoverProps> = observ
               {R.isEmpty(notificationsToShow) ? (
                 <Text color="greys.grey01">{t("notification.noUnread")}</Text>
               ) : (
-                notificationsToShow.map((n) => (
+                notificationsToShow?.map((n) => (
                   <CustomMessageBox status={getSemanticKey(n)} description={n.actionText} key={n.id}>
                     <UnorderedList pl={0} mb={0}>
-                      {generateSpecificLinkData(n).map((link) => (
+                      {generateSpecificLinkData(n)?.map((link) => (
                         <ListItem whiteSpace={"normal"} key={link.href}>
                           <RouterLinkButton
                             variant="link"

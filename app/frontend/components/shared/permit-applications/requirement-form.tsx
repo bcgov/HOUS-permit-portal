@@ -10,8 +10,7 @@ import { useNavigate } from "react-router-dom"
 import { useMountStatus } from "../../../hooks/use-mount-status"
 import { IPermitApplication } from "../../../models/permit-application"
 import { useMst } from "../../../setup/root"
-import { EFlashMessageStatus } from "../../../types/enums"
-import { EFileUploadAttachmentType } from "../../../types/enums"
+import { EFileUploadAttachmentType, EFlashMessageStatus } from "../../../types/enums"
 import { IErrorsBoxData } from "../../../types/types"
 import { getCompletedBlocksFromForm, getRequirementByKey } from "../../../utils/formio-component-traversal"
 import { singleRequirementFormJson, singleRequirementSubmissionData } from "../../../utils/formio-helpers"
@@ -350,6 +349,7 @@ export const RequirementForm = observer(
       }
     }
     const showVersionDiffContactWarning = shouldShowDiff && !userShouldSeeDiff
+
     return (
       <>
         <Flex
@@ -513,7 +513,7 @@ export const RequirementForm = observer(
             requirementJson={singleRequirementFormJson(
               getRequirementByKey(pastVersion.formJson, previousSubmissionKey)
             )}
-            submissionJson={singleRequirementSubmissionData(pastVersion.submissionData, previousSubmissionKey)}
+            submissionData={singleRequirementSubmissionData(pastVersion.submissionData, previousSubmissionKey)}
           />
         )}
       </>

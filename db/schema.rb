@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_03_24_191650) do
+ActiveRecord::Schema[7.1].define(version: 2025_04_10_174655) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -27,6 +27,20 @@ ActiveRecord::Schema[7.1].define(version: 2025_03_24_191650) do
     t.datetime "updated_at", null: false
     t.index ["jti"], name: "index_allowlisted_jwts_on_jti", unique: true
     t.index ["user_id"], name: "index_allowlisted_jwts_on_user_id"
+  end
+
+  create_table "api_key_expiration_notifications",
+               id: :uuid,
+               default: -> { "gen_random_uuid()" },
+               force: :cascade do |t|
+    t.uuid "external_api_key_id", null: false
+    t.integer "notification_interval_days"
+    t.datetime "sent_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["external_api_key_id"],
+            name:
+              "index_api_key_expiration_notifications_on_external_api_key_id"
   end
 
   create_table "assets",
@@ -78,6 +92,12 @@ ActiveRecord::Schema[7.1].define(version: 2025_03_24_191650) do
     t.uuid "contactable_id"
     t.index %w[contactable_type contactable_id],
             name: "index_contacts_on_contactable"
+  end
+
+  create_table "data_migrations",
+               primary_key: "version",
+               id: :string,
+               force: :cascade do |t|
   end
 
   create_table "early_access_previews",
@@ -529,7 +549,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_03_24_191650) do
                force: :cascade do |t|
     t.string "reason_code", limit: 64
     t.jsonb "requirement_json"
-    t.jsonb "submission_json"
+    t.jsonb "submission_data"
     t.string "comment", limit: 350
     t.uuid "submission_version_id", null: false
     t.uuid "user_id", null: false
@@ -594,6 +614,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_03_24_191650) do
             null: false
     t.jsonb "revision_reason_options"
     t.uuid "small_scale_requirement_template_id"
+    t.boolean "inbox_enabled", default: false, null: false
     t.index ["small_scale_requirement_template_id"],
             name: "idx_on_small_scale_requirement_template_id_235b636c86"
   end
@@ -945,6 +966,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_03_24_191650) do
   end
 
   add_foreign_key "allowlisted_jwts", "users", on_delete: :cascade
+  add_foreign_key "api_key_expiration_notifications", "external_api_keys"
   add_foreign_key "collaborators", "users"
   add_foreign_key "early_access_previews", "users", column: "previewer_id"
   add_foreign_key "external_api_keys", "jurisdictions"

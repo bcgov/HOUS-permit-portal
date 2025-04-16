@@ -45,7 +45,7 @@
     "@formio/js": "^5.0.0-rc.37",
     "@formio/react": "^5.3.0",
     "@phosphor-icons/react": "^2.0.15",
-    "@react-pdf/renderer": "^3.4.0",
+    "@react-pdf/renderer": "^4.3.0",
     "@types/jest": "^29.5.10",
     "@types/react": "^18.2.38",
     "@types/react-datepicker": "^6.0.1",
@@ -100,7 +100,7 @@
     "gen:theme-typings": "chakra-cli tokens app/frontend/styles/theme/index.ts",
     "postinstall": "npm run gen:theme-typings",
     "build:ssr": "bundle exec vite build --ssr",
-    "generate-pdf": " node public/vite-ssr/ssr.js"
+    "generate-pdf": "node public/vite-ssr/ssr.js"
   },
   "lint-staged": {
     "*.{js,css,md,ts,tsx}": [
