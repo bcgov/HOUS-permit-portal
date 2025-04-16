@@ -18,7 +18,6 @@ import {
 import { ArrowCounterClockwise, Info, Trash } from "@phosphor-icons/react"
 import "@uppy/core/dist/style.min.css"
 import "@uppy/dashboard/dist/style.css"
-import "@uppy/drag-drop/dist/style.css"
 import { observer } from "mobx-react-lite"
 // import DragDrop from "@uppy/react/lib/DragDrop.js"
 import { Icon } from "@chakra-ui/react"
