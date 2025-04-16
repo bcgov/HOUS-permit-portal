@@ -47,9 +47,6 @@ export const PermitApplicationIndexScreen = observer(({}: IPermitApplicationInde
 
   const requirementTemplateId = query.get("requirementTemplateId")
   const templateVersionId = query.get("templateVersionId")
-  
-  
-
 
   useSearch(permitApplicationStore, [
     requirementTemplateId || "",
@@ -88,10 +85,7 @@ export const PermitApplicationIndexScreen = observer(({}: IPermitApplicationInde
                   {t("ui.resetFilters")}
                 </Button>
               )}
-              <PermitApplicationFiltersMenu 
-                searchModel={permitApplicationStore}
-                i18nPrefix="permitApplication"
-              />
+              <PermitApplicationFiltersMenu />
               <FormControl w="fit-content">
                 <FormLabel>{t("ui.search")}</FormLabel>
                 <ModelSearchInput searchModel={permitApplicationStore} />

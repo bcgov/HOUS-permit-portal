@@ -28,7 +28,7 @@ import { UnitSelect } from "../../../shared/select/selectors/unit-select"
 import { EditableGroup, TEditableGroupProps } from "./editable-group"
 import { GenericContactEdit } from "./generic-contact-edit"
 import { PidInfoEdit } from "./pid-info-edit"
-import { IControlProps } from "./types"
+import { IControlProps, TIsMultipleFilesCheckboxProps } from "./types"
 
 export type TRequirementEditProps<TFieldValues extends FieldValues> = TEditableGroupProps<TFieldValues> & {
   unitSelectProps?: IControlProps<TFieldValues>
@@ -38,6 +38,7 @@ export type TRequirementEditProps<TFieldValues extends FieldValues> = TEditableG
     getOptionValue: (idx: number) => IOption | undefined
   }
   canAddMultipleContactProps?: IControlProps<TFieldValues>
+  isMultipleFilesCheckboxProps?: TIsMultipleFilesCheckboxProps<TFieldValues>
 }
 
 const requirementsComponentMap = {
@@ -345,8 +346,19 @@ const requirementsComponentMap = {
     )
   },
 
-  [ERequirementType.file]: function <TFieldValues>(props: TRequirementEditProps<TFieldValues>) {
-    return <EditableGroup editableInput={<i className="fa fa-cloud-upload"></i>} {...props} />
+  [ERequirementType.file]: function <TFieldValues>({
+    isMultipleFilesCheckboxProps,
+    ...props
+  }: TRequirementEditProps<TFieldValues>) {
+    const { t } = useTranslation()
+
+    return (
+      <EditableGroup
+        editableInput={<i className="fa fa-cloud-upload"></i>}
+        isMultipleFilesCheckboxProps={isMultipleFilesCheckboxProps}
+        {...props}
+      />
+    )
   },
 
   [ERequirementType.energyStepCode]: function <TFieldValues>(props) {
@@ -419,7 +431,12 @@ const requirementsComponentMap = {
         },
       },
       { type: ERequirementContactFieldItemType.professionalAssociation },
-      { type: ERequirementContactFieldItemType.professionalNumber },
+      {
+        type: ERequirementContactFieldItemType.professionalNumber,
+        containerProps: {
+          gridColumn: "1 / span 2",
+        },
+      },
       { type: ERequirementContactFieldItemType.organization },
     ]
     return (
@@ -433,7 +450,12 @@ const requirementsComponentMap = {
     )
   },
 
-  [ERequirementType.pidInfo]: function <TFieldValues>({ editableLabelProps, ...rest }) {
+  [ERequirementType.pidInfo]: function <TFieldValues>({
+    editableLabelProps,
+    isOptionalCheckboxProps,
+    controlProps,
+    ...rest
+  }) {
     const pidInfoFieldItemTypes: Array<{
       type: ERequirementType
       key: string
@@ -461,6 +483,8 @@ const requirementsComponentMap = {
         requirementType={ERequirementType.pidInfo}
         fieldItems={pidInfoFieldItemTypes}
         editableLabelProps={editableLabelProps}
+        isOptionalCheckboxProps={isOptionalCheckboxProps}
+        controlProps={controlProps}
         {...rest}
       />
     )
@@ -490,6 +514,10 @@ export const RequirementFieldEdit = observer(function RequirementFieldEdit<TFiel
 
     if (!isContactRequirement(requirementType)) {
       toRemove.push("canAddMultipleContactProps")
+    }
+
+    if (requirementType !== ERequirementType.file) {
+      toRemove.push("isMultipleFilesCheckboxProps")
     }
 
     return toRemove

@@ -484,7 +484,7 @@ const options = {
         permitApplication: {
           noneFound: "No permits yet",
           noneFoundExplanation:
-            "Missing permits? You might have used a login option different from the one you used to create the permits. Log out and try logging back in with the BCeID or BC Services Card you used to create them.",
+            "Missing permits? You might have used a login option different from the one you used to create the permits. Log out and try logging back in with the BCeID or BC Services Card Account you used to create them.",
           submissionBlockModal: {
             title: "Trying to submit this application?",
             description:
@@ -499,6 +499,7 @@ const options = {
           },
           updateToNewVersion: "Update my application",
           reviewOutdatedSubmissionLink: "View draft applications",
+          configureStepCodePageLink: "Configure Step Code(s)",
           reviewUpdatedEditLink: "View template",
           reviewOutdatedTitle: "Filters applied to show applications that are outdated",
           reviewOutdatedMessage: "Filters have been applied. Please review and acknowledge the actions required below.",
@@ -562,6 +563,8 @@ const options = {
             submitted_at: "Submitted at",
             viewed_at: "Viewed at",
             status: "Status",
+            created_at: "Created at",
+            updated_at: "Updated at",
           },
           submissionInbox: {
             contactInviteWarning:
@@ -662,7 +665,7 @@ const options = {
             contactsSummary: "Contacts summary",
             inboxDisabledTitle: "Inbox disabled",
             inboxDisabled:
-              "Submissions for this local jurisdictions are currently disabled. You will be able to make edits to this permit application but will not be able to submit until this jurisdiction's is accepting submissions again.",
+              "Submissions for this local jurisdictions are currently disabled. You will be able to make edits to this permit application but will not be able to submit until this jurisdiction's is accepting submissions again and inboxes are enabled globally.",
             downloadApplication: "Download application",
             fetchingMissingPdf: "Fetching {{missingPdf}}...",
             missingPdfLabels: {
@@ -837,6 +840,7 @@ const options = {
             helpTextPlaceHolder: "Help text",
             optionalForSubmitters: "This field is optional for submitters",
             isAnElectiveField: "This is an elective field for local jurisdictions",
+            allowMultipleFilesLabel: "Allow multiple files",
             optionsMenu: {
               triggerButton: "Options",
               remove: "Remove",
@@ -995,7 +999,7 @@ const options = {
             },
           },
           info: {
-            title: "BC Step Code Compliance Checklist - Part 9 Buildings",
+            title: "BC Energy Compliance Reports",
             energy: "Energy Step Code",
             zeroCarbon: "Zero Carbon Step Code",
             performancePaths: {
@@ -1421,6 +1425,15 @@ const options = {
                 },
               },
             },
+            globalFeatureAccess: {
+              title: "Global feature access",
+              description: "Turn system features on or off for all users system-wide.",
+              submissionInbox: "Submissions inbox",
+              submissionInboxDescription:
+                "Enable review managers to accept and process permit applications. If you turn off this feature, submitters can’t submit applications, and review managers won’t receive new applications.",
+              toggleOn: "On",
+              toggleOff: "Off",
+            },
             externalApiKeys: {
               title: "API settings",
               description: "Manage API keys for the Building Permit Hub.",
@@ -1531,6 +1544,7 @@ const options = {
             applicationRevisionsRequested: "Revisions requested by jurisdiction",
             collaboration: "Collaboration",
             integrationMapping: "API integration mapping",
+            unmappedApiNotification: "Unmapped API Notification",
           },
           emailConfirmed: {
             heading: "Email confirmed!",
@@ -1841,6 +1855,15 @@ const options = {
             smallScale: "Set as Small Scale New Contruction Preview on landing page",
             fourPlus: "Set as Four Plus New Construction Preview",
           },
+          globalFeatureAccess: {
+            title: "Global feature access",
+            description: "Turn system features on or off for all users",
+            submissionInbox: "Submissions inbox",
+            submissionInboxDescription:
+              "Enable review managers to accept and process permit applications. If you turn off this feature, submitters can’t submit applications, and review managers won’t receive new applications.",
+            toggleOn: "On",
+            toggleOff: "Off",
+          },
           sitewideMessage: {
             title: "Site-wide message",
             description: "Enable and configure a site-wide message",
@@ -2076,6 +2099,7 @@ const options = {
             eula: "End user license agreement",
             earlyAccess: "Early access",
             update: "Update",
+            globalFeatureAccess: "Global feature access",
           },
         },
         automatedCompliance: {

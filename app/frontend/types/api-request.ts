@@ -89,6 +89,7 @@ export interface IInvitePreviewersParams {
 
 export interface ISiteConfigurationUpdateParams {
   displaySitewideMessage?: boolean | null
+  inboxEnabled?: boolean | null
   sitewideMessage?: string | null
   helpLinkItems?: IHelpLinkItems
   revisionReasonsMap?: { [key: string]: IRevisionReason }

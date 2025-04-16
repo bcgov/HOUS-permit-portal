@@ -170,7 +170,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
         return (self.latestSubmissionVersion?.revisionRequests || []).slice().sort((a, b) => a.createdAt - b.createdAt)
       },
       get inboxEnabled() {
-        return self.jurisdiction?.inboxEnabled
+        return self.jurisdiction?.inboxEnabled && self.rootStore.siteConfigurationStore.inboxEnabled
       },
     }))
     .views((self) => ({
