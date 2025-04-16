@@ -6,13 +6,16 @@ import {
   AccordionPanel,
   AccordionProps,
   Box,
+  Flex,
   HStack,
   IconButton,
+  Text,
   useDisclosure,
   VStack,
 } from "@chakra-ui/react"
 import { X } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
+import * as R from "ramda"
 import React, { useEffect } from "react"
 import { useTranslation } from "react-i18next"
 import { ERequirementType, EVisibility } from "../../../types/enums"
@@ -25,11 +28,11 @@ import { isQuillEmpty } from "../../../utils/utility-functions"
 import { Editor } from "../../shared/editor/editor"
 import { ElectiveTag } from "../../shared/elective-tag"
 import { FirstNationsTag } from "../../shared/first-nations-tag"
+import { RequirementDocumentDownloadButton } from "../../shared/requirement-template/requirement-document-download-button"
 import { RichTextTip } from "../../shared/rich-text-tip"
 import { VisibilityTag } from "../../shared/visibility-tag.tsx"
 import { RequirementFieldDisplay } from "./requirement-field-display"
 import { RequirementsBlockModal } from "./requirements-block-modal"
-
 type TProps = {
   requirementBlock: IDenormalizedRequirementBlock
   onRemove?: () => void
@@ -111,6 +114,7 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
                 />
               )}
             </HStack>
+
             <HStack spacing={2}>
               <VisibilityTag visibility={requirementBlock.visibility} />
               <Box mr={2}>{requirementBlock.firstNations && <FirstNationsTag />}</Box>
@@ -151,16 +155,31 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
                 },
               }}
               px={6}
-              my={4}
               mx="-4"
-              p={2}
-              pb={4}
+              p={6}
               className="requirement-block-description"
               borderBottom="1px solid"
               borderBottomColor="border.light"
             >
               <Editor htmlValue={requirementBlock.displayDescription} readonly />
             </Box>
+          )}
+          {!R.isEmpty(requirementBlock.requirementDocuments) && (
+            <Flex
+              direction={"column"}
+              gap={2}
+              mb={4}
+              px={6}
+              pb={6}
+              mx="-4"
+              borderBottom="1px solid"
+              borderBottomColor="border.light"
+            >
+              <Text fontWeight={700}>{t("requirementsLibrary.fields.requirementDocuments")}</Text>
+              {requirementBlock.requirementDocuments?.map((document) => (
+                <RequirementDocumentDownloadButton key={document.id} document={document} />
+              ))}
+            </Flex>
           )}
           {!isQuillEmpty(requirementBlockCustomization?.tip) && (
             <Box px={2} my={4}>
@@ -219,7 +238,7 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
                         helperText={requirement?.hint}
                         unit={
                           requirementType === ERequirementType.number
-                            ? requirement?.inputOptions?.numberUnit ?? null
+                            ? (requirement?.inputOptions?.numberUnit ?? null)
                             : undefined
                         }
                         options={requirement?.inputOptions?.valueOptions?.map((option) => option.label)}

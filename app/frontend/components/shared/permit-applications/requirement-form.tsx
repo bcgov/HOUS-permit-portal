@@ -10,10 +10,11 @@ import { useNavigate } from "react-router-dom"
 import { useMountStatus } from "../../../hooks/use-mount-status"
 import { IPermitApplication } from "../../../models/permit-application"
 import { useMst } from "../../../setup/root"
-import { EFlashMessageStatus } from "../../../types/enums"
+import { EFileUploadAttachmentType, EFlashMessageStatus } from "../../../types/enums"
 import { IErrorsBoxData } from "../../../types/types"
 import { getCompletedBlocksFromForm, getRequirementByKey } from "../../../utils/formio-component-traversal"
 import { singleRequirementFormJson, singleRequirementSubmissionData } from "../../../utils/formio-helpers"
+import { downloadFileFromStorage } from "../../../utils/utility-functions"
 import { CompareRequirementsBox } from "../../domains/permit-application/compare-requirements-box"
 import { ErrorsBox } from "../../domains/permit-application/errors-box"
 import { BuilderBottomFloatingButtons } from "../../domains/requirement-template/builder-bottom-floating-buttons"
@@ -212,14 +213,23 @@ export const RequirementForm = observer(
       onPreviousSubmissionOpen()
     }
 
+    const handleDownloadRequirementDocument = async (event) => {
+      downloadFileFromStorage({
+        model: EFileUploadAttachmentType.RequirementDocument,
+        modelId: event.detail.id,
+      })
+    }
+
     useEffect(() => {
       document.addEventListener("openStepCode", handleOpenStepCode)
       document.addEventListener("openAutofillContact", handleOpenContactAutofill)
       document.addEventListener("openPreviousSubmission", handleOpenPreviousSubmission)
+      document.addEventListener("downloadRequirementDocument", handleDownloadRequirementDocument)
       return () => {
         document.removeEventListener("openStepCode", handleOpenStepCode)
         document.removeEventListener("openAutofillContact", handleOpenContactAutofill)
         document.removeEventListener("openPreviousSubmission", handleOpenPreviousSubmission)
+        document.removeEventListener("downloadRequirementDocument", handleDownloadRequirementDocument)
       }
     }, [])
 
