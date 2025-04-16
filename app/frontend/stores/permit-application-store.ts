@@ -262,7 +262,7 @@ export const PermitApplicationStoreModel = types
         revisionMode: overrides.revisionMode ?? false,
         diff: overrides.diff || null,
         submissionVersions: overrides.submissionVersions || [],
-        selectedPastSubmissionVersion: overrides.selectedPastSubmissionVersion || null,
+        selectedSubmissionVersion: overrides.selectedSubmissionVersion || null,
         permitCollaborationMap: overrides.permitCollaborationMap || {},
         permitBlockStatusMap: overrides.permitBlockStatusMap || {},
         isViewingPastRequests: overrides.isViewingPastRequests ?? false,
