@@ -509,6 +509,12 @@ class RequirementFormJsonService
     input_type = requirement.input_type
     input_options = requirement.input_options
 
+    if input_options["value_options"].is_a?(Array)
+      input_options["value_options"].select! do |option|
+        option["label"].present? && option["value"].present?
+      end
+    end
+
     if (input_type.to_sym == :file)
       return(
         {
