@@ -1,5 +1,5 @@
 import { Container, Flex, Heading } from "@chakra-ui/react"
-import { FileText, Pencil, Tray, Users } from "@phosphor-icons/react"
+import { Pencil } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
