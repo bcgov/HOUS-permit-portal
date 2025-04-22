@@ -4,12 +4,14 @@ import React from "react"
 import { IPart3StepCodeChecklist } from "../../../../../../../models/part-3-step-code-checklist"
 import { Field } from "../../../../part-9/checklist/pdf-content/shared/field"
 import { Panel } from "../../../../part-9/checklist/pdf-content/shared/panel"
-import { i18nPrefix } from "./i18n-prefix"
 
 interface IProps {
   checklist: IPart3StepCodeChecklist
 }
 export const ProjectInfo = function StepCodePart3ChecklistPDFProjectInfo({ checklist }: IProps) {
+  type TPrefix = "stepCode.part3.projectDetails"
+  const i18nPrefix: TPrefix = "stepCode.part3.projectDetails"
+
   return (
     <Panel heading={t(`${i18nPrefix}.heading`)}>
       <Field label={t(`${i18nPrefix}.name`)} value={checklist.projectName} />

@@ -43,29 +43,40 @@ export const RenewableEnergy = observer(function Part3StepCodeFormRenewableEnerg
   const { isSubmitting, isValid, isSubmitted, errors } = formState
 
   const onSubmit = async (values) => {
-    if (!isValid) return
+    if (!checklist) return
 
+    const alternatePath = checklist.alternateNavigateAfterSavePath
+    checklist.setAlternateNavigateAfterSavePath(null)
+
+    let updateSucceeded = false
+    if (!isValid) return
     if (isRelevant == "no") {
-      // update the checklist to remove generatedElectricity if present
       const updated =
         !checklist.generatedElectricity ||
         (await checklist.update({
           generatedElectricity: null,
         }))
       if (!updated) return
+      updateSucceeded = true
     } else {
       const updated = await checklist.update(values)
       if (!updated) return
+      updateSucceeded = true
     }
 
-    await checklist.completeSection("renewableEnergy")
+    if (updateSucceeded) {
+      await checklist.completeSection("renewableEnergy")
 
-    navigate(location.pathname.replace("renewable-energy", "overheating-requirements"))
+      if (alternatePath) {
+        navigate(alternatePath)
+      } else {
+        navigate(location.pathname.replace("renewable-energy", "overheating-requirements"))
+      }
+    }
   }
 
   useEffect(() => {
     if (isSubmitted) {
-      // reset form state to prevent message box from showing again until form is resubmitted
       reset(undefined, { keepDirtyValues: true, keepErrors: true })
     }
   }, [isValid])
@@ -77,7 +88,6 @@ export const RenewableEnergy = observer(function Part3StepCodeFormRenewableEnerg
   }, [isRelevant])
 
   const percentOfUse = useMemo(() => {
-    // Total Electricity Generated On-Site / Total Electricity (from modelled output)
     if (checklist.totalElectricityUse == 0) return null
     return parseFloat(watchGeneratedElectricity) / checklist.totalElectricityUse
   }, [watchGeneratedElectricity])
@@ -93,7 +103,7 @@ export const RenewableEnergy = observer(function Part3StepCodeFormRenewableEnerg
         {!isValid && isSubmitted && <CustomMessageBox title={t("stepCode.part3.errorTitle")} status="error" />}
         <SectionHeading>{t(`${i18nPrefix}.heading`)}</SectionHeading>
       </Flex>
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form onSubmit={handleSubmit(onSubmit)} name="part3SectionForm">
         <Flex direction="column" gap={{ base: 6, xl: 6 }} pb={4}>
           <FormControl>
             <FormLabel>{t(`${i18nPrefix}.isRelevant`)}</FormLabel>

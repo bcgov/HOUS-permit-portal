@@ -30,9 +30,20 @@ export const RequirementsSummary = observer(function RequirementsSummary() {
     : "baseline-occupancies"
 
   const onSubmit = async () => {
-    await checklist.completeSection("requirementsSummary")
+    if (!checklist) return
 
-    navigate(location.pathname.replace("requirements-summary", "step-code-summary"))
+    const alternatePath = checklist.alternateNavigateAfterSavePath
+    checklist.setAlternateNavigateAfterSavePath(null)
+
+    const updateSucceeded = await checklist.completeSection("requirementsSummary")
+
+    if (updateSucceeded) {
+      if (alternatePath) {
+        navigate(alternatePath)
+      } else {
+        navigate(location.pathname.replace("requirements-summary", "step-code-summary"))
+      }
+    }
   }
 
   return (
@@ -91,7 +102,7 @@ export const RequirementsSummary = observer(function RequirementsSummary() {
               </>
             )}
 
-            <form onSubmit={handleSubmit(onSubmit)}>
+            <form onSubmit={handleSubmit(onSubmit)} name="part3SectionForm">
               <FormControl>
                 <FormLabel>{t(`${i18nPrefix}.confirm.label`)}</FormLabel>
                 <Button type="submit" variant="primary" isLoading={isSubmitting} isDisabled={isSubmitting}>

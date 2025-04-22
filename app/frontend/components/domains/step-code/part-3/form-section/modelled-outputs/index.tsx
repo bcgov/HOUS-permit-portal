@@ -82,6 +82,11 @@ export const ModelledOutputs = observer(function Part3StepCodeFormModelledOutput
   ])
 
   const onSubmit = handleSubmit(async (data) => {
+    if (!checklist) return
+
+    const alternatePath = checklist.alternateNavigateAfterSavePath
+    checklist.setAlternateNavigateAfterSavePath(null)
+
     const deletedEnergyOutputsAttributes = data.modelledEnergyOutputsAttributes
       .filter((output) => !output.fuelTypeId && output.id)
       .map((output) => ({ id: output.id, _destroy: true }))
@@ -101,9 +106,15 @@ export const ModelledOutputs = observer(function Part3StepCodeFormModelledOutput
       ...deletedOtherEnergyOutputsAttributes,
     ]
     const updated = await checklist?.update({ ...data, modelledEnergyOutputsAttributes: energyOutputs })
+
     if (updated) {
       await checklist?.completeSection("modelledOutputs")
-      navigate(location.pathname.replace("modelled-outputs", "renewable-energy"))
+
+      if (alternatePath) {
+        navigate(alternatePath)
+      } else {
+        navigate(location.pathname.replace("modelled-outputs", "renewable-energy"))
+      }
     }
   })
 
@@ -117,7 +128,7 @@ export const ModelledOutputs = observer(function Part3StepCodeFormModelledOutput
       </Text>
       <FormProvider {...formMethods}>
         {checklist ? (
-          <Stack as="form" onSubmit={onSubmit} gap={8}>
+          <Stack as="form" onSubmit={onSubmit} gap={8} name="part3SectionForm">
             <ModelledEnergyOutputsGrid mt={6} />
             <AnnualEnergyWholeBuildingGrid />
             <StepCodeBuildingPortionsGrid />

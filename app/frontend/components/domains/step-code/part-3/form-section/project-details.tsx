@@ -32,9 +32,20 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
   const { isSubmitting } = formState
 
   const onSubmit = async () => {
-    await checklist.completeSection("projectDetails")
+    if (!checklist) return
 
-    navigate(location.pathname.replace("project-details", "location-details"))
+    const alternatePath = checklist.alternateNavigateAfterSavePath
+    checklist.setAlternateNavigateAfterSavePath(null)
+
+    const updateSucceeded = await checklist.completeSection("projectDetails")
+
+    if (updateSucceeded) {
+      if (alternatePath) {
+        navigate(alternatePath)
+      } else {
+        navigate(location.pathname.replace("project-details", "location-details"))
+      }
+    }
   }
 
   return (
@@ -43,7 +54,7 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
         <SectionHeading>{t(`${i18nPrefix}.heading`)}</SectionHeading>
         <Text fontSize="md">{t(`${i18nPrefix}.instructions`)}</Text>
       </Flex>
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form onSubmit={handleSubmit(onSubmit)} name="part3SectionForm">
         <Flex direction="column" gap={{ base: 6, xl: 6 }} pb={4}>
           <Field label={t(`${i18nPrefix}.name`)} value={checklist.projectName} />
           <Flex gap={{ base: 6, xl: 6 }} direction={{ base: "column", xl: "row" }}>

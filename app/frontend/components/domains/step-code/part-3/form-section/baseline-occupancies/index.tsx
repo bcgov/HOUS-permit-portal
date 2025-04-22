@@ -47,10 +47,14 @@ export const BaselineOccupancies = observer(function Part3StepCodeFormBaselineOc
   const { isSubmitting, isValid, isSubmitted, errors } = formState
 
   const onSubmit = async (values) => {
-    if (!isValid) return
+    if (!checklist) return
 
+    const alternatePath = checklist.alternateNavigateAfterSavePath
+    checklist.setAlternateNavigateAfterSavePath(null)
+
+    let updateSucceeded = false
+    if (!isValid) return
     if (isRelevant == "no") {
-      // update the checklist to remove baseline occupancies if there are any
       const updated =
         R.isEmpty(checklist.baselineOccupancies) ||
         (await checklist.update({
@@ -61,11 +65,11 @@ export const BaselineOccupancies = observer(function Part3StepCodeFormBaselineOc
           baselineOccupancies: { complete: true },
           baselineDetails: { relevant: false },
         })
+        updateSucceeded = true
       } else {
         return
       }
     } else {
-      // create new selections, keep existing selections, delete removed selections
       const newSelections = values.baselineOccupancies
         .filter((ocKey) => !checklist.baselineOccupancies.map((oc) => oc.key).includes(ocKey))
         .map((ocKey) => ({ key: ocKey }))
@@ -75,7 +79,6 @@ export const BaselineOccupancies = observer(function Part3StepCodeFormBaselineOc
       const deletedSelections = checklist.baselineOccupancies
         .filter((oc) => !values.baselineOccupancies.includes(oc.key))
         .map((oc) => ({ id: oc.id, _destroy: true }))
-
       values.baselineOccupanciesAttributes = [...newSelections, ...existingSelections, ...deletedSelections]
       delete values.baselineOccupancies
 
@@ -86,19 +89,24 @@ export const BaselineOccupancies = observer(function Part3StepCodeFormBaselineOc
           baselineDetails: { relevant: true },
           baselinePerformance: { relevant: true },
         })
+        updateSucceeded = true
       } else {
         return
       }
     }
 
-    const nextSectionPath = isRelevant == "yes" ? "baseline-details" : "district-energy"
-
-    navigate(location.pathname.replace("baseline-occupancies", nextSectionPath))
+    if (updateSucceeded) {
+      if (alternatePath) {
+        navigate(alternatePath)
+      } else {
+        const nextSectionPath = isRelevant == "yes" ? "baseline-details" : "district-energy"
+        navigate(location.pathname.replace("baseline-occupancies", nextSectionPath))
+      }
+    }
   }
 
   useEffect(() => {
     if (isSubmitted) {
-      // reset form state to prevent message box from showing again until form is resubmitted
       reset(undefined, { keepDirtyValues: true, keepErrors: true })
     }
   }, [isValid])
@@ -117,7 +125,7 @@ export const BaselineOccupancies = observer(function Part3StepCodeFormBaselineOc
           }}
         />
       </Flex>
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form onSubmit={handleSubmit(onSubmit)} name="part3SectionForm">
         <Flex direction="column" gap={{ base: 6, xl: 6 }} pb={4}>
           <FormControl>
             <FormLabel>{t(`${i18nPrefix}.isRelevant`)}</FormLabel>

@@ -76,16 +76,26 @@ export const ResidentialAdjustments = observer(function Part3StepCodeFormResiden
   const watchMuaFuels = watch("makeUpAirFuelsAttributes")
 
   const onSubmit = async (values) => {
+    if (!checklist) return
+
+    const alternatePath = checklist.alternateNavigateAfterSavePath
+    checklist.setAlternateNavigateAfterSavePath(null)
+
     const updated = await checklist.update(values)
+
     if (updated) {
       await checklist.completeSection("residentialAdjustments")
-      navigate(location.pathname.replace("residential-adjustments", "document-references"))
+
+      if (alternatePath) {
+        navigate(alternatePath)
+      } else {
+        navigate(location.pathname.replace("residential-adjustments", "document-references"))
+      }
     }
   }
 
   useEffect(() => {
     if (isSubmitted) {
-      // reset form state to prevent message box from showing again until form is resubmitted
       reset(undefined, { keepDirtyValues: true, keepErrors: true })
     }
   }, [isValid])
@@ -97,7 +107,7 @@ export const ResidentialAdjustments = observer(function Part3StepCodeFormResiden
         <SectionHeading>{t(`${i18nPrefix}.heading`)}</SectionHeading>
       </Flex>
       <FormProvider {...formMethods}>
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form onSubmit={handleSubmit(onSubmit)} name="part3SectionForm">
           <Flex direction="column" gap={{ base: 6, xl: 6 }} pb={4}>
             <FormControl>
               <FormLabel>{t(`${i18nPrefix}.hdd.label`)}</FormLabel>

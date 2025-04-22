@@ -111,6 +111,9 @@ export const Part3StepCodeChecklistModel = types
     complianceReport: types.maybeNull(types.frozen<IPart3ComplianceReport>()),
   })
   .extend(withEnvironment())
+  .volatile((self) => ({
+    alternateNavigateAfterSavePath: types.maybeNull(types.string).create(null),
+  }))
   .views((self) => ({
     get stepCodeType() {
       return Part3StepCodeType
@@ -206,6 +209,9 @@ export const Part3StepCodeChecklistModel = types
     },
   }))
   .actions((self) => ({
+    setAlternateNavigateAfterSavePath(value: string | null) {
+      self.alternateNavigateAfterSavePath = value
+    },
     load: flow(function* () {
       const response = yield self.environment.api.fetchPart3Checklist(self.id)
       if (response.ok) {

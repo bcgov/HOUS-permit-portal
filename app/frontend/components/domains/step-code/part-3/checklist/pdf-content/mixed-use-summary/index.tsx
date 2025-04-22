@@ -30,24 +30,24 @@ export const MixedUseSummary = function StepCodePart3ChecklistPDFMixedUseSummary
   }
 
   const isBaseline = checklist.isBaseline
-  const wholeBuildingPrefix = `${i18nPrefix}.wholeBuilding`
-  const stepCodePortionsPrefix = `${i18nPrefix}.stepCode`
-  const occupanciesPrefix = `${i18nPrefix}.occupancies`
 
   return (
     <Panel heading={t(`${i18nPrefix}.heading`)} break>
       {/* Whole Building Performance Section */}
       <View style={styles.sectionContainer}>
-        <Text style={styles.title}>{t("stepCode.part3.stepCodeSummary.mixedUse.wholeBuilding.title")}</Text>
+        <Text style={styles.title}>{t("stepCode.part3.stepCodeSummary.mixedUse.wholeBuilding.title")}</Text>z
         {isBaseline ? (
           <BaselineWholeBuildingPdf
             requirements={requirements}
             compliance={compliance}
             adjustedResults={adjustedResults}
-            prefix={wholeBuildingPrefix}
           />
         ) : (
-          <StepCodeWholeBuildingPdf requirements={requirements} compliance={compliance} prefix={wholeBuildingPrefix} />
+          <StepCodeWholeBuildingPdf
+            requirements={requirements}
+            adjustedResults={adjustedResults}
+            complianceSummary={compliance}
+          />
         )}
       </View>
 
@@ -55,19 +55,14 @@ export const MixedUseSummary = function StepCodePart3ChecklistPDFMixedUseSummary
       {!R.isEmpty(checklist.stepCodeOccupancies) && (
         <View style={styles.sectionContainer}>
           <Text style={styles.title}>{t("stepCode.part3.stepCodeSummary.mixedUse.stepCode.title")}</Text>
-          <StepCodePortionsPdf
-            requirements={requirements}
-            adjustedResults={adjustedResults}
-            compliance={compliance}
-            prefix={stepCodePortionsPrefix}
-          />
+          <StepCodePortionsPdf requirements={requirements} adjustedResults={adjustedResults} compliance={compliance} />
         </View>
       )}
 
       {/* Step Code Occupancies Performance Section */}
       <View style={styles.sectionContainer}>
         <Text style={styles.title}>{t("stepCode.part3.stepCodeSummary.mixedUse.occupancies.title")}</Text>
-        <StepCodeOccupanciesPdf checklist={checklist} prefix={occupanciesPrefix} />
+        <StepCodeOccupanciesPdf checklist={checklist} />
       </View>
     </Panel>
   )

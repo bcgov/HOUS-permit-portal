@@ -28,7 +28,7 @@ export const FuelTypes = observer(function Part3StepCodeFormFuelTypes() {
   const { checklist } = usePart3StepCode()
 
   const [isRelevant, setIsRelevant] = useState(
-    !R.isEmpty(checklist.uncommonFuelTypes) ? "yes" : checklist.isComplete("fuelTypes") && "no"
+    !R.isEmpty(checklist?.uncommonFuelTypes) ? "yes" : checklist.isComplete("fuelTypes") && "no"
   )
 
   const navigate = useNavigate()
@@ -37,17 +37,21 @@ export const FuelTypes = observer(function Part3StepCodeFormFuelTypes() {
   const { handleSubmit, formState, resetField, reset, control } = useForm({
     mode: "onSubmit",
     defaultValues: {
-      fuelTypes: checklist.uncommonFuelTypes.map((ft) => ft.key),
+      fuelTypes: checklist?.uncommonFuelTypes.map((ft) => ft.key) || [],
     },
   })
 
   const { isSubmitting, isValid, isSubmitted, errors } = formState
 
   const onSubmit = async (values) => {
-    if (!isValid) return
+    if (!checklist) return
 
+    const alternatePath = checklist.alternateNavigateAfterSavePath
+    checklist.setAlternateNavigateAfterSavePath(null)
+
+    let updateSucceeded = false
+    if (!isValid) return
     if (isRelevant == "no") {
-      // update the checklist to remove custom fuel types if there are any
       const updated =
         R.isEmpty(checklist.uncommonFuelTypes) ||
         (await checklist.update({
@@ -58,11 +62,11 @@ export const FuelTypes = observer(function Part3StepCodeFormFuelTypes() {
           fuelTypes: { complete: true },
           additionalFuelTypes: { relevant: false },
         })
+        updateSucceeded = true
       } else {
         return
       }
     } else {
-      // create new selections, keep existing selections, delete removed selections
       const newSelections = values.fuelTypes
         .filter((ocKey) => !checklist.uncommonFuelTypes.map((oc) => oc.key).includes(ocKey))
         .map((ocKey) => ({ key: ocKey }))
@@ -72,7 +76,6 @@ export const FuelTypes = observer(function Part3StepCodeFormFuelTypes() {
       const deletedSelections = checklist.uncommonFuelTypes
         .filter((oc) => !values.fuelTypes.includes(oc.key))
         .map((oc) => ({ id: oc.id, _destroy: true }))
-
       values.fuelTypesAttributes = [...newSelections, ...existingSelections, ...deletedSelections]
       delete values.fuelTypes
 
@@ -82,19 +85,24 @@ export const FuelTypes = observer(function Part3StepCodeFormFuelTypes() {
           fuelTypes: { complete: true },
           additionalFuelTypes: { relevant: !R.isEmpty(checklist.otherFuelTypes) },
         })
+        updateSucceeded = true
       } else {
         return
       }
     }
 
-    const nextSectionPath = !R.isEmpty(checklist.otherFuelTypes) ? "additional-fuel-types" : "baseline-performance"
-
-    navigate(location.pathname.replace("fuel-types", nextSectionPath))
+    if (updateSucceeded) {
+      if (alternatePath) {
+        navigate(alternatePath)
+      } else {
+        const nextSectionPath = !R.isEmpty(checklist.otherFuelTypes) ? "additional-fuel-types" : "baseline-performance"
+        navigate(location.pathname.replace("fuel-types", nextSectionPath))
+      }
+    }
   }
 
   useEffect(() => {
     if (isSubmitted) {
-      // reset form state to prevent message box from showing again until form is resubmitted
       reset(undefined, { keepDirtyValues: true, keepErrors: true })
     }
   }, [isValid])
@@ -114,7 +122,7 @@ export const FuelTypes = observer(function Part3StepCodeFormFuelTypes() {
           <Trans i18nKey={`${i18nPrefix}.instructions`} components={{ br: <br /> }} />
         </Text>
       </Flex>
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form onSubmit={handleSubmit(onSubmit)} name="part3SectionForm">
         <Flex direction="column" gap={{ base: 6, xl: 6 }} pb={4}>
           <FormControl>
             <FormLabel>{t(`${i18nPrefix}.isRelevant`)}</FormLabel>
@@ -143,7 +151,7 @@ export const FuelTypes = observer(function Part3StepCodeFormFuelTypes() {
                   render={({ field: { onChange, value } }) => (
                     <CheckboxGroup defaultValue={value} onChange={onChange}>
                       <Flex direction="column">
-                        {Object.values(checklist.uncommonFuelTypeKeys).map((key) => (
+                        {Object.values(checklist?.uncommonFuelTypeKeys || []).map((key) => (
                           <Checkbox key={key} value={key}>
                             <Trans
                               i18nKey={`${i18nPrefix}.fuelTypeKeys.${key}`}

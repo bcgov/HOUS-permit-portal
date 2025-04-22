@@ -57,21 +57,29 @@ export const AdditionalFuelTypes = observer(function Part3StepCodeFormAdditional
   }
 
   const onSubmit = async (values) => {
-    if (!isValid) return
+    if (!checklist) return
 
+    const alternatePath = checklist.alternateNavigateAfterSavePath
+    checklist.setAlternateNavigateAfterSavePath(null)
+
+    if (!isValid) return
     const updated = await checklist.update(values)
+
     if (updated) {
       await checklist.completeSection("additionalFuelTypes")
+
+      if (alternatePath) {
+        navigate(alternatePath)
+      } else {
+        navigate(location.pathname.replace("additional-fuel-types", "baseline-performance"))
+      }
     } else {
       return
     }
-
-    navigate(location.pathname.replace("additional-fuel-types", "baseline-performance"))
   }
 
   useEffect(() => {
     if (isSubmitted) {
-      // reset form state to prevent message box from showing again until form is resubmitted
       reset(undefined, { keepDirtyValues: true, keepErrors: true })
     }
   }, [isValid])
@@ -101,7 +109,7 @@ export const AdditionalFuelTypes = observer(function Part3StepCodeFormAdditional
         </Flex>
       </Flex>
       <FormProvider {...formMethods}>
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form onSubmit={handleSubmit(onSubmit)} name="part3SectionForm">
           <Flex direction="column" gap={{ base: 6, xl: 6 }} pb={4}>
             {fields.map((field, idx) => (
               <OtherFuelTypeFields field={field} idx={idx} onAdd={onAdd} />

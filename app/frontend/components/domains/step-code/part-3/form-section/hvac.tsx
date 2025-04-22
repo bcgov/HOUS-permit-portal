@@ -182,10 +182,21 @@ export const HVAC = observer(() => {
   )
 
   const onSubmit = handleSubmit(async (data) => {
-    const updated = await checklist?.update(data)
+    if (!checklist) return
+
+    const alternatePath = checklist.alternateNavigateAfterSavePath
+    checklist.setAlternateNavigateAfterSavePath(null)
+
+    const updated = await checklist.update(data)
+
     if (updated) {
-      await checklist?.completeSection("hvac")
-      navigate(location.pathname.replace("hvac", "contact"))
+      await checklist.completeSection("hvac")
+
+      if (alternatePath) {
+        navigate(alternatePath)
+      } else {
+        navigate(location.pathname.replace("hvac", "contact"))
+      }
     }
   })
   return (
@@ -196,7 +207,7 @@ export const HVAC = observer(() => {
       <Text fontSize="md">{t(`${i18nPrefix}.description`)}</Text>
 
       <FormProvider {...formMethods}>
-        <Stack as="form" onSubmit={onSubmit} spacing={7} mt={3}>
+        <Stack as="form" onSubmit={onSubmit} spacing={7} mt={3} name="part3SectionForm">
           {optionSections.map((section) => (
             <OptionsSection
               key={section.optionFieldName}

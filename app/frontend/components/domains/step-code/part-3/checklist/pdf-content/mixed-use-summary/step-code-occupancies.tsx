@@ -8,10 +8,13 @@ import { styles } from "./styles"
 
 interface IProps {
   checklist: IPart3StepCodeChecklist
-  prefix: string
 }
 
-export const StepCodeOccupanciesPdf = ({ checklist, prefix }: IProps) => (
+// Static prefix assumed based on usage context
+// Note: Updated path from occupancyRequirements to occupancies based on linter hint
+const prefix = "stepCode.part3.stepCodeSummary.mixedUse.occupancies"
+
+export const StepCodeOccupanciesPdf = ({ checklist }: IProps) => (
   <View style={styles.table}>
     <View style={styles.tableRow}>
       <View style={{ ...styles.tableCell, ...styles.tableHeaderCell, flex: 3 }}>
@@ -27,22 +30,16 @@ export const StepCodeOccupanciesPdf = ({ checklist, prefix }: IProps) => (
     {checklist.stepCodeOccupancies.map((oc: IStepCodeOccupancy) => (
       <View key={oc.id} style={styles.tableRow}>
         <View style={{ ...styles.tableCell, flex: 3 }}>
-          <Input
-            isDisabled
-            value={t(`stepCode.part3.stepCodeOccupancyKeys.${oc.key}`)}
-            inputStyles={styles.inputStyle}
-          />
+          <Input value={t(`stepCode.part3.stepCodeOccupancyKeys.${oc.key}`)} inputStyles={styles.inputStyle} />
         </View>
         <View style={{ ...styles.tableCell, flex: 2 }}>
           <Input
-            isDisabled
             value={t(`stepCodeChecklist.edit.codeComplianceSummary.energyStepCode.steps.${oc.energyStepRequired}`)}
             inputStyles={styles.inputStyle}
           />
         </View>
         <View style={{ ...styles.tableCell, flex: 2 }}>
           <Input
-            isDisabled
             value={t(
               `stepCodeChecklist.edit.codeComplianceSummary.zeroCarbonStepCode.steps.${oc.zeroCarbonStepRequired}`
             )}
@@ -54,21 +51,16 @@ export const StepCodeOccupanciesPdf = ({ checklist, prefix }: IProps) => (
     {checklist.baselineOccupancies.map((oc: IBaselineOccupancy) => (
       <View key={oc.id} style={styles.tableRow}>
         <View style={{ ...styles.tableCell, flex: 3 }}>
-          <Input
-            isDisabled
-            value={t(`stepCode.part3.baselineOccupancyKeys.${oc.key}`)}
-            inputStyles={styles.inputStyle}
-          />
+          <Input value={t(`stepCode.part3.baselineOccupancyKeys.${oc.key}`)} inputStyles={styles.inputStyle} />
         </View>
         <View style={{ ...styles.tableCell, flex: 2 }}>
           <Input
-            isDisabled
             value={t(`stepCode.part3.performanceRequirements.${oc.performanceRequirement}`)}
             inputStyles={styles.inputStyle}
           />
         </View>
         <View style={{ ...styles.tableCell, flex: 2 }}>
-          <Input isDisabled value="-" inputStyles={styles.inputStyle} />
+          <Input value="-" inputStyles={styles.inputStyle} />
         </View>
       </View>
     ))}

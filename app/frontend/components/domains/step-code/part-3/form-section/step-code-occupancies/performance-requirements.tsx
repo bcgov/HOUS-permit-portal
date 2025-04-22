@@ -61,21 +61,29 @@ export const StepCodeOccupanciesPerformanceRequirements = observer(
     const { isSubmitting, isValid, isSubmitted, errors } = formState
 
     const onSubmit = async (values) => {
-      if (!isValid) return
+      if (!checklist) return
 
+      const alternatePath = checklist.alternateNavigateAfterSavePath
+      checklist.setAlternateNavigateAfterSavePath(null)
+
+      if (!isValid) return
       const updated = await checklist.update(values)
+
       if (updated) {
         await checklist.completeSection("stepCodePerformanceRequirements")
+
+        if (alternatePath) {
+          navigate(alternatePath)
+        } else {
+          navigate(location.pathname.replace("step-code-performance-requirements", "modelled-outputs"))
+        }
       } else {
         return
       }
-
-      navigate(location.pathname.replace("step-code-performance-requirements", "modelled-outputs"))
     }
 
     useEffect(() => {
       if (isSubmitted) {
-        // reset form state to prevent message box from showing again until form is resubmitted
         reset(undefined, { keepDirtyValues: true, keepErrors: true })
       }
     }, [isValid])
@@ -88,7 +96,7 @@ export const StepCodeOccupanciesPerformanceRequirements = observer(
           <Text fontSize="md">{t(`${i18nPrefix}.instructions`)}</Text>
         </Flex>
         <FormProvider {...formMethods}>
-          <form onSubmit={handleSubmit(onSubmit)}>
+          <form onSubmit={handleSubmit(onSubmit)} name="part3SectionForm">
             <Flex direction="column" gap={{ base: 6, xl: 6 }} pb={4}>
               {fields.map((field, idx) => (
                 <OccupancyEnergyStep field={field} idx={idx} />

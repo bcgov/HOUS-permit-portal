@@ -30,29 +30,40 @@ export const OverheatingRequirements = observer(function Part3StepCodeFormOverhe
   const { isSubmitting, isValid, isSubmitted, errors } = formState
 
   const onSubmit = async (values) => {
-    if (!isValid) return
+    if (!checklist) return
 
+    const alternatePath = checklist.alternateNavigateAfterSavePath
+    checklist.setAlternateNavigateAfterSavePath(null)
+
+    let updateSucceeded = false
+    if (!isValid) return
     if (isRelevant == "no") {
-      // update the checklist to remove generatedElectricity if present
       const updated =
         !checklist.overheatingHours ||
         (await checklist.update({
           overheatingHours: null,
         }))
       if (!updated) return
+      updateSucceeded = true
     } else {
       const updated = await checklist.update(values)
       if (!updated) return
+      updateSucceeded = true
     }
 
-    await checklist.completeSection("overheatingRequirements")
+    if (updateSucceeded) {
+      await checklist.completeSection("overheatingRequirements")
 
-    navigate(location.pathname.replace("overheating-requirements", "residential-adjustments"))
+      if (alternatePath) {
+        navigate(alternatePath)
+      } else {
+        navigate(location.pathname.replace("overheating-requirements", "residential-adjustments"))
+      }
+    }
   }
 
   useEffect(() => {
     if (isSubmitted) {
-      // reset form state to prevent message box from showing again until form is resubmitted
       reset(undefined, { keepDirtyValues: true, keepErrors: true })
     }
   }, [isValid])
@@ -69,7 +80,7 @@ export const OverheatingRequirements = observer(function Part3StepCodeFormOverhe
         {!isValid && isSubmitted && <CustomMessageBox title={t("stepCode.part3.errorTitle")} status="error" />}
         <SectionHeading>{t(`${i18nPrefix}.heading`)}</SectionHeading>
       </Flex>
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form onSubmit={handleSubmit(onSubmit)} name="part3SectionForm">
         <Flex direction="column" gap={{ base: 6, xl: 6 }} pb={4}>
           <FormControl>
             <FormLabel>{t(`${i18nPrefix}.isRelevant`)}</FormLabel>

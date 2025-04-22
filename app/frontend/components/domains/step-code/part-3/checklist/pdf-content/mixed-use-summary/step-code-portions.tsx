@@ -9,11 +9,12 @@ interface IProps {
   requirements: IPart3ComplianceReport["performance"]["requirements"]
   compliance: IPart3ComplianceReport["performance"]["complianceSummary"]
   adjustedResults: IPart3ComplianceReport["performance"]["adjustedResults"]
-  prefix: string
 }
 
-export const StepCodePortionsPdf = ({ requirements, adjustedResults, compliance, prefix }: IProps) => {
-  const tediComplies = !!compliance?.tedi?.stepCodePortionComplies
+export const StepCodePortionsPdf = ({ requirements, adjustedResults, compliance }: IProps) => {
+  const tediComplies = !!compliance?.tedi?.stepCodePortion
+
+  const prefix = "stepCode.part3.stepCodeSummary.mixedUse.stepCode"
 
   return (
     <View style={styles.table}>
@@ -34,17 +35,16 @@ export const StepCodePortionsPdf = ({ requirements, adjustedResults, compliance,
           <Text>{t(`${prefix}.requirement`)}</Text>
         </View>
         <View style={{ ...styles.tableCell, flex: 1 }}>
-          <Input isDisabled value="-" inputStyles={styles.inputStyle} />
+          <Input value="-" inputStyles={styles.inputStyle} />
         </View>
         <View style={{ ...styles.tableCell, flex: 1 }}>
           <Input
-            isDisabled
             value={requirements?.stepCodePortions?.areaWeightedTotals?.tedi || "-"}
             inputStyles={styles.inputStyle}
           />
         </View>
         <View style={{ ...styles.tableCell, flex: 1 }}>
-          <Input isDisabled value="-" inputStyles={styles.inputStyle} />
+          <Input value="-" inputStyles={styles.inputStyle} />
         </View>
       </View>
       <View style={styles.tableRow}>
@@ -52,13 +52,13 @@ export const StepCodePortionsPdf = ({ requirements, adjustedResults, compliance,
           <Text>{t(`${prefix}.performance`)}</Text>
         </View>
         <View style={{ ...styles.tableCell, flex: 1 }}>
-          <Input isDisabled value="-" inputStyles={styles.inputStyle} />
+          <Input value="-" inputStyles={styles.inputStyle} />
         </View>
         <View style={{ ...styles.tableCell, flex: 1 }}>
-          <Input isDisabled value={adjustedResults?.tedi?.stepCodePortion || "-"} inputStyles={styles.inputStyle} />
+          <Input value={adjustedResults?.tedi?.stepCodePortion || "-"} inputStyles={styles.inputStyle} />
         </View>
         <View style={{ ...styles.tableCell, flex: 1 }}>
-          <Input isDisabled value="-" inputStyles={styles.inputStyle} />
+          <Input value="-" inputStyles={styles.inputStyle} />
         </View>
       </View>
       <View style={styles.tableRow}>
@@ -66,11 +66,10 @@ export const StepCodePortionsPdf = ({ requirements, adjustedResults, compliance,
           <Text>{t(`${prefix}.compliance`)}</Text>
         </View>
         <View style={{ ...styles.tableCell, flex: 1 }}>
-          <Input isDisabled value="-" inputStyles={styles.inputStyle} />
+          <Input value="-" inputStyles={styles.inputStyle} />
         </View>
         <View style={{ ...styles.tableCell, flex: 1 }}>
           <Input
-            isDisabled
             // Note: _disabled prop doesn't exist on the PDF Input component
             // style={ tediComplies ? { backgroundColor: theme.colors.semantic.infoLight } : { backgroundColor: theme.colors.semantic.errorLight } }
             value={tediComplies ? t("ui.yes") : t("ui.no")}
@@ -78,7 +77,7 @@ export const StepCodePortionsPdf = ({ requirements, adjustedResults, compliance,
           />
         </View>
         <View style={{ ...styles.tableCell, flex: 1 }}>
-          <Input isDisabled value="-" inputStyles={styles.inputStyle} />
+          <Input value="-" inputStyles={styles.inputStyle} />
         </View>
       </View>
     </View>

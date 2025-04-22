@@ -55,12 +55,21 @@ export const BaselinePerformance = observer(function Part3StepCodeFormBaselinePe
   const watchEnergyOutputs = watch("referenceEnergyOutputsAttributes")
 
   const onSubmit = async (values) => {
+    if (!checklist) return
+
+    const alternatePath = checklist.alternateNavigateAfterSavePath
+    checklist.setAlternateNavigateAfterSavePath(null)
+
     const updated = await checklist.update(values)
     if (updated) {
       await checklist.completeSection("baselinePerformance")
-    }
 
-    navigate(location.pathname.replace("baseline-performance", "step-code-occupancies"))
+      if (alternatePath) {
+        navigate(alternatePath)
+      } else {
+        navigate(location.pathname.replace("baseline-performance", "step-code-occupancies"))
+      }
+    }
   }
 
   useEffect(() => {
@@ -94,7 +103,7 @@ export const BaselinePerformance = observer(function Part3StepCodeFormBaselinePe
         {/* <Text fontSize="md">{t(`${i18nPrefix}.instructions`)}</Text> */}
       </Flex>
       <FormProvider {...formMethods}>
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form onSubmit={handleSubmit(onSubmit)} name="part3SectionForm">
           <Flex direction="column" gap={{ base: 6, xl: 6 }} pb={4}>
             <FormControl>
               <FormLabel>{t(`${i18nPrefix}.refAnnualThermalEnergyDemand.label`)}</FormLabel>

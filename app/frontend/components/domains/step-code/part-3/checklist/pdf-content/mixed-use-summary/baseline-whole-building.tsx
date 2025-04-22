@@ -9,7 +9,6 @@ interface IProps {
   requirements: IPart3ComplianceReport["performance"]["requirements"]
   compliance: IPart3ComplianceReport["performance"]["complianceSummary"]
   adjustedResults: IPart3ComplianceReport["performance"]["adjustedResults"]
-  prefix: string // Keep prefix for translation keys
 }
 
 // Define static translation keys based on the prefix structure used elsewhere
@@ -22,7 +21,7 @@ const i18nKeys = {
   totalEnergyUnits: "stepCode.part3.metrics.totalEnergy.units",
 } as const
 
-export const BaselineWholeBuildingPdf = ({ requirements, compliance, adjustedResults, prefix }: IProps) => {
+export const BaselineWholeBuildingPdf = ({ requirements, compliance, adjustedResults }: IProps) => {
   const requirementValue = requirements?.wholeBuilding?.totalEnergy
   const performanceValue = adjustedResults?.totalEnergy
   const isCompliant = !!compliance?.totalEnergy
