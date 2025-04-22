@@ -150,6 +150,7 @@ en:
       notify_new_or_unconfirmed_preview: "You’re Invited to Preview a Building Permit Template"
       notify_preview: "You’re Invited to Preview a Building Permit Template"
       notify_batched_integration_mapping: "New API mappings"
+      notify_api_key_status_change: "API Key for %{jurisdiction_name} is %{interval}"
   arbitrary_message_construct:
     devise:
       failure:
@@ -239,6 +240,9 @@ en:
       logout_success:
         title: Successfully logged out.
         message: ""
+      logout_error:
+        title: Oops
+        message: "There was an error logging out"
       registration_error:
         title: Account could not be created.
         message: "%{error_message}"
@@ -654,6 +658,7 @@ en:
       autofill_contact: "Autofill"
     requirement_block:
       optional_block_confirmation_requirement_label: "I acknowledge that all fields in this block are either complete, or not applicable."
+      documents_title: "Download related documents"
     requirement:
       multi_grid:
         default_add: "Add more"

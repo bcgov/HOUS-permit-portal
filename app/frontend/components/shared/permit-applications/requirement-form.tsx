@@ -4,15 +4,17 @@ import { observer } from "mobx-react-lite"
 import { ArrowSquareOut } from "@phosphor-icons/react"
 import { format } from "date-fns"
 import * as R from "ramda"
-import React, { useEffect, useRef, useState } from "react"
+import React, { useEffect, useMemo, useRef, useState } from "react"
 import { Trans, useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { useMountStatus } from "../../../hooks/use-mount-status"
 import { IPermitApplication } from "../../../models/permit-application"
 import { useMst } from "../../../setup/root"
+import { EFileUploadAttachmentType, EFlashMessageStatus } from "../../../types/enums"
 import { IErrorsBoxData } from "../../../types/types"
 import { getCompletedBlocksFromForm, getRequirementByKey } from "../../../utils/formio-component-traversal"
 import { singleRequirementFormJson, singleRequirementSubmissionData } from "../../../utils/formio-helpers"
+import { downloadFileFromStorage } from "../../../utils/utility-functions"
 import { CompareRequirementsBox } from "../../domains/permit-application/compare-requirements-box"
 import { ErrorsBox } from "../../domains/permit-application/errors-box"
 import { BuilderBottomFloatingButtons } from "../../domains/requirement-template/builder-bottom-floating-buttons"
@@ -58,8 +60,9 @@ export const RequirementForm = observer(
       formattedFormJson,
       isDraft,
       previousSubmissionVersion,
-      selectedPastSubmissionVersion,
+      selectedSubmissionVersion,
       isViewingPastRequests,
+      previousToSelectedSubmissionVersion,
       inboxEnabled,
       sandbox,
     } = permitApplication
@@ -69,7 +72,7 @@ export const RequirementForm = observer(
     const shouldShowDiff = permitApplication?.shouldShowApplicationDiff(isEditing)
     const userShouldSeeDiff = permitApplication?.currentUserShouldSeeApplicationDiff
 
-    const pastVersion = isViewingPastRequests ? selectedPastSubmissionVersion : previousSubmissionVersion
+    const pastVersion = previousToSelectedSubmissionVersion || previousSubmissionVersion
     const isMounted = useMountStatus()
     const { t } = useTranslation()
     const navigate = useNavigate()
@@ -85,6 +88,27 @@ export const RequirementForm = observer(
     const [previousSubmissionKey, setPreviousSubmissionKey] = useState(null)
     const [firstComponentKey, setFirstComponentKey] = useState(null)
     const [isCollapsedAll, setIsCollapsedAllState] = useState(false)
+
+    const currentSubmissionData = useMemo(() => {
+      return R.clone(submissionData)
+    }, [submissionData])
+
+    const pastClonedDataCache = useRef(new Map())
+
+    const displayedSubmissionData = useMemo(() => {
+      if (selectedSubmissionVersion) {
+        const cacheKey = selectedSubmissionVersion.id
+        if (pastClonedDataCache.current.has(cacheKey)) {
+          return pastClonedDataCache.current.get(cacheKey)
+        } else {
+          const clonedData = R.clone(selectedSubmissionVersion.submissionData)
+          pastClonedDataCache.current.set(cacheKey, clonedData)
+          return clonedData
+        }
+      } else {
+        return currentSubmissionData
+      }
+    }, [selectedSubmissionVersion, currentSubmissionData])
 
     const [unsavedSubmissionData, setUnsavedSubmissionData] = useState(() => R.clone(submissionData))
 
@@ -107,6 +131,11 @@ export const RequirementForm = observer(
         permitApplication.fetchDiff()
       }
     }, [])
+
+    useEffect(() => {
+      setUnsavedSubmissionData(displayedSubmissionData)
+      // We don't want to trigger a re-render if the permitApplication itself changes, only if the derived data changes
+    }, [displayedSubmissionData])
 
     useEffect(() => {
       // The box observers need to be re-registered whenever a panel is collapsed
@@ -184,14 +213,23 @@ export const RequirementForm = observer(
       onPreviousSubmissionOpen()
     }
 
+    const handleDownloadRequirementDocument = async (event) => {
+      downloadFileFromStorage({
+        model: EFileUploadAttachmentType.RequirementDocument,
+        modelId: event.detail.id,
+      })
+    }
+
     useEffect(() => {
       document.addEventListener("openStepCode", handleOpenStepCode)
       document.addEventListener("openAutofillContact", handleOpenContactAutofill)
       document.addEventListener("openPreviousSubmission", handleOpenPreviousSubmission)
+      document.addEventListener("downloadRequirementDocument", handleDownloadRequirementDocument)
       return () => {
         document.removeEventListener("openStepCode", handleOpenStepCode)
         document.removeEventListener("openAutofillContact", handleOpenContactAutofill)
         document.removeEventListener("openPreviousSubmission", handleOpenPreviousSubmission)
+        document.removeEventListener("downloadRequirementDocument", handleDownloadRequirementDocument)
       }
     }, [])
 
@@ -311,6 +349,7 @@ export const RequirementForm = observer(
       }
     }
     const showVersionDiffContactWarning = shouldShowDiff && !userShouldSeeDiff
+
     return (
       <>
         <Flex
@@ -360,17 +399,20 @@ export const RequirementForm = observer(
               description={t("permitApplication.show.revisionsWereRequested", {
                 date: format(permitApplication.revisionsRequestedAt, "MMM d, yyyy h:mm a"),
               })}
-              status="warning"
+              status={EFlashMessageStatus.warning}
             />
           )}
           {showVersionDiffContactWarning && (
-            <CustomMessageBox description={t("permitApplication.show.versionDiffContactWarning")} status="warning" />
+            <CustomMessageBox
+              description={t("permitApplication.show.versionDiffContactWarning")}
+              status={EFlashMessageStatus.warning}
+            />
           )}
           {!inboxEnabled && !sandbox && (
             <CustomMessageBox
               title={t("permitApplication.show.inboxDisabledTitle")}
               description={t("permitApplication.show.inboxDisabled")}
-              status="error"
+              status={EFlashMessageStatus.error}
             />
           )}
           {permitApplication?.isSubmitted ? (
@@ -379,7 +421,7 @@ export const RequirementForm = observer(
                 date: format(permitApplication.submittedAt, "MMM d, yyyy h:mm a"),
                 jurisdictionName: jurisdiction.qualifiedName,
               })}
-              status="info"
+              status={EFlashMessageStatus.info}
             />
           ) : (
             <CustomMessageBox
@@ -413,7 +455,7 @@ export const RequirementForm = observer(
                   }}
                 />
               }
-              status="info"
+              status={EFlashMessageStatus.info}
             />
           )}
           <Box bg="greys.grey03" p={3} borderRadius="sm">
@@ -471,7 +513,7 @@ export const RequirementForm = observer(
             requirementJson={singleRequirementFormJson(
               getRequirementByKey(pastVersion.formJson, previousSubmissionKey)
             )}
-            submissionJson={singleRequirementSubmissionData(pastVersion.submissionData, previousSubmissionKey)}
+            submissionData={singleRequirementSubmissionData(pastVersion.submissionData, previousSubmissionKey)}
           />
         )}
       </>

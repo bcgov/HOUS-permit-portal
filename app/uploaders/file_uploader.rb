@@ -2,16 +2,19 @@ class FileUploader < Shrine
   plugin :validation_helpers
 
   Attacher.validate do
-    validate_max_size Constants::Sizes::FILE_UPLOAD_MAX_SIZE * 1024 * 1024 #100 MB to start
-    #could be images, excel files, bims, we do not have an exhaustive list right now.
+    validate_max_size Constants::Sizes::FILE_UPLOAD_MAX_SIZE * 1024 * 1024 # 100 MB to start
+    # could be images, excel files, bims, we do not have an exhaustive list right now.
   end
 
   def generate_location(io, derivative: nil, **options)
     record = options[:record]
     if record
-      #The default is (supporting document) model, but we want to ignore it: model = record.class.name.underscore
-      parent_model = record.permit_application.class.name.underscore #permit application nesting
-      parent_id = record.permit_application.id
+      # If the record is a FileUploadAttachment or its subclass, use the attached_to interface
+      return unless record.is_a?(FileUploadAttachment)
+
+      parent_model = record.attached_to_model_name
+      parent_id = record.attached_to_id
+
       identifier = record.id || "temp" # Use 'temp' if record ID is nil
       # Construct the path with support for derivatives
       path = [parent_model, parent_id, identifier]

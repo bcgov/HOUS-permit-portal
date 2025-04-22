@@ -45,6 +45,19 @@ export interface IRequirementBlockParams {
   requirementsAttributes: IRequirementAttributes[]
   replaceBlockId?: string
   replaceOnTemplateId?: string
+  requirementDocumentsAttributes?: Array<{
+    id?: string
+    _destroy?: boolean
+    file: {
+      id: string
+      storage: string
+      metadata: {
+        size: number
+        filename: string
+        mimeType: string
+      }
+    }
+  }>
 }
 
 export interface ITemplateSectionBlockAttributes {

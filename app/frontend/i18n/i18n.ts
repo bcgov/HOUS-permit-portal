@@ -279,6 +279,7 @@ const options = {
           seeLiveButton: "See Live",
           invite: "Invite",
           public: "Public",
+          undo: "Undo",
         },
         notification: {
           title: "Notifications",
@@ -693,7 +694,7 @@ const options = {
             clickQuestion: "Click on the question(s) or requirement(s) you want the submitter to revise.",
             revision: {
               newRevision: "New revision",
-              pastRequests: "Past requests",
+              pastRequests: "Past submissions",
               reason: "Reason",
               reasonCode: "Reason code",
               revisionRequest: "Revision request",
@@ -900,9 +901,10 @@ const options = {
             firstNations: "First Nations",
             description: "Description",
             associations: "Associations",
-            formFields: "Form fields",
+            formFields: "Form Fields",
             updatedAt: "Updated at",
             requirementSku: "Requirement SKU",
+            requirementDocuments: "Related documents",
           },
           configurationsColumn: "Configurations",
           fieldDescriptions: {
@@ -1819,7 +1821,7 @@ const options = {
               description:
                 "Local jurisdictions can change building permit applications to fit their needs by adding elective fields and offering submitters practical tips. This helps make the application forms reflect the distinct regulations, standards, and requirements of each jurisdiction, so applicants provide the correct information needed by their area.",
               tipLabel: "Tip for submitters (optional)",
-              helpSectionLink: "Help Section link",
+              helpSectionLink: "Provide a URL for Submitters",
               filterLabel: "Search electives",
               sortLabel: "Sort by",
               filterPlaceholder: "Search electives",

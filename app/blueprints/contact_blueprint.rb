@@ -6,6 +6,7 @@ class ContactBlueprint < Blueprinter::Base
          :title,
          :department,
          :phone,
+         :email,
          :extension,
          :cell,
          :address,

@@ -18,7 +18,7 @@ import { SingleRequirementForm } from "../permit-applications/single-requirement
 
 export interface IPreviousSubmissionModalProps extends Partial<ReturnType<typeof useDisclosure>> {
   requirementJson: ISingleRequirementFormJson
-  submissionJson: any
+  submissionData: any
 }
 
 export const PreviousSubmissionModal: React.FC<IPreviousSubmissionModalProps> = ({
@@ -26,7 +26,7 @@ export const PreviousSubmissionModal: React.FC<IPreviousSubmissionModalProps> = 
   onOpen,
   onClose,
   requirementJson,
-  submissionJson,
+  submissionData,
 }) => {
   const { t } = useTranslation()
 
@@ -42,7 +42,7 @@ export const PreviousSubmissionModal: React.FC<IPreviousSubmissionModalProps> = 
           </Heading>
         </ModalHeader>
         <ModalBody>
-          <SingleRequirementForm requirementJson={requirementJson} submissionJson={submissionJson} />
+          <SingleRequirementForm requirementJson={requirementJson} submissionData={submissionData} />
           <ModalFooter>
             <Flex width="full" justify="center">
               <Button variant="secondary" onClick={onClose}>
