@@ -8,14 +8,11 @@ import { ErrorScreen } from "../../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../../shared/base/loading-screen"
 import { HomeScreenBox } from "../../home-screen-box"
 import { SectionBox } from "../../section-box"
-import { useMst } from "../../../../../setup/root"
-import { EUserRoles } from "../../../../../types/enums"
 
 export const ConfigurationManagementScreen = observer(function ConfigurationManagementScreen() {
   const i18nPrefix = "home.configurationManagement"
   const { currentJurisdiction, error } = useJurisdiction()
-  const { userStore } = useMst()
-  const { currentUser } = userStore
+  
   return error ? (
     <ErrorScreen error={error} />
   ) : (
@@ -47,25 +44,9 @@ export const ConfigurationManagementScreen = observer(function ConfigurationMana
                   <FormLabel>{t(`${i18nPrefix}.jurisdictionNameLabel`)}</FormLabel>
                   <Input bg="greys.white" value={currentJurisdiction.name} isDisabled />
                 </FormControl>
-                {/* TODO: what to show here? */}
-                {/* <FormControl>
-              <FormLabel>{t(`${i18nPrefix}.jurisdictionLocationLabel`)}</FormLabel>
-              <Input bg="greys.white" value={jurisdiction.boundryPoints} isDisabled />
-            </FormControl> */}
               </Flex>
             </SectionBox>
               <Grid templateColumns="repeat(2, 1fr)" gap={6}>
-                <GridItem>
-                  <HomeScreenBox
-                    title={t(`${i18nPrefix}.stepCodeRequirements.title`)}
-                    description={t(`${i18nPrefix}.stepCodeRequirements.description`)}
-                    linkText={t("ui.edit")}
-                    icon={<FileText size="24px" color="var(--chakra-colors-text-primary)" />}
-                    href="energy-step"
-                    h="full"
-                    disableForSandbox
-                  />
-                </GridItem>
                 <GridItem>
                   <HomeScreenBox
                     title={t(`${i18nPrefix}.externalApiKeys.title`)}
@@ -86,17 +67,7 @@ export const ConfigurationManagementScreen = observer(function ConfigurationMana
                     h="full"
                     disableForSandbox
                   />
-                </GridItem>
-                <GridItem>
-                  <HomeScreenBox
-                    title={t(`${i18nPrefix}.globalFeatureAccess.title`)}
-                    description={t(`${i18nPrefix}.globalFeatureAccess.description`)}
-                    linkText={t("ui.edit")}
-                    icon={<SlidersHorizontal size="24px" color="var(--chakra-colors-text-link)" />}
-                    href="global-feature-access"
-                    h="full"
-                  />
-                </GridItem>
+                </GridItem>    
               </Grid>
           </VStack>
         </Container>

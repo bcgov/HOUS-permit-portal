@@ -48,6 +48,11 @@ const ConfigurationManagementScreen = lazy(() =>
     default: module.ConfigurationManagementScreen,
   }))
 )
+const TechnicalSupportConfigurationManagementScreen = lazy(() =>
+  import("../home/technical-support/configuration-management-screen").then((module) => ({
+    default: module.ConfigurationManagementScreen,
+  }))
+)
 const EnergyStepRequirementsScreen = lazy(() =>
   import("../home/review-manager/configuration-management-screen/energy-step-requirements-screen").then((module) => ({
     default: module.EnergyStepRequirementsScreen,
@@ -405,14 +410,8 @@ const AppRoutes = observer(() => {
     <>
       <Route
         path="/jurisdictions/:jurisdictionId/configuration-management"
-        element={<ConfigurationManagementScreen />}
+        element={<TechnicalSupportConfigurationManagementScreen />}
       />
-      <Route path="/jurisdictions/:jurisdictionId/users" element={<JurisdictionUserIndexScreen />} />
-      {/* <Route path="/jurisdictions/:jurisdictionId/users/invite" element={<InviteScreen />} />
-      <Route path="/jurisdictions/:jurisdictionId/api-settings" element={<ExternalApiKeysIndexScreen />}>
-        <Route path="create" element={<ExternalApiKeyModalSubRoute />} />
-        <Route path=":externalApiKeyId/manage" element={<ExternalApiKeyModalSubRoute />} />
-      </Route> */}
     </>
   )
 

@@ -382,7 +382,7 @@ const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
                   {currentUser?.isReviewer && reviwerOnlyItems}
                   {currentUser?.isSubmitter && submitterOnlyItems}
                   {currentUser?.isReviewStaff && reviewStaffOnlyItems}
-                  {currentUser?.isTechnicalSupport}
+                  {currentUser?.isTechnicalSupport && reviewStaffOnlyItems}
                   {!currentUser?.isSubmitter && (
                     <>
                       <MenuItem bg="greys.grey03" onClick={(e) => navigate("/permit-applications/new")}>
