@@ -658,9 +658,9 @@ export interface IPart3SectionCompletionStatus {
 export type TPart3NavLinkKey = keyof IPart3SectionCompletionStatus
 export type TPart3NavSectionKey = "overview" | "compliance" | "results"
 
-interface IPart3ComplianceMetrics {
+// Define the base structure shared by both metric types
+interface IPart3ComplianceMetricsBase {
   modelled_floor_area?: string
-  tedi: string
   teui: string
   ghgi: string
   totalEnergy?: string
@@ -670,26 +670,42 @@ interface IPart3ComplianceMetrics {
   performanceRequirementAchieved?: EBaselinePerformanceRequirement
 }
 
-interface IPart3StepCodeComplianceRequirements {
-  areaWeightedTotals: IPart3ComplianceMetrics
-  occupanciesRequirements: IPart3ComplianceMetrics[]
-}
-interface IPart3ComplianceReportRequirements {
-  baselinePortions: IPart3ComplianceMetrics
-  stepCodePortions: IPart3StepCodeComplianceRequirements
-  wholeBuilding: IPart3ComplianceMetrics
+// Type where TEDI is expected to be a simple string (e.g., for requirements)
+export interface IPart3ComplianceMetrics extends IPart3ComplianceMetricsBase {
+  tedi: string
 }
 
+// Type where TEDI can be an object with an optional wholeBuilding property (e.g., for adjustedResults, complianceSummary)
+export interface IPart3ComplianceMetricsNestedTEDI extends IPart3ComplianceMetricsBase {
+  tedi?: {
+    wholeBuilding?: string
+    stepCodePortion?: string
+  }
+}
+
+interface IPart3StepCodeComplianceRequirements {
+  areaWeightedTotals: IPart3ComplianceMetrics // Assuming string tedi, adjust if needed
+  occupanciesRequirements: IPart3ComplianceMetrics[] // Assuming string tedi, adjust if needed
+}
+// Update IPart3ComplianceReportRequirements to use the specific type for wholeBuilding
+interface IPart3ComplianceReportRequirements {
+  baselinePortions: IPart3ComplianceMetrics // Assuming string tedi, adjust if needed
+  stepCodePortions: IPart3StepCodeComplianceRequirements // References IPart3ComplianceMetrics
+  wholeBuilding: IPart3ComplianceMetrics // Use the type with string tedi
+}
+
+// Update IPart3ComplianceReportPerformance to use the correct types
 interface IPart3ComplianceReportPerformance {
   requirements: IPart3ComplianceReportRequirements
-  resultsAsModelled: IPart3ComplianceMetrics
-  corridorPressurizedAdjustment: IPart3ComplianceMetrics
-  suiteSubMeteringAdjustment: IPart3ComplianceMetrics
-  adjustedResults: IPart3ComplianceMetrics
-  complianceSummary: IPart3ComplianceMetrics
+  // Assuming these also use the nested structure based on adjusted/compliance. Adjust if needed.
+  resultsAsModelled: IPart3ComplianceMetricsNestedTEDI
+  corridorPressurizedAdjustment: IPart3ComplianceMetricsNestedTEDI
+  suiteSubMeteringAdjustment: IPart3ComplianceMetricsNestedTEDI
+  // Explicitly use the nested TEDI type based on component usage
+  adjustedResults: IPart3ComplianceMetricsNestedTEDI
+  complianceSummary: IPart3ComplianceMetricsNestedTEDI
 }
 
 export interface IPart3ComplianceReport {
-  // occupancies: IPart3ComplianceMetrics[]
   performance: IPart3ComplianceReportPerformance
 }

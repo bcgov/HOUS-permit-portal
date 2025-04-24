@@ -40,15 +40,22 @@ export const Contact = observer(() => {
   const location = useLocation()
 
   const onSubmit = handleSubmit(async (values) => {
-    const updated = await checklist?.update(values)
+    if (!checklist) return
 
+    const alternatePath = checklist.alternateNavigateAfterSavePath
+    checklist.setAlternateNavigateAfterSavePath(null)
+
+    const updated = await checklist.update(values)
     if (!updated) {
       return
     }
+    await checklist.completeSection("contact")
 
-    await checklist?.completeSection("contact")
-
-    navigate(location.pathname.replace("contact", "requirements-summary"))
+    if (alternatePath) {
+      navigate(alternatePath)
+    } else {
+      navigate(location.pathname.replace("contact", "requirements-summary"))
+    }
   })
 
   return (
@@ -62,7 +69,7 @@ export const Contact = observer(() => {
       </Text>
 
       <FormProvider {...formMethods}>
-        <Box as="form" onSubmit={onSubmit} mt={9} maxW="26.875rem">
+        <Box as="form" onSubmit={onSubmit} mt={9} maxW="26.875rem" name="part3SectionForm">
           <Stack direction="column" spacing={7}>
             <TextFormControl fieldName="completedByName" label={t(`${i18nPrefix}.fields.completedByName`)} required />
             <TextFormControl fieldName="completedByTitle" label={t(`${i18nPrefix}.fields.completedByTitle`)} required />

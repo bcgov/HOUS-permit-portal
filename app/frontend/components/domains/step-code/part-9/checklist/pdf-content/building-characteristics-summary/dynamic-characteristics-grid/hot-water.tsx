@@ -1,7 +1,7 @@
 import { Text } from "@react-pdf/renderer"
 import { t } from "i18next"
 import React from "react"
-import { IStepCodeChecklist } from "../../../../../../../../models/part-9-step-code-checklist"
+import { IPart9StepCodeChecklist } from "../../../../../../../../models/part-9-step-code-checklist"
 import { theme } from "../../../../../../../../styles/theme"
 import { EHotWaterPerformanceType } from "../../../../../../../../types/enums"
 import { generateUUID } from "../../../../../../../../utils/utility-functions"
@@ -10,7 +10,7 @@ import { Field } from "../../shared/field"
 import { GridItem } from "../../shared/grid-item"
 import { HStack } from "../../shared/h-stack"
 interface IProps {
-  checklist: IStepCodeChecklist
+  checklist: IPart9StepCodeChecklist
 }
 export function HotWater({ checklist }: IProps) {
   return (

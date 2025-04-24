@@ -20,7 +20,7 @@ export const BaselineEnergyPerformance = observer(function BaselineEnergyPerform
         </FormLabel>
         <Input
           maxW={"124px"}
-          value={t(`stepCode.part3.performanceRequirements.${occupancy.performanceRequirement}`)}
+          value={t(`stepCode.part3.performanceRequirements.${occupancy?.performanceRequirement}`)}
           isDisabled
         />
       </FormControl>

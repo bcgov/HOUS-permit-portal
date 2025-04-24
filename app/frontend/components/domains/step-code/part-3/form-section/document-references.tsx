@@ -120,6 +120,11 @@ export const DocumentReferences = observer(function DocumentaReferences() {
 
   const onSubmit = formMethods.handleSubmit(
     async ({ defaultDocumentReferencesAttributes, otherDocumentReferencesAttributes }) => {
+      if (!checklist) return
+
+      const alternatePath = checklist.alternateNavigateAfterSavePath
+      checklist.setAlternateNavigateAfterSavePath(null)
+
       const documentReferences = [...defaultDocumentReferencesAttributes, ...otherDocumentReferencesAttributes]
       const deletedDocumentReferences = (checklist?.documentReferences ?? [])
         .filter((documentReference) => !documentReferences.some((d) => d.id === documentReference.id))
@@ -133,7 +138,12 @@ export const DocumentReferences = observer(function DocumentaReferences() {
 
       if (updated) {
         await checklist?.completeSection("documentReferences")
-        navigate(location.pathname.replace("document-references", "performance-characteristics"))
+
+        if (alternatePath) {
+          navigate(alternatePath)
+        } else {
+          navigate(location.pathname.replace("document-references", "performance-characteristics"))
+        }
       }
     }
   )
@@ -165,7 +175,7 @@ export const DocumentReferences = observer(function DocumentaReferences() {
       </Heading>
 
       <FormProvider {...formMethods}>
-        <Box as="form" onSubmit={onSubmit}>
+        <Box as="form" onSubmit={onSubmit} name="part3SectionForm">
           <Accordion
             index={openAccordionIndexes}
             onChange={setOpenAccordionIndexes}

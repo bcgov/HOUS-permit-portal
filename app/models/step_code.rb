@@ -16,4 +16,13 @@ class StepCode < ApplicationRecord
   def builder
     "" #replace with a config on permit application
   end
+
+  def blueprint
+    raise NotImplementedError, "Subclasses must implement the blueprint method"
+  end
+
+  def checklist_blueprint
+    raise NotImplementedError,
+          "Subclasses must implement the checklist_blueprint method"
+  end
 end

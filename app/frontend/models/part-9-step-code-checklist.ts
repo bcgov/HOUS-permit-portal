@@ -10,6 +10,7 @@ import {
   EStepCodeEPCTestingTargetType,
 } from "../types/enums"
 import { renameKeys } from "../utils/utility-functions"
+import { Part9StepCodeType } from "./part-9-step-code"
 import { StepCodeBuildingCharacteristicsSummaryModel } from "./step-code-building-characteristic-summary"
 import { StepCodeComplianceReportModel } from "./step-code-compliance-report"
 
@@ -70,6 +71,12 @@ export const Part9StepCodeChecklistModel = types.snapshotProcessor(
     })
     .extend(withEnvironment())
     .views((self) => ({
+      get stepCodeType() {
+        return Part9StepCodeType
+      },
+      get dwellingUnitsCount() {
+        return self.selectedReport?.energy?.dwellingUnitsCount
+      },
       get defaultFormValues() {
         const snapshot = getSnapshot(self)
         return renameKeys(

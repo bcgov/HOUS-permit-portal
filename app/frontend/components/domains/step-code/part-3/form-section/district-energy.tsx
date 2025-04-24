@@ -78,7 +78,7 @@ export const DistrictEnergy = observer(function Part3StepCodeFormDistrictEnergy(
         {!isValid && isSubmitted && <CustomMessageBox title={t("stepCode.part3.errorTitle")} status="error" />}
         <SectionHeading>{t(`${i18nPrefix}.heading`)}</SectionHeading>
       </Flex>
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form onSubmit={handleSubmit(onSubmit)} name="part3SectionForm">
         <Flex direction="column" gap={{ base: 6, xl: 6 }} pb={4}>
           <FormControl>
             <FormLabel>{t(`${i18nPrefix}.isRelevant`)}</FormLabel>

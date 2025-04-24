@@ -39,17 +39,28 @@ export const LocationDetails = observer(function Part3StepCodeFormLocationDetail
   const { isSubmitting, isValid, isSubmitted, errors } = formState
 
   const onSubmit = async (values) => {
+    if (!checklist) return
+
+    const alternatePath = checklist.alternateNavigateAfterSavePath
+    checklist.setAlternateNavigateAfterSavePath(null)
+
     const updated = await checklist.update(values)
+
     if (updated) {
       await checklist.completeSection("locationDetails")
-    }
 
-    navigate(location.pathname.replace("location-details", "baseline-occupancies"))
+      if (alternatePath) {
+        navigate(alternatePath)
+      } else {
+        navigate(location.pathname.replace("location-details", "baseline-occupancies"))
+      }
+    } else {
+      console.error("Update failed for location details")
+    }
   }
 
   useEffect(() => {
     if (isSubmitted) {
-      // reset form state to prevent message box from showing again until form is resubmitted
       reset(undefined, { keepDirtyValues: true, keepErrors: true })
     }
   }, [isValid])
@@ -61,7 +72,7 @@ export const LocationDetails = observer(function Part3StepCodeFormLocationDetail
         <SectionHeading>{t(`${i18nPrefix}.heading`)}</SectionHeading>
         <Text fontSize="md">{t(`${i18nPrefix}.instructions`)}</Text>
       </Flex>
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form onSubmit={handleSubmit(onSubmit)} name="part3SectionForm">
         <Flex direction="column" gap={{ base: 6, xl: 6 }} pb={4}>
           <FormControl>
             <FormLabel>{t(`${i18nPrefix}.aboveGradeStories.label`)}</FormLabel>

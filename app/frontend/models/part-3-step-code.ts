@@ -18,7 +18,11 @@ export const Part3StepCodeModel = types
   .extend(withEnvironment())
   .extend(withRootStore())
   .extend(withMerge())
-  .views((self) => ({}))
+  .views((self) => ({
+    get checklistForPdf() {
+      return self.checklist
+    },
+  }))
   .views((self) => ({}))
   .actions((self) => ({}))
 

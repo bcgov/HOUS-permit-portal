@@ -17,17 +17,29 @@ export const StepCodeSummary = observer(function StepCodeSummary() {
   const { permitApplicationId } = useParams()
   const navigate = useNavigate()
   const location = useLocation()
-  const isMixedUse = checklist.stepCodeOccupancies.length + checklist.baselineOccupancies.length > 1
-  const isBaseline = checklist.stepCodeOccupancies.length == 0
+  const isMixedUse = checklist.isMixedUse
+  const isBaseline = checklist.isBaseline
 
   const { handleSubmit, formState } = useForm()
   const { isSubmitting } = formState
 
   const onSubmit = async () => {
-    await checklist.completeSection("requirementsSummary")
+    if (!checklist) return
 
-    // TODO: early access navigate?
-    permitApplicationId && navigate(`/permit-applications/${permitApplicationId}/edit`)
+    const alternatePath = checklist.alternateNavigateAfterSavePath
+    checklist.setAlternateNavigateAfterSavePath(null)
+
+    const updateSucceeded = await checklist.completeSection("stepCodeSummary")
+
+    if (updateSucceeded) {
+      if (alternatePath) {
+        navigate(alternatePath)
+      } else {
+        permitApplicationId && navigate(`/permit-applications/${permitApplicationId}/edit`)
+      }
+    } else {
+      console.error("Failed to complete stepCodeSummary section")
+    }
   }
 
   const stepCodeOccupanciesPath = checklist.isComplete("stepCodeOccupancies")
@@ -69,7 +81,7 @@ export const StepCodeSummary = observer(function StepCodeSummary() {
           <MixedUsePerformance />
         </Flex>
       )}
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form onSubmit={handleSubmit(onSubmit)} name="part3SectionForm">
         <FormControl>
           <Button type="submit" variant="primary" isLoading={isSubmitting} isDisabled={isSubmitting}>
             {t(`${i18nPrefix}.cta`)}

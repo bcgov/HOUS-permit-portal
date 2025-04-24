@@ -47,10 +47,14 @@ export const StepCodeOccupancies = observer(function Part3StepCodeFormStepCodeOc
   const { isSubmitting, isValid, isSubmitted, errors } = formState
 
   const onSubmit = async (values) => {
-    if (!isValid) return
+    if (!checklist) return
 
+    const alternatePath = checklist.alternateNavigateAfterSavePath
+    checklist.setAlternateNavigateAfterSavePath(null)
+
+    let updateSucceeded = false
+    if (!isValid) return
     if (isRelevant == "no") {
-      // update the checklist to remove stepCode occupancies if there are any
       const updated =
         R.isEmpty(checklist.stepCodeOccupancies) ||
         (await checklist.update({
@@ -61,11 +65,11 @@ export const StepCodeOccupancies = observer(function Part3StepCodeFormStepCodeOc
           stepCodeOccupancies: { complete: true },
           stepCodePerformanceRequirements: { relevant: false },
         })
+        updateSucceeded = true
       } else {
         return
       }
     } else {
-      // create new selections, keep existing selections, delete removed selections
       const newSelections = values.stepCodeOccupancies
         .filter((ocKey) => !checklist.stepCodeOccupancies.map((oc) => oc.key).includes(ocKey))
         .map((ocKey) => ({ key: ocKey }))
@@ -75,7 +79,6 @@ export const StepCodeOccupancies = observer(function Part3StepCodeFormStepCodeOc
       const deletedSelections = checklist.stepCodeOccupancies
         .filter((oc) => !values.stepCodeOccupancies.includes(oc.key))
         .map((oc) => ({ id: oc.id, _destroy: true }))
-
       values.stepCodeOccupanciesAttributes = [...newSelections, ...existingSelections, ...deletedSelections]
       delete values.stepCodeOccupancies
 
@@ -85,19 +88,24 @@ export const StepCodeOccupancies = observer(function Part3StepCodeFormStepCodeOc
           stepCodeOccupancies: { complete: true },
           stepCodePerformanceRequirements: { relevant: true },
         })
+        updateSucceeded = true
       } else {
         return
       }
     }
 
-    const nextSectionPath = isRelevant == "yes" ? "step-code-performance-requirements" : "modelled-outputs"
-
-    navigate(location.pathname.replace("step-code-occupancies", nextSectionPath))
+    if (updateSucceeded) {
+      if (alternatePath) {
+        navigate(alternatePath)
+      } else {
+        const nextSectionPath = isRelevant == "yes" ? "step-code-performance-requirements" : "modelled-outputs"
+        navigate(location.pathname.replace("step-code-occupancies", nextSectionPath))
+      }
+    }
   }
 
   useEffect(() => {
     if (isSubmitted) {
-      // reset form state to prevent message box from showing again until form is resubmitted
       reset(undefined, { keepDirtyValues: true, keepErrors: true })
     }
   }, [isValid])
@@ -116,7 +124,7 @@ export const StepCodeOccupancies = observer(function Part3StepCodeFormStepCodeOc
           }}
         />
       </Flex>
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form onSubmit={handleSubmit(onSubmit)} name="part3SectionForm">
         <Flex direction="column" gap={{ base: 6, xl: 6 }} pb={4}>
           <FormControl>
             <FormLabel>{t(`${i18nPrefix}.isRelevant`)}</FormLabel>

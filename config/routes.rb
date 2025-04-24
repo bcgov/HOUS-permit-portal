@@ -227,7 +227,7 @@ Rails.application.routes.draw do
 
     namespace :part_3_building do
       resources :step_codes, only: %i[create], shallow: true do
-        resources :checklists, only: %i[update]
+        resources :checklists, only: %i[show update]
       end
     end
 

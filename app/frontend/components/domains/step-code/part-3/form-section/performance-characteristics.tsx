@@ -103,16 +103,26 @@ export const PerformanceCharacteristics = observer(function Part3StepCodeFormPer
   }, [watchWindowEffective])
 
   const onSubmit = async (values) => {
+    if (!checklist) return
+
+    const alternatePath = checklist.alternateNavigateAfterSavePath
+    checklist.setAlternateNavigateAfterSavePath(null)
+
     const updated = await checklist.update(values)
+
     if (updated) {
       await checklist.completeSection("performanceCharacteristics")
-      navigate(location.pathname.replace("performance-characteristics", "hvac"))
+
+      if (alternatePath) {
+        navigate(alternatePath)
+      } else {
+        navigate(location.pathname.replace("performance-characteristics", "hvac"))
+      }
     }
   }
 
   useEffect(() => {
     if (isSubmitted) {
-      // reset form state to prevent message box from showing again until form is resubmitted
       reset(undefined, { keepDirtyValues: true, keepErrors: true })
     }
   }, [isValid])
@@ -130,7 +140,7 @@ export const PerformanceCharacteristics = observer(function Part3StepCodeFormPer
         <SectionHeading>{t(`${i18nPrefix}.heading`)}</SectionHeading>
       </Flex>
       <FormProvider {...formMethods}>
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form onSubmit={handleSubmit(onSubmit)} name="part3SectionForm">
           <Flex direction="column" gap={{ base: 6, xl: 6 }} pb={4}>
             <FormControl>
               <FormLabel pb={1}>{t(`${i18nPrefix}.software.label`)}</FormLabel>
@@ -188,7 +198,10 @@ export const PerformanceCharacteristics = observer(function Part3StepCodeFormPer
                   validate: (value) => value === true || value === false || t(`${i18nPrefix}.ventilation.error`),
                 }}
                 render={({ field: { value, onChange } }) => (
-                  <RadioGroup onChange={(val) => onChange(val === "yes")} value={value ? "yes" : "no"}>
+                  <RadioGroup
+                    onChange={(val) => onChange(val === "yes")}
+                    value={value === true ? "yes" : value === false ? "no" : undefined}
+                  >
                     <Stack spacing={5} direction="row">
                       <Radio variant="binary" value={"yes"}>
                         {t("ui.yes")}

@@ -42,21 +42,32 @@ export const BaselineDetails = observer(function Part3StepCodeFormBaselineDetail
   const { isSubmitting, isValid, isSubmitted } = formState
 
   const onSubmit = async (values) => {
-    if (!isValid) return
+    if (!checklist) return
 
+    const alternatePath = checklist.alternateNavigateAfterSavePath
+    checklist.setAlternateNavigateAfterSavePath(null)
+
+    let updateSucceeded = false
+    if (!isValid) return
     const updated = await checklist.update(values)
     if (updated) {
       await checklist.completeSection("baselineDetails")
+      updateSucceeded = true
     } else {
       return
     }
 
-    navigate(location.pathname.replace("baseline-details", "district-energy"))
+    if (updateSucceeded) {
+      if (alternatePath) {
+        navigate(alternatePath)
+      } else {
+        navigate(location.pathname.replace("baseline-details", "district-energy"))
+      }
+    }
   }
 
   useEffect(() => {
     if (isSubmitted) {
-      // reset form state to prevent message box from showing again until form is resubmitted
       reset(undefined, { keepDirtyValues: true, keepErrors: true })
     }
   }, [isValid])
@@ -73,7 +84,7 @@ export const BaselineDetails = observer(function Part3StepCodeFormBaselineDetail
         </Flex>
       </Flex>
       <FormProvider {...formMethods}>
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form onSubmit={handleSubmit(onSubmit)} name="part3SectionForm">
           <Flex direction="column" gap={{ base: 6, xl: 6 }} pb={4}>
             <Accordion defaultIndex={[...Array(checklist.baselineOccupancies.length).keys()]} allowMultiple>
               {checklist.baselineOccupancies.map((oc, idx) => (

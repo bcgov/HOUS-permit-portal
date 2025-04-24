@@ -13,6 +13,10 @@ class Part9StepCode < StepCode
   before_create :set_plan_fields
   # validate :requires_plan_document
 
+  def primary_checklist
+    pre_construction_checklist
+  end
+
   def blueprint
     Part9StepCodeBlueprint
   end
@@ -29,6 +33,10 @@ class Part9StepCode < StepCode
     permit_application.step_code_plan_author != plan_author ||
       permit_application.step_code_plan_version != plan_version ||
       permit_application.step_code_plan_date != plan_date
+  end
+
+  def checklist_blueprint
+    StepCode::Part9::ChecklistBlueprint
   end
 
   private

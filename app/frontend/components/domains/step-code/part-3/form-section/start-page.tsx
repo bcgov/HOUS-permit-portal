@@ -19,9 +19,20 @@ export const StartPage = observer(function Part3StepCodeFormStartPage() {
   const { isSubmitting } = formState
 
   const onSubmit = async () => {
-    await checklist.completeSection("start")
+    if (!checklist) return
 
-    navigate(location.pathname.replace("start", "project-details"))
+    const alternatePath = checklist.alternateNavigateAfterSavePath
+    checklist.setAlternateNavigateAfterSavePath(null)
+
+    const updateSucceeded = await checklist.completeSection("start")
+
+    if (updateSucceeded) {
+      if (alternatePath) {
+        navigate(alternatePath)
+      } else {
+        navigate(location.pathname.replace("start", "project-details"))
+      }
+    }
   }
 
   return (
@@ -43,7 +54,7 @@ export const StartPage = observer(function Part3StepCodeFormStartPage() {
           />
         </Box>
       </Flex>
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form onSubmit={handleSubmit(onSubmit)} name="part3SectionForm">
         <Button type="submit" variant="primary" isLoading={isSubmitting} isDisabled={isSubmitting}>
           {t("stepCode.part3.cta")}
         </Button>
