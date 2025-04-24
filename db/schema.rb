@@ -34,10 +34,13 @@ ActiveRecord::Schema[7.1].define(version: 2025_04_10_174655) do
                default: -> { "gen_random_uuid()" },
                force: :cascade do |t|
     t.uuid "external_api_key_id", null: false
-    t.integer "notification_interval_days"
-    t.datetime "sent_at"
+    t.integer "notification_interval_days", null: false
+    t.datetime "sent_at", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index %w[external_api_key_id notification_interval_days],
+            name: "idx_api_key_expiration_notifications_on_key_id_and_interval",
+            unique: true
     t.index ["external_api_key_id"],
             name:
               "index_api_key_expiration_notifications_on_external_api_key_id"

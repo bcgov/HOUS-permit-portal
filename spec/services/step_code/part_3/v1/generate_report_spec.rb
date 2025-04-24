@@ -120,6 +120,7 @@ RSpec.describe StepCode::Part3::V1::GenerateReport do
               step_code_portion: true
             },
             ghgi: true,
+            performance_requirement_achieved: nil,
             total_energy: nil,
             energy_step_achieved: 4,
             zero_carbon_step_achieved: 4
@@ -334,6 +335,7 @@ RSpec.describe StepCode::Part3::V1::GenerateReport do
               step_code_portion: true
             },
             ghgi: true,
+            performance_requirement_achieved: nil,
             total_energy: nil,
             energy_step_achieved: 4,
             zero_carbon_step_achieved: 4
