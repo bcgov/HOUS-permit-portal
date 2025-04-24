@@ -1,14 +1,6 @@
 class Api::Part9Building::ChecklistsController < Api::ApplicationController
   before_action :set_and_authorize_checklist, only: %i[show update]
 
-  def index
-    @step_code_checklists =
-      policy_scope(Part9StepCode::Checklist).where(
-        step_code_id: params[:step_code_id]
-      )
-    render_success @step_code_checklists
-  end
-
   def show
     render_success @step_code_checklist,
                    nil,

@@ -35,9 +35,6 @@ export const Part3NavLinks = function Part3StepCodeNavLinks() {
       <Button variant="secondary" onClick={handleSave}>
         {t("stepCode.saveAndGoBack")}
       </Button>
-      <Button variant="primary" type="submit">
-        {t("stepCode.markAsComplete")}
-      </Button>
     </HStack>
   )
 }
