@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_12_20_235808) do
+ActiveRecord::Schema[7.1].define(version: 2025_04_10_174655) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -27,6 +27,20 @@ ActiveRecord::Schema[7.1].define(version: 2024_12_20_235808) do
     t.datetime "updated_at", null: false
     t.index ["jti"], name: "index_allowlisted_jwts_on_jti", unique: true
     t.index ["user_id"], name: "index_allowlisted_jwts_on_user_id"
+  end
+
+  create_table "api_key_expiration_notifications",
+               id: :uuid,
+               default: -> { "gen_random_uuid()" },
+               force: :cascade do |t|
+    t.uuid "external_api_key_id", null: false
+    t.integer "notification_interval_days"
+    t.datetime "sent_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["external_api_key_id"],
+            name:
+              "index_api_key_expiration_notifications_on_external_api_key_id"
   end
 
   create_table "assets",
@@ -600,6 +614,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_12_20_235808) do
     t.boolean "enable_email_collaboration_notification", default: true
     t.boolean "enable_in_app_integration_mapping_notification", default: true
     t.boolean "enable_email_integration_mapping_notification", default: true
+    t.boolean "enable_in_app_unmapped_api_notification", default: true
+    t.boolean "enable_email_unmapped_api_notification", default: true
     t.index ["user_id"], name: "index_preferences_on_user_id"
   end
 
@@ -625,6 +641,18 @@ ActiveRecord::Schema[7.1].define(version: 2024_12_20_235808) do
             name: "index_requirement_blocks_on_name_and_first_nations",
             unique: true
     t.index ["sku"], name: "index_requirement_blocks_on_sku", unique: true
+  end
+
+  create_table "requirement_documents",
+               id: :uuid,
+               default: -> { "gen_random_uuid()" },
+               force: :cascade do |t|
+    t.uuid "requirement_block_id", null: false
+    t.jsonb "file_data"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["requirement_block_id"],
+            name: "index_requirement_documents_on_requirement_block_id"
   end
 
   create_table "requirement_template_sections",
@@ -718,7 +746,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_12_20_235808) do
                force: :cascade do |t|
     t.string "reason_code", limit: 64
     t.jsonb "requirement_json"
-    t.jsonb "submission_json"
+    t.jsonb "submission_data"
     t.string "comment", limit: 350
     t.uuid "submission_version_id", null: false
     t.uuid "user_id", null: false
@@ -783,6 +811,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_12_20_235808) do
             null: false
     t.jsonb "revision_reason_options"
     t.uuid "small_scale_requirement_template_id"
+    t.boolean "inbox_enabled", default: false, null: false
     t.index ["small_scale_requirement_template_id"],
             name: "idx_on_small_scale_requirement_template_id_235b636c86"
   end
@@ -1085,6 +1114,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_12_20_235808) do
   end
 
   add_foreign_key "allowlisted_jwts", "users", on_delete: :cascade
+  add_foreign_key "api_key_expiration_notifications", "external_api_keys"
   add_foreign_key "collaborators", "users"
   add_foreign_key "document_references",
                   "part_3_step_code_checklists",
@@ -1144,6 +1174,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_12_20_235808) do
                   "permit_classifications",
                   column: "permit_type_id"
   add_foreign_key "preferences", "users"
+  add_foreign_key "requirement_documents", "requirement_blocks"
   add_foreign_key "requirement_template_sections",
                   "requirement_template_sections",
                   column: "copied_from_id"

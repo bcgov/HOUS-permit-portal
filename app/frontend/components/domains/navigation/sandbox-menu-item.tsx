@@ -20,6 +20,8 @@ import * as R from "ramda"
 import React, { useState } from "react"
 import { Trans, useTranslation } from "react-i18next"
 import { useMst } from "../../../setup/root"
+import { EFlashMessageStatus } from "../../../types/enums"
+import { CustomMessageBox } from "../../shared/base/custom-message-box"
 import { SandboxSelect } from "../../shared/select/selectors/sandbox-select"
 
 export const SandboxMenuItem: React.FC = observer(() => {
@@ -34,16 +36,16 @@ export const SandboxMenuItem: React.FC = observer(() => {
 
   // Handler for toggling the switch
   const handleToggle = () => {
-    if (!isSandboxActive) {
-      onOpen() // Open modal to confirm turning on
-    } else {
-      clearSandboxId() // Directly turn off
-    }
+    onOpen() // Open modal in both cases
   }
 
   // Handler for confirming turning on the switch
   const handleConfirm = () => {
-    setCurrentSandboxId(selectedOption)
+    if (isSandboxActive) {
+      clearSandboxId() // Turn off sandbox mode
+    } else {
+      setCurrentSandboxId(selectedOption) // Turn on sandbox mode
+    }
     onClose()
   }
 
@@ -63,34 +65,54 @@ export const SandboxMenuItem: React.FC = observer(() => {
       <Modal isOpen={isOpen} onClose={onClose} size="xl">
         <ModalOverlay />
         <ModalContent p={6}>
-          <ModalHeader>{t("sandbox.switch.title")}</ModalHeader>
+          <ModalHeader>{isSandboxActive ? t("sandbox.switch.leaveTitle") : t("sandbox.switch.title")}</ModalHeader>
           <ModalBody>
-            <Text>{t("sandbox.switch.description")}</Text>
-            <UnorderedList mt={2}>
-              {(t("sandbox.switch.descriptionList", { returnObjects: true }) as string[]).map((item, index) => (
-                <ListItem key={index}>{item}</ListItem>
-              ))}
-            </UnorderedList>
+            {isSandboxActive ? (
+              // Content for leaving sandbox mode
+              <CustomMessageBox
+                p={4}
+                status={EFlashMessageStatus.special}
+                title={t(`sandbox.switch.warningTitle`)}
+                description={t(`sandbox.switch.leaveWarning`)}
+              />
+            ) : (
+              // Content for entering sandbox mode
+              <>
+                <Text my={4}>{t("sandbox.switch.description")}</Text>
+                <UnorderedList mt={2}>
+                  {(t("sandbox.switch.descriptionList", { returnObjects: true }) as string[]).map((item, index) => (
+                    <ListItem key={index}>{item}</ListItem>
+                  ))}
+                </UnorderedList>
 
-            <Text mt={4}>{t("sandbox.switch.choicesAvailable")}</Text>
-            <UnorderedList my={2}>
-              <ListItem>
-                <Trans i18nKey="sandbox.switch.publishedDescription" />
-              </ListItem>
-              <ListItem>
-                <Trans i18nKey="sandbox.switch.scheduledDescription" />
-              </ListItem>
-            </UnorderedList>
+                <Text mt={4}>{t("sandbox.switch.choicesAvailable")}</Text>
+                <UnorderedList my={2}>
+                  <ListItem>
+                    <Trans i18nKey="sandbox.switch.publishedDescription" />
+                  </ListItem>
+                  <ListItem>
+                    <Trans i18nKey="sandbox.switch.scheduledDescription" />
+                  </ListItem>
+                </UnorderedList>
 
-            <Text fontWeight="bold" mt={4}>
-              {t("ui.select")}
-            </Text>
-            <SandboxSelect onChange={setSelectedOption} value={selectedOption} options={sandboxOptions} />
+                <Text fontWeight="bold" mt={4}>
+                  {t("ui.select")}
+                </Text>
+                <SandboxSelect onChange={setSelectedOption} value={selectedOption} options={sandboxOptions} />
+                <CustomMessageBox
+                  mt={6}
+                  p={4}
+                  status={EFlashMessageStatus.special}
+                  title={t(`sandbox.switch.warningTitle`)}
+                  description={t(`sandbox.switch.warning`)}
+                />
+              </>
+            )}
           </ModalBody>
           <ModalFooter mt={4}>
             <Flex w="full" gap={4}>
               <Button onClick={handleConfirm} variant="primary">
-                {t("sandbox.switch.continue")}
+                {isSandboxActive ? t("sandbox.switch.leave") : t("sandbox.switch.continue")}
               </Button>
               <Button onClick={onClose} variant="secondary">
                 {t("ui.neverMind")}

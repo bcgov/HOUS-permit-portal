@@ -74,11 +74,11 @@ Shrine.plugin :presign_endpoint,
                     content_disposition:
                       ContentDisposition.attachment(filename),
                     content_type: type
+                    # content_length_range: [0, 10 * 1024 * 1024] # limit upload size to 10 MB
                     # content_md5: request.params["checksum"],
                     # transfer_encoding: "chunked",
                   }
                 }
-Shrine.plugin :uppy_s3_multipart if SHRINE_USE_S3
 
 class Shrine::Storage::S3
   #https://github.com/transloadit/uppy/blob/960362b373666b18a6970f3778ee1440176975af/packages/%40uppy/companion/src/server/controllers/s3.js#L105

@@ -9,7 +9,7 @@ class PermitCollaboration < ApplicationRecord
 
   after_initialize :set_default_collaboration_type
   after_save :reindex_permit_application
-  after_destroy :send_unassignment_notification
+  after_destroy :send_unassignment_notification, :reindex_permit_application
 
   validates :permit_application_id,
             uniqueness: {

@@ -417,6 +417,10 @@
       a {
         text-decoration: underline;
       }
+
+      .address-autocomplete-container input {
+        max-width: var(--chakra-sizes-container-lg);
+      }
     }
   }
 
@@ -743,6 +747,47 @@
     }
   }
 
+  div.requirement-document-download-button {
+    margin-top: 0;
+  }
+
+  div.requirement-document-download-button-container {
+    border-bottom: 1px solid var(--chakra-colors-border-light);
+    padding-bottom: var(--chakra-space-4);
+    margin-left: calc(-1 * var(--chakra-space-6));
+    margin-right: calc(-1 * var(--chakra-space-6));
+    padding-left: var(--chakra-space-6);
+    padding-right: var(--chakra-space-6);
+
+    .btn.requirement-document-download-button {
+      text-transform: none;
+      position: relative;
+      padding-left: 35px;
+      background: none;
+      border: none;
+      color: $bcgov-link;
+      text-decoration: none;
+      font-weight: normal;
+
+      &:hover {
+        background: none;
+        text-decoration: underline;
+      }
+
+      &::before {
+        content: "\f019"; // FontAwesome download icon
+        font-family: "FontAwesome";
+        position: absolute;
+        font-weight: 200;
+        left: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 16px;
+        color: inherit;
+      }
+    }
+  }
+
   .btn.revision-button {
     background: var(--chakra-colors-theme-yellow);
     color: var(--chakra-colors-border-dark);
@@ -996,6 +1041,12 @@
 
 .single-requirement-form {
   button {
+    display: none;
+  }
+}
+
+.early-access-requirement-form {
+  .autofill-button {
     display: none;
   }
 }

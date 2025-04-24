@@ -115,6 +115,12 @@ class Api::RequirementBlocksController < Api::ApplicationController
       :sign_off_role,
       :reviewer_role,
       association_list: [],
+      requirement_documents_attributes: [
+        :id,
+        :_destroy,
+        :requirement_block_id,
+        file: [:id, :storage, metadata: {}]
+      ],
       requirements_attributes: [
         :id,
         :requirement_code,
@@ -132,6 +138,7 @@ class Api::RequirementBlocksController < Api::ApplicationController
           :number_unit,
           :can_add_multiple_contacts,
           :energy_step_code,
+          :multiple,
           value_options: [%i[value label]],
           conditional: %i[eq show when hide],
           computed_compliance: [:value, :module, options_map: {}]

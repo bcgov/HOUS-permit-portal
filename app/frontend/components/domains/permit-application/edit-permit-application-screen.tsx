@@ -41,6 +41,7 @@ import { BlockCollaboratorAssignmentManagement } from "./collaborator-management
 import { CollaboratorsSidebar } from "./collaborator-management/collaborators-sidebar"
 import { useCollaborationAssignmentNodes } from "./collaborator-management/hooks/use-collaboration-assignment-nodes"
 import { ContactSummaryModal } from "./contact-summary-modal"
+import { appendAnchorWithSvgToLabel } from "./energy-step-code-report-link"
 import { RevisionSideBar } from "./revision-sidebar"
 import { SubmissionDownloadModal } from "./submission-download-modal"
 
@@ -112,6 +113,12 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   const nicknameWatch = watch("nickname")
   const isStepCode = R.test(/step-code/, window.location.pathname)
 
+  const labelSelector = "div[class*='energy_step_code_report_file'] label"
+  const anchorUrl =
+    "https://www2.gov.bc.ca/gov/content/housing-tenancy/building-or-renovating/permits/building-permit-hub/29065#Reports"
+  const svgPathData =
+    "M224,104a8,8,0,0,1-16,0V59.32l-66.33,66.34a8,8,0,0,1-11.32-11.32L196.68,48H152a8,8,0,0,1,0-16h64a8,8,0,0,1,8,8Zm-40,24a8,8,0,0,0-8,8v72H48V80h72a8,8,0,0,0,0-16H48A16,16,0,0,0,32,80V208a16,16,0,0,0,16,16H176a16,16,0,0,0,16-16V136A8,8,0,0,0,184,128Z"
+  appendAnchorWithSvgToLabel(labelSelector, anchorUrl, svgPathData)
   const handleSave = async ({
     autosave,
     skipPristineCheck,
@@ -348,7 +355,11 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
                   permitApplication={currentPermitApplication}
                   collaborationType={ECollaborationType.submission}
                 />
-                <Button variant="primary" onClick={handleClickFinishLater}>
+                <Button
+                  variant="primary"
+                  onClick={handleClickFinishLater}
+                  isDisabled={currentPermitApplication.isViewingPastRequests}
+                >
                   {t("permitApplication.edit.saveDraft")}
                 </Button>
                 <Button
@@ -425,7 +436,12 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
               triggerSave={handleSave}
               showHelpButton
               isEditing={currentPermitApplication?.isDraft}
-              renderSaveButton={() => <SaveButton handleSave={handleSave} />}
+              renderSaveButton={() => (
+                <SaveButton
+                  handleSave={handleSave}
+                  isViewingPastRequests={currentPermitApplication?.isViewingPastRequests}
+                />
+              )}
               updateCollaborationAssignmentNodes={updateRequirementBlockAssignmentNode}
             />
           </Flex>
@@ -453,7 +469,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   )
 })
 
-function SaveButton({ handleSave }) {
+function SaveButton({ handleSave, isViewingPastRequests }) {
   const { handleSubmit, formState } = useForm()
   const { isSubmitting } = formState
 
@@ -467,7 +483,7 @@ function SaveButton({ handleSave }) {
         leftIcon={<FloppyDiskBack />}
         type="submit"
         isLoading={isSubmitting}
-        isDisabled={isSubmitting}
+        isDisabled={isSubmitting || isViewingPastRequests}
       >
         {t("ui.onlySave")}
       </Button>

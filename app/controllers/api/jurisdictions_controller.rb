@@ -31,7 +31,8 @@ class Api::JurisdictionsController < Api::ApplicationController
                      },
                      blueprint: JurisdictionBlueprint,
                      blueprint_opts: {
-                       view: :base
+                       view: :base,
+                       current_user: current_user
                      }
                    }
   end
@@ -55,7 +56,8 @@ class Api::JurisdictionsController < Api::ApplicationController
                      {
                        blueprint: JurisdictionBlueprint,
                        blueprint_opts: {
-                         view: :base
+                         view: :base,
+                         current_user: current_user
                        }
                      }
     else
@@ -107,7 +109,14 @@ class Api::JurisdictionsController < Api::ApplicationController
   # GET /api/jurisdictions/:id
   def show
     authorize @jurisdiction
-    render_success(@jurisdiction, nil, blueprint_opts: { view: :base })
+    render_success(
+      @jurisdiction,
+      nil,
+      blueprint_opts: {
+        view: :base,
+        current_user: current_user
+      }
+    )
   end
 
   # POST /api/jurisdiction
@@ -125,7 +134,8 @@ class Api::JurisdictionsController < Api::ApplicationController
                      {
                        blueprint: JurisdictionBlueprint,
                        blueprint_opts: {
-                         view: :base
+                         view: :base,
+                         current_user: current_user
                        }
                      }
     else

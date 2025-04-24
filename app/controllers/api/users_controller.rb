@@ -11,7 +11,7 @@ class Api::UsersController < Api::ApplicationController
                   accept_invitation
                 ]
   skip_after_action :verify_policy_scoped, only: %i[index]
-  skip_before_action :require_confirmation, only: %i[profile]
+  skip_before_action :require_confirmation, only: %i[profile license_agreements]
   skip_before_action :require_confirmation,
                      only: %i[accept_eula resend_confirmation]
 
@@ -110,7 +110,6 @@ class Api::UsersController < Api::ApplicationController
   def license_agreements
     @user = current_user
     authorize current_user
-
     render_success @user,
                    nil,
                    {
@@ -243,6 +242,8 @@ class Api::UsersController < Api::ApplicationController
         enable_email_collaboration_notification
         enable_in_app_integration_mapping_notification
         enable_email_integration_mapping_notification
+        enable_in_app_unmapped_api_notification
+        enable_email_unmapped_api_notification
       ]
     )
   end

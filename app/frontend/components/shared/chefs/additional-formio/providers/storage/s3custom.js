@@ -65,7 +65,6 @@ const s3custom = function Provider(formio) {
 
         return persistedResponse
       } catch (error) {
-        import.meta.env.DEV && console.log("[DEV] file upload error", error)
         throw new StorageError(error, "Failed to upload the file directly.  Please contact support.")
       }
     },
@@ -80,7 +79,7 @@ const s3custom = function Provider(formio) {
           const params = new URLSearchParams({
             id: fileInfo.id,
           })
-          const response = await fetch(`/api/storage/s3/delete?${params.toString()}`, {
+          const response = await fetch(`/api/s3/params/delete?${params.toString()}`, {
             method: "DELETE",
             headers: {
               "Content-Type": "application/json",
@@ -103,12 +102,11 @@ const s3custom = function Provider(formio) {
         // import.meta.env.DEV && console.log("s3 custom download files", fileInfo, options)
         // Return a file value, the file value must have a url
         const params = new URLSearchParams({
-          id: fileInfo.id,
           ...(fileInfo.model && { model: fileInfo.model }),
           ...(fileInfo.modelId && { model_id: fileInfo.modelId }),
         })
 
-        const response = await fetch(`/api/storage/s3/download?${params.toString()}`, {
+        const response = await fetch(`/api/s3/params/download?${params.toString()}`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",

@@ -63,7 +63,6 @@ class PermitApplication < ApplicationRecord
   delegate :code, :name, to: :permit_type, prefix: true
   delegate :code, :name, to: :activity, prefix: true
   delegate :published_template_version, to: :template_version
-  delegate :inbox_enabled, to: :jurisdiction
 
   before_validation :assign_default_nickname, on: :create
   before_validation :assign_unique_number, on: :create
@@ -85,6 +84,14 @@ class PermitApplication < ApplicationRecord
         end
 
   COMPLETION_SECTION_KEY = "section-completion-key"
+
+  def inbox_enabled?
+    jurisdiction&.inbox_enabled? && SiteConfiguration.inbox_enabled?
+  end
+
+  def inbox_enabled
+    inbox_enabled?
+  end
 
   def supporting_documents_for_submitter_based_on_user_permissions(
     supporting_documents,
@@ -202,6 +209,7 @@ class PermitApplication < ApplicationRecord
       template_version_id: template_version.id,
       requirement_template_id: template_version.requirement_template.id,
       created_at: created_at,
+      updated_at: updated_at,
       using_current_template_version: using_current_template_version,
       user_ids_with_submission_edit_permissions:
         [submitter.id] +
@@ -372,12 +380,6 @@ class PermitApplication < ApplicationRecord
   def send_submit_notifications
     # All submission related emails and in-app notifications are handled by this method
     NotificationService.publish_application_submission_event(self)
-    confirmed_permit_type_submission_contacts.each do |permit_type_submission_contact|
-      PermitHubMailer.notify_reviewer_application_received(
-        permit_type_submission_contact,
-        self
-      ).deliver_later
-    end
   end
 
   def formatted_submission_data_for_external_use
@@ -668,6 +670,7 @@ class PermitApplication < ApplicationRecord
 
   def notify_user_reference_number_updated
     return if new_record?
+
     NotificationService.publish_application_view_event(self)
   end
 
@@ -709,7 +712,12 @@ class PermitApplication < ApplicationRecord
     return unless sandbox
 
     unless jurisdiction.sandboxes.include?(sandbox)
-      errors.add(:sandbox, "must belong to the jurisdiction")
+      errors.add(
+        :sandbox,
+        I18n.t(
+          "activerecord.errors.models.permit_application.attributes.sandbox.incorrect_jurisdiction"
+        )
+      )
     end
   end
 
@@ -717,7 +725,12 @@ class PermitApplication < ApplicationRecord
     return unless template_version.present?
 
     unless template_version.live?
-      errors.add(:template_version, "must be for a live requirement template")
+      errors.add(
+        :template_version,
+        I18n.t(
+          "activerecord.errors.models.permit_application.attributes.template_version.must_be_live"
+        )
+      )
     end
   end
 end

@@ -194,6 +194,7 @@ export interface IDenormalizedRequirementBlock {
   displayName: string
   displayDescription?: string
   requirements: IDenormalizedRequirement[]
+  requirementDocuments: IRequirementDocument[]
 }
 
 export interface IDenormalizedTemplateSectionBlock {
@@ -257,9 +258,27 @@ export interface IPart9ChecklistSelectOptions {
 }
 
 export interface IPart3ChecklistSelectOptions {}
+export interface IFileData {
+  id: string
+  storage: string
+  metadata: {
+    size: number
+    filename: string
+    mimeType: string
+  }
+}
+
+export interface IRequirementDocument {
+  id?: string
+  requirementBlockId: string
+  file: IFileData
+  createdAt?: Date
+  _destroy?: boolean
+}
 
 export interface IRequirementBlockCustomization {
   tip?: string
+  helpLink?: string
   enabledElectiveFieldIds?: Array<string>
   enabledElectiveFieldReasons?: Record<string, EEnabledElectiveFieldReason>
 }
@@ -510,7 +529,7 @@ export interface IRevisionRequest {
   id: string
   reasonCode: string
   requirementJson: IFormIORequirement
-  submissionJson: any
+  submissionData: any
   comment: string
   user?: IMinimalFrozenUser
   createdAt: number

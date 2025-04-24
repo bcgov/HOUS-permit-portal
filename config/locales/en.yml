@@ -62,6 +62,10 @@ en:
               no_contact: "is not ready to accept applications through this tool yet. Please check with your local jurisdiction."
               inbox_not_enabled: "inbox for this permit application is not enabled"
             pid_or_pin: "must have a PID or PIN."
+            sandbox:
+              incorrect_jurisdiction: "must belong to the jurisdiction. Please apply to your own jurisdiction to use this sandbox."
+            template_version:
+              must_be_live: "must be for a live requirement template"
         requirement_template:
           step_code_package_required: '"Energy step code" is required to have the Design package energy step code file'
           duplicate_energy_step_code: 'Multiple "Energy step code" requirements found. Please ensure there is only one "Energy step code" requirement in the template'
@@ -146,6 +150,7 @@ en:
       notify_new_or_unconfirmed_preview: "You’re Invited to Preview a Building Permit Template"
       notify_preview: "You’re Invited to Preview a Building Permit Template"
       notify_batched_integration_mapping: "New API mappings"
+      notify_api_key_status_change: "API Key for %{jurisdiction_name} is %{interval}"
   arbitrary_message_construct:
     devise:
       failure:
@@ -235,6 +240,9 @@ en:
       logout_success:
         title: Successfully logged out.
         message: ""
+      logout_error:
+        title: Oops
+        message: "There was an error logging out"
       registration_error:
         title: Account could not be created.
         message: "%{error_message}"
@@ -535,6 +543,9 @@ en:
       update_success:
         title: ""
         message: "Successfully updated site configuration"
+      update_global_feature:
+        title: ""
+        message: ""
       show_error:
         tite: "Oops"
         message: "There was an error loading the site configuration"
@@ -629,6 +640,13 @@ en:
       preview_management:
         create_user_error: "Failed to invite user to preview: %{error_message}"
         assign_previewer_error: "Failed to assign previewer: %{error_message}"
+    template_versioning_service:
+      early_access_version_error: "Cannot create early access version for a non-early access requirement template"
+      invalid_schedule_date: "Version date must be in the future and after latest scheduled version date"
+      force_publish_disabled: "Force publish is not enabled"
+      publish_before_schedule_date: "Version cannot be published before it's scheduled date"
+      copy_customizations_error: "Old jurisdiction customizations could not be copied to new template version for jurisdiction_id:%{jurisdiction_id}"
+      copy_customizations_log_error: "Error copying customizations to new template version: %{message}"
   formio:
     requirement_template:
       completion_title: "Completion"
@@ -640,6 +658,7 @@ en:
       autofill_contact: "Autofill"
     requirement_block:
       optional_block_confirmation_requirement_label: "I acknowledge that all fields in this block are either complete, or not applicable."
+      documents_title: "Download related documents"
     requirement:
       multi_grid:
         default_add: "Add more"
@@ -666,7 +685,7 @@ en:
       enabled_elective_field_reason_incorrect: "Reason required when enabling a field and must be one of {accepted_reasons}"
   notification:
     template_version:
-      new_version_notification: 'A new version of "%{template_label}" has been published'
+      new_version_notification: 'Please update the Energy Step Code and Zero Carbon Step Code requirements in your Configuration Management for  "%{template_label}"'
       new_customization_notification: "%{jurisdiction_name} has made a modification to the requirements for %{template_label}"
     permit_application:
       submission_notification: "Your application %{number} has been received by %{jurisdiction_name} and is pending review."

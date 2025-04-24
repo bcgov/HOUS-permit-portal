@@ -54,7 +54,7 @@ module PermitApplicationStatus
     end
 
     def can_submit?
-      return false unless jurisdiction.inbox_enabled? || sandbox.present?
+      return false unless inbox_enabled? || sandbox.present?
 
       signed =
         submission_data.dig("data", "section-completion-key", "signed").present?

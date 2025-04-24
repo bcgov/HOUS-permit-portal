@@ -9,6 +9,7 @@ import {
   ERequirementType,
   EVisibility,
 } from "../types/enums"
+import { IRequirementDocument } from "../types/types"
 import { RequirementModel } from "./requirement"
 
 export const RequirementBlockModel = types
@@ -26,6 +27,7 @@ export const RequirementBlockModel = types
     createdAt: types.Date,
     updatedAt: types.Date,
     discardedAt: types.maybeNull(types.Date),
+    requirementDocuments: types.array(types.frozen<IRequirementDocument>()),
   })
   .extend(withEnvironment())
   .extend(withRootStore())
