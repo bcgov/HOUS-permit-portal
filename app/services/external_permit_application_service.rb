@@ -120,18 +120,22 @@ class ExternalPermitApplicationService
   end
 
   def get_raw_h2k_files
-    unless permit_application.step_code.present? &&
-             !permit_application
-               .step_code
-               .pre_construction_checklist
-               .data_entries
-               .empty?
+    step_code = permit_application.step_code
+    # Return nil if step_code is missing or doesn't support pre_construction_checklist
+    unless step_code.present? &&
+             step_code.respond_to?(:pre_construction_checklist)
       return nil
     end
 
-    permit_application
-      .step_code
-      .pre_construction_checklist
+    checklist = step_code.pre_construction_checklist
+    # Return nil if checklist is missing, doesn't support data_entries, or has no data_entries
+    unless checklist.present? && checklist.respond_to?(:data_entries) &&
+             !checklist.data_entries.empty?
+      return nil
+    end
+
+    # Now it's safe to access data_entries
+    checklist
       .data_entries
       .map do |data_entry|
         url = data_entry.h2k_file_url

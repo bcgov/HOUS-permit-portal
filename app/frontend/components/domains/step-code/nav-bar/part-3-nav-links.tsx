@@ -9,18 +9,20 @@ export const Part3NavLinks = function Part3StepCodeNavLinks() {
   const { permitApplicationId } = useParams()
 
   const handleSave = async () => {
-    if (!checklist || !permitApplicationId) return
+    if (!checklist) return
 
     const formName = "part3SectionForm"
     const formElement = document.forms[formName]
 
+    const editPath = permitApplicationId ? `/permit-applications/${permitApplicationId}/edit` : "/"
+    checklist.setAlternateNavigateAfterSavePath(editPath)
+
     if (formElement) {
-      const editPath = `/permit-applications/${permitApplicationId}/edit`
-      checklist.setAlternateNavigateAfterSavePath(editPath)
       //@ts-ignore
       formElement.dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }))
     } else {
       console.warn(`Part 3 Save: Could not find form with name '${formName}'`)
+      // Reset the path if the form wasn't found, as the save won't happen
       checklist.setAlternateNavigateAfterSavePath(null)
     }
   }
