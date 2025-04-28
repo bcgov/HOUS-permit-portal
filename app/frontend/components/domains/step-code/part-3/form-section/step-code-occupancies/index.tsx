@@ -4,6 +4,7 @@ import {
   CheckboxGroup,
   Flex,
   FormControl,
+  FormErrorMessage,
   FormHelperText,
   FormLabel,
   ListItem,
@@ -33,6 +34,7 @@ export const StepCodeOccupancies = observer(function Part3StepCodeFormStepCodeOc
   const [isRelevant, setIsRelevant] = useState(
     !R.isEmpty(checklist.stepCodeOccupancies) ? "yes" : checklist.isComplete("stepCodeOccupancies") && "no"
   )
+  const [radioError, setRadioError] = useState<string | null>(null)
 
   const navigate = useNavigate()
   const location = useLocation()
@@ -44,8 +46,17 @@ export const StepCodeOccupancies = observer(function Part3StepCodeFormStepCodeOc
 
   const { isSubmitting, isValid, isSubmitted, errors } = formState
 
+  useEffect(() => {
+    if (isRelevant === "no" && R.isEmpty(checklist.baselineOccupancies)) {
+      setRadioError(t(`${i18nPrefix}.cannotSelectNoWhenBaselineEmpty`) as string)
+    }
+  }, [])
+
   const onSubmit = async (values) => {
     if (!checklist) return
+    if (radioError) {
+      return
+    }
 
     const alternatePath = checklist.alternateNavigateAfterSavePath
     checklist.setAlternateNavigateAfterSavePath(null)
@@ -108,6 +119,15 @@ export const StepCodeOccupancies = observer(function Part3StepCodeFormStepCodeOc
     }
   }, [isValid])
 
+  const handleIsRelevantChange = (newValue: string) => {
+    setIsRelevant(newValue)
+    if (newValue === "no" && R.isEmpty(checklist.baselineOccupancies)) {
+      setRadioError(t(`${i18nPrefix}.cannotSelectNoWhenBaselineEmpty`) as string)
+    } else {
+      setRadioError(null)
+    }
+  }
+
   return (
     <>
       <Flex direction="column" gap={2} pb={6}>
@@ -122,9 +142,9 @@ export const StepCodeOccupancies = observer(function Part3StepCodeFormStepCodeOc
       </Flex>
       <form onSubmit={handleSubmit(onSubmit)} name="part3SectionForm">
         <Flex direction="column" gap={{ base: 6, xl: 6 }} pb={4}>
-          <FormControl>
+          <FormControl isInvalid={!!radioError}>
             <FormLabel>{t(`${i18nPrefix}.isRelevant`)}</FormLabel>
-            <RadioGroup onChange={setIsRelevant} value={isRelevant}>
+            <RadioGroup onChange={handleIsRelevantChange} value={isRelevant}>
               <Stack spacing={5} direction="row">
                 <Radio variant="binary" value={"yes"}>
                   {t("ui.yes")}
@@ -134,6 +154,7 @@ export const StepCodeOccupancies = observer(function Part3StepCodeFormStepCodeOc
                 </Radio>
               </Stack>
             </RadioGroup>
+            {radioError && <FormErrorMessage>{radioError}</FormErrorMessage>}
           </FormControl>
           {isRelevant == "yes" ? (
             <>

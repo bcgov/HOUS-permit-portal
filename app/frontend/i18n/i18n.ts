@@ -1238,6 +1238,8 @@ const options = {
                 "If there are occupancies subject to Steps 2, 3, or 4 (not including Step 2 with a reference building) in your project, this form will collect additional details.<br/><br/>These occupancies are:<ul><li>Group C Hotel and motel</li><li>Group C Other residential</li><li>Group D Office</li><li>Group D Other</li><li>Group E Mercantile</li>",
               isRelevant: "Does your project include any of the these occupancies?",
               disabledCtaTooltip: "Please select an occupancy",
+              cannotSelectNoWhenBaselineEmpty:
+                "Please must select at least one occupancy if no baseline occupancies are selected",
               occupancies: {
                 label: "Which occupancies apply to this building? Select all that apply:",
                 error: "Select the occupancies from the list that apply to this building.",
