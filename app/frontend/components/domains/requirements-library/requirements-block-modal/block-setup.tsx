@@ -18,7 +18,6 @@ import {
 import { ArrowCounterClockwise, Info, Trash } from "@phosphor-icons/react"
 import "@uppy/core/dist/style.min.css"
 import "@uppy/dashboard/dist/style.css"
-import "@uppy/drag-drop/dist/style.css"
 import { observer } from "mobx-react-lite"
 // import DragDrop from "@uppy/react/lib/DragDrop.js"
 import { Icon } from "@chakra-ui/react"
@@ -37,9 +36,7 @@ import { TagsSelect } from "../../../shared/select/selectors/tags-select"
 import { BlockSetupOptionsMenu } from "../block-setup-options-menu"
 import { IRequirementBlockForm } from "./index"
 
-const helperTextStyles: Partial<TextProps> = {
-  color: "border.base",
-}
+const helperTextStyles: Partial<TextProps> = { color: "border.base" }
 
 export const BlockSetup = observer(function BlockSetup({
   requirementBlock,
@@ -71,18 +68,11 @@ export const BlockSetup = observer(function BlockSetup({
 
   const visibilityWatch = watch("visibility")
 
-  const visibilityBgColor = {
-    any: "greys.grey10",
-    live: "semantic.infoLight",
-    early_access: "semantic.warningLight",
-  }
+  const visibilityBgColor = { any: "greys.grey10", live: "semantic.infoLight", early_access: "semantic.warningLight" }
 
   const requirementDocumentsAttributes = watch("requirementDocumentsAttributes")
 
-  const { fields, append, remove, update } = useFieldArray({
-    control,
-    name: "requirementDocumentsAttributes",
-  })
+  const { fields, append, remove, update } = useFieldArray({ control, name: "requirementDocumentsAttributes" })
 
   const handleUploadSuccess = (file: UppyFile<{}, {}>, response: any) => {
     // Create a new document with the uploaded file data
@@ -93,11 +83,7 @@ export const BlockSetup = observer(function BlockSetup({
       file: {
         id: key,
         storage: "cache",
-        metadata: {
-          size: file.size || 0,
-          filename: file.name,
-          mimeType: file.type || "application/octet-stream",
-        },
+        metadata: { size: file.size || 0, filename: file.name, mimeType: file.type || "application/octet-stream" },
       },
     }
     // Use append from useFieldArray
@@ -122,11 +108,7 @@ export const BlockSetup = observer(function BlockSetup({
     }
   }
 
-  const uppy = useUppyS3({
-    onUploadSuccess: handleUploadSuccess,
-    maxNumberOfFiles: 10,
-    autoProceed: true,
-  })
+  const uppy = useUppyS3({ onUploadSuccess: handleUploadSuccess, maxNumberOfFiles: 10, autoProceed: true })
 
   return (
     <Box as={"section"} w={"350px"} boxShadow={"md"} borderRadius={"xl"} bg={"greys.grey10"} ref={containerRef}>
@@ -183,14 +165,7 @@ export const BlockSetup = observer(function BlockSetup({
           </FormHelperText>
         </FormControl>
         <FormControl>
-          <FormLabel
-            sx={{
-              ":after": {
-                content: `"${t("ui.optional")}"`,
-                ml: 1.5,
-              },
-            }}
-          >
+          <FormLabel sx={{ ":after": { content: `"${t("ui.optional")}"`, ml: 1.5 } }}>
             {t("requirementsLibrary.fields.associations")}
           </FormLabel>
           <Controller
@@ -202,15 +177,9 @@ export const BlockSetup = observer(function BlockSetup({
                   onChange={(options) => onChange(options.map((option) => option.value))}
                   fetchOptions={fetchAssociationOptions}
                   placeholder={undefined}
-                  selectedOptions={value.map((association) => ({
-                    value: association,
-                    label: association,
-                  }))}
+                  selectedOptions={value.map((association) => ({ value: association, label: association }))}
                   styles={{
-                    container: (css, state) => ({
-                      ...css,
-                      width: "100%",
-                    }),
+                    container: (css, state) => ({ ...css, width: "100%" }),
                     menuPortal: (base) => ({ ...base, zIndex: 9999 }),
                   }}
                   menuPortalTarget={document.body}
