@@ -7,6 +7,7 @@ import React, { Suspense, useEffect, useRef, useState } from "react"
 import { FormProvider, useForm } from "react-hook-form"
 import { useNavigate, useParams } from "react-router-dom"
 import { usePart9StepCode } from "../../../../../hooks/resources/use-part-9-step-code"
+import { EFlashMessageStatus } from "../../../../../types/enums"
 import { SharedSpinner } from "../../../../shared/base/shared-spinner"
 import { BuildingCharacteristicsSummary } from "./building-characteristics-summary"
 import { CompletedBy } from "./completed-by"
@@ -112,7 +113,7 @@ export const StepCodeChecklistForm = observer(function StepCodeChecklistForm() {
                 <StepNotMetWarning i18nKey="zeroCarbonStepNotMet" scrollToSection={scrollToZeroCarbonCompliance} />
               )}
               <Alert
-                status="info"
+                status={EFlashMessageStatus.info}
                 rounded="lg"
                 borderWidth={1}
                 borderColor="semantic.info"

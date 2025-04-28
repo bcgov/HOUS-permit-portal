@@ -22,7 +22,7 @@ import { Controller, useForm } from "react-hook-form"
 import { Trans } from "react-i18next"
 import { useLocation, useNavigate } from "react-router-dom"
 import { usePart3StepCode } from "../../../../../../hooks/resources/use-part-3-step-code"
-import { EStepCodeOccupancyKey } from "../../../../../../types/enums"
+import { EFlashMessageStatus, EStepCodeOccupancyKey } from "../../../../../../types/enums"
 import { CustomMessageBox } from "../../../../../shared/base/custom-message-box"
 import { SectionHeading } from "../shared/section-heading"
 
@@ -39,9 +39,7 @@ export const StepCodeOccupancies = observer(function Part3StepCodeFormStepCodeOc
 
   const { handleSubmit, formState, control, reset } = useForm({
     mode: "onSubmit",
-    defaultValues: {
-      stepCodeOccupancies: checklist.stepCodeOccupancies.map((oc) => oc.key),
-    },
+    defaultValues: { stepCodeOccupancies: checklist.stepCodeOccupancies.map((oc) => oc.key) },
   })
 
   const { isSubmitting, isValid, isSubmitted, errors } = formState
@@ -113,15 +111,13 @@ export const StepCodeOccupancies = observer(function Part3StepCodeFormStepCodeOc
   return (
     <>
       <Flex direction="column" gap={2} pb={6}>
-        {!isValid && isSubmitted && <CustomMessageBox title={t("stepCode.part3.errorTitle")} status="error" />}
+        {!isValid && isSubmitted && (
+          <CustomMessageBox title={t("stepCode.part3.errorTitle")} status={EFlashMessageStatus.error} />
+        )}
         <SectionHeading>{t(`${i18nPrefix}.heading`)}</SectionHeading>
         <Trans
           i18nKey={`${i18nPrefix}.instructions`}
-          components={{
-            ul: <UnorderedList ml={0} pl={6} />,
-            li: <ListItem mb={0} />,
-            strong: <strong />,
-          }}
+          components={{ ul: <UnorderedList ml={0} pl={6} />, li: <ListItem mb={0} />, strong: <strong /> }}
         />
       </Flex>
       <form onSubmit={handleSubmit(onSubmit)} name="part3SectionForm">
@@ -155,12 +151,7 @@ export const StepCodeOccupancies = observer(function Part3StepCodeFormStepCodeOc
                       <SimpleGrid columns={2} spacing={1}>
                         {Object.values(EStepCodeOccupancyKey).map((key) => (
                           <Checkbox key={key} value={key}>
-                            <Trans
-                              i18nKey={`${i18nPrefix}.occupancyKeys.${key}`}
-                              components={{
-                                strong: <strong />,
-                              }}
-                            />
+                            <Trans i18nKey={`${i18nPrefix}.occupancyKeys.${key}`} components={{ strong: <strong /> }} />
                           </Checkbox>
                         ))}
                       </SimpleGrid>

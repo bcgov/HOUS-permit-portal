@@ -5,7 +5,7 @@ class StepCode::ChecklistPolicy < ApplicationPolicy
   end
 
   def update?
-    # TODO: authorization for early access
+    return true if record.step_code&.permit_application.blank?
 
     return false if record.step_code&.permit_application&.submitted?
 

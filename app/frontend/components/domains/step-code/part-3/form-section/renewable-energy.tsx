@@ -19,6 +19,7 @@ import { useForm } from "react-hook-form"
 import { Trans } from "react-i18next"
 import { useLocation, useNavigate } from "react-router-dom"
 import { usePart3StepCode } from "../../../../../hooks/resources/use-part-3-step-code"
+import { EFlashMessageStatus } from "../../../../../types/enums"
 import { CustomMessageBox } from "../../../../shared/base/custom-message-box"
 import { SectionHeading } from "./shared/section-heading"
 
@@ -100,7 +101,9 @@ export const RenewableEnergy = observer(function Part3StepCodeFormRenewableEnerg
   return (
     <>
       <Flex direction="column" gap={2} pb={6}>
-        {!isValid && isSubmitted && <CustomMessageBox title={t("stepCode.part3.errorTitle")} status="error" />}
+        {!isValid && isSubmitted && (
+          <CustomMessageBox title={t("stepCode.part3.errorTitle")} status={EFlashMessageStatus.error} />
+        )}
         <SectionHeading>{t(`${i18nPrefix}.heading`)}</SectionHeading>
       </Flex>
       <form onSubmit={handleSubmit(onSubmit)} name="part3SectionForm">

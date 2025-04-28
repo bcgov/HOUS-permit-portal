@@ -18,7 +18,7 @@ import React, { useEffect } from "react"
 import { Controller, useForm } from "react-hook-form"
 import { useLocation, useNavigate } from "react-router-dom"
 import { usePart3StepCode } from "../../../../../hooks/resources/use-part-3-step-code"
-import { EClimateZone } from "../../../../../types/enums"
+import { EClimateZone, EFlashMessageStatus } from "../../../../../types/enums"
 import { CustomMessageBox } from "../../../../shared/base/custom-message-box"
 import { SectionHeading } from "./shared/section-heading"
 
@@ -68,7 +68,9 @@ export const LocationDetails = observer(function Part3StepCodeFormLocationDetail
   return (
     <>
       <Flex direction="column" gap={2} pb={6}>
-        {!isValid && isSubmitted && <CustomMessageBox title={t("stepCode.part3.errorTitle")} status="error" />}
+        {!isValid && isSubmitted && (
+          <CustomMessageBox title={t("stepCode.part3.errorTitle")} status={EFlashMessageStatus.error} />
+        )}
         <SectionHeading>{t(`${i18nPrefix}.heading`)}</SectionHeading>
         <Text fontSize="md">{t(`${i18nPrefix}.instructions`)}</Text>
       </Flex>

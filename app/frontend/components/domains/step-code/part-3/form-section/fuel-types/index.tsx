@@ -20,6 +20,7 @@ import { Controller, useForm } from "react-hook-form"
 import { Trans } from "react-i18next"
 import { useLocation, useNavigate } from "react-router-dom"
 import { usePart3StepCode } from "../../../../../../hooks/resources/use-part-3-step-code"
+import { EFlashMessageStatus } from "../../../../../../types/enums"
 import { CustomMessageBox } from "../../../../../shared/base/custom-message-box"
 import { SectionHeading } from "../shared/section-heading"
 
@@ -36,9 +37,7 @@ export const FuelTypes = observer(function Part3StepCodeFormFuelTypes() {
 
   const { handleSubmit, formState, resetField, reset, control } = useForm({
     mode: "onSubmit",
-    defaultValues: {
-      fuelTypes: checklist?.uncommonFuelTypes.map((ft) => ft.key) || [],
-    },
+    defaultValues: { fuelTypes: checklist?.uncommonFuelTypes.map((ft) => ft.key) || [] },
   })
 
   const { isSubmitting, isValid, isSubmitted, errors } = formState
@@ -116,7 +115,9 @@ export const FuelTypes = observer(function Part3StepCodeFormFuelTypes() {
   return (
     <>
       <Flex direction="column" gap={2} pb={6}>
-        {!isValid && isSubmitted && <CustomMessageBox title={t("stepCode.part3.errorTitle")} status="error" />}
+        {!isValid && isSubmitted && (
+          <CustomMessageBox title={t("stepCode.part3.errorTitle")} status={EFlashMessageStatus.error} />
+        )}
         <SectionHeading>{t(`${i18nPrefix}.heading`)}</SectionHeading>
         <Text fontSize="md">
           <Trans i18nKey={`${i18nPrefix}.instructions`} components={{ br: <br /> }} />
@@ -153,12 +154,7 @@ export const FuelTypes = observer(function Part3StepCodeFormFuelTypes() {
                       <Flex direction="column">
                         {Object.values(checklist?.uncommonFuelTypeKeys || []).map((key) => (
                           <Checkbox key={key} value={key}>
-                            <Trans
-                              i18nKey={`${i18nPrefix}.fuelTypeKeys.${key}`}
-                              components={{
-                                strong: <strong />,
-                              }}
-                            />
+                            <Trans i18nKey={`${i18nPrefix}.fuelTypeKeys.${key}`} components={{ strong: <strong /> }} />
                           </Checkbox>
                         ))}
                       </Flex>

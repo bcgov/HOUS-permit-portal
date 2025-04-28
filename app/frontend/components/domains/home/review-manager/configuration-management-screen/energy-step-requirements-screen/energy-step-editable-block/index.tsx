@@ -6,6 +6,7 @@ import * as R from "ramda"
 import React, { useEffect, useState } from "react"
 import { Controller, useFieldArray, useForm } from "react-hook-form"
 import { IJurisdiction } from "../../../../../../../models/jurisdiction"
+import { EFlashMessageStatus } from "../../../../../../../types/enums"
 import { IPermitTypeRequiredStep } from "../../../../../../../types/types"
 import { generateUUID } from "../../../../../../../utils/utility-functions"
 import { CustomMessageBox } from "../../../../../../shared/base/custom-message-box"
@@ -160,7 +161,11 @@ export const EnergyStepEditableBlock = observer(function EnergyStepEditableBlock
               </FormControl>
             </Flex>
             {isCustomizing && (
-              <CustomMessageBox status="warning" description={t(`${i18nPrefix}.overriddenWarning`)} p={1} />
+              <CustomMessageBox
+                status={EFlashMessageStatus.warning}
+                description={t(`${i18nPrefix}.overriddenWarning`)}
+                p={1}
+              />
             )}
           </Flex>
 

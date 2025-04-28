@@ -19,6 +19,7 @@ import { Controller, FormProvider, useFieldArray, useForm, useFormContext } from
 import { Trans } from "react-i18next"
 import { useLocation, useNavigate } from "react-router-dom"
 import { usePart3StepCode } from "../../../../../../hooks/resources/use-part-3-step-code"
+import { EFlashMessageStatus } from "../../../../../../types/enums"
 import { IStepCodeOccupancy } from "../../../../../../types/types"
 import { CustomMessageBox } from "../../../../../shared/base/custom-message-box"
 import { EnergyStepSelect } from "../../../../home/review-manager/configuration-management-screen/energy-step-requirements-screen/energy-step-editable-block/energy-step-select"
@@ -91,7 +92,9 @@ export const StepCodeOccupanciesPerformanceRequirements = observer(
     return (
       <>
         <Flex direction="column" gap={2} pb={6}>
-          {!isValid && isSubmitted && <CustomMessageBox title={t("stepCode.part3.errorTitle")} status="error" />}
+          {!isValid && isSubmitted && (
+            <CustomMessageBox title={t("stepCode.part3.errorTitle")} status={EFlashMessageStatus.error} />
+          )}
           <SectionHeading>{t(`${i18nPrefix}.heading`)}</SectionHeading>
           <Text fontSize="md">{t(`${i18nPrefix}.instructions`)}</Text>
         </Flex>

@@ -8,10 +8,26 @@ class Api::Part3Building::StepCodesController < Api::ApplicationController
             permit_application_id: step_code_params[:permit_application_id]
           ).first_or_create!(step_code_params)
         else
-          # early access
-          # TODO - this will create a new step code on every page refresh..
-          #        should we persist the session to retrieve the current early access step code if present?
-          Part3StepCode.create(step_code_params)
+          # Early access: try to find via session, otherwise create new and store ID in session
+          step_code = nil
+          if session[:early_access_part3_step_code_id]
+            step_code =
+              Part3StepCode.find_by(
+                id: session[:early_access_part3_step_code_id]
+              )
+            # Clear session if ID exists but record doesn't (e.g., deleted)
+            session.delete(:early_access_part3_step_code_id) unless step_code
+          end
+
+          # Create if not found via session
+          step_code ||= Part3StepCode.create(step_code_params)
+
+          # Store the ID in the session if the record is valid and persisted
+          session[
+            :early_access_part3_step_code_id
+          ] = step_code.id if step_code&.persisted?
+
+          step_code # Return the found or created step_code
         end
       )
     render_success @step_code

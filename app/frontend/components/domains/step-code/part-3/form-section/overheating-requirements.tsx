@@ -6,6 +6,7 @@ import React, { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { useLocation, useNavigate } from "react-router-dom"
 import { usePart3StepCode } from "../../../../../hooks/resources/use-part-3-step-code"
+import { EFlashMessageStatus } from "../../../../../types/enums"
 import { CustomMessageBox } from "../../../../shared/base/custom-message-box"
 import { SectionHeading } from "./shared/section-heading"
 
@@ -77,7 +78,9 @@ export const OverheatingRequirements = observer(function Part3StepCodeFormOverhe
   return (
     <>
       <Flex direction="column" gap={2} pb={6}>
-        {!isValid && isSubmitted && <CustomMessageBox title={t("stepCode.part3.errorTitle")} status="error" />}
+        {!isValid && isSubmitted && (
+          <CustomMessageBox title={t("stepCode.part3.errorTitle")} status={EFlashMessageStatus.error} />
+        )}
         <SectionHeading>{t(`${i18nPrefix}.heading`)}</SectionHeading>
       </Flex>
       <form onSubmit={handleSubmit(onSubmit)} name="part3SectionForm">
@@ -116,9 +119,9 @@ export const OverheatingRequirements = observer(function Part3StepCodeFormOverhe
                 />
               </FormControl>
               {watchOverheatingHours > checklist.overheatingHoursLimit ? (
-                <CustomMessageBox title={t(`${i18nPrefix}.compliance.fail`)} status="error" />
+                <CustomMessageBox title={t(`${i18nPrefix}.compliance.fail`)} status={EFlashMessageStatus.error} />
               ) : watchOverheatingHours ? (
-                <CustomMessageBox title={t(`${i18nPrefix}.compliance.pass`)} status="success" />
+                <CustomMessageBox title={t(`${i18nPrefix}.compliance.pass`)} status={EFlashMessageStatus.success} />
               ) : null}
               <FormControl>
                 <Button type="submit" variant="primary" isLoading={isSubmitting} isDisabled={isSubmitting}>

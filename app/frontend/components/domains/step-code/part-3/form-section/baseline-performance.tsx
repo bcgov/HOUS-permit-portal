@@ -19,6 +19,7 @@ import { FormProvider, useFieldArray, useForm, useFormContext } from "react-hook
 import { Trans } from "react-i18next"
 import { useLocation, useNavigate } from "react-router-dom"
 import { usePart3StepCode } from "../../../../../hooks/resources/use-part-3-step-code"
+import { EFlashMessageStatus } from "../../../../../types/enums"
 import { CustomMessageBox } from "../../../../shared/base/custom-message-box"
 import { GridColumnHeader } from "../../part-9/checklist/shared/grid/column-header"
 import { GridData } from "../../part-9/checklist/shared/grid/data"
@@ -97,7 +98,9 @@ export const BaselinePerformance = observer(function Part3StepCodeFormBaselinePe
   return (
     <>
       <Flex direction="column" gap={2} pb={6}>
-        {!isValid && isSubmitted && <CustomMessageBox title={t("stepCode.part3.errorTitle")} status="error" />}
+        {!isValid && isSubmitted && (
+          <CustomMessageBox title={t("stepCode.part3.errorTitle")} status={EFlashMessageStatus.error} />
+        )}
         <SectionHeading>{t(`${i18nPrefix}.heading`)}</SectionHeading>
         {/* TODO: instructions (pending copy) */}
         {/* <Text fontSize="md">{t(`${i18nPrefix}.instructions`)}</Text> */}

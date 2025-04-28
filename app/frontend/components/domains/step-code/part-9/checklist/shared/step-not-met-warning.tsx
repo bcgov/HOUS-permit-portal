@@ -2,6 +2,7 @@ import { Alert, AlertProps, Box, Button } from "@chakra-ui/react"
 import { WarningCircle } from "@phosphor-icons/react"
 import React from "react"
 import { Trans } from "react-i18next"
+import { EFlashMessageStatus } from "../../../../../../types/enums"
 
 interface IProps extends AlertProps {
   i18nKey: "energyStepNotMet" | "zeroCarbonStepNotMet"
@@ -11,7 +12,7 @@ interface IProps extends AlertProps {
 export function StepNotMetWarning({ i18nKey, scrollToSection, ...rest }: IProps) {
   return (
     <Alert
-      status="error"
+      status={EFlashMessageStatus.error}
       rounded="lg"
       borderWidth={1}
       borderColor="semantic.error"

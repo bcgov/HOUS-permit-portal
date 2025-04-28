@@ -29,7 +29,7 @@ import { Controller, FormProvider, useForm } from "react-hook-form"
 import { Trans } from "react-i18next"
 import { useLocation, useNavigate } from "react-router-dom"
 import { usePart3StepCode } from "../../../../../hooks/resources/use-part-3-step-code"
-import { EPart3StepCodeSoftware } from "../../../../../types/enums"
+import { EFlashMessageStatus, EPart3StepCodeSoftware } from "../../../../../types/enums"
 import { generateUUID } from "../../../../../utils/utility-functions"
 import { CustomMessageBox } from "../../../../shared/base/custom-message-box"
 import { RowHeader } from "../../part-9/checklist/building-characteristics-summary/row-header"
@@ -136,7 +136,9 @@ export const PerformanceCharacteristics = observer(function Part3StepCodeFormPer
   return (
     <>
       <Flex direction="column" gap={2} pb={6}>
-        {!isValid && isSubmitted && <CustomMessageBox title={t("stepCode.part3.errorTitle")} status="error" />}
+        {!isValid && isSubmitted && (
+          <CustomMessageBox title={t("stepCode.part3.errorTitle")} status={EFlashMessageStatus.error} />
+        )}
         <SectionHeading>{t(`${i18nPrefix}.heading`)}</SectionHeading>
       </Flex>
       <FormProvider {...formMethods}>

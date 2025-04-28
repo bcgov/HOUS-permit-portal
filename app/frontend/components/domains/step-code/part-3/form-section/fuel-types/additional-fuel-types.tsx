@@ -21,7 +21,7 @@ import { FormProvider, useFieldArray, useForm, useFormContext } from "react-hook
 import { Trans } from "react-i18next"
 import { useLocation, useNavigate } from "react-router-dom"
 import { usePart3StepCode } from "../../../../../../hooks/resources/use-part-3-step-code"
-import { EFuelType } from "../../../../../../types/enums"
+import { EFlashMessageStatus, EFuelType } from "../../../../../../types/enums"
 import { CustomMessageBox } from "../../../../../shared/base/custom-message-box"
 
 const i18nPrefix = "stepCode.part3.additionalFuelTypes"
@@ -87,7 +87,9 @@ export const AdditionalFuelTypes = observer(function Part3StepCodeFormAdditional
   return (
     <>
       <Flex direction="column" gap={2}>
-        {!isValid && isSubmitted && <CustomMessageBox title={t("stepCode.part3.errorTitle")} status="error" />}
+        {!isValid && isSubmitted && (
+          <CustomMessageBox title={t("stepCode.part3.errorTitle")} status={EFlashMessageStatus.error} />
+        )}
         <Flex direction="column" gap={2} pb={4}>
           <Heading as="h2" fontSize="2xl" variant="yellowline" pt={4} m={0}>
             {t(`${i18nPrefix}.heading`)}
