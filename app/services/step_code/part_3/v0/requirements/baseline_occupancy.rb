@@ -1,4 +1,4 @@
-class Part3::V0::Requirements::BaselineOccupancy
+class StepCode::Part3::V0::Requirements::BaselineOccupancy
   attr_reader :occupancy, :climate_zone, :energy_step, :zero_carbon_step
 
   def initialize(occupancy:)
