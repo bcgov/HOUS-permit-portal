@@ -29,7 +29,7 @@ FactoryBot.define do
 
     factory :energy_step_code_tool_part_3_requirement do
       requirement_code { "energy_step_code_tool_part_3" }
-      input_type { "energy_step_code" }
+      input_type { "energy_step_code_part_3" }
       input_options do
         {
           "conditional" => {
