@@ -52,6 +52,7 @@ export const BaselineOccupancies = observer(function Part3StepCodeFormBaselineOc
 
     let updateSucceeded = false
     if (!isValid) return
+
     if (isRelevant == "no") {
       const updated =
         R.isEmpty(checklist.baselineOccupancies) ||
