@@ -55,8 +55,11 @@ class PermitApplication < ApplicationRecord
   validate :sandbox_belongs_to_jurisdiction
   validate :template_version_of_live_template
 
-  delegate :qualified_name, to: :jurisdiction, prefix: true
-  delegate :name, to: :jurisdiction, prefix: true
+  delegate :qualified_name,
+           :heating_degree_days,
+           :name,
+           to: :jurisdiction,
+           prefix: true
   delegate :code, :name, to: :permit_type, prefix: true
   delegate :code, :name, to: :activity, prefix: true
   delegate :published_template_version, to: :template_version
