@@ -54,7 +54,11 @@ export const PermitTypeRadioSelect = observer(
 
     if (R.isEmpty(permitTypeOptions)) {
       return (
-        <CustomMessageBox status="error" description={t("translation:permitApplication.new.noContactsAvailable")} />
+        <CustomMessageBox
+          status="error"
+          title={t("translation:permitApplication.new.noContactsAvailableTitle")}
+          description={t("translation:permitApplication.new.noContactsAvailableDescription")}
+        />
       )
     }
 
