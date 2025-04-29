@@ -589,6 +589,12 @@ class RequirementFormJsonService
     input_type = requirement.input_type
     input_options = requirement.input_options
 
+    if input_options["value_options"].is_a?(Array)
+      input_options["value_options"].select! do |option|
+        option["label"].present? && option["value"].present?
+      end
+    end
+
     if (input_type.to_sym == :file)
       return(
         {
@@ -606,7 +612,13 @@ class RequirementFormJsonService
         end
       )
     end
-    DEFAULT_FORMIO_TYPE_TO_OPTIONS[input_type.to_sym] || {}
+    options = DEFAULT_FORMIO_TYPE_TO_OPTIONS[input_type.to_sym] || {}
+    if input_options["computed_compliance"].present?
+      options[:tooltip] = I18n.t("formio.requirement.auto_compliance.tooltip")
+    end
+
+    options
+
   end
 
   def snake_to_camel(snake_str)

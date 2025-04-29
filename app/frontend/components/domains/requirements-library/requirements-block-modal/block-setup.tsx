@@ -1,6 +1,7 @@
 import {
   Box,
   Button,
+  Center,
   Checkbox,
   Flex,
   FormControl,
@@ -15,7 +16,7 @@ import {
   Tooltip,
   VStack,
 } from "@chakra-ui/react"
-import { ArrowCounterClockwise, Info, Trash } from "@phosphor-icons/react"
+import { ArrowCounterClockwise, Info, Trash, Upload } from "@phosphor-icons/react"
 import "@uppy/core/dist/style.min.css"
 import "@uppy/dashboard/dist/style.css"
 import { observer } from "mobx-react-lite"
@@ -23,6 +24,7 @@ import { observer } from "mobx-react-lite"
 import { Icon } from "@chakra-ui/react"
 import { UppyFile } from "@uppy/core"
 import Dashboard from "@uppy/react/lib/Dashboard.js"
+import * as R from "ramda"
 import React, { useRef } from "react"
 import { Controller, useFieldArray, useFormContext } from "react-hook-form"
 import { Trans, useTranslation } from "react-i18next"
@@ -36,7 +38,9 @@ import { TagsSelect } from "../../../shared/select/selectors/tags-select"
 import { BlockSetupOptionsMenu } from "../block-setup-options-menu"
 import { IRequirementBlockForm } from "./index"
 
-const helperTextStyles: Partial<TextProps> = { color: "border.base" }
+const helperTextStyles: Partial<TextProps> = {
+  color: "border.base",
+}
 
 export const BlockSetup = observer(function BlockSetup({
   requirementBlock,
@@ -239,7 +243,14 @@ export const BlockSetup = observer(function BlockSetup({
               )}
             </Flex>
           ))}
-          <Dashboard uppy={uppy} height={300} />
+          <Box position="relative">
+            <Dashboard uppy={uppy} height={300} />
+            {R.isEmpty(uppy.getFiles()) && (
+              <Center position="absolute" top={"48%"} left={"48%"}>
+                <Upload size={24} />
+              </Center>
+            )}
+          </Box>
         </FormControl>
         {withOptionsMenu
           ? requirementBlock && <BlockSetupOptionsMenu requirementBlock={requirementBlock} />
