@@ -15,6 +15,7 @@ import { observer } from "mobx-react-lite"
 import React from "react"
 import { useMst } from "../../../../../../../setup/root"
 import { EEnergyStep } from "../../../../../../../types/enums"
+import { ConditionalWrapper } from "../../../../../../shared/conditional-wrapper"
 import { i18nPrefix } from "../i18n-prefix"
 
 interface IProps {
@@ -22,9 +23,16 @@ interface IProps {
   value: EEnergyStep
   isDisabled?: boolean
   allowNull?: boolean
+  portal?: boolean
 }
 
-export const EnergyStepSelect = observer(function EnergyStepSelect({ onChange, value, isDisabled, allowNull }: IProps) {
+export const EnergyStepSelect = observer(function EnergyStepSelect({
+  onChange,
+  value,
+  isDisabled,
+  allowNull,
+  portal,
+}: IProps) {
   const {
     stepCodeStore: { getEnergyStepOptions },
   } = useMst()
@@ -55,7 +63,7 @@ export const EnergyStepSelect = observer(function EnergyStepSelect({ onChange, v
               <InputRightElement children={<CaretDown color="gray.300" />} />
             </InputGroup>
           </PopoverTrigger>
-          <Portal>
+          <ConditionalWrapper condition={portal} wrapper={(children) => <Portal>{children}</Portal>}>
             <PopoverContent>
               <VStack align="start" spacing={0}>
                 {options.map((value, i) => (
@@ -78,7 +86,7 @@ export const EnergyStepSelect = observer(function EnergyStepSelect({ onChange, v
                 ))}
               </VStack>
             </PopoverContent>
-          </Portal>
+          </ConditionalWrapper>
         </>
       )}
     </Popover>

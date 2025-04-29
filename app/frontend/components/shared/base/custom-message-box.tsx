@@ -45,7 +45,7 @@ export const CustomMessageBox = ({
         <Box color={`semantic.${status}`}>{iconMap[status]}</Box>
         <Flex direction="column">
           {title && (
-            <Heading as="h3" fontSize="md" {...headingProps}>
+            <Heading as="h3" fontSize="md" m={0} lineHeight={5} {...headingProps}>
               {title}
             </Heading>
           )}

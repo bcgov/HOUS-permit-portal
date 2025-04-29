@@ -8,6 +8,12 @@ class ExternalApi::ApplicationController < ActionController::API
 
   attr_reader :current_external_api_key
 
+  rescue_from ActiveRecord::RecordNotFound do |exception|
+    # You might want to customize the error key based on the model
+    # e.g., extract model name from exception.message
+    render_error "misc.not_found_error", { status: :not_found }, exception # Pass exception for logging
+  end
+
   rescue_from Pundit::NotAuthorizedError, with: :external_api_key_not_authorized
 
   # skip because this is API only controller, not connecting to any SPA

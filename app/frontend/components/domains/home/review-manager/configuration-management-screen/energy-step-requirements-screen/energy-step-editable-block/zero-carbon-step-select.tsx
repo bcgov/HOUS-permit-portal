@@ -15,6 +15,7 @@ import { observer } from "mobx-react-lite"
 import React from "react"
 import { useMst } from "../../../../../../../setup/root"
 import { EZeroCarbonStep } from "../../../../../../../types/enums"
+import { ConditionalWrapper } from "../../../../../../shared/conditional-wrapper"
 import { i18nPrefix } from "../i18n-prefix"
 
 interface IProps {
@@ -22,6 +23,7 @@ interface IProps {
   value: EZeroCarbonStep
   isDisabled?: boolean
   allowNull?: boolean
+  portal?: boolean
 }
 
 export const ZeroCarbonStepSelect = observer(function ZeroCarbonStepSelect({
@@ -29,6 +31,7 @@ export const ZeroCarbonStepSelect = observer(function ZeroCarbonStepSelect({
   value,
   isDisabled,
   allowNull,
+  portal,
 }: IProps) {
   const {
     stepCodeStore: { getZeroCarbonStepOptions },
@@ -53,16 +56,14 @@ export const ZeroCarbonStepSelect = observer(function ZeroCarbonStepSelect({
                 shadow="base"
                 isDisabled={isDisabled}
               >
-                {value === undefined
+                {value === undefined || value === null
                   ? t(`ui.selectPlaceholder`)
-                  : value
-                    ? t(`${i18nPrefix}.stepRequired.zeroCarbon.options.${value}`)
-                    : t(`${i18nPrefix}.notRequired`)}
+                  : t(`${i18nPrefix}.stepRequired.zeroCarbon.options.${value}`)}
               </Input>
               <InputRightElement children={<CaretDown color="gray.300" />} />
             </InputGroup>
           </PopoverTrigger>
-          <Portal>
+          <ConditionalWrapper condition={portal} wrapper={(children) => <Portal>{children}</Portal>}>
             <PopoverContent>
               <VStack align="start" spacing={0}>
                 {options.map((value, i) => (
@@ -87,7 +88,7 @@ export const ZeroCarbonStepSelect = observer(function ZeroCarbonStepSelect({
                 ))}
               </VStack>
             </PopoverContent>
-          </Portal>
+          </ConditionalWrapper>
         </>
       )}
     </Popover>

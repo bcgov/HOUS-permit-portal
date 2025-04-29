@@ -23,9 +23,11 @@ To help us understand and address the issue efficiently, please use the followin
 - **Contact Information**: Your preferred contact information in case we need further details or clarification.
 
 By following these guidelines, you will help us address security issues more effectively and ensure the safety of our users.
-1. **Email us**: Send a detailed report to our security team at **BPH.Dev@gov.bc.ca**  
+
+1. **Email us**: Send a detailed report to our security team at **BPH.Dev@gov.bc.ca**
 
 2. **Include the following details in your report**:
+
    - **Description**: A detailed description of the vulnerability, including what it is, how it can be exploited, and any other relevant details.
    - **Reproduction Steps**: Clear and concise steps to reproduce the issue.
    - **Impact**: A description of the potential impact of the vulnerability, such as unauthorized access, data leakage, etc.

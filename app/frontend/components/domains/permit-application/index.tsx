@@ -9,7 +9,11 @@ import { useResetQueryParams } from "../../../hooks/use-reset-query-params"
 import { useSearch } from "../../../hooks/use-search"
 import { IPermitApplication } from "../../../models/permit-application"
 import { useMst } from "../../../setup/root"
-import { EPermitApplicationStatusGroup, EPermitApplicationSubmitterSortFields } from "../../../types/enums"
+import {
+  EFlashMessageStatus,
+  EPermitApplicationStatusGroup,
+  EPermitApplicationSubmitterSortFields,
+} from "../../../types/enums"
 import { BlueTitleBar } from "../../shared/base/blue-title-bar"
 import { CustomMessageBox } from "../../shared/base/custom-message-box"
 import { Paginator } from "../../shared/base/inputs/paginator"
@@ -104,7 +108,7 @@ export const PermitApplicationIndexScreen = observer(({}: IPermitApplicationInde
             </Flex>
           ) : R.isEmpty(tablePermitApplications) ? (
             <CustomMessageBox
-              status="info"
+              status={EFlashMessageStatus.info}
               title={t("permitApplication.noneFound")}
               description={t("permitApplication.noneFoundExplanation")}
             />

@@ -8,7 +8,7 @@ import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { useQuery } from "../../../hooks/use-query"
 import { useMst } from "../../../setup/root"
-import { EUserRoles } from "../../../types/enums"
+import { EFlashMessageStatus, EUserRoles } from "../../../types/enums"
 import { CustomMessageBox } from "../../shared/base/custom-message-box"
 import { UserInput } from "../../shared/base/inputs/user-input"
 
@@ -94,7 +94,7 @@ export const AdminInviteScreen = observer(({}: IAdminInviteScreenProps) => {
               </Flex>
               {!R.isEmpty(takenEmails) && (
                 <CustomMessageBox
-                  status="error"
+                  status={EFlashMessageStatus.error}
                   title={t("user.takenErrorTitle")}
                   description={t("user.takenErrorDescription")}
                 />

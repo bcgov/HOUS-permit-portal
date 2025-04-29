@@ -380,6 +380,11 @@ const requirementsComponentMap = {
   [ERequirementType.energyStepCode]: function <TFieldValues>(props) {
     return <EditableGroup editableInput={<i className="fa fa-bolt"></i>} {...props} />
   },
+
+  [ERequirementType.energyStepCodePart3]: function <TFieldValues>(props) {
+    return <EditableGroup editableInput={<i className="fa fa-bolt"></i>} {...props} />
+  },
+
   [ERequirementType.generalContact]: function <TFieldValues>({
     editableLabelProps,
     canAddMultipleContactProps,

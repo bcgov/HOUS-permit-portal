@@ -9,7 +9,7 @@ import { useNavigate } from "react-router-dom"
 import { useJurisdiction } from "../../../hooks/resources/use-jurisdiction"
 import { useQuery } from "../../../hooks/use-query"
 import { useMst } from "../../../setup/root"
-import { EUserRoles } from "../../../types/enums"
+import { EFlashMessageStatus, EUserRoles } from "../../../types/enums"
 import { CustomMessageBox } from "../../shared/base/custom-message-box"
 import { ErrorScreen } from "../../shared/base/error-screen"
 import { UserInput } from "../../shared/base/inputs/user-input"
@@ -108,7 +108,7 @@ export const InviteScreen = observer(({}: IInviteScreenProps) => {
               </Flex>
               {!R.isEmpty(takenEmails) && (
                 <CustomMessageBox
-                  status="error"
+                  status={EFlashMessageStatus.error}
                   title={t("user.takenErrorTitle")}
                   description={t("user.takenErrorDescription")}
                 />
