@@ -53,18 +53,12 @@ const EnergyStepRequirementsScreen = lazy(() =>
     default: module.EnergyStepRequirementsScreen,
   }))
 )
-const ReviewManagerGlobalFeatureAccessScreen = lazy(() =>
-  import("../home/review-manager/configuration-management-screen/global-feature-access-screen").then((module) => ({
-    default: module.ReviewManagerGlobalFeatureAccessScreen,
+const SubmissionsInboxSetupScreen = lazy(() =>
+  import("../home/review-manager/configuration-management-screen/submissions-inbox-setup-screen").then((module) => ({
+    default: module.SubmissionsInboxSetupScreen,
   }))
 )
-const ReviewStaffInboxFeatureAccessScreen = lazy(() =>
-  import(
-    "../home/review-manager/configuration-management-screen/global-feature-access-screen/inbox-feature-access"
-  ).then((module) => ({
-    default: module.InboxFeatureAccessScreen,
-  }))
-)
+
 const JurisdictionIndexScreen = lazy(() =>
   import("../jurisdictions/index").then((module) => ({ default: module.JurisdictionIndexScreen }))
 )
@@ -212,9 +206,9 @@ const AdminGlobalFeatureAccessScreen = lazy(() =>
   }))
 )
 
-const InboxFeatureAccessScreen = lazy(() =>
-  import("../super-admin/site-configuration-management/inbox-feature-access").then((module) => ({
-    default: module.InboxFeatureAccessScreen,
+const AdminSubmissionInboxScreen = lazy(() =>
+  import("../super-admin/site-configuration-management/submission-inbox").then((module) => ({
+    default: module.AdminSubmissionInboxScreen,
   }))
 )
 
@@ -379,7 +373,7 @@ const AppRoutes = observer(() => {
       <Route path="/configuration-management/global-feature-access" element={<AdminGlobalFeatureAccessScreen />} />
       <Route
         path="/configuration-management/global-feature-access/submission-inbox"
-        element={<InboxFeatureAccessScreen />}
+        element={<AdminSubmissionInboxScreen />}
       />
       <Route path="/configuration-management/users/invite" element={<AdminInviteScreen />} />
       <Route path="/reporting" element={<ReportingScreen />} />
@@ -405,12 +399,8 @@ const AppRoutes = observer(() => {
     <>
       <Route path="/jurisdictions/:jurisdictionId/submission-inbox" element={<JurisdictionSubmissionInboxScreen />} />
       <Route
-        path="/jurisdictions/:jurisdictionId/configuration-management/global-feature-access"
-        element={<ReviewManagerGlobalFeatureAccessScreen />}
-      />
-      <Route
-        path="/jurisdictions/:jurisdictionId/configuration-management/global-feature-access/submission-inbox"
-        element={<ReviewStaffInboxFeatureAccessScreen />}
+        path="/jurisdictions/:jurisdictionId/configuration-management/submissions-inbox-setup"
+        element={<SubmissionsInboxSetupScreen />}
       />
       <Route
         path="/jurisdictions/:jurisdictionId/configuration-management/energy-step"
