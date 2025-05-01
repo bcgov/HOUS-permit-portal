@@ -1,9 +1,10 @@
 import { Box, Container, Divider, Flex, Heading, HStack, Text, VStack } from "@chakra-ui/react"
 import { CaretLeft } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
-import React, { useEffect, useState } from "react"
+import React from "react"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../../setup/root"
+import { SharedSpinner } from "../../../shared/base/shared-spinner"
 import { SwitchButton } from "../../../shared/buttons/switch-button"
 import { RouterLinkButton } from "../../../shared/navigation/router-link-button"
 
@@ -12,20 +13,16 @@ export const AdminSubmissionInboxScreen = observer(() => {
   const { t } = useTranslation()
   const { siteConfigurationStore } = useMst()
   const { updateSiteConfiguration, configurationLoaded } = siteConfigurationStore
-  const [inboxEnabled, setInboxEnabled] = useState(false)
 
-  const updateInboxEnabled = async (checked) => {
-    setInboxEnabled(checked)
+  const updateInboxEnabled = async (checked: boolean) => {
     await updateSiteConfiguration({
       inboxEnabled: checked,
     })
   }
 
-  useEffect(() => {
-    if (configurationLoaded) {
-      setInboxEnabled(siteConfigurationStore.inboxEnabled || false)
-    }
-  }, [configurationLoaded])
+  if (!configurationLoaded) {
+    return <SharedSpinner />
+  }
 
   return (
     <Container maxW="container.lg" p={8} as={"main"}>
@@ -55,7 +52,11 @@ export const AdminSubmissionInboxScreen = observer(() => {
             <Text style={{ fontWeight: "bold" }}>{t(`${i18nPrefix}.submissionInbox`)}</Text>
             <HStack spacing={5} align="center">
               <HStack spacing={6}>
-                <SwitchButton enable={inboxEnabled} update={updateInboxEnabled} size={"lg"} />
+                <SwitchButton
+                  isChecked={siteConfigurationStore.inboxEnabled || false}
+                  onChange={(e) => updateInboxEnabled(e.target.checked)}
+                  size={"lg"}
+                />
               </HStack>
             </HStack>
           </Flex>
