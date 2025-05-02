@@ -8,6 +8,7 @@ import { useMst } from "../../../setup/root"
 import { EFlashMessageStatus } from "../../../types/enums"
 import { FlashMessage } from "../../shared/base/flash-message"
 import { LoadingScreen } from "../../shared/base/loading-screen"
+import { ReviewManagerFeatureAccessScreen } from "../home/review-manager/configuration-management-screen/feature-access-screen"
 import { EULAScreen } from "../onboarding/eula"
 import { NavBar } from "./nav-bar"
 import { ProtectedRoute } from "./protected-route"
@@ -48,6 +49,14 @@ const ConfigurationManagementScreen = lazy(() =>
     default: module.ConfigurationManagementScreen,
   }))
 )
+const ReviewStaffInboxFeatureAccessScreen = lazy(() =>
+  import("../home/review-manager/configuration-management-screen/feature-access-screen/inbox-feature-access").then(
+    (module) => ({
+      default: module.InboxFeatureAccessScreen,
+    })
+  )
+)
+
 const EnergyStepRequirementsScreen = lazy(() =>
   import("../home/review-manager/configuration-management-screen/energy-step-requirements-screen").then((module) => ({
     default: module.EnergyStepRequirementsScreen,
@@ -399,10 +408,6 @@ const AppRoutes = observer(() => {
     <>
       <Route path="/jurisdictions/:jurisdictionId/submission-inbox" element={<JurisdictionSubmissionInboxScreen />} />
       <Route
-        path="/jurisdictions/:jurisdictionId/configuration-management/submissions-inbox-setup"
-        element={<SubmissionsInboxSetupScreen />}
-      />
-      <Route
         path="/jurisdictions/:jurisdictionId/configuration-management/energy-step"
         element={<EnergyStepRequirementsScreen />}
       />
@@ -439,6 +444,14 @@ const AppRoutes = observer(() => {
       <Route
         path="/jurisdictions/:jurisdictionId/configuration-management"
         element={<ConfigurationManagementScreen />}
+      />
+      <Route
+        path="/jurisdictions/:jurisdictionId/configuration-management/feature-access"
+        element={<ReviewManagerFeatureAccessScreen />}
+      />
+      <Route
+        path="/jurisdictions/:jurisdictionId/configuration-management/feature-access/submissions-inbox-setup"
+        element={<SubmissionsInboxSetupScreen />}
       />
       <Route path="/digital-building-permits" element={<JurisdictionDigitalPermitScreen />} />
       <Route path="/api-settings/api-mappings" element={<JurisdictionApiMappingsSetupIndexScreen />} />
