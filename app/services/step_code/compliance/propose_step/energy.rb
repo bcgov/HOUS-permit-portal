@@ -1,10 +1,10 @@
 class StepCode::Compliance::ProposeStep::Energy < StepCode::Compliance::ProposeStep::Base
   def min_step
-    @min_step ||= ENV["MIN_ENERGY_STEP"].to_i
+    @min_step ||= ENV["PART_9_MIN_ENERGY_STEP"].to_i
   end
 
   def max_step
-    @max_step ||= ENV["MAX_ENERGY_STEP"].to_i
+    @max_step ||= ENV["PART_9_MAX_ENERGY_STEP"].to_i
   end
 
   def checkers
