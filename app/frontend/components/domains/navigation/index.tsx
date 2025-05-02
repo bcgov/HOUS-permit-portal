@@ -408,10 +408,6 @@ const AppRoutes = observer(() => {
     <>
       <Route path="/jurisdictions/:jurisdictionId/submission-inbox" element={<JurisdictionSubmissionInboxScreen />} />
       <Route
-        path="/jurisdictions/:jurisdictionId/configuration-management/submissions-inbox-setup"
-        element={<SubmissionsInboxSetupScreen />}
-      />
-      <Route
         path="/jurisdictions/:jurisdictionId/configuration-management/energy-step"
         element={<EnergyStepRequirementsScreen />}
       />
@@ -455,7 +451,7 @@ const AppRoutes = observer(() => {
       />
       <Route
         path="/jurisdictions/:jurisdictionId/configuration-management/feature-access/submissions-inbox-setup"
-        element={<ReviewStaffInboxFeatureAccessScreen />}
+        element={<SubmissionsInboxSetupScreen />}
       />
       <Route path="/digital-building-permits" element={<JurisdictionDigitalPermitScreen />} />
       <Route path="/api-settings/api-mappings" element={<JurisdictionApiMappingsSetupIndexScreen />} />
