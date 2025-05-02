@@ -1437,6 +1437,15 @@ const options = {
               toggleOn: "On",
               toggleOff: "Off",
             },
+            featureAccess: {
+              title: "Feature access",
+              description: "Turn system features on or off for all users system-wide.",
+              submissionInbox: "Submissions inbox",
+              submissionInboxDescription:
+                "Enable review managers to accept and process permit applications. If you turn off this feature, submitters can’t submit applications, and review managers won’t receive new applications.",
+              toggleOn: "On",
+              toggleOff: "Off",
+            },
             externalApiKeys: {
               title: "API settings",
               description: "Manage API keys for the Building Permit Hub.",

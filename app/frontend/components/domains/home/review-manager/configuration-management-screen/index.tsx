@@ -60,7 +60,7 @@ export const ConfigurationManagementScreen = observer(function ConfigurationMana
                   description={t(`${i18nPrefix}.submissionsInboxSetup.description`)}
                   linkText={t("ui.edit")}
                   icon={<Tray size="24px" color="var(--chakra-colors-text-primary)" />}
-                  href="submissions-inbox-setup"
+                  href="feature-access/submissions-inbox-setup"
                   h="full"
                   disableForSandbox
                 />
@@ -104,6 +104,17 @@ export const ConfigurationManagementScreen = observer(function ConfigurationMana
                   linkText={t("ui.edit")}
                   icon={<Users size={24} />}
                   href={`/jurisdictions/${currentJurisdiction.slug}/users`}
+                  h="full"
+                  disableForSandbox
+                />
+              </GridItem>
+              <GridItem>
+                <HomeScreenBox
+                  title={t(`${i18nPrefix}.featureAccess.title`)}
+                  description={t(`${i18nPrefix}.featureAccess.description`)}
+                  linkText={t("ui.edit")}
+                  icon={<Tray size="24px" color="var(--chakra-colors-text-primary)" />}
+                  href="feature-access"
                   h="full"
                   disableForSandbox
                 />
