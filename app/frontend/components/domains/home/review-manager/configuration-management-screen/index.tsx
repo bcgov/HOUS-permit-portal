@@ -113,7 +113,7 @@ export const ConfigurationManagementScreen = observer(function ConfigurationMana
                   title={t(`${i18nPrefix}.featureAccess.title`)}
                   description={t(`${i18nPrefix}.featureAccess.description`)}
                   linkText={t("ui.edit")}
-                  icon={<Tray size="24px" color="var(--chakra-colors-text-primary)" />}
+                  icon={<SlidersHorizontal size="24px" color="var(--chakra-colors-text-primary)" />}
                   href="feature-access"
                   h="full"
                   disableForSandbox
