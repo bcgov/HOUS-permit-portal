@@ -36,6 +36,9 @@ export const Part9StepCodeModel = types
     get checklistForPdf() {
       return self.preConstructionChecklist
     },
+    get isComplete() {
+      return self.preConstructionChecklist?.isComplete
+    },
   }))
   .actions((self) => ({
     updateChecklist: flow(function* (id, values) {
