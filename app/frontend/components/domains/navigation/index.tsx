@@ -48,6 +48,7 @@ const ConfigurationManagementScreen = lazy(() =>
     default: module.ConfigurationManagementScreen,
   }))
 )
+
 const EnergyStepRequirementsScreen = lazy(() =>
   import("../home/review-manager/configuration-management-screen/energy-step-requirements-screen").then((module) => ({
     default: module.EnergyStepRequirementsScreen,
