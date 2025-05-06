@@ -247,6 +247,8 @@ Rails.application.routes.draw do
       post "revoke", on: :member
     end
 
+    resources :audit_logs, only: [:index]
+
     resources :collaborators, only: %i[] do
       collection do
         resources :collaboratorable, only: %i[] do

@@ -30,6 +30,7 @@ gem "tzinfo-data", platforms: %i[windows jruby]
 # Reduces boot times through caching; required in config/boot.rb
 gem "bootsnap", require: false
 
+gem "audited"
 # Authentication
 gem "devise", "4.9.3"
 gem "devise_invitable", "~> 2.0.9"
