@@ -49,13 +49,6 @@ const ConfigurationManagementScreen = lazy(() =>
     default: module.ConfigurationManagementScreen,
   }))
 )
-const ReviewStaffInboxFeatureAccessScreen = lazy(() =>
-  import("../home/review-manager/configuration-management-screen/feature-access-screen/inbox-feature-access").then(
-    (module) => ({
-      default: module.InboxFeatureAccessScreen,
-    })
-  )
-)
 
 const EnergyStepRequirementsScreen = lazy(() =>
   import("../home/review-manager/configuration-management-screen/energy-step-requirements-screen").then((module) => ({
