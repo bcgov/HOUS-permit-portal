@@ -3,7 +3,7 @@ class Jurisdiction < ApplicationRecord
   friendly_id :qualified_name, use: :slugged
   include JurisdictionExternalApiState
 
-  audited only: [:inbox_enabled], if: :inbox_enabled_changed?
+  audited only: [:inbox_enabled], if: :saved_change_to_inbox_enabled?
   BASE_INCLUDES = %i[
     permit_type_submission_contacts
     contacts
@@ -286,10 +286,6 @@ class Jurisdiction < ApplicationRecord
   end
 
   private
-
-  def inbox_enabled_changed?
-    saved_change_to_inbox_enabled?
-  end
 
   def create_permit_type_required_steps
     PermitType.all.each do |permit_type|
