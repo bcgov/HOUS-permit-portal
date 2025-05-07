@@ -1,4 +1,6 @@
 class SiteConfiguration < ApplicationRecord
+  audited only: [:inbox_enabled], if: :inbox_enabled_changed?
+
   # Ensures that only one SiteConfiguration record can be created
   before_create :ensure_single_record
   validate :validate_help_link_items
@@ -69,6 +71,10 @@ class SiteConfiguration < ApplicationRecord
         )
       )
     end
+  end
+
+  def inbox_enabled_changed?
+    saved_change_to_inbox_enabled?
   end
 
   def max_undiscarded_revision_reasons
