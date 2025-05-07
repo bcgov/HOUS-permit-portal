@@ -11,13 +11,11 @@ require "shrine/storage/s3"
 module Constants
   module Sizes
     FILE_UPLOAD_MAX_SIZE =
-      (
-        if ENV["VITE_FILE_UPLOAD_MAX_SIZE"].present?
-          ENV["VITE_FILE_UPLOAD_MAX_SIZE"].to_d
-        else
-          100
-        end
-      )
+      ENV["VITE_APP_FILE_UPLOAD_MAX_SIZE_MB"].presence&.to_d || 200
+
+    FILE_UPLOAD_CHUNK_SIZE =
+      ENV["VITE_APP_FILE_UPLOAD_CHUNK_SIZE_MB"].presence&.to_d || 10
+
     FILE_UPLOAD_ZIP_MAX_SIZE = FILE_UPLOAD_MAX_SIZE * 10
   end
 end
@@ -35,7 +33,14 @@ if SHRINE_USE_S3
     region: ENV["BCGOV_OBJECT_STORAGE_REGION"] || "no-region-needed", # We are using Object Storage which does not require this, put in a dummy variable.  For dev testing will need a region.
     access_key_id: ENV["BCGOV_OBJECT_STORAGE_ACCESS_KEY_ID"],
     secret_access_key: ENV["BCGOV_OBJECT_STORAGE_SECRET_ACCESS_KEY"],
-    force_path_style: true
+    force_path_style: true,
+    upload_options: { # Default options for all uploads to this storage
+      # Temporarily using a static string to debug Proc issue
+      content_disposition: "attachment"
+      # content_disposition: ->(io, metadata) do
+      #   "attachment; filename=\"#{metadata[:filename]}\""
+      # end
+    }
   }
   Shrine.storages = {
     cache:
@@ -68,16 +73,26 @@ Shrine.plugin :presign_endpoint,
                 lambda { |request|
                   filename = request.params["filename"]
                   type = request.params["type"]
+                  size_str = request.params["size"]
 
-                  {
+                  options = {
                     method: :put,
                     content_disposition:
                       ContentDisposition.attachment(filename),
                     content_type: type
-                    # content_length_range: [0, 10 * 1024 * 1024] # limit upload size to 10 MB
-                    # content_md5: request.params["checksum"],
-                    # transfer_encoding: "chunked",
                   }
+
+                  # Ensure size is a positive integer before setting content_length
+                  if size_str.present? && size_str.match?(/\A\d+\z/) &&
+                       size_str.to_i > 0
+                    options[:content_length] = size_str.to_i
+                  end
+                  # If size is not valid or not present, content_length will not be set.
+                  # S3 might require Content-Length for PUTs unless using chunked transfer,
+                  # but Uppy typically sets Content-Length header itself during the PUT.
+                  # Presigning with Content-Length makes the URL more specific.
+
+                  options
                 }
 
 class Shrine::Storage::S3
@@ -88,36 +103,57 @@ class Shrine::Storage::S3
   #we want to simulate something similar for form.io, but to simplify it we will use a presign put
   #one thing to watch out for is that presign_put uses shortly timed urls
 
-  def presign_put(id, options)
+  def presign_put(id, options) # options here comes from the presign_endpoint plugin's presign_options lambda
     obj = object(id)
 
-    #chunking handled by uppy
-    signed_url = obj.presigned_url(:put, options)
-    url = Shrine.storages[:cache].url(id, public: false, expires_in: 3600)
-    # When any of these options are specified, the corresponding request
-    # headers must be included in the upload request.
-    headers = {}
-    headers["Content-Length"] = options[:content_length] if options[
+    # Filter options to only include those valid for Aws::S3::Presigner#presigned_url for :put_object
+    # The `options` hash from the lambda might include other keys like :method for the final response.
+    s3_presign_options = {}
+    s3_presign_options[:content_type] = options[:content_type] if options[
+      :content_type
+    ]
+    s3_presign_options[:content_disposition] = options[
+      :content_disposition
+    ] if options[:content_disposition]
+    s3_presign_options[:content_length] = options[:content_length] if options[
       :content_length
     ]
-    headers["Content-Type"] = options[:content_type] if options[:content_type]
-    headers["Content-Disposition"] = options[:content_disposition] if options[
+    s3_presign_options[:content_md5] = options[:content_md5] if options[
+      :content_md5
+    ] # If you plan to use it
+    # Add any other S3-specific PUT options you need, e.g., :acl, :cache_control, :expires, etc.
+    # s3_presign_options[:acl] = "public-read" # Example
+
+    signed_url = obj.presigned_url(:put, s3_presign_options)
+
+    # The `url` here is a local URL, not the S3 one. Uppy typically needs the S3 direct upload URL.
+    # The response from Shrine's presign_endpoint usually provides `url` (the signed S3 URL) and `fields` (for POSTs).
+    # For PUTs, just the `signed_url` is primary.
+    # Your `use-uppy-s3.ts` expects `signed_url` specifically in the response from `/api/s3/params`.
+
+    # Construct headers for the client to use when making the PUT request to S3.
+    # These should generally match what was used to generate the signature.
+    # However, for a PUT to a presigned URL, the client often only needs to set Content-Type
+    # and Content-Length matching the file, and the presigned URL handles the auth.
+    # The headers in the response are more for guiding the client if it constructs its own request from scratch
+    # or for POST policies.
+    response_headers = {}
+    response_headers["Content-Type"] = s3_presign_options[
+      :content_type
+    ] if s3_presign_options[:content_type]
+    # Content-Length is usually set by the client (Uppy) based on the actual file part.
+    # response_headers["Content-Length"] = s3_presign_options[:content_length] if s3_presign_options[:content_length]
+    response_headers["Content-Disposition"] = s3_presign_options[
       :content_disposition
-    ]
-    headers["Content-Encoding"] = options[:content_encoding] if options[
-      :content_encoding
-    ]
-    headers["Content-Language"] = options[:content_language] if options[
-      :content_language
-    ]
-    headers["Content-MD5"] = options[:content_md5] if options[:content_md5]
+    ] if s3_presign_options[:content_disposition]
 
     {
-      method: :put,
-      url: url,
-      signed_url: signed_url,
-      headers: headers,
-      key: obj.key
+      method: :put, # This is for the Uppy client, indicating it should use PUT
+      url: signed_url, # This should be the S3 presigned URL that Uppy will PUT to
+      # fields: {}, # Fields are typically for POST policies, not PUTs
+      headers: response_headers, # Headers Uppy might need to set on its PUT request to S3 (often minimal for PUTs)
+      key: obj.key, # The object key in S3
+      signed_url: signed_url # Redundant if url is the signed_url, but your use-uppy-s3.ts specifically looks for signed_url
     }
   end
 
