@@ -173,4 +173,42 @@ class Shrine::Storage::S3
       signed_url: signed_url # Redundant if url is the signed_url, but our use-uppy-s3.ts specifically looks for signed_url
     }
   end
+
+  def copy(io, id, **copy_options)
+    # For ECS S3: be explicit about metadata handling during copy.
+    # We want to apply new metadata (like content_disposition from upload_options)
+    # and not copy all metadata from the source, to ensure compatibility.
+    options = {
+      metadata_directive: "REPLACE",
+      tagging_directive: "REPLACE" # Ensures tags are also replaced, not copied. Adjust if not desired.
+    }
+
+    # Merge standard S3 storage options like acl, server_side_encryption if they are set on the storage instance
+    options[:acl] = @acl if @acl
+    options[
+      :server_side_encryption
+    ] = @server_side_encryption if @server_side_encryption
+
+    # Incorporate multipart copy logic if applicable (from shrine.rb.old logic)
+    # @multipart_threshold is initialized by Shrine's S3 storage.
+    # The :copy key should exist. Using a very large default as a fallback.
+    effective_multipart_threshold =
+      (
+        if @multipart_threshold && @multipart_threshold[:copy]
+          @multipart_threshold[:copy]
+        else
+          5 * 1024 * 1024 * 1024
+        end
+      ) # Default to 5GB
+    if io.size && io.size >= effective_multipart_threshold
+      options.merge!(multipart_copy: true, content_length: io.size)
+    end
+
+    # Merge options passed by Shrine's core copy logic.
+    # This will include `content_disposition` from the `upload_options` plugin,
+    # which will now be applied correctly due to `metadata_directive: "REPLACE"`.
+    options.merge!(copy_options)
+
+    object(id).copy_from(io.storage.object(io.id), **options)
+  end
 end
