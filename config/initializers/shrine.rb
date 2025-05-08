@@ -174,41 +174,31 @@ class Shrine::Storage::S3
     }
   end
 
+  # ECS S3 copy function does not take as many params, it works when its plain.  You can test in the code below to verify.
+  # s3_client= Shrine.storages[:cache].client
+  # s3_client.copy_object({
+  #   copy_source: "#{ENV["BCGOV_OBJECT_STORAGE_BUCKET"]}/4ff7582a03d0aa90e13d179f1268381c.pdf",
+  #   bucket: ENV["BCGOV_OBJECT_STORAGE_BUCKET"],
+  #   key: "test.pdf"
+  # })
+  #itnercepted
+  # {:copy_source=>"housing-bssb-ex-permithub-dev-bkt/4ff7582a03d0aa90e13d179f1268381c.pdf",
+  #  :bucket=>"housing-bssb-ex-permithub-dev-bkt",
+  #  :key=>"test.pdf"}
+
   def copy(io, id, **copy_options)
-    # For ECS S3: be explicit about metadata handling during copy.
-    # We want to apply new metadata (like content_disposition from upload_options)
-    # and not copy all metadata from the source, to ensure compatibility.
+    # don't inherit source object metadata or AWS tags
     options = {
-      metadata_directive: "REPLACE",
-      tagging_directive: "REPLACE" # Ensures tags are also replaced, not copied. Adjust if not desired.
+      # metadata_directive: "REPLACE",  #OVERRIDE COPY DO NOT ALLOW THESE DIRECTIVE OPTIONS
+      # tagging_directive: "REPLACE"  #OVERRIDE COPY DO NOT ALLOW THESE DIRECTIVE OPTIONS
     }
 
-    # Merge standard S3 storage options like acl, server_side_encryption if they are set on the storage instance
-    options[:acl] = @acl if @acl
-    options[
-      :server_side_encryption
-    ] = @server_side_encryption if @server_side_encryption
-
-    # Incorporate multipart copy logic if applicable (from shrine.rb.old logic)
-    # @multipart_threshold is initialized by Shrine's S3 storage.
-    # The :copy key should exist. Using a very large default as a fallback.
-    effective_multipart_threshold =
-      (
-        if @multipart_threshold && @multipart_threshold[:copy]
-          @multipart_threshold[:copy]
-        else
-          5 * 1024 * 1024 * 1024
-        end
-      ) # Default to 5GB
-    if io.size && io.size >= effective_multipart_threshold
+    if io.size && io.size >= @multipart_threshold[:copy]
+      # pass :content_length on multipart copy to avoid an additional HEAD request
       options.merge!(multipart_copy: true, content_length: io.size)
     end
 
-    # Merge options passed by Shrine's core copy logic.
-    # This will include `content_disposition` from the `upload_options` plugin,
-    # which will now be applied correctly due to `metadata_directive: "REPLACE"`.
     options.merge!(copy_options)
-
     object(id).copy_from(io.storage.object(io.id), **options)
   end
 end
