@@ -61,14 +61,12 @@ export const RequirementForm = observer(
       isDraft,
       previousSubmissionVersion,
       selectedSubmissionVersion,
-      isViewingPastRequests,
       previousToSelectedSubmissionVersion,
       inboxEnabled,
       sandbox,
     } = permitApplication
 
     const { userStore } = useMst()
-    const { currentUser } = userStore
     const shouldShowDiff = permitApplication?.shouldShowApplicationDiff(isEditing)
     const userShouldSeeDiff = permitApplication?.currentUserShouldSeeApplicationDiff
 
@@ -217,6 +215,7 @@ export const RequirementForm = observer(
       downloadFileFromStorage({
         model: EFileUploadAttachmentType.RequirementDocument,
         modelId: event.detail.id,
+        filename: event.detail.filename,
       })
     }
 
