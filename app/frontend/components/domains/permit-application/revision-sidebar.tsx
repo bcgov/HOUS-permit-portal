@@ -364,9 +364,7 @@ const RevisionRequestListItem = ({ revisionRequest }: IRevisionRequestListItemPr
 
   return (
     <ListItem mb={4} w="full">
-      <ScrollLink to={`formio-component-${requirementJson.key}`} trigger={currentPermitApplication?.formFormatKey}>
-        {requirementJson.label}
-      </ScrollLink>
+      <ScrollLink to={`formio-component-${requirementJson.key}`}>{requirementJson.label}</ScrollLink>
       <Flex fontStyle="italic">
         {t("permitApplication.show.revision.reasonCode")}: {reasonCode}
       </Flex>

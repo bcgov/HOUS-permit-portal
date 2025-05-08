@@ -173,4 +173,32 @@ class Shrine::Storage::S3
       signed_url: signed_url # Redundant if url is the signed_url, but our use-uppy-s3.ts specifically looks for signed_url
     }
   end
+
+  # ECS S3 copy function does not take as many params, it works when its plain.  You can test in the code below to verify.
+  # s3_client= Shrine.storages[:cache].client
+  # s3_client.copy_object({
+  #   copy_source: "#{ENV["BCGOV_OBJECT_STORAGE_BUCKET"]}/4ff7582a03d0aa90e13d179f1268381c.pdf",
+  #   bucket: ENV["BCGOV_OBJECT_STORAGE_BUCKET"],
+  #   key: "test.pdf"
+  # })
+  #itnercepted
+  # {:copy_source=>"housing-bssb-ex-permithub-dev-bkt/4ff7582a03d0aa90e13d179f1268381c.pdf",
+  #  :bucket=>"housing-bssb-ex-permithub-dev-bkt",
+  #  :key=>"test.pdf"}
+
+  def copy(io, id, **copy_options)
+    # don't inherit source object metadata or AWS tags
+    options = {
+      # metadata_directive: "REPLACE",  #OVERRIDE COPY DO NOT ALLOW THESE DIRECTIVE OPTIONS
+      # tagging_directive: "REPLACE"  #OVERRIDE COPY DO NOT ALLOW THESE DIRECTIVE OPTIONS
+    }
+
+    if io.size && io.size >= @multipart_threshold[:copy]
+      # pass :content_length on multipart copy to avoid an additional HEAD request
+      options.merge!(multipart_copy: true, content_length: io.size)
+    end
+
+    options.merge!(copy_options)
+    object(id).copy_from(io.storage.object(io.id), **options)
+  end
 end
