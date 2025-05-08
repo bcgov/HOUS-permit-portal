@@ -9,7 +9,6 @@ import { Trans, useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { useMountStatus } from "../../../hooks/use-mount-status"
 import { IPermitApplication } from "../../../models/permit-application"
-import { useMst } from "../../../setup/root"
 import { EFileUploadAttachmentType, EFlashMessageStatus } from "../../../types/enums"
 import { IErrorsBoxData } from "../../../types/types"
 import { getCompletedBlocksFromForm, getRequirementByKey } from "../../../utils/formio-component-traversal"
@@ -61,14 +60,11 @@ export const RequirementForm = observer(
       isDraft,
       previousSubmissionVersion,
       selectedSubmissionVersion,
-      isViewingPastRequests,
       previousToSelectedSubmissionVersion,
       inboxEnabled,
       sandbox,
     } = permitApplication
 
-    const { userStore } = useMst()
-    const { currentUser } = userStore
     const shouldShowDiff = permitApplication?.shouldShowApplicationDiff(isEditing)
     const userShouldSeeDiff = permitApplication?.currentUserShouldSeeApplicationDiff
 
@@ -198,9 +194,14 @@ export const RequirementForm = observer(
       }
     }, [formJson, isMounted, window.innerHeight, wrapperClickCount])
 
-    const handleOpenStepCode = async (_event) => {
+    const handleOpenStepCodePart3 = async (_event) => {
       await triggerSave?.()
-      navigate("step-code", { state: { enableStepCodeRoute: true } })
+      navigate("part-3-step-code")
+    }
+
+    const handleOpenStepCodePart9 = async (_event) => {
+      await triggerSave?.()
+      navigate("part-9-step-code")
     }
 
     const handleOpenContactAutofill = async (event) => {
@@ -221,12 +222,14 @@ export const RequirementForm = observer(
     }
 
     useEffect(() => {
-      document.addEventListener("openStepCode", handleOpenStepCode)
+      document.addEventListener("openStepCode", handleOpenStepCodePart9)
+      document.addEventListener("openStepCodePart3", handleOpenStepCodePart3)
       document.addEventListener("openAutofillContact", handleOpenContactAutofill)
       document.addEventListener("openPreviousSubmission", handleOpenPreviousSubmission)
       document.addEventListener("downloadRequirementDocument", handleDownloadRequirementDocument)
       return () => {
-        document.removeEventListener("openStepCode", handleOpenStepCode)
+        document.removeEventListener("openStepCode", handleOpenStepCodePart9)
+        document.removeEventListener("openStepCodePart3", handleOpenStepCodePart3)
         document.removeEventListener("openAutofillContact", handleOpenContactAutofill)
         document.removeEventListener("openPreviousSubmission", handleOpenPreviousSubmission)
         document.removeEventListener("downloadRequirementDocument", handleDownloadRequirementDocument)
@@ -286,19 +289,29 @@ export const RequirementForm = observer(
     }
 
     const onChange = (changedEvent) => {
-      //in the case of a multi select box, there is a change but no onblur bubbled up
-      if (changedEvent?.changed?.component?.type == "selectboxes") {
-        if (onCompletedBlocksChange) {
-          onCompletedBlocksChange(getCompletedBlocksFromForm(changedEvent?.changed?.instance?.root))
-        }
-        setErrorBoxData(mapErrorBoxData(changedEvent?.changed?.instance?.root?.errors))
+      const instance = changedEvent?.changed?.instance
+      const component = changedEvent?.changed?.component
+      const root = instance?.root
+
+      if (!root || !component) {
+        return // Exit if necessary objects are not available
       }
-      if (changedEvent?.changed?.component?.type == "simplefile") {
-        //https://github.com/formio/formio.js/blob/4.19.x/src/components/file/File.unit.js
-        // formio `pristine` is not set for file upldates
-        // using `setPristine(false)` causes the entire form to validate so instead, we use a separate dirty state
-        // trigger save to rerun compliance and save file
-        triggerSave?.({ autosave: true, skipPristineCheck: true })
+
+      const componentType = component.type
+
+      if (componentType === "selectboxes" || componentType === "simplefile") {
+        if (onCompletedBlocksChange) {
+          onCompletedBlocksChange(getCompletedBlocksFromForm(root))
+        }
+        setErrorBoxData(mapErrorBoxData(root.errors))
+
+        if (componentType === "simplefile") {
+          // https://github.com/formio/formio.js/blob/4.19.x/src/components/file/File.unit.js
+          // formio `pristine` is not set for file updates
+          // using `setPristine(false)` causes the entire form to validate so instead, we use a separate dirty state
+          // trigger save to rerun compliance and save file
+          triggerSave?.({ autosave: true, skipPristineCheck: true })
+        }
       }
     }
 

@@ -1,5 +1,5 @@
 RSpec.describe StepCode::Compliance::ProposeStep::Base do
-  let(:step_code) { build(:step_code) }
+  let(:step_code) { build(:part_9_step_code) }
   let(:min_required_step) { 3 }
   let(:min_step) { 3 }
   let(:max_step) { 5 }
