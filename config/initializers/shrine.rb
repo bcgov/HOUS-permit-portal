@@ -35,11 +35,14 @@ if SHRINE_USE_S3
     secret_access_key: ENV["BCGOV_OBJECT_STORAGE_SECRET_ACCESS_KEY"],
     force_path_style: true,
     upload_options: { # Default options for all uploads to this storage
-      # Temporarily using a static string to debug Proc issue
-      content_disposition: "attachment"
-      # content_disposition: ->(io, metadata) do
-      #   "attachment; filename=\"#{metadata[:filename]}\""
-      # end
+      # Restore the lambda for dynamic content_disposition
+      content_disposition: ->(io, metadata) do
+        # Ensure filename is reasonably sanitized just in case, although Shrine/AWS might handle it
+        filename = metadata[:filename] || "download"
+        # Basic sanitization: replace double quotes to prevent header issues
+        sanitized_filename = filename.gsub(/["\\]/, "_") # Replace quotes and backslashes
+        "attachment; filename=\"#{sanitized_filename}\""
+      end
     }
   }
   Shrine.storages = {
@@ -62,11 +65,30 @@ Shrine.plugin :backgrounding
 Shrine.plugin :derivatives
 Shrine.plugin :determine_mime_type
 Shrine.plugin :add_metadata
-# Shrine.plugin :url_options, cache: url_options, store: url_options
 Shrine.plugin :form_assign
 Shrine.plugin :data_uri
 Shrine.plugin :remote_url,
               max_size: Constants::Sizes::FILE_UPLOAD_MAX_SIZE * 1024 * 1024 # https://shrinerb.com/docs/plugins/remote_url
+Shrine.plugin :upload_options,
+              store: ->(io, context = {}) do
+                # This lambda is called for uploads to :store (including promotion)
+                if context[:action] == :store
+                  metadata =
+                    begin
+                      context[:metadata] || io.metadata
+                    rescue StandardError
+                      {}
+                    end
+                  filename = metadata["filename"] || "download"
+                  sanitized_filename = filename.gsub(/["\\]/, "_")
+                  {
+                    content_disposition:
+                      "attachment; filename=\"#{sanitized_filename}\""
+                  }
+                else
+                  {}
+                end
+              end
 
 Shrine.plugin :presign_endpoint,
               presign_options:
@@ -95,14 +117,9 @@ Shrine.plugin :presign_endpoint,
                   options
                 }
 
-class Shrine::Storage::S3
-  #https://github.com/transloadit/uppy/blob/960362b373666b18a6970f3778ee1440176975af/packages/%40uppy/companion/src/server/controllers/s3.js#L105
-  #https://github.com/transloadit/uppy/blob/960362b373666b18a6970f3778ee1440176975af/packages/%40uppy/companion/src/server/controllers/s3.js#L240
-  #https://github.com/janko/uppy-s3_multipart/blob/master/lib/uppy/s3_multipart/client.rb
-  #uppy utilizes functionality to hit the endpoint to create a multi upload request and then allow you to batch sign urls for each part
-  #we want to simulate something similar for form.io, but to simplify it we will use a presign put
-  #one thing to watch out for is that presign_put uses shortly timed urls
+# Shrine.plugin :url_options, cache: url_options, store: url_options
 
+class Shrine::Storage::S3
   def presign_put(id, options) # options here comes from the presign_endpoint plugin's presign_options lambda
     obj = object(id)
 
@@ -129,7 +146,7 @@ class Shrine::Storage::S3
     # The `url` here is a local URL, not the S3 one. Uppy typically needs the S3 direct upload URL.
     # The response from Shrine's presign_endpoint usually provides `url` (the signed S3 URL) and `fields` (for POSTs).
     # For PUTs, just the `signed_url` is primary.
-    # Your `use-uppy-s3.ts` expects `signed_url` specifically in the response from `/api/s3/params`.
+    # Our `use-uppy-s3.ts` expects `signed_url` specifically in the response from `/api/s3/params`.
 
     # Construct headers for the client to use when making the PUT request to S3.
     # These should generally match what was used to generate the signature.
@@ -153,35 +170,7 @@ class Shrine::Storage::S3
       # fields: {}, # Fields are typically for POST policies, not PUTs
       headers: response_headers, # Headers Uppy might need to set on its PUT request to S3 (often minimal for PUTs)
       key: obj.key, # The object key in S3
-      signed_url: signed_url # Redundant if url is the signed_url, but your use-uppy-s3.ts specifically looks for signed_url
+      signed_url: signed_url # Redundant if url is the signed_url, but our use-uppy-s3.ts specifically looks for signed_url
     }
-  end
-
-  # ECS S3 copy function does not take as many params, it works when its plain.  You can test in the code below to verify.
-  # s3_client= Shrine.storages[:cache].client
-  # s3_client.copy_object({
-  #   copy_source: "#{ENV["BCGOV_OBJECT_STORAGE_BUCKET"]}/4ff7582a03d0aa90e13d179f1268381c.pdf",
-  #   bucket: ENV["BCGOV_OBJECT_STORAGE_BUCKET"],
-  #   key: "test.pdf"
-  # })
-  #itnercepted
-  # {:copy_source=>"housing-bssb-ex-permithub-dev-bkt/4ff7582a03d0aa90e13d179f1268381c.pdf",
-  #  :bucket=>"housing-bssb-ex-permithub-dev-bkt",
-  #  :key=>"test.pdf"}
-
-  def copy(io, id, **copy_options)
-    # don't inherit source object metadata or AWS tags
-    options = {
-      # metadata_directive: "REPLACE",  #OVERRIDE COPY DO NOT ALLOW THESE DIRECTIVE OPTIONS
-      # tagging_directive: "REPLACE"  #OVERRIDE COPY DO NOT ALLOW THESE DIRECTIVE OPTIONS
-    }
-
-    if io.size && io.size >= @multipart_threshold[:copy]
-      # pass :content_length on multipart copy to avoid an additional HEAD request
-      options.merge!(multipart_copy: true, content_length: io.size)
-    end
-
-    options.merge!(copy_options)
-    object(id).copy_from(io.storage.object(io.id), **options)
   end
 end

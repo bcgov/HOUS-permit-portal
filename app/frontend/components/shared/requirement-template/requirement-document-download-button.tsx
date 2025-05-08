@@ -17,6 +17,7 @@ export const RequirementDocumentDownloadButton: React.FC<RequirementDocumentDown
     downloadFileFromStorage({
       model: EFileUploadAttachmentType.RequirementDocument,
       modelId: document.id,
+      filename: document.file.metadata.filename,
     })
   }
 
