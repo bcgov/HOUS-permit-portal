@@ -19,6 +19,7 @@ export const Footer = observer(() => {
     "/forgot-password",
     "/welcome",
     "/contact",
+    "/project-readiness-tools",
   ]
 
   const shouldShowFooter = onlyShowFooterOnRoutes.some((route) => location.pathname.startsWith(route))

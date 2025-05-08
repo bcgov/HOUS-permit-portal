@@ -2149,6 +2149,7 @@ const options = {
         },
         home: {
           jurisdictionsTitle: "Jurisdictions",
+          projectReadinessTools: "Project readiness tools",
           siteConfigurationTitle: "Configuration management",
           jurisdictionsDescription:
             "Administer Review Managers and their roles within local jurisdictions through the Building Permit Hub. This includes inviting or removing managers, managing overall jurisdictions, customizing community pages, and handling jurisdiction-specific settings.",
@@ -2939,6 +2940,7 @@ const options = {
             earlyAccess: "Early access",
             update: "Update",
             globalFeatureAccess: "Global feature access",
+            projectReadinessTools: "Project readiness tools",
           },
         },
         automatedCompliance: {
