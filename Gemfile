@@ -72,7 +72,6 @@ gem "exception_notification", "~> 4.5.0"
 gem "nokogiri", ">= 1.18.3"
 gem "rdoc", ">= 6.6.3.1"
 gem "rack", ">= 3.1.12"
-gem "uppy-s3_multipart", "~> 1.2"
 gem "simple-feed", "~> 3.2.0"
 # For external api docs
 gem "rswag-api", "~> 2.13"
