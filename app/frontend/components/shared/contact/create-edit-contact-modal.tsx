@@ -17,6 +17,7 @@ import { useTranslation } from "react-i18next"
 import { useMst } from "../../../setup/root"
 import { IContact } from "../../../types/types"
 import { convertE164PhoneToInputDefault } from "../../../utils/utility-functions"
+import { AddressFormControl } from "../form/address-form-control"
 import { EmailFormControl } from "../form/email-form-control"
 import { PhoneFormControl, TextFormControl } from "../form/input-form-control"
 import { RemoveConfirmationModal } from "../modals/remove-confirmation-modal"
@@ -127,7 +128,7 @@ export const CreateEditContactModal = ({
               <TextFormControl label={t("contact.fields.extension")} fieldName="extension" />
               <PhoneFormControl label={t("contact.fields.cell")} fieldName="cell" />
               <TextFormControl label={t("contact.fields.title")} fieldName="title" />
-              <TextFormControl label={t("contact.fields.address")} fieldName="address" />
+              <AddressFormControl label={t("contact.fields.address")} fieldName="address" />
               <Flex direction={{ base: "column", md: "row" }} gap={2}>
                 <TextFormControl label={t("contact.fields.organization")} fieldName="organization" />
                 <TextFormControl label={t("contact.fields.department")} fieldName="department" />
