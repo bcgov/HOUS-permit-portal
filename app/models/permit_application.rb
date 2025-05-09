@@ -41,6 +41,9 @@ class PermitApplication < ApplicationRecord
   has_many :collaborators, through: :permit_collaborations
   has_many :permit_block_statuses, dependent: :destroy
 
+  has_many :permit_project_permit_applications, dependent: :destroy
+  has_many :permit_projects, through: :permit_project_permit_applications
+
   scope :submitted, -> { joins(:submission_versions).distinct }
 
   scope :sandboxed, -> { where.not(sandbox_id: nil) }
