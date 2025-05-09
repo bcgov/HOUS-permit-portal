@@ -21,19 +21,12 @@ export const ProjectReadinessToolsIndexScreen = () => {
 
   const newContentItems = [
     {
-      sectionTitle: "Check your project against Provincial regulations",
+      sectionTitle: t("home.projectReadinessTools.sectionTitle"),
       items: [
         {
-          linkText: "Check if your project meets BC's Step Code requirements",
-          description:
-            "Generate a free report that details your project's compliance with BC's Energy and Zero Carbon Step Code requirements",
-          href: "#", // Placeholder link
-        },
-        {
-          linkText: "Check if your drawings follow the BC Building Code",
-          description:
-            "Upload your drawings to get a report about where your drawings follow or don't follow certain sections of the BC Building Code",
-          href: "#", // Placeholder link
+          linkText: t("home.projectReadinessTools.letterOfAssuranceLink"),
+          description: t("home.projectReadinessTools.letterOfAssuranceDescription"),
+          href: "project-readiness-tools/letters-of-assurance",
         },
       ],
     },
@@ -47,11 +40,10 @@ export const ProjectReadinessToolsIndexScreen = () => {
         borderBottom={"none"}
       />
       <Heading as="h1" mt="16">
-        Prepare and check your project documents
+        {t("home.projectReadinessTools.pageHeading")}
       </Heading>
       <Text pt="4" fontSize="lg" color="gray.600">
-        Use guided tools to understand Step Code requirements, review your application materials, and digitally sign
-        your permit documents
+        {t("home.projectReadinessTools.pageDescription")}
       </Text>
 
       {newContentItems.map((section, sectionIndex) => (
@@ -71,7 +63,9 @@ export const ProjectReadinessToolsIndexScreen = () => {
                       {item.description}
                     </Text>
                   </Box>
-                  <ArrowRight size={20} />
+                  <Link href={item.href} color="blue.600" fontWeight="semibold" fontSize="lg">
+                    <ArrowRight size={20} />
+                  </Link>
                 </Flex>
               </Box>
             ))}
