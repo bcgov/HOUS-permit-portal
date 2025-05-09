@@ -431,7 +431,7 @@ const options = {
               submission:
                 "The collaboration feature allows the author of a permit application to invite collaborators by email. Invited collaborators must register for an account through BCeID if they do not have one already.<1/><1/> Collaborators can view and contribute only to the requirement blocks they are assigned. Notifications are sent to the collaborators when they are assigned to a requirement block, and their avatars are displayed next to the blocks they are assigned to.<1/><1/> Additionally, the designated submitter has access to the entire application and can submit it on behalf of the author. The author can manage and remove collaborators as needed.",
               review:
-                "The collaboration feature allows reviewers of a submitted permit application to invite additional reviewers, provided they are already part of the jurisdiction.<1/><1/> Reviewers can view and contribute to the assigned requirement blocks and update the status of each block. Notifications are sent when reviewers are assigned to a requirement block or when the status changes to “Ready”. Avatars are displayed next to the blocks to indicate who is assigned. Status updates are visible only to reviewers within the local jurisdiction.<1/><1/> The designated reviewer serves as the primary contact internally at the local jurisdiction, responsible for overseeing the submitted permit application.",
+                "The collaboration feature allows reviewers of a submitted permit application to invite additional reviewers, provided they are already part of the jurisdiction.<1/><1/> Reviewers can view and contribute to the assigned requirement blocks and update the status of each block. Notifications are sent when reviewers are assigned to a requirement block or when the status changes to 'Ready'. Avatars are displayed next to the blocks to indicate who is assigned. Status updates are visible only to reviewers within the local jurisdiction.<1/><1/> The designated reviewer serves as the primary contact internally at the local jurisdiction, responsible for overseeing the submitted permit application.",
             },
             designatedSubmitters: "Designated submitter(s)",
             designatedReviewers: "Designated reviewer(s)",
@@ -440,7 +440,7 @@ const options = {
             authorCanSubmit: "Author of this application is also allowed to submit: <1>{{author}}</1>.",
             assignees: "Assignee(s)",
             assigneeHelperText:
-              "To assign collaborators, look for the grey header at the top of each requirement block and click “Assign”.",
+              "To assign collaborators, look for the grey header at the top of each requirement block and click 'Assign'.",
             noDesignatedSubmitters: "None assigned",
             assignedTo: "Assigned to",
             assigneeEmail: "Email:",
@@ -466,7 +466,7 @@ const options = {
               noneAssigned: "None assigned",
               inviteWarning: {
                 title: "Assign a collaborator?",
-                body: "When you are inviting collaborators to participate in a building permit application through our system, it’s important to understand the specific roles and permissions involved. Only the person who creates the permit application, referred to as the “author,” has the ability to invite collaborators. These collaborators are then only able to access specific sections of the application—those that they are specifically assigned to. Importantly, while the author and one person they designate (Designated Submitter) can submit the completed application, all collaborators must have a verified Building Permit HUB account using BCeID to ensure security. Additionally, the author retains the exclusive right to remove or reassign collaborators. This ensures that control over the application remains centralized while still allowing for collaborative input where necessary.",
+                body: "When you are inviting collaborators to participate in a building permit application through our system, it's important to understand the specific roles and permissions involved. Only the person who creates the permit application, referred to as the 'author,' has the ability to invite collaborators. These collaborators are then only able to access specific sections of the application—those that they are specifically assigned to. Importantly, while the author and one person they designate (Designated Submitter) can submit the completed application, all collaborators must have a verified Building Permit HUB account using BCeID to ensure security. Additionally, the author retains the exclusive right to remove or reassign collaborators. This ensures that control over the application remains centralized while still allowing for collaborative input where necessary.",
               },
               newContactButton: "New contact",
               noResultsText: {
@@ -2149,7 +2149,55 @@ const options = {
         },
         home: {
           jurisdictionsTitle: "Jurisdictions",
-          projectReadinessTools: "Project readiness tools",
+          projectReadinessTools: {
+            title: "Project readiness tools",
+            pageHeading: "Prepare and check your project documents",
+            pageDescription:
+              "Use guided tools to understand Step Code requirements, review your application materials, and digitally sign your permit documents",
+            sectionTitle: "Check your project against Provincial regulations",
+            letterOfAssuranceLink: "Letters of Assurance",
+            letterOfAssuranceDescription:
+              "Generate a free report that details your project's compliance with BC's Energy and Zero Carbon Step Code requirements",
+            letterOfAssurancePage: {
+              pageTitle: "",
+              whatAreLOAsTitle: "What are Letters of Assurance (LOAs)?",
+              whatAreLOAsDescription1:
+                "LOA\'s are legal documents that are required under the BC Building Code to ensure that buildings are designed and constructed in line with building safety standards for complex buildings (Part 3) and some simpler buildings (Part 9). Some local governments may also require LOA\'s in other cases. LOA\' confirm that registered professionals (e.g., architects, professional engineers and others) are taking responsibility to ensure the design and construction of a building meet building safety standards.",
+              whatAreLOAsDescription2:
+                "Local jurisdictions use LOA\'s to verify code compliance and confirm that necessary professional oversight is in place throughout the project.",
+              whoMustSubmitLOAsTitle: "Who must submit LOA\'s?",
+              whoMustSubmitLOAsDescription:
+                "LOA\'s must be signed, sealed and submitted by registered professionals which include architects and professional engineers (structural, mechanical, plumbing, fire suppression systems and geotechnical) when required. These professionals are responsible for designing and reviewing different parts of the building such as structure, plumbing, or fire safety. In most cases, the architect is also the coordinating registered professional, who ensures all safety-related areas are covered by the correct experts.",
+              loaResponsibilities: {
+                buildingDesign:
+                  "Building design – architect responsible for the overall building design and coordination.",
+                structural: "Structural– engineer designs the building\'s frame and foundation.",
+                mechanical: "Mechanical– engineer designs heating, ventilation, and air conditioning (HVAC).",
+                plumbing: "Plumbing – engineer or plumber designs water and drainage systems.",
+                fireSuppression: "Fire suppression systems – engineer designs systems like sprinklers (if required).",
+                geotechnical:
+                  "Geotechnical - engineer reviews ground and slope stability for excavation, foundation, temporary retaining systems during constructions and finished building.",
+              },
+              whenToSubmitLOAsTitle: "When do LOA\'s need to be submitted?",
+              whenToSubmitLOAsDescription1:
+                "LOA\'s must be submitted as part of the permitting process at the time of the building permit application:",
+              whenToSubmitLOAsScheduleA:
+                "\'Schedule A\' from is signed by the owner and coordinating registered professional (usually the architect).",
+              whenToSubmitLOAsScheduleB:
+                "\'Schedule B\' forms are signed by each registered professional responsible for their part of the project (e.g., structural, plumbing, mechanical).",
+              whenToSubmitLOAsNotAllProjects:
+                "Not all construction projects need every type of Schedule B. For example: A fire suppression Schedule B isn\'t needed if no sprinkler system is required. The coordinating professional decides which ones apply based on the project.",
+              whenToSubmitLOAsEndOfConstruction:
+                "At the end of the construction process, before building occupancy is granted, additional LOA\'s are required:",
+              whenToSubmitLOAsScheduleCA:
+                "\'Schedule C-A\' form is submitted by the coordinating professional to confirm all work complies with the code.",
+              whenToSubmitLOAsScheduleCB:
+                "\'Schedule C-B form is submitted by each registered professional who signed a Schedule B.",
+              howLOAsFitTitle: "How do LOA\'s fit into the building permit process?",
+              howLOAsFitDescription:
+                "LOA\'s should only be provided if there is a building code or a local government requirement for them, typically for Part 3 complex buildings. LOA\'s help local governments building inspectors confirm that qualified professionals are involved in the project. They also provide a record of who is responsible for making sure the work follows the building code.",
+            },
+          },
           siteConfigurationTitle: "Configuration management",
           jurisdictionsDescription:
             "Administer Review Managers and their roles within local jurisdictions through the Building Permit Hub. This includes inviting or removing managers, managing overall jurisdictions, customizing community pages, and handling jurisdiction-specific settings.",
