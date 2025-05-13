@@ -2125,7 +2125,7 @@ const options = {
             eula: "End user license agreement",
             earlyAccess: "Early access",
             update: "Update",
-            projectReadinessTools: "Project readiness tools",
+            projectReadinessTools: "Prepare and check your project documents",
           },
         },
         automatedCompliance: {
