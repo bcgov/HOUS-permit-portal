@@ -2747,6 +2747,16 @@ const options = {
             title: "Export energy step code configuration by jurisdiction",
             filename: "Energy step code configuration by jurisdiction",
           },
+          stepCodeMetrics: {
+            name: "Energy step code metrics for all jurisdictions",
+            description: "Energy step code metrics for all jurisdictions",
+            title: "Energy step code metrics for all jurisdictions",
+            filename: "Energy step code metrics for all jurisdictions",
+            filenamePart3: "Part 3 step code metrics",
+            filenamePart9: "Part 9 step code metrics",
+            downloadPart3: "Download Part 3 metrics",
+            downloadPart9: "Download Part 9 metrics",
+          },
           applicationMetrics: {
             name: "Basic Application metrics for all jurisdictions",
             description:
