@@ -2988,7 +2988,7 @@ const options = {
             earlyAccess: "Early access",
             update: "Update",
             globalFeatureAccess: "Global feature access",
-            projectReadinessTools: "Project readiness tools",
+            projectReadinessTools: "Prepare and check your project documents",
           },
         },
         automatedCompliance: {

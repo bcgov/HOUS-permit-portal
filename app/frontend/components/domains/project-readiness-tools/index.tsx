@@ -53,7 +53,7 @@ export const ProjectReadinessToolsIndexScreen = () => {
           </Heading>
           <VStack divider={<Divider borderColor="border.light" />} spacing={0} align="stretch">
             {section.items.map((item, itemIndex) => (
-              <Box key={itemIndex} py="6">
+              <Box key={itemIndex} py="6" borderBottom="1px solid" borderTop="1px solid" borderColor="border.light">
                 <Flex justify="space-between" align="center" w="full">
                   <Box flex="1" pr="4">
                     <Link href={item.href} color="blue.600" fontWeight="semibold" fontSize="lg">
