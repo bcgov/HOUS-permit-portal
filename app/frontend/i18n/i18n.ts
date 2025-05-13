@@ -2248,6 +2248,7 @@ const options = {
             },
             globalFeatureAccess: {
               title: "Global feature access",
+              featureAccess: "Feature access",
               description: "Turn system features on or off for all users system-wide.",
               submissionInbox: "Submissions inbox",
               submissionInboxDescription:

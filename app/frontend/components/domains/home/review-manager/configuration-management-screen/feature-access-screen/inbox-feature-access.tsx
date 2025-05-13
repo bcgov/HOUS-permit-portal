@@ -17,7 +17,7 @@ export const InboxFeatureAccessScreen = observer(() => {
     <FeatureToggleScreen
       i18nPrefix={i18nPrefix}
       featureKey="submissionInbox"
-      backUrl={`/jurisdictions/${currentJurisdiction?.slug}/configuration-management/global-feature-access/`}
+      backUrl={`/jurisdictions/${currentJurisdiction?.slug}/configuration-management/feature-access/`}
       isEnabled={currentJurisdiction?.inboxEnabled || false}
       onToggle={handleToggle}
     />
