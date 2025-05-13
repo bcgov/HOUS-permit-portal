@@ -21,7 +21,11 @@ export const ProjectReadinessToolsIndexScreen = () => {
 
   const newContentItems = [
     {
-      sectionTitle: t("home.projectReadinessTools.sectionTitle"),
+      sectionTitle: t("home.projectReadinessTools.checkYourProject"),
+      items: [],
+    },
+    {
+      sectionTitle: t("home.projectReadinessTools.prepareYourApplication"),
       items: [
         {
           linkText: t("home.projectReadinessTools.letterOfAssuranceLink"),

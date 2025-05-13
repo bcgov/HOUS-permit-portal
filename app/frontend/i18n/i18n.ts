@@ -2152,12 +2152,12 @@ const options = {
           projectReadinessTools: {
             title: "Project readiness tools",
             pageHeading: "Prepare and check your project documents",
-            pageDescription:
-              "Use guided tools to understand Step Code requirements, review your application materials, and digitally sign your permit documents",
-            sectionTitle: "Check your project against Provincial regulations",
-            letterOfAssuranceLink: "Letters of Assurance",
+            pageDescription: "Use these tools to help prepare a complete and compliant permit application",
+            checkYourProject: "Check your project against Provincial regulations",
+            prepareYourApplication: "Prepare your application package for submission",
+            letterOfAssuranceLink: "Create your Letters of Assurance",
             letterOfAssuranceDescription:
-              "Generate a free report that details your project's compliance with BC's Energy and Zero Carbon Step Code requirements",
+              "Complete Letters of Assurance to confirm who is professionally responsible for design and field review on your project, as required by the BC Building Code for some building types",
             letterOfAssurancePage: {
               pageTitle: "",
               whatAreLOAsTitle: "What are Letters of Assurance (LOAs)?",
