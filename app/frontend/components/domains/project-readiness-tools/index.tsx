@@ -1,9 +1,7 @@
 import { Box, Container, Divider, Flex, Heading, Link, Text, VStack } from "@chakra-ui/react"
 import { ArrowRight } from "@phosphor-icons/react/dist/ssr"
-import i18next from "i18next"
 import React from "react"
 import { useTranslation } from "react-i18next"
-import { SubNavBar } from "../navigation/sub-nav-bar"
 
 export const ProjectReadinessToolsIndexScreen = () => {
   const { t } = useTranslation()
@@ -15,11 +13,7 @@ export const ProjectReadinessToolsIndexScreen = () => {
     },
   ]
 
-  const contactTeamInstructions = i18next.t("site.contactTeamInstructions", {
-    returnObjects: true,
-  }) as string[]
-
-  const newContentItems = [
+  const projectReadinessPageItems = [
     {
       sectionTitle: t("home.projectReadinessTools.checkYourProject"),
       items: [],
@@ -38,11 +32,6 @@ export const ProjectReadinessToolsIndexScreen = () => {
 
   return (
     <Container maxW="container.lg" pb="36" px="8">
-      <SubNavBar
-        staticBreadCrumbs={breadCrumbs}
-        breadCrumbContainerProps={{ px: 0, sx: { ol: { pl: 0 } } }}
-        borderBottom={"none"}
-      />
       <Heading as="h1" mt="16">
         {t("home.projectReadinessTools.pageHeading")}
       </Heading>
@@ -50,7 +39,7 @@ export const ProjectReadinessToolsIndexScreen = () => {
         {t("home.projectReadinessTools.pageDescription")}
       </Text>
 
-      {newContentItems.map((section, sectionIndex) => (
+      {projectReadinessPageItems.map((section, sectionIndex) => (
         <Box key={sectionIndex} mt="16">
           <Heading as="h2" size="lg" mb="8">
             {section.sectionTitle}
