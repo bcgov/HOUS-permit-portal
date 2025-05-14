@@ -48,6 +48,11 @@ const ConfigurationManagementScreen = lazy(() =>
     default: module.ConfigurationManagementScreen,
   }))
 )
+const TechnicalSupportConfigurationManagementScreen = lazy(() =>
+  import("../home/technical-support/configuration-management-screen").then((module) => ({
+    default: module.ConfigurationManagementScreen,
+  }))
+)
 const EnergyStepRequirementsScreen = lazy(() =>
   import("../home/review-manager/configuration-management-screen/energy-step-requirements-screen").then((module) => ({
     default: module.EnergyStepRequirementsScreen,
@@ -407,6 +412,15 @@ const AppRoutes = observer(() => {
     </>
   )
 
+  const technicalSupportRoutes = (
+    <>
+      <Route
+        path="/jurisdictions/:jurisdictionId/configuration-management"
+        element={<TechnicalSupportConfigurationManagementScreen />}
+      />
+    </>
+  )
+
   const managerOrReviewerRoutes = (
     <>
       <Route path="/jurisdictions/:jurisdictionId/submission-inbox" element={<JurisdictionSubmissionInboxScreen />} />
@@ -468,7 +482,7 @@ const AppRoutes = observer(() => {
       />
     </>
   )
-
+  
   const mustAcceptEula = loggedIn && !currentUser.eulaAccepted && !currentUser.isSuperAdmin
   return (
     <>
@@ -524,7 +538,7 @@ const AppRoutes = observer(() => {
               isAllowed={
                 loggedIn &&
                 !mustAcceptEula &&
-                (currentUser.isReviewManager || currentUser.isRegionalReviewManager || currentUser.isSuperAdmin)
+                (currentUser.isReviewManager || currentUser.isRegionalReviewManager || currentUser.isSuperAdmin || currentUser.isTechnicalSupport)
               }
               redirectPath={(mustAcceptEula && "/") || (loggedIn && "/not-found")}
             />
@@ -550,6 +564,17 @@ const AppRoutes = observer(() => {
           }
         >
           {managerOrReviewerRoutes}
+        </Route>
+
+        <Route
+          element={
+            <ProtectedRoute
+              isAllowed={loggedIn && !mustAcceptEula && currentUser.isTechnicalSupport}
+              redirectPath={(mustAcceptEula && "/") || (loggedIn && "/not-found")}
+            />
+          }
+        >
+          {technicalSupportRoutes}
         </Route>
 
         <Route
