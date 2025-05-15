@@ -22,6 +22,7 @@ import { usePart3StepCode } from "../../../../../../hooks/resources/use-part-3-s
 import { EFlashMessageStatus } from "../../../../../../types/enums"
 import { IStepCodeOccupancy } from "../../../../../../types/types"
 import { CustomMessageBox } from "../../../../../shared/base/custom-message-box"
+import { RouterLink } from "../../../../../shared/navigation/router-link"
 import { EnergyStepSelect } from "../../../../home/review-manager/configuration-management-screen/energy-step-requirements-screen/energy-step-editable-block/energy-step-select"
 import { ZeroCarbonStepSelect } from "../../../../home/review-manager/configuration-management-screen/energy-step-requirements-screen/energy-step-editable-block/zero-carbon-step-select"
 import { GridColumnHeader } from "../../../part-9/checklist/shared/grid/column-header"
@@ -58,7 +59,7 @@ export const StepCodeOccupanciesPerformanceRequirements = observer(
       control,
       name: "stepCodeOccupanciesAttributes",
     })
-
+    const stepCodeOccupanciesPath = "step-code-occupancies"
     const { isSubmitting, isValid, isSubmitted, errors } = formState
 
     const onSubmit = async (values) => {
@@ -132,7 +133,18 @@ export const StepCodeOccupanciesPerformanceRequirements = observer(
                   <OccupancyRow field={f} idx={idx} />
                 ))}
               </Grid>
-
+              <Text>
+                <Trans
+                  i18nKey={`${i18nPrefix}.occupanciesTable.hint`}
+                  components={{
+                    stepCodeOccupanciesLink: (
+                      <RouterLink
+                        to={`${location.pathname.replace("step-code-performance-requirements", stepCodeOccupanciesPath)}`}
+                      />
+                    ),
+                  }}
+                />
+              </Text>
               <Button type="submit" variant="primary" isLoading={isSubmitting} isDisabled={isSubmitting}>
                 {t("stepCode.part3.cta")}
               </Button>
