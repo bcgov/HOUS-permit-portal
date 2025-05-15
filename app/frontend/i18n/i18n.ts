@@ -2249,6 +2249,7 @@ const options = {
             },
             globalFeatureAccess: {
               title: "Global feature access",
+              featureAccess: "Feature access",
               description: "Turn system features on or off for all users system-wide.",
               submissionInbox: "Submissions inbox",
               submissionInboxDescription:
@@ -2901,6 +2902,7 @@ const options = {
             digitalBuildingPermits: "Digital building permits",
             contact: "Contact us",
             configurationManagement: "Configuration management",
+            featureAccess: "Feature access",
             energyStep: "Energy Step Code requirements",
             submissionsInboxSetup: "Submissions inbox setup",
             confirmed: "E-mail confirmed",

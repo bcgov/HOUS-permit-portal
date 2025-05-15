@@ -53,17 +53,17 @@ const EnergyStepRequirementsScreen = lazy(() =>
     default: module.EnergyStepRequirementsScreen,
   }))
 )
-const ReviewManagerGlobalFeatureAccessScreen = lazy(() =>
-  import("../home/review-manager/configuration-management-screen/global-feature-access-screen").then((module) => ({
-    default: module.ReviewManagerGlobalFeatureAccessScreen,
+const ReviewManagerFeatureAccessScreen = lazy(() =>
+  import("../home/review-manager/configuration-management-screen/feature-access-screen").then((module) => ({
+    default: module.ReviewManagerFeatureAccessScreen,
   }))
 )
 const ReviewStaffInboxFeatureAccessScreen = lazy(() =>
-  import(
-    "../home/review-manager/configuration-management-screen/global-feature-access-screen/inbox-feature-access"
-  ).then((module) => ({
-    default: module.InboxFeatureAccessScreen,
-  }))
+  import("../home/review-manager/configuration-management-screen/feature-access-screen/inbox-feature-access").then(
+    (module) => ({
+      default: module.InboxFeatureAccessScreen,
+    })
+  )
 )
 const JurisdictionIndexScreen = lazy(() =>
   import("../jurisdictions/index").then((module) => ({ default: module.JurisdictionIndexScreen }))
@@ -411,11 +411,11 @@ const AppRoutes = observer(() => {
     <>
       <Route path="/jurisdictions/:jurisdictionId/submission-inbox" element={<JurisdictionSubmissionInboxScreen />} />
       <Route
-        path="/jurisdictions/:jurisdictionId/configuration-management/global-feature-access"
-        element={<ReviewManagerGlobalFeatureAccessScreen />}
+        path="/jurisdictions/:jurisdictionId/configuration-management/feature-access"
+        element={<ReviewManagerFeatureAccessScreen />}
       />
       <Route
-        path="/jurisdictions/:jurisdictionId/configuration-management/global-feature-access/submission-inbox"
+        path="/jurisdictions/:jurisdictionId/configuration-management/feature-access/submission-inbox"
         element={<ReviewStaffInboxFeatureAccessScreen />}
       />
       <Route
