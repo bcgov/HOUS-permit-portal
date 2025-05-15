@@ -441,3 +441,7 @@ export enum ELandingTemplateKeys {
   SmallScale = "small_scale_requirement_template_id",
   // FourPlus = "four_plus_template_version_id",
 }
+export enum EStepCodeType {
+  Part3 = "Part3StepCode",
+  Part9 = "Part9StepCode",
+}

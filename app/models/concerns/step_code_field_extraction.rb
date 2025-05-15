@@ -13,18 +13,21 @@ module StepCodeFieldExtraction
 
   def step_code_plan_author
     return if step_code_plan_document.blank?
+
     # assumed to be the last signature placed on the file
     step_code_plan_document.last_signer[:name]
   end
 
   def step_code_plan_version
     return if step_code_plan_document.blank?
+
     # assumed to be the file name
     step_code_plan_document.file_data.dig("metadata", "filename")
   end
 
   def step_code_plan_date
     return if step_code_plan_document.blank?
+
     # assumed to be the date the last signature placed onteh file was
     step_code_plan_document.last_signer[:date]
   end
