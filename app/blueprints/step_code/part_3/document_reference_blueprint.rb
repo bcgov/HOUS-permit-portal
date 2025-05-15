@@ -6,4 +6,8 @@ class StepCode::Part3::DocumentReferenceBlueprint < Blueprinter::Base
          :document_name,
          :date_issued,
          :prepared_by
+
+  view :metrics_export do
+    exclude :prepared_by
+  end
 end

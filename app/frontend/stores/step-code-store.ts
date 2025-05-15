@@ -125,17 +125,28 @@ export const StepCodeStoreModel = types
         throw error
       }
     }),
-    downloadStepCodeMetrics: flow(function* (stepCodeType: EStepCodeType) {
+    downloadStepCodeMetrics: flow(function* (
+      stepCodeType: EStepCodeType,
+      options?: {
+        timeframeFrom?: Date
+        timeframeTo?: Date
+      }
+    ) {
       try {
-        const response = yield* toGenerator(self.environment.api.downloadStepCodeMetricsCsv(stepCodeType))
+        const response = yield* toGenerator(
+          self.environment.api.downloadStepCodeMetricsJson(stepCodeType, {
+            timeframeFrom: options?.timeframeFrom?.toISOString(),
+            timeframeTo: options?.timeframeTo?.toISOString(),
+          })
+        )
         if (!response.ok) {
           return response.ok
         }
 
-        const blobData = response.data
-        const fileName = `${t(`reporting.stepCodeMetrics.filename${stepCodeType === EStepCodeType.Part3 ? "Part3" : "Part9"}`)}.csv`
-        const mimeType = "text/csv"
-        startBlobDownload(blobData, mimeType, fileName)
+        const jsonData = response.data
+        const blobData = new Blob([JSON.stringify(jsonData, null, 2)], { type: "application/json" })
+        const fileName = `${t(`reporting.stepCodeMetrics.filename${stepCodeType === EStepCodeType.Part3 ? "Part3" : "Part9"}`)}.json`
+        startBlobDownload(blobData, "application/json", fileName)
 
         return response
       } catch (error) {
