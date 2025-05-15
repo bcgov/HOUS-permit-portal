@@ -55,11 +55,11 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_06_164041) do
   end
 
   create_table "audits", force: :cascade do |t|
-    t.integer "auditable_id"
+    t.uuid "auditable_id"
     t.string "auditable_type"
-    t.integer "associated_id"
+    t.uuid "associated_id"
     t.string "associated_type"
-    t.integer "user_id"
+    t.uuid "user_id"
     t.string "user_type"
     t.string "username"
     t.string "action"
@@ -309,7 +309,6 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_06_164041) do
     t.string "external_api_state", default: "g_off", null: false
     t.integer "heating_degree_days"
     t.boolean "inbox_enabled", default: false, null: false
-    t.integer "heating_degree_days"
     t.index ["prefix"], name: "index_jurisdictions_on_prefix", unique: true
     t.index ["regional_district_id"],
             name: "index_jurisdictions_on_regional_district_id"
