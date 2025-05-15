@@ -1,11 +1,11 @@
 class Part9StepCode < StepCode
   has_many :checklists,
-           class_name: "Part9StepCode::Checklist",
+           class_name: "StepCodeChecklist",
            foreign_key: :step_code_id,
            dependent: :destroy
   has_one :pre_construction_checklist,
           -> { where(stage: :pre_construction) },
-          class_name: "Part9StepCode::Checklist",
+          class_name: "StepCodeChecklist",
           foreign_key: :step_code_id
 
   accepts_nested_attributes_for :pre_construction_checklist

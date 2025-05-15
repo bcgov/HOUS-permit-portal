@@ -164,6 +164,8 @@ const options = {
           },
         },
         ui: {
+          from: "From",
+          to: "To",
           okay: "Okay",
           filter: "Filter",
           until: "til",

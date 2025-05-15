@@ -86,4 +86,21 @@ class StepCodeChecklistBlueprint < Blueprinter::Base
       StepCode::ComplianceReportBlueprint.render_as_hash(report)
     end
   end
+
+  view :metrics_export do
+    include_view :project_info_metrics
+    include_view :compliance_summary
+    include_view :building_characteristics_summary
+    include_view :mid_construction_testing_results
+    include_view :compliance_reports
+  end
+
+  view :project_info_metrics do
+    fields :building_permit_number, :jurisdiction_name, :pid, :building_type
+    field :full_address, name: :address
+
+    field :dwelling_units_count do |checklist, _options|
+      checklist.data_entries.sum(:dwelling_units_count)
+    end
+  end
 end

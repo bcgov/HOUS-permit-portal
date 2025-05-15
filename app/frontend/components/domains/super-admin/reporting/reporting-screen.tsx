@@ -1,11 +1,26 @@
-import { Box, Button, Container, Flex, Heading, Input, Menu, MenuButton, MenuList, VStack } from "@chakra-ui/react"
-import { FileCsv } from "@phosphor-icons/react"
+import {
+  Box,
+  Button,
+  Container,
+  Flex,
+  Heading,
+  HStack,
+  Input,
+  Menu,
+  MenuButton,
+  MenuList,
+  Text,
+  VStack,
+} from "@chakra-ui/react"
+import { BracketsCurly, FileCsv } from "@phosphor-icons/react"
+import { subDays } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../../setup/root"
 import { EStepCodeType } from "../../../../types/enums"
 import { ManageMenuItem, ManageMenuItemButton } from "../../../shared/base/manage-menu-item"
+import { DatePicker } from "../../../shared/date-picker"
 import { SearchGrid } from "../../../shared/grid/search-grid"
 import { SearchGridItem } from "../../../shared/grid/search-grid-item"
 import { GridHeaders } from "./grid-header"
@@ -17,14 +32,18 @@ export const ReportingScreen = observer(() => {
   const { downloadApplicationMetrics } = permitApplicationStore
 
   const [filter, setFilter] = useState("")
+  const [timeframeFrom, setTimeframeFrom] = useState<Date>(subDays(new Date(), 365))
+  const [timeframeTo, setTimeframeTo] = useState<Date>(new Date())
 
   interface IReportBase {
     name: string
     description: string
+    displayTimeframe?: boolean
     dropdown: Array<{
       text: string
       onClick?: () => void
       href?: string
+      icon?: React.ReactNode
     }>
   }
 
@@ -62,15 +81,17 @@ export const ReportingScreen = observer(() => {
     },
     {
       name: t("reporting.stepCodeMetrics.name"),
-      description: t("reporting.stepCodeMetrics.description"),
+      description: t("reporting.applicationMetrics.description"),
+      displayTimeframe: true,
       dropdown: [
         {
-          text: t("reporting.stepCodeMetrics.downloadPart3"),
-          onClick: () => downloadStepCodeMetrics(EStepCodeType.Part3),
-        },
-        {
           text: t("reporting.stepCodeMetrics.downloadPart9"),
-          onClick: () => downloadStepCodeMetrics(EStepCodeType.Part9),
+          onClick: () =>
+            downloadStepCodeMetrics(EStepCodeType.Part9, {
+              timeframeFrom,
+              timeframeTo,
+            }),
+          icon: <BracketsCurly size={24} />,
         },
       ],
     },
@@ -114,13 +135,38 @@ export const ReportingScreen = observer(() => {
                         {t("ui.manage")}
                       </MenuButton>
                       <MenuList>
+                        {reportType.displayTimeframe && (
+                          <Box p={3} borderBottom="1px solid" borderColor="border.input">
+                            <HStack spacing={2} align="stretch">
+                              <Box>
+                                <Text fontSize="sm" mb={1}>
+                                  {t("ui.from")}
+                                </Text>
+                                <DatePicker
+                                  selected={timeframeFrom}
+                                  onChange={(date: Date) => setTimeframeFrom(date)}
+                                />
+                              </Box>
+                              <Box>
+                                <Text fontSize="sm" mb={1}>
+                                  {t("ui.to")}
+                                </Text>
+                                <DatePicker selected={timeframeTo} onChange={(date: Date) => setTimeframeTo(date)} />
+                              </Box>
+                            </HStack>
+                          </Box>
+                        )}
                         {reportType.dropdown.map((item, index) =>
                           item.href ? (
-                            <ManageMenuItem key={index} icon={<FileCsv size={24} />} to={item.href}>
+                            <ManageMenuItem key={index} icon={item.icon || <FileCsv size={24} />} to={item.href}>
                               {item.text}
                             </ManageMenuItem>
                           ) : (
-                            <ManageMenuItemButton key={index} leftIcon={<FileCsv size={24} />} onClick={item.onClick}>
+                            <ManageMenuItemButton
+                              key={index}
+                              leftIcon={item.icon || <FileCsv size={24} />}
+                              onClick={item.onClick}
+                            >
                               {item.text}
                             </ManageMenuItemButton>
                           )

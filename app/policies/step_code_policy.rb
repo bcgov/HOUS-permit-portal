@@ -19,7 +19,7 @@ class StepCodePolicy < ApplicationPolicy
     user.super_admin?
   end
 
-  def download_step_code_metrics_csv?
+  def download_step_code_metrics_json?
     user.super_admin?
   end
 

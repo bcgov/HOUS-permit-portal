@@ -587,8 +587,18 @@ export class Api {
     return this.client.get<BlobPart>(`/step_codes/download_step_code_summary_csv`)
   }
 
-  async downloadStepCodeMetricsCsv(stepCodeType: EStepCodeType) {
-    return this.client.get<BlobPart>(`/step_codes/download_step_code_metrics_csv`, { stepCodeType })
+  async downloadStepCodeMetricsJson(
+    stepCodeType: EStepCodeType,
+    options?: {
+      timeframeFrom?: string
+      timeframeTo?: string
+    }
+  ) {
+    return this.client.get<BlobPart>(`/step_codes/download_step_code_metrics_json`, {
+      stepCodeType,
+      timeframeFrom: options?.timeframeFrom,
+      timeframeTo: options?.timeframeTo,
+    })
   }
 
   async downloadApplicationMetricsCsv() {

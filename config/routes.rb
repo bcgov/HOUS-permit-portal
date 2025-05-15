@@ -218,9 +218,9 @@ Rails.application.routes.draw do
       get "download_step_code_summary_csv",
           on: :collection,
           to: "step_codes#download_step_code_summary_csv"
-      get "download_step_code_metrics_csv",
+      get "download_step_code_metrics_json",
           on: :collection,
-          to: "step_codes#download_step_code_metrics_csv"
+          to: "step_codes#download_step_code_metrics_json"
     end
 
     post "tags/search", to: "tags#index", as: :tags_search

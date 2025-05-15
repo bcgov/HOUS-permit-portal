@@ -38,6 +38,7 @@ class StepCode < ApplicationRecord
 
   def set_plan_fields
     return if permit_application.blank?
+
     assign_attributes(
       plan_author: permit_application.step_code_plan_author,
       plan_version: permit_application.step_code_plan_version,

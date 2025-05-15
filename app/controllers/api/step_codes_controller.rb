@@ -52,29 +52,40 @@ class Api::StepCodesController < Api::ApplicationController
     send_data csv_data, type: "text/csv"
   end
 
-  def download_step_code_metrics_csv
-    authorize :step_code, :download_step_code_metrics_csv?
+  def download_step_code_metrics_json
+    authorize :step_code, :download_step_code_metrics_json?
 
     step_code_type = step_code_metrics_params[:step_code_type]
+    timeframe_from = step_code_metrics_params[:timeframe_from]
+    timeframe_to = step_code_metrics_params[:timeframe_to]
     service = StepCodeExportService.new
 
-    csv_data =
+    result =
       case step_code_type
       when "Part3StepCode"
-        service.part_3_metrics_csv
+        service.part_3_metrics_json(
+          timeframe_from: timeframe_from,
+          timeframe_to: timeframe_to
+        )
       when "Part9StepCode"
-        service.part_9_metrics_csv
+        service.part_9_metrics_json(
+          timeframe_from: timeframe_from,
+          timeframe_to: timeframe_to
+        )
       else
         raise ActionController::BadRequest, "Invalid step code type"
       end
-
-    send_data csv_data, type: "text/csv"
+    binding.pry
+    send_data result,
+              type: "text/csv",
+              disposition: "attachment",
+              filename: "#{step_code_type.downcase}_metrics.json"
   end
 
   private
 
   def step_code_metrics_params
-    params.permit(:step_code_type)
+    params.permit(:step_code_type, :timeframe_from, :timeframe_to)
   end
 
   def step_code_params
