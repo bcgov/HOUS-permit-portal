@@ -95,6 +95,9 @@ const ContactScreen = lazy(() => import("../misc/contact-screen").then((module) 
 const PermitApplicationIndexScreen = lazy(() =>
   import("../permit-application").then((module) => ({ default: module.PermitApplicationIndexScreen }))
 )
+const PermitProjectIndexScreen = lazy(() =>
+  import("../permit-project").then((module) => ({ default: module.PermitProjectIndexScreen }))
+)
 const EditPermitApplicationScreen = lazy(() =>
   import("../permit-application/edit-permit-application-screen").then((module) => ({
     default: module.EditPermitApplicationScreen,
@@ -490,6 +493,7 @@ const AppRoutes = observer(() => {
           element={<ProtectedRoute isAllowed={loggedIn && !mustAcceptEula} redirectPath={mustAcceptEula && "/"} />}
         >
           <Route path="/permit-applications" element={<PermitApplicationIndexScreen />} />
+          <Route path="/permit-projects" element={<PermitProjectIndexScreen />} />
           <Route path="/permit-applications/new" element={<NewPermitApplicationScreen />} />
           <Route path="/permit-applications/:permitApplicationId/edit" element={<EditPermitApplicationScreen />} />
           <Route
