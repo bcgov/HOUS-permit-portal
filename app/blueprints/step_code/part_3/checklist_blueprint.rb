@@ -111,6 +111,18 @@ class StepCode::Part3::ChecklistBlueprint < Blueprinter::Base
     )
   end
 
+  view :metrics_export do
+    exclude :completed_by_name
+    exclude :completed_by_title
+    exclude :completed_by_email
+    exclude :completed_by_phone_number
+    exclude :completed_by_organization_name
+
+    association :document_references,
+                blueprint: StepCode::Part3::DocumentReferenceBlueprint,
+                view: :metrics_export
+  end
+
   view :extended do
     include_view :default
   end

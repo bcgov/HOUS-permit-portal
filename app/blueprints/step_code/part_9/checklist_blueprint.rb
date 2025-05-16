@@ -69,6 +69,18 @@ class StepCode::Part9::ChecklistBlueprint < Blueprinter::Base
            :notes
   end
 
+  view :mid_construction_testing_results_metrics do
+    fields :site_visit_completed,
+           :site_visit_date,
+           :testing_pressure,
+           :testing_pressure_direction,
+           :testing_result_type,
+           :testing_result,
+           :home_state,
+           :compliance_status,
+           :notes
+  end
+
   view :compliance_reports do
     transform StepCode::Part9::ComplianceReportsTransformer
 
@@ -85,6 +97,23 @@ class StepCode::Part9::ChecklistBlueprint < Blueprinter::Base
         checklist.selected_report || checklist.passing_compliance_reports[0] ||
           checklist.compliance_reports[0]
       StepCode::Part9::ComplianceReportBlueprint.render_as_hash(report)
+    end
+  end
+
+  view :metrics_export do
+    include_view :project_info_metrics
+    include_view :compliance_summary
+    include_view :building_characteristics_summary
+    include_view :mid_construction_testing_results_metrics
+    include_view :compliance_reports
+  end
+
+  view :project_info_metrics do
+    fields :building_permit_number, :jurisdiction_name, :pid, :building_type
+    field :full_address, name: :address
+
+    field :dwelling_units_count do |checklist, _options|
+      checklist.data_entries.sum(:dwelling_units_count)
     end
   end
 end
