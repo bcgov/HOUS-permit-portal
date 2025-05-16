@@ -1,5 +1,5 @@
 class CreateProjectRelatedEntitiesAndPaymentDetails < ActiveRecord::Migration[
-  7.0
+  7.1
 ]
   def change
     # Table for PropertyPlanLocalJurisdiction
