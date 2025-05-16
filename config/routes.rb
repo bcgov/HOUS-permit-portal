@@ -191,6 +191,10 @@ Rails.application.routes.draw do
           to: "permit_applications#download_application_metrics_csv"
     end
 
+    resources :permit_projects, only: %i[show] do
+      post "search", on: :collection, to: "permit_projects#index"
+    end
+
     resources :permit_collaborations, only: %i[destroy] do
       post "reinvite", on: :member, to: "permit_collaborations#reinvite"
     end
