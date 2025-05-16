@@ -34,14 +34,6 @@ class PermitProjectPolicy < ApplicationPolicy
     Pundit.policy!(user, record.primary_permit_application).index?
   end
 
-  # Class-level check: Can the user generally attempt to access the project list/search page?
-  # Called by `authorize PermitProject, :access_list?` in the controller.
-  def access_list?
-    # Define the general permission to attempt searching for projects.
-    # This should NOT be overly permissive. Example: User must have a specific role.
-    user.super_admin? || user.review_staff? || user.submitter? # Customize these roles as needed
-  end
-
   # Define other actions like create?, update?, destroy? as needed,
   # potentially by checking permissions on the primary_permit_application.
 end

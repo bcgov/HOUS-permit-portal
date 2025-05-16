@@ -8,9 +8,6 @@ class Api::PermitProjectsController < Api::ApplicationController
   skip_after_action :verify_policy_scoped, only: [:index]
 
   def index
-    # Initial action authorization (if any, e.g., access_list? if defined in policy)
-    # authorize PermitProject, :access_list? # This was discussed; re-add if needed for general action gating.
-
     perform_permit_project_search # This method now comes from the concern
 
     # Apply your iterative authorization method to the Searchkick results.
