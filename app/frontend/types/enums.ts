@@ -626,3 +626,13 @@ export enum EDocumentReferenceDocumentType {
   electricalDrawing = "electrical_drawing",
   other = "other",
 }
+
+export enum EPermitProjectSortFields {
+  description = "description",
+  updatedAt = "updated_at",
+  createdAt = "created_at",
+  number = "number",
+  status = "status",
+  fullAddress = "full_address",
+  submittedAt = "submitted_at",
+}

@@ -25,6 +25,9 @@ class PermitApplication < ApplicationRecord
              ],
              text_end: %i[number]
 
+  # Virtual attribute to accept an existing project's ID on creation
+  attr_accessor :target_project_id
+
   belongs_to :submitter, class_name: "User"
   belongs_to :jurisdiction
   belongs_to :permit_type
@@ -58,6 +61,9 @@ class PermitApplication < ApplicationRecord
   validates :reference_number, length: { maximum: 300 }, allow_nil: true
   validate :sandbox_belongs_to_jurisdiction
   validate :template_version_of_live_template
+  validate :target_project_must_exist,
+           if: -> { target_project_id.present? },
+           on: :create
 
   delegate :qualified_name,
            :heating_degree_days,
@@ -78,6 +84,7 @@ class PermitApplication < ApplicationRecord
   after_commit :send_submitted_webhook, if: :saved_change_to_status?
   after_commit :notify_user_reference_number_updated,
                if: :saved_change_to_reference_number?
+  after_create :ensure_project_association
 
   scope :with_submitter_role,
         -> { joins(:submitter).where(users: { role: "submitter" }) }
@@ -202,7 +209,7 @@ class PermitApplication < ApplicationRecord
     {
       number: number,
       nickname: nickname,
-      permit_classifications: "#{permit_type.name} #{activity.name}",
+      permit_classifications: formatted_permit_classifications,
       submitter: "#{submitter.name} #{submitter.email}",
       submitted_at: submitted_at,
       resubmitted_at: resubmitted_at,
@@ -220,11 +227,7 @@ class PermitApplication < ApplicationRecord
           users_by_collaboration_options(collaboration_type: :submission).pluck(
             :id
           ),
-      review_delegatee_name:
-        users_by_collaboration_options(
-          collaboration_type: :review,
-          collaborator_type: :delegatee
-        ).first&.name,
+      review_delegatee_name: review_delegatee_name,
       has_collaborator: has_collaborator?,
       sandbox_id: sandbox_id
     }
@@ -599,6 +602,13 @@ class PermitApplication < ApplicationRecord
     end
   end
 
+  def review_delegatee_name
+    users_by_collaboration_options(
+      collaboration_type: :review,
+      collaborator_type: :delegatee
+    ).first&.name
+  end
+
   private
 
   def update_collaboration_assignments
@@ -736,5 +746,55 @@ class PermitApplication < ApplicationRecord
         )
       )
     end
+  end
+
+  def target_project_must_exist
+    unless PermitProject.exists?(target_project_id)
+      errors.add(:target_project_id, "does not refer to a valid PermitProject")
+    end
+  end
+
+  def ensure_project_association
+    if target_project_id.present?
+      project = PermitProject.find_by(id: target_project_id)
+      # The `target_project_must_exist` validation should have already caught if project is nil.
+      # However, for safety in the callback:
+      unless project
+        Rails.logger.error "PermitApplication #{id}: Could not find target_project_id #{target_project_id} in after_create callback despite validation."
+        # This state indicates a potential race condition or issue with validation timing if it occurs.
+        # Raising an error here might be too late as the PA is saved.
+        return # Or handle more gracefully
+      end
+
+      self.permit_project_permit_applications.create!(
+        permit_project: project,
+        is_primary: false # Supplemental
+      )
+    else
+      # No target_project_id provided; create a new PermitProject
+      # and make this PermitApplication its primary.
+      PermitProject.transaction do
+        new_project = PermitProject.new
+
+        # Set default description for the new project
+        new_project.description =
+          "Project for: #{nickname} - #{permit_type_and_activity} at #{full_address}".squish
+
+        # Build directly on the has_one :primary_permit_project_permit_application association
+        new_project.build_primary_permit_project_permit_application(
+          permit_application: self, # `self` is the newly created PermitApplication
+          is_primary: true # Explicitly set is_primary for the join record
+        )
+        new_project.save!
+      end
+    end
+  rescue ActiveRecord::RecordInvalid => e
+    # This PermitApplication is already created. Logging the error is crucial.
+    Rails.logger.error "PermitApplication #{id}: Failed to associate with a project due to RecordInvalid: #{e.message}. Orphaned PermitApplication may exist."
+    # Re-raising might help if this is part of a larger, outer transaction.
+    raise e
+  rescue ActiveRecord::RecordNotFound => e
+    Rails.logger.error "PermitApplication #{id}: Failed to associate with a project due to RecordNotFound: #{e.message}. Orphaned PermitApplication may exist."
+    raise e
   end
 end
