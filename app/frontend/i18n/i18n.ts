@@ -2187,7 +2187,7 @@ const options = {
             jurisdictionAbout: {
               title: "My jurisdiction's About page",
               description:
-                "Customize the informational page that submitters will see when they are in the Building Permit Hub.",
+                "Customize the informational page that submitters will see when they are in the Building Permit Hub",
             },
             users: {
               title: "Users",
@@ -2213,7 +2213,7 @@ const options = {
             },
             stepCodeRequirements: {
               title: "Energy Step Code requirements",
-              description: "Define step code requirements.",
+              description: "Define step code requirements",
               setMinimum:
                 "Set the minimum acceptable levels of Energy Step Code and Zero Carbon Step Code for each permit type below:",
               part9Building: "Part 9 Building",
@@ -2246,19 +2246,21 @@ const options = {
                 },
               },
             },
-            globalFeatureAccess: {
+            featureAccess: {
               title: "Global feature access",
               featureAccess: "Feature access",
-              description: "Turn system features on or off for all users system-wide.",
-              submissionInbox: "Submissions inbox",
-              submissionInboxDescription:
-                "Enable review managers to accept and process permit applications. If you turn off this feature, submitters can’t submit applications, and review managers won’t receive new applications.",
+              description: "Turn features on or off for all users in your jurisdiction",
+              submissionInbox: "Submissions inbox setup",
+              submissionInboxDescription: "Specify where submitted permit applications should be sent",
               toggleOn: "On",
               toggleOff: "Off",
+              acceptPermitApplications: "Accept permit applications",
+              switchButtonInstructions:
+                "Turning this on lets users submit applications. The email addresses set in this section will receive submitted applications",
             },
             externalApiKeys: {
               title: "API settings",
-              description: "Manage API keys for the Building Permit Hub.",
+              description: "Manage API keys for the Building Permit Hub",
             },
           },
           superAdminTitle: "Admin home",
@@ -2902,6 +2904,7 @@ const options = {
             contact: "Contact us",
             configurationManagement: "Configuration management",
             featureAccess: "Feature access",
+            submissionInboxSetup: "Submissions inbox setup",
             energyStep: "Energy Step Code requirements",
             submissionsInboxSetup: "Submissions inbox setup",
             confirmed: "E-mail confirmed",
