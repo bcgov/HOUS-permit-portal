@@ -15,16 +15,12 @@ export const ProjectReadinessToolsIndexScreen = () => {
 
   const projectReadinessPageItems = [
     {
-      sectionTitle: t("home.projectReadinessTools.checkYourProject"),
-      items: [],
-    },
-    {
       sectionTitle: t("home.projectReadinessTools.prepareYourApplication"),
       items: [
         {
           linkText: t("home.projectReadinessTools.letterOfAssuranceLink"),
           description: t("home.projectReadinessTools.letterOfAssuranceDescription"),
-          href: "project-readiness-tools/letters-of-assurance",
+          href: "project-readiness-tools/create-your-letters-of-assurance",
         },
       ],
     },

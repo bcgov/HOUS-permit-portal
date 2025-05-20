@@ -604,7 +604,10 @@ const AppRoutes = observer(() => {
         <Route path="/accept-invitation" element={<AcceptInvitationScreen />} />
         <Route path="/contact" element={<ContactScreen />} />
         <Route path="/project-readiness-tools" element={<ProjectReadinessToolsIndexScreen />} />
-        <Route path="/project-readiness-tools/letters-of-assurance" element={<LettersOfAssuranceScreen />} />
+        <Route
+          path="/project-readiness-tools/create-your-letters-of-assurance"
+          element={<LettersOfAssuranceScreen />}
+        />
         <Route path="/confirmed" element={<EmailConfirmedScreen />} />
         <Route path="/welcome" element={<LandingScreen />} />
         <Route

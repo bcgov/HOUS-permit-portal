@@ -2159,6 +2159,67 @@ const options = {
             letterOfAssuranceDescription:
               "Complete Letters of Assurance to confirm who is professionally responsible for design and field review on your project, as required by the BC Building Code for some building types",
             letterOfAssurancePage: {
+              createYourLOAsTitle: "Create your Letters of Assurance",
+              createYourLOAsIntro:
+                "Some building permit applications need Letters of Assurance (LOAs). Letters of Assurance are legal documents that clearly identify the responsibilities of architects, engineers and other registered professionals when designing building components and reviewing them in the field.",
+              createYourLOAsInstructions: "Registered professionals can use the forms on this page to:",
+              createYourLOAsInstructionFill: "Fill out Letters of Assurance for your project",
+              whoThisIsForTitle: "Who this is for",
+              whoThisIsForDescription:
+                "If your project requires Letters of Assurance, each registered professional involved must sign and seal their form as part of the building permit process.",
+              whoThisIsForMayNeed: "You may need Letters of Assurance if your project:",
+              whoThisIsForComplex: "is a complex building (usually Part 3 of the Building Code)",
+              whoThisIsForSimpler:
+                "is a simpler building (Part 9 of the Building Code) where Letters of Assurance are required by your local government",
+              whoThisIsForInvolves: "involves registered professionals like architects or engineers",
+              whoThisIsForCheckWithLG:
+                "Check with your local government to find out if LOAs are required for your project. You can also read the <1>Letters of Assurance guide for BC Building Code 2018 and Vancouver Building By-law 2019 (PDF, 526 KB)</1> for more information.",
+              whenToSubmitTitle: "When to submit Letters of Assurance",
+              whenToSubmitDescription:
+                "Only submit Letters of Assurance if your project needs them under the Building Code or local bylaws.",
+              whenToSubmitIfRequired: "If required, submit these forms when you apply for your building permit:",
+              whenToSubmitScheduleA:
+                "<strong>Schedule A:</strong> signed by the owner and a Coordinating Registered Professional (usually the architect)",
+              whenToSubmitScheduleB:
+                "<strong>Schedule B:</strong> one form for each professional (like a structural or mechanical engineer) taking responsibility for a part of the project",
+              whenToSubmitNotEvery:
+                "Not every project needs all types of Schedule B. Your coordinating professional decides which are needed.",
+              whenToSubmitBeforeOccupy:
+                "Before you can occupy the building, additional Letters of Assurance are required:",
+              whenToSubmitScheduleCA:
+                "<strong>Schedule C-A:</strong> submitted by the coordinating professional to confirm everything meets the Building Code",
+              whenToSubmitScheduleCB:
+                "<strong>Schedule C-B:</strong> submitted by each professional who submitted a Schedule B earlier",
+              whatLOAsCoverTitle: "What Letters of Assurance cover",
+              whatLOAsCoverDescription:
+                "Each registered professional takes responsibility for a specific part of the project. For example:",
+              whatLOAsCoverArchitect: "<strong>Architect:</strong> overall design and coordination",
+              whatLOAsCoverStructural: "<strong>Structural engineer:</strong> the frame and foundation",
+              whatLOAsCoverMechanical:
+                "<strong>Mechanical engineer:</strong> heating, ventilation, and air conditioning (HVAC)",
+              whatLOAsCoverPlumbing: "<strong>Plumbing engineer or plumber:</strong> water and drainage systems",
+              whatLOAsCoverFire: "<strong>Fire suppression engineer:</strong> sprinklers or other systems (if needed)",
+              whatLOAsCoverGeotechnical: "<strong>Geotechnical engineer:</strong> ground stability and excavation",
+              whatLOAsCoverIfThree:
+                "If there are 3 or more professionals involved, you'll also need a Coordinating Registered Professional to oversee the design and field reviews.",
+              fillableLettersOfAssurance: "Fillable Letters of Assurance",
+              scheduleAFileLink: "Schedule A (PDF, 361 KB)",
+              scheduleADescription:
+                "Confirms that a Coordinating Registered Professional like an architect or engineer has been hired by the building owner. Submit as part of a building permit application.",
+              scheduleBFileLink: "Schedule B (PDF, 587 KB)",
+              scheduleBDescription:
+                "Confirms that a Registered Professional of Record takes responsibility for certain building components and applicable field reviews. Submit before construction begins on each building component.",
+              scheduleCAFileLink: "Schedule C-A (PDF, 260 KB)",
+              scheduleCADescription:
+                "Confirms the Coordinating Registered Professional fulfilled their obligations under Schedule A. Submit after project completion, but before an occupancy permit or final inspection.",
+              scheduleCBFileLink: "Schedule C-B (PDF, 259 KB)",
+              scheduleCBDescription:
+                "Confirms the Registered Professional of Record fulfilled their obligations under Schedule B. Submit after project completion, but before an occupancy permit or final inspection.",
+              previousLettersOfAssuranceTitle: "Previous Letters of Assurance",
+              previousLettersOfAssuranceDescription:
+                "For projects that were permitted prior to March 8, 2024 you can find Letters of Assurance on the BC Codes website:",
+              previousLettersOfAssuranceLink: "Projects December 11, 2018 to March 8, 2024",
+              previousLettersOfAssuranceLink2: "Projects December 20, 2012 to December 10, 2018",
               pageTitle: "",
               whatAreLOAsTitle: "What are Letters of Assurance (LOAs)?",
               whatAreLOAsDescription1:
@@ -2989,6 +3050,7 @@ const options = {
             update: "Update",
             globalFeatureAccess: "Global feature access",
             projectReadinessTools: "Prepare and check your project documents",
+            createYourLettersOfAssurance: "Create your Letters of Assurance",
           },
         },
         automatedCompliance: {
