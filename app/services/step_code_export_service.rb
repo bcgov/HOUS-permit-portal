@@ -76,12 +76,17 @@ class StepCodeExportService
             "Timeframe from cannot be more than 365 days in the past"
     end
 
+    # Select cached fields as well.
+    # The `includes` are still important for primary_checklist and permit_applications.status
     query =
-      model_class.includes(*includes).where(
-        permit_applications: {
-          status: %i[newly_submitted resubmitted]
-        }
-      )
+      model_class
+        .includes(
+          *includes
+        ) # includes: %i[permit_application checklist/checklists]
+        .select(
+          "step_codes.*, permit_applications.status AS permit_application_status"
+        ) # Ensure all necessary fields are selected
+        .where(permit_applications: { status: %i[newly_submitted resubmitted] })
 
     query = query.where("step_codes.created_at >= ?", parsed_timeframe_from)
 
@@ -90,12 +95,12 @@ class StepCodeExportService
 
     query = query.where("step_codes.created_at <= ?", adjusted_timeframe_to)
 
-    step_codes = query.to_a
+    step_codes = query.to_a # Fetch all records
     type = model_class.name
     metadata = {
       type: type,
-      timeframe_from: parsed_timeframe_from, # Use parsed versions for metadata too
-      timeframe_to: parsed_timeframe_to, # Use parsed versions for metadata too
+      timeframe_from: parsed_timeframe_from,
+      timeframe_to: parsed_timeframe_to,
       total_records: step_codes.length,
       generated_at: Time.current.iso8601
     }
@@ -117,18 +122,53 @@ class StepCodeExportService
           ).to_a.map(&:to_s)
       )
     end
-    {
-      metadata: metadata,
-      data:
-        step_codes
-          .map do |step_code|
-            checklist = step_code.primary_checklist
-            next unless checklist
 
-            # binding.pry
-            blueprint_class.render_as_hash(checklist, view: :metrics_export)
+    data_array =
+      step_codes
+        .map do |step_code|
+          checklist = step_code.primary_checklist # Relies on includes
+          next unless checklist
+
+          json_to_use = nil
+          cache_is_valid = false
+
+          if step_code.respond_to?(:cached_metrics_json) &&
+               step_code.cached_metrics_json.present? &&
+               step_code.respond_to?(:metrics_cached_at) &&
+               step_code.metrics_cached_at.present?
+            if step_code.metrics_cached_at >= step_code.updated_at &&
+                 step_code.metrics_cached_at >= checklist.updated_at
+              json_to_use = step_code.cached_metrics_json
+              cache_is_valid = true
+              # Rails.logger.debug "Using cached metrics for #{type} ID: #{step_code.id}"
+            else
+              Rails.logger.warn "Cached metrics for #{type} ID: #{step_code.id} is stale. Regenerating."
+            end
+          else
+            Rails.logger.warn "Cached metrics for #{type} ID: #{step_code.id} not found or incomplete. Regenerating."
           end
-          .compact
-    }
+
+          unless cache_is_valid
+            begin
+              json_to_use =
+                blueprint_class.render_as_hash(checklist, view: :metrics_export)
+              # Optionally, update the cache here for this specific record if it was stale/missing.
+              # This makes the current request faster next time, but adds a write operation.
+              # To avoid N+1 writes during a large export, this is commented out by default.
+              # Consider if a small number of live updates are acceptable or if it should only log.
+              # if step_code.respond_to?(:update_columns) # Ensure the method exists
+              #   step_code.update_columns(cached_metrics_json: json_to_use, metrics_cached_at: Time.current)
+              #   Rails.logger.info "Live-regenerated and cached metrics for #{type} ID: #{step_code.id}"
+              # end
+            rescue StandardError => e
+              Rails.logger.error "Error live-generating metrics for #{type} ID: #{step_code.id} - #{e.message}"
+              next # Skip this record if live generation fails
+            end
+          end
+          json_to_use # This will be the cached JSON or the freshly generated one
+        end
+        .compact
+
+    { metadata: metadata, data: data_array }
   end
 end
