@@ -626,3 +626,8 @@ export enum EDocumentReferenceDocumentType {
   electricalDrawing = "electrical_drawing",
   other = "other",
 }
+
+export enum EStepCodeType {
+  Part3 = "Part3StepCode",
+  Part9 = "Part9StepCode",
+}
