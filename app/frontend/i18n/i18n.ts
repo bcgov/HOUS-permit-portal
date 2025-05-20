@@ -2221,14 +2221,6 @@ const options = {
               previousLettersOfAssuranceLink: "Projects December 11, 2018 to March 8, 2024",
               previousLettersOfAssuranceLink2: "Projects December 20, 2012 to December 10, 2018",
               pageTitle: "",
-              whatAreLOAsTitle: "What are Letters of Assurance (LOAs)?",
-              whatAreLOAsDescription1:
-                "LOA\'s are legal documents that are required under the BC Building Code to ensure that buildings are designed and constructed in line with building safety standards for complex buildings (Part 3) and some simpler buildings (Part 9). Some local governments may also require LOA\'s in other cases. LOA\' confirm that registered professionals (e.g., architects, professional engineers and others) are taking responsibility to ensure the design and construction of a building meet building safety standards.",
-              whatAreLOAsDescription2:
-                "Local jurisdictions use LOA\'s to verify code compliance and confirm that necessary professional oversight is in place throughout the project.",
-              whoMustSubmitLOAsTitle: "Who must submit LOA\'s?",
-              whoMustSubmitLOAsDescription:
-                "LOA\'s must be signed, sealed and submitted by registered professionals which include architects and professional engineers (structural, mechanical, plumbing, fire suppression systems and geotechnical) when required. These professionals are responsible for designing and reviewing different parts of the building such as structure, plumbing, or fire safety. In most cases, the architect is also the coordinating registered professional, who ensures all safety-related areas are covered by the correct experts.",
               loaResponsibilities: {
                 buildingDesign:
                   "Building design – architect responsible for the overall building design and coordination.",
@@ -2239,24 +2231,6 @@ const options = {
                 geotechnical:
                   "Geotechnical - engineer reviews ground and slope stability for excavation, foundation, temporary retaining systems during constructions and finished building.",
               },
-              whenToSubmitLOAsTitle: "When do LOA\'s need to be submitted?",
-              whenToSubmitLOAsDescription1:
-                "LOA\'s must be submitted as part of the permitting process at the time of the building permit application:",
-              whenToSubmitLOAsScheduleA:
-                "\'Schedule A\' from is signed by the owner and coordinating registered professional (usually the architect).",
-              whenToSubmitLOAsScheduleB:
-                "\'Schedule B\' forms are signed by each registered professional responsible for their part of the project (e.g., structural, plumbing, mechanical).",
-              whenToSubmitLOAsNotAllProjects:
-                "Not all construction projects need every type of Schedule B. For example: A fire suppression Schedule B isn\'t needed if no sprinkler system is required. The coordinating professional decides which ones apply based on the project.",
-              whenToSubmitLOAsEndOfConstruction:
-                "At the end of the construction process, before building occupancy is granted, additional LOA\'s are required:",
-              whenToSubmitLOAsScheduleCA:
-                "\'Schedule C-A\' form is submitted by the coordinating professional to confirm all work complies with the code.",
-              whenToSubmitLOAsScheduleCB:
-                "\'Schedule C-B form is submitted by each registered professional who signed a Schedule B.",
-              howLOAsFitTitle: "How do LOA\'s fit into the building permit process?",
-              howLOAsFitDescription:
-                "LOA\'s should only be provided if there is a building code or a local government requirement for them, typically for Part 3 complex buildings. LOA\'s help local governments building inspectors confirm that qualified professionals are involved in the project. They also provide a record of who is responsible for making sure the work follows the building code.",
             },
           },
           siteConfigurationTitle: "Configuration management",
