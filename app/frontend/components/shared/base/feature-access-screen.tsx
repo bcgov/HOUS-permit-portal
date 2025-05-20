@@ -82,7 +82,11 @@ const FeatureRow = ({
           {(() => {
             const toggleKey = `${i18nPrefix}.toggle${enabled ? "On" : "Off"}`
             // @ts-ignore
-            return t(toggleKey)
+            return (
+              <Text as="span" fontWeight="bold">
+                {t(toggleKey)}
+              </Text>
+            )
           })()}
         </RouterLinkButton>
       </GridItem>

@@ -65,6 +65,13 @@ const ReviewStaffInboxFeatureAccessScreen = lazy(() =>
     })
   )
 )
+const ReviewStaffMyJurisdictionAboutPageScreen = lazy(() =>
+  import(
+    "../home/review-manager/configuration-management-screen/feature-access-screen/my-jurisdiction-about-page"
+  ).then((module) => ({
+    default: module.myJurisdictionAboutPageScreen,
+  }))
+)
 const JurisdictionIndexScreen = lazy(() =>
   import("../jurisdictions/index").then((module) => ({ default: module.JurisdictionIndexScreen }))
 )
@@ -417,6 +424,10 @@ const AppRoutes = observer(() => {
       <Route
         path="/jurisdictions/:jurisdictionId/configuration-management/feature-access/submissions-inbox-setup"
         element={<ReviewStaffInboxFeatureAccessScreen />}
+      />
+      <Route
+        path="/jurisdictions/:jurisdictionId/configuration-management/feature-access/my-jurisdiction-about-page"
+        element={<ReviewStaffMyJurisdictionAboutPageScreen />}
       />
       <Route
         path="/jurisdictions/:jurisdictionId/configuration-management/energy-step"

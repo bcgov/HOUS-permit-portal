@@ -1,7 +1,7 @@
 import { Container, Flex, Heading, Text, VStack } from "@chakra-ui/react"
 import { CaretLeft } from "@phosphor-icons/react"
 import React from "react"
-import { useTranslation } from "react-i18next"
+import { Trans, useTranslation } from "react-i18next"
 import { useLocation } from "react-router-dom"
 import { SubmissionsInboxSetupScreen } from "../../domains/home/review-manager/configuration-management-screen/submissions-inbox-setup-screen"
 import { SwitchButton } from "../buttons/switch-button"
@@ -12,6 +12,7 @@ interface FeatureToggleScreenProps {
   featureKey: string
   backUrl: string
   isEnabled: boolean
+  editPageUrl: string
   onToggle: (checked: boolean) => void
 }
 
@@ -20,6 +21,7 @@ export const FeatureToggleScreen: React.FC<FeatureToggleScreenProps> = ({
   featureKey,
   backUrl,
   isEnabled,
+  editPageUrl,
   onToggle,
 }) => {
   const { t } = useTranslation()
@@ -37,15 +39,30 @@ export const FeatureToggleScreen: React.FC<FeatureToggleScreenProps> = ({
             {t(`${i18nPrefix}.${featureKey}`)}
           </Heading>
           <Text color="text.secondary" fontSize="lg" mt={2}>
-            {/* ts-ignore */}
-            {t(`${i18nPrefix}.${featureKey}Description`)}
+            <Trans
+              i18nKey={`${i18nPrefix}.${featureKey}Description`}
+              components={{
+                1: (
+                  <RouterLinkButton
+                    variant={"link"}
+                    to={editPageUrl}
+                    variant="link"
+                    fontSize="lg"
+                    textDecoration="none"
+                  ></RouterLinkButton>
+                ),
+              }}
+            />
           </Text>
         </Flex>
         {/* ts-ignore */}
-        <Flex justify="space-between" w="100%">
+        <Flex w="100%" align="center" justify="space-between">
           {!location.pathname.endsWith("/submissions-inbox-setup") && (
-            <SwitchButton isChecked={isEnabled} onChange={(e) => onToggle(e.target.checked)} size={"lg"} />
+            <Text color="text.secondary" fontSize="lg" fontWeight="bold">
+              {t(`${i18nPrefix}.${featureKey}`)}
+            </Text>
           )}
+          <SwitchButton isChecked={isEnabled} onChange={(e) => onToggle(e.target.checked)} size={"lg"} mt={1} />
         </Flex>
       </VStack>
       {location.pathname.endsWith("/submissions-inbox-setup") && (
