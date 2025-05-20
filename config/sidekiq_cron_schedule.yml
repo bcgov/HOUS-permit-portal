@@ -21,3 +21,8 @@ check_expiring_api_keys:
   class: "CheckExpiringApiKeysJob"
   queue: default
   active_job: false
+
+  cache_step_code_metrics:
+  cron: "0 2 * * *" # Every day at 2:00 AM
+  class: "CacheStepCodeMetricsJob"
+  queue: default # Or your preferred queue
