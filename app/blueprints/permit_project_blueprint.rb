@@ -4,7 +4,7 @@ class PermitProjectBlueprint < Blueprinter::Base
   fields :description, :created_at, :updated_at
 
   view :extended_with_primary_details do
-    include_fields :description, :created_at, :updated_at
+    fields :description, :created_at, :updated_at
 
     # Delegated fields from primary_permit_application
     fields :status,
@@ -35,14 +35,14 @@ class PermitProjectBlueprint < Blueprinter::Base
 
   # A simpler view for general listings, adjust as needed
   view :base do
-    include_fields :id,
-                   :description,
-                   :created_at,
-                   :updated_at,
-                   :number,
-                   :status,
-                   :nickname,
-                   :full_address
+    fields :id,
+           :description,
+           :created_at,
+           :updated_at,
+           :number,
+           :status,
+           :nickname,
+           :full_address
     association :submitter, blueprint: UserBlueprint, view: :minimal
     association :permit_type, blueprint: PermitClassificationBlueprint
     association :activity, blueprint: PermitClassificationBlueprint

@@ -43,7 +43,11 @@ module Api::Concerns::Search::PermitProjects
       :page,
       :per_page,
       filters: [ # Define potential filters here
-      # e.g., :jurisdiction_id, { status: [] }
+        # e.g., :jurisdiction_id, { status: [] }
+        # Add other filters that PermitApplication search uses, like :has_collaborator
+        :jurisdiction_id,
+        { status: [] },
+        :has_collaborator
       ],
       sort: %i[field direction]
     )
@@ -64,28 +68,32 @@ module Api::Concerns::Search::PermitProjects
     end
   end
 
-  # Determines the where clause for Searchkick
+  # Determines the where clause for Searchkick, mirroring PermitApplication logic
   def permit_project_where_clause
     filters = permit_project_search_params[:filters] || {}
-    where_conditions = {}
 
-    # Example: Add conditions based on current_user or context if needed
-    # if current_user.review_staff? && @jurisdiction # Assuming @jurisdiction might be set
-    #   where_conditions[:jurisdiction_id] = @jurisdiction.id # Requires jurisdiction_id to be indexed for Project
-    # end
+    # Handle :has_collaborator filter like in PermitApplication
+    if filters.key?(:has_collaborator) && filters[:has_collaborator] == false
+      filters[:has_collaborator] = nil # Or remove the key if Searchkick handles nil as no filter
+    end
 
-    # Apply filters from params
-    # Example filter handling:
-    # if filters[:status].present?
-    #   where_conditions[:status] = filters[:status]
-    # end
-    # if filters[:jurisdiction_id].present?
-    #   # This would require jurisdiction_id to be indexed for PermitProject,
-    #   # likely from its primary_permit_application.search_data
-    #   where_conditions[:primary_permit_application_jurisdiction_id] = filters[:jurisdiction_id]
-    # end
+    where_conditions =
+      if @jurisdiction # Assuming @jurisdiction might be set for specific views
+        {
+          jurisdiction_id: @jurisdiction.id,
+          # Overrides status filter if @jurisdiction is set, mirroring PA behavior
+          status: %i[newly_submitted resubmitted]
+        }
+      else
+        # Default for general user views, ensures user has edit permissions on primary app
+        { user_ids_with_submission_edit_permissions: current_user.id }
+      end
 
-    # Merge compact symbolic keys from filters into where_conditions
+    # Add sandbox_id filter if applicable, mirroring PA behavior
+    where_conditions[:sandbox_id] = current_sandbox&.id if defined?(
+      current_sandbox
+    ) && current_sandbox && !current_user.super_admin?
+
     (filters.to_h.deep_symbolize_keys.compact).merge!(where_conditions)
   end
 end

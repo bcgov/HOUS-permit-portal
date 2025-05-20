@@ -1,4 +1,4 @@
-import { cast, flow, Instance, SnapshotIn, types } from "mobx-state-tree"
+import { cast, flow, Instance, types } from "mobx-state-tree"
 import * as R from "ramda"
 import { createSearchModel } from "../lib/create-search-model"
 import { withEnvironment } from "../lib/with-environment"
@@ -47,6 +47,37 @@ export const PermitProjectStoreModel = types
     // Add other views as needed
   }))
   .actions((self) => ({
+    __beforeMergeUpdate(permitProject) {
+      // Handle submitter
+      if (permitProject.submitter && typeof permitProject.submitter === "object") {
+        self.rootStore.userStore.mergeUpdate(permitProject.submitter, "usersMap")
+      }
+
+      // Handle primary permit application
+      if (permitProject.primaryPermitApplication && typeof permitProject.primaryPermitApplication === "object") {
+        self.rootStore.permitApplicationStore.mergeUpdate(
+          permitProject.primaryPermitApplication,
+          "permitApplicationMap"
+        )
+      }
+
+      // Handle supplemental permit applications
+      if (permitProject.supplementalPermitApplications && Array.isArray(permitProject.supplementalPermitApplications)) {
+        permitProject.supplementalPermitApplications.forEach((app) => {
+          if (typeof app === "object") {
+            self.rootStore.permitApplicationStore.mergeUpdate(app, "permitApplicationMap")
+          }
+        })
+      }
+
+      // Return modified data with references instead of full objects
+      return R.mergeRight(permitProject, {
+        submitter: permitProject.submitter?.id || null,
+        primaryPermitApplication: permitProject.primaryPermitApplication?.id || null,
+        supplementalPermitApplications:
+          permitProject.supplementalPermitApplications?.map((app) => (typeof app === "object" ? app.id : app)) || [],
+      })
+    },
     setCurrentPermitProject(permitProjectId: string | null) {
       if (permitProjectId === null) {
         self.currentPermitProject = null
@@ -59,79 +90,6 @@ export const PermitProjectStoreModel = types
     },
     resetCurrentPermitProject() {
       self.currentPermitProject = null
-    },
-    // __beforeMergeUpdate is critical for handling nested data structures
-    __beforeMergeUpdate(projectData: Partial<SnapshotIn<typeof PermitProjectModel>> & { id: string }) {
-      // Handle primaryPermitApplication
-      if (projectData.primaryPermitApplication && typeof projectData.primaryPermitApplication === "object") {
-        self.rootStore.permitApplicationStore.mergeUpdate(
-          projectData.primaryPermitApplication as any, // API returns full object, store needs to process it
-          "permitApplicationMap"
-        )
-        projectData.primaryPermitApplication = (projectData.primaryPermitApplication as any).id
-      } else if (
-        typeof projectData.primaryPermitApplication === "object" &&
-        projectData.primaryPermitApplication !== null
-      ) {
-        // It's already a snapshot object from elsewhere, ensure it's just the ID
-        projectData.primaryPermitApplication = (projectData.primaryPermitApplication as any).id
-      }
-
-      // Handle supplementalPermitApplications
-      if (projectData.supplementalPermitApplications && Array.isArray(projectData.supplementalPermitApplications)) {
-        const processedApps = projectData.supplementalPermitApplications.map((app: any) => {
-          if (typeof app === "object" && app !== null) {
-            self.rootStore.permitApplicationStore.mergeUpdate(app, "permitApplicationMap")
-            return app.id
-          }
-          return app // Assuming it's already an ID (string)
-        })
-        projectData.supplementalPermitApplications = processedApps.filter((id) => typeof id === "string") as string[]
-      }
-
-      return projectData // Return the modified data for merging
-    },
-    // __beforeMergeUpdateAll can optimize merging of associations for multiple projects
-    __beforeMergeUpdateAll(projectsData: (Partial<SnapshotIn<typeof PermitProjectModel>> & { id: string })[]) {
-      const allApplications: any[] = []
-      projectsData.forEach((project) => {
-        if (project.primaryPermitApplication && typeof project.primaryPermitApplication === "object") {
-          allApplications.push(project.primaryPermitApplication)
-        }
-        if (project.supplementalPermitApplications) {
-          project.supplementalPermitApplications.forEach((app) => {
-            if (typeof app === "object" && app !== null) {
-              allApplications.push(app)
-            }
-          })
-        }
-      })
-
-      const uniqueApps = R.uniqBy(
-        (app) => app.id,
-        allApplications.filter((app) => app && app.id)
-      )
-      if (uniqueApps.length > 0) {
-        self.rootStore.permitApplicationStore.mergeUpdateAll(uniqueApps as any[], "permitApplicationMap")
-      }
-
-      // Modify projectsData to replace full app objects with IDs, similar to __beforeMergeUpdate
-      const processedProjects = projectsData.map((project) => {
-        const processedProject: Partial<SnapshotIn<typeof PermitProjectModel>> & { id: string } = { ...project }
-        if (
-          processedProject.primaryPermitApplication &&
-          typeof processedProject.primaryPermitApplication === "object"
-        ) {
-          processedProject.primaryPermitApplication = (processedProject.primaryPermitApplication as any).id
-        }
-        if (processedProject.supplementalPermitApplications) {
-          processedProject.supplementalPermitApplications = processedProject.supplementalPermitApplications
-            .map((app: any) => (typeof app === "object" && app !== null ? app.id : app))
-            .filter((id) => typeof id === "string") as string[]
-        }
-        return processedProject
-      })
-      return processedProjects
     },
     setTablePermitProjects: (projects: IPermitProject[]) => {
       self.tablePermitProjects = cast(projects.map((p) => p.id))

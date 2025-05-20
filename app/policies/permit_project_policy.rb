@@ -5,7 +5,10 @@ class PermitProjectPolicy < ApplicationPolicy
       # Get the IDs of PermitApplications the user is allowed to see based on PermitApplicationPolicy::Scope
       # This scope is used by Pundit.policy_scope! which IS class-level.
       allowed_permit_application_ids =
-        Pundit.policy_scope!(user, PermitApplication).select(:id)
+        Pundit.policy_scope!(
+          UserContext.new(user, sandbox),
+          PermitApplication
+        ).select(:id)
 
       scope # This is PermitProject.all or a base scope from the controller
         .joins(:primary_permit_project_permit_application)
@@ -21,19 +24,27 @@ class PermitProjectPolicy < ApplicationPolicy
 
   # Assuming this is ONLY called by `apply_search_authorization` where `record` is an instance of PermitProject.
   def index?
-    # Can the user see this specific project instance?
-    # Delegates to your instance-based PermitApplicationPolicy#index? (or show? if you refactor PA policy)
     return false unless record.primary_permit_application.present?
-    Pundit.policy!(user, record.primary_permit_application).index?
+
+    delegate_to_primary_application(:index?)
   end
 
   # This is for authorizing a specific project instance (e.g., in a show action).
   def show?
     return false unless record.primary_permit_application.present?
-    # Delegates to your instance-based PermitApplicationPolicy#index? (or show? if you refactor PA policy)
-    Pundit.policy!(user, record.primary_permit_application).index?
+
+    delegate_to_primary_application(:show?)
   end
 
-  # Define other actions like create?, update?, destroy? as needed,
-  # potentially by checking permissions on the primary_permit_application.
+  private
+
+  def delegate_to_primary_application(action)
+    Pundit.policy!(user_context, record.primary_permit_application).public_send(
+      action
+    )
+  end
+
+  def user_context
+    @user_context ||= UserContext.new(user, sandbox)
+  end
 end

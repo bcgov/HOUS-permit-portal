@@ -482,6 +482,12 @@ const options = {
             },
           },
         },
+        permitProject: {
+          indexTitle: "My active projects",
+          listTitle: "Permit projects",
+          noneFound: "No projects yet",
+          noneFoundExplanation: "There are currently no permit projects matching your criteria.",
+        },
         permitApplication: {
           noneFound: "No permits yet",
           noneFoundExplanation:
@@ -2858,6 +2864,7 @@ const options = {
           metaKeywords: "BC, british columba, permit, portal, hub, permitting, permit application",
           loggedInWelcome: "Welcome back!",
           myPermits: "My permits",
+          myProjects: "My projects",
           newApplication: "New permit application",
           activePermits: "Active permits",
           approvedPermits: "Approved permits",
@@ -2921,6 +2928,7 @@ const options = {
             earlyAccess: "Early access",
             update: "Update",
             globalFeatureAccess: "Global feature access",
+            permitProjects: "Permit projects",
           },
         },
         automatedCompliance: {
