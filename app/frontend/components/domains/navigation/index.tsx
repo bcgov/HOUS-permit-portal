@@ -415,7 +415,7 @@ const AppRoutes = observer(() => {
         element={<ReviewManagerFeatureAccessScreen />}
       />
       <Route
-        path="/jurisdictions/:jurisdictionId/configuration-management/feature-access/submission-inbox"
+        path="/jurisdictions/:jurisdictionId/configuration-management/feature-access/submissions-inbox-setup"
         element={<ReviewStaffInboxFeatureAccessScreen />}
       />
       <Route

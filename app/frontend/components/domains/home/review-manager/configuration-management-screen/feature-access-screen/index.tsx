@@ -6,7 +6,7 @@ import { useJurisdiction } from "../../../../../../hooks/resources/use-jurisdict
 import { FeatureAccessScreen } from "../../../../../shared/base/feature-access-screen"
 
 export const ReviewManagerFeatureAccessScreen = observer(() => {
-  const i18nPrefix = "home.configurationManagement.globalFeatureAccess"
+  const i18nPrefix = "home.configurationManagement.featureAccess"
   const { t } = useTranslation()
   const { currentJurisdiction } = useJurisdiction()
   const location = useLocation()
@@ -15,7 +15,7 @@ export const ReviewManagerFeatureAccessScreen = observer(() => {
     {
       label: t(`${i18nPrefix}.submissionInbox`),
       enabled: currentJurisdiction?.inboxEnabled,
-      route: "submission-inbox",
+      route: "submissions-inbox-setup",
     },
     // Add more features as needed
   ]
@@ -23,7 +23,7 @@ export const ReviewManagerFeatureAccessScreen = observer(() => {
   return (
     <FeatureAccessScreen
       i18nPrefix={i18nPrefix}
-      title={t(`${i18nPrefix}.featureAccess`)}
+      title={t(`${i18nPrefix}.title`)}
       description={t(`${i18nPrefix}.description`)}
       features={features}
     />
