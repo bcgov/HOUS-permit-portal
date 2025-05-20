@@ -1,5 +1,6 @@
 class PermitProject < ApplicationRecord
   searchkick word_middle: %i[
+               description
                nickname
                full_address
                permit_classifications
@@ -59,11 +60,23 @@ class PermitProject < ApplicationRecord
            :step_code,
            :review_delegatee_name,
            :formatted_permit_classifications,
-           :search_data, # Delegate search_data as well
            to: :primary_permit_application,
            allow_nil: true # Consider if nil is acceptable before validation
 
   # Validations, scopes, methods, etc. can be added here
+
+  def search_data
+    # Ensure primary_permit_application and its search_data are present
+    primary_app_search_data = primary_permit_application&.search_data || {}
+
+    {
+      # Project-specific fields
+      description: description
+      # Merge with primary application's search data
+      # Fields from primary_permit_application will overwrite project's if names clash
+      # (though 'description' is unlikely to be in primary_app_search_data directly)
+    }.merge(primary_app_search_data)
+  end
 
   def permit_application
     primary_permit_application

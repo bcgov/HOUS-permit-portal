@@ -51,39 +51,5 @@ export const PermitProjectModel = types
       return self.primaryPermitApplication?.permitTypeAndActivity || "N/A"
     },
   }))
-  .actions((self) => ({
-    // Placeholder for __mergeUpdate if complex associations are handled, similar to PermitApplicationModel
-    __mergeUpdate: (resourceData: any) => {
-      // Logic to handle nested models or references before applying the snapshot
-      // For example, if primaryPermitApplication is an object, ensure it's processed by PermitApplicationStore
-      if (resourceData.submitter && typeof resourceData.submitter === "object") {
-        self.rootStore.userStore.mergeUpdate(resourceData.submitter, "usersMap")
-        resourceData.submitter = resourceData.submitter.id
-      }
-      // PermitType and Activity are frozen, so they should come as objects directly.
-      // If they were references, you'd handle them like submitter.
-
-      if (resourceData.primaryPermitApplication && typeof resourceData.primaryPermitApplication === "object") {
-        self.rootStore.permitApplicationStore.mergeUpdate(resourceData.primaryPermitApplication, "permitApplicationMap")
-        resourceData.primaryPermitApplication = resourceData.primaryPermitApplication.id
-      }
-      if (resourceData.supplementalPermitApplications && Array.isArray(resourceData.supplementalPermitApplications)) {
-        const appIds = resourceData.supplementalPermitApplications.map((app: any) => {
-          if (typeof app === "object") {
-            self.rootStore.permitApplicationStore.mergeUpdate(app, "permitApplicationMap")
-            return app.id
-          }
-          return app // Assuming it's already an ID
-        })
-        resourceData.supplementalPermitApplications = appIds
-      }
-      // Apply the processed snapshot to self
-      // This direct assignment is MST's way of updating.
-      // For complex updates or if 'self' is a map entry, you might use self.rootStore.permitProjectStore.permitProjectMap.put(newData)
-      // However, __mergeUpdate is usually called on an instance that's already in a map.
-      Object.assign(self, resourceData)
-    },
-    // Add other actions here
-  }))
 
 export interface IPermitProject extends Instance<typeof PermitProjectModel> {}

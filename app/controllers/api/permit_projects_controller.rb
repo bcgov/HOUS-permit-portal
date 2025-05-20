@@ -9,6 +9,7 @@ class Api::PermitProjectsController < Api::ApplicationController
 
   def index
     perform_permit_project_search # This method now comes from the concern
+    # binding.pry
 
     # Apply your iterative authorization method to the Searchkick results.
     # This will use PermitProjectPolicy#index? for each instance.

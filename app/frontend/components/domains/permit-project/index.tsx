@@ -45,7 +45,7 @@ export const PermitProjectIndexScreen = observer(({}: IPermitProjectIndexScreenP
   return (
     <Flex as="main" direction="column" w="full" bg="greys.white" pb="24">
       {/* Potentially add tabs for project statuses if applicable */}
-      <BlueTitleBar title={t("permitProject.indexTitle", "Permit Projects")} />
+      <BlueTitleBar title={t("permitProject.indexTitle")} />
       <Container maxW="container.lg" pb={4}>
         <Flex as="section" direction="column" p={6} gap={6} flex={1}>
           {/* Add "New Project" button if needed
@@ -63,7 +63,7 @@ export const PermitProjectIndexScreen = observer(({}: IPermitProjectIndexScreenP
             justify="space-between"
             direction={{ base: "column", md: "row" }}
           >
-            <Heading as="h2">{t("permitProject.listTitle", "All Projects")}</Heading>
+            <Heading as="h2">{t("permitProject.listTitle")}</Heading>
             <Flex align="flex-end" gap={4} direction={{ base: "column", md: "row" }}>
               {/* Add filters menu if developed
               {permitProjectStore.hasResetableFilters && ( // Assuming hasResetableFilters is added to store
@@ -92,11 +92,8 @@ export const PermitProjectIndexScreen = observer(({}: IPermitProjectIndexScreenP
           ) : R.isEmpty(tablePermitProjects) ? (
             <CustomMessageBox
               status={EFlashMessageStatus.info}
-              title={t("permitProject.noneFound", "No Permit Projects Found")}
-              description={t(
-                "permitProject.noneFoundExplanation",
-                "There are currently no permit projects matching your criteria."
-              )}
+              title={t("permitProject.noneFound")}
+              description={t("permitProject.noneFoundExplanation")}
             />
           ) : (
             tablePermitProjects.map((project) => (
