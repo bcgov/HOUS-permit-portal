@@ -23,7 +23,7 @@ export const ReviewManagerFeatureAccessScreen = observer(() => {
   return (
     <FeatureAccessScreen
       i18nPrefix={i18nPrefix}
-      title={t(`${i18nPrefix}.featureAccess`)}
+      title={t(`${i18nPrefix}.title`)}
       description={t(`${i18nPrefix}.description`)}
       features={features}
     />

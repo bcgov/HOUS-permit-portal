@@ -100,7 +100,7 @@ export const ConfigurationManagementScreen = observer(function ConfigurationMana
               </GridItem>
               <GridItem>
                 <HomeScreenBox
-                  title={t(`${i18nPrefix}.featureAccess.featureAccess`)}
+                  title={t(`${i18nPrefix}.featureAccess.title`)}
                   description={t(`${i18nPrefix}.featureAccess.description`)}
                   linkText={t("ui.edit")}
                   icon={<SlidersHorizontal size="24px" color="var(--chakra-colors-text-link)" />}

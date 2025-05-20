@@ -2247,8 +2247,7 @@ const options = {
               },
             },
             featureAccess: {
-              title: "Global feature access",
-              featureAccess: "Feature access",
+              title: "Feature access",
               description: "Turn features on or off for all users in your jurisdiction",
               submissionInbox: "Submissions inbox setup",
               submissionInboxDescription: "Specify where submitted permit applications should be sent",
