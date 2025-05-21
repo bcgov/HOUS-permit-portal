@@ -131,7 +131,7 @@ class User < ApplicationRecord
         regional_review_manager
         technical_support
       ]
-    when "review_manager", "regional_review_manager"
+    when "review_manager", "regional_review_manager", "technical_support"
       %w[reviewer review_manager technical_support]
     else
       []
