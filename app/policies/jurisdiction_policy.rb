@@ -22,7 +22,7 @@ class JurisdictionPolicy < ApplicationPolicy
   def update?
     user.super_admin? ||
       (
-        (user.staff? || user.technical_support?) &&
+        (user.review_staff? || user.technical_support?) &&
           user.jurisdictions.find(record.id)
       )
   end

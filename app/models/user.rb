@@ -138,10 +138,6 @@ class User < ApplicationRecord
     end
   end
 
-  def staff?
-    review_staff? || super_admin?
-  end
-
   def manager?
     review_manager? || regional_review_manager?
   end
