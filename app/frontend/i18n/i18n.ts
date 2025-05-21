@@ -2378,11 +2378,12 @@ const options = {
           email: "Email",
           // Leave in snake case so we can use: t(`user.roles.${role}`)
           roles: {
-            submitter: "submitter",
-            regional_review_manager: "regional review manager",
-            review_manager: "review manager",
-            reviewer: "reviewer",
-            super_admin: "super admin",
+            submitter: "Submitter",
+            regional_review_manager: "Regional Review Manager",
+            review_manager: "Review Manager",
+            reviewer: "Reviewer",
+            super_admin: "Super Admin",
+            technical_support: "Technical Support",
           },
           rolesExplanation: {
             submitter:
@@ -2394,6 +2395,8 @@ const options = {
               "A Reviewer is typically an employee within the local government or a designated authority responsible for examining building permit applications submitted by the Submitter. Reviewers assess the documentation for compliance with building codes, zoning laws, and other regulatory requirements. They may request additional information, approve, reject, or provide comments on the applications.",
             super_admin:
               "The Super Admin is the highest-level user within the system, with overarching control over the entire permit application platform. They have the authority to manage user roles, including creating and removing user accounts, and to modify the system configuration. This role is responsible for the maintenance of the system, including updates and enhancements, and ensuring that the system meets the operational and strategic objectives of the local government or the organization.",
+            technical_support:
+              "The Technical Support - LJ role is designed to assist local jurisdictions with technical aspects of the Building Permit Hub. This role acts as the first point of contact for troubleshooting and managing technical configurations related to the API and user access. They provide support to ensure that local jurisdictions can effectively integrate with the platform and maintain smooth operations.",
           },
           assignTo: "Assign to...",
           department: "Department",
