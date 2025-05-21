@@ -1,5 +1,5 @@
 import { Container, Flex, FormControl, FormLabel, Grid, GridItem, Heading, Input, Text, VStack } from "@chakra-ui/react"
-import { FileText, SlidersHorizontal, Users } from "@phosphor-icons/react"
+import { FileText, Info, Key, SlidersHorizontal, Users } from "@phosphor-icons/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React, { Suspense } from "react"
@@ -67,7 +67,7 @@ export const ConfigurationManagementScreen = observer(function ConfigurationMana
                   title={t(`${i18nPrefix}.externalApiKeys.title`)}
                   description={t(`${i18nPrefix}.externalApiKeys.description`)}
                   linkText={t("ui.edit")}
-                  icon={<SlidersHorizontal size={24} />}
+                  icon={<Key size={24} />}
                   href={`/jurisdictions/${currentJurisdiction.slug}/api-settings`}
                   h="full"
                 />
@@ -85,11 +85,11 @@ export const ConfigurationManagementScreen = observer(function ConfigurationMana
               </GridItem>
               <GridItem>
                 <HomeScreenBox
-                  title={t(`${i18nPrefix}.globalFeatureAccess.title`)}
-                  description={t(`${i18nPrefix}.globalFeatureAccess.description`)}
+                  title={t(`${i18nPrefix}.featureAccess.title`)}
+                  description={t(`${i18nPrefix}.featureAccess.description`)}
                   linkText={t("ui.edit")}
                   icon={<SlidersHorizontal size="24px" color="var(--chakra-colors-text-link)" />}
-                  href="global-feature-access"
+                  href="feature-access"
                   h="full"
                 />
               </GridItem>

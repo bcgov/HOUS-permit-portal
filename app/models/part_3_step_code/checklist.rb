@@ -19,7 +19,7 @@ class Part3StepCode::Checklist < ApplicationRecord
   has_many :make_up_air_fuels, dependent: :destroy
   accepts_nested_attributes_for :make_up_air_fuels, allow_destroy: true
 
-  has_many :document_references
+  has_many :document_references, dependent: :destroy
   has_many :reference_energy_outputs,
            -> { where(source: :reference) },
            class_name: "Part3StepCode::EnergyOutput",
