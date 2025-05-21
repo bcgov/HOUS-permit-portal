@@ -4,6 +4,7 @@ class PermitApplication < ApplicationRecord
   include StepCodeFieldExtraction
   include ZipfileUploader.Attachment(:zipfile)
   include PermitApplicationStatus
+  include ProjectItem
 
   SEARCH_INCLUDES = %i[
     permit_type
@@ -44,8 +45,10 @@ class PermitApplication < ApplicationRecord
   has_many :collaborators, through: :permit_collaborations
   has_many :permit_block_statuses, dependent: :destroy
 
-  has_many :permit_project_permit_applications, dependent: :destroy
-  has_many :permit_projects, through: :permit_project_permit_applications
+  has_many :project_memberships, as: :item, dependent: :destroy
+  has_many :permit_projects,
+           through: :project_memberships,
+           source: :permit_project
 
   scope :submitted, -> { joins(:submission_versions).distinct }
 
@@ -755,46 +758,47 @@ class PermitApplication < ApplicationRecord
   end
 
   def ensure_project_association
+    project_to_associate = nil
     if target_project_id.present?
-      project = PermitProject.find_by(id: target_project_id)
-      # The `target_project_must_exist` validation should have already caught if project is nil.
-      # However, for safety in the callback:
-      unless project
-        Rails.logger.error "PermitApplication #{id}: Could not find target_project_id #{target_project_id} in after_create callback despite validation."
-        # This state indicates a potential race condition or issue with validation timing if it occurs.
-        # Raising an error here might be too late as the PA is saved.
-        return # Or handle more gracefully
+      project_to_associate = PermitProject.find_by(id: target_project_id)
+      unless project_to_associate
+        errors.add(:target_project_id, "not found") # Should be caught by validation, but good to check
+        throw(:abort) # Prevent association if project not found, and rollback PermitApplication creation
       end
-
-      self.permit_project_permit_applications.create!(
-        permit_project: project,
-        is_primary: false # Supplemental
-      )
     else
-      # No target_project_id provided; create a new PermitProject
-      # and make this PermitApplication its primary.
-      PermitProject.transaction do
-        new_project = PermitProject.new
-
-        # Set default description for the new project
-        new_project.description =
-          "Project for: #{nickname} - #{permit_type_and_activity} at #{full_address}".squish
-
-        # Build directly on the has_one :primary_permit_project_permit_application association
-        new_project.build_primary_permit_project_permit_application(
-          permit_application: self, # `self` is the newly created PermitApplication
-          is_primary: true # Explicitly set is_primary for the join record
+      # Create a new PermitProject if no target_project_id is provided
+      project_to_associate = PermitProject.new(owner: self.submitter) # Set owner here
+      # Optionally set a default description or other attributes for the new project
+      project_to_associate.description ||=
+        "Project for #{self.nickname || "new application"}"
+      unless project_to_associate.save
+        errors.add(
+          :base,
+          "Could not create new project: #{project_to_associate.errors.full_messages.join(", ")}"
         )
-        new_project.save!
+        throw(:abort)
       end
     end
-  rescue ActiveRecord::RecordInvalid => e
-    # This PermitApplication is already created. Logging the error is crucial.
-    Rails.logger.error "PermitApplication #{id}: Failed to associate with a project due to RecordInvalid: #{e.message}. Orphaned PermitApplication may exist."
-    # Re-raising might help if this is part of a larger, outer transaction.
-    raise e
-  rescue ActiveRecord::RecordNotFound => e
-    Rails.logger.error "PermitApplication #{id}: Failed to associate with a project due to RecordNotFound: #{e.message}. Orphaned PermitApplication may exist."
-    raise e
+
+    # Associate this PermitApplication (as an item) with the project
+    # The uniqueness validation in ProjectMembership will prevent duplicates.
+    membership =
+      ProjectMembership.new(permit_project: project_to_associate, item: self)
+    unless membership.save
+      errors.add(
+        :base,
+        "Could not add application to project: #{membership.errors.full_messages.join(", ")}"
+      )
+      # If the project was newly created in this transaction, we might want to ensure it gets rolled back too.
+      # The `throw(:abort)` should handle this if `ensure_project_association` is part of the PA save transaction.
+      throw(:abort)
+    end
+  rescue ActiveRecord::RecordInvalid => e # Should be less likely with explicit saves and checks
+    Rails.logger.error "Error in ensure_project_association (RecordInvalid): #{e.message}"
+    errors.add(:base, "Could not associate with project: #{e.message}")
+    throw(:abort)
+    # rescue ActiveRecord::Rollback => e # If specific rollback handling is needed
+    #   Rails.logger.info "Rollback during ensure_project_association: #{e.message}"
+    #   # Errors should already be on the model from the point the rollback was triggered.
   end
 end

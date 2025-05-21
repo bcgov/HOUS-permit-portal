@@ -1,84 +1,57 @@
 class PermitProject < ApplicationRecord
-  searchkick word_middle: %i[
-               description
-               nickname
-               full_address
-               permit_classifications
-               submitter
-               status
-               review_delegatee_name
-             ],
-             text_end: %i[number]
+  searchkick word_middle: %i[description full_address], text_end: %i[number] # number will come from primary item
 
+  belongs_to :owner, class_name: "User"
   belongs_to :property_plan_local_jurisdiction, optional: true
   has_one :permit_project_payment_detail, dependent: :destroy
   has_one :payment_detail, through: :permit_project_payment_detail
 
-  # Association for the single primary application join record
-  has_one :primary_permit_project_permit_application,
-          -> { primary }, # Using scope from PermitProjectPermitApplication
-          class_name: "PermitProjectPermitApplication",
-          dependent: :destroy
-
-  # Association for the actual primary permit application
-  has_one :primary_permit_application,
-          through: :primary_permit_project_permit_application,
-          source: :permit_application
-
-  # Association for all supplemental application join records
-  has_many :supplemental_permit_project_permit_applications,
-           -> { supplemental }, # Using scope from PermitProjectPermitApplication
-           class_name: "PermitProjectPermitApplication",
-           dependent: :destroy
-
-  # Association for all actual supplemental permit applications
-  has_many :supplemental_permit_applications,
-           through: :supplemental_permit_project_permit_applications,
-           source: :permit_application
-
-  # Optional: If you still want an easy way to get ALL applications
-  has_many :permit_project_permit_applications, dependent: :destroy
-  has_many :permit_applications, through: :permit_project_permit_applications
-
-  # Validation: Ensure a primary permit application join record is always present
-  # This validates the direct association, which is built in memory during creation.
-  validates :primary_permit_project_permit_application, presence: true
-
-  # --- Permit Project: Delegate to the PRIMARY permit application ---
-  delegate :status,
-           :number,
-           :nickname,
-           :full_address,
-           :submitter,
-           :jurisdiction,
-           :permit_type,
-           :activity,
-           :submitted_at,
-           :viewed_at,
-           :resubmitted_at,
-           :permit_type_and_activity,
-           :step_code,
-           :review_delegatee_name,
-           :formatted_permit_classifications,
-           to: :primary_permit_application,
-           allow_nil: true # Consider if nil is acceptable before validation
+  # New associations for generalized project items
+  has_many :project_memberships, dependent: :destroy
+  has_many :permit_applications, # Renaming from 'items' to be specific for now
+           through: :project_memberships,
+           source: :item,
+           source_type: "PermitApplication"
+  # Add other item types as needed, e.g.:
+  # has_many :inspections, through: :project_memberships, source: :item, source_type: "Inspection"
 
   # Validations, scopes, methods, etc. can be added here
+  # The old validation for primary_permit_project_permit_application is removed.
 
-  def search_data
-    # Ensure primary_permit_application and its search_data are present
-    primary_app_search_data = primary_permit_application&.search_data || {}
+  # The old delegate block is removed. Attributes will be accessed via primary_project_item.
 
-    {
-      # Project-specific fields
-      description: description
-      # Merge with primary application's search data
-      # Fields from primary_permit_application will overwrite project's if names clash
-      # (though 'description' is unlikely to be in primary_app_search_data directly)
-    }.merge(primary_app_search_data)
+  # Method to determine the primary project item (e.g., the first one created)
+  def primary_project_item
+    # This assumes project_memberships are ordered by creation or items have created_at
+    # and you want the item itself, not the membership record.
+    # It also assumes item has a created_at attribute for ordering.
+    # The join ensures that `item` is loaded and `items.created_at` can be used for ordering.
+    project_memberships.joins(:item).order("items.created_at ASC").first&.item
   end
 
-  def permit_application
-    primary_permit_application
-  end
+  # Delegated helper methods are now removed.
+  # Code consuming this model must now use `project.primary_project_item&.attribute_name`
+
+  # def search_data
+  #   # This needs significant rework based on how search should behave with multiple items.
+  #   # For now, let's make it simple or comment out.
+  #   primary_item_data = primary_project_item&.search_data || {}
+  #   {
+  #     description: description, # This is a direct attribute of PermitProject
+  #     # Fields from primary_project_item
+  #     number: primary_project_item&.number,
+  #     full_address: primary_project_item&.full_address,
+  #     # ... add other fields needed for search from primary_project_item
+  #   }.merge(primary_item_data) # Be careful with merging, ensure no clashes or desired overrides
+  # end
+
+  # This method might no longer make sense if there can be multiple applications or item types.
+  # Or it should return the primary_project_item if it's a PermitApplication.
+  # def permit_application
+  #   item = primary_project_item
+  #   item if item.is_a?(PermitApplication)
+  # end
+
+  # TODO: Re-evaluate and re-implement search_data based on primary_project_item
+  # and the possibility of multiple items of different types in the future.
 end

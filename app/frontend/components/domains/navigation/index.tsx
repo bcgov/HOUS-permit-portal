@@ -98,6 +98,9 @@ const PermitApplicationIndexScreen = lazy(() =>
 const PermitProjectIndexScreen = lazy(() =>
   import("../permit-project").then((module) => ({ default: module.PermitProjectIndexScreen }))
 )
+const PermitProjectScreen = lazy(() =>
+  import("../permit-project/permit-project-screen").then((module) => ({ default: module.PermitProjectScreen }))
+)
 const EditPermitApplicationScreen = lazy(() =>
   import("../permit-application/edit-permit-application-screen").then((module) => ({
     default: module.EditPermitApplicationScreen,
@@ -494,6 +497,7 @@ const AppRoutes = observer(() => {
         >
           <Route path="/permit-applications" element={<PermitApplicationIndexScreen />} />
           <Route path="/permit-projects" element={<PermitProjectIndexScreen />} />
+          <Route path="/permit-projects/:permitProjectId" element={<PermitProjectScreen />} />
           <Route path="/permit-applications/new" element={<NewPermitApplicationScreen />} />
           <Route path="/permit-applications/:permitApplicationId/edit" element={<EditPermitApplicationScreen />} />
           <Route

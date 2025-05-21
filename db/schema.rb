@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_05_16_204033) do
+ActiveRecord::Schema[7.1].define(version: 2025_05_21_211058) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -54,28 +54,6 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_16_204033) do
     t.datetime "updated_at", null: false
   end
 
-  create_table "audits", force: :cascade do |t|
-    t.uuid "auditable_id"
-    t.string "auditable_type"
-    t.uuid "associated_id"
-    t.string "associated_type"
-    t.uuid "user_id"
-    t.string "user_type"
-    t.string "username"
-    t.string "action"
-    t.text "audited_changes"
-    t.integer "version", default: 0
-    t.string "comment"
-    t.string "remote_address"
-    t.string "request_uuid"
-    t.datetime "created_at"
-    t.index %w[associated_type associated_id], name: "associated_index"
-    t.index %w[auditable_type auditable_id version], name: "auditable_index"
-    t.index ["created_at"], name: "index_audits_on_created_at"
-    t.index ["request_uuid"], name: "index_audits_on_request_uuid"
-    t.index %w[user_id user_type], name: "user_index"
-  end
-
   create_table "collaborators",
                id: :uuid,
                default: -> { "gen_random_uuid()" },
@@ -117,12 +95,6 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_16_204033) do
     t.uuid "contactable_id"
     t.index %w[contactable_type contactable_id],
             name: "index_contacts_on_contactable"
-  end
-
-  create_table "data_migrations",
-               primary_key: "version",
-               id: :string,
-               force: :cascade do |t|
   end
 
   create_table "document_references",
@@ -423,9 +395,9 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_16_204033) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.jsonb "section_completion_status"
-    t.integer "is_suite_sub_metered"
     t.string "heating_system_plant_description"
     t.string "cooling_system_plant_description"
+    t.integer "is_suite_sub_metered"
     t.index ["step_code_id"],
             name: "index_part_3_step_code_checklists_on_step_code_id"
   end
@@ -623,26 +595,6 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_16_204033) do
             unique: true
   end
 
-  create_table "permit_project_permit_applications",
-               id: :uuid,
-               default: -> { "gen_random_uuid()" },
-               force: :cascade do |t|
-    t.uuid "permit_application_id", null: false
-    t.uuid "permit_project_id", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.boolean "is_primary", default: false, null: false
-    t.index %w[permit_application_id permit_project_id],
-            name: "index_permit_project_apps_on_app_id_and_project_id",
-            unique: true
-    t.index ["permit_application_id"], name: "idx_proj_app_on_app_id"
-    t.index %w[permit_project_id is_primary],
-            name: "index_unique_primary_application_for_project",
-            unique: true,
-            where: "(is_primary = true)"
-    t.index ["permit_project_id"], name: "idx_proj_app_on_proj_id"
-  end
-
   create_table "permit_projects",
                id: :uuid,
                default: -> { "gen_random_uuid()" },
@@ -653,6 +605,8 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_16_204033) do
     t.uuid "property_plan_local_jurisdiction_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.uuid "owner_id", null: false
+    t.index ["owner_id"], name: "index_permit_projects_on_owner_id"
     t.index ["property_plan_local_jurisdiction_id"],
             name: "index_permit_projects_on_property_plan_local_jurisdiction_id"
   end
@@ -718,6 +672,22 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_16_204033) do
     t.boolean "enable_in_app_unmapped_api_notification", default: true
     t.boolean "enable_email_unmapped_api_notification", default: true
     t.index ["user_id"], name: "index_preferences_on_user_id"
+  end
+
+  create_table "project_memberships", force: :cascade do |t|
+    t.uuid "permit_project_id", null: false
+    t.string "item_type", null: false
+    t.bigint "item_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index %w[item_id item_type],
+            name: "index_project_memberships_on_item_id_and_item_type"
+    t.index %w[item_type item_id], name: "index_project_memberships_on_item"
+    t.index %w[permit_project_id item_id item_type],
+            name: "index_project_memberships_on_project_and_item",
+            unique: true
+    t.index ["permit_project_id"],
+            name: "index_project_memberships_on_permit_project_id"
   end
 
   create_table "property_plan_local_jurisdictions",
@@ -1285,9 +1255,8 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_16_204033) do
   add_foreign_key "permit_collaborations", "permit_applications"
   add_foreign_key "permit_project_payment_details", "payment_details"
   add_foreign_key "permit_project_payment_details", "permit_projects"
-  add_foreign_key "permit_project_permit_applications", "permit_applications"
-  add_foreign_key "permit_project_permit_applications", "permit_projects"
   add_foreign_key "permit_projects", "property_plan_local_jurisdictions"
+  add_foreign_key "permit_projects", "users", column: "owner_id"
   add_foreign_key "permit_type_required_steps", "jurisdictions"
   add_foreign_key "permit_type_required_steps",
                   "permit_classifications",
@@ -1297,6 +1266,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_16_204033) do
                   "permit_classifications",
                   column: "permit_type_id"
   add_foreign_key "preferences", "users"
+  add_foreign_key "project_memberships", "permit_projects"
   add_foreign_key "property_plan_local_jurisdictions", "jurisdictions"
   add_foreign_key "requirement_documents", "requirement_blocks"
   add_foreign_key "requirement_template_sections",
