@@ -233,6 +233,7 @@ class Api::JurisdictionsController < Api::ApplicationController
       :description_html,
       :checklist_html,
       :look_out_html,
+      :show_about_page,
       :contact_summary_html,
       :map_zoom,
       :inbox_enabled,

@@ -19,6 +19,7 @@ export const JurisdictionModel = types
     submissionEmail: types.maybeNull(types.string),
     qualifiedName: types.string,
     inboxEnabled: types.boolean,
+    showAboutPage: types.boolean,
     reverseQualifiedName: types.maybeNull(types.string),
     regionalDistrictName: types.maybeNull(types.string),
     localityType: types.maybeNull(types.string),

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_05_09_210248) do
+ActiveRecord::Schema[7.1].define(version: 2025_05_06_164041) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -34,10 +34,13 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_09_210248) do
                default: -> { "gen_random_uuid()" },
                force: :cascade do |t|
     t.uuid "external_api_key_id", null: false
-    t.integer "notification_interval_days"
-    t.datetime "sent_at"
+    t.integer "notification_interval_days", null: false
+    t.datetime "sent_at", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index %w[external_api_key_id notification_interval_days],
+            name: "idx_api_key_expiration_notifications_on_key_id_and_interval",
+            unique: true
     t.index ["external_api_key_id"],
             name:
               "index_api_key_expiration_notifications_on_external_api_key_id"
@@ -49,6 +52,28 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_09_210248) do
                force: :cascade do |t|
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "audits", force: :cascade do |t|
+    t.integer "auditable_id"
+    t.string "auditable_type"
+    t.integer "associated_id"
+    t.string "associated_type"
+    t.integer "user_id"
+    t.string "user_type"
+    t.string "username"
+    t.string "action"
+    t.text "audited_changes"
+    t.integer "version", default: 0
+    t.string "comment"
+    t.string "remote_address"
+    t.string "request_uuid"
+    t.datetime "created_at"
+    t.index %w[associated_type associated_id], name: "associated_index"
+    t.index %w[auditable_type auditable_id version], name: "auditable_index"
+    t.index ["created_at"], name: "index_audits_on_created_at"
+    t.index ["request_uuid"], name: "index_audits_on_request_uuid"
+    t.index %w[user_id user_type], name: "user_index"
   end
 
   create_table "collaborators",
@@ -92,12 +117,6 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_09_210248) do
     t.uuid "contactable_id"
     t.index %w[contactable_type contactable_id],
             name: "index_contacts_on_contactable"
-  end
-
-  create_table "data_migrations",
-               primary_key: "version",
-               id: :string,
-               force: :cascade do |t|
   end
 
   create_table "document_references",
@@ -284,6 +303,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_09_210248) do
     t.string "external_api_state", default: "g_off", null: false
     t.boolean "inbox_enabled", default: false, null: false
     t.integer "heating_degree_days"
+    t.boolean "show_about_page", default: true, null: false
     t.index ["prefix"], name: "index_jurisdictions_on_prefix", unique: true
     t.index ["regional_district_id"],
             name: "index_jurisdictions_on_regional_district_id"
@@ -454,32 +474,6 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_09_210248) do
             name: "index_part_9_step_code_checklists_on_step_requirement_id"
   end
 
-  create_table "payment_detail_transactions",
-               id: :uuid,
-               default: -> { "gen_random_uuid()" },
-               force: :cascade do |t|
-    t.string "transaction_type"
-    t.decimal "transaction_amount", precision: 10, scale: 2
-    t.string "transaction_status"
-    t.text "transaction_service_response"
-    t.uuid "payment_detail_id", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["payment_detail_id"],
-            name: "index_payment_detail_transactions_on_payment_detail_id"
-  end
-
-  create_table "payment_details",
-               id: :uuid,
-               default: -> { "gen_random_uuid()" },
-               force: :cascade do |t|
-    t.string "external_service_name"
-    t.string "payment_service"
-    t.string "payment_status"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-  end
-
   create_table "permit_applications",
                id: :uuid,
                default: -> { "gen_random_uuid()" },
@@ -582,51 +576,6 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_09_210248) do
             name: "index_permit_collaborations_on_permit_application_id"
   end
 
-  create_table "permit_project_payment_details",
-               id: :uuid,
-               default: -> { "gen_random_uuid()" },
-               force: :cascade do |t|
-    t.uuid "permit_project_id", null: false
-    t.uuid "payment_detail_id", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["payment_detail_id"],
-            name: "index_permit_project_payment_details_on_payment_detail_id",
-            unique: true
-    t.index ["permit_project_id"],
-            name: "index_permit_project_payment_details_on_permit_project_id",
-            unique: true
-  end
-
-  create_table "permit_project_permit_applications",
-               id: :uuid,
-               default: -> { "gen_random_uuid()" },
-               force: :cascade do |t|
-    t.uuid "permit_application_id", null: false
-    t.uuid "permit_project_id", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index %w[permit_application_id permit_project_id],
-            name: "index_permit_project_apps_on_app_id_and_project_id",
-            unique: true
-    t.index ["permit_application_id"], name: "idx_proj_app_on_app_id"
-    t.index ["permit_project_id"], name: "idx_proj_app_on_proj_id"
-  end
-
-  create_table "permit_projects",
-               id: :uuid,
-               default: -> { "gen_random_uuid()" },
-               force: :cascade do |t|
-    t.text "description"
-    t.text "notes"
-    t.string "permit_project_status"
-    t.uuid "property_plan_local_jurisdiction_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["property_plan_local_jurisdiction_id"],
-            name: "index_permit_projects_on_property_plan_local_jurisdiction_id"
-  end
-
   create_table "permit_type_required_steps",
                id: :uuid,
                default: -> { "gen_random_uuid()" },
@@ -688,22 +637,6 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_09_210248) do
     t.boolean "enable_in_app_unmapped_api_notification", default: true
     t.boolean "enable_email_unmapped_api_notification", default: true
     t.index ["user_id"], name: "index_preferences_on_user_id"
-  end
-
-  create_table "property_plan_local_jurisdictions",
-               id: :uuid,
-               default: -> { "gen_random_uuid()" },
-               force: :cascade do |t|
-    t.uuid "jurisdiction_id", null: false
-    t.string "principal_use"
-    t.string "accessory_use"
-    t.string "setbacks"
-    t.string "elevations"
-    t.boolean "supporting_documents_required"
-    t.string "ocp_status"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["jurisdiction_id"], name: "idx_pplj_on_jurisdiction_id"
   end
 
   create_table "requirement_blocks",
@@ -1239,7 +1172,6 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_09_210248) do
                   "permit_type_required_steps",
                   column: "step_requirement_id"
   add_foreign_key "part_9_step_code_checklists", "step_codes"
-  add_foreign_key "payment_detail_transactions", "payment_details"
   add_foreign_key "permit_applications", "jurisdictions"
   add_foreign_key "permit_applications",
                   "permit_classifications",
@@ -1253,11 +1185,6 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_09_210248) do
   add_foreign_key "permit_block_statuses", "permit_applications"
   add_foreign_key "permit_collaborations", "collaborators"
   add_foreign_key "permit_collaborations", "permit_applications"
-  add_foreign_key "permit_project_payment_details", "payment_details"
-  add_foreign_key "permit_project_payment_details", "permit_projects"
-  add_foreign_key "permit_project_permit_applications", "permit_applications"
-  add_foreign_key "permit_project_permit_applications", "permit_projects"
-  add_foreign_key "permit_projects", "property_plan_local_jurisdictions"
   add_foreign_key "permit_type_required_steps", "jurisdictions"
   add_foreign_key "permit_type_required_steps",
                   "permit_classifications",
@@ -1267,7 +1194,6 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_09_210248) do
                   "permit_classifications",
                   column: "permit_type_id"
   add_foreign_key "preferences", "users"
-  add_foreign_key "property_plan_local_jurisdictions", "jurisdictions"
   add_foreign_key "requirement_documents", "requirement_blocks"
   add_foreign_key "requirement_template_sections",
                   "requirement_template_sections",
