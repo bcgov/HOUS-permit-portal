@@ -1,5 +1,5 @@
 import { Container, Flex, Heading } from "@chakra-ui/react"
-import { Pencil } from "@phosphor-icons/react"
+import { Pencil, Users } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
@@ -28,6 +28,12 @@ export const TechnicalSupportHomeScreen = observer(({ ...rest }: IHomeScreenProp
             description={t("home.configurationManagement.reviewManagerDescription")}
             icon={<Pencil size={24} />}
             href={`jurisdictions/${jurisdiction.slug}/configuration-management`}
+          />
+          <HomeScreenBox
+            title={t("home.configurationManagement.users.title")}
+            description={t("home.configurationManagement.users.description")}
+            icon={<Users size={24} />}
+            href={`jurisdictions/${jurisdiction.slug}/users`}
           />
         </Flex>
       </Flex>
