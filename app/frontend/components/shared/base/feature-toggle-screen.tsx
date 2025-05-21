@@ -46,7 +46,6 @@ export const FeatureToggleScreen: React.FC<FeatureToggleScreenProps> = ({
                   <RouterLinkButton
                     variant={"link"}
                     to={editPageUrl}
-                    variant="link"
                     fontSize="lg"
                     textDecoration="none"
                   ></RouterLinkButton>

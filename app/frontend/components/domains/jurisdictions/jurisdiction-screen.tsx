@@ -117,7 +117,7 @@ export const JurisdictionScreen = observer(() => {
         {showAboutPage ? (
           <>
             <FormProvider {...formMethods}>
-              <form onSubmit={handleSubmit(onSubmit)}>
+              <form onSubmit={formMethods.handleSubmit(onSubmit)} className="space-y-8 divide-y divide-gray-200">
                 <Flex direction="column" gap={16}>
                   <Flex gap={14}>
                     <Show above="md">
@@ -182,7 +182,7 @@ export const JurisdictionScreen = observer(() => {
                       <Trans
                         i18nKey={"jurisdiction.edit.stepCode.description"}
                         components={{
-                          1: <Link href={t("stepCode.helpLink") || "#"} isExternal></Link>,
+                          1: <Link href={t("stepCode.helpLink") ?? "#"} isExternal></Link>,
                           2: <ArrowSquareOut />,
                         }}
                       />
