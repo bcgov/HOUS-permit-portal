@@ -1522,8 +1522,8 @@ const options = {
               toggleOff: "Off",
             },
             featureAccess: {
-              title: "Feature access",
-              description: "Turn system features on or off for all users jurisdiction-wide.",
+              title: "Feature access and settings",
+              description: "Manage and enable features for all users",
               submissionInbox: "Submissions inbox",
               submissionInboxDescription:
                 "Enable review managers to accept and process permit applications. If you turn off this feature, submitters can’t submit applications, and review managers won’t receive new applications.",
