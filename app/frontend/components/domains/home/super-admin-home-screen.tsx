@@ -1,5 +1,5 @@
 import { Container, Flex, Heading } from "@chakra-ui/react"
-import { BookOpen, Buildings, ChartBar, FileLock, FileText, Pencil } from "@phosphor-icons/react"
+import { BookOpen, Buildings, ChartBar, FileLock, Files, FileText, Pencil } from "@phosphor-icons/react"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { IHomeScreenProps } from "."
@@ -20,6 +20,18 @@ export const SuperAdminHomeScreen = ({ ...rest }: IHomeScreenProps) => {
             description={t("home.jurisdictionsDescription")}
             icon={<Buildings size={24} />}
             href="/jurisdictions"
+          />
+          <HomeScreenBox
+            title={t("permitApplication.indexTitle")}
+            description={t("home.permitApplicationsDescription", "View and manage permit applications.")}
+            icon={<FileText size={24} />}
+            href="/permit-applications"
+          />
+          <HomeScreenBox
+            title={t("permitProject.indexTitle", "Permit Projects")}
+            description={t("home.permitProjectsDescription", "View and manage permit projects.")}
+            icon={<Files size={24} />}
+            href="/permit-projects"
           />
           <HomeScreenBox
             title={t("home.permitTemplateCatalogueTitle")}

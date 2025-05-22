@@ -15,6 +15,7 @@ import { IPart9StepCodeChecklist } from "../../models/part-9-step-code-checklist
 import { IPermitApplication } from "../../models/permit-application"
 import { IActivity, IPermitType } from "../../models/permit-classification"
 import { IPermitCollaboration } from "../../models/permit-collaboration"
+import { IPermitProject } from "../../models/permit-project"
 import { IRequirementTemplate } from "../../models/requirement-template"
 import { ITemplateVersion } from "../../models/template-version"
 import { IUser } from "../../models/user"
@@ -46,6 +47,7 @@ import {
   EJurisdictionSortFields,
   EPermitApplicationSortFields,
   EPermitBlockStatus,
+  EPermitProjectSortFields,
   ERequirementLibrarySortFields,
   ERequirementTemplateSortFields,
   ETemplateVersionStatus,
@@ -57,6 +59,7 @@ import {
   IJurisdictionFilters,
   IJurisdictionSearchFilters,
   IPermitApplicationSearchFilters,
+  IPermitProjectSearchFilters,
   ITemplateVersionDiff,
   TAutoComplianceModuleConfigurations,
   TCreateRequirementTemplateFormData,
@@ -212,6 +215,14 @@ export class Api {
 
   async fetchPermitApplications(params?: TSearchParams<EPermitApplicationSortFields, IPermitApplicationSearchFilters>) {
     return this.client.post<IJurisdictionPermitApplicationResponse>(`/permit_applications/search`, params)
+  }
+
+  async fetchPermitProjects(params?: TSearchParams<EPermitProjectSortFields, IPermitProjectSearchFilters>) {
+    return this.client.post<ApiResponse<IPermitProject[]>>(`/permit_projects/search`, params)
+  }
+
+  async fetchPermitProject(id: string) {
+    return this.client.get<ApiResponse<IPermitProject>>(`/permit_projects/${id}`)
   }
 
   async fetchCollaboratorsByCollaboratorable(collaboratorableId: string, params?: TSearchParams<never, never>) {

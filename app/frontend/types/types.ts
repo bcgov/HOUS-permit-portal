@@ -493,9 +493,16 @@ export interface IJurisdictionSearchFilters {
 }
 
 export interface IPermitApplicationSearchFilters {
-  requirementTemplateId?: string
-  templateVersionId?: string
   status?: EPermitApplicationStatus[]
+  templateVersionId?: string
+  requirementTemplateId?: string
+  hasCollaborator?: boolean
+  query?: string
+}
+
+export interface IPermitProjectSearchFilters {
+  query?: string
+  // Add other specific filters if needed, e.g., status, submitterId
 }
 
 export interface ITemplateVersionDiff {

@@ -4,6 +4,7 @@ class PermitApplication < ApplicationRecord
   include StepCodeFieldExtraction
   include ZipfileUploader.Attachment(:zipfile)
   include PermitApplicationStatus
+  include ProjectItem
 
   SEARCH_INCLUDES = %i[
     permit_type
@@ -25,6 +26,9 @@ class PermitApplication < ApplicationRecord
              ],
              text_end: %i[number]
 
+  # Virtual attribute to accept an existing project's ID on creation
+  attr_accessor :target_project_id
+
   belongs_to :submitter, class_name: "User"
   belongs_to :jurisdiction
   belongs_to :permit_type
@@ -41,8 +45,10 @@ class PermitApplication < ApplicationRecord
   has_many :collaborators, through: :permit_collaborations
   has_many :permit_block_statuses, dependent: :destroy
 
-  has_many :permit_project_permit_applications, dependent: :destroy
-  has_many :permit_projects, through: :permit_project_permit_applications
+  has_many :project_memberships, as: :item, dependent: :destroy
+  has_many :permit_projects,
+           through: :project_memberships,
+           source: :permit_project
 
   scope :submitted, -> { joins(:submission_versions).distinct }
 
@@ -58,6 +64,9 @@ class PermitApplication < ApplicationRecord
   validates :reference_number, length: { maximum: 300 }, allow_nil: true
   validate :sandbox_belongs_to_jurisdiction
   validate :template_version_of_live_template
+  validate :target_project_must_exist,
+           if: -> { target_project_id.present? },
+           on: :create
 
   delegate :qualified_name,
            :heating_degree_days,
@@ -78,6 +87,7 @@ class PermitApplication < ApplicationRecord
   after_commit :send_submitted_webhook, if: :saved_change_to_status?
   after_commit :notify_user_reference_number_updated,
                if: :saved_change_to_reference_number?
+  after_create :ensure_project_association
 
   scope :with_submitter_role,
         -> { joins(:submitter).where(users: { role: "submitter" }) }
@@ -202,7 +212,7 @@ class PermitApplication < ApplicationRecord
     {
       number: number,
       nickname: nickname,
-      permit_classifications: "#{permit_type.name} #{activity.name}",
+      permit_classifications: formatted_permit_classifications,
       submitter: "#{submitter.name} #{submitter.email}",
       submitted_at: submitted_at,
       resubmitted_at: resubmitted_at,
@@ -220,11 +230,7 @@ class PermitApplication < ApplicationRecord
           users_by_collaboration_options(collaboration_type: :submission).pluck(
             :id
           ),
-      review_delegatee_name:
-        users_by_collaboration_options(
-          collaboration_type: :review,
-          collaborator_type: :delegatee
-        ).first&.name,
+      review_delegatee_name: review_delegatee_name,
       has_collaborator: has_collaborator?,
       sandbox_id: sandbox_id
     }
@@ -599,6 +605,13 @@ class PermitApplication < ApplicationRecord
     end
   end
 
+  def review_delegatee_name
+    users_by_collaboration_options(
+      collaboration_type: :review,
+      collaborator_type: :delegatee
+    ).first&.name
+  end
+
   private
 
   def update_collaboration_assignments
@@ -736,5 +749,56 @@ class PermitApplication < ApplicationRecord
         )
       )
     end
+  end
+
+  def target_project_must_exist
+    unless PermitProject.exists?(target_project_id)
+      errors.add(:target_project_id, "does not refer to a valid PermitProject")
+    end
+  end
+
+  def ensure_project_association
+    project_to_associate = nil
+    if target_project_id.present?
+      project_to_associate = PermitProject.find_by(id: target_project_id)
+      unless project_to_associate
+        errors.add(:target_project_id, "not found") # Should be caught by validation, but good to check
+        throw(:abort) # Prevent association if project not found, and rollback PermitApplication creation
+      end
+    else
+      # Create a new PermitProject if no target_project_id is provided
+      project_to_associate = PermitProject.new(owner: self.submitter) # Set owner here
+      # Optionally set a default description or other attributes for the new project
+      project_to_associate.description ||=
+        "Project for #{self.nickname || "new application"}"
+      unless project_to_associate.save
+        errors.add(
+          :base,
+          "Could not create new project: #{project_to_associate.errors.full_messages.join(", ")}"
+        )
+        throw(:abort)
+      end
+    end
+
+    # Associate this PermitApplication (as an item) with the project
+    # The uniqueness validation in ProjectMembership will prevent duplicates.
+    membership =
+      ProjectMembership.new(permit_project: project_to_associate, item: self)
+    unless membership.save
+      errors.add(
+        :base,
+        "Could not add application to project: #{membership.errors.full_messages.join(", ")}"
+      )
+      # If the project was newly created in this transaction, we might want to ensure it gets rolled back too.
+      # The `throw(:abort)` should handle this if `ensure_project_association` is part of the PA save transaction.
+      throw(:abort)
+    end
+  rescue ActiveRecord::RecordInvalid => e # Should be less likely with explicit saves and checks
+    Rails.logger.error "Error in ensure_project_association (RecordInvalid): #{e.message}"
+    errors.add(:base, "Could not associate with project: #{e.message}")
+    throw(:abort)
+    # rescue ActiveRecord::Rollback => e # If specific rollback handling is needed
+    #   Rails.logger.info "Rollback during ensure_project_association: #{e.message}"
+    #   # Errors should already be on the model from the point the rollback was triggered.
   end
 end

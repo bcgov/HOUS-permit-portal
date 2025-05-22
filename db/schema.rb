@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_05_09_210248) do
+ActiveRecord::Schema[7.1].define(version: 2025_05_21_211058) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -34,10 +34,13 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_09_210248) do
                default: -> { "gen_random_uuid()" },
                force: :cascade do |t|
     t.uuid "external_api_key_id", null: false
-    t.integer "notification_interval_days"
-    t.datetime "sent_at"
+    t.integer "notification_interval_days", null: false
+    t.datetime "sent_at", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index %w[external_api_key_id notification_interval_days],
+            name: "idx_api_key_expiration_notifications_on_key_id_and_interval",
+            unique: true
     t.index ["external_api_key_id"],
             name:
               "index_api_key_expiration_notifications_on_external_api_key_id"
@@ -92,12 +95,6 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_09_210248) do
     t.uuid "contactable_id"
     t.index %w[contactable_type contactable_id],
             name: "index_contacts_on_contactable"
-  end
-
-  create_table "data_migrations",
-               primary_key: "version",
-               id: :string,
-               force: :cascade do |t|
   end
 
   create_table "document_references",
@@ -282,8 +279,8 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_09_210248) do
     t.string "slug"
     t.integer "map_zoom"
     t.string "external_api_state", default: "g_off", null: false
-    t.boolean "inbox_enabled", default: false, null: false
     t.integer "heating_degree_days"
+    t.boolean "inbox_enabled", default: false, null: false
     t.index ["prefix"], name: "index_jurisdictions_on_prefix", unique: true
     t.index ["regional_district_id"],
             name: "index_jurisdictions_on_regional_district_id"
@@ -598,21 +595,6 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_09_210248) do
             unique: true
   end
 
-  create_table "permit_project_permit_applications",
-               id: :uuid,
-               default: -> { "gen_random_uuid()" },
-               force: :cascade do |t|
-    t.uuid "permit_application_id", null: false
-    t.uuid "permit_project_id", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index %w[permit_application_id permit_project_id],
-            name: "index_permit_project_apps_on_app_id_and_project_id",
-            unique: true
-    t.index ["permit_application_id"], name: "idx_proj_app_on_app_id"
-    t.index ["permit_project_id"], name: "idx_proj_app_on_proj_id"
-  end
-
   create_table "permit_projects",
                id: :uuid,
                default: -> { "gen_random_uuid()" },
@@ -623,6 +605,8 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_09_210248) do
     t.uuid "property_plan_local_jurisdiction_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.uuid "owner_id", null: false
+    t.index ["owner_id"], name: "index_permit_projects_on_owner_id"
     t.index ["property_plan_local_jurisdiction_id"],
             name: "index_permit_projects_on_property_plan_local_jurisdiction_id"
   end
@@ -688,6 +672,22 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_09_210248) do
     t.boolean "enable_in_app_unmapped_api_notification", default: true
     t.boolean "enable_email_unmapped_api_notification", default: true
     t.index ["user_id"], name: "index_preferences_on_user_id"
+  end
+
+  create_table "project_memberships", force: :cascade do |t|
+    t.uuid "permit_project_id", null: false
+    t.string "item_type", null: false
+    t.bigint "item_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index %w[item_id item_type],
+            name: "index_project_memberships_on_item_id_and_item_type"
+    t.index %w[item_type item_id], name: "index_project_memberships_on_item"
+    t.index %w[permit_project_id item_id item_type],
+            name: "index_project_memberships_on_project_and_item",
+            unique: true
+    t.index ["permit_project_id"],
+            name: "index_project_memberships_on_permit_project_id"
   end
 
   create_table "property_plan_local_jurisdictions",
@@ -1255,9 +1255,8 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_09_210248) do
   add_foreign_key "permit_collaborations", "permit_applications"
   add_foreign_key "permit_project_payment_details", "payment_details"
   add_foreign_key "permit_project_payment_details", "permit_projects"
-  add_foreign_key "permit_project_permit_applications", "permit_applications"
-  add_foreign_key "permit_project_permit_applications", "permit_projects"
   add_foreign_key "permit_projects", "property_plan_local_jurisdictions"
+  add_foreign_key "permit_projects", "users", column: "owner_id"
   add_foreign_key "permit_type_required_steps", "jurisdictions"
   add_foreign_key "permit_type_required_steps",
                   "permit_classifications",
@@ -1267,6 +1266,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_09_210248) do
                   "permit_classifications",
                   column: "permit_type_id"
   add_foreign_key "preferences", "users"
+  add_foreign_key "project_memberships", "permit_projects"
   add_foreign_key "property_plan_local_jurisdictions", "jurisdictions"
   add_foreign_key "requirement_documents", "requirement_blocks"
   add_foreign_key "requirement_template_sections",
