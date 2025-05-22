@@ -212,9 +212,6 @@ export const BlockSetup = observer(function BlockSetup({
         <FormControl isReadOnly={true}>
           <FormLabel>{t("requirementsLibrary.fields.requirementSku")}</FormLabel>
           <Input bg={"white"} value={watch("sku")} isDisabled={true} />
-          <FormHelperText {...helperTextStyles}>
-            {t("requirementsLibrary.fieldDescriptions.requirementSku")}
-          </FormHelperText>
         </FormControl>
         <FormControl>
           <FormLabel>{t("requirementsLibrary.fields.requirementDocuments")}</FormLabel>
