@@ -92,6 +92,9 @@ class Jurisdiction < ApplicationRecord
 
   before_create :assign_unique_prefix
 
+  after_save :update_inbox_enabled, if: :saved_change_to_inbox_enabled?
+  after_update :update_inbox_enabled, if: :saved_change_to_inbox_enabled?
+
   def customizations
     # Convenience method to prevent carpal tunnel syndrome
     jurisdiction_template_version_customizations
@@ -384,5 +387,9 @@ class Jurisdiction < ApplicationRecord
         )
       )
     end
+  end
+
+  def update_inbox_enabled
+    permit_applications.update_all(inbox_enabled: inbox_enabled)
   end
 end
