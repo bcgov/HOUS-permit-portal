@@ -26,11 +26,11 @@ class StepCode::Compliance::CheckRequirements::ZeroCarbon::Base
   end
 
   def total(field)
-    checklist.data_entries.where(stage: stage).sum(field)
+    checklist.data_entries.sum(field)
   end
 
   def min(field)
-    checklist.data_entries.where(stage: stage).minimum(field)
+    checklist.data_entries.minimum(field)
   end
 
   def total_heated_floor_area

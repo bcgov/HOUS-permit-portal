@@ -48,22 +48,27 @@ const ConfigurationManagementScreen = lazy(() =>
     default: module.ConfigurationManagementScreen,
   }))
 )
+const TechnicalSupportConfigurationManagementScreen = lazy(() =>
+  import("../home/technical-support/configuration-management-screen").then((module) => ({
+    default: module.ConfigurationManagementScreen,
+  }))
+)
 const EnergyStepRequirementsScreen = lazy(() =>
   import("../home/review-manager/configuration-management-screen/energy-step-requirements-screen").then((module) => ({
     default: module.EnergyStepRequirementsScreen,
   }))
 )
-const ReviewManagerGlobalFeatureAccessScreen = lazy(() =>
-  import("../home/review-manager/configuration-management-screen/global-feature-access-screen").then((module) => ({
-    default: module.ReviewManagerGlobalFeatureAccessScreen,
+const ReviewManagerFeatureAccessScreen = lazy(() =>
+  import("../home/review-manager/configuration-management-screen/feature-access-screen").then((module) => ({
+    default: module.ReviewManagerFeatureAccessScreen,
   }))
 )
 const ReviewStaffInboxFeatureAccessScreen = lazy(() =>
-  import(
-    "../home/review-manager/configuration-management-screen/global-feature-access-screen/inbox-feature-access"
-  ).then((module) => ({
-    default: module.InboxFeatureAccessScreen,
-  }))
+  import("../home/review-manager/configuration-management-screen/feature-access-screen/inbox-feature-access").then(
+    (module) => ({
+      default: module.InboxFeatureAccessScreen,
+    })
+  )
 )
 const JurisdictionIndexScreen = lazy(() =>
   import("../jurisdictions/index").then((module) => ({ default: module.JurisdictionIndexScreen }))
@@ -168,9 +173,16 @@ const ExportTemplatesScreen = lazy(() =>
 const RequirementsLibraryScreen = lazy(() =>
   import("../requirements-library").then((module) => ({ default: module.RequirementsLibraryScreen }))
 )
-const StepCodeForm = lazy(() => import("../step-code").then((module) => ({ default: module.StepCodeForm })))
+const Part9StepCodeForm = lazy(() =>
+  import("../step-code/part-9").then((module) => ({ default: module.Part9StepCodeForm }))
+)
+const Part3StepCodeForm = lazy(() =>
+  import("../step-code/part-3").then((module) => ({ default: module.Part3StepCodeForm }))
+)
 const StepCodeChecklistPDFViewer = lazy(() =>
-  import("../step-code/checklist/pdf-content/viewer").then((module) => ({ default: module.StepCodeChecklistPDFViewer }))
+  import("../step-code/checklist/pdf-content/viewer").then((module) => ({
+    default: module.StepCodeChecklistPDFViewer,
+  }))
 )
 const SiteConfigurationManagementScreen = lazy(() =>
   import("../super-admin/site-configuration-management").then((module) => ({
@@ -329,7 +341,6 @@ const AppRoutes = observer(() => {
   const { loggedIn, tokenExpired } = sessionStore
   const location = useLocation()
   const background = location.state && location.state.background
-  const enableStepCodeRoute = location.state?.enableStepCodeRoute
 
   const { currentUser } = userStore
   const { afterLoginPath, setAfterLoginPath, resetAuth } = sessionStore
@@ -401,15 +412,24 @@ const AppRoutes = observer(() => {
     </>
   )
 
+  const technicalSupportRoutes = (
+    <>
+      <Route
+        path="/jurisdictions/:jurisdictionId/configuration-management"
+        element={<TechnicalSupportConfigurationManagementScreen />}
+      />
+    </>
+  )
+
   const managerOrReviewerRoutes = (
     <>
       <Route path="/jurisdictions/:jurisdictionId/submission-inbox" element={<JurisdictionSubmissionInboxScreen />} />
       <Route
-        path="/jurisdictions/:jurisdictionId/configuration-management/global-feature-access"
-        element={<ReviewManagerGlobalFeatureAccessScreen />}
+        path="/jurisdictions/:jurisdictionId/configuration-management/feature-access"
+        element={<ReviewManagerFeatureAccessScreen />}
       />
       <Route
-        path="/jurisdictions/:jurisdictionId/configuration-management/global-feature-access/submission-inbox"
+        path="/jurisdictions/:jurisdictionId/configuration-management/feature-access/submissions-inbox-setup"
         element={<ReviewStaffInboxFeatureAccessScreen />}
       />
       <Route
@@ -462,7 +482,7 @@ const AppRoutes = observer(() => {
       />
     </>
   )
-
+  
   const mustAcceptEula = loggedIn && !currentUser.eulaAccepted && !currentUser.isSuperAdmin
   return (
     <>
@@ -485,9 +505,19 @@ const AppRoutes = observer(() => {
         >
           <Route path="/permit-applications" element={<PermitApplicationIndexScreen />} />
           <Route path="/permit-applications/new" element={<NewPermitApplicationScreen />} />
-          <Route path="/permit-applications/:permitApplicationId/edit" element={<EditPermitApplicationScreen />}>
-            <Route path="step-code" element={<StepCodeForm />} />
-          </Route>
+          <Route path="/permit-applications/:permitApplicationId/edit" element={<EditPermitApplicationScreen />} />
+          <Route
+            path="/permit-applications/:permitApplicationId/edit/part-9-step-code"
+            element={<Part9StepCodeForm />}
+          />
+          <Route
+            path="/permit-applications/:permitApplicationId/edit/part-3-step-code"
+            element={<Part3StepCodeForm />}
+          />
+          <Route
+            path="/permit-applications/:permitApplicationId/edit/part-3-step-code/:section"
+            element={<Part3StepCodeForm />}
+          />
           <Route
             path="/permit-applications/:permitApplicationId/sucessful-submission"
             element={<SuccessfulSubmissionScreen />}
@@ -508,7 +538,7 @@ const AppRoutes = observer(() => {
               isAllowed={
                 loggedIn &&
                 !mustAcceptEula &&
-                (currentUser.isReviewManager || currentUser.isRegionalReviewManager || currentUser.isSuperAdmin)
+                (currentUser.isReviewManager || currentUser.isRegionalReviewManager || currentUser.isSuperAdmin || currentUser.isTechnicalSupport)
               }
               redirectPath={(mustAcceptEula && "/") || (loggedIn && "/not-found")}
             />
@@ -534,6 +564,17 @@ const AppRoutes = observer(() => {
           }
         >
           {managerOrReviewerRoutes}
+        </Route>
+
+        <Route
+          element={
+            <ProtectedRoute
+              isAllowed={loggedIn && !mustAcceptEula && currentUser.isTechnicalSupport}
+              redirectPath={(mustAcceptEula && "/") || (loggedIn && "/not-found")}
+            />
+          }
+        >
+          {technicalSupportRoutes}
         </Route>
 
         <Route
@@ -565,13 +606,10 @@ const AppRoutes = observer(() => {
           element={currentUser?.isSuperAdmin ? <JurisdictionIndexScreen /> : <LimitedJurisdictionIndexScreen />}
         />
         <Route path="/jurisdictions/:jurisdictionId" element={<JurisdictionScreen />} />
+        <Route path="/part-3-step-code" element={<RedirectScreen path="start" />} />
+        <Route path="/part-3-step-code/:section" element={<Part3StepCodeForm />} />
         <Route path="*" element={<NotFoundScreen />} />
       </Routes>
-      {enableStepCodeRoute && (
-        <Routes>
-          <Route path="/permit-applications/:permitApplicationId/edit/step-code" element={<StepCodeForm />} />
-        </Routes>
-      )}
     </>
   )
 })

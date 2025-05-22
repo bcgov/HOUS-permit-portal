@@ -4,6 +4,7 @@ class PermitTypeRequiredStep < ApplicationRecord
   delegate :name, to: :permit_type, prefix: true
 
   has_many :step_code_checklists,
+           class_name: "Part9StepCode::Checklist",
            foreign_key: "step_requirement_id",
            dependent: :nullify
 
