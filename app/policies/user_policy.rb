@@ -12,7 +12,7 @@ class UserPolicy < ApplicationPolicy
   end
 
   def invite?
-    user.super_admin? || user.manager?
+    user.super_admin? || user.manager? || user.technical_support?
   end
 
   def invite_reviewer?
@@ -29,7 +29,7 @@ class UserPolicy < ApplicationPolicy
 
   def search_jurisdiction_users?
     return true if user.super_admin? && (record.manager? || record.super_admin?)
-    user.manager? && record_in_users_jurisdictions?
+    (user.manager? || user.technical_support?) && record_in_users_jurisdictions?
   end
 
   def search_admin_users?

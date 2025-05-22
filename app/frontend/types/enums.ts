@@ -69,6 +69,7 @@ export enum EUserRoles {
   reviewManager = "review_manager",
   reviewer = "reviewer",
   superAdmin = "super_admin",
+  technicalSupport = "technical_support",
 }
 
 export enum ERequirementLibrarySortFields {
@@ -625,4 +626,9 @@ export enum EDocumentReferenceDocumentType {
   mechanicalDrawing = "mechanical_drawing",
   electricalDrawing = "electrical_drawing",
   other = "other",
+}
+
+export enum EStepCodeType {
+  Part3 = "Part3StepCode",
+  Part9 = "Part9StepCode",
 }

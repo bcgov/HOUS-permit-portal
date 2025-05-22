@@ -1090,7 +1090,7 @@ const options = {
             baselineOccupancies: {
               heading: "Occupancy classifications for buildings with a baseline",
               instructions:
-                "Building projects with occupancy classifications subject to Step 2 (NECB Part 8) requirements or Subsection 10.2.2.1.(1)(a) or (b) of Division B of the BC Building Code must provide certain details to compare against a baseline energy model.<br /><br/>These occupancy classifications are:<br /><br /><ul><li><strong>A1</strong> Assembly (viewing performing arts)</li><li><strong>A2</strong> Assembly (not elsewhere categorized)</li><li><strong>A3</strong> Assembly (area)</li><li><strong>B1</strong> Detention</li><li><strong>B2</strong> Treatment</li><li><strong>B3</strong> Care</li><li><strong>F1</strong> High-hazard industrial</li><li><strong>F2</strong> Medium-hazard industrial</li><li><strong>F3</strong> Low-hazard industrial</li></ul>",
+                "Building projects with occupancy classifications or uses subject to Step 2 (NECB Part 8) requirements as outlined in Table 10.2.3.3.-A to 10.2.3.3.-F or Subsection 10.2.2.1.(1)(a) or (b) of Division B of the BC Building Code must provide certain details to compare against a baseline energy model. <br/><br/> Note that this checklist is not intended to be used for buildings complying exclusively under Subsection 10.2.2.1.(1)(a) or (b) of Division B of the BC Building Code and the building must contain at least one Step Code occupancy or use as outlined in Table 10.2.3.3.-A to 10.2.3.3.-J of Division B of the BC Building Code.<br/><br/>These occupancy classifications are:<br /><br /><ul><li><strong>A1</strong> Assembly (viewing performing arts)</li><li><strong>A2</strong> Assembly (not elsewhere categorized)</li><li><strong>A3</strong> Assembly (area)</li><li><strong>B1</strong> Detention</li><li><strong>B2</strong> Treatment</li><li><strong>B3</strong> Care</li><li><strong>F1</strong> High-hazard industrial</li><li><strong>F2</strong> Medium-hazard industrial</li><li><strong>F3</strong> Low-hazard industrial</li></ul>",
               isRelevant: "Does your project include any of the these occupancy classifications?",
               disabledCtaTooltip: "Please select an occupancy",
               occupancies: {
@@ -1235,7 +1235,7 @@ const options = {
             stepCodeOccupancies: {
               heading: "Occupancies subject to Steps 2, 3, or 4",
               instructions:
-                "If there are occupancies subject to Steps 2, 3, or 4 (not including Step 2 with a reference building) in your project, this form will collect additional details.<br/><br/>These occupancies are:<ul><li>Group C Hotel and motel</li><li>Group C Other residential</li><li>Group D Office</li><li>Group D Other</li><li>Group E Mercantile</li>",
+                "For occupancies subject to Steps 2, 3 or 4 as per Table 10.2.3.3.-G to Table 10.2.3.3.-J of Division B of the BC Building Code, this form will collect additional details.<br/><br/>These occupancies are:<ul><li>Group C Hotel and motel</li><li>Group C Other residential</li><li>Group D Office</li><li>Group D Other</li><li>Group E Mercantile</li>",
               isRelevant: "Does your project include any of the these occupancies?",
               disabledCtaTooltip: "Please select an occupancy",
               cannotSelectNoWhenBaselineEmpty:
@@ -1285,6 +1285,7 @@ const options = {
                   modelledFloorArea: "Modelled floor area (m<sup>2</sup>)",
                   ghg: "GHG emissions level",
                 },
+                hint: "Need to add an occupancy or change the occupancies in this table? Go to <stepCodeOccupanciesLink>Occupancies subject to Steps 2, 3, or 4</stepCodeOccupanciesLink> and select the occupancies that apply.",
               },
               modelledFloorArea: {
                 label: "What is the modelled floor area for {{occupancyName}} in square metres?",
@@ -2377,11 +2378,12 @@ const options = {
           email: "Email",
           // Leave in snake case so we can use: t(`user.roles.${role}`)
           roles: {
-            submitter: "submitter",
-            regional_review_manager: "regional review manager",
-            review_manager: "review manager",
-            reviewer: "reviewer",
-            super_admin: "super admin",
+            submitter: "Submitter",
+            regional_review_manager: "Regional Review Manager",
+            review_manager: "Review Manager",
+            reviewer: "Reviewer",
+            super_admin: "Super Admin",
+            technical_support: "Technical Support",
           },
           rolesExplanation: {
             submitter:
@@ -2393,6 +2395,8 @@ const options = {
               "A Reviewer is typically an employee within the local government or a designated authority responsible for examining building permit applications submitted by the Submitter. Reviewers assess the documentation for compliance with building codes, zoning laws, and other regulatory requirements. They may request additional information, approve, reject, or provide comments on the applications.",
             super_admin:
               "The Super Admin is the highest-level user within the system, with overarching control over the entire permit application platform. They have the authority to manage user roles, including creating and removing user accounts, and to modify the system configuration. This role is responsible for the maintenance of the system, including updates and enhancements, and ensuring that the system meets the operational and strategic objectives of the local government or the organization.",
+            technical_support:
+              "The Technical Support - LJ role is designed to assist local jurisdictions with technical aspects of the Building Permit Hub. This role acts as the first point of contact for troubleshooting and managing technical configurations related to the API and user access. They provide support to ensure that local jurisdictions can effectively integrate with the platform and maintain smooth operations.",
           },
           assignTo: "Assign to...",
           department: "Department",
@@ -2748,6 +2752,16 @@ const options = {
             description: "A summary of step code requirements by jurisdictions",
             title: "Export energy step code configuration by jurisdiction",
             filename: "Energy step code configuration by jurisdiction",
+          },
+          stepCodeMetrics: {
+            name: "Energy step code metrics for all jurisdictions",
+            description: "Energy step code metrics for all jurisdictions",
+            title: "Energy step code metrics for all jurisdictions",
+            filename: "Energy step code metrics for all jurisdictions",
+            filenamePart3: "Part 3 step code metrics",
+            filenamePart9: "Part 9 step code metrics",
+            downloadPart3: "Download Part 3 metrics",
+            downloadPart9: "Download Part 9 metrics",
           },
           applicationMetrics: {
             name: "Basic Application metrics for all jurisdictions",
