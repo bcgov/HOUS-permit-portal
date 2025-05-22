@@ -41,6 +41,7 @@ import { BlockCollaboratorAssignmentManagement } from "./collaborator-management
 import { CollaboratorsSidebar } from "./collaborator-management/collaborators-sidebar"
 import { useCollaborationAssignmentNodes } from "./collaborator-management/hooks/use-collaboration-assignment-nodes"
 import { ContactSummaryModal } from "./contact-summary-modal"
+import { setupEnergyStepCodeReportLink } from "./energy-step-code-report-link"
 import { RevisionSideBar } from "./revision-sidebar"
 import { SubmissionDownloadModal } from "./submission-download-modal"
 
@@ -111,7 +112,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
 
   const nicknameWatch = watch("nickname")
   const isStepCode = R.test(/step-code/, window.location.pathname)
-
+  setupEnergyStepCodeReportLink()
   const handleSave = async ({
     autosave,
     skipPristineCheck,
