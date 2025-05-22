@@ -12,6 +12,7 @@ class PermitProject < ApplicationRecord
            through: :project_memberships,
            source: :item,
            source_type: "PermitApplication"
+  has_many :project_documents, dependent: :destroy
   # Add other item types as needed, e.g.:
   # has_many :inspections, through: :project_memberships, source: :item, source_type: "Inspection"
 
