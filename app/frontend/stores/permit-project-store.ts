@@ -5,8 +5,9 @@ import { withEnvironment } from "../lib/with-environment"
 import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
 import { IPermitProject, PermitProjectModel } from "../models/permit-project"
+import { IPermitProjectUpdateParams, IProjectDocumentAttribute } from "../types/api-request" // Import new types
 import { EPermitProjectSortFields } from "../types/enums" // Import from enums
-import { IPermitProjectSearchFilters, TSearchParams } from "../types/types" // Import IPermitProjectSearchFilters from types
+import { IPermitProjectSearchFilters, IProjectDocument, TSearchParams } from "../types/types" // Import IPermitProjectSearchFilters and IProjectDocument from types
 
 // Define search filters for PermitProjects
 // export interface IPermitProjectSearchFilters {
@@ -49,21 +50,13 @@ export const PermitProjectStoreModel = types
   .actions((self) => ({
     __beforeMergeUpdate(permitProject) {
       // Handle submitter
-      if (permitProject.submitter && typeof permitProject.submitter === "object") {
-        self.rootStore.userStore.mergeUpdate(permitProject.submitter, "usersMap")
+      if (permitProject.owner && typeof permitProject.owner === "object") {
+        self.rootStore.userStore.mergeUpdate(permitProject.owner, "usersMap")
       }
 
-      // Handle primary permit application
-      if (permitProject.primaryPermitApplication && typeof permitProject.primaryPermitApplication === "object") {
-        self.rootStore.permitApplicationStore.mergeUpdate(
-          permitProject.primaryPermitApplication,
-          "permitApplicationMap"
-        )
-      }
-
-      // Handle supplemental permit applications
-      if (permitProject.supplementalPermitApplications && Array.isArray(permitProject.supplementalPermitApplications)) {
-        permitProject.supplementalPermitApplications.forEach((app) => {
+      // Handle permit applications
+      if (permitProject.permitApplications && Array.isArray(permitProject.permitApplications)) {
+        permitProject.permitApplications.forEach((app) => {
           if (typeof app === "object") {
             self.rootStore.permitApplicationStore.mergeUpdate(app, "permitApplicationMap")
           }
@@ -72,10 +65,9 @@ export const PermitProjectStoreModel = types
 
       // Return modified data with references instead of full objects
       return R.mergeRight(permitProject, {
-        submitter: permitProject.submitter?.id || null,
-        primaryPermitApplication: permitProject.primaryPermitApplication?.id || null,
-        supplementalPermitApplications:
-          permitProject.supplementalPermitApplications?.map((app) => (typeof app === "object" ? app.id : app)) || [],
+        owner: permitProject.owner?.id || null,
+        permitApplications:
+          permitProject.permitApplications?.map((app) => (typeof app === "object" ? app.id : app)) || [],
       })
     },
     setCurrentPermitProject(permitProjectId: string | null) {
@@ -111,7 +103,6 @@ export const PermitProjectStoreModel = types
         },
       }
 
-      // Replace with actual API call
       const response = yield self.environment.api.fetchPermitProjects(searchParams)
 
       if (response.ok && response.data) {
@@ -123,7 +114,6 @@ export const PermitProjectStoreModel = types
         self.totalCount = response.data.meta.totalCount
         self.countPerPage = response.data.meta.perPage
       } else {
-        // Handle error, maybe set an error state
         console.error("Failed to search permit projects:", response)
       }
       return response.ok
@@ -131,14 +121,41 @@ export const PermitProjectStoreModel = types
     fetchPermitProject: flow(function* (id: string) {
       const response = yield self.environment.api.fetchPermitProject(id)
       if (response.ok && response.data) {
-        const projectData = response.data.data // Assuming API returns { data: project }
-        projectData.isFullyLoaded = true // Optional: if you track loading state per item
+        const projectData = response.data.data
         self.mergeUpdate(projectData, "permitProjectMap")
         return self.permitProjectMap.get(id)
       }
       return null
     }),
-    // This action is called by createSearchModel to apply filters from URL or other sources
+    updateCurrentPermitProject: flow(function* (params: {
+      description?: string
+      projectDocuments?: Array<Partial<IProjectDocument> & { _destroy?: boolean; permitProjectId?: string }>
+    }) {
+      if (!self.currentPermitProject) return { ok: false, data: null }
+
+      const apiParams: IPermitProjectUpdateParams = {
+        description: params.description,
+      }
+
+      if (params.projectDocuments) {
+        apiParams.projectDocumentsAttributes = params.projectDocuments.map((doc) => {
+          const attribute: IProjectDocumentAttribute = {
+            id: doc.id,
+            permitProjectId: doc.permitProjectId,
+            file: doc.file,
+            _destroy: doc._destroy,
+          }
+          return attribute
+        })
+      }
+
+      const response = yield self.environment.api.updatePermitProject(self.currentPermitProject.id, apiParams)
+
+      if (response.ok && response.data) {
+        self.mergeUpdate(response.data.data, "permitProjectMap")
+      }
+      return response
+    }),
     setPermitProjectFilters(queryParams: URLSearchParams) {
       const query = queryParams.get("query")
       if (query) {

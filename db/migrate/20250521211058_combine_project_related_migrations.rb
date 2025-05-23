@@ -83,9 +83,10 @@ class CombineProjectRelatedMigrations < ActiveRecord::Migration[7.1]
 
     # From 20250521165640_create_project_memberships_and_drop_old_join_table.rb
     # Create the new project_memberships table
-    create_table :project_memberships do |t|
+    create_table :project_memberships, id: :uuid do |t|
       t.references :permit_project, null: false, foreign_key: true, type: :uuid
-      t.references :item, polymorphic: true, null: false
+      t.uuid :item_id, null: false
+      t.string :item_type, null: false
       # t.boolean :is_primary_item, default: false # We'll determine primary dynamically for now
 
       t.timestamps

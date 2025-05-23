@@ -317,3 +317,6 @@ if Rails.env.development?
   site_config = SiteConfiguration.instance
   site_config.update(inbox_enabled: true)
 end
+
+puts "Seeding Permit Projects from Permit Applications..."
+PermitProjectSeederService.call

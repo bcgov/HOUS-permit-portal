@@ -40,6 +40,11 @@ class User < ApplicationRecord
   has_many :permit_applications,
            foreign_key: "submitter_id",
            dependent: :destroy
+  has_many :permit_projects,
+           class_name: "PermitProject",
+           foreign_key: :owner_id,
+           dependent: :destroy,
+           inverse_of: :owner
   has_many :applied_jurisdictions,
            through: :permit_applications,
            source: :jurisdiction

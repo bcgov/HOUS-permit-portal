@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_05_21_211058) do
+ActiveRecord::Schema[7.1].define(version: 2025_05_22_000000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -95,6 +95,12 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_21_211058) do
     t.uuid "contactable_id"
     t.index %w[contactable_type contactable_id],
             name: "index_contacts_on_contactable"
+  end
+
+  create_table "data_migrations",
+               primary_key: "version",
+               id: :string,
+               force: :cascade do |t|
   end
 
   create_table "document_references",
@@ -674,15 +680,29 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_21_211058) do
     t.index ["user_id"], name: "index_preferences_on_user_id"
   end
 
-  create_table "project_memberships", force: :cascade do |t|
+  create_table "project_documents",
+               id: :uuid,
+               default: -> { "gen_random_uuid()" },
+               force: :cascade do |t|
     t.uuid "permit_project_id", null: false
+    t.text "file_data"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["permit_project_id"],
+            name: "index_project_documents_on_permit_project_id"
+  end
+
+  create_table "project_memberships",
+               id: :uuid,
+               default: -> { "gen_random_uuid()" },
+               force: :cascade do |t|
+    t.uuid "permit_project_id", null: false
+    t.uuid "item_id", null: false
     t.string "item_type", null: false
-    t.bigint "item_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index %w[item_id item_type],
             name: "index_project_memberships_on_item_id_and_item_type"
-    t.index %w[item_type item_id], name: "index_project_memberships_on_item"
     t.index %w[permit_project_id item_id item_type],
             name: "index_project_memberships_on_project_and_item",
             unique: true
@@ -1266,6 +1286,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_21_211058) do
                   "permit_classifications",
                   column: "permit_type_id"
   add_foreign_key "preferences", "users"
+  add_foreign_key "project_documents", "permit_projects"
   add_foreign_key "project_memberships", "permit_projects"
   add_foreign_key "property_plan_local_jurisdictions", "jurisdictions"
   add_foreign_key "requirement_documents", "requirement_blocks"

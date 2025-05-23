@@ -24,6 +24,7 @@ import {
   IExternalApiKeyParams,
   IIntegrationMappingUpdateParams,
   IInvitePreviewersParams,
+  IPermitProjectUpdateParams,
   IRequirementBlockParams,
   IRequirementTemplateUpdateParams,
   ITagSearchParams,
@@ -223,6 +224,10 @@ export class Api {
 
   async fetchPermitProject(id: string) {
     return this.client.get<ApiResponse<IPermitProject>>(`/permit_projects/${id}`)
+  }
+
+  async updatePermitProject(id: string, params: IPermitProjectUpdateParams) {
+    return this.client.patch<ApiResponse<IPermitProject>>(`/permit_projects/${id}`, { permitProject: params })
   }
 
   async fetchCollaboratorsByCollaboratorable(collaboratorableId: string, params?: TSearchParams<never, never>) {
