@@ -45,6 +45,19 @@ export interface IRequirementBlockParams {
   requirementsAttributes: IRequirementAttributes[]
   replaceBlockId?: string
   replaceOnTemplateId?: string
+  requirementDocumentsAttributes?: Array<{
+    id?: string
+    _destroy?: boolean
+    file: {
+      id: string
+      storage: string
+      metadata: {
+        size: number
+        filename: string
+        mimeType: string
+      }
+    }
+  }>
 }
 
 export interface ITemplateSectionBlockAttributes {
@@ -89,6 +102,7 @@ export interface IInvitePreviewersParams {
 
 export interface ISiteConfigurationUpdateParams {
   displaySitewideMessage?: boolean | null
+  inboxEnabled?: boolean | null
   sitewideMessage?: string | null
   helpLinkItems?: IHelpLinkItems
   revisionReasonsMap?: { [key: string]: IRevisionReason }

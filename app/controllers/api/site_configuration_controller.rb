@@ -15,16 +15,15 @@ class Api::SiteConfigurationController < Api::ApplicationController
 
   def update
     authorize :site_configuration, :update?
+
     if @site_configuration.update(site_configuration_params)
       render_success @site_configuration, "site_configuration.update_success"
     else
-      return(
-        render_error(
-          "site_configuration.update_error",
-          message_opts: {
-            error_message: @site_configuration.errors.full_messages.join(", ")
-          }
-        )
+      render_error(
+        "site_configuration.update_error",
+        message_opts: {
+          error_message: @site_configuration.errors.full_messages.join(", ")
+        }
       )
     end
   end
@@ -39,6 +38,7 @@ class Api::SiteConfigurationController < Api::ApplicationController
     params.require(:site_configuration).permit(
       :display_sitewide_message,
       :sitewide_message,
+      :inbox_enabled,
       :small_scale_requirement_template_id,
       help_link_items: [
         get_started_link_item: %i[href title description show],

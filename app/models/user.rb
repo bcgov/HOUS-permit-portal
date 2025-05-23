@@ -62,6 +62,7 @@ class User < ApplicationRecord
   accepts_nested_attributes_for :preference
 
   # Validations
+  validates :role, presence: true
   validate :valid_role_change, if: :role_changed?, on: :update
   validate :jurisdiction_must_belong_to_correct_roles
   validate :confirmed_user_has_fields

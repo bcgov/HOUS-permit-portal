@@ -311,3 +311,9 @@ if Rails.env.development?
     u.save
   end
 end
+
+if Rails.env.development?
+  puts "Ensuring site configuration inbox is enabled for development..."
+  site_config = SiteConfiguration.instance
+  site_config.update(inbox_enabled: true)
+end

@@ -1,0 +1,10 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+# Your rule content
+
+In general, keys and variables in frontend code should always be in camelCase
+when these are sent to the ruby backend, these are automatically converted into snake_case

@@ -1,54 +1,222 @@
 class Api::StorageController < Api::ApplicationController
-  skip_after_action :verify_authorized
+  skip_after_action :verify_authorized,
+                    only: %i[
+                      upload
+                      create_multipart_upload
+                      batch_presign_multipart_parts
+                      complete_multipart_upload
+                      abort_multipart_upload
+                    ]
   skip_after_action :verify_policy_scoped
+  before_action :set_record,
+                except: %i[
+                  upload
+                  create_multipart_upload
+                  batch_presign_multipart_parts
+                  complete_multipart_upload
+                  abort_multipart_upload
+                ]
 
   def upload
+    # Authorization is handled by individual model controller policies
     #https://shrinerb.com/docs/plugins/presign_endpoint#calling-from-a-controller
     set_rack_response FileUploader.presign_response(:cache, request.env)
   end
 
   AUTHORIZED_S3_MODELS = {
     "SupportingDocument" => SupportingDocument,
-    "StepCode" => StepCode
+    "RequirementDocument" => RequirementDocument
   }.freeze
 
   def download
-    if params[:id].start_with?("cache/")
-      url =
-        Shrine.storages[:cache].url(
-          params[:id].slice(6..-1),
-          public: false,
-          expires_in: 3600
-        )
-      render json: { url: }, status: :ok
-    elsif params[:model_id] && AUTHORIZED_S3_MODELS[params[:model]]
-      record_class = AUTHORIZED_S3_MODELS[params[:model]]
-      record = record_class.find(params[:model_id])
-      authorize record
-      render json: { url: record.file_url }, status: :ok
-    else
-      render_error("misc.not_found_error", status: :not_found)
-    end
-  rescue ActiveRecord::RecordNotFound => e
-    render_error("misc.not_found_error", { status: :not_found }, e)
+    authorize @record
+    render json: { url: @record.file_url }, status: :ok
   end
 
-  def delete
-    if params[:id].start_with?("cache/")
-      # if we use files instead of simple files, we'd need to send back a presigned url directly
-      Shrine.storages[:cache].delete(params[:id])
-      render json: { id: params[:id] }, status: :ok
-    elsif params[:model_id] && AUTHORIZED_S3_MODELS.include?(params[:model])
-      # if the object is already persisted to storage, we don't delete it.  The deletion happens during cleanup jobs.  See history if we need to bring this back.
-      render json: { id: params[:id] }, status: :ok
-    else
-      render_error("misc.not_found_error", { status: :not_found }, e)
+  # Multipart Upload Actions
+  # POST /api/s3/params/multipart
+  # Expected params: { filename: "example.jpg", type: "image/jpeg", metadata: { ... } } (metadata optional)
+  def create_multipart_upload
+    s3_client = Shrine.storages[:cache].client
+    bucket_name = Shrine.storages[:cache].bucket.name
+    # Generate a unique key, possibly incorporating the original filename for readability/debugging
+    # Ensuring it starts with the cache prefix
+    original_filename = params[:filename] || "unknown_filename"
+    unique_key =
+      "#{Shrine.storages[:cache].prefix}/#{SecureRandom.uuid}-#{original_filename}"
+
+    begin
+      response =
+        s3_client.create_multipart_upload(
+          {
+            bucket: bucket_name,
+            key: unique_key,
+            content_type: params[:type] # Optional: pass content type if available and useful
+            # Add metadata if your S3 provider supports it and it's needed, e.g., metadata: params[:metadata]
+          }
+        )
+      render json: {
+               uploadId: response.upload_id,
+               key: response.key
+             },
+             status: :ok
+    rescue Aws::S3::Errors::ServiceError => e
+      render_error(
+        "s3.multipart_init_failed",
+        { status: :internal_server_error, error_message: e.message },
+        e
+      )
     end
-  rescue ActiveRecord::RecordNotFound => e
-    render_error("misc.not_found_error", { status: :not_found }, e)
+  end
+
+  # GET /api/s3/params/multipart/:upload_id/batch
+  # Expected params: { key: "s3_object_key", partNumbers: "1,2,3" }
+  def batch_presign_multipart_parts
+    s3_client = Shrine.storages[:cache].client
+    bucket_name = Shrine.storages[:cache].bucket.name
+    upload_id = params[:upload_id]
+    object_key = params[:key] # This is the full key from create_multipart_upload
+    part_numbers = params[:partNumbers]&.split(",")&.map(&:to_i)
+
+    if !upload_id || !object_key || part_numbers.blank?
+      return(
+        render_error(
+          "s3.missing_params_for_batch_presign",
+          { status: :bad_request },
+          StandardError.new("Missing uploadId, key, or partNumbers")
+        )
+      )
+    end
+
+    begin
+      presigned_urls = {}
+      part_numbers.each do |part_number|
+        # Note: AWS SDK presign_url for upload_part is not standard.
+        # We need to generate a presigned URL for a PUT request for each part.
+        # The S3 service itself handles associating these parts with the upload_id.
+        presigner = Aws::S3::Presigner.new(client: s3_client)
+        url =
+          presigner.presigned_url(
+            :upload_part,
+            bucket: bucket_name,
+            key: object_key,
+            upload_id: upload_id, # Essential for identifying the part with the multipart upload
+            part_number: part_number,
+            expires_in: 3600 # 1 hour
+          )
+        presigned_urls[part_number.to_s] = url
+      end
+      render json: { presignedUrls: presigned_urls }, status: :ok
+    rescue Aws::S3::Errors::ServiceError => e
+      render_error(
+        "s3.batch_presign_failed",
+        { status: :internal_server_error, error_message: e.message },
+        e
+      )
+    end
+  end
+
+  # POST /api/s3/params/multipart/:upload_id/complete
+  # Expected params: { key: "s3_object_key", parts: [{ PartNumber: 1, ETag: "etag1" }, ...] }
+  def complete_multipart_upload
+    s3_client = Shrine.storages[:cache].client
+    bucket_name = Shrine.storages[:cache].bucket.name
+    upload_id = params[:upload_id]
+    object_key = params[:key]
+    # Ensure parts are in the correct format for the SDK: array of hashes
+    # { parts: [{ part_number: 1, etag: "..."}] }
+    sdk_parts =
+      params[:parts].map do |p|
+        { part_number: p[:PartNumber].to_i, etag: p[:ETag] }
+      end
+
+    if !upload_id || !object_key || sdk_parts.blank?
+      return(
+        render_error(
+          "s3.missing_params_for_complete",
+          { status: :bad_request },
+          StandardError.new("Missing uploadId, key, or parts")
+        )
+      )
+    end
+
+    begin
+      response =
+        s3_client.complete_multipart_upload(
+          {
+            bucket: bucket_name,
+            key: object_key,
+            upload_id: upload_id,
+            multipart_upload: {
+              parts: sdk_parts
+            }
+          }
+        )
+      # The location might not be in response.location for all S3 providers for complete_multipart_upload.
+      # It's safer to construct it or get it via a head_object if needed.
+      # For now, we'll assume the frontend uses the key and standard S3 URL construction.
+      # If your S3 provider returns a location, you can use: location: response.location
+      render json: {
+               location: "s3://#{bucket_name}/#{object_key}",
+               key: object_key
+             },
+             status: :ok # Simplified location
+    rescue Aws::S3::Errors::ServiceError => e
+      render_error(
+        "s3.multipart_complete_failed",
+        { status: :internal_server_error, error_message: e.message },
+        e
+      )
+    end
+  end
+
+  # DELETE /api/s3/params/multipart/:upload_id
+  # Expected params: { key: "s3_object_key" }
+  def abort_multipart_upload
+    s3_client = Shrine.storages[:cache].client
+    bucket_name = Shrine.storages[:cache].bucket.name
+    upload_id = params[:upload_id]
+    object_key = params[:key] # Or however the key is passed, query param might be more RESTful: params[:object_key]
+
+    if !upload_id || !object_key
+      return(
+        render_error(
+          "s3.missing_params_for_abort",
+          { status: :bad_request },
+          StandardError.new("Missing uploadId or key")
+        )
+      )
+    end
+
+    begin
+      s3_client.abort_multipart_upload(
+        { bucket: bucket_name, key: object_key, upload_id: upload_id }
+      )
+      render json: {
+               message: "Multipart upload aborted successfully."
+             },
+             status: :ok
+    rescue Aws::S3::Errors::ServiceError => e
+      render_error(
+        "s3.multipart_abort_failed",
+        { status: :internal_server_error, error_message: e.message },
+        e
+      )
+    end
   end
 
   private
+
+  def set_record
+    unless params[:model_id] && AUTHORIZED_S3_MODELS[params[:model]]
+      raise ActiveRecord::RecordNotFound
+    end
+
+    record_class = AUTHORIZED_S3_MODELS[params[:model]]
+    @record = record_class.find(params[:model_id])
+  rescue ActiveRecord::RecordNotFound => e
+    render_error("misc.not_found_error", { status: :not_found }, e)
+  end
 
   def set_rack_response((status, headers, body))
     self.status = status

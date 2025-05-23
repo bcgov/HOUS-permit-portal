@@ -380,6 +380,16 @@ export const FieldsSetup = observer(function FieldsSetup({
                                 }
                               : undefined
                           }
+                          isMultipleFilesCheckboxProps={
+                            requirementType === ERequirementType.file
+                              ? {
+                                  controlProps: {
+                                    control: control,
+                                    name: `requirementsAttributes.${index}.inputOptions.multiple` as any,
+                                  },
+                                }
+                              : undefined
+                          }
                           requirementCode={watchedRequirementCode}
                         />
                       </Box>
@@ -397,7 +407,7 @@ export const FieldsSetup = observer(function FieldsSetup({
                           helperText={watchedHint}
                           unit={
                             requirementType === ERequirementType.number
-                              ? watch(`requirementsAttributes.${index}.inputOptions.numberUnit`) ?? null
+                              ? (watch(`requirementsAttributes.${index}.inputOptions.numberUnit`) ?? null)
                               : undefined
                           }
                           options={watch(`requirementsAttributes.${index}.inputOptions.valueOptions`)?.map(

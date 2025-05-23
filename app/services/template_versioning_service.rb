@@ -34,7 +34,9 @@ class TemplateVersioningService
   def self.schedule!(requirement_template, version_date)
     if !is_valid_schedule_version_date?(requirement_template, version_date)
       raise TemplateVersionScheduleError.new(
-              "Version date must be in the future and after latest scheduled version date"
+              I18n.t(
+                "services.template_versioning_service.invalid_schedule_date"
+              )
             )
     end
 
@@ -82,7 +84,9 @@ class TemplateVersioningService
   def self.force_publish_now!(requirement_template)
     unless ENV["ENABLE_TEMPLATE_FORCE_PUBLISH"] == "true"
       raise TemplateVersionForcePublishNowError.new(
-              "Force publish is not enabled"
+              I18n.t(
+                "services.template_versioning_service.force_publish_disabled"
+              )
             )
     end
 
@@ -125,7 +129,9 @@ class TemplateVersioningService
   )
     unless requirement_template.type == EarlyAccessRequirementTemplate.name
       raise TemplateVersionPublishError,
-            "Cannot create early access version for a non-early access requirement template"
+            I18n.t(
+              "services.template_versioning_service.early_access_version_error"
+            )
     end
 
     attributes = {
@@ -160,7 +166,9 @@ class TemplateVersioningService
 
     if template_version.version_date > Date.current && !skip_date_check
       raise TemplateVersionPublishError,
-            "Version cannot be published before it's scheduled date"
+            I18n.t(
+              "services.template_versioning_service.publish_before_schedule_date"
+            )
     end
 
     ActiveRecord::Base.transaction do
@@ -175,30 +183,33 @@ class TemplateVersioningService
 
       previous_version = template_version.previous_version
 
-      return template_version if previous_version.blank?
-
-      previous_version
-        .jurisdiction_template_version_customizations
-        .each do |customization|
-        begin
-          copy_jurisdiction_customizations_to_template_version(
-            customization,
-            template_version
-          )
-        rescue StandardError => e
-          # we want to know if an error is happening
-          # but don't want to fail the whole publish process because of it
-          Rails.logger.error(
-            "Error copying customizations to new template version: #{e.message}"
-          )
+      # Copy customizations only if there's a previous version
+      if previous_version.present?
+        previous_version
+          .jurisdiction_template_version_customizations
+          .each do |customization|
+          begin
+            copy_jurisdiction_customizations_to_template_version(
+              customization,
+              template_version
+            )
+          rescue StandardError => e
+            # we want to know if an error is happening
+            # but don't want to fail the whole publish process because of it
+            Rails.logger.error(
+              I18n.t(
+                "services.template_versioning_service.copy_customizations_log_error",
+                message: e.message
+              )
+            )
+          end
         end
       end
-
-      # Publish the notification
-      NotificationService.publish_new_template_version_publish_event(
-        template_version
-      )
     end
+    # Publish the notification after the transaction successfully completes
+    NotificationService.publish_new_template_version_publish_event(
+      template_version
+    )
 
     template_version
   end
@@ -465,7 +476,11 @@ class TemplateVersioningService
 
     if !copied_jurisdiction_template_version_customization.save
       raise TemplateVersionPublishError.new(
-              "Old jurisdiction customizations could not be copied to new template version for jurisdiction_id:#{jurisdiction_template_version_customization.jurisdiction_id}"
+              I18n.t(
+                "services.template_versioning_service.copy_customizations_error",
+                jurisdiction_id:
+                  jurisdiction_template_version_customization.jurisdiction_id
+              )
             )
     end
   end

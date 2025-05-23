@@ -28,7 +28,7 @@ import { useMst } from "../../../setup/root"
 import { IRevisionRequestsAttributes } from "../../../types/api-request"
 import { IFormIORequirement, IRevisionRequest, ISubmissionVersion } from "../../../types/types"
 import { getRequirementByKey } from "../../../utils/formio-component-traversal"
-import { getSinglePreviousSubmissionJson } from "../../../utils/formio-submission-traversal"
+import { getSinglePreviousSubmissionData } from "../../../utils/formio-submission-traversal"
 import { handleScrollToBottom } from "../../../utils/utility-functions"
 import ConfirmationModal from "../../shared/modals/confirmation-modal"
 import { ScrollLink } from "../../shared/permit-applications/scroll-link"
@@ -51,7 +51,7 @@ export const RevisionSideBar = observer(
     const { t } = useTranslation()
     const isMounted = useMountStatus()
     const [requirementForRevision, setRequirementForRevision] = useState<IFormIORequirement>()
-    const [submissionJsonForRevision, setSubmissionJsonForRevision] = useState<any>()
+    const [submissionDataForRevision, setSubmissionDataForRevision] = useState<any>()
     const [revisionRequest, setRevisionRequest] = useState<IRevisionRequest>()
     const [revisionRequestDefault, setRevisionRequestDefault] = useState<IRevisionRequest>()
     const {
@@ -143,12 +143,12 @@ export const RevisionSideBar = observer(
         isViewingPastRequests && selectedSubmissionVersion?.revisionRequests?.find(finder)
       const foundRevisionRequest = upToDateFields.find(finder)
       const foundRequirement = getRequirementByKey(permitApplication.formJson, event.detail.key)
-      const foundSubmissionJson = getSinglePreviousSubmissionJson(permitApplication.submissionData, event.detail.key)
+      const foundSubmissionData = getSinglePreviousSubmissionData(permitApplication.submissionData, event.detail.key)
 
       setRevisionRequest(foundRevisionRequest)
       setRevisionRequestDefault(foundRevisionRequestDefault)
       setRequirementForRevision(foundRequirement)
-      setSubmissionJsonForRevision(foundSubmissionJson)
+      setSubmissionDataForRevision(foundSubmissionData)
       onOpen()
     }
 
@@ -317,7 +317,7 @@ export const RevisionSideBar = observer(
             onOpen={onOpen}
             onClose={onClose}
             requirementJson={requirementForRevision}
-            submissionJson={submissionJsonForRevision}
+            submissionData={submissionDataForRevision}
             useFieldArrayMethods={useFieldArrayMethods}
             revisionRequest={revisionRequest}
             revisionRequestDefault={revisionRequestDefault}
@@ -364,9 +364,7 @@ const RevisionRequestListItem = ({ revisionRequest }: IRevisionRequestListItemPr
 
   return (
     <ListItem mb={4} w="full">
-      <ScrollLink to={`formio-component-${requirementJson.key}`} trigger={currentPermitApplication?.formFormatKey}>
-        {requirementJson.label}
-      </ScrollLink>
+      <ScrollLink to={`formio-component-${requirementJson.key}`}>{requirementJson.label}</ScrollLink>
       <Flex fontStyle="italic">
         {t("permitApplication.show.revision.reasonCode")}: {reasonCode}
       </Flex>

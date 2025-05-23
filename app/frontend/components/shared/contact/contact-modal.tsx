@@ -75,10 +75,11 @@ export const ContactModal: React.FC<IContactModalProps> = ({
     const sectionKey = requirementKey.split("|")[0].slice(21, 64)
     const newSectionFields = {}
     INPUT_CONTACT_KEYS.forEach((contactField) => {
-      let newValue = ["cell", "phone"].includes(contactField)
-        ? // The normalized phone number starts with +1... (country code)
-          convertPhoneNumberToFormioFormat(contact[contactField] as string)
+      // Declare newValue as any to allow mixed types
+      let newValue: any = ["cell", "phone"].includes(contactField)
+        ? convertPhoneNumberToFormioFormat(contact[contactField] as string)
         : contact[contactField] || ""
+      newValue = contactField === "address" ? { display_name: newValue } : newValue
       newSectionFields[`${requirementKey}|${contactField}`] = newValue
     })
 
@@ -102,10 +103,11 @@ export const ContactModal: React.FC<IContactModalProps> = ({
 
     const newContactElement = {}
     INPUT_CONTACT_KEYS.forEach((contactField) => {
-      // The normalized phone number starts with +1... (country code)
-      let newValue = ["cell", "phone"].includes(contactField)
+      // Declare newValue as any to allow mixed types
+      let newValue: any = ["cell", "phone"].includes(contactField)
         ? convertPhoneNumberToFormioFormat(contact[contactField] as string)
         : contact[contactField]
+      newValue = contactField === "address" ? { display_name: newValue } : newValue
       newContactElement[`${requirementKey}|${contactType}|${contactField}`] = newValue
     })
     const clonedArray = R.clone(submissionState.data?.[sectionKey]?.[requirementKey] ?? [])

@@ -244,6 +244,15 @@ class NotificationService
           user
         )&.deliver_later
       end
+
+      permit_application
+        .confirmed_permit_type_submission_contacts
+        .each do |permit_type_submission_contact|
+        PermitHubMailer.notify_reviewer_application_received(
+          permit_type_submission_contact,
+          permit_application
+        ).deliver_later
+      end
     end
 
     # assignees to be notified

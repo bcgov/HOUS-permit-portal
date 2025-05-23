@@ -189,4 +189,7 @@ export interface IPreference {
 
   enableInAppIntegrationMappingNotification: boolean
   enableEmailIntegrationMappingNotification: boolean
+
+  enableInAppUnmappedApiNotification: boolean
+  enableEmailUnmappedApiNotification: boolean
 }

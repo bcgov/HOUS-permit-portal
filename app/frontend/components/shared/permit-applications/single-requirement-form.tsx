@@ -6,15 +6,14 @@ import { Form } from "../chefs"
 
 interface SingleRequirementFormProps {
   requirementJson: ISingleRequirementFormJson
-  submissionJson: any
+  submissionData: any
 }
 
-export const SingleRequirementForm: React.FC<SingleRequirementFormProps> = ({ requirementJson, submissionJson }) => {
+export const SingleRequirementForm: React.FC<SingleRequirementFormProps> = ({ requirementJson, submissionData }) => {
   const { t } = useTranslation()
-
   return (
     <Box className="form-wrapper single-requirement-form">
-      <Form form={requirementJson} submission={submissionJson} options={{ readOnly: true }} />
+      <Form form={requirementJson} submission={submissionData} options={{ readOnly: true }} />
     </Box>
   )
 }

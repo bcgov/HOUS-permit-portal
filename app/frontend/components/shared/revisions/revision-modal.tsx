@@ -30,7 +30,7 @@ import { SingleRequirementForm } from "../permit-applications/single-requirement
 
 export interface IRevisionModalProps extends Partial<ReturnType<typeof useDisclosure>> {
   requirementJson: IFormIORequirement
-  submissionJson: any
+  submissionData: any
   revisionRequest: IRevisionRequest
   revisionRequestDefault?: IRevisionRequest
   useFieldArrayMethods: UseFieldArrayReturn<IRevisionRequestForm, "revisionRequestsAttributes", "fieldId">
@@ -41,7 +41,7 @@ export interface IRevisionModalProps extends Partial<ReturnType<typeof useDisclo
 
 export const RevisionModal: React.FC<IRevisionModalProps> = ({
   requirementJson,
-  submissionJson,
+  submissionData,
   isOpen,
   onOpen,
   onClose,
@@ -86,7 +86,7 @@ export const RevisionModal: React.FC<IRevisionModalProps> = ({
       userId: currentUser.id,
       reasonCode,
       requirementJson,
-      submissionJson,
+      submissionData,
       comment,
     }
     if (revisionRequest) {
@@ -118,12 +118,12 @@ export const RevisionModal: React.FC<IRevisionModalProps> = ({
     revisionRequestDefault?.requirementJson ?? revisionRequest?.requirementJson ?? requirementJson
   )
   const requirementSubmission =
-    revisionRequestDefault?.submissionJson ?? revisionRequest?.submissionJson ?? submissionJson
+    revisionRequestDefault?.submissionData ?? revisionRequest?.submissionData ?? submissionData
 
   const selectedLabel = revisionReasonOptions.find((opt) => opt.value === reasonCode)?.label
 
   return (
-    <Modal onClose={handleClose} isOpen={isOpen} size="lg">
+    <Modal onClose={handleClose} isOpen={isOpen} size="2xl">
       <ModalOverlay />
 
       <ModalContent mt={48}>
@@ -174,7 +174,7 @@ export const RevisionModal: React.FC<IRevisionModalProps> = ({
 
             <Divider />
 
-            <SingleRequirementForm requirementJson={requirementForm} submissionJson={requirementSubmission} />
+            <SingleRequirementForm requirementJson={requirementForm} submissionData={requirementSubmission} />
           </Flex>
           <ModalFooter>
             <Flex width="full" justify="center" gap={4}>

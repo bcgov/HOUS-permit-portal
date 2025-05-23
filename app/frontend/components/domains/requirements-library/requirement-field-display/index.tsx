@@ -101,6 +101,22 @@ const requirementsComponentMap = {
     )
   },
 
+  [ERequirementType.bcaddress](props: TRequirementFieldDisplayProps) {
+    return (
+      <GenericFieldDisplay
+        inputDisplay={
+          <InputGroup>
+            <InputLeftElement>
+              <MapPin />
+            </InputLeftElement>
+            <Input bg={"white"} />
+          </InputGroup>
+        }
+        {...props}
+      />
+    )
+  },
+
   [ERequirementType.date](props: TRequirementFieldDisplayProps) {
     return (
       <GenericFieldDisplay

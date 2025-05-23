@@ -1,6 +1,7 @@
 class SiteConfigurationBlueprint < Blueprinter::Base
   fields :display_sitewide_message,
          :sitewide_message,
+         :inbox_enabled,
          :small_scale_requirement_template_id
 
   field :help_link_items do |site_configuration, _options|
