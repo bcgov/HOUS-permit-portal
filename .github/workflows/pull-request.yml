@@ -9,7 +9,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     name: Run RSpec Test Suite
-    environment: "CI-test"
+    # environment: "CI-test"
     env:
       RAILS_ENV: test
       DATABASE_URL: postgres://user:password@localhost:5432/test_db

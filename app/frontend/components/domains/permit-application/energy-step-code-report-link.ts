@@ -17,4 +17,4 @@ export const setupEnergyStepCodeReportLink = () => {
   labelSelector.forEach((label) => {
     label.addEventListener("click", handleLabelClick)
   })
-}
+  

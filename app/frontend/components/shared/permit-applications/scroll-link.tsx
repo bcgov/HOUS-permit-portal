@@ -1,28 +1,39 @@
 import { Link } from "@chakra-ui/react"
+import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
-import { useMountStatus } from "../../../hooks/use-mount-status"
 
 interface ScrollLinkProps {
   to: string
   children: React.ReactNode
-  trigger?: any
   [key: string]: any
 }
 
-export const ScrollLink: React.FC<ScrollLinkProps> = ({ to, children, trigger, ...props }) => {
+export const ScrollLink: React.FC<ScrollLinkProps> = observer(({ to, children, ...props }) => {
   const [targetElement, setTargetElement] = useState<HTMLElement | null>(null)
-  const isMounted = useMountStatus()
 
   useEffect(() => {
-    let element = document.getElementById(to)
-    if (!element) {
-      const classElements = document.getElementsByClassName(to)
-      if (classElements.length > 0) {
-        element = classElements[0] as HTMLElement
+    const findElement = () => {
+      let element = document.getElementById(to)
+      if (!element) {
+        const classElements = document.getElementsByClassName(to)
+        if (classElements.length > 0) {
+          element = classElements[0] as HTMLElement
+        }
       }
+      setTargetElement(element)
     }
-    setTargetElement(element)
-  }, [to, isMounted, trigger])
+
+    findElement() // Initial attempt to find the element
+
+    // Observe DOM changes to find the element if it appears later
+    const observer = new MutationObserver(findElement)
+    observer.observe(document.body, { childList: true, subtree: true })
+
+    // Cleanup function to disconnect the observer
+    return () => {
+      observer.disconnect()
+    }
+  }, [to])
 
   const handleClick = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
     event.preventDefault()
@@ -73,4 +84,4 @@ export const ScrollLink: React.FC<ScrollLinkProps> = ({ to, children, trigger, .
       {children}
     </Link>
   )
-}
+})

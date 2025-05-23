@@ -8,6 +8,7 @@ import { useMst } from "../../../setup/root"
 import { EFlashMessageStatus } from "../../../types/enums"
 import { FlashMessage } from "../../shared/base/flash-message"
 import { LoadingScreen } from "../../shared/base/loading-screen"
+import { ReviewManagerFeatureAccessScreen } from "../home/review-manager/configuration-management-screen/feature-access-screen"
 import { EULAScreen } from "../onboarding/eula"
 import { NavBar } from "./nav-bar"
 import { ProtectedRoute } from "./protected-route"
@@ -48,6 +49,7 @@ const ConfigurationManagementScreen = lazy(() =>
     default: module.ConfigurationManagementScreen,
   }))
 )
+
 const EnergyStepRequirementsScreen = lazy(() =>
   import("../home/review-manager/configuration-management-screen/energy-step-requirements-screen").then((module) => ({
     default: module.EnergyStepRequirementsScreen,
@@ -86,6 +88,14 @@ const EditJurisdictionScreen = lazy(() =>
 )
 const LandingScreen = lazy(() => import("../landing").then((module) => ({ default: module.LandingScreen })))
 const ContactScreen = lazy(() => import("../misc/contact-screen").then((module) => ({ default: module.ContactScreen })))
+const ProjectReadinessToolsIndexScreen = lazy(() =>
+  import("../project-readiness-tools").then((module) => ({ default: module.ProjectReadinessToolsIndexScreen }))
+)
+const LettersOfAssuranceScreen = lazy(() =>
+  import("../project-readiness-tools/letter-of-assurance").then((module) => ({
+    default: module.LettersOfAssuranceScreen,
+  }))
+)
 const PermitApplicationIndexScreen = lazy(() =>
   import("../permit-application").then((module) => ({ default: module.PermitApplicationIndexScreen }))
 )
@@ -197,6 +207,18 @@ const LandingSetupScreen = lazy(() =>
 const AdminUserIndexScreen = lazy(() =>
   import("../super-admin/site-configuration-management/users-screen").then((module) => ({
     default: module.AdminUserIndexScreen,
+  }))
+)
+
+const AdminGlobalFeatureAccessScreen = lazy(() =>
+  import("../super-admin/site-configuration-management/global-feature-access").then((module) => ({
+    default: module.AdminGlobalFeatureAccessScreen,
+  }))
+)
+
+const AdminSubmissionInboxScreen = lazy(() =>
+  import("../super-admin/site-configuration-management/submission-inbox").then((module) => ({
+    default: module.AdminSubmissionInboxScreen,
   }))
 )
 
@@ -358,6 +380,11 @@ const AppRoutes = observer(() => {
       <Route path="/configuration-management/revision-reason-setup" element={<RevisionReasonSetupScreen />} />
       <Route path="/configuration-management/landing-setup" element={<LandingSetupScreen />} />
       <Route path="/configuration-management/users" element={<AdminUserIndexScreen />} />
+      <Route path="/configuration-management/global-feature-access" element={<AdminGlobalFeatureAccessScreen />} />
+      <Route
+        path="/configuration-management/global-feature-access/submission-inbox"
+        element={<AdminSubmissionInboxScreen />}
+      />
       <Route path="/configuration-management/users/invite" element={<AdminInviteScreen />} />
       <Route path="/reporting" element={<ReportingScreen />} />
       <Route path="/reporting/export-template-summary" element={<ExportTemplateSummaryScreen />} />
@@ -381,10 +408,6 @@ const AppRoutes = observer(() => {
   const managerOrReviewerRoutes = (
     <>
       <Route path="/jurisdictions/:jurisdictionId/submission-inbox" element={<JurisdictionSubmissionInboxScreen />} />
-      <Route
-        path="/jurisdictions/:jurisdictionId/configuration-management/submissions-inbox-setup"
-        element={<SubmissionsInboxSetupScreen />}
-      />
       <Route
         path="/jurisdictions/:jurisdictionId/configuration-management/energy-step"
         element={<EnergyStepRequirementsScreen />}
@@ -422,6 +445,14 @@ const AppRoutes = observer(() => {
       <Route
         path="/jurisdictions/:jurisdictionId/configuration-management"
         element={<ConfigurationManagementScreen />}
+      />
+      <Route
+        path="/jurisdictions/:jurisdictionId/configuration-management/feature-access"
+        element={<ReviewManagerFeatureAccessScreen />}
+      />
+      <Route
+        path="/jurisdictions/:jurisdictionId/configuration-management/feature-access/submissions-inbox-setup"
+        element={<SubmissionsInboxSetupScreen />}
       />
       <Route path="/digital-building-permits" element={<JurisdictionDigitalPermitScreen />} />
       <Route path="/api-settings/api-mappings" element={<JurisdictionApiMappingsSetupIndexScreen />} />
@@ -527,6 +558,11 @@ const AppRoutes = observer(() => {
         {/* Public Routes */}
         <Route path="/accept-invitation" element={<AcceptInvitationScreen />} />
         <Route path="/contact" element={<ContactScreen />} />
+        <Route path="/project-readiness-tools" element={<ProjectReadinessToolsIndexScreen />} />
+        <Route
+          path="/project-readiness-tools/create-your-letters-of-assurance"
+          element={<LettersOfAssuranceScreen />}
+        />
         <Route path="/confirmed" element={<EmailConfirmedScreen />} />
         <Route path="/welcome" element={<LandingScreen />} />
         <Route

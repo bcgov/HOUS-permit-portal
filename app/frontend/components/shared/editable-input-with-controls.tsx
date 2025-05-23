@@ -73,7 +73,7 @@ function EditableControls({
         <Button {...getSubmitButtonProps()} variant={"primary"} {...saveButtonProps}>
           {saveTextContent}
         </Button>
-        <Button {...getCancelButtonProps()} variant={"primaryInverse"} {...cancelButtonProps}>
+        <Button {...getCancelButtonProps()} variant={"primaryInverse"} {...cancelButtonProps} mr={2}>
           {cancelTextContent}
         </Button>
       </ButtonGroup>
@@ -129,7 +129,7 @@ export const EditableInputWithControls = observer(function EditableInputWithCont
     <Editable
       as={Flex}
       alignItems={"center"}
-      placeholder={isInEditMode ? placeholder : initialHint ?? placeholder}
+      placeholder={isInEditMode ? placeholder : (initialHint ?? placeholder)}
       color={R.isEmpty(editableProps.value) ? "text.link" : undefined}
       onEdit={() => {
         setIsInEditMode(true)
