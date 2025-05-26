@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_05_22_000000) do
+ActiveRecord::Schema[7.1].define(version: 2025_05_26_180029) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -70,6 +70,32 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_22_000000) do
     t.index ["user_id"], name: "index_collaborators_on_user_id"
   end
 
+  create_table "community_document_property_plan_jurisdictions",
+               id: :uuid,
+               default: -> { "gen_random_uuid()" },
+               force: :cascade do |t|
+    t.uuid "community_document_id", null: false
+    t.uuid "property_plan_jurisdiction_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["community_document_id"],
+            name: "idx_on_community_document_id_dcf6d2ab32"
+    t.index ["property_plan_jurisdiction_id"],
+            name: "idx_on_property_plan_jurisdiction_id_a816414237"
+  end
+
+  create_table "community_documents",
+               id: :uuid,
+               default: -> { "gen_random_uuid()" },
+               force: :cascade do |t|
+    t.uuid "jurisdiction_id", null: false
+    t.text "file_data"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["jurisdiction_id"],
+            name: "index_community_documents_on_jurisdiction_id"
+  end
+
   create_table "contacts",
                id: :uuid,
                default: -> { "gen_random_uuid()" },
@@ -95,12 +121,6 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_22_000000) do
     t.uuid "contactable_id"
     t.index %w[contactable_type contactable_id],
             name: "index_contacts_on_contactable"
-  end
-
-  create_table "data_migrations",
-               primary_key: "version",
-               id: :string,
-               force: :cascade do |t|
   end
 
   create_table "document_references",
@@ -608,13 +628,13 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_22_000000) do
     t.text "description"
     t.text "notes"
     t.string "permit_project_status"
-    t.uuid "property_plan_local_jurisdiction_id"
+    t.uuid "property_plan_jurisdiction_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.uuid "owner_id", null: false
     t.index ["owner_id"], name: "index_permit_projects_on_owner_id"
-    t.index ["property_plan_local_jurisdiction_id"],
-            name: "index_permit_projects_on_property_plan_local_jurisdiction_id"
+    t.index ["property_plan_jurisdiction_id"],
+            name: "index_permit_projects_on_property_plan_jurisdiction_id"
   end
 
   create_table "permit_type_required_steps",
@@ -710,7 +730,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_22_000000) do
             name: "index_project_memberships_on_permit_project_id"
   end
 
-  create_table "property_plan_local_jurisdictions",
+  create_table "property_plan_jurisdictions",
                id: :uuid,
                default: -> { "gen_random_uuid()" },
                force: :cascade do |t|
@@ -1223,6 +1243,11 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_22_000000) do
   add_foreign_key "allowlisted_jwts", "users", on_delete: :cascade
   add_foreign_key "api_key_expiration_notifications", "external_api_keys"
   add_foreign_key "collaborators", "users"
+  add_foreign_key "community_document_property_plan_jurisdictions",
+                  "community_documents"
+  add_foreign_key "community_document_property_plan_jurisdictions",
+                  "property_plan_jurisdictions"
+  add_foreign_key "community_documents", "jurisdictions"
   add_foreign_key "document_references",
                   "part_3_step_code_checklists",
                   column: "checklist_id"
@@ -1275,7 +1300,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_22_000000) do
   add_foreign_key "permit_collaborations", "permit_applications"
   add_foreign_key "permit_project_payment_details", "payment_details"
   add_foreign_key "permit_project_payment_details", "permit_projects"
-  add_foreign_key "permit_projects", "property_plan_local_jurisdictions"
+  add_foreign_key "permit_projects", "property_plan_jurisdictions"
   add_foreign_key "permit_projects", "users", column: "owner_id"
   add_foreign_key "permit_type_required_steps", "jurisdictions"
   add_foreign_key "permit_type_required_steps",
@@ -1288,7 +1313,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_22_000000) do
   add_foreign_key "preferences", "users"
   add_foreign_key "project_documents", "permit_projects"
   add_foreign_key "project_memberships", "permit_projects"
-  add_foreign_key "property_plan_local_jurisdictions", "jurisdictions"
+  add_foreign_key "property_plan_jurisdictions", "jurisdictions"
   add_foreign_key "requirement_documents", "requirement_blocks"
   add_foreign_key "requirement_template_sections",
                   "requirement_template_sections",

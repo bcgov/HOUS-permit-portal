@@ -2,7 +2,7 @@ class PermitProject < ApplicationRecord
   searchkick word_middle: %i[description full_address], text_end: %i[number] # number will come from primary item
 
   belongs_to :owner, class_name: "User"
-  belongs_to :property_plan_local_jurisdiction, optional: true
+  belongs_to :property_plan_jurisdiction, optional: true
   has_one :permit_project_payment_detail, dependent: :destroy
   has_one :payment_detail, through: :permit_project_payment_detail
 
