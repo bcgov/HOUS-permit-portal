@@ -22,6 +22,9 @@ export const Part3StepCodeModel = types
     get checklistForPdf() {
       return self.checklist
     },
+    get isComplete() {
+      return self.checklist?.isComplete
+    },
   }))
   .views((self) => ({}))
   .actions((self) => ({}))

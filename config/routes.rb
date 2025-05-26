@@ -218,6 +218,9 @@ Rails.application.routes.draw do
       get "download_step_code_summary_csv",
           on: :collection,
           to: "step_codes#download_step_code_summary_csv"
+      get "download_step_code_metrics_csv",
+          on: :collection,
+          to: "step_codes#download_step_code_metrics_csv"
     end
 
     namespace :part_9_building do

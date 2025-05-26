@@ -48,6 +48,7 @@ import {
   EPermitBlockStatus,
   ERequirementLibrarySortFields,
   ERequirementTemplateSortFields,
+  EStepCodeType,
   ETemplateVersionStatus,
   EUserSortFields,
 } from "../../types/enums"
@@ -590,6 +591,10 @@ export class Api {
 
   async downloadStepCodeSummaryCsv() {
     return this.client.get<BlobPart>(`/step_codes/download_step_code_summary_csv`)
+  }
+
+  async downloadStepCodeMetricsCsv(stepCodeType: EStepCodeType) {
+    return this.client.get<BlobPart>(`/step_codes/download_step_code_metrics_csv`, { stepCodeType })
   }
 
   async downloadApplicationMetricsCsv() {

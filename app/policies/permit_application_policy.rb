@@ -1,7 +1,9 @@
 class PermitApplicationPolicy < ApplicationPolicy
   # All user types can use the search permit application
   def index?
-    if user.super_admin? || record.submitter == user ||
+    return true if user.super_admin?
+
+    if record.submitter == user ||
          record.collaborator?(user_id: user.id, collaboration_type: :submission)
       true
     elsif user.review_staff?

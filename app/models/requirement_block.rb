@@ -226,10 +226,35 @@ class RequirementBlock < ApplicationRecord
 
     return unless has_energy_step_code
 
+    # Determine if this is a Part 3 or Part 9 block
+    is_part_3 =
+      requirements.any? do |req|
+        req.requirement_code == "energy_step_code_tool_part_3"
+      end
+    is_part_9 =
+      requirements.any? do |req|
+        req.requirement_code == "energy_step_code_tool_part_9"
+      end
+
+    # Select the appropriate dependency schema based on the block type
+    required_dependencies =
+      if is_part_3
+        Requirement::ENERGY_STEP_CODE_PART_3_DEPENDENCY_REQUIRED_SCHEMA.keys.map(
+          &:to_s
+        )
+      elsif is_part_9
+        Requirement::ENERGY_STEP_CODE_PART_9_DEPENDENCY_REQUIRED_SCHEMA.keys.map(
+          &:to_s
+        )
+      else
+        [] # If neither Part 3 nor Part 9 is found, no dependencies to check
+      end
+
     has_all_dependencies =
-      Requirement::ENERGY_STEP_CODE_REQUIRED_DEPENDENCY_CODES.all? do |dependency_code|
-        requirements.count { |req| req.requirement_code == dependency_code } ==
-          1
+      required_dependencies.all? do |dependency_code|
+        count =
+          requirements.count { |req| req.requirement_code == dependency_code }
+        count == 1
       end
 
     return if has_all_dependencies

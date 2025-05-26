@@ -20,6 +20,10 @@ class Api::Part3Building::StepCodesController < Api::ApplicationController
           end
 
           # Create if not found via session
+          # NOTE ABOUT "INSECURE MASS ASSIGNMENT": See step_code_params below
+          # section_completion_status is given {} which allows any values
+          # however, this is not a sensitive field and is not used in any
+          # security critical processes. Clearing this code scanning warning only works temporarily.
           step_code ||= Part3StepCode.create(step_code_params)
 
           # Store the ID in the session if the record is valid and persisted

@@ -1,6 +1,9 @@
 class RequirementFormJsonService
   attr_accessor :requirement
 
+  ENERGY_STEP_CODE_TOOLTIP_URL =
+    "https://www2.gov.bc.ca/gov/content/housing-tenancy/building-or-renovating/permits/building-permit-hub/29065#Reports"
+
   DEFAULT_FORMIO_TYPE_TO_OPTIONS = {
     text: {
       type: "simpletextfield"
@@ -610,6 +613,11 @@ class RequirementFormJsonService
           file_hash[:custom_class] = "formio-component-file" if file_hash[
             :type
           ] != "file"
+          if requirement.key(requirement&.requirement_block&.key).end_with?(
+               "energy_step_code_report_file"
+             )
+            file_hash[:tooltip] = ENERGY_STEP_CODE_TOOLTIP_URL
+          end
         end
       )
     end

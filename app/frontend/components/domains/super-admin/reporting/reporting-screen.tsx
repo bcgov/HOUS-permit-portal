@@ -4,6 +4,7 @@ import { observer } from "mobx-react-lite"
 import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../../setup/root"
+import { EStepCodeType } from "../../../../types/enums"
 import { ManageMenuItem, ManageMenuItemButton } from "../../../shared/base/manage-menu-item"
 import { SearchGrid } from "../../../shared/grid/search-grid"
 import { SearchGridItem } from "../../../shared/grid/search-grid-item"
@@ -11,42 +12,67 @@ import { GridHeaders } from "./grid-header"
 
 export const ReportingScreen = observer(() => {
   const { t } = useTranslation()
-  const { stepCodeStore } = useMst()
-  const { downloadStepCodeSummary, downloadApplicationMetrics } = stepCodeStore
+  const { stepCodeStore, permitApplicationStore } = useMst()
+  const { downloadStepCodeSummary, downloadStepCodeMetrics } = stepCodeStore
+  const { downloadApplicationMetrics } = permitApplicationStore
 
   const [filter, setFilter] = useState("")
 
   interface IReportBase {
     name: string
     description: string
+    dropdown: Array<{
+      text: string
+      onClick?: () => void
+      href?: string
+    }>
   }
 
-  interface IReportWithHref extends IReportBase {
-    href: string
-    onClick?: never
-  }
-
-  interface IReportWithOnClick extends IReportBase {
-    href?: never
-    onClick: () => any
-  }
-
-  type TReport = IReportWithHref | IReportWithOnClick
+  type TReport = IReportBase
   const reportTypes: TReport[] = [
     {
       name: t("reporting.templateSummary.name"),
       description: t("reporting.templateSummary.description"),
-      href: "export-template-summary",
+      dropdown: [
+        {
+          text: t("ui.open"),
+          href: "export-template-summary",
+        },
+      ],
     },
     {
       name: t("reporting.stepCodeSummary.name"),
       description: t("reporting.stepCodeSummary.description"),
-      onClick: downloadStepCodeSummary,
+      dropdown: [
+        {
+          text: t("ui.download"),
+          onClick: downloadStepCodeSummary,
+        },
+      ],
     },
     {
       name: t("reporting.applicationMetrics.name"),
       description: t("reporting.applicationMetrics.description"),
-      onClick: downloadApplicationMetrics,
+      dropdown: [
+        {
+          text: t("ui.download"),
+          onClick: downloadApplicationMetrics,
+        },
+      ],
+    },
+    {
+      name: t("reporting.stepCodeMetrics.name"),
+      description: t("reporting.stepCodeMetrics.description"),
+      dropdown: [
+        {
+          text: t("reporting.stepCodeMetrics.downloadPart3"),
+          onClick: () => downloadStepCodeMetrics(EStepCodeType.Part3),
+        },
+        {
+          text: t("reporting.stepCodeMetrics.downloadPart9"),
+          onClick: () => downloadStepCodeMetrics(EStepCodeType.Part9),
+        },
+      ],
     },
   ]
 
@@ -78,7 +104,7 @@ export const ReportingScreen = observer(() => {
 
           {filteredReportTypes.map((reportType) => {
             return (
-              <Box key={reportType.href} className={"reporting-index-grid-row"} role={"row"} display={"contents"}>
+              <Box key={reportType.name} className={"reporting-index-grid-row"} role={"row"} display={"contents"}>
                 <SearchGridItem>{reportType.name}</SearchGridItem>
                 <SearchGridItem>{reportType.description}</SearchGridItem>
                 <SearchGridItem>
@@ -88,14 +114,16 @@ export const ReportingScreen = observer(() => {
                         {t("ui.manage")}
                       </MenuButton>
                       <MenuList>
-                        {reportType.onClick ? (
-                          <ManageMenuItemButton leftIcon={<FileCsv size={24} />} onClick={reportType.onClick}>
-                            {t("ui.download")}
-                          </ManageMenuItemButton>
-                        ) : (
-                          <ManageMenuItem icon={<FileCsv size={24} />} to={reportType.href}>
-                            {t("ui.open")}
-                          </ManageMenuItem>
+                        {reportType.dropdown.map((item, index) =>
+                          item.href ? (
+                            <ManageMenuItem key={index} icon={<FileCsv size={24} />} to={item.href}>
+                              {item.text}
+                            </ManageMenuItem>
+                          ) : (
+                            <ManageMenuItemButton key={index} leftIcon={<FileCsv size={24} />} onClick={item.onClick}>
+                              {item.text}
+                            </ManageMenuItemButton>
+                          )
                         )}
                       </MenuList>
                     </Menu>

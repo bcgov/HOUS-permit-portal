@@ -57,7 +57,7 @@ class Part9StepCode < StepCode
     if permit_application.step_code_plan_document.blank?
       errors.add(
         :plan_version,
-        "file is missing.  Please upload on the permit application first."
+        "file is missing. Please upload on the permit application first."
       )
       # EVENTUALLY BRING THIS LOGIC BACK ONCE WE DECIDE BEST WAY TO CONFIGURE IF A STEP CODE REQUIRES A SIGNED DOCUMENT.
       # elsif permit_application.step_code_plan_document.compliance_data.blank? ||

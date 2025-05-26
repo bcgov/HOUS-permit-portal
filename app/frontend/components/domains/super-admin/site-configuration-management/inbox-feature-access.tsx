@@ -39,10 +39,10 @@ export const InboxFeatureAccessScreen = observer(() => {
         >
           {t("ui.back")}
         </RouterLinkButton>
-        <Heading as="h1" m={0}>
+        <Heading as="h1" m={0} p={0}>
           {t(`${i18nPrefix}.submissionInbox`)}
         </Heading>
-        <Text color="text.secondary" m={0}>
+        <Text color="text.secondary" m={0} mt={23}>
           {t(`${i18nPrefix}.submissionInboxDescription`)}
         </Text>
         <Flex pb={4} justify="space-between" w="100%" borderBottom="1px solid" borderColor="border.light">

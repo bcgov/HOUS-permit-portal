@@ -15,6 +15,10 @@ class Api::Part9Building::StepCodesController < Api::ApplicationController
   def create
     #save step code like normal
     authorize Part9StepCode.new
+    # NOTE ABOUT "INSECURE MASS ASSIGNMENT": See step_code_params below
+    # h2k_file is given {} which allows any values
+    # however, this is not a sensitive field and is not used in any
+    # security critical processes. Clearing this code scanning warning only works temporarily.
     Part9StepCode.transaction do
       @step_code = Part9StepCode.create(step_code_params)
       if @step_code.valid?

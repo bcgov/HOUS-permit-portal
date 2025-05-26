@@ -4,7 +4,7 @@ class Api::ExternalApiKeysController < Api::ApplicationController
   def index
     # Only authorized to query own jurisdiction for review managers
     if (
-         current_user.review_manager? || current_user.regional_review_manager?
+         current_user.review_manager? || current_user.regional_review_manager?  || current_user.technical_support?
        ) && params[:jurisdiction_id].present? &&
          !current_user.jurisdictions.find(params[:jurisdiction_id])
       raise Pundit::NotAuthorizedError

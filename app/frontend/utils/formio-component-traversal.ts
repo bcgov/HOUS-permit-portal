@@ -39,12 +39,27 @@ export const getNestedComponentsIncomplete = (components) => {
   //in a multi select, this is a hash of key values with true / falses
   //in a general_contact, this is a layer of nested fields
 
-  return components
-    .filter((comp) => comp._visible)
-    .filter((comp) => {
-      //in the case of general_contacts, a fieldset has the isValid function
-      return comp.error || (comp.component.validate?.required && !comp.isValid(comp.dataValue, true))
-    })
+  const visibleComponents = components.filter((comp) => comp._visible)
+
+  // Filter out buttons *before* checking validity
+  // Note: Adjust property access (comp.type vs comp.component.type) if needed based on your component structure
+  const visibleInputComponents = visibleComponents.filter(
+    (comp) => comp.type !== "button" && comp.component?.type !== "button"
+  )
+
+  const invalidComponents = visibleInputComponents.filter((comp) => {
+    //in the case of general_contacts, a fieldset has the isValid function
+    const hasError = comp.error
+    // Check if comp.component exists before accessing validate
+    const isRequired = comp.component?.validate?.required
+    // Check if isValid method exists before calling it
+    const isValidCheck = typeof comp.isValid === "function" ? !comp.isValid(comp.dataValue, true) : false
+    const isRequiredButInvalid = isRequired && isValidCheck
+
+    return hasError || isRequiredButInvalid
+  })
+
+  return invalidComponents
 }
 
 export const getCompletedBlocksFromForm = (rootComponent) => {

@@ -6,7 +6,7 @@ import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
 import { IPart3StepCode, Part3StepCodeModel, Part3StepCodeType } from "../models/part-3-step-code"
 import { IPart9StepCode, Part9StepCodeModel, Part9StepCodeType } from "../models/part-9-step-code"
-import { EEnergyStep, EZeroCarbonStep } from "../types/enums"
+import { EEnergyStep, EStepCodeType, EZeroCarbonStep } from "../types/enums"
 import { IPart3ChecklistSelectOptions, IPart9ChecklistSelectOptions } from "../types/types"
 import { startBlobDownload } from "../utils/utility-functions"
 
@@ -125,22 +125,22 @@ export const StepCodeStoreModel = types
         throw error
       }
     }),
-    downloadApplicationMetrics: flow(function* () {
+    downloadStepCodeMetrics: flow(function* (stepCodeType: EStepCodeType) {
       try {
-        const response = yield* toGenerator(self.environment.api.downloadApplicationMetricsCsv())
+        const response = yield* toGenerator(self.environment.api.downloadStepCodeMetricsCsv(stepCodeType))
         if (!response.ok) {
           return response.ok
         }
 
         const blobData = response.data
-        const fileName = `${t("reporting.applicationMetrics.filename")}.csv`
+        const fileName = `${t(`reporting.stepCodeMetrics.filename${stepCodeType === EStepCodeType.Part3 ? "Part3" : "Part9"}`)}.csv`
         const mimeType = "text/csv"
         startBlobDownload(blobData, mimeType, fileName)
 
         return response
       } catch (error) {
         if (import.meta.env.DEV) {
-          console.error(`Failed to download permit application metrics:`, error)
+          console.error(`Failed to download step code metrics:`, error)
         }
         throw error
       }

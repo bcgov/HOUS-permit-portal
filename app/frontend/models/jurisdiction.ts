@@ -188,4 +188,6 @@ export const JurisdictionModel = types
     }),
   }))
 
-export interface IJurisdiction extends Instance<typeof JurisdictionModel> {}
+export interface IJurisdiction extends Instance<typeof JurisdictionModel> {
+  inboxEnabled: never
+}
