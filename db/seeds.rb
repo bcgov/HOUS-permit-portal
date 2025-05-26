@@ -320,3 +320,10 @@ end
 
 puts "Seeding Permit Projects from Permit Applications..."
 PermitProjectSeederService.call
+
+# Confirm all users at the end of seeding for development/testing
+if Rails.env.development? || Rails.env.test?
+  puts "Confirming all users..."
+  User.find_each { |user| user.confirm unless user.confirmed? }
+  puts "All users confirmed."
+end

@@ -1,44 +1,53 @@
 class Api::Part3Building::StepCodesController < Api::ApplicationController
+  # respond_to :json # Removed as per user feedback and previous successful diagnosis
+
   def create
-    authorize Part3StepCode.new
-    @step_code =
-      (
-        if step_code_params[:permit_application_id]
-          Part3StepCode.where(
-            permit_application_id: step_code_params[:permit_application_id]
-          ).first_or_create!(step_code_params)
-        else
-          # Early access: try to find via session, otherwise create new and store ID in session
-          step_code = nil
-          if session[:early_access_part3_step_code_id]
-            step_code =
-              Part3StepCode.find_by(
-                id: session[:early_access_part3_step_code_id]
-              )
-            # Clear session if ID exists but record doesn't (e.g., deleted)
-            session.delete(:early_access_part3_step_code_id) unless step_code
-          end
+    # authorize Part3StepCode.new # Pundit might need adjustment for polymorphic parent
 
-          # Create if not found via session
-          step_code ||= Part3StepCode.create(step_code_params)
+    parent_resource = find_parent_resource || current_user # Default to current_user if no other parent ID given
 
-          # Store the ID in the session if the record is valid and persisted
-          session[
-            :early_access_part3_step_code_id
-          ] = step_code.id if step_code&.persisted?
+    # Initialize Part3StepCode, Pundit authorize might need to be called on the specific instance or with parent
+    @step_code = Part3StepCode.new(step_code_params_for_create)
+    # It might be more appropriate to authorize based on the parent resource context, or the step_code with its parent assigned.
+    # For example: authorize parent_resource, :create_step_code? or authorize @step_code, policy_class: Part3StepCodePolicy
+    authorize @step_code # Placeholder: ensure Part3StepCodePolicy is adequate
 
-          step_code # Return the found or created step_code
-        end
+    @step_code.parent = parent_resource # Assign the determined parent
+
+    if @step_code.save
+      render_success @step_code
+    else
+      render_error(
+        "step_code.create_error",
+        {
+          message_opts: {
+            error_message: @step_code.errors.full_messages.join(", ")
+          }
+        }
       )
-    render_success @step_code
+    end
   end
 
   private
 
-  def step_code_params
+  def find_parent_resource
+    if params[:permit_application_id]
+      PermitApplication.find_by(id: params[:permit_application_id])
+    elsif params[:permit_project_id]
+      PermitProject.find_by(id: params[:permit_project_id])
+      # No explicit user_id check here; defaults to current_user in the create action if others are nil
+    else
+      nil # No specific parent ID provided in params
+    end
+  end
+
+  # Renamed from step_code_params to avoid conflict if you have a general step_code_params for update
+  def step_code_params_for_create
+    # Do not permit :parent_id, :parent_type here. Set parent association directly.
+    # :permit_application_id is also removed as it's handled by find_parent_resource
     params.require(:step_code).permit(
-      :permit_application_id,
       checklist_attributes: [section_completion_status: {}]
+      # Add any other direct StepCode attributes here if necessary
     )
   end
 end

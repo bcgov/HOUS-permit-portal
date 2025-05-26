@@ -50,6 +50,8 @@ class PermitApplication < ApplicationRecord
            through: :project_memberships,
            source: :permit_project
 
+  has_many :step_codes, as: :parent, dependent: :destroy
+
   scope :submitted, -> { joins(:submission_versions).distinct }
 
   scope :sandboxed, -> { where.not(sandbox_id: nil) }

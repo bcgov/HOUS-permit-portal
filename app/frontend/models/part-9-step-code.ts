@@ -5,17 +5,22 @@ import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
 import { EEnergyStep, EZeroCarbonStep } from "../types/enums"
 import { Part9StepCodeChecklistModel } from "./part-9-step-code-checklist"
+import { StepCodeBaseFields } from "./step-code-base"
 
 export const Part9StepCodeType = "Part9StepCode"
 
 export const Part9StepCodeModel = types
-  .model("Part9StepCodeModel", {
-    id: types.identifier,
-    type: types.literal(Part9StepCodeType),
-    checklistsMap: types.map(Part9StepCodeChecklistModel),
-    zeroCarbonSteps: types.array(types.enumeration(Object.values(EZeroCarbonStep))),
-    energySteps: types.array(types.enumeration(Object.values(EEnergyStep))),
-  })
+  .compose(
+    "Part9StepCodeModel",
+    StepCodeBaseFields,
+    types.model({
+      id: types.identifier,
+      type: types.literal(Part9StepCodeType),
+      checklistsMap: types.map(Part9StepCodeChecklistModel),
+      zeroCarbonSteps: types.array(types.enumeration(Object.values(EZeroCarbonStep))),
+      energySteps: types.array(types.enumeration(Object.values(EEnergyStep))),
+    })
+  )
   .extend(withEnvironment())
   .extend(withRootStore())
   .extend(withMerge())

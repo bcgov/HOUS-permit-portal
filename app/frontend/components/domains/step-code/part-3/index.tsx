@@ -24,24 +24,30 @@ export const Part3StepCodeForm = observer(function Part3StepCodeForm() {
   } = useMst()
   const { stepCode } = usePart3StepCode()
   const navigate = useNavigate()
-  const isEarlyAccess = !permitApplicationId
 
-  const permitApplication = !isEarlyAccess && getPermitApplicationById(permitApplicationId)
+  const permitApplication = permitApplicationId && getPermitApplicationById(permitApplicationId)
 
   usePermitApplication()
 
   // create the step code if needed
   useEffect(() => {
-    if (!!stepCode) return // step code already exists
-    if (!isEarlyAccess && !permitApplication?.isFullyLoaded) return // wait for permit application to load
-
-    if (!stepCode) {
-      createPart3StepCode({
-        permitApplicationId, // nil for early access
-        checklistAttributes: { sectionCompletionStatus: defaultSectionCompletionStatus },
-      })
+    if (!!stepCode) {
+      return // Step code already exists
     }
-  }, [permitApplication?.isFullyLoaded, stepCode])
+
+    // If there's a permitApplicationId, wait for the permitApplication to be fully loaded.
+    // If no permitApplicationId, proceed to create (will be user-associated).
+    if (permitApplicationId && !permitApplication?.isFullyLoaded) {
+      return // Wait for permit application to load
+    }
+
+    // If stepCode is still not present at this point, create it.
+    // permitApplicationId will be undefined if not in params, backend handles user-association.
+    createPart3StepCode({
+      permitApplicationId,
+      checklistAttributes: { sectionCompletionStatus: defaultSectionCompletionStatus },
+    })
+  }, [permitApplication?.isFullyLoaded, stepCode, permitApplicationId, createPart3StepCode]) // Removed isEarlyAccess, added createPart3StepCode
 
   // handle redirect if no section is specified
   useEffect(() => {

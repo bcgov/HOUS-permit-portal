@@ -38,12 +38,6 @@ export const Part3StepCodeChecklistModel = types
     id: types.identifier,
     isLoaded: types.maybeNull(types.boolean),
     sectionCompletionStatus: types.maybeNull(types.frozen<IPart3SectionCompletionStatus>()),
-    // permit application info
-    projectName: types.maybeNull(types.string),
-    projectIdentifier: types.maybeNull(types.string),
-    projectAddress: types.maybeNull(types.string),
-    jurisdictionName: types.maybeNull(types.string),
-    permitDate: types.maybeNull(types.string),
     projectStage: types.maybeNull(types.enumeration<EProjectStage[]>(Object.values(EProjectStage))),
     buildingCodeVersion: types.maybeNull(
       types.enumeration<EBuildingCodeVersion[]>(Object.values(EBuildingCodeVersion))
