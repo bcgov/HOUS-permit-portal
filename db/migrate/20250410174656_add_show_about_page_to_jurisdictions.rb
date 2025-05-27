@@ -1,13 +1,10 @@
-class AddShowAboutPageToJurisdictions < ActiveRecord::Migration[6.1]
+class AddShowAboutPageToJurisdictions < ActiveRecord::Migration[7.1]
   def up
     add_column :jurisdictions,
                :show_about_page,
                :boolean,
-               default: true,
+               default: false,
                null: false
-
-    execute "UPDATE jurisdictions SET show_about_page = true;"
-    SQL
   end
 
   def down
