@@ -8,7 +8,6 @@ import { IExternalApiKey } from "../../models/external-api-key"
 import { IIntegrationMapping } from "../../models/integration-mapping"
 import { IJurisdiction } from "../../models/jurisdiction"
 import { IJurisdictionTemplateVersionCustomization } from "../../models/jurisdiction-template-version-customization"
-import { IPart3StepCode } from "../../models/part-3-step-code"
 import { IPart3StepCodeChecklist } from "../../models/part-3-step-code-checklist"
 import { IPart9StepCode } from "../../models/part-9-step-code"
 import { IPart9StepCodeChecklist } from "../../models/part-9-step-code-checklist"
@@ -20,6 +19,7 @@ import { IRequirementTemplate } from "../../models/requirement-template"
 import { ITemplateVersion } from "../../models/template-version"
 import { IUser } from "../../models/user"
 import { ISiteConfigurationStore } from "../../stores/site-configuration-store"
+import { IStepCode } from "../../stores/step-code-store"
 import {
   IExternalApiKeyParams,
   IIntegrationMappingUpdateParams,
@@ -51,6 +51,7 @@ import {
   EPermitProjectSortFields,
   ERequirementLibrarySortFields,
   ERequirementTemplateSortFields,
+  EStepCodeType,
   ETemplateVersionStatus,
   EUserSortFields,
 } from "../../types/enums"
@@ -59,6 +60,7 @@ import {
   ICopyRequirementTemplateFormData,
   IJurisdictionFilters,
   IJurisdictionSearchFilters,
+  IPart9ChecklistSelectOptions,
   IPermitApplicationSearchFilters,
   IPermitProjectSearchFilters,
   ITemplateVersionDiff,
@@ -224,6 +226,18 @@ export class Api {
 
   async fetchPermitProject(id: string) {
     return this.client.get<ApiResponse<IPermitProject>>(`/permit_projects/${id}`)
+  }
+
+  async createPermitProject(projectData: {
+    name: string
+    description?: string
+    fullAddress?: string
+    pid?: string
+    pin?: string
+    propertyPlanJurisdictionId?: string
+    // Add other fields as necessary
+  }) {
+    return this.client.post<ApiResponse<IPermitProject>>("/permit_projects", { permitProject: projectData })
   }
 
   async updatePermitProject(id: string, params: IPermitProjectUpdateParams) {
@@ -589,19 +603,66 @@ export class Api {
   }
 
   async fetchPart9StepCodes() {
-    return this.client.get<ApiResponse<(IPart9StepCode | IPart3StepCode)[]>>("/part_9_building/step_codes")
+    return this.client.get<ApiResponse<IStepCode[]>>("/part_9_building/step_codes")
   }
 
-  async createPart3StepCode(stepCode: IPart3StepCode) {
-    return this.client.post<ApiResponse<IPart3StepCode>>("/part_3_building/step_codes", { stepCode })
+  async fetchPart9StepCodeSelectOptions() {
+    return this.client.get<ApiResponse<{ selectOptions: IPart9ChecklistSelectOptions }>>(
+      "/part_9_building/step_codes/select_options"
+    )
   }
 
-  async createPart9StepCode(stepCode: IPart9StepCode) {
-    return this.client.post<ApiResponse<IPart9StepCode>>("/part_9_building/step_codes", { stepCode })
+  async createOrFindStepCodeForPermitApplication(
+    permitApplicationId: string,
+    stepCodeType: EStepCodeType,
+    attributes: {
+      checklistAttributes?: { sectionCompletionStatus: Record<string, any> }
+      name?: string
+      preConstructionChecklistAttributes?: any
+    }
+  ) {
+    return this.client.post<ApiResponse<IStepCode>>(
+      `/permit_applications/${permitApplicationId}/part_3_building/step_code`,
+      {
+        step_code: {
+          type: stepCodeType,
+          ...attributes,
+        },
+      }
+    )
+  }
+
+  async createStepCode(
+    stepCodeType: EStepCodeType,
+    attributes: {
+      permitApplicationId?: string
+      permitProjectId?: string
+      name?: string // For Part 9 Step Code name
+      checklistAttributes?: { sectionCompletionStatus: Record<string, any> } // For Part 3
+      preConstructionChecklistAttributes?: any // For Part 9
+      permitProjectAttributes?: {
+        // For creating a project with the step code
+        id?: string
+        name?: string
+        description?: string
+        fullAddress?: string
+        pid?: string
+        pin?: string
+        ownerId?: string
+        propertyPlanJurisdictionId?: string
+      }
+    }
+  ) {
+    return this.client.post<ApiResponse<IStepCode>>(`/step_codes`, {
+      step_code: {
+        type: stepCodeType,
+        ...attributes,
+      },
+    })
   }
 
   async deleteStepCode(id: string) {
-    return this.client.delete<ApiResponse<IPart9StepCode | IPart3StepCode>>(`/step_codes/${id}`)
+    return this.client.delete<ApiResponse<IStepCode>>(`/step_codes/${id}`)
   }
 
   async downloadStepCodeSummaryCsv() {

@@ -123,6 +123,12 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_26_232142) do
             name: "index_contacts_on_contactable"
   end
 
+  create_table "data_migrations",
+               primary_key: "version",
+               id: :string,
+               force: :cascade do |t|
+  end
+
   create_table "document_references",
                id: :uuid,
                default: -> { "gen_random_uuid()" },
@@ -307,6 +313,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_26_232142) do
     t.string "external_api_state", default: "g_off", null: false
     t.integer "heating_degree_days"
     t.boolean "inbox_enabled", default: false, null: false
+    t.boolean "show_about_page", default: false, null: false
     t.index ["prefix"], name: "index_jurisdictions_on_prefix", unique: true
     t.index ["regional_district_id"],
             name: "index_jurisdictions_on_regional_district_id"

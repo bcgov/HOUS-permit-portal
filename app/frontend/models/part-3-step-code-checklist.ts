@@ -16,6 +16,7 @@ import {
   EPart3BuildingType,
   EPart3StepCodeSoftware,
   EProjectStage,
+  EStepCodeType,
 } from "../types/enums"
 import {
   DeepPartial,
@@ -31,7 +32,6 @@ import {
   IStepCodeOccupancy,
   TPart3NavLinkKey,
 } from "../types/types"
-import { Part3StepCodeType } from "./part-3-step-code"
 
 export const Part3StepCodeChecklistModel = types
   .model("Part3StepCodeChecklistModel", {
@@ -110,7 +110,7 @@ export const Part3StepCodeChecklistModel = types
   }))
   .views((self) => ({
     get stepCodeType() {
-      return Part3StepCodeType
+      return EStepCodeType.part3StepCode
     },
     isComplete(key: TPart3NavLinkKey): boolean {
       return self.sectionCompletionStatus[key]?.complete

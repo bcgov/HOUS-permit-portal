@@ -189,9 +189,14 @@ Rails.application.routes.draw do
       get "download_application_metrics_csv",
           on: :collection,
           to: "permit_applications#download_application_metrics_csv"
+
+      # New route for Part 3 Step Code
+      post "part_3_building/step_code",
+           on: :member,
+           to: "permit_applications#create_or_find_step_code"
     end
 
-    resources :permit_projects, only: %i[show index update] do
+    resources :permit_projects, only: %i[show index update create] do
       post "search", on: :collection, to: "permit_projects#index"
     end
 
@@ -218,7 +223,7 @@ Rails.application.routes.draw do
 
     resources :end_user_license_agreement, only: %i[index]
 
-    resources :step_codes, only: %i[destroy], shallow: true do
+    resources :step_codes, only: %i[create destroy], shallow: true do
       get "download_step_code_summary_csv",
           on: :collection,
           to: "step_codes#download_step_code_summary_csv"
@@ -227,11 +232,12 @@ Rails.application.routes.draw do
     namespace :part_9_building do
       resources :step_codes, only: %i[index create], shallow: true do
         resources :checklists, only: %i[index show update]
+        get :select_options, on: :collection
       end
     end
 
     namespace :part_3_building do
-      resources :step_codes, only: %i[create], shallow: true do
+      resources :step_codes, only: [], shallow: true do
         resources :checklists, only: %i[show update]
       end
     end

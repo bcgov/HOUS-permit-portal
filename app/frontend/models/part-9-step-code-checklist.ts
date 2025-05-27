@@ -8,9 +8,9 @@ import {
   EStepCodeChecklistStatus,
   EStepCodeCompliancePath,
   EStepCodeEPCTestingTargetType,
+  EStepCodeType,
 } from "../types/enums"
 import { renameKeys } from "../utils/utility-functions"
-import { Part9StepCodeType } from "./part-9-step-code"
 import { StepCodeBuildingCharacteristicsSummaryModel } from "./step-code-building-characteristic-summary"
 import { StepCodeComplianceReportModel } from "./step-code-compliance-report"
 
@@ -72,7 +72,7 @@ export const Part9StepCodeChecklistModel = types.snapshotProcessor(
     .extend(withEnvironment())
     .views((self) => ({
       get stepCodeType() {
-        return Part9StepCodeType
+        return EStepCodeType.part9StepCode
       },
       get dwellingUnitsCount() {
         return self.selectedReport?.energy?.dwellingUnitsCount

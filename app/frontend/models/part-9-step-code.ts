@@ -3,11 +3,9 @@ import { Instance, types } from "mobx-state-tree"
 import { withEnvironment } from "../lib/with-environment"
 import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
-import { EEnergyStep, EZeroCarbonStep } from "../types/enums"
+import { EEnergyStep, EStepCodeType, EZeroCarbonStep } from "../types/enums"
 import { Part9StepCodeChecklistModel } from "./part-9-step-code-checklist"
 import { StepCodeBaseFields } from "./step-code-base"
-
-export const Part9StepCodeType = "Part9StepCode"
 
 export const Part9StepCodeModel = types
   .compose(
@@ -15,7 +13,7 @@ export const Part9StepCodeModel = types
     StepCodeBaseFields,
     types.model({
       id: types.identifier,
-      type: types.literal(Part9StepCodeType),
+      type: types.literal(EStepCodeType.part9StepCode),
       checklistsMap: types.map(Part9StepCodeChecklistModel),
       zeroCarbonSteps: types.array(types.enumeration(Object.values(EZeroCarbonStep))),
       energySteps: types.array(types.enumeration(Object.values(EEnergyStep))),

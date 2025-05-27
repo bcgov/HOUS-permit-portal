@@ -637,3 +637,8 @@ export enum EPermitProjectSortFields {
   fullAddress = "full_address",
   submittedAt = "submitted_at",
 }
+
+export enum EStepCodeType {
+  part3StepCode = "Part3StepCode",
+  part9StepCode = "Part9StepCode",
+}

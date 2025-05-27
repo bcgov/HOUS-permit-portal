@@ -24,6 +24,7 @@ import Dashboard from "@uppy/react/lib/Dashboard.js"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useRef } from "react"
 import { FormProvider, useFieldArray, useForm } from "react-hook-form"
+import { useLocation } from "react-router-dom"
 import { usePermitProject } from "../../../hooks/resources/use-permit-project"
 import useUppyS3 from "../../../hooks/use-uppy-s3"
 import { IPermitApplication } from "../../../models/permit-application" // Assuming path to your model
@@ -52,6 +53,7 @@ export const PermitProjectScreen = observer(() => {
   const { currentPermitProject, error } = usePermitProject()
   const { permitProjectStore } = useMst()
   const toast = useToast()
+  const location = useLocation()
 
   // Create a ref to hold the current project ID
   const currentPermitProjectIdRef = useRef<string | null>(null)
@@ -151,6 +153,11 @@ export const PermitProjectScreen = observer(() => {
 
   const permitApplications = currentPermitProject.permitApplications || []
 
+  // Determine default tab index from URL query parameter
+  const queryParams = new URLSearchParams(location.search)
+  const tabQueryParam = queryParams.get("tab")
+  const defaultTabIndex = tabQueryParam ? parseInt(tabQueryParam, 10) : 0
+
   return (
     <FormProvider {...methods}>
       <Box p={5} as="form" onSubmit={handleSubmit(onSubmit)}>
@@ -167,7 +174,7 @@ export const PermitProjectScreen = observer(() => {
           </Text>
         </Box>
 
-        <Tabs variant="enclosed-colored" isLazy>
+        <Tabs variant="enclosed-colored" isLazy defaultIndex={defaultTabIndex}>
           <TabList>
             <Tab>Permit Applications</Tab>
             <Tab>Documents</Tab>
