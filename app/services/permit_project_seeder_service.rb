@@ -5,55 +5,104 @@ class PermitProjectSeederService
   end
 
   def seed
-    Rails.logger.info "PermitProjectSeederService: Starting to create permit projects for primary applications."
+    Rails.logger.info "PermitProjectSeederService: Starting to create permit projects for applications."
 
-    PermitApplication.find_each do |permit_application|
-      if ProjectMembership.exists?(
-           item_id: permit_application.id,
-           item_type: "PermitApplication"
-         )
-        Rails.logger.info "PermitProjectSeederService: PermitApplication #{permit_application.id} already belongs to a project. Skipping."
+    application_ids = PermitApplication.pluck(:id)
+    Rails.logger.info "PermitProjectSeederService: Found #{application_ids.count} PermitApplication ID(s) to process: #{application_ids.inspect}"
+
+    application_ids.each do |pa_id|
+      permit_application = PermitApplication.find(pa_id)
+      Rails.logger.info "PermitProjectSeederService: Processing PA ID: #{pa_id}. Current permit_project_id on PA: #{permit_application.permit_project_id}"
+
+      if permit_application.permit_project_id.present?
+        Rails.logger.info "PermitProjectSeederService: PermitApplication #{permit_application.id} already has an associated PermitProject #{permit_application.permit_project_id}. Skipping."
         next
       end
 
+      pa_jurisdiction_id =
+        permit_application.read_attribute_before_type_cast(:jurisdiction_id)
+      pa_nickname =
+        permit_application.read_attribute_before_type_cast(:nickname)
+      pa_full_address =
+        permit_application.read_attribute_before_type_cast(:full_address)
+      pa_pid = permit_application.read_attribute_before_type_cast(:pid)
+      pa_pin = permit_application.read_attribute_before_type_cast(:pin)
+
+      Rails.logger.info "PermitProjectSeederService: For PA #{pa_id} - Old Jurisdiction ID: #{pa_jurisdiction_id.inspect}, Nickname: #{pa_nickname.inspect}"
+
+      if pa_jurisdiction_id.blank?
+        Rails.logger.warn "PermitProjectSeederService: PA #{pa_id} - Skipping PermitProject creation because old jurisdiction_id is blank."
+        next # Skip to the next permit_application
+      end
+
       ActiveRecord::Base.transaction do
-        description_string =
-          "Project for: #{permit_application.nickname || "N/A"}"
+        project_name_for_title = pa_nickname || "N/A"
         activity_name = permit_application.activity&.name || "N/A"
         permit_type_name = permit_application.permit_type&.name || "N/A"
-        description_string += " - #{activity_name} / #{permit_type_name}"
-        description_string += " at #{permit_application.full_address || "N/A"}"
-        description_string = description_string.squish
+        address_for_title = pa_full_address || "N/A"
 
-        new_project =
-          PermitProject.new(
-            owner: permit_application.submitter, # Assumes permit_application.submitter is the correct owner
-            description: description_string
-          )
+        title_string =
+          "Project for: #{project_name_for_title} - #{activity_name} / #{permit_type_name} at #{address_for_title}"
+        title_string = title_string.squish
+
+        new_project_attributes = {
+          owner: permit_application.submitter,
+          title: title_string,
+          jurisdiction_id: pa_jurisdiction_id,
+          full_address: pa_full_address,
+          pid: pa_pid,
+          pin: pa_pin
+        }
+        Rails.logger.info "PermitProjectSeederService: PA #{pa_id} - Attempting to create PermitProject with attributes: #{new_project_attributes.except(:owner).merge(owner_id: permit_application.submitter&.id)}"
+
+        new_project = PermitProject.new(new_project_attributes)
+
+        #binding.pry # Moved pry here to inspect new_project before save
+        Rails.logger.info "PermitProjectSeederService: PA #{pa_id} - Is new_project valid? #{new_project.valid?}"
+        unless new_project.valid?
+          Rails.logger.error "PermitProjectSeederService: PA #{pa_id} - PermitProject validation errors: #{new_project.errors.full_messages.join(", ")}"
+        end
 
         unless new_project.save
-          Rails.logger.error "PermitProjectSeederService: Failed to save new PermitProject for PermitApplication #{permit_application.id}: #{new_project.errors.full_messages.join(", ")}"
+          Rails.logger.error "PermitProjectSeederService: Failed to save new PermitProject for PA #{permit_application.id}: #{new_project.errors.full_messages.join(", ")}. Rolling back."
           raise ActiveRecord::Rollback, "Failed to save new PermitProject"
         end
+        Rails.logger.info "PermitProjectSeederService: PA #{pa_id} - Successfully saved new PermitProject #{new_project.id}."
 
-        membership =
-          ProjectMembership.new(
-            permit_project: new_project,
-            item: permit_application
-          )
-
-        unless membership.save
-          Rails.logger.error "PermitProjectSeederService: Failed to save ProjectMembership for PermitApplication #{permit_application.id} and Project #{new_project.id}: #{membership.errors.full_messages.join(", ")}"
-          raise ActiveRecord::Rollback, "Failed to save ProjectMembership"
+        permit_application.permit_project = new_project
+        Rails.logger.info "PermitProjectSeederService: PA #{pa_id} - Is permit_application valid before saving association? #{permit_application.valid?}"
+        unless permit_application.valid?
+          Rails.logger.error "PermitProjectSeederService: PA #{pa_id} - PermitApplication validation errors before saving association: #{permit_application.errors.full_messages.join(", ")}"
         end
-        Rails.logger.info "PermitProjectSeederService: Successfully created Project #{new_project.id} (Owner: #{new_project.owner_id}) and linked PermitApplication #{permit_application.id}."
+
+        unless permit_application.save
+          Rails.logger.error "PermitProjectSeederService: Failed to associate PA #{permit_application.id} with Project #{new_project.id}: #{permit_application.errors.full_messages.join(", ")}. Rolling back."
+          raise ActiveRecord::Rollback,
+                "Failed to save PA with new project association"
+        end
+        Rails.logger.info "PermitProjectSeederService: PA #{pa_id} - Successfully associated PA with Project #{new_project.id}."
+
+        # Your original binding.pry location - it should be reached if saves are successful
+        # binding.pry
+
+        if permit_application.step_codes.any?
+          permit_application.step_codes.each do |sc|
+            sc.permit_project = new_project
+            unless sc.save
+              Rails.logger.error "PermitProjectSeederService: Failed to associate StepCode #{sc.id} with Project #{new_project.id}: #{sc.errors.full_messages.join(", ")}"
+              raise ActiveRecord::Rollback,
+                    "Failed to save StepCode with new project association"
+            end
+          end
+          Rails.logger.info "PermitProjectSeederService: Updated #{permit_application.step_codes.count} StepCode(s) for PA #{permit_application.id} to link to Project #{new_project.id}."
+        end
+
+        Rails.logger.info "PermitProjectSeederService: Successfully created Project #{new_project.id} for PA #{permit_application.id}."
       end
     rescue ActiveRecord::Rollback => e
-      Rails.logger.error "PermitProjectSeederService: Transaction rolled back for PermitApplication #{permit_application.id}: #{e.message}"
-      # Optionally, decide if a single rollback should stop the whole process or just this iteration
+      Rails.logger.error "PermitProjectSeederService: Transaction rolled back for PA #{pa_id}: #{e.message}"
     rescue => e
-      Rails.logger.error "PermitProjectSeederService: Error processing PermitApplication #{permit_application.id}: #{e.message}\n#{e.backtrace.join("\n")}"
-      # Optionally, decide if a single error should stop the whole process or just this iteration
+      Rails.logger.error "PermitProjectSeederService: Error processing PA #{pa_id}: #{e.message}\n#{e.backtrace.join("\n")}"
     end
     Rails.logger.info "PermitProjectSeederService: Finished creating permit projects."
   end

@@ -262,7 +262,7 @@ class Api::JurisdictionsController < Api::ApplicationController
         zero_carbon_step_required
         _destroy
       ],
-      community_documents_attributes: [
+      jurisdiction_documents_attributes: [
         :id,
         :jurisdiction_id,
         :_destroy,

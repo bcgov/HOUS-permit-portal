@@ -57,6 +57,34 @@ class Api::PermitProjectsController < Api::ApplicationController
     end
   end
 
+  def create
+    @permit_project = PermitProject.new(permit_project_params)
+    @permit_project.owner = current_user # Assign the current user as the owner
+    authorize @permit_project # Assuming you have a PermitProjectPolicy with :create?
+
+    if @permit_project.save
+      render_success @permit_project,
+                     "activerecord.attributes.permit_project.created", # Add this translation key
+                     {
+                       blueprint: PermitProjectBlueprint,
+                       status: :created,
+                       blueprint_opts: {
+                         view: :extended # Or :base, depending on what you want to return
+                       }
+                     }
+    else
+      render_error(
+        "activerecord.errors.models.permit_project.create_error", # Add this translation key
+        {
+          message_opts: {
+            errors: @permit_project.errors.full_messages
+          },
+          status: :unprocessable_entity
+        }
+      )
+    end
+  end
+
   private
 
   def set_permit_project
@@ -65,7 +93,11 @@ class Api::PermitProjectsController < Api::ApplicationController
 
   def permit_project_params
     params.require(:permit_project).permit(
-      :description,
+      :title, # Changed from name and description
+      :full_address, # Added full_address
+      :pid, # Added pid
+      :pin, # Added pin
+      :property_plan_jurisdiction_id, # Added property_plan_jurisdiction_id
       project_documents_attributes: [
         :id,
         :permit_project_id,

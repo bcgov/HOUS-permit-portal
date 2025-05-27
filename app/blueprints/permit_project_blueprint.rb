@@ -1,7 +1,7 @@
 class PermitProjectBlueprint < Blueprinter::Base
   identifier :id
 
-  fields :description, :created_at, :updated_at
+  fields :title, :created_at, :updated_at
 
   view :extended do
     association :permit_applications,

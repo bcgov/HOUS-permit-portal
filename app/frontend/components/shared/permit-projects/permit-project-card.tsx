@@ -33,23 +33,25 @@ export const PermitProjectCard = observer(({ permitProject }: IPermitProjectCard
   const { userStore } = useMst()
   const currentUser = userStore.currentUser
 
-  const { primaryPermitApplication } = permitProject
+  // Get the first permit application to display some of its details, if available
+  const displayApplication = permitProject.permitApplications?.[0]
 
-  // Use project's own description as nickname, or fallback to primary app's nickname
-  const nickname = permitProject.description || primaryPermitApplication?.nickname
-  const permitTypeAndActivity =
-    primaryPermitApplication?.permitTypeAndActivity || permitProject.permitTypeAndActivity || "N/A"
-  const number = permitProject.number || primaryPermitApplication?.number || "N/A"
-  // Use project's createdAt, or fallback to primary app's if available
-  const createdAt = permitProject.createdAt || primaryPermitApplication?.createdAt
+  // Use project's own title as nickname
+  const nickname = permitProject.title
+  // Details potentially from the first permit application
+  const permitTypeAndActivity = displayApplication?.permitTypeAndActivity || "N/A"
+  const number = displayApplication?.number || "N/A" // Assuming 'number' might exist on permitApplication
+  // Use project's own dates
+  const createdAt = permitProject.createdAt
   const updatedAt = permitProject.updatedAt
-  const viewedAt = primaryPermitApplication?.viewedAt
-  const status = permitProject.status || primaryPermitApplication?.status
+  // Details from the first permit application
+  const viewedAt = displayApplication?.viewedAt
+  const status = displayApplication?.status
 
-  // Determine if the primary application is submitted. This might influence UI elements.
-  const isPrimaryApplicationSubmitted = primaryPermitApplication?.isSubmitted || false
-  // Using project's submitter, or fallback to primary app's
-  const projectSubmitter = permitProject.submitter || primaryPermitApplication?.submitter
+  // Determine if the display application is submitted.
+  const isDisplayApplicationSubmitted = displayApplication?.isSubmitted || false
+  // Submitter details from the first permit application
+  const projectSubmitter = displayApplication?.submitter
   const isSubmissionCollaboration = projectSubmitter?.id !== currentUser?.id
 
   // Simplified routing for project card - link to project view/edit
@@ -77,9 +79,7 @@ export const PermitProjectCard = observer(({ permitProject }: IPermitProjectCard
           <Flex direction="column" flex={{ base: 0, md: 1 }} maxW={{ base: "100%", md: "20%" }}>
             <Box p={2}>
               <Image
-                src={
-                  primaryPermitApplication?.permitType?.imageUrl || "/images/permit_classifications/low_residential.png"
-                } // Use primary app image or fallback
+                src={displayApplication?.permitType?.imageUrl || "/images/permit_classifications/low_residential.png"} // Use display app image or fallback
                 alt={`thumbnail for ${nickname}`}
                 w="200px"
                 h="110px"
@@ -95,9 +95,7 @@ export const PermitProjectCard = observer(({ permitProject }: IPermitProjectCard
         <Show below="md">
           <Flex justify="space-between" alignItems="center">
             <Image
-              src={
-                primaryPermitApplication?.permitType?.imageUrl || "/images/permit_classifications/low_residential.png"
-              } // Use primary app image or fallback
+              src={displayApplication?.permitType?.imageUrl || "/images/permit_classifications/low_residential.png"} // Use display app image or fallback
               alt={`thumbnail for ${nickname}`}
               w="150px"
               h="80px"
@@ -122,14 +120,14 @@ export const PermitProjectCard = observer(({ permitProject }: IPermitProjectCard
               </Text>
             </Flex>
           )}
-          {/* Collaboration callout - adapt if project has direct collaborators or use primary app's */}
-          {isSubmissionCollaboration && primaryPermitApplication && (
+          {/* Collaboration callout - use display application's details */}
+          {isSubmissionCollaboration && displayApplication && (
             <Flex bg="semantic.info" color={"white"} {...calloutBannerContainerProps}>
               <Info size={14} />
               <Text {...calloutBannerTextProps}>
                 <Trans
                   i18nKey={
-                    primaryPermitApplication.isDraft
+                    displayApplication.isDraft
                       ? "permitApplication.card.collaborationCalloutDraft"
                       : "permitApplication.card.collaborationCalloutSubmitted"
                   }

@@ -7,7 +7,7 @@ import { PermitApplicationModel } from "./permit-application"
 export const PermitProjectModel = types
   .model("PermitProjectModel", {
     id: types.identifier,
-    description: types.maybeNull(types.string), // Projects might not have a description initially
+    title: types.string,
     permitApplications: types.array(types.reference(types.late(() => PermitApplicationModel))),
     projectDocuments: types.maybeNull(types.array(types.frozen<IProjectDocument>())), // Changed to IProjectDocument
     createdAt: types.Date,

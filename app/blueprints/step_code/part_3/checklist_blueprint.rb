@@ -54,19 +54,18 @@ class StepCode::Part3::ChecklistBlueprint < Blueprinter::Base
          :completed_by_email,
          :completed_by_phone_number,
          :completed_by_organization_name
-  field :pid, name: :project_identifier
-  field :nickname, name: :project_name
-  field :full_address, name: :project_address
 
-  field :overheating_hours_limit do |_checklist, _options|
-    Constants::Part3StepCode::OVERHEATING_HOURS_LIMIT
+  # Fields from ProjectItem concern (delegated from PermitProject via StepCode)
+  field :pid, name: :project_identifier # Actual Parcel ID from project, exposed as project_identifier
+  field :project_name
+  field :project_address
+  field :jurisdiction_name # Delegated from permit_project.jurisdiction.name
+
+  field :permit_date do |checklist, _options| # Delegated from permit_project.created_at
+    checklist.permit_date&.strftime("%b %e, %Y")
   end
 
-  field :permit_date do |checklist, _options|
-    checklist.newly_submitted_at&.strftime("%b%e, %Y")
-  end
-
-  field :status, name: :project_stage
+  field :status, name: :project_stage # This status seems to be checklist specific, not project status
 
   field :building_code_version do |checklist, _options|
     if checklist.newly_submitted_at.present?
@@ -109,6 +108,10 @@ class StepCode::Part3::ChecklistBlueprint < Blueprinter::Base
     StepCode::Part3::ComplianceReportBlueprint.render_as_hash(
       checklist.compliance_report.results
     )
+  end
+
+  field :overheating_hours_limit do |_checklist, _options|
+    Constants::Part3StepCode::OVERHEATING_HOURS_LIMIT
   end
 
   view :extended do

@@ -3,7 +3,6 @@ import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React from "react"
 import { useTranslation } from "react-i18next"
-import { useFlashQueryParam } from "../../../hooks/use-flash-query-param"
 import { useSearch } from "../../../hooks/use-search"
 import { IPermitProject } from "../../../models/permit-project"
 import { useMst } from "../../../setup/root"
@@ -14,6 +13,7 @@ import { Paginator } from "../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../shared/base/inputs/per-page-select"
 import { ModelSearchInput } from "../../shared/base/model-search-input"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
+import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { PermitProjectCard } from "../../shared/permit-projects/permit-project-card"
 import { SortSelect } from "../../shared/select/selectors/sort-select"
 // import { PermitProjectFiltersMenu } from "./permit-project-filters-menu"; // If filters are needed
@@ -40,7 +40,6 @@ export const PermitProjectIndexScreen = observer(({}: IPermitProjectIndexScreenP
 
   // useSearch hook will be updated later if needed for project-specific params
   useSearch(permitProjectStore, [])
-  useFlashQueryParam()
 
   return (
     <Flex as="main" direction="column" w="full" bg="greys.white" pb="24">
@@ -48,15 +47,14 @@ export const PermitProjectIndexScreen = observer(({}: IPermitProjectIndexScreenP
       <BlueTitleBar title={t("permitProject.indexTitle")} />
       <Container maxW="container.lg" pb={4}>
         <Flex as="section" direction="column" p={6} gap={6} flex={1}>
-          {/* Add "New Project" button if needed
           <RouterLinkButton
-            to="/permit-projects/new" // Adjust route as needed
+            to="/permit-projects/new"
             variant="primary"
             alignSelf={{ base: "center", md: "flex-start" }}
+            mb={6}
           >
             {t("permitProject.startNew", "Start New Project")}
           </RouterLinkButton>
-          */}
           <Flex
             gap={6}
             align={{ base: "flex-start", md: "flex-end" }}
