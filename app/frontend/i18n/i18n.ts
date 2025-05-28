@@ -1455,7 +1455,7 @@ const options = {
             jurisdictionAbout: {
               title: "My jurisdiction's About page",
               description:
-                "Customize the informational page that submitters will see when they are in the Building Permit Hub.",
+                "Customize the informational page that submitters will see when they are in the Building Permit Hub",
             },
             users: {
               title: "Users",
@@ -1463,7 +1463,7 @@ const options = {
             },
             submissionsInboxSetup: {
               title: "Submissions inbox setup",
-              description: "Specify email addresses that should receive applications.",
+              description: "Specify email addresses that should receive applications",
               inboxEnabled: "Enable inbox",
               permitTypes: {
                 label: "Send permit applications for",
@@ -1523,12 +1523,14 @@ const options = {
             },
             featureAccess: {
               title: "Feature access and settings",
-              description: "Manage and enable features for all users",
-              submissionInbox: "Submissions inbox",
-              submissionInboxDescription:
-                "Enable review managers to accept and process permit applications. If you turn off this feature, submitters can’t submit applications, and review managers won’t receive new applications.",
+              description: "Turn features on or off for all users in your jurisdiction",
+              submissionInbox: "Submissions inbox setup",
+              submissionInboxDescription: "Specify where submitted permit applications should be sent",
               toggleOn: "On",
               toggleOff: "Off",
+              acceptPermitApplications: "Accept permit applications",
+              switchButtonInstructions:
+                "Turning this on lets users submit applications. The email addresses set in this section will receive submitted applications",
             },
             externalApiKeys: {
               title: "API settings",

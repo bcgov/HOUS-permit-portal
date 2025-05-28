@@ -55,10 +55,12 @@ const EnergyStepRequirementsScreen = lazy(() =>
     default: module.EnergyStepRequirementsScreen,
   }))
 )
-const SubmissionsInboxSetupScreen = lazy(() =>
-  import("../home/review-manager/configuration-management-screen/submissions-inbox-setup-screen").then((module) => ({
-    default: module.SubmissionsInboxSetupScreen,
-  }))
+const InboxFeatureAccessScreen = lazy(() =>
+  import("../home/review-manager/configuration-management-screen/feature-access-screen/inbox-feature-access").then(
+    (module) => ({
+      default: module.InboxFeatureAccessScreen,
+    })
+  )
 )
 
 const JurisdictionIndexScreen = lazy(() =>
@@ -452,7 +454,7 @@ const AppRoutes = observer(() => {
       />
       <Route
         path="/jurisdictions/:jurisdictionId/configuration-management/feature-access/submissions-inbox-setup"
-        element={<SubmissionsInboxSetupScreen />}
+        element={<InboxFeatureAccessScreen />}
       />
       <Route path="/digital-building-permits" element={<JurisdictionDigitalPermitScreen />} />
       <Route path="/api-settings/api-mappings" element={<JurisdictionApiMappingsSetupIndexScreen />} />
