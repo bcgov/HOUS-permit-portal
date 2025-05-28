@@ -15,7 +15,7 @@ class StepCode::Part3::V0::Seeders::JurisdictionHDD
 
         hdd = row[header_mapping["BCBC 2018 HDD"]]
         j = Jurisdiction.find_by(name:, locality_type:)
-        j.update!(heating_degree_days: hdd)
+        j&.update!(heating_degree_days: hdd)
       end
     end
   end
