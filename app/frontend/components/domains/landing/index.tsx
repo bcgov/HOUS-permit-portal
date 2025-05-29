@@ -35,7 +35,6 @@ import { Controller, FormProvider, useForm } from "react-hook-form"
 import { Trans, useTranslation } from "react-i18next"
 import { IJurisdiction } from "../../../models/jurisdiction"
 import { useMst } from "../../../setup/root"
-import { YellowLineSmall } from "../../shared/base/decorative/yellow-line-small"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
 import { RouterLink } from "../../shared/navigation/router-link"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
@@ -87,6 +86,17 @@ export const LandingScreen = observer(({}: ILandingScreenProps) => {
                 {t("landing.title")}
               </Heading>
               <Text fontSize="lg">{t("landing.intro")}</Text>
+              <RouterLinkButton
+                to={currentUser ? "/" : "/login"}
+                variant="primaryInverse"
+                rightIcon={<CaretRight size={16} />}
+              >
+                {currentUser
+                  ? t("landing.goTo", {
+                      location: currentUser?.isSubmitter ? t("landing.submitterPanel") : t("landing.adminPanel"),
+                    })
+                  : t("landing.permitApp")}
+              </RouterLinkButton>
             </Flex>
           </Container>
         </Flex>
@@ -98,40 +108,41 @@ export const LandingScreen = observer(({}: ILandingScreenProps) => {
             <IconBox icon={<CheckCircle size={32} />}>{t("landing.bestPractices")}</IconBox>
             <IconBox icon={<ClipboardText size={32} />}>{t("landing.easyToFollow")}</IconBox>
           </Flex>
-
-          <Flex gap={10} alignItems="flex-start" direction={{ base: "column", md: "row" }}>
-            <Flex
-              as="section"
-              direction="column"
-              borderRadius="lg"
-              bg="theme.blueAlt"
-              p={8}
-              gap={6}
-              color="greys.white"
-              flex={1}
-              minW={{ base: "0", md: "50%" }}
+          <Flex
+            as="section"
+            direction="column"
+            borderRadius="lg"
+            bg="var(--chakra-colors-theme-blueLight)"
+            p={8}
+            gap={6}
+            color="theme.secondary"
+            flex={1}
+            minW={{ base: "0", md: "50%" }}
+            boxShadow="sm"
+            position="relative"
+          >
+            <Heading as="h2" fontSize="2xl" mb={2} fontWeight="bold">
+              {t("landing.toolsSectionTitle")}
+            </Heading>
+            <Text fontSize="lg">{t("landing.toolsSectionDesc1")}</Text>
+            <Text fontSize="lg">{t("landing.toolsSectionDesc2")}</Text>
+            <Button
+              as={RouterLink}
+              to="/tools"
+              variant="primary"
+              size="lg"
+              alignSelf="flex-start"
+              rightIcon={<CaretRight size={20} />}
+              mt={2}
             >
-              <Heading as="h2">{t("landing.accessMyPermits")}</Heading>
-              <Text>{t("landing.accessExplanation")}</Text>
-              <YellowLineSmall />
-              <Flex gap={6} direction={{ base: "column", md: "row" }}>
-                <RouterLinkButton
-                  to={currentUser ? "/" : "/login"}
-                  variant="primaryInverse"
-                  icon={<CaretRight size={16} />}
-                >
-                  {t("landing.goTo", {
-                    location:
-                      !currentUser || currentUser.isSubmitter ? t("landing.permitApp") : t("landing.adminPanel"),
-                  })}
-                </RouterLinkButton>
-              </Flex>
-            </Flex>
+              {t("landing.goToTools")}
+            </Button>
+          </Flex>
+          <Flex gap={10} alignItems="flex-start" direction={{ base: "column", md: "row" }}>
             <VStack as="section" align="flex-start" spacing={4}>
               <Heading as="h2" variant="yellowline">
                 {t("landing.whoForTitle")}
               </Heading>
-
               <UnorderedList spacing={1} pl={4}>
                 {whoFor.map((str) => (
                   <ListItem key={str}>{str}</ListItem>

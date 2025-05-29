@@ -148,8 +148,9 @@ const options = {
           cantFind: "Can't find your address?",
           browseList: "Browse list of jurisdictions",
           goTo: "Go to {{ location }}",
-          permitApp: "permit app",
+          permitApp: "Log in",
           adminPanel: "admin panel",
+          submitterPanel: "permit app",
           enabledCommunitiesDescription: "Communities you can submit Building Permit applications in:",
           moreComingSoon: "(more coming soon)",
           andMore: "...and more",
@@ -162,6 +163,12 @@ const options = {
             end: "Accurately fill out your permit application online with ease",
             endButton: "Get started now",
           },
+          goToTools: "Go to tools",
+          toolsSectionTitle: "Tools to help prepare your project for application",
+          toolsSectionDesc1:
+            "Use Building Permit Hub's tools to check your application for readiness and prepare key documents for your project.",
+          toolsSectionDesc2:
+            "Check your project against Provincial requirements such as Step Codes and prepare other documents.",
         },
         ui: {
           okay: "Okay",
@@ -1517,7 +1524,7 @@ const options = {
               description: "Turn system features on or off for all users system-wide.",
               submissionInbox: "Submissions inbox",
               submissionInboxDescription:
-                "Enable review managers to accept and process permit applications. If you turn off this feature, submitters can’t submit applications, and review managers won’t receive new applications.",
+                "Enable review managers to accept and process permit applications. If you turn off this feature, submitters can't submit applications, and review managers won't receive new applications.",
               toggleOn: "On",
               toggleOff: "Off",
             },
@@ -1958,7 +1965,7 @@ const options = {
             description: "Turn system features on or off for all users",
             submissionInbox: "Submissions inbox",
             submissionInboxDescription:
-              "Enable review managers to accept and process permit applications. If you turn off this feature, submitters can’t submit applications, and review managers won’t receive new applications.",
+              "Enable review managers to accept and process permit applications. If you turn off this feature, submitters can't submit applications, and review managers won't receive new applications.",
             toggleOn: "On",
             toggleOff: "Off",
           },
