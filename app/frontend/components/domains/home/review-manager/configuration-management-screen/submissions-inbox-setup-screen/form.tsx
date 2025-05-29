@@ -1,4 +1,4 @@
-import { FormLabel, HStack, Switch, VStack } from "@chakra-ui/react"
+import { VStack } from "@chakra-ui/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
@@ -91,19 +91,6 @@ export const Form = observer(function SubmissionInboxSetupForm({ jurisdiction }:
               />
             )
           })}
-          {/* Inbox Enabled Switch */}
-          <HStack width="100%" align="center">
-            <FormLabel htmlFor="inbox-enabled-switch" mb="0">
-              {t(`${i18nPrefix}.inboxEnabled`)}
-            </FormLabel>
-            <Switch
-              id="inbox-enabled-switch"
-              isChecked={jurisdiction.inboxEnabled}
-              onChange={(e) => {
-                jurisdiction.update({ inboxEnabled: e.target.checked })
-              }}
-            />
-          </HStack>
         </VStack>
       </form>
     </FormProvider>
