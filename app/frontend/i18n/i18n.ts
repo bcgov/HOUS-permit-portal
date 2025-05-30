@@ -2332,8 +2332,8 @@ const options = {
               },
             },
             featureAccess: {
-              title: "Feature access",
-              description: "Turn features on or off for all users in your jurisdiction",
+              title: "Feature access and settings",
+              description: "Manage and enable features for all users",
               submissionInbox: "Submissions inbox setup",
               submissionInboxDescription: "Specify where submitted permit applications should be sent",
               toggleOn: "On",
