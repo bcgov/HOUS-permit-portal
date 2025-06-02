@@ -21,7 +21,8 @@ RSpec.describe User, type: :model do
                review_manager: 1,
                reviewer: 2,
                super_admin: 3,
-               regional_review_manager: 4
+               regional_review_manager: 4,
+               technical_support: 5
              )
     end
 
@@ -47,13 +48,13 @@ RSpec.describe User, type: :model do
     it "a super admin can invite reviewers, review managers, super admins" do
       inviter = build(:user, :super_admin)
       expect(inviter.invitable_roles).to match_array(
-        %w[reviewer review_manager regional_review_manager super_admin]
+        %w[reviewer review_manager regional_review_manager super_admin technical_support]
       )
     end
     it "a review manager can invite reviewers and review managers" do
       inviter = build(:user, :review_manager)
       expect(inviter.invitable_roles).to match_array(
-        %w[reviewer review_manager]
+        %w[reviewer review_manager technical_support]
       )
     end
     it "a reviewer cannot invite anyone" do

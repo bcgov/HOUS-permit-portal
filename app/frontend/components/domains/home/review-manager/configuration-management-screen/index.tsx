@@ -12,7 +12,6 @@ import { SectionBox } from "../../section-box"
 export const ConfigurationManagementScreen = observer(function ConfigurationManagementScreen() {
   const i18nPrefix = "home.configurationManagement"
   const { currentJurisdiction, error } = useJurisdiction()
-
   return error ? (
     <ErrorScreen error={error} />
   ) : (
@@ -23,7 +22,6 @@ export const ConfigurationManagementScreen = observer(function ConfigurationMana
             <Heading mb={0} fontSize="3xl">
               {t(`${i18nPrefix}.title`)}
             </Heading>
-
             <SectionBox>
               <Flex align="flex-end">
                 <Text mb={2} mr={2}>
@@ -52,7 +50,6 @@ export const ConfigurationManagementScreen = observer(function ConfigurationMana
             </FormControl> */}
               </Flex>
             </SectionBox>
-
             <Grid templateColumns="repeat(2, 1fr)" gap={6}>
               <GridItem>
                 <HomeScreenBox
@@ -75,7 +72,6 @@ export const ConfigurationManagementScreen = observer(function ConfigurationMana
                   h="full"
                 />
               </GridItem>
-
               <GridItem>
                 <HomeScreenBox
                   title={t(`${i18nPrefix}.users.title`)}
