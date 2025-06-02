@@ -2266,6 +2266,8 @@ const options = {
               myJurisdictionAboutPageDescription:
                 "Show a custom About page on Building Permit Hub with information specific to your jurisdiction's requirements, contact information, or common issues to watch for.<br/><br/> Only turn this page on after you've added your content. If it's turned on without custom content, the page will appear blank. <1>Edit your jurisdiction's About page content</1>",
               myJurisdictionAboutPageEdit: "Edit",
+              editJurisdictionAboutPage: "Edit my jurisdiction About page",
+              editJurisdictionEditButton: "Edit page",
               toggleOn: "On",
               toggleOff: "Off",
               acceptPermitApplications: "Accept permit applications",

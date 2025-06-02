@@ -18,6 +18,7 @@ export const myJurisdictionAboutPageScreen = observer(() => {
       backUrl={`/jurisdictions/${currentJurisdiction?.slug}/configuration-management/feature-access/`}
       isEnabled={currentJurisdiction?.showAboutPage ?? false}
       editPageUrl={`/jurisdictions/${currentJurisdiction?.slug}/`}
+      pageKey="my-jurisdiction-about-page"
       onToggle={handleToggle}
     />
   )

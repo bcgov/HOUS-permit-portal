@@ -1,13 +1,17 @@
-class AddShowAboutPageToJurisdictions < ActiveRecord::Migration[7.1]
+class AddShowAboutPageToJurisdictions < ActiveRecord::Migration[7.0]
   def up
-    add_column :jurisdictions,
-               :show_about_page,
-               :boolean,
-               default: false,
-               null: false
+    unless column_exists?(:jurisdictions, :show_about_page)
+      add_column :jurisdictions,
+                 :show_about_page,
+                 :boolean,
+                 default: false,
+                 null: false
+    end
   end
 
   def down
-    remove_column :jurisdictions, :show_about_page
+    if column_exists?(:jurisdictions, :show_about_page)
+      remove_column :jurisdictions, :show_about_page
+    end
   end
 end

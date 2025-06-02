@@ -1,8 +1,8 @@
-import { Container, Flex, Heading, Text, VStack } from "@chakra-ui/react"
-import { CaretLeft } from "@phosphor-icons/react"
+import { Box, Button, Container, Flex, Heading, Icon, Text, VStack } from "@chakra-ui/react"
+import { CaretLeft, NotePencil } from "@phosphor-icons/react"
 import React from "react"
 import { Trans, useTranslation } from "react-i18next"
-import { useLocation } from "react-router-dom"
+import { Link as RouterLink, useLocation } from "react-router-dom"
 import { SubmissionsInboxSetupScreen } from "../../domains/home/review-manager/configuration-management-screen/submissions-inbox-setup-screen"
 import { SwitchButton } from "../buttons/switch-button"
 import { RouterLinkButton } from "../navigation/router-link-button"
@@ -14,6 +14,7 @@ interface FeatureToggleScreenProps {
   isEnabled: boolean
   editPageUrl: string
   onToggle: (checked: boolean) => void
+  pageKey: string
 }
 
 export const FeatureToggleScreen: React.FC<FeatureToggleScreenProps> = ({
@@ -23,10 +24,10 @@ export const FeatureToggleScreen: React.FC<FeatureToggleScreenProps> = ({
   isEnabled,
   editPageUrl,
   onToggle,
+  pageKey,
 }) => {
   const { t } = useTranslation()
   const location = useLocation()
-
   return (
     <Container maxW="container.lg" p={8} as={"main"}>
       <VStack alignItems={"flex-start"} w={"full"} h={"full"} gap={6}>
@@ -56,12 +57,16 @@ export const FeatureToggleScreen: React.FC<FeatureToggleScreenProps> = ({
         </Flex>
         {/* ts-ignore */}
         <Flex w="100%" align="center" justify="space-between">
-          {!location.pathname.endsWith("/submissions-inbox-setup") && (
-            <Text color="text.secondary" fontSize="lg" fontWeight="bold">
-              {t(`${i18nPrefix}.${featureKey}`)}
-            </Text>
+          {!location.pathname.endsWith("/submissions-inbox-setup") && pageKey !== "my-jurisdiction-about-page" ? (
+            <>
+              <Text color="text.secondary" fontSize="lg" fontWeight="bold">
+                {t(`${i18nPrefix}.${featureKey}`)}
+              </Text>
+              <SwitchButton isChecked={isEnabled} onChange={(e) => onToggle(e.target.checked)} size={"lg"} mt={1} />
+            </>
+          ) : (
+            <span />
           )}
-          <SwitchButton isChecked={isEnabled} onChange={(e) => onToggle(e.target.checked)} size={"lg"} mt={1} />
         </Flex>
       </VStack>
       {location.pathname.endsWith("/submissions-inbox-setup") && (
@@ -77,6 +82,25 @@ export const FeatureToggleScreen: React.FC<FeatureToggleScreenProps> = ({
             <SwitchButton isChecked={isEnabled} onChange={(e) => onToggle(e.target.checked)} size={"lg"} />
           </Flex>
         </>
+      )}
+      {pageKey === "my-jurisdiction-about-page" && (
+        <Box>
+          <Heading as="h2" fontSize="2xl" fontWeight="bold" mb={4}>
+            {t(`${i18nPrefix}.editJurisdictionAboutPage`)}
+          </Heading>
+          <Button
+            as={RouterLink}
+            to={pageKey}
+            leftIcon={<Icon as={NotePencil} boxSize={6} />}
+            colorScheme="blue"
+            size="lg"
+            fontWeight="bold"
+            borderRadius="lg"
+            px={8}
+          >
+            {t(`${i18nPrefix}.editJurisdictionEditButton`)}
+          </Button>
+        </Box>
       )}
     </Container>
   )
