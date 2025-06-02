@@ -16,9 +16,6 @@ class MigrateDataToPermitProjectsAndDropOldColumns < ActiveRecord::Migration[
       # For now, proceeding with simple removal if it exists.
       remove_column :permit_applications, :jurisdiction_id, :uuid # remove_reference might fail if FK constraint name is unknown or already gone
     end
-    if column_exists?(:permit_applications, :nickname)
-      remove_column :permit_applications, :nickname, :string
-    end
     if column_exists?(:permit_applications, :full_address)
       remove_column :permit_applications, :full_address, :text
     end
@@ -65,9 +62,6 @@ class MigrateDataToPermitProjectsAndDropOldColumns < ActiveRecord::Migration[
       # This was the PA's direct jurisdiction_id
       add_column :permit_applications, :jurisdiction_id, :uuid
       # add_reference :permit_applications, :jurisdiction, foreign_key: true, type: :uuid, null: true # This was the original, but if it was just a simple column, add_column is fine.
-    end
-    unless column_exists?(:permit_applications, :nickname)
-      add_column :permit_applications, :nickname, :string
     end
     unless column_exists?(:permit_applications, :full_address)
       add_column :permit_applications, :full_address, :text

@@ -34,13 +34,10 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_29_185101) do
                default: -> { "gen_random_uuid()" },
                force: :cascade do |t|
     t.uuid "external_api_key_id", null: false
-    t.integer "notification_interval_days", null: false
-    t.datetime "sent_at", null: false
+    t.integer "notification_interval_days"
+    t.datetime "sent_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index %w[external_api_key_id notification_interval_days],
-            name: "idx_api_key_expiration_notifications_on_key_id_and_interval",
-            unique: true
     t.index ["external_api_key_id"],
             name:
               "index_api_key_expiration_notifications_on_external_api_key_id"
@@ -95,6 +92,12 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_29_185101) do
     t.uuid "contactable_id"
     t.index %w[contactable_type contactable_id],
             name: "index_contacts_on_contactable"
+  end
+
+  create_table "data_migrations",
+               primary_key: "version",
+               id: :string,
+               force: :cascade do |t|
   end
 
   create_table "document_references",
@@ -476,6 +479,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_29_185101) do
     t.jsonb "submission_data"
     t.string "number"
     t.datetime "signed_off_at"
+    t.string "nickname"
     t.datetime "viewed_at"
     t.jsonb "zipfile_data"
     t.uuid "template_version_id", null: false

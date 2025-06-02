@@ -29,8 +29,7 @@ module StepCodeParamsConcern
       # Nested attributes for PermitProject
       permit_project_attributes: [
         :id, # Allow :id for updates if project already exists and is being associated
-        :name,
-        :description,
+        :title, # Added title
         :full_address,
         :pid,
         :pin,

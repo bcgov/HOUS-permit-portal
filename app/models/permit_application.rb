@@ -600,6 +600,10 @@ class PermitApplication < ApplicationRecord
     ).first&.name
   end
 
+  def jurisdiction_name
+    jurisdiction&.qualified_name
+  end
+
   private
 
   def update_collaboration_assignments
@@ -607,8 +611,15 @@ class PermitApplication < ApplicationRecord
   end
 
   def assign_default_nickname
-    if permit_project && permit_project.name.blank?
-      Rails.logger.warn "PermitProject associated with PermitApplication #{id} has a blank name. Consider setting it."
+    if nickname.blank? # Only attempt to default if nickname is not already provided
+      if permit_project&.title.present?
+        self.nickname =
+          "#{formatted_permit_classifications} Application for #{permit_project.title}"
+      elsif permit_project && permit_project.title.blank?
+        # Log a warning if project exists but its title is blank, as nickname won't be defaulted from it.
+        Rails.logger.warn "PermitApplication (ID: #{id || "new"}) - Default nickname assignment: Associated PermitProject (ID: #{permit_project.id}) has a blank title. `nickname` may fail presence validation if not set from params or factory."
+      end
+      # If permit_project is nil, or its title is blank, nickname remains blank and will be caught by presence validation if not set elsewhere.
     end
   end
 
