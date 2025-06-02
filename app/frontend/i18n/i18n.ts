@@ -2264,7 +2264,7 @@ const options = {
               submissionInboxDescription: "Specify where submitted permit applications should be sent",
               myJurisdictionAboutPage: "My Jurisdiction's About page",
               myJurisdictionAboutPageDescription:
-                "Show a custom About page on Building Permit Hub with information specific to your jurisdiction's requirements, contact information, or common issues to watch for.<br/><br/> Only turn this page on after you've added your content. If it's turned on without custom content, the page will appear blank. <1>Edit your jurisdiction's About page content</1>",
+                "Show a custom About page on Building Permit Hub with information specific to your jurisdiction's requirements, contact information, or common issues to watch for.<br><br> Only turn this page on after you've added your content. If it's turned on without custom content, the page will appear blank. <1> Edit your jurisdiction's About page content",
               myJurisdictionAboutPageEdit: "Edit",
               editJurisdictionAboutPage: "Edit my jurisdiction About page",
               editJurisdictionEditButton: "Edit page",
