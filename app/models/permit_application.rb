@@ -50,7 +50,7 @@ class PermitApplication < ApplicationRecord
   # Custom validation
 
   validate :jurisdiction_has_matching_submission_contact
-  validates :nickname, presence: true
+  # validates :nickname, presence: true
   validates :number, presence: true
   validates :reference_number, length: { maximum: 300 }, allow_nil: true
   validate :sandbox_belongs_to_jurisdiction
@@ -60,7 +60,6 @@ class PermitApplication < ApplicationRecord
   delegate :code, :name, to: :activity, prefix: true
   delegate :published_template_version, to: :template_version
 
-  before_validation :assign_default_nickname, on: :create
   before_validation :assign_unique_number, on: :create
   before_validation :set_template_version, on: :create
   before_validation :populate_base_form_data, on: :create
@@ -193,7 +192,8 @@ class PermitApplication < ApplicationRecord
   def search_data
     {
       number: number,
-      nickname: nickname,
+      # nickname: nickname, # Temporarily commented out
+      nickname: "TEMP_NICKNAME_FOR_BISECT", # Placeholder
       full_address: full_address,
       permit_classifications: formatted_permit_classifications,
       submitter: "#{submitter.name} #{submitter.email}",

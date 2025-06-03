@@ -38,6 +38,9 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_29_185101) do
     t.datetime "sent_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index %w[external_api_key_id notification_interval_days],
+            name: "idx_api_key_expiration_notifications_on_key_id_and_interval",
+            unique: true
     t.index ["external_api_key_id"],
             name:
               "index_api_key_expiration_notifications_on_external_api_key_id"
@@ -294,8 +297,8 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_29_185101) do
     t.string "slug"
     t.integer "map_zoom"
     t.string "external_api_state", default: "g_off", null: false
-    t.boolean "inbox_enabled", default: false, null: false
     t.integer "heating_degree_days"
+    t.boolean "inbox_enabled", default: false, null: false
     t.index ["prefix"], name: "index_jurisdictions_on_prefix", unique: true
     t.index ["regional_district_id"],
             name: "index_jurisdictions_on_regional_district_id"
