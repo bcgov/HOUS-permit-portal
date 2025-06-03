@@ -50,7 +50,7 @@ const ConfigurationManagementScreen = lazy(() =>
 )
 const TechnicalSupportConfigurationManagementScreen = lazy(() =>
   import("../home/technical-support/configuration-management-screen").then((module) => ({
-    default: module.ConfigurationManagementScreen,
+    default: module.TechnicalSupportConfigurationManagementScreen,
   }))
 )
 const EnergyStepRequirementsScreen = lazy(() =>
@@ -449,18 +449,8 @@ const AppRoutes = observer(() => {
         path="/jurisdictions/:jurisdictionId/configuration-management"
         element={<TechnicalSupportConfigurationManagementScreen />}
       />
-      <Route
-        path="/jurisdictions/:jurisdictionId/configuration-management/feature-access"
-        element={<ReviewManagerFeatureAccessScreen />}
-      />
-      <Route
-        path="/jurisdictions/:jurisdictionId/configuration-management/feature-access/submissions-inbox-setup"
-        element={
-          <SubmissionsInboxSetupScreenLazy
-            editPageUrl={`/jurisdictions/${useParams().jurisdictionId}/configuration-management/feature-access`}
-          />
-        }
-      />
+      <Route path="/jurisdictions/:jurisdictionId/users" element={<JurisdictionUserIndexScreen />} />
+      <Route path="/jurisdictions/:jurisdictionId/users/invite" element={<InviteScreen />} />
     </>
   )
 
@@ -535,17 +525,17 @@ const AppRoutes = observer(() => {
   )
 
   console.log("--- Debugging ProtectedRoute conditions ---")
-  console.log("loggedIn:", loggedIn)
-  console.log("currentUser (object or null):", currentUser)
-  console.log("mustAcceptEula (based on safe booleans):", mustAcceptEula)
-  console.log("isReviewStaff (safe boolean):", isReviewStaff)
-  console.log("isReviewer (safe boolean):", isReviewer)
-  console.log("isReviewManager (safe boolean):", isReviewManager)
-  console.log("isRegionalReviewManager (safe boolean):", isRegionalReviewManager)
-  console.log("isTechnicalSupport (safe boolean):", isTechnicalSupport)
-  console.log("eulaAccepted (safe boolean):", eulaAccepted)
-  console.log("isSuperAdmin (safe boolean):", isSuperAdmin)
-  console.log("isUnconfirmed (safe boolean):", isUnconfirmed)
+  // console.log("loggedIn:", loggedIn)
+  // console.log("currentUser (object or null):", currentUser)
+  // console.log("mustAcceptEula (based on safe booleans):", mustAcceptEula)
+  // console.log("isReviewStaff (safe boolean):", isReviewStaff)
+  // console.log("isReviewer (safe boolean):", isReviewer)
+  // console.log("isReviewManager (safe boolean):", isReviewManager)
+  // console.log("isRegionalReviewManager (safe boolean):", isRegionalReviewManager)
+  // console.log("isTechnicalSupport (safe boolean):", isTechnicalSupport)
+  // console.log("eulaAccepted (safe boolean):", eulaAccepted)
+  // console.log("isSuperAdmin (safe boolean):", isSuperAdmin)
+  // console.log("isUnconfirmed (safe boolean):", isUnconfirmed)
 
   // Step 4: Calculate isAllowed props using safe booleans
   const isAllowedForAdminOrManager =
@@ -557,9 +547,16 @@ const AppRoutes = observer(() => {
 
   const isAllowedForTechnicalSupport = loggedIn && !mustAcceptEula && isTechnicalSupport
   console.log("isAllowed for technicalSupportRoutes:", isAllowedForTechnicalSupport)
+  console.log("is TS===========>:", isTechnicalSupport)
 
-  const isAllowedForReviewManagerOnly = loggedIn && !mustAcceptEula && isReviewStaff && !isReviewer
-  console.log("isAllowed for reviewManagerOnlyRoutes:", isAllowedForReviewManagerOnly)
+  const isAllowedForReviewManagerOnly = loggedIn && !mustAcceptEula && (isReviewManager || isRegionalReviewManager)
+
+  console.log("isAllowed for reviewManagerOnlyRoutes================>:", isAllowedForReviewManagerOnly)
+  console.log("isReviewManager:", isReviewManager)
+  console.log("isRegionalReviewManager:", isRegionalReviewManager)
+  console.log("isTechnicalSupport:", isTechnicalSupport)
+  console.log("isAllowedForReviewManagerOnly:", isAllowedForReviewManagerOnly)
+  console.log("currentUser:", currentUser)
   console.log("--- End Debugging --- ")
 
   return (
@@ -639,27 +636,27 @@ const AppRoutes = observer(() => {
         >
           {managerOrReviewerRoutes}
         </Route>
-
-        <Route
-          element={
-            <ProtectedRoute
-              isAllowed={isAllowedForTechnicalSupport}
-              redirectPath={(mustAcceptEula && "/") || (loggedIn && "/not-found")}
-            />
-          }
-        >
-          {technicalSupportRoutes}
-        </Route>
-
         <Route
           element={
             <ProtectedRoute
               isAllowed={isAllowedForReviewManagerOnly}
               redirectPath={(mustAcceptEula && "/") || (loggedIn && "/not-found")}
+              tempVar={"aaa" + isAllowedForReviewManagerOnly}
             />
           }
         >
           {reviewManagerOnlyRoutes}
+        </Route>
+        <Route
+          element={
+            <ProtectedRoute
+              isAllowed={isAllowedForTechnicalSupport}
+              redirectPath={(mustAcceptEula && "/") || (loggedIn && "/not-found")}
+              tempVar={"f"}
+            />
+          }
+        >
+          {technicalSupportRoutes}
         </Route>
 
         <Route element={<ProtectedRoute isAllowed={!loggedIn} redirectPath="/" />}>

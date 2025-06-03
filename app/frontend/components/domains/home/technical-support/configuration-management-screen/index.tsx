@@ -9,7 +9,7 @@ import { LoadingScreen } from "../../../../shared/base/loading-screen"
 import { SectionBox } from "../../section-box"
 import { TechnicalSupportHomeSection } from "../TechnicalSupportHomeSection"
 
-export const ConfigurationManagementScreen = observer(function ConfigurationManagementScreen() {
+export const TechnicalSupportConfigurationManagementScreen = observer(function ConfigurationManagementScreen() {
   const i18nPrefix = "home.configurationManagement"
   const { currentJurisdiction, error } = useJurisdiction()
 
