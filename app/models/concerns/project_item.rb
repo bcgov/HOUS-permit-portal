@@ -9,13 +9,11 @@ module ProjectItem
              :full_address,
              :pid,
              :pin,
-             :created_at, # For project_start_date
-             :id, # For project_identifier
+             :jurisdiction,
+             :permit_date,
              to: :permit_project,
              allow_nil: true # allow_nil should be false if permit_project is truly non-optional and always present
 
-    # Delegate jurisdiction through permit_project
-    delegate :jurisdiction, to: :permit_project, allow_nil: true # allow_nil for jurisdiction if permit_project can be nil
     delegate :qualified_name,
              :heating_degree_days,
              to: :jurisdiction,
@@ -25,8 +23,7 @@ module ProjectItem
     # Aliases for consistent naming
     alias_method :project_name, :title
     alias_method :project_address, :full_address
-    alias_method :project_start_date, :created_at # Project's created_at is its start date
-    alias_method :project_identifier, :id # PermitProject's ID is the project_identifier
+    alias_method :project_identifier, :pid
 
     # Ensure permit_project is present if it's meant to be non-optional.
     # This can also be handled at the database level or with model validations

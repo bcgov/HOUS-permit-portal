@@ -579,7 +579,8 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_29_185101) do
     t.string "pid"
     t.string "pin"
     t.text "notes"
-    t.string "permit_project_status"
+    t.date "permit_date"
+    t.integer "phase"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["jurisdiction_id"],

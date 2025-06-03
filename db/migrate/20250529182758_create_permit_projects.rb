@@ -13,7 +13,8 @@ class CreatePermitProjects < ActiveRecord::Migration[7.1]
       t.string :pid
       t.string :pin
       t.text :notes
-      t.string :permit_project_status
+      t.date :permit_date
+      t.integer :phase
 
       t.timestamps
     end

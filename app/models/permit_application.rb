@@ -34,12 +34,13 @@ class PermitApplication < ApplicationRecord
   # The front end form update provides a json paylioad of items we want to force update on the front-end since form io maintains its own state and does not 'rerender' if we send the form data back
   attr_accessor :front_end_form_update
 
-  has_one :step_code, dependent: :destroy
   has_many :submission_versions, dependent: :destroy
   has_many :permit_collaborations, dependent: :destroy
   has_many :collaborators, through: :permit_collaborations
   has_many :permit_block_statuses, dependent: :destroy
-  has_many :step_codes, dependent: :destroy
+
+  # Standard has_one association if StepCode directly belongs_to PermitApplication
+  has_one :step_code, dependent: :destroy
 
   scope :submitted, -> { joins(:submission_versions).distinct }
 
@@ -602,6 +603,10 @@ class PermitApplication < ApplicationRecord
 
   def jurisdiction_name
     jurisdiction&.qualified_name
+  end
+
+  def search_document_id
+    self.id # Ensures Searchkick uses the PermitApplication's own ID
   end
 
   private
