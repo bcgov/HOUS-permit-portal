@@ -443,7 +443,7 @@ const AppRoutes = observer(() => {
     </>
   )
 
-  const technicalSupportRoutes = (
+  const technicalSupportOrManagerRoutes = (
     <>
       <Route
         path="/jurisdictions/:jurisdictionId/configuration-management"
@@ -502,24 +502,8 @@ const AppRoutes = observer(() => {
   const reviewManagerOnlyRoutes = (
     <>
       <Route
-        path="/jurisdictions/:jurisdictionId/configuration-management/feature-access"
-        element={<ReviewManagerFeatureAccessScreen />}
-      />
-      <Route
-        path="/jurisdictions/:jurisdictionId/configuration-management/feature-access/submissions-inbox-setup"
-        element={
-          <SubmissionsInboxSetupScreenLazy
-            editPageUrl={`/jurisdictions/${useParams().jurisdictionId}/configuration-management/feature-access`}
-          />
-        }
-      />
-      <Route
         path="/digital-building-permits/:templateVersionId/edit"
         element={<JurisdictionEditDigitalPermitScreen />}
-      />
-      <Route
-        path="/jurisdictions/:jurisdictionId/configuration-management"
-        element={<ConfigurationManagementScreen />}
       />
       <Route path="/digital-building-permits" element={<JurisdictionDigitalPermitScreen />} />
       <Route path="/api-settings/api-mappings" element={<JurisdictionApiMappingsSetupIndexScreen />} />
@@ -555,12 +539,13 @@ const AppRoutes = observer(() => {
   const isAllowedForManagerOrReviewer = loggedIn && !mustAcceptEula && isReviewStaff
   console.log("isAllowed for managerOrReviewerRoutes:", isAllowedForManagerOrReviewer)
 
-  const isAllowedForTechnicalSupport = loggedIn && !mustAcceptEula && isTechnicalSupport
-  console.log("isAllowed for technicalSupportRoutes:", isAllowedForTechnicalSupport)
-
   const isAllowedForReviewManagerOnly = loggedIn && !mustAcceptEula && isReviewStaff && !isReviewer
   console.log("isAllowed for reviewManagerOnlyRoutes:", isAllowedForReviewManagerOnly)
   console.log("--- End Debugging --- ")
+
+  const isAllowedForTechnicalSupportOrManager =
+    loggedIn && !mustAcceptEula && (isTechnicalSupport || isAllowedForReviewManagerOnly)
+  console.log("isAllowed for technicalSupportOrManagerRoutes:", isAllowedForTechnicalSupportOrManager)
 
   return (
     <>
@@ -643,12 +628,12 @@ const AppRoutes = observer(() => {
         <Route
           element={
             <ProtectedRoute
-              isAllowed={isAllowedForTechnicalSupport}
+              isAllowed={isAllowedForTechnicalSupportOrManager}
               redirectPath={(mustAcceptEula && "/") || (loggedIn && "/not-found")}
             />
           }
         >
-          {technicalSupportRoutes}
+          {technicalSupportOrManagerRoutes}
         </Route>
 
         <Route
