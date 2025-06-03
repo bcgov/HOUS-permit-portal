@@ -3,6 +3,7 @@ class Part3StepCode::Checklist < ApplicationRecord
   self.table_name = "part_3_step_code_checklists"
 
   belongs_to :step_code,
+             optional: true,
              class_name: "Part3StepCode",
              foreign_key: "step_code_id",
              inverse_of: :checklist
