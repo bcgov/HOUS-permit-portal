@@ -503,40 +503,14 @@ const AppRoutes = observer(() => {
     </>
   )
 
-  console.log("--- Debugging ProtectedRoute conditions ---")
-  // console.log("loggedIn:", loggedIn)
-  // console.log("currentUser (object or null):", currentUser)
-  // console.log("mustAcceptEula (based on safe booleans):", mustAcceptEula)
-  // console.log("isReviewStaff (safe boolean):", isReviewStaff)
-  // console.log("isReviewer (safe boolean):", isReviewer)
-  // console.log("isReviewManager (safe boolean):", isReviewManager)
-  // console.log("isRegionalReviewManager (safe boolean):", isRegionalReviewManager)
-  // console.log("isTechnicalSupport (safe boolean):", isTechnicalSupport)
-  // console.log("eulaAccepted (safe boolean):", eulaAccepted)
-  // console.log("isSuperAdmin (safe boolean):", isSuperAdmin)
-  // console.log("isUnconfirmed (safe boolean):", isUnconfirmed)
-
   // Step 4: Calculate isAllowed props using safe booleans
   const isAllowedForAdminOrManager =
     loggedIn && !mustAcceptEula && (isReviewManager || isRegionalReviewManager || isSuperAdmin || isTechnicalSupport)
-  console.log("isAllowed for adminOrManagerRoutes:", isAllowedForAdminOrManager)
 
   const isAllowedForManagerOrReviewer = loggedIn && !mustAcceptEula && isReviewStaff
-  console.log("isAllowed for managerOrReviewerRoutes:", isAllowedForManagerOrReviewer)
-
   const isAllowedForReviewManagerOnly = loggedIn && !mustAcceptEula && (isReviewManager || isRegionalReviewManager)
-
-  console.log("isAllowed for reviewManagerOnlyRoutes================>:", isAllowedForReviewManagerOnly)
-  console.log("isReviewManager:", isReviewManager)
-  console.log("isRegionalReviewManager:", isRegionalReviewManager)
-  console.log("isTechnicalSupport:", isTechnicalSupport)
-  console.log("isAllowedForReviewManagerOnly:", isAllowedForReviewManagerOnly)
-  console.log("currentUser:", currentUser)
-  console.log("--- End Debugging --- ")
-
   const isAllowedForTechnicalSupportOrManager =
     loggedIn && !mustAcceptEula && (isTechnicalSupport || isAllowedForReviewManagerOnly)
-  console.log("isAllowed for technicalSupportOrManagerRoutes:", isAllowedForTechnicalSupportOrManager)
 
   return (
     <>
