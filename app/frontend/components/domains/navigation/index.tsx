@@ -490,6 +490,18 @@ const AppRoutes = observer(() => {
         path="/digital-building-permits/:templateVersionId/edit"
         element={<JurisdictionEditDigitalPermitScreen />}
       />
+      <Route
+        path="/jurisdictions/:jurisdictionId/configuration-management/feature-access"
+        element={<ReviewManagerFeatureAccessScreen />}
+      />
+      <Route
+        path="/jurisdictions/:jurisdictionId/configuration-management/feature-access/my-jurisdiction-about-page"
+        element={<ReviewManagerFeatureAccessScreen />}
+      />
+      <Route
+        path="/jurisdictions/:jurisdictionId/configuration-management/feature-access/submissions-inbox-setup"
+        element={<SubmissionsInboxSetupScreenLazy />}
+      />
       <Route path="/digital-building-permits" element={<JurisdictionDigitalPermitScreen />} />
       <Route path="/api-settings/api-mappings" element={<JurisdictionApiMappingsSetupIndexScreen />} />
       <Route

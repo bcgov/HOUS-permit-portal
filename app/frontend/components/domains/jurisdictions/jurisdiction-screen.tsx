@@ -102,6 +102,9 @@ export const JurisdictionScreen = observer(() => {
     reset(getDefaultJurisdictionValues())
   }
 
+  const contactEmail = t("site.contactEmail")
+  const mailtoHref = `mailto:${contactEmail}?subject=Suggest%20my%20community%20for%20Building%20Permit%20Hub&body=hey,%20we%20need%20our%20local%20gov%20to%20get%20in%20on%20this`
+
   return (
     <Flex as="main" direction="column" w="full" bg="greys.white" pb="24">
       <BlueTitleBar title={qualifiedName} />
@@ -265,7 +268,7 @@ export const JurisdictionScreen = observer(() => {
               </Text>
               <Button
                 as="a"
-                href="mailto:digital.codes.permits@gov.bc.ca?subject=Suggest%20my%20community%20for%20Building%20Permit%20Hub"
+                href={mailtoHref}
                 colorScheme="blue"
                 size="lg"
                 fontWeight="bold"
