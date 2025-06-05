@@ -295,6 +295,55 @@ RSpec.describe SubmissionDataKeyConverterService do
       )
     end
 
+    context "with SubmissionVersion records" do
+      let!(:submission_version_with_snake_keys) do
+        sv =
+          FactoryBot.create(
+            :submission_version,
+            permit_application: pa_with_snake_keys
+          )
+        sv.update!(submission_data: submission_data_with_snake)
+        sv
+      end
+
+      let!(:submission_version_with_camel_keys) do
+        sv =
+          FactoryBot.create(
+            :submission_version,
+            permit_application: pa_with_camel_keys
+          )
+        sv.update!(submission_data: submission_data_all_camel)
+        sv
+      end
+
+      it "correctly converts snake_case keys for SubmissionVersion" do
+        SubmissionDataKeyConverterService.call
+
+        submission_version_with_snake_keys.reload
+        updated_file =
+          submission_version_with_snake_keys.submission_data["data"][
+            "sectionA"
+          ][
+            "file_upload_field"
+          ][
+            0
+          ]
+        expect(updated_file).to include("originalName" => "original_file1.pdf")
+        expect(updated_file).not_to include("original_name")
+      end
+
+      it "does not modify already camelCased data for SubmissionVersion" do
+        original_data =
+          submission_version_with_camel_keys.submission_data.deep_dup
+        SubmissionDataKeyConverterService.call
+
+        submission_version_with_camel_keys.reload
+        expect(submission_version_with_camel_keys.submission_data).to eq(
+          original_data
+        )
+      end
+    end
+
     context "summary reporting" do
       before do
         # Clear and set up specific PAs for summary count verification
@@ -382,6 +431,35 @@ RSpec.describe SubmissionDataKeyConverterService do
         expect(result[:failed_records].size).to eq(1)
         expect(result[:failed_records][0][:id]).to eq(pa_that_will_fail_save.id)
         expect(result[:failed_records][0][:error]).to be_a(String)
+      end
+
+      it "logs an error for a failed SubmissionVersion save" do
+        sv_that_will_fail =
+          FactoryBot.create(
+            :submission_version,
+            permit_application: pa_with_snake_keys
+          )
+        sv_that_will_fail.update!(submission_data: submission_data_with_snake)
+
+        allow(sv_that_will_fail).to receive(:save!).and_raise(
+          ActiveRecord::RecordInvalid.new(sv_that_will_fail)
+        )
+        allow(SubmissionVersion).to receive(:find_each).and_yield(
+          sv_that_will_fail
+        )
+        # Prevent PermitApplication from being processed in this specific test
+        allow(PermitApplication).to receive(:find_each)
+
+        expect(Rails.logger).to receive(:error).with(
+          /Failed to update SubmissionVersion ID: #{sv_that_will_fail.id}/
+        ).at_least(:once)
+
+        result = SubmissionDataKeyConverterService.call
+
+        failed_record =
+          result[:failed_records].find { |r| r[:model] == "SubmissionVersion" }
+        expect(failed_record).not_to be_nil
+        expect(failed_record[:id]).to eq(sv_that_will_fail.id)
       end
     end
   end

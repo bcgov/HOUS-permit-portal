@@ -1,17 +1,17 @@
 namespace :submission_data do
-  desc "Converts snake_case keys to camelCase for file objects in PermitApplication.submission_data"
+  desc "Converts snake_case keys to camelCase for file objects in PermitApplication and SubmissionVersion submission_data"
   task fix_file_object_keys: :environment do
-    puts "Starting conversion of snake_case keys in submission_data file objects..."
+    puts "Starting conversion of snake_case keys in submission_data for PermitApplication and SubmissionVersion..."
 
     result = SubmissionDataKeyConverterService.call
 
     puts "--- Key Conversion Summary ---"
-    puts "Total PermitApplications processed: #{result[:processed_count]}"
-    puts "Total PermitApplications updated: #{result[:updated_count]}"
+    puts "Total records processed: #{result[:processed_count]}"
+    puts "Total records updated: #{result[:updated_count]}"
     if result[:failed_records].any?
-      puts "Failed to update the following PermitApplication IDs:"
+      puts "Failed to update the following records:"
       result[:failed_records].each do |failure|
-        puts "  ID: #{failure[:id]}, Error: #{failure[:error]}"
+        puts "  Model: #{failure[:model]}, ID: #{failure[:id]}, Error: #{failure[:error]}"
       end
     else
       puts "No failures encountered." if result[:updated_count] > 0

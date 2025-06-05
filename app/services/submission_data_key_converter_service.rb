@@ -6,39 +6,58 @@ class SubmissionDataKeyConverterService
     "group_permissions" => "groupPermissions"
   }.freeze
 
+  MODELS_TO_PROCESS = [PermitApplication, SubmissionVersion].freeze
+
   def self.call
     new.perform
   end
 
   def perform
+    results = { processed_count: 0, updated_count: 0, failed_records: [] }
+
+    MODELS_TO_PROCESS.each do |model_class|
+      model_results = process_model(model_class)
+      results[:processed_count] += model_results[:processed_count]
+      results[:updated_count] += model_results[:updated_count]
+      results[:failed_records].concat(model_results[:failed_records])
+    end
+
+    results
+  end
+
+  private
+
+  def process_model(model_class)
     updated_count = 0
     failed_records = []
     processed_count = 0
 
-    PermitApplication.find_each do |pa|
+    model_class.find_each do |record|
       processed_count += 1
-      original_submission_data = pa.submission_data
+      original_submission_data = record.submission_data
       next if original_submission_data.blank?
 
-      changed_in_this_pa = { value: false }
-
+      changed_in_this_record = { value: false }
       current_data_for_processing = original_submission_data.deep_dup
-
       new_submission_data =
         recursive_key_converter(
           current_data_for_processing,
           KEY_MAP,
-          changed_in_this_pa
+          changed_in_this_record
         )
 
-      if changed_in_this_pa[:value]
-        pa.submission_data = new_submission_data
+      if changed_in_this_record[:value]
+        record.submission_data = new_submission_data
         begin
-          pa.save!
+          record.save!
           updated_count += 1
         rescue ActiveRecord::RecordInvalid => e
-          Rails.logger.error "Failed to update PermitApplication ID: #{pa.id}. Errors: #{e.message}"
-          failed_records << { id: pa.id, error: e.message }
+          Rails.logger.error "Failed to update #{model_class.name} ID: #{record.id}. Errors: #{e.message}"
+          failed_records << {
+            model: model_class.name,
+            id: record.id,
+            error: e.message
+          }
         end
       end
     end
@@ -49,8 +68,6 @@ class SubmissionDataKeyConverterService
       failed_records: failed_records
     }
   end
-
-  private
 
   def file_like_object?(data)
     return false unless data.is_a?(Hash)
