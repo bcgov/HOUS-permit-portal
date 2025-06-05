@@ -269,7 +269,7 @@ export async function downloadFileFromStorage(options: {
   const { model, modelId, filename } = options
   console.log("[DownloadDebug] Attempting to download:", { model, modelId, filename })
   try {
-    const response = await fetch(`/api/s3/params/download?model=${model}&model_id=${modelId}`, {
+    const response = await fetch(`/api/s3/params/download?model=${model}&modelId=${modelId}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
