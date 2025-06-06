@@ -1,6 +1,8 @@
 require "rails_helper"
 
-RSpec.describe SubmissionDataKeyConverterService do
+RSpec.describe SubmissionDataKeyConverterService,
+               type: :service,
+               search: true do
   describe ".call" do
     # Ensure necessary base data for factories if they rely on `first` records
     let!(:jurisdiction) { FactoryBot.create(:sub_district) }

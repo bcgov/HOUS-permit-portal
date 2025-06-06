@@ -1,6 +1,6 @@
 require "rails_helper"
 
-RSpec.describe RequirementBlock, type: :model, search: true do
+RSpec.describe RequirementBlock, type: :model do
   describe "associations" do
     # Testing direct associations
     it { should have_many(:requirements) }

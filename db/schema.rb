@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_06_06_170610) do
+ActiveRecord::Schema[7.1].define(version: 2025_04_10_174655) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -73,6 +73,9 @@ ActiveRecord::Schema[7.1].define(version: 2025_06_06_170610) do
     t.string "contactable_type"
     t.uuid "contactable_id"
     t.index ["contactable_type", "contactable_id"], name: "index_contacts_on_contactable"
+  end
+
+  create_table "data_migrations", primary_key: "version", id: :string, force: :cascade do |t|
   end
 
   create_table "early_access_previews", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -357,7 +360,6 @@ ActiveRecord::Schema[7.1].define(version: 2025_06_06_170610) do
     t.uuid "copied_from_id"
     t.uuid "assignee_id"
     t.boolean "public", default: false
-    t.string "created_by_test"
     t.index ["activity_id"], name: "index_requirement_templates_on_activity_id"
     t.index ["assignee_id"], name: "index_requirement_templates_on_assignee_id"
     t.index ["copied_from_id"], name: "index_requirement_templates_on_copied_from_id"

@@ -1,6 +1,6 @@
 require "rails_helper"
 
-RSpec.describe StepCode, type: :model, search: true do
+RSpec.describe StepCode, type: :model do
   # We do not enforce that permit_applications must be present to reserve room for step code model with no permit application, therefore we do not do it { should belong_to(:permit_application) }
 
   let!(:permit_application) { create(:permit_application) }

@@ -78,8 +78,6 @@ class RequirementTemplate < ApplicationRecord
   validate :validate_step_code_related_dependencies
   validate :public_only_for_early_access_preview
 
-  after_create :set_created_by_test, if: -> { Rails.env.test? }
-
   def assignee
     nil
   end
@@ -231,13 +229,6 @@ class RequirementTemplate < ApplicationRecord
   end
 
   private
-
-  def set_created_by_test
-    return unless defined?(RSpec.current_example) && RSpec.current_example
-
-    # Using update_column to avoid triggering other callbacks
-    update_column(:created_by_test, RSpec.current_example.full_description)
-  end
 
   def public_only_for_early_access_preview
     if public && !early_access?

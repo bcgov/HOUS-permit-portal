@@ -1,3 +1,5 @@
+require "rails_helper"
+
 RSpec.describe Requirement, type: :model, search: true do
   describe "associations" do
     # Testing direct associations
