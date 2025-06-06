@@ -16,6 +16,8 @@ class PermitProject < ApplicationRecord
   # Add other item types as needed, e.g.:
   # has_many :inspections, through: :project_memberships, source: :item, source_type: "Inspection"
 
+  has_many :step_codes, as: :parent, dependent: :destroy
+
   accepts_nested_attributes_for :project_documents, allow_destroy: true
 
   # Validations, scopes, methods, etc. can be added here

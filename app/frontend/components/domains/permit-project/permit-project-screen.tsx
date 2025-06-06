@@ -24,6 +24,7 @@ import Dashboard from "@uppy/react/lib/Dashboard.js"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useRef } from "react"
 import { FormProvider, useFieldArray, useForm } from "react-hook-form"
+import { useLocation } from "react-router-dom"
 import { usePermitProject } from "../../../hooks/resources/use-permit-project"
 import useUppyS3 from "../../../hooks/use-uppy-s3"
 import { IPermitApplication } from "../../../models/permit-application" // Assuming path to your model
@@ -34,6 +35,7 @@ import { ErrorScreen } from "../../shared/base/error-screen"
 import { FileDownloadButton } from "../../shared/base/file-download-button" // Import the new button
 import { LoadingScreen } from "../../shared/base/loading-screen"
 import { PermitApplicationCard } from "../../shared/permit-applications/permit-application-card" // Import the card component
+import { ProjectReadinessTabContent } from "./project-readiness-tab-content"
 
 interface IProjectDocumentFormInput extends Omit<IProjectDocument, "createdAt" | "file" | "id"> {
   id?: string
@@ -51,6 +53,7 @@ export const PermitProjectScreen = observer(() => {
   const { currentPermitProject, error } = usePermitProject()
   const { permitProjectStore } = useMst()
   const toast = useToast()
+  const location = useLocation()
 
   // Create a ref to hold the current project ID
   const currentPermitProjectIdRef = useRef<string | null>(null)
@@ -150,6 +153,11 @@ export const PermitProjectScreen = observer(() => {
 
   const permitApplications = currentPermitProject.permitApplications || []
 
+  // Determine default tab index from URL query parameter
+  const queryParams = new URLSearchParams(location.search)
+  const tabQueryParam = queryParams.get("tab")
+  const defaultTabIndex = tabQueryParam ? parseInt(tabQueryParam, 10) : 0
+
   return (
     <FormProvider {...methods}>
       <Box p={5} as="form" onSubmit={handleSubmit(onSubmit)}>
@@ -166,10 +174,11 @@ export const PermitProjectScreen = observer(() => {
           </Text>
         </Box>
 
-        <Tabs variant="enclosed-colored" isLazy>
+        <Tabs variant="enclosed-colored" isLazy defaultIndex={defaultTabIndex}>
           <TabList>
             <Tab>Permit Applications</Tab>
             <Tab>Documents</Tab>
+            <Tab>Project Readiness</Tab>
           </TabList>
           <TabPanels>
             <TabPanel p={{ base: 0, md: 4 }}>
@@ -251,6 +260,9 @@ export const PermitProjectScreen = observer(() => {
               {fields.length === 0 && !currentPermitProject.projectDocuments?.length && (
                 <Text>No documents uploaded to this project yet.</Text>
               )}
+            </TabPanel>
+            <TabPanel p={4}>
+              <ProjectReadinessTabContent />
             </TabPanel>
           </TabPanels>
         </Tabs>

@@ -11,7 +11,6 @@ class PermitApplication < ApplicationRecord
     submission_versions
     step_code
     activity
-    jurisdiction
     submitter
     permit_collaborations
   ]
@@ -26,11 +25,7 @@ class PermitApplication < ApplicationRecord
              ],
              text_end: %i[number]
 
-  # Virtual attribute to accept an existing project's ID on creation
-  attr_accessor :target_project_id
-
   belongs_to :submitter, class_name: "User"
-  belongs_to :jurisdiction
   belongs_to :permit_type
   belongs_to :activity
   belongs_to :template_version
@@ -44,11 +39,6 @@ class PermitApplication < ApplicationRecord
   has_many :permit_collaborations, dependent: :destroy
   has_many :collaborators, through: :permit_collaborations
   has_many :permit_block_statuses, dependent: :destroy
-
-  has_many :project_memberships, as: :item, dependent: :destroy
-  has_many :permit_projects,
-           through: :project_memberships,
-           source: :permit_project
 
   scope :submitted, -> { joins(:submission_versions).distinct }
 
@@ -64,9 +54,6 @@ class PermitApplication < ApplicationRecord
   validates :reference_number, length: { maximum: 300 }, allow_nil: true
   validate :sandbox_belongs_to_jurisdiction
   validate :template_version_of_live_template
-  validate :target_project_must_exist,
-           if: -> { target_project_id.present? },
-           on: :create
 
   delegate :qualified_name,
            :heating_degree_days,
@@ -87,7 +74,6 @@ class PermitApplication < ApplicationRecord
   after_commit :send_submitted_webhook, if: :saved_change_to_status?
   after_commit :notify_user_reference_number_updated,
                if: :saved_change_to_reference_number?
-  after_create :ensure_project_association
 
   scope :with_submitter_role,
         -> { joins(:submitter).where(users: { role: "submitter" }) }
@@ -212,13 +198,14 @@ class PermitApplication < ApplicationRecord
     {
       number: number,
       nickname: nickname,
+      full_address: full_address,
       permit_classifications: formatted_permit_classifications,
       submitter: "#{submitter.name} #{submitter.email}",
       submitted_at: submitted_at,
       resubmitted_at: resubmitted_at,
       viewed_at: viewed_at,
       status: status,
-      jurisdiction_id: jurisdiction.id,
+      jurisdiction_id: jurisdiction&.id,
       submitter_id: submitter.id,
       template_version_id: template_version.id,
       requirement_template_id: template_version.requirement_template.id,
@@ -295,8 +282,8 @@ class PermitApplication < ApplicationRecord
       form_customizations_snapshot
     else
       jurisdiction
-        .jurisdiction_template_version_customizations
-        .find_by(template_version: template_version, sandbox_id: sandbox_id)
+        &.jurisdiction_template_version_customizations
+        &.find_by(template_version: template_version, sandbox_id: sandbox_id)
         &.customizations
     end
   end
@@ -307,7 +294,7 @@ class PermitApplication < ApplicationRecord
   end
 
   def number_prefix
-    jurisdiction.prefix
+    jurisdiction&.prefix
   end
 
   def notifiable_users
@@ -325,13 +312,17 @@ class PermitApplication < ApplicationRecord
     if submitted?
       relevant_collaborators =
         relevant_collaborators +
-          jurisdiction.review_managers if jurisdiction.review_managers.present?
+          (
+            jurisdiction&.review_managers || []
+          ) if jurisdiction&.review_managers.present?
       relevant_collaborators =
         relevant_collaborators +
-          jurisdiction.regional_review_managers if jurisdiction.regional_review_managers.present?
+          (
+            jurisdiction&.regional_review_managers || []
+          ) if jurisdiction&.regional_review_managers.present?
       relevant_collaborators =
         relevant_collaborators +
-          jurisdiction.reviewers if jurisdiction.reviewers.present?
+          (jurisdiction&.reviewers || []) if jurisdiction&.reviewers.present?
     end
 
     relevant_collaborators
@@ -453,6 +444,7 @@ class PermitApplication < ApplicationRecord
   def resubmitted_at
     return nil if submission_versions.length <= 1
     return latest_submission_version.created_at
+    #
   end
 
   def submit_event_notification_data
@@ -517,7 +509,7 @@ class PermitApplication < ApplicationRecord
   end
 
   def step_code_requirements
-    jurisdiction.permit_type_required_steps.where(permit_type_id:)
+    jurisdiction&.permit_type_required_steps&.where(permit_type_id:)
   end
 
   def energy_step_code_required?
@@ -619,40 +611,24 @@ class PermitApplication < ApplicationRecord
   end
 
   def assign_default_nickname
-    self.nickname =
-      "#{jurisdiction_qualified_name}: #{full_address || pid || pin || id}" if self.nickname.blank?
+    if permit_project && permit_project.name.blank?
+      Rails.logger.warn "PermitProject associated with PermitApplication #{id} has a blank name. Consider setting it."
+    end
   end
 
   def assign_unique_number
     last_number =
       jurisdiction
-        .permit_applications
-        .where("number LIKE ?", "#{number_prefix}-%")
-        .order(Arel.sql("LENGTH(number) DESC"), number: :desc)
-        .limit(1)
-        .pluck(:number)
-        .first
-
-    # Notice that the last number comes from the specific jurisdiction
+        &.permit_applications
+        &.where("number LIKE ?", "#{number_prefix}-%")
+        &.order(Arel.sql("LENGTH(number) DESC"), number: :desc)
+        &.limit(1)
+        &.pluck(:number)
+        &.first
 
     if last_number
       number_parts = last_number.split("-")
-      new_integer = number_parts[1..-1].join.to_i + 1 # Increment the sequence
-
-      # the remainder of dividing any number by 1000 always gives the last 3 digits
-      # Removing the last 3 digits (integer division by 1000), then taking the remainder above gives the middle 3
-      # Removing the last 6 digits (division), then taking the remainder as above gives the first 3 digits
-
-      # irb(main):008> 123456789 / 1_000
-      # => 123456
-      # irb(main):010> 123456 % 1000
-      # => 456
-      # irb(main):009> 123456789 / 1_000_000
-      # => 123
-      # irb(main):013> 123 % 1000
-      # => 123
-
-      # %03d pads with 0s
+      new_integer = number_parts[1..-1].join.to_i + 1
       new_number =
         format(
           "%s-%03d-%03d-%03d",
@@ -662,11 +638,8 @@ class PermitApplication < ApplicationRecord
           new_integer % 1000
         )
     else
-      # Start with the initial number if there are no previous numbers
       new_number = format("%s-001-000-000", number_prefix)
     end
-
-    # Assign the new number to the permit application
     self.number = new_number if self.number.blank?
     return new_number
   end
@@ -676,8 +649,8 @@ class PermitApplication < ApplicationRecord
 
     current_customizations =
       jurisdiction
-        .jurisdiction_template_version_customizations
-        .find_by(template_version: template_version)
+        &.jurisdiction_template_version_customizations
+        &.find_by(template_version: template_version)
         &.customizations
 
     return unless current_customizations.present?
@@ -692,10 +665,12 @@ class PermitApplication < ApplicationRecord
   end
 
   def reindex_jurisdiction_permit_application_size
-    return unless jurisdiction.present?
-    return unless new_record? || destroyed? || saved_change_to_jurisdiction_id?
+    return unless permit_project&.jurisdiction.present?
+    unless new_record? || destroyed? || saved_change_to_permit_project_id?
+      return
+    end
 
-    jurisdiction.reindex
+    permit_project.jurisdiction.reindex
   end
 
   def submitter_must_have_role
@@ -710,6 +685,7 @@ class PermitApplication < ApplicationRecord
   end
 
   def jurisdiction_has_matching_submission_contact
+    return unless jurisdiction
     matching_contacts =
       PermitTypeSubmissionContact.where(
         jurisdiction: jurisdiction,
@@ -717,7 +693,7 @@ class PermitApplication < ApplicationRecord
       )
     if matching_contacts.empty?
       errors.add(
-        :jurisdiction,
+        :jurisdiction_id,
         I18n.t(
           "activerecord.errors.models.permit_application.attributes.jurisdiction.no_contact"
         )
@@ -727,6 +703,7 @@ class PermitApplication < ApplicationRecord
 
   def sandbox_belongs_to_jurisdiction
     return unless sandbox
+    return unless jurisdiction
 
     unless jurisdiction.sandboxes.include?(sandbox)
       errors.add(
@@ -749,56 +726,5 @@ class PermitApplication < ApplicationRecord
         )
       )
     end
-  end
-
-  def target_project_must_exist
-    unless PermitProject.exists?(target_project_id)
-      errors.add(:target_project_id, "does not refer to a valid PermitProject")
-    end
-  end
-
-  def ensure_project_association
-    project_to_associate = nil
-    if target_project_id.present?
-      project_to_associate = PermitProject.find_by(id: target_project_id)
-      unless project_to_associate
-        errors.add(:target_project_id, "not found") # Should be caught by validation, but good to check
-        throw(:abort) # Prevent association if project not found, and rollback PermitApplication creation
-      end
-    else
-      # Create a new PermitProject if no target_project_id is provided
-      project_to_associate = PermitProject.new(owner: self.submitter) # Set owner here
-      # Optionally set a default description or other attributes for the new project
-      project_to_associate.description ||=
-        "Project for #{self.nickname || "new application"}"
-      unless project_to_associate.save
-        errors.add(
-          :base,
-          "Could not create new project: #{project_to_associate.errors.full_messages.join(", ")}"
-        )
-        throw(:abort)
-      end
-    end
-
-    # Associate this PermitApplication (as an item) with the project
-    # The uniqueness validation in ProjectMembership will prevent duplicates.
-    membership =
-      ProjectMembership.new(permit_project: project_to_associate, item: self)
-    unless membership.save
-      errors.add(
-        :base,
-        "Could not add application to project: #{membership.errors.full_messages.join(", ")}"
-      )
-      # If the project was newly created in this transaction, we might want to ensure it gets rolled back too.
-      # The `throw(:abort)` should handle this if `ensure_project_association` is part of the PA save transaction.
-      throw(:abort)
-    end
-  rescue ActiveRecord::RecordInvalid => e # Should be less likely with explicit saves and checks
-    Rails.logger.error "Error in ensure_project_association (RecordInvalid): #{e.message}"
-    errors.add(:base, "Could not associate with project: #{e.message}")
-    throw(:abort)
-    # rescue ActiveRecord::Rollback => e # If specific rollback handling is needed
-    #   Rails.logger.info "Rollback during ensure_project_association: #{e.message}"
-    #   # Errors should already be on the model from the point the rollback was triggered.
   end
 end

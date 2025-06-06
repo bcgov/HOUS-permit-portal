@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_05_26_180029) do
+ActiveRecord::Schema[7.1].define(version: 2025_05_26_232142) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -121,6 +121,12 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_26_180029) do
     t.uuid "contactable_id"
     t.index %w[contactable_type contactable_id],
             name: "index_contacts_on_contactable"
+  end
+
+  create_table "data_migrations",
+               primary_key: "version",
+               id: :string,
+               force: :cascade do |t|
   end
 
   create_table "document_references",
@@ -307,6 +313,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_26_180029) do
     t.string "external_api_state", default: "g_off", null: false
     t.integer "heating_degree_days"
     t.boolean "inbox_enabled", default: false, null: false
+    t.boolean "show_about_page", default: false, null: false
     t.index ["prefix"], name: "index_jurisdictions_on_prefix", unique: true
     t.index ["regional_district_id"],
             name: "index_jurisdictions_on_regional_district_id"
@@ -1030,13 +1037,19 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_26_180029) do
                force: :cascade do |t|
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.uuid "permit_application_id"
     t.string "plan_author"
     t.string "plan_version"
     t.string "plan_date"
     t.string "type"
-    t.index ["permit_application_id"],
-            name: "index_step_codes_on_permit_application_id"
+    t.string "parent_type"
+    t.uuid "parent_id"
+    t.string "project_name"
+    t.string "project_address"
+    t.string "jurisdiction_name"
+    t.string "project_identifier"
+    t.date "permit_date"
+    t.index %w[parent_type parent_id],
+            name: "index_step_codes_on_parent_type_and_parent_id"
   end
 
   create_table "submission_versions",
@@ -1343,7 +1356,6 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_26_180029) do
   add_foreign_key "step_code_data_entries",
                   "part_9_step_code_checklists",
                   column: "checklist_id"
-  add_foreign_key "step_codes", "permit_applications"
   add_foreign_key "submission_versions", "permit_applications"
   add_foreign_key "supporting_documents", "permit_applications"
   add_foreign_key "supporting_documents", "submission_versions"
