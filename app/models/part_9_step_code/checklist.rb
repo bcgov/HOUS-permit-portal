@@ -1,4 +1,5 @@
 class Part9StepCode::Checklist < ApplicationRecord
+  include StepCodeChecklistDelegates
   self.table_name = "part_9_step_code_checklists"
 
   belongs_to :step_code, optional: true
@@ -17,11 +18,6 @@ class Part9StepCode::Checklist < ApplicationRecord
   accepts_nested_attributes_for :building_characteristics_summary
   after_create :create_building_characteristics_summary
 
-  delegate :building_permit_number,
-           :jurisdiction_name,
-           :full_address,
-           :pid,
-           to: :step_code
   delegate :plan_author, :plan_version, :plan_date, to: :step_code
 
   enum stage: %i[pre_construction mid_construction as_built]

@@ -213,6 +213,42 @@ export const PermitApplicationStoreModel = types
       // @ts-ignore
       self.statusFilter = statuses
     },
+    searchPermitApplications: flow(function* (opts?: { reset?: boolean; page?: number; countPerPage?: number }) {
+      if (opts?.reset) {
+        self.resetPages()
+      }
+      const searchParams = {
+        query: self.query,
+        sort: self.sort,
+        page: opts?.page ?? self.currentPage,
+        perPage: opts?.countPerPage ?? self.countPerPage,
+        filters: {
+          status: self.statusFilter,
+          templateVersionId: self.templateVersionIdFilter,
+          requirementTemplateId: self.requirementTemplateIdFilter,
+          hasCollaborator: self.hasCollaboratorFilter,
+        },
+      } as TSearchParams<EPermitApplicationSortFields, IPermitApplicationSearchFilters>
+
+      const currentJurisdictionId = self.rootStore?.jurisdictionStore?.currentJurisdiction?.id
+
+      const response = currentJurisdictionId
+        ? yield self.environment.api.fetchJurisdictionPermitApplications(currentJurisdictionId, searchParams)
+        : yield self.environment.api.fetchPermitApplications(searchParams)
+
+      if (response.ok) {
+        self.mergeUpdateAll(response.data.data, "permitApplicationMap")
+        ;(self?.rootStore?.jurisdictionStore?.currentJurisdiction ?? self).setTablePermitApplications(
+          response.data.data
+        )
+
+        self.currentPage = opts?.page ?? self.currentPage
+        self.totalPages = response.data.meta.totalPages
+        self.totalCount = response.data.meta.totalCount
+        self.countPerPage = opts?.countPerPage ?? self.countPerPage
+      }
+      return response.ok
+    }),
   }))
   .actions((self) => ({
     getEphemeralPermitApplication(
@@ -294,42 +330,7 @@ export const PermitApplicationStoreModel = types
     removePermitApplication(id: string) {
       self.permitApplicationMap.delete(id)
     },
-    searchPermitApplications: flow(function* (opts?: { reset?: boolean; page?: number; countPerPage?: number }) {
-      if (opts?.reset) {
-        self.resetPages()
-      }
-      const searchParams = {
-        query: self.query,
-        sort: self.sort,
-        page: opts?.page ?? self.currentPage,
-        perPage: opts?.countPerPage ?? self.countPerPage,
-        filters: {
-          status: self.statusFilter,
-          templateVersionId: self.templateVersionIdFilter,
-          requirementTemplateId: self.requirementTemplateIdFilter,
-          hasCollaborator: self.hasCollaboratorFilter,
-        },
-      } as TSearchParams<EPermitApplicationSortFields, IPermitApplicationSearchFilters>
 
-      const currentJurisdictionId = self.rootStore?.jurisdictionStore?.currentJurisdiction?.id
-
-      const response = currentJurisdictionId
-        ? yield self.environment.api.fetchJurisdictionPermitApplications(currentJurisdictionId, searchParams)
-        : yield self.environment.api.fetchPermitApplications(searchParams)
-
-      if (response.ok) {
-        self.mergeUpdateAll(response.data.data, "permitApplicationMap")
-        ;(self?.rootStore?.jurisdictionStore?.currentJurisdiction ?? self).setTablePermitApplications(
-          response.data.data
-        )
-
-        self.currentPage = opts?.page ?? self.currentPage
-        self.totalPages = response.data.meta.totalPages
-        self.totalCount = response.data.meta.totalCount
-        self.countPerPage = opts?.countPerPage ?? self.countPerPage
-      }
-      return response.ok
-    }),
     fetchPermitApplication: flow(function* (id: string, review?: boolean) {
       // If the user is review staff, we still need to hit the show endpoint to update viewedAt
       const { ok, data: response } = yield self.environment.api.fetchPermitApplication(id, review)

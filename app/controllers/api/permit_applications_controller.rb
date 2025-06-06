@@ -1,5 +1,6 @@
 class Api::PermitApplicationsController < Api::ApplicationController
   include Api::Concerns::Search::PermitApplications
+  include StepCodeParamsConcern
 
   before_action :set_permit_application,
                 only: %i[
@@ -16,6 +17,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
                   invite_new_collaborator
                   remove_collaborator_collaborations
                   create_or_update_permit_block_status
+                  create_or_find_step_code
                 ]
   skip_after_action :verify_policy_scoped, only: [:index]
 
@@ -408,6 +410,60 @@ class Api::PermitApplicationsController < Api::ApplicationController
                      }
       end
     end
+  end
+
+  def create_or_find_step_code
+    authorize @permit_application
+
+    submitted_params = step_code_params
+    step_code_type_string = submitted_params[:type]
+
+    model_class =
+      case step_code_type_string
+      when "Part3StepCode"
+        Part3StepCode
+      when "Part9StepCode"
+        Part9StepCode
+      else
+        render_error "Invalid StepCode type provided.", status: :bad_request and
+          return
+      end
+
+    # Specific authorization for the type of step code if needed, e.g.:
+    # authorize model_class.new, :create_on_permit_application?
+    # For now, assuming the initial authorize @permit_application is sufficient.
+
+    # Remove :type from params to avoid mass assignment issues if model doesn't have a `type=` setter
+    attributes_for_creation = submitted_params.except(:type)
+
+    # Add project_id if the model class requires it and it's not already in attributes_for_creation
+    # This assumes StepCode (base or specific types) might want project_id.
+    # If only some types need it, conditional logic might be better.
+    if model_class.column_names.include?("project_id") &&
+         @permit_application.permit_project_id.present?
+      attributes_for_creation[
+        :project_id
+      ] ||= @permit_application.permit_project_id
+    end
+
+    @step_code_instance =
+      model_class.where(
+        permit_application_id: @permit_application.id
+        # Add other unique identifiers if necessary for `first_or_create!` for a specific type
+        # e.g., for Part9, if name should be unique in context of PA: name: attributes_for_creation[:name]
+      ).first_or_create!(attributes_for_creation)
+
+    render_success @step_code_instance,
+                   "#{model_class.model_name.human} processed successfully.",
+                   {
+                     blueprint: StepCodeBlueprint,
+                     blueprint_opts: {
+                       view: :base
+                     }
+                   }
+  rescue NameError # Catches if EStepCodeType is not defined/accessible in this controller context
+    render_error "Invalid StepCode type mapping in controller.",
+                 status: :internal_server_error
   end
 
   def download_application_metrics_csv

@@ -2,7 +2,7 @@ class PermitProject < ApplicationRecord
   searchkick word_middle: %i[description full_address], text_end: %i[number] # number will come from primary item
 
   belongs_to :owner, class_name: "User"
-  belongs_to :property_plan_local_jurisdiction, optional: true
+  belongs_to :property_plan_jurisdiction, optional: true
   has_one :permit_project_payment_detail, dependent: :destroy
   has_one :payment_detail, through: :permit_project_payment_detail
 
@@ -15,6 +15,10 @@ class PermitProject < ApplicationRecord
   has_many :project_documents, dependent: :destroy
   # Add other item types as needed, e.g.:
   # has_many :inspections, through: :project_memberships, source: :item, source_type: "Inspection"
+
+  has_many :step_codes, as: :parent, dependent: :destroy
+
+  accepts_nested_attributes_for :project_documents, allow_destroy: true
 
   # Validations, scopes, methods, etc. can be added here
   # The old validation for primary_permit_project_permit_application is removed.

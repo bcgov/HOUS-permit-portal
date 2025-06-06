@@ -1,12 +1,14 @@
 class StepCode < ApplicationRecord
+  include ProjectItem
   belongs_to :permit_application, optional: true
 
-  delegate :number, to: :permit_application, prefix: :building_permit
+  # Delegates for attributes from PermitApplication
+  delegate :number,
+           to: :permit_application,
+           prefix: :building_permit,
+           allow_nil: true
+
   delegate :submitter,
-           :nickname,
-           :jurisdiction_name,
-           :full_address,
-           :pid,
            :newly_submitted_at,
            :status,
            :jurisdiction_heating_degree_days,

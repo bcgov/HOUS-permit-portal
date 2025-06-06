@@ -261,6 +261,12 @@ class Api::JurisdictionsController < Api::ApplicationController
         energy_step_required
         zero_carbon_step_required
         _destroy
+      ],
+      community_documents_attributes: [
+        :id,
+        :jurisdiction_id,
+        :_destroy,
+        file: [:id, :storage, metadata: %i[size filename mime_type]]
       ]
     )
   end

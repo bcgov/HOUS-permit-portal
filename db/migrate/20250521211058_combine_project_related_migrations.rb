@@ -1,7 +1,7 @@
 class CombineProjectRelatedMigrations < ActiveRecord::Migration[7.1]
   def change
     # From 20250509210248_create_project_related_entities_and_payment_details.rb
-    create_table :property_plan_local_jurisdictions, id: :uuid do |t|
+    create_table :property_plan_jurisdictions, id: :uuid do |t|
       t.references :jurisdiction,
                    null: false,
                    foreign_key: true,
@@ -23,7 +23,7 @@ class CombineProjectRelatedMigrations < ActiveRecord::Migration[7.1]
       t.text :description
       t.text :notes
       t.string :permit_project_status
-      t.references :property_plan_local_jurisdiction,
+      t.references :property_plan_jurisdiction,
                    type: :uuid,
                    foreign_key: true,
                    null: true
@@ -83,9 +83,10 @@ class CombineProjectRelatedMigrations < ActiveRecord::Migration[7.1]
 
     # From 20250521165640_create_project_memberships_and_drop_old_join_table.rb
     # Create the new project_memberships table
-    create_table :project_memberships do |t|
+    create_table :project_memberships, id: :uuid do |t|
       t.references :permit_project, null: false, foreign_key: true, type: :uuid
-      t.references :item, polymorphic: true, null: false
+      t.uuid :item_id, null: false
+      t.string :item_type, null: false
       # t.boolean :is_primary_item, default: false # We'll determine primary dynamically for now
 
       t.timestamps

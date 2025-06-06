@@ -26,6 +26,7 @@ export enum ERequirementTemplateType {
 export enum EFileUploadAttachmentType {
   RequirementDocument = "RequirementDocument",
   SupportingDocument = "SupportingDocument",
+  ProjectDocument = "ProjectDocument",
 }
 
 export enum EPermitClassificationCode {
@@ -635,4 +636,9 @@ export enum EPermitProjectSortFields {
   status = "status",
   fullAddress = "full_address",
   submittedAt = "submitted_at",
+}
+
+export enum EStepCodeType {
+  part3StepCode = "Part3StepCode",
+  part9StepCode = "Part9StepCode",
 }

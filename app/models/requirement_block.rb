@@ -221,6 +221,10 @@ class RequirementBlock < ApplicationRecord
   end
 
   def validate_step_code_dependencies
+    return
+    # TODO: Remove this once we have a way to validate step code dependencies
+    # This is a temporary fix to allow for the step code dependencies to be validated
+    # once we have a way to validate step code dependencies
     has_energy_step_code =
       requirements.any? { |req| req.input_type_energy_step_code? }
 

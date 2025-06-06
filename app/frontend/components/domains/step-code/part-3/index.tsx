@@ -20,28 +20,26 @@ export const Part3StepCodeForm = observer(function Part3StepCodeForm() {
   const { permitApplicationId, section } = useParams()
   const {
     stepCodeStore: { createPart3StepCode },
-    permitApplicationStore: { getPermitApplicationById },
   } = useMst()
   const { stepCode } = usePart3StepCode()
   const navigate = useNavigate()
-  const isEarlyAccess = !permitApplicationId
 
-  const permitApplication = !isEarlyAccess && getPermitApplicationById(permitApplicationId)
+  const { currentPermitApplication } = usePermitApplication()
 
-  usePermitApplication()
-
-  // create the step code if needed
   useEffect(() => {
-    if (!!stepCode) return // step code already exists
-    if (!isEarlyAccess && !permitApplication?.isFullyLoaded) return // wait for permit application to load
-
-    if (!stepCode) {
-      createPart3StepCode({
-        permitApplicationId, // nil for early access
-        checklistAttributes: { sectionCompletionStatus: defaultSectionCompletionStatus },
-      })
+    if (!!stepCode) {
+      return
     }
-  }, [permitApplication?.isFullyLoaded, stepCode])
+
+    if (permitApplicationId && !currentPermitApplication?.isFullyLoaded) {
+      return
+    }
+
+    createPart3StepCode({
+      permitApplicationId,
+      checklistAttributes: { sectionCompletionStatus: defaultSectionCompletionStatus },
+    })
+  }, [stepCode, permitApplicationId, currentPermitApplication?.isFullyLoaded, createPart3StepCode])
 
   // handle redirect if no section is specified
   useEffect(() => {

@@ -62,6 +62,7 @@ class Jurisdiction < ApplicationRecord
   has_many :collaborators, as: :collaboratorable, dependent: :destroy
   has_many :sandboxes, dependent: :destroy
   has_many :property_plan_local_jurisdictions, dependent: :destroy
+  has_many :community_documents, dependent: :destroy
 
   validates :name, uniqueness: { scope: :locality_type, case_sensitive: false }
   validates :locality_type, presence: true
@@ -90,6 +91,7 @@ class Jurisdiction < ApplicationRecord
                                   }
 
   accepts_nested_attributes_for :permit_type_required_steps, allow_destroy: true
+  accepts_nested_attributes_for :community_documents, allow_destroy: true
 
   before_create :assign_unique_prefix
 

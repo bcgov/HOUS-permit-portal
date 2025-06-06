@@ -40,6 +40,11 @@ class User < ApplicationRecord
   has_many :permit_applications,
            foreign_key: "submitter_id",
            dependent: :destroy
+  has_many :permit_projects,
+           class_name: "PermitProject",
+           foreign_key: :owner_id,
+           dependent: :destroy,
+           inverse_of: :owner
   has_many :applied_jurisdictions,
            through: :permit_applications,
            source: :jurisdiction
@@ -60,6 +65,8 @@ class User < ApplicationRecord
 
   has_one :preference, dependent: :destroy
   accepts_nested_attributes_for :preference
+
+  has_many :step_codes, as: :parent, dependent: :destroy
 
   # Validations
   validate :valid_role_change, if: :role_changed?, on: :update
@@ -140,6 +147,12 @@ class User < ApplicationRecord
 
   def review_staff?
     reviewer? || review_manager? || regional_review_manager?
+  end
+
+  def review_staff_in_jurisdiction?(jurisdiction_to_check)
+    return false unless jurisdiction_to_check && jurisdictions.any? # Guard against nil jurisdiction
+
+    review_staff? && jurisdictions.exists?(jurisdiction_to_check.id)
   end
 
   def role_name
