@@ -1,6 +1,8 @@
 require "rails_helper"
 
-RSpec.describe Api::TemplateVersionsController, type: :controller do
+RSpec.describe Api::TemplateVersionsController,
+               type: :controller,
+               search: true do
   let!(:jurisdiction) { create(:sub_district) }
   let!(:review_manager) do
     create(:user, :review_manager, jurisdiction: jurisdiction)

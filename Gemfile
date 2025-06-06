@@ -93,6 +93,7 @@ group :development, :test do
   gem "factory_bot_rails", "~> 6.4.2"
   gem "faker", "~> 3.2.2"
   gem "shoulda-matchers", "~> 5.3.0"
+  gem "database_cleaner-active_record"
   gem "vcr", "~> 6.2"
   gem "bullet", "~> 7.1.6"
 end

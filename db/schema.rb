@@ -75,6 +75,9 @@ ActiveRecord::Schema[7.1].define(version: 2025_04_10_174655) do
     t.index ["contactable_type", "contactable_id"], name: "index_contacts_on_contactable"
   end
 
+  create_table "data_migrations", primary_key: "version", id: :string, force: :cascade do |t|
+  end
+
   create_table "early_access_previews", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "early_access_requirement_template_id", null: false
     t.uuid "previewer_id", null: false
