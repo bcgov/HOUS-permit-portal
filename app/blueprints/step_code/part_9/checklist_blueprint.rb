@@ -13,12 +13,15 @@ class StepCode::Part9::ChecklistBlueprint < Blueprinter::Base
   end
 
   view :project_info do
-    fields :building_permit_number,
-           :jurisdiction_name,
-           :pid,
-           :building_type,
-           :builder
-    field :full_address, name: :address
+    fields :building_permit_number, :building_type, :builder
+
+    field :project_name
+    field :project_address
+    field :pid, name: :project_identifier
+    field :jurisdiction_name
+    field :permit_date do |checklist, _options|
+      checklist.permit_date&.strftime("%b %e, %Y")
+    end
 
     field :dwelling_units_count do |checklist, _options|
       checklist.data_entries.sum(:dwelling_units_count)

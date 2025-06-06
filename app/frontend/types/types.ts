@@ -259,21 +259,30 @@ export interface IPart9ChecklistSelectOptions {
 
 export interface IPart3ChecklistSelectOptions {}
 export interface IFileData {
-  id: string
-  storage: string
+  id: string // Corresponds to file_id in the blueprint
+  storage?: string // Corresponds to file_data?.dig("storage")
   metadata: {
-    size: number
-    filename: string
-    mimeType: string
+    size: number // Corresponds to file_size
+    filename: string // Corresponds to file_name
+    mimeType?: string // Corresponds to file_type
   }
 }
 
-export interface IRequirementDocument {
-  id?: string
-  requirementBlockId: string
+export interface IBaseFileAttachment {
+  id: string
   file: IFileData
-  createdAt?: Date
-  _destroy?: boolean
+  createdAt: Date // Assuming string date from backend, MST will cast
+  // updatedAt?: Date; // Optional, if needed
+  _destroy?: boolean // Common for managing nested resources
+}
+
+export interface IRequirementDocument extends IBaseFileAttachment {
+  requirementBlockId: string
+  // _destroy is now in IBaseFileAttachment
+}
+
+export interface IProjectDocument extends IBaseFileAttachment {
+  permitProjectId: string // Foreign key to link to PermitProject
 }
 
 export interface IRequirementBlockCustomization {
@@ -493,9 +502,16 @@ export interface IJurisdictionSearchFilters {
 }
 
 export interface IPermitApplicationSearchFilters {
-  requirementTemplateId?: string
-  templateVersionId?: string
   status?: EPermitApplicationStatus[]
+  templateVersionId?: string
+  requirementTemplateId?: string
+  hasCollaborator?: boolean
+  query?: string
+}
+
+export interface IPermitProjectSearchFilters {
+  query?: string
+  // Add other specific filters if needed, e.g., status, submitterId
 }
 
 export interface ITemplateVersionDiff {

@@ -108,7 +108,7 @@
       "prettier --write"
     ],
     "*.rb": [
-      "stree write"
+      "stree write --ignore-files='**/schema.rb'"
     ]
   }
 }

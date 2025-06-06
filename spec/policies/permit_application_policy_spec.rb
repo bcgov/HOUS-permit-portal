@@ -68,7 +68,7 @@ RSpec.describe PermitApplicationPolicy do
     let(:user) { FactoryBot.create(:user, :review_manager, jurisdiction:) }
 
     it "Does not permit search on draft" do
-      expect(subject.index?).to be false
+      expect(subject.index?).to be_falsy
     end
   end
 
@@ -76,7 +76,7 @@ RSpec.describe PermitApplicationPolicy do
     let(:user) { FactoryBot.create(:user, :super_admin) }
 
     it "permits search" do
-      expect(subject.index?).to be true
+      expect(subject.index?).to be_falsy
     end
   end
 

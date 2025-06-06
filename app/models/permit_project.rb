@@ -1,10 +1,39 @@
 class PermitProject < ApplicationRecord
-  has_many :permit_project_permit_applications, dependent: :destroy
-  has_many :permit_applications, through: :permit_project_permit_applications
+  searchkick word_middle: %i[title full_address pid pin], text_end: %i[number] # Added name, pid, pin to searchkick
 
-  belongs_to :property_plan_local_jurisdiction, optional: true # Assuming PPLJ_Id is FK in PermitProject
+  belongs_to :owner, class_name: "User"
+  belongs_to :jurisdiction # Direct association to Jurisdiction
+  belongs_to :property_plan_jurisdiction, optional: true
   has_one :permit_project_payment_detail, dependent: :destroy
   has_one :payment_detail, through: :permit_project_payment_detail
 
-  # Validations, scopes, methods, etc. can be added here
+  has_many :permit_applications
+  has_many :project_documents, dependent: :destroy
+  has_many :step_codes
+
+  accepts_nested_attributes_for :project_documents, allow_destroy: true
+
+  def search_data
+    {
+      title: title,
+      full_address: full_address,
+      pid: pid,
+      pin: pin,
+      owner_id: owner_id,
+      jurisdiction_id: jurisdiction_id,
+      created_at: created_at,
+      updated_at: updated_at
+      # Add other relevant fields for searching PermitProject itself
+    }
+  end
+
+  # This method might no longer make sense if there can be multiple applications or item types.
+  # Or it should return the primary_project_item if it's a PermitApplication.
+  # def permit_application
+  #   item = primary_project_item
+  #   item if item.is_a?(PermitApplication)
+  # end
+
+  # TODO: Re-evaluate and re-implement search_data based on primary_project_item
+  # and the possibility of multiple items of different types in the future.
 end

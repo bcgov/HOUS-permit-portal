@@ -1,6 +1,5 @@
 class Api::StorageController < Api::ApplicationController
   skip_after_action :verify_authorized, only: %i[upload]
-  skip_after_action :verify_policy_scoped
   before_action :set_record, except: %i[upload]
 
   def upload
@@ -11,7 +10,9 @@ class Api::StorageController < Api::ApplicationController
 
   AUTHORIZED_S3_MODELS = {
     "SupportingDocument" => SupportingDocument,
-    "RequirementDocument" => RequirementDocument
+    "RequirementDocument" => RequirementDocument,
+    "ProjectDocument" => ProjectDocument,
+    "JurisdictionDocument" => JurisdictionDocument
   }.freeze
 
   def download

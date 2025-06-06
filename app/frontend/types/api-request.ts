@@ -9,6 +9,17 @@ import {
   TConditional,
 } from "./types"
 
+// Define the common file structure for API attachments
+export interface IUppyAttachmentFile {
+  id: string
+  storage?: string
+  metadata: {
+    size: number
+    filename: string
+    mimeType: string
+  }
+}
+
 export interface IFormConditional {
   when: string
   operand: string
@@ -48,15 +59,7 @@ export interface IRequirementBlockParams {
   requirementDocumentsAttributes?: Array<{
     id?: string
     _destroy?: boolean
-    file: {
-      id: string
-      storage: string
-      metadata: {
-        size: number
-        filename: string
-        mimeType: string
-      }
-    }
+    file: IUppyAttachmentFile
   }>
 }
 
@@ -127,4 +130,18 @@ export interface IExternalApiKeyParams {
 
 export interface IIntegrationMappingUpdateParams {
   simplifiedMap?: ISimplifiedRequirementsMap
+}
+
+// Added for Permit Project Updates
+export interface IProjectDocumentAttribute {
+  id?: string
+  permitProjectId?: string
+  file?: IUppyAttachmentFile
+  _destroy?: boolean
+}
+
+export interface IPermitProjectUpdateParams {
+  description?: string
+  // other PermitProject fields that can be updated
+  projectDocumentsAttributes?: IProjectDocumentAttribute[]
 }
