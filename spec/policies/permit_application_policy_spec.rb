@@ -1,6 +1,6 @@
 require "rails_helper"
 
-RSpec.describe PermitApplicationPolicy do
+RSpec.describe PermitApplicationPolicy, search: true do
   subject do
     described_class.new(
       UserContext.new(user, sandbox),

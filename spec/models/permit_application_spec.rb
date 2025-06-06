@@ -1,6 +1,6 @@
 require "rails_helper"
 
-RSpec.describe PermitApplication, type: :model do
+RSpec.describe PermitApplication, type: :model, search: true do
   describe "associations" do
     subject { build_stubbed(:permit_application) }
 

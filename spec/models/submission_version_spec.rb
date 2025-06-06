@@ -1,7 +1,7 @@
 # spec/models/submission_version_spec.rb
 require "rails_helper"
 
-RSpec.describe SubmissionVersion, type: :model do
+RSpec.describe SubmissionVersion, type: :model, search: true do
   describe "Scopes" do
     # Create sandboxed and non-sandboxed permit applications
     let!(:jurisdiction) { create(:sub_district) }

@@ -1,7 +1,8 @@
 require "rails_helper"
 
-RSpec.describe TemplateVersioningService, type: :service do
+RSpec.describe TemplateVersioningService, type: :service, search: true do
   let!(:requirement_template) do
+    binding.pry
     create(:live_full_requirement_template, sections_count: 3)
   end
 

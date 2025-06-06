@@ -1,7 +1,9 @@
 # spec/controllers/api/requirement_templates_controller_spec.rb
 require "rails_helper"
 
-RSpec.describe Api::RequirementTemplatesController, type: :controller do
+RSpec.describe Api::RequirementTemplatesController,
+               type: :controller,
+               search: true do
   let!(:super_admin) { create(:user, :super_admin) }
   let!(:activity) { create(:activity) }
   let!(:permit_type) { create(:permit_type, code: :high_residential) }
