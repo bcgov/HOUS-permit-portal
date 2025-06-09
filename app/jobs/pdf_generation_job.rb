@@ -160,6 +160,19 @@ class PdfGenerationJob
           err = "Pdf generation process failed: #{exit_status}"
           Rails.logger.error err
 
+          # Log the failing JSON data for debugging if a release version is set
+          # This environment variable should only be present on test and dev environments
+          if ENV["VITE_RELEASE_VERSION"].present?
+            begin
+              parsed_json = JSON.parse(pdf_json_data)
+              Rails.logger.error "###############################"
+              Rails.logger.error "Failing PDF JSON data:\n#{JSON.pretty_generate(parsed_json)}"
+              Rails.logger.error "###############################"
+            rescue JSON::ParserError
+              Rails.logger.error "Failing PDF JSON data (could not be parsed):\n#{pdf_json_data}"
+            end
+          end
+
           # this will raise an error and retry the job
           raise err
         end
