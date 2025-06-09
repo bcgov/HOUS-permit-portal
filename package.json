@@ -100,7 +100,8 @@
     "gen:theme-typings": "chakra-cli tokens app/frontend/styles/theme/index.ts",
     "postinstall": "npm run gen:theme-typings",
     "build:ssr": "bundle exec vite build --ssr",
-    "generate-pdf": "node public/vite-ssr/ssr.js"
+    "generate-pdf": "node public/vite-ssr/ssr.js",
+    "generate-pdf:debug": "node --inspect-brk public/vite-ssr/ssr.js"
   },
   "lint-staged": {
     "*.{js,css,md,ts,tsx}": [
