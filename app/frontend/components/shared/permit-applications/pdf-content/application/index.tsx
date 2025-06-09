@@ -56,10 +56,6 @@ const FormComponent = function ApplicationPDFFormComponent({
   component,
   dataPath,
 }: IFormComponentProps) {
-  // Defensively ensure title and label are strings to prevent errors.
-  component.title = component.title || ""
-  component.label = component.label || ""
-
   const extractFields = (component) => {
     if (component.input) {
       const { isVisible } = extractFieldInfo(component)
@@ -95,7 +91,7 @@ const FormComponent = function ApplicationPDFFormComponent({
       dataPath = [component.key]
       const { components, columns } = component
       const componentFields = fields(components || columns)
-      const isValid = !R.isEmpty(component.title.trim()) && componentFields.length > 0
+      const isValid = !R.isEmpty((component.title || "").trim()) && componentFields.length > 0
       if (!isValid) return null
       const firstChild: any = R.head(components)
       const additionalChildren: any = R.tail(components)
