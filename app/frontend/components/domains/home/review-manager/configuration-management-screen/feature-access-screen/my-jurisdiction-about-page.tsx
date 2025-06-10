@@ -13,7 +13,6 @@ export const myJurisdictionAboutPageScreen = observer(() => {
   const { currentJurisdiction } = useJurisdiction()
   const navigate = useNavigate()
   const { t } = useTranslation()
-  console.log(currentJurisdiction?.slug)
   const [isEnabled, setIsEnabled] = useState(currentJurisdiction?.showAboutPage ?? false)
 
   const handleToggle = (checked) => {
