@@ -4,6 +4,7 @@ class Api::ApplicationController < ActionController::API
 
   before_action :authenticate_user!
   before_action :store_currents
+  before_action :set_audited_user
   before_action :require_confirmation
 
   rescue_from Pundit::NotAuthorizedError, with: :user_not_authorized
@@ -18,6 +19,10 @@ class Api::ApplicationController < ActionController::API
   end
 
   protected
+
+  def set_audited_user
+    Audited.store[:current_user] = -> { current_user }
+  end
 
   def apply_search_authorization(results, policy_action = action_name)
     results.select { |result| policy(result).send("#{policy_action}?".to_sym) }
