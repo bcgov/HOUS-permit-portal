@@ -6,6 +6,7 @@ import React, { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useSearch } from "../../../../../hooks/use-search"
 import { useMst } from "../../../../../setup/root"
+import { EFlashMessageStatus } from "../../../../../types/enums"
 import { IOption } from "../../../../../types/types"
 import { urlForPath } from "../../../../../utils/utility-functions"
 import { CopyLinkButton } from "../../../../shared/base/copy-link-button"
@@ -63,7 +64,7 @@ export const EarlyAccessRequirementTemplatesIndexScreen = observer(function Requ
             </Heading>
 
             <CustomMessageBox
-              status="info"
+              status={EFlashMessageStatus.info}
               description={t("earlyAccessRequirementTemplate.index.invitationInfo")}
               p={1}
             />

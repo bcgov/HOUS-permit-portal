@@ -6,12 +6,18 @@ import { IRequirement } from "../models/requirement"
 import {
   EAutoComplianceModule,
   EAutoComplianceType,
+  EBaselineOccupancyKey,
+  EBaselinePerformanceRequirement,
   ECollaborationType,
   ECollaboratorType,
+  EDocumentReferenceDocumentType,
   EDoorsPerformanceType,
   EEnabledElectiveFieldReason,
+  EEnergyOutputSource,
+  EEnergyOutputUseType,
   EEnergyStep,
   EFossilFuelsPresence,
+  EFuelType,
   EHotWaterPerformanceType,
   EJurisdictionTypes,
   ENotificationActionType,
@@ -27,12 +33,19 @@ import {
   EStepCodeBuildingType,
   EStepCodeCompliancePath,
   EStepCodeEPCTestingTargetType,
+  EStepCodeOccupancyKey,
   ETemplateVersionStatus,
   EUserRoles,
   EVisibility,
   EWindowsGlazedDoorsPerformanceType,
   EZeroCarbonStep,
 } from "./enums"
+
+export type DeepPartial<T> = T extends object
+  ? {
+      [P in keyof T]?: DeepPartial<T[P]>
+    }
+  : T
 
 export type TLatLngTuple = [number, number]
 
@@ -181,6 +194,7 @@ export interface IDenormalizedRequirementBlock {
   displayName: string
   displayDescription?: string
   requirements: IDenormalizedRequirement[]
+  requirementDocuments: IRequirementDocument[]
 }
 
 export interface IDenormalizedTemplateSectionBlock {
@@ -232,7 +246,7 @@ interface IStepCodeBuildingCharacteristicSummarySelectOptions {
   fossilFuelsPresence: EFossilFuelsPresence[]
 }
 
-export interface IStepCodeSelectOptions {
+export interface IPart9ChecklistSelectOptions {
   compliancePaths: EStepCodeCompliancePath[]
   airtightnessValues: EStepCodeAirtightnessValue[]
   epcTestingTargetTypes: EStepCodeEPCTestingTargetType[]
@@ -241,6 +255,25 @@ export interface IStepCodeSelectOptions {
   buildingCharacteristicsSummary: IStepCodeBuildingCharacteristicSummarySelectOptions
   energySteps: EEnergyStep[]
   zeroCarbonSteps: EZeroCarbonStep[]
+}
+
+export interface IPart3ChecklistSelectOptions {}
+export interface IFileData {
+  id: string
+  storage: string
+  metadata: {
+    size: number
+    filename: string
+    mimeType: string
+  }
+}
+
+export interface IRequirementDocument {
+  id?: string
+  requirementBlockId: string
+  file: IFileData
+  createdAt?: Date
+  _destroy?: boolean
 }
 
 export interface IRequirementBlockCustomization {
@@ -496,7 +529,7 @@ export interface IRevisionRequest {
   id: string
   reasonCode: string
   requirementJson: IFormIORequirement
-  submissionJson: any
+  submissionData: any
   comment: string
   user?: IMinimalFrozenUser
   createdAt: number
@@ -549,3 +582,149 @@ export type TVisibility =
   | EVisibilityValues
   | `${EVisibilityValues},${EVisibilityValues}`
   | `${EVisibilityValues},${EVisibilityValues},${EVisibilityValues}`
+
+export interface IBaselineOccupancy {
+  id?: string
+  key: EBaselineOccupancyKey
+  modelledFloorArea: string
+  performanceRequirement: EBaselinePerformanceRequirement
+  percentBetterRequirement?: string
+  requirementSource?: string
+}
+export interface IStepCodeOccupancy {
+  id?: string
+  key: EStepCodeOccupancyKey
+  modelledFloorArea: string
+  energyStepRequired: EEnergyStep
+  zeroCarbonStepRequired: EZeroCarbonStep
+  requirementSource?: string
+}
+export interface IFuelType {
+  id?: string
+  key: EFuelType
+  description: string
+  emissionsFactor: string
+  source: string
+}
+
+export interface IEnergyOutput {
+  id?: string
+  source: EEnergyOutputSource
+  useType: EEnergyOutputUseType
+  annualEnergy: string
+  name: string | null
+  fuelTypeId: string | null
+}
+
+export interface IMakeUpAirFuel {
+  id?: string
+  fuelTypeId: string
+  percentOfLoad: string | number // string if its coming from the API, number if it's a form field
+}
+
+export interface IDocumentReference {
+  id?: string
+  documentType: EDocumentReferenceDocumentType
+  documentTypeDescription?: string | null
+  issuedFor?: string | null
+  documentName?: string | null
+  dateIssued?: number | null | Date
+  preparedBy?: string | null
+}
+
+type TNavLinkSection = "overview" | "compliance" | "results"
+
+export interface IPart3NavLink {
+  key: TPart3NavLinkKey
+  location: string
+  subLinks: IPart3NavLink[]
+  section?: TNavLinkSection
+}
+export interface IPart3NavSection {
+  key: TPart3NavSectionKey
+  navLinks: IPart3NavLink[]
+}
+
+export interface IPart3SectionCompletionStatusEntry {
+  complete: boolean
+  relevant: boolean
+}
+
+export interface IPart3SectionCompletionStatus {
+  start: IPart3SectionCompletionStatusEntry
+  projectDetails: IPart3SectionCompletionStatusEntry
+  locationDetails: IPart3SectionCompletionStatusEntry
+  baselineOccupancies: IPart3SectionCompletionStatusEntry
+  baselineDetails: IPart3SectionCompletionStatusEntry
+  districtEnergy: IPart3SectionCompletionStatusEntry
+  fuelTypes: IPart3SectionCompletionStatusEntry
+  additionalFuelTypes: IPart3SectionCompletionStatusEntry
+  baselinePerformance: IPart3SectionCompletionStatusEntry
+  stepCodeOccupancies: IPart3SectionCompletionStatusEntry
+  stepCodePerformanceRequirements: IPart3SectionCompletionStatusEntry
+  modelledOutputs: IPart3SectionCompletionStatusEntry
+  renewableEnergy: IPart3SectionCompletionStatusEntry
+  overheatingRequirements: IPart3SectionCompletionStatusEntry
+  residentialAdjustments: IPart3SectionCompletionStatusEntry
+  documentReferences: IPart3SectionCompletionStatusEntry
+  performanceCharacteristics: IPart3SectionCompletionStatusEntry
+  hvac: IPart3SectionCompletionStatusEntry
+  contact: IPart3SectionCompletionStatusEntry
+  requirementsSummary: IPart3SectionCompletionStatusEntry
+  stepCodeSummary: IPart3SectionCompletionStatusEntry
+}
+
+export type TPart3NavLinkKey = keyof IPart3SectionCompletionStatus
+export type TPart3NavSectionKey = "overview" | "compliance" | "results"
+
+// Define the base structure shared by both metric types
+interface IPart3ComplianceMetricsBase {
+  modelled_floor_area?: string
+  teui: string
+  ghgi: string
+  totalEnergy?: string
+  occupancy?: EStepCodeOccupancyKey
+  energyStepAchieved?: EEnergyStep
+  zeroCarbonStepAchieved?: EZeroCarbonStep
+  performanceRequirementAchieved?: EBaselinePerformanceRequirement
+}
+
+// Type where TEDI is expected to be a simple string (e.g., for requirements)
+export interface IPart3ComplianceMetrics extends IPart3ComplianceMetricsBase {
+  tedi: string
+}
+
+// Type where TEDI can be an object with an optional wholeBuilding property (e.g., for adjustedResults, complianceSummary)
+export interface IPart3ComplianceMetricsNestedTEDI extends IPart3ComplianceMetricsBase {
+  tedi?: {
+    wholeBuilding?: string
+    stepCodePortion?: string
+  }
+}
+
+interface IPart3StepCodeComplianceRequirements {
+  areaWeightedTotals: IPart3ComplianceMetrics // Assuming string tedi, adjust if needed
+  occupanciesRequirements: IPart3ComplianceMetrics[] // Assuming string tedi, adjust if needed
+}
+// Update IPart3ComplianceReportRequirements to use the specific type for wholeBuilding
+interface IPart3ComplianceReportRequirements {
+  baselinePortions: IPart3ComplianceMetrics // Assuming string tedi, adjust if needed
+  stepCodePortions: IPart3StepCodeComplianceRequirements // References IPart3ComplianceMetrics
+  wholeBuilding: IPart3ComplianceMetrics // Use the type with string tedi
+}
+
+// Update IPart3ComplianceReportPerformance to use the correct types
+interface IPart3ComplianceReportPerformance {
+  requirements: IPart3ComplianceReportRequirements
+  // Assuming these also use the nested structure based on adjusted/compliance. Adjust if needed.
+  resultsAsModelled: IPart3ComplianceMetricsNestedTEDI
+  corridorPressurizedAdjustment: IPart3ComplianceMetricsNestedTEDI
+  suiteSubMeteringAdjustment: IPart3ComplianceMetricsNestedTEDI
+  // Explicitly use the nested TEDI type based on component usage
+  adjustedResults: IPart3ComplianceMetricsNestedTEDI
+  complianceSummary: IPart3ComplianceMetricsNestedTEDI
+}
+
+export interface IPart3ComplianceReport {
+  performance: IPart3ComplianceReportPerformance
+}

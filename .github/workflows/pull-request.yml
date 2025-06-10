@@ -1,5 +1,9 @@
 name: Pull Request Workflow
 
+permissions:
+  contents: read
+  pull-requests: write
+
 on:
   pull_request:
     branches: ["main", "develop"]
@@ -9,7 +13,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     name: Run RSpec Test Suite
-    environment: "CI-test"
+    # environment: "CI-test"
     env:
       RAILS_ENV: test
       DATABASE_URL: postgres://user:password@localhost:5432/test_db
@@ -20,10 +24,14 @@ jobs:
       CONSIGNO_URL: https://consignostub.dev-hous-permit-portal.com/stub/api/v1
       GEO_ALR_REST_URL: https://alr_rest_url_stub/arcserver/rest/services
       GEO_LTSA_PARCELMAP_REST_URL: https://ltsa_parcel_map_url_stub/arcserver/rest/services
-      MIN_ZERO_CARBON_STEP: "1"
-      MAX_ZERO_CARBON_STEP: "5"
-      MIN_ENERGY_STEP: "3"
-      MAX_ENERGY_STEP: "4"
+      PART_9_MIN_ENERGY_STEP: "3"
+      PART_9_MAX_ENERGY_STEP: "5"
+      PART_9_MIN_ZERO_CARBON_STEP: "1"
+      PART_9_MAX_ZERO_CARBON_STEP: "4"
+      PART_3_MIN_ENERGY_STEP: "2"
+      PART_3_MAX_ENERGY_STEP: "4"
+      PART_3_MIN_ZERO_CARBON_STEP: "1"
+      PART_3_MAX_ZERO_CARBON_STEP: "4"
       # The following keys are stub keys
       ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY: "ucZeHIu5E5Fd6mTRQjBzfc1qu6qzvA"
       ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY: "ucZeHIu5E5Fd6mTRQjBzfc1qu6qzvA"

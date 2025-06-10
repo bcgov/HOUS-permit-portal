@@ -70,6 +70,9 @@ export const UserModel = types
     get isSubmitter() {
       return self.role == EUserRoles.submitter
     },
+    get isTechnicalSupport() {
+      return self.role == EUserRoles.technicalSupport
+    },
     get isDiscarded() {
       return self.discardedAt !== null
     },
@@ -121,6 +124,8 @@ export const UserModel = types
         newRole = EUserRoles.reviewer
       } else if (self.role === EUserRoles.reviewer) {
         newRole = EUserRoles.reviewManager
+      } else if (self.role === EUserRoles.technicalSupport) {
+        newRole = EUserRoles.reviewer
       } else {
         return
       }
@@ -189,4 +194,7 @@ export interface IPreference {
 
   enableInAppIntegrationMappingNotification: boolean
   enableEmailIntegrationMappingNotification: boolean
+
+  enableInAppUnmappedApiNotification: boolean
+  enableEmailUnmappedApiNotification: boolean
 }

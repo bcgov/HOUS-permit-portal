@@ -62,6 +62,10 @@ export const FieldsSetupDrawer = observer(function FieldsSetupMenu({
     if (type === ERequirementType.energyStepCode) {
       acc.push({ requirementType: ERequirementType.file, isStepCodePackageFileRequirement: true })
     }
+    // TBD - not sure if the design package needs to be linked to part 3
+    // if (type === ERequirementType.energyStepCodePart3) {
+    //   acc.push({ requirementType: ERequirementType.file, isStepCodePackageFileRequirement: true })
+    // }
 
     return acc
   }, [])
@@ -94,10 +98,7 @@ export const FieldsSetupDrawer = observer(function FieldsSetupMenu({
             </Flex>
             <Flex flexDir={"column"} w={"full"}>
               {requirementTypeOptions
-                .filter(
-                  ({ requirementType }) =>
-                    hasRequirementFieldDisplayComponent(requirementType) && requirementType !== ERequirementType.address // filtering address for now because the back-end formio side of the address field is not yet implemented completely
-                )
+                .filter(({ requirementType }) => hasRequirementFieldDisplayComponent(requirementType))
                 .map(({ requirementType, isStepCodePackageFileRequirement = false }) => (
                   <HStack
                     key={`${requirementType}${isStepCodePackageFileRequirement ? "_stepCodePackage" : ""}`}

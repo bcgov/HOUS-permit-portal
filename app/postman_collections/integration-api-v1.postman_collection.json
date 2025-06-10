@@ -1,0 +1,150 @@
+{
+  "info": {
+    "name": "Integration API V1",
+    "description": "### API documentation overview\nThis document provides detailed information about the APIs available for external integrators to query and retrieve submitted and resubmitted permit applications.\nIt also includes specifications on webhook events that notify your systems in real-time.\n\n### Data scope:\nThe permit applications returned by these APIs are limited to those within the jurisdiction associated with the API key used for the request. This\nensures that each integrator has access solely to relevant data.\n\n### Integration steps:\nTo integrate with our APIs, please contact the Building Permit Hub team to enable your API access. Your local jurisdiction can then obtain the API key\nand register your webhook URL in their configuration settings on the building permit hub. You can reach us directly at <digital.codes.permits@gov.bc.ca>\nfor further assistance.\n\n### Authentication and authorization:\nAccess to these APIs is controlled via an API key, which must be included in the Authorization header as a Bearer token like so:\n```\nAuthorization: Bearer {Your_API_Key_Here}\n```\nPlease note that a unique API key is required for each jurisdiction you wish to access, enhancing security and data integrity.\n\n### Rate limits:\nTo ensure fair usage, the API is rate-limited to 100 requests per minute per API key and 300 requests per IP in a 3 minute interval. Exceeding these\nlimits will result in a 429 response. If this occurs, we recommend spacing out your requests. Continued exceeding of rate limits\nmay necessitate further contact with the building permit hub team.\n\n### Api base path:\nThe base path for all API endpoints is `/external_api/v1`.\n\n### Server information for testing:\nBy default the requests from the documentation will be sent to the current environment servers. For testing purposes, you can specify a different server using the {serverUrl} variable.\nDuring your integration testing phase, you have the flexibility to use custom URLs by configuring the serverUrl variable. This allows you to\ntailor the API environment to better suit your development needs. Ensure that your custom URLs are configured correctly to avoid any connectivity or data access issues.\n\n### Special considerations:\nA returned permit application will have a status of either `newly_submitted` for permit applications submitted for the first time, or `resubmitted` for\npermit applications that have been resubmitted due to revision requests. The `resubmitted_at` field will indicate the timestamp of the latest resubmission.\nWhile there may be multiple resubmissions, the submission data payload returned will reflect the most recent submission data. \n\nFor security purposes, any API response that includes a file URL will have a signed URL. These files will be available for download for a limited time (1 hour).\nWe recommend downloading the file immediately upon receiving the URL to avoid any issues. If necessary, you can always call the API again to retrieve a\nnew file URL.\n\n### Visual aids and examples:\nFor a better understanding of how our APIs work, including webhook setups and request handling, please refer to the code examples included later\nin this document.\n",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Permit applications",
+      "item": [
+        {
+          "name": "Search Permit Applications",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "    // Parse the response JSON data",
+                  "    const responseJson = pm.response.json();",
+                  "",
+                  "    // Check if the 'data' array exists and has at least one item",
+                  "    if (responseJson && responseJson.data && responseJson.data.length > 0) {",
+                  "        // Get the ids from the first object in the 'data' array",
+                  "        const firstPaId = responseJson.data[0].id;",
+                  "        const firstPvId = responseJson.data[0].permit_version.id;",
+                  "",
+                  "        // Set the extracted IDs into collection variables",
+                  "        pm.collectionVariables.set(\"permit_application_id\", firstPaId);",
+                  "        pm.collectionVariables.set(\"template_version_id\", firstPvId);",
+                  "",
+                  "        console.log(\"Set collection variable 'permit_application_id' to:\", firstPaId);",
+                  "    } else {",
+                  "        console.log(\"Could not find 'data[0].id' in the response to set the variables.\");",
+                  "    }"
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"permit_classifications\": \"Example Classification\",\n  \"status\": \"newly_submitted\",\n  \"submitted_at\": {\n    \"gte\": \"2024-01-01T00:00:00-07:00\",\n    \"lte\": \"2024-12-31T23:59:59-07:00\"\n  },\n  \"resubmitted_at\": {\n    \"gte\": \"2024-01-01T00:00:00-07:00\",\n    \"lte\": \"2024-12-31T23:59:59-07:00\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/external_api/v1/permit_applications/search",
+              "host": ["{{base_url}}"],
+              "path": ["external_api", "v1", "permit_applications", "search"]
+            },
+            "description": "This endpoint retrieves a list of permit applications in a paginated format. It allows you to search through permit applications based on specified criteria, returning results in manageable pages."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Permit Application by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/external_api/v1/permit_applications/{{permit_application_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["external_api", "v1", "permit_applications", "{{permit_application_id}}"]
+            },
+            "description": "This endpoint retrieves detailed information about a specific permit application using its unique identifier (ID). Please note that requests to this endpoint are subject to rate limiting to ensure optimal performance and fair usage."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Integration Mapping by Version ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/external_api/v1/permit_applications/versions/{{template_version_id}}/integration_mapping",
+              "host": ["{{base_url}}"],
+              "path": [
+                "external_api",
+                "v1",
+                "permit_applications",
+                "versions",
+                "{{template_version_id}}",
+                "integration_mapping"
+              ]
+            },
+            "description": "This endpoint retrieves the integration mapping between the Building Permit Hub system and the local jurisdiction’s integration system. It uses a unique ID associated with a specific version of the permit template."
+          },
+          "response": []
+        }
+      ],
+      "description": "Submitted permit applications (scoped to API key jurisdiction)"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{api_key}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "exec": [""]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "exec": [""]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "api_key",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "permit_application_id",
+      "value": ""
+    },
+    {
+      "key": "template_version_id",
+      "value": ""
+    }
+  ]
+}

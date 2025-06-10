@@ -261,7 +261,69 @@ export function urlForPath(path: string): string {
   return `${baseUrl}${normalizedPath}`
 }
 
+export async function downloadFileFromStorage(options: { model: string; modelId?: string }): Promise<void> {
+  try {
+    const { model, modelId } = options
+    const params = new URLSearchParams()
+
+    if (model) params.append("model", model)
+    if (modelId) params.append("model_id", modelId)
+
+    const response = await fetch(`/api/s3/params/download?${params.toString()}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+    })
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+
+    const responseJson = await response.json()
+    window.open(responseJson.url, "_blank")
+  } catch (error) {
+    console.error("Failed to download file:", error)
+    throw error
+  }
+}
+
 export function isSafari() {
   // Check if the browser is Safari
   return /^((?!chrome|android).)*safari/i.test(navigator.userAgent)
+}
+
+/**
+ * Converts a number to a localized string representation (defaults to en-CA)
+ * @param value - Number to format
+ * @param options - Intl.NumberFormatOptions for additional formatting options
+ * @param locale - BCP 47 language tag (e.g., 'en-CA', 'fr-CA')
+ * @returns Formatted string or empty string if value is null/undefined
+ */
+export function numberToFormattedString(
+  value: number | null | undefined,
+  options: Intl.NumberFormatOptions = {},
+  locale: string = "en-CA"
+): string {
+  if (value === null || value === undefined) return ""
+
+  return value.toLocaleString(locale, {
+    maximumFractionDigits: 3,
+    ...options,
+  })
+}
+
+/**
+ * Converts a formatted string back to a number
+ * @param value - Formatted string to parse (e.g., "1,234.56")
+ * @returns Parsed number or 0 if input is empty/invalid
+ */
+export function formattedStringToNumber(value: string): number {
+  const rawValue = value.replace(/,/g, "")?.trim()
+
+  if (!rawValue) return 0
+
+  const parsedValue = Number(rawValue)
+  return !isNaN(parsedValue) ? parsedValue : 0
 }

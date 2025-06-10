@@ -20,7 +20,7 @@ module PermitApplicationStatus
       %w[newly_submitted resubmitted]
     end
 
-    aasm column: "status", enum: true do
+    aasm column: "status", enum: true, timestamp: true do
       state :new_draft, initial: true
       state :newly_submitted
       state :revisions_requested
@@ -54,7 +54,7 @@ module PermitApplicationStatus
     end
 
     def can_submit?
-      return false unless jurisdiction.inbox_enabled? || sandbox.present?
+      return false unless inbox_enabled? || sandbox.present?
 
       signed =
         submission_data.dig("data", "section-completion-key", "signed").present?
@@ -73,15 +73,14 @@ module PermitApplicationStatus
     def handle_submission
       update(signed_off_at: Time.current)
 
-      checklist = step_code&.pre_construction_checklist
-
+      checklist = step_code&.primary_checklist
       submission_versions.create!(
         form_json: self.form_json,
         submission_data: self.submission_data,
         step_code_checklist_json:
           (
             if checklist.present?
-              StepCodeChecklistBlueprint.render_as_hash(
+              step_code.checklist_blueprint.render_as_hash(
                 checklist,
                 view: :extended
               )

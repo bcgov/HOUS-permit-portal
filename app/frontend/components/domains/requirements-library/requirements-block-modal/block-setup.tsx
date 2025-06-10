@@ -2,10 +2,12 @@ import {
   Box,
   Button,
   Checkbox,
+  Flex,
   FormControl,
   FormHelperText,
   FormLabel,
   HStack,
+  IconButton,
   Input,
   Text,
   Textarea,
@@ -13,12 +15,19 @@ import {
   Tooltip,
   VStack,
 } from "@chakra-ui/react"
-import { Info } from "@phosphor-icons/react"
+import { ArrowCounterClockwise, Info, Trash } from "@phosphor-icons/react"
+import "@uppy/core/dist/style.min.css"
+import "@uppy/dashboard/dist/style.css"
 import { observer } from "mobx-react-lite"
+// import DragDrop from "@uppy/react/lib/DragDrop.js"
+import { Icon } from "@chakra-ui/react"
+import { UppyFile } from "@uppy/core"
+import Dashboard from "@uppy/react/lib/Dashboard.js"
 import React, { useRef } from "react"
-import { Controller, useFormContext } from "react-hook-form"
+import { Controller, useFieldArray, useFormContext } from "react-hook-form"
 import { Trans, useTranslation } from "react-i18next"
 import { useParams } from "react-router-dom"
+import useUppyS3 from "../../../../hooks/use-uppy-s3"
 import { IRequirementBlock } from "../../../../models/requirement-block"
 import { useMst } from "../../../../setup/root"
 import { ConfirmationModal } from "../../../shared/confirmation-modal"
@@ -27,9 +36,7 @@ import { TagsSelect } from "../../../shared/select/selectors/tags-select"
 import { BlockSetupOptionsMenu } from "../block-setup-options-menu"
 import { IRequirementBlockForm } from "./index"
 
-const helperTextStyles: Partial<TextProps> = {
-  color: "border.base",
-}
+const helperTextStyles: Partial<TextProps> = { color: "border.base" }
 
 export const BlockSetup = observer(function BlockSetup({
   requirementBlock,
@@ -43,7 +50,7 @@ export const BlockSetup = observer(function BlockSetup({
   const { requirementBlockStore } = useMst()
   const { isEditingEarlyAccess } = requirementBlockStore
   const { t } = useTranslation()
-  const { register, control, watch } = useFormContext<IRequirementBlockForm>()
+  const { register, control, watch, setValue } = useFormContext<IRequirementBlockForm>()
   const containerRef = useRef<HTMLDivElement>(null)
 
   const { requirementTemplateId } = useParams()
@@ -61,11 +68,47 @@ export const BlockSetup = observer(function BlockSetup({
 
   const visibilityWatch = watch("visibility")
 
-  const visibilityBgColor = {
-    any: "greys.grey10",
-    live: "semantic.infoLight",
-    early_access: "semantic.warningLight",
+  const visibilityBgColor = { any: "greys.grey10", live: "semantic.infoLight", early_access: "semantic.warningLight" }
+
+  const requirementDocumentsAttributes = watch("requirementDocumentsAttributes")
+
+  const { fields, append, remove, update } = useFieldArray({ control, name: "requirementDocumentsAttributes" })
+
+  const handleUploadSuccess = (file: UppyFile<{}, {}>, response: any) => {
+    // Create a new document with the uploaded file data
+    const parts = response.uploadURL.split("/")
+    const key = parts[parts.length - 1]
+    const newDocument = {
+      // requirementBlockId: requirementBlock?.id, // No requirementBlock ID when creating
+      file: {
+        id: key,
+        storage: "cache",
+        metadata: { size: file.size || 0, filename: file.name, mimeType: file.type || "application/octet-stream" },
+      },
+    }
+    // Use append from useFieldArray
+    append(newDocument, { shouldFocus: false })
+    // Update form state instead of model directly
+    // setValue("requirementDocumentsAttributes", [...requirementDocumentsAttributes, newDocument], { shouldDirty: true })
   }
+
+  const handleRemoveFile = (documentId: string) => {
+    const index = requirementDocumentsAttributes.findIndex((doc) => (doc.id || doc.file?.id) === documentId)
+    if (index !== -1) {
+      const doc = requirementDocumentsAttributes[index]
+      update(index, { ...doc, _destroy: true })
+    }
+  }
+
+  const handleUndoRemove = (documentId: string) => {
+    const index = requirementDocumentsAttributes.findIndex((doc) => (doc.id || doc.file?.id) === documentId)
+    if (index !== -1) {
+      const doc = requirementDocumentsAttributes[index]
+      update(index, { ...doc, _destroy: false })
+    }
+  }
+
+  const uppy = useUppyS3({ onUploadSuccess: handleUploadSuccess, maxNumberOfFiles: 10, autoProceed: true })
 
   return (
     <Box as={"section"} w={"350px"} boxShadow={"md"} borderRadius={"xl"} bg={"greys.grey10"} ref={containerRef}>
@@ -122,14 +165,7 @@ export const BlockSetup = observer(function BlockSetup({
           </FormHelperText>
         </FormControl>
         <FormControl>
-          <FormLabel
-            sx={{
-              ":after": {
-                content: `"${t("ui.optional")}"`,
-                ml: 1.5,
-              },
-            }}
-          >
+          <FormLabel sx={{ ":after": { content: `"${t("ui.optional")}"`, ml: 1.5 } }}>
             {t("requirementsLibrary.fields.associations")}
           </FormLabel>
           <Controller
@@ -141,15 +177,9 @@ export const BlockSetup = observer(function BlockSetup({
                   onChange={(options) => onChange(options.map((option) => option.value))}
                   fetchOptions={fetchAssociationOptions}
                   placeholder={undefined}
-                  selectedOptions={value.map((association) => ({
-                    value: association,
-                    label: association,
-                  }))}
+                  selectedOptions={value.map((association) => ({ value: association, label: association }))}
                   styles={{
-                    container: (css, state) => ({
-                      ...css,
-                      width: "100%",
-                    }),
+                    container: (css, state) => ({ ...css, width: "100%" }),
                     menuPortal: (base) => ({ ...base, zIndex: 9999 }),
                   }}
                   menuPortalTarget={document.body}
@@ -162,7 +192,6 @@ export const BlockSetup = observer(function BlockSetup({
             {t("requirementsLibrary.fieldDescriptions.associations")}
           </FormHelperText>
         </FormControl>
-
         <FormControl>
           <Controller
             name="firstNations"
@@ -176,13 +205,41 @@ export const BlockSetup = observer(function BlockSetup({
             }}
           />
         </FormControl>
-
         <FormControl isReadOnly={true}>
           <FormLabel>{t("requirementsLibrary.fields.requirementSku")}</FormLabel>
           <Input bg={"white"} value={watch("sku")} isDisabled={true} />
           <FormHelperText {...helperTextStyles}>
             {t("requirementsLibrary.fieldDescriptions.requirementSku")}
           </FormHelperText>
+        </FormControl>
+        <FormControl>
+          <FormLabel>{t("requirementsLibrary.fields.requirementDocuments")}</FormLabel>
+          {requirementDocumentsAttributes?.map((doc) => (
+            <Flex key={doc.id || doc.file?.id} justifyContent="space-between" alignItems="center" gap={2} mb={1}>
+              <Text textDecoration={doc._destroy ? "line-through" : "none"}>{doc.file?.metadata?.filename}</Text>
+              {doc._destroy ? (
+                <Button
+                  variant="link"
+                  size="sm"
+                  color="semantic.info"
+                  leftIcon={<Icon as={ArrowCounterClockwise} />}
+                  onClick={() => handleUndoRemove(doc.id || doc.file?.id)}
+                >
+                  {t("ui.undo")}
+                </Button>
+              ) : (
+                <IconButton
+                  aria-label={t("ui.remove")}
+                  color="semantic.error"
+                  icon={<Icon as={Trash} />}
+                  variant="tertiary"
+                  size="sm"
+                  onClick={() => handleRemoveFile(doc.id || doc.file?.id)}
+                />
+              )}
+            </Flex>
+          ))}
+          <Dashboard uppy={uppy} height={300} />
         </FormControl>
         {withOptionsMenu
           ? requirementBlock && <BlockSetupOptionsMenu requirementBlock={requirementBlock} />
@@ -200,10 +257,6 @@ export const BlockSetup = observer(function BlockSetup({
                   handleCopyToEarlyAccess()
                   _onClose()
                 }}
-                // confirmButtonProps={{
-                //   isLoading: false, // Replace with your loading state if needed
-                //   isDisabled: false, // Replace with your validation logic if needed
-                // }}
               />
             )}
       </VStack>
