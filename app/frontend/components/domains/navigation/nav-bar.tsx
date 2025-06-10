@@ -170,7 +170,7 @@ export const NavBar = observer(function NavBar() {
                   {t("site.myPermits")}
                 </RouterLinkButton>
               )}
-              {currentUser?.isReviewStaff && !currentUser.isRegionalReviewManager && (
+              {(currentUser?.isReviewStaff || currentUser?.isTechnicalSupport) && !currentUser.isRegionalReviewManager && (
                 <Flex direction="column">
                   <Text color="greys.white">{currentUser.jurisdiction.name}</Text>
                   <Text color="whiteAlpha.700" textAlign="right" variant="tiny_uppercase">
@@ -382,6 +382,7 @@ const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
                   {currentUser?.isReviewer && reviwerOnlyItems}
                   {currentUser?.isSubmitter && submitterOnlyItems}
                   {currentUser?.isReviewStaff && reviewStaffOnlyItems}
+                  {currentUser?.isTechnicalSupport && reviewStaffOnlyItems}
                   {!currentUser?.isSubmitter && (
                     <>
                       <MenuItem bg="greys.grey03" onClick={(e) => navigate("/permit-applications/new")}>
@@ -421,6 +422,7 @@ const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
                 )}
                 <NavMenuItem label={t("site.home")} to="/" />
                 <NavMenuItem label={t("home.jurisdictionsTitle")} to={"/jurisdictions"} />
+                <NavMenuItem label={t("home.projectReadinessTools.title")} to={"/project-readiness-tools"} />
                 {loggedIn && <NavMenuItem label={t("auth.logout")} onClick={handleClickLogout} />}
               </>
             )}
