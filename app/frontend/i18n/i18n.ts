@@ -1422,6 +1422,156 @@ const options = {
                   "Geotechnical - engineer reviews ground and slope stability for excavation, foundation, temporary retaining systems during constructions and finished building.",
               },
             },
+            joinTheBuildingPermitHub: {
+              title: "Join the Building Permit Hub",
+              subtitle: "A voluntary, modern permitting platform built with BC communities, for BC communities.",
+              ourVision: {
+                title: "Our Vision",
+                description: "The Building Permit Hub is here to make building permits faster and easier for everyone:",
+                audiences: {
+                  localGovernments: "local governments",
+                  builders: "builders",
+                  homeowners: "homeowners",
+                  applicants: "anyone applying for a permit",
+                },
+                platformDescription:
+                  "It's a free, voluntary platform that supports you from the moment a property is identified for your construction project — all the way through to occupancy.",
+                mission:
+                  "We're here to accelerate housing approvals, strengthen partnerships, and lay the foundation for a connected, future-ready permitting system across the province.",
+                flexibility:
+                  "Every community is different, and that's why the Hub is built with choice and flexibility in mind. Use the features that work best for your jurisdiction, whether you're just getting started or already have your own digital system.",
+              },
+              currentStatus: {
+                title: "Where we are & What you can use today",
+                description: "The Hub is live and available to all jurisdictions in BC.",
+                features: {
+                  title: "You can start using:",
+                  smallScaleHousing: "small-scale multi-unit housing permit types",
+                  automatedStepCode: "automated Step Code compliance tools (BC Building Code Part 3 & Part 9)",
+                  collaborativeFlows: "collaborative submission and review flows",
+                  customizablePermits: "customizable permit types tailored to your bylaws",
+                  resubmissionTools: "resubmission and revision tools",
+                },
+                workflowNote:
+                  "Whether you're digital, hybrid, or paper-based, you can participate in a way that fits your current workflow.",
+              },
+              builtTogether: {
+                title: "Built together, with You",
+                description:
+                  "We're co-developing this platform with local governments, First Nations, and industry partners.",
+                feedbackNote:
+                  "Your feedback — whether it's a new idea or something that isn't working — shapes what we build.",
+                communityFeatures: {
+                  title: "Some features that came directly from community feedback:",
+                  multipleUploads: "support for multiple file uploads",
+                  fileScanning: "malicious file scanning",
+                  flexibleTools: "flexible tools for tracking, reviewing, and collaborating",
+                },
+              },
+              whatsNext: {
+                title: "What's coming next",
+                timeline: "Here's what we're working on for the next 6–7 months:",
+                features: {
+                  permitFolders: {
+                    title: "Permit Project Folders",
+                    description: "Submit multiple permits together or in sequence — ideal for complex projects.",
+                  },
+                  readinessTools: {
+                    title: "Project Readiness Tools",
+                    description:
+                      "Pre-application tools like letters of assurance, lateral load and seismic calculators — usable outside the permit form.",
+                  },
+                  documentUpload: {
+                    title: "Independent Document Upload",
+                    description:
+                      "Support documents that aren't tied to specific form fields, helpful for large or complex submissions.",
+                  },
+                  designCatalogues: {
+                    title: "Standardized Design Catalogues",
+                    description:
+                      "Work with national partners to speed up reviews and encourage consistency across housing types.",
+                  },
+                  dashboards: {
+                    title: "Cross-Jurisdiction Dashboards",
+                    description:
+                      "For submitters working across BC: one dashboard for all permit activity, no matter the community.",
+                  },
+                  statusTracking: {
+                    title: "Enhanced Status Tracking",
+                    description:
+                      "More dynamic status updates — visible in real time for both jurisdictions and submitters.",
+                  },
+                },
+              },
+              flexibleAdoption: {
+                title: "Flexible Adoption to Fit You",
+                description: "You don't need to use the entire platform.",
+                examples: {
+                  title: "Examples:",
+                  stepCode: "Use just the Step Code tools, and we'll send the compliance reports directly to you",
+                  specificTools:
+                    "Adopt specific tools like document upload or project folders as they become available",
+                  preApplication:
+                    "Let your users benefit from our pre-application readiness tools, without needing to change your permitting system",
+                },
+                note: "We're designing the Hub to meet 60–70% of most jurisdictions' needs — not to replace what already works.",
+              },
+              integration: {
+                title: "Connected Through Integration",
+                description:
+                  "Many jurisdictions have asked for integration into their existing software (like Tempest or CityView). We're responding by:",
+                features: {
+                  openApi: "Offering open API submission",
+                  directPush: "Allowing the Hub to push applications directly into your permitting system",
+                  statusUpdates:
+                    "Soon: receiving status updates back from your system, to display to applicants in real time",
+                },
+              },
+              getStarted: {
+                title: "How to Get Started",
+                description:
+                  "Joining the Building Permit Hub is simple — and we're here to support you every step of the way.",
+                steps: {
+                  learnMore: {
+                    title: "1. Learn More",
+                    guide: "Download our Local Government Onboarding Guide (PDF)",
+                  },
+                  reachOut: {
+                    title: "2. Reach Out to Start the Conversation",
+                    description:
+                      "Every community is different. Let's talk about your goals and how the Hub can support them.",
+                    email: "buildingpermithub@gov.bc.ca",
+                  },
+                  beginOnboarding: {
+                    title: "3. Begin Onboarding",
+                    description: "We'll walk with you through readiness, setup, and rollout. Go at your pace.",
+                  },
+                },
+              },
+              notAlone: {
+                title: "You're Not Alone",
+                stats: {
+                  liveJurisdictions: "Over 5 jurisdictions are live",
+                  coCreation: "Over 40 local governments and 7 First Nations helped co-create the foundation",
+                },
+                feedback:
+                  "Feedback has been positive — and the number one request is more permits and broader support for project workflows. That's exactly what we're building next.",
+              },
+              seeMore: {
+                title: "Want to See More?",
+                description: "We'd be happy to:",
+                options: {
+                  demo: "Walk you through a live demo",
+                  technical: "Answer technical questions",
+                  success: "Share success stories from other communities",
+                },
+                contact: {
+                  email: "buildingpermithub@gov.bc.ca",
+                  phone: "1-800-XXX-XXXX",
+                  sessions: "Live onboarding sessions available",
+                },
+              },
+            },
           },
           siteConfigurationTitle: "Configuration management",
           jurisdictionsDescription:
