@@ -659,7 +659,8 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_06_164041) do
     t.index ["discarded_at"], name: "index_requirement_blocks_on_discarded_at"
     t.index %w[name first_nations],
             name: "index_requirement_blocks_on_name_and_first_nations",
-            unique: true
+            unique: true,
+            where: "(discarded_at IS NULL)"
     t.index ["sku"], name: "index_requirement_blocks_on_sku", unique: true
   end
 

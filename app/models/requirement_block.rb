@@ -27,11 +27,12 @@ class RequirementBlock < ApplicationRecord
   enum visibility: { any: 0, early_access: 1, live: 2 }, _default: 0
 
   validates :sku, uniqueness: true, presence: true
-  validates :name, presence: true, uniqueness: { scope: :first_nations }
+  validates :name, presence: true
   validates :display_name, presence: true
   validate :validate_step_code_dependencies
   validate :validate_requirements_conditional
   validate :early_access_on_appropriate_template
+  validate :unique_name_among_non_discarded
 
   before_validation :set_sku, on: :create
   before_validation :ensure_unique_name, on: :create
@@ -307,7 +308,11 @@ class RequirementBlock < ApplicationRecord
     new_name = base_name
 
     # Loop to find a unique name
-    while self.class.exists?(name: new_name)
+    while self
+            .class
+            .where(discarded_at: nil)
+            .where(first_nations: first_nations)
+            .exists?(name: new_name)
       new_name = increment_last_word(new_name)
     end
 
@@ -329,5 +334,17 @@ class RequirementBlock < ApplicationRecord
     end
 
     words.join(" ")
+  end
+
+  def unique_name_among_non_discarded
+    return if name.blank?
+    if self
+         .class
+         .where.not(id: id)
+         .where(first_nations: first_nations)
+         .where(discarded_at: nil)
+         .exists?(name: name)
+      errors.add(:name, "has already been taken")
+    end
   end
 end
