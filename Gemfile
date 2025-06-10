@@ -71,7 +71,7 @@ gem "friendly_id", "~> 5.5.1"
 gem "exception_notification", "~> 4.5.0"
 gem "nokogiri", ">= 1.18.8"
 gem "rdoc", ">= 6.6.3.1"
-gem "rack", ">= 3.1.14"
+gem "rack", ">= 3.1.16"
 gem "simple-feed", "~> 3.2.0"
 # For external api docs
 gem "rswag-api", "~> 2.13"
