@@ -17,7 +17,12 @@ import { EUserRoles } from "../../types/enums"
 export function UserRolesExplanationModal() {
   const { t } = useTranslation()
   const { isOpen, onOpen, onClose } = useDisclosure()
-  const rolesToExplain = [EUserRoles.submitter, EUserRoles.reviewManager, EUserRoles.reviewer, EUserRoles.technicalSupport]
+  const rolesToExplain = [
+    EUserRoles.submitter,
+    EUserRoles.reviewManager,
+    EUserRoles.reviewer,
+    EUserRoles.technicalSupport,
+  ]
   return (
     <>
       <Button onClick={onOpen} variant={"link"} textDecoration={"underline"}>

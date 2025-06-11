@@ -84,6 +84,7 @@
     cursor: pointer;
     text-decoration: underline;
     pointer-events: auto;
+    color: $bcgov-link;
 
     &::after {
       content: "";

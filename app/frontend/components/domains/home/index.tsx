@@ -5,8 +5,8 @@ import { EUserRoles } from "../../../types/enums"
 import { PermitApplicationIndexScreen } from "../permit-application"
 import { ReviewManagerHomeScreen } from "./review-manager"
 import { ReviewerHomeScreen } from "./reviewer-home-screen"
-import { TechnicalSupportHomeScreen } from "./technical-support"
 import { SuperAdminHomeScreen } from "./super-admin-home-screen"
+import { TechnicalSupportHomeScreen } from "./technical-support"
 
 const roleSpecificScreens = (role: EUserRoles, props: IHomeScreenProps) => {
   return {

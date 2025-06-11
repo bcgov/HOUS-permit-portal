@@ -1,6 +1,8 @@
 require "rails_helper"
 
-RSpec.describe Api::RequirementBlocksController, type: :controller do
+RSpec.describe Api::RequirementBlocksController,
+               type: :controller,
+               search: true do
   # Include Devise test helpers if using Devise for authentication
   include Devise::Test::ControllerHelpers
 

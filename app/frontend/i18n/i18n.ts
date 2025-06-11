@@ -148,8 +148,9 @@ const options = {
           cantFind: "Can't find your address?",
           browseList: "Browse list of jurisdictions",
           goTo: "Go to {{ location }}",
-          permitApp: "permit app",
+          permitApp: "Log in",
           adminPanel: "admin panel",
+          submitterPanel: "permit app",
           enabledCommunitiesDescription: "Communities you can submit Building Permit applications in:",
           moreComingSoon: "(more coming soon)",
           andMore: "...and more",
@@ -162,6 +163,12 @@ const options = {
             end: "Accurately fill out your permit application online with ease",
             endButton: "Get started now",
           },
+          goToTools: "Go to tools",
+          toolsSectionTitle: "Tools to help prepare your project for application",
+          toolsSectionDesc1:
+            "Use Building Permit Hub's tools to check your application for readiness and prepare key documents for your project.",
+          toolsSectionDesc2:
+            "Check your project against Provincial requirements such as Step Codes and prepare other documents.",
         },
         ui: {
           okay: "Okay",
@@ -646,8 +653,9 @@ const options = {
             confirmation:
               "You confirm that the information you provided was completed to the best of your knowledge and ability",
             yourReference: "For reference, your BC Building Permit Hub Application # is {{ number }}",
-            noContactsAvailable:
-              "This jurisdiction is not ready to accept applications through this tool yet. Please check with your local jurisdiction.",
+            noContactsAvailableTitle: "No template has been scheduled for this permit type and work type combination",
+            noContactsAvailableDescription:
+              "To start an application in Sandbox mode, schedule a template for publishing for this permit type and work type combination.",
             whatsNext:
               "Upon receipt by the local jurisdiction, you will be notified via email or phone of any updates to your application's status or if additional documentation is required.",
             emailed:
@@ -2290,7 +2298,7 @@ const options = {
             },
             submissionsInboxSetup: {
               title: "Submissions inbox setup",
-              description: "Specify email addresses that should receive applications.",
+              description: "Specify email addresses that should receive applications",
               inboxEnabled: "Enable inbox",
               permitTypes: {
                 label: "Send permit applications for",
@@ -2341,9 +2349,21 @@ const options = {
                 },
               },
             },
+            globalFeatureAccess: {
+              title: "Global feature access",
+              description: "Turn system features on or off for all users system-wide.",
+              submissionInbox: "Submissions inbox",
+              submissionInboxDescription:
+                "Enable review managers to accept and process permit applications. If you turn off this feature, submitters can't submit applications, and review managers won't receive new applications.",
+              toggleOn: "On",
+              toggleOff: "Off",
+              acceptPermitApplications: "Accept permit applications",
+              switchButtonInstructions:
+                "Turning this on lets users submit applications. The email addresses set in this section will receive submitted applications",
+            },
             featureAccess: {
               title: "Feature access and settings",
-              description: "Manage and enable features for all users",
+              description: "Turn features on or off for all users in your jurisdiction",
               submissionInbox: "Submissions inbox setup",
               submissionInboxDescription: "Specify where submitted permit applications should be sent",
               myJurisdictionAboutPage: "My Jurisdiction's About page",
@@ -2787,7 +2807,7 @@ const options = {
             description: "Turn system features on or off for all users",
             submissionInbox: "Submissions inbox",
             submissionInboxDescription:
-              "Enable review managers to accept and process permit applications. If you turn off this feature, submitters can’t submit applications, and review managers won’t receive new applications.",
+              "Enable review managers to accept and process permit applications. If you turn off this feature, submitters can't submit applications, and review managers won't receive new applications.",
             toggleOn: "On",
             toggleOff: "Off",
           },

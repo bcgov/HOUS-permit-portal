@@ -241,6 +241,13 @@ Rails.application.routes.draw do
     get "s3/params/download" => "storage#download"
     delete "s3/params/delete" => "storage#delete"
 
+    post "s3/params/multipart" => "storage#create_multipart_upload"
+    get "s3/params/multipart/:upload_id/batch" =>
+          "storage#batch_presign_multipart_parts"
+    post "s3/params/multipart/:upload_id/complete" =>
+           "storage#complete_multipart_upload"
+    delete "s3/params/multipart/:upload_id" => "storage#abort_multipart_upload"
+
     resources :site_configuration, only: [] do
       get :show, on: :collection
       put :update, on: :collection

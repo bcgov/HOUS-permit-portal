@@ -1,6 +1,8 @@
 require "rails_helper"
 
-RSpec.describe EarlyAccess::PreviewManagementService, type: :service do
+RSpec.describe EarlyAccess::PreviewManagementService,
+               type: :service,
+               search: true do
   let(:early_access_requirement_template) do
     create(:early_access_requirement_template)
   end

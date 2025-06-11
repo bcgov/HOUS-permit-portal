@@ -43,6 +43,7 @@ const LoginScreen = lazy(() =>
   import("../authentication/login-screen").then((module) => ({ default: module.LoginScreen }))
 )
 const HomeScreen = lazy(() => import("../home").then((module) => ({ default: module.HomeScreen })))
+
 const ConfigurationManagementScreen = lazy(() =>
   import("../home/review-manager/configuration-management-screen").then((module) => ({
     default: module.ConfigurationManagementScreen,
@@ -70,6 +71,7 @@ const ReviewStaffMyJurisdictionAboutPageScreen = lazy(() =>
     default: module.myJurisdictionAboutPageScreen,
   }))
 )
+
 const JurisdictionIndexScreen = lazy(() =>
   import("../jurisdictions/index").then((module) => ({ default: module.JurisdictionIndexScreen }))
 )
@@ -232,9 +234,9 @@ const AdminGlobalFeatureAccessScreen = lazy(() =>
   }))
 )
 
-const InboxFeatureAccessScreen = lazy(() =>
-  import("../super-admin/site-configuration-management/inbox-feature-access").then((module) => ({
-    default: module.InboxFeatureAccessScreen,
+const AdminSubmissionInboxScreen = lazy(() =>
+  import("../super-admin/site-configuration-management/submission-inbox").then((module) => ({
+    default: module.AdminSubmissionInboxScreen,
   }))
 )
 
@@ -389,9 +391,6 @@ const AppRoutes = observer(() => {
   const isSuperAdmin = currentUser ? currentUser.isSuperAdmin : false
   const isUnconfirmed = currentUser ? currentUser.isUnconfirmed : false
 
-  // Step 3: Use these safe booleans in further logic
-  const mustAcceptEula = loggedIn && !eulaAccepted && !isSuperAdmin
-
   const superAdminOnlyRoutes = (
     <>
       <Route path="/jurisdictions/new" element={<NewJurisdictionScreen />} />
@@ -416,7 +415,7 @@ const AppRoutes = observer(() => {
       <Route path="/configuration-management/global-feature-access" element={<AdminGlobalFeatureAccessScreen />} />
       <Route
         path="/configuration-management/global-feature-access/submission-inbox"
-        element={<InboxFeatureAccessScreen />}
+        element={<AdminSubmissionInboxScreen />}
       />
       <Route path="/configuration-management/users/invite" element={<AdminInviteScreen />} />
       <Route path="/reporting" element={<ReportingScreen />} />
@@ -502,6 +501,10 @@ const AppRoutes = observer(() => {
         path="/jurisdictions/:jurisdictionId/configuration-management/feature-access/submissions-inbox-setup"
         element={<SubmissionsInboxSetupScreenLazy />}
       />
+      <Route
+        path="/jurisdictions/:jurisdictionId/configuration-management/feature-access"
+        element={<ReviewManagerFeatureAccessScreen />}
+      />
       <Route path="/digital-building-permits" element={<JurisdictionDigitalPermitScreen />} />
       <Route path="/api-settings/api-mappings" element={<JurisdictionApiMappingsSetupIndexScreen />} />
       <Route
@@ -514,6 +517,8 @@ const AppRoutes = observer(() => {
       />
     </>
   )
+
+  const mustAcceptEula = loggedIn && !currentUser.eulaAccepted && !currentUser.isSuperAdmin
 
   // Step 4: Calculate isAllowed props using safe booleans
   const isAllowedForAdminOrManager =

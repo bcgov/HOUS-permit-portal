@@ -57,6 +57,7 @@ class Requirement < ApplicationRecord
                       message: "must contain _file for file type"
 
   validates :label, presence: true
+  validates :input_type, presence: true
   validates :label,
             uniqueness: {
               scope: :requirement_block_id,

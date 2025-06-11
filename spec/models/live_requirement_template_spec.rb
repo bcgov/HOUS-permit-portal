@@ -1,7 +1,7 @@
 # spec/models/live_requirement_template_spec.rb
 require "rails_helper"
 
-RSpec.describe LiveRequirementTemplate, type: :model do
+RSpec.describe LiveRequirementTemplate, type: :model, search: true do
   describe "Validations" do
     subject { build(:live_requirement_template) }
 
