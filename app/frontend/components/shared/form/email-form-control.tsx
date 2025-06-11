@@ -105,11 +105,7 @@ export const EmailFormControl = ({
           />
         )}
       </Flex>
-      {errorMessage && !inputProps?.isDisabled && (
-        <FormErrorMessage>
-          {errorMessage}
-        </FormErrorMessage>
-      )}
+      {errorMessage && !inputProps?.isDisabled && <FormErrorMessage>{errorMessage}</FormErrorMessage>}
     </FormControl>
   )
 }

@@ -1,5 +1,5 @@
 import { Container, Flex, FormControl, FormLabel, Grid, GridItem, Heading, Input, Text, VStack } from "@chakra-ui/react"
-import { FileText, Info, Key, SlidersHorizontal, Users } from "@phosphor-icons/react"
+import { FileText, Key, SlidersHorizontal, Users } from "@phosphor-icons/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React, { Suspense } from "react"
@@ -12,7 +12,6 @@ import { SectionBox } from "../../section-box"
 export const ConfigurationManagementScreen = observer(function ConfigurationManagementScreen() {
   const i18nPrefix = "home.configurationManagement"
   const { currentJurisdiction, error } = useJurisdiction()
-
   return error ? (
     <ErrorScreen error={error} />
   ) : (
@@ -23,7 +22,6 @@ export const ConfigurationManagementScreen = observer(function ConfigurationMana
             <Heading mb={0} fontSize="3xl">
               {t(`${i18nPrefix}.title`)}
             </Heading>
-
             <SectionBox>
               <Flex align="flex-end">
                 <Text mb={2} mr={2}>
@@ -52,7 +50,6 @@ export const ConfigurationManagementScreen = observer(function ConfigurationMana
             </FormControl> */}
               </Flex>
             </SectionBox>
-
             <Grid templateColumns="repeat(2, 1fr)" gap={6}>
               <GridItem>
                 <HomeScreenBox
@@ -67,17 +64,6 @@ export const ConfigurationManagementScreen = observer(function ConfigurationMana
               </GridItem>
               <GridItem>
                 <HomeScreenBox
-                  title={t(`${i18nPrefix}.jurisdictionAbout.title`)}
-                  description={t(`${i18nPrefix}.jurisdictionAbout.description`)}
-                  linkText={t("ui.edit")}
-                  icon={<Info size="24px" color="var(--chakra-colors-text-primary)" />}
-                  href={`/jurisdictions/${currentJurisdiction.slug}`}
-                  h="full"
-                  disableForSandbox
-                />
-              </GridItem>
-              <GridItem>
-                <HomeScreenBox
                   title={t(`${i18nPrefix}.externalApiKeys.title`)}
                   description={t(`${i18nPrefix}.externalApiKeys.description`)}
                   linkText={t("ui.edit")}
@@ -86,7 +72,6 @@ export const ConfigurationManagementScreen = observer(function ConfigurationMana
                   h="full"
                 />
               </GridItem>
-
               <GridItem>
                 <HomeScreenBox
                   title={t(`${i18nPrefix}.users.title`)}

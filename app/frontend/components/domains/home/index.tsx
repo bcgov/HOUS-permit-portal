@@ -6,6 +6,7 @@ import { PermitApplicationIndexScreen } from "../permit-application"
 import { ReviewManagerHomeScreen } from "./review-manager"
 import { ReviewerHomeScreen } from "./reviewer-home-screen"
 import { SuperAdminHomeScreen } from "./super-admin-home-screen"
+import { TechnicalSupportHomeScreen } from "./technical-support"
 
 const roleSpecificScreens = (role: EUserRoles, props: IHomeScreenProps) => {
   return {
@@ -14,6 +15,7 @@ const roleSpecificScreens = (role: EUserRoles, props: IHomeScreenProps) => {
     [EUserRoles.reviewManager]: <ReviewManagerHomeScreen {...props} />,
     [EUserRoles.regionalReviewManager]: <ReviewManagerHomeScreen {...props} />,
     [EUserRoles.submitter]: <PermitApplicationIndexScreen {...props} />,
+    [EUserRoles.technicalSupport]: <TechnicalSupportHomeScreen {...props} />,
   }[role]
 }
 
