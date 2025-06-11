@@ -1,11 +1,8 @@
-import { Checkbox, CheckboxProps } from "@chakra-ui/react"
+import { Checkbox } from "@chakra-ui/react"
 import React from "react"
 import { FieldValues, useController } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { IControlProps } from "./types"
-
-export type TIsElectiveCheckboxProps<TFieldValues extends FieldValues> = IControlProps<TFieldValues> &
-  Partial<CheckboxProps>
+import { TIsElectiveCheckboxProps } from "./types"
 
 export function IsElectiveCheckbox<TFieldValues extends FieldValues>({
   controlProps,

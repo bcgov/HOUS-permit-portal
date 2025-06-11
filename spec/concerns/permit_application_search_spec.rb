@@ -1,6 +1,8 @@
 require "rails_helper"
 
-RSpec.describe Api::Concerns::Search::PermitApplications, type: :controller do
+RSpec.describe Api::Concerns::Search::PermitApplications,
+               type: :controller,
+               search: true do
   # This assumes you have a dummy controller for testing the concern
   controller(Api::ApplicationController) do
     include Api::Concerns::Search::PermitApplications

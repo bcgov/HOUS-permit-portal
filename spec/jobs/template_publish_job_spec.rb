@@ -4,7 +4,7 @@ require "rails_helper"
 require "sidekiq/testing"
 require "sidekiq/cron"
 
-RSpec.describe TemplatePublishJob, type: :job do
+RSpec.describe TemplatePublishJob, type: :job, search: true do
   before { Sidekiq::Testing.fake! }
 
   describe "#perform" do

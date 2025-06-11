@@ -1,7 +1,7 @@
 # spec/models/early_access_requirement_template_spec.rb
 require "rails_helper"
 
-RSpec.describe EarlyAccessRequirementTemplate, type: :model do
+RSpec.describe EarlyAccessRequirementTemplate, type: :model, search: true do
   subject { build(:early_access_requirement_template) }
 
   describe "Associations" do

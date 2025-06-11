@@ -261,6 +261,47 @@ export function urlForPath(path: string): string {
   return `${baseUrl}${normalizedPath}`
 }
 
+export async function downloadFileFromStorage(options: {
+  model: string
+  modelId?: string
+  filename: string
+}): Promise<void> {
+  const { model, modelId, filename } = options
+  console.log("[DownloadDebug] Attempting to download:", { model, modelId, filename })
+  try {
+    const response = await fetch(`/api/s3/params/download?model=${model}&modelId=${modelId}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+    })
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+
+    const data = await response.json()
+    console.log("[DownloadDebug] Received data from API:", data)
+    if (data.url) {
+      console.log("[DownloadDebug] S3 URL:", data.url)
+      const a = document.createElement("a")
+      a.href = data.url
+      a.download = filename
+      console.log("[DownloadDebug] Anchor element created:", { href: a.href, download: a.download })
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      console.log("[DownloadDebug] Anchor clicked and removed.")
+    } else {
+      throw new Error("No URL found in response")
+    }
+  } catch (error) {
+    console.error("Failed to download file:", error)
+    throw error
+  }
+}
+
 export function isSafari() {
   // Check if the browser is Safari
   return /^((?!chrome|android).)*safari/i.test(navigator.userAgent)

@@ -26,6 +26,7 @@ import { Trans, useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { IJurisdiction } from "../../../models/jurisdiction"
 import { useMst } from "../../../setup/root"
+import { EFlashMessageStatus } from "../../../types/enums"
 import { IOption } from "../../../types/types"
 import { BlueTitleBar } from "../../shared/base/blue-title-bar"
 import { CustomMessageBox } from "../../shared/base/custom-message-box"
@@ -137,7 +138,11 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
       <BlueTitleBar title={t("permitApplication.start")} />
       <Container maxW="container.lg" py={8}>
         {currentUser.isReviewStaff && (
-          <CustomMessageBox status="info" description={t("permitApplication.new.submitToOwn")} mb={8} />
+          <CustomMessageBox
+            status={EFlashMessageStatus.info}
+            description={t("permitApplication.new.submitToOwn")}
+            mb={8}
+          />
         )}
         <DisclaimerInfo />
         <TimelineInfo />
