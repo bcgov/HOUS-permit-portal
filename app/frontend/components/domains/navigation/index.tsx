@@ -48,11 +48,6 @@ const ConfigurationManagementScreen = lazy(() =>
     default: module.ConfigurationManagementScreen,
   }))
 )
-const TechnicalSupportConfigurationManagementScreen = lazy(() =>
-  import("../home/technical-support/configuration-management-screen").then((module) => ({
-    default: module.ConfigurationManagementScreen,
-  }))
-)
 const EnergyStepRequirementsScreen = lazy(() =>
   import("../home/review-manager/configuration-management-screen/energy-step-requirements-screen").then((module) => ({
     default: module.EnergyStepRequirementsScreen,
@@ -63,12 +58,17 @@ const ReviewManagerFeatureAccessScreen = lazy(() =>
     default: module.ReviewManagerFeatureAccessScreen,
   }))
 )
-const ReviewStaffInboxFeatureAccessScreen = lazy(() =>
-  import("../home/review-manager/configuration-management-screen/feature-access-screen/inbox-feature-access").then(
-    (module) => ({
-      default: module.InboxFeatureAccessScreen,
-    })
-  )
+const SubmissionsInboxSetupScreenLazy = lazy(() =>
+  import("../home/review-manager/configuration-management-screen/submissions-inbox-setup-screen").then((module) => ({
+    default: module.SubmissionsInboxSetupScreen,
+  }))
+)
+const ReviewStaffMyJurisdictionAboutPageScreen = lazy(() =>
+  import(
+    "../home/review-manager/configuration-management-screen/feature-access-screen/my-jurisdiction-about-page"
+  ).then((module) => ({
+    default: module.myJurisdictionAboutPageScreen,
+  }))
 )
 const JurisdictionIndexScreen = lazy(() =>
   import("../jurisdictions/index").then((module) => ({ default: module.JurisdictionIndexScreen }))
@@ -356,6 +356,11 @@ const AppRoutes = observer(() => {
   const navigate = useNavigate()
   const { t } = useTranslation()
 
+  if (currentUser === undefined) {
+    console.log("AppRoutes: currentUser is undefined, rendering LoadingScreen.")
+    return <LoadingScreen />
+  }
+
   useEffect(() => {
     if (tokenExpired) {
       resetAuth()
@@ -373,6 +378,19 @@ const AppRoutes = observer(() => {
   }, [afterLoginPath, loggedIn])
 
   useSyncPathWithStore()
+
+  // Step 2: Safely derive booleans from currentUser. These default to false if currentUser is null.
+  const isReviewStaff = currentUser ? currentUser.isReviewStaff : false
+  const isReviewer = currentUser ? currentUser.isReviewer : false
+  const isReviewManager = currentUser ? currentUser.isReviewManager : false
+  const isRegionalReviewManager = currentUser ? currentUser.isRegionalReviewManager : false
+  const isTechnicalSupport = currentUser ? currentUser.isTechnicalSupport : false
+  const eulaAccepted = currentUser ? currentUser.eulaAccepted : false
+  const isSuperAdmin = currentUser ? currentUser.isSuperAdmin : false
+  const isUnconfirmed = currentUser ? currentUser.isUnconfirmed : false
+
+  // Step 3: Use these safe booleans in further logic
+  const mustAcceptEula = loggedIn && !eulaAccepted && !isSuperAdmin
 
   const superAdminOnlyRoutes = (
     <>
@@ -420,12 +438,14 @@ const AppRoutes = observer(() => {
     </>
   )
 
-  const technicalSupportRoutes = (
+  const technicalSupportOrManagerRoutes = (
     <>
       <Route
         path="/jurisdictions/:jurisdictionId/configuration-management"
-        element={<TechnicalSupportConfigurationManagementScreen />}
+        element={<ConfigurationManagementScreen />}
       />
+      <Route path="/jurisdictions/:jurisdictionId/users" element={<JurisdictionUserIndexScreen />} />
+      <Route path="/jurisdictions/:jurisdictionId/users/invite" element={<InviteScreen />} />
     </>
   )
 
@@ -433,12 +453,8 @@ const AppRoutes = observer(() => {
     <>
       <Route path="/jurisdictions/:jurisdictionId/submission-inbox" element={<JurisdictionSubmissionInboxScreen />} />
       <Route
-        path="/jurisdictions/:jurisdictionId/configuration-management/feature-access"
-        element={<ReviewManagerFeatureAccessScreen />}
-      />
-      <Route
-        path="/jurisdictions/:jurisdictionId/configuration-management/feature-access/submissions-inbox-setup"
-        element={<ReviewStaffInboxFeatureAccessScreen />}
+        path="/jurisdictions/:jurisdictionId/configuration-management/feature-access/my-jurisdiction-about-page"
+        element={<ReviewStaffMyJurisdictionAboutPageScreen />}
       />
       <Route
         path="/jurisdictions/:jurisdictionId/configuration-management/energy-step"
@@ -475,8 +491,16 @@ const AppRoutes = observer(() => {
         element={<JurisdictionEditDigitalPermitScreen />}
       />
       <Route
-        path="/jurisdictions/:jurisdictionId/configuration-management"
-        element={<ConfigurationManagementScreen />}
+        path="/jurisdictions/:jurisdictionId/configuration-management/feature-access"
+        element={<ReviewManagerFeatureAccessScreen />}
+      />
+      <Route
+        path="/jurisdictions/:jurisdictionId/configuration-management/feature-access/my-jurisdiction-about-page"
+        element={<ReviewManagerFeatureAccessScreen />}
+      />
+      <Route
+        path="/jurisdictions/:jurisdictionId/configuration-management/feature-access/submissions-inbox-setup"
+        element={<SubmissionsInboxSetupScreenLazy />}
       />
       <Route path="/digital-building-permits" element={<JurisdictionDigitalPermitScreen />} />
       <Route path="/api-settings/api-mappings" element={<JurisdictionApiMappingsSetupIndexScreen />} />
@@ -490,8 +514,16 @@ const AppRoutes = observer(() => {
       />
     </>
   )
-  
-  const mustAcceptEula = loggedIn && !currentUser.eulaAccepted && !currentUser.isSuperAdmin
+
+  // Step 4: Calculate isAllowed props using safe booleans
+  const isAllowedForAdminOrManager =
+    loggedIn && !mustAcceptEula && (isReviewManager || isRegionalReviewManager || isSuperAdmin || isTechnicalSupport)
+
+  const isAllowedForManagerOrReviewer = loggedIn && !mustAcceptEula && isReviewStaff
+  const isAllowedForReviewManagerOnly = loggedIn && !mustAcceptEula && (isReviewManager || isRegionalReviewManager)
+  const isAllowedForTechnicalSupportOrManager =
+    loggedIn && !mustAcceptEula && (isTechnicalSupport || isAllowedForReviewManagerOnly)
+
   return (
     <>
       <Routes location={background || location}>
@@ -499,7 +531,7 @@ const AppRoutes = observer(() => {
           // Onboarding step 1: EULA
           <Route path="/" element={<EULAScreen />} />
         )}
-        {loggedIn && currentUser.eulaAccepted && currentUser.isUnconfirmed && (
+        {loggedIn && eulaAccepted && isUnconfirmed && (
           // Onboarding step 2: confirm email
           <Route path="/" element={<ProfileScreen />} />
         )}
@@ -543,11 +575,7 @@ const AppRoutes = observer(() => {
         <Route
           element={
             <ProtectedRoute
-              isAllowed={
-                loggedIn &&
-                !mustAcceptEula &&
-                (currentUser.isReviewManager || currentUser.isRegionalReviewManager || currentUser.isSuperAdmin || currentUser.isTechnicalSupport)
-              }
+              isAllowed={isAllowedForAdminOrManager}
               redirectPath={(mustAcceptEula && "/") || (loggedIn && "/not-found")}
             />
           }
@@ -566,7 +594,7 @@ const AppRoutes = observer(() => {
         <Route
           element={
             <ProtectedRoute
-              isAllowed={loggedIn && !mustAcceptEula && currentUser.isReviewStaff}
+              isAllowed={isAllowedForManagerOrReviewer}
               redirectPath={(mustAcceptEula && "/") || (loggedIn && "/not-found")}
             />
           }
@@ -577,19 +605,20 @@ const AppRoutes = observer(() => {
         <Route
           element={
             <ProtectedRoute
-              isAllowed={loggedIn && !mustAcceptEula && currentUser.isTechnicalSupport}
+              isAllowed={isAllowedForTechnicalSupportOrManager}
               redirectPath={(mustAcceptEula && "/") || (loggedIn && "/not-found")}
             />
           }
         >
-          {technicalSupportRoutes}
+          {technicalSupportOrManagerRoutes}
         </Route>
 
         <Route
           element={
             <ProtectedRoute
-              isAllowed={loggedIn && !mustAcceptEula && currentUser.isReviewStaff && !currentUser.isReviewer}
+              isAllowed={isAllowedForReviewManagerOnly}
               redirectPath={(mustAcceptEula && "/") || (loggedIn && "/not-found")}
+              tempVar={"aaa" + isAllowedForReviewManagerOnly}
             />
           }
         >
