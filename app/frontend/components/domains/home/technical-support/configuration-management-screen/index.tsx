@@ -7,7 +7,7 @@ import { useJurisdiction } from "../../../../../hooks/resources/use-jurisdiction
 import { ErrorScreen } from "../../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../../shared/base/loading-screen"
 import { SectionBox } from "../../section-box"
-import { TechnicalSupportHomeSection } from "../TechnicalSupportHomeSection"
+import { TechnicalSupportHomeSection } from "../technical-support-home-section"
 
 export const ConfigurationManagementScreen = observer(function ConfigurationManagementScreen() {
   const i18nPrefix = "home.configurationManagement"

@@ -4,6 +4,7 @@ import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React, { Suspense } from "react"
 import { useJurisdiction } from "../../../../../hooks/resources/use-jurisdiction"
+import { useMst } from "../../../../../setup/root"
 import { ErrorScreen } from "../../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../../shared/base/loading-screen"
 import { HomeScreenBox } from "../../home-screen-box"
@@ -12,6 +13,9 @@ import { SectionBox } from "../../section-box"
 export const ConfigurationManagementScreen = observer(function ConfigurationManagementScreen() {
   const i18nPrefix = "home.configurationManagement"
   const { currentJurisdiction, error } = useJurisdiction()
+  const { userStore } = useMst()
+  const { currentUser } = userStore
+  const isTechnicalSupport = currentUser?.isTechnicalSupport
   return error ? (
     <ErrorScreen error={error} />
   ) : (
@@ -50,50 +54,67 @@ export const ConfigurationManagementScreen = observer(function ConfigurationMana
             </FormControl> */}
               </Flex>
             </SectionBox>
-            <Grid templateColumns="repeat(2, 1fr)" gap={6}>
-              <GridItem>
-                <HomeScreenBox
-                  title={t(`${i18nPrefix}.stepCodeRequirements.title`)}
-                  description={t(`${i18nPrefix}.stepCodeRequirements.description`)}
-                  linkText={t("ui.edit")}
-                  icon={<FileText size="24px" color="var(--chakra-colors-text-primary)" />}
-                  href="energy-step"
-                  h="full"
-                  disableForSandbox
-                />
-              </GridItem>
-              <GridItem>
-                <HomeScreenBox
-                  title={t(`${i18nPrefix}.externalApiKeys.title`)}
-                  description={t(`${i18nPrefix}.externalApiKeys.description`)}
-                  linkText={t("ui.edit")}
-                  icon={<Key size={24} />}
-                  href={`/jurisdictions/${currentJurisdiction.slug}/api-settings`}
-                  h="full"
-                />
-              </GridItem>
-              <GridItem>
-                <HomeScreenBox
-                  title={t(`${i18nPrefix}.users.title`)}
-                  description={t(`${i18nPrefix}.users.description`)}
-                  linkText={t("ui.edit")}
-                  icon={<Users size={24} />}
-                  href={`/jurisdictions/${currentJurisdiction.slug}/users`}
-                  h="full"
-                  disableForSandbox
-                />
-              </GridItem>
-              <GridItem>
-                <HomeScreenBox
-                  title={t(`${i18nPrefix}.featureAccess.title`)}
-                  description={t(`${i18nPrefix}.featureAccess.description`)}
-                  linkText={t("ui.edit")}
-                  icon={<SlidersHorizontal size="24px" color="var(--chakra-colors-text-link)" />}
-                  href="feature-access"
-                  h="full"
-                />
-              </GridItem>
-            </Grid>
+            {/* Refactored grid items to avoid duplication */}
+            {(() => {
+              const apiKeysGridItem = (
+                <GridItem key="apiKeys">
+                  <HomeScreenBox
+                    title={t(`${i18nPrefix}.externalApiKeys.title`)}
+                    description={t(`${i18nPrefix}.externalApiKeys.description`)}
+                    linkText={t("ui.edit")}
+                    icon={<Key size={24} />}
+                    href={`/jurisdictions/${currentJurisdiction.slug}/api-settings`}
+                    h="full"
+                  />
+                </GridItem>
+              )
+              const usersGridItem = (
+                <GridItem key="users">
+                  <HomeScreenBox
+                    title={t(`${i18nPrefix}.users.title`)}
+                    description={t(`${i18nPrefix}.users.description`)}
+                    linkText={t("ui.edit")}
+                    icon={<Users size={24} />}
+                    href={`/jurisdictions/${currentJurisdiction.slug}/users`}
+                    h="full"
+                    disableForSandbox
+                  />
+                </GridItem>
+              )
+              const stepCodeGridItem = (
+                <GridItem key="stepCode">
+                  <HomeScreenBox
+                    title={t(`${i18nPrefix}.stepCodeRequirements.title`)}
+                    description={t(`${i18nPrefix}.stepCodeRequirements.description`)}
+                    linkText={t("ui.edit")}
+                    icon={<FileText size="24px" color="var(--chakra-colors-text-primary)" />}
+                    href="energy-step"
+                    h="full"
+                    disableForSandbox
+                  />
+                </GridItem>
+              )
+              const featureAccessGridItem = (
+                <GridItem key="featureAccess">
+                  <HomeScreenBox
+                    title={t(`${i18nPrefix}.featureAccess.title`)}
+                    description={t(`${i18nPrefix}.featureAccess.description`)}
+                    linkText={t("ui.edit")}
+                    icon={<SlidersHorizontal size="24px" color="var(--chakra-colors-text-link)" />}
+                    href="feature-access"
+                    h="full"
+                  />
+                </GridItem>
+              )
+              const items = isTechnicalSupport
+                ? [apiKeysGridItem, usersGridItem]
+                : [stepCodeGridItem, apiKeysGridItem, usersGridItem, featureAccessGridItem]
+              return (
+                <Grid templateColumns="repeat(2, 1fr)" gap={6}>
+                  {items}
+                </Grid>
+              )
+            })()}
           </VStack>
         </Container>
       )}

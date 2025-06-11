@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next"
 import { IHomeScreenProps } from ".."
 import { useMst } from "../../../../setup/root"
 import { ErrorScreen } from "../../../shared/base/error-screen"
-import { TechnicalSupportHomeSection } from "./TechnicalSupportHomeSection"
+import { TechnicalSupportHomeSection } from "./technical-support-home-section"
 
 export const TechnicalSupportHomeScreen = observer(({ ...rest }: IHomeScreenProps) => {
   const { t } = useTranslation()

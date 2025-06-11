@@ -417,6 +417,21 @@ const options = {
           templatesUsed: "Templates used",
           search: "Search jurisdictions",
           view: "View Jurisdiction",
+          notUsingBPH: {
+            title: "This community isn't using Building Permit Hub yet",
+            description:
+              "Building Permit Hub helps people in British Columbia understand local permitting requirements, prepare applications, and submit them online. Participating jurisdictions can review applications more efficiently, with automatic checks and digital tools to help avoid delays.",
+            noInfo:
+              "This community hasn't joined Building Permit Hub yet, so you won't find permitting information here for {{jurisdictionName}}.",
+            wantToUse: {
+              title: "Want to use Building Permit Hub in your community?",
+              description:
+                "We're working with local governments and First Nations across British Columbia to bring Building Permit Hub to more places. If you'd like to see your community on Building Permit Hub, you can suggest it to our team.",
+              buttonHelp:
+                "Clicking the button below opens a new email. You'll be able to review or edit the message before sending.",
+              buttonText: "Suggest your community",
+            },
+          },
         },
         permitCollaboration: {
           status: "Status",
@@ -2277,11 +2292,6 @@ const options = {
             jurisdictionLocalityTypeLabel: "Locality type of local jurisdiction",
             jurisdictionNameLabel: "Name of local jurisdiction",
             jurisdictionLocationLabel: "Location",
-            jurisdictionAbout: {
-              title: "My jurisdiction's About page",
-              description:
-                "Customize the informational page that submitters will see when they are in the Building Permit Hub",
-            },
             users: {
               title: "Users",
               description: "Manage and invite reviewers and other staff for this jurisdiciton",
@@ -2356,6 +2366,12 @@ const options = {
               description: "Turn features on or off for all users in your jurisdiction",
               submissionInbox: "Submissions inbox setup",
               submissionInboxDescription: "Specify where submitted permit applications should be sent",
+              myJurisdictionAboutPage: "My Jurisdiction's About page",
+              myJurisdictionAboutPageDescription:
+                "Show a custom About page on Building Permit Hub with information specific to your jurisdiction's requirements, contact information, or common issues to watch for.<br><br> Only turn this page on after you've added your content. If it's turned on without custom content, the page will appear blank. <1> Edit your jurisdiction's About page content",
+              myJurisdictionAboutPageEdit: "Edit",
+              editJurisdictionAboutPage: "Edit my jurisdiction About page",
+              editJurisdictionEditButton: "Edit page",
               toggleOn: "On",
               toggleOff: "Off",
               acceptPermitApplications: "Accept permit applications",
@@ -3021,6 +3037,7 @@ const options = {
             contact: "Contact us",
             configurationManagement: "Configuration management",
             featureAccess: "Feature access",
+            myJurisdictionAboutPage: "My jurisdiction's about page",
             submissionInboxSetup: "Submissions inbox setup",
             energyStep: "Energy Step Code requirements",
             submissionsInboxSetup: "Submissions inbox setup",
