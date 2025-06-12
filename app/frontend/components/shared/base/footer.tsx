@@ -21,6 +21,7 @@ export const Footer = observer(() => {
     "/contact",
     "/project-readiness-tools",
     "/letter-of-assurance",
+    "/onboarding-checklist-page-for-lg-adopting",
   ]
 
   const shouldShowFooter = onlyShowFooterOnRoutes.some((route) => location.pathname.startsWith(route))
