@@ -91,7 +91,7 @@ jobs:
           RELEASE_NAME="$DEFAULT_RELEASE_NAME"
         fi
 
-        CHART_DIR="./charts/$COMPONENT"
+        CHART_DIR="./devops/helm-charts/$COMPONENT"
 
         if [[ ! -d "$CHART_DIR" ]]; then
           echo "Chart directory $CHART_DIR does not exist"
@@ -106,6 +106,16 @@ jobs:
         if [[ ! -f "$CHART_DIR/$VALUES_FILE" ]]; then
           echo "Missing environment values file $VALUES_FILE in $CHART_DIR"
           exit 1
+        fi
+
+        echo "Checking current Helm release version..."
+        CURRENT_RELEASE=$(helm list --namespace "$NAMESPACE" --filter "^$RELEASE_NAME$" -o json)
+
+        if [ "$CURRENT_RELEASE" != "[]" ]; then
+          echo "Current release details:"
+          echo "$CURRENT_RELEASE" | grep -E '"name"|"chart"|"app_version"' || echo "$CURRENT_RELEASE"
+        else
+          echo "No existing release found for $RELEASE_NAME in namespace $NAMESPACE"
         fi
 
         echo "Deploying $RELEASE_NAME to namespace $NAMESPACE"
