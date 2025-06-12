@@ -10,7 +10,12 @@ export const usePermitApplication = ({ review }: { review?: boolean } = {}) => {
   const { permitApplicationStore, sandboxStore } = useMst()
   const { currentSandbox } = sandboxStore
 
-  const { currentPermitApplication, setCurrentPermitApplication, fetchPermitApplication } = permitApplicationStore
+  const {
+    currentPermitApplication,
+    setCurrentPermitApplication,
+    fetchPermitApplication,
+    isLoadingCurrentPermitApplication: isLoading,
+  } = permitApplicationStore
 
   const [error, setError] = useState<Error | undefined>(undefined)
   const { t } = useTranslation()
@@ -20,13 +25,7 @@ export const usePermitApplication = ({ review }: { review?: boolean } = {}) => {
       try {
         setCurrentPermitApplication(null)
         if (isUUID(permitApplicationId)) {
-          let permitApplication = await fetchPermitApplication(permitApplicationId, review)
-          if (permitApplication) {
-            setCurrentPermitApplication(permitApplicationId)
-            setError(null)
-          } else {
-            setError(new Error(t("errors.fetchPermitApplication")))
-          }
+          await fetchPermitApplication(permitApplicationId, review)
         }
       } catch (e) {
         console.error(e)
@@ -35,5 +34,13 @@ export const usePermitApplication = ({ review }: { review?: boolean } = {}) => {
     })()
   }, [pathname, currentSandbox?.id])
 
-  return { currentPermitApplication, error }
+  useEffect(() => {
+    if (!isLoading && !currentPermitApplication && isUUID(permitApplicationId)) {
+      setError(new Error(t("errors.fetchPermitApplication")))
+    } else if (!isLoading && currentPermitApplication) {
+      setError(null)
+    }
+  }, [isLoading, currentPermitApplication, permitApplicationId])
+
+  return { currentPermitApplication, error, isLoading }
 }

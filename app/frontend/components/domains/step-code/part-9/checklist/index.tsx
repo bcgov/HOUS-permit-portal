@@ -19,7 +19,7 @@ import { StepNotMetWarning } from "./shared/step-not-met-warning"
 import { ZeroCarbonStepCodeCompliance } from "./zero-carbon-step-code-compliance"
 
 export const StepCodeChecklistForm = observer(function StepCodeChecklistForm() {
-  const { stepCode } = usePart9StepCode()
+  const { stepCode, isLoading } = usePart9StepCode()
   const { permitApplicationId } = useParams()
   const checklist = stepCode.preConstructionChecklist
   const navigate = useNavigate()
@@ -30,8 +30,10 @@ export const StepCodeChecklistForm = observer(function StepCodeChecklistForm() {
 
   useEffect(() => {
     const fetch = async () => await checklist.load()
-    checklist && !checklist.isLoaded && fetch()
-  }, [checklist?.isLoaded])
+    if (checklist && !checklist.isLoaded && !isLoading) {
+      fetch()
+    }
+  }, [checklist?.isLoaded, isLoading])
 
   useEffect(() => {
     checklist?.isLoaded && reset(checklist.defaultFormValues)
@@ -127,7 +129,12 @@ export const StepCodeChecklistForm = observer(function StepCodeChecklistForm() {
             </VStack>
             <FormProvider {...formMethods}>
               <form onSubmit={handleSubmit(onSubmit)} name="stepCodeChecklistForm">
-                <Accordion allowMultiple defaultIndex={[0, 1, 2, 3, 4]} index={index} onChange={setIndex}>
+                <Accordion
+                  allowMultiple
+                  defaultIndex={[0, 1, 2, 3, 4]}
+                  index={index}
+                  onChange={(i: number[]) => setIndex(i)}
+                >
                   <ProjectInfo checklist={checklist} />
                   <ComplianceSummary
                     checklist={checklist}

@@ -37,6 +37,7 @@ export const PermitApplicationStoreModel = types
       permitApplicationMap: types.map(PermitApplicationModel),
       tablePermitApplications: types.array(types.reference(PermitApplicationModel)),
       currentPermitApplication: types.maybeNull(types.reference(PermitApplicationModel)),
+      isLoadingCurrentPermitApplication: types.optional(types.boolean, false),
       statusFilter: types.optional(types.array(types.enumeration(filterableStatus)), [
         EPermitApplicationStatus.newDraft,
         EPermitApplicationStatus.revisionsRequested,
@@ -83,6 +84,9 @@ export const PermitApplicationStoreModel = types
     },
   }))
   .actions((self) => ({
+    setIsLoadingCurrentPermitApplication(isLoading: boolean) {
+      self.isLoadingCurrentPermitApplication = isLoading
+    },
     setCurrentPermitApplication(permitApplicationId) {
       self.currentPermitApplication = permitApplicationId
       self.currentPermitApplication?.stepCode &&
@@ -341,15 +345,19 @@ export const PermitApplicationStoreModel = types
       return response.ok
     }),
     fetchPermitApplication: flow(function* (id: string, review?: boolean) {
-      // If the user is review staff, we still need to hit the show endpoint to update viewedAt
-      const { ok, data: response } = yield self.environment.api.fetchPermitApplication(id, review)
-      if (ok && response.data) {
-        const permitApplication = response.data
-
-        permitApplication.isFullyLoaded = true
-
-        self.mergeUpdate(permitApplication, "permitApplicationMap")
-        return permitApplication
+      self.setIsLoadingCurrentPermitApplication(true)
+      try {
+        const response = yield self.environment.api.fetchPermitApplication(id, review)
+        if (response.ok) {
+          const permitApplication = self.mergeUpdate(response.data.data, "permitApplicationMap")
+          return permitApplication
+        }
+        return null
+      } catch (error) {
+        console.error("Failed to fetch permit application", error)
+        return null
+      } finally {
+        self.setIsLoadingCurrentPermitApplication(false)
       }
     }),
 
