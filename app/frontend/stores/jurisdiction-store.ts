@@ -87,7 +87,7 @@ export const JurisdictionStoreModel = types
           page: opts?.page ?? self.currentPage,
           perPage: opts?.countPerPage ?? self.countPerPage,
           filters: {
-            inboxEnabled: inboxEnabled,
+            inboxEnabled,
           },
         })
       )
