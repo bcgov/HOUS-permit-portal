@@ -92,6 +92,7 @@ export enum EJurisdictionSortFields {
   permitApplicationsSize = "permit_applications_size",
   regionalDistrict = "regional_district_name",
   submissionInboxSetUp = "submission_inbox_set_up",
+  inboxEnabled = "inbox_enabled",
 }
 
 export enum EUserSortFields {
