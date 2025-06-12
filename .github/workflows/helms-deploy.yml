@@ -23,10 +23,24 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     if: ${{ github.event.inputs.component != '' }}
+    environment: ${{ github.event.inputs.environment }}
 
     steps:
     - name: Checkout Code
       uses: actions/checkout@v4
+
+    - name: Check if user is authorized
+      run: |
+        AUTHORIZED_USERS="${{ secrets.AUTHORIZED_USERS }}"
+        CURRENT_USER="${{ github.actor }}"
+
+        # Check if CURRENT_USER is in AUTHORIZED_USERS
+        if [[ ",$AUTHORIZED_USERS," != *",$CURRENT_USER,"* ]]; then
+          echo "❌ Error: $CURRENT_USER is not authorized to trigger this deployment."
+          exit 1
+        else
+          echo "✅ Authorized user: $CURRENT_USER"
+        fi
 
     - name: Install kubectl
       uses: azure/setup-kubectl@v4
