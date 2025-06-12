@@ -1428,7 +1428,8 @@ const options = {
             subtitle: "A voluntary, modern permitting platform built with BC communities, for BC communities.",
             ourVision: {
               title: "Our Vision",
-              description: "The Building Permit Hub is here to make building permits faster and easier for everyone:",
+              description:
+                "The <strong>Building Permit Hub</strong> is here to make building permits faster and easier for everyone:",
               audiences: {
                 localGovernments: "local governments",
                 builders: "builders",
@@ -1436,22 +1437,23 @@ const options = {
                 applicants: "anyone applying for a permit",
               },
               platformDescription:
-                "It's a free, voluntary platform that supports you from the moment a property is identified for your construction project — all the way through to occupancy.",
+                "It's a <strong>free, voluntary</strong> platform that supports you from the moment a property is identified for your construction project — all the way through to occupancy.",
               mission:
-                "We're here to accelerate housing approvals, strengthen partnerships, and lay the foundation for a connected, future-ready permitting system across the province.",
+                "We're here to accelerate housing approvals, strengthen partnerships, and lay the foundation for a <strong>connected, future-ready permitting system</strong> across the province.",
               flexibility:
-                "Every community is different, and that's why the Hub is built with choice and flexibility in mind. Use the features that work best for your jurisdiction, whether you're just getting started or already have your own digital system.",
+                "Every community is different, and that's why the Hub is built with <strong>choice and flexibility</strong>  in mind. Use the features that work best for your jurisdiction, whether you're just getting started or already have your own digital system.",
             },
             currentStatus: {
               title: "Where we are & What you can use today",
-              description: "The Hub is live and available to all jurisdictions in BC.",
+              description: "The Hub is <strong>live and available</strong> to all jurisdictions in BC.",
               features: {
                 title: "You can start using:",
-                smallScaleHousing: "small-scale multi-unit housing permit types",
-                automatedStepCode: "automated Step Code compliance tools (BC Building Code Part 3 & Part 9)",
-                collaborativeFlows: "collaborative submission and review flows",
-                customizablePermits: "customizable permit types tailored to your bylaws",
-                resubmissionTools: "resubmission and revision tools",
+                smallScaleHousing: "<strong>small-scale multi-unit housing permit types</strong>",
+                automatedStepCode:
+                  "<strong>automated Step Code compliance tools</strong> (BC Building Code Part 3 & Part 9)",
+                collaborativeFlows: "<strong>collaborative submission and review flows</strong>",
+                customizablePermits: "<strong>customizable permit types tailored to your bylaws</strong>",
+                resubmissionTools: "<strong>resubmission and revision tools</strong>",
               },
               workflowNote:
                 "Whether you're digital, hybrid, or paper-based, you can participate in a way that fits your current workflow.",
@@ -1461,7 +1463,7 @@ const options = {
               description:
                 "We're co-developing this platform with local governments, First Nations, and industry partners.",
               feedbackNote:
-                "Your feedback — whether it's a new idea or something that isn't working — shapes what we build.",
+                "Your feedback — whether it's a new idea or something that isn't working — <strong>shapes what we build</strong>.",
               communityFeatures: {
                 title: "Some features that came directly from community feedback:",
                 multipleUploads: "support for multiple file uploads",
@@ -1509,22 +1511,25 @@ const options = {
               description: "You don't need to use the entire platform.",
               examples: {
                 title: "Examples:",
-                stepCode: "Use just the Step Code tools, and we'll send the compliance reports directly to you",
-                specificTools: "Adopt specific tools like document upload or project folders as they become available",
+                stepCode:
+                  "Use just the <strong>Step Code tools</strong>, and we'll send the compliance reports directly to you",
+                specificTools:
+                  "Adopt specific tools like <strong>document upload</strong> or <strong>project folders</strong> as they become available",
                 preApplication:
-                  "Let your users benefit from our pre-application readiness tools, without needing to change your permitting system",
+                  "Let your users benefit from our <strong>pre-application readiness tools</strong>, without needing to change your permitting system",
               },
-              note: "We're designing the Hub to meet 60–70% of most jurisdictions' needs — not to replace what already works.",
+              note: "We're designing the Hub to meet <strong>60–70% of most jurisdictions' needs</strong> — not to replace what already works.",
             },
             integration: {
               title: "Connected Through Integration",
               description:
                 "Many jurisdictions have asked for integration into their existing software (like Tempest or CityView). We're responding by:",
               features: {
-                openApi: "Offering open API submission",
-                directPush: "Allowing the Hub to push applications directly into your permitting system",
+                openApi: "Offering <strong>open API submission</strong>",
+                directPush:
+                  "Allowing the Hub to <strong>push applications directly into your permitting system</strong>",
                 statusUpdates:
-                  "Soon: receiving status updates back from your system, to display to applicants in real time",
+                  "Soon: receiving <strong>status updates back from your system</strong>, to display to applicants in real time",
               },
             },
             getStarted: {
@@ -1551,11 +1556,12 @@ const options = {
             notAlone: {
               title: "You're Not Alone",
               stats: {
-                liveJurisdictions: "Over 5 jurisdictions are live",
-                coCreation: "Over 40 local governments and 7 First Nations helped co-create the foundation",
+                liveJurisdictions: "<strong>Over 5 jurisdictions are live</strong>",
+                coCreation:
+                  "Over <strong>40 local governments</strong> and <strong>7 First Nations</strong> helped co-create the foundation",
               },
               feedback:
-                "Feedback has been positive — and the number one request is more permits and broader support for project workflows. That's exactly what we're building next.",
+                "Feedback has been positive — and the number one request is <strong>more permits and broader support for project workflows</strong>. That's exactly what we're building next.",
             },
             seeMore: {
               title: "Want to See More?",
@@ -1566,9 +1572,9 @@ const options = {
                 success: "Share success stories from other communities",
               },
               contact: {
-                email: "buildingpermithub@gov.bc.ca",
-                phone: "1-800-XXX-XXXX",
-                sessions: "Live onboarding sessions available",
+                email: "<strong>buildingpermithub@gov.bc.ca</strong>",
+                phone: "<strong>1-800-XXX-XXXX</strong>",
+                sessions: "<strong>Live onboarding sessions available</strong>",
               },
             },
           },
@@ -2357,6 +2363,7 @@ const options = {
             globalFeatureAccess: "Global feature access",
             projectReadinessTools: "Prepare and check your project documents",
             createYourLettersOfAssurance: "Create your Letters of Assurance",
+            onboardingChecklistPageForLgAdopting: "Onboarding checklist page for LG adopting",
           },
         },
         automatedCompliance: {
