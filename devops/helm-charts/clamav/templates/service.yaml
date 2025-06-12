@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: "{{ $.Values.clamav.name }}"
+  name: "{{ $.Values.clamav.name }}"
+spec:
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+    - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+    - name: 3310-tcp
+      port: 3310
+      protocol: TCP
+      targetPort: 3310
+  selector:
+    app: "{{ $.Values.clamav.name }}"
+    deployment: "{{ $.Values.clamav.name }}"
+  sessionAffinity: None
+  type: ClusterIP
+status:
+  loadBalancer: {}
