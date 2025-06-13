@@ -99,6 +99,9 @@ const EditJurisdictionScreen = lazy(() =>
 )
 const LandingScreen = lazy(() => import("../landing").then((module) => ({ default: module.LandingScreen })))
 const ContactScreen = lazy(() => import("../misc/contact-screen").then((module) => ({ default: module.ContactScreen })))
+const PrivacyPolicyScreen = lazy(() =>
+  import("../misc/privacy-policy-screen").then((module) => ({ default: module.PrivacyPolicyScreen }))
+)
 const ProjectReadinessToolsIndexScreen = lazy(() =>
   import("../project-readiness-tools").then((module) => ({ default: module.ProjectReadinessToolsIndexScreen }))
 )
@@ -637,6 +640,7 @@ const AppRoutes = observer(() => {
         {/* Public Routes */}
         <Route path="/accept-invitation" element={<AcceptInvitationScreen />} />
         <Route path="/contact" element={<ContactScreen />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicyScreen />} />
         <Route path="/project-readiness-tools" element={<ProjectReadinessToolsIndexScreen />} />
         <Route
           path="/project-readiness-tools/create-your-letters-of-assurance"
