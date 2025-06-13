@@ -14,18 +14,13 @@ import { Part9StepCodeType } from "./part-9-step-code"
 import { StepCodeBuildingCharacteristicsSummaryModel } from "./step-code-building-characteristic-summary"
 import { StepCodeComplianceReportModel } from "./step-code-compliance-report"
 
-function preProcessor(snapshot) {
-  return {
-    ...snapshot,
-    selectedReport: snapshot.selectedReport?.requirementId,
-  }
-}
+let _selectedReportId = null
 
 export const Part9StepCodeChecklistModel = types.snapshotProcessor(
   types
     .model("Part9StepCodeChecklistModel", {
       id: types.identifier,
-      isLoaded: types.maybeNull(types.boolean),
+      isLoaded: types.optional(types.boolean, false),
       stage: types.enumeration<EStepCodeChecklistStage[]>(Object.values(EStepCodeChecklistStage)),
       status: types.enumeration<EStepCodeChecklistStatus[]>(Object.values(EStepCodeChecklistStatus)),
       // permit application info
@@ -67,7 +62,7 @@ export const Part9StepCodeChecklistModel = types.snapshotProcessor(
       epcCalculationCompliance: types.maybeNull(types.boolean),
       // calculated / pre-populated fields
       complianceReports: types.array(StepCodeComplianceReportModel),
-      selectedReport: types.maybeNull(types.late(() => types.safeReference(StepCodeComplianceReportModel))),
+      selectedReport: types.maybeNull(types.late(() => types.reference(StepCodeComplianceReportModel))),
     })
     .extend(withEnvironment())
     .views((self) => ({
@@ -113,36 +108,51 @@ export const Part9StepCodeChecklistModel = types.snapshotProcessor(
       get stepRequirementId() {
         return self.selectedReport?.requirementId || self.complianceReports[0].requirementId
       },
+      get reportsForSelect() {
+        return self.complianceReports.map((report) => ({
+          value: report.requirementId,
+          label: report.requirementId,
+        }))
+      },
     }))
     .actions((self) => ({
       load: flow(function* () {
         const response = yield self.environment.api.fetchPart9Checklist(self.id)
         if (response.ok) {
-          const snapshot = response.data.data
-          console.log("[Checklist Load] Raw API data (camelCased):", JSON.parse(JSON.stringify(snapshot)))
-          const processedSnapshot = preProcessor(snapshot)
-          console.log("[Checklist Load] Snapshot for applySnapshot:", JSON.parse(JSON.stringify(processedSnapshot)))
-
-          try {
-            applySnapshot(self, processedSnapshot)
-            self.isLoaded = true
-          } catch (e) {
-            console.error("[Checklist Load] Error applying snapshot:", e)
-            // Log compliance reports on the model instance at the time of the error
-            console.log(
-              "[Checklist Load] complianceReports on model during error:",
-              JSON.parse(JSON.stringify(self.complianceReports))
-            )
-            throw e
-          }
+          console.log("[Checklist Load] About to apply snapshot.")
+          applySnapshot(self, response.data.data)
+          self.isLoaded = true
         }
       }),
       setSelectedReport(requirementId: string) {
         const report = self.complianceReports.find((r) => r.requirementId == requirementId)
-        self.selectedReport = report
+        self.selectedReport = report as any
       },
     })),
-  { preProcessor }
+  {
+    preProcessor(snapshot) {
+      console.log("[Checklist preProcessor] Entering.")
+      if ((snapshot as any).selectedReport) {
+        _selectedReportId = (snapshot as any).selectedReport.requirementId
+        console.log(`[Checklist preProcessor] Extracted selectedReportId: ${_selectedReportId}`)
+        delete (snapshot as any).selectedReport
+        console.log("[Checklist preProcessor] Deleted selectedReport from snapshot.")
+      }
+      return snapshot
+    },
+    postProcessor(snapshot, node) {
+      console.log("[Checklist postProcessor] Entering.")
+      if (_selectedReportId) {
+        console.log(
+          `[Checklist postProcessor] Found _selectedReportId: ${_selectedReportId}. Calling setSelectedReport.`
+        )
+        node.setSelectedReport(_selectedReportId)
+        _selectedReportId = null // clear after use
+        console.log("[Checklist postProcessor] Cleared _selectedReportId.")
+      }
+      return snapshot
+    },
+  }
 )
 
 export interface IPart9StepCodeChecklist extends Instance<typeof Part9StepCodeChecklistModel> {}
