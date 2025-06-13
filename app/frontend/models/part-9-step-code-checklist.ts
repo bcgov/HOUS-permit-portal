@@ -118,8 +118,23 @@ export const Part9StepCodeChecklistModel = types.snapshotProcessor(
       load: flow(function* () {
         const response = yield self.environment.api.fetchPart9Checklist(self.id)
         if (response.ok) {
-          applySnapshot(self, preProcessor(response.data.data))
-          self.isLoaded = true
+          const snapshot = response.data.data
+          console.log("[Checklist Load] Raw API data (camelCased):", JSON.parse(JSON.stringify(snapshot)))
+          const processedSnapshot = preProcessor(snapshot)
+          console.log("[Checklist Load] Snapshot for applySnapshot:", JSON.parse(JSON.stringify(processedSnapshot)))
+
+          try {
+            applySnapshot(self, processedSnapshot)
+            self.isLoaded = true
+          } catch (e) {
+            console.error("[Checklist Load] Error applying snapshot:", e)
+            // Log compliance reports on the model instance at the time of the error
+            console.log(
+              "[Checklist Load] complianceReports on model during error:",
+              JSON.parse(JSON.stringify(self.complianceReports))
+            )
+            throw e
+          }
         }
       }),
       setSelectedReport(requirementId: string) {
