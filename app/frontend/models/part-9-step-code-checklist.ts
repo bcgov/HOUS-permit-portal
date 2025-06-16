@@ -20,6 +20,18 @@ function preProcessor(snapshot) {
   if (snapshot.complianceReports && snapshot.complianceReports.length > 0) {
     const firstReportKeys = Object.keys(snapshot.complianceReports[0])
     console.log("%c[MST DIAGNOSTICS] 2a. Keys of first compliance report:", "color: magenta;", firstReportKeys)
+    snapshot.complianceReports.forEach((report, index) => {
+      try {
+        // We don't need to keep this instance, just check if it throws
+        StepCodeComplianceReportModel.create(report)
+        console.log(`%c[MST DIAGNOSTICS] 2c-${index}. Report snapshot is valid.`, "color: cyan;")
+      } catch (e) {
+        console.error(`%c[MST DIAGNOSTICS] 2d-${index}. Report snapshot is INVALID!`, "color: red;", {
+          report,
+          error: e,
+        })
+      }
+    })
   }
   if (snapshot.selectedReport) {
     const selectedReportKeys = Object.keys(snapshot.selectedReport)
