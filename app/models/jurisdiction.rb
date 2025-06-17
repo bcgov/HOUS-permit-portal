@@ -162,9 +162,9 @@ class Jurisdiction < ApplicationRecord
 
   def search_data
     {
-      qualified_name: qualified_name,
-      reverse_qualified_name: reverse_qualified_name,
-      regional_district_name: regional_district_name,
+      qualified_name: qualified_name.upcase,
+      reverse_qualified_name: reverse_qualified_name.upcase,
+      regional_district_name: regional_district_name&.upcase,
       name: name,
       type: type,
       updated_at: updated_at,
