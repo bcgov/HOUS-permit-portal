@@ -20,6 +20,7 @@ export const JurisdictionModel = types
     qualifiedName: types.string,
     inboxEnabled: types.boolean,
     showAboutPage: types.boolean,
+    designatedReviewer: types.boolean,
     reverseQualifiedName: types.maybeNull(types.string),
     regionalDistrictName: types.maybeNull(types.string),
     localityType: types.maybeNull(types.string),

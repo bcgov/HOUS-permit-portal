@@ -1,0 +1,45 @@
+import { Button, Container, Flex, Heading, VStack } from "@chakra-ui/react"
+import { CaretLeft } from "@phosphor-icons/react"
+import { observer } from "mobx-react-lite"
+import React, { useState } from "react"
+import { useTranslation } from "react-i18next"
+import { useNavigate } from "react-router-dom"
+import { useJurisdiction } from "../../../../../../hooks/resources/use-jurisdiction"
+import { SwitchButton } from "../../../../../shared/buttons/switch-button"
+
+export const designatedReviewerScreen = observer(() => {
+  const i18nPrefix = "home.configurationManagement.featureAccess"
+  const { currentJurisdiction } = useJurisdiction()
+  const navigate = useNavigate()
+  const { t } = useTranslation()
+  const [isEnabled, setIsEnabled] = useState(currentJurisdiction?.designatedReviewer ?? false)
+
+  const handleToggle = (checked) => {
+    setIsEnabled(checked)
+    currentJurisdiction.update({ designatedReviewer: checked })
+  }
+
+  return (
+    <Container maxW="container.lg" p={8} as={"main"}>
+      <VStack alignItems={"flex-start"} w={"full"} h={"full"} gap={6}>
+        <Button variant="link" onClick={() => navigate(-1)} leftIcon={<CaretLeft size={20} />} textDecoration="none">
+          {t("ui.back")}
+        </Button>
+        <Flex align="center" w="100%" direction="column" alignItems="flex-start">
+          <Heading as="h1" mb={4}>
+            {/* ts-ignore */}
+            {t(`${i18nPrefix}.designatedReviewer`)}
+          </Heading>
+        </Flex>
+      </VStack>
+      <Flex mt={8} align="center" w="100%" direction="row" justify="space-between">
+        <Flex direction="column" alignItems="flex-start">
+          <Heading fontSize="2xl" mb={4}>
+            {t(`${i18nPrefix}.editDesignatedReviewer`)}
+          </Heading>
+        </Flex>
+        <SwitchButton isChecked={isEnabled} onChange={(e) => handleToggle(e.target.checked)} size={"lg"} />
+      </Flex>
+    </Container>
+  )
+})

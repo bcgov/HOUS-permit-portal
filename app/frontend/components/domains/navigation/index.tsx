@@ -72,6 +72,14 @@ const ReviewStaffMyJurisdictionAboutPageScreen = lazy(() =>
   }))
 )
 
+const DesignatedReviewerScreen = lazy(() =>
+  import("../home/review-manager/configuration-management-screen/feature-access-screen/designated-reviewer").then(
+    (module) => ({
+      default: module.designatedReviewerScreen,
+    })
+  )
+)
+
 const JurisdictionIndexScreen = lazy(() =>
   import("../jurisdictions/index").then((module) => ({ default: module.JurisdictionIndexScreen }))
 )
@@ -454,6 +462,10 @@ const AppRoutes = observer(() => {
       <Route
         path="/jurisdictions/:jurisdictionId/configuration-management/feature-access/my-jurisdiction-about-page"
         element={<ReviewStaffMyJurisdictionAboutPageScreen />}
+      />
+      <Route
+        path="/jurisdictions/:jurisdictionId/configuration-management/feature-access/designated-reviewer"
+        element={<DesignatedReviewerScreen />}
       />
       <Route
         path="/jurisdictions/:jurisdictionId/configuration-management/energy-step"

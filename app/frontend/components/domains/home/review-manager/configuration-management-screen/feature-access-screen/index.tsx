@@ -20,6 +20,11 @@ export const ReviewManagerFeatureAccessScreen = observer(() => {
       enabled: currentJurisdiction?.showAboutPage,
       route: "my-jurisdiction-about-page",
     },
+    {
+      label: t(`${i18nPrefix}.designatedReviewer`),
+      enabled: currentJurisdiction?.designatedReviewer,
+      route: "designated-reviewer",
+    },
     // Add more features as needed
   ]
 

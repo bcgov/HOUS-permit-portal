@@ -537,6 +537,13 @@ export const PermitApplicationModel = types.snapshotProcessor(
           }, {})
         )
       },
+      getReviewManagerCollaboration(userId: string) {
+        return Array.from(self.permitCollaborationMap.values()).find(
+          (collaboration) =>
+            collaboration.collaborationType === ECollaborationType.review &&
+            collaboration.collaborator.user.id === userId
+        )
+      },
     }))
     .actions((self) => ({
       updatePermitCollaboration(permitCollaborationData: IPermitCollaboration) {
