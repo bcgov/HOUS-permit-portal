@@ -178,6 +178,8 @@ class RequirementFormJsonService
   end
 
   def to_form_json(requirement_block_key = requirement&.requirement_block&.key)
+    return {} unless requirement&.input_type.present?
+
     json =
       if requirement.input_type_general_contact? ||
            requirement.input_type_professional_contact?
