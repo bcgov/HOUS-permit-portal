@@ -178,6 +178,8 @@ class RequirementFormJsonService
   end
 
   def to_form_json(requirement_block_key = requirement&.requirement_block&.key)
+    Rails.logger.info "--- RequirementFormJsonService#to_form_json ---"
+    Rails.logger.info "Requirement ID: #{requirement.id}, Input Type: #{requirement.input_type}"
     return {} unless requirement&.input_type.present?
 
     json =
@@ -224,6 +226,7 @@ class RequirementFormJsonService
       )
     end
 
+    Rails.logger.info "Checking for energy_step_code. Requirement ID: #{requirement.id}, Input Type: #{requirement.input_type}"
     if requirement.input_type.to_sym == :energy_step_code
       json.merge!(
         { energyStepCode: requirement.input_options["energy_step_code"] }
