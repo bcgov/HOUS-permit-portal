@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_06_16_210003) do
+ActiveRecord::Schema[7.1].define(version: 2025_06_18_204739) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -235,8 +235,8 @@ ActiveRecord::Schema[7.1].define(version: 2025_06_16_210003) do
     t.string "external_api_state", default: "g_off", null: false
     t.boolean "inbox_enabled", default: false, null: false
     t.integer "heating_degree_days"
-    t.boolean "show_about_page", default: true, null: false
-    t.boolean "designated_reviewer", default: false, null: false
+    t.boolean "show_about_page", default: false, null: false
+    t.boolean "allow_designated_reviewer", default: false, null: false
     t.index ["prefix"], name: "index_jurisdictions_on_prefix", unique: true
     t.index ["regional_district_id"], name: "index_jurisdictions_on_regional_district_id"
     t.index ["slug"], name: "index_jurisdictions_on_slug", unique: true
@@ -620,6 +620,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_06_16_210003) do
     t.jsonb "revision_reason_options"
     t.uuid "small_scale_requirement_template_id"
     t.boolean "inbox_enabled", default: false, null: false
+    t.boolean "allow_designated_reviewer", default: false, null: false
     t.index ["small_scale_requirement_template_id"], name: "idx_on_small_scale_requirement_template_id_235b636c86"
   end
 

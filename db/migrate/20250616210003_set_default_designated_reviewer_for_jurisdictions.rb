@@ -1,8 +1,8 @@
 class SetDefaultDesignatedReviewerForJurisdictions < ActiveRecord::Migration[
-  7.0
+  7.1
 ]
   def up
-    execute "UPDATE jurisdictions SET designated_reviewer = false;"
+    execute "UPDATE jurisdictions SET allow_designated_reviewer = false;"
   end
 
   def down

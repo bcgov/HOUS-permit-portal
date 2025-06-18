@@ -13,6 +13,7 @@ export const SiteConfigurationStoreModel = types.snapshotProcessor(
       configurationLoaded: types.optional(types.boolean, false),
       displaySitewideMessage: types.maybeNull(types.boolean),
       inboxEnabled: types.maybeNull(types.boolean),
+      //allowDesignatedReviewer: types.maybeNull(types.boolean),
       sitewideMessage: types.maybeNull(types.string),
       helpLinkItems: types.frozen<IHelpLinkItems>(),
       revisionReasonsMap: types.map(RevisionReasonModel),

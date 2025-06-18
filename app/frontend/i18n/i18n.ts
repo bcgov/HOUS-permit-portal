@@ -2817,6 +2817,8 @@ const options = {
               "Enable review managers to accept and process permit applications. If you turn off this feature, submitters can't submit applications, and review managers won't receive new applications.",
             toggleOn: "On",
             toggleOff: "Off",
+            designatedReviewer: "Designated Reviewer",
+            designatedReviewerDescription: "Turn the designated reviewer on or off site-wide.",
           },
           sitewideMessage: {
             title: "Site-wide message",
