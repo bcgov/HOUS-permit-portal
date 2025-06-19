@@ -1573,7 +1573,6 @@ const options = {
               },
               contact: {
                 email: "<strong>buildingpermithub@gov.bc.ca</strong>",
-                phone: "<strong>1-800-XXX-XXXX</strong>",
                 sessions: "<strong>Live onboarding sessions available</strong>",
               },
             },

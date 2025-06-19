@@ -247,9 +247,6 @@ export const OnboardingChecklistPageForLgAdoptingScreen = () => {
       <Text fontSize="lg" color="blue.700" mb={1}>
         📧 <Trans i18nKey="home.joinTheBuildingPermitHub.seeMore.contact.email" />
       </Text>
-      <Text fontSize="lg" color="gray.700" mb={1}>
-        📞 <Trans i18nKey="home.joinTheBuildingPermitHub.seeMore.contact.phone" />
-      </Text>
       <Text fontSize="lg" color="gray.700" mb={8}>
         📧 <Trans i18nKey="home.joinTheBuildingPermitHub.seeMore.contact.sessions" />
       </Text>
