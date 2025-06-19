@@ -22,7 +22,7 @@ export const ReviewManagerFeatureAccessScreen = observer(() => {
     },
     {
       label: t(`${i18nPrefix}.designatedReviewer`),
-      enabled: currentJurisdiction?.designatedReviewer,
+      enabled: currentJurisdiction?.allowDesignatedReviewer,
       route: "designated-reviewer",
     },
     // Add more features as needed

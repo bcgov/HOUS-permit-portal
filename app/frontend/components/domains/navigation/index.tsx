@@ -75,7 +75,7 @@ const ReviewStaffMyJurisdictionAboutPageScreen = lazy(() =>
 const DesignatedReviewerScreen = lazy(() =>
   import("../home/review-manager/configuration-management-screen/feature-access-screen/designated-reviewer").then(
     (module) => ({
-      default: module.designatedReviewerScreen,
+      default: module.DesignatedReviewerScreen,
     })
   )
 )
@@ -248,11 +248,11 @@ const AdminSubmissionInboxScreen = lazy(() =>
   }))
 )
 
-// const AdminDesignatedReviewerScreen = lazy(() =>
-//   import("../super-admin/site-configuration-management/designated-reviewer-screen").then((module) => ({
-//     default: module.AdminDesignatedReviewerScreen,
-//   }))
-// )
+const AdminDesignatedReviewerScreen = lazy(() =>
+  import("../super-admin/site-configuration-management/designated-reviewer-screen").then((module) => ({
+    default: module.AdminDesignatedReviewerScreen,
+  }))
+)
 
 const ReportingScreen = lazy(() =>
   import("../super-admin/reporting/reporting-screen").then((module) => ({ default: module.ReportingScreen }))
@@ -431,10 +431,10 @@ const AppRoutes = observer(() => {
         path="/configuration-management/global-feature-access/submission-inbox"
         element={<AdminSubmissionInboxScreen />}
       />
-      {/* <Route
+      <Route
         path="/configuration-management/global-feature-access/designated-reviewer"
         element={<AdminDesignatedReviewerScreen />}
-      /> */}
+      />
       <Route path="/configuration-management/users/invite" element={<AdminInviteScreen />} />
       <Route path="/reporting" element={<ReportingScreen />} />
       <Route path="/reporting/export-template-summary" element={<ExportTemplateSummaryScreen />} />

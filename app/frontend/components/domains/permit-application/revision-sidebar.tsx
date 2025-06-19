@@ -189,17 +189,7 @@ export const RevisionSideBar = observer(
             promptHeader={t("permitApplication.show.revision.confirmHeader")}
             promptMessage={t("permitApplication.show.revision.confirmMessage")}
             renderTrigger={(onConfirmationModalOpen) => {
-              const { userStore } = useMst()
-              const { currentUser } = userStore
-
-              const designatedReviewerCollaboration = permitApplication.getCollaborationDelegatee(
-                ECollaborationType.review
-              )
-              const showDesignatedReviewerModal =
-                permitApplication.jurisdiction.designatedReviewer &&
-                (!designatedReviewerCollaboration ||
-                  designatedReviewerCollaboration.collaborator?.user?.id !== currentUser.id)
-
+              const showDesignatedReviewerModal = permitApplication.shouldShowDesignatedReviewerModal
               const handleClick = () => {
                 if (showDesignatedReviewerModal) {
                   onDesignatedReviewerModalOpen()

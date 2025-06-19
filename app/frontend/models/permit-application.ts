@@ -176,6 +176,10 @@ export const PermitApplicationModel = types.snapshotProcessor(
       get inboxEnabled() {
         return self.jurisdiction?.inboxEnabled && self.rootStore.siteConfigurationStore.inboxEnabled
       },
+      get isDesignatedReviewerEnabled() {
+        const { siteConfigurationStore } = self.rootStore
+        return siteConfigurationStore.allowDesignatedReviewer && self.jurisdiction.allowDesignatedReviewer
+      },
     }))
     .views((self) => ({
       get pastSubmissionVersionOptions() {
@@ -537,11 +541,29 @@ export const PermitApplicationModel = types.snapshotProcessor(
           }, {})
         )
       },
-      getReviewManagerCollaboration(userId: string) {
+      getDesignatedReviewer(userId: string) {
         return Array.from(self.permitCollaborationMap.values()).find(
           (collaboration) =>
             collaboration.collaborationType === ECollaborationType.review &&
             collaboration.collaborator.user.id === userId
+        )
+      },
+    }))
+    .views((self) => ({
+      get shouldShowDesignatedReviewerModal() {
+        const { siteConfigurationStore, userStore } = self.rootStore
+        const { currentUser } = userStore
+
+        const siteConfigurationADR = siteConfigurationStore.allowDesignatedReviewer
+        const jurisdictionADR = self.jurisdiction.allowDesignatedReviewer
+        if (!siteConfigurationADR && !jurisdictionADR) {
+          return false
+        }
+        console.log(self.getCollaborationDelegatee(ECollaborationType.review))
+        const designatedReviewerCollaboration = self.getCollaborationDelegatee(ECollaborationType.review)
+
+        return (
+          !designatedReviewerCollaboration || designatedReviewerCollaboration.collaborator?.user?.id !== currentUser.id
         )
       },
     }))

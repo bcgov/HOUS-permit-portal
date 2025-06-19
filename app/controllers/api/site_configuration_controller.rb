@@ -39,6 +39,7 @@ class Api::SiteConfigurationController < Api::ApplicationController
       :display_sitewide_message,
       :sitewide_message,
       :inbox_enabled,
+      :allow_designated_reviewer,
       :small_scale_requirement_template_id,
       help_link_items: [
         get_started_link_item: %i[href title description show],

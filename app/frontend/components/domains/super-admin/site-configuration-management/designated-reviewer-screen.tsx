@@ -1,33 +1,36 @@
-import { Container } from "@chakra-ui/react"
+import { Container, Flex, Heading, Text, VStack } from "@chakra-ui/react"
+import { CaretLeft } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
-import React from "react"
+import React, { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../../setup/root"
+import { SwitchButton } from "../../../shared/buttons/switch-button"
+import { RouterLinkButton } from "../../../shared/navigation/router-link-button"
 
 export const AdminDesignatedReviewerScreen = observer(() => {
   const i18nPrefix = "siteConfiguration.globalFeatureAccess"
   const { t } = useTranslation()
   const { siteConfigurationStore } = useMst()
-  //const { updateSiteConfiguration, configurationLoaded } = siteConfigurationStore
-  //const [allowDesignatedReviewer, setAllowDesignatedReviewer] = useState(false)
+  const { updateSiteConfiguration, configurationLoaded } = siteConfigurationStore
+  const [allowDesignatedReviewer, setAllowDesignatedReviewer] = useState(false)
 
-  // const updateInboxEnabled = async (e) => {
-  //   // optimistic update is fine
-  //   setAllowDesignatedReviewer(e.target.checked)
-  //   await updateSiteConfiguration({
-  //     allowDesignatedReviewer: e.target.checked,
-  //   })
-  // }
+  const updateInboxEnabled = async (e) => {
+    // optimistic update is fine
+    setAllowDesignatedReviewer(e.target.checked)
+    await updateSiteConfiguration({
+      allowDesignatedReviewer: e.target.checked,
+    })
+  }
 
-  // useEffect(() => {
-  //   if (configurationLoaded) {
-  //     setAllowDesignatedReviewer(siteConfigurationStore.allowDesignatedReviewer || false)
-  //   }
-  // }, [configurationLoaded])
+  useEffect(() => {
+    if (configurationLoaded) {
+      setAllowDesignatedReviewer(siteConfigurationStore.allowDesignatedReviewer || false)
+    }
+  }, [configurationLoaded])
 
   return (
     <Container maxW="container.lg" p={8} as={"main"}>
-      {/* <VStack alignItems={"flex-start"} w={"full"} h={"full"} gap={6}>
+      <VStack alignItems={"flex-start"} w={"full"} h={"full"} gap={6}>
         <RouterLinkButton
           variant={"link"}
           to={`/configuration-management/global-feature-access/`}
@@ -43,7 +46,7 @@ export const AdminDesignatedReviewerScreen = observer(() => {
           <Text>{t(`${i18nPrefix}.designatedReviewerDescription`)}</Text>
           <SwitchButton isChecked={allowDesignatedReviewer} onChange={updateInboxEnabled} size={"lg"} />
         </Flex>
-      </VStack> */}
+      </VStack>
     </Container>
   )
 })
