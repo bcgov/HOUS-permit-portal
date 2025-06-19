@@ -1,4 +1,5 @@
 class PermitProject < ApplicationRecord
+  include Discard::Model
   searchkick word_middle: %i[title full_address pid pin], text_end: %i[number] # Added name, pid, pin to searchkick
 
   belongs_to :owner, class_name: "User"
@@ -22,8 +23,10 @@ class PermitProject < ApplicationRecord
       owner_id: owner_id,
       jurisdiction_id: jurisdiction_id,
       created_at: created_at,
-      updated_at: updated_at
-      # Add other relevant fields for searching PermitProject itself
+      updated_at: updated_at,
+      discarded: discarded_at.present?,
+      phase: phase,
+      forcasted_completion_date: forcasted_completion_date
     }
   end
 
@@ -36,4 +39,16 @@ class PermitProject < ApplicationRecord
 
   # TODO: Re-evaluate and re-implement search_data based on primary_project_item
   # and the possibility of multiple items of different types in the future.
+
+  # TODO: User to define the logic for this helper method
+  def phase
+    # Example implementation, to be defined by user
+    permit_applications.first&.status || "draft"
+  end
+
+  # TODO: User to define the logic for this helper method
+  def forcasted_completion_date
+    # Example implementation, to be defined by user
+    Time.zone.now + 14.days
+  end
 end

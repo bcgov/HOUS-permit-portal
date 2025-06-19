@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_05_29_185101) do
+ActiveRecord::Schema[7.1].define(version: 2025_06_19_190417) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -39,28 +39,6 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_29_185101) do
   create_table "assets", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-  end
-
-  create_table "audits", force: :cascade do |t|
-    t.integer "auditable_id"
-    t.string "auditable_type"
-    t.integer "associated_id"
-    t.string "associated_type"
-    t.integer "user_id"
-    t.string "user_type"
-    t.string "username"
-    t.string "action"
-    t.text "audited_changes"
-    t.integer "version", default: 0
-    t.string "comment"
-    t.string "remote_address"
-    t.string "request_uuid"
-    t.datetime "created_at"
-    t.index ["associated_type", "associated_id"], name: "associated_index"
-    t.index ["auditable_type", "auditable_id", "version"], name: "auditable_index"
-    t.index ["created_at"], name: "index_audits_on_created_at"
-    t.index ["request_uuid"], name: "index_audits_on_request_uuid"
-    t.index ["user_id", "user_type"], name: "user_index"
   end
 
   create_table "collaborators", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -95,6 +73,9 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_29_185101) do
     t.string "contactable_type"
     t.uuid "contactable_id"
     t.index ["contactable_type", "contactable_id"], name: "index_contacts_on_contactable"
+  end
+
+  create_table "data_migrations", primary_key: "version", id: :string, force: :cascade do |t|
   end
 
   create_table "document_references", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -243,7 +224,6 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_29_185101) do
     t.string "external_api_state", default: "g_off", null: false
     t.boolean "inbox_enabled", default: false, null: false
     t.integer "heating_degree_days"
-    t.boolean "show_about_page", default: true, null: false
     t.index ["prefix"], name: "index_jurisdictions_on_prefix", unique: true
     t.index ["regional_district_id"], name: "index_jurisdictions_on_regional_district_id"
     t.index ["slug"], name: "index_jurisdictions_on_slug", unique: true
@@ -469,6 +449,8 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_29_185101) do
     t.integer "phase"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.datetime "discarded_at"
+    t.index ["discarded_at"], name: "index_permit_projects_on_discarded_at"
     t.index ["jurisdiction_id"], name: "index_permit_projects_on_jurisdiction_id"
     t.index ["owner_id"], name: "index_permit_projects_on_owner_id"
   end
@@ -542,7 +524,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_29_185101) do
     t.datetime "discarded_at"
     t.integer "visibility", default: 0, null: false
     t.index ["discarded_at"], name: "index_requirement_blocks_on_discarded_at"
-    t.index ["name", "first_nations"], name: "index_requirement_blocks_on_name_and_first_nations", unique: true
+    t.index ["name", "first_nations"], name: "index_requirement_blocks_on_name_and_first_nations", unique: true, where: "(discarded_at IS NULL)"
     t.index ["sku"], name: "index_requirement_blocks_on_sku", unique: true
   end
 

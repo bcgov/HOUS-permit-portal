@@ -1,3 +1,4 @@
+import { t } from "i18next"
 import { cast, flow, Instance, types } from "mobx-state-tree"
 import * as R from "ramda"
 import { createSearchModel } from "../lib/create-search-model"
@@ -30,14 +31,8 @@ export const PermitProjectStoreModel = types
   .extend(withMerge())
   .views((self) => ({
     getSortColumnHeader(field: EPermitProjectSortFields) {
-      // Translate field names to human-readable column headers
-      // This might involve using a translation library like i18next if internationalization is needed
-      const fieldMap = {
-        [EPermitProjectSortFields.description]: "Description",
-        [EPermitProjectSortFields.updatedAt]: "Last Updated",
-        [EPermitProjectSortFields.createdAt]: "Created Date",
-      }
-      return fieldMap[field] || field
+      // @ts-ignore
+      return t(`permitProject.columns.${field}`)
     },
     getPermitProjectById(id: string) {
       return self.permitProjectMap.get(id)

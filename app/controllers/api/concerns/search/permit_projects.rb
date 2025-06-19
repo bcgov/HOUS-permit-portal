@@ -41,7 +41,8 @@ module Api::Concerns::Search::PermitProjects
         # e.g., :jurisdiction_id, { status: [] }
         # Add other filters that PermitApplication search uses, like :has_collaborator
         :jurisdiction_id,
-        { status: [] }
+        { status: [] },
+        :show_archived
       ],
       sort: %i[field direction]
     )
@@ -64,9 +65,10 @@ module Api::Concerns::Search::PermitProjects
 
   # Determines the where clause for Searchkick, mirroring PermitApplication logic
   def permit_project_where_clause
-    # Start with filters from params and process them
-    (permit_project_search_params[:filters] || {}).merge(
-      { owner_id: current_user.id }
-    )
+    filters = (permit_project_search_params[:filters] || {}).deep_dup
+    show_archived =
+      ActiveModel::Type::Boolean.new.cast(filters.delete(:show_archived))
+
+    filters.merge(owner_id: current_user.id, discarded: show_archived)
   end
 end

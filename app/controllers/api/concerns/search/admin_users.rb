@@ -50,7 +50,7 @@ module Api::Concerns::Search::AdminUsers
   end
 
   def discarded
-    user_search_params[:show_archived].present?
+    ActiveModel::Type::Boolean.new.cast(user_search_params[:show_archived])
   end
 
   def user_order
