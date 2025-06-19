@@ -214,7 +214,6 @@ ActiveRecord::Schema[7.1].define(version: 2025_06_19_210327) do
     t.boolean "inbox_enabled", default: false, null: false
     t.integer "heating_degree_days"
     t.boolean "show_about_page", default: false, null: false
-    t.boolean "allow_designated_reviewer", default: false, null: false
     t.index ["prefix"], name: "index_jurisdictions_on_prefix", unique: true
     t.index ["regional_district_id"], name: "index_jurisdictions_on_regional_district_id"
     t.index ["slug"], name: "index_jurisdictions_on_slug", unique: true
@@ -598,7 +597,6 @@ ActiveRecord::Schema[7.1].define(version: 2025_06_19_210327) do
     t.jsonb "revision_reason_options"
     t.uuid "small_scale_requirement_template_id"
     t.boolean "inbox_enabled", default: false, null: false
-    t.boolean "allow_designated_reviewer", default: false, null: false
     t.index ["small_scale_requirement_template_id"], name: "idx_on_small_scale_requirement_template_id_235b636c86"
   end
 
