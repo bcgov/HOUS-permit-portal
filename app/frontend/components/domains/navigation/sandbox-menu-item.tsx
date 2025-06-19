@@ -78,13 +78,8 @@ export const SandboxMenuItem: React.FC = observer(() => {
             ) : (
               // Content for entering sandbox mode
               <>
-                <Text my={4}>{t("sandbox.switch.description")}</Text>
-                <UnorderedList mt={2}>
-                  {(t("sandbox.switch.descriptionList", { returnObjects: true }) as string[]).map((item, index) => (
-                    <ListItem key={index}>{item}</ListItem>
-                  ))}
-                </UnorderedList>
-
+                <Text my={4}>{t("sandbox.switch.descriptionParagraph1")}</Text>
+                <Text my={4}>{t("sandbox.switch.descriptionParagraph2")}</Text>
                 <Text mt={4}>{t("sandbox.switch.choicesAvailable")}</Text>
                 <UnorderedList my={2}>
                   <ListItem>
