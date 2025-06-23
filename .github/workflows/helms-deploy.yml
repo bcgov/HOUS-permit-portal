@@ -54,11 +54,6 @@ jobs:
       with:
         version: 'v3.14.0'
 
-    - name: Install kubectl
-      uses: azure/setup-kubectl@v4
-      with:
-        version: 'latest'
-
     - name: Authenticate with OpenShift
       env:
         OPENSHIFT_API_URL: ${{ secrets.OPENSHIFT_API_URL }}
