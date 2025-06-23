@@ -1,6 +1,6 @@
 class PermitProject < ApplicationRecord
   include Discard::Model
-  searchkick word_middle: %i[title full_address pid pin], text_end: %i[number] # Added name, pid, pin to searchkick
+  searchkick word_middle: %i[title full_address pid pin] # Search configuration for PermitProject
 
   belongs_to :owner, class_name: "User"
   belongs_to :jurisdiction # Direct association to Jurisdiction

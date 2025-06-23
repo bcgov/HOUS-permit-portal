@@ -93,6 +93,7 @@ export const PermitProjectStoreModel = types
         page: opts?.page ?? self.currentPage, // from createSearchModel
         perPage: opts?.countPerPage ?? self.countPerPage, // from createSearchModel
         filters: {
+          showArchived: self.showArchived,
           query: self.query, // Example filter, adapt as needed
           // Add other filters from self, if defined
         },

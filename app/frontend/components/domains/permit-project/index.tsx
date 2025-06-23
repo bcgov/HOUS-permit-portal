@@ -82,9 +82,13 @@ export const PermitProjectIndexScreen = observer(({}: IPermitProjectIndexScreenP
                 {t("permitProject.index.allProjects", "All projects")}
               </Heading>
 
-              <Flex gap={4}>
-                <FormControl w="300px">
-                  <ModelSearchInput searchModel={permitProjectStore} placeholder={t("ui.search")} />
+              <Flex direction="column" gap={4}>
+                <FormControl w="full">
+                  <ModelSearchInput
+                    searchModel={permitProjectStore}
+                    inputProps={{ placeholder: t("ui.search"), width: "full" }}
+                    inputGroupProps={{ width: "full" }}
+                  />
                 </FormControl>
                 <ActiveArchivedFilter searchModel={permitProjectStore} />
               </Flex>

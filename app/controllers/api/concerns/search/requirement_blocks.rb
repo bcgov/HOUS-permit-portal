@@ -42,7 +42,7 @@ module Api::Concerns::Search::RequirementBlocks
   end
 
   def discarded
-    ActiveModel::Type::Boolean.new.cast(search_params[:show_archived])
+    ActiveModel::Type::Boolean.new.cast(search_params[:show_archived] || false)
   end
 
   def visibility

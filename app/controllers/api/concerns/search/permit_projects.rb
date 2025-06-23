@@ -6,11 +6,6 @@ module Api::Concerns::Search::PermitProjects
     search_conditions = {
       order: permit_project_order,
       match: :word_middle, # Default match type, can be customized
-      fields: [
-        # Define default searchable fields for PermitProject
-        # These should align with what's indexed in PermitProject.search_data
-        { description: :word_middle }
-      ],
       where: permit_project_where_clause,
       page: permit_project_search_params[:page],
       per_page:
@@ -67,7 +62,9 @@ module Api::Concerns::Search::PermitProjects
   def permit_project_where_clause
     filters = (permit_project_search_params[:filters] || {}).deep_dup
     show_archived =
-      ActiveModel::Type::Boolean.new.cast(filters.delete(:show_archived))
+      ActiveModel::Type::Boolean.new.cast(
+        filters.delete(:show_archived) || false
+      )
 
     filters.merge(owner_id: current_user.id, discarded: show_archived)
   end

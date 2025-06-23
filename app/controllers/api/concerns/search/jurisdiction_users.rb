@@ -55,7 +55,9 @@ module Api::Concerns::Search::JurisdictionUsers
   end
 
   def discarded
-    ActiveModel::Type::Boolean.new.cast(user_search_params[:show_archived])
+    ActiveModel::Type::Boolean.new.cast(
+      user_search_params[:show_archived] || false
+    )
   end
 
   def user_order

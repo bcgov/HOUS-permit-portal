@@ -511,6 +511,7 @@ export interface IPermitApplicationSearchFilters {
 
 export interface IPermitProjectSearchFilters {
   query?: string
+  showArchived?: boolean
   // Add other specific filters if needed, e.g., status, submitterId
 }
 

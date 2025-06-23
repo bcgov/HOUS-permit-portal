@@ -1,4 +1,5 @@
 import { Button, ButtonProps, Menu, MenuButton, MenuList, Radio, RadioGroup, VStack } from "@chakra-ui/react"
+import { CaretDown } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
@@ -25,7 +26,14 @@ export const ActiveArchivedFilter = observer(function ActiveArchivedFilter<TSear
 
   return (
     <Menu>
-      <MenuButton as={Button} variant="outline" {...rest}>
+      <MenuButton
+        as={Button}
+        variant="outline"
+        borderColor="semantic.info"
+        bg="semantic.infoLight"
+        rightIcon={<CaretDown />}
+        {...rest}
+      >
         {showArchived ? t("ui.archived", "Archived") : t("ui.active", "Active")}
       </MenuButton>
       <MenuList p={4} zIndex="dropdown">
