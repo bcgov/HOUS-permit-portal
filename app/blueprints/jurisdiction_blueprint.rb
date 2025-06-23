@@ -17,6 +17,7 @@ class JurisdictionBlueprint < Blueprinter::Base
            :permit_applications_size,
            :map_position,
            :inbox_enabled,
+           :show_about_page,
            :map_zoom,
            :regional_district_name,
            :created_at,

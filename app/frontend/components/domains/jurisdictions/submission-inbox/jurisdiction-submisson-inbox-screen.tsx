@@ -58,7 +58,7 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
           <Can action="jurisdiction:manage" data={{ jurisdiction: currentJurisdiction }}>
             <Button
               as={RouterLink}
-              to={`/jurisdictions/${currentJurisdiction.slug}/configuration-management/submissions-inbox-setup`}
+              to={`/jurisdictions/${currentJurisdiction.slug}/configuration-management/feature-access/submissions-inbox-setup`}
               variant="secondary"
             >
               {t("ui.setup")}

@@ -104,6 +104,17 @@ class PdfGenerationJob
 
     File.open(json_filename, "w") { |file| file.write(pdf_json_data) }
 
+    # REMOVE THIS FOR PRODUCTION
+    # begin
+    #   parsed_json = JSON.parse(pdf_json_data)
+    #   Rails.logger.error "############################### Failing PDF JSON data:\n"
+    #   Rails.logger.error "#{JSON.pretty_generate(parsed_json)}"
+    #   Rails.logger.error "###############################"
+    # rescue JSON::ParserError
+    #   Rails.logger.error "Failing PDF JSON data (could not be parsed):\n#{pdf_json_data}"
+    #   Rails.logger.error "###############################"
+    # end
+
     # Run Node.js script as a child process, passing JSON data as an argument
     stdout, stderr, status =
       Open3.popen3(

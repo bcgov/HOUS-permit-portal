@@ -113,7 +113,6 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
 
   const nicknameWatch = watch("nickname")
   const isStepCode = R.test(/step-code/, window.location.pathname)
-
   setupEnergyStepCodeReportLink()
   const handleSave = async ({
     autosave,

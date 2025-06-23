@@ -1,6 +1,8 @@
 require "rails_helper"
 
-RSpec.describe AutomatedCompliance::ParcelInfoExtractor do
+RSpec.describe AutomatedCompliance::ParcelInfoExtractor,
+               type: :service,
+               search: true do
   let!(:requirement_template) do
     create(:live_requirement_template_with_compliance)
   end

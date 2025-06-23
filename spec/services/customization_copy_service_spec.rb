@@ -1,7 +1,7 @@
 # spec/services/customization_copy_service_spec.rb
 require "rails_helper"
 
-RSpec.describe CustomizationCopyService, type: :service do
+RSpec.describe CustomizationCopyService, type: :service, search: true do
   include TestConstants
 
   let(:from_template_version) { create(:template_version) }
