@@ -23,15 +23,31 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     if: ${{ github.event.inputs.component != '' }}
+    environment: ${{ github.event.inputs.environment }}
 
     steps:
     - name: Checkout Code
       uses: actions/checkout@v4
 
-    - name: Install kubectl
-      uses: azure/setup-kubectl@v4
-      with:
-        version: 'latest'
+    - name: Check if user is authorized
+      run: |
+        AUTHORIZED_USERS="${{ secrets.AUTHORIZED_USERS }}"
+        CURRENT_USER="${{ github.actor }}"
+
+        # Check if CURRENT_USER is in AUTHORIZED_USERS
+        if [[ ",$AUTHORIZED_USERS," != *",$CURRENT_USER,"* ]]; then
+          echo "❌ Error: $CURRENT_USER is not authorized to trigger this deployment."
+          exit 1
+        else
+          echo "✅ Authorized user: $CURRENT_USER"
+        fi
+
+    - name: Install OpenShift CLI (oc)
+      run: |
+        curl -LO https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/openshift-client-linux.tar.gz
+        tar -xzf openshift-client-linux.tar.gz
+        sudo mv oc kubectl /usr/local/bin/
+        oc version
 
     - name: Install Helm
       uses: azure/setup-helm@v3
@@ -91,7 +107,7 @@ jobs:
           RELEASE_NAME="$DEFAULT_RELEASE_NAME"
         fi
 
-        CHART_DIR="./charts/$COMPONENT"
+        CHART_DIR="./devops/helm-charts/$COMPONENT"
 
         if [[ ! -d "$CHART_DIR" ]]; then
           echo "Chart directory $CHART_DIR does not exist"
@@ -106,6 +122,16 @@ jobs:
         if [[ ! -f "$CHART_DIR/$VALUES_FILE" ]]; then
           echo "Missing environment values file $VALUES_FILE in $CHART_DIR"
           exit 1
+        fi
+
+        echo "Checking current Helm release version..."
+        CURRENT_RELEASE=$(helm list --namespace "$NAMESPACE" --filter "^$RELEASE_NAME$" -o json)
+
+        if [ "$CURRENT_RELEASE" != "[]" ]; then
+          echo "Current release details:"
+          echo "$CURRENT_RELEASE" | grep -E '"name"|"chart"|"app_version"' || echo "$CURRENT_RELEASE"
+        else
+          echo "No existing release found for $RELEASE_NAME in namespace $NAMESPACE"
         fi
 
         echo "Deploying $RELEASE_NAME to namespace $NAMESPACE"
