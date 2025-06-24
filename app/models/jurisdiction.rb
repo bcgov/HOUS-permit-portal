@@ -353,13 +353,16 @@ class Jurisdiction < ApplicationRecord
   def ensure_default_sandboxes
     if sandboxes.published.empty?
       sandboxes.build(
-        name: "Published Sandbox",
+        name: "Published",
+        description:
+          "Work with application forms that have already been published",
         template_version_status_scope: :published
       )
     end
     if sandboxes.scheduled.empty?
       sandboxes.build(
-        name: "Scheduled Sandbox",
+        name: "Scheduled",
+        description: "Work with application forms scheduled to be published",
         template_version_status_scope: :scheduled
       )
     end

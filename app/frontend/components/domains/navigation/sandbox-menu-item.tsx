@@ -1,7 +1,6 @@
 import {
   Button,
   Flex,
-  ListItem,
   MenuDivider,
   MenuItem,
   Modal,
@@ -12,13 +11,12 @@ import {
   ModalOverlay,
   Switch,
   Text,
-  UnorderedList,
   useDisclosure,
 } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React, { useState } from "react"
-import { Trans, useTranslation } from "react-i18next"
+import { useTranslation } from "react-i18next"
 import { useMst } from "../../../setup/root"
 import { EFlashMessageStatus } from "../../../types/enums"
 import { CustomMessageBox } from "../../shared/base/custom-message-box"
@@ -80,20 +78,15 @@ export const SandboxMenuItem: React.FC = observer(() => {
               <>
                 <Text my={4}>{t("sandbox.switch.descriptionParagraph1")}</Text>
                 <Text my={4}>{t("sandbox.switch.descriptionParagraph2")}</Text>
-                <Text mt={4}>{t("sandbox.switch.choicesAvailable")}</Text>
-                <UnorderedList my={2}>
-                  <ListItem>
-                    <Trans i18nKey="sandbox.switch.publishedDescription" />
-                  </ListItem>
-                  <ListItem>
-                    <Trans i18nKey="sandbox.switch.scheduledDescription" />
-                  </ListItem>
-                </UnorderedList>
-
-                <Text fontWeight="bold" mt={4}>
-                  {t("ui.select")}
+                <Text fontWeight="bold" mt={4} mb={2}>
+                  {t("ui.chooseSandboxMode")}
                 </Text>
-                <SandboxSelect onChange={setSelectedOption} value={selectedOption} options={sandboxOptions} />
+                <SandboxSelect
+                  onChange={setSelectedOption}
+                  value={selectedOption}
+                  options={sandboxOptions}
+                  children={""}
+                />
                 <CustomMessageBox
                   mt={6}
                   p={4}

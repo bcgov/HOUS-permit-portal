@@ -206,6 +206,7 @@ export const ExternalApiKeyModalSubRoute = observer(function ExternalApiKeyModal
                         options={currentJurisdiction.sandboxOptions}
                         includeLive
                         isDisabled={!!externalApiKey}
+                        children={""}
                       />
                     )
                   }}

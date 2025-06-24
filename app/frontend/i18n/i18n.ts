@@ -287,6 +287,7 @@ const options = {
           invite: "Invite",
           public: "Public",
           undo: "Undo",
+          chooseSandboxMode: "Choose a sandbox mode",
         },
         notification: {
           title: "Notifications",
@@ -751,12 +752,7 @@ const options = {
             descriptionParagraph2:
               "You can see how your updates will appear to submitters, try out test permit applications, and publish your changes when you're ready.",
             leaveDescription: "You are about to leave sandbox mode. Any unsaved changes will be lost.",
-            choicesAvailable: "Choices available",
             liveDescription: "<strong>Live</strong>: No sandbox. Submit directly to the live inbox.",
-            publishedDescription:
-              "<strong>Published sandbox:</strong> Sandbox that emulates the live mode by letting you test edits on published permit templates.",
-            scheduledDescription:
-              "<strong>Scheduled sandbox:</strong> Sandbox that lets you interact with scheduled permit templates.",
             continue: "Enter sandbox mode",
             leave: "Leave sandbox",
             superAdminAvailable: "Super Admin feature available!",

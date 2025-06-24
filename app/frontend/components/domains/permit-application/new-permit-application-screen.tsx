@@ -199,12 +199,6 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
                             <ListItem>
                               <Trans i18nKey="sandbox.switch.liveDescription" />
                             </ListItem>
-                            <ListItem>
-                              <Trans i18nKey="sandbox.switch.publishedDescription" />
-                            </ListItem>
-                            <ListItem>
-                              <Trans i18nKey="sandbox.switch.scheduledDescription" />
-                            </ListItem>
                           </UnorderedList>
                           <NewPermitApplicationSandboxSelect options={jurisdiction.sandboxOptions} />
                         </Flex>
