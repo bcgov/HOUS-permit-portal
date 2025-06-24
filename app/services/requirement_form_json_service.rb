@@ -178,6 +178,7 @@ class RequirementFormJsonService
   end
 
   def to_form_json(requirement_block_key = requirement&.requirement_block&.key)
+    return nil unless requirement&.input_type.present?
     json =
       if requirement.input_type_general_contact? ||
            requirement.input_type_professional_contact?
@@ -585,7 +586,7 @@ class RequirementFormJsonService
   end
 
   def formio_type_options
-    return unless requirement.input_type.present?
+    return {} unless requirement.input_type.present?
 
     input_type = requirement.input_type
     input_options = requirement.input_options
@@ -624,7 +625,6 @@ class RequirementFormJsonService
     end
 
     options
-
   end
 
   def snake_to_camel(snake_str)
