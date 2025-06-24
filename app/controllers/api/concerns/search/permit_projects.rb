@@ -6,11 +6,6 @@ module Api::Concerns::Search::PermitProjects
     search_conditions = {
       order: permit_project_order,
       match: :word_middle, # Default match type, can be customized
-      fields: [
-        # Define default searchable fields for PermitProject
-        # These should align with what's indexed in PermitProject.search_data
-        { description: :word_middle }
-      ],
       where: permit_project_where_clause,
       page: permit_project_search_params[:page],
       per_page:
@@ -37,12 +32,7 @@ module Api::Concerns::Search::PermitProjects
       :query,
       :page,
       :per_page,
-      filters: [ # Define potential filters here
-        # e.g., :jurisdiction_id, { status: [] }
-        # Add other filters that PermitApplication search uses, like :has_collaborator
-        :jurisdiction_id,
-        { status: [] }
-      ],
+      filters: %i[jurisdiction_id show_archived phase],
       sort: %i[field direction]
     )
   end
@@ -64,9 +54,15 @@ module Api::Concerns::Search::PermitProjects
 
   # Determines the where clause for Searchkick, mirroring PermitApplication logic
   def permit_project_where_clause
-    # Start with filters from params and process them
-    (permit_project_search_params[:filters] || {}).merge(
-      { owner_id: current_user.id }
-    )
+    filters = (permit_project_search_params[:filters] || {}).deep_dup
+    show_archived =
+      ActiveModel::Type::Boolean.new.cast(
+        filters.delete(:show_archived) || false
+      )
+
+    phase = filters.delete(:phase)
+    filters[:phase] = phase if phase.present? && phase != "all"
+
+    filters.merge(owner_id: current_user.id, discarded: show_archived)
   end
 end

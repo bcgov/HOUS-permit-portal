@@ -30,10 +30,10 @@ export function BuilderBottomFloatingButtons({ isCollapsedAll, setIsCollapsedAll
     >
       {renderSaveButton && renderSaveButton()}
       <HStack ml="auto">
-        <Button variant="greyButton" leftIcon={<ArrowUp />} onClick={handleScrollToTop}>
+        <Button variant="greyButton" minW="132px" leftIcon={<ArrowUp />} onClick={handleScrollToTop}>
           {t("requirementTemplate.edit.goToTop")}
         </Button>
-        <Button variant="greyButton" onClick={debouncedHandleClick}>
+        <Button variant="greyButton" minW="132px" onClick={debouncedHandleClick}>
           {isCollapsedAll ? t("ui.expandAll") : t("ui.collapseAll")}
         </Button>
       </HStack>

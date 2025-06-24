@@ -164,6 +164,7 @@ const options = {
           },
         },
         ui: {
+          apply: "Apply",
           okay: "Okay",
           filter: "Filter",
           until: "til",
@@ -219,6 +220,8 @@ const options = {
           optional: "(optional)",
           archive: "Remove and archive",
           restore: "Restore",
+          archived: "Archived",
+          active: "Active",
           seeArchivedButton: "See archived",
           seeUnarchivedButton: "See unarchived",
           never: "never",
@@ -483,11 +486,27 @@ const options = {
           },
         },
         permitProject: {
+          phase: {
+            all: "All statuses",
+            empty: "Empty",
+            new_draft: "Draft",
+            newly_submitted: "Submitted",
+            resubmitted: "Resubmitted",
+            revisions_requested: "Revisions Requested",
+          },
+          index: {
+            title: "Projects",
+            pinnedProjects: "Pinned projects",
+            pinnedProjectsTbd: "Pinned projects TBD",
+            allProjects: "All projects",
+          },
           indexTitle: "My active projects",
           listTitle: "Permit projects",
           noneFound: "No projects yet",
           noneFoundExplanation: "There are currently no permit projects matching your criteria.",
           columns: {
+            title: "Project name",
+            address: "Location",
             description: "Description",
             number: "Application #",
             reference_number: "Reference #",
@@ -496,9 +515,11 @@ const options = {
             submitted_at: "Submitted at",
             viewed_at: "Viewed at",
             status: "Status",
+            phase: "Status",
             full_address: "Full address",
             created_at: "Created at",
-            updated_at: "Updated at",
+            updated_at: "Last modified",
+            forcasted_completion_date: "Forecasted",
           },
           name: "Project Name",
           description: "Description",
@@ -512,6 +533,7 @@ const options = {
           createErrorTitle: "Failed to Create Project",
           startNew: "Start New Project",
         },
+
         permitApplication: {
           noneFound: "No permits yet",
           noneFoundExplanation:

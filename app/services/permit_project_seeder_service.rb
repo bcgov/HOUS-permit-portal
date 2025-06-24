@@ -57,7 +57,6 @@ class PermitProjectSeederService
 
         new_project = PermitProject.new(new_project_attributes)
 
-        #binding.pry # Moved pry here to inspect new_project before save
         Rails.logger.info "PermitProjectSeederService: PA #{pa_id} - Is new_project valid? #{new_project.valid?}"
         unless new_project.valid?
           Rails.logger.error "PermitProjectSeederService: PA #{pa_id} - PermitProject validation errors: #{new_project.errors.full_messages.join(", ")}"
@@ -81,9 +80,6 @@ class PermitProjectSeederService
                 "Failed to save PA with new project association"
         end
         Rails.logger.info "PermitProjectSeederService: PA #{pa_id} - Successfully associated PA with Project #{new_project.id}."
-
-        # Your original binding.pry location - it should be reached if saves are successful
-        # binding.pry
 
         if permit_application.step_codes.any?
           permit_application.step_codes.each do |sc|

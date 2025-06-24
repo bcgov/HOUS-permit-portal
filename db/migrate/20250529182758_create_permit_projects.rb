@@ -15,6 +15,7 @@ class CreatePermitProjects < ActiveRecord::Migration[7.1]
       t.text :notes
       t.date :permit_date
       t.integer :phase
+      t.datetime :discarded_at
 
       t.timestamps
     end
