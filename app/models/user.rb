@@ -48,6 +48,11 @@ class User < ApplicationRecord
            dependent: :destroy,
            inverse_of: :owner
 
+  has_many :pinned_projects, dependent: :destroy
+  has_many :pinned_permit_projects,
+           through: :pinned_projects,
+           source: :permit_project
+
   # New intermediate association for jurisdictions applied for via permit applications
   has_many :application_projects,
            through: :permit_applications,

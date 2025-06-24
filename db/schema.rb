@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_06_19_190417) do
+ActiveRecord::Schema[7.1].define(version: 2025_06_24_163718) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -478,6 +478,16 @@ ActiveRecord::Schema[7.1].define(version: 2025_06_19_190417) do
     t.index ["permit_type_id"], name: "index_permit_type_submission_contacts_on_permit_type_id"
   end
 
+  create_table "pinned_projects", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "user_id", null: false
+    t.uuid "permit_project_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["permit_project_id"], name: "index_pinned_projects_on_permit_project_id"
+    t.index ["user_id", "permit_project_id"], name: "index_pinned_projects_on_user_id_and_permit_project_id", unique: true
+    t.index ["user_id"], name: "index_pinned_projects_on_user_id"
+  end
+
   create_table "preferences", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "user_id", null: false
     t.boolean "enable_in_app_new_template_version_publish_notification", default: true
@@ -902,6 +912,8 @@ ActiveRecord::Schema[7.1].define(version: 2025_06_19_190417) do
   add_foreign_key "permit_type_required_steps", "permit_classifications", column: "permit_type_id"
   add_foreign_key "permit_type_submission_contacts", "jurisdictions"
   add_foreign_key "permit_type_submission_contacts", "permit_classifications", column: "permit_type_id"
+  add_foreign_key "pinned_projects", "permit_projects"
+  add_foreign_key "pinned_projects", "users"
   add_foreign_key "preferences", "users"
   add_foreign_key "project_documents", "permit_projects"
   add_foreign_key "requirement_documents", "requirement_blocks"

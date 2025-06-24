@@ -11,6 +11,9 @@ class PermitProject < ApplicationRecord
   has_many :permit_applications
   has_many :project_documents, dependent: :destroy
   has_many :step_codes
+  has_many :collaborators, through: :permit_applications
+  has_many :pinned_projects, dependent: :destroy
+  has_many :pinning_users, through: :pinned_projects, source: :user
 
   accepts_nested_attributes_for :project_documents, allow_destroy: true
 
@@ -22,6 +25,7 @@ class PermitProject < ApplicationRecord
       pin: pin,
       owner_id: owner_id,
       jurisdiction_id: jurisdiction_id,
+      collaborator_ids: collaborators.pluck(:user_id).uniq,
       created_at: created_at,
       updated_at: updated_at,
       discarded: discarded_at.present?,

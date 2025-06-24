@@ -6,13 +6,12 @@ module PermitApplicationStatus
            new_draft: 0,
            newly_submitted: 1,
            revisions_requested: 3,
-           resubmitted: 4,
-           approved: 5
+           resubmitted: 4
+           #  approved: 5
          },
          _default: 0
 
     validate :inbox_must_be_enabled_on_non_sandboxed_when_submitted
-    after_commit :reindex_permit_project, if: :saved_change_to_status?
 
     def self.draft_statuses
       %w[new_draft revisions_requested]
@@ -126,9 +125,5 @@ module PermitApplicationStatus
     end
 
     private
-
-    def reindex_permit_project
-      permit_project&.reindex
-    end
   end
 end

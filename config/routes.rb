@@ -197,7 +197,12 @@ Rails.application.routes.draw do
     end
 
     resources :permit_projects, only: %i[show index update create] do
+      get "pinned", on: :collection
       post "search", on: :collection, to: "permit_projects#index"
+      member do
+        post :pin
+        delete :unpin
+      end
     end
 
     resources :permit_collaborations, only: %i[destroy] do

@@ -258,6 +258,7 @@ if PermitApplication.first.blank?
       )
 
     PermitApplication.create!(
+      nickname: "Permit application #{i + 1}",
       submitter: current_submitter,
       permit_project: permit_project,
       activity_id: template_version.activity.id,

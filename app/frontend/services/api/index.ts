@@ -228,6 +228,10 @@ export class Api {
     return this.client.get<ApiResponse<IPermitProject>>(`/permit_projects/${id}`)
   }
 
+  async fetchPinnedProjects() {
+    return this.client.get<ApiResponse<IPermitProject[]>>(`/permit_projects/pinned`)
+  }
+
   async createPermitProject(projectData: {
     name: string
     description?: string
@@ -242,6 +246,14 @@ export class Api {
 
   async updatePermitProject(id: string, params: IPermitProjectUpdateParams) {
     return this.client.patch<ApiResponse<IPermitProject>>(`/permit_projects/${id}`, { permitProject: params })
+  }
+
+  async pinPermitProject(id: string) {
+    return this.client.post<ApiResponse<IPermitProject>>(`/permit_projects/${id}/pin`)
+  }
+
+  async unpinPermitProject(id: string) {
+    return this.client.delete<ApiResponse<IPermitProject>>(`/permit_projects/${id}/unpin`)
   }
 
   async fetchCollaboratorsByCollaboratorable(collaboratorableId: string, params?: TSearchParams<never, never>) {

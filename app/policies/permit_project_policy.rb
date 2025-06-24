@@ -9,7 +9,11 @@ class PermitProjectPolicy < ApplicationPolicy
 
   # Check if the user can index/list projects (relies on the Scope above for actual filtering)
   def index?
-    user_is_owner?
+    user_is_owner_or_collaborator?
+  end
+
+  def pinned?
+    index?
   end
 
   # This is for authorizing a specific project instance (e.g., in a show action).
@@ -31,11 +35,28 @@ class PermitProjectPolicy < ApplicationPolicy
     user_is_owner?
   end
 
+  def pin?
+    user_is_owner_or_collaborator?
+  end
+
+  def unpin?
+    user_is_owner_or_collaborator?
+  end
+
   private
 
   def user_is_owner?
     return false unless user && record # Ensure user and record exist
+
     record.owner_id == user.id
+  end
+
+  def user_is_owner_or_collaborator?
+    return true if user_is_owner?
+
+    record.permit_applications.any? do |app|
+      app.collaborators.any? { |collaborator| collaborator.user_id == user.id }
+    end
   end
 
   # user_context is still useful if you need to check policies of associated items for more granular permissions.

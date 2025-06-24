@@ -2,13 +2,15 @@ module ProjectItem
   extend ActiveSupport::Concern
 
   included do
-    belongs_to :permit_project # Non-optional, will be validated by presence
+    belongs_to :permit_project, touch: true
+    has_one :jurisdiction, through: :permit_project
+    has_one :owner, through: :permit_project
+
+    # Delegations to PermitProject for core project details
+    delegate :full_address, :pid, :pin, to: :permit_project
 
     # Delegations to PermitProject for core project details
     delegate :title,
-             :full_address,
-             :pid,
-             :pin,
              :jurisdiction,
              :permit_date,
              to: :permit_project,

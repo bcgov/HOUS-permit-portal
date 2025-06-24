@@ -1,13 +1,14 @@
 class Api::PermitProjectsController < Api::ApplicationController
   include Api::Concerns::Search::PermitProjects # Include the new concern
 
-  before_action :set_permit_project, only: %i[show update]
+  before_action :set_permit_project, only: %i[show update pin unpin]
 
   # TODO: If you create a search concern similar to Api::Concerns::Search::PermitApplications,
   # include it here for more advanced search parameter handling.
   # e.g., include Api::Concerns::Search::PermitProjects
 
-  skip_after_action :verify_policy_scoped, only: [:index]
+  skip_after_action :verify_policy_scoped, only: %i[index pinned]
+  skip_after_action :verify_authorized, only: %i[pinned]
 
   def index
     perform_permit_project_search # This method now comes from the concern
@@ -25,7 +26,8 @@ class Api::PermitProjectsController < Api::ApplicationController
                        total_count: @permit_project_search.total_count,
                        current_page: @permit_project_search.current_page
                      },
-                     blueprint: PermitProjectBlueprint
+                     blueprint: PermitProjectBlueprint,
+                     blueprint_opts: blueprint_options
                    }
   end
 
@@ -35,9 +37,7 @@ class Api::PermitProjectsController < Api::ApplicationController
                    nil,
                    {
                      blueprint: PermitProjectBlueprint,
-                     blueprint_opts: {
-                       view: :extended
-                     }
+                     blueprint_opts: blueprint_options(view: :extended)
                    }
   end
 
@@ -48,9 +48,7 @@ class Api::PermitProjectsController < Api::ApplicationController
                      nil,
                      {
                        blueprint: PermitProjectBlueprint,
-                       blueprint_opts: {
-                         view: :extended
-                       }
+                       blueprint_opts: blueprint_options(view: :extended)
                      }
     else
       render_error @permit_project.errors, :unprocessable_entity
@@ -64,17 +62,15 @@ class Api::PermitProjectsController < Api::ApplicationController
 
     if @permit_project.save
       render_success @permit_project,
-                     "activerecord.attributes.permit_project.created", # Add this translation key
+                     "permit_project.create_success", # Add this translation key
                      {
                        blueprint: PermitProjectBlueprint,
                        status: :created,
-                       blueprint_opts: {
-                         view: :extended # Or :base, depending on what you want to return
-                       }
+                       blueprint_opts: blueprint_options(view: :extended)
                      }
     else
       render_error(
-        "activerecord.errors.models.permit_project.create_error", # Add this translation key
+        "permit_project.create_error", # Add this translation key
         {
           message_opts: {
             errors: @permit_project.errors.full_messages
@@ -85,7 +81,54 @@ class Api::PermitProjectsController < Api::ApplicationController
     end
   end
 
+  def pinned
+    pinned_projects =
+      apply_search_authorization(current_user.pinned_permit_projects)
+    render_success pinned_projects,
+                   nil,
+                   {
+                     blueprint: PermitProjectBlueprint,
+                     blueprint_opts: blueprint_options
+                   }
+  end
+
+  def pin
+    authorize @permit_project, :pin?
+    current_user.pinned_projects.create(permit_project: @permit_project)
+    render_success @permit_project,
+                   "permit_project.pin_success",
+                   {
+                     blueprint: PermitProjectBlueprint,
+                     blueprint_opts: blueprint_options(view: :extended)
+                   }
+  end
+
+  def unpin
+    authorize @permit_project, :unpin?
+    pinned_project =
+      current_user.pinned_projects.find_by(permit_project: @permit_project)
+    if pinned_project
+      pinned_project.destroy
+      render_success @permit_project,
+                     "permit_project.unpin_success",
+                     {
+                       blueprint: PermitProjectBlueprint,
+                       blueprint_opts: blueprint_options(view: :extended)
+                     }
+    else
+      render_error "permit_project.unpin_error", :not_found
+    end
+  end
+
   private
+
+  def blueprint_options(view: :default)
+    {
+      view: view,
+      current_user: current_user,
+      pinned_project_ids: current_user.pinned_permit_project_ids
+    }
+  end
 
   def set_permit_project
     @permit_project = PermitProject.find(params[:id])

@@ -525,7 +525,22 @@ en:
       create_or_update_permit_block_status_error:
         title: Error
         message: "There was an error updating permit block status"
-
+    permit_project:
+      create_success:
+        title: ""
+        message: "Permit project pinned successfully"
+      create_error:
+        title: Error
+        message: "%{error_message}"
+      pin_success:
+        title: ""
+        message: "Permit project pinned successfully"
+      unpin_success:
+        title: ""
+        message: "Permit project unpinned successfully"
+      unpin_error:
+        title: Error
+        message: "There was an error unpinning the project"
     permit_collaboration:
       destroy_success:
         title: ""

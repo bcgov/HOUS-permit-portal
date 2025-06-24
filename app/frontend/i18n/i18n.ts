@@ -486,6 +486,8 @@ const options = {
           },
         },
         permitProject: {
+          pinProject: "Pin project",
+          unpinProject: "Unpin project",
           phase: {
             all: "All statuses",
             empty: "Empty",
@@ -497,6 +499,7 @@ const options = {
           index: {
             title: "Projects",
             pinnedProjects: "Pinned projects",
+            noPinnedProjects: "You have no pinned projects",
             pinnedProjectsTbd: "Pinned projects TBD",
             allProjects: "All projects",
           },

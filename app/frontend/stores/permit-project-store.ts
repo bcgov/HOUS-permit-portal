@@ -21,6 +21,7 @@ export const PermitProjectStoreModel = types
   .compose(
     types.model("PermitProjectStoreModel", {
       permitProjectMap: types.map(PermitProjectModel),
+      pinnedProjects: types.array(types.reference(PermitProjectModel)),
       tablePermitProjects: types.array(types.reference(PermitProjectModel)), // For table views
       currentPermitProject: types.maybeNull(types.reference(PermitProjectModel)),
       phaseFilter: types.maybeNull(types.enumeration(Object.values(EPermitProjectPhase))),
@@ -82,6 +83,9 @@ export const PermitProjectStoreModel = types
     setTablePermitProjects: (projects: IPermitProject[]) => {
       self.tablePermitProjects = cast(projects.map((p) => p.id))
     },
+    setPinnedProjects: (projects: IPermitProject[]) => {
+      self.pinnedProjects = cast(projects.map((p) => p.id))
+    },
   }))
   .actions((self) => ({
     searchPermitProjects: flow(function* (opts?: { reset?: boolean; page?: number; countPerPage?: number }) {
@@ -112,6 +116,16 @@ export const PermitProjectStoreModel = types
         self.countPerPage = response.data.meta.perPage
       } else {
         console.error("Failed to search permit projects:", response)
+      }
+      return response.ok
+    }),
+    fetchPinnedProjects: flow(function* () {
+      const response = yield self.environment.api.fetchPinnedProjects()
+      if (response.ok && response.data) {
+        self.mergeUpdateAll(response.data.data, "permitProjectMap")
+        self.setPinnedProjects(response.data.data)
+      } else {
+        console.error("Failed to fetch pinned projects:", response)
       }
       return response.ok
     }),
@@ -190,6 +204,38 @@ export const PermitProjectStoreModel = types
       setQueryParam("phase", valueToSet)
       self.phaseFilter = valueToSet
     },
+    // PIN TODO: Move this to the project model
+    togglePin: flow(function* (permitProjectId: string) {
+      const project = self.permitProjectMap.get(permitProjectId)
+      if (!project) return
+
+      const originalIsPinned = project.isPinned
+      // Optimistic update
+      project.setIsPinned(!originalIsPinned)
+
+      // Add to pinned list or remove from it
+      if (!originalIsPinned) {
+        self.pinnedProjects.push(project)
+      } else {
+        self.pinnedProjects.replace(self.pinnedProjects.filter((p) => p.id !== project.id))
+      }
+
+      const response = !originalIsPinned
+        ? yield self.environment.api.pinPermitProject(permitProjectId)
+        : yield self.environment.api.unpinPermitProject(permitProjectId)
+
+      if (response.ok) {
+        self.mergeUpdate(response.data.data, "permitProjectMap")
+      } else {
+        // Revert on failure
+        project.setIsPinned(originalIsPinned)
+        if (!originalIsPinned) {
+          self.pinnedProjects.replace(self.pinnedProjects.filter((p) => p.id !== project.id))
+        } else {
+          self.pinnedProjects.push(project)
+        }
+      }
+    }),
   }))
 
 export interface IPermitProjectStore extends Instance<typeof PermitProjectStoreModel> {}

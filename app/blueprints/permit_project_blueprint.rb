@@ -8,6 +8,11 @@ class PermitProjectBlueprint < Blueprinter::Base
          :created_at,
          :updated_at
 
+  # NOTE: is_pinned check is optimized by preloading ids in the controller
+  field :is_pinned do |permit_project, options|
+    options[:pinned_project_ids]&.include?(permit_project.id)
+  end
+
   view :extended do
     association :permit_applications,
                 blueprint: PermitApplicationBlueprint,
