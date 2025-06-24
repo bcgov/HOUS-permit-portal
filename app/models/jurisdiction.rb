@@ -40,7 +40,7 @@ class Jurisdiction < ApplicationRecord
     reviewers_size
     permit_applications_size
     user_ids
-    submission_inbox_set_up
+    inbox_enabled
     created_at
   ]
   SUPER_ADMIN_ADDITIONAL_DATA_FIELDS = %i[manager_emails]
@@ -171,7 +171,7 @@ class Jurisdiction < ApplicationRecord
       reviewers_size: reviewers_size,
       permit_applications_size: permit_applications_size,
       user_ids: users.pluck(:id),
-      submission_inbox_set_up: submission_inbox_set_up,
+      inbox_enabled: inbox_enabled,
       created_at: created_at,
       manager_emails: manager_emails
     }

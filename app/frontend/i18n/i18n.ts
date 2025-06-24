@@ -398,7 +398,7 @@ const options = {
             templatesUsed: "Templates used",
             mapPosition: "Map position",
             regionalDistrictName: "Regional district",
-            submissionInboxSetUp: "Accepting submissions",
+            inboxEnabled: "Accepting submissions",
           },
           lat: "Latitude",
           lng: "Longitude",
