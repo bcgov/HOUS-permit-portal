@@ -32,13 +32,7 @@ module Api::Concerns::Search::PermitProjects
       :query,
       :page,
       :per_page,
-      filters: [ # Define potential filters here
-        # e.g., :jurisdiction_id, { status: [] }
-        # Add other filters that PermitApplication search uses, like :has_collaborator
-        :jurisdiction_id,
-        { status: [] },
-        :show_archived
-      ],
+      filters: %i[jurisdiction_id show_archived phase],
       sort: %i[field direction]
     )
   end
@@ -65,6 +59,9 @@ module Api::Concerns::Search::PermitProjects
       ActiveModel::Type::Boolean.new.cast(
         filters.delete(:show_archived) || false
       )
+
+    phase = filters.delete(:phase)
+    filters[:phase] = phase if phase.present? && phase != "all"
 
     filters.merge(owner_id: current_user.id, discarded: show_archived)
   end

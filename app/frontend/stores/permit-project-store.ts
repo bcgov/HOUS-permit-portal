@@ -7,8 +7,9 @@ import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
 import { IPermitProject, PermitProjectModel } from "../models/permit-project"
 import { IPermitProjectUpdateParams, IProjectDocumentAttribute } from "../types/api-request" // Import new types
-import { EPermitProjectSortFields } from "../types/enums" // Import from enums
+import { EPermitProjectPhase, EPermitProjectSortFields } from "../types/enums" // Import from enums
 import { IPermitProjectSearchFilters, IProjectDocument, TSearchParams } from "../types/types" // Import IPermitProjectSearchFilters and IProjectDocument from types
+import { setQueryParam } from "../utils/utility-functions"
 
 // Define search filters for PermitProjects
 // export interface IPermitProjectSearchFilters {
@@ -22,7 +23,7 @@ export const PermitProjectStoreModel = types
       permitProjectMap: types.map(PermitProjectModel),
       tablePermitProjects: types.array(types.reference(PermitProjectModel)), // For table views
       currentPermitProject: types.maybeNull(types.reference(PermitProjectModel)),
-      // Add any specific filters as simple types here, similar to PermitApplicationStore
+      phaseFilter: types.maybeNull(types.enumeration(Object.values(EPermitProjectPhase))),
     }),
     createSearchModel<EPermitProjectSortFields>("searchPermitProjects", "setPermitProjectFilters")
   )
@@ -94,8 +95,8 @@ export const PermitProjectStoreModel = types
         perPage: opts?.countPerPage ?? self.countPerPage, // from createSearchModel
         filters: {
           showArchived: self.showArchived,
-          query: self.query, // Example filter, adapt as needed
-          // Add other filters from self, if defined
+          query: self.query,
+          phase: self.phaseFilter,
         },
       }
 
@@ -153,13 +154,8 @@ export const PermitProjectStoreModel = types
       return response
     }),
     setPermitProjectFilters(queryParams: URLSearchParams) {
-      const query = queryParams.get("query")
-      if (query) {
-        self.query = query // Set query from createSearchModel
-      }
-      // Set other filters from queryParams if they exist
-      // e.g., const status = queryParams.get("status");
-      // if (status) self.statusFilter = status;
+      const phase = queryParams.get("phase") as EPermitProjectPhase
+      self.phaseFilter = phase
     },
     createPermitProject: flow(function* (projectData: {
       name: string
@@ -187,6 +183,13 @@ export const PermitProjectStoreModel = types
         return { ok: false, error: response.data?.meta?.message || response.problem }
       }
     }),
+    setPhaseFilter: (phase: EPermitProjectPhase | "all") => {
+      if (!phase) return
+
+      const valueToSet = phase === "all" ? null : phase
+      setQueryParam("phase", valueToSet)
+      self.phaseFilter = valueToSet
+    },
   }))
 
 export interface IPermitProjectStore extends Instance<typeof PermitProjectStoreModel> {}

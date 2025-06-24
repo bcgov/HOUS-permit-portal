@@ -641,3 +641,13 @@ export enum EPermitProjectSortFields {
   forcastedCompletionDate = "forcasted_completion_date",
   phase = "phase",
 }
+
+export enum EPermitProjectPhase {
+  all = "all",
+  empty = "empty",
+  newDraft = "new_draft",
+  newlySubmitted = "newly_submitted",
+  revisionsRequested = "revisions_requested",
+  resubmitted = "resubmitted",
+  approved = "approved",
+}

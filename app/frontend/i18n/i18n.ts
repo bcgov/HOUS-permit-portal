@@ -487,6 +487,8 @@ const options = {
         },
         permitProject: {
           phase: {
+            all: "All statuses",
+            empty: "Empty",
             new_draft: "Draft",
             newly_submitted: "Submitted",
             resubmitted: "Resubmitted",

@@ -1,4 +1,19 @@
-import { Box, Container, Flex, FormControl, GridItem, Heading, Text, VStack } from "@chakra-ui/react"
+import {
+  Box,
+  Container,
+  Flex,
+  FormControl,
+  GridItem,
+  Heading,
+  IconButton,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
+  Text,
+  VStack,
+} from "@chakra-ui/react"
+import { DotsThreeVertical } from "@phosphor-icons/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
@@ -19,6 +34,7 @@ import { SearchGrid } from "../../shared/grid/search-grid"
 import { SearchGridItem } from "../../shared/grid/search-grid-item"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { GridHeaders } from "./grid-header"
+import { PhaseFilter } from "./phase-filter"
 
 interface IPermitProjectIndexScreenProps {}
 
@@ -77,12 +93,12 @@ export const PermitProjectIndexScreen = observer(({}: IPermitProjectIndexScreenP
               </Box>
             </VStack>
 
-            <VStack align="stretch" spacing={4}>
+            <VStack align="stretch" spacing={4} w="full">
               <Heading as="h2" size="lg">
                 {t("permitProject.index.allProjects", "All projects")}
               </Heading>
 
-              <Flex direction="column" gap={4}>
+              <Flex direction="column" gap={4} jw="full">
                 <FormControl w="full">
                   <ModelSearchInput
                     searchModel={permitProjectStore}
@@ -90,7 +106,10 @@ export const PermitProjectIndexScreen = observer(({}: IPermitProjectIndexScreenP
                     inputGroupProps={{ width: "full" }}
                   />
                 </FormControl>
-                <ActiveArchivedFilter searchModel={permitProjectStore} />
+                <Flex justifyContent={"space-between"} w="full">
+                  <ActiveArchivedFilter searchModel={permitProjectStore} />
+                  <PhaseFilter searchModel={permitProjectStore} />
+                </Flex>
               </Flex>
 
               <SearchGrid templateColumns="2fr 1.5fr 1.5fr 1.5fr 1.5fr 1.5fr 0.5fr" gridRowClassName="project-grid-row">
@@ -125,7 +144,19 @@ export const PermitProjectIndexScreen = observer(({}: IPermitProjectIndexScreenP
                         {/* @ts-ignore */}
                         <Text fontWeight="bold">{t(`permitProject.phase.${project.phase}`)}</Text>
                       </SearchGridItem>
-                      <SearchGridItem>Actions</SearchGridItem>
+                      <SearchGridItem>
+                        <Menu>
+                          <MenuButton
+                            as={IconButton}
+                            aria-label={t("ui.options")}
+                            icon={<DotsThreeVertical size={24} />}
+                            variant="ghost"
+                          />
+                          <MenuList>
+                            <MenuItem>Placeholder</MenuItem>
+                          </MenuList>
+                        </Menu>
+                      </SearchGridItem>
                     </Box>
                   ))
                 )}

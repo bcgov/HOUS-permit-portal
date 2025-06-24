@@ -42,8 +42,9 @@ class PermitProject < ApplicationRecord
 
   # TODO: User to define the logic for this helper method
   def phase
-    # Example implementation, to be defined by user
-    permit_applications.first&.status || "draft"
+    return "empty" if permit_applications.blank?
+
+    permit_applications.max_by(&:pertinence_score).status
   end
 
   # TODO: User to define the logic for this helper method
