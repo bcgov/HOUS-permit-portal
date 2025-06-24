@@ -2789,7 +2789,7 @@ const options = {
           },
         },
         siteConfiguration: {
-          title: "Site configuration management",
+          title: "Configuration",
           adminUserIndex: {
             title: "Users",
             description: "View and manage administrative users",
@@ -2821,7 +2821,7 @@ const options = {
           },
           revisionReasonsAttributesSetup: {
             title: "Revision reasons",
-            description: "Setup reasons to be applied to revision requests",
+            description: "Manage revision request reasons",
             options: "Selectable options",
             fields: {
               reasonCode: "Reason code",
@@ -2830,8 +2830,8 @@ const options = {
             },
           },
           helpDrawerSetup: {
-            title: "Help drawer links",
-            description: "Setup links to show in the help drawer for all users",
+            title: "Help drawer",
+            description: "Manage help drawer links",
             settings: "Links",
             fields: {
               show: "Show",
@@ -3035,7 +3035,7 @@ const options = {
             stepCodes: "Step Codes",
             digitalBuildingPermits: "Digital building permits",
             contact: "Contact us",
-            configurationManagement: "Configuration management",
+            configurationManagement: "Configuration",
             featureAccess: "Feature access",
             myJurisdictionAboutPage: "My jurisdiction's about page",
             submissionInboxSetup: "Submissions inbox setup",
