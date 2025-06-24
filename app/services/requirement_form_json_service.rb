@@ -1,7 +1,9 @@
 class RequirementFormJsonService
   attr_accessor :requirement
+
   ENERGY_STEP_CODE_TOOLTIP_URL =
     "https://www2.gov.bc.ca/gov/content/housing-tenancy/building-or-renovating/permits/building-permit-hub/29065#Reports"
+
   DEFAULT_FORMIO_TYPE_TO_OPTIONS = {
     text: {
       type: "simpletextfield"
@@ -170,6 +172,13 @@ class RequirementFormJsonService
       title: I18n.t("formio.requirement_template.energy_step_code"),
       label: I18n.t("formio.requirement_template.energy_step_code"),
       custom: "document.dispatchEvent(new Event('openStepCode'));"
+    },
+    energy_step_code_part_3: {
+      type: "button",
+      action: "custom",
+      title: I18n.t("formio.requirement_template.energy_step_code"),
+      label: I18n.t("formio.requirement_template.energy_step_code"),
+      custom: "document.dispatchEvent(new Event('openStepCodePart3'));"
     }
   }
 

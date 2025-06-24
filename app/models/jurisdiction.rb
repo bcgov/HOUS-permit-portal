@@ -292,8 +292,8 @@ class Jurisdiction < ApplicationRecord
     PermitType.all.each do |permit_type|
       permit_type_required_steps.create(
         permit_type:,
-        energy_step_required: ENV["MIN_ENERGY_STEP"],
-        zero_carbon_step_required: ENV["MIN_ZERO_CARBON_STEP"],
+        energy_step_required: ENV["PART_9_MIN_ENERGY_STEP"],
+        zero_carbon_step_required: ENV["PART_9_MIN_ZERO_CARBON_STEP"],
         default: true
       )
     end

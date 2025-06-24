@@ -1,0 +1,115 @@
+name: Deploy Helm Charts to OpenShift
+
+on:
+  workflow_dispatch:
+    inputs:
+      component:
+        description: 'Component to deploy (app, ha-redis, ha-postgres-crunchydb, ha-elasticsearch)'
+        required: true
+      environment:
+        description: 'Environment to deploy (dev, test, prod)'
+        required: true
+        default: 'dev'
+      release_name:
+        description: 'Override Helm release name (optional)'
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+  pull-requests: write
+  
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.component != '' }}
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Install kubectl
+      uses: azure/setup-kubectl@v4
+      with:
+        version: 'latest'
+
+    - name: Install Helm
+      uses: azure/setup-helm@v3
+      with:
+        version: 'v3.14.0'
+
+    - name: Authenticate with OpenShift
+      env:
+        OPENSHIFT_API_URL: ${{ secrets.OPENSHIFT_API_URL }}
+        OPENSHIFT_TOKEN: ${{ secrets.OPENSHIFT_TOKEN }}
+      run: |
+        echo "::add-mask::${OPENSHIFT_TOKEN}"
+        oc login --token="${OPENSHIFT_TOKEN}" --server="${OPENSHIFT_API_URL}"
+
+    - name: Deploy Helm Chart
+      env:
+        COMPONENT: ${{ github.event.inputs.component }}
+        ENVIRONMENT: ${{ github.event.inputs.environment }}
+        OVERRIDE_RELEASE_NAME: ${{ github.event.inputs.release_name }}
+        PROJECT_PREFIX: ${{ secrets.OPENSHIFT_PROJECT_PREFIX }}
+      run: |
+        set -e
+
+        # Set values file and namespace
+        case "$ENVIRONMENT" in
+          dev)  VALUES_FILE="values-dev.yaml" ;;
+          test) VALUES_FILE="values-test.yaml" ;;
+          prod) VALUES_FILE="values-prod.yaml" ;;
+          tools) VALUES_FILE="values-tools.yaml" ;;
+          *)
+            echo "Invalid environment: $ENVIRONMENT"
+            exit 1
+            ;;
+        esac
+
+        NAMESPACE="${PROJECT_PREFIX}-${ENVIRONMENT}"
+
+        # Hardcoded fallback release names per component
+        case "$COMPONENT" in
+          app)              DEFAULT_RELEASE_NAME="hous-permit-portal" ;;
+          redis)            DEFAULT_RELEASE_NAME="ha-redis" ;;
+          hap-crunchydb)    DEFAULT_RELEASE_NAME="ha-postgres-crunchydb" ;;
+          elasticsearch)    DEFAULT_RELEASE_NAME="ha-elasticsearch" ;;
+          consigno)         DEFAULT_RELEASE_NAME="consigno-server-automation" ;;
+          anycable)         DEFAULT_RELEASE_NAME="anycable-go" ;;
+          clamav)           DEFAULT_RELEASE_NAME="clamav" ;;
+          *)
+            echo "Invalid component: $COMPONENT"
+            exit 1
+            ;;
+        esac
+
+        # Final release name: use override if given, else default
+        if [ -n "$OVERRIDE_RELEASE_NAME" ]; then
+          RELEASE_NAME="$OVERRIDE_RELEASE_NAME"
+        else
+          RELEASE_NAME="$DEFAULT_RELEASE_NAME"
+        fi
+
+        CHART_DIR="./charts/$COMPONENT"
+
+        if [[ ! -d "$CHART_DIR" ]]; then
+          echo "Chart directory $CHART_DIR does not exist"
+          exit 1
+        fi
+
+        if [[ ! -f "$CHART_DIR/values.yaml" ]]; then
+          echo "Missing base values.yaml in $CHART_DIR"
+          exit 1
+        fi
+
+        if [[ ! -f "$CHART_DIR/$VALUES_FILE" ]]; then
+          echo "Missing environment values file $VALUES_FILE in $CHART_DIR"
+          exit 1
+        fi
+
+        echo "Deploying $RELEASE_NAME to namespace $NAMESPACE"
+        helm upgrade --install "$RELEASE_NAME" "$CHART_DIR" \
+          --namespace "$NAMESPACE" \
+          -f "$CHART_DIR/values.yaml" \
+          -f "$CHART_DIR/$VALUES_FILE"

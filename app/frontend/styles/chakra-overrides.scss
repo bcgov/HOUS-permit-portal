@@ -74,15 +74,6 @@
   z-index: 20 !important;
 }
 
-// Fix the down arrow icon position on the login page accordians
-.chakra-accordion__item {
-  button.chakra-accordion__button {
-    span {
-      width: 100%;
-    }
-  }
-}
-
 /* Energy Step Code Label */
 #submitter-view-permit {
   label[id*="energy_step_code_report_file"] {
