@@ -2286,9 +2286,8 @@ const options = {
           configurationManagement: {
             title: "Configuration",
             reviewManagerDescription:
-              "Set up your submissions inbox, define Step Codes, configure features, and edit the 'About' page to reflect specific local information",
-            adminDescription:
-              "Manage site-wide settings and messages along with providing administrative control to Super Admins.",
+              "Configure your jurisdiction's operational setup within the Building Permit Hub. Set up your submission inbox, define energy step codes, and edit the 'About' page to reflect specific local information.",
+            adminDescription: "Manage system-wide settings, notifications, and administrative access",
             jurisdictionLocalityTypeLabel: "Locality type of local jurisdiction",
             jurisdictionNameLabel: "Name of local jurisdiction",
             jurisdictionLocationLabel: "Location",
