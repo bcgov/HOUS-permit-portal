@@ -29,6 +29,7 @@ FactoryBot.define do
     trait :super_admin do
       role { :super_admin }
       password { "P@ssword1" }
+      jurisdiction { nil }
     end
 
     transient do

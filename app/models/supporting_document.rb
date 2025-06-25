@@ -1,8 +1,12 @@
-class SupportingDocument < ApplicationRecord
+class SupportingDocument < FileUploadAttachment
   belongs_to :permit_application
   belongs_to :submission_version, optional: true
 
   include FileUploader.Attachment(:file)
+
+  def attached_to
+    permit_application
+  end
 
   validate :validate_submission_version_data_key
 
@@ -101,31 +105,6 @@ class SupportingDocument < ApplicationRecord
 
   def summarizeString(parsed_signature)
     "#{parsed_signature[:name]} (#{parsed_signature[:subject]}) signed at #{parsed_signature[:date]}"
-  end
-
-  def file_id
-    file_data.dig("id")
-  end
-
-  def file_size
-    file_data.dig("metadata", "size")
-  end
-
-  def file_name
-    file_data.dig("metadata", "filename")
-  end
-
-  def file_type
-    file_data.dig("metadata", "mime_type")
-  end
-
-  def file_url
-    file&.url(
-      public: false,
-      expires_in: 3600,
-      response_content_disposition:
-        "attachment; filename=\"#{file.original_filename}\""
-    )
   end
 
   STATIC_DOCUMENT_DATA_KEYS = [

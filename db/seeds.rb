@@ -197,8 +197,8 @@ if PermitApplication.first.blank?
   RequirementBlock.find_each { |block| block.destroy unless block.valid? }
 
   # Energy Step Code Reference Tables
-  StepCode::MEUIReferencesSeeder.seed!
-  StepCode::TEDIReferencesSeeder.seed!
+  StepCode::Part9::MEUIReferencesSeeder.seed!
+  StepCode::Part9::TEDIReferencesSeeder.seed!
 
   # Creating Permit Applications
   puts "Seeding permit applications..."
@@ -310,4 +310,10 @@ if Rails.env.development?
     u.last_name = "Admin"
     u.save
   end
+end
+
+if Rails.env.development?
+  puts "Ensuring site configuration inbox is enabled for development..."
+  site_config = SiteConfiguration.instance
+  site_config.update(inbox_enabled: true)
 end

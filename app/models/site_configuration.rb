@@ -33,6 +33,10 @@ class SiteConfiguration < ApplicationRecord
     first_or_create
   end
 
+  def self.inbox_enabled?
+    instance.inbox_enabled
+  end
+
   # This override allows discarding of reasons and updating them by reason_code
   # if a discarded reason of a particular code is found and updated, it will be undiscarded.
   def revision_reasons_attributes=(attributes)

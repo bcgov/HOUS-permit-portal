@@ -18,4 +18,8 @@ class GeocoderPolicy < ApplicationPolicy
   def pid_details?
     site_options?
   end
+
+  def form_bc_addresses?
+    true
+  end
 end

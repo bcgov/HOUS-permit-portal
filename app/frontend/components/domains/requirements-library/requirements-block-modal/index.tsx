@@ -22,7 +22,11 @@ import { useAutoComplianceModuleConfigurations } from "../../../../hooks/resourc
 import { IRequirementBlock } from "../../../../models/requirement-block"
 import { useMst } from "../../../../setup/root"
 import { IFormConditional, IRequirementAttributes, IRequirementBlockParams } from "../../../../types/api-request"
-import { EEnergyStepCodeDependencyRequirementCode, EVisibility } from "../../../../types/enums"
+import {
+  EEnergyStepCodeDependencyRequirementCode,
+  EEnergyStepCodePart3DependencyRequirementCode,
+  EVisibility,
+} from "../../../../types/enums"
 import { IDenormalizedRequirementBlock, TAutoComplianceModuleConfigurations } from "../../../../types/types"
 import { AUTO_COMPLIANCE_OPTIONS_MAP_KEY_PREFIX } from "../../../../utils"
 import { isOptionsMapperModuleConfiguration } from "../../../../utils/utility-functions"
@@ -72,11 +76,13 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
           sku: (requirementBlock as IRequirementBlock).sku,
           associationList: (requirementBlock as IRequirementBlock).associations,
           requirementsAttributes: (requirementBlock as IRequirementBlock).requirementFormDefaults,
+          requirementDocumentsAttributes: (requirementBlock as IRequirementBlock).requirementDocuments,
         }
       : {
           visibility: forEarlyAccess ? EVisibility.earlyAccess : EVisibility.any,
           associationList: [],
           requirementsAttributes: [],
+          requirementDocumentsAttributes: [],
         }
   }
   const formProps = useForm<IRequirementBlockForm>({
@@ -111,25 +117,27 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
         } as any,
       }
 
+      const isEnergyStepCodeDependency =
+        Object.values(EEnergyStepCodeDependencyRequirementCode).includes(
+          ra.requirementCode as EEnergyStepCodeDependencyRequirementCode
+        ) ||
+        Object.values(EEnergyStepCodePart3DependencyRequirementCode).includes(
+          ra.requirementCode as EEnergyStepCodePart3DependencyRequirementCode
+        )
+
       const shouldAppendConditional = formConditional?.when && formConditional?.operand && formConditional?.then
-
-      const isEnergyStepCodeDependency = Object.values(EEnergyStepCodeDependencyRequirementCode).includes(
-        ra.requirementCode as EEnergyStepCodeDependencyRequirementCode
-      )
-
       // energy step code dependency conditionals is not possible to edit from the front-end and has default values
       // and follows a slightly different structure so we make sure not to remove them or alter them
-      if (isEnergyStepCodeDependency) {
-        processedRequirementAttributes.inputOptions.conditional = conditional
-      } else if (shouldAppendConditional) {
-        const cond = ra.inputOptions.conditional as IFormConditional
+      const cond = ra.inputOptions.conditional as IFormConditional
+      if (shouldAppendConditional) {
         processedRequirementAttributes.inputOptions.conditional = {
           when: cond.when,
           eq: cond.operand,
           [cond.then]: true,
         }
+      } else if (isEnergyStepCodeDependency && cond) {
+        processedRequirementAttributes.inputOptions.conditional = cond
       }
-
       return getPrunedOptionsMapperComplianceConfiguration(
         processedRequirementAttributes,
         autoComplianceModuleConfigurations
@@ -140,18 +148,20 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
       const removedRequirementAttributes = requirementBlock.requirements
         .filter((requirement) => !data.requirementsAttributes.find((attribute) => attribute.id === requirement.id))
         .map((requirement) => ({ id: requirement.id, _destroy: true }))
-
       isSuccess = await (requirementBlock as IRequirementBlock).update?.({
         ...data,
         requirementsAttributes: [
           ...mappedRequirementAttributes,
           ...removedRequirementAttributes,
         ] as IRequirementAttributes[],
+        requirementDocumentsAttributes: data.requirementDocumentsAttributes,
       })
     } else {
+      // For new blocks, include any documents that were uploaded
       isSuccess = await createRequirementBlock({
         ...data,
         requirementsAttributes: [...mappedRequirementAttributes],
+        requirementDocumentsAttributes: data.requirementDocumentsAttributes || [],
       })
     }
     if (isSuccess) {

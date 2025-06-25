@@ -7,12 +7,18 @@ import { Controller, useController, useFieldArray, useFormContext } from "react-
 import { useTranslation } from "react-i18next"
 import { v4 as uuidv4 } from "uuid"
 import {
+  getEnergyStepCodePart3RequirementRequiredSchema,
   getEnergyStepCodeRequirementRequiredSchema,
   STEP_CODE_PACKAGE_FILE_REQUIREMENT_CODE,
 } from "../../../../constants"
 import { IRequirementBlock } from "../../../../models/requirement-block"
 import { IFormConditional, IRequirementAttributes } from "../../../../types/api-request"
-import { EEnergyStepCodeDependencyRequirementCode, ENumberUnit, ERequirementType } from "../../../../types/enums"
+import {
+  EEnergyStepCodeDependencyRequirementCode,
+  EEnergyStepCodePart3DependencyRequirementCode,
+  ENumberUnit,
+  ERequirementType,
+} from "../../../../types/enums"
 import { IDenormalizedRequirementBlock } from "../../../../types/types"
 import {
   isContactRequirement,
@@ -73,7 +79,10 @@ export const FieldsSetup = observer(function FieldsSetup({
     _callBack: any,
     matchesStepCodePackageRequirementCode?: boolean
   ) => {
-    if (requirementType !== ERequirementType.energyStepCode) {
+    if (
+      requirementType !== ERequirementType.energyStepCode &&
+      requirementType !== ERequirementType.energyStepCodePart3
+    ) {
       const isStepCodePackageFile = requirementType === ERequirementType.file && matchesStepCodePackageRequirementCode
       const defaults = {
         requirementCode: isStepCodePackageFile ? STEP_CODE_PACKAGE_FILE_REQUIREMENT_CODE : `dummy-${uuidv4()}`,
@@ -102,24 +111,45 @@ export const FieldsSetup = observer(function FieldsSetup({
       return
     }
 
-    // handle energy_step_code requirement as it's a special case where we have to add multiple other requirements
-    // with additional defaults
-    const energyStepCodeDependencyDefaults = Object.values(EEnergyStepCodeDependencyRequirementCode)
-      .map((code) => getEnergyStepCodeRequirementRequiredSchema(code))
-      .map((requirement) => {
-        const energyRequirementInOriginalBlock = requirementBlock?.requirements.find(
-          (r) => requirement.requirementCode === r.requirementCode
-        )
+    if (requirementType == ERequirementType.energyStepCode) {
+      // handle energy_step_code requirement as it's a special case where we have to add multiple other requirements
+      // with additional defaults
+      const energyStepCodeDependencyDefaults = Object.values(EEnergyStepCodeDependencyRequirementCode)
+        .map((code) => getEnergyStepCodeRequirementRequiredSchema(code))
+        .map((requirement) => {
+          const energyRequirementInOriginalBlock = requirementBlock?.requirements.find(
+            (r) => requirement.requirementCode === r.requirementCode
+          )
 
-        // we reuse the id of the original energy requirement dependency if it exists
-        // this is to prevent duplicate label error from back-end, when removing then adding an energy_step_code requirement
-        if (energyRequirementInOriginalBlock) {
-          requirement.id = energyRequirementInOriginalBlock.id
-        }
-        return requirement
-      })
+          // we reuse the id of the original energy requirement dependency if it exists
+          // this is to prevent duplicate label error from back-end, when removing then adding an energy_step_code requirement
+          if (energyRequirementInOriginalBlock) {
+            requirement.id = energyRequirementInOriginalBlock.id
+          }
+          return requirement
+        })
 
-    append(energyStepCodeDependencyDefaults)
+      append(energyStepCodeDependencyDefaults)
+    }
+
+    if (requirementType == ERequirementType.energyStepCodePart3) {
+      const energyStepCodePart3DependencyDefaults = Object.values(EEnergyStepCodePart3DependencyRequirementCode)
+        .map((code) => getEnergyStepCodePart3RequirementRequiredSchema(code))
+        .map((requirement) => {
+          const energyRequirementInOriginalBlock = requirementBlock?.requirements.find(
+            (r) => requirement.requirementCode === r.requirementCode
+          )
+
+          // we reuse the id of the original energy requirement dependency if it exists
+          // this is to prevent duplicate label error from back-end, when removing then adding an energy_step_code requirement
+          if (energyRequirementInOriginalBlock) {
+            requirement.id = energyRequirementInOriginalBlock.id
+          }
+          return requirement
+        })
+
+      append(energyStepCodePart3DependencyDefaults)
+    }
   }
 
   const hasFields = fields.length > 0
@@ -128,7 +158,10 @@ export const FieldsSetup = observer(function FieldsSetup({
     const hasEnergyStepCodeRequirement = watchedRequirements?.some(
       (r) => (r as IRequirementAttributes).inputType === ERequirementType.energyStepCode
     )
-    const hasStepCodePackageFileRequirement = watchedRequirements?.some((r) =>
+    const hasEnergyStepCodePart3Requirement = watchedRequirements?.some(
+      (r) => (r as IRequirementAttributes).inputType === ERequirementType.energyStepCodePart3
+    )
+    const hasStepCodePackageFileRequirement = watchedRequirements.some((r) =>
       isStepCodePackageFileRequirementCode(r.requirementCode)
     )
 
@@ -139,6 +172,10 @@ export const FieldsSetup = observer(function FieldsSetup({
 
     if (hasEnergyStepCodeRequirement) {
       disabledTypes.push({ requirementType: ERequirementType.energyStepCode })
+    }
+
+    if (hasEnergyStepCodePart3Requirement) {
+      disabledTypes.push({ requirementType: ERequirementType.energyStepCodePart3 })
     }
 
     if (hasStepCodePackageFileRequirement) {
@@ -158,11 +195,11 @@ export const FieldsSetup = observer(function FieldsSetup({
       return
     }
 
-    const isEnergyStepCodeRequirement = requirement.inputType === ERequirementType.energyStepCode
-
+    const isEnergyStepCodeRequirement =
+      requirement.inputType === ERequirementType.energyStepCode ||
+      requirement.inputType === ERequirementType.energyStepCodePart3
     if (!isEnergyStepCodeRequirement) {
       remove(index)
-
       return
     }
 
@@ -172,6 +209,14 @@ export const FieldsSetup = observer(function FieldsSetup({
       )
 
       if (isEnergyStepCodeDependency) {
+        acc.push(idx)
+      }
+
+      const isEnergyStepCodePart3Dependency = Object.values(EEnergyStepCodePart3DependencyRequirementCode).includes(
+        req.requirementCode as EEnergyStepCodePart3DependencyRequirementCode
+      )
+
+      if (isEnergyStepCodePart3Dependency) {
         acc.push(idx)
       }
 
@@ -380,6 +425,16 @@ export const FieldsSetup = observer(function FieldsSetup({
                                 }
                               : undefined
                           }
+                          isMultipleFilesCheckboxProps={
+                            requirementType === ERequirementType.file
+                              ? {
+                                  controlProps: {
+                                    control: control,
+                                    name: `requirementsAttributes.${index}.inputOptions.multiple` as any,
+                                  },
+                                }
+                              : undefined
+                          }
                           requirementCode={watchedRequirementCode}
                         />
                       </Box>
@@ -397,7 +452,7 @@ export const FieldsSetup = observer(function FieldsSetup({
                           helperText={watchedHint}
                           unit={
                             requirementType === ERequirementType.number
-                              ? watch(`requirementsAttributes.${index}.inputOptions.numberUnit`) ?? null
+                              ? (watch(`requirementsAttributes.${index}.inputOptions.numberUnit`) ?? null)
                               : undefined
                           }
                           options={watch(`requirementsAttributes.${index}.inputOptions.valueOptions`)?.map(

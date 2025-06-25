@@ -9,6 +9,7 @@ import {
   ERequirementType,
   EVisibility,
 } from "../types/enums"
+import { IRequirementDocument } from "../types/types"
 import { RequirementModel } from "./requirement"
 
 export const RequirementBlockModel = types
@@ -26,12 +27,15 @@ export const RequirementBlockModel = types
     createdAt: types.Date,
     updatedAt: types.Date,
     discardedAt: types.maybeNull(types.Date),
+    requirementDocuments: types.array(types.frozen<IRequirementDocument>()),
   })
   .extend(withEnvironment())
   .extend(withRootStore())
   .views((self) => ({
     get blocksWithEnergyStepCode() {
-      return self.requirements?.some((r) => r.inputType === ERequirementType.energyStepCode)
+      return self.requirements?.some(
+        (r) => r.inputType === ERequirementType.energyStepCode || r.inputType === ERequirementType.energyStepCodePart3
+      )
     },
     get blocksWithStepCodePackageFile() {
       return self.requirements?.some((r) => r.requirementCode === STEP_CODE_PACKAGE_FILE_REQUIREMENT_CODE)

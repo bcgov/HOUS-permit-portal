@@ -34,7 +34,7 @@ export const FlashMessageModel = types
       isClosable: boolean = true,
       position: ToastPositionWithLogical = "top"
     ) {
-      self.isVisible = true
+      self.isVisible = !!description
 
       self.status = status
       self.title = title

@@ -41,6 +41,7 @@ import { BlockCollaboratorAssignmentManagement } from "./collaborator-management
 import { CollaboratorsSidebar } from "./collaborator-management/collaborators-sidebar"
 import { useCollaborationAssignmentNodes } from "./collaborator-management/hooks/use-collaboration-assignment-nodes"
 import { ContactSummaryModal } from "./contact-summary-modal"
+import { setupEnergyStepCodeReportLink } from "./energy-step-code-report-link"
 import { RevisionSideBar } from "./revision-sidebar"
 import { SubmissionDownloadModal } from "./submission-download-modal"
 
@@ -66,6 +67,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   })
 
   const [completedBlocks, setCompletedBlocks] = useState({})
+
   const { isOpen: isContactsOpen, onOpen: onContactsOpen, onClose: onContactsClose } = useDisclosure()
 
   const [processEventOnLoad, setProcessEventOnLoad] = useState<CustomEvent | null>(null)
@@ -111,7 +113,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
 
   const nicknameWatch = watch("nickname")
   const isStepCode = R.test(/step-code/, window.location.pathname)
-
+  setupEnergyStepCodeReportLink()
   const handleSave = async ({
     autosave,
     skipPristineCheck,
@@ -348,7 +350,11 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
                   permitApplication={currentPermitApplication}
                   collaborationType={ECollaborationType.submission}
                 />
-                <Button variant="primary" onClick={handleClickFinishLater}>
+                <Button
+                  variant="primary"
+                  onClick={handleClickFinishLater}
+                  isDisabled={currentPermitApplication.isViewingPastRequests}
+                >
                   {t("permitApplication.edit.saveDraft")}
                 </Button>
                 <Button
@@ -425,7 +431,12 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
               triggerSave={handleSave}
               showHelpButton
               isEditing={currentPermitApplication?.isDraft}
-              renderSaveButton={() => <SaveButton handleSave={handleSave} />}
+              renderSaveButton={() => (
+                <SaveButton
+                  handleSave={handleSave}
+                  isViewingPastRequests={currentPermitApplication?.isViewingPastRequests}
+                />
+              )}
               updateCollaborationAssignmentNodes={updateRequirementBlockAssignmentNode}
             />
           </Flex>
@@ -453,7 +464,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   )
 })
 
-function SaveButton({ handleSave }) {
+function SaveButton({ handleSave, isViewingPastRequests }) {
   const { handleSubmit, formState } = useForm()
   const { isSubmitting } = formState
 
@@ -467,7 +478,7 @@ function SaveButton({ handleSave }) {
         leftIcon={<FloppyDiskBack />}
         type="submit"
         isLoading={isSubmitting}
-        isDisabled={isSubmitting}
+        isDisabled={isSubmitting || isViewingPastRequests}
       >
         {t("ui.onlySave")}
       </Button>

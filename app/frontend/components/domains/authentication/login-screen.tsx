@@ -134,7 +134,7 @@ export const LoginScreen = ({ isAdmin }: ILoginScreenProps) => {
               <Text>{t("auth.chooseSituation")}</Text>
               <Accordion mt={8} allowToggle allowMultiple>
                 <AccordionItem>
-                  <AccordionButton>
+                  <AccordionButton display="flex" justifyContent="space-between">
                     <Box as="span" py={2} textAlign="left">
                       <Heading as="h3">{t("auth.submitterAccordion")}</Heading>
                     </Box>
@@ -147,7 +147,7 @@ export const LoginScreen = ({ isAdmin }: ILoginScreenProps) => {
                 </AccordionItem>
 
                 <AccordionItem>
-                  <AccordionButton>
+                  <AccordionButton display="flex" justifyContent="space-between">
                     <Box as="span" py={2} textAlign="left">
                       <Heading as="h3">{t("auth.entityAccordion")}</Heading>
                     </Box>
@@ -160,7 +160,7 @@ export const LoginScreen = ({ isAdmin }: ILoginScreenProps) => {
                 </AccordionItem>
 
                 <AccordionItem>
-                  <AccordionButton>
+                  <AccordionButton display="flex" justifyContent="space-between">
                     <Box as="span" py={2} textAlign="left">
                       <Heading as="h3">{t("auth.lgAccordion")}</Heading>
                     </Box>
@@ -184,14 +184,11 @@ export const LoginScreen = ({ isAdmin }: ILoginScreenProps) => {
                 {t("auth.loginHelp")}{" "}
               </Text>
               <Text as="span">{t("auth.goToPartners")} </Text>
-              <Link href="https://www.bceid.ca/clp/account_recovery.aspx" isExternal>
+              <Link href={import.meta.env.VITE_BCEID_PARTNER_URL} isExternal>
                 {t("auth.bceid")}
               </Link>{" "}
               {t("ui.or")}{" "}
-              <Link
-                href="https://www2.gov.bc.ca/gov/content/governments/government-id/bcservicescardapp#setup"
-                isExternal
-              >
+              <Link href={import.meta.env.VITE_BCSC_REGISTRATION_URL} isExternal>
                 {t("auth.bcsc")}
               </Link>
             </Text>

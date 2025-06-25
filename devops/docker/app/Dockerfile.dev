@@ -1,6 +1,6 @@
 # Make sure RUBY_VERSION matches the Ruby version in .ruby-version and Gemfile
 ARG RUBY_VERSION=3.2.5-bullseye
-FROM ruby:$RUBY_VERSION
+FROM docker.io/library/ruby:$RUBY_VERSION
 
 WORKDIR /app
 
@@ -18,7 +18,7 @@ RUN apt-get update -qq && \
 
 # Install Ruby gems
 COPY Gemfile Gemfile.lock ./
-RUN gem install bundler:2.5.4 && \
+RUN gem install bundler:2.5.22 && \
     bundle install
 
 # Install Node.js

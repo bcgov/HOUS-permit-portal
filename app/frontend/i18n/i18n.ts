@@ -27,16 +27,16 @@ const options = {
           adminLogin: "Admin login",
           adminAccountAccess: "If you cannot log in with your IDIR, please contact your administrator to gain access.",
           lgPrompt:
-            "You must have a BCeID account to use this system. If you don’t have one yet, please register for one based on your use case.",
+            "You must have a BCeID account to use this system. If you don't have one yet, please register for one based on your use case.",
           publicPrompt:
-            "You must have either a BC Services Card Account or BCeID account to use this system. If you don’t have one yet, please register for one based on your use case. <br/><br/> <strong>Please note that BCeID and BC Services Card logins will act as two separate accounts, and you must consistently use the same method for all future logins.</strong>",
+            "You must have either a BC Services Card Account or BCeID account to use this system. If you don't have one yet, please register for one based on your use case. <br/><br/> <strong>Please note that BCeID and BC Services Card logins will act as two separate accounts, and you must consistently use the same method for all future logins.</strong>",
           chooseSituation: "Choose the situation that best matches your own to learn more about your login choices.",
           loginHelp: "Having trouble logging in?",
           goToPartners: "Go to our login partners",
-          submitterAccordion: "I’m an individual submitter, such as a homeowner or agent",
-          lgAccordion: "I’m logging in as a representative of a local government or First Nation ",
+          submitterAccordion: "I'm an individual submitter, such as a homeowner or agent",
+          lgAccordion: "I'm logging in as a representative of a local government or First Nation ",
           entityAccordion:
-            "I’m logging in on behalf of a legal entity, such as a company, partnership, or educational institution ",
+            "I'm logging in on behalf of a legal entity, such as a company, partnership, or educational institution ",
           localGov: "Are you a member of local government?",
           chooseLogin: "Choosing the right option",
           matchLogin: "Choose the option that best matches your situation to access this service",
@@ -55,15 +55,15 @@ const options = {
             },
             basic: {
               title: "Basic BCeID",
-              residentOrNon: "You’re a resident or non-resident of Canada",
-              repOrg: "You’re representing a company or organization, but your company doesn’t have a Business BCeID",
-              lgReviewManager: "You’re a regional review manager who is also an individual submitter",
-              lgJurisdiction: "You’re representing a jurisdiction, but your jurisdiction doesn’t have a Business BCeID",
+              residentOrNon: "You're a resident or non-resident of Canada",
+              repOrg: "You're representing a company or organization, but your company doesn't have a Business BCeID",
+              lgReviewManager: "You're a regional review manager who is also an individual submitter",
+              lgJurisdiction: "You're representing a jurisdiction, but your jurisdiction doesn't have a Business BCeID",
               register: "Register for Basic BCeID",
             },
             business: {
               title: "Business BCeID",
-              entityDescription: "You can use this option if you’re logging in on behalf of a legal entity, such as:",
+              entityDescription: "You can use this option if you're logging in on behalf of a legal entity, such as:",
               lgDescription:
                 "Most people representing a local government or jurisdiction will use a Business BCeID to log in",
               company: "Company or partnership or sole proprietorship",
@@ -114,7 +114,7 @@ const options = {
           iNeed: "What do I need?",
           whyUseTitle: "Why use this tool?",
           whyUse:
-            "The Building Permit Hub helps you submit a building permit application through a streamlined and standardized approach across jurisdictions in B.C. This tool connects you with local government and First Nation information to support the building permit submission process.",
+            "The Building Permit Hub helps you submit a building permit application through a streamlined and standardized approach across jurisdictions in B.C. This tool connects you with local government and First Nations information to support the building permit submission process.",
           iNeedLong: "What do I need for a housing building permit?",
           reqsVary:
             "Permit requirements vary by local jurisdiction and depend on the geography of the surrounding location.",
@@ -148,8 +148,9 @@ const options = {
           cantFind: "Can't find your address?",
           browseList: "Browse list of jurisdictions",
           goTo: "Go to {{ location }}",
-          permitApp: "permit app",
+          permitApp: "Log in",
           adminPanel: "admin panel",
+          submitterPanel: "permit app",
           enabledCommunitiesDescription: "Communities you can submit Building Permit applications in:",
           moreComingSoon: "(more coming soon)",
           andMore: "...and more",
@@ -162,6 +163,12 @@ const options = {
             end: "Accurately fill out your permit application online with ease",
             endButton: "Get started now",
           },
+          goToTools: "Go to tools",
+          toolsSectionTitle: "Tools to help prepare your project for application",
+          toolsSectionDesc1:
+            "Use Building Permit Hub's tools to check your application for readiness and prepare key documents for your project.",
+          toolsSectionDesc2:
+            "Check your project against Provincial requirements such as Step Codes and prepare other documents.",
         },
         ui: {
           okay: "Okay",
@@ -189,12 +196,14 @@ const options = {
           backHome: "Back to home",
           yes: "Yes",
           no: "No",
+          na: "N/A",
           show: "Show",
           hide: "Hide",
           setup: "Setup",
           search: "Search",
           loading: "Loading...",
           invalidInput: "Invalid input",
+          invalidUrl: "Invalid url",
           invalidEmail: "Invalid email",
           selectPlaceholder: "Select",
           selectApplicable: "Select applicable:",
@@ -270,7 +279,6 @@ const options = {
           copy: "Copy",
           copyNoun: "Copy",
           options: "Options",
-          na: "N/A",
           share: "Share",
           unassigned: "Unassigned",
           unassign: "Unassign",
@@ -278,6 +286,7 @@ const options = {
           seeLiveButton: "See Live",
           invite: "Invite",
           public: "Public",
+          undo: "Undo",
         },
         notification: {
           title: "Notifications",
@@ -408,6 +417,21 @@ const options = {
           templatesUsed: "Templates used",
           search: "Search jurisdictions",
           view: "View Jurisdiction",
+          notUsingBPH: {
+            title: "This community isn't using Building Permit Hub yet",
+            description:
+              "Building Permit Hub helps people in British Columbia understand local permitting requirements, prepare applications, and submit them online. Participating jurisdictions can review applications more efficiently, with automatic checks and digital tools to help avoid delays.",
+            noInfo:
+              "This community hasn't joined Building Permit Hub yet, so you won't find permitting information here for {{jurisdictionName}}.",
+            wantToUse: {
+              title: "Want to use Building Permit Hub in your community?",
+              description:
+                "We're working with local governments and First Nations across British Columbia to bring Building Permit Hub to more places. If you'd like to see your community on Building Permit Hub, you can suggest it to our team.",
+              buttonHelp:
+                "Clicking the button below opens a new email. You'll be able to review or edit the message before sending.",
+              buttonText: "Suggest your community",
+            },
+          },
         },
         permitCollaboration: {
           status: "Status",
@@ -429,7 +453,7 @@ const options = {
               submission:
                 "The collaboration feature allows the author of a permit application to invite collaborators by email. Invited collaborators must register for an account through BCeID if they do not have one already.<1/><1/> Collaborators can view and contribute only to the requirement blocks they are assigned. Notifications are sent to the collaborators when they are assigned to a requirement block, and their avatars are displayed next to the blocks they are assigned to.<1/><1/> Additionally, the designated submitter has access to the entire application and can submit it on behalf of the author. The author can manage and remove collaborators as needed.",
               review:
-                "The collaboration feature allows reviewers of a submitted permit application to invite additional reviewers, provided they are already part of the jurisdiction.<1/><1/> Reviewers can view and contribute to the assigned requirement blocks and update the status of each block. Notifications are sent when reviewers are assigned to a requirement block or when the status changes to “Ready”. Avatars are displayed next to the blocks to indicate who is assigned. Status updates are visible only to reviewers within the local jurisdiction.<1/><1/> The designated reviewer serves as the primary contact internally at the local jurisdiction, responsible for overseeing the submitted permit application.",
+                "The collaboration feature allows reviewers of a submitted permit application to invite additional reviewers, provided they are already part of the jurisdiction.<1/><1/> Reviewers can view and contribute to the assigned requirement blocks and update the status of each block. Notifications are sent when reviewers are assigned to a requirement block or when the status changes to 'Ready'. Avatars are displayed next to the blocks to indicate who is assigned. Status updates are visible only to reviewers within the local jurisdiction.<1/><1/> The designated reviewer serves as the primary contact internally at the local jurisdiction, responsible for overseeing the submitted permit application.",
             },
             designatedSubmitters: "Designated submitter(s)",
             designatedReviewers: "Designated reviewer(s)",
@@ -438,7 +462,7 @@ const options = {
             authorCanSubmit: "Author of this application is also allowed to submit: <1>{{author}}</1>.",
             assignees: "Assignee(s)",
             assigneeHelperText:
-              "To assign collaborators, look for the grey header at the top of each requirement block and click “Assign”.",
+              "To assign collaborators, look for the grey header at the top of each requirement block and click 'Assign'.",
             noDesignatedSubmitters: "None assigned",
             assignedTo: "Assigned to",
             assigneeEmail: "Email:",
@@ -464,7 +488,7 @@ const options = {
               noneAssigned: "None assigned",
               inviteWarning: {
                 title: "Assign a collaborator?",
-                body: "When you are inviting collaborators to participate in a building permit application through our system, it’s important to understand the specific roles and permissions involved. Only the person who creates the permit application, referred to as the “author,” has the ability to invite collaborators. These collaborators are then only able to access specific sections of the application—those that they are specifically assigned to. Importantly, while the author and one person they designate (Designated Submitter) can submit the completed application, all collaborators must have a verified Building Permit HUB account using BCeID to ensure security. Additionally, the author retains the exclusive right to remove or reassign collaborators. This ensures that control over the application remains centralized while still allowing for collaborative input where necessary.",
+                body: "When you are inviting collaborators to participate in a building permit application through our system, it's important to understand the specific roles and permissions involved. Only the person who creates the permit application, referred to as the 'author,' has the ability to invite collaborators. These collaborators are then only able to access specific sections of the application—those that they are specifically assigned to. Importantly, while the author and one person they designate (Designated Submitter) can submit the completed application, all collaborators must have a verified Building Permit HUB account using BCeID to ensure security. Additionally, the author retains the exclusive right to remove or reassign collaborators. This ensures that control over the application remains centralized while still allowing for collaborative input where necessary.",
               },
               newContactButton: "New contact",
               noResultsText: {
@@ -562,6 +586,8 @@ const options = {
             submitted_at: "Submitted at",
             viewed_at: "Viewed at",
             status: "Status",
+            created_at: "Created at",
+            updated_at: "Updated at",
           },
           submissionInbox: {
             contactInviteWarning:
@@ -627,8 +653,9 @@ const options = {
             confirmation:
               "You confirm that the information you provided was completed to the best of your knowledge and ability",
             yourReference: "For reference, your BC Building Permit Hub Application # is {{ number }}",
-            noContactsAvailable:
-              "This jurisdiction is not ready to accept applications through this tool yet. Please check with your local jurisdiction.",
+            noContactsAvailableTitle: "No template has been scheduled for this permit type and work type combination",
+            noContactsAvailableDescription:
+              "To start an application in Sandbox mode, schedule a template for publishing for this permit type and work type combination.",
             whatsNext:
               "Upon receipt by the local jurisdiction, you will be notified via email or phone of any updates to your application's status or if additional documentation is required.",
             emailed:
@@ -638,9 +665,9 @@ const options = {
             pinUnableToVerify: "Unable to verify PIN, please confirm and proceed as applicable.",
             needToKnow: "What you need to know",
             disclaimer1:
-              "You can use this website to submit a permit application for your building project. This website checks if your application meets some codes, but approval isn’t automatic.",
+              "You can use this website to submit a permit application for your building project. This website checks if your application meets some codes, but approval isn't automatic.",
             disclaimer2:
-              "After you’ve submitted your application, local officials will review it. They may ask you to fix issues or show that your application meets requirements before approving it.",
+              "After you've submitted your application, local officials will review it. They may ask you to fix issues or show that your application meets requirements before approving it.",
           },
           edit: {
             saveDraft: "Save and finish later",
@@ -662,7 +689,7 @@ const options = {
             contactsSummary: "Contacts summary",
             inboxDisabledTitle: "Inbox disabled",
             inboxDisabled:
-              "Submissions for this local jurisdictions are currently disabled. You will be able to make edits to this permit application but will not be able to submit until this jurisdiction's is accepting submissions again.",
+              "Submissions for this local jurisdictions are currently disabled. You will be able to make edits to this permit application but will not be able to submit until this jurisdiction's is accepting submissions again and inboxes are enabled globally.",
             downloadApplication: "Download application",
             fetchingMissingPdf: "Fetching {{missingPdf}}...",
             missingPdfLabels: {
@@ -690,7 +717,7 @@ const options = {
             clickQuestion: "Click on the question(s) or requirement(s) you want the submitter to revise.",
             revision: {
               newRevision: "New revision",
-              pastRequests: "Past requests",
+              pastRequests: "Past submissions",
               reason: "Reason",
               reasonCode: "Reason code",
               revisionRequest: "Revision request",
@@ -713,7 +740,14 @@ const options = {
           switch: {
             label: "Sandbox mode",
             title: "Enter testing sandbox mode?",
+            leaveTitle: "Leave sandbox mode?",
+            leaveWarning:
+              "Save your work before leaving sandbox mode. Any unsaved changes to permit applications or template customizations will not be kept.",
+            warning:
+              "Save your work before entering sandbox mode. Any unsaved changes to permit applications or template customizations will not be kept.",
+            warningTitle: "Unsaved changes will be lost",
             description: "While in this mode, you will be able to:",
+            leaveDescription: "You are about to leave sandbox mode. Any unsaved changes will be lost.",
             descriptionList: [
               "make changes to a permit template without affecting what is published live.",
               "publish permit templates for testing it out as how a submitter would see it",
@@ -725,7 +759,8 @@ const options = {
               "<strong>Published sandbox:</strong> Sandbox that emulates the live mode by letting you test edits on published permit templates.",
             scheduledDescription:
               "<strong>Scheduled sandbox:</strong> Sandbox that lets you interact with scheduled permit templates.",
-            continue: "Continue to sandbox",
+            continue: "Enter sandbox mode",
+            leave: "Leave sandbox",
             superAdminAvailable: "Super Admin feature available!",
             testingPurposes: "For testing purposes, you may choose which permit applications to test.",
           },
@@ -829,6 +864,7 @@ const options = {
             helpTextPlaceHolder: "Help text",
             optionalForSubmitters: "This field is optional for submitters",
             isAnElectiveField: "This is an elective field for local jurisdictions",
+            allowMultipleFilesLabel: "Allow multiple files",
             optionsMenu: {
               triggerButton: "Options",
               remove: "Remove",
@@ -875,6 +911,10 @@ const options = {
                 label:
                   "Please use this tool to do your fill in your step code details and it will populate onto the application.",
               },
+              energyStepCodeToolPart3: {
+                label:
+                  "Please use this tool to do your fill in your step code details and it will populate onto the application.",
+              },
               energyStepCodeReportFile: {
                 label: "BC Energy Step Code Compliance Report",
               },
@@ -888,9 +928,10 @@ const options = {
             firstNations: "First Nations",
             description: "Description",
             associations: "Associations",
-            formFields: "Form fields",
+            formFields: "Form Fields",
             updatedAt: "Updated at",
             requirementSku: "Requirement SKU",
+            requirementDocuments: "Related documents",
           },
           configurationsColumn: "Configurations",
           fieldDescriptions: {
@@ -915,9 +956,10 @@ const options = {
             file: "File upload",
             phone: "Phone",
             email: "E-mail",
-            energyStepCode: "Energy Step Code",
+            energyStepCode: "Energy Step Code Part 9",
             stepCodePackageFile: "Design package file for energy step code",
             pidInfo: "Pid Info",
+            energyStepCodePart3: "Energy Step Code Part 3",
           },
           contactFieldItemLabels: {
             firstName: "First name",
@@ -968,6 +1010,815 @@ const options = {
           },
         },
         stepCode: {
+          part3: {
+            title: "Energy and Zero Carbon Step Codes for Step 3 Buildings",
+            errorTitle: "There is a problem",
+            cta: "Save and continue",
+            sidebar: {
+              responsiveButton: "Sections",
+              overview: "Overview",
+              start: "Start page",
+              projectDetails: "Project details",
+              locationDetails: "Building and location details",
+              compliance: "Compliance",
+              baselineOccupancies: "Occupancy classifications for buildings with a baseline",
+              baselineDetails: "Baseline comparison details",
+              districtEnergy: "District energy system",
+              fuelTypes: "Fuel types",
+              additionalFuelTypes: "Additional fuel types",
+              baselinePerformance: "Baseline energy model performance",
+              stepCodeOccupancies: "Occupancies subject to step 2, 3, or 4",
+              stepCodePerformanceRequirements: "Performance requirements for step 2, 3, and 4 buildings",
+              modelledOutputs: "Modelled outputs for entire building",
+              renewableEnergy: "Renewable Energy",
+              overheatingRequirements: "Overheating requirements",
+              residentialAdjustments: "Residential project adjustments",
+              documentReferences: "Document references",
+              performanceCharacteristics: "Summary of building performance characteristics",
+              hvac: "HVAC",
+              results: "Results",
+              contact: "Contact information",
+              requirementsSummary: "Performance requriements summary",
+              stepCodeSummary: "Step code summary",
+            },
+            startPage: {
+              heading: "Energy and Zero Carbon Step Codes for Step 3 Buildings",
+              description:
+                "You can use this tool to generate a report about your project’s compliance. After you've submitted your application, local officials will review it. They may ask you to fix issues or show that your application meets requirements before approving it.",
+              info: {
+                title: "Before you start",
+                body: "This form requires energy modelling results for your building. Before starting, use energy modelling software to model your building’s energy performance.",
+                help: "More details can be found at <1>energystepcode.ca?<2></2></1>",
+                link: "https://energystepcode.ca",
+              },
+              cta: "Create report",
+            },
+            projectDetails: {
+              heading: "Project details",
+              instructions:
+                "Project details have been filled in from your Permit Application. Confirm the details below to continue.",
+              name: "Project name",
+              address: "Project address",
+              postalCode: "Postal code",
+              identifier: "Project identifier",
+              jurisdiction: "Jurisdiction",
+              date: "Building permit date",
+              stage: "Project stage",
+              version: "Applicable version of the BC Building Code",
+              confirm: "Does everything look correct?",
+              cta: "Yes, continue",
+              modify: "Incorrect or missing information? <1>Go back</1> to main application to fill in missing fields.",
+              stages: {
+                new_draft: "Building Permit",
+                newly_submitted: "Building Permit",
+                revisions_requested: "Revised Permit",
+                resubmitted: "Revised Permit",
+              },
+              buildingCodeVersions: {
+                BCBC_2024: "BCBC 2024",
+                BCBC_2018_rev_5: "BCBC 2018 Revision 5",
+                BCBC_2018_rev_4: "BCBC 2018 Revision 4",
+                BCBC_2018_rev_3: "BCBC 2018 Revision 3",
+                BCBC_2018_rev_2: "BCBC 2018 Revision 2",
+                BCBC_2018_rev_1: "BCBC 2018 Revision 1",
+              },
+            },
+            locationDetails: {
+              heading: "Building and location details",
+              errorDescription: "",
+              instructions: "Set key parameters for your project.",
+              aboveGradeStories: {
+                label: "Number of above grade stories",
+                hint: "Include half-storeys and relevant below-grade storeys",
+                error: "Enter the number of above grade stories for this project.",
+              },
+              hdd: {
+                label: "Heating degree days below 18°C",
+                hint: "HDD is specified by the AHJ",
+                error: "Enter the heating degree days below 18°C for this project.",
+              },
+              climateZone: {
+                label: "Climate zone",
+                error: "Select the climate zone for this project.",
+              },
+              climateZones: {
+                zone_4: "Zone 4",
+                zone_5: "Zone 5",
+                zone_6: "Zone 6",
+                zone_7a: "Zone 7A",
+                zone_7b: "Zone 7B",
+                zone_8: "Zone 8",
+              },
+            },
+            baselineOccupancies: {
+              heading: "Occupancy classifications for buildings with a baseline",
+              instructions:
+                "Building projects with occupancy classifications or uses subject to Step 2 (NECB Part 8) requirements as outlined in Table 10.2.3.3.-A to 10.2.3.3.-F or Subsection 10.2.2.1.(1)(a) or (b) of Division B of the BC Building Code must provide certain details to compare against a baseline energy model. <br/><br/> Note that this checklist is not intended to be used for buildings complying exclusively under Subsection 10.2.2.1.(1)(a) or (b) of Division B of the BC Building Code and the building must contain at least one Step Code occupancy or use as outlined in Table 10.2.3.3.-A to 10.2.3.3.-J of Division B of the BC Building Code.<br/><br/>These occupancy classifications are:<br /><br /><ul><li><strong>A1</strong> Assembly (viewing performing arts)</li><li><strong>A2</strong> Assembly (not elsewhere categorized)</li><li><strong>A3</strong> Assembly (area)</li><li><strong>B1</strong> Detention</li><li><strong>B2</strong> Treatment</li><li><strong>B3</strong> Care</li><li><strong>F1</strong> High-hazard industrial</li><li><strong>F2</strong> Medium-hazard industrial</li><li><strong>F3</strong> Low-hazard industrial</li></ul>",
+              isRelevant: "Does your project include any of the these occupancy classifications?",
+              disabledCtaTooltip: "Please select an occupancy",
+              occupancies: {
+                label: "Which occupancy classifications apply to this building? Select all that apply:",
+                error: "Select the occupancy classifications from the list that are in this building.",
+              },
+              occupancyKeys: {
+                performing_arts_assembly: "<strong>A1</strong> Assembly (viewing performance arts)",
+                other_assembly: "<strong>A2</strong> Assembly (not elsewhere categorized)",
+                arena_assembly: "<strong>A3</strong> Assembly (arena)",
+                open_air_assembly: "<strong>A4</strong> Assembly (occupants in open air)",
+                detention: "<strong>B1</strong> Detention",
+                treatment: "<strong>B2</strong> Treatment",
+                care: "<strong>B3</strong> Care",
+                high_hazard_industrial: "<strong>F1</strong> High-hazard industrial",
+                medium_hazard_industrial: "<strong>F2</strong> Medium-hazard industrial",
+                low_hazard_industrial: "<strong>F3</strong> Low-hazard industrial",
+              },
+            },
+            baselineDetails: {
+              heading: "Baseline comparison details",
+              instructions:
+                "Enter the baseline comparison details for each occupancy classification subject to Step 2 (NECB Part 8) requirements or Subsection 10.2.2.1.(1)(a) or (b) of Division B of the BC Building Code.",
+              modelledFloorArea: {
+                label: "What is the modelled floor area for {{occupancyName}} in square metres?",
+                units: "m<sup>2</sup>",
+                error: "Enter the modelled floor area for {{occupancyName}}.",
+              },
+              performanceRequirement: {
+                label: "What is the performance requirement for {{occupancyName}}?",
+                error: "Select the performance requirement for {{occupancyName}}.",
+              },
+              isCustomRequirement:
+                "Does the authority having jurisdiction (AHJ) require higher performance than BC Building Code minimums for {{occupancyName}}?",
+              requirementSource: {
+                label: "What is the source of this performance requirement?",
+                hint: "If this project’s authority having jurisdiction requires higher performance than BC minimums, enter the bylaw, policy, or document(s) that dictate this project’s energy requirements. ",
+                error: "Enter the requirement source for {{occupancyName}}.",
+              },
+            },
+            performanceRequirements: {
+              step_2_necb: "Step 2 (NECB)",
+              ashrae: "ASHRAE 90.1",
+              "%_better_ashrae": "Percent (%) better than ASHRAE 90.1",
+              necb: "NECB",
+              "%_better_necb": "Percent (%) better than NECB",
+            },
+            baselineOccupancyKeys: {
+              performing_arts_assembly: "A1 Assembly (viewing performance arts)",
+              other_assembly: "A2 Assembly (not elsewhere categorized)",
+              arena_assembly: "A3 Assembly (arena)",
+              open_air_assembly: "A4 Assembly (occupants in open air)",
+              detention: "B1 Detention",
+              treatment: "B2 Treatment",
+              care: "B3 Care",
+              high_hazard_industrial: "F1 High-hazard industrial",
+              medium_hazard_industrial: "F2 Medium-hazard industrial",
+              low_hazard_industrial: "F3 Low-hazard industrial",
+            },
+            districtEnergy: {
+              heading: "District energy system",
+              isRelevant: "Is this project connected to a district energy system?",
+              description: {
+                label: "Name or description of district energy system",
+                error: "Enter name or description of district energy system.",
+              },
+              emissionsFactor: {
+                label: "Emissions factor (in kgCo<sub>2e</sub>/kWh)",
+                hint: "The emissions factor for all systems or equipment powered by the system's energy",
+                error: "Enter emissions factor.",
+              },
+              source: {
+                label: "Reference for source of emissions factor value",
+                hint: "Provide actual district energy system information, or details as indicated by applicable AHJ bylaw or policy",
+                error: "Enter reference for source of emissions factor value.",
+              },
+            },
+            fuelTypes: {
+              heading: "Fuel types",
+              instructions:
+                "If your project uses fuel types other than electricity, natural gas, or district energy, you can provide details about them here. <br /><br />These additional fuel types are not listed in the BC Building Code. They are provided as a reference that can be used for compliance with the Zero Carbon Step Code at the discretion of the Authority Having Jurisdiction (AHJ).",
+              isRelevant:
+                "Does this project use any fuel types other than electricity, natural gas, or district energy?",
+              fuelTypes: {
+                label: "Fuel types used in this project other than electricity, natural gas, or district energy",
+                error: "Select the fuel types from the list that are used by this building.",
+              },
+              fuelTypeKeys: {
+                electricity: "Electricity",
+                natural_gas: "Natural Gas",
+                district_energy: "District Energy",
+                propane: "Propane",
+                light_fuel_oil: "Light fuel oil (standard)",
+                heavy_fuel_oil: "Heavy fuel oil",
+                diesel_fuel: "Diesel fuel (standard)",
+                wood_fuel: "Wood fuel",
+                other: "Other fuel type(s) not listed here",
+              },
+            },
+            additionalFuelTypes: {
+              heading: "Additional fuel types",
+              instructions:
+                "If your project uses other fuel types, you can enter them below. These fuel types are not included in the BC Building Code. The Authority Having Jurisdiction (AHJ) will decide if they meet the requirements of the Zero Carbon Step Code.<br/><br/>For your reference, emissions factors for some fuels have been imported from <download>National Inventory Report 1990-2020: Greenhouse Gas Sources and Sinks in Canada – Part 2. En81-4- 2020-2-eng.pdf</download>",
+              description: {
+                label: "Fuel type",
+                hint: "Enter only one fuel type, additional types can be added later",
+                error: "Enter the fuel type description",
+              },
+              emissionsFactor: {
+                label: "Emissions factor for this fuel type (in kgCO<sub>2e</sub>/kWh)",
+                hint: "The emissions factor for all systems or equipment powered by the system's energy",
+                error: "Enter the emissions factor for this fuel type",
+              },
+              source: {
+                label: "Reference for source of emissions factor value",
+                hint: "The name of the document where this emissions factor value was found",
+                error: "Enter the reference source of the emissions factor value.",
+              },
+              addMore: {
+                label: "Do you need to add any other fuel types?",
+              },
+            },
+            baselinePerformance: {
+              heading: "Baseline energy model performance",
+              refAnnualThermalEnergyDemand: {
+                label: "Total annual thermal energy demand for baseline building",
+                units: "kWh",
+                hint: "Results for the baseline or reference building or building portion",
+                error: "Enter the total annual thermal energy demand for the baseline buidling",
+              },
+              refEnergyOutputs: {
+                label: "In the table, enter the annual energy demand for each fuel type",
+                fuelType: "Fuel type",
+                annualEnergy: "Annual energy (kWh)",
+                emissionsFactor: "Emissions factor (kgCO<sub>2e</sub>/kWh)",
+                emissions: "Emissions (kgCO<sub>2e</sub>)",
+                totalAnnualEnergy: "Total annual energy",
+                totalAnnualEmissions: "Total annual emissions",
+                hint: "Need to change an emissions factor or add a fuel type? Go to <link>fuel types</link>",
+              },
+            },
+            stepCodeOccupancies: {
+              heading: "Occupancies subject to Steps 2, 3, or 4",
+              instructions:
+                "For occupancies subject to Steps 2, 3 or 4 as per Table 10.2.3.3.-G to Table 10.2.3.3.-J of Division B of the BC Building Code, this form will collect additional details.<br/><br/>These occupancies are:<ul><li>Group C Hotel and motel</li><li>Group C Other residential</li><li>Group D Office</li><li>Group D Other</li><li>Group E Mercantile</li>",
+              isRelevant: "Does your project include any of the these occupancies?",
+              disabledCtaTooltip: "Please select an occupancy",
+              cannotSelectNoWhenBaselineEmpty:
+                "Please must select at least one occupancy if no baseline occupancies are selected",
+              occupancies: {
+                label: "Which occupancies apply to this building? Select all that apply:",
+                error: "Select the occupancies from the list that apply to this building.",
+              },
+              occupancyKeys: {
+                hotel_motel: "<strong>Group C</strong> Hotel and motel",
+                residential: "<strong>Group C</strong> Other residential",
+                office: "<strong>Group D</strong> Office",
+                other: "<strong>Group D</strong> Other",
+                mercantile: "<strong>Group E</strong> Mercantile",
+              },
+            },
+            stepCodeOccupancyKeys: {
+              hotel_motel: "Group C Hotel and motel",
+              residential: "Group C Other residential",
+              office: "Group D Office",
+              other: "Group D Other",
+              mercantile: "Group E Mercantile",
+            },
+            stepCodePerformanceRequirements: {
+              heading: "Performance requirements for Step 2, 3, and 4 Buildings",
+              instructions:
+                "If there are occupancies subject to Steps 2, 3, or 4 (not including Step 2 with a reference building) in your project, this section will collect additional details.",
+              stepCodeRequirement: {
+                isCustom: {
+                  label:
+                    "Does the authority having jurisdiction require higher performance than BC building code minimums for {{occupancyName}}?",
+                  hint: "Although this form is for Step Code compliance, some AHJs require higher performance than BCBC minimums",
+                },
+                energyStepRequired: {
+                  label: "Energy step required",
+                  error: "Select energy step required",
+                },
+                source: {
+                  label: "What determines this performance requirement for {{occupancyName}}?",
+                  hint: "Enter the bylaw, policy, rezoning condition, etc. from the authority having jurisdiction (AHJ)",
+                  error: "Enter the performance requirement source",
+                },
+              },
+              occupanciesTable: {
+                headers: {
+                  occupancy: "Occupancy",
+                  modelledFloorArea: "Modelled floor area (m<sup>2</sup>)",
+                  ghg: "GHG emissions level",
+                },
+                hint: "Need to add an occupancy or change the occupancies in this table? Go to <stepCodeOccupanciesLink>Occupancies subject to Steps 2, 3, or 4</stepCodeOccupanciesLink> and select the occupancies that apply.",
+              },
+              modelledFloorArea: {
+                label: "What is the modelled floor area for {{occupancyName}} in square metres?",
+                units: "m<sup>2</sup>",
+                error: "Enter the modelled floor area",
+              },
+              zeroCarbonStepRequired: {
+                error: "Select GHG emissions level",
+              },
+            },
+            modelledOutputs: {
+              heading: "Modelled outputs for entire building",
+              description:
+                "Enter the annual energy consumption by end use and fuel type in kWh. For end uses served by multiple fuels or fuel mixtures, enter as separate end uses. If you need additional use types, you can add additional rows to the table.",
+              useInfoIconLabel: "Use info",
+              infoDescriptions: {
+                generalHeating:
+                  "If project includes heating provided by multiple fuel types these must be entered separately in this section. This includes systems that use supplementary fuel sources\n\n(e.g. air source heat pump with auxiliary natural gas heating below a minimum ambient temperature)",
+                domesticHotWater:
+                  "If project includes DHW heating provided by multiple fuel types these must be entered separately in this section. This includes systems that use supplementary fuel sources\n\n(e.g. air source heat pump with auxiliary natural gas heating below a minimum ambient temperature)",
+                totalAnnualEnergy:
+                  "For Step 2 (NECB) compliance, please refer to cell B39 for the 'Total Energy Use' for the Reference Case. The 'Total Energy Use' of the Design Case is not to exceed the Reference Case.",
+                wholeBuildingAnnualThermalEnergyDemand:
+                  "Note this is total kWh, not kWh/m2; it is used to calculate TEDI along with the MFA.",
+                wholeBuildingAnnualCoolingEnergyDemand:
+                  "Note this is total kWh, not kWh/m2; it is used to calculate cooling energy demand intensity along with the MFA.\n\nThis is not a compliance metric and is used for information purposes only. The definition is the same as TEDI, but for cooling rather than heating.",
+                stepCodeAnnualThermalEnergyDemand:
+                  "Portions of building with TEDI requirements must comply with those targets prior to being averaged with non-Step Code building results.\n\nIf the building only contains Step 2 (NECB) occupancies (reported in Section B), this entry is not required.",
+              },
+              energyOutputsTable: {
+                column: {
+                  use: "Use",
+                  annualEnergy: "Annual energy (kWh)",
+                  fuelType: "Fuel type",
+                  emissionsFactor: "Emissions factor (kgCO2e/kWh)",
+                  emissions: "Emissions (kgCO2e)",
+                },
+                useTypes: {
+                  interior_lighting: "Interior lighting",
+                  exterior_lighting: "Exterior lighting",
+                  heating_general: "Heating",
+                  cooling: "Cooling",
+                  pumps: "Pumps",
+                  fans: "Fans",
+                  domestic_hot_water: "Domestic hot water",
+                  plug_loads: "Plug loads",
+                  other: "Other",
+                },
+                fuelTypes: {
+                  electricity: "Electricity",
+                  natural_gas: "Natural gas",
+                  district_energy: "District energy",
+                  propane: "Propane",
+                  light_fuel_oil: "Light fuel oil",
+                  heavy_fuel_oil: "Heavy fuel oil",
+                  diesel_fuel: "Diesel fuel",
+                  wood_fuel: "Wood fuel",
+                  other: "Other",
+                },
+                addUseType: "Add use type",
+                totalByFuelType: "Total <1>{{fuelType}}</1>",
+                totalByFuelTypeOther: "Total <1>{{fuelTypeDescription}}</1> (Other)",
+                totalAnnualEnergy: "Total annual energy",
+                totalEmissions: "Total annual emissions",
+                fuelTypeRequired: "To add an energy use type, select a fuel type first.",
+                fuelTypeClearHelpText: "To remove this energy use type entry, clear the fuel type.",
+              },
+              annualEnergyWholeBuildingTable: {
+                tableHeader: "Annual energy for calculations (whole building)",
+                annualThermalEnergyDemand: "Annual thermal energy demand for TEDI (kWh)",
+                annualCoolingEnergyDemand: "Annual cooling energy demand for CEDI (kWh)",
+              },
+              stepCodeBuildingPortionsTable: {
+                tableHeader: "Step code building portions",
+                annualThermalEnergyDemand: "Annual thermal energy demand for TEDI",
+                kwhM2: "(kWh/(m2⋅year))",
+              },
+            },
+            renewableEnergy: {
+              heading: "Renewable energy",
+              isRelevant: "Does this project include on-site generated renewable electricity for compliance?",
+              generatedElectricity: {
+                label: "Total electricity generated on site (kWh)",
+                error: "Enter eletricity generated on site.",
+                units: "kWh",
+              },
+              percentOfUse: {
+                label: "Percentage of total energy use",
+                hint: "Automatically calculated",
+                units: "%",
+              },
+              adjustedEF: {
+                label: "Adjusted electricity emissions factor kgCO<sub>2e</sub>/kWh",
+                hint: "Automatically calculated",
+              },
+            },
+            overheatingRequirements: {
+              heading: "Overheating requirements",
+              isRelevant: "Is the project subject to overheating limits?",
+              limit: {
+                label: "Overheating hours limit",
+                hint: "This value is set according to City of Vancouver Energy Modeling Guidelines, Section 4",
+              },
+              worstCase: {
+                label: "Overheating hours for worst case suite/zone",
+                error: "Enter overheating hours for worst case suite/zone",
+              },
+              compliance: {
+                pass: "This building complies with overheating criteria. Worst case suite/zone overheating hours are below the limit.",
+                fail: "This building does not comply with overheating criteria. Worst case suite/zone overheating hours are over the limit.",
+              },
+            },
+            residentialAdjustments: {
+              heading: "Residential project adjustments",
+              hdd: {
+                label: "Heating degree days",
+                hint: "Provided during project set-up section",
+              },
+              pressurizedDoors: {
+                label: "Number of suite doors pressurized",
+                error: "Enter number of suite doors pressurized",
+              },
+              airflow: {
+                label: "Airflow for pressurization per door (L/s/door)",
+                error: "Enter airflow ",
+              },
+              area: {
+                label: "Area of corridors pressurized (m<sup>2</sup>)",
+                hint: "Provide only corridor area related to pressurizing corridors that lead to suites",
+                units: "m<sup>2</sup>",
+                error: "Enter area of corridors pressurized",
+              },
+              muaFuel: {
+                label: "Make-up air fuel type",
+                error: "Select make-up air fuel type",
+                mixture: {
+                  option: "Make-up air (MUA) fuel mixture",
+                  fuelType: { label: "MUA fuel type", error: "Select MUA fuel type" },
+                  emissionsFactor: "Emissions factor (kgCO<sub>2e</sub>/kWh)",
+                  required: "Select MUA fuel mixture",
+                  percentOfLoad: {
+                    label: "% of annual load",
+                    units: "%",
+                    error: "Enter % of load",
+                  },
+                  totalPercentOfLoad: {
+                    error: "Percent of load must add up to 100",
+                  },
+                  add: "Add line",
+                },
+              },
+              suiteSubMetering: {
+                isRelevant: {
+                  label: "Is suite hydronic heating sub-metered?",
+                  hint: "Select no if sub-metering is required per City of Vancouver Energy Modelling Guidelines Section 2.7",
+                  error: "Select option",
+                  options: {
+                    yes: "Yes",
+                    no: "No",
+                    not_applicable: "Not applicable",
+                  },
+                },
+                heatingEnergy: {
+                  label: "Residential occupancies heating energy (kWh)",
+                  hint: "The 15% adjustment per City of Vancouver Modelling Guidelines section 2.7 only applies to this portion of the heating energy and not the inputs for the whole building",
+                  units: "kWh",
+                  error: "Enter residential occupancies heating energy",
+                },
+              },
+            },
+            hvac: {
+              heading: "HVAC",
+              description:
+                "Choose the most appropriate plant and system types for this project. If you don’t see a plant or system type that fits this project, you can select ‘Other’ to provide a short description.",
+              heatingSystemPlant: {
+                heading: "Heating plant",
+                options: {
+                  none: "None (no central plant)",
+                  air_source_heat_pump: "Air source heat pump",
+                  ground_source_heat_pump: "Ground source heat pump",
+                  air_source_vrf: "Air source VRF",
+                  ground_source_vrf: "Ground source VRF",
+                  gas_boiler: "Gas boiler",
+                  district_system: "District system",
+                  other: "Other",
+                },
+              },
+              heatingSystemType: {
+                heading: "Heating system",
+                options: {
+                  electric_baseboard: "Electric baseboard",
+                  hydronic_basebaord: "Hydronic baseboard",
+                  hydronic_fan_coils: "Hydronic fan coils",
+                  vav_reheat: "VAV reheat",
+                  air_source_heat_pump: "Air source heat pump",
+                  vrf_units: "VRF units",
+                  radiant_floor_cooling: "Radiant floor/cooling",
+                  gas_fired_rooftop: "Gas fired rooftop unit",
+                  electric_resistance_rooftop: "Electric resistance rooftop unit",
+                  heat_pump_rooftop: "Heat pump rooftop unit",
+                  other: "Other",
+                },
+              },
+              coolingSystemPlant: {
+                heading: "Cooling plant",
+                options: {
+                  none: "None (no central plant)",
+                  air_cooled_chiller: "Air cooled chiller",
+                  water_cooled_chiller: "Water cooled chiller",
+                  air_source_heat_pump: "Air source heat pump",
+                  ground_source_heat_pump: "Ground source heat pump",
+                  air_source_vrf: "Air source VRF",
+                  ground_source_vrf: "Ground source VRF",
+                  other: "Other",
+                },
+              },
+              coolingSystemType: {
+                heading: "Cooling system",
+                options: {
+                  ptac: "PTACs",
+                  hydronic_fan_coils: "Hydronic fan coils",
+                  hydronic_baseboards: "Hydronic baseboards",
+                  vrf_units: "VRF units",
+                  radiant_floor_ceiling: "Radiant floor/ceiling",
+                  none: "None",
+                  other: "Other",
+                },
+              },
+              dhwSystemType: {
+                heading: "DHW system",
+                options: {
+                  heat_pump_space_heating: "Heat pump integrated with space heating",
+                  air_source_heat_pump: "Dedicated heat pump (air source)",
+                  ground_source_heat_pump: "Dedicated heat pump (ground source)",
+                  gas_space_heating: "Gas integrated with space heating",
+                  gas: "Dedicated gas",
+                  suite_electric: "Suite electric",
+                  suite_gas: "Suite gas",
+                  other: "Other",
+                },
+              },
+            },
+            performanceCharacteristics: {
+              heading: "Summary of building performance characteristics",
+              software: {
+                label: "Software used to create energy modelling report for this project",
+                error: "Select software used",
+                options: {
+                  ies_ve: "IES VE",
+                  energy_plus: "EnergyPlus",
+                  design_builder: "DesignBuilder",
+                  open_studio: "OpenStudio",
+                  e_quest: "eQuest",
+                  doe_2_other: "DOE-2 Other",
+                  phpp: "PHPP",
+                  other: "Other",
+                },
+              },
+              softwareName: {
+                label: "Software Name",
+                error: "Enter software name",
+              },
+              weatherFile: {
+                label: "Name of simulation weather file",
+                error: "Enter simulation weather file name",
+              },
+              ventilation: {
+                label: "Is demand control ventilation used?",
+                error: "Select option",
+              },
+              buildingCharacteristics: {
+                description: "Description",
+                value: "Value",
+                result: "Result",
+              },
+              aboveGroundWallArea: {
+                label: "Modelled above-ground wall area (m<sup>2</sup>)",
+                error: "Enter above-ground wall area",
+                hint: "Gross vertical façade area, includes glazed and opaque vertical surfaces.<br /><br />Report for spaces within MFA (e.g. if above-grade parkade, exlude those walls).",
+              },
+              vfar: { label: "Vertical facade-to-floor area ratio (VFAR)" },
+              wwr: { label: "Window-to-wall area ratio (WWR)", units: "%", error: "Enter window-to-wall area ratio" },
+              wfr: {
+                label: "Window-to-floor area ratio (WFR)",
+                hint: "Calculated value for informational purposes, based on MFA, WWR and wall area values entered.",
+              },
+              airtightness: {
+                label: "Assumed design airtightness (L/S⋅m<sup>2</sup> @ 75 Pa)",
+                error: "Enter design airtightness",
+                hint: "This is the q75Pa described in CoV EMG v2 Section 2.4.1.",
+              },
+              infiltrationRate: {
+                label: "Modelled infiltration rate (L/s/m<sup>2</sup> facade)",
+                error: "Enter infiltration rate",
+                hint: "This is the IAGW described in CoV EMG v2 Section 2.4.1",
+              },
+              wallClearField: {
+                label: "Average wall clear field R-value (m<sup>2</sup>K/w)",
+                error: "Enter average wall clear field R-value",
+                hint: "Above grade walls only - includes uniformly distributed thermal bridges only.<br /><br />Report for spaces within MFA (e.g. if above-grade parkade, exlude those walls).",
+                conversionUnits: "ft<sup>2</sup>hr°F/Btu",
+              },
+              wallEffectiveField: {
+                label: "Average wall effective field R-value (m<sup>2</sup>K/w)",
+                error: "Enter average wall effective field R-value",
+                hint: "Above grade walls only - includes all thermal bridging.<br /><br />Report for spaces within MFA (e.g. if above-grade parkade, exlude those walls).",
+              },
+              roofClearField: {
+                label: "Average roof clear field R-value (m<sup>2</sup>K/w)",
+                error: "Enter average roof clear field R-value",
+                hint: "Includes uniformly distributed thermal bridges only.",
+                conversionUnits: "ft<sup>2</sup>hr°F/Btu",
+              },
+              roofEffectiveField: {
+                label: "Average roof effective field R-value (m<sup>2</sup>K/w)",
+                error: "Enter average roof effective field R-value",
+                hint: "Includes all thermal bridging.",
+              },
+              windowEffective: {
+                label: "Average window effective U-value (W/m<sup>2</sup>K)",
+                hint: "Value should be area-weighted based on all windows on project.",
+                error: "Enter average window effective U-value",
+                conversionUnits: "Btu/ft<sup>2</sup>hr°F",
+              },
+              windowSolar: {
+                label: "Average window solar heat gain coefficient",
+                error: "Enter average window solar heat gain coefficient",
+                hint: "Value should be area-weighted based on all windows on project.",
+              },
+              occupantDensity: {
+                label: "Average occupant density (m<sup>2</sup>/person)",
+                error: "Enter average occupant density",
+                hint: "Use the MFA and the total building occupancy from energy model for spaces within the MFA.",
+              },
+              lightingDensity: {
+                label: "Average lighting power density (W/m<sup>2</sup>)",
+                error: "Enter average lighting power density",
+                hint: "Use the total lighting power load, not considering operating schedules and control schemes, for spaces within the MFA (e.g. ignore parkade lighting) and the MFA.",
+              },
+              ventilationRate: {
+                label: "Average ventilation rate (L/s/m<sup>2</sup>)",
+                error: "Enter average ventilation rate",
+                hint: "Use peak building ventilation, not considering operating schedules, servings spaces within the MFA, and the MFA.",
+              },
+              dhwSavings: {
+                label: "Total building DHW low-flow savings (%)",
+                error: "Enter total building DHW low-flow savings",
+                hint: "% savings is intended to represent reduction over code minimum flow rates, if a rate below the peak hourly is being used, per CoV EMG v2 2.2.1.",
+                units: "%",
+              },
+              hrvErvEfficiency: {
+                label: "Average HRV/ERV sensible efficiency",
+                error: "Enter average HRV/ERV sensible efficiency",
+                hint: "Use SRE (sensible recovery efficiency) per CoV EMG v2 2.6.1.",
+              },
+            },
+            metrics: {
+              totalEnergy: { label: "Total energy", units: "kWh" },
+              teui: { label: "TEUI", units: "kWh/m<sup>2</sup>/year" },
+              tedi: { label: "TEDI", units: "kWh/m<sup>2</sup>/year" },
+              ghgi: { label: "GHGI", units: "kgCO<sub>2</sub>/m<sup>2</sup>/year" },
+            },
+            requirementsSummary: {
+              heading: "Performance requirements summary",
+              missingInfo: {
+                title: "You haven't entered any relevant performance details",
+                message:
+                  "Performance requirements will appear here after you have entered information in <baselineOccupanciesLink>Baseline energy performance requirements</baselineOccupanciesLink> and <stepCodeOccupanciesLink>Performance requirements for Step 2, 3, and 4 Buildings</stepCodeOccupanciesLink>.",
+              },
+              buildingType: {
+                label: "Building type summary",
+                hint: "A summary of your building determined by your responses ",
+                options: {
+                  stepCode: "Single-occupancy building with a Step 2, 3, or 4 occupancy class",
+                  baseline: "Single-occupancy building with no Step 2, 3, or 4 occupancy classes",
+                  mixedUse: "Mixed-use building",
+                },
+              },
+              baselineRequirements: {
+                title: "Baseline performance requirements results",
+                hint: {
+                  singleOccupancy:
+                    "This value is calculated from inputs in <baselinePerformanceLink>Baseline energy performance requirements</baselinePerformanceLink>",
+                  mixedUse:
+                    "These values are calculated from inputs in <baselinePerformanceLink>Baseline energy performance requirements</baselinePerformanceLink><br /><br /><strong>Note:</strong> GHGI is to be reported in all cases, but will only be taken into account for compliance if GHGI is a requirements of the local government.",
+                },
+              },
+              stepCodeRequirements: {
+                title: "Step Code performance requirements results for Step 2, 3, and 4 Buildings",
+                occupancy: "Occupancy classification",
+                hint: "These values are calculated from inputs in <stepCodePerformanceLink>Performance requirements for Step 2, 3, and 4 Buildings</stepCodePerformanceLink><br /><br /><strong>Note:</strong> GHGI is to be reported in all cases, but will only be taken into account for compliance if GHGI is a requirements of the local government.",
+              },
+              residentialAdjustments: {
+                title: "Residential project adjustments",
+                wholeBuilding: { label: "Whole building adjustment", units: "kWh/m<sup>2</sup>/year" },
+                stepCodePortion: { label: "Step Code portion adjustment", units: "kWh/m<sup>2</sup>/year" },
+                hint: "Step Code portion adjustment is used in buildings where the Step Code portion of the building needs to meet TEDI on its own.",
+              },
+              wholeBuildingRequirements: {
+                title: "Whole building performance requirements",
+                hint: {
+                  singleOccupancy:
+                    "This value is calculated from inputs in <baselinePerformanceLink>Baseline energy performance requirements</baselinePerformanceLink> and <stepCodePerformanceLink>Performance requirements for Step 2, 3, and 4 Buildings</stepCodePerformanceLink><br /><br />Note: GHGI is to be reported in all cases, but will only be taken into account for compliance if GHGI is a requirements of the local government.<br /><br />Note: If the building has GHGI target as indicated in <stepCodePerformanceLink>Performance requirements for Step 2, 3, and 4 Buildings</stepCodePerformanceLink>, the value is determined as the area weighted average between the baseline/reference building GHGI from <baselinePerformanceLink>Baseline energy performance requirements</baselinePerformanceLink> and GHGI from <stepCodePerformanceLink>Performance requirements for Step 2, 3, and 4 Buildings</stepCodePerformanceLink> (if applicable)",
+                  mixedUse:
+                    "These values are calculated from inputs in <baselinePerformanceLink>Baseline energy performance requirements</baselinePerformanceLink> and <stepCodePerformanceLink>Performance requirements for Step 2, 3, and 4 Buildings</stepCodePerformanceLink><br /><br /><strong>Note:</strong> GHGI is to be reported in all cases, but will only be taken into account for compliance if GHGI is a requirements of the local government.<br /><br /><strong>Note:</strong> If the building has GHGI target as indicated in <stepCodePerformanceLink>Performance requirements for Step 2, 3, and 4 Buildings</stepCodePerformanceLink>, the value is determined as the area weighted average between the baseline/reference building GHGI from <baselinePerformanceLink>Baseline energy performance requirements</baselinePerformanceLink> and GHGI from <stepCodePerformanceLink>Performance requirements for Step 2, 3, and 4 Buildings</stepCodePerformanceLink> (if applicable)",
+                },
+              },
+              confirm: { label: "Does everything look correct?", cta: "Yes, create report" },
+              help: "Incorrect or missing information? Go to the relevant section to make corrections.",
+            },
+            documentReferences: {
+              heading: "Document references",
+              documentTypes: {
+                architectural_drawing: "Architectural drawing",
+                mechanical_drawing: "Mechanical drawing",
+                electrical_drawing: "Electrical drawing",
+                other: "Other",
+              },
+              otherDocumentQuestion: "Do you need to add any other documents?",
+              otherDocumentAnswers: {
+                yes: "Yes",
+                no: "No",
+              },
+              documentFields: {
+                documentName: "Name of document(s)",
+                issuedFor: "Issued for",
+                documentTypeDescription: "Type of document",
+                dateIssued: "Date issued",
+                preparedBy: "Company name of preparer",
+              },
+            },
+            completedByContact: {
+              heading: "Contact information",
+              description: "Enter contact information for the individual who completed this form.",
+              disclaimer:
+                "This form is not intended to be professionally sealed. The design professional responsible for energy modelling must document energy modelling information in an Energy Modelling Report as described by the Joint Architectural Institute of BC and Engineers and Geoscientists BC Professional Practice Guidelines – Whole Building Energy Modelling Services.",
+              fields: {
+                completedByName: "Name",
+                completedByTitle: "Job title",
+                completedByEmail: "Email",
+                completedByOrganization: "Organization or company name",
+                completedByPhoneNumber: "Phone",
+              },
+            },
+            stepCodeSummary: {
+              missingInfo: {
+                title: "You haven't entered any relevant performance details",
+                message:
+                  "Performance requirements will appear here after you have entered information in <baselineOccupanciesLink>Baseline energy performance requirements</baselineOccupanciesLink> and <stepCodeOccupanciesLink>Performance requirements for Step 2, 3, and 4 Buildings</stepCodeOccupanciesLink>.",
+              },
+              stepCode: {
+                heading: "Step Code summary",
+                compliancePath: "BC Building Code Performance Compliance Path: ",
+                stepCodeOccupancy: { label: "Step Code occupancy", mixedUse: "Refer to mixed-use section" },
+                required: "Required",
+                achieved: "Achieved",
+                performanceRequirement: {
+                  notAchieved: "Requirement not achieved",
+                },
+                energy: {
+                  title: "Energy Step Code",
+                  multiOccupancy:
+                    "Project has multiple Step Code occupancies. Refer to “Summary for mixed-use buildings” for compliance results.",
+                  stepRequired: "Step required",
+                  achieved: "Step achieved",
+                  notAchieved: "Step not achieved",
+                  result: {
+                    success: "Required step for Energy Step Code achieved",
+                    failure: "Required step for Energy Step Code not achieved",
+                  },
+                },
+                zeroCarbon: {
+                  title: "Zero Carbon Step Code",
+                  multiOccupancy:
+                    "Project has multiple Step Code occupancies. Refer to “Summary for mixed-use buildings” for compliance results.",
+                  levelRequired: "Level required",
+                  required: "Required",
+                  notRequired: "No Step Code requirement",
+                  achieved: "Level achieved",
+                  notAchieved: "Level not achieved",
+                  result: {
+                    success: "Required step for Zero Carbon Step Code achieved",
+                    failure: "Required step for Zero Carbon Step Code not achieved",
+                  },
+                },
+              },
+              mixedUse: {
+                heading: "Summary for mixed-use buildings",
+                wholeBuilding: {
+                  title: "Whole building requirements",
+                  requirements: "Blended requirements",
+                  performance: "Performance achieved",
+                  compliance: "Does building comply?",
+                },
+                stepCode: {
+                  title: "Step code requirements",
+                  requirement: "TEDI requirement",
+                  performance: "TEDI achieved",
+                  compliance: "Does building comply?",
+                },
+                occupancies: {
+                  title: "Step code occupancies",
+                  occupancy: "Occupancy",
+                  energy: "Energy requirement",
+                  ghgi: "Zero Carbon requirement",
+                },
+              },
+              cta: "Save and exit",
+            },
+          },
           title: "Step code auto-compliance tool",
           subTitle:
             "You can use this tool to generate your BC Energy Step Code Compliance Report. Approval is not automatic. After you've submitted your application, local officials will review it. They may ask you to fix issues or show that your application meets requirements before approving it.",
@@ -1035,6 +1886,7 @@ const options = {
         stepCodeChecklist: {
           pdf: {
             for: "Step code pre-construction checklist for",
+            forPart3: "Part 3 Step code checklist for",
           },
           edit: {
             heading: "BC Step Code Compliance Checklist - Part 9 Buildings",
@@ -1079,6 +1931,7 @@ const options = {
             codeComplianceSummary: {
               heading: "B: Code Compliance Summary",
               required: "Required",
+              achieved: "Achieved",
               notMet: "not achieved",
               stepRequirement: {
                 heading: "Step Requirements",
@@ -1103,6 +1956,7 @@ const options = {
                 stepRequired: "Step required",
                 stepProposed: "Proposed step achieved",
                 steps: {
+                  "2": "2",
                   "3": "3",
                   "4": "4",
                   "5": "5",
@@ -1113,6 +1967,7 @@ const options = {
                 stepRequired: "Level required",
                 stepProposed: "Proposed step achieved",
                 steps: {
+                  "0": "Not required",
                   "1": "EL 1",
                   "2": "EL 2",
                   "3": "EL 3",
@@ -1317,6 +2172,90 @@ const options = {
         },
         home: {
           jurisdictionsTitle: "Jurisdictions",
+          projectReadinessTools: {
+            title: "Project readiness tools",
+            pageHeading: "Prepare and check your project documents",
+            pageDescription: "Use these tools to help prepare a complete and compliant permit application",
+            checkYourProject: "Check your project against Provincial regulations",
+            prepareYourApplication: "Prepare your application package for submission",
+            letterOfAssuranceLink: "Create your Letters of Assurance",
+            letterOfAssuranceDescription:
+              "Complete Letters of Assurance to confirm who is professionally responsible for design and field review on your project, as required by the BC Building Code for some building types",
+            letterOfAssurancePage: {
+              createYourLOAsTitle: "Create your Letters of Assurance",
+              createYourLOAsIntro:
+                "Some building permit applications need Letters of Assurance (LOAs). Letters of Assurance are legal documents that clearly identify the responsibilities of architects, engineers and other registered professionals when designing building components and reviewing them in the field.",
+              createYourLOAsInstructions: "Registered professionals can use the forms on this page to:",
+              createYourLOAsInstructionFill: "Fill out Letters of Assurance for your project",
+              whoThisIsForTitle: "Who this is for",
+              whoThisIsForDescription:
+                "If your project requires Letters of Assurance, each registered professional involved must sign and seal their form as part of the building permit process.",
+              whoThisIsForMayNeed: "You may need Letters of Assurance if your project:",
+              whoThisIsForComplex: "is a complex building (usually Part 3 of the Building Code)",
+              whoThisIsForSimpler:
+                "is a simpler building (Part 9 of the Building Code) where Letters of Assurance are required by your local government",
+              whoThisIsForInvolves: "involves registered professionals like architects or engineers",
+              whoThisIsForCheckWithLG:
+                "Check with your local government to find out if LOAs are required for your project. You can also read the <1>Letters of Assurance guide for BC Building Code 2018 and Vancouver Building By-law 2019 (PDF, 526 KB)</1> for more information.",
+              whenToSubmitTitle: "When to submit Letters of Assurance",
+              whenToSubmitDescription:
+                "Only submit Letters of Assurance if your project needs them under the Building Code or local bylaws.",
+              whenToSubmitIfRequired: "If required, submit these forms when you apply for your building permit:",
+              whenToSubmitScheduleA:
+                "<strong>Schedule A:</strong> signed by the owner and a Coordinating Registered Professional (usually the architect)",
+              whenToSubmitScheduleB:
+                "<strong>Schedule B:</strong> one form for each professional (like a structural or mechanical engineer) taking responsibility for a part of the project",
+              whenToSubmitNotEvery:
+                "Not every project needs all types of Schedule B. Your coordinating professional decides which are needed.",
+              whenToSubmitBeforeOccupy:
+                "Before you can occupy the building, additional Letters of Assurance are required:",
+              whenToSubmitScheduleCA:
+                "<strong>Schedule C-A:</strong> submitted by the coordinating professional to confirm everything meets the Building Code",
+              whenToSubmitScheduleCB:
+                "<strong>Schedule C-B:</strong> submitted by each professional who submitted a Schedule B earlier",
+              whatLOAsCoverTitle: "What Letters of Assurance cover",
+              whatLOAsCoverDescription:
+                "Each registered professional takes responsibility for a specific part of the project. For example:",
+              whatLOAsCoverArchitect: "<strong>Architect:</strong> overall design and coordination",
+              whatLOAsCoverStructural: "<strong>Structural engineer:</strong> the frame and foundation",
+              whatLOAsCoverMechanical:
+                "<strong>Mechanical engineer:</strong> heating, ventilation, and air conditioning (HVAC)",
+              whatLOAsCoverPlumbing: "<strong>Plumbing engineer or plumber:</strong> water and drainage systems",
+              whatLOAsCoverFire: "<strong>Fire suppression engineer:</strong> sprinklers or other systems (if needed)",
+              whatLOAsCoverGeotechnical: "<strong>Geotechnical engineer:</strong> ground stability and excavation",
+              whatLOAsCoverIfThree:
+                "If there are 3 or more professionals involved, you'll also need a Coordinating Registered Professional to oversee the design and field reviews.",
+              fillableLettersOfAssurance: "Fillable Letters of Assurance",
+              scheduleAFileLink: "Schedule A (PDF, 361 KB)",
+              scheduleADescription:
+                "Confirms that a Coordinating Registered Professional like an architect or engineer has been hired by the building owner. Submit as part of a building permit application.",
+              scheduleBFileLink: "Schedule B (PDF, 587 KB)",
+              scheduleBDescription:
+                "Confirms that a Registered Professional of Record takes responsibility for certain building components and applicable field reviews. Submit before construction begins on each building component.",
+              scheduleCAFileLink: "Schedule C-A (PDF, 260 KB)",
+              scheduleCADescription:
+                "Confirms the Coordinating Registered Professional fulfilled their obligations under Schedule A. Submit after project completion, but before an occupancy permit or final inspection.",
+              scheduleCBFileLink: "Schedule C-B (PDF, 259 KB)",
+              scheduleCBDescription:
+                "Confirms the Registered Professional of Record fulfilled their obligations under Schedule B. Submit after project completion, but before an occupancy permit or final inspection.",
+              previousLettersOfAssuranceTitle: "Previous Letters of Assurance",
+              previousLettersOfAssuranceDescription:
+                "For projects that were permitted prior to March 8, 2024 you can find Letters of Assurance on the BC Codes website:",
+              previousLettersOfAssuranceLink: "Projects December 11, 2018 to March 8, 2024",
+              previousLettersOfAssuranceLink2: "Projects December 20, 2012 to December 10, 2018",
+              pageTitle: "",
+              loaResponsibilities: {
+                buildingDesign:
+                  "Building design – architect responsible for the overall building design and coordination.",
+                structural: "Structural– engineer designs the building\'s frame and foundation.",
+                mechanical: "Mechanical– engineer designs heating, ventilation, and air conditioning (HVAC).",
+                plumbing: "Plumbing – engineer or plumber designs water and drainage systems.",
+                fireSuppression: "Fire suppression systems – engineer designs systems like sprinklers (if required).",
+                geotechnical:
+                  "Geotechnical - engineer reviews ground and slope stability for excavation, foundation, temporary retaining systems during constructions and finished building.",
+              },
+            },
+          },
           siteConfigurationTitle: "Configuration management",
           jurisdictionsDescription:
             "Administer Review Managers and their roles within local jurisdictions through the Building Permit Hub. This includes inviting or removing managers, managing overall jurisdictions, customizing community pages, and handling jurisdiction-specific settings.",
@@ -1353,18 +2292,13 @@ const options = {
             jurisdictionLocalityTypeLabel: "Locality type of local jurisdiction",
             jurisdictionNameLabel: "Name of local jurisdiction",
             jurisdictionLocationLabel: "Location",
-            jurisdictionAbout: {
-              title: "My jurisdiction's About page",
-              description:
-                "Customize the informational page that submitters will see when they are in the Building Permit Hub.",
-            },
             users: {
               title: "Users",
               description: "Manage and invite reviewers and other staff for this jurisdiciton",
             },
             submissionsInboxSetup: {
               title: "Submissions inbox setup",
-              description: "Specify email addresses that should receive applications.",
+              description: "Specify email addresses that should receive applications",
               inboxEnabled: "Enable inbox",
               permitTypes: {
                 label: "Send permit applications for",
@@ -1382,7 +2316,7 @@ const options = {
             },
             stepCodeRequirements: {
               title: "Energy Step Code requirements",
-              description: "Define step code requirements.",
+              description: "Define step code requirements",
               setMinimum:
                 "Set the minimum acceptable levels of Energy Step Code and Zero Carbon Step Code for each permit type below:",
               part9Building: "Part 9 Building",
@@ -1397,6 +2331,7 @@ const options = {
                 energy: {
                   title: "Energy Step Code Level",
                   options: {
+                    "2": "2",
                     "3": "3",
                     "4": "4",
                     "5": "5",
@@ -1405,6 +2340,7 @@ const options = {
                 zeroCarbon: {
                   title: "Zero Carbon Step Code Level",
                   options: {
+                    "0": "Not required",
                     "1": "EL 1 - Measure Only",
                     "2": "EL 2 - Moderate",
                     "3": "EL 3 - Strong",
@@ -1413,9 +2349,38 @@ const options = {
                 },
               },
             },
+            globalFeatureAccess: {
+              title: "Global feature access",
+              description: "Turn system features on or off for all users system-wide.",
+              submissionInbox: "Submissions inbox",
+              submissionInboxDescription:
+                "Enable review managers to accept and process permit applications. If you turn off this feature, submitters can't submit applications, and review managers won't receive new applications.",
+              toggleOn: "On",
+              toggleOff: "Off",
+              acceptPermitApplications: "Accept permit applications",
+              switchButtonInstructions:
+                "Turning this on lets users submit applications. The email addresses set in this section will receive submitted applications",
+            },
+            featureAccess: {
+              title: "Feature access and settings",
+              description: "Turn features on or off for all users in your jurisdiction",
+              submissionInbox: "Submissions inbox setup",
+              submissionInboxDescription: "Specify where submitted permit applications should be sent",
+              myJurisdictionAboutPage: "My Jurisdiction's About page",
+              myJurisdictionAboutPageDescription:
+                "Show a custom About page on Building Permit Hub with information specific to your jurisdiction's requirements, contact information, or common issues to watch for.<br><br> Only turn this page on after you've added your content. If it's turned on without custom content, the page will appear blank. <1> Edit your jurisdiction's About page content",
+              myJurisdictionAboutPageEdit: "Edit",
+              editJurisdictionAboutPage: "Edit my jurisdiction About page",
+              editJurisdictionEditButton: "Edit page",
+              toggleOn: "On",
+              toggleOff: "Off",
+              acceptPermitApplications: "Accept permit applications",
+              switchButtonInstructions:
+                "Turning this on lets users submit applications. The email addresses set in this section will receive submitted applications",
+            },
             externalApiKeys: {
               title: "API settings",
-              description: "Manage API keys for the Building Permit Hub.",
+              description: "Manage API keys for the Building Permit Hub",
             },
           },
           superAdminTitle: "Admin home",
@@ -1488,7 +2453,7 @@ const options = {
           changeBceid: "If you want to change your BCeID information, please go to ",
           changeBceidLinkText: "bceid.ca",
           confirmationRequiredWithEmail:
-            "Action required: please click the link in the verification email that was sent to you. You will continue to receive emails at <strong>{{email}}</strong> until your new email is confirmed. <br/><br/>(Didn’t receive it? <1>Resend email</1>)",
+            "Action required: please click the link in the verification email that was sent to you. You will continue to receive emails at <strong>{{email}}</strong> until your new email is confirmed. <br/><br/>(Didn't receive it? <1>Resend email</1>)",
           confirmationRequired:
             "Action required: please click the link in the verification email that was sent to you. <br/><br/>(Didn't receive it? <1>Resend email</1>)",
           receiveNotifications: "Receive notifications",
@@ -1533,11 +2498,12 @@ const options = {
           email: "Email",
           // Leave in snake case so we can use: t(`user.roles.${role}`)
           roles: {
-            submitter: "submitter",
-            regional_review_manager: "regional review manager",
-            review_manager: "review manager",
-            reviewer: "reviewer",
-            super_admin: "super admin",
+            submitter: "Submitter",
+            regional_review_manager: "Regional Review Manager",
+            review_manager: "Review Manager",
+            reviewer: "Reviewer",
+            super_admin: "Super Admin",
+            technical_support: "Technical Support",
           },
           rolesExplanation: {
             submitter:
@@ -1549,6 +2515,8 @@ const options = {
               "A Reviewer is typically an employee within the local government or a designated authority responsible for examining building permit applications submitted by the Submitter. Reviewers assess the documentation for compliance with building codes, zoning laws, and other regulatory requirements. They may request additional information, approve, reject, or provide comments on the applications.",
             super_admin:
               "The Super Admin is the highest-level user within the system, with overarching control over the entire permit application platform. They have the authority to manage user roles, including creating and removing user accounts, and to modify the system configuration. This role is responsible for the maintenance of the system, including updates and enhancements, and ensuring that the system meets the operational and strategic objectives of the local government or the organization.",
+            technical_support:
+              "The Technical Support - LJ role is designed to assist local jurisdictions with technical aspects of the Building Permit Hub. This role acts as the first point of contact for troubleshooting and managing technical configurations related to the API and user access. They provide support to ensure that local jurisdictions can effectively integrate with the platform and maintain smooth operations.",
           },
           assignTo: "Assign to...",
           department: "Department",
@@ -1795,6 +2763,7 @@ const options = {
               description:
                 "Local jurisdictions can change building permit applications to fit their needs by adding elective fields and offering submitters practical tips. This helps make the application forms reflect the distinct regulations, standards, and requirements of each jurisdiction, so applicants provide the correct information needed by their area.",
               tipLabel: "Tip for submitters (optional)",
+              helpSectionLink: "Provide a URL for Submitters",
               filterLabel: "Search electives",
               sortLabel: "Sort by",
               filterPlaceholder: "Search electives",
@@ -1832,6 +2801,15 @@ const options = {
               "Set open access previews to display on the front page. Select from the available public access previews below.",
             smallScale: "Set as Small Scale New Contruction Preview on landing page",
             fourPlus: "Set as Four Plus New Construction Preview",
+          },
+          globalFeatureAccess: {
+            title: "Global feature access",
+            description: "Turn system features on or off for all users",
+            submissionInbox: "Submissions inbox",
+            submissionInboxDescription:
+              "Enable review managers to accept and process permit applications. If you turn off this feature, submitters can't submit applications, and review managers won't receive new applications.",
+            toggleOn: "On",
+            toggleOff: "Off",
           },
           sitewideMessage: {
             title: "Site-wide message",
@@ -1895,6 +2873,16 @@ const options = {
             title: "Export energy step code configuration by jurisdiction",
             filename: "Energy step code configuration by jurisdiction",
           },
+          stepCodeMetrics: {
+            name: "Energy step code metrics for all jurisdictions",
+            description: "Energy step code metrics for all jurisdictions",
+            title: "Energy step code metrics for all jurisdictions",
+            filename: "Energy step code metrics for all jurisdictions",
+            filenamePart3: "Part 3 step code metrics",
+            filenamePart9: "Part 9 step code metrics",
+            downloadPart3: "Download Part 3 metrics",
+            downloadPart9: "Download Part 9 metrics",
+          },
           applicationMetrics: {
             name: "Basic Application metrics for all jurisdictions",
             description:
@@ -1949,7 +2937,7 @@ const options = {
             sandbox: "Sandbox",
           },
           notificationEmailHint:
-            "This email will be used to notify your local integration partner about upcoming changes to API mappings. Note: Jurisdiction review managers will be notified via their registered email irrespective of this field",
+            "This email will be used to notify your local integration partner about upcoming changes to API mappings. <strong>Note:</strong> Jurisdiction review managers will be notified via their registered email irrespective of this field",
           fieldPlaceholders: {
             webhookUrl: "https://example.com/webhook",
           },
@@ -2002,7 +2990,7 @@ const options = {
           disclaimerTitle: "Disclaimer",
           copyrightHolder: "Government of British Columbia.",
           metaDescription:
-            "The Building Permit Hub helps you submit a building permit application through a streamlined and standardized approach across jurisdictions in B.C. This tool connects you with local government and First Nation information to support the building permit submission process.",
+            "The Building Permit Hub helps you submit a building permit application through a streamlined and standardized approach across jurisdictions in B.C. This tool connects you with local government and First Nations information to support the building permit submission process.",
           metaKeywords: "BC, british columba, permit, portal, hub, permitting, permit application",
           loggedInWelcome: "Welcome back!",
           myPermits: "My permits",
@@ -2048,6 +3036,9 @@ const options = {
             digitalBuildingPermits: "Digital building permits",
             contact: "Contact us",
             configurationManagement: "Configuration management",
+            featureAccess: "Feature access",
+            myJurisdictionAboutPage: "My jurisdiction's about page",
+            submissionInboxSetup: "Submissions inbox setup",
             energyStep: "Energy Step Code requirements",
             submissionsInboxSetup: "Submissions inbox setup",
             confirmed: "E-mail confirmed",
@@ -2068,6 +3059,9 @@ const options = {
             eula: "End user license agreement",
             earlyAccess: "Early access",
             update: "Update",
+            globalFeatureAccess: "Global feature access",
+            projectReadinessTools: "Prepare and check your project documents",
+            createYourLettersOfAssurance: "Create your Letters of Assurance",
           },
         },
         automatedCompliance: {

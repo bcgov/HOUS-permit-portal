@@ -23,10 +23,11 @@ class Requirement < ApplicationRecord
          address: 13,
          bcaddress: 14,
          signature: 15,
-         energy_step_code: 16,
+         energy_step_code: 16, #NOTE: THIS IS ASSUMED TO BE PART_9
          general_contact: 17,
          professional_contact: 18,
-         pid_info: 19
+         pid_info: 19,
+         energy_step_code_part_3: 20
        },
        _prefix: true
 
@@ -56,6 +57,7 @@ class Requirement < ApplicationRecord
                       message: "must contain _file for file type"
 
   validates :label, presence: true
+  validates :input_type, presence: true
   validates :label,
             uniqueness: {
               scope: :requirement_block_id,
@@ -75,11 +77,12 @@ class Requirement < ApplicationRecord
   CONTACT_TYPES = %w[general_contact professional_contact]
 
   STEP_CODE_PACKAGE_FILE_REQUIREMENT_CODE = "architectural_drawing_file".freeze
-  ENERGY_STEP_CODE_REQUIREMENT_CODE = "energy_step_code_tool_part_9".freeze
-
-  ENERGY_STEP_CODE_DEPENDENCY_REQUIRED_SCHEMA = {
+  ENERGY_STEP_CODE_SELECT_REQUIREMENT_CODE = "energy_step_code_method".freeze
+  ENERGY_STEP_CODE_PART_9_REQUIREMENT_CODE =
+    "energy_step_code_tool_part_9".freeze
+  ENERGY_STEP_CODE_PART_9_DEPENDENCY_REQUIRED_SCHEMA = {
     energy_step_code_method: {
-      "requirement_code" => "energy_step_code_method",
+      "requirement_code" => ENERGY_STEP_CODE_SELECT_REQUIREMENT_CODE,
       "input_type" => "select",
       "input_options" => {
         "value_options" => [
@@ -126,8 +129,53 @@ class Requirement < ApplicationRecord
       }
     }
   }
+
+  ENERGY_STEP_CODE_PART_3_REQUIREMENT_CODE =
+    "energy_step_code_tool_part_3".freeze
+  ENERGY_STEP_CODE_PART_3_DEPENDENCY_REQUIRED_SCHEMA = {
+    energy_step_code_method: {
+      "requirement_code" => ENERGY_STEP_CODE_SELECT_REQUIREMENT_CODE,
+      "input_type" => "select",
+      "input_options" => {
+        "value_options" => [
+          {
+            "label" => "Utilizing the digital step code tool",
+            "value" => "tool"
+          },
+          { "label" => "By file upload", "value" => "file" }
+        ]
+      }
+    },
+    energy_step_code_tool_part_3: {
+      "requirement_code" => "energy_step_code_tool_part_3",
+      "input_type" => "energy_step_code_part_3",
+      "input_options" => {
+        "conditional" => {
+          "eq" => "tool",
+          "show" => true,
+          "when" => "energy_step_code_method"
+        },
+        "energy_step_code" => "part_3"
+      }
+    },
+    energy_step_code_report_file: {
+      "requirement_code" => "energy_step_code_report_file",
+      "input_type" => "file",
+      "input_options" => {
+        "conditional" => {
+          "eq" => "file",
+          "show" => true,
+          "when" => "energy_step_code_method"
+        }
+      }
+    }
+  }
+
   ENERGY_STEP_CODE_REQUIRED_DEPENDENCY_CODES =
-    ENERGY_STEP_CODE_DEPENDENCY_REQUIRED_SCHEMA.keys.map(&:to_s).freeze
+    (
+      ENERGY_STEP_CODE_PART_9_DEPENDENCY_REQUIRED_SCHEMA.keys.map(&:to_s) +
+        ENERGY_STEP_CODE_PART_3_DEPENDENCY_REQUIRED_SCHEMA.keys.map(&:to_s)
+    ).uniq.freeze
 
   def value_options
     return nil if input_options.blank? || input_options["value_options"].blank?
@@ -234,11 +282,11 @@ class Requirement < ApplicationRecord
       (
         if (using_dummy || blank)
           if input_type_energy_step_code?
-            return ENERGY_STEP_CODE_REQUIREMENT_CODE
+            return ENERGY_STEP_CODE_PART_9_REQUIREMENT_CODE
           end
 
           if label.blank?
-            ENERGY_STEP_CODE_REQUIREMENT_CODE
+            ENERGY_STEP_CODE_PART_9_REQUIREMENT_CODE
           else
             label.parameterize(separator: "_")
           end
@@ -396,15 +444,18 @@ class Requirement < ApplicationRecord
 
   def validate_energy_step_code_requirement_code
     unless input_type_energy_step_code? &&
-             requirement_code != ENERGY_STEP_CODE_REQUIREMENT_CODE &&
-             !using_dummied_requirement_code
+             !(
+               requirement_code == ENERGY_STEP_CODE_PART_9_REQUIREMENT_CODE ||
+                 requirement_code == ENERGY_STEP_CODE_PART_3_REQUIREMENT_CODE
+             ) && !using_dummied_requirement_code
       return
     end
 
     errors.add(
       :requirement_code,
       :incorrect_energy_requirement_code,
-      correct_requirement_code: ENERGY_STEP_CODE_REQUIREMENT_CODE,
+      correct_requirement_code:
+        "#{ENERGY_STEP_CODE_PART_9_REQUIREMENT_CODE} or #{ENERGY_STEP_CODE_PART_3_REQUIREMENT_CODE}",
       incorrect_requirement_code: requirement_code
     )
   end
@@ -426,10 +477,7 @@ class Requirement < ApplicationRecord
     # if it is an empty hash as we don't care about it. if it as it will have no effect to conditionals.
     # Note we don't want to remove the key if it has other conditionals, as we want the validation below
     # to catch that, as it is an invalid schema. Also the key is only removed from the duplicated attributes.
-    if requirement_code ==
-         ENERGY_STEP_CODE_DEPENDENCY_REQUIRED_SCHEMA[:energy_step_code_method][
-           "requirement_code"
-         ] &&
+    if requirement_code == ENERGY_STEP_CODE_SELECT_REQUIREMENT_CODE &&
          (
            current_attributes_of_interest.dig(
              "input_options",
@@ -443,9 +491,12 @@ class Requirement < ApplicationRecord
       current_attributes_of_interest["input_options"].delete("conditional")
     end
 
-    unless ENERGY_STEP_CODE_DEPENDENCY_REQUIRED_SCHEMA[
+    unless ENERGY_STEP_CODE_PART_9_DEPENDENCY_REQUIRED_SCHEMA[
              requirement_code.to_sym
-           ] == current_attributes_of_interest
+           ] == current_attributes_of_interest ||
+             ENERGY_STEP_CODE_PART_3_DEPENDENCY_REQUIRED_SCHEMA[
+               requirement_code.to_sym
+             ] == current_attributes_of_interest
       errors.add(
         :base,
         :incorrect_energy_requirement_schema,

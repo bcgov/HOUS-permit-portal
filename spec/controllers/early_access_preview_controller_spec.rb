@@ -1,6 +1,8 @@
 require "rails_helper"
 
-RSpec.describe Api::EarlyAccessPreviewsController, type: :controller do
+RSpec.describe Api::EarlyAccessPreviewsController,
+               type: :controller,
+               search: true do
   let!(:super_admin) { create(:user, :super_admin) }
   let!(:early_access_preview) { create(:early_access_preview) }
   let!(:discarded_preview) { create(:early_access_preview, :discarded) }

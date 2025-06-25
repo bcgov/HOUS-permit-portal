@@ -1,6 +1,9 @@
 class RequirementFormJsonService
   attr_accessor :requirement
 
+  ENERGY_STEP_CODE_TOOLTIP_URL =
+    "https://www2.gov.bc.ca/gov/content/housing-tenancy/building-or-renovating/permits/building-permit-hub/29065#Reports"
+
   DEFAULT_FORMIO_TYPE_TO_OPTIONS = {
     text: {
       type: "simpletextfield"
@@ -11,15 +14,102 @@ class RequirementFormJsonService
     email: {
       type: "simpleemail"
     },
-    # TODO: figure out why these address fields don't work
-    # address: {
-    #   type: "simpleaddressadvanced",
-    # },
     address: {
-      type: "simpletextfield"
+      type: "simpleaddressadvanced",
+      provider: "nominatim",
+      validate: {
+        isUseForCopy: false
+      },
+      tableView: false,
+      components: [
+        {
+          key: "address1",
+          type: "textfield",
+          input: true,
+          label: "Address 1",
+          tableView: false,
+          customConditional:
+            "show = _.get(instance, 'parent.manualMode', false);"
+        },
+        {
+          key: "address2",
+          type: "textfield",
+          input: true,
+          label: "Address 2",
+          tableView: false,
+          customConditional:
+            "show = _.get(instance, 'parent.manualMode', false);"
+        },
+        {
+          key: "city",
+          type: "textfield",
+          input: true,
+          label: "City",
+          tableView: false,
+          customConditional:
+            "show = _.get(instance, 'parent.manualMode', false);"
+        },
+        {
+          key: "state",
+          type: "textfield",
+          input: true,
+          label: "Province / State",
+          tableView: false,
+          customConditional:
+            "show = _.get(instance, 'parent.manualMode', false);"
+        },
+        {
+          key: "country",
+          type: "textfield",
+          input: true,
+          label: "Country",
+          tableView: false,
+          customConditional:
+            "show = _.get(instance, 'parent.manualMode', false);"
+        },
+        {
+          key: "zip",
+          type: "textfield",
+          input: true,
+          label: "Postal / Zip Code",
+          tableView: false,
+          customConditional:
+            "show = _.get(instance, 'parent.manualMode', false);"
+        }
+      ]
     },
     bcaddress: {
-      type: "bcaddress"
+      type: "simplebcaddress",
+      provider: "custom",
+      tableView: false,
+      providerOptions: {
+        url: "/api/geocoder/form_bc_addresses",
+        params: {
+          # echo: true,
+          brief: true,
+          # minScore: 55,
+          # onlyCivic: true,
+          maxResults: 10,
+          autoComplete: true
+          # matchAccuracy: 100,
+          # matchPrecision: "unit, civic_number, intersection, block, street, locality, province"
+          # precisionPoints: 100
+        },
+        queryProperty: "addressString",
+        responseProperty: "features",
+        displayValueProperty: "properties.fullAddress"
+      },
+      queryParameters: {
+        # echo: true,
+        brief: true,
+        # minScore: 55,
+        # onlyCivic: true,
+        maxResults: 10,
+        autoComplete: true
+        # matchAccuracy: 100,
+        # matchPrecision:  "unit, civic_number, intersection, block, street, locality, province"
+        # precisionPoints: 100
+      }
     },
     signature: {
       type: "simplesignatureadvanced"
@@ -82,6 +172,13 @@ class RequirementFormJsonService
       title: I18n.t("formio.requirement_template.energy_step_code"),
       label: I18n.t("formio.requirement_template.energy_step_code"),
       custom: "document.dispatchEvent(new Event('openStepCode'));"
+    },
+    energy_step_code_part_3: {
+      type: "button",
+      action: "custom",
+      title: I18n.t("formio.requirement_template.energy_step_code"),
+      label: I18n.t("formio.requirement_template.energy_step_code"),
+      custom: "document.dispatchEvent(new Event('openStepCodePart3'));"
     }
   }
 
@@ -200,14 +297,15 @@ class RequirementFormJsonService
       input: true,
       key: key,
       label: I18n.t("formio.requirement.contact.#{field_type.to_s}"),
-      type: "textfield",
       validate: {
         required: required
       },
-      **DEFAULT_FORMIO_TYPE_TO_OPTIONS[:text]
+      **(
+        DEFAULT_FORMIO_TYPE_TO_OPTIONS[field_type] ||
+          DEFAULT_FORMIO_TYPE_TO_OPTIONS[:text]
+      )
     }
 
-    # TODO: address is a text now, replace with address type when implemented
     field_to_form_json = {
       email: {
         **DEFAULT_FORMIO_TYPE_TO_OPTIONS[:email]
@@ -331,17 +429,8 @@ class RequirementFormJsonService
           get_contact_field_form_json(:business_license, parent_key, false)
         ]
       ),
-      get_columns_form_json(
-        "professional_columns",
-        [
-          get_contact_field_form_json(
-            :professional_association,
-            parent_key,
-            false
-          ),
-          get_contact_field_form_json(:professional_number, parent_key, false)
-        ]
-      )
+      get_contact_field_form_json(:professional_association, parent_key, false),
+      get_contact_field_form_json(:professional_number, parent_key, false)
     ]
   end
 
@@ -437,6 +526,7 @@ class RequirementFormJsonService
     required = false
   )
     return {} unless requirement.input_type_pid_info?
+
     key = "#{requirement.key(requirement_block_key)}|additional_pid_info"
     component = {
       legend: requirement.label,
@@ -466,11 +556,11 @@ class RequirementFormJsonService
           ]
         ),
         get_nested_info_component(
-          :address,
+          :bcaddress,
           requirement_block_key,
           "Address",
           false,
-          :address
+          :bcaddress
         )
       ]
     }
@@ -509,6 +599,12 @@ class RequirementFormJsonService
     input_type = requirement.input_type
     input_options = requirement.input_options
 
+    if input_options["value_options"].is_a?(Array)
+      input_options["value_options"].select! do |option|
+        option["label"].present? && option["value"].present?
+      end
+    end
+
     if (input_type.to_sym == :file)
       return(
         {
@@ -523,10 +619,20 @@ class RequirementFormJsonService
           file_hash[:custom_class] = "formio-component-file" if file_hash[
             :type
           ] != "file"
+          if requirement.key(requirement&.requirement_block&.key).end_with?(
+               "energy_step_code_report_file"
+             )
+            file_hash[:tooltip] = ENERGY_STEP_CODE_TOOLTIP_URL
+          end
         end
       )
     end
-    DEFAULT_FORMIO_TYPE_TO_OPTIONS[input_type.to_sym] || {}
+    options = DEFAULT_FORMIO_TYPE_TO_OPTIONS[input_type.to_sym] || {}
+    if input_options["computed_compliance"].present?
+      options[:tooltip] = I18n.t("formio.requirement.auto_compliance.tooltip")
+    end
+
+    options
   end
 
   def snake_to_camel(snake_str)

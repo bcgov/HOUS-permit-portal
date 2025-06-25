@@ -30,7 +30,7 @@ import { Controller, FormProvider, useForm, useFormContext } from "react-hook-fo
 import { Trans, useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { useMst } from "../../../setup/root"
-import { EUserRoles } from "../../../types/enums"
+import { EFlashMessageStatus, EUserRoles } from "../../../types/enums"
 import { EmailFormControl } from "../../shared/form/email-form-control"
 import { TextFormControl } from "../../shared/form/input-form-control"
 import { UserEulas } from "../../shared/user-eulas"
@@ -49,19 +49,9 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
 
   const getDefaults = () => {
     const { firstName, lastName, nickname, certified, organization, preference, department } = currentUser
-    return {
-      firstName,
-      lastName,
-      certified,
-      organization,
-      preferenceAttributes: preference,
-      department
-    }
+    return { firstName, lastName, certified, organization, preferenceAttributes: preference, department }
   }
-  const formMethods = useForm({
-    mode: "onSubmit",
-    defaultValues: getDefaults(),
-  })
+  const formMethods = useForm({ mode: "onSubmit", defaultValues: getDefaults() })
   const { handleSubmit, formState, control, reset, setValue } = formMethods
   const { isSubmitting } = formState
 
@@ -78,12 +68,7 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
   }
 
   const events = [
-    {
-      event: t("user.notifications.essential"),
-      inAppChecked: false,
-      emailChecked: true,
-      emailDisabled: true,
-    },
+    { event: t("user.notifications.essential"), inAppChecked: false, emailChecked: true, emailDisabled: true },
     {
       event: t("user.notifications.templateChanged"),
       inAppControl: "preferenceAttributes.enableInAppNewTemplateVersionPublishNotification",
@@ -179,16 +164,18 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
                 </>
               )}
               <Divider my={1} />
-              <TextFormControl
-                // @ts-ignore
-                label={currentUser.omniauthProviderLabel}
-                hint={currentUser.omniauthEmail}
-                inputProps={{ value: currentUser.omniauthUsername }}
-                isDisabled
-              />
+              {currentUser.omniauthProvider !== "bcsc" && (
+                <TextFormControl
+                  // @ts-ignore
+                  label={currentUser.omniauthProviderLabel}
+                  hint={currentUser.omniauthEmail}
+                  inputProps={{ value: currentUser.omniauthUsername }}
+                  isDisabled
+                />
+              )}
               {!currentUser.isSuperAdmin && (
                 <Alert
-                  status="info"
+                  status={EFlashMessageStatus.info}
                   borderRadius="sm"
                   gap={1.5}
                   borderWidth={1}
@@ -206,7 +193,7 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
                   </Text>
                 </Alert>
               )}
-              { currentUser.isReviewStaff && (
+              {currentUser.isReviewStaff && (
                 <Flex gap={{ base: 4, md: 6 }} direction={{ base: "column", md: "row" }}>
                   <TextFormControl label={t("user.department")} fieldName="department" required />
                 </Flex>
@@ -229,11 +216,7 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
                         isDisabled: true,
                         value: currentUser.unconfirmedEmail,
                         paddingRight: "98.23px",
-                        _disabled: {
-                          color: "text.primary",
-                          bg: "greys.grey04",
-                          borderColor: "border.light",
-                        },
+                        _disabled: { color: "text.primary", bg: "greys.grey04", borderColor: "border.light" },
                       }}
                       inputRightElement={
                         <InputRightElement pointerEvents="none" width="auto" px={2}>
@@ -260,11 +243,7 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
                         isDisabled: true,
                         value: currentUser.email,
                         paddingRight: "82.35px",
-                        _disabled: {
-                          color: "text.primary",
-                          bg: "greys.grey04",
-                          borderColor: "border.light",
-                        },
+                        _disabled: { color: "text.primary", bg: "greys.grey04", borderColor: "border.light" },
                       }}
                       inputRightElement={
                         <InputRightElement pointerEvents="none" width="auto" px={2}>
@@ -284,7 +263,7 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
 
                   {confirmationRequired && (
                     <Alert
-                      status="warning"
+                      status={EFlashMessageStatus.warning}
                       borderRadius="sm"
                       gap={1.5}
                       borderWidth={1}
@@ -299,16 +278,12 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
                           <Trans
                             i18nKey="user.confirmationRequiredWithEmail"
                             values={{ email: currentUser.email }}
-                            components={{
-                              1: <Button variant="link" onClick={handleResendConfirmationEmail} />,
-                            }}
+                            components={{ 1: <Button variant="link" onClick={handleResendConfirmationEmail} /> }}
                           />
                         ) : (
                           <Trans
                             i18nKey="user.confirmationRequired"
-                            components={{
-                              1: <Button variant="link" onClick={handleResendConfirmationEmail} />,
-                            }}
+                            components={{ 1: <Button variant="link" onClick={handleResendConfirmationEmail} /> }}
                           />
                         )}
                       </Text>
@@ -362,9 +337,7 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
             <Text fontSize="xs">
               <Trans
                 i18nKey={"user.deleteAccount"}
-                components={{
-                  1: <Link href={`mailto:digital.codes.permits@gov.bc.ca`}></Link>,
-                }}
+                components={{ 1: <Link href={`mailto:digital.codes.permits@gov.bc.ca`}></Link> }}
               />
             </Text>
           </Flex>

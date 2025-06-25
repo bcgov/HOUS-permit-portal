@@ -33,6 +33,7 @@ import {
 } from "../utils/formio-component-traversal"
 
 import { format } from "date-fns"
+import { StepCodeModel } from "../stores/step-code-store"
 import { compareSubmissionData } from "../utils/formio-helpers"
 import { convertResourceArrayToRecord } from "../utils/utility-functions"
 import { ICollaborator } from "./collaborator"
@@ -42,7 +43,6 @@ import { IActivity, IPermitType } from "./permit-classification"
 import { IPermitCollaboration, PermitCollaborationModel } from "./permit-collaboration"
 import { IRequirement } from "./requirement"
 import { SandboxModel } from "./sandbox"
-import { StepCodeModel } from "./step-code"
 import { TemplateVersionModel } from "./template-version"
 import { IUser, UserModel } from "./user"
 
@@ -89,7 +89,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
       revisionMode: types.optional(types.boolean, false),
       diff: types.maybeNull(types.frozen<ITemplateVersionDiff>()),
       submissionVersions: types.array(types.frozen<ISubmissionVersion>()),
-      selectedPastSubmissionVersion: types.maybeNull(types.frozen<ISubmissionVersion>()),
+      selectedSubmissionVersion: types.maybeNull(types.frozen<ISubmissionVersion>()),
       permitCollaborationMap: types.map(PermitCollaborationModel),
       permitBlockStatusMap: types.map(PermitBlockStatusModel),
       isViewingPastRequests: types.optional(types.boolean, false),
@@ -97,6 +97,10 @@ export const PermitApplicationModel = types.snapshotProcessor(
     .extend(withEnvironment())
     .extend(withRootStore())
     .views((self) => ({
+      get isPart3() {
+        // TODO
+        return false
+      },
       get isDraft() {
         return (
           self.status === EPermitApplicationStatus.newDraft ||
@@ -154,21 +158,23 @@ export const PermitApplicationModel = types.snapshotProcessor(
         return self.sortedSubmissionVersions[1]
       },
       get previousToSelectedSubmissionVersion() {
-        if (!self.selectedPastSubmissionVersion) return null
+        if (!self.selectedSubmissionVersion) return null
 
         // Find the index of the selected version
         const selectedIndex = self.sortedSubmissionVersions.findIndex(
-          (version) => version.createdAt === self.selectedPastSubmissionVersion?.createdAt
+          (version) => version.createdAt === self.selectedSubmissionVersion?.createdAt
         )
 
         // Return the previous version if it exists
-        return selectedIndex > 0 ? self.sortedSubmissionVersions[selectedIndex - 1] : null
+        return selectedIndex < self.sortedSubmissionVersions.length - 1
+          ? self.sortedSubmissionVersions[selectedIndex + 1]
+          : null
       },
       get latestRevisionRequests() {
         return (self.latestSubmissionVersion?.revisionRequests || []).slice().sort((a, b) => a.createdAt - b.createdAt)
       },
       get inboxEnabled() {
-        return self.jurisdiction?.inboxEnabled
+        return self.jurisdiction?.inboxEnabled && self.rootStore.siteConfigurationStore.inboxEnabled
       },
     }))
     .views((self) => ({
@@ -222,13 +228,13 @@ export const PermitApplicationModel = types.snapshotProcessor(
         )
         const diffColoredFormJson = combineDiff(complianceHintedFormJson, self.diff)
         const revisionRequestsToUse = self.isViewingPastRequests
-          ? self.selectedPastSubmissionVersion?.revisionRequests
+          ? self.selectedSubmissionVersion?.revisionRequests
           : self.latestRevisionRequests
         let changedKeys = []
-        if (self.isViewingPastRequests && self.selectedPastSubmissionVersion) {
+        if (self.isViewingPastRequests && self.selectedSubmissionVersion) {
           changedKeys = compareSubmissionData(
             self.previousToSelectedSubmissionVersion?.submissionData,
-            self.selectedPastSubmissionVersion?.submissionData
+            self.selectedSubmissionVersion?.submissionData
           )
         } else if (self.previousSubmissionVersion) {
           changedKeys = compareSubmissionData(
@@ -236,11 +242,16 @@ export const PermitApplicationModel = types.snapshotProcessor(
             self.latestSubmissionVersion.submissionData
           )
         }
-        const changedMarkedFormJson = combineChangeMarkers(diffColoredFormJson, self.isSubmitted, changedKeys)
+        const changedMarkedFormJson = combineChangeMarkers(
+          diffColoredFormJson,
+          self.isSubmitted || self.isViewingPastRequests,
+          changedKeys
+        )
         const revisionModeFormJson =
           self.revisionMode || self.isRevisionsRequested
             ? combineRevisionButtons(changedMarkedFormJson, self.isSubmitted, revisionRequestsToUse)
-            : diffColoredFormJson
+            : changedMarkedFormJson // Use changedMarkedFormJson if not in revision mode
+
         return revisionModeFormJson
       },
       sectionKey(sectionId) {
@@ -273,9 +284,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
         return (
           (R.isNil(self.diff) ? `${self.templateVersion.id}` : `${self.templateVersion.id}-diff`) +
           (self.revisionMode ? "-revision" : "") +
-          (self.selectedPastSubmissionVersion
-            ? `-past-submission-version-${self.selectedPastSubmissionVersion.id}`
-            : "") +
+          (self.selectedSubmissionVersion ? `-past-submission-version-${self.selectedSubmissionVersion.id}` : "") +
           (self.isViewingPastRequests ? "-past-requests" : "")
         )
       },
@@ -548,8 +557,8 @@ export const PermitApplicationModel = types.snapshotProcessor(
       setIsDirty(isDirty: boolean) {
         self.isDirty = isDirty
       },
-      setSelectedPastSubmissionVersion(submissionVersion: ISubmissionVersion) {
-        self.selectedPastSubmissionVersion = submissionVersion
+      setSelectedSubmissionVersion(submissionVersion: ISubmissionVersion) {
+        self.selectedSubmissionVersion = submissionVersion
       },
       resetDiff() {
         self.showingCompareAfter = false

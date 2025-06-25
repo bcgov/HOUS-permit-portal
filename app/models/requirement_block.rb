@@ -12,22 +12,27 @@ class RequirementBlock < ApplicationRecord
              word_start: %i[name requirement_labels associations configurations]
 
   has_many :requirements, -> { order(position: :asc) }, dependent: :destroy
+  has_many :requirement_documents,
+           dependent: :destroy,
+           inverse_of: :requirement_block
 
   has_many :template_section_blocks, dependent: :destroy
   has_many :requirement_template_sections, through: :template_section_blocks
 
   accepts_nested_attributes_for :requirements, allow_destroy: true
+  accepts_nested_attributes_for :requirement_documents, allow_destroy: true
 
   enum sign_off_role: { any: 0 }, _prefix: true
   enum reviewer_role: { any: 0 }, _prefix: true
   enum visibility: { any: 0, early_access: 1, live: 2 }, _default: 0
 
   validates :sku, uniqueness: true, presence: true
-  validates :name, presence: true, uniqueness: { scope: :first_nations }
+  validates :name, presence: true
   validates :display_name, presence: true
   validate :validate_step_code_dependencies
   validate :validate_requirements_conditional
   validate :early_access_on_appropriate_template
+  validate :unique_name_among_non_discarded
 
   before_validation :set_sku, on: :create
   before_validation :ensure_unique_name, on: :create
@@ -85,14 +90,52 @@ class RequirementBlock < ApplicationRecord
   end
 
   def components_form_json(section_key)
-    optional_block = requirements.all? { |req| !req.required }
+    is_optional_block = requirements.all? { |req| !req.required }
+    has_documents = requirement_documents.any?
     requirement_map = requirements.map { |r| r.to_form_json(key(section_key)) }
 
-    if optional_block
+    requirement_map.unshift(documents_component(section_key)) if has_documents
+
+    if is_optional_block
       requirement_map.push(optional_block_confirmation_requirement(section_key))
     end
 
     requirement_map
+  end
+
+  def documents_component(section_key)
+    {
+      id: "#{id}-documents",
+      key: "#{key(section_key)}|documents",
+      type: "container",
+      custom_class: "requirement-document-download-button-container",
+      components: [
+        {
+          id: "#{id}-documents-label",
+          key: "#{key(section_key)}|documents-label",
+          type: "content",
+          html: "<h4>#{I18n.t("formio.requirement_block.documents_title")}</h4>"
+        }
+      ].concat(
+        requirement_documents.map do |document|
+          {
+            id: "#{id}-document-#{document.id}",
+            key: "#{key(section_key)}|document-#{document.id}",
+            type: "button",
+            action: "custom",
+            custom_class: "requirement-document-download-button",
+            label: document.file.metadata["filename"],
+            custom:
+              "document.dispatchEvent(new CustomEvent('downloadRequirementDocument', {
+            detail: {
+              id: '#{document.id}',
+              filename: '#{document.file.metadata["filename"]}'
+            }
+          }));"
+          }
+        end
+      )
+    }
   end
 
   def optional_block_confirmation_requirement(section_key)
@@ -184,10 +227,35 @@ class RequirementBlock < ApplicationRecord
 
     return unless has_energy_step_code
 
+    # Determine if this is a Part 3 or Part 9 block
+    is_part_3 =
+      requirements.any? do |req|
+        req.requirement_code == "energy_step_code_tool_part_3"
+      end
+    is_part_9 =
+      requirements.any? do |req|
+        req.requirement_code == "energy_step_code_tool_part_9"
+      end
+
+    # Select the appropriate dependency schema based on the block type
+    required_dependencies =
+      if is_part_3
+        Requirement::ENERGY_STEP_CODE_PART_3_DEPENDENCY_REQUIRED_SCHEMA.keys.map(
+          &:to_s
+        )
+      elsif is_part_9
+        Requirement::ENERGY_STEP_CODE_PART_9_DEPENDENCY_REQUIRED_SCHEMA.keys.map(
+          &:to_s
+        )
+      else
+        [] # If neither Part 3 nor Part 9 is found, no dependencies to check
+      end
+
     has_all_dependencies =
-      Requirement::ENERGY_STEP_CODE_REQUIRED_DEPENDENCY_CODES.all? do |dependency_code|
-        requirements.count { |req| req.requirement_code == dependency_code } ==
-          1
+      required_dependencies.all? do |dependency_code|
+        count =
+          requirements.count { |req| req.requirement_code == dependency_code }
+        count == 1
       end
 
     return if has_all_dependencies
@@ -240,7 +308,11 @@ class RequirementBlock < ApplicationRecord
     new_name = base_name
 
     # Loop to find a unique name
-    while self.class.exists?(name: new_name)
+    while self
+            .class
+            .where(discarded_at: nil)
+            .where(first_nations: first_nations)
+            .exists?(name: new_name)
       new_name = increment_last_word(new_name)
     end
 
@@ -262,5 +334,17 @@ class RequirementBlock < ApplicationRecord
     end
 
     words.join(" ")
+  end
+
+  def unique_name_among_non_discarded
+    return if name.blank?
+    if self
+         .class
+         .where.not(id: id)
+         .where(first_nations: first_nations)
+         .where(discarded_at: nil)
+         .exists?(name: name)
+      errors.add(:name, "has already been taken")
+    end
   end
 end
