@@ -2289,11 +2289,10 @@ const options = {
             },
           },
           configurationManagement: {
-            title: "Configuration management",
+            title: "Configuration",
             reviewManagerDescription:
               "Configure your jurisdiction's operational setup within the Building Permit Hub. Set up your submission inbox, define energy step codes, and edit the 'About' page to reflect specific local information.",
-            adminDescription:
-              "Manage site-wide settings and messages along with providing administrative control to Super Admins.",
+            adminDescription: "Manage system-wide settings, notifications, and administrative access",
             jurisdictionLocalityTypeLabel: "Locality type of local jurisdiction",
             jurisdictionNameLabel: "Name of local jurisdiction",
             jurisdictionLocationLabel: "Location",
@@ -2395,7 +2394,7 @@ const options = {
           submissionsInboxDescription: "View all submitted building permit applications.",
           permitsTitle: "Digital building permits",
           permitsDescription:
-            "Enhance building permits application process within your local jurisdiction by setting up helpful tips for submitters and selecting elective questions based on your local needs.",
+            "Set up helpful tips for submitters and select elective questions based on your local needs to customize the permit application process for your local jurisdiction",
           userManagementTitle: "User management",
           userManagementDescription: "Invite or remove Review Managers or Reviewers in the Building Permit Hub.",
           auditLogTitle: "Audit log",
@@ -2796,7 +2795,7 @@ const options = {
           },
         },
         siteConfiguration: {
-          title: "Site configuration management",
+          title: "Configuration",
           adminUserIndex: {
             title: "Users",
             description: "View and manage administrative users",
@@ -2830,7 +2829,7 @@ const options = {
           },
           revisionReasonsAttributesSetup: {
             title: "Revision reasons",
-            description: "Setup reasons to be applied to revision requests",
+            description: "Manage revision request reasons",
             options: "Selectable options",
             fields: {
               reasonCode: "Reason code",
@@ -2839,8 +2838,8 @@ const options = {
             },
           },
           helpDrawerSetup: {
-            title: "Help drawer links",
-            description: "Setup links to show in the help drawer for all users",
+            title: "Help drawer",
+            description: "Manage help drawer links",
             settings: "Links",
             fields: {
               show: "Show",
@@ -3044,7 +3043,7 @@ const options = {
             stepCodes: "Step Codes",
             digitalBuildingPermits: "Digital building permits",
             contact: "Contact us",
-            configurationManagement: "Configuration management",
+            configurationManagement: "Configuration",
             featureAccess: "Feature access",
             myJurisdictionAboutPage: "My jurisdiction's about page",
             designatedReviewer: "Designated Reviewer",
