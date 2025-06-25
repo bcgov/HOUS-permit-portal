@@ -178,7 +178,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
       },
       get isDesignatedReviewerEnabled() {
         const { siteConfigurationStore } = self.rootStore
-        return siteConfigurationStore.allowDesignatedReviewer && self.jurisdiction.allowDesignatedReviewer
+        return siteConfigurationStore.allowDesignatedReviewer || self.jurisdiction.allowDesignatedReviewer
       },
     }))
     .views((self) => ({
@@ -556,15 +556,24 @@ export const PermitApplicationModel = types.snapshotProcessor(
 
         const siteConfigurationADR = siteConfigurationStore.allowDesignatedReviewer
         const jurisdictionADR = self.jurisdiction.allowDesignatedReviewer
-        if (!siteConfigurationADR && !jurisdictionADR) {
+
+        const featureEnabled = siteConfigurationADR === true ? true : jurisdictionADR
+        const designatedReviewerCollaboration = self.getCollaborationDelegatee(ECollaborationType.review)
+        const designatedReviewerExists = designatedReviewerCollaboration?.collaborator?.user?.id != null
+
+        if (featureEnabled === false && designatedReviewerExists) {
+          return true
+        }
+
+        if (featureEnabled === true && designatedReviewerExists) {
           return false
         }
-        console.log(self.getCollaborationDelegatee(ECollaborationType.review))
-        const designatedReviewerCollaboration = self.getCollaborationDelegatee(ECollaborationType.review)
 
-        return (
-          !designatedReviewerCollaboration || designatedReviewerCollaboration.collaborator?.user?.id !== currentUser.id
-        )
+        if (featureEnabled === true && !designatedReviewerExists) {
+          return true
+        }
+
+        return false
       },
     }))
     .actions((self) => ({

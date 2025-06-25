@@ -1,11 +1,9 @@
-import { Button, Container, Flex, Heading, Text, VStack } from "@chakra-ui/react"
-import { CaretLeft } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { useJurisdiction } from "../../../../../../hooks/resources/use-jurisdiction"
-import { SwitchButton } from "../../../../../shared/buttons/switch-button"
+import { DesignatedReviewerSettings } from "../../../../../shared/designated-reviewer-settings"
 
 export const DesignatedReviewerScreen = observer(() => {
   const i18nPrefix = "home.configurationManagement.featureAccess"
@@ -14,30 +12,18 @@ export const DesignatedReviewerScreen = observer(() => {
   const { t } = useTranslation()
   const [isEnabled, setIsEnabled] = useState(currentJurisdiction?.allowDesignatedReviewer ?? false)
 
-  const handleToggle = (checked) => {
+  const handleToggle = (checked: boolean) => {
     setIsEnabled(checked)
     currentJurisdiction.update({ allowDesignatedReviewer: checked })
   }
 
   return (
-    <Container maxW="container.lg" p={8} as={"main"}>
-      <VStack alignItems={"flex-start"} w={"full"} h={"full"} gap={6}>
-        <Button variant="link" onClick={() => navigate(-1)} leftIcon={<CaretLeft size={20} />} textDecoration="none">
-          {t("ui.back")}
-        </Button>
-        <Flex align="center" w="100%" direction="column" alignItems="flex-start">
-          <Heading as="h1" mb={4}>
-            {/* ts-ignore */}
-            {t(`${i18nPrefix}.designatedReviewer`)}
-          </Heading>
-        </Flex>
-      </VStack>
-      <Flex mt={8} align="center" w="100%" direction="row" justify="space-between">
-        <Flex direction="column" alignItems="flex-start">
-          <Text>{t(`${i18nPrefix}.editDesignatedReviewer`)}</Text>
-        </Flex>
-        <SwitchButton isChecked={isEnabled} onChange={(e) => handleToggle(e.target.checked)} size={"lg"} />
-      </Flex>
-    </Container>
+    <DesignatedReviewerSettings
+      handleBack={() => navigate(-1)}
+      title={t(`${i18nPrefix}.designatedReviewer`)}
+      description={t(`${i18nPrefix}.editDesignatedReviewer`)}
+      isEnabled={isEnabled}
+      onToggle={handleToggle}
+    />
   )
 })
