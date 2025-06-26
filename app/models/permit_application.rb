@@ -31,6 +31,8 @@ class PermitApplication < ApplicationRecord
   belongs_to :template_version
   belongs_to :sandbox, optional: true
 
+  has_one :requirement_template, through: :template_version
+
   # The front end form update provides a json paylioad of items we want to force update on the front-end since form io maintains its own state and does not 'rerender' if we send the form data back
   attr_accessor :front_end_form_update
 

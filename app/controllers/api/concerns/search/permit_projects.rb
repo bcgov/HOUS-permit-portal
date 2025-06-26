@@ -33,7 +33,12 @@ module Api::Concerns::Search::PermitProjects
       :query,
       :page,
       :per_page,
-      filters: %i[jurisdiction_id show_archived phase],
+      filters: [
+        :jurisdiction_id,
+        :show_archived,
+        :phase,
+        requirement_template_ids: []
+      ],
       sort: %i[field direction]
     )
   end
@@ -63,6 +68,11 @@ module Api::Concerns::Search::PermitProjects
 
     phase = search_filters.delete(:phase)
     search_filters[:phase] = phase if phase.present? && phase != "all"
+
+    requirement_template_ids = search_filters.delete(:requirement_template_ids)
+    if requirement_template_ids.present?
+      search_filters[:requirement_template_ids] = requirement_template_ids
+    end
 
     search_filters[:discarded] = show_archived
 

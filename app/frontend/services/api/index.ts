@@ -450,6 +450,10 @@ export class Api {
     return this.client.post<IRequirementTemplateResponse>(`/requirement_templates/search`, params)
   }
 
+  async fetchRequirementTemplatesForFilter() {
+    return this.client.get<IApiResponse<{ id: string; nickname: string }[], {}>>(`/requirement_templates/for_filter`)
+  }
+
   async fetchRequirementTemplate(id: string) {
     return this.client.get<IApiResponse<IRequirementTemplate, {}>>(`/requirement_templates/${id}`)
   }

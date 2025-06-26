@@ -5,6 +5,7 @@ import {
   FormControl,
   GridItem,
   Heading,
+  HStack,
   IconButton,
   Menu,
   MenuButton,
@@ -36,6 +37,7 @@ import { RouterLink } from "../../shared/navigation/router-link"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { GridHeaders } from "./grid-header"
 import { PhaseFilter } from "./phase-filter"
+import { RequirementTemplateFilter } from "./requirement-template-filter"
 
 interface IPermitProjectIndexScreenProps {}
 
@@ -163,7 +165,10 @@ export const PermitProjectIndexScreen = observer(({}: IPermitProjectIndexScreenP
                   />
                 </FormControl>
                 <Flex justifyContent={"space-between"} w="full">
-                  <ActiveArchivedFilter searchModel={permitProjectStore} />
+                  <HStack>
+                    <ActiveArchivedFilter searchModel={permitProjectStore} />
+                    <RequirementTemplateFilter searchModel={permitProjectStore} />
+                  </HStack>
                   <PhaseFilter searchModel={permitProjectStore} />
                 </Flex>
               </Flex>

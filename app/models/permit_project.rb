@@ -30,7 +30,12 @@ class PermitProject < ApplicationRecord
       updated_at: updated_at,
       discarded: discarded_at.present?,
       phase: phase,
-      forcasted_completion_date: forcasted_completion_date
+      forcasted_completion_date: forcasted_completion_date,
+      requirement_template_ids:
+        permit_applications
+          .map { |pa| pa.requirement_template&.id }
+          .compact
+          .uniq
     }
   end
 

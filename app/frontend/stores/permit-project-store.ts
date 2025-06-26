@@ -25,6 +25,7 @@ export const PermitProjectStoreModel = types
       tablePermitProjects: types.array(types.reference(PermitProjectModel)), // For table views
       currentPermitProject: types.maybeNull(types.reference(PermitProjectModel)),
       phaseFilter: types.maybeNull(types.enumeration(Object.values(EPermitProjectPhase))),
+      requirementTemplateFilter: types.maybeNull(types.array(types.string)),
     }),
     createSearchModel<EPermitProjectSortFields>("searchPermitProjects", "setPermitProjectFilters")
   )
@@ -67,6 +68,11 @@ export const PermitProjectStoreModel = types
           permitProject.permitApplications?.map((app) => (typeof app === "object" ? app.id : app)) || [],
       })
     },
+    setRequirementTemplateFilter(value: string[]) {
+      self.requirementTemplateFilter = cast(value)
+      const paramValue = value && value.length > 0 ? value.join(",") : null
+      setQueryParam("requirementTemplateFilter", paramValue)
+    },
     setCurrentPermitProject(permitProjectId: string | null) {
       if (permitProjectId === null) {
         self.currentPermitProject = null
@@ -101,6 +107,7 @@ export const PermitProjectStoreModel = types
           showArchived: self.showArchived,
           query: self.query,
           phase: self.phaseFilter,
+          requirementTemplateIds: self.requirementTemplateFilter,
         },
       }
 
@@ -168,8 +175,17 @@ export const PermitProjectStoreModel = types
       return response
     }),
     setPermitProjectFilters(queryParams: URLSearchParams) {
+      const showArchived = queryParams.get("showArchived")
+      const query = queryParams.get("query")
+      const requirementTemplateFilter = queryParams.get("requirementTemplateFilter")
       const phase = queryParams.get("phase") as EPermitProjectPhase
+
       self.phaseFilter = phase
+      self.setShowArchived(showArchived === "true")
+      self.setQuery(query || "")
+      if (requirementTemplateFilter) {
+        self.setRequirementTemplateFilter(requirementTemplateFilter.split(","))
+      }
     },
     createPermitProject: flow(function* (projectData: {
       name: string

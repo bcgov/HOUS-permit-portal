@@ -10,7 +10,7 @@ import { withRootStore } from "../lib/with-root-store"
 import { IRequirementTemplate, RequirementTemplateModel } from "../models/requirement-template"
 import { IRequirementTemplateUpdateParams } from "../types/api-request"
 import { ERequirementTemplateSortFields, EVisibility } from "../types/enums"
-import { ICopyRequirementTemplateFormData, TCreateRequirementTemplateFormData } from "../types/types"
+import { ICopyRequirementTemplateFormData, IOption, TCreateRequirementTemplateFormData } from "../types/types"
 import { toCamelCase } from "../utils/utility-functions"
 
 export const RequirementTemplateStoreModel = types
@@ -18,6 +18,7 @@ export const RequirementTemplateStoreModel = types
     types.model("RequirementTemplateStoreModel").props({
       requirementTemplateMap: types.map(RequirementTemplateModel),
       tableRequirementTemplates: types.array(types.safeReference(RequirementTemplateModel)),
+      filterOptions: types.optional(types.array(types.frozen<IOption>()), []),
     }),
     createSearchModel<ERequirementTemplateSortFields>("fetchRequirementTemplates")
   )
@@ -183,6 +184,13 @@ export const RequirementTemplateStoreModel = types
       }
 
       return false
+    }),
+    fetchFilterOptions: flow(function* () {
+      const response = yield* toGenerator(self.environment.api.fetchRequirementTemplatesForFilter())
+      if (response.ok) {
+        self.filterOptions = cast(response.data.data)
+      }
+      return response.ok
     }),
   }))
   .actions((self) => ({

@@ -2514,6 +2514,7 @@ const options = {
           changed: "changed",
           added: "added",
           removed: "removed",
+          filter: "Template",
           edit: {
             requirementsLibraryTab: "Requirements Library",
             earlyAccessRequirementsLibraryTab: "Early Access Requirements Library",

@@ -32,6 +32,18 @@ class Api::RequirementTemplatesController < Api::ApplicationController
                    }
   end
 
+  def for_filter
+    authorize :requirement_template, :for_filter?
+    templates =
+      LiveRequirementTemplate.with_published_version.kept.includes(
+        :permit_type,
+        :activity
+      )
+    render_success templates,
+                   nil,
+                   { blueprint: OptionsBlueprint, view: :default }
+  end
+
   def show
     authorize @requirement_template
 
