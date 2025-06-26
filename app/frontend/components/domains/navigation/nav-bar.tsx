@@ -425,6 +425,10 @@ const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
                 <NavMenuItem label={t("site.home")} to="/" />
                 <NavMenuItem label={t("home.jurisdictionsTitle")} to={"/jurisdictions"} />
                 <NavMenuItem label={t("home.projectReadinessTools.title")} to={"/project-readiness-tools"} />
+                <NavMenuItem
+                  label={t("home.joinTheBuildingPermitHub.title")}
+                  to={"/onboarding-checklist-page-for-lg-adopting"}
+                />
                 {loggedIn && <NavMenuItem label={t("auth.logout")} onClick={handleClickLogout} />}
               </>
             )}
