@@ -202,6 +202,10 @@ class Jurisdiction < ApplicationRecord
     "#{name}, #{qualifier}"
   end
 
+  def disambiguated_name
+    disambiguator.present? ? "#{name} (#{disambiguator})" : name
+  end
+
   def review_managers_size
     (review_managers&.size || 0) + (regional_review_managers&.size || 0)
   end

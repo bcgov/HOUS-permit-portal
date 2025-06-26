@@ -1,7 +1,20 @@
-import { Button, ButtonProps, Checkbox, Menu, MenuButton, MenuList, useCheckboxGroup, VStack } from "@chakra-ui/react"
-import { CaretDown } from "@phosphor-icons/react"
+import {
+  Button,
+  ButtonProps,
+  Checkbox,
+  Divider,
+  Input,
+  InputGroup,
+  InputLeftElement,
+  Menu,
+  MenuButton,
+  MenuList,
+  useCheckboxGroup,
+  VStack,
+} from "@chakra-ui/react"
+import { CaretDown, MagnifyingGlass } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
-import React, { useEffect } from "react"
+import React, { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { ISearch } from "../../../lib/create-search-model"
 import { useMst } from "../../../setup/root"
@@ -17,6 +30,7 @@ export const RequirementTemplateFilter = observer(function RequirementTemplateFi
   const { t } = useTranslation()
   const { requirementTemplateStore } = useMst()
   const { requirementTemplateFilter, setRequirementTemplateFilter, search } = searchModel as any
+  const [searchTerm, setSearchTerm] = useState("")
 
   useEffect(() => {
     requirementTemplateStore.fetchFilterOptions()
@@ -27,26 +41,35 @@ export const RequirementTemplateFilter = observer(function RequirementTemplateFi
     search()
   }
 
+  const handleReset = () => {
+    setRequirementTemplateFilter(null)
+    search()
+  }
+
   const { getCheckboxProps } = useCheckboxGroup({
     value: requirementTemplateFilter || [],
     onChange: handleChange,
   })
 
+  const filteredOptions = requirementTemplateStore.filterOptions?.filter((option) =>
+    option.label.toLowerCase().includes(searchTerm.toLowerCase())
+  )
+
   return (
     <Menu>
-      <MenuButton
-        as={Button}
-        variant="outline"
-        // borderColor="semantic.info"
-        // bg="semantic.infoLight"
-        rightIcon={<CaretDown />}
-        {...rest}
-      >
+      <MenuButton as={Button} variant="outline" rightIcon={<CaretDown />} {...rest}>
         {t("requirementTemplate.filter")}
       </MenuButton>
       <MenuList p={4} zIndex="dropdown">
         <VStack align="start" spacing={4}>
-          {requirementTemplateStore?.filterOptions?.map((option) => {
+          <InputGroup>
+            <InputLeftElement pointerEvents="none">
+              <MagnifyingGlass />
+            </InputLeftElement>
+            <Input placeholder={t("ui.search")} value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+          </InputGroup>
+          <Divider />
+          {filteredOptions?.map((option) => {
             const checkboxProps = getCheckboxProps({ value: option.value })
             return (
               <Checkbox key={option.value} {...checkboxProps}>
@@ -54,6 +77,17 @@ export const RequirementTemplateFilter = observer(function RequirementTemplateFi
               </Checkbox>
             )
           })}
+          <Divider />
+          <Button
+            onClick={handleReset}
+            variant="primary"
+            size="sm"
+            alignSelf="center"
+            w="full"
+            isDisabled={!requirementTemplateFilter || requirementTemplateFilter.length === 0}
+          >
+            {t("ui.reset", "Reset")}
+          </Button>
         </VStack>
       </MenuList>
     </Menu>

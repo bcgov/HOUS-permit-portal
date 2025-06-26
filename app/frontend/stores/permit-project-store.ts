@@ -1,5 +1,5 @@
 import { t } from "i18next"
-import { cast, flow, Instance, types } from "mobx-state-tree"
+import { cast, flow, Instance, toGenerator, types } from "mobx-state-tree"
 import * as R from "ramda"
 import { createSearchModel } from "../lib/create-search-model"
 import { withEnvironment } from "../lib/with-environment"
@@ -11,12 +11,6 @@ import { EPermitProjectPhase, EPermitProjectSortFields } from "../types/enums" /
 import { IPermitProjectSearchFilters, IProjectDocument, TSearchParams } from "../types/types" // Import IPermitProjectSearchFilters and IProjectDocument from types
 import { setQueryParam } from "../utils/utility-functions"
 
-// Define search filters for PermitProjects
-// export interface IPermitProjectSearchFilters {
-//   query?: string
-//   // Add other specific filters if needed, e.g., status, submitterId
-// }
-
 export const PermitProjectStoreModel = types
   .compose(
     types.model("PermitProjectStoreModel", {
@@ -26,6 +20,7 @@ export const PermitProjectStoreModel = types
       currentPermitProject: types.maybeNull(types.reference(PermitProjectModel)),
       phaseFilter: types.maybeNull(types.enumeration(Object.values(EPermitProjectPhase))),
       requirementTemplateFilter: types.maybeNull(types.array(types.string)),
+      isFetchingPinnedProjects: types.optional(types.boolean, false),
     }),
     createSearchModel<EPermitProjectSortFields>("searchPermitProjects", "setPermitProjectFilters")
   )
@@ -127,14 +122,19 @@ export const PermitProjectStoreModel = types
       return response.ok
     }),
     fetchPinnedProjects: flow(function* () {
-      const response = yield self.environment.api.fetchPinnedProjects()
-      if (response.ok && response.data) {
-        self.mergeUpdateAll(response.data.data, "permitProjectMap")
-        self.setPinnedProjects(response.data.data)
-      } else {
-        console.error("Failed to fetch pinned projects:", response)
+      self.isFetchingPinnedProjects = true
+      try {
+        const response = yield* toGenerator(self.environment.api.fetchPinnedProjects())
+        if (response.ok && response.data) {
+          self.mergeUpdateAll(response.data.data, "permitProjectMap")
+          self.setPinnedProjects(response.data.data)
+        } else {
+          console.error("Failed to fetch pinned projects:", response)
+        }
+        return response.ok
+      } finally {
+        self.isFetchingPinnedProjects = false
       }
-      return response.ok
     }),
     fetchPermitProject: flow(function* (id: string) {
       const response = yield self.environment.api.fetchPermitProject(id)
@@ -220,38 +220,6 @@ export const PermitProjectStoreModel = types
       setQueryParam("phase", valueToSet)
       self.phaseFilter = valueToSet
     },
-    // PIN TODO: Move this to the project model
-    togglePin: flow(function* (permitProjectId: string) {
-      const project = self.permitProjectMap.get(permitProjectId)
-      if (!project) return
-
-      const originalIsPinned = project.isPinned
-      // Optimistic update
-      project.setIsPinned(!originalIsPinned)
-
-      // Add to pinned list or remove from it
-      if (!originalIsPinned) {
-        self.pinnedProjects.push(project)
-      } else {
-        self.pinnedProjects.replace(self.pinnedProjects.filter((p) => p.id !== project.id))
-      }
-
-      const response = !originalIsPinned
-        ? yield self.environment.api.pinPermitProject(permitProjectId)
-        : yield self.environment.api.unpinPermitProject(permitProjectId)
-
-      if (response.ok) {
-        self.mergeUpdate(response.data.data, "permitProjectMap")
-      } else {
-        // Revert on failure
-        project.setIsPinned(originalIsPinned)
-        if (!originalIsPinned) {
-          self.pinnedProjects.replace(self.pinnedProjects.filter((p) => p.id !== project.id))
-        } else {
-          self.pinnedProjects.push(project)
-        }
-      }
-    }),
   }))
 
 export interface IPermitProjectStore extends Instance<typeof PermitProjectStoreModel> {}

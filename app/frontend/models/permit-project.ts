@@ -1,4 +1,4 @@
-import { Instance, types } from "mobx-state-tree"
+import { flow, Instance, toGenerator, types } from "mobx-state-tree"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
 import { EPermitApplicationStatus } from "../types/enums"
@@ -25,6 +25,34 @@ export const PermitProjectModel = types
     setIsPinned(isPinned: boolean) {
       self.isPinned = isPinned
     },
+    togglePin: flow(function* () {
+      const originalIsPinned = self.isPinned
+      // Optimistic update
+      self.isPinned = !originalIsPinned
+
+      const store = self.rootStore.permitProjectStore
+      if (!originalIsPinned) {
+        store.pinnedProjects.push(self)
+      } else {
+        store.pinnedProjects.replace(store.pinnedProjects.filter((p) => p.id !== self.id))
+      }
+
+      const response = !originalIsPinned
+        ? yield* toGenerator(self.environment.api.pinPermitProject(self.id))
+        : yield* toGenerator(self.environment.api.unpinPermitProject(self.id))
+
+      if (response.ok) {
+        store.mergeUpdate(response.data.data, "permitProjectMap")
+      } else {
+        // Revert on failure
+        self.isPinned = originalIsPinned
+        if (!originalIsPinned) {
+          store.pinnedProjects.replace(store.pinnedProjects.filter((p) => p.id !== self.id))
+        } else {
+          store.pinnedProjects.push(self)
+        }
+      }
+    }),
   }))
 
 export interface IPermitProject extends Instance<typeof PermitProjectModel> {}
