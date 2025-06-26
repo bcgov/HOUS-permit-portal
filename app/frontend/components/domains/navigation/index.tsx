@@ -110,6 +110,11 @@ const LettersOfAssuranceScreen = lazy(() =>
     default: module.LettersOfAssuranceScreen,
   }))
 )
+const OnboardingChecklistPageForLgAdoptingScreen = lazy(() =>
+  import("../onboarding/onboarding-checklist-page-for-lg-adopting-screen").then((module) => ({
+    default: module.OnboardingChecklistPageForLgAdoptingScreen,
+  }))
+)
 const PermitApplicationIndexScreen = lazy(() =>
   import("../permit-application").then((module) => ({ default: module.PermitApplicationIndexScreen }))
 )
@@ -645,6 +650,10 @@ const AppRoutes = observer(() => {
         <Route
           path="/project-readiness-tools/create-your-letters-of-assurance"
           element={<LettersOfAssuranceScreen />}
+        />
+        <Route
+          path="/onboarding-checklist-page-for-lg-adopting"
+          element={<OnboardingChecklistPageForLgAdoptingScreen />}
         />
         <Route path="/confirmed" element={<EmailConfirmedScreen />} />
         <Route path="/welcome" element={<LandingScreen />} />
