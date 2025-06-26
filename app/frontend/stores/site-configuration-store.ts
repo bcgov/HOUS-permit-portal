@@ -5,6 +5,11 @@ import { RevisionReasonModel } from "../models/revision-reason"
 import { ISiteConfigurationUpdateParams } from "../types/api-request"
 import { IHelpLinkItems } from "../types/types.js"
 
+interface ILandingPageTemplate {
+  id: string
+  nickname: string
+}
+
 // Define the SiteConfiguration model
 export const SiteConfigurationStoreModel = types.snapshotProcessor(
   types
@@ -16,7 +21,7 @@ export const SiteConfigurationStoreModel = types.snapshotProcessor(
       sitewideMessage: types.maybeNull(types.string),
       helpLinkItems: types.frozen<IHelpLinkItems>(),
       revisionReasonsMap: types.map(RevisionReasonModel),
-      smallScaleRequirementTemplateId: types.maybeNull(types.string),
+      landingPageEarlyAccessRequirementTemplates: types.optional(types.frozen<ILandingPageTemplate[]>(), []),
     })
     .extend(withRootStore())
     .extend(withEnvironment())
@@ -25,8 +30,7 @@ export const SiteConfigurationStoreModel = types.snapshotProcessor(
         self.configurationLoaded = false
         const response: any = yield self.environment.api.fetchSiteConfiguration()
         if (response.ok) {
-          let responseData = response.data.data
-          applySnapshot(self, preProcessor(responseData))
+          applySnapshot(self, preProcessor(response.data.data))
         }
         self.configurationLoaded = true
         return response.ok
@@ -38,8 +42,7 @@ export const SiteConfigurationStoreModel = types.snapshotProcessor(
         const response: any = yield self.environment.api.updateSiteConfiguration(siteConfiguration)
 
         if (response.ok) {
-          let responseData = response.data.data
-          applySnapshot(self, preProcessor(responseData))
+          applySnapshot(self, preProcessor(response.data.data))
           self.configurationLoaded = true
         }
         self.configurationLoaded = true
@@ -56,10 +59,11 @@ export const SiteConfigurationStoreModel = types.snapshotProcessor(
       get activeRevisionReasons() {
         return Array.from(self.revisionReasonsMap.values()).filter((reason) => !reason.discardedAt)
       },
-    }))
-    .views((self) => ({
+      get landingPageEarlyAccessRequirementTemplateIds() {
+        return self.landingPageEarlyAccessRequirementTemplates.map((template) => template.id)
+      },
       get revisionReasonOptions() {
-        return self.activeRevisionReasons.map((rr) => ({ label: rr.description, value: rr.reasonCode }))
+        return this.activeRevisionReasons.map((rr) => ({ label: rr.description, value: rr.reasonCode }))
       },
       get shownHelpLinkItems() {
         if (!self?.helpLinkItems) return []
@@ -81,6 +85,7 @@ function preProcessor(snapshot) {
       return acc
     }, {})
   }
+
   return processedSnapShot
 }
 

@@ -1,5 +1,5 @@
 import { IRevisionReason } from "../models/revision-reason"
-import { ELandingTemplateKeys, ENumberUnit, ERequirementType, ETagType, EVisibility } from "./enums"
+import { ENumberUnit, ERequirementType, ETagType, EVisibility } from "./enums"
 import {
   IHelpLinkItems,
   IOption,
@@ -101,12 +101,12 @@ export interface IInvitePreviewersParams {
 }
 
 export interface ISiteConfigurationUpdateParams {
-  displaySitewideMessage?: boolean | null
-  inboxEnabled?: boolean | null
-  sitewideMessage?: string | null
+  displaySitewideMessage?: boolean
+  sitewideMessage?: string
+  inboxEnabled?: boolean
   helpLinkItems?: IHelpLinkItems
   revisionReasonsMap?: { [key: string]: IRevisionReason }
-  [ELandingTemplateKeys.SmallScale]?: string | null
+  landingPageEarlyAccessRequirementTemplateIds?: string[] | null
   revisionReasonsAttributes?: IRevisionReasonsAttributes[]
 }
 
