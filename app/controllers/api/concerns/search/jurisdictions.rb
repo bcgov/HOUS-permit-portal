@@ -48,7 +48,7 @@ module Api::Concerns::Search::Jurisdictions
       :query,
       :page,
       :per_page,
-      filters: [:submission_inbox_set_up],
+      filters: %i[submission_inbox_set_up inbox_enabled],
       sort: %i[field direction]
     )
   end
