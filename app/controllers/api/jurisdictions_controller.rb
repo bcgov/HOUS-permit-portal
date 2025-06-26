@@ -124,7 +124,7 @@ class Api::JurisdictionsController < Api::ApplicationController
     class_to_use =
       Jurisdiction.class_for_locality_type(jurisdiction_params[:locality_type])
 
-    @jurisdiction = class_to_use.build(jurisdiction_params)
+    @jurisdiction = class_to_use.build(processed_jurisdiction_params)
 
     authorize @jurisdiction
 
@@ -264,6 +264,16 @@ class Api::JurisdictionsController < Api::ApplicationController
         _destroy
       ]
     )
+  end
+
+  def processed_jurisdiction_params
+    current_params = jurisdiction_params
+    current_params[:name] = current_params[:name]
+      .split
+      .map
+      .with_index { |word, i| i.zero? ? word.capitalize : word }
+      .join(" ")
+    current_params
   end
 
   def update_external_api_enabled_params
