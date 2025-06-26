@@ -196,7 +196,8 @@ class Api::TemplateVersionsController < Api::ApplicationController
     authorize @template_version, :show?
 
     @integration_mapping =
-      @template_version.integration_mappings.find_by(
+      IntegrationMapping.find_or_create_by!(
+        template_version_id: @template_version.id,
         jurisdiction_id: params[:jurisdiction_id]
       )
 
@@ -208,7 +209,8 @@ class Api::TemplateVersionsController < Api::ApplicationController
                      {
                        blueprint: IntegrationMappingBlueprint,
                        blueprint_opts: {
-                         view: :base
+                         view: :base,
+                         sandbox: current_sandbox
                        }
                      }
     else
