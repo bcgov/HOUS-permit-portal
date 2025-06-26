@@ -72,6 +72,14 @@ const ReviewStaffMyJurisdictionAboutPageScreen = lazy(() =>
   }))
 )
 
+const DesignatedReviewerScreen = lazy(() =>
+  import("../home/review-manager/configuration-management-screen/feature-access-screen/designated-reviewer").then(
+    (module) => ({
+      default: module.DesignatedReviewerScreen,
+    })
+  )
+)
+
 const JurisdictionIndexScreen = lazy(() =>
   import("../jurisdictions/index").then((module) => ({ default: module.JurisdictionIndexScreen }))
 )
@@ -242,6 +250,12 @@ const AdminGlobalFeatureAccessScreen = lazy(() =>
 const AdminSubmissionInboxScreen = lazy(() =>
   import("../super-admin/site-configuration-management/submission-inbox").then((module) => ({
     default: module.AdminSubmissionInboxScreen,
+  }))
+)
+
+const AdminDesignatedReviewerScreen = lazy(() =>
+  import("../super-admin/site-configuration-management/designated-reviewer-screen").then((module) => ({
+    default: module.AdminDesignatedReviewerScreen,
   }))
 )
 
@@ -422,6 +436,10 @@ const AppRoutes = observer(() => {
         path="/configuration-management/global-feature-access/submission-inbox"
         element={<AdminSubmissionInboxScreen />}
       />
+      <Route
+        path="/configuration-management/global-feature-access/designated-reviewer"
+        element={<AdminDesignatedReviewerScreen />}
+      />
       <Route path="/configuration-management/users/invite" element={<AdminInviteScreen />} />
       <Route path="/reporting" element={<ReportingScreen />} />
       <Route path="/reporting/export-template-summary" element={<ExportTemplateSummaryScreen />} />
@@ -459,6 +477,10 @@ const AppRoutes = observer(() => {
       <Route
         path="/jurisdictions/:jurisdictionId/configuration-management/feature-access/my-jurisdiction-about-page"
         element={<ReviewStaffMyJurisdictionAboutPageScreen />}
+      />
+      <Route
+        path="/jurisdictions/:jurisdictionId/configuration-management/feature-access/designated-reviewer"
+        element={<DesignatedReviewerScreen />}
       />
       <Route
         path="/jurisdictions/:jurisdictionId/configuration-management/energy-step"
