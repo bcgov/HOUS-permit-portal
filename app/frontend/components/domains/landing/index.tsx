@@ -93,7 +93,7 @@ export const LandingScreen = observer(({}: ILandingScreenProps) => {
               >
                 {currentUser
                   ? t("landing.goTo", {
-                      location: currentUser?.isSubmitter ? t("landing.submitterPanel") : t("landing.adminPanel"),
+                      location: currentUser?.isSuperAdmin ? t("landing.adminPanel") : t("landing.submitterPanel"),
                     })
                   : t("landing.permitApp")}
               </RouterLinkButton>
@@ -124,8 +124,10 @@ export const LandingScreen = observer(({}: ILandingScreenProps) => {
             <Heading as="h2" fontSize="2xl" mb={2} fontWeight="bold">
               {t("landing.toolsSectionTitle")}
             </Heading>
-            <Text fontSize="lg">{t("landing.toolsSectionDesc1")}</Text>
-            <Text fontSize="lg">{t("landing.toolsSectionDesc2")}</Text>
+            <Text fontSize="lg">
+              {t("landing.toolsSectionDesc1")}
+              {t("landing.toolsSectionDesc2")}
+            </Text>
             <Button
               as={RouterLink}
               to="/tools"

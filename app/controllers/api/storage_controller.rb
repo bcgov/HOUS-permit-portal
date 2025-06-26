@@ -208,12 +208,12 @@ class Api::StorageController < Api::ApplicationController
   private
 
   def set_record
-    unless params[:model_id] && AUTHORIZED_S3_MODELS[params[:model]]
+    unless params[:modelId] && AUTHORIZED_S3_MODELS[params[:model]]
       raise ActiveRecord::RecordNotFound
     end
 
     record_class = AUTHORIZED_S3_MODELS[params[:model]]
-    @record = record_class.find(params[:model_id])
+    @record = record_class.find(params[:modelId])
   rescue ActiveRecord::RecordNotFound => e
     render_error("misc.not_found_error", { status: :not_found }, e)
   end

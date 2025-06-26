@@ -34,7 +34,8 @@ class PermitApplication < ApplicationRecord
 
   # The front end form update provides a json paylioad of items we want to force update on the front-end since form io maintains its own state and does not 'rerender' if we send the form data back
   attr_accessor :front_end_form_update
-  has_one :step_code
+
+  has_one :step_code, dependent: :destroy
   has_many :submission_versions, dependent: :destroy
   has_many :permit_collaborations, dependent: :destroy
   has_many :collaborators, through: :permit_collaborations
@@ -55,8 +56,11 @@ class PermitApplication < ApplicationRecord
   validate :sandbox_belongs_to_jurisdiction
   validate :template_version_of_live_template
 
-  delegate :qualified_name, to: :jurisdiction, prefix: true
-  delegate :name, to: :jurisdiction, prefix: true
+  delegate :qualified_name,
+           :heating_degree_days,
+           :name,
+           to: :jurisdiction,
+           prefix: true
   delegate :code, :name, to: :permit_type, prefix: true
   delegate :code, :name, to: :activity, prefix: true
   delegate :published_template_version, to: :template_version

@@ -269,7 +269,7 @@ export async function downloadFileFromStorage(options: {
   const { model, modelId, filename } = options
   console.log("[DownloadDebug] Attempting to download:", { model, modelId, filename })
   try {
-    const response = await fetch(`/api/s3/params/download?model=${model}&model_id=${modelId}`, {
+    const response = await fetch(`/api/s3/params/download?model=${model}&modelId=${modelId}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -305,4 +305,38 @@ export async function downloadFileFromStorage(options: {
 export function isSafari() {
   // Check if the browser is Safari
   return /^((?!chrome|android).)*safari/i.test(navigator.userAgent)
+}
+
+/**
+ * Converts a number to a localized string representation (defaults to en-CA)
+ * @param value - Number to format
+ * @param options - Intl.NumberFormatOptions for additional formatting options
+ * @param locale - BCP 47 language tag (e.g., 'en-CA', 'fr-CA')
+ * @returns Formatted string or empty string if value is null/undefined
+ */
+export function numberToFormattedString(
+  value: number | null | undefined,
+  options: Intl.NumberFormatOptions = {},
+  locale: string = "en-CA"
+): string {
+  if (value === null || value === undefined) return ""
+
+  return value.toLocaleString(locale, {
+    maximumFractionDigits: 3,
+    ...options,
+  })
+}
+
+/**
+ * Converts a formatted string back to a number
+ * @param value - Formatted string to parse (e.g., "1,234.56")
+ * @returns Parsed number or 0 if input is empty/invalid
+ */
+export function formattedStringToNumber(value: string): number {
+  const rawValue = value.replace(/,/g, "")?.trim()
+
+  if (!rawValue) return 0
+
+  const parsedValue = Number(rawValue)
+  return !isNaN(parsedValue) ? parsedValue : 0
 }

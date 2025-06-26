@@ -1,6 +1,6 @@
 require "rails_helper"
 
-RSpec.describe AutomatedComplianceUtils do
+RSpec.describe AutomatedComplianceUtils, type: :concern, search: true do
   #permit_application uses this
   let!(:requirement_template) do
     create(:live_requirement_template_with_compliance)

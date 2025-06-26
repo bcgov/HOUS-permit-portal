@@ -1,7 +1,9 @@
 # spec/controllers/api/requirement_blocks_controller_spec.rb
 require "rails_helper"
 
-RSpec.describe Api::RequirementBlocksController, type: :controller do
+RSpec.describe Api::RequirementBlocksController,
+               type: :controller,
+               search: true do
   # Define users with different roles
   let(:super_admin) { create(:user, :super_admin) }
   let(:submitter) { create(:user, :submitter) }

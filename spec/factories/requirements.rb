@@ -27,6 +27,21 @@ FactoryBot.define do
       end
     end
 
+    factory :energy_step_code_tool_part_3_requirement do
+      requirement_code { "energy_step_code_tool_part_3" }
+      input_type { "energy_step_code_part_3" }
+      input_options do
+        {
+          "conditional" => {
+            "eq" => "tool",
+            "show" => true,
+            "when" => "energy_step_code_method"
+          },
+          "energy_step_code" => "part_3"
+        }
+      end
+    end
+
     factory :energy_step_code_method_requirement do
       requirement_code { "energy_step_code_method" }
       input_type { "select" }
