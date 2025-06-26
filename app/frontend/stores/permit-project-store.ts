@@ -15,7 +15,7 @@ export const PermitProjectStoreModel = types
   .compose(
     types.model("PermitProjectStoreModel", {
       permitProjectMap: types.map(PermitProjectModel),
-      pinnedProjects: types.array(types.reference(PermitProjectModel)),
+      pinnedProjectsArray: types.array(types.reference(PermitProjectModel)),
       tablePermitProjects: types.array(types.reference(PermitProjectModel)), // For table views
       currentPermitProject: types.maybeNull(types.reference(PermitProjectModel)),
       phaseFilter: types.maybeNull(types.enumeration(Object.values(EPermitProjectPhase))),
@@ -37,6 +37,9 @@ export const PermitProjectStoreModel = types
     },
     get permitProjects() {
       return Array.from(self.permitProjectMap.values())
+    },
+    get pinnedProjects() {
+      return self.pinnedProjectsArray.map((p) => p)
     },
     // Add other views as needed
   }))
@@ -85,7 +88,15 @@ export const PermitProjectStoreModel = types
       self.tablePermitProjects = cast(projects.map((p) => p.id))
     },
     setPinnedProjects: (projects: IPermitProject[]) => {
-      self.pinnedProjects = cast(projects.map((p) => p.id))
+      self.pinnedProjectsArray = cast(projects.map((p) => p.id))
+    },
+    togglePinnedProject(project: IPermitProject) {
+      const isPinned = self.pinnedProjectsArray.some((p) => p.id === project.id)
+      if (isPinned) {
+        self.pinnedProjectsArray.remove(project)
+      } else {
+        self.pinnedProjectsArray.push(project)
+      }
     },
   }))
   .actions((self) => ({
@@ -111,11 +122,7 @@ export const PermitProjectStoreModel = types
       if (response.ok && response.data) {
         self.mergeUpdateAll(response.data.data, "permitProjectMap")
         self.setTablePermitProjects(response.data.data.map((p) => self.permitProjectMap.get(p.id)))
-
-        self.currentPage = response.data.meta.currentPage
-        self.totalPages = response.data.meta.totalPages
-        self.totalCount = response.data.meta.totalCount
-        self.countPerPage = response.data.meta.perPage
+        self.setPageFields(response.data.meta, opts)
       } else {
         console.error("Failed to search permit projects:", response)
       }
@@ -160,6 +167,7 @@ export const PermitProjectStoreModel = types
           const attribute: IProjectDocumentAttribute = {
             id: doc.id,
             permitProjectId: doc.permitProjectId,
+            // TODO: fix this
             file: doc.file,
             _destroy: doc._destroy,
           }

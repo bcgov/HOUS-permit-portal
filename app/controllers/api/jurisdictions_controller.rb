@@ -24,11 +24,7 @@ class Api::JurisdictionsController < Api::ApplicationController
     render_success authorized_results,
                    nil,
                    {
-                     meta: {
-                       total_pages: @search.total_pages,
-                       total_count: @search.total_count,
-                       current_page: @search.current_page
-                     },
+                     meta: page_meta(@search),
                      blueprint: JurisdictionBlueprint,
                      blueprint_opts: {
                        view: :base,
@@ -168,11 +164,7 @@ class Api::JurisdictionsController < Api::ApplicationController
     render_success authorized_results,
                    nil,
                    {
-                     meta: {
-                       total_pages: @user_search.total_pages,
-                       total_count: @user_search.total_count,
-                       current_page: @user_search.current_page
-                     },
+                     meta: page_meta(@user_search),
                      blueprint: UserBlueprint,
                      blueprint_opts: {
                        view: :base
@@ -189,11 +181,7 @@ class Api::JurisdictionsController < Api::ApplicationController
     render_success authorized_results,
                    nil,
                    {
-                     meta: {
-                       total_pages: @permit_application_search.total_pages,
-                       total_count: @permit_application_search.total_count,
-                       current_page: @permit_application_search.current_page
-                     },
+                     meta: page_meta(@permit_application_search),
                      blueprint: PermitApplicationBlueprint,
                      blueprint_opts: {
                        view: :jurisdiction_review_inbox

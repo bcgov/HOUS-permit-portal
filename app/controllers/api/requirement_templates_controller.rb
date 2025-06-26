@@ -20,11 +20,7 @@ class Api::RequirementTemplatesController < Api::ApplicationController
     render_success authorized_results,
                    nil,
                    {
-                     meta: {
-                       total_pages: @search.total_pages,
-                       total_count: @search.total_count,
-                       current_page: @search.current_page
-                     },
+                     meta: page_meta(@search),
                      blueprint: RequirementTemplateBlueprint,
                      blueprint_opts: {
                        current_user: current_user

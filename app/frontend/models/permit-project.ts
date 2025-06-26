@@ -31,11 +31,7 @@ export const PermitProjectModel = types
       self.isPinned = !originalIsPinned
 
       const store = self.rootStore.permitProjectStore
-      if (!originalIsPinned) {
-        store.pinnedProjects.push(self)
-      } else {
-        store.pinnedProjects.replace(store.pinnedProjects.filter((p) => p.id !== self.id))
-      }
+      store.togglePinnedProject(self as IPermitProject)
 
       const response = !originalIsPinned
         ? yield* toGenerator(self.environment.api.pinPermitProject(self.id))
@@ -46,11 +42,7 @@ export const PermitProjectModel = types
       } else {
         // Revert on failure
         self.isPinned = originalIsPinned
-        if (!originalIsPinned) {
-          store.pinnedProjects.replace(store.pinnedProjects.filter((p) => p.id !== self.id))
-        } else {
-          store.pinnedProjects.push(self)
-        }
+        store.togglePinnedProject(self as IPermitProject)
       }
     }),
   }))

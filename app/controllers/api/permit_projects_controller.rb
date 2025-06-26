@@ -21,11 +21,7 @@ class Api::PermitProjectsController < Api::ApplicationController
     render_success authorized_results,
                    nil,
                    {
-                     meta: {
-                       total_pages: @permit_project_search.total_pages,
-                       total_count: @permit_project_search.total_count,
-                       current_page: @permit_project_search.current_page
-                     },
+                     meta: page_meta(@permit_project_search),
                      blueprint: PermitProjectBlueprint,
                      blueprint_opts: blueprint_options
                    }
