@@ -75,6 +75,9 @@ ActiveRecord::Schema[7.1].define(version: 2025_06_26_203759) do
     t.index ["contactable_type", "contactable_id"], name: "index_contacts_on_contactable"
   end
 
+  create_table "data_migrations", primary_key: "version", id: :string, force: :cascade do |t|
+  end
+
   create_table "document_references", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "checklist_id"
     t.string "document_name"
@@ -528,6 +531,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_06_26_203759) do
     t.uuid "copied_from_id"
     t.uuid "assignee_id"
     t.boolean "public", default: false
+    t.string "created_by_test"
     t.uuid "site_configuration_id"
     t.index ["activity_id"], name: "index_requirement_templates_on_activity_id"
     t.index ["assignee_id"], name: "index_requirement_templates_on_assignee_id"
@@ -878,16 +882,8 @@ ActiveRecord::Schema[7.1].define(version: 2025_06_26_203759) do
   add_foreign_key "revision_requests", "submission_versions"
   add_foreign_key "revision_requests", "users"
   add_foreign_key "sandboxes", "jurisdictions"
-<<<<<<< HEAD
-  add_foreign_key "site_configurations", "requirement_templates", column: "small_scale_requirement_template_id"
   add_foreign_key "step_code_building_characteristics_summaries", "part_9_step_code_checklists", column: "checklist_id"
   add_foreign_key "step_code_data_entries", "part_9_step_code_checklists", column: "checklist_id"
-=======
-  add_foreign_key "step_code_building_characteristics_summaries", "step_code_checklists"
-  add_foreign_key "step_code_checklists", "permit_type_required_steps", column: "step_requirement_id"
-  add_foreign_key "step_code_checklists", "step_codes"
-  add_foreign_key "step_code_data_entries", "step_codes"
->>>>>>> be371075d9e2a2095d7620b02ae7e11a73a1d5f5
   add_foreign_key "step_codes", "permit_applications"
   add_foreign_key "submission_versions", "permit_applications"
   add_foreign_key "supporting_documents", "permit_applications"
