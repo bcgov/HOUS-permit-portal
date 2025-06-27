@@ -99,10 +99,11 @@ export const StepCodeStoreModel = types
       }
     }),
     deleteStepCode: flow(function* () {
-      const response = yield self.environment.api.deleteStepCode(self.currentStepCode.id)
+      const stepCodeId = self.currentStepCode.id
+      const response = yield self.environment.api.deleteStepCode(stepCodeId)
       if (response.ok) {
-        self.stepCodesMap.delete(self.currentStepCode.id)
         self.currentStepCode = null
+        self.stepCodesMap.delete(stepCodeId)
       }
     }),
     downloadStepCodeSummary: flow(function* () {

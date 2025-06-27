@@ -19,6 +19,7 @@ import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React, { useState } from "react"
 import { Trans, useTranslation } from "react-i18next"
+import { useNavigate } from "react-router-dom"
 import { useMst } from "../../../setup/root"
 import { EFlashMessageStatus } from "../../../types/enums"
 import { CustomMessageBox } from "../../shared/base/custom-message-box"
@@ -34,6 +35,8 @@ export const SandboxMenuItem: React.FC = observer(() => {
   const { isOpen, onOpen, onClose } = useDisclosure()
   const [selectedOption, setSelectedOption] = useState(sandboxOptions[0]?.value)
 
+  const navigate = useNavigate()
+
   // Handler for toggling the switch
   const handleToggle = () => {
     onOpen() // Open modal in both cases
@@ -47,6 +50,7 @@ export const SandboxMenuItem: React.FC = observer(() => {
       setCurrentSandboxId(selectedOption) // Turn on sandbox mode
     }
     onClose()
+    navigate(0)
   }
 
   if (!currentUser.jurisdiction || R.isEmpty(sandboxOptions)) return <></>

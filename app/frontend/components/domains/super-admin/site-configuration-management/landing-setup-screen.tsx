@@ -1,67 +1,53 @@
-import {
-  Box,
-  Checkbox,
-  Container,
-  Heading,
-  IconButton,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
-  TabPanel,
-  Text,
-} from "@chakra-ui/react"
-import { CaretDown } from "@phosphor-icons/react"
+import { Button, Checkbox, Container, Flex, Heading, TabPanel, Text } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
-import { useForm } from "react-hook-form"
+import { useFieldArray, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { useNavigate, useSearchParams } from "react-router-dom"
+import { useSearchParams } from "react-router-dom"
 import { useActivityOptions } from "../../../../hooks/resources/use-activity-options"
 import { useMst } from "../../../../setup/root"
-import { ELandingTemplateKeys } from "../../../../types/enums"
 import { ErrorScreen } from "../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../shared/base/loading-screen"
 import { ActivityTabSwitcher } from "../../requirement-template/activity-tab-switcher"
 import { DigitalBuildingPermitsList } from "../../requirement-template/digital-building-permits-list"
 
-export type TLandingForm = {
-  [Key in ELandingTemplateKeys]: string
+interface ILandingPageSetupForm {
+  templateIds: { id: string }[]
 }
 
-export const LandingSetupScreen = observer(function LandingSetupScreen() {
+export const LandingSetupScreen = observer(() => {
   const { t } = useTranslation()
-  const { userStore, siteConfigurationStore } = useMst()
-  const { updateSiteConfiguration, configurationLoaded, smallScaleRequirementTemplateId } = siteConfigurationStore
+  const { siteConfigurationStore } = useMst()
+  const { updateSiteConfiguration, landingPageEarlyAccessRequirementTemplateIds } = siteConfigurationStore
   const { activityOptions: allActivityOptions, error: activityOptionsError } = useActivityOptions({
-    customErrorMessage: t("errors.fetchWorkTypeOptions"),
+    customErrorMessage: "Error fetching work type options",
   })
   const [searchParams, setSearchParams] = useSearchParams({ earlyAccess: "true" })
   const enabledActivityOptions = allActivityOptions?.filter((option) => option.value.enabled) ?? null
   const activityId = searchParams.get("activityId")
 
-  const navigate = useNavigate()
-
-  const getFormDefaults = () => {
-    return {
-      [ELandingTemplateKeys.SmallScale]: null,
-    }
-  }
-
-  const formMethods = useForm<TLandingForm>({
-    mode: "onChange",
-    defaultValues: getFormDefaults(),
+  const { control, handleSubmit, reset } = useForm<ILandingPageSetupForm>({
+    defaultValues: { templateIds: [] },
   })
 
-  const { handleSubmit, formState, reset } = formMethods
-  const { isSubmitting } = formState
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "templateIds",
+    keyName: "key",
+  })
 
   useEffect(() => {
-    reset(getFormDefaults())
-  }, [configurationLoaded, reset])
+    if (landingPageEarlyAccessRequirementTemplateIds) {
+      reset({
+        templateIds: landingPageEarlyAccessRequirementTemplateIds.map((id) => ({ id })),
+      })
+    }
+  }, [landingPageEarlyAccessRequirementTemplateIds, reset])
 
-  const onSubmit = async (formData: TLandingForm) => {
-    await updateSiteConfiguration(formData)
+  const onSubmit = async (data: ILandingPageSetupForm) => {
+    await updateSiteConfiguration({
+      landingPageEarlyAccessRequirementTemplateIds: data.templateIds.map((field) => field.id),
+    })
   }
 
   const navigateToActivityTab = (activityId: string, replace?: boolean) => {
@@ -84,26 +70,18 @@ export const LandingSetupScreen = observer(function LandingSetupScreen() {
   const selectedTabIndex = enabledActivityOptions.findIndex((option) => option.value.id === activityId)
 
   if (enabledActivityOptions.length === 0 || selectedTabIndex === -1) {
-    return <ErrorScreen error={new Error(t("errors.workTypeNotFound"))} />
-  }
-
-  // Handler to submit the form with landingAttributes
-  const setLandingTemplateSubmitHandler = (landingPageKey: ELandingTemplateKeys, requirementTemplateId: string) => {
-    const payload: TLandingForm = {
-      [landingPageKey]: requirementTemplateId,
-    }
-    onSubmit(payload)
+    return <ErrorScreen error={new Error("Work type not found")} />
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <Container maxW="container.lg" py={8} px={{ base: 8, xl: 0 }} flexGrow={1} as="main">
-        <Box w="full" px={8}>
+    <Container maxW="container.lg" py={8} px={{ base: 8, xl: 0 }} flexGrow={1} as="main">
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <Flex direction="column" w="full" px={8}>
           <Heading as="h1" size="2xl">
             {t("siteConfiguration.landingPageSetup.title")}
           </Heading>
           <Text color="text.secondary" my={6}>
-            {t("siteConfiguration.landingPageSetup.selectOpenAccessPreviews")}
+            {t("siteConfiguration.landingPageSetup.description")}
           </Text>
 
           <ActivityTabSwitcher
@@ -112,46 +90,37 @@ export const LandingSetupScreen = observer(function LandingSetupScreen() {
             enabledActivityOptions={enabledActivityOptions}
           >
             {enabledActivityOptions.map((activityOption) => (
-              <TabPanel key={activityOption.value.id} w="100%" pt={0}>
+              <TabPanel key={activityOption.value.id} w="100%" px={6}>
                 <DigitalBuildingPermitsList
                   activityId={activityOption.value.id}
                   earlyAccess={true}
                   isPublic={true}
-                  renderButton={(templateVersion) => (
-                    <Menu>
-                      <MenuButton
-                        as={IconButton}
-                        aria-label="Select Template Version"
-                        icon={<CaretDown />}
-                        variant="outline"
-                        size="sm"
-                      />
-                      <MenuList>
-                        <MenuItem
-                          onClick={() =>
-                            setLandingTemplateSubmitHandler(
-                              ELandingTemplateKeys.SmallScale,
-                              templateVersion.requirementTemplateId
-                            )
+                  renderButton={(templateVersion) => {
+                    const fieldIndex = fields.findIndex((field) => field.id === templateVersion.requirementTemplateId)
+                    return (
+                      <Checkbox
+                        isChecked={fieldIndex !== -1}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            append({ id: templateVersion.requirementTemplateId })
+                          } else {
+                            remove(fieldIndex)
                           }
-                        >
-                          <Checkbox
-                            isChecked={smallScaleRequirementTemplateId === templateVersion.requirementTemplateId}
-                          >
-                            {t("siteConfiguration.landingPageSetup.smallScale")}
-                          </Checkbox>
-                        </MenuItem>
-
-                        {/* Future items can be handled similarly by adding to this menu*/}
-                      </MenuList>
-                    </Menu>
-                  )}
+                        }}
+                      >
+                        {t("ui.select")}
+                      </Checkbox>
+                    )
+                  }}
                 />
               </TabPanel>
             ))}
           </ActivityTabSwitcher>
-        </Box>
-      </Container>
-    </form>
+          <Button type="submit" variant="primary" mt={6} mr={6} alignSelf={"flex-end"} justifySelf={"flex-end"}>
+            {t("ui.save")}
+          </Button>
+        </Flex>
+      </form>
+    </Container>
   )
 })

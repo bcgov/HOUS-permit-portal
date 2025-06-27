@@ -1,13 +1,24 @@
 class AddDefaultStepsToJurisdictions < ActiveRecord::Migration[7.1]
-  def change
-    change_column :jurisdictions,
-                  :energy_step_required,
-                  :integer,
-                  default: ENV["PART_9_MIN_ENERGY_STEP"]
-    change_column :jurisdictions,
-                  :zero_carbon_step_required,
-                  :integer,
-                  default: ENV["PART_9_MIN_ZERO_CARBON_STEP"]
+  def up
+    change_column_default :jurisdictions,
+                          :energy_step_required,
+                          from: nil,
+                          to: ENV["PART_9_MIN_ENERGY_STEP"]&.to_i
+    change_column_default :jurisdictions,
+                          :zero_carbon_step_required,
+                          from: nil,
+                          to: ENV["PART_9_MIN_ZERO_CARBON_STEP"]&.to_i
+  end
+
+  def down
+    change_column_default :jurisdictions,
+                          :energy_step_required,
+                          from: ENV["PART_9_MIN_ENERGY_STEP"]&.to_i,
+                          to: nil
+    change_column_default :jurisdictions,
+                          :zero_carbon_step_required,
+                          from: ENV["PART_9_MIN_ZERO_CARBON_STEP"]&.to_i,
+                          to: nil
   end
 
   def data

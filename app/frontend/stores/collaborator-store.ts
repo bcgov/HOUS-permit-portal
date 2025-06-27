@@ -6,7 +6,6 @@ import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
 import { CollaboratorModel, ICollaborator } from "../models/collaborator"
 import { IJurisdiction } from "../models/jurisdiction"
-import { IUser } from "../models/user"
 import { ECollaborationType, ECollaboratorableType } from "../types/enums"
 import { TSearchParams } from "../types/types"
 
@@ -55,7 +54,7 @@ export const CollaboratorStoreModel = types
 
       //find all unique submitters
       const users = R.uniqBy(
-        (u: IUser) => u.id,
+        (u: { id: string }) => u.id,
         collaboratorsData
           .filter((c) => c.collaboratorableType === ECollaboratorableType.User)
           .map((c) => c.collaboratorable)

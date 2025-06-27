@@ -197,7 +197,10 @@ export const PermitApplicationStoreModel = types
     },
     setStatusFilter(statuses: TFilterableStatus[] | undefined) {
       if (!statuses) return
+
       setQueryParam("status", statuses)
+
+      if (statuses.some((status) => !filterableStatus.includes(status))) return
       // @ts-ignore
       self.statusFilter = statuses
     },
