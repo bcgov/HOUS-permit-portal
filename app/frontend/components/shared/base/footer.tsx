@@ -21,11 +21,8 @@ export const Footer = observer(() => {
     "/contact",
     "/project-readiness-tools",
     "/letter-of-assurance",
-<<<<<<< HUB-3012-privacy-page-for-lg-adopting
     "/privacy-policy",
-=======
     "/onboarding-checklist-page-for-lg-adopting",
->>>>>>> release/0.7.0
   ]
 
   const shouldShowFooter = onlyShowFooterOnRoutes.some((route) => location.pathname.startsWith(route))
