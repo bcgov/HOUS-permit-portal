@@ -203,11 +203,12 @@ export const LandingScreen = observer(({}: ILandingScreenProps) => {
           </Flex>
 
           {landingPageEarlyAccessRequirementTemplates.length > 0 && (
-            <VStack as="section" w="full" gap={4} my={16} alignItems="flex-start">
+            <VStack as="section" w="full" gap={2} my={16} alignItems="flex-start">
               <Heading as="h2" variant="yellowline">
                 {t("landing.underDevelopmentTitle")}
               </Heading>
               <Text textAlign="left">{t("landing.underDevelopmentBody")}</Text>
+              <Text textAlign="left">{t("landing.listedDrafts")}</Text>
               <Heading as="h4" size="md" pt={6}>
                 {t("landing.ssmuHousingTitle")}
               </Heading>

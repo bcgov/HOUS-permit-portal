@@ -133,9 +133,9 @@ const options = {
             "Permits help ensure that construction and major renovations follow local bylaws, the building code and health and safety standards. You will need the required permits before any stage of a project can start. Projects for the interior of your home or minor repairs may not require a permit depending on your local jurisdiction and geography.",
           permitConnect:
             "The B.C government is making housing development projects easier with a new coordinated approach. Visit <1>Permit Connect BC to learn more</1>.",
-          expectQ: "What can I expect?",
+          expectQ: "A new building permit experience for BC",
           expectA:
-            "Once you have provided all the information needed for the permits, your local jurisdiction will be notified and will contact you to discuss if more details are needed. This could be because of how the land is used, the rules for building in that area, how much the area can support, the quality of the soil, and/or any environmental concerns.",
+            "Building Permit Hub is a new way to submit building permits in BC. Here is what it can help you do:",
           createdQ: "Why was this tool created?",
           createdA:
             "The Building Permit Hub will make it faster and simpler for home builders and developers to send in building permits for new housing online. Local jurisdictions can receive the applications and process them faster too. This tool automatically checks if the application follows the rules in the B.C. Building Code, including the Energy Step Code, to help prevent any delays in the application process.",
@@ -179,7 +179,9 @@ const options = {
           card3Body: "Stay up to date and respond to building officials directly, all in one place",
           underDevelopmentTitle: "Share your feedback on permit applications under development",
           underDevelopmentBody:
-            "We’re co-developing standard permit types with local governments and First Nations across BC. These drafts are available for review and discussion as we continue this work together. The listed drafts are open for review. These permit applications are drafts; do not use for permit intake. ",
+            "We’re co-developing standard permit types with local governments and First Nations across BC. These drafts are available for review and discussion as we continue this work together.",
+          listedDrafts:
+            " The listed drafts are open for review. These permit applications are drafts; do not use for permit intake.",
           shareFeedbackBody:
             "We’re looking for your input. <1>Email us your feedback at:</1> <2>digital.codes.permits@gov.bc.ca</2>",
           ssmuHousingTitle: "Small-scale / multi-unit housing permits",
