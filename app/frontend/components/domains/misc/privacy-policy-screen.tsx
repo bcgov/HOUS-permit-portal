@@ -2,6 +2,17 @@ import { Box, Container, Heading, ListItem, Text, UnorderedList, VStack } from "
 import React from "react"
 import { useTranslation } from "react-i18next"
 
+const PrivacyPolicyList = ({ items }: { items: string[] }) => {
+  const { t } = useTranslation()
+  return (
+    <UnorderedList spacing={2} pl={6}>
+      {items.map((itemKey) => (
+        <ListItem key={itemKey}>{t(itemKey)}</ListItem>
+      ))}
+    </UnorderedList>
+  )
+}
+
 export const PrivacyPolicyScreen = () => {
   const { t } = useTranslation()
 
@@ -31,12 +42,14 @@ export const PrivacyPolicyScreen = () => {
             {t("site.privacyPolicyWhatInformationWeCollect")}
           </Heading>
           <Text mb={4}>{t("site.privacyPolicyWhatInformationWeCollectDescription1")}</Text>
-          <UnorderedList spacing={2} pl={6}>
-            <ListItem>{t("site.privacyPolicyWhatInformationWeCollectItem1")}</ListItem>
-            <ListItem>{t("site.privacyPolicyWhatInformationWeCollectItem2")}</ListItem>
-            <ListItem>{t("site.privacyPolicyWhatInformationWeCollectItem3")}</ListItem>
-            <ListItem>{t("site.privacyPolicyWhatInformationWeCollectItem4")}</ListItem>
-          </UnorderedList>
+          <PrivacyPolicyList
+            items={[
+              "site.privacyPolicyWhatInformationWeCollectItem1",
+              "site.privacyPolicyWhatInformationWeCollectItem2",
+              "site.privacyPolicyWhatInformationWeCollectItem3",
+              "site.privacyPolicyWhatInformationWeCollectItem4",
+            ]}
+          />
           <Text mt={4}>{t("site.privacyPolicyWhatInformationWeCollectDescription2")}</Text>
         </Box>
 
@@ -45,14 +58,16 @@ export const PrivacyPolicyScreen = () => {
             {t("site.privacyPolicyHowWeUseYourInformation")}
           </Heading>
           <Text mb={4}>{t("site.privacyPolicyHowWeUseYourInformationDescription")}</Text>
-          <UnorderedList spacing={2} pl={6}>
-            <ListItem>{t("site.privacyPolicyHowWeUseYourInformationItem1")}</ListItem>
-            <ListItem>{t("site.privacyPolicyHowWeUseYourInformationItem2")}</ListItem>
-            <ListItem>{t("site.privacyPolicyHowWeUseYourInformationItem3")}</ListItem>
-            <ListItem>{t("site.privacyPolicyHowWeUseYourInformationItem4")}</ListItem>
-            <ListItem>{t("site.privacyPolicyHowWeUseYourInformationItem5")}</ListItem>
-            <ListItem>{t("site.privacyPolicyHowWeUseYourInformationItem6")}</ListItem>
-          </UnorderedList>
+          <PrivacyPolicyList
+            items={[
+              "site.privacyPolicyHowWeUseYourInformationItem1",
+              "site.privacyPolicyHowWeUseYourInformationItem2",
+              "site.privacyPolicyHowWeUseYourInformationItem3",
+              "site.privacyPolicyHowWeUseYourInformationItem4",
+              "site.privacyPolicyHowWeUseYourInformationItem5",
+              "site.privacyPolicyHowWeUseYourInformationItem6",
+            ]}
+          />
           <Text mt={4}>{t("site.privacyPolicyHowWeUseYourInformationDescription2")}</Text>
         </Box>
 
@@ -61,13 +76,14 @@ export const PrivacyPolicyScreen = () => {
             {t("site.privacyPolicyWhoCanAccessYourInformation")}
           </Heading>
           <Text mb={4}>{t("site.privacyPolicyWhoCanAccessYourInformationDescription")}</Text>
-          <UnorderedList spacing={2} pl={6}>
-            <ListItem>{t("site.privacyPolicyWhoCanAccessYourInformationItem1")}</ListItem>
-            <ListItem>{t("site.privacyPolicyWhoCanAccessYourInformationItem2")}</ListItem>
-            <ListItem>{t("site.privacyPolicyWhoCanAccessYourInformationItem3")}</ListItem>
-          </UnorderedList>
+          <PrivacyPolicyList
+            items={[
+              "site.privacyPolicyWhoCanAccessYourInformationItem1",
+              "site.privacyPolicyWhoCanAccessYourInformationItem2",
+              "site.privacyPolicyWhoCanAccessYourInformationItem3",
+            ]}
+          />
           <Text mt={4}>{t("site.privacyPolicyWhoCanAccessYourInformationDescription2")}</Text>
-          <Text mt={4}>{t("site.privacyPolicyWhoCanAccessYourInformationDescription3")}</Text>
         </Box>
 
         <Box>
@@ -75,12 +91,14 @@ export const PrivacyPolicyScreen = () => {
             {t("site.privacyPolicyHowWeProtectYourInformation")}
           </Heading>
           <Text mb={4}>{t("site.privacyPolicyHowWeProtectYourInformationDescription")}</Text>
-          <UnorderedList spacing={2} pl={6}>
-            <ListItem>{t("site.privacyPolicyHowWeProtectYourInformationItem1")}</ListItem>
-            <ListItem>{t("site.privacyPolicyHowWeProtectYourInformationItem2")}</ListItem>
-            <ListItem>{t("site.privacyPolicyHowWeProtectYourInformationItem3")}</ListItem>
-            <ListItem>{t("site.privacyPolicyHowWeProtectYourInformationItem4")}</ListItem>
-          </UnorderedList>
+          <PrivacyPolicyList
+            items={[
+              "site.privacyPolicyHowWeProtectYourInformationItem1",
+              "site.privacyPolicyHowWeProtectYourInformationItem2",
+              "site.privacyPolicyHowWeProtectYourInformationItem3",
+              "site.privacyPolicyHowWeProtectYourInformationItem4",
+            ]}
+          />
         </Box>
 
         <Box>
@@ -88,12 +106,14 @@ export const PrivacyPolicyScreen = () => {
             {t("site.privacyPolicyYourRights")}
           </Heading>
           <Text mb={4}>{t("site.privacyPolicyYourRightsDescription")}</Text>
-          <UnorderedList spacing={2} pl={6}>
-            <ListItem>{t("site.privacyPolicyYourRightsItem1")}</ListItem>
-            <ListItem>{t("site.privacyPolicyYourRightsItem2")}</ListItem>
-            <ListItem>{t("site.privacyPolicyYourRightsItem3")}</ListItem>
-            <ListItem>{t("site.privacyPolicyYourRightsItem4")}</ListItem>
-          </UnorderedList>
+          <PrivacyPolicyList
+            items={[
+              "site.privacyPolicyYourRightsItem1",
+              "site.privacyPolicyYourRightsItem2",
+              "site.privacyPolicyYourRightsItem3",
+              "site.privacyPolicyYourRightsItem4",
+            ]}
+          />
           <Text mt={4} mb={4}>
             {t("site.privacyPolicyYourRightsContactIntro")}
           </Text>
