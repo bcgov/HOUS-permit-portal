@@ -201,6 +201,7 @@ export interface IDenormalizedTemplate {
   description?: string
   permitType: IPermitType
   activity: IActivity
+  firstNations: boolean
   requirementTemplateSections: IDenormalizedRequirementTemplateSection[]
 }
 

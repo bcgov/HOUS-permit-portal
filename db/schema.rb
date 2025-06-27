@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_06_17_175120) do
+ActiveRecord::Schema[7.1].define(version: 2025_06_26_203759) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -360,11 +360,13 @@ ActiveRecord::Schema[7.1].define(version: 2025_06_17_175120) do
     t.uuid "copied_from_id"
     t.uuid "assignee_id"
     t.boolean "public", default: false
+    t.uuid "site_configuration_id"
     t.index ["activity_id"], name: "index_requirement_templates_on_activity_id"
     t.index ["assignee_id"], name: "index_requirement_templates_on_assignee_id"
     t.index ["copied_from_id"], name: "index_requirement_templates_on_copied_from_id"
     t.index ["discarded_at"], name: "index_requirement_templates_on_discarded_at"
     t.index ["permit_type_id"], name: "index_requirement_templates_on_permit_type_id"
+    t.index ["site_configuration_id"], name: "index_requirement_templates_on_site_configuration_id"
     t.index ["type"], name: "index_requirement_templates_on_type"
   end
 
@@ -427,9 +429,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_06_17_175120) do
     t.datetime "updated_at", null: false
     t.jsonb "help_link_items", default: {"dictionary_link_item"=>{"href"=>"", "show"=>false, "title"=>"Dictionary of terms", "description"=>"See detailed explanations of terms that appear on building permits"}, "user_guide_link_item"=>{"href"=>"", "show"=>false, "title"=>"User and role guides", "description"=>"Step-by-step instructions on how to make the most out of the platform"}, "get_started_link_item"=>{"href"=>"", "show"=>false, "title"=>"Get started on Building Permit Hub", "description"=>"How to submit a building permit application through a streamlined and standardized approach across BC"}, "best_practices_link_item"=>{"href"=>"", "show"=>false, "title"=>"Best practices", "description"=>"How to use the Building Permit Hub efficiently for application submission"}}, null: false
     t.jsonb "revision_reason_options"
-    t.uuid "small_scale_requirement_template_id"
     t.boolean "inbox_enabled", default: false, null: false
-    t.index ["small_scale_requirement_template_id"], name: "idx_on_small_scale_requirement_template_id_235b636c86"
   end
 
   create_table "step_code_building_characteristics_summaries", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -739,13 +739,13 @@ ActiveRecord::Schema[7.1].define(version: 2025_06_17_175120) do
   add_foreign_key "requirement_templates", "permit_classifications", column: "activity_id"
   add_foreign_key "requirement_templates", "permit_classifications", column: "permit_type_id"
   add_foreign_key "requirement_templates", "requirement_templates", column: "copied_from_id"
+  add_foreign_key "requirement_templates", "site_configurations"
   add_foreign_key "requirement_templates", "users", column: "assignee_id"
   add_foreign_key "requirements", "requirement_blocks"
   add_foreign_key "revision_reasons", "site_configurations"
   add_foreign_key "revision_requests", "submission_versions"
   add_foreign_key "revision_requests", "users"
   add_foreign_key "sandboxes", "jurisdictions"
-  add_foreign_key "site_configurations", "requirement_templates", column: "small_scale_requirement_template_id"
   add_foreign_key "step_code_building_characteristics_summaries", "step_code_checklists"
   add_foreign_key "step_code_checklists", "permit_type_required_steps", column: "step_requirement_id"
   add_foreign_key "step_code_checklists", "step_codes"

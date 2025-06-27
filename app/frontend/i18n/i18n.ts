@@ -133,9 +133,9 @@ const options = {
             "Permits help ensure that construction and major renovations follow local bylaws, the building code and health and safety standards. You will need the required permits before any stage of a project can start. Projects for the interior of your home or minor repairs may not require a permit depending on your local jurisdiction and geography.",
           permitConnect:
             "The B.C government is making housing development projects easier with a new coordinated approach. Visit <1>Permit Connect BC to learn more</1>.",
-          expectQ: "What can I expect?",
+          expectQ: "A new building permit experience for BC",
           expectA:
-            "Once you have provided all the information needed for the permits, your local jurisdiction will be notified and will contact you to discuss if more details are needed. This could be because of how the land is used, the rules for building in that area, how much the area can support, the quality of the soil, and/or any environmental concerns.",
+            "Building Permit Hub is a new way to submit building permits in BC. Here is what it can help you do:",
           createdQ: "Why was this tool created?",
           createdA:
             "The Building Permit Hub will make it faster and simpler for home builders and developers to send in building permits for new housing online. Local jurisdictions can receive the applications and process them faster too. This tool automatically checks if the application follows the rules in the B.C. Building Code, including the Energy Step Code, to help prevent any delays in the application process.",
@@ -154,6 +154,7 @@ const options = {
           enabledCommunitiesDescription: "Communities you can submit Building Permit applications in:",
           moreComingSoon: "(more coming soon)",
           andMore: "...and more",
+          earlyAccessTemplates: "See some of our templates in progress",
           additionalContent: {
             left: "See helpful tips from your local jurisdictions to streamline your digital building permit applications",
             mid: "Preview the Small-scale/Multi-unit housing checklist",
@@ -169,6 +170,25 @@ const options = {
             "Use Building Permit Hub's tools to check your application for readiness and prepare key documents for your project.",
           toolsSectionDesc2:
             "Check your project against Provincial requirements such as Step Codes and prepare other documents.",
+
+          card1Title: "Find out what’s required before you apply",
+          card1Body: "Tools and checklists to help you prepare your application package",
+          card2Title: "Submit your application online",
+          card2Body: "Consistent application forms, even when rules vary by community",
+          card3Title: "Track progress and talk to reviewers",
+          card3Body: "Stay up to date and respond to building officials directly, all in one place",
+          underDevelopmentTitle: "Share your feedback on permit applications under development",
+          underDevelopmentBody:
+            "We’re co-developing standard permit types with local governments and First Nations across BC. These drafts are available for review and discussion as we continue this work together.",
+          listedDrafts:
+            " The listed drafts are open for review. These permit applications are drafts; do not use for permit intake.",
+          shareFeedbackBody:
+            "We’re looking for your input. <1>Email us your feedback at:</1> <2>digital.codes.permits@gov.bc.ca</2>",
+          ssmuHousingTitle: "Small-scale / multi-unit housing permits",
+          part9ChecklistsTitle: "Part 9 checklists",
+          part9ChecklistsBody:
+            "These checklists help you gather the right documents and prepare your application for small buildings that fall under Part 9 of the BC Building Code (up to 3 storeys, fewer than 600m²).",
+          part9ChecklistsLink: "Part 9 checklists (PDF)",
         },
         ui: {
           okay: "Okay",
@@ -1954,7 +1974,7 @@ const options = {
           },
           landingPageSetup: {
             title: "Landing page setup",
-            description: "Configure content for the landing page",
+            description: "Select the open access previews that will be displayed on the landing page.",
             selectOpenAccessPreviews:
               "Set open access previews to display on the front page. Select from the available public access previews below.",
             smallScale: "Set as Small Scale New Contruction Preview on landing page",

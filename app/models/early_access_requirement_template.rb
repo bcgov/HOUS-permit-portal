@@ -3,28 +3,13 @@ class EarlyAccessRequirementTemplate < RequirementTemplate
     RequirementTemplate::SEARCH_INCLUDES + %i[assignee early_access_previews]
 
   belongs_to :assignee, class_name: "User", optional: true
+  belongs_to :site_configuration, optional: true
 
   has_many :early_access_previews, dependent: :destroy
   has_many :previewers, through: :early_access_previews, source: :previewer
 
   before_validation :maintain_published_early_access_version,
                     unless: :maintaining_published_version?
-
-  has_one :small_scale_site_configuration,
-          class_name: "SiteConfiguration",
-          foreign_key: "small_scale_requirement_template_id",
-          dependent: :nullify
-
-  # In the future, add new landing page templates like so:
-  # has_one :medium_scale_site_configuration,
-  #         class_name: "SiteConfiguration",
-  #         foreign_key: "medium_scale_requirement_template_id",
-  #         dependent: :nullify
-
-  # has_one :large_scale_site_configuration,
-  #         class_name: "SiteConfiguration",
-  #         foreign_key: "large_scale_requirement_template_id",
-  #         dependent: :nullify
 
   validate :valid_template_version_status
 
@@ -60,19 +45,14 @@ class EarlyAccessRequirementTemplate < RequirementTemplate
   end
 
   def public_cannot_be_false_if_any_site_configuration_exists
-    if !public && site_configuration_present?
+    if !public && site_configuration.present?
       errors.add(
         :public,
-        "cannot be set to false because a site configuration is set to use this template on the landing page."
+        I18n.t(
+          "activerecord.errors.models.requirement_template.attributes.public.landing_published_requires_public"
+        )
       )
     end
-  end
-
-  def site_configuration_present?
-    small_scale_site_configuration.present?
-    # In the future, add new landing page templates like so:
-    # || medium_scale_site_configuration.present? ||
-    #   large_scale_site_configuration.present?
   end
 
   def valid_template_version_status
