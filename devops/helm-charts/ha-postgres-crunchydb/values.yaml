@@ -73,10 +73,10 @@ crunchy-postgres:
       region: "ca-central-1"
       # key is the S3 key. This is stored in a Secret.
       # Please DO NOT push this value to GitHub
-      key: "s3keyValue"
+      key: "stubbed-s3-key"
       # keySecret is the S3 key secret. This is stored in a Secret.
       # Please DO NOT push this value to GitHub
-      keySecret: "s3SecretValue"
+      keySecret: "stubbed-s3-key-secret"
 
   patroni:
     postgresql:
