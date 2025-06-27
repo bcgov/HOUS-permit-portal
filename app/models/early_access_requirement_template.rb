@@ -49,7 +49,7 @@ class EarlyAccessRequirementTemplate < RequirementTemplate
       errors.add(
         :public,
         I18n.t(
-          "activerecord.errors.models.requirement_template.attributes.template_versions.landing_published_requires_public"
+          "activerecord.errors.models.requirement_template.attributes.public.landing_published_requires_public"
         )
       )
     end

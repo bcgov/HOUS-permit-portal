@@ -240,7 +240,6 @@ export const LandingScreen = observer(({}: ILandingScreenProps) => {
             <Link
               href="/pdfs/BPH-Standardized List of Requirements V.2024.09.01 - SEP 2024.pdf"
               download="BPH-Standardized List of Requirements V.2024.09.01 - SEP 2024.pdf"
-              color="bc-blue"
               textDecoration="underline"
             >
               {t("landing.part9ChecklistsLink")}
@@ -417,7 +416,7 @@ interface IBareBoxProps {
 
 const BareBox: React.FC<IBareBoxProps> = ({ children }) => {
   return (
-    <Box p={6} borderRadius="lg" bg="theme.blueLight" color="theme.blueAlt" flex={1}>
+    <Box p={4} borderRadius="lg" bg="theme.blueLight" color="theme.blueAlt" flex={1}>
       <Flex gap={6} align="center" h="full">
         <Text fontSize="md" fontWeight="bold" textAlign="left">
           {children}
