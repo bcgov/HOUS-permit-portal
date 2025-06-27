@@ -93,7 +93,7 @@ export const LandingScreen = observer(({}: ILandingScreenProps) => {
               >
                 {currentUser
                   ? t("landing.goTo", {
-                      location: currentUser?.isSubmitter ? t("landing.submitterPanel") : t("landing.adminPanel"),
+                      location: currentUser?.isSuperAdmin ? t("landing.adminPanel") : t("landing.projectsPanel"),
                     })
                   : t("landing.permitApp")}
               </RouterLinkButton>
