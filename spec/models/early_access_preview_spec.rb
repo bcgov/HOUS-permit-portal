@@ -1,6 +1,6 @@
 require "rails_helper"
 
-RSpec.describe EarlyAccessPreview, type: :model do
+RSpec.describe EarlyAccessPreview, type: :model, search: true do
   let(:early_access_preview) { create(:early_access_preview) }
 
   describe "Associations" do
@@ -177,6 +177,7 @@ RSpec.describe EarlyAccessPreview, type: :model do
 
     it "sets expires_at to nil and then recalculates it based on the default duration" do
       Timecop.freeze(current_time) do
+        allow(ENV).to receive(:[]).and_call_original
         allow(ENV).to receive(:[]).with(
           "EARLY_ACCESS_EXPIRATION_DAYS"
         ).and_return(nil)

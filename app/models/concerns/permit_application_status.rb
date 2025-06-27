@@ -10,8 +10,6 @@ module PermitApplicationStatus
          },
          _default: 0
 
-    validate :inbox_must_be_enabled_on_non_sandboxed_when_submitted
-
     def self.draft_statuses
       %w[new_draft revisions_requested]
     end
@@ -20,7 +18,7 @@ module PermitApplicationStatus
       %w[newly_submitted resubmitted]
     end
 
-    aasm column: "status", enum: true do
+    aasm column: "status", enum: true, timestamp: true do
       state :new_draft, initial: true
       state :newly_submitted
       state :revisions_requested
@@ -73,15 +71,14 @@ module PermitApplicationStatus
     def handle_submission
       update(signed_off_at: Time.current)
 
-      checklist = step_code&.pre_construction_checklist
-
+      checklist = step_code&.primary_checklist
       submission_versions.create!(
         form_json: self.form_json,
         submission_data: self.submission_data,
         step_code_checklist_json:
           (
             if checklist.present?
-              StepCodeChecklistBlueprint.render_as_hash(
+              step_code.checklist_blueprint.render_as_hash(
                 checklist,
                 view: :extended
               )
@@ -94,23 +91,6 @@ module PermitApplicationStatus
       zip_and_upload_supporting_documents
 
       send_submit_notifications
-    end
-
-    def inbox_must_be_enabled_on_non_sandboxed_when_submitted
-      return unless sandbox.nil?
-
-      return unless jurisdiction.present?
-
-      return if jurisdiction.inbox_enabled?
-
-      return unless PermitApplication.submitted_statuses.include?(status)
-
-      errors.add(
-        :jurisdiction,
-        I18n.t(
-          "activerecord.errors.models.permit_application.attributes.jurisdiction.inbox_not_enabled"
-        )
-      )
     end
   end
 end

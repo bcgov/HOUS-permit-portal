@@ -214,11 +214,25 @@ Rails.application.routes.draw do
 
     resources :end_user_license_agreement, only: %i[index]
 
-    resources :step_codes, only: %i[index create destroy], shallow: true do
-      resources :step_code_checklists, only: %i[index show update]
+    resources :step_codes, only: %i[destroy], shallow: true do
       get "download_step_code_summary_csv",
           on: :collection,
           to: "step_codes#download_step_code_summary_csv"
+      get "download_step_code_metrics_csv",
+          on: :collection,
+          to: "step_codes#download_step_code_metrics_csv"
+    end
+
+    namespace :part_9_building do
+      resources :step_codes, only: %i[index create], shallow: true do
+        resources :checklists, only: %i[index show update]
+      end
+    end
+
+    namespace :part_3_building do
+      resources :step_codes, only: %i[create], shallow: true do
+        resources :checklists, only: %i[show update]
+      end
     end
 
     post "tags/search", to: "tags#index", as: :tags_search
@@ -226,6 +240,13 @@ Rails.application.routes.draw do
     get "s3/params" => "storage#upload" # use a storage controller instead of shrine mount since we want api authentication before being able to access
     get "s3/params/download" => "storage#download"
     delete "s3/params/delete" => "storage#delete"
+
+    post "s3/params/multipart" => "storage#create_multipart_upload"
+    get "s3/params/multipart/:upload_id/batch" =>
+          "storage#batch_presign_multipart_parts"
+    post "s3/params/multipart/:upload_id/complete" =>
+           "storage#complete_multipart_upload"
+    delete "s3/params/multipart/:upload_id" => "storage#abort_multipart_upload"
 
     resources :site_configuration, only: [] do
       get :show, on: :collection

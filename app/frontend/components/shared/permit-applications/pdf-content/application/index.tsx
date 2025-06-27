@@ -91,7 +91,7 @@ const FormComponent = function ApplicationPDFFormComponent({
       dataPath = [component.key]
       const { components, columns } = component
       const componentFields = fields(components || columns)
-      const isValid = !R.isEmpty(component.title.trim()) && componentFields.length > 0
+      const isValid = !R.isEmpty((component.title || "").trim()) && componentFields.length > 0
       if (!isValid) return null
       const firstChild: any = R.head(components)
       const additionalChildren: any = R.tail(components)
@@ -339,15 +339,18 @@ const CheckboxField = function ApplicationPDFPanelCheckboxField({ value, label }
 }
 
 function Checkbox({ isChecked, label }) {
+  const checked = !!isChecked
   return (
     <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
       <View
         style={{
           width: 8,
           height: 8,
-          borderColor: theme.colors.border.dark,
-          borderWidth: isChecked ? 0 : 0.75,
-          backgroundColor: isChecked ? theme.colors.text.primary : theme.colors.greys.white,
+          backgroundColor: checked ? theme.colors.text.primary : theme.colors.greys.white,
+          ...(!checked && {
+            borderColor: theme.colors.border.dark,
+            borderWidth: 0.75,
+          }),
         }}
       />
 

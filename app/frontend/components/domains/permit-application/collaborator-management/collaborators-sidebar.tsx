@@ -247,10 +247,10 @@ const AssigneeAccordion = observer(function AssigneeAccordion({
                 moreDetailsElement={
                   notificationEmail ? (
                     <HStack spacing={4} className={"collaboratorCardEmailContainer"} display={"none"}>
-                      <Text as={"span"} fontSize={"sm"} fontWeight={700}>
+                      <Text fontSize={"sm"} fontWeight={700}>
                         {t("permitCollaboration.sidebar.assigneeEmail")}
                       </Text>
-                      <Flex alignItems={"baseline"} color={"link"} onClick={(e) => e.stopPropagation()}>
+                      <Flex alignItems={"baseline"} color={"link"} onClick={(e) => e.stopPropagation()} flexGrow={1}>
                         <Envelope
                           size={14}
                           style={{
@@ -280,7 +280,7 @@ const AssigneeAccordion = observer(function AssigneeAccordion({
           </Box>
         )}
         <AccordionPanel border={"none"} bg={"greys.grey04"} pb={2}>
-          <Box w={"full"} bg={"white"} p={2} border={"1px solid"} borderColor={"border.light"} borderRadius={"sm"}>
+          <Box w={"full"} bg={"white"} p={2} border={"1px solid red"} borderColor={"border.light"} borderRadius={"sm"}>
             <Text as={"h5"} fontSize={"sm"} fontWeight={700} textTransform={"uppercase"} color={"text.secondary"}>
               {t("permitCollaboration.sidebar.assignedTo")}
             </Text>
@@ -389,8 +389,8 @@ const CollaborationCard = observer(function CollaborationCard({
       justifyContent={"space-between"}
       {...containerProps}
     >
-      <HStack spacing={4}>
-        <Avatar name={name} size={"xs"} />
+      <HStack spacing={4} w={"full"}>
+        <Avatar name={name} size={"xs"} maxW={"24px"} />
         {permitCollaboration ? (
           <Stack spacing={1} alignItems={"flex-start"}>
             <Text fontWeight={700}>{name}</Text>

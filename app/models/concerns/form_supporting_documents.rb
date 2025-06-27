@@ -50,7 +50,9 @@ module FormSupportingDocuments
     find_file_fields_and_transform!(
       submission_data,
       []
-    ) { |file_field_key, file_array| file_array.map { |fa| fa["model_id"] } }
+    ) do |file_field_key, file_array|
+      file_array.map { |fa| fa["model_id"] || fa["modelId"] }
+    end
   end
 
   def supporting_doc_ids_from_all_versions_submission_data
@@ -62,7 +64,7 @@ module FormSupportingDocuments
           sv.formatted_submission_data,
           []
         ) do |_file_field_key, file_array|
-          file_array.map { |fa| fa["model_id"] }
+          file_array.map { |fa| fa["modelId"] }
         end
 
       doc_ids += version_doc_ids if version_doc_ids.is_a?(Array)
@@ -77,7 +79,7 @@ module FormSupportingDocuments
 
     # compliance data for energy step code
     # fetch the energy step_code from json
-    if requirement_energy_step_code_key_value && step_code
+    if requirement_energy_step_code_key_value && step_code.is_a?(Part9StepCode)
       if step_code.plan_out_of_date
         joined[
           requirement_energy_step_code_key_value[0]
