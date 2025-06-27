@@ -7,9 +7,36 @@ const PrivacyPolicyList = ({ items }: { items: string[] }) => {
   return (
     <UnorderedList spacing={2} pl={6}>
       {items.map((itemKey) => (
-        <ListItem key={itemKey}>{t(itemKey)}</ListItem>
+        <ListItem key={itemKey}>{t(itemKey as any)}</ListItem>
       ))}
     </UnorderedList>
+  )
+}
+
+interface PrivacyPolicySectionProps {
+  headingKey: string
+  descriptionKey: string
+  listItems: string[]
+  description2Key?: string
+}
+
+const PrivacyPolicySection: React.FC<PrivacyPolicySectionProps> = ({
+  headingKey,
+  descriptionKey,
+  listItems,
+  description2Key,
+}) => {
+  const { t } = useTranslation()
+
+  return (
+    <Box>
+      <Heading as="h2" size="lg" mt={8} mb={4}>
+        {t(headingKey as any)}
+      </Heading>
+      <Text mb={4}>{t(descriptionKey as any)}</Text>
+      <PrivacyPolicyList items={listItems} />
+      {description2Key && <Text mt={4}>{t(description2Key as any)}</Text>}
+    </Box>
   )
 }
 
@@ -37,69 +64,53 @@ export const PrivacyPolicyScreen = () => {
           <Text>{t("site.privacyPolicyOverviewDescription2")}</Text>
         </Box>
 
-        <Box>
-          <Heading as="h2" size="lg" mt={8} mb={4}>
-            {t("site.privacyPolicyWhatInformationWeCollect")}
-          </Heading>
-          <Text mb={4}>{t("site.privacyPolicyWhatInformationWeCollectDescription1")}</Text>
-          <PrivacyPolicyList
-            items={[
-              "site.privacyPolicyWhatInformationWeCollectItem1",
-              "site.privacyPolicyWhatInformationWeCollectItem2",
-              "site.privacyPolicyWhatInformationWeCollectItem3",
-              "site.privacyPolicyWhatInformationWeCollectItem4",
-            ]}
-          />
-          <Text mt={4}>{t("site.privacyPolicyWhatInformationWeCollectDescription2")}</Text>
-        </Box>
+        <PrivacyPolicySection
+          headingKey="site.privacyPolicyWhatInformationWeCollect"
+          descriptionKey="site.privacyPolicyWhatInformationWeCollectDescription1"
+          listItems={[
+            "site.privacyPolicyWhatInformationWeCollectItem1",
+            "site.privacyPolicyWhatInformationWeCollectItem2",
+            "site.privacyPolicyWhatInformationWeCollectItem3",
+            "site.privacyPolicyWhatInformationWeCollectItem4",
+          ]}
+          description2Key="site.privacyPolicyWhatInformationWeCollectDescription2"
+        />
 
-        <Box>
-          <Heading as="h2" size="lg" mt={8} mb={4}>
-            {t("site.privacyPolicyHowWeUseYourInformation")}
-          </Heading>
-          <Text mb={4}>{t("site.privacyPolicyHowWeUseYourInformationDescription")}</Text>
-          <PrivacyPolicyList
-            items={[
-              "site.privacyPolicyHowWeUseYourInformationItem1",
-              "site.privacyPolicyHowWeUseYourInformationItem2",
-              "site.privacyPolicyHowWeUseYourInformationItem3",
-              "site.privacyPolicyHowWeUseYourInformationItem4",
-              "site.privacyPolicyHowWeUseYourInformationItem5",
-              "site.privacyPolicyHowWeUseYourInformationItem6",
-            ]}
-          />
-          <Text mt={4}>{t("site.privacyPolicyHowWeUseYourInformationDescription2")}</Text>
-        </Box>
+        <PrivacyPolicySection
+          headingKey="site.privacyPolicyHowWeUseYourInformation"
+          descriptionKey="site.privacyPolicyHowWeUseYourInformationDescription"
+          listItems={[
+            "site.privacyPolicyHowWeUseYourInformationItem1",
+            "site.privacyPolicyHowWeUseYourInformationItem2",
+            "site.privacyPolicyHowWeUseYourInformationItem3",
+            "site.privacyPolicyHowWeUseYourInformationItem4",
+            "site.privacyPolicyHowWeUseYourInformationItem5",
+            "site.privacyPolicyHowWeUseYourInformationItem6",
+          ]}
+          description2Key="site.privacyPolicyHowWeUseYourInformationDescription2"
+        />
 
-        <Box>
-          <Heading as="h2" size="lg" mt={8} mb={4}>
-            {t("site.privacyPolicyWhoCanAccessYourInformation")}
-          </Heading>
-          <Text mb={4}>{t("site.privacyPolicyWhoCanAccessYourInformationDescription")}</Text>
-          <PrivacyPolicyList
-            items={[
-              "site.privacyPolicyWhoCanAccessYourInformationItem1",
-              "site.privacyPolicyWhoCanAccessYourInformationItem2",
-              "site.privacyPolicyWhoCanAccessYourInformationItem3",
-            ]}
-          />
-          <Text mt={4}>{t("site.privacyPolicyWhoCanAccessYourInformationDescription2")}</Text>
-        </Box>
+        <PrivacyPolicySection
+          headingKey="site.privacyPolicyWhoCanAccessYourInformation"
+          descriptionKey="site.privacyPolicyWhoCanAccessYourInformationDescription"
+          listItems={[
+            "site.privacyPolicyWhoCanAccessYourInformationItem1",
+            "site.privacyPolicyWhoCanAccessYourInformationItem2",
+            "site.privacyPolicyWhoCanAccessYourInformationItem3",
+          ]}
+          description2Key="site.privacyPolicyWhoCanAccessYourInformationDescription2"
+        />
 
-        <Box>
-          <Heading as="h2" size="lg" mt={8} mb={4}>
-            {t("site.privacyPolicyHowWeProtectYourInformation")}
-          </Heading>
-          <Text mb={4}>{t("site.privacyPolicyHowWeProtectYourInformationDescription")}</Text>
-          <PrivacyPolicyList
-            items={[
-              "site.privacyPolicyHowWeProtectYourInformationItem1",
-              "site.privacyPolicyHowWeProtectYourInformationItem2",
-              "site.privacyPolicyHowWeProtectYourInformationItem3",
-              "site.privacyPolicyHowWeProtectYourInformationItem4",
-            ]}
-          />
-        </Box>
+        <PrivacyPolicySection
+          headingKey="site.privacyPolicyHowWeProtectYourInformation"
+          descriptionKey="site.privacyPolicyHowWeProtectYourInformationDescription"
+          listItems={[
+            "site.privacyPolicyHowWeProtectYourInformationItem1",
+            "site.privacyPolicyHowWeProtectYourInformationItem2",
+            "site.privacyPolicyHowWeProtectYourInformationItem3",
+            "site.privacyPolicyHowWeProtectYourInformationItem4",
+          ]}
+        />
 
         <Box>
           <Heading as="h2" size="lg" mt={8} mb={4}>
