@@ -124,8 +124,10 @@ export const LandingScreen = observer(({}: ILandingScreenProps) => {
             <Heading as="h2" fontSize="2xl" mb={2} fontWeight="bold">
               {t("landing.toolsSectionTitle")}
             </Heading>
-            <Text fontSize="lg">{t("landing.toolsSectionDesc1")}</Text>
-            <Text fontSize="lg">{t("landing.toolsSectionDesc2")}</Text>
+            <Text fontSize="lg">
+              {t("landing.toolsSectionDesc1")}
+              {t("landing.toolsSectionDesc2")}
+            </Text>
             <Button
               as={RouterLink}
               to="/tools"

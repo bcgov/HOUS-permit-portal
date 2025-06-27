@@ -1,5 +1,5 @@
 class AddUnmappedNotificationToPreference < ActiveRecord::Migration[7.1]
-  def change    
+  def change
     add_column :preferences,
                :enable_in_app_unmapped_api_notification,
                :boolean,

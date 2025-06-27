@@ -58,7 +58,7 @@ export const EmailFormControl = ({
           <>
             <FormLabel>{label || t("auth.emailLabel")}</FormLabel>
             {!required && showOptional && (
-              <Text ml={-2} mb={2}>
+              <Text ml={-2} mb={1}>
                 {t("ui.optional")}
               </Text>
             )}
@@ -105,11 +105,7 @@ export const EmailFormControl = ({
           />
         )}
       </Flex>
-      {errorMessage && !inputProps?.isDisabled && (
-        <FormErrorMessage>
-          {errorMessage}
-        </FormErrorMessage>
-      )}
+      {errorMessage && !inputProps?.isDisabled && <FormErrorMessage>{errorMessage}</FormErrorMessage>}
     </FormControl>
   )
 }

@@ -33,17 +33,7 @@ if SHRINE_USE_S3
     region: ENV["BCGOV_OBJECT_STORAGE_REGION"] || "no-region-needed", # We are using Object Storage which does not require this, put in a dummy variable.  For dev testing will need a region.
     access_key_id: ENV["BCGOV_OBJECT_STORAGE_ACCESS_KEY_ID"],
     secret_access_key: ENV["BCGOV_OBJECT_STORAGE_SECRET_ACCESS_KEY"],
-    force_path_style: true,
-    upload_options: { # Default options for all uploads to this storage
-      # Restore the lambda for dynamic content_disposition
-      content_disposition: ->(io, metadata) do
-        # Ensure filename is reasonably sanitized just in case, although Shrine/AWS might handle it
-        filename = metadata[:filename] || "download"
-        # Basic sanitization: replace double quotes to prevent header issues
-        sanitized_filename = filename.gsub(/["\\]/, "_") # Replace quotes and backslashes
-        "attachment; filename=\"#{sanitized_filename}\""
-      end
-    }
+    force_path_style: true
   }
   Shrine.storages = {
     cache:
@@ -69,26 +59,6 @@ Shrine.plugin :form_assign
 Shrine.plugin :data_uri
 Shrine.plugin :remote_url,
               max_size: Constants::Sizes::FILE_UPLOAD_MAX_SIZE * 1024 * 1024 # https://shrinerb.com/docs/plugins/remote_url
-Shrine.plugin :upload_options,
-              store: ->(io, context = {}) do
-                # This lambda is called for uploads to :store (including promotion)
-                if context[:action] == :store
-                  metadata =
-                    begin
-                      context[:metadata] || io.metadata
-                    rescue StandardError
-                      {}
-                    end
-                  filename = metadata["filename"] || "download"
-                  sanitized_filename = filename.gsub(/["\\]/, "_")
-                  {
-                    content_disposition:
-                      "attachment; filename=\"#{sanitized_filename}\""
-                  }
-                else
-                  {}
-                end
-              end
 
 Shrine.plugin :presign_endpoint,
               presign_options:

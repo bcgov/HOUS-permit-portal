@@ -2,6 +2,7 @@ require "swagger_helper"
 
 RSpec.describe "external_api/v1/permit_applications",
                type: :request,
+               search: true,
                openapi_spec: "external_api/v1/swagger.yaml" do
   let!(:external_api_key) { create(:external_api_key) }
   let!(:token) { external_api_key.token }

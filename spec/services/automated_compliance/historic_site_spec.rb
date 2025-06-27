@@ -1,6 +1,8 @@
 require "rails_helper"
 
-RSpec.describe AutomatedCompliance::HistoricSite do
+RSpec.describe AutomatedCompliance::HistoricSite,
+               type: :service,
+               search: true do
   let!(:requirement_template) do
     create(:live_requirement_template_with_heritage)
   end

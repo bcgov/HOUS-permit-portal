@@ -1,6 +1,6 @@
 require "rails_helper"
 
-RSpec.describe TemplateVersion, type: :model do
+RSpec.describe TemplateVersion, type: :model, search: true do
   describe "#create_integration_mappings callback" do
     context "when the template version is published and status has changed" do
       let!(:jurisdiction) { create(:sub_district) }
