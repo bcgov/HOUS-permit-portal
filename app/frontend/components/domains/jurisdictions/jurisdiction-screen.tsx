@@ -112,7 +112,7 @@ export const JurisdictionScreen = observer(() => {
         <JurisdictionMap mapPosition={mapPositionWatch} mapZoom={mapZoomWatch} />
       </Show>
       <Container maxW="container.lg" py={{ base: 6, md: 16 }} px={8}>
-        {!currentJurisdiction.submissionInboxSetUp && (
+        {!currentJurisdiction.inboxEnabled && (
           <Box my={8}>
             <CustomMessageBox status={EFlashMessageStatus.warning} description={t("jurisdiction.notEnabled")} />
           </Box>
