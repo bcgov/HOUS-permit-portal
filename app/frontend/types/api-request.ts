@@ -1,5 +1,5 @@
 import { IRevisionReason } from "../models/revision-reason"
-import { ELandingTemplateKeys, ENumberUnit, ERequirementType, ETagType, EVisibility } from "./enums"
+import { ENumberUnit, ERequirementType, ETagType, EVisibility } from "./enums"
 import {
   IHelpLinkItems,
   IOption,
@@ -107,7 +107,7 @@ export interface ISiteConfigurationUpdateParams {
   sitewideMessage?: string | null
   helpLinkItems?: IHelpLinkItems
   revisionReasonsMap?: { [key: string]: IRevisionReason }
-  [ELandingTemplateKeys.SmallScale]?: string | null
+  landingPageEarlyAccessRequirementTemplateIds?: string[] | null
   revisionReasonsAttributes?: IRevisionReasonsAttributes[]
 }
 

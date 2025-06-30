@@ -17,7 +17,7 @@ export const JurisdictionStoreModel = types
       jurisdictionMap: types.map(JurisdictionModel),
       tableJurisdictions: types.array(types.safeReference(JurisdictionModel)),
       currentJurisdiction: types.maybeNull(types.maybe(types.reference(JurisdictionModel))),
-      submissionInboxSetUpFilter: types.maybeNull(types.string),
+      inboxEnabledFilter: types.maybeNull(types.string),
     }),
     createSearchModel<EJurisdictionSortFields>("searchJurisdictions", "setJurisdictionFilters")
   )
@@ -74,7 +74,7 @@ export const JurisdictionStoreModel = types
     }),
     searchJurisdictions: flow(function* (
       opts?: { reset?: boolean; page?: number; countPerPage?: number },
-      submissionInboxSetUp?: boolean
+      inboxEnabled?: boolean
     ) {
       if (opts?.reset) {
         self.resetPages()
@@ -85,7 +85,7 @@ export const JurisdictionStoreModel = types
           query: self.query,
           sort: self.sort,
           filters: {
-            submissionInboxSetUp,
+            inboxEnabled,
           },
         })
       )
@@ -123,10 +123,10 @@ export const JurisdictionStoreModel = types
       return response.ok
     }),
     setJurisdictionFilters(queryParams) {
-      const submissionInboxSetUpFilter = queryParams.get("submissionInboxSetUp")
+      const inboxEnabledFilter = queryParams.get("inboxEnabled")
 
-      if (submissionInboxSetUpFilter) {
-        self.submissionInboxSetUpFilter = submissionInboxSetUpFilter
+      if (inboxEnabledFilter) {
+        self.inboxEnabledFilter = inboxEnabledFilter
       }
     },
     fetchJurisdiction: flow(function* (id: string) {

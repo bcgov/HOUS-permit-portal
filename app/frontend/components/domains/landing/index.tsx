@@ -17,16 +17,7 @@ import {
   UnorderedList,
   VStack,
 } from "@chakra-ui/react"
-import {
-  ArrowSquareOut,
-  CaretRight,
-  CheckCircle,
-  ClipboardText,
-  Download,
-  FileArrowUp,
-  Info,
-  MapPin,
-} from "@phosphor-icons/react"
+import { CaretRight, CheckCircle, ClipboardText, FileArrowUp, Info, MapPin } from "@phosphor-icons/react"
 import i18next from "i18next"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
@@ -48,7 +39,7 @@ export const LandingScreen = observer(({}: ILandingScreenProps) => {
   const mailto = "mailto:" + t("site.contactEmail")
   const iNeedRef = useRef<HTMLDivElement>(null)
   const { sessionStore, userStore, siteConfigurationStore } = useMst()
-  const { smallScaleRequirementTemplateId } = siteConfigurationStore
+  const { landingPageEarlyAccessRequirementTemplates } = siteConfigurationStore
   const { loggedIn } = sessionStore
   const { currentUser } = userStore
 
@@ -93,7 +84,7 @@ export const LandingScreen = observer(({}: ILandingScreenProps) => {
               >
                 {currentUser
                   ? t("landing.goTo", {
-                      location: currentUser?.isSuperAdmin ? t("landing.adminPanel") : t("landing.submitterPanel"),
+                      location: currentUser?.isSuperAdmin ? t("landing.adminPanel") : t("landing.projectsPanel"),
                     })
                   : t("landing.permitApp")}
               </RouterLinkButton>
@@ -195,50 +186,80 @@ export const LandingScreen = observer(({}: ILandingScreenProps) => {
       </Box>
       <Box bg="greys.white">
         <Container maxW="container.lg" py={16} px={8} textAlign="center" gap="6">
-          <Heading as="h3" fontSize="md">
+          <Heading as="h3" fontSize="md" textAlign="left">
             {t("landing.expectQ")}
           </Heading>
-          <Text>{t("landing.expectA")}</Text>
+          <Text textAlign="left">{t("landing.expectA")}</Text>
 
           <Flex mt={8} gap={6} direction={{ base: "column", md: "row" }}>
-            <BareBox n={"1"}>{t("landing.additionalContent.left")}</BareBox>
-
-            <BareBox n={"2"}>
-              {t("landing.additionalContent.mid")}
+            <BareBox>
+              <Text>{t("landing.card1Title")}</Text>
               <br />
               <Text as="span" fontWeight={400}>
-                {t("landing.additionalContent.midSub")}
+                {t("landing.card1Body")}
               </Text>
-
-              <HStack>
-                <Button
-                  as="a"
-                  variant={"primary"}
-                  href={"/pdfs/BPH-Standardized List of Requirements V.2024.09.01 - SEP 2024.pdf"}
-                  download={"BPH-Standardized List of Requirements V.2024.09.01 - SEP 2024.pdf"}
-                  mt={2}
-                  leftIcon={<Download />}
-                >
-                  {t("landing.additionalContent.midDownload")}
-                </Button>
-                <RouterLinkButton
-                  variant={"primary"}
-                  mt={2}
-                  leftIcon={<ArrowSquareOut />}
-                  to={`/early-access/requirement-templates/${smallScaleRequirementTemplateId}`}
-                >
-                  {t("landing.additionalContent.viewTemplate")}
-                </RouterLinkButton>
-              </HStack>
             </BareBox>
 
-            <BareBox n={"3"}>
-              {t("landing.additionalContent.end")}
-              <RouterLinkButton mt={2} variant={"primary"} to={loggedIn ? "/permit-applications/new" : "/login"}>
-                {t("landing.additionalContent.endButton")}
-              </RouterLinkButton>
+            <BareBox>
+              <Text>{t("landing.card2Title")}</Text>
+              <br />
+              <Text as="span" fontWeight={400}>
+                {t("landing.card2Body")}
+              </Text>
+            </BareBox>
+
+            <BareBox>
+              <Text>{t("landing.card3Title")}</Text>
+              <br />
+              <Text as="span" fontWeight={400}>
+                {t("landing.card3Body")}
+              </Text>
             </BareBox>
           </Flex>
+
+          {landingPageEarlyAccessRequirementTemplates.length > 0 && (
+            <VStack as="section" w="full" gap={2} my={16} alignItems="flex-start">
+              <Heading as="h2" variant="yellowline">
+                {t("landing.underDevelopmentTitle")}
+              </Heading>
+              <Text textAlign="left">{t("landing.underDevelopmentBody")}</Text>
+              <Text textAlign="left">{t("landing.listedDrafts")}</Text>
+              <Heading as="h4" size="md" pt={6}>
+                {t("landing.ssmuHousingTitle")}
+              </Heading>
+              <VStack spacing={2} mt={2} alignItems="flex-start">
+                {landingPageEarlyAccessRequirementTemplates?.map((template) => (
+                  <RouterLink key={template.id} to={`/early-access/requirement-templates/${template.id}`}>
+                    {template.nickname}
+                  </RouterLink>
+                ))}
+              </VStack>
+              <Text mt={4}>
+                <Trans
+                  i18nKey="landing.shareFeedbackBody"
+                  components={{
+                    1: <Text as="strong"></Text>,
+                    2: <Link href="mailto:digital.codes.permits@gov.bc.ca" isExternal color="link.default"></Link>,
+                  }}
+                />
+              </Text>
+            </VStack>
+          )}
+
+          <Box textAlign="left" mt={8}>
+            <Box width="50px" height="4px" bg="yellow.400" mb={4} />
+            <Heading as="h2" size="lg" mb={4}>
+              {t("landing.part9ChecklistsTitle")}
+            </Heading>
+            <Text mb={2}>{t("landing.part9ChecklistsBody")}</Text>
+            <Link
+              href="/pdfs/BPH-Standardized List of Requirements V.2024.09.01 - SEP 2024.pdf"
+              download="BPH-Standardized List of Requirements V.2024.09.01 - SEP 2024.pdf"
+              textDecoration="underline"
+            >
+              {t("landing.part9ChecklistsLink")}
+            </Link>
+          </Box>
         </Container>
       </Box>
       <Box bg="greys.grey03">
@@ -405,27 +426,13 @@ const IconBox = ({ icon, children, ...rest }: IIconBoxProps) => {
 }
 
 interface IBareBoxProps {
-  n: string
   children: ReactNode
 }
 
-const BareBox: React.FC<IBareBoxProps> = ({ n, children }) => {
+const BareBox: React.FC<IBareBoxProps> = ({ children }) => {
   return (
     <Box p={4} borderRadius="lg" bg="theme.blueLight" color="theme.blueAlt" flex={1}>
       <Flex gap={6} align="center" h="full">
-        <Flex
-          alignItems="center"
-          justifyContent="center"
-          bg="theme.blue"
-          color="white"
-          borderRadius="50%"
-          minWidth="35px"
-          height="35px"
-          fontSize={20}
-          fontWeight="bold"
-        >
-          {n}
-        </Flex>
         <Text fontSize="md" fontWeight="bold" textAlign="left">
           {children}
         </Text>

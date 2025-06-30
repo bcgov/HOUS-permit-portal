@@ -40,7 +40,7 @@ class Api::SiteConfigurationController < Api::ApplicationController
       :sitewide_message,
       :inbox_enabled,
       :allow_designated_reviewer,
-      :small_scale_requirement_template_id,
+      landing_page_early_access_requirement_template_ids: [],
       help_link_items: [
         get_started_link_item: %i[href title description show],
         best_practices_link_item: %i[href title description show],
