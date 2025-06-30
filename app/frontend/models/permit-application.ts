@@ -177,8 +177,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
         return self.jurisdiction?.inboxEnabled && self.rootStore.siteConfigurationStore.inboxEnabled
       },
       get isDesignatedReviewerEnabled() {
-        const { siteConfigurationStore } = self.rootStore
-        return siteConfigurationStore.allowDesignatedReviewer || self.jurisdiction.allowDesignatedReviewer
+        return self.jurisdiction.allowDesignatedReviewer
       },
     }))
     .views((self) => ({
@@ -551,13 +550,12 @@ export const PermitApplicationModel = types.snapshotProcessor(
     }))
     .views((self) => ({
       get shouldShowDesignatedReviewerModal() {
-        const { siteConfigurationStore, userStore } = self.rootStore
+        const { userStore } = self.rootStore
         const { currentUser } = userStore
 
-        const siteConfigurationADR = siteConfigurationStore.allowDesignatedReviewer
         const jurisdictionADR = self.jurisdiction.allowDesignatedReviewer
 
-        const featureEnabled = siteConfigurationADR === true ? true : jurisdictionADR
+        const featureEnabled = jurisdictionADR
         const designatedReviewerCollaboration = self.getCollaborationDelegatee(ECollaborationType.review)
         const designatedReviewerExists = designatedReviewerCollaboration?.collaborator?.user?.id != null
 

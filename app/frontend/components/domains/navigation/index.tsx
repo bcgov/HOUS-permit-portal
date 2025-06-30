@@ -361,7 +361,7 @@ export const Navigation = observer(() => {
 
 const AppRoutes = observer(() => {
   const rootStore = useMst()
-  const { sessionStore, userStore, uiStore } = rootStore
+  const { siteConfigurationStore, sessionStore, userStore, uiStore } = rootStore
   const { loggedIn, tokenExpired } = sessionStore
   const location = useLocation()
   const background = location.state && location.state.background
@@ -371,7 +371,7 @@ const AppRoutes = observer(() => {
 
   const navigate = useNavigate()
   const { t } = useTranslation()
-
+  const { allowDesignatedReviewer } = siteConfigurationStore
   if (currentUser === undefined) {
     console.log("AppRoutes: currentUser is undefined, rendering LoadingScreen.")
     return <LoadingScreen />
@@ -432,7 +432,7 @@ const AppRoutes = observer(() => {
         element={<AdminSubmissionInboxScreen />}
       />
       <Route
-        path="/configuration-management/global-feature-access/designated-reviewer"
+        path="/configuration-management/global-feature-access/access-control-for-revision-requests-to-submitters"
         element={<AdminDesignatedReviewerScreen />}
       />
       <Route path="/configuration-management/users/invite" element={<AdminInviteScreen />} />
@@ -473,10 +473,12 @@ const AppRoutes = observer(() => {
         path="/jurisdictions/:jurisdictionId/configuration-management/feature-access/my-jurisdiction-about-page"
         element={<ReviewStaffMyJurisdictionAboutPageScreen />}
       />
-      <Route
-        path="/jurisdictions/:jurisdictionId/configuration-management/feature-access/designated-reviewer"
-        element={<DesignatedReviewerScreen />}
-      />
+      {allowDesignatedReviewer && (
+        <Route
+          path="/jurisdictions/:jurisdictionId/configuration-management/feature-access/limit-who-can-request-revisions-from-submitters"
+          element={<DesignatedReviewerScreen />}
+        />
+      )}
       <Route
         path="/jurisdictions/:jurisdictionId/configuration-management/energy-step"
         element={<EnergyStepRequirementsScreen />}

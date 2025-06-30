@@ -2374,9 +2374,15 @@ const options = {
               myJurisdictionAboutPageDescription:
                 "Show a custom About page on Building Permit Hub with information specific to your jurisdiction's requirements, contact information, or common issues to watch for.<br><br> Only turn this page on after you've added your content. If it's turned on without custom content, the page will appear blank. <1> Edit your jurisdiction's About page content",
               myJurisdictionAboutPageEdit: "Edit",
-              designatedReviewer: "Designated Reviewer",
+              designatedReviewer: "Limit who can request revisions from submitters",
               editJurisdictionAboutPage: "Edit my jurisdiction About page",
-              editDesignatedReviewer: "Toggle on or off a designated Reviewer",
+              editDesignatedReviewer: {
+                intro: "You can restrict who’s allowed to request revisions from applicants.",
+                item1:
+                  "When this setting is <strong>off</strong>, any reviewer with access to the application can send revisions",
+                item2:
+                  "When <strong>on</strong>, only a person assigned to a permit application as a designated reviewer can send revision requests",
+              },
               editJurisdictionEditButton: "Edit page",
               toggleOn: "On",
               toggleOff: "Off",
@@ -2816,8 +2822,16 @@ const options = {
               "Enable review managers to accept and process permit applications. If you turn off this feature, submitters can't submit applications, and review managers won't receive new applications.",
             toggleOn: "On",
             toggleOff: "Off",
-            designatedReviewer: "Designated Reviewer",
+            accessControlRevisionRequests: "Access control for revision requests to submitters",
             designatedReviewerDescription: "Turn the designated reviewer on or off site-wide.",
+            editDesignatedReviewer: {
+              intro:
+                "Allow jurisdictions to require that only designated reviewers can send revision requests to submitters.",
+              item1:
+                "When this setting is <strong>off</strong>, all reviewers with access to a permit can send revisions, across all jurisdictions",
+              item2:
+                "When <strong>on</strong>, jurisdictions can choose to limit who can request revisions from applicants",
+            },
           },
           sitewideMessage: {
             title: "Site-wide message",
@@ -3046,7 +3060,8 @@ const options = {
             configurationManagement: "Configuration",
             featureAccess: "Feature access",
             myJurisdictionAboutPage: "My jurisdiction's about page",
-            designatedReviewer: "Designated Reviewer",
+            accessControlForRevisionRequestsToSubmitters: "Access control for revision requests to submitters",
+            limitWhoCanRequestRevisionsFromSubmitters: "Access control for revision requests to submitters",
             submissionInboxSetup: "Submissions inbox setup",
             energyStep: "Energy Step Code requirements",
             submissionsInboxSetup: "Submissions inbox setup",

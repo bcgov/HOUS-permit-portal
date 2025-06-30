@@ -21,7 +21,6 @@ export const DesignatedReviewerScreen = observer(() => {
     <DesignatedReviewerSettings
       handleBack={() => navigate(-1)}
       title={t(`${i18nPrefix}.designatedReviewer`)}
-      description={t(`${i18nPrefix}.editDesignatedReviewer`)}
       isEnabled={isEnabled}
       onToggle={handleToggle}
     />

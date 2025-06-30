@@ -16,9 +16,9 @@ export const AdminGlobalFeatureAccessScreen = observer(() => {
       route: "submission-inbox",
     },
     {
-      label: t(`${i18nPrefix}.designatedReviewer`),
+      label: t(`${i18nPrefix}.accessControlRevisionRequests`),
       enabled: siteConfigurationStore?.allowDesignatedReviewer,
-      route: "designated-reviewer",
+      route: "access-control-for-revision-requests-to-submitters",
     },
     // Add more features here as needed
   ]

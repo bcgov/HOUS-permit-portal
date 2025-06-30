@@ -6,7 +6,6 @@ import { useMst } from "../../../../setup/root"
 import { DesignatedReviewerSettings } from "../../../shared/designated-reviewer-settings"
 
 export const AdminDesignatedReviewerScreen = observer(() => {
-  const i18nPrefix = "siteConfiguration.globalFeatureAccess"
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { siteConfigurationStore } = useMst()
@@ -29,8 +28,7 @@ export const AdminDesignatedReviewerScreen = observer(() => {
   return (
     <DesignatedReviewerSettings
       handleBack={() => navigate(-1)}
-      title={t(`${i18nPrefix}.designatedReviewer`)}
-      description={t(`${i18nPrefix}.designatedReviewerDescription`)}
+      title={t("siteConfiguration.globalFeatureAccess.accessControlRevisionRequests")}
       isEnabled={allowDesignatedReviewer}
       onToggle={handleToggle}
     />
