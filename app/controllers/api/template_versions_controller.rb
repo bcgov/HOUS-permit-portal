@@ -154,11 +154,14 @@ class Api::TemplateVersionsController < Api::ApplicationController
           permit_type: @template_version.permit_type,
           first_nations: false
         )
-      from_template_version = requirement_template.published_template_version
+      from_template_version = requirement_template&.published_template_version
     end
 
-    if from_template_version.nil?
-      render_error("misc.not_found_error", status: :not_found) and return
+    if requirement_template.nil? || from_template_version.nil?
+      render_error(
+        "jurisdiction_template_version_customization.no_copy_target_error",
+        status: :not_found
+      ) and return
     end
 
     if @jurisdiction_template_version_customization =
@@ -173,7 +176,7 @@ class Api::TemplateVersionsController < Api::ApplicationController
            copy_customization_params[:include_tips]
          )
       render_success @jurisdiction_template_version_customization,
-                     "jurisdiction_template_version_customization.update_success",
+                     "jurisdiction_template_version_customization.copy_success",
                      {
                        blueprint:
                          JurisdictionTemplateVersionCustomizationBlueprint
@@ -196,7 +199,8 @@ class Api::TemplateVersionsController < Api::ApplicationController
     authorize @template_version, :show?
 
     @integration_mapping =
-      @template_version.integration_mappings.find_by(
+      IntegrationMapping.find_or_create_by!(
+        template_version_id: @template_version.id,
         jurisdiction_id: params[:jurisdiction_id]
       )
 
@@ -208,7 +212,8 @@ class Api::TemplateVersionsController < Api::ApplicationController
                      {
                        blueprint: IntegrationMappingBlueprint,
                        blueprint_opts: {
-                         view: :base
+                         view: :base,
+                         sandbox: current_sandbox
                        }
                      }
     else
