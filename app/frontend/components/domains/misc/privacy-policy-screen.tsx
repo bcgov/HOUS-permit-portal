@@ -157,7 +157,6 @@ export const PrivacyPolicyScreen = () => {
           <Text>{t("site.privacyPolicyContactUsAddress1")}</Text>
           <Text>{t("site.privacyPolicyContactUsAddress2")}</Text>
           <Text>{t("site.privacyPolicyContactUsEmail")}</Text>
-          <Text>{t("site.privacyPolicyContactUsPhone")}</Text>
         </Box>
       </VStack>
     </Container>

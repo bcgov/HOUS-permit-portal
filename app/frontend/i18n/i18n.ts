@@ -3247,10 +3247,9 @@ const options = {
           privacyPolicyContactUsDescription:
             "If you have questions about this policy or how your personal information is handled, please contact us at:",
           privacyPolicyContactUsTitle: "Ministry of Housing and Municipal Affairs",
-          privacyPolicyContactUsAddress1: "PO Box 9871, Stn Prov Govt",
-          privacyPolicyContactUsAddress2: "Victoria, BC V8W 9E2",
-          privacyPolicyContactUsEmail: "Email: [Insert Contact Email]",
-          privacyPolicyContactUsPhone: "Phone: [Insert Contact Phone Number]",
+          privacyPolicyContactUsAddress1: "PO Box 9844 Stn Prov Govt",
+          privacyPolicyContactUsAddress2: "Victoria, BC V8W 9T2",
+          privacyPolicyContactUsEmail: "Email: digital.codes.permits@gov.bc.ca",
           breadcrumb: {
             latest: "Latest",
             profile: "Profile",
