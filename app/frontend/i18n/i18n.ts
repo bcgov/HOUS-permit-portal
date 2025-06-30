@@ -133,9 +133,9 @@ const options = {
             "Permits help ensure that construction and major renovations follow local bylaws, the building code and health and safety standards. You will need the required permits before any stage of a project can start. Projects for the interior of your home or minor repairs may not require a permit depending on your local jurisdiction and geography.",
           permitConnect:
             "The B.C government is making housing development projects easier with a new coordinated approach. Visit <1>Permit Connect BC to learn more</1>.",
-          expectQ: "What can I expect?",
+          expectQ: "A new building permit experience for BC",
           expectA:
-            "Once you have provided all the information needed for the permits, your local jurisdiction will be notified and will contact you to discuss if more details are needed. This could be because of how the land is used, the rules for building in that area, how much the area can support, the quality of the soil, and/or any environmental concerns.",
+            "Building Permit Hub is a new way to submit building permits in BC. Here is what it can help you do:",
           createdQ: "Why was this tool created?",
           createdA:
             "The Building Permit Hub will make it faster and simpler for home builders and developers to send in building permits for new housing online. Local jurisdictions can receive the applications and process them faster too. This tool automatically checks if the application follows the rules in the B.C. Building Code, including the Energy Step Code, to help prevent any delays in the application process.",
@@ -149,11 +149,12 @@ const options = {
           browseList: "Browse list of jurisdictions",
           goTo: "Go to {{ location }}",
           permitApp: "Log in",
-          adminPanel: "admin panel",
-          submitterPanel: "permit app",
+          adminPanel: "admin home",
+          projectsPanel: "projects",
           enabledCommunitiesDescription: "Communities you can submit Building Permit applications in:",
           moreComingSoon: "(more coming soon)",
           andMore: "...and more",
+          earlyAccessTemplates: "See some of our templates in progress",
           additionalContent: {
             left: "See helpful tips from your local jurisdictions to streamline your digital building permit applications",
             mid: "Preview the Small-scale/Multi-unit housing checklist",
@@ -169,6 +170,25 @@ const options = {
             "Use Building Permit Hub's tools to check your application for readiness and prepare key documents for your project.",
           toolsSectionDesc2:
             "Check your project against Provincial requirements such as Step Codes and prepare other documents.",
+
+          card1Title: "Find out what’s required before you apply",
+          card1Body: "Tools and checklists to help you prepare your application package",
+          card2Title: "Submit your application online",
+          card2Body: "Consistent application forms, even when rules vary by community",
+          card3Title: "Track progress and talk to reviewers",
+          card3Body: "Stay up to date and respond to building officials directly, all in one place",
+          underDevelopmentTitle: "Share your feedback on permit applications under development",
+          underDevelopmentBody:
+            "We’re co-developing standard permit types with local governments and First Nations across BC. These drafts are available for review and discussion as we continue this work together.",
+          listedDrafts:
+            " The listed drafts are open for review. These permit applications are drafts; do not use for permit intake.",
+          shareFeedbackBody:
+            "We’re looking for your input. <1>Email us your feedback at:</1> <2>digital.codes.permits@gov.bc.ca</2>",
+          ssmuHousingTitle: "Small-scale / multi-unit housing permits",
+          part9ChecklistsTitle: "Part 9 checklists",
+          part9ChecklistsBody:
+            "These checklists help you gather the right documents and prepare your application for small buildings that fall under Part 9 of the BC Building Code (up to 3 storeys, fewer than 600m²).",
+          part9ChecklistsLink: "Part 9 checklists (PDF)",
         },
         ui: {
           okay: "Okay",
@@ -398,7 +418,7 @@ const options = {
             templatesUsed: "Templates used",
             mapPosition: "Map position",
             regionalDistrictName: "Regional district",
-            submissionInboxSetUp: "Accepting submissions",
+            inboxEnabled: "Accepting submissions",
           },
           lat: "Latitude",
           lng: "Longitude",
@@ -2256,6 +2276,160 @@ const options = {
               },
             },
           },
+          joinTheBuildingPermitHub: {
+            title: "Join the Building Permit Hub",
+            subtitle: "A voluntary, modern permitting platform built with BC communities, for BC communities.",
+            ourVision: {
+              title: "Our Vision",
+              description:
+                "The <strong>Building Permit Hub</strong> is here to make building permits faster and easier for everyone:",
+              audiences: {
+                localGovernments: "local governments",
+                builders: "builders",
+                homeowners: "homeowners",
+                applicants: "anyone applying for a permit",
+              },
+              platformDescription:
+                "It's a <strong>free, voluntary</strong> platform that supports you from the moment a property is identified for your construction project — all the way through to occupancy.",
+              mission:
+                "We're here to accelerate housing approvals, strengthen partnerships, and lay the foundation for a <strong>connected, future-ready permitting system</strong> across the province.",
+              flexibility:
+                "Every community is different, and that's why the Hub is built with <strong>choice and flexibility</strong>  in mind. Use the features that work best for your jurisdiction, whether you're just getting started or already have your own digital system.",
+            },
+            currentStatus: {
+              title: "Where we are & What you can use today",
+              description: "The Hub is <strong>live and available</strong> to all jurisdictions in BC.",
+              features: {
+                title: "You can start using:",
+                smallScaleHousing: "<strong>small-scale multi-unit housing permit types</strong>",
+                automatedStepCode:
+                  "<strong>automated Step Code compliance tools</strong> (BC Building Code Part 3 & Part 9)",
+                collaborativeFlows: "<strong>collaborative submission and review flows</strong>",
+                customizablePermits: "<strong>customizable permit types tailored to your bylaws</strong>",
+                resubmissionTools: "<strong>resubmission and revision tools</strong>",
+              },
+              workflowNote:
+                "Whether you're digital, hybrid, or paper-based, you can participate in a way that fits your current workflow.",
+            },
+            builtTogether: {
+              title: "Built together, with You",
+              description:
+                "We're co-developing this platform with local governments, First Nations, and industry partners.",
+              feedbackNote:
+                "Your feedback — whether it's a new idea or something that isn't working — <strong>shapes what we build</strong>.",
+              communityFeatures: {
+                title: "Some features that came directly from community feedback:",
+                multipleUploads: "support for multiple file uploads",
+                fileScanning: "malicious file scanning",
+                flexibleTools: "flexible tools for tracking, reviewing, and collaborating",
+              },
+            },
+            whatsNext: {
+              title: "What's coming next",
+              timeline: "Here's what we're working on for the next 6–7 months:",
+              features: {
+                permitFolders: {
+                  title: "Permit Project Folders",
+                  description: "Submit multiple permits together or in sequence — ideal for complex projects.",
+                },
+                readinessTools: {
+                  title: "Project Readiness Tools",
+                  description:
+                    "Pre-application tools like letters of assurance, lateral load and seismic calculators — usable outside the permit form.",
+                },
+                documentUpload: {
+                  title: "Independent Document Upload",
+                  description:
+                    "Support documents that aren't tied to specific form fields, helpful for large or complex submissions.",
+                },
+                designCatalogues: {
+                  title: "Standardized Design Catalogues",
+                  description:
+                    "Work with national partners to speed up reviews and encourage consistency across housing types.",
+                },
+                dashboards: {
+                  title: "Cross-Jurisdiction Dashboards",
+                  description:
+                    "For submitters working across BC: one dashboard for all permit activity, no matter the community.",
+                },
+                statusTracking: {
+                  title: "Enhanced Status Tracking",
+                  description:
+                    "More dynamic status updates — visible in real time for both jurisdictions and submitters.",
+                },
+              },
+            },
+            flexibleAdoption: {
+              title: "Flexible Adoption to Fit You",
+              description: "You don't need to use the entire platform.",
+              examples: {
+                title: "Examples:",
+                stepCode:
+                  "Use just the <strong>Step Code tools</strong>, and we'll send the compliance reports directly to you",
+                specificTools:
+                  "Adopt specific tools like <strong>document upload</strong> or <strong>project folders</strong> as they become available",
+                preApplication:
+                  "Let your users benefit from our <strong>pre-application readiness tools</strong>, without needing to change your permitting system",
+              },
+              note: "We're designing the Hub to meet <strong>60–70% of most jurisdictions' needs</strong> — not to replace what already works.",
+            },
+            integration: {
+              title: "Connected Through Integration",
+              description:
+                "Many jurisdictions have asked for integration into their existing software (like Tempest or CityView). We're responding by:",
+              features: {
+                openApi: "Offering <strong>open API submission</strong>",
+                directPush:
+                  "Allowing the Hub to <strong>push applications directly into your permitting system</strong>",
+                statusUpdates:
+                  "Soon: receiving <strong>status updates back from your system</strong>, to display to applicants in real time",
+              },
+            },
+            getStarted: {
+              title: "How to Get Started",
+              description:
+                "Joining the Building Permit Hub is simple — and we're here to support you every step of the way.",
+              steps: {
+                learnMore: {
+                  title: "1. Learn More",
+                  guide: "Download our Local Government Onboarding Guide (PDF)",
+                },
+                reachOut: {
+                  title: "2. Reach Out to Start the Conversation",
+                  description:
+                    "Every community is different. Let's talk about your goals and how the Hub can support them.",
+                  email: "buildingpermithub@gov.bc.ca",
+                },
+                beginOnboarding: {
+                  title: "3. Begin Onboarding",
+                  description: "We'll walk with you through readiness, setup, and rollout. Go at your pace.",
+                },
+              },
+            },
+            notAlone: {
+              title: "You're Not Alone",
+              stats: {
+                liveJurisdictions: "<strong>Over 5 jurisdictions are live</strong>",
+                coCreation:
+                  "Over <strong>40 local governments</strong> and <strong>7 First Nations</strong> helped co-create the foundation",
+              },
+              feedback:
+                "Feedback has been positive — and the number one request is <strong>more permits and broader support for project workflows</strong>. That's exactly what we're building next.",
+            },
+            seeMore: {
+              title: "Want to See More?",
+              description: "We'd be happy to:",
+              options: {
+                demo: "Walk you through a live demo",
+                technical: "Answer technical questions",
+                success: "Share success stories from other communities",
+              },
+              contact: {
+                email: "<strong>buildingpermithub@gov.bc.ca</strong>",
+                sessions: "<strong>Live onboarding sessions available</strong>",
+              },
+            },
+          },
           siteConfigurationTitle: "Configuration management",
           jurisdictionsDescription:
             "Administer Review Managers and their roles within local jurisdictions through the Building Permit Hub. This includes inviting or removing managers, managing overall jurisdictions, customizing community pages, and handling jurisdiction-specific settings.",
@@ -2789,14 +2963,14 @@ const options = {
           },
         },
         siteConfiguration: {
-          title: "Site configuration management",
+          title: "Configuration",
           adminUserIndex: {
             title: "Users",
             description: "View and manage administrative users",
           },
           landingPageSetup: {
             title: "Landing page setup",
-            description: "Configure content for the landing page",
+            description: "Select the open access previews that will be displayed on the landing page.",
             selectOpenAccessPreviews:
               "Set open access previews to display on the front page. Select from the available public access previews below.",
             smallScale: "Set as Small Scale New Contruction Preview on landing page",
@@ -2821,7 +2995,7 @@ const options = {
           },
           revisionReasonsAttributesSetup: {
             title: "Revision reasons",
-            description: "Setup reasons to be applied to revision requests",
+            description: "Manage revision request reasons",
             options: "Selectable options",
             fields: {
               reasonCode: "Reason code",
@@ -2830,8 +3004,8 @@ const options = {
             },
           },
           helpDrawerSetup: {
-            title: "Help drawer links",
-            description: "Setup links to show in the help drawer for all users",
+            title: "Help drawer",
+            description: "Manage help drawer links",
             settings: "Links",
             fields: {
               show: "Show",
@@ -3035,7 +3209,7 @@ const options = {
             stepCodes: "Step Codes",
             digitalBuildingPermits: "Digital building permits",
             contact: "Contact us",
-            configurationManagement: "Configuration management",
+            configurationManagement: "Configuration",
             featureAccess: "Feature access",
             myJurisdictionAboutPage: "My jurisdiction's about page",
             submissionInboxSetup: "Submissions inbox setup",
@@ -3062,6 +3236,7 @@ const options = {
             globalFeatureAccess: "Global feature access",
             projectReadinessTools: "Prepare and check your project documents",
             createYourLettersOfAssurance: "Create your Letters of Assurance",
+            onboardingChecklistPageForLgAdopting: "Onboarding checklist page for LG adopting",
           },
         },
         automatedCompliance: {

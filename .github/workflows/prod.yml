@@ -20,6 +20,15 @@ jobs:
     environment: prod
 
     steps:
+      # Step to check if the user is authorized
+      - name: Check if user is authorized
+        run: |
+          AUTHORIZED_USERS="${{ secrets.AUTHORIZED_USERS }}"
+          if [[ ! ",$AUTHORIZED_USERS," =~ ",${{ github.actor }}," ]]; then
+            echo "Error: ${GITHUB_ACTOR} is not authorized to trigger this workflow"
+            exit 1
+          fi
+          
       - name: Install Git LFS
         run: |
           sudo apt-get update

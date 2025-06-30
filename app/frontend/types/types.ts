@@ -214,6 +214,7 @@ export interface IDenormalizedTemplate {
   description?: string
   permitType: IPermitType
   activity: IActivity
+  firstNations: boolean
   requirementTemplateSections: IDenormalizedRequirementTemplateSection[]
 }
 
@@ -489,7 +490,7 @@ export interface IJurisdictionFilters {
 }
 
 export interface IJurisdictionSearchFilters {
-  submissionInboxSetUp?: boolean
+  inboxEnabled?: boolean
 }
 
 export interface IPermitApplicationSearchFilters {

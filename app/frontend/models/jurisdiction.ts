@@ -45,7 +45,6 @@ export const JurisdictionModel = types
       types.enumeration(Object.values(EJurisdictionExternalApiState)),
       EJurisdictionExternalApiState.gOff
     ),
-    submissionInboxSetUp: types.boolean,
     permitTypeRequiredSteps: types.array(types.frozen<IPermitTypeRequiredStep>()),
     sandboxes: types.array(types.reference(SandboxModel)),
   })
@@ -189,6 +188,4 @@ export const JurisdictionModel = types
     }),
   }))
 
-export interface IJurisdiction extends Instance<typeof JurisdictionModel> {
-  inboxEnabled: never
-}
+export interface IJurisdiction extends Instance<typeof JurisdictionModel> {}

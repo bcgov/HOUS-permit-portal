@@ -92,7 +92,8 @@ class RequirementBlock < ApplicationRecord
   def components_form_json(section_key)
     is_optional_block = requirements.all? { |req| !req.required }
     has_documents = requirement_documents.any?
-    requirement_map = requirements.map { |r| r.to_form_json(key(section_key)) }
+    requirement_map =
+      requirements.map { |r| r.to_form_json(key(section_key)) }.compact
 
     requirement_map.unshift(documents_component(section_key)) if has_documents
 
