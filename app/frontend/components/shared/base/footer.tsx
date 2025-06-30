@@ -21,6 +21,7 @@ export const Footer = observer(() => {
     "/contact",
     "/project-readiness-tools",
     "/letter-of-assurance",
+    "/privacy-policy",
     "/onboarding-checklist-page-for-lg-adopting",
   ]
 
@@ -96,6 +97,9 @@ export const Footer = observer(() => {
                         >
                           {t("site.disclaimerTitle")}
                         </Link>
+                        <RouterLink to="/privacy-policy" color="text.primary">
+                          {t("site.privacyPolicy")}
+                        </RouterLink>
                         <Link
                           href="https://www2.gov.bc.ca/gov/content/home/accessible-government"
                           target="_blank"
