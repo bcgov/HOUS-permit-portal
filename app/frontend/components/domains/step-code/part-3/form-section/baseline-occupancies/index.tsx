@@ -37,7 +37,7 @@ export const BaselineOccupancies = observer(function Part3StepCodeFormBaselineOc
   const navigate = useNavigate()
   const location = useLocation()
 
-  const { handleSubmit, formState, control, reset } = useForm({
+  const { handleSubmit, formState, control, reset, trigger } = useForm({
     mode: "onSubmit",
     defaultValues: { baselineOccupancies: checklist.baselineOccupancies.map((oc) => oc.key) },
   })
@@ -110,6 +110,11 @@ export const BaselineOccupancies = observer(function Part3StepCodeFormBaselineOc
     }
   }, [isValid])
 
+  useEffect(() => {
+    // trigger validation when the isRelevant value changes, as it is a dependency for the validation
+    trigger("baselineOccupancies")
+  }, [isRelevant, trigger])
+
   return (
     <>
       <Flex direction="column" gap={2} pb={6}>
@@ -146,7 +151,14 @@ export const BaselineOccupancies = observer(function Part3StepCodeFormBaselineOc
                 </FormHelperText>
                 <Controller
                   name="baselineOccupancies"
-                  rules={{ required: t(`${i18nPrefix}.occupancies.error`) }}
+                  rules={{
+                    validate: (value) => {
+                      if (isRelevant === "yes" && (!value || value.length === 0)) {
+                        return t(`${i18nPrefix}.occupancies.error`)
+                      }
+                      return true
+                    },
+                  }}
                   control={control}
                   render={({ field: { onChange, value } }) => (
                     <CheckboxGroup defaultValue={value} onChange={onChange}>
