@@ -452,6 +452,7 @@ const requirementsComponentMap = {
         },
       },
       { type: ERequirementContactFieldItemType.professionalAssociation },
+      { type: ERequirementContactFieldItemType.contactType },
       {
         type: ERequirementContactFieldItemType.professionalNumber,
         containerProps: {

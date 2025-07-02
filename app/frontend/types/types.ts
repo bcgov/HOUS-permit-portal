@@ -50,6 +50,7 @@ export type DeepPartial<T> = T extends object
 export type TLatLngTuple = [number, number]
 
 export interface IContact {
+  contactType: string
   id: string
   firstName: string
   lastName: string
