@@ -8,6 +8,10 @@ class PermitProjectBlueprint < Blueprinter::Base
          :created_at,
          :updated_at
 
+  field :jurisdiction_disambiguated_name do |permit_project, _options|
+    permit_project.jurisdiction.disambiguated_name
+  end
+
   # NOTE: is_pinned check is optimized by preloading ids in the controller
   field :is_pinned do |permit_project, options|
     options[:pinned_project_ids]&.include?(permit_project.id)

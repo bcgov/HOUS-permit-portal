@@ -8,7 +8,8 @@ import { useTranslation } from "react-i18next"
 import { datefnsTableDateFormat } from "../../../constants"
 import { IPermitProject } from "../../../models/permit-project"
 import { useMst } from "../../../setup/root"
-import { EPermitProjectSortFields } from "../../../types/enums"
+import { EFlashMessageStatus, EPermitProjectSortFields } from "../../../types/enums"
+import { CustomMessageBox } from "../../shared/base/custom-message-box"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
 import { SearchGrid } from "../../shared/grid/search-grid"
 import { SearchGridItem } from "../../shared/grid/search-grid-item"
@@ -30,11 +31,10 @@ export const PinnedProjectsGrid = observer(() => {
           <SharedSpinner />
         </Flex>
       ) : R.isEmpty(pinnedProjects) ? (
-        <Box bg="greys.grey04" p={10} borderRadius="md" borderWidth="1px" borderColor="border.light">
-          <Text textAlign="center" color="greys.grey70">
-            {t("permitProject.index.noPinnedProjects", "You have no pinned projects")}
-          </Text>
-        </Box>
+        <CustomMessageBox
+          status={EFlashMessageStatus.info}
+          description={t("permitProject.index.noPinnedProjects", "You have no pinned projects")}
+        />
       ) : (
         <SearchGrid templateColumns="2fr 1.5fr 1.5fr 1.5fr 1.5fr 1.5fr 0.5fr" gridRowClassName="project-grid-row">
           <GridHeaders columns={Object.values(EPermitProjectSortFields)} includeActionColumn />
@@ -43,7 +43,12 @@ export const PinnedProjectsGrid = observer(() => {
               <SearchGridItem>
                 <RouterLink to={`/permit-projects/${project.id}`}>{project.title}</RouterLink>
               </SearchGridItem>
-              <SearchGridItem>{project.fullAddress}</SearchGridItem>
+              <SearchGridItem>
+                <Flex direction="column">
+                  <Text fontWeight="bold">{project.jurisdictionDisambiguatedName}</Text>
+                  <Text>{project.shortAddress}</Text>
+                </Flex>
+              </SearchGridItem>
               <SearchGridItem>submitter</SearchGridItem>
               <SearchGridItem>{project.updatedAt && format(project.updatedAt, datefnsTableDateFormat)}</SearchGridItem>
               <SearchGridItem>

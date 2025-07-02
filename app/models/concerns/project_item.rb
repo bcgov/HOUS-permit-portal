@@ -9,6 +9,8 @@ module ProjectItem
     # Delegations to PermitProject for core project details
     delegate :full_address, :pid, :pin, to: :permit_project
 
+    after_commit :reindex_permit_project
+
     # Delegations to PermitProject for core project details
     delegate :title,
              :jurisdiction,
@@ -37,6 +39,15 @@ module ProjectItem
     # or if more complex logic were needed.
     def jurisdiction
       permit_project&.jurisdiction
+    end
+
+    private
+
+    def reindex_permit_project
+      return unless permit_project
+
+      permit_project.reload
+      permit_project.reindex
     end
   end
 end

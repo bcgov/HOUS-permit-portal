@@ -5,8 +5,8 @@ class PermitProject < ApplicationRecord
   belongs_to :owner, class_name: "User"
   belongs_to :jurisdiction # Direct association to Jurisdiction
   belongs_to :property_plan_jurisdiction, optional: true
-  has_one :permit_project_payment_detail, dependent: :destroy
-  has_one :payment_detail, through: :permit_project_payment_detail
+  # has_one :permit_project_payment_detail, dependent: :destroy
+  # has_one :payment_detail, through: :permit_project_payment_detail
 
   has_many :permit_applications
   has_many :project_documents, dependent: :destroy
@@ -49,14 +49,12 @@ class PermitProject < ApplicationRecord
   # TODO: Re-evaluate and re-implement search_data based on primary_project_item
   # and the possibility of multiple items of different types in the future.
 
-  # TODO: User to define the logic for this helper method
   def phase
     return "empty" if permit_applications.blank?
 
     permit_applications.max_by(&:pertinence_score).status
   end
 
-  # TODO: User to define the logic for this helper method
   def forcasted_completion_date
     # Example implementation, to be defined by user
     Time.zone.now + 14.days

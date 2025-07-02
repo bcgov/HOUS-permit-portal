@@ -83,8 +83,8 @@ export const ProjectsTable = observer(() => {
         ) : R.isEmpty(tablePermitProjects) ? (
           <GridItem gridColumn="span 7">
             <CustomMessageBox
+              m={4}
               status={EFlashMessageStatus.info}
-              title={t("permitProject.noneFound")}
               description={t("permitProject.noneFoundExplanation")}
             />
           </GridItem>
@@ -94,7 +94,12 @@ export const ProjectsTable = observer(() => {
               <SearchGridItem>
                 <RouterLink to={`/permit-projects/${project.id}`}>{project.title}</RouterLink>
               </SearchGridItem>
-              <SearchGridItem>{project.fullAddress}</SearchGridItem>
+              <SearchGridItem>
+                <Flex direction="column">
+                  <Text fontWeight="bold">{project.jurisdictionDisambiguatedName}</Text>
+                  <Text>{project.shortAddress}</Text>
+                </Flex>
+              </SearchGridItem>
               <SearchGridItem>submitter</SearchGridItem>
               <SearchGridItem>{project.updatedAt && format(project.updatedAt, datefnsTableDateFormat)}</SearchGridItem>
               <SearchGridItem>

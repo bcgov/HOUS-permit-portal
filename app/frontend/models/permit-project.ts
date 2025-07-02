@@ -10,6 +10,7 @@ export const PermitProjectModel = types
     id: types.identifier,
     title: types.string,
     fullAddress: types.maybeNull(types.string),
+    jurisdictionDisambiguatedName: types.string,
     forcastedCompletionDate: types.maybeNull(types.Date),
     phase: types.enumeration(Object.values(EPermitApplicationStatus)),
     permitApplications: types.array(types.reference(types.late(() => PermitApplicationModel))),
@@ -20,7 +21,11 @@ export const PermitProjectModel = types
   })
   .extend(withEnvironment())
   .extend(withRootStore())
-  .views((self) => ({}))
+  .views((self) => ({
+    get shortAddress() {
+      return self.fullAddress?.split(",")[0]
+    },
+  }))
   .actions((self) => ({
     setIsPinned(isPinned: boolean) {
       self.isPinned = isPinned

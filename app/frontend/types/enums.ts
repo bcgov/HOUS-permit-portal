@@ -635,7 +635,7 @@ export enum EStepCodeType {
 
 export enum EPermitProjectSortFields {
   title = "title",
-  fullAddress = "full_address",
+  location = "location",
   submitter = "submitter",
   updatedAt = "updated_at",
   forcastedCompletionDate = "forcasted_completion_date",

@@ -79,7 +79,9 @@ class Api::PermitProjectsController < Api::ApplicationController
 
   def pinned
     pinned_projects =
-      apply_search_authorization(current_user.pinned_permit_projects)
+      apply_search_authorization(
+        current_user.pinned_permit_projects.includes(:jurisdiction)
+      )
     render_success pinned_projects,
                    nil,
                    {
@@ -127,7 +129,7 @@ class Api::PermitProjectsController < Api::ApplicationController
   end
 
   def set_permit_project
-    @permit_project = PermitProject.find(params[:id])
+    @permit_project = PermitProject.includes(:jurisdiction).find(params[:id])
   end
 
   def permit_project_params
