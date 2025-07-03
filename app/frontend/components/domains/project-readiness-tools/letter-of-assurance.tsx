@@ -29,7 +29,7 @@ export const LettersOfAssuranceScreen = () => {
       <Text fontSize="lg" color="text.primary" mb="2">
         {t("home.projectReadinessTools.letterOfAssurancePage.whoThisIsForMayNeed")}
       </Text>
-      <UnorderedList mb={2} pl={6}>
+      <UnorderedList mb={2} pl={6} fontSize="lg">
         <ListItem>{t("home.projectReadinessTools.letterOfAssurancePage.whoThisIsForComplex")}</ListItem>
         <ListItem>{t("home.projectReadinessTools.letterOfAssurancePage.whoThisIsForSimpler")}</ListItem>
         <ListItem>{t("home.projectReadinessTools.letterOfAssurancePage.whoThisIsForInvolves")}</ListItem>
@@ -58,7 +58,7 @@ export const LettersOfAssuranceScreen = () => {
       <Text fontSize="lg" color="text.primary" mb={2}>
         {t("home.projectReadinessTools.letterOfAssurancePage.whenToSubmitIfRequired")}
       </Text>
-      <UnorderedList mb={2} pl={6}>
+      <UnorderedList mb={2} pl={6} fontSize="lg">
         <ListItem>
           <Trans i18nKey="home.projectReadinessTools.letterOfAssurancePage.whenToSubmitScheduleA" />
         </ListItem>
@@ -72,7 +72,7 @@ export const LettersOfAssuranceScreen = () => {
       <Text fontSize="lg" color="text.primary" mb={2}>
         {t("home.projectReadinessTools.letterOfAssurancePage.whenToSubmitBeforeOccupy")}
       </Text>
-      <UnorderedList mb={8} pl={6}>
+      <UnorderedList mb={8} pl={6} fontSize="lg">
         <ListItem>
           <Trans i18nKey="home.projectReadinessTools.letterOfAssurancePage.whenToSubmitScheduleCA" />
         </ListItem>
@@ -87,7 +87,7 @@ export const LettersOfAssuranceScreen = () => {
       <Text fontSize="lg" color="text.primary" mb={2}>
         {t("home.projectReadinessTools.letterOfAssurancePage.whatLOAsCoverDescription")}
       </Text>
-      <UnorderedList mb={2} pl={6}>
+      <UnorderedList mb={2} pl={6} fontSize="lg">
         <ListItem>
           <Trans i18nKey="home.projectReadinessTools.letterOfAssurancePage.whatLOAsCoverArchitect" />
         </ListItem>
