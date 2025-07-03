@@ -10,6 +10,8 @@ import {
   InputLeftElement,
   InputProps,
   InputRightElement,
+  Select,
+  SelectProps,
   Text,
   Textarea,
 } from "@chakra-ui/react"
@@ -37,26 +39,41 @@ interface IInputFormControlProps<TInputProps = Partial<InputProps>> extends Form
   showOptional?: boolean
 }
 
+interface IOption {
+  value: string
+  label: string
+}
+
+interface IOptionGroup {
+  label: string
+  options: IOption[]
+}
+
+interface ISelectFormControlProps extends IInputFormControlProps<Partial<SelectProps>> {
+  options?: IOption[]
+  optionGroups?: IOptionGroup[]
+}
+
 const isValidUrl = (url: string) => {
   const regex = /^(https?:\/\/)?([a-z0-9-]+\.)+[a-z]{2,6}(\/[\w.-]*)?\/?$/i
   return regex.test(url)
 }
 
 export const TextFormControl = (props: IInputFormControlProps) => {
-  return (
-    <InputFormControl
-      {...(R.mergeDeepRight(
-        {
-          inputProps: { type: "text" },
-          validate: {
-            satisfiesLength: (str) =>
-              (!props.required && !str) || (str?.length >= 1 && str?.length < 128) || t("ui.invalidInput"),
-          },
-        },
-        props
-      ) as IInputFormControlProps)}
-    />
-  )
+  const { inputProps, validate, ...rest } = props
+  const mergedProps: IInputFormControlProps = {
+    ...rest,
+    inputProps: {
+      type: "text",
+      ...inputProps,
+    },
+    validate: {
+      satisfiesLength: (str) =>
+        (!props.required && !str) || (str?.length >= 1 && str?.length < 128) || t("ui.invalidInput"),
+      ...validate,
+    },
+  }
+  return <InputFormControl {...mergedProps} />
 }
 
 export const UrlFormControl = (props: IInputFormControlProps) => {
@@ -240,6 +257,65 @@ const InputFormControl = ({
         {leftElement && <InputLeftElement pointerEvents="none">{leftElement}</InputLeftElement>}
         {rightElement && <InputRightElement pointerEvents="none">{rightElement}</InputRightElement>}
       </InputGroup>
+    </FormControl>
+  )
+}
+
+export const SelectFormControl = ({
+  label,
+  fieldName,
+  required,
+  validate,
+  hint,
+  inputProps = {},
+  key = fieldName,
+  options,
+  optionGroups,
+  showOptional = true,
+  ...rest
+}: ISelectFormControlProps) => {
+  const { register, formState } = useFormContext()
+  const { errors } = formState
+  const { t } = useTranslation()
+  const errorMessage = (fieldName && fieldArrayCompatibleErrorMessage(fieldName, errors)) || null
+  const registerProps = fieldName
+    ? { ...register(fieldName, { required: required && t("ui.isRequired", { field: label }), validate }) }
+    : {}
+
+  return (
+    <FormControl isInvalid={!!errorMessage} {...rest}>
+      {label && (
+        <HStack gap={0}>
+          <FormLabel>{label} </FormLabel>
+          {!required && showOptional && (
+            <Text ml={-2} mb={2}>
+              {t("ui.optional")}
+            </Text>
+          )}
+        </HStack>
+      )}
+      <Select bg="greys.white" {...registerProps} {...inputProps}>
+        {options?.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+        {optionGroups?.map((group) => (
+          <optgroup key={group.label} label={group.label}>
+            {group.options.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </optgroup>
+        ))}
+      </Select>
+      {errorMessage && <FormErrorMessage>{errorMessage as string}</FormErrorMessage>}
+      {hint && (
+        <FormHelperText mt={1} color="border.base">
+          {hint}
+        </FormHelperText>
+      )}
     </FormControl>
   )
 }

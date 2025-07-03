@@ -15,6 +15,7 @@ class ContactBlueprint < Blueprinter::Base
          :business_license,
          :professional_association,
          :professional_number,
+         :contact_type,
          :created_at,
          :updated_at
 end
