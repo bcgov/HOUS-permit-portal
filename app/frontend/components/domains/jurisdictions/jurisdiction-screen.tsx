@@ -103,7 +103,12 @@ export const JurisdictionScreen = observer(() => {
   }
 
   const contactEmail = t("site.contactEmail")
-  const mailtoHref = `mailto:${contactEmail}?subject=Suggest%20my%20community%20for%20Building%20Permit%20Hub&body=hey,%20we%20need%20our%20local%20gov%20to%20get%20in%20on%20this`
+  const emailBody = t("jurisdiction.notUsingBPH.wantToUse.emailBody", {
+    jurisdictionName: qualifiedName,
+  })
+  const mailtoHref = `mailto:${contactEmail}?subject=${t("jurisdiction.notUsingBPH.wantToUse.emailSubject", {
+    jurisdictionName: qualifiedName,
+  })}&body=${encodeURIComponent(emailBody)}`
 
   return (
     <Flex as="main" direction="column" w="full" bg="greys.white" pb="24">
@@ -264,7 +269,7 @@ export const JurisdictionScreen = observer(() => {
                 {t("jurisdiction.notUsingBPH.wantToUse.description")}
               </Text>
               <Text fontSize="md" mb={6}>
-                {t("jurisdiction.notUsingBPH.wantToUse.buttonDescription")}
+                {t("jurisdiction.notUsingBPH.wantToUse.emailButtonDescription")}
               </Text>
               <Button
                 as="a"
@@ -276,7 +281,7 @@ export const JurisdictionScreen = observer(() => {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                {t("jurisdiction.notUsingBPH.wantToUse.buttonText")}
+                {t("jurisdiction.notUsingBPH.wantToUse.emailButtonText")}
               </Button>
             </Box>
           </Box>
