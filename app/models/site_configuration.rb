@@ -28,6 +28,10 @@ class SiteConfiguration < ApplicationRecord
     instance.inbox_enabled
   end
 
+  def self.allow_designated_reviewer?
+    instance.allow_designated_reviewer
+  end
+
   # This override allows discarding of reasons and updating them by reason_code
   # if a discarded reason of a particular code is found and updated, it will be undiscarded.
   def revision_reasons_attributes=(attributes)

@@ -41,6 +41,28 @@ ActiveRecord::Schema[7.1].define(version: 2025_06_26_203759) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "audits", force: :cascade do |t|
+    t.integer "auditable_id"
+    t.string "auditable_type"
+    t.integer "associated_id"
+    t.string "associated_type"
+    t.integer "user_id"
+    t.string "user_type"
+    t.string "username"
+    t.string "action"
+    t.text "audited_changes"
+    t.integer "version", default: 0
+    t.string "comment"
+    t.string "remote_address"
+    t.string "request_uuid"
+    t.datetime "created_at"
+    t.index ["associated_type", "associated_id"], name: "associated_index"
+    t.index ["auditable_type", "auditable_id", "version"], name: "auditable_index"
+    t.index ["created_at"], name: "index_audits_on_created_at"
+    t.index ["request_uuid"], name: "index_audits_on_request_uuid"
+    t.index ["user_id", "user_type"], name: "user_index"
+  end
+
   create_table "collaborators", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "user_id", null: false
     t.string "collaboratorable_type", null: false
@@ -217,6 +239,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_06_26_203759) do
     t.boolean "inbox_enabled", default: false, null: false
     t.integer "heating_degree_days"
     t.boolean "show_about_page", default: false, null: false
+    t.boolean "allow_designated_reviewer", default: false, null: false
     t.index ["prefix"], name: "index_jurisdictions_on_prefix", unique: true
     t.index ["regional_district_id"], name: "index_jurisdictions_on_regional_district_id"
     t.index ["slug"], name: "index_jurisdictions_on_slug", unique: true
@@ -602,6 +625,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_06_26_203759) do
     t.jsonb "help_link_items", default: {"dictionary_link_item"=>{"href"=>"", "show"=>false, "title"=>"Dictionary of terms", "description"=>"See detailed explanations of terms that appear on building permits"}, "user_guide_link_item"=>{"href"=>"", "show"=>false, "title"=>"User and role guides", "description"=>"Step-by-step instructions on how to make the most out of the platform"}, "get_started_link_item"=>{"href"=>"", "show"=>false, "title"=>"Get started on Building Permit Hub", "description"=>"How to submit a building permit application through a streamlined and standardized approach across BC"}, "best_practices_link_item"=>{"href"=>"", "show"=>false, "title"=>"Best practices", "description"=>"How to use the Building Permit Hub efficiently for application submission"}}, null: false
     t.jsonb "revision_reason_options"
     t.boolean "inbox_enabled", default: false, null: false
+    t.boolean "allow_designated_reviewer", default: false, null: false
   end
 
   create_table "step_code_building_characteristics_summaries", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|

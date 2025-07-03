@@ -54,6 +54,32 @@ export function toCamelCase(input: string): string {
   )
 }
 
+export function keysToCamelCase(obj) {
+  const correctCamelCaseKey = (key: string) =>
+    key
+      .split(/[-_]/)
+      .map((part, index) => {
+        if (index === 0) {
+          return part
+        }
+        return part.charAt(0).toUpperCase() + part.slice(1)
+      })
+      .join("")
+
+  if (Array.isArray(obj)) {
+    return obj.map((v) => keysToCamelCase(v))
+  } else if (obj !== null && obj.constructor === Object) {
+    return Object.keys(obj).reduce(
+      (result, key) => ({
+        ...result,
+        [correctCamelCaseKey(key)]: keysToCamelCase(obj[key]),
+      }),
+      {}
+    )
+  }
+  return obj
+}
+
 export function setQueryParam(key: string, value: string | string[]) {
   const searchParams = new URLSearchParams(window.location.search)
   if (!value) {
