@@ -443,10 +443,23 @@ const options = {
             wantToUse: {
               title: "Want to use Building Permit Hub in your community?",
               description:
-                "We're working with local governments and First Nations across British Columbia to bring Building Permit Hub to more places. If you'd like to see your community on Building Permit Hub, you can suggest it to our team.",
-              buttonHelp:
-                "Clicking the button below opens a new email. You'll be able to review or edit the message before sending.",
-              buttonText: "Suggest your community",
+                "Let your local government or First Nation know you're interested in using this service. We've written a sample email to make it easy.",
+              emailButtonDescription: "Click the button below to open the message in your default email client.",
+              emailButtonText: "Send an email to your local government",
+              emailSubject: "Please contact {{jurisdictionName}} about joining Building Permit Hub",
+              emailBody: `Hello,
+
+I'd like to see my community, {{jurisdictionName}}, join Building Permit Hub.
+
+Why I think they should join:
+[List any issues you've run into when applying for permits, e.g. delays, confusion, inconsistent requirements, etc.]
+
+Please reach out to my local jurisdiction to let them know there's interest from the community.
+
+Thank you,
+[Your name]
+[Optional: Your business or company name]
+[Optional: Your contact info, if needed for follow-up]`,
             },
           },
         },
