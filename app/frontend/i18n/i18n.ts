@@ -2457,7 +2457,7 @@ const options = {
           configurationManagement: {
             title: "Configuration",
             reviewManagerDescription:
-              "set up your submission inbox, define Step Codes, configure features, and edit the 'About' page to reflect specific local information",
+              "Set up your submission inbox, define Step Codes, configure features, and edit the 'About' page to reflect specific local information",
             adminDescription:
               "Manage site-wide settings and messages along with providing administrative control to Super Admins.",
             jurisdictionLocalityTypeLabel: "Locality type of local jurisdiction",
@@ -2559,7 +2559,7 @@ const options = {
           submissionsInboxDescription: "View all submitted building permit applications.",
           permitsTitle: "Digital building permits",
           permitsDescription:
-            "Set up helpful tips for submitters and select elective questions based on your local needs to customize the permit application process for your local jurisdiction",
+            "Set up helpful tips for submitters and select elective questions to customize the permit application process for your local jurisdiction",
           userManagementTitle: "User management",
           userManagementDescription: "Invite or remove Review Managers or Reviewers in the Building Permit Hub.",
           auditLogTitle: "Audit log",
