@@ -203,7 +203,7 @@ class Jurisdiction < ApplicationRecord
   end
 
   def disambiguated_name
-    disambiguator.present? ? "#{name} (#{disambiguator})" : name
+    disambiguator.present? ? "#{name} (#{disambiguator.titleize})" : name
   end
 
   def review_managers_size
