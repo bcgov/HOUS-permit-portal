@@ -167,7 +167,7 @@ const options = {
           goToTools: "Go to tools",
           toolsSectionTitle: "Tools to help prepare your project for application",
           toolsSectionDesc1:
-            "Use Building Permit Hub's tools to check your application for readiness and prepare key documents for your project.",
+            "Use Building Permit Hub's tools to check your application for readiness and prepare key documents for your project. ",
           toolsSectionDesc2:
             "Check your project against Provincial requirements such as Step Codes and prepare other documents.",
 
