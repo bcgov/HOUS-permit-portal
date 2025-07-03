@@ -67,7 +67,7 @@ export const Part9StepCodeChecklistModel = types.snapshotProcessor(
       epcCalculationCompliance: types.maybeNull(types.boolean),
       // calculated / pre-populated fields
       complianceReports: types.array(StepCodeComplianceReportModel),
-      selectedReport: types.maybeNull(types.late(() => types.reference(StepCodeComplianceReportModel))),
+      selectedReport: types.maybeNull(types.late(() => types.safeReference(StepCodeComplianceReportModel))),
     })
     .extend(withEnvironment())
     .views((self) => ({

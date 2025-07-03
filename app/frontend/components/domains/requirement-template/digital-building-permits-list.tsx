@@ -1,4 +1,4 @@
-import { Button, Flex, HStack, Stack, Text } from "@chakra-ui/react"
+import { Button, Center, Flex, HStack, Stack, Text } from "@chakra-ui/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -7,7 +7,7 @@ import { useTemplateVersions } from "../../../hooks/resources/use-template-versi
 import { ITemplateVersion } from "../../../models/template-version"
 import { ETemplateVersionStatus } from "../../../types/enums"
 import { ErrorScreen } from "../../shared/base/error-screen"
-import { LoadingScreen } from "../../shared/base/loading-screen"
+import { SharedSpinner } from "../../shared/base/shared-spinner"
 import { FirstNationsTag } from "../../shared/first-nations-tag"
 import { RouterLink } from "../../shared/navigation/router-link"
 import { TemplateStatusTag } from "../../shared/requirement-template/template-status-tag"
@@ -47,10 +47,15 @@ export const DigitalBuildingPermitsList = observer(function DigitalBuildingPermi
   const showStatusTag = showStatus || can("requirementTemplate:manage")
 
   if (error) return <ErrorScreen error={error} />
-  if (isLoading) return <LoadingScreen />
+  if (isLoading)
+    return (
+      <Center>
+        <SharedSpinner />
+      </Center>
+    )
 
   return (
-    <Stack as="section" w={"min(100%, 866px)"} px={6}>
+    <Stack as="section" w={"min(100%, 906px)"} justifyContent={"center"}>
       {templateVersions.length === 0 && (
         <Text color={"text.secondary"} fontSize={"sm"} fontStyle={"italic"} alignSelf={"center"}>
           {t("digitalBuildingPermits.index.emptyPermitsText")}
@@ -58,7 +63,7 @@ export const DigitalBuildingPermitsList = observer(function DigitalBuildingPermi
       )}
       {templateVersions.map((templateVersion) => {
         return (
-          <SectionBox key={templateVersion.id}>
+          <SectionBox key={templateVersion.id} w="full">
             <Flex w="full" as="section">
               <Stack spacing={3} flex={1}>
                 <Text as="h3" color={"text.link"} fontWeight={700} fontSize="xl">

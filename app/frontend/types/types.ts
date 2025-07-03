@@ -82,8 +82,8 @@ export interface ISort<TField = string> {
 }
 
 export interface IOption<TValue = string> {
+  label: string
   value: TValue
-  label?: string
 }
 
 export type TDebouncedFunction<T extends (...args: any[]) => any> = (...args: Parameters<T>) => void
@@ -214,6 +214,7 @@ export interface IDenormalizedTemplate {
   description?: string
   permitType: IPermitType
   activity: IActivity
+  firstNations: boolean
   requirementTemplateSections: IDenormalizedRequirementTemplateSection[]
 }
 

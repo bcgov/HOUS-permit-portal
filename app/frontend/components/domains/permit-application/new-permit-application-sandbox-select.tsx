@@ -32,6 +32,7 @@ export const NewPermitApplicationSandboxSelect = observer(function NavSandboxSel
       includeLive
       bg="greys.white"
       w="50%"
+      children={""}
     />
   )
 })

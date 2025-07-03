@@ -1,7 +1,6 @@
 import {
   Button,
   Flex,
-  ListItem,
   MenuDivider,
   MenuItem,
   Modal,
@@ -12,13 +11,13 @@ import {
   ModalOverlay,
   Switch,
   Text,
-  UnorderedList,
   useDisclosure,
 } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React, { useState } from "react"
-import { Trans, useTranslation } from "react-i18next"
+import { useTranslation } from "react-i18next"
+import { useNavigate } from "react-router-dom"
 import { useMst } from "../../../setup/root"
 import { EFlashMessageStatus } from "../../../types/enums"
 import { CustomMessageBox } from "../../shared/base/custom-message-box"
@@ -34,6 +33,8 @@ export const SandboxMenuItem: React.FC = observer(() => {
   const { isOpen, onOpen, onClose } = useDisclosure()
   const [selectedOption, setSelectedOption] = useState(sandboxOptions[0]?.value)
 
+  const navigate = useNavigate()
+
   // Handler for toggling the switch
   const handleToggle = () => {
     onOpen() // Open modal in both cases
@@ -47,6 +48,7 @@ export const SandboxMenuItem: React.FC = observer(() => {
       setCurrentSandboxId(selectedOption) // Turn on sandbox mode
     }
     onClose()
+    navigate(0)
   }
 
   if (!currentUser.jurisdiction || R.isEmpty(sandboxOptions)) return <></>
@@ -78,27 +80,17 @@ export const SandboxMenuItem: React.FC = observer(() => {
             ) : (
               // Content for entering sandbox mode
               <>
-                <Text my={4}>{t("sandbox.switch.description")}</Text>
-                <UnorderedList mt={2}>
-                  {(t("sandbox.switch.descriptionList", { returnObjects: true }) as string[]).map((item, index) => (
-                    <ListItem key={index}>{item}</ListItem>
-                  ))}
-                </UnorderedList>
-
-                <Text mt={4}>{t("sandbox.switch.choicesAvailable")}</Text>
-                <UnorderedList my={2}>
-                  <ListItem>
-                    <Trans i18nKey="sandbox.switch.publishedDescription" />
-                  </ListItem>
-                  <ListItem>
-                    <Trans i18nKey="sandbox.switch.scheduledDescription" />
-                  </ListItem>
-                </UnorderedList>
-
-                <Text fontWeight="bold" mt={4}>
-                  {t("ui.select")}
+                <Text my={4}>{t("sandbox.switch.descriptionParagraph1")}</Text>
+                <Text my={4}>{t("sandbox.switch.descriptionParagraph2")}</Text>
+                <Text fontWeight="bold" mt={4} mb={2}>
+                  {t("ui.chooseSandboxMode")}
                 </Text>
-                <SandboxSelect onChange={setSelectedOption} value={selectedOption} options={sandboxOptions} />
+                <SandboxSelect
+                  onChange={setSelectedOption}
+                  value={selectedOption}
+                  options={sandboxOptions}
+                  children={""}
+                />
                 <CustomMessageBox
                   mt={6}
                   p={4}

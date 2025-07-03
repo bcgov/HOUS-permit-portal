@@ -169,26 +169,30 @@ class Api::PermitApplicationsController < Api::ApplicationController
 
   def upload_supporting_document
     authorize @permit_application
-    success = @permit_application.update(supporting_document_params)
-    if success
-      regex_pattern =
-        "(#{supporting_document_params["supporting_documents_attributes"].map { |spd| spd.dig("file", "id") }.compact.join("|")})$"
-      render_success @permit_application.supporting_documents.file_ids_with_regex(
-                       regex_pattern
-                     ),
-                     nil,
-                     {
-                       blueprint: SupportingDocumentBlueprint,
-                       blueprint_opts: {
-                         view: :form_io_details
+    begin
+      success = @permit_application.update(supporting_document_params)
+      if success
+        regex_pattern =
+          "(#{supporting_document_params["supporting_documents_attributes"].map { |spd| spd.dig("file", "id") }.compact.join("|")})$"
+        render_success @permit_application.supporting_documents.file_ids_with_regex(
+                         regex_pattern
+                       ),
+                       nil,
+                       {
+                         blueprint: SupportingDocumentBlueprint,
+                         blueprint_opts: {
+                           view: :form_io_details
+                         }
                        }
+      else
+        render_error "permit_application.update_error",
+                     message_opts: {
+                       error_message:
+                         @permit_application.errors.full_messages.join(", ")
                      }
-    else
-      render_error "permit_application.update_error",
-                   message_opts: {
-                     error_message:
-                       @permit_application.errors.full_messages.join(", ")
-                   }
+      end
+    rescue Shrine::FileNotFound
+      render_error "permit_application.file_not_found_error"
     end
   end
 

@@ -1,5 +1,5 @@
 import { Container, Flex, Heading } from "@chakra-ui/react"
-import { FileText, Pencil, Tray, Users } from "@phosphor-icons/react"
+import { FileText, Gear, Tray, Users } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
@@ -39,7 +39,7 @@ export const ReviewManagerHomeScreen = observer(({ ...rest }: IHomeScreenProps) 
           <HomeScreenBox
             title={t("home.configurationManagement.title")}
             description={t("home.configurationManagement.reviewManagerDescription")}
-            icon={<Pencil size={24} />}
+            icon={<Gear size={24} />}
             href={`jurisdictions/${jurisdiction.slug}/configuration-management`}
           />
           <HomeScreenBox
