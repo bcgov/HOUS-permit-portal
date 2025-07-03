@@ -105,19 +105,6 @@ export const JurisdictionScreen = observer(() => {
   const contactEmail = t("site.contactEmail")
   const emailBody = t("jurisdiction.notUsingBPH.wantToUse.emailBody", {
     jurisdictionName: qualifiedName,
-    defaultValue: `Hello,
-
-I’d like to see my community, [JURISDICTION NAME], join Building Permit Hub.
-
-Why I think they should join:
-[List any issues you’ve run into when applying for permits, e.g. delays, confusion, inconsistent requirements, etc.]
-
-Please reach out to my local jurisdiction to let them know there’s interest from the community.
-
-Thank you,
-[Your name]
-[Optional: Your business or company name]
-[Optional: Your contact info, if needed for follow-up]`,
   })
   const mailtoHref = `mailto:${contactEmail}?subject=${t("jurisdiction.notUsingBPH.wantToUse.emailSubject", {
     jurisdictionName: qualifiedName,
