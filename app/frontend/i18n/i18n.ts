@@ -2458,8 +2458,7 @@ const options = {
             title: "Configuration",
             reviewManagerDescription:
               "Set up your submission inbox, define Step Codes, configure features, and edit the 'About' page to reflect specific local information",
-            adminDescription:
-              "Manage site-wide settings and messages along with providing administrative control to Super Admins.",
+            adminDescription: "Manage system-wide settings, notifications, and administrative access",
             jurisdictionLocalityTypeLabel: "Locality type of local jurisdiction",
             jurisdictionNameLabel: "Name of local jurisdiction",
             jurisdictionLocationLabel: "Location",
