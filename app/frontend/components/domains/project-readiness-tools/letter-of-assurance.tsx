@@ -16,7 +16,7 @@ export const LettersOfAssuranceScreen = () => {
       <Text fontSize="lg" color="text.primary" mb="2">
         {t("home.projectReadinessTools.letterOfAssurancePage.createYourLOAsInstructions")}
       </Text>
-      <UnorderedList mb={6} pl={6}>
+      <UnorderedList mb={6} pl={6} fontSize="lg">
         <ListItem>{t("home.projectReadinessTools.letterOfAssurancePage.createYourLOAsInstructionFill")}</ListItem>
       </UnorderedList>
 
