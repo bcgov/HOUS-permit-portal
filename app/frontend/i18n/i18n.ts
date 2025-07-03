@@ -167,10 +167,7 @@ const options = {
           goToTools: "Go to tools",
           toolsSectionTitle: "Tools to help prepare your project for application",
           toolsSectionDesc1:
-            "Use Building Permit Hub's tools to check your application for readiness and prepare key documents for your project. ",
-          toolsSectionDesc2:
-            "Check your project against Provincial requirements such as Step Codes and prepare other documents.",
-
+            "Use Building Permit Hub's tools to check your application for readiness and prepare key documents for your project. Check your project against Provincial requirements such as Step Codes and prepare other documents.",
           card1Title: "Find out what’s required before you apply",
           card1Body: "Tools and checklists to help you prepare your application package",
           card2Title: "Submit your application online",
