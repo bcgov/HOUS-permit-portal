@@ -34,6 +34,7 @@ class StepCode::Part3::V0::Requirements::StepCodeOccupancy
   end
 
   def zero_carbon_requirement
+    # binding.pry
     StepCode::Part3::V0::Requirements::References::ZeroCarbon.value(
       major_occupancy_type,
       occupancy.zero_carbon_step_required

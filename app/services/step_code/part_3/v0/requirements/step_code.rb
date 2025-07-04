@@ -38,9 +38,11 @@ class StepCode::Part3::V0::Requirements::StepCode
     return if measure_only?(metric) || total_mfa == 0
 
     occupancies_requirements.inject(0) do |sum, requirement|
+      # binding.pry
       sum + requirement[:modelled_floor_area] * requirement[metric]
     end / total_mfa
-  rescue StandardError
+  rescue StandardError => e
+    # binding.pry
     nil
   end
 

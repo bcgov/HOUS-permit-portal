@@ -19,7 +19,9 @@ class StepCode::Part3::V0::Requirements::WholeBuilding
   private
 
   def total(metric:)
+    # binding.pry
     return unless applicable?(metric: metric) && total_mfa > 0
+
     (baseline_portion(metric) + step_code_portion(metric)) / total_mfa
   rescue StandardError
     nil
@@ -32,6 +34,7 @@ class StepCode::Part3::V0::Requirements::WholeBuilding
   end
 
   def step_code_portion(metric)
+    # binding.pry
     return 0 if step_code_mfa == 0
 
     step_code_mfa * step_code_requirement[metric]

@@ -6,6 +6,7 @@ class StepCode::Part3::V1::GenerateReport < StepCode::Part3::V0::GenerateReport
     @checklist = checklist
     @requirements =
       StepCode::Part3::V0::LookupRequirements.new(checklist: checklist).call
+    # binding.pry
     @performance =
       StepCode::Part3::V1::EvaluatePerformance.new(
         checklist: checklist,

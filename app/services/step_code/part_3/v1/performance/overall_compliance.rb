@@ -39,6 +39,7 @@ class StepCode::Part3::V1::Performance::OverallCompliance < StepCode::Part3::V1:
 
   def tedi
     super do
+      # binding.pry
       {
         whole_building:
           whole_building_tedi_compliance? && step_code_portion_tedi_compliance?,

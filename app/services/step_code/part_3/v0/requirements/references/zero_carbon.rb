@@ -19,6 +19,7 @@ class StepCode::Part3::V0::Requirements::References::ZeroCarbon
   ]
 
   def self.value(major_occupancy_type, level)
+    # binding.pry
     found_value =
       LOOKUP.find do |item|
         item[:type] == major_occupancy_type && item[:level] == level

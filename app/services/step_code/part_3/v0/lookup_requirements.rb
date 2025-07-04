@@ -6,6 +6,7 @@ class StepCode::Part3::V0::LookupRequirements
   end
 
   def call
+    # binding.pry
     {
       baseline_portions: baseline_portions_requirement,
       step_code_portions: step_code_portions_requirements,

@@ -22,4 +22,10 @@ class Part3StepCode::OccupancyClassification < ApplicationRecord
 
     self[:energy_step_required].presence || ENV["PART_3_MIN_ENERGY_STEP"].to_i
   end
+
+  # def zero_carbon_step_required
+  #   return unless step_code_occupancy?
+
+  #   self[:zero_carbon_step_required].presence || ENV["PART_3_MIN_ZERO_CARBON_STEP"].to_i
+  # end
 end

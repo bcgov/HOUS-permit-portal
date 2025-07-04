@@ -264,7 +264,7 @@ const OccupancyRow = observer(function OccupancyRow({ field, idx }: IOccupancyPr
             control={control}
             rules={{
               validate: (value, formValues) =>
-                value === undefined
+                value === undefined || value === null
                   ? t(`${i18nPrefix}.zeroCarbonStepRequired.error`, {
                       occupancyName: t(`${oci18nPrefix}.${field.key}`),
                     })
@@ -272,6 +272,7 @@ const OccupancyRow = observer(function OccupancyRow({ field, idx }: IOccupancyPr
             }}
             name={`stepCodeOccupanciesAttributes.${idx}.zeroCarbonStepRequired`}
             render={({ field: { onChange, value } }) => {
+              // consider removing allowNull? may lead to undefined zero carbon result achieved
               return <ZeroCarbonStepSelect onChange={onChange} value={value} allowNull />
             }}
           />
