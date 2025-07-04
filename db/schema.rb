@@ -224,6 +224,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_06_26_162435) do
     t.string "external_api_state", default: "g_off", null: false
     t.boolean "inbox_enabled", default: false, null: false
     t.integer "heating_degree_days"
+    t.boolean "show_about_page", default: false, null: false
     t.string "disambiguator"
     t.index ["prefix"], name: "index_jurisdictions_on_prefix", unique: true
     t.index ["regional_district_id"], name: "index_jurisdictions_on_regional_district_id"
@@ -448,10 +449,9 @@ ActiveRecord::Schema[7.1].define(version: 2025_06_26_162435) do
     t.text "notes"
     t.date "permit_date"
     t.integer "phase"
+    t.datetime "discarded_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.datetime "discarded_at"
-    t.index ["discarded_at"], name: "index_permit_projects_on_discarded_at"
     t.index ["jurisdiction_id"], name: "index_permit_projects_on_jurisdiction_id"
     t.index ["owner_id"], name: "index_permit_projects_on_owner_id"
   end
@@ -535,7 +535,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_06_26_162435) do
     t.datetime "discarded_at"
     t.integer "visibility", default: 0, null: false
     t.index ["discarded_at"], name: "index_requirement_blocks_on_discarded_at"
-    t.index ["name", "first_nations"], name: "index_requirement_blocks_on_name_and_first_nations", unique: true
+    t.index ["name", "first_nations"], name: "index_requirement_blocks_on_name_and_first_nations", unique: true, where: "(discarded_at IS NULL)"
     t.index ["sku"], name: "index_requirement_blocks_on_sku", unique: true
   end
 
@@ -572,6 +572,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_06_26_162435) do
     t.uuid "copied_from_id"
     t.uuid "assignee_id"
     t.boolean "public", default: false
+    t.string "created_by_test"
     t.index ["activity_id"], name: "index_requirement_templates_on_activity_id"
     t.index ["assignee_id"], name: "index_requirement_templates_on_assignee_id"
     t.index ["copied_from_id"], name: "index_requirement_templates_on_copied_from_id"
@@ -639,8 +640,8 @@ ActiveRecord::Schema[7.1].define(version: 2025_06_26_162435) do
     t.datetime "updated_at", null: false
     t.jsonb "help_link_items", default: {"dictionary_link_item"=>{"href"=>"", "show"=>false, "title"=>"Dictionary of terms", "description"=>"See detailed explanations of terms that appear on building permits"}, "user_guide_link_item"=>{"href"=>"", "show"=>false, "title"=>"User and role guides", "description"=>"Step-by-step instructions on how to make the most out of the platform"}, "get_started_link_item"=>{"href"=>"", "show"=>false, "title"=>"Get started on Building Permit Hub", "description"=>"How to submit a building permit application through a streamlined and standardized approach across BC"}, "best_practices_link_item"=>{"href"=>"", "show"=>false, "title"=>"Best practices", "description"=>"How to use the Building Permit Hub efficiently for application submission"}}, null: false
     t.jsonb "revision_reason_options"
-    t.uuid "small_scale_requirement_template_id"
     t.boolean "inbox_enabled", default: false, null: false
+    t.uuid "small_scale_requirement_template_id"
     t.index ["small_scale_requirement_template_id"], name: "idx_on_small_scale_requirement_template_id_235b636c86"
   end
 

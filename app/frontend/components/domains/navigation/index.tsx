@@ -43,6 +43,7 @@ const LoginScreen = lazy(() =>
   import("../authentication/login-screen").then((module) => ({ default: module.LoginScreen }))
 )
 const HomeScreen = lazy(() => import("../home").then((module) => ({ default: module.HomeScreen })))
+
 const ConfigurationManagementScreen = lazy(() =>
   import("../home/review-manager/configuration-management-screen").then((module) => ({
     default: module.ConfigurationManagementScreen,
@@ -53,18 +54,24 @@ const EnergyStepRequirementsScreen = lazy(() =>
     default: module.EnergyStepRequirementsScreen,
   }))
 )
-const ReviewManagerGlobalFeatureAccessScreen = lazy(() =>
-  import("../home/review-manager/configuration-management-screen/global-feature-access-screen").then((module) => ({
-    default: module.ReviewManagerGlobalFeatureAccessScreen,
+const ReviewManagerFeatureAccessScreen = lazy(() =>
+  import("../home/review-manager/configuration-management-screen/feature-access-screen").then((module) => ({
+    default: module.ReviewManagerFeatureAccessScreen,
   }))
 )
-const ReviewStaffInboxFeatureAccessScreen = lazy(() =>
+const SubmissionsInboxSetupScreenLazy = lazy(() =>
+  import("../home/review-manager/configuration-management-screen/submissions-inbox-setup-screen").then((module) => ({
+    default: module.SubmissionsInboxSetupScreen,
+  }))
+)
+const ReviewStaffMyJurisdictionAboutPageScreen = lazy(() =>
   import(
-    "../home/review-manager/configuration-management-screen/global-feature-access-screen/inbox-feature-access"
+    "../home/review-manager/configuration-management-screen/feature-access-screen/my-jurisdiction-about-page"
   ).then((module) => ({
-    default: module.InboxFeatureAccessScreen,
+    default: module.myJurisdictionAboutPageScreen,
   }))
 )
+
 const JurisdictionIndexScreen = lazy(() =>
   import("../jurisdictions/index").then((module) => ({ default: module.JurisdictionIndexScreen }))
 )
@@ -92,6 +99,14 @@ const EditJurisdictionScreen = lazy(() =>
 )
 const LandingScreen = lazy(() => import("../landing").then((module) => ({ default: module.LandingScreen })))
 const ContactScreen = lazy(() => import("../misc/contact-screen").then((module) => ({ default: module.ContactScreen })))
+const ProjectReadinessToolsIndexScreen = lazy(() =>
+  import("../project-readiness-tools").then((module) => ({ default: module.ProjectReadinessToolsIndexScreen }))
+)
+const LettersOfAssuranceScreen = lazy(() =>
+  import("../project-readiness-tools/letter-of-assurance").then((module) => ({
+    default: module.LettersOfAssuranceScreen,
+  }))
+)
 const PermitApplicationIndexScreen = lazy(() =>
   import("../permit-application").then((module) => ({ default: module.PermitApplicationIndexScreen }))
 )
@@ -228,9 +243,9 @@ const AdminGlobalFeatureAccessScreen = lazy(() =>
   }))
 )
 
-const InboxFeatureAccessScreen = lazy(() =>
-  import("../super-admin/site-configuration-management/inbox-feature-access").then((module) => ({
-    default: module.InboxFeatureAccessScreen,
+const AdminSubmissionInboxScreen = lazy(() =>
+  import("../super-admin/site-configuration-management/submission-inbox").then((module) => ({
+    default: module.AdminSubmissionInboxScreen,
   }))
 )
 
@@ -352,6 +367,11 @@ const AppRoutes = observer(() => {
   const navigate = useNavigate()
   const { t } = useTranslation()
 
+  if (currentUser === undefined) {
+    console.log("AppRoutes: currentUser is undefined, rendering LoadingScreen.")
+    return <LoadingScreen />
+  }
+
   useEffect(() => {
     if (tokenExpired) {
       resetAuth()
@@ -369,6 +389,16 @@ const AppRoutes = observer(() => {
   }, [afterLoginPath, loggedIn])
 
   useSyncPathWithStore()
+
+  // Step 2: Safely derive booleans from currentUser. These default to false if currentUser is null.
+  const isReviewStaff = currentUser ? currentUser.isReviewStaff : false
+  const isReviewer = currentUser ? currentUser.isReviewer : false
+  const isReviewManager = currentUser ? currentUser.isReviewManager : false
+  const isRegionalReviewManager = currentUser ? currentUser.isRegionalReviewManager : false
+  const isTechnicalSupport = currentUser ? currentUser.isTechnicalSupport : false
+  const eulaAccepted = currentUser ? currentUser.eulaAccepted : false
+  const isSuperAdmin = currentUser ? currentUser.isSuperAdmin : false
+  const isUnconfirmed = currentUser ? currentUser.isUnconfirmed : false
 
   const superAdminOnlyRoutes = (
     <>
@@ -394,7 +424,7 @@ const AppRoutes = observer(() => {
       <Route path="/configuration-management/global-feature-access" element={<AdminGlobalFeatureAccessScreen />} />
       <Route
         path="/configuration-management/global-feature-access/submission-inbox"
-        element={<InboxFeatureAccessScreen />}
+        element={<AdminSubmissionInboxScreen />}
       />
       <Route path="/configuration-management/users/invite" element={<AdminInviteScreen />} />
       <Route path="/reporting" element={<ReportingScreen />} />
@@ -416,16 +446,23 @@ const AppRoutes = observer(() => {
     </>
   )
 
+  const technicalSupportOrManagerRoutes = (
+    <>
+      <Route
+        path="/jurisdictions/:jurisdictionId/configuration-management"
+        element={<ConfigurationManagementScreen />}
+      />
+      <Route path="/jurisdictions/:jurisdictionId/users" element={<JurisdictionUserIndexScreen />} />
+      <Route path="/jurisdictions/:jurisdictionId/users/invite" element={<InviteScreen />} />
+    </>
+  )
+
   const managerOrReviewerRoutes = (
     <>
       <Route path="/jurisdictions/:jurisdictionId/submission-inbox" element={<JurisdictionSubmissionInboxScreen />} />
       <Route
-        path="/jurisdictions/:jurisdictionId/configuration-management/global-feature-access"
-        element={<ReviewManagerGlobalFeatureAccessScreen />}
-      />
-      <Route
-        path="/jurisdictions/:jurisdictionId/configuration-management/global-feature-access/submission-inbox"
-        element={<ReviewStaffInboxFeatureAccessScreen />}
+        path="/jurisdictions/:jurisdictionId/configuration-management/feature-access/my-jurisdiction-about-page"
+        element={<ReviewStaffMyJurisdictionAboutPageScreen />}
       />
       <Route
         path="/jurisdictions/:jurisdictionId/configuration-management/energy-step"
@@ -462,8 +499,20 @@ const AppRoutes = observer(() => {
         element={<JurisdictionEditDigitalPermitScreen />}
       />
       <Route
-        path="/jurisdictions/:jurisdictionId/configuration-management"
-        element={<ConfigurationManagementScreen />}
+        path="/jurisdictions/:jurisdictionId/configuration-management/feature-access"
+        element={<ReviewManagerFeatureAccessScreen />}
+      />
+      <Route
+        path="/jurisdictions/:jurisdictionId/configuration-management/feature-access/my-jurisdiction-about-page"
+        element={<ReviewManagerFeatureAccessScreen />}
+      />
+      <Route
+        path="/jurisdictions/:jurisdictionId/configuration-management/feature-access/submissions-inbox-setup"
+        element={<SubmissionsInboxSetupScreenLazy />}
+      />
+      <Route
+        path="/jurisdictions/:jurisdictionId/configuration-management/feature-access"
+        element={<ReviewManagerFeatureAccessScreen />}
       />
       <Route path="/digital-building-permits" element={<JurisdictionDigitalPermitScreen />} />
       <Route path="/api-settings/api-mappings" element={<JurisdictionApiMappingsSetupIndexScreen />} />
@@ -479,6 +528,16 @@ const AppRoutes = observer(() => {
   )
 
   const mustAcceptEula = loggedIn && !currentUser.eulaAccepted && !currentUser.isSuperAdmin
+
+  // Step 4: Calculate isAllowed props using safe booleans
+  const isAllowedForAdminOrManager =
+    loggedIn && !mustAcceptEula && (isReviewManager || isRegionalReviewManager || isSuperAdmin || isTechnicalSupport)
+
+  const isAllowedForManagerOrReviewer = loggedIn && !mustAcceptEula && isReviewStaff
+  const isAllowedForReviewManagerOnly = loggedIn && !mustAcceptEula && (isReviewManager || isRegionalReviewManager)
+  const isAllowedForTechnicalSupportOrManager =
+    loggedIn && !mustAcceptEula && (isTechnicalSupport || isAllowedForReviewManagerOnly)
+
   return (
     <>
       <Routes location={background || location}>
@@ -486,7 +545,7 @@ const AppRoutes = observer(() => {
           // Onboarding step 1: EULA
           <Route path="/" element={<EULAScreen />} />
         )}
-        {loggedIn && currentUser.eulaAccepted && currentUser.isUnconfirmed && (
+        {loggedIn && eulaAccepted && isUnconfirmed && (
           // Onboarding step 2: confirm email
           <Route path="/" element={<ProfileScreen />} />
         )}
@@ -533,11 +592,7 @@ const AppRoutes = observer(() => {
         <Route
           element={
             <ProtectedRoute
-              isAllowed={
-                loggedIn &&
-                !mustAcceptEula &&
-                (currentUser.isReviewManager || currentUser.isRegionalReviewManager || currentUser.isSuperAdmin)
-              }
+              isAllowed={isAllowedForAdminOrManager}
               redirectPath={(mustAcceptEula && "/") || (loggedIn && "/not-found")}
             />
           }
@@ -556,7 +611,7 @@ const AppRoutes = observer(() => {
         <Route
           element={
             <ProtectedRoute
-              isAllowed={loggedIn && !mustAcceptEula && currentUser.isReviewStaff}
+              isAllowed={isAllowedForManagerOrReviewer}
               redirectPath={(mustAcceptEula && "/") || (loggedIn && "/not-found")}
             />
           }
@@ -567,8 +622,20 @@ const AppRoutes = observer(() => {
         <Route
           element={
             <ProtectedRoute
-              isAllowed={loggedIn && !mustAcceptEula && currentUser.isReviewStaff && !currentUser.isReviewer}
+              isAllowed={isAllowedForTechnicalSupportOrManager}
               redirectPath={(mustAcceptEula && "/") || (loggedIn && "/not-found")}
+            />
+          }
+        >
+          {technicalSupportOrManagerRoutes}
+        </Route>
+
+        <Route
+          element={
+            <ProtectedRoute
+              isAllowed={isAllowedForReviewManagerOnly}
+              redirectPath={(mustAcceptEula && "/") || (loggedIn && "/not-found")}
+              tempVar={"aaa" + isAllowedForReviewManagerOnly}
             />
           }
         >
@@ -582,6 +649,11 @@ const AppRoutes = observer(() => {
         {/* Public Routes */}
         <Route path="/accept-invitation" element={<AcceptInvitationScreen />} />
         <Route path="/contact" element={<ContactScreen />} />
+        <Route path="/project-readiness-tools" element={<ProjectReadinessToolsIndexScreen />} />
+        <Route
+          path="/project-readiness-tools/create-your-letters-of-assurance"
+          element={<LettersOfAssuranceScreen />}
+        />
         <Route path="/confirmed" element={<EmailConfirmedScreen />} />
         <Route path="/welcome" element={<LandingScreen />} />
         <Route

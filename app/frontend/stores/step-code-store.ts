@@ -124,22 +124,22 @@ export const StepCodeStoreModel = types
         throw error
       }
     }),
-    downloadApplicationMetrics: flow(function* () {
+    downloadStepCodeMetrics: flow(function* (stepCodeType: EStepCodeType) {
       try {
-        const response = yield* toGenerator(self.environment.api.downloadApplicationMetricsCsv())
+        const response = yield* toGenerator(self.environment.api.downloadStepCodeMetricsCsv(stepCodeType))
         if (!response.ok) {
           return response.ok
         }
 
         const blobData = response.data
-        const fileName = `${t("reporting.applicationMetrics.filename")}.csv`
+        const fileName = `${t(`reporting.stepCodeMetrics.filename${stepCodeType === EStepCodeType.part3StepCode ? "Part3" : "Part9"}`)}.csv`
         const mimeType = "text/csv"
         startBlobDownload(blobData, mimeType, fileName)
 
         return response
       } catch (error) {
         if (import.meta.env.DEV) {
-          console.error(`Failed to download permit application metrics:`, error)
+          console.error(`Failed to download step code metrics:`, error)
         }
         throw error
       }

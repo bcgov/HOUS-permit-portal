@@ -1,5 +1,9 @@
 name: Pull Request Workflow
 
+permissions:
+  contents: read
+  pull-requests: write
+
 on:
   pull_request:
     branches: ["main", "develop"]
@@ -29,9 +33,9 @@ jobs:
       PART_3_MIN_ZERO_CARBON_STEP: "1"
       PART_3_MAX_ZERO_CARBON_STEP: "4"
       # The following keys are stub keys
-      ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY: "ucZeHIu5E5Fd6mTRQjBzfc1qu6qzvA"
-      ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY: "ucZeHIu5E5Fd6mTRQjBzfc1qu6qzvA"
-      ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT: "ucZeHIu5E5Fd6mTRQjBzfc1qu6qzvA"
+      ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY: "stubbed-active-record-encryption-primary-key"
+      ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY: "stubbed-active-record-encryption-deterministic-key"
+      ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT: "stubbed-active-record-encryption-key-derivation-salt"
     services:
       postgres:
         image: postgres:16

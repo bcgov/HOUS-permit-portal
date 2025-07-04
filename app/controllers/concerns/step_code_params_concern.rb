@@ -3,6 +3,10 @@ module StepCodeParamsConcern
 
   private
 
+  def step_code_metrics_params
+    params.permit(:step_code_type)
+  end
+
   def step_code_params
     # This method permits attributes relevant to both Part3 and Part9 StepCodes.
     # Models should only pick up the attributes relevant to them during mass assignment.

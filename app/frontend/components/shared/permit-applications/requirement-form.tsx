@@ -218,6 +218,7 @@ export const RequirementForm = observer(
       downloadFileFromStorage({
         model: EFileUploadAttachmentType.RequirementDocument,
         modelId: event.detail.id,
+        filename: event.detail.filename,
       })
     }
 

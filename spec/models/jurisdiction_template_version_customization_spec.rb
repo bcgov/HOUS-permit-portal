@@ -1,6 +1,8 @@
 require "rails_helper"
 
-RSpec.describe JurisdictionTemplateVersionCustomization, type: :model do
+RSpec.describe JurisdictionTemplateVersionCustomization,
+               type: :model,
+               search: true do
   let(:requirement) { create(:requirement, elective: true) }
   let(:jurisdiction) { create(:sub_district) }
   let(:published_template_version) do

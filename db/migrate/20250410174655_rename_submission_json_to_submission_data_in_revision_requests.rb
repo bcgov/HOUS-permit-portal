@@ -3,5 +3,6 @@ class RenameSubmissionJsonToSubmissionDataInRevisionRequests < ActiveRecord::Mig
 ]
   def change
     rename_column :revision_requests, :submission_json, :submission_data
+    PermitApplication.reindex
   end
 end

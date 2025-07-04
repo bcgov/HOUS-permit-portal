@@ -11,8 +11,6 @@ module PermitApplicationStatus
          },
          _default: 0
 
-    validate :inbox_must_be_enabled_on_non_sandboxed_when_submitted
-
     def self.draft_statuses
       %w[new_draft revisions_requested]
     end
@@ -106,24 +104,5 @@ module PermitApplicationStatus
 
       send_submit_notifications
     end
-
-    def inbox_must_be_enabled_on_non_sandboxed_when_submitted
-      return unless sandbox.nil?
-
-      return unless jurisdiction.present?
-
-      return if jurisdiction.inbox_enabled?
-
-      return unless PermitApplication.submitted_statuses.include?(status)
-
-      errors.add(
-        :jurisdiction,
-        I18n.t(
-          "activerecord.errors.models.permit_application.attributes.jurisdiction.inbox_not_enabled"
-        )
-      )
-    end
-
-    private
   end
 end

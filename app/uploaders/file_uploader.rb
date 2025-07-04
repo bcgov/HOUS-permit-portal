@@ -1,8 +1,22 @@
 class FileUploader < Shrine
   plugin :validation_helpers
 
+  Attacher.promote_block do
+    PromoteJob.perform_async(
+      self.class.name,
+      record.class.name,
+      record.id,
+      name.to_s,
+      file_data
+    )
+  end
+
+  Attacher.destroy_block do
+    DestroyJob.perform_async(self.class.name, self.data)
+  end
+
   Attacher.validate do
-    validate_max_size Constants::Sizes::FILE_UPLOAD_MAX_SIZE * 1024 * 1024 # 100 MB to start
+    validate_max_size Constants::Sizes::FILE_UPLOAD_MAX_SIZE * 1024 * 1024 # 200 MB to start
     # could be images, excel files, bims, we do not have an exhaustive list right now.
   end
 

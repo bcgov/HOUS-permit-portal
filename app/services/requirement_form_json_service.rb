@@ -1,6 +1,9 @@
 class RequirementFormJsonService
   attr_accessor :requirement
 
+  ENERGY_STEP_CODE_TOOLTIP_URL =
+    "https://www2.gov.bc.ca/gov/content/housing-tenancy/building-or-renovating/permits/building-permit-hub/29065#Reports"
+
   DEFAULT_FORMIO_TYPE_TO_OPTIONS = {
     text: {
       type: "simpletextfield"
@@ -184,6 +187,7 @@ class RequirementFormJsonService
   end
 
   def to_form_json(requirement_block_key = requirement&.requirement_block&.key)
+    return nil unless requirement&.input_type.present?
     json =
       if requirement.input_type_general_contact? ||
            requirement.input_type_professional_contact?
@@ -591,10 +595,16 @@ class RequirementFormJsonService
   end
 
   def formio_type_options
-    return unless requirement.input_type.present?
+    return {} unless requirement.input_type.present?
 
     input_type = requirement.input_type
     input_options = requirement.input_options
+
+    if input_options["value_options"].is_a?(Array)
+      input_options["value_options"].select! do |option|
+        option["label"].present? && option["value"].present?
+      end
+    end
 
     if (input_type.to_sym == :file)
       return(
@@ -610,10 +620,20 @@ class RequirementFormJsonService
           file_hash[:custom_class] = "formio-component-file" if file_hash[
             :type
           ] != "file"
+          if requirement.key(requirement&.requirement_block&.key).end_with?(
+               "energy_step_code_report_file"
+             )
+            file_hash[:tooltip] = ENERGY_STEP_CODE_TOOLTIP_URL
+          end
         end
       )
     end
-    DEFAULT_FORMIO_TYPE_TO_OPTIONS[input_type.to_sym] || {}
+    options = DEFAULT_FORMIO_TYPE_TO_OPTIONS[input_type.to_sym] || {}
+    if input_options["computed_compliance"].present?
+      options[:tooltip] = I18n.t("formio.requirement.auto_compliance.tooltip")
+    end
+
+    options
   end
 
   def snake_to_camel(snake_str)

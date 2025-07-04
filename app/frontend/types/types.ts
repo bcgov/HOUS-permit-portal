@@ -499,7 +499,7 @@ export interface IJurisdictionFilters {
 }
 
 export interface IJurisdictionSearchFilters {
-  submissionInboxSetUp?: boolean
+  inboxEnabled?: boolean
 }
 
 export interface IPermitApplicationSearchFilters {
