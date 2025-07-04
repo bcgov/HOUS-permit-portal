@@ -15,3 +15,5 @@ export type TIsElectiveCheckboxProps<TFieldValues extends FieldValues> = IContro
 
 export type TIsMultipleFilesCheckboxProps<TFieldValues extends FieldValues> = IControlProps<TFieldValues> &
   Partial<CheckboxProps>
+
+export type TEditableInstructionsTextProps<TFieldValues extends FieldValues> = IControlProps<TFieldValues>
