@@ -66,11 +66,11 @@ export const ReportingScreen = observer(() => {
       dropdown: [
         {
           text: t("reporting.stepCodeMetrics.downloadPart3"),
-          onClick: () => downloadStepCodeMetrics(EStepCodeType.Part3),
+          onClick: () => downloadStepCodeMetrics(EStepCodeType.part3StepCode),
         },
         {
           text: t("reporting.stepCodeMetrics.downloadPart9"),
-          onClick: () => downloadStepCodeMetrics(EStepCodeType.Part9),
+          onClick: () => downloadStepCodeMetrics(EStepCodeType.part9StepCode),
         },
       ],
     },

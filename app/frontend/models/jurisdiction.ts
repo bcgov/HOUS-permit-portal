@@ -16,6 +16,7 @@ export const JurisdictionModel = types
     id: types.identifier,
     slug: types.maybeNull(types.string),
     name: types.maybeNull(types.string),
+    disambiguatedName: types.maybeNull(types.string),
     submissionEmail: types.maybeNull(types.string),
     qualifiedName: types.string,
     inboxEnabled: types.boolean,

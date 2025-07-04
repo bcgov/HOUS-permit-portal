@@ -50,6 +50,10 @@ class RequirementTemplatePolicy < ApplicationPolicy
     create?
   end
 
+  def for_filter?
+    true
+  end
+
   def unschedule_template_version?
     create? && record.scheduled?
   end

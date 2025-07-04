@@ -1,7 +1,22 @@
 FactoryBot.define do
   factory :permit_application do
     association :submitter, factory: :user, role: "submitter"
-    association :jurisdiction, factory: :sub_district
+    transient do
+      jurisdiction { nil }
+      pid { nil }
+      pin { nil }
+      full_address { nil }
+    end
+
+    permit_project do
+      attrs = {}
+      attrs[:jurisdiction] = jurisdiction if jurisdiction.present?
+      attrs[:pid] = pid if pid.present?
+      attrs[:pin] = pin if pin.present?
+      attrs[:full_address] = full_address if full_address.present?
+      association(:permit_project, **attrs)
+    end
+
     permit_type do
       PermitType.first || association(:permit_type, code: :low_residential)
     end
@@ -11,7 +26,6 @@ FactoryBot.define do
     status { :new_draft }
     sequence(:nickname) { |n| "Permit Application Nickname #{n}" }
     association :template_version
-    pid { "999999999" }
 
     trait :newly_submitted do
       status { :newly_submitted }

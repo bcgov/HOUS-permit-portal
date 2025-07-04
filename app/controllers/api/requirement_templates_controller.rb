@@ -20,16 +20,24 @@ class Api::RequirementTemplatesController < Api::ApplicationController
     render_success authorized_results,
                    nil,
                    {
-                     meta: {
-                       total_pages: @search.total_pages,
-                       total_count: @search.total_count,
-                       current_page: @search.current_page
-                     },
+                     meta: page_meta(@search),
                      blueprint: RequirementTemplateBlueprint,
                      blueprint_opts: {
                        current_user: current_user
                      }
                    }
+  end
+
+  def for_filter
+    authorize :requirement_template, :for_filter?
+    templates =
+      LiveRequirementTemplate.with_published_version.kept.includes(
+        :permit_type,
+        :activity
+      )
+    render_success templates,
+                   nil,
+                   { blueprint: OptionsBlueprint, view: :default }
   end
 
   def show

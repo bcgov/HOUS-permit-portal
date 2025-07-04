@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_06_17_175120) do
+ActiveRecord::Schema[7.1].define(version: 2025_06_26_162435) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -174,6 +174,14 @@ ActiveRecord::Schema[7.1].define(version: 2025_06_17_175120) do
     t.index ["template_version_id"], name: "index_integration_mappings_on_template_version_id"
   end
 
+  create_table "jurisdiction_documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "jurisdiction_id", null: false
+    t.text "file_data"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["jurisdiction_id"], name: "index_jurisdiction_documents_on_jurisdiction_id"
+  end
+
   create_table "jurisdiction_memberships", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "jurisdiction_id", null: false
     t.uuid "user_id", null: false
@@ -217,6 +225,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_06_17_175120) do
     t.boolean "inbox_enabled", default: false, null: false
     t.integer "heating_degree_days"
     t.boolean "show_about_page", default: false, null: false
+    t.string "disambiguator"
     t.index ["prefix"], name: "index_jurisdictions_on_prefix", unique: true
     t.index ["regional_district_id"], name: "index_jurisdictions_on_regional_district_id"
     t.index ["slug"], name: "index_jurisdictions_on_slug", unique: true
@@ -366,14 +375,10 @@ ActiveRecord::Schema[7.1].define(version: 2025_06_17_175120) do
   create_table "permit_applications", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.integer "status", default: 0
     t.uuid "submitter_id", null: false
-    t.uuid "jurisdiction_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.uuid "permit_type_id", null: false
     t.uuid "activity_id", null: false
-    t.string "full_address"
-    t.string "pid"
-    t.string "pin"
     t.jsonb "submission_data"
     t.string "number"
     t.datetime "signed_off_at"
@@ -388,9 +393,10 @@ ActiveRecord::Schema[7.1].define(version: 2025_06_17_175120) do
     t.boolean "first_nations", default: false
     t.uuid "sandbox_id"
     t.datetime "newly_submitted_at", precision: nil
+    t.uuid "permit_project_id"
     t.index ["activity_id"], name: "index_permit_applications_on_activity_id"
-    t.index ["jurisdiction_id"], name: "index_permit_applications_on_jurisdiction_id"
     t.index ["number"], name: "index_permit_applications_on_number", unique: true
+    t.index ["permit_project_id"], name: "index_permit_applications_on_permit_project_id"
     t.index ["permit_type_id"], name: "index_permit_applications_on_permit_type_id"
     t.index ["sandbox_id"], name: "index_permit_applications_on_sandbox_id"
     t.index ["submitter_id"], name: "index_permit_applications_on_submitter_id"
@@ -433,6 +439,23 @@ ActiveRecord::Schema[7.1].define(version: 2025_06_17_175120) do
     t.index ["permit_application_id"], name: "index_permit_collaborations_on_permit_application_id"
   end
 
+  create_table "permit_projects", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "owner_id", null: false
+    t.uuid "jurisdiction_id", null: false
+    t.string "title"
+    t.text "full_address"
+    t.string "pid"
+    t.string "pin"
+    t.text "notes"
+    t.date "permit_date"
+    t.integer "phase"
+    t.datetime "discarded_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["jurisdiction_id"], name: "index_permit_projects_on_jurisdiction_id"
+    t.index ["owner_id"], name: "index_permit_projects_on_owner_id"
+  end
+
   create_table "permit_type_required_steps", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "jurisdiction_id", null: false
     t.uuid "permit_type_id"
@@ -456,6 +479,16 @@ ActiveRecord::Schema[7.1].define(version: 2025_06_17_175120) do
     t.index ["permit_type_id"], name: "index_permit_type_submission_contacts_on_permit_type_id"
   end
 
+  create_table "pinned_projects", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "user_id", null: false
+    t.uuid "permit_project_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["permit_project_id"], name: "index_pinned_projects_on_permit_project_id"
+    t.index ["user_id", "permit_project_id"], name: "index_pinned_projects_on_user_id_and_permit_project_id", unique: true
+    t.index ["user_id"], name: "index_pinned_projects_on_user_id"
+  end
+
   create_table "preferences", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "user_id", null: false
     t.boolean "enable_in_app_new_template_version_publish_notification", default: true
@@ -477,6 +510,14 @@ ActiveRecord::Schema[7.1].define(version: 2025_06_17_175120) do
     t.boolean "enable_in_app_unmapped_api_notification", default: true
     t.boolean "enable_email_unmapped_api_notification", default: true
     t.index ["user_id"], name: "index_preferences_on_user_id"
+  end
+
+  create_table "project_documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "permit_project_id", null: false
+    t.text "file_data"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["permit_project_id"], name: "index_project_documents_on_permit_project_id"
   end
 
   create_table "requirement_blocks", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -599,8 +640,8 @@ ActiveRecord::Schema[7.1].define(version: 2025_06_17_175120) do
     t.datetime "updated_at", null: false
     t.jsonb "help_link_items", default: {"dictionary_link_item"=>{"href"=>"", "show"=>false, "title"=>"Dictionary of terms", "description"=>"See detailed explanations of terms that appear on building permits"}, "user_guide_link_item"=>{"href"=>"", "show"=>false, "title"=>"User and role guides", "description"=>"Step-by-step instructions on how to make the most out of the platform"}, "get_started_link_item"=>{"href"=>"", "show"=>false, "title"=>"Get started on Building Permit Hub", "description"=>"How to submit a building permit application through a streamlined and standardized approach across BC"}, "best_practices_link_item"=>{"href"=>"", "show"=>false, "title"=>"Best practices", "description"=>"How to use the Building Permit Hub efficiently for application submission"}}, null: false
     t.jsonb "revision_reason_options"
-    t.uuid "small_scale_requirement_template_id"
     t.boolean "inbox_enabled", default: false, null: false
+    t.uuid "small_scale_requirement_template_id"
     t.index ["small_scale_requirement_template_id"], name: "idx_on_small_scale_requirement_template_id_235b636c86"
   end
 
@@ -678,7 +719,9 @@ ActiveRecord::Schema[7.1].define(version: 2025_06_17_175120) do
     t.string "plan_version"
     t.string "plan_date"
     t.string "type"
+    t.uuid "permit_project_id"
     t.index ["permit_application_id"], name: "index_step_codes_on_permit_application_id"
+    t.index ["permit_project_id"], name: "index_step_codes_on_permit_project_id"
   end
 
   create_table "submission_versions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -844,6 +887,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_06_17_175120) do
   add_foreign_key "integration_mapping_notifications", "template_versions"
   add_foreign_key "integration_mappings", "jurisdictions"
   add_foreign_key "integration_mappings", "template_versions"
+  add_foreign_key "jurisdiction_documents", "jurisdictions"
   add_foreign_key "jurisdiction_memberships", "jurisdictions"
   add_foreign_key "jurisdiction_memberships", "users"
   add_foreign_key "jurisdiction_template_version_customizations", "jurisdictions"
@@ -855,20 +899,25 @@ ActiveRecord::Schema[7.1].define(version: 2025_06_17_175120) do
   add_foreign_key "part_3_step_code_checklists", "step_codes"
   add_foreign_key "part_9_step_code_checklists", "permit_type_required_steps", column: "step_requirement_id"
   add_foreign_key "part_9_step_code_checklists", "step_codes"
-  add_foreign_key "permit_applications", "jurisdictions"
   add_foreign_key "permit_applications", "permit_classifications", column: "activity_id"
   add_foreign_key "permit_applications", "permit_classifications", column: "permit_type_id"
+  add_foreign_key "permit_applications", "permit_projects"
   add_foreign_key "permit_applications", "sandboxes"
   add_foreign_key "permit_applications", "template_versions"
   add_foreign_key "permit_applications", "users", column: "submitter_id"
   add_foreign_key "permit_block_statuses", "permit_applications"
   add_foreign_key "permit_collaborations", "collaborators"
   add_foreign_key "permit_collaborations", "permit_applications"
+  add_foreign_key "permit_projects", "jurisdictions"
+  add_foreign_key "permit_projects", "users", column: "owner_id"
   add_foreign_key "permit_type_required_steps", "jurisdictions"
   add_foreign_key "permit_type_required_steps", "permit_classifications", column: "permit_type_id"
   add_foreign_key "permit_type_submission_contacts", "jurisdictions"
   add_foreign_key "permit_type_submission_contacts", "permit_classifications", column: "permit_type_id"
+  add_foreign_key "pinned_projects", "permit_projects"
+  add_foreign_key "pinned_projects", "users"
   add_foreign_key "preferences", "users"
+  add_foreign_key "project_documents", "permit_projects"
   add_foreign_key "requirement_documents", "requirement_blocks"
   add_foreign_key "requirement_template_sections", "requirement_template_sections", column: "copied_from_id"
   add_foreign_key "requirement_template_sections", "requirement_templates"
@@ -885,6 +934,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_06_17_175120) do
   add_foreign_key "step_code_building_characteristics_summaries", "part_9_step_code_checklists", column: "checklist_id"
   add_foreign_key "step_code_data_entries", "part_9_step_code_checklists", column: "checklist_id"
   add_foreign_key "step_codes", "permit_applications"
+  add_foreign_key "step_codes", "permit_projects"
   add_foreign_key "submission_versions", "permit_applications"
   add_foreign_key "supporting_documents", "permit_applications"
   add_foreign_key "supporting_documents", "submission_versions"

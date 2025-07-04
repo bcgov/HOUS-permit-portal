@@ -14,6 +14,7 @@ class Api::SessionsController < Devise::SessionsController
     )
 
     Devise.sign_out_all_scopes ? sign_out : sign_out(resource_name)
+    reset_session
 
     # Use the token for the Keycloak logout if available
     if id_token.present? && ENV["KEYCLOAK_LOGOUT_URL"].present?

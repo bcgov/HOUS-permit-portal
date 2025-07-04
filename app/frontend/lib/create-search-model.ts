@@ -34,6 +34,12 @@ export const createSearchModel = <TSortField, TFetchOptions extends IFetchOption
         self.totalCount = null
         !skipQueryParam && setQueryParam("currentPage", "1")
       },
+      setPageFields(metadata, opts?: { page?: number; countPerPage?: number }) {
+        self.currentPage = opts?.page ?? metadata.currentPage ?? self.currentPage
+        self.totalPages = metadata.totalPages ?? self.totalPages
+        self.totalCount = metadata.totalCount ?? self.totalCount
+        self.countPerPage = opts?.countPerPage ?? metadata.perPage ?? self.countPerPage
+      },
       setCountPerPage(countPerPage: number) {
         !skipQueryParam && setQueryParam("countPerPage", countPerPage.toString())
         self.countPerPage = countPerPage
@@ -106,10 +112,12 @@ export const createSearchModel = <TSortField, TFetchOptions extends IFetchOption
       }),
       handlePageChange: flow(function* (page: number, opts?: TFetchOptions) {
         setQueryParam("currentPage", page.toString())
+        self.currentPage = page
         return yield self.fetchData({ page, ...opts })
       }),
       handleCountPerPageChange: flow(function* (countPerPage: number, opts?: TFetchOptions) {
         setQueryParam("countPerPage", countPerPage.toString())
+        self.countPerPage = countPerPage
         return yield self.fetchData({ countPerPage, ...opts })
       }),
       resetAll() {

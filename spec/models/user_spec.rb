@@ -6,7 +6,7 @@ RSpec.describe User, type: :model do
     it { should have_many(:permit_applications) }
     it do
       should have_many(:applied_jurisdictions).through(
-               :permit_applications
+               :application_projects
              ).source(:jurisdiction)
     end
 

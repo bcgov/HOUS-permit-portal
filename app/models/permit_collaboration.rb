@@ -1,6 +1,6 @@
 class PermitCollaboration < ApplicationRecord
   belongs_to :collaborator
-  belongs_to :permit_application
+  belongs_to :permit_application, touch: true
 
   enum collaboration_type: { submission: 0, review: 1 }
   enum collaborator_type: { delegatee: 0, assignee: 1 }, _default: 0
@@ -140,7 +140,8 @@ class PermitCollaboration < ApplicationRecord
   private
 
   def reindex_permit_application
-    permit_application.reindex if saved_change_to_collaborator_id?
+    # This is now handled by the touch: true option
+    # permit_application.reindex if saved_change_to_collaborator_id?
   end
 
   def validate_author_not_collaborator

@@ -1,6 +1,8 @@
 class LiveRequirementTemplate < RequirementTemplate
   validate :unique_classification_for_undiscarded
 
+  scope :with_published_version, -> { joins(:published_template_version) }
+
   def visibility
     "live"
   end

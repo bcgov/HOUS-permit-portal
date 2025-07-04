@@ -159,10 +159,7 @@ export const UserStoreModel = types
         self.mergeUpdateAll(response.data.data, "usersMap")
 
         self.setTableUsers(response.data.data)
-        self.currentPage = opts?.page ?? self.currentPage
-        self.totalPages = response.data.meta.totalPages
-        self.totalCount = response.data.meta.totalCount
-        self.countPerPage = opts?.countPerPage ?? self.countPerPage
+        self.setPageFields(response.data.meta, opts)
       }
       return response.ok
     }),

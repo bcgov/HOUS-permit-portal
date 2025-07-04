@@ -4,6 +4,7 @@ class JurisdictionBlueprint < Blueprinter::Base
   view :base do
     fields :slug,
            :name,
+           :disambiguated_name,
            :locality_type,
            :qualifier,
            :qualified_name,

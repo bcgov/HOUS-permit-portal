@@ -11,11 +11,7 @@ class ExternalApi::V1::PermitApplicationsController < ExternalApi::ApplicationCo
     render_success authorized_results,
                    nil,
                    {
-                     meta: {
-                       total_pages: @permit_application_search.total_pages,
-                       total_count: @permit_application_search.total_count,
-                       current_page: @permit_application_search.current_page
-                     },
+                     meta: page_meta(@permit_application_search),
                      blueprint: PermitApplicationBlueprint,
                      blueprint_opts: {
                        view: :external_api

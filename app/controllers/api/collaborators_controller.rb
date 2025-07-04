@@ -14,11 +14,7 @@ class Api::CollaboratorsController < Api::ApplicationController
     render_success authorized_results,
                    nil,
                    {
-                     meta: {
-                       total_pages: @collaborator_search.total_pages,
-                       total_count: @collaborator_search.total_count,
-                       current_page: @collaborator_search.current_page
-                     },
+                     meta: page_meta(@collaborator_search),
                      blueprint: CollaboratorBlueprint
                    }
   end

@@ -47,6 +47,10 @@ class RequirementTemplateBlueprint < Blueprinter::Base
     end
   end
 
+  view :filter do
+    fields :nickname
+  end
+
   view :template_snapshot do
     association :requirement_template_sections,
                 blueprint: RequirementTemplateSectionBlueprint
