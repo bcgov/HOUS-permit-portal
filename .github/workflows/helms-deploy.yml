@@ -70,18 +70,20 @@ jobs:
         PROJECT_PREFIX: ${{ secrets.OPENSHIFT_PROJECT_PREFIX }}
       run: |
         set -e
-
+        
         # Set values file and namespace
         case "$ENVIRONMENT" in
-          dev)  VALUES_FILE="values-dev.yaml" ;;
-          test) VALUES_FILE="values-test.yaml" ;;
-          prod) VALUES_FILE="values-prod.yaml" ;;
-          tools) VALUES_FILE="values-tools.yaml" ;;
+          dev|tools) VALUES_FILE="values-dev.yaml" ;;  # tools aliases dev
+          test)      VALUES_FILE="values-test.yaml" ;;
+          prod)      VALUES_FILE="values-prod.yaml" ;;
           *)
-            echo "Invalid environment: $ENVIRONMENT"
+            echo "❌ Invalid environment: $ENVIRONMENT"
             exit 1
             ;;
         esac
+
+        echo "🔧 Using values file: $VALUES_FILE"
+
 
         NAMESPACE="${PROJECT_PREFIX}-${ENVIRONMENT}"
 
