@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       component:
-        description: 'Component to deploy (app, ha-redis, ha-postgres-crunchydb, ha-elasticsearch)'
+        description: 'Component to deploy (app, reha-redisdis, cruha-postgres-crunchydb, ha-elasticsearch, consigno-verifio-notarius-server, anycable-go, clamav)'
         required: true
       environment:
         description: 'Environment to deploy (dev, test, prod)'
@@ -88,11 +88,11 @@ jobs:
         # Hardcoded fallback release names per component
         case "$COMPONENT" in
           app)              DEFAULT_RELEASE_NAME="hous-permit-portal" ;;
-          redis)            DEFAULT_RELEASE_NAME="ha-redis" ;;
-          hap-crunchydb)    DEFAULT_RELEASE_NAME="ha-postgres-crunchydb" ;;
-          elasticsearch)    DEFAULT_RELEASE_NAME="ha-elasticsearch" ;;
-          consigno)         DEFAULT_RELEASE_NAME="consigno-server-automation" ;;
-          anycable)         DEFAULT_RELEASE_NAME="anycable-go" ;;
+          ha-redis)            DEFAULT_RELEASE_NAME="ha-redis" ;;
+          ha-postgres-crunchydb)    DEFAULT_RELEASE_NAME="ha-postgres-crunchydb" ;;
+          ha-elasticsearch)    DEFAULT_RELEASE_NAME="ha-elasticsearch" ;;
+          consigno-verifio-notarius-server)         DEFAULT_RELEASE_NAME="consigno-server-automation" ;;
+          anycable-go)         DEFAULT_RELEASE_NAME="anycable-go" ;;
           clamav)           DEFAULT_RELEASE_NAME="clamav" ;;
           *)
             echo "Invalid component: $COMPONENT"
