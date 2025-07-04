@@ -7,6 +7,7 @@ module PermitApplicationStatus
            newly_submitted: 1,
            revisions_requested: 3,
            resubmitted: 4
+           #  approved: 5
          },
          _default: 0
 
@@ -51,6 +52,17 @@ module PermitApplicationStatus
 
     def submitted?
       newly_submitted? || resubmitted?
+    end
+
+    def pertinence_score
+      {
+        "new_draft" => 30,
+        "newly_submitted" => 10,
+        "resubmitted" => 20,
+        "revisions_requested" => 40
+      }[
+        status
+      ] || -1
     end
 
     def can_submit?
@@ -111,5 +123,7 @@ module PermitApplicationStatus
         )
       )
     end
+
+    private
   end
 end
