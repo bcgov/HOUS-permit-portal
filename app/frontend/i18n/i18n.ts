@@ -4,13 +4,6 @@ import { initReactI18next } from "react-i18next"
 export const defaultNS = "translation"
 export const fallbackNS = "translation"
 
-const fallbackTranslations = {
-  en: {
-    fallback: "Not found",
-  },
-  // You can add more fallback translations for other languages here
-}
-
 const options = {
   resources: {
     /* English translations */
@@ -3251,9 +3244,6 @@ const options = {
   lng: "en", // default language
   fallbackLng: "en",
   interpolation: { escapeValue: false },
-  parseMissingKeyHandler: (key, defaultValue) => {
-    return fallbackTranslations.en.fallback
-  },
 }
 
 i18n.use(initReactI18next).init(options)
