@@ -354,29 +354,29 @@ export const FieldsSetup = observer(function FieldsSetup({
                           requirementType={requirementType}
                           editableLabelProps={{
                             controlProps: {
-                              control: control,
+                              control,
                               name: `requirementsAttributes.${index}.label`,
                               rules: { required: true },
                             },
                             color: "text.link",
-                            "aria-label": "Edit Label",
+                            "aria-label": t("requirementsLibrary.modals.fieldLabel"),
                           }}
                           editableHelperTextProps={{
-                            controlProps: {
-                              control: control,
-                              name: `requirementsAttributes.${index}.hint`,
-                            },
+                            controlProps: { control, name: `requirementsAttributes.${index}.hint` },
+                          }}
+                          editableInstructionsTextProps={{
+                            controlProps: { control, name: `requirementsAttributes.${index}.instructions` },
                           }}
                           isOptionalCheckboxProps={{
                             controlProps: {
-                              control: control,
+                              control,
                               name: `requirementsAttributes.${index}.required`,
                               defaultValue: true,
                             },
                           }}
                           isElectiveCheckboxProps={{
                             controlProps: {
-                              control: control,
+                              control,
                               name: `requirementsAttributes.${index}.elective`,
                             },
                           }}

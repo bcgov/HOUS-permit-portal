@@ -6,6 +6,7 @@ class RequirementBlueprint < Blueprinter::Base
          :label,
          :input_type,
          :hint,
+         :instructions,
          :required,
          :related_content,
          :required_for_in_person_hint,
