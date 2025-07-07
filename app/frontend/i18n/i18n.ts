@@ -160,10 +160,7 @@ const options = {
           goToTools: "Go to tools",
           toolsSectionTitle: "Tools to help prepare your project for application",
           toolsSectionDesc1:
-            "Use Building Permit Hub's tools to check your application for readiness and prepare key documents for your project.",
-          toolsSectionDesc2:
-            "Check your project against Provincial requirements such as Step Codes and prepare other documents.",
-
+            "Use Building Permit Hub's tools to check your application for readiness and prepare key documents for your project. Check your project against Provincial requirements such as Step Codes and prepare other documents.",
           card1Title: "Find out what’s required before you apply",
           card1Body: "Tools and checklists to help you prepare your application package",
           card2Title: "Submit your application online",
@@ -300,6 +297,7 @@ const options = {
           invite: "Invite",
           public: "Public",
           undo: "Undo",
+          chooseSandboxMode: "Choose a sandbox mode",
         },
         notification: {
           title: "Notifications",
@@ -439,10 +437,23 @@ const options = {
             wantToUse: {
               title: "Want to use Building Permit Hub in your community?",
               description:
-                "We're working with local governments and First Nations across British Columbia to bring Building Permit Hub to more places. If you'd like to see your community on Building Permit Hub, you can suggest it to our team.",
-              buttonHelp:
-                "Clicking the button below opens a new email. You'll be able to review or edit the message before sending.",
-              buttonText: "Suggest your community",
+                "Let your local government or First Nation know you're interested in using this service. We've written a sample email to make it easy.",
+              emailButtonDescription: "Click the button below to open the message in your default email client.",
+              emailButtonText: "Send an email to your local government",
+              emailSubject: "Please contact {{jurisdictionName}} about joining Building Permit Hub",
+              emailBody: `Hello,
+
+I'd like to see my community, {{jurisdictionName}}, join Building Permit Hub.
+
+Why I think they should join:
+[List any issues you've run into when applying for permits, e.g. delays, confusion, inconsistent requirements, etc.]
+
+Please reach out to my local jurisdiction to let them know there's interest from the community.
+
+Thank you,
+[Your name]
+[Optional: Your business or company name]
+[Optional: Your contact info, if needed for follow-up]`,
             },
           },
         },
@@ -759,19 +770,12 @@ const options = {
             warning:
               "Save your work before entering sandbox mode. Any unsaved changes to permit applications or template customizations will not be kept.",
             warningTitle: "Unsaved changes will be lost",
-            description: "While in this mode, you will be able to:",
+            descriptionParagraph1:
+              "Sandbox mode lets you preview and test changes to your permit application forms without affecting live forms.",
+            descriptionParagraph2:
+              "You can see how your updates will appear to submitters, try out test permit applications, and publish your changes when you're ready.",
             leaveDescription: "You are about to leave sandbox mode. Any unsaved changes will be lost.",
-            descriptionList: [
-              "make changes to a permit template without affecting what is published live.",
-              "publish permit templates for testing it out as how a submitter would see it",
-              "if you made any changes on a permit, you may choose to copy those over to publish live.",
-            ],
-            choicesAvailable: "Choices available",
             liveDescription: "<strong>Live</strong>: No sandbox. Submit directly to the live inbox.",
-            publishedDescription:
-              "<strong>Published sandbox:</strong> Sandbox that emulates the live mode by letting you test edits on published permit templates.",
-            scheduledDescription:
-              "<strong>Scheduled sandbox:</strong> Sandbox that lets you interact with scheduled permit templates.",
             continue: "Enter sandbox mode",
             leave: "Leave sandbox",
             superAdminAvailable: "Super Admin feature available!",
@@ -2453,9 +2457,8 @@ const options = {
           configurationManagement: {
             title: "Configuration",
             reviewManagerDescription:
-              "set up your submission inbox, define Step Codes, configure features, and edit the 'About' page to reflect specific local information",
-            adminDescription:
-              "Manage site-wide settings and messages along with providing administrative control to Super Admins.",
+              "Set up your submission inbox, define Step Codes, configure features, and edit the 'About' page to reflect specific local information",
+            adminDescription: "Manage system-wide settings, notifications, and administrative access",
             jurisdictionLocalityTypeLabel: "Locality type of local jurisdiction",
             jurisdictionNameLabel: "Name of local jurisdiction",
             jurisdictionLocationLabel: "Location",
@@ -2555,7 +2558,7 @@ const options = {
           submissionsInboxDescription: "View all submitted building permit applications.",
           permitsTitle: "Digital building permits",
           permitsDescription:
-            "Set up helpful tips for submitters and select elective questions based on your local needs to customize the permit application process for your local jurisdiction",
+            "Set up helpful tips for submitters and select elective questions to customize the permit application process for your local jurisdiction",
           userManagementTitle: "User management",
           userManagementDescription: "Invite or remove Review Managers or Reviewers in the Building Permit Hub.",
           auditLogTitle: "Audit log",

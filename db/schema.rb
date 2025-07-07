@@ -591,6 +591,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_06_26_203759) do
     t.integer "template_version_status_scope", default: 0, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.text "description"
     t.index ["jurisdiction_id"], name: "index_sandboxes_on_jurisdiction_id"
   end
 
