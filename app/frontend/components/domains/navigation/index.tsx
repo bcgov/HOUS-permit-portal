@@ -42,6 +42,7 @@ const EmailConfirmedScreen = lazy(() =>
 const LoginScreen = lazy(() =>
   import("../authentication/login-screen").then((module) => ({ default: module.LoginScreen }))
 )
+
 const HomeScreen = lazy(() => import("../home").then((module) => ({ default: module.HomeScreen })))
 
 const ConfigurationManagementScreen = lazy(() =>
@@ -110,6 +111,11 @@ const LettersOfAssuranceScreen = lazy(() =>
 const CheckStepCodeRequirementsScreen = lazy(() =>
   import("../project-readiness-tools/check-step-code-requirements").then((module) => ({
     default: module.CheckStepCodeRequirementsScreen,
+  }))
+)
+const NewCheckStepCodeRequirementsScreen = lazy(() =>
+  import("../project-readiness-tools/check-step-code-requirements/new").then((module) => ({
+    default: module.NewCheckStepCodeRequirementsScreen,
   }))
 )
 
@@ -331,7 +337,7 @@ export const Navigation = observer(() => {
     validateToken()
   }, [])
 
-  if (isLoggingOut) return <LoadingScreen />
+  if (isLoggingOut) return <LoadingScreen message={t("site.loggingOut")} />
 
   return (
     <BrowserRouter>
@@ -348,7 +354,7 @@ export const Navigation = observer(() => {
       <NavBar />
 
       {isValidating ? (
-        <LoadingScreen />
+        <LoadingScreen message={t("site.validating")} />
       ) : (
         <Suspense fallback={<LoadingScreen />}>
           <AppRoutes />
@@ -363,12 +369,11 @@ export const Navigation = observer(() => {
 const AppRoutes = observer(() => {
   const rootStore = useMst()
   const { sessionStore, userStore, uiStore } = rootStore
-  const { loggedIn, tokenExpired } = sessionStore
+  const { loggedIn, tokenExpired, resetAuth, afterLoginPath, setAfterLoginPath } = sessionStore
   const location = useLocation()
   const background = location.state && location.state.background
 
   const { currentUser } = userStore
-  const { afterLoginPath, setAfterLoginPath, resetAuth } = sessionStore
 
   const navigate = useNavigate()
   const { t } = useTranslation()
@@ -379,6 +384,13 @@ const AppRoutes = observer(() => {
   }
 
   useEffect(() => {
+    if (loggedIn && afterLoginPath) {
+      navigate(afterLoginPath)
+      setAfterLoginPath(null)
+    }
+  }, [loggedIn, afterLoginPath])
+
+  useEffect(() => {
     if (tokenExpired) {
       resetAuth()
       setAfterLoginPath(location.pathname)
@@ -386,13 +398,6 @@ const AppRoutes = observer(() => {
       uiStore.flashMessage.show(EFlashMessageStatus.warning, t("auth.tokenExpired"), null)
     }
   }, [tokenExpired])
-
-  useEffect(() => {
-    if (loggedIn && afterLoginPath) {
-      setAfterLoginPath(null)
-      navigate(afterLoginPath)
-    }
-  }, [afterLoginPath, loggedIn])
 
   useSyncPathWithStore()
 
@@ -546,139 +551,149 @@ const AppRoutes = observer(() => {
 
   return (
     <>
-      <Routes location={background || location}>
-        {mustAcceptEula && (
-          // Onboarding step 1: EULA
-          <Route path="/" element={<EULAScreen />} />
-        )}
-        {loggedIn && eulaAccepted && isUnconfirmed && (
-          // Onboarding step 2: confirm email
-          <Route path="/" element={<ProfileScreen />} />
-        )}
-        {loggedIn ? (
-          <Route path="/" element={<HomeScreen />} />
-        ) : (
-          <Route path="/" element={<RedirectScreen path="/welcome" />} />
-        )}
-        <Route
-          element={<ProtectedRoute isAllowed={loggedIn && !mustAcceptEula} redirectPath={mustAcceptEula && "/"} />}
-        >
-          <Route path="/permit-applications" element={<PermitApplicationIndexScreen />} />
-          <Route path="/permit-projects" element={<PermitProjectIndexScreen />} />
-          <Route path="/permit-projects/new" element={<NewPermitProjectScreen />} />
-          <Route path="/permit-projects/:permitProjectId" element={<PermitProjectScreen />} />
-          <Route path="/permit-applications/new" element={<NewPermitApplicationScreen />} />
-          <Route path="/permit-applications/:permitApplicationId/edit" element={<EditPermitApplicationScreen />} />
+      {loggedIn && afterLoginPath ? (
+        <LoadingScreen message={t("site.redirecting")} />
+      ) : (
+        <Routes location={background || location}>
+          {mustAcceptEula && (
+            // Onboarding step 1: EULA
+            <Route path="/" element={<EULAScreen />} />
+          )}
+          {loggedIn && eulaAccepted && isUnconfirmed && (
+            // Onboarding step 2: confirm email
+            <Route path="/" element={<ProfileScreen />} />
+          )}
+          {loggedIn ? (
+            <Route path="/" element={<HomeScreen />} />
+          ) : (
+            <Route path="/" element={<RedirectScreen path="/welcome" />} />
+          )}
           <Route
-            path="/permit-applications/:permitApplicationId/edit/part-9-step-code"
-            element={<Part9StepCodeForm />}
+            element={<ProtectedRoute isAllowed={loggedIn && !mustAcceptEula} redirectPath={mustAcceptEula && "/"} />}
+          >
+            <Route path="/permit-applications" element={<PermitApplicationIndexScreen />} />
+            <Route path="/permit-projects" element={<PermitProjectIndexScreen />} />
+            <Route path="/permit-projects/new" element={<NewPermitProjectScreen />} />
+            <Route path="/permit-projects/:permitProjectId" element={<PermitProjectScreen />} />
+            <Route path="/permit-applications/new" element={<NewPermitApplicationScreen />} />
+            <Route path="/permit-applications/:permitApplicationId/edit" element={<EditPermitApplicationScreen />} />
+            <Route
+              path="/permit-applications/:permitApplicationId/edit/part-9-step-code"
+              element={<Part9StepCodeForm />}
+            />
+            <Route
+              path="/permit-applications/:permitApplicationId/edit/part-3-step-code"
+              element={<Part3StepCodeForm />}
+            />
+            <Route
+              path="/permit-applications/:permitApplicationId/edit/part-3-step-code/:section"
+              element={<Part3StepCodeForm />}
+            />
+            <Route
+              path="/permit-applications/:permitApplicationId/sucessful-submission"
+              element={<SuccessfulSubmissionScreen />}
+            />
+            <Route
+              path="/project-readiness-tools/check-step-code-requirements/new"
+              element={<NewCheckStepCodeRequirementsScreen />}
+            />
+          </Route>
+
+          <Route element={<ProtectedRoute isAllowed={loggedIn} />}>
+            <Route path="/profile" element={<ProfileScreen />} />
+          </Route>
+
+          <Route element={<ProtectedRoute isAllowed={loggedIn && !currentUser?.isSuperAdmin} />}>
+            <Route path="/profile/eula" element={<EULAScreen withClose />} />
+          </Route>
+
+          <Route
+            element={
+              <ProtectedRoute
+                isAllowed={isAllowedForAdminOrManager}
+                redirectPath={(mustAcceptEula && "/") || (loggedIn && "/not-found")}
+              />
+            }
+          >
+            {adminOrManagerRoutes}
+          </Route>
+
+          <Route
+            element={
+              <ProtectedRoute
+                isAllowed={loggedIn && currentUser.isSuperAdmin}
+                redirectPath={loggedIn && "/not-found"}
+              />
+            }
+          >
+            {superAdminOnlyRoutes}
+          </Route>
+
+          <Route
+            element={
+              <ProtectedRoute
+                isAllowed={isAllowedForManagerOrReviewer}
+                redirectPath={(mustAcceptEula && "/") || (loggedIn && "/not-found")}
+              />
+            }
+          >
+            {managerOrReviewerRoutes}
+          </Route>
+
+          <Route
+            element={
+              <ProtectedRoute
+                isAllowed={isAllowedForTechnicalSupportOrManager}
+                redirectPath={(mustAcceptEula && "/") || (loggedIn && "/not-found")}
+              />
+            }
+          >
+            {technicalSupportOrManagerRoutes}
+          </Route>
+
+          <Route
+            element={
+              <ProtectedRoute
+                isAllowed={isAllowedForReviewManagerOnly}
+                redirectPath={(mustAcceptEula && "/") || (loggedIn && "/not-found")}
+              />
+            }
+          >
+            {reviewManagerOnlyRoutes}
+          </Route>
+
+          <Route element={<ProtectedRoute isAllowed={!loggedIn} redirectPath="/" />}>
+            <Route path="/login" element={<LoginScreen />} />
+            <Route path="/admin" element={<LoginScreen isAdmin />} />
+          </Route>
+          {/* Public Routes */}
+          <Route path="/accept-invitation" element={<AcceptInvitationScreen />} />
+          <Route path="/contact" element={<ContactScreen />} />
+          <Route path="/project-readiness-tools" element={<ProjectReadinessToolsIndexScreen />} />
+          <Route
+            path="/project-readiness-tools/create-your-letters-of-assurance"
+            element={<LettersOfAssuranceScreen />}
           />
           <Route
-            path="/permit-applications/:permitApplicationId/edit/part-3-step-code"
-            element={<Part3StepCodeForm />}
+            path="/project-readiness-tools/check-step-code-requirements"
+            element={<CheckStepCodeRequirementsScreen />}
+          />
+          <Route path="/confirmed" element={<EmailConfirmedScreen />} />
+          <Route path="/welcome" element={<LandingScreen />} />
+          <Route
+            path="/early-access/requirement-templates/:requirementTemplateId"
+            element={<EarlyAccessRequirementTemplateScreen />}
           />
           <Route
-            path="/permit-applications/:permitApplicationId/edit/part-3-step-code/:section"
-            element={<Part3StepCodeForm />}
+            path="/jurisdictions"
+            element={currentUser?.isSuperAdmin ? <JurisdictionIndexScreen /> : <LimitedJurisdictionIndexScreen />}
           />
-          <Route
-            path="/permit-applications/:permitApplicationId/sucessful-submission"
-            element={<SuccessfulSubmissionScreen />}
-          />
-        </Route>
-
-        <Route element={<ProtectedRoute isAllowed={loggedIn} />}>
-          <Route path="/profile" element={<ProfileScreen />} />
-        </Route>
-
-        <Route element={<ProtectedRoute isAllowed={loggedIn && !currentUser?.isSuperAdmin} />}>
-          <Route path="/profile/eula" element={<EULAScreen withClose />} />
-        </Route>
-
-        <Route
-          element={
-            <ProtectedRoute
-              isAllowed={isAllowedForAdminOrManager}
-              redirectPath={(mustAcceptEula && "/") || (loggedIn && "/not-found")}
-            />
-          }
-        >
-          {adminOrManagerRoutes}
-        </Route>
-
-        <Route
-          element={
-            <ProtectedRoute isAllowed={loggedIn && currentUser.isSuperAdmin} redirectPath={loggedIn && "/not-found"} />
-          }
-        >
-          {superAdminOnlyRoutes}
-        </Route>
-
-        <Route
-          element={
-            <ProtectedRoute
-              isAllowed={isAllowedForManagerOrReviewer}
-              redirectPath={(mustAcceptEula && "/") || (loggedIn && "/not-found")}
-            />
-          }
-        >
-          {managerOrReviewerRoutes}
-        </Route>
-
-        <Route
-          element={
-            <ProtectedRoute
-              isAllowed={isAllowedForTechnicalSupportOrManager}
-              redirectPath={(mustAcceptEula && "/") || (loggedIn && "/not-found")}
-            />
-          }
-        >
-          {technicalSupportOrManagerRoutes}
-        </Route>
-
-        <Route
-          element={
-            <ProtectedRoute
-              isAllowed={isAllowedForReviewManagerOnly}
-              redirectPath={(mustAcceptEula && "/") || (loggedIn && "/not-found")}
-              tempVar={"aaa" + isAllowedForReviewManagerOnly}
-            />
-          }
-        >
-          {reviewManagerOnlyRoutes}
-        </Route>
-
-        <Route element={<ProtectedRoute isAllowed={!loggedIn} redirectPath="/" />}>
-          <Route path="/login" element={<LoginScreen />} />
-          <Route path="/admin" element={<LoginScreen isAdmin />} />
-        </Route>
-        {/* Public Routes */}
-        <Route path="/accept-invitation" element={<AcceptInvitationScreen />} />
-        <Route path="/contact" element={<ContactScreen />} />
-        <Route path="/project-readiness-tools" element={<ProjectReadinessToolsIndexScreen />} />
-        <Route
-          path="/project-readiness-tools/create-your-letters-of-assurance"
-          element={<LettersOfAssuranceScreen />}
-        />
-        <Route
-          path="/project-readiness-tools/check-step-code-requirements"
-          element={<CheckStepCodeRequirementsScreen />}
-        />
-        <Route path="/confirmed" element={<EmailConfirmedScreen />} />
-        <Route path="/welcome" element={<LandingScreen />} />
-        <Route
-          path="/early-access/requirement-templates/:requirementTemplateId"
-          element={<EarlyAccessRequirementTemplateScreen />}
-        />
-        <Route
-          path="/jurisdictions"
-          element={currentUser?.isSuperAdmin ? <JurisdictionIndexScreen /> : <LimitedJurisdictionIndexScreen />}
-        />
-        <Route path="/jurisdictions/:jurisdictionId" element={<JurisdictionScreen />} />
-        <Route path="/part-3-step-code" element={<RedirectScreen path="start" />} />
-        <Route path="/part-3-step-code/:section" element={<Part3StepCodeForm />} />
-        <Route path="*" element={<NotFoundScreen />} />
-      </Routes>
+          <Route path="/jurisdictions/:jurisdictionId" element={<JurisdictionScreen />} />
+          <Route path="/part-3-step-code" element={<RedirectScreen path="start" />} />
+          <Route path="/part-3-step-code/:section" element={<Part3StepCodeForm />} />
+          <Route path="*" element={<NotFoundScreen />} />
+        </Routes>
+      )}
     </>
   )
 })

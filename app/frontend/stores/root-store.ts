@@ -62,7 +62,7 @@ export const RootStoreModel = types
     loadLocalPersistedData: flow(function* () {
       unprotect(self)
       yield makePersistable(self.sessionStore, {
-        name: `${self.userStore.currentUser?.id}-SessionStore`,
+        name: `SessionStore`,
         properties: ["afterLoginPath"],
         storage: localStorage,
       })

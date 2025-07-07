@@ -3038,6 +3038,10 @@ const options = {
           },
         },
         site: {
+          redirecting: "Redirecting...",
+          validating: "Validating...",
+          loggingOut: "Logging out...",
+          loading: "Loading...",
           title: "Building Permit Hub",
           titleLong: "Building Permit Hub",
           adminNavBarTitle: "Building Permit Hub - Admin Panel",
