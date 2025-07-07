@@ -1,7 +1,8 @@
-import { Box, Container, Divider, Flex, Heading, Link, Text, VStack } from "@chakra-ui/react"
+import { Box, Container, Divider, Flex, Heading, Text, VStack } from "@chakra-ui/react"
 import { ArrowRight } from "@phosphor-icons/react/dist/ssr"
 import React from "react"
 import { useTranslation } from "react-i18next"
+import { RouterLink } from "../../shared/navigation/router-link"
 
 export const ProjectReadinessToolsIndexScreen = () => {
   const { t } = useTranslation()
@@ -15,12 +16,37 @@ export const ProjectReadinessToolsIndexScreen = () => {
 
   const projectReadinessPageItems = [
     {
+      sectionTitle: t("home.projectReadinessTools.checkYourProject"),
+      items: [
+        {
+          linkText: t("home.projectReadinessTools.lookupStepCodeLink"),
+          description: t("home.projectReadinessTools.lookupStepCodeDescription"),
+          href: "#",
+        },
+        {
+          linkText: t("home.projectReadinessTools.meetStepCodeLink"),
+          description: t("home.projectReadinessTools.meetStepCodeDescription"),
+          href: "/project-readiness-tools/check-step-code-requirements",
+        },
+        {
+          linkText: t("home.projectReadinessTools.checkDrawingsLink"),
+          description: t("home.projectReadinessTools.checkDrawingsDescription"),
+          href: "#",
+        },
+      ],
+    },
+    {
       sectionTitle: t("home.projectReadinessTools.prepareYourApplication"),
       items: [
         {
+          linkText: t("home.projectReadinessTools.signDocumentsLink"),
+          description: t("home.projectReadinessTools.signDocumentsDescription"),
+          href: "#",
+        },
+        {
           linkText: t("home.projectReadinessTools.letterOfAssuranceLink"),
-          description: t("home.projectReadinessTools.letterOfAssuranceDescription"),
-          href: "project-readiness-tools/create-your-letters-of-assurance",
+          description: t("home.projectReadinessTools.createLoaDescription"),
+          href: "/project-readiness-tools/create-your-letters-of-assurance",
         },
       ],
     },
@@ -42,19 +68,19 @@ export const ProjectReadinessToolsIndexScreen = () => {
           </Heading>
           <VStack divider={<Divider borderColor="border.light" />} spacing={0} align="stretch">
             {section.items.map((item, itemIndex) => (
-              <Box key={itemIndex} py="6" borderBottom="1px solid" borderTop="1px solid" borderColor="border.light">
+              <Box key={itemIndex} py="6" borderColor="border.light" mb={2}>
                 <Flex justify="space-between" align="center" w="full">
                   <Box flex="1" pr="4">
-                    <Link href={item.href} color="text.link" fontWeight="semibold" fontSize="lg">
+                    <RouterLink to={item.href} color="text.link" fontWeight="semibold" fontSize="lg">
                       {item.linkText}
-                    </Link>
+                    </RouterLink>
                     <Text mt="2" color="text.primary">
                       {item.description}
                     </Text>
                   </Box>
-                  <Link href={item.href} color="text.link" fontWeight="semibold" fontSize="lg">
+                  <RouterLink to={item.href} color="text.link" fontWeight="semibold" fontSize="lg">
                     <ArrowRight size={20} />
-                  </Link>
+                  </RouterLink>
                 </Flex>
               </Box>
             ))}

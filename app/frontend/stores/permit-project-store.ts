@@ -183,14 +183,10 @@ export const PermitProjectStoreModel = types
       return response
     }),
     setPermitProjectFilters(queryParams: URLSearchParams) {
-      const showArchived = queryParams.get("showArchived")
-      const query = queryParams.get("query")
       const requirementTemplateFilter = queryParams.get("requirementTemplateFilter")
       const phase = queryParams.get("phase") as EPermitProjectPhase
 
       self.phaseFilter = phase
-      self.setShowArchived(showArchived === "true")
-      self.setQuery(query || "")
       if (requirementTemplateFilter) {
         self.setRequirementTemplateFilter(requirementTemplateFilter.split(","))
       }

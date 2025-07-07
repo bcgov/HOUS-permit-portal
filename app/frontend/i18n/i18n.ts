@@ -175,6 +175,7 @@ const options = {
           okay: "Okay",
           filter: "Filter",
           until: "til",
+          start: "Start",
           reorder: "Reorder",
           delete: "Delete",
           confirmDelete: "Confirm delete",
@@ -2233,8 +2234,21 @@ const options = {
             checkYourProject: "Check your project against Provincial regulations",
             prepareYourApplication: "Prepare your application package for submission",
             letterOfAssuranceLink: "Create your Letters of Assurance",
-            letterOfAssuranceDescription:
+            lookupStepCodeLink: "Look up Step Code requirements for your project",
+            lookupStepCodeDescription:
+              "Enter an address to find the the Energy and Zero Carbon Step Code requirements for your project",
+            meetStepCodeLink: "Check if your project meets BC's Step Codes requirements",
+            meetStepCodeDescription:
+              "Generate a report that details a project's compliance with BC's Energy Step Code and Zero Carbon Step Code requirements",
+            checkDrawingsLink: "Check if your drawings follow the BC Building Code",
+            checkDrawingsDescription:
+              "Upload your drawings to get a report about where your drawings follow or don't follow certain sections of the BC Building Code",
+            signDocumentsLink: "Digitally sign and authenticate your permit documents",
+            signDocumentsDescription:
+              "Add secure digital signatures that meet provincial requirements for authenticity and integrity in building permit submissions",
+            createLoaDescription:
               "Complete Letters of Assurance to confirm who is professionally responsible for design and field review on your project, as required by the BC Building Code for some building types",
+            compliantApplicationLink: "complete and compliant permit application",
             letterOfAssurancePage: {
               createYourLOAsTitle: "Create your Letters of Assurance",
               createYourLOAsIntro:
@@ -2308,6 +2322,28 @@ const options = {
                 geotechnical:
                   "Geotechnical - engineer reviews ground and slope stability for excavation, foundation, temporary retaining systems during constructions and finished building.",
               },
+            },
+            checkStepCodeRequirementsScreen: {
+              pageHeading: "Check if your project meets BC's Step Codes requirements",
+              toolIntro: "You can use this tool to:",
+              toolPoint1: "generate a Step Codes compliance report for Part 3 and Part 9 Buildings",
+              toolPoint2:
+                "submit a completed Step Codes compliance report to the local government or First Nation responsible for approving permits",
+              loginButton: "Log in to start",
+              whoTitle: "Who this tool is for",
+              whoDescription: "This Step Codes reporting tool is designed for:",
+              whoPoint1: "energy modellers",
+              whoPoint2: "architects and other design professionals",
+              whenTitle: "When to create a Step Codes report",
+              whenDescription:
+                "The local government or First Nation responsible for approving permits may ask for Step Codes compliance information at different stages of your project. You can use this tool to generate a report instead of submitting the Excel checklists from the Energy Step Code website.",
+              whatToExpectTitle: "What to expect",
+              whatToExpectDescription:
+                "You'll be asked for energy modelling results for your project. Before starting, use energy modelling software to model your building's energy performance.",
+              whatsIncludedTitle: "What's included in a Step Code report:",
+              whatsIncludedPoint1: "the Energy and Zero Carbon steps your project must meet (if any)",
+              whatsIncludedPoint2: "whether your project meets the required steps",
+              downloadSampleLink: "Download a sample report",
             },
           },
           siteConfigurationTitle: "Configuration management",
@@ -3072,6 +3108,7 @@ const options = {
           forHelp: "For help with the Building Permit Hub please contact:",
           reviewNotifications: "Review notifications",
           breadcrumb: {
+            checkStepCodeRequirements: "Check step code requirements",
             latest: "Latest",
             profile: "Profile",
             jurisdictions: "Jurisdictions",
