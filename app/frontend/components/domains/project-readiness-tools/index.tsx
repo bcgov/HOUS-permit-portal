@@ -16,36 +16,36 @@ export const ProjectReadinessToolsIndexScreen = () => {
 
   const projectReadinessPageItems = [
     {
-      sectionTitle: t("home.projectReadinessTools.checkYourProject"),
+      sectionTitle: t("projectReadinessTools.checkYourProject"),
       items: [
         {
-          linkText: t("home.projectReadinessTools.lookupStepCodeLink"),
-          description: t("home.projectReadinessTools.lookupStepCodeDescription"),
+          linkText: t("projectReadinessTools.lookupStepCodeLink"),
+          description: t("projectReadinessTools.lookupStepCodeDescription"),
           href: "#",
         },
         {
-          linkText: t("home.projectReadinessTools.meetStepCodeLink"),
-          description: t("home.projectReadinessTools.meetStepCodeDescription"),
+          linkText: t("projectReadinessTools.meetStepCodeLink"),
+          description: t("projectReadinessTools.meetStepCodeDescription"),
           href: "/project-readiness-tools/check-step-code-requirements",
         },
         {
-          linkText: t("home.projectReadinessTools.checkDrawingsLink"),
-          description: t("home.projectReadinessTools.checkDrawingsDescription"),
+          linkText: t("projectReadinessTools.checkDrawingsLink"),
+          description: t("projectReadinessTools.checkDrawingsDescription"),
           href: "#",
         },
       ],
     },
     {
-      sectionTitle: t("home.projectReadinessTools.prepareYourApplication"),
+      sectionTitle: t("projectReadinessTools.prepareYourApplication"),
       items: [
         {
-          linkText: t("home.projectReadinessTools.signDocumentsLink"),
-          description: t("home.projectReadinessTools.signDocumentsDescription"),
+          linkText: t("projectReadinessTools.signDocumentsLink"),
+          description: t("projectReadinessTools.signDocumentsDescription"),
           href: "#",
         },
         {
-          linkText: t("home.projectReadinessTools.letterOfAssuranceLink"),
-          description: t("home.projectReadinessTools.createLoaDescription"),
+          linkText: t("projectReadinessTools.letterOfAssuranceLink"),
+          description: t("projectReadinessTools.createLoaDescription"),
           href: "/project-readiness-tools/create-your-letters-of-assurance",
         },
       ],
@@ -55,10 +55,10 @@ export const ProjectReadinessToolsIndexScreen = () => {
   return (
     <Container maxW="container.lg" pb="36" px="8">
       <Heading as="h1" mt="16" color="text.primary">
-        {t("home.projectReadinessTools.pageHeading")}
+        {t("projectReadinessTools.pageHeading")}
       </Heading>
       <Text pt="4" fontSize="lg" color="text.primary">
-        {t("home.projectReadinessTools.pageDescription")}
+        {t("projectReadinessTools.pageDescription")}
       </Text>
 
       {projectReadinessPageItems.map((section, sectionIndex) => (

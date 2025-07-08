@@ -7,10 +7,7 @@ class Api::StepCodesController < Api::ApplicationController
     step_code_class = params[:step_code][:type].safe_constantize
     unless step_code_class &&
              [Part3StepCode, Part9StepCode].include?(step_code_class)
-      render_error(
-        "activerecord.errors.models.step_code.attributes.type.invalid",
-        status: :bad_request
-      )
+      render_error("step_code.create_error", status: :bad_request)
       return
     end
 
@@ -19,7 +16,7 @@ class Api::StepCodesController < Api::ApplicationController
 
     if @step_code.save
       render_success @step_code,
-                     "activerecord.attributes.step_code.created",
+                     "step_code.create_success",
                      {
                        blueprint: StepCodeBlueprint,
                        blueprint_opts: {
@@ -27,7 +24,12 @@ class Api::StepCodesController < Api::ApplicationController
                        }
                      }
     else
-      render_error("activerecord.errors.models.step_code.create_error")
+      render_error(
+        "step_code.create_error",
+        message_opts: {
+          error_message: @step_code.errors.full_messages.join(", ")
+        }
+      )
     end
   end
 

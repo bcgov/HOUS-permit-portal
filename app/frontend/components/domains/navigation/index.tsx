@@ -113,10 +113,12 @@ const CheckStepCodeRequirementsScreen = lazy(() =>
     default: module.CheckStepCodeRequirementsScreen,
   }))
 )
-const NewCheckStepCodeRequirementsScreen = lazy(() =>
-  import("../project-readiness-tools/check-step-code-requirements/new").then((module) => ({
-    default: module.NewCheckStepCodeRequirementsScreen,
-  }))
+const StartCheckStepCodeRequirementsScreen = lazy(() =>
+  import("../project-readiness-tools/check-step-code-requirements/start-check-step-code-requirements-screen").then(
+    (module) => ({
+      default: module.StartCheckStepCodeRequirementsScreen,
+    })
+  )
 )
 
 const PermitApplicationIndexScreen = lazy(() =>
@@ -594,8 +596,8 @@ const AppRoutes = observer(() => {
               element={<SuccessfulSubmissionScreen />}
             />
             <Route
-              path="/project-readiness-tools/check-step-code-requirements/new"
-              element={<NewCheckStepCodeRequirementsScreen />}
+              path="/project-readiness-tools/check-step-code-requirements/start"
+              element={<StartCheckStepCodeRequirementsScreen />}
             />
           </Route>
 

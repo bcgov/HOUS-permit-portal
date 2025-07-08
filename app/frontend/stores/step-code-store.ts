@@ -160,11 +160,12 @@ export const StepCodeStoreModel = types
       } else if (permitProjectId) {
         response = yield self.environment.api.createStepCode(EStepCodeType.part3StepCode, {
           checklistAttributes,
-          permitProjectId: permitProjectId,
+          permitProjectId,
         })
       } else {
-        console.error("Part 3 Step Code creation requires either permitApplicationId or permitProjectId.")
-        return { ok: false, error: "Missing permitApplicationId or permitProjectId" }
+        response = yield self.environment.api.createStepCode(EStepCodeType.part3StepCode, {
+          checklistAttributes,
+        })
       }
 
       if (response.ok) {

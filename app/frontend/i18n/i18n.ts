@@ -2227,125 +2227,6 @@ const options = {
         },
         home: {
           jurisdictionsTitle: "Jurisdictions",
-          projectReadinessTools: {
-            title: "Project readiness tools",
-            pageHeading: "Prepare and check your project documents",
-            pageDescription: "Use these tools to help prepare a complete and compliant permit application",
-            checkYourProject: "Check your project against Provincial regulations",
-            prepareYourApplication: "Prepare your application package for submission",
-            letterOfAssuranceLink: "Create your Letters of Assurance",
-            lookupStepCodeLink: "Look up Step Code requirements for your project",
-            lookupStepCodeDescription:
-              "Enter an address to find the the Energy and Zero Carbon Step Code requirements for your project",
-            meetStepCodeLink: "Check if your project meets BC's Step Codes requirements",
-            meetStepCodeDescription:
-              "Generate a report that details a project's compliance with BC's Energy Step Code and Zero Carbon Step Code requirements",
-            checkDrawingsLink: "Check if your drawings follow the BC Building Code",
-            checkDrawingsDescription:
-              "Upload your drawings to get a report about where your drawings follow or don't follow certain sections of the BC Building Code",
-            signDocumentsLink: "Digitally sign and authenticate your permit documents",
-            signDocumentsDescription:
-              "Add secure digital signatures that meet provincial requirements for authenticity and integrity in building permit submissions",
-            createLoaDescription:
-              "Complete Letters of Assurance to confirm who is professionally responsible for design and field review on your project, as required by the BC Building Code for some building types",
-            compliantApplicationLink: "complete and compliant permit application",
-            letterOfAssurancePage: {
-              createYourLOAsTitle: "Create your Letters of Assurance",
-              createYourLOAsIntro:
-                "Some building permit applications need Letters of Assurance (LOAs). Letters of Assurance are legal documents that clearly identify the responsibilities of architects, engineers and other registered professionals when designing building components and reviewing them in the field.",
-              createYourLOAsInstructions: "Registered professionals can use the forms on this page to:",
-              createYourLOAsInstructionFill: "Fill out Letters of Assurance for your project",
-              whoThisIsForTitle: "Who this is for",
-              whoThisIsForDescription:
-                "If your project requires Letters of Assurance, each registered professional involved must sign and seal their form as part of the building permit process.",
-              whoThisIsForMayNeed: "You may need Letters of Assurance if your project:",
-              whoThisIsForComplex: "is a complex building (usually Part 3 of the Building Code)",
-              whoThisIsForSimpler:
-                "is a simpler building (Part 9 of the Building Code) where Letters of Assurance are required by your local government",
-              whoThisIsForInvolves: "involves registered professionals like architects or engineers",
-              whoThisIsForCheckWithLG:
-                "Check with your local government to find out if LOAs are required for your project. You can also read the <1>Letters of Assurance guide for BC Building Code 2018 and Vancouver Building By-law 2019 (PDF, 526 KB)</1> for more information.",
-              whenToSubmitTitle: "When to submit Letters of Assurance",
-              whenToSubmitDescription:
-                "Only submit Letters of Assurance if your project needs them under the Building Code or local bylaws.",
-              whenToSubmitIfRequired: "If required, submit these forms when you apply for your building permit:",
-              whenToSubmitScheduleA:
-                "<strong>Schedule A:</strong> signed by the owner and a Coordinating Registered Professional (usually the architect)",
-              whenToSubmitScheduleB:
-                "<strong>Schedule B:</strong> one form for each professional (like a structural or mechanical engineer) taking responsibility for a part of the project",
-              whenToSubmitNotEvery:
-                "Not every project needs all types of Schedule B. Your coordinating professional decides which are needed.",
-              whenToSubmitBeforeOccupy:
-                "Before you can occupy the building, additional Letters of Assurance are required:",
-              whenToSubmitScheduleCA:
-                "<strong>Schedule C-A:</strong> submitted by the coordinating professional to confirm everything meets the Building Code",
-              whenToSubmitScheduleCB:
-                "<strong>Schedule C-B:</strong> submitted by each professional who submitted a Schedule B earlier",
-              whatLOAsCoverTitle: "What Letters of Assurance cover",
-              whatLOAsCoverDescription:
-                "Each registered professional takes responsibility for a specific part of the project. For example:",
-              whatLOAsCoverArchitect: "<strong>Architect:</strong> overall design and coordination",
-              whatLOAsCoverStructural: "<strong>Structural engineer:</strong> the frame and foundation",
-              whatLOAsCoverMechanical:
-                "<strong>Mechanical engineer:</strong> heating, ventilation, and air conditioning (HVAC)",
-              whatLOAsCoverPlumbing: "<strong>Plumbing engineer or plumber:</strong> water and drainage systems",
-              whatLOAsCoverFire: "<strong>Fire suppression engineer:</strong> sprinklers or other systems (if needed)",
-              whatLOAsCoverGeotechnical: "<strong>Geotechnical engineer:</strong> ground stability and excavation",
-              whatLOAsCoverIfThree:
-                "If there are 3 or more professionals involved, you'll also need a Coordinating Registered Professional to oversee the design and field reviews.",
-              fillableLettersOfAssurance: "Fillable Letters of Assurance",
-              scheduleAFileLink: "Schedule A (PDF, 361 KB)",
-              scheduleADescription:
-                "Confirms that a Coordinating Registered Professional like an architect or engineer has been hired by the building owner. Submit as part of a building permit application.",
-              scheduleBFileLink: "Schedule B (PDF, 587 KB)",
-              scheduleBDescription:
-                "Confirms that a Registered Professional of Record takes responsibility for certain building components and applicable field reviews. Submit before construction begins on each building component.",
-              scheduleCAFileLink: "Schedule C-A (PDF, 260 KB)",
-              scheduleCADescription:
-                "Confirms the Coordinating Registered Professional fulfilled their obligations under Schedule A. Submit after project completion, but before an occupancy permit or final inspection.",
-              scheduleCBFileLink: "Schedule C-B (PDF, 259 KB)",
-              scheduleCBDescription:
-                "Confirms the Registered Professional of Record fulfilled their obligations under Schedule B. Submit after project completion, but before an occupancy permit or final inspection.",
-              previousLettersOfAssuranceTitle: "Previous Letters of Assurance",
-              previousLettersOfAssuranceDescription:
-                "For projects that were permitted prior to March 8, 2024 you can find Letters of Assurance on the BC Codes website:",
-              previousLettersOfAssuranceLink: "Projects December 11, 2018 to March 8, 2024",
-              previousLettersOfAssuranceLink2: "Projects December 20, 2012 to December 10, 2018",
-              pageTitle: "",
-              loaResponsibilities: {
-                buildingDesign:
-                  "Building design – architect responsible for the overall building design and coordination.",
-                structural: "Structural– engineer designs the building\'s frame and foundation.",
-                mechanical: "Mechanical– engineer designs heating, ventilation, and air conditioning (HVAC).",
-                plumbing: "Plumbing – engineer or plumber designs water and drainage systems.",
-                fireSuppression: "Fire suppression systems – engineer designs systems like sprinklers (if required).",
-                geotechnical:
-                  "Geotechnical - engineer reviews ground and slope stability for excavation, foundation, temporary retaining systems during constructions and finished building.",
-              },
-            },
-            checkStepCodeRequirementsScreen: {
-              pageHeading: "Check if your project meets BC's Step Codes requirements",
-              toolIntro: "You can use this tool to:",
-              toolPoint1: "generate a Step Codes compliance report for Part 3 and Part 9 Buildings",
-              toolPoint2:
-                "submit a completed Step Codes compliance report to the local government or First Nation responsible for approving permits",
-              loginButton: "Log in to start",
-              whoTitle: "Who this tool is for",
-              whoDescription: "This Step Codes reporting tool is designed for:",
-              whoPoint1: "energy modellers",
-              whoPoint2: "architects and other design professionals",
-              whenTitle: "When to create a Step Codes report",
-              whenDescription:
-                "The local government or First Nation responsible for approving permits may ask for Step Codes compliance information at different stages of your project. You can use this tool to generate a report instead of submitting the Excel checklists from the Energy Step Code website.",
-              whatToExpectTitle: "What to expect",
-              whatToExpectDescription:
-                "You'll be asked for energy modelling results for your project. Before starting, use energy modelling software to model your building's energy performance.",
-              whatsIncludedTitle: "What's included in a Step Code report:",
-              whatsIncludedPoint1: "the Energy and Zero Carbon steps your project must meet (if any)",
-              whatsIncludedPoint2: "whether your project meets the required steps",
-              downloadSampleLink: "Download a sample report",
-            },
-          },
           siteConfigurationTitle: "Configuration management",
           jurisdictionsDescription:
             "Administer Review Managers and their roles within local jurisdictions through the Building Permit Hub. This includes inviting or removing managers, managing overall jurisdictions, customizing community pages, and handling jurisdiction-specific settings.",
@@ -2483,6 +2364,149 @@ const options = {
           userManagementDescription: "Invite or remove Review Managers or Reviewers in the Building Permit Hub.",
           auditLogTitle: "Audit log",
           stepCodes: "Step Codes",
+        },
+        projectReadinessTools: {
+          title: "Project readiness tools",
+          pageHeading: "Prepare and check your project documents",
+          pageDescription: "Use these tools to help prepare a complete and compliant permit application",
+          checkYourProject: "Check your project against Provincial regulations",
+          prepareYourApplication: "Prepare your application package for submission",
+          letterOfAssuranceLink: "Create your Letters of Assurance",
+          lookupStepCodeLink: "Look up Step Code requirements for your project",
+          lookupStepCodeDescription:
+            "Enter an address to find the the Energy and Zero Carbon Step Code requirements for your project",
+          meetStepCodeLink: "Check if your project meets BC's Step Codes requirements",
+          meetStepCodeDescription:
+            "Generate a report that details a project's compliance with BC's Energy Step Code and Zero Carbon Step Code requirements",
+          checkDrawingsLink: "Check if your drawings follow the BC Building Code",
+          checkDrawingsDescription:
+            "Upload your drawings to get a report about where your drawings follow or don't follow certain sections of the BC Building Code",
+          signDocumentsLink: "Digitally sign and authenticate your permit documents",
+          signDocumentsDescription:
+            "Add secure digital signatures that meet provincial requirements for authenticity and integrity in building permit submissions",
+          createLoaDescription:
+            "Complete Letters of Assurance to confirm who is professionally responsible for design and field review on your project, as required by the BC Building Code for some building types",
+          compliantApplicationLink: "complete and compliant permit application",
+          letterOfAssurancePage: {
+            createYourLOAsTitle: "Create your Letters of Assurance",
+            createYourLOAsIntro:
+              "Some building permit applications need Letters of Assurance (LOAs). Letters of Assurance are legal documents that clearly identify the responsibilities of architects, engineers and other registered professionals when designing building components and reviewing them in the field.",
+            createYourLOAsInstructions: "Registered professionals can use the forms on this page to:",
+            createYourLOAsInstructionFill: "Fill out Letters of Assurance for your project",
+            whoThisIsForTitle: "Who this is for",
+            whoThisIsForDescription:
+              "If your project requires Letters of Assurance, each registered professional involved must sign and seal their form as part of the building permit process.",
+            whoThisIsForMayNeed: "You may need Letters of Assurance if your project:",
+            whoThisIsForComplex: "is a complex building (usually Part 3 of the Building Code)",
+            whoThisIsForSimpler:
+              "is a simpler building (Part 9 of the Building Code) where Letters of Assurance are required by your local government",
+            whoThisIsForInvolves: "involves registered professionals like architects or engineers",
+            whoThisIsForCheckWithLG:
+              "Check with your local government to find out if LOAs are required for your project. You can also read the <1>Letters of Assurance guide for BC Building Code 2018 and Vancouver Building By-law 2019 (PDF, 526 KB)</1> for more information.",
+            whenToSubmitTitle: "When to submit Letters of Assurance",
+            whenToSubmitDescription:
+              "Only submit Letters of Assurance if your project needs them under the Building Code or local bylaws.",
+            whenToSubmitIfRequired: "If required, submit these forms when you apply for your building permit:",
+            whenToSubmitScheduleA:
+              "<strong>Schedule A:</strong> signed by the owner and a Coordinating Registered Professional (usually the architect)",
+            whenToSubmitScheduleB:
+              "<strong>Schedule B:</strong> one form for each professional (like a structural or mechanical engineer) taking responsibility for a part of the project",
+            whenToSubmitNotEvery:
+              "Not every project needs all types of Schedule B. Your coordinating professional decides which are needed.",
+            whenToSubmitBeforeOccupy:
+              "Before you can occupy the building, additional Letters of Assurance are required:",
+            whenToSubmitScheduleCA:
+              "<strong>Schedule C-A:</strong> submitted by the coordinating professional to confirm everything meets the Building Code",
+            whenToSubmitScheduleCB:
+              "<strong>Schedule C-B:</strong> submitted by each professional who submitted a Schedule B earlier",
+            whatLOAsCoverTitle: "What Letters of Assurance cover",
+            whatLOAsCoverDescription:
+              "Each registered professional takes responsibility for a specific part of the project. For example:",
+            whatLOAsCoverArchitect: "<strong>Architect:</strong> overall design and coordination",
+            whatLOAsCoverStructural: "<strong>Structural engineer:</strong> the frame and foundation",
+            whatLOAsCoverMechanical:
+              "<strong>Mechanical engineer:</strong> heating, ventilation, and air conditioning (HVAC)",
+            whatLOAsCoverPlumbing: "<strong>Plumbing engineer or plumber:</strong> water and drainage systems",
+            whatLOAsCoverFire: "<strong>Fire suppression engineer:</strong> sprinklers or other systems (if needed)",
+            whatLOAsCoverGeotechnical: "<strong>Geotechnical engineer:</strong> ground stability and excavation",
+            whatLOAsCoverIfThree:
+              "If there are 3 or more professionals involved, you'll also need a Coordinating Registered Professional to oversee the design and field reviews.",
+            fillableLettersOfAssurance: "Fillable Letters of Assurance",
+            scheduleAFileLink: "Schedule A (PDF, 361 KB)",
+            scheduleADescription:
+              "Confirms that a Coordinating Registered Professional like an architect or engineer has been hired by the building owner. Submit as part of a building permit application.",
+            scheduleBFileLink: "Schedule B (PDF, 587 KB)",
+            scheduleBDescription:
+              "Confirms that a Registered Professional of Record takes responsibility for certain building components and applicable field reviews. Submit before construction begins on each building component.",
+            scheduleCAFileLink: "Schedule C-A (PDF, 260 KB)",
+            scheduleCADescription:
+              "Confirms the Coordinating Registered Professional fulfilled their obligations under Schedule A. Submit after project completion, but before an occupancy permit or final inspection.",
+            scheduleCBFileLink: "Schedule C-B (PDF, 259 KB)",
+            scheduleCBDescription:
+              "Confirms the Registered Professional of Record fulfilled their obligations under Schedule B. Submit after project completion, but before an occupancy permit or final inspection.",
+            previousLettersOfAssuranceTitle: "Previous Letters of Assurance",
+            previousLettersOfAssuranceDescription:
+              "For projects that were permitted prior to March 8, 2024 you can find Letters of Assurance on the BC Codes website:",
+            previousLettersOfAssuranceLink: "Projects December 11, 2018 to March 8, 2024",
+            previousLettersOfAssuranceLink2: "Projects December 20, 2012 to December 10, 2018",
+            pageTitle: "",
+            loaResponsibilities: {
+              buildingDesign:
+                "Building design – architect responsible for the overall building design and coordination.",
+              structural: "Structural– engineer designs the building\'s frame and foundation.",
+              mechanical: "Mechanical– engineer designs heating, ventilation, and air conditioning (HVAC).",
+              plumbing: "Plumbing – engineer or plumber designs water and drainage systems.",
+              fireSuppression: "Fire suppression systems – engineer designs systems like sprinklers (if required).",
+              geotechnical:
+                "Geotechnical - engineer reviews ground and slope stability for excavation, foundation, temporary retaining systems during constructions and finished building.",
+            },
+          },
+          checkStepCodeRequirementsScreen: {
+            pageHeading: "Check if your project meets BC's Step Codes requirements",
+            toolIntro: "You can use this tool to:",
+            toolPoint1: "generate a Step Codes compliance report for Part 3 and Part 9 Buildings",
+            toolPoint2:
+              "submit a completed Step Codes compliance report to the local government or First Nation responsible for approving permits",
+            loginButton: "Log in to start",
+            whoTitle: "Who this tool is for",
+            whoDescription: "This Step Codes reporting tool is designed for:",
+            whoPoint1: "energy modellers",
+            whoPoint2: "architects and other design professionals",
+            whenTitle: "When to create a Step Codes report",
+            whenDescription:
+              "The local government or First Nation responsible for approving permits may ask for Step Codes compliance information at different stages of your project. You can use this tool to generate a report instead of submitting the Excel checklists from the Energy Step Code website.",
+            whatToExpectTitle: "What to expect",
+            whatToExpectDescription:
+              "You'll be asked for energy modelling results for your project. Before starting, use energy modelling software to model your building's energy performance.",
+            whatsIncludedTitle: "What's included in a Step Code report:",
+            whatsIncludedPoint1: "the Energy and Zero Carbon steps your project must meet (if any)",
+            whatsIncludedPoint2: "whether your project meets the required steps",
+            downloadSampleLink: "Download a sample report",
+          },
+          startCheckStepCodeRequirementsScreen: {
+            back: "Back",
+            title: "Building categories",
+            description:
+              "This tool supports Step Code reporting for buildings that fall under Part 3 or Part 9 of the BC Building Code:",
+            part3Buildings: {
+              title: "Part 3 buildings",
+              description:
+                "Step-by-step entry of your energy modelling results. Estimated time to complete: 30-45 minutes",
+            },
+            part9Buildings: {
+              title: "Part 9 buildings",
+              description:
+                "Enter project details and upload your HOT2000 (H2K) file. Estimated time to complete: 5-10 minutes",
+            },
+            otherBuildingTypes: {
+              title: "Other building types",
+              description: "The BC Energy Step Code currently applies only to Part 3 and Part 9 buildings",
+            },
+            question: "Which part of the BC Building Code applies to your project?",
+            part3: "Part 3",
+            part9: "Part 9",
+            next: "Next",
+          },
         },
         admin: {},
         errors: {

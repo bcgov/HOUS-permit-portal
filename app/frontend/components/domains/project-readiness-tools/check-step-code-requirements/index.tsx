@@ -13,44 +13,44 @@ export const CheckStepCodeRequirementsScreen = () => {
   return (
     <Container maxW="container.lg" py={16}>
       <Box>
-        <Heading as="h1">{t("home.projectReadinessTools.checkStepCodeRequirementsScreen.pageHeading")}</Heading>
-        <Text mt={8}>{t("home.projectReadinessTools.checkStepCodeRequirementsScreen.toolIntro")}</Text>
+        <Heading as="h1">{t("projectReadinessTools.checkStepCodeRequirementsScreen.pageHeading")}</Heading>
+        <Text mt={8}>{t("projectReadinessTools.checkStepCodeRequirementsScreen.toolIntro")}</Text>
         <UnorderedList mt={4} spacing={2}>
-          <ListItem>{t("home.projectReadinessTools.checkStepCodeRequirementsScreen.toolPoint1")}</ListItem>
-          <ListItem>{t("home.projectReadinessTools.checkStepCodeRequirementsScreen.toolPoint2")}</ListItem>
+          <ListItem>{t("projectReadinessTools.checkStepCodeRequirementsScreen.toolPoint1")}</ListItem>
+          <ListItem>{t("projectReadinessTools.checkStepCodeRequirementsScreen.toolPoint2")}</ListItem>
         </UnorderedList>
-        <RouterLinkButton variant="primary" mt={8} to="/project-readiness-tools/check-step-code-requirements/new">
-          {currentUser ? t("ui.start") : t("home.projectReadinessTools.checkStepCodeRequirementsScreen.loginButton")}
+        <RouterLinkButton variant="primary" mt={8} to="/project-readiness-tools/check-step-code-requirements/start">
+          {currentUser ? t("ui.start") : t("projectReadinessTools.checkStepCodeRequirementsScreen.loginButton")}
         </RouterLinkButton>
 
         <Heading as="h2" size="lg" mt={16}>
-          {t("home.projectReadinessTools.checkStepCodeRequirementsScreen.whoTitle")}
+          {t("projectReadinessTools.checkStepCodeRequirementsScreen.whoTitle")}
         </Heading>
-        <Text mt={4}>{t("home.projectReadinessTools.checkStepCodeRequirementsScreen.whoDescription")}</Text>
+        <Text mt={4}>{t("projectReadinessTools.checkStepCodeRequirementsScreen.whoDescription")}</Text>
         <UnorderedList mt={4} spacing={2}>
-          <ListItem>{t("home.projectReadinessTools.checkStepCodeRequirementsScreen.whoPoint1")}</ListItem>
-          <ListItem>{t("home.projectReadinessTools.checkStepCodeRequirementsScreen.whoPoint2")}</ListItem>
+          <ListItem>{t("projectReadinessTools.checkStepCodeRequirementsScreen.whoPoint1")}</ListItem>
+          <ListItem>{t("projectReadinessTools.checkStepCodeRequirementsScreen.whoPoint2")}</ListItem>
         </UnorderedList>
 
         <Heading as="h2" size="lg" mt={16}>
-          {t("home.projectReadinessTools.checkStepCodeRequirementsScreen.whenTitle")}
+          {t("projectReadinessTools.checkStepCodeRequirementsScreen.whenTitle")}
         </Heading>
-        <Text mt={4}>{t("home.projectReadinessTools.checkStepCodeRequirementsScreen.whenDescription")}</Text>
+        <Text mt={4}>{t("projectReadinessTools.checkStepCodeRequirementsScreen.whenDescription")}</Text>
 
         <Heading as="h2" size="lg" mt={16}>
-          {t("home.projectReadinessTools.checkStepCodeRequirementsScreen.whatToExpectTitle")}
+          {t("projectReadinessTools.checkStepCodeRequirementsScreen.whatToExpectTitle")}
         </Heading>
-        <Text mt={4}>{t("home.projectReadinessTools.checkStepCodeRequirementsScreen.whatToExpectDescription")}</Text>
+        <Text mt={4}>{t("projectReadinessTools.checkStepCodeRequirementsScreen.whatToExpectDescription")}</Text>
 
         <Heading as="h3" size="md" mt={8}>
-          {t("home.projectReadinessTools.checkStepCodeRequirementsScreen.whatsIncludedTitle")}
+          {t("projectReadinessTools.checkStepCodeRequirementsScreen.whatsIncludedTitle")}
         </Heading>
         <UnorderedList mt={4} spacing={2}>
-          <ListItem>{t("home.projectReadinessTools.checkStepCodeRequirementsScreen.whatsIncludedPoint1")}</ListItem>
-          <ListItem>{t("home.projectReadinessTools.checkStepCodeRequirementsScreen.whatsIncludedPoint2")}</ListItem>
+          <ListItem>{t("projectReadinessTools.checkStepCodeRequirementsScreen.whatsIncludedPoint1")}</ListItem>
+          <ListItem>{t("projectReadinessTools.checkStepCodeRequirementsScreen.whatsIncludedPoint2")}</ListItem>
         </UnorderedList>
         <RouterLink to="#" color="text.link">
-          {t("home.projectReadinessTools.checkStepCodeRequirementsScreen.downloadSampleLink")}
+          {t("projectReadinessTools.checkStepCodeRequirementsScreen.downloadSampleLink")}
         </RouterLink>
       </Box>
     </Container>
