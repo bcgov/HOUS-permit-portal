@@ -10,7 +10,7 @@ interface IChecklistSideBarProps {
 }
 
 export const ChecklistSideBar = observer(({ permitApplication, completedBlocks }: IChecklistSideBarProps) => {
-  const { formJson } = permitApplication
+  const { formJson, stepCode } = permitApplication
   const { selectedTabIndex, setSelectedTabIndex, indexOfBlockId, getBlockClass } = permitApplication
 
   const navHeight = document.getElementById("mainNav")?.offsetHeight
@@ -51,6 +51,8 @@ export const ChecklistSideBar = observer(({ permitApplication, completedBlocks }
                       {section.title}
                     </Heading>
                     {section?.components?.map((block) => {
+                      const isEnergyStepCodeBlock = block.title === "Energy Step Code"
+                      const showCompleted = completedBlocks[block.key] && !(isEnergyStepCodeBlock && !stepCode)
                       return (
                         <Tab
                           key={block.key}
@@ -64,7 +66,7 @@ export const ChecklistSideBar = observer(({ permitApplication, completedBlocks }
                         >
                           <Flex align="center">
                             <Box w={5} mr={2}>
-                              {completedBlocks[block.key] ? (
+                              {showCompleted ? (
                                 <CheckCircle color="var(--chakra-colors-semantic-success)" size={18} />
                               ) : (
                                 <CircleDashed color="var(--chakra-colors-greys-grey01)" size={18} />
