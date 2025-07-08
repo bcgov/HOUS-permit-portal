@@ -3,36 +3,6 @@ class Api::StepCodesController < Api::ApplicationController
 
   # DELETE /api/step_codes/:id
 
-  def create
-    step_code_class = params[:step_code][:type].safe_constantize
-    unless step_code_class &&
-             [Part3StepCode, Part9StepCode].include?(step_code_class)
-      render_error("step_code.create_error", status: :bad_request)
-      return
-    end
-
-    @step_code = step_code_class.new(step_code_params)
-    authorize @step_code
-
-    if @step_code.save
-      render_success @step_code,
-                     "step_code.create_success",
-                     {
-                       blueprint: StepCodeBlueprint,
-                       blueprint_opts: {
-                         view: :base
-                       }
-                     }
-    else
-      render_error(
-        "step_code.create_error",
-        message_opts: {
-          error_message: @step_code.errors.full_messages.join(", ")
-        }
-      )
-    end
-  end
-
   def destroy
     @step_code = StepCode.find(params[:id])
     authorize @step_code

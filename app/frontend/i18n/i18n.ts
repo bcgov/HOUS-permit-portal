@@ -3184,6 +3184,7 @@ const options = {
             permitProjects: "Permit projects",
             projectReadinessTools: "Prepare and check your project documents",
             createYourLettersOfAssurance: "Create your Letters of Assurance",
+            start: "Start",
           },
         },
         automatedCompliance: {

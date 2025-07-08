@@ -150,23 +150,15 @@ export const StepCodeStoreModel = types
       checklistAttributes: { sectionCompletionStatus: Record<string, any> }
     }) {
       const { permitApplicationId, permitProjectId, checklistAttributes } = values
-      let response
+      const payload: any = { checklistAttributes }
       if (permitApplicationId) {
-        response = yield self.environment.api.createOrFindStepCodeForPermitApplication(
-          permitApplicationId,
-          EStepCodeType.part3StepCode,
-          { checklistAttributes }
-        )
-      } else if (permitProjectId) {
-        response = yield self.environment.api.createStepCode(EStepCodeType.part3StepCode, {
-          checklistAttributes,
-          permitProjectId,
-        })
-      } else {
-        response = yield self.environment.api.createStepCode(EStepCodeType.part3StepCode, {
-          checklistAttributes,
-        })
+        payload.permitApplicationId = permitApplicationId
       }
+      if (permitProjectId) {
+        payload.permitProjectId = permitProjectId
+      }
+
+      const response = yield self.environment.api.createPart3StepCode(payload)
 
       if (response.ok) {
         self.mergeUpdate(response.data.data, "stepCodesMap")
@@ -205,10 +197,10 @@ export const StepCodeStoreModel = types
       } else if (permitProjectId) {
         payload.permitProjectId = permitProjectId
         if (values.name) payload.name = values.name
-        response = yield self.environment.api.createStepCode(EStepCodeType.part9StepCode, payload)
+        response = yield self.environment.api.createPart9StepCode(payload)
       } else if (permitProjectAttributes) {
         payload.permitProjectAttributes = permitProjectAttributes
-        response = yield self.environment.api.createStepCode(EStepCodeType.part9StepCode, payload)
+        response = yield self.environment.api.createPart9StepCode(payload)
       } else {
         console.error(
           "Part 9 Step Code creation requires permitApplicationId, permitProjectId, or permitProjectAttributes."

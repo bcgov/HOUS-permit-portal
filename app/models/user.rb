@@ -43,6 +43,12 @@ class User < ApplicationRecord
            dependent: :destroy,
            inverse_of: :submitter
 
+  has_many :created_step_codes,
+           class_name: "StepCode",
+           foreign_key: "creator_id",
+           inverse_of: :creator,
+           dependent: :destroy
+
   has_many :permit_projects,
            class_name: "PermitProject",
            foreign_key: :owner_id,

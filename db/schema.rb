@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_06_26_162435) do
+ActiveRecord::Schema[7.1].define(version: 2025_07_08_203447) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -720,6 +720,11 @@ ActiveRecord::Schema[7.1].define(version: 2025_06_26_162435) do
     t.string "plan_date"
     t.string "type"
     t.uuid "permit_project_id"
+    t.uuid "creator_id", null: false
+    t.string "full_address"
+    t.string "pid"
+    t.string "pin"
+    t.index ["creator_id"], name: "index_step_codes_on_creator_id"
     t.index ["permit_application_id"], name: "index_step_codes_on_permit_application_id"
     t.index ["permit_project_id"], name: "index_step_codes_on_permit_project_id"
   end
@@ -935,6 +940,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_06_26_162435) do
   add_foreign_key "step_code_data_entries", "part_9_step_code_checklists", column: "checklist_id"
   add_foreign_key "step_codes", "permit_applications"
   add_foreign_key "step_codes", "permit_projects"
+  add_foreign_key "step_codes", "users", column: "creator_id"
   add_foreign_key "submission_versions", "permit_applications"
   add_foreign_key "supporting_documents", "permit_applications"
   add_foreign_key "supporting_documents", "submission_versions"

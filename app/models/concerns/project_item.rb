@@ -2,12 +2,9 @@ module ProjectItem
   extend ActiveSupport::Concern
 
   included do
-    belongs_to :permit_project, touch: true
+    belongs_to :permit_project, touch: true, optional: true
     has_one :jurisdiction, through: :permit_project
     has_one :owner, through: :permit_project
-
-    # Delegations to PermitProject for core project details
-    delegate :full_address, :pid, :pin, to: :permit_project
 
     after_commit :reindex_permit_project
 
@@ -28,6 +25,19 @@ module ProjectItem
     alias_method :project_name, :title
     alias_method :project_address, :full_address
     alias_method :project_identifier, :pid
+
+    # Custom getters that prioritize permit_project but fall back to self
+    def full_address
+      permit_project&.full_address || super
+    end
+
+    def pid
+      permit_project&.pid || super
+    end
+
+    def pin
+      permit_project&.pin || super
+    end
 
     # Ensure permit_project is present if it's meant to be non-optional.
     # This can also be handled at the database level or with model validations

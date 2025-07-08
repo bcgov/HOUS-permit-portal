@@ -648,35 +648,6 @@ export class Api {
     )
   }
 
-  async createStepCode(
-    stepCodeType: EStepCodeType,
-    attributes: {
-      permitApplicationId?: string
-      permitProjectId?: string
-      name?: string // For Part 9 Step Code name
-      checklistAttributes?: { sectionCompletionStatus: Record<string, any> } // For Part 3
-      preConstructionChecklistAttributes?: any // For Part 9
-      permitProjectAttributes?: {
-        // For creating a project with the step code
-        id?: string
-        name?: string
-        description?: string
-        fullAddress?: string
-        pid?: string
-        pin?: string
-        ownerId?: string
-        propertyPlanJurisdictionId?: string
-      }
-    }
-  ) {
-    return this.client.post<ApiResponse<IStepCode>>(`/step_codes`, {
-      step_code: {
-        type: stepCodeType,
-        ...attributes,
-      },
-    })
-  }
-
   async deleteStepCode(id: string) {
     return this.client.delete<ApiResponse<IStepCode>>(`/step_codes/${id}`)
   }
@@ -802,5 +773,24 @@ export class Api {
 
   async fetchCurrentUserAcceptedEulas() {
     return this.client.get<ApiResponse<IUser>>(`/users/current_user/license_agreements`)
+  }
+
+  async createPart3StepCode(data: {
+    permitApplicationId?: string
+    permitProjectId?: string
+    checklistAttributes: { sectionCompletionStatus: Record<string, any> }
+  }) {
+    if (data.permitApplicationId) {
+      return this.client.post<ApiResponse<IStepCode>>(
+        `/permit_applications/${data.permitApplicationId}/part_3_building/step_code`,
+        { stepCode: data }
+      )
+    } else {
+      return this.client.post<ApiResponse<IStepCode>>(`/part_3_building/step_codes`, { stepCode: data })
+    }
+  }
+
+  async createPart9StepCode(data: any) {
+    return this.client.post<ApiResponse<IStepCode>>(`/part_9_building/step_codes`, { stepCode: data })
   }
 }
