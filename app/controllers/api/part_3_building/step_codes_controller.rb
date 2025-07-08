@@ -1,4 +1,11 @@
 class Api::Part3Building::StepCodesController < Api::ApplicationController
+  before_action :set_step_code, only: [:show]
+
+  def show
+    authorize @step_code
+    render_success @step_code, nil, { blueprint: Part3StepCodeBlueprint }
+  end
+
   def create
     authorize Part3StepCode.new
     @step_code = Part3StepCode.new(step_code_params_with_creator)
@@ -16,6 +23,10 @@ class Api::Part3Building::StepCodesController < Api::ApplicationController
   end
 
   private
+
+  def set_step_code
+    @step_code = Part3StepCode.find(params[:id])
+  end
 
   def step_code_params
     params.require(:step_code).permit(

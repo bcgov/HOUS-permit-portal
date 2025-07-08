@@ -1,6 +1,10 @@
 class Part3StepCode::Checklist < ApplicationRecord
-  include StepCodeChecklistDelegates
   self.table_name = "part_3_step_code_checklists"
+
+  delegate :newly_submitted_at,
+           :building_permit_number,
+           to: :step_code,
+           allow_nil: true
 
   belongs_to :step_code,
              optional: true,

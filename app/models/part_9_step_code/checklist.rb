@@ -1,5 +1,4 @@
 class Part9StepCode::Checklist < ApplicationRecord
-  include StepCodeChecklistDelegates
   self.table_name = "part_9_step_code_checklists"
 
   belongs_to :step_code, optional: true

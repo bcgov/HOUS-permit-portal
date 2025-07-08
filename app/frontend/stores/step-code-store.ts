@@ -220,6 +220,16 @@ export const StepCodeStoreModel = types
         return { ok: false, error: response.data?.errors || response.problem }
       }
     }),
+    fetchPart3StepCode: flow(function* (id: string) {
+      const response = yield self.environment.api.fetchPart3StepCode(id)
+      if (response.ok) {
+        self.mergeUpdate(response.data.data, "stepCodesMap")
+        return response.data.data
+      } else {
+        console.error("Failed to fetch Part 3 Step Code:", response.problem, response.data)
+        return null
+      }
+    }),
   }))
 
 export interface IStepCodeStore extends Instance<typeof StepCodeStoreModel> {}

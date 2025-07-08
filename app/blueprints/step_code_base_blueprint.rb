@@ -1,7 +1,12 @@
 class StepCodeBaseBlueprint < Blueprinter::Base
   identifier :id
 
-  fields :type
+  fields :type,
+         :project_name,
+         :project_identifier,
+         :full_address,
+         :jurisdiction_name,
+         :permit_date
 
   field :parent_type do |step_code, _options|
     step_code.parent&.class&.name

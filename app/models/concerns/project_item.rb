@@ -17,26 +17,29 @@ module ProjectItem
 
     delegate :qualified_name,
              :heating_degree_days,
+             :name,
              to: :jurisdiction,
              prefix: :jurisdiction, # Results in jurisdiction_name, jurisdiction_qualified_name, etc.
              allow_nil: true
 
     # Aliases for consistent naming
     alias_method :project_name, :title
-    alias_method :project_address, :full_address
-    alias_method :project_identifier, :pid
 
     # Custom getters that prioritize permit_project but fall back to self
     def full_address
-      permit_project&.full_address || super
+      permit_project&.full_address || read_attribute(:full_address)
     end
 
     def pid
-      permit_project&.pid || super
+      permit_project&.pid || read_attribute(:pid)
     end
 
     def pin
-      permit_project&.pin || super
+      permit_project&.pin || read_attribute(:pin)
+    end
+
+    def project_identifier
+      permit_project&.id
     end
 
     # Ensure permit_project is present if it's meant to be non-optional.

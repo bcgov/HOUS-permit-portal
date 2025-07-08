@@ -19,7 +19,7 @@ export const CheckStepCodeRequirementsScreen = () => {
           <ListItem>{t("projectReadinessTools.checkStepCodeRequirementsScreen.toolPoint1")}</ListItem>
           <ListItem>{t("projectReadinessTools.checkStepCodeRequirementsScreen.toolPoint2")}</ListItem>
         </UnorderedList>
-        <RouterLinkButton variant="primary" mt={8} to="/project-readiness-tools/check-step-code-requirements/start">
+        <RouterLinkButton variant="primary" mt={8} to="/project-readiness-tools/check-step-code-requirements/select">
           {currentUser ? t("ui.start") : t("projectReadinessTools.checkStepCodeRequirementsScreen.loginButton")}
         </RouterLinkButton>
 

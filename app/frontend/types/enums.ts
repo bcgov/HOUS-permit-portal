@@ -635,7 +635,6 @@ export enum EStepCodeType {
 }
 
 export enum EStepCodeParentType {
-  PermitApplication = "PermitApplication",
   PermitProject = "PermitProject",
   User = "User",
 }

@@ -16,11 +16,12 @@ class StepCode < ApplicationRecord
            :newly_submitted_at,
            :status,
            :jurisdiction_heating_degree_days,
+           :permit_date,
            to: :permit_application,
            allow_nil: true
 
   def parent
-    permit_application || permit_project || creator
+    permit_project || creator
   end
 
   def owner

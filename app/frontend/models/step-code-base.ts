@@ -7,7 +7,7 @@ export const StepCodeBaseFields = types.model("StepCodeBaseFields", {
   parentId: types.maybeNull(types.string),
   projectName: types.maybeNull(types.string),
   projectIdentifier: types.maybeNull(types.string),
-  projectAddress: types.maybeNull(types.string),
+  fullAddress: types.maybeNull(types.string),
   jurisdictionName: types.maybeNull(types.string),
   permitDate: types.maybeNull(types.string), // Consider types.Date if you parse/format dates
 })

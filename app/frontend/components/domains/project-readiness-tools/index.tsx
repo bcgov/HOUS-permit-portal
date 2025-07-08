@@ -28,21 +28,21 @@ export const ProjectReadinessToolsIndexScreen = () => {
           description: t("projectReadinessTools.meetStepCodeDescription"),
           href: "/project-readiness-tools/check-step-code-requirements",
         },
-        {
-          linkText: t("projectReadinessTools.checkDrawingsLink"),
-          description: t("projectReadinessTools.checkDrawingsDescription"),
-          href: "#",
-        },
+        // {
+        //   linkText: t("projectReadinessTools.checkDrawingsLink"),
+        //   description: t("projectReadinessTools.checkDrawingsDescription"),
+        //   href: "#",
+        // },
       ],
     },
     {
       sectionTitle: t("projectReadinessTools.prepareYourApplication"),
       items: [
-        {
-          linkText: t("projectReadinessTools.signDocumentsLink"),
-          description: t("projectReadinessTools.signDocumentsDescription"),
-          href: "#",
-        },
+        // {
+        //   linkText: t("projectReadinessTools.signDocumentsLink"),
+        //   description: t("projectReadinessTools.signDocumentsDescription"),
+        //   href: "#",
+        // },
         {
           linkText: t("projectReadinessTools.letterOfAssuranceLink"),
           description: t("projectReadinessTools.createLoaDescription"),

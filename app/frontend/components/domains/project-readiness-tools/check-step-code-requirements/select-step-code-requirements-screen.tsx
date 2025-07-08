@@ -1,17 +1,48 @@
-import { Box, Container, Heading, List, ListItem, Radio, RadioGroup, Stack, Text, VStack } from "@chakra-ui/react"
+import {
+  Box,
+  Button,
+  Container,
+  Heading,
+  List,
+  ListItem,
+  Radio,
+  RadioGroup,
+  Stack,
+  Text,
+  VStack,
+} from "@chakra-ui/react"
 import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
+import { useNavigate } from "react-router-dom"
+import { useMst } from "../../../../setup/root"
 import { EStepCodeType } from "../../../../types/enums"
 import { BackButton } from "../../../shared/buttons/back-button"
-import { RouterLinkButton } from "../../../shared/navigation/router-link-button"
+import { defaultSectionCompletionStatus } from "../../step-code/part-3/sidebar/nav-sections"
 
-export const StartCheckStepCodeRequirementsScreen = () => {
+export const SelectStepCodeRequirementsScreen = () => {
   const { t } = useTranslation()
+  const { stepCodeStore } = useMst()
+  const navigate = useNavigate()
   const [stepCodeTypeValue, setStepCodeTypeValue] = useState<EStepCodeType | null>(null)
+  const [isCreating, setIsCreating] = useState(false)
 
-  const stepCodeHrefs = {
-    [EStepCodeType.part3StepCode]: "/part-3-step-code/start",
-    // [EStepCodeType.part9StepCode]: "TODO",
+  const handleNextClick = async () => {
+    if (!stepCodeTypeValue) return
+
+    setIsCreating(true)
+    let result
+
+    if (stepCodeTypeValue === EStepCodeType.part3StepCode) {
+      result = await stepCodeStore.createPart3StepCode({
+        checklistAttributes: { sectionCompletionStatus: defaultSectionCompletionStatus },
+      })
+    }
+
+    if (result?.ok) {
+      navigate(`/part-3-step-code/${result.data.id}/start`)
+    } else {
+      setIsCreating(false)
+    }
   }
 
   return (
@@ -66,9 +97,14 @@ export const StartCheckStepCodeRequirementsScreen = () => {
             </Stack>
           </RadioGroup>
           <Box pt={4}>
-            <RouterLinkButton to={stepCodeHrefs[stepCodeTypeValue]} variant="primary" isDisabled={!stepCodeTypeValue}>
+            <Button
+              onClick={handleNextClick}
+              variant="primary"
+              isDisabled={!stepCodeTypeValue || isCreating}
+              isLoading={isCreating}
+            >
               {t("projectReadinessTools.startCheckStepCodeRequirementsScreen.next")}
-            </RouterLinkButton>
+            </Button>
           </Box>
         </VStack>
       </VStack>

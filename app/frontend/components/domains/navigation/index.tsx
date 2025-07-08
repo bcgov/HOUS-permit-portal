@@ -113,10 +113,10 @@ const CheckStepCodeRequirementsScreen = lazy(() =>
     default: module.CheckStepCodeRequirementsScreen,
   }))
 )
-const StartCheckStepCodeRequirementsScreen = lazy(() =>
-  import("../project-readiness-tools/check-step-code-requirements/start-check-step-code-requirements-screen").then(
+const SelectStepCodeRequirementsScreen = lazy(() =>
+  import("../project-readiness-tools/check-step-code-requirements/select-step-code-requirements-screen").then(
     (module) => ({
-      default: module.StartCheckStepCodeRequirementsScreen,
+      default: module.SelectStepCodeRequirementsScreen,
     })
   )
 )
@@ -596,8 +596,8 @@ const AppRoutes = observer(() => {
               element={<SuccessfulSubmissionScreen />}
             />
             <Route
-              path="/project-readiness-tools/check-step-code-requirements/start"
-              element={<StartCheckStepCodeRequirementsScreen />}
+              path="/project-readiness-tools/check-step-code-requirements/select"
+              element={<SelectStepCodeRequirementsScreen />}
             />
           </Route>
 
@@ -691,8 +691,7 @@ const AppRoutes = observer(() => {
             element={currentUser?.isSuperAdmin ? <JurisdictionIndexScreen /> : <LimitedJurisdictionIndexScreen />}
           />
           <Route path="/jurisdictions/:jurisdictionId" element={<JurisdictionScreen />} />
-          <Route path="/part-3-step-code" element={<RedirectScreen path="start" />} />
-          <Route path="/part-3-step-code/:section" element={<Part3StepCodeForm />} />
+          <Route path="/part-3-step-code/:stepCodeId/:section" element={<Part3StepCodeForm />} />
           <Route path="*" element={<NotFoundScreen />} />
         </Routes>
       )}

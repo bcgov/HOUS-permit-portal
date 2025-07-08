@@ -8,6 +8,7 @@ import { IExternalApiKey } from "../../models/external-api-key"
 import { IIntegrationMapping } from "../../models/integration-mapping"
 import { IJurisdiction } from "../../models/jurisdiction"
 import { IJurisdictionTemplateVersionCustomization } from "../../models/jurisdiction-template-version-customization"
+import { IPart3StepCode } from "../../models/part-3-step-code"
 import { IPart3StepCodeChecklist } from "../../models/part-3-step-code-checklist"
 import { IPart9StepCode } from "../../models/part-9-step-code"
 import { IPart9StepCodeChecklist } from "../../models/part-9-step-code-checklist"
@@ -773,6 +774,10 @@ export class Api {
 
   async fetchCurrentUserAcceptedEulas() {
     return this.client.get<ApiResponse<IUser>>(`/users/current_user/license_agreements`)
+  }
+
+  async fetchPart3StepCode(id: string) {
+    return this.client.get<ApiResponse<IPart3StepCode>>(`/part_3_building/step_codes/${id}`)
   }
 
   async createPart3StepCode(data: {

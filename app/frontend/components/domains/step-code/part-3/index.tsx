@@ -13,7 +13,6 @@ import { StepCodeNavBar } from "../nav-bar"
 import { Part3NavLinks } from "../nav-bar/part-3-nav-links"
 import { FormSection } from "./form-section"
 import { Sidebar } from "./sidebar"
-import { defaultSectionCompletionStatus } from "./sidebar/nav-sections"
 import { SideBarDrawer } from "./sidebar/side-bar-drawer"
 
 export const Part3StepCodeForm = observer(function Part3StepCodeForm() {
@@ -25,21 +24,6 @@ export const Part3StepCodeForm = observer(function Part3StepCodeForm() {
   const navigate = useNavigate()
 
   const { currentPermitApplication } = usePermitApplication()
-
-  useEffect(() => {
-    if (!!stepCode) {
-      return
-    }
-
-    if (permitApplicationId && !currentPermitApplication?.isFullyLoaded) {
-      return
-    }
-
-    createPart3StepCode({
-      permitApplicationId,
-      checklistAttributes: { sectionCompletionStatus: defaultSectionCompletionStatus },
-    })
-  }, [stepCode, permitApplicationId, currentPermitApplication?.isFullyLoaded, createPart3StepCode])
 
   // handle redirect if no section is specified
   useEffect(() => {

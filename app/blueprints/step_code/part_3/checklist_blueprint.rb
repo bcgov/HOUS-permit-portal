@@ -7,7 +7,6 @@ class StepCode::Part3::ChecklistBlueprint < Blueprinter::Base
          :step_code_annual_thermal_energy_demand,
          :total_occupancy_floor_area,
          :total_step_code_occupancy_floor_area,
-         :jurisdiction_name,
          :building_height,
          :heating_degree_days,
          :ref_annual_thermal_energy_demand,
@@ -54,18 +53,6 @@ class StepCode::Part3::ChecklistBlueprint < Blueprinter::Base
          :completed_by_email,
          :completed_by_phone_number,
          :completed_by_organization_name
-
-  # Fields from ProjectItem concern (delegated from PermitProject via StepCode)
-  field :pid, name: :project_identifier # Actual Parcel ID from project, exposed as project_identifier
-  field :project_name
-  field :project_address
-  field :jurisdiction_name # Delegated from permit_project.jurisdiction.name
-
-  field :permit_date do |checklist, _options| # Delegated from permit_project.created_at
-    checklist.permit_date&.strftime("%b %e, %Y")
-  end
-
-  field :status, name: :project_stage # This status seems to be checklist specific, not project status
 
   field :building_code_version do |checklist, _options|
     if checklist.newly_submitted_at.present?

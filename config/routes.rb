@@ -246,7 +246,7 @@ Rails.application.routes.draw do
     end
 
     namespace :part_3_building do
-      resources :step_codes, only: %i[create]
+      resources :step_codes, only: %i[create show]
       resources :checklists, only: %i[show update]
     end
 
