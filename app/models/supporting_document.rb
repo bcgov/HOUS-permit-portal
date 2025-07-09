@@ -125,4 +125,12 @@ class SupportingDocument < FileUploadAttachment
       )
     )
   end
+
+  def file_url(disposition: "attachment", **options)
+    file.url(
+      response_content_disposition:
+        "#{disposition}; filename=\"#{standardized_filename}\"",
+      **options
+    )
+  end
 end

@@ -1,14 +1,19 @@
 import ReactPDF from "@react-pdf/renderer"
 import fs from "fs"
 import React from "react"
-import { Part9PDFContent as StepCodeChecklistPDFContent } from "../components/domains/step-code/part-9/checklist/pdf-content"
+import { Part3PDFContent } from "../components/domains/step-code/part-3/checklist/pdf-content"
+import { Part9PDFContent } from "../components/domains/step-code/part-9/checklist/pdf-content"
 import { PDFContent as PermitApplicationPDFContent } from "../components/shared/permit-applications/pdf-content"
 import "../i18n/i18n"
 import { combineComplianceHints } from "../utils/formio-component-traversal"
 
 const args = process.argv.slice(2)
 
-// TODO: ADD PART 3 PDF CONTENT
+const ChecklistComponentMap = {
+  low_residential: Part9PDFContent,
+  medium_residential: Part3PDFContent,
+}
+
 const generatePdfs = async (filePath) => {
   try {
     const pdfJsonData = fs.readFileSync(filePath, "utf-8")
@@ -46,15 +51,19 @@ const generatePdfs = async (filePath) => {
 
     if (pdfData.checklist) {
       const stepCodeChecklistPDFPath = pdfData.meta.generationPaths.stepCodeChecklist
-      stepCodeChecklistPDFPath &&
-        (await ReactPDF.renderToFile(
-          <StepCodeChecklistPDFContent
+      const permitTypeCode = pdfData.permitApplication?.permitType?.code
+      const ChecklistComponent = ChecklistComponentMap[permitTypeCode]
+
+      if (stepCodeChecklistPDFPath && ChecklistComponent) {
+        await ReactPDF.renderToFile(
+          <ChecklistComponent
             permitApplication={pdfData.permitApplication}
             checklist={pdfData.checklist}
             assetDirectoryPath={assetDirectoryPath}
           />,
           stepCodeChecklistPDFPath
-        ))
+        )
+      }
     }
   } catch (error) {
     import.meta.env.DEV && console.error("Error generating pdf:", error.message)
