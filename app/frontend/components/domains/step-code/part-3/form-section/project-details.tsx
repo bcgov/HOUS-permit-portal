@@ -20,15 +20,13 @@ import { useForm } from "react-hook-form"
 import { Trans } from "react-i18next"
 import { useLocation, useNavigate, useParams } from "react-router-dom"
 import { usePart3StepCode } from "../../../../../hooks/resources/use-part-3-step-code"
+import { EStepCodeParentType } from "../../../../../types/enums"
 import { SharedSpinner } from "../../../../shared/base/shared-spinner"
 import { SectionHeading } from "./shared/section-heading"
 
 interface IProjectDetailsForm {
-  projectName?: string
-  projectAddress?: string
-  jurisdictionName?: string
+  fullAddress?: string
   projectIdentifier?: string
-  permitDate?: string
 }
 
 export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails() {
@@ -49,11 +47,8 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
   useEffect(() => {
     if (checklist && stepCode) {
       reset({
-        projectName: stepCode.projectName || "",
-        projectAddress: stepCode.projectAddress || "",
-        jurisdictionName: stepCode.jurisdictionName || "",
+        fullAddress: stepCode.fullAddress || "",
         projectIdentifier: stepCode.projectIdentifier || "",
-        permitDate: stepCode.permitDate || "",
       })
     }
   }, [checklist, stepCode, reset])
@@ -64,25 +59,9 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
     const stepCodeAttributes: Partial<IProjectDetailsForm & { id: string }> = { id: stepCode.id }
     let needsUpdate = false
 
-    if (stepCode.parentType !== "PermitApplication") {
-      if (!stepCode.projectName && data.projectName) {
-        stepCodeAttributes.projectName = data.projectName
-        needsUpdate = true
-      }
-      if (!stepCode.projectAddress && data.projectAddress) {
-        stepCodeAttributes.projectAddress = data.projectAddress
-        needsUpdate = true
-      }
-      if (!stepCode.jurisdictionName && data.jurisdictionName) {
-        stepCodeAttributes.jurisdictionName = data.jurisdictionName
-        needsUpdate = true
-      }
-      if (!stepCode.projectIdentifier && data.projectIdentifier) {
-        stepCodeAttributes.projectIdentifier = data.projectIdentifier
-        needsUpdate = true
-      }
-      if (!stepCode.permitDate && data.permitDate) {
-        stepCodeAttributes.permitDate = data.permitDate
+    if (stepCode.parentType == EStepCodeParentType.User) {
+      if (!stepCode.fullAddress && data.fullAddress) {
+        stepCodeAttributes.fullAddress = data.fullAddress
         needsUpdate = true
       }
     }
@@ -116,9 +95,9 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
     )
   }
 
-  const isParentPermitApplication = stepCode.parentType === "PermitApplication"
+  const isParentPermitProject = stepCode.parentType === EStepCodeParentType.PermitProject
 
-  const isEditable = (fieldValue: string | undefined | null) => !isParentPermitApplication && !fieldValue
+  const isEditable = (fieldValue: string | undefined | null) => !isParentPermitProject
 
   return (
     <>
@@ -128,27 +107,19 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
       </Flex>
       <form onSubmit={handleSubmit(onSubmit)} name="part3SectionForm">
         <Flex direction="column" gap={{ base: 6, xl: 6 }} pb={4}>
-          {isEditable(stepCode.projectName) ? (
-            <FormControl isInvalid={!!errors.projectName}>
-              <FormLabel htmlFor="projectName">{t(`${i18nPrefix}.name`)}</FormLabel>
-              <Input id="projectName" {...register("projectName")} />
-              <FormErrorMessage>{errors.projectName?.message}</FormErrorMessage>
-            </FormControl>
-          ) : (
-            <Field label={t(`${i18nPrefix}.name`)} value={stepCode.projectName} />
-          )}
+          <Field label={t(`${i18nPrefix}.name`)} value={stepCode.projectName} />
 
           <Flex gap={{ base: 6, xl: 6 }} direction={{ base: "column", xl: "row" }}>
-            {isEditable(stepCode.projectAddress) ? (
-              <FormControl isInvalid={!!errors.projectAddress} width={{ base: "auto", xl: "430px" }}>
-                <FormLabel htmlFor="projectAddress">{t(`${i18nPrefix}.address`)}</FormLabel>
+            {isEditable(stepCode.fullAddress) ? (
+              <FormControl isInvalid={!!errors.fullAddress} width={{ base: "auto", xl: "430px" }}>
+                <FormLabel htmlFor="fullAddress">{t(`${i18nPrefix}.address`)}</FormLabel>
                 <InputGroup>
                   <InputLeftElement pointerEvents="none">
                     <MapPin />
                   </InputLeftElement>
-                  <Input id="projectAddress" {...register("projectAddress")} />
+                  <Input id="fullAddress" {...register("fullAddress")} />
                 </InputGroup>
-                <FormErrorMessage>{errors.projectAddress?.message}</FormErrorMessage>
+                <FormErrorMessage>{errors.fullAddress?.message}</FormErrorMessage>
               </FormControl>
             ) : (
               <FormControl width={{ base: "auto", xl: "430px" }}>
@@ -157,20 +128,12 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
                   <InputLeftElement pointerEvents="none">
                     <MapPin />
                   </InputLeftElement>
-                  <Input isDisabled value={stepCode.projectAddress || ""} />
+                  <Input isDisabled value={stepCode.fullAddress || ""} />
                 </InputGroup>
               </FormControl>
             )}
 
-            {isEditable(stepCode.jurisdictionName) ? (
-              <FormControl isInvalid={!!errors.jurisdictionName} flex={1}>
-                <FormLabel htmlFor="jurisdictionName">{t(`${i18nPrefix}.jurisdiction`)}</FormLabel>
-                <Input id="jurisdictionName" {...register("jurisdictionName")} />
-                <FormErrorMessage>{errors.jurisdictionName?.message}</FormErrorMessage>
-              </FormControl>
-            ) : (
-              <Field flex={1} label={t(`${i18nPrefix}.jurisdiction`)} value={stepCode.jurisdictionName} />
-            )}
+            <Field flex={1} label={t(`${i18nPrefix}.jurisdiction`)} value={stepCode.jurisdictionName} />
           </Flex>
 
           <Flex gap={{ base: 6, xl: 6 }} direction={{ base: "column", xl: "row" }}>
@@ -179,29 +142,13 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
               width={{ base: "auto", xl: "430px" }}
               direction={{ base: "column", lg: "row" }}
             >
-              {isEditable(stepCode.projectIdentifier) ? (
-                <FormControl isInvalid={!!errors.projectIdentifier}>
-                  <FormLabel htmlFor="projectIdentifier">{t(`${i18nPrefix}.identifier`)}</FormLabel>
-                  <Input id="projectIdentifier" {...register("projectIdentifier")} />
-                  <FormErrorMessage>{errors.projectIdentifier?.message}</FormErrorMessage>
-                </FormControl>
-              ) : (
-                <Field label={t(`${i18nPrefix}.identifier`)} value={stepCode.projectIdentifier} />
-              )}
+              <Field label={t(`${i18nPrefix}.identifier`)} value={stepCode.projectIdentifier} />
               <Field
                 label={t(`${i18nPrefix}.stage`)}
                 value={checklist.projectStage ? t(`${i18nPrefix}.stages.${checklist.projectStage}`) : ""}
               />
             </Flex>
-            {isEditable(stepCode.permitDate) ? (
-              <FormControl isInvalid={!!errors.permitDate} flex={1}>
-                <FormLabel htmlFor="permitDate">{t(`${i18nPrefix}.date`)}</FormLabel>
-                <Input id="permitDate" type="date" {...register("permitDate")} />
-                <FormErrorMessage>{errors.permitDate?.message}</FormErrorMessage>
-              </FormControl>
-            ) : (
-              <Field flex={1} label={t(`${i18nPrefix}.date`)} value={stepCode.permitDate || ""} />
-            )}
+            <Field flex={1} label={t(`${i18nPrefix}.date`)} value={stepCode.permitDate || ""} />
           </Flex>
           <Field
             maxWidth={{ base: "none", xl: "430px" }}

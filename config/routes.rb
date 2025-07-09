@@ -239,16 +239,15 @@ Rails.application.routes.draw do
     end
 
     namespace :part_9_building do
-      resources :step_codes, only: %i[index create], shallow: true do
-        resources :checklists, only: %i[index show update]
+      resources :checklists, only: %i[show update]
+      resources :step_codes, only: %i[index create] do
         get :select_options, on: :collection
       end
     end
 
     namespace :part_3_building do
-      resources :step_codes, only: [], shallow: true do
-        resources :checklists, only: %i[show update]
-      end
+      resources :step_codes, only: %i[create show]
+      resources :checklists, only: %i[show update]
     end
 
     post "tags/search", to: "tags#index", as: :tags_search

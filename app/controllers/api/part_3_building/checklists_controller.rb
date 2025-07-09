@@ -134,14 +134,7 @@ class Api::Part3Building::ChecklistsController < Api::ApplicationController
         date_issued
         prepared_by
       ],
-      step_code_attributes: %i[
-        id
-        project_name
-        project_address
-        jurisdiction_name
-        project_identifier
-        permit_date
-      ]
+      step_code_attributes: %i[id full_address]
     )
   end
 end

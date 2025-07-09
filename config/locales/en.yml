@@ -568,12 +568,15 @@ en:
         tite: "Oops"
         message: "%{error_message}"
     step_code:
-      h2k_imported:
+      create_success:
         title: ""
-        message: "Your Hot2000 file has been successfully imported. Please review the imported fields."
+        message: "Step code created successfully!"
       create_error:
         title: Error
         message: "%{error_message}"
+      h2k_imported:
+        title: ""
+        message: "Your Hot2000 file has been successfully imported. Please review the imported fields."
     step_code_checklist:
       update_success:
         title: ""

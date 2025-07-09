@@ -84,6 +84,11 @@ function isApiMappingPath(path: string): boolean {
   return regex.test(path)
 }
 
+function isLoginPath(path: string): boolean {
+  const regex = /^\/login.*$/
+  return regex.test(path)
+}
+
 function shouldHideSubNavbarForPath(path: string): boolean {
   const matchers: Array<(path: string) => boolean> = [
     (path) => path === "/",
@@ -95,6 +100,7 @@ function shouldHideSubNavbarForPath(path: string): boolean {
     isPermitApplicationPath,
     isDigitalPermitEditPath,
     isApiMappingPath,
+    isLoginPath,
   ]
 
   return matchers.some((matcher) => matcher(path))
@@ -213,7 +219,7 @@ export const NavBar = observer(function NavBar() {
       </Box>
       {!R.isEmpty(criticalNotifications) && <ActionRequiredBox notification={criticalNotifications[0]} />}
 
-      {!shouldHideSubNavbarForPath(path) && loggedIn && <SubNavBar />}
+      {!shouldHideSubNavbarForPath(path) && <SubNavBar />}
     </PopoverProvider>
   )
 })
@@ -424,7 +430,7 @@ const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
                 )}
                 <NavMenuItem label={t("site.home")} to="/" />
                 <NavMenuItem label={t("home.jurisdictionsTitle")} to={"/jurisdictions"} />
-                <NavMenuItem label={t("home.projectReadinessTools.title")} to={"/project-readiness-tools"} />
+                <NavMenuItem label={t("projectReadinessTools.title")} to={"/project-readiness-tools"} />
                 {loggedIn && <NavMenuItem label={t("auth.logout")} onClick={handleClickLogout} />}
               </>
             )}

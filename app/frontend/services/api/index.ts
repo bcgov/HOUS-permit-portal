@@ -8,6 +8,7 @@ import { IExternalApiKey } from "../../models/external-api-key"
 import { IIntegrationMapping } from "../../models/integration-mapping"
 import { IJurisdiction } from "../../models/jurisdiction"
 import { IJurisdictionTemplateVersionCustomization } from "../../models/jurisdiction-template-version-customization"
+import { IPart3StepCode } from "../../models/part-3-step-code"
 import { IPart3StepCodeChecklist } from "../../models/part-3-step-code-checklist"
 import { IPart9StepCode } from "../../models/part-9-step-code"
 import { IPart9StepCodeChecklist } from "../../models/part-9-step-code-checklist"
@@ -648,35 +649,6 @@ export class Api {
     )
   }
 
-  async createStepCode(
-    stepCodeType: EStepCodeType,
-    attributes: {
-      permitApplicationId?: string
-      permitProjectId?: string
-      name?: string // For Part 9 Step Code name
-      checklistAttributes?: { sectionCompletionStatus: Record<string, any> } // For Part 3
-      preConstructionChecklistAttributes?: any // For Part 9
-      permitProjectAttributes?: {
-        // For creating a project with the step code
-        id?: string
-        name?: string
-        description?: string
-        fullAddress?: string
-        pid?: string
-        pin?: string
-        ownerId?: string
-        propertyPlanJurisdictionId?: string
-      }
-    }
-  ) {
-    return this.client.post<ApiResponse<IStepCode>>(`/step_codes`, {
-      step_code: {
-        type: stepCodeType,
-        ...attributes,
-      },
-    })
-  }
-
   async deleteStepCode(id: string) {
     return this.client.delete<ApiResponse<IStepCode>>(`/step_codes/${id}`)
   }
@@ -802,5 +774,28 @@ export class Api {
 
   async fetchCurrentUserAcceptedEulas() {
     return this.client.get<ApiResponse<IUser>>(`/users/current_user/license_agreements`)
+  }
+
+  async fetchPart3StepCode(id: string) {
+    return this.client.get<ApiResponse<IPart3StepCode>>(`/part_3_building/step_codes/${id}`)
+  }
+
+  async createPart3StepCode(data: {
+    permitApplicationId?: string
+    permitProjectId?: string
+    checklistAttributes: { sectionCompletionStatus: Record<string, any> }
+  }) {
+    if (data.permitApplicationId) {
+      return this.client.post<ApiResponse<IStepCode>>(
+        `/permit_applications/${data.permitApplicationId}/part_3_building/step_code`,
+        { stepCode: data }
+      )
+    } else {
+      return this.client.post<ApiResponse<IStepCode>>(`/part_3_building/step_codes`, { stepCode: data })
+    }
+  }
+
+  async createPart9StepCode(data: any) {
+    return this.client.post<ApiResponse<IStepCode>>(`/part_9_building/step_codes`, { stepCode: data })
   }
 }

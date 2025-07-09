@@ -11,8 +11,7 @@ interface IFetchOptions {
 
 export const createSearchModel = <TSortField, TFetchOptions extends IFetchOptions = IFetchOptions>(
   fetchDataActionName: string,
-  setFiltersName?: string,
-  skipQueryParam = false
+  setFiltersName?: string
 ) =>
   types
     .model()
@@ -20,7 +19,7 @@ export const createSearchModel = <TSortField, TFetchOptions extends IFetchOption
       query: types.maybeNull(types.string),
       sort: types.maybeNull(types.frozen<ISort<TSortField>>()),
       currentPage: types.optional(types.number, 1),
-      showArchived: types.optional(types.boolean, false),
+      showArchived: types.maybeNull(types.boolean),
       visibility: types.maybeNull(types.frozen<TVisibility>()),
       totalPages: types.maybeNull(types.number),
       totalCount: types.maybeNull(types.number),
@@ -32,7 +31,7 @@ export const createSearchModel = <TSortField, TFetchOptions extends IFetchOption
         self.currentPage = 1
         self.totalPages = null
         self.totalCount = null
-        !skipQueryParam && setQueryParam("currentPage", "1")
+        setQueryParam("currentPage", "1")
       },
       setPageFields(metadata, opts?: { page?: number; countPerPage?: number }) {
         self.currentPage = opts?.page ?? metadata.currentPage ?? self.currentPage
@@ -41,23 +40,23 @@ export const createSearchModel = <TSortField, TFetchOptions extends IFetchOption
         self.countPerPage = opts?.countPerPage ?? metadata.perPage ?? self.countPerPage
       },
       setCountPerPage(countPerPage: number) {
-        !skipQueryParam && setQueryParam("countPerPage", countPerPage.toString())
+        setQueryParam("countPerPage", countPerPage.toString())
         self.countPerPage = countPerPage
       },
       setCurrentPage(currentPage: number) {
-        !skipQueryParam && setQueryParam("currentPage", currentPage.toString())
+        setQueryParam("currentPage", currentPage.toString())
         self.currentPage = currentPage
       },
       setQuery(query: string) {
-        !skipQueryParam && setQueryParam("query", query)
+        setQueryParam("query", query)
         self.query = !!query?.trim() ? query : null
       },
       setShowArchived(bool) {
-        !skipQueryParam && setQueryParam("showArchived", bool.toString())
+        setQueryParam("showArchived", bool.toString())
         self.showArchived = bool
       },
       setVisibility(value: TVisibility) {
-        !skipQueryParam && setQueryParam("visibility", value)
+        setQueryParam("visibility", value)
         self.visibility = value
       },
       fetchData: flow(function* (opts?: TFetchOptions) {
