@@ -1,11 +1,7 @@
 class AddDesignatedReviewerToJurisdictions < ActiveRecord::Migration[7.1]
   def up
     unless column_exists?(:jurisdictions, :allow_designated_reviewer)
-      add_column :jurisdictions,
-                 :allow_designated_reviewer,
-                 :boolean,
-                 default: false,
-                 null: false
+      add_column :jurisdictions, :allow_designated_reviewer, :boolean
     end
   end
 
