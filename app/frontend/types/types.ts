@@ -84,6 +84,7 @@ export interface ISort<TField = string> {
 export interface IOption<TValue = string> {
   label: string
   value: TValue
+  description?: string
 }
 
 export type TDebouncedFunction<T extends (...args: any[]) => any> = (...args: Parameters<T>) => void
@@ -165,6 +166,8 @@ export interface IFormIORequirement {
   conditional?: any
   components?: IFormIORequirement[]
   persistent?: string
+  requirementInputType?: string
+  energyStepCode?: string
 }
 
 export interface ISubmissionData {

@@ -26,7 +26,7 @@ export const Part3StepCodeModel = types
       return self.checklist
     },
     get isComplete() {
-      return self.checklist?.isComplete
+      return self.checklist?.isAllComplete
     },
   }))
   .views((self) => ({}))
