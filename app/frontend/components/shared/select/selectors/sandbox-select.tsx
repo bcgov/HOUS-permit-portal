@@ -4,7 +4,7 @@ import React from "react"
 import { useTranslation } from "react-i18next"
 import { IOption } from "../../../../types/types"
 
-interface ISandboxSelectProps extends Omit<RadioGroupProps, "onChange"> {
+interface ISandboxSelectProps extends Omit<RadioGroupProps, "onChange" | "children"> {
   onChange: (value: string) => void
   value?: string // Make value optional
   options: IOption[]
@@ -30,15 +30,32 @@ export const SandboxSelect = observer(function SandboxSelect({
     >
       <Stack>
         {includeLive && (
-          <Radio value="" size="lg" alignItems="flex-start">
-            <Box transform="translateY(-4px)">
+          <Radio
+            value=""
+            size="lg"
+            alignItems="flex-start"
+            color="greys.grey01"
+            bg="greys.grey04"
+            border="1px solid"
+            borderColor="greys.grey01"
+          >
+            <Box>
               <Text fontWeight="bold">{t("sandbox.live")}</Text>
             </Box>
           </Radio>
         )}
         {options.map((s) => (
-          <Radio key={s.value} value={s.value} size="lg" alignItems="flex-start">
-            <Box transform="translateY(-4px)">
+          <Radio
+            key={s.value}
+            value={s.value}
+            size="lg"
+            alignItems="flex-start"
+            color="greys.grey01"
+            bg="greys.grey04"
+            border="1px solid"
+            borderColor="greys.grey01"
+          >
+            <Box>
               <Text fontWeight="bold" mb={1}>
                 {s.label}
               </Text>

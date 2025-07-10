@@ -194,12 +194,8 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
                         <Info />
                         <Flex direction="column">
                           <Heading>{t("sandbox.switch.superAdminAvailable")}</Heading>
-                          <Text>{t("sandbox.switch.testingPurposes")}</Text>
-                          <UnorderedList my={2}>
-                            <ListItem>
-                              <Trans i18nKey="sandbox.switch.liveDescription" />
-                            </ListItem>
-                          </UnorderedList>
+                          <Text mb={4}>{t("sandbox.switch.testingPurposes")}</Text>
+
                           <NewPermitApplicationSandboxSelect options={jurisdiction.sandboxOptions} />
                         </Flex>
                       </Flex>
