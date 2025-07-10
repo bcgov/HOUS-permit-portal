@@ -3219,6 +3219,8 @@ Thank you,
           pleaseContact: "Please contact your local government for questions related to your permit application.",
           forHelp: "For help with the Building Permit Hub please contact:",
           reviewNotifications: "Review notifications",
+          earlyAccessStepCodePreviewNotAvailable: "Early access preview of step code is not yet available.",
+
           breadcrumb: {
             latest: "Latest",
             profile: "Profile",
