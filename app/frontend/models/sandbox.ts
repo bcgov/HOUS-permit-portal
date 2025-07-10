@@ -6,6 +6,7 @@ export const SandboxModel = types
   .props({
     id: types.identifier,
     name: types.string,
+    description: types.maybeNull(types.string),
     templateVersionStatusScope: types.enumeration(Object.values(ETemplateVersionStatus)),
   })
   .views((self) => ({

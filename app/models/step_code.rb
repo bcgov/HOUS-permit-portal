@@ -1,6 +1,4 @@
 class StepCode < ApplicationRecord
-  # DO NOT INCLUDE THIS ONCE STEP CODE IS SUBCLASSES (0.7.0)
-  self.inheritance_column = :_type_disabled
   belongs_to :permit_application, optional: true
 
   delegate :number, to: :permit_application, prefix: :building_permit

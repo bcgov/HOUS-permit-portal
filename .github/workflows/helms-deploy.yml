@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       component:
-        description: 'Component to deploy (app, ha-redis, ha-postgres-crunchydb, ha-elasticsearch)'
+        description: 'Component to deploy (app, ha-redis, cruha-postgres-crunchydb, ha-elasticsearch, consigno-verifio-notarius-server, anycable-go, clamav)'
         required: true
       environment:
         description: 'Environment to deploy (dev, test, prod)'
@@ -23,15 +23,31 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     if: ${{ github.event.inputs.component != '' }}
+    environment: ${{ github.event.inputs.environment }}
 
     steps:
     - name: Checkout Code
       uses: actions/checkout@v4
 
-    - name: Install kubectl
-      uses: azure/setup-kubectl@v4
-      with:
-        version: 'latest'
+    - name: Check if user is authorized
+      run: |
+        AUTHORIZED_USERS="${{ secrets.AUTHORIZED_USERS }}"
+        CURRENT_USER="${{ github.actor }}"
+
+        # Check if CURRENT_USER is in AUTHORIZED_USERS
+        if [[ ",$AUTHORIZED_USERS," != *",$CURRENT_USER,"* ]]; then
+          echo "❌ Error: $CURRENT_USER is not authorized to trigger this deployment."
+          exit 1
+        else
+          echo "✅ Authorized user: $CURRENT_USER"
+        fi
+
+    - name: Install OpenShift CLI (oc)
+      run: |
+        curl -LO https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/openshift-client-linux.tar.gz
+        tar -xzf openshift-client-linux.tar.gz
+        sudo mv oc kubectl /usr/local/bin/
+        oc version
 
     - name: Install Helm
       uses: azure/setup-helm@v3
@@ -54,29 +70,31 @@ jobs:
         PROJECT_PREFIX: ${{ secrets.OPENSHIFT_PROJECT_PREFIX }}
       run: |
         set -e
-
+        
         # Set values file and namespace
         case "$ENVIRONMENT" in
-          dev)  VALUES_FILE="values-dev.yaml" ;;
-          test) VALUES_FILE="values-test.yaml" ;;
-          prod) VALUES_FILE="values-prod.yaml" ;;
-          tools) VALUES_FILE="values-tools.yaml" ;;
+          dev|tools) VALUES_FILE="values-dev.yaml" ;;  # tools aliases dev
+          test)      VALUES_FILE="values-test.yaml" ;;
+          prod)      VALUES_FILE="values-prod.yaml" ;;
           *)
-            echo "Invalid environment: $ENVIRONMENT"
+            echo "❌ Invalid environment: $ENVIRONMENT"
             exit 1
             ;;
         esac
+
+        echo "🔧 Using values file: $VALUES_FILE"
+
 
         NAMESPACE="${PROJECT_PREFIX}-${ENVIRONMENT}"
 
         # Hardcoded fallback release names per component
         case "$COMPONENT" in
           app)              DEFAULT_RELEASE_NAME="hous-permit-portal" ;;
-          redis)            DEFAULT_RELEASE_NAME="ha-redis" ;;
-          hap-crunchydb)    DEFAULT_RELEASE_NAME="ha-postgres-crunchydb" ;;
-          elasticsearch)    DEFAULT_RELEASE_NAME="ha-elasticsearch" ;;
-          consigno)         DEFAULT_RELEASE_NAME="consigno-server-automation" ;;
-          anycable)         DEFAULT_RELEASE_NAME="anycable-go" ;;
+          ha-redis)            DEFAULT_RELEASE_NAME="ha-redis" ;;
+          ha-postgres-crunchydb)    DEFAULT_RELEASE_NAME="ha-postgres-crunchydb" ;;
+          ha-elasticsearch)    DEFAULT_RELEASE_NAME="ha-elasticsearch" ;;
+          consigno-verifio-notarius-server)         DEFAULT_RELEASE_NAME="consigno-server-automation" ;;
+          anycable-go)         DEFAULT_RELEASE_NAME="anycable-go" ;;
           clamav)           DEFAULT_RELEASE_NAME="clamav" ;;
           *)
             echo "Invalid component: $COMPONENT"
@@ -91,7 +109,7 @@ jobs:
           RELEASE_NAME="$DEFAULT_RELEASE_NAME"
         fi
 
-        CHART_DIR="./charts/$COMPONENT"
+        CHART_DIR="./devops/helm-charts/$COMPONENT"
 
         if [[ ! -d "$CHART_DIR" ]]; then
           echo "Chart directory $CHART_DIR does not exist"
@@ -106,6 +124,16 @@ jobs:
         if [[ ! -f "$CHART_DIR/$VALUES_FILE" ]]; then
           echo "Missing environment values file $VALUES_FILE in $CHART_DIR"
           exit 1
+        fi
+
+        echo "Checking current Helm release version..."
+        CURRENT_RELEASE=$(helm list --namespace "$NAMESPACE" --filter "^$RELEASE_NAME$" -o json)
+
+        if [ "$CURRENT_RELEASE" != "[]" ]; then
+          echo "Current release details:"
+          echo "$CURRENT_RELEASE" | grep -E '"name"|"chart"|"app_version"' || echo "$CURRENT_RELEASE"
+        else
+          echo "No existing release found for $RELEASE_NAME in namespace $NAMESPACE"
         fi
 
         echo "Deploying $RELEASE_NAME to namespace $NAMESPACE"

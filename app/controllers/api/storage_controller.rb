@@ -61,11 +61,7 @@ class Api::StorageController < Api::ApplicationController
              },
              status: :ok
     rescue Aws::S3::Errors::ServiceError => e
-      render_error(
-        "s3.multipart_init_failed",
-        { status: :internal_server_error, error_message: e.message },
-        e
-      )
+      render_error "s3.multipart_init_failed"
     end
   end
 
@@ -79,13 +75,7 @@ class Api::StorageController < Api::ApplicationController
     part_numbers = params[:partNumbers]&.split(",")&.map(&:to_i)
 
     if !upload_id || !object_key || part_numbers.blank?
-      return(
-        render_error(
-          "s3.missing_params_for_batch_presign",
-          { status: :bad_request },
-          StandardError.new("Missing uploadId, key, or partNumbers")
-        )
-      )
+      return render_error "s3.missing_params_for_batch_presign"
     end
 
     begin
@@ -108,11 +98,7 @@ class Api::StorageController < Api::ApplicationController
       end
       render json: { presignedUrls: presigned_urls }, status: :ok
     rescue Aws::S3::Errors::ServiceError => e
-      render_error(
-        "s3.batch_presign_failed",
-        { status: :internal_server_error, error_message: e.message },
-        e
-      )
+      render_error "s3.batch_presign_failed"
     end
   end
 
@@ -131,13 +117,7 @@ class Api::StorageController < Api::ApplicationController
       end
 
     if !upload_id || !object_key || sdk_parts.blank?
-      return(
-        render_error(
-          "s3.missing_params_for_complete",
-          { status: :bad_request },
-          StandardError.new("Missing uploadId, key, or parts")
-        )
-      )
+      return render_error "s3.missing_params_for_complete"
     end
 
     begin
@@ -162,11 +142,7 @@ class Api::StorageController < Api::ApplicationController
              },
              status: :ok # Simplified location
     rescue Aws::S3::Errors::ServiceError => e
-      render_error(
-        "s3.multipart_complete_failed",
-        { status: :internal_server_error, error_message: e.message },
-        e
-      )
+      render_error "s3.multipart_complete_failed"
     end
   end
 
@@ -179,13 +155,7 @@ class Api::StorageController < Api::ApplicationController
     object_key = params[:key] # Or however the key is passed, query param might be more RESTful: params[:object_key]
 
     if !upload_id || !object_key
-      return(
-        render_error(
-          "s3.missing_params_for_abort",
-          { status: :bad_request },
-          StandardError.new("Missing uploadId or key")
-        )
-      )
+      return render_error "s3.missing_params_for_abort"
     end
 
     begin
@@ -197,11 +167,7 @@ class Api::StorageController < Api::ApplicationController
              },
              status: :ok
     rescue Aws::S3::Errors::ServiceError => e
-      render_error(
-        "s3.multipart_abort_failed",
-        { status: :internal_server_error, error_message: e.message },
-        e
-      )
+      render_error "s3.multipart_abort_failed"
     end
   end
 
@@ -215,7 +181,7 @@ class Api::StorageController < Api::ApplicationController
     record_class = AUTHORIZED_S3_MODELS[params[:model]]
     @record = record_class.find(params[:modelId])
   rescue ActiveRecord::RecordNotFound => e
-    render_error("misc.not_found_error", { status: :not_found }, e)
+    render_error "misc.not_found_error", { status: :not_found }, e
   end
 
   def set_rack_response((status, headers, body))

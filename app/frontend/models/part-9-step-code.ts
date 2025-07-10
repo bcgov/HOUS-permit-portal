@@ -28,6 +28,9 @@ export const Part9StepCodeModel = types
     },
   }))
   .views((self) => ({
+    get primaryChecklist() {
+      return self.checklists[0]
+    },
     get preConstructionChecklist() {
       return self.checklists[0]
     },

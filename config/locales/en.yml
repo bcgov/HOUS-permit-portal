@@ -484,6 +484,9 @@ en:
       update_error:
         title: Error
         message: "%{error_message}"
+      file_not_found_error:
+        title: Error
+        message: "There was an error saving your uploaded files, please re-upload and try again."
       save_success:
         title: ""
         message: "Permit application successfully updated!"
@@ -580,6 +583,28 @@ en:
       not_found_error:
         title: "Error"
         message: 404 - The requested resource could not be found
+    s3:
+      multipart_init_failed:
+        title: "File Upload Error"
+        message: "Could not start the multipart upload."
+      missing_params_for_batch_presign:
+        title: "File Upload Error"
+        message: "Missing parameters for generating upload URLs."
+      batch_presign_failed:
+        title: "File Upload Error"
+        message: "Could not generate URLs for file parts."
+      missing_params_for_complete:
+        title: "File Upload Error"
+        message: "Missing parameters to complete the upload."
+      multipart_complete_failed:
+        title: "File Upload Error"
+        message: "Could not complete the multipart upload."
+      missing_params_for_abort:
+        title: "File Upload Error"
+        message: "Missing parameters to abort the upload."
+      multipart_abort_failed:
+        title: "File Upload Error"
+        message: "Could not abort the multipart upload."
     jurisdiction_template_version_customization:
       update_success:
         title: ""
