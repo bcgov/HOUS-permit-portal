@@ -3149,6 +3149,40 @@ Thank you,
             "Do you have some feedback for the Building Permit Hub Team?",
             "Do you have any questions or need assistance regarding your experience using the Building Permit Hub?",
           ],
+          contactUs: {
+            responseAim:
+              "We aim to respond to Building Permit Hub inquiries within 2 to 5 days business days. For urgent permit application issues, please contact your local jurisdiction directly.",
+            hours: {
+              title: "When We're Available",
+              availability: "Building Permit Hub Support: Monday-Friday, 8:30 AM - 4:30 PM (Pacific Time)",
+              note: "Note: Local jurisdictions may have different hours for permit-specific questions",
+            },
+            quickHelp: {
+              title: "Try These First",
+              loginIssues:
+                "<strong>Login Issues?</strong> Clear your browser cache or try an incognito window (Link to BCeID or BC Servcices Card Account)",
+              uploadProblems: "<strong>Upload Problems?</strong> Ensure files are under 10MB",
+              applicationStatus: "<strong>Application Status?</strong> Log into your account to view real-time updates",
+            },
+            routing: {
+              title: "Choose the Right Contact Method",
+              technical: {
+                title: "Technical Issues with the Website",
+                description: "Browser errors, login problems, file upload issues",
+                email: "📧 digital.codes.permits@gov.bc.ca",
+              },
+              permit: {
+                title: "Permit Application Questions",
+                description: "Requirements, timelines, approval status",
+                instruction: "📞 Contact your local building department (find yours below)",
+              },
+            },
+            jurisdictionFinder: {
+              title: "Find Your Local Building Department",
+              prompt: "<i>Not sure which jurisdiction handles your permit?</i>",
+              search: "[Search by address or postal code] → Link to jurisdiction lookup tool",
+            },
+          },
           contactTeamCTA: "Please contact us at",
           contactNeedHelp: "Need general help?",
           contactNeedHelpInstructions:
