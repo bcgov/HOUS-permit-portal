@@ -23,8 +23,10 @@ export const RestartConfirmationModal = observer(function RestartStepCodeConfirm
   const navigate = useNavigate()
 
   const handleDeleteStepCode = async () => {
-    await stepCodeStore.deleteStepCode()
-    navigate(0)
+    const response = await stepCodeStore.deleteStepCode()
+    if (response?.ok) {
+      navigate(0)
+    }
     onClose()
   }
 

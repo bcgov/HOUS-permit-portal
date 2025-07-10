@@ -98,12 +98,21 @@ export const StepCodeStoreModel = types
         return true
       }
     }),
-    deleteStepCode: flow(function* () {
-      const stepCodeId = self.currentStepCode.id
-      const response = yield self.environment.api.deleteStepCode(stepCodeId)
-      if (response.ok) {
-        self.currentStepCode = null
-        self.stepCodesMap.delete(stepCodeId)
+    deleteStepCode: flow(function* deleteStepCode() {
+      if (!self.currentStepCode) return
+
+      try {
+        const stepCodeId = self.currentStepCode.id
+        const response = yield self.environment.api.deleteStepCode(stepCodeId)
+
+        // WORKAROUND: something is preventing the step code from being deleted from the map without errors, so you must refresh the page to see the changes
+        // use navigate(0)
+        return response
+      } catch (e) {
+        if (import.meta.env.DEV) {
+          console.error(`Failed to delete step code:`, e)
+        }
+        throw e
       }
     }),
     downloadStepCodeSummary: flow(function* () {
