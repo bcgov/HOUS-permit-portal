@@ -50,7 +50,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
   types
     .model("PermitApplicationModel", {
       id: types.identifier,
-      nickname: types.string,
+      nickname: types.maybeNull(types.string),
       number: types.string,
       fullAddress: types.maybeNull(types.string), // for now some seeds will not have this
       pin: types.maybeNull(types.string), // for now some seeds will not have this

@@ -31,14 +31,18 @@ class PermitApplication < ApplicationRecord
   belongs_to :template_version
   belongs_to :sandbox, optional: true
 
+  has_one :requirement_template, through: :template_version
+
   # The front end form update provides a json paylioad of items we want to force update on the front-end since form io maintains its own state and does not 'rerender' if we send the form data back
   attr_accessor :front_end_form_update
 
-  has_one :step_code, dependent: :destroy
   has_many :submission_versions, dependent: :destroy
   has_many :permit_collaborations, dependent: :destroy
   has_many :collaborators, through: :permit_collaborations
   has_many :permit_block_statuses, dependent: :destroy
+
+  # Standard has_one association if StepCode directly belongs_to PermitApplication
+  has_one :step_code, dependent: :destroy
 
   scope :submitted, -> { joins(:submission_versions).distinct }
 
@@ -49,22 +53,16 @@ class PermitApplication < ApplicationRecord
   # Custom validation
 
   validate :jurisdiction_has_matching_submission_contact
-  validates :nickname, presence: true
+  # validates :nickname, presence: true
   validates :number, presence: true
   validates :reference_number, length: { maximum: 300 }, allow_nil: true
   validate :sandbox_belongs_to_jurisdiction
   validate :template_version_of_live_template
 
-  delegate :qualified_name,
-           :heating_degree_days,
-           :name,
-           to: :jurisdiction,
-           prefix: true
   delegate :code, :name, to: :permit_type, prefix: true
   delegate :code, :name, to: :activity, prefix: true
   delegate :published_template_version, to: :template_version
 
-  before_validation :assign_default_nickname, on: :create
   before_validation :assign_unique_number, on: :create
   before_validation :set_template_version, on: :create
   before_validation :populate_base_form_data, on: :create
@@ -604,6 +602,14 @@ class PermitApplication < ApplicationRecord
     ).first&.name
   end
 
+  def jurisdiction_name
+    jurisdiction&.qualified_name
+  end
+
+  def search_document_id
+    self.id # Ensures Searchkick uses the PermitApplication's own ID
+  end
+
   private
 
   def update_collaboration_assignments
@@ -611,8 +617,15 @@ class PermitApplication < ApplicationRecord
   end
 
   def assign_default_nickname
-    if permit_project && permit_project.name.blank?
-      Rails.logger.warn "PermitProject associated with PermitApplication #{id} has a blank name. Consider setting it."
+    if nickname.blank? # Only attempt to default if nickname is not already provided
+      if permit_project&.title.present?
+        self.nickname =
+          "#{formatted_permit_classifications} Application for #{permit_project.title}"
+      elsif permit_project && permit_project.title.blank?
+        # Log a warning if project exists but its title is blank, as nickname won't be defaulted from it.
+        Rails.logger.warn "PermitApplication (ID: #{id || "new"}) - Default nickname assignment: Associated PermitProject (ID: #{permit_project.id}) has a blank title. `nickname` may fail presence validation if not set from params or factory."
+      end
+      # If permit_project is nil, or its title is blank, nickname remains blank and will be caught by presence validation if not set elsewhere.
     end
   end
 

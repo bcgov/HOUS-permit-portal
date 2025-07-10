@@ -6,11 +6,6 @@ module Api::Concerns::Search::PermitProjects
     search_conditions = {
       order: permit_project_order,
       match: :word_middle, # Default match type, can be customized
-      fields: [
-        # Define default searchable fields for PermitProject
-        # These should align with what's indexed in PermitProject.search_data
-        { description: :word_middle }
-      ],
       where: permit_project_where_clause,
       page: permit_project_search_params[:page],
       per_page:
@@ -23,7 +18,8 @@ module Api::Concerns::Search::PermitProjects
           else
             nil # No pagination if no page is specified
           end
-        )
+        ),
+      includes: [:owner, :jurisdiction, { permit_applications: :collaborators }]
     }
     @permit_project_search =
       PermitProject.search(permit_project_query, **search_conditions)
@@ -37,11 +33,11 @@ module Api::Concerns::Search::PermitProjects
       :query,
       :page,
       :per_page,
-      filters: [ # Define potential filters here
-        # e.g., :jurisdiction_id, { status: [] }
-        # Add other filters that PermitApplication search uses, like :has_collaborator
+      filters: [
         :jurisdiction_id,
-        { status: [] }
+        :show_archived,
+        :phase,
+        requirement_template_ids: []
       ],
       sort: %i[field direction]
     )
@@ -64,9 +60,31 @@ module Api::Concerns::Search::PermitProjects
 
   # Determines the where clause for Searchkick, mirroring PermitApplication logic
   def permit_project_where_clause
-    # Start with filters from params and process them
-    (permit_project_search_params[:filters] || {}).merge(
-      { owner_id: current_user.id }
-    )
+    search_filters = (permit_project_search_params[:filters] || {}).deep_dup
+    show_archived =
+      ActiveModel::Type::Boolean.new.cast(
+        search_filters.delete(:show_archived) || false
+      )
+
+    phase = search_filters.delete(:phase)
+    search_filters[:phase] = phase if phase.present? && phase != "all"
+
+    requirement_template_ids = search_filters.delete(:requirement_template_ids)
+    if requirement_template_ids.present?
+      search_filters[:requirement_template_ids] = requirement_template_ids
+    end
+
+    search_filters[:discarded] = show_archived
+
+    or_conditions = [
+      { owner_id: current_user.id },
+      { collaborator_ids: current_user.id }
+    ]
+
+    final_where = { _and: [{ _or: or_conditions }] }
+
+    search_filters.each { |key, value| final_where[:_and] << { key => value } }
+
+    final_where
   end
 end

@@ -1,4 +1,5 @@
 import { HStack, Select, Text } from "@chakra-ui/react"
+import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
 
@@ -8,7 +9,7 @@ interface IPerPageSelectProps {
   totalCount: number
 }
 
-export const PerPageSelect = ({ handleCountPerPageChange, countPerPage, totalCount }: IPerPageSelectProps) => {
+export const PerPageSelect = observer(({ handleCountPerPageChange, countPerPage, totalCount }: IPerPageSelectProps) => {
   const { t } = useTranslation()
 
   return (
@@ -28,4 +29,4 @@ export const PerPageSelect = ({ handleCountPerPageChange, countPerPage, totalCou
       </Text>
     </HStack>
   )
-}
+})

@@ -66,6 +66,11 @@ export const StepCodeStoreModel = types
     },
   }))
   .actions((self) => ({
+    setCurrentStepCode(stepCodeId) {
+      self.currentStepCode = stepCodeId
+    },
+  }))
+  .actions((self) => ({
     __beforeMergeUpdate(stepCode: IPart9StepCode | IPart3StepCode) {
       if (stepCode.type === "Part9StepCode") {
         const checklistsMap = (stepCode as IPart9StepCode).checklists?.reduce((checklistsMap, checklist) => {
@@ -124,22 +129,22 @@ export const StepCodeStoreModel = types
         throw error
       }
     }),
-    downloadApplicationMetrics: flow(function* () {
+    downloadStepCodeMetrics: flow(function* (stepCodeType: EStepCodeType) {
       try {
-        const response = yield* toGenerator(self.environment.api.downloadApplicationMetricsCsv())
+        const response = yield* toGenerator(self.environment.api.downloadStepCodeMetricsCsv(stepCodeType))
         if (!response.ok) {
           return response.ok
         }
 
         const blobData = response.data
-        const fileName = `${t("reporting.applicationMetrics.filename")}.csv`
+        const fileName = `${t(`reporting.stepCodeMetrics.filename${stepCodeType === EStepCodeType.part3StepCode ? "Part3" : "Part9"}`)}.csv`
         const mimeType = "text/csv"
         startBlobDownload(blobData, mimeType, fileName)
 
         return response
       } catch (error) {
         if (import.meta.env.DEV) {
-          console.error(`Failed to download permit application metrics:`, error)
+          console.error(`Failed to download step code metrics:`, error)
         }
         throw error
       }
@@ -150,22 +155,15 @@ export const StepCodeStoreModel = types
       checklistAttributes: { sectionCompletionStatus: Record<string, any> }
     }) {
       const { permitApplicationId, permitProjectId, checklistAttributes } = values
-      let response
+      const payload: any = { checklistAttributes }
       if (permitApplicationId) {
-        response = yield self.environment.api.createOrFindStepCodeForPermitApplication(
-          permitApplicationId,
-          EStepCodeType.part3StepCode,
-          { checklistAttributes }
-        )
-      } else if (permitProjectId) {
-        response = yield self.environment.api.createStepCode(EStepCodeType.part3StepCode, {
-          checklistAttributes,
-          permitProjectId: permitProjectId,
-        })
-      } else {
-        console.error("Part 3 Step Code creation requires either permitApplicationId or permitProjectId.")
-        return { ok: false, error: "Missing permitApplicationId or permitProjectId" }
+        payload.permitApplicationId = permitApplicationId
       }
+      if (permitProjectId) {
+        payload.permitProjectId = permitProjectId
+      }
+
+      const response = yield self.environment.api.createPart3StepCode(payload)
 
       if (response.ok) {
         self.mergeUpdate(response.data.data, "stepCodesMap")
@@ -180,6 +178,7 @@ export const StepCodeStoreModel = types
       values: Omit<IPart9StepCode, "id" | "type" | "checklistsMap" | "checklists" | "createdAt" | "updatedAt"> & {
         permitApplicationId?: string
         permitProjectId?: string
+        name?: string
         permitProjectAttributes?: {
           name?: string
           description?: string
@@ -202,10 +201,11 @@ export const StepCodeStoreModel = types
         )
       } else if (permitProjectId) {
         payload.permitProjectId = permitProjectId
-        response = yield self.environment.api.createStepCode(EStepCodeType.part9StepCode, payload)
+        if (values.name) payload.name = values.name
+        response = yield self.environment.api.createPart9StepCode(payload)
       } else if (permitProjectAttributes) {
         payload.permitProjectAttributes = permitProjectAttributes
-        response = yield self.environment.api.createStepCode(EStepCodeType.part9StepCode, payload)
+        response = yield self.environment.api.createPart9StepCode(payload)
       } else {
         console.error(
           "Part 9 Step Code creation requires permitApplicationId, permitProjectId, or permitProjectAttributes."
@@ -223,6 +223,16 @@ export const StepCodeStoreModel = types
       } else {
         console.error("Failed to create/find Part 9 Step Code:", response.problem, response.data)
         return { ok: false, error: response.data?.errors || response.problem }
+      }
+    }),
+    fetchPart3StepCode: flow(function* (id: string) {
+      const response = yield self.environment.api.fetchPart3StepCode(id)
+      if (response.ok) {
+        self.mergeUpdate(response.data.data, "stepCodesMap")
+        return response.data.data
+      } else {
+        console.error("Failed to fetch Part 3 Step Code:", response.problem, response.data)
+        return null
       }
     }),
   }))

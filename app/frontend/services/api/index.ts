@@ -228,6 +228,10 @@ export class Api {
     return this.client.get<ApiResponse<IPermitProject>>(`/permit_projects/${id}`)
   }
 
+  async fetchPinnedProjects() {
+    return this.client.get<ApiResponse<IPermitProject[]>>(`/permit_projects/pinned`)
+  }
+
   async createPermitProject(projectData: {
     name: string
     description?: string
@@ -242,6 +246,14 @@ export class Api {
 
   async updatePermitProject(id: string, params: IPermitProjectUpdateParams) {
     return this.client.patch<ApiResponse<IPermitProject>>(`/permit_projects/${id}`, { permitProject: params })
+  }
+
+  async pinPermitProject(id: string) {
+    return this.client.post<ApiResponse<IPermitProject>>(`/permit_projects/${id}/pin`)
+  }
+
+  async unpinPermitProject(id: string) {
+    return this.client.delete<ApiResponse<IPermitProject>>(`/permit_projects/${id}/unpin`)
   }
 
   async fetchCollaboratorsByCollaboratorable(collaboratorableId: string, params?: TSearchParams<never, never>) {
@@ -438,6 +450,10 @@ export class Api {
     return this.client.post<IRequirementTemplateResponse>(`/requirement_templates/search`, params)
   }
 
+  async fetchRequirementTemplatesForFilter() {
+    return this.client.get<IApiResponse<{ id: string; nickname: string }[], {}>>(`/requirement_templates/for_filter`)
+  }
+
   async fetchRequirementTemplate(id: string) {
     return this.client.get<IApiResponse<IRequirementTemplate, {}>>(`/requirement_templates/${id}`)
   }
@@ -632,41 +648,16 @@ export class Api {
     )
   }
 
-  async createStepCode(
-    stepCodeType: EStepCodeType,
-    attributes: {
-      permitApplicationId?: string
-      permitProjectId?: string
-      name?: string // For Part 9 Step Code name
-      checklistAttributes?: { sectionCompletionStatus: Record<string, any> } // For Part 3
-      preConstructionChecklistAttributes?: any // For Part 9
-      permitProjectAttributes?: {
-        // For creating a project with the step code
-        id?: string
-        name?: string
-        description?: string
-        fullAddress?: string
-        pid?: string
-        pin?: string
-        ownerId?: string
-        propertyPlanJurisdictionId?: string
-      }
-    }
-  ) {
-    return this.client.post<ApiResponse<IStepCode>>(`/step_codes`, {
-      step_code: {
-        type: stepCodeType,
-        ...attributes,
-      },
-    })
-  }
-
   async deleteStepCode(id: string) {
     return this.client.delete<ApiResponse<IStepCode>>(`/step_codes/${id}`)
   }
 
   async downloadStepCodeSummaryCsv() {
     return this.client.get<BlobPart>(`/step_codes/download_step_code_summary_csv`)
+  }
+
+  async downloadStepCodeMetricsCsv(stepCodeType: EStepCodeType) {
+    return this.client.get<BlobPart>(`/step_codes/download_step_code_metrics_csv`, { stepCodeType })
   }
 
   async downloadApplicationMetricsCsv() {
@@ -782,5 +773,28 @@ export class Api {
 
   async fetchCurrentUserAcceptedEulas() {
     return this.client.get<ApiResponse<IUser>>(`/users/current_user/license_agreements`)
+  }
+
+  async fetchPart3StepCode(id: string) {
+    return this.client.get<ApiResponse<IPart3StepCode>>(`/part_3_building/step_codes/${id}`)
+  }
+
+  async createPart3StepCode(data: {
+    permitApplicationId?: string
+    permitProjectId?: string
+    checklistAttributes: { sectionCompletionStatus: Record<string, any> }
+  }) {
+    if (data.permitApplicationId) {
+      return this.client.post<ApiResponse<IStepCode>>(
+        `/permit_applications/${data.permitApplicationId}/part_3_building/step_code`,
+        { stepCode: data }
+      )
+    } else {
+      return this.client.post<ApiResponse<IStepCode>>(`/part_3_building/step_codes`, { stepCode: data })
+    }
+  }
+
+  async createPart9StepCode(data: any) {
+    return this.client.post<ApiResponse<IStepCode>>(`/part_9_building/step_codes`, { stepCode: data })
   }
 }

@@ -1,4 +1,5 @@
-import { cast, flow, Instance, types } from "mobx-state-tree"
+import { t } from "i18next"
+import { cast, flow, Instance, toGenerator, types } from "mobx-state-tree"
 import * as R from "ramda"
 import { createSearchModel } from "../lib/create-search-model"
 import { withEnvironment } from "../lib/with-environment"
@@ -6,22 +7,20 @@ import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
 import { IPermitProject, PermitProjectModel } from "../models/permit-project"
 import { IPermitProjectUpdateParams, IProjectDocumentAttribute } from "../types/api-request" // Import new types
-import { EPermitProjectSortFields } from "../types/enums" // Import from enums
+import { EPermitProjectPhase, EPermitProjectSortFields } from "../types/enums" // Import from enums
 import { IPermitProjectSearchFilters, IProjectDocument, TSearchParams } from "../types/types" // Import IPermitProjectSearchFilters and IProjectDocument from types
-
-// Define search filters for PermitProjects
-// export interface IPermitProjectSearchFilters {
-//   query?: string
-//   // Add other specific filters if needed, e.g., status, submitterId
-// }
+import { setQueryParam } from "../utils/utility-functions"
 
 export const PermitProjectStoreModel = types
   .compose(
     types.model("PermitProjectStoreModel", {
       permitProjectMap: types.map(PermitProjectModel),
+      pinnedProjectsArray: types.array(types.reference(PermitProjectModel)),
       tablePermitProjects: types.array(types.reference(PermitProjectModel)), // For table views
       currentPermitProject: types.maybeNull(types.reference(PermitProjectModel)),
-      // Add any specific filters as simple types here, similar to PermitApplicationStore
+      phaseFilter: types.maybeNull(types.enumeration(Object.values(EPermitProjectPhase))),
+      requirementTemplateFilter: types.maybeNull(types.array(types.string)),
+      isFetchingPinnedProjects: types.optional(types.boolean, false),
     }),
     createSearchModel<EPermitProjectSortFields>("searchPermitProjects", "setPermitProjectFilters")
   )
@@ -30,20 +29,17 @@ export const PermitProjectStoreModel = types
   .extend(withMerge())
   .views((self) => ({
     getSortColumnHeader(field: EPermitProjectSortFields) {
-      // Translate field names to human-readable column headers
-      // This might involve using a translation library like i18next if internationalization is needed
-      const fieldMap = {
-        [EPermitProjectSortFields.description]: "Description",
-        [EPermitProjectSortFields.updatedAt]: "Last Updated",
-        [EPermitProjectSortFields.createdAt]: "Created Date",
-      }
-      return fieldMap[field] || field
+      // @ts-ignore
+      return t(`permitProject.columns.${field}`)
     },
     getPermitProjectById(id: string) {
       return self.permitProjectMap.get(id)
     },
     get permitProjects() {
       return Array.from(self.permitProjectMap.values())
+    },
+    get pinnedProjects() {
+      return self.pinnedProjectsArray.map((p) => p)
     },
     // Add other views as needed
   }))
@@ -70,6 +66,11 @@ export const PermitProjectStoreModel = types
           permitProject.permitApplications?.map((app) => (typeof app === "object" ? app.id : app)) || [],
       })
     },
+    setRequirementTemplateFilter(value: string[]) {
+      self.requirementTemplateFilter = cast(value)
+      const paramValue = value && value.length > 0 ? value.join(",") : null
+      setQueryParam("requirementTemplateFilter", paramValue)
+    },
     setCurrentPermitProject(permitProjectId: string | null) {
       if (permitProjectId === null) {
         self.currentPermitProject = null
@@ -86,6 +87,17 @@ export const PermitProjectStoreModel = types
     setTablePermitProjects: (projects: IPermitProject[]) => {
       self.tablePermitProjects = cast(projects.map((p) => p.id))
     },
+    setPinnedProjects: (projects: IPermitProject[]) => {
+      self.pinnedProjectsArray = cast(projects.map((p) => p.id))
+    },
+    togglePinnedProject(project: IPermitProject) {
+      const isPinned = self.pinnedProjectsArray.some((p) => p.id === project.id)
+      if (isPinned) {
+        self.pinnedProjectsArray.remove(project)
+      } else {
+        self.pinnedProjectsArray.push(project)
+      }
+    },
   }))
   .actions((self) => ({
     searchPermitProjects: flow(function* (opts?: { reset?: boolean; page?: number; countPerPage?: number }) {
@@ -98,8 +110,10 @@ export const PermitProjectStoreModel = types
         page: opts?.page ?? self.currentPage, // from createSearchModel
         perPage: opts?.countPerPage ?? self.countPerPage, // from createSearchModel
         filters: {
-          query: self.query, // Example filter, adapt as needed
-          // Add other filters from self, if defined
+          showArchived: self.showArchived,
+          query: self.query,
+          phase: self.phaseFilter,
+          requirementTemplateIds: self.requirementTemplateFilter,
         },
       }
 
@@ -108,15 +122,26 @@ export const PermitProjectStoreModel = types
       if (response.ok && response.data) {
         self.mergeUpdateAll(response.data.data, "permitProjectMap")
         self.setTablePermitProjects(response.data.data.map((p) => self.permitProjectMap.get(p.id)))
-
-        self.currentPage = response.data.meta.currentPage
-        self.totalPages = response.data.meta.totalPages
-        self.totalCount = response.data.meta.totalCount
-        self.countPerPage = response.data.meta.perPage
+        self.setPageFields(response.data.meta, opts)
       } else {
         console.error("Failed to search permit projects:", response)
       }
       return response.ok
+    }),
+    fetchPinnedProjects: flow(function* () {
+      self.isFetchingPinnedProjects = true
+      try {
+        const response = yield* toGenerator(self.environment.api.fetchPinnedProjects())
+        if (response.ok && response.data) {
+          self.mergeUpdateAll(response.data.data, "permitProjectMap")
+          self.setPinnedProjects(response.data.data)
+        } else {
+          console.error("Failed to fetch pinned projects:", response)
+        }
+        return response.ok
+      } finally {
+        self.isFetchingPinnedProjects = false
+      }
     }),
     fetchPermitProject: flow(function* (id: string) {
       const response = yield self.environment.api.fetchPermitProject(id)
@@ -142,6 +167,7 @@ export const PermitProjectStoreModel = types
           const attribute: IProjectDocumentAttribute = {
             id: doc.id,
             permitProjectId: doc.permitProjectId,
+            // TODO: fix this
             file: doc.file,
             _destroy: doc._destroy,
           }
@@ -157,13 +183,46 @@ export const PermitProjectStoreModel = types
       return response
     }),
     setPermitProjectFilters(queryParams: URLSearchParams) {
-      const query = queryParams.get("query")
-      if (query) {
-        self.query = query // Set query from createSearchModel
+      const requirementTemplateFilter = queryParams.get("requirementTemplateFilter")
+      const phase = queryParams.get("phase") as EPermitProjectPhase
+
+      self.phaseFilter = phase
+      if (requirementTemplateFilter) {
+        self.setRequirementTemplateFilter(requirementTemplateFilter.split(","))
       }
-      // Set other filters from queryParams if they exist
-      // e.g., const status = queryParams.get("status");
-      // if (status) self.statusFilter = status;
+    },
+    createPermitProject: flow(function* (projectData: {
+      name: string
+      description?: string
+      fullAddress?: string
+      pid?: string
+      pin?: string
+      propertyPlanJurisdictionId?: string
+    }) {
+      const response = yield self.environment.api.createPermitProject(projectData)
+      if (response.ok && response.data?.data) {
+        self.mergeUpdate(response.data.data, "permitProjectMap")
+        const newProjectId = response.data.data.id // Get id from response
+        const newProject = self.permitProjectMap.get(newProjectId) // Get the model instance from the map
+        if (newProject) {
+          self.setCurrentPermitProject(newProject.id)
+          return { ok: true, data: newProject }
+        } else {
+          // Should not happen if mergeUpdate and response were successful
+          console.error("Failed to retrieve new project from map after creation.")
+          return { ok: false, error: "Failed to retrieve project post-creation." }
+        }
+      } else {
+        console.error("Failed to create permit project:", response.problem, response.data)
+        return { ok: false, error: response.data?.meta?.message || response.problem }
+      }
+    }),
+    setPhaseFilter: (phase: EPermitProjectPhase | "all") => {
+      if (!phase) return
+
+      const valueToSet = phase === "all" ? null : phase
+      setQueryParam("phase", valueToSet)
+      self.phaseFilter = valueToSet
     },
     createPermitProject: flow(function* (projectData: {
       name: string

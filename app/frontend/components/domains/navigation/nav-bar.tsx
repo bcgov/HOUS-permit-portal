@@ -84,6 +84,11 @@ function isApiMappingPath(path: string): boolean {
   return regex.test(path)
 }
 
+function isLoginPath(path: string): boolean {
+  const regex = /^\/login.*$/
+  return regex.test(path)
+}
+
 function shouldHideSubNavbarForPath(path: string): boolean {
   const matchers: Array<(path: string) => boolean> = [
     (path) => path === "/",
@@ -95,6 +100,7 @@ function shouldHideSubNavbarForPath(path: string): boolean {
     isPermitApplicationPath,
     isDigitalPermitEditPath,
     isApiMappingPath,
+    isLoginPath,
   ]
 
   return matchers.some((matcher) => matcher(path))
@@ -170,14 +176,15 @@ export const NavBar = observer(function NavBar() {
                   {t("site.myPermits")}
                 </RouterLinkButton>
               )}
-              {currentUser?.isReviewStaff && !currentUser.isRegionalReviewManager && (
-                <Flex direction="column">
-                  <Text color="greys.white">{currentUser.jurisdiction.name}</Text>
-                  <Text color="whiteAlpha.700" textAlign="right" variant="tiny_uppercase">
-                    {t(`user.roles.${currentUser.role as EUserRoles}`)}
-                  </Text>
-                </Flex>
-              )}
+              {(currentUser?.isReviewStaff || currentUser?.isTechnicalSupport) &&
+                !currentUser.isRegionalReviewManager && (
+                  <Flex direction="column">
+                    <Text color="greys.white">{currentUser.jurisdiction.name}</Text>
+                    <Text color="whiteAlpha.700" textAlign="right" variant="tiny_uppercase">
+                      {t(`user.roles.${currentUser.role as EUserRoles}`)}
+                    </Text>
+                  </Flex>
+                )}
 
               {currentUser?.isRegionalReviewManager && (
                 <VStack align="flex-end" gap={1}>
@@ -212,7 +219,7 @@ export const NavBar = observer(function NavBar() {
       </Box>
       {!R.isEmpty(criticalNotifications) && <ActionRequiredBox notification={criticalNotifications[0]} />}
 
-      {!shouldHideSubNavbarForPath(path) && loggedIn && <SubNavBar />}
+      {!shouldHideSubNavbarForPath(path) && <SubNavBar />}
     </PopoverProvider>
   )
 })
@@ -382,6 +389,7 @@ const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
                   {currentUser?.isReviewer && reviwerOnlyItems}
                   {currentUser?.isSubmitter && submitterOnlyItems}
                   {currentUser?.isReviewStaff && reviewStaffOnlyItems}
+                  {currentUser?.isTechnicalSupport && reviewStaffOnlyItems}
                   {!currentUser?.isSubmitter && (
                     <>
                       <MenuItem bg="greys.grey03" onClick={(e) => navigate("/permit-applications/new")}>
@@ -422,6 +430,7 @@ const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
                 )}
                 <NavMenuItem label={t("site.home")} to="/" />
                 <NavMenuItem label={t("home.jurisdictionsTitle")} to={"/jurisdictions"} />
+                <NavMenuItem label={t("projectReadinessTools.title")} to={"/project-readiness-tools"} />
                 {loggedIn && <NavMenuItem label={t("auth.logout")} onClick={handleClickLogout} />}
               </>
             )}

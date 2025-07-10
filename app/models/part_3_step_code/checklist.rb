@@ -1,8 +1,13 @@
 class Part3StepCode::Checklist < ApplicationRecord
-  include StepCodeChecklistDelegates
   self.table_name = "part_3_step_code_checklists"
 
+  delegate :newly_submitted_at,
+           :building_permit_number,
+           to: :step_code,
+           allow_nil: true
+
   belongs_to :step_code,
+             optional: true,
              class_name: "Part3StepCode",
              foreign_key: "step_code_id",
              inverse_of: :checklist
@@ -169,6 +174,8 @@ class Part3StepCode::Checklist < ApplicationRecord
   private
 
   def set_climate_info
+    return unless step_code&.permit_application || step_code&.permit_project
+
     self.heating_degree_days ||= step_code.jurisdiction_heating_degree_days
     self.climate_zone ||=
       StepCode::Part3::V0::Requirements::References::ClimateZone.value(

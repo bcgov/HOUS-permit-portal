@@ -27,11 +27,12 @@ class RequirementBlock < ApplicationRecord
   enum visibility: { any: 0, early_access: 1, live: 2 }, _default: 0
 
   validates :sku, uniqueness: true, presence: true
-  validates :name, presence: true, uniqueness: { scope: :first_nations }
+  validates :name, presence: true
   validates :display_name, presence: true
   validate :validate_step_code_dependencies
   validate :validate_requirements_conditional
   validate :early_access_on_appropriate_template
+  validate :unique_name_among_non_discarded
 
   before_validation :set_sku, on: :create
   before_validation :ensure_unique_name, on: :create
@@ -91,7 +92,8 @@ class RequirementBlock < ApplicationRecord
   def components_form_json(section_key)
     is_optional_block = requirements.all? { |req| !req.required }
     has_documents = requirement_documents.any?
-    requirement_map = requirements.map { |r| r.to_form_json(key(section_key)) }
+    requirement_map =
+      requirements.map { |r| r.to_form_json(key(section_key)) }.compact
 
     requirement_map.unshift(documents_component(section_key)) if has_documents
 
@@ -221,19 +223,40 @@ class RequirementBlock < ApplicationRecord
   end
 
   def validate_step_code_dependencies
-    return
-    # TODO: Remove this once we have a way to validate step code dependencies
-    # This is a temporary fix to allow for the step code dependencies to be validated
-    # once we have a way to validate step code dependencies
     has_energy_step_code =
       requirements.any? { |req| req.input_type_energy_step_code? }
 
     return unless has_energy_step_code
 
+    # Determine if this is a Part 3 or Part 9 block
+    is_part_3 =
+      requirements.any? do |req|
+        req.requirement_code == "energy_step_code_tool_part_3"
+      end
+    is_part_9 =
+      requirements.any? do |req|
+        req.requirement_code == "energy_step_code_tool_part_9"
+      end
+
+    # Select the appropriate dependency schema based on the block type
+    required_dependencies =
+      if is_part_3
+        Requirement::ENERGY_STEP_CODE_PART_3_DEPENDENCY_REQUIRED_SCHEMA.keys.map(
+          &:to_s
+        )
+      elsif is_part_9
+        Requirement::ENERGY_STEP_CODE_PART_9_DEPENDENCY_REQUIRED_SCHEMA.keys.map(
+          &:to_s
+        )
+      else
+        [] # If neither Part 3 nor Part 9 is found, no dependencies to check
+      end
+
     has_all_dependencies =
-      Requirement::ENERGY_STEP_CODE_REQUIRED_DEPENDENCY_CODES.all? do |dependency_code|
-        requirements.count { |req| req.requirement_code == dependency_code } ==
-          1
+      required_dependencies.all? do |dependency_code|
+        count =
+          requirements.count { |req| req.requirement_code == dependency_code }
+        count == 1
       end
 
     return if has_all_dependencies
@@ -286,7 +309,11 @@ class RequirementBlock < ApplicationRecord
     new_name = base_name
 
     # Loop to find a unique name
-    while self.class.exists?(name: new_name)
+    while self
+            .class
+            .where(discarded_at: nil)
+            .where(first_nations: first_nations)
+            .exists?(name: new_name)
       new_name = increment_last_word(new_name)
     end
 
@@ -308,5 +335,17 @@ class RequirementBlock < ApplicationRecord
     end
 
     words.join(" ")
+  end
+
+  def unique_name_among_non_discarded
+    return if name.blank?
+    if self
+         .class
+         .where.not(id: id)
+         .where(first_nations: first_nations)
+         .where(discarded_at: nil)
+         .exists?(name: name)
+      errors.add(:name, "has already been taken")
+    end
   end
 end

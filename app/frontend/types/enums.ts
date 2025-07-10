@@ -70,6 +70,7 @@ export enum EUserRoles {
   reviewManager = "review_manager",
   reviewer = "reviewer",
   superAdmin = "super_admin",
+  technicalSupport = "technical_support",
 }
 
 export enum ERequirementLibrarySortFields {
@@ -628,14 +629,33 @@ export enum EDocumentReferenceDocumentType {
   other = "other",
 }
 
+export enum EStepCodeType {
+  part3StepCode = "Part3StepCode",
+  part9StepCode = "Part9StepCode",
+}
+
+export enum EStepCodeParentType {
+  PermitProject = "PermitProject",
+  User = "User",
+}
+
 export enum EPermitProjectSortFields {
-  description = "description",
+  title = "title",
+  location = "location",
+  submitter = "submitter",
   updatedAt = "updated_at",
-  createdAt = "created_at",
-  number = "number",
-  status = "status",
-  fullAddress = "full_address",
-  submittedAt = "submitted_at",
+  forcastedCompletionDate = "forcasted_completion_date",
+  phase = "phase",
+}
+
+export enum EPermitProjectPhase {
+  all = "all",
+  empty = "empty",
+  newDraft = "new_draft",
+  newlySubmitted = "newly_submitted",
+  revisionsRequested = "revisions_requested",
+  resubmitted = "resubmitted",
+  approved = "approved",
 }
 
 export enum EStepCodeType {

@@ -2,45 +2,65 @@ module ProjectItem
   extend ActiveSupport::Concern
 
   included do
-    belongs_to :permit_project # Non-optional
-    accepts_nested_attributes_for :permit_project
+    belongs_to :permit_project, touch: true, optional: true
+    has_one :jurisdiction, through: :permit_project
+    has_one :owner, through: :permit_project
 
-    # Delegations to PermitProject
-    delegate :name,
-             :address,
-             :identifier,
-             :project_start_date,
-             :pid,
-             :pin,
+    after_commit :reindex_permit_project
+
+    # Delegations to PermitProject for core project details
+    delegate :title,
+             :jurisdiction,
+             :permit_date,
              to: :permit_project,
-             allow_nil: true # Allows attributes on permit_project to be nil
+             allow_nil: true # allow_nil should be false if permit_project is truly non-optional and always present
 
-    # jurisdiction_name will now come from permit_project.jurisdiction.name
-    # Delegate jurisdiction itself, and then specific jurisdiction attributes as needed
-    delegate :jurisdiction, to: :permit_project
-    delegate :name,
-             :qualified_name,
+    delegate :qualified_name,
              :heating_degree_days,
+             :name,
              to: :jurisdiction,
-             prefix: true,
+             prefix: :jurisdiction, # Results in jurisdiction_name, jurisdiction_qualified_name, etc.
              allow_nil: true
 
-    # Aliases for delegated PermitProject attributes
-    alias_method :project_name, :name
-    alias_method :nickname, :name
+    # Aliases for consistent naming
+    alias_method :project_name, :title
 
-    alias_method :project_address, :address
-    alias_method :full_address, :address # This now points to permit_project.address
+    # Custom getters that prioritize permit_project but fall back to self
+    def full_address
+      permit_project&.full_address || read_attribute(:full_address)
+    end
 
-    # project_identifier still maps to permit_project.identifier
-    alias_method :project_identifier, :identifier
-    # pid now correctly maps to permit_project.pid via direct delegation above
-    # pin will be mapped if added to delegate above
+    def pid
+      permit_project&.pid || read_attribute(:pid)
+    end
 
-    alias_method :permit_date, :project_start_date
+    def pin
+      permit_project&.pin || read_attribute(:pin)
+    end
 
+    def project_identifier
+      permit_project&.id
+    end
+
+    # Ensure permit_project is present if it's meant to be non-optional.
+    # This can also be handled at the database level or with model validations
+    # on the including class if `allow_nil: true` is used above for resilience.
+    # validates :permit_project, presence: true # Uncomment if strict presence is required by including models
+
+    # Custom method for jurisdiction to ensure it safely accesses through permit_project
+    # This is somewhat redundant if using delegate with allow_nil: true but can be kept for clarity
+    # or if more complex logic were needed.
     def jurisdiction
       permit_project&.jurisdiction
+    end
+
+    private
+
+    def reindex_permit_project
+      return unless permit_project
+
+      permit_project.reload
+      permit_project.reindex
     end
   end
 end

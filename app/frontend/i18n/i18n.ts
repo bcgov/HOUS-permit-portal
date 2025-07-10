@@ -148,8 +148,9 @@ const options = {
           cantFind: "Can't find your address?",
           browseList: "Browse list of jurisdictions",
           goTo: "Go to {{ location }}",
-          permitApp: "permit app",
+          permitApp: "Log in",
           adminPanel: "admin panel",
+          submitterPanel: "permit app",
           enabledCommunitiesDescription: "Communities you can submit Building Permit applications in:",
           moreComingSoon: "(more coming soon)",
           andMore: "...and more",
@@ -162,11 +163,19 @@ const options = {
             end: "Accurately fill out your permit application online with ease",
             endButton: "Get started now",
           },
+          goToTools: "Go to tools",
+          toolsSectionTitle: "Tools to help prepare your project for application",
+          toolsSectionDesc1:
+            "Use Building Permit Hub's tools to check your application for readiness and prepare key documents for your project.",
+          toolsSectionDesc2:
+            "Check your project against Provincial requirements such as Step Codes and prepare other documents.",
         },
         ui: {
+          apply: "Apply",
           okay: "Okay",
           filter: "Filter",
           until: "til",
+          start: "Start",
           reorder: "Reorder",
           delete: "Delete",
           confirmDelete: "Confirm delete",
@@ -219,6 +228,8 @@ const options = {
           optional: "(optional)",
           archive: "Remove and archive",
           restore: "Restore",
+          archived: "Archived",
+          active: "Active",
           seeArchivedButton: "See archived",
           seeUnarchivedButton: "See unarchived",
           never: "never",
@@ -410,6 +421,21 @@ const options = {
           templatesUsed: "Templates used",
           search: "Search jurisdictions",
           view: "View Jurisdiction",
+          notUsingBPH: {
+            title: "This community isn't using Building Permit Hub yet",
+            description:
+              "Building Permit Hub helps people in British Columbia understand local permitting requirements, prepare applications, and submit them online. Participating jurisdictions can review applications more efficiently, with automatic checks and digital tools to help avoid delays.",
+            noInfo:
+              "This community hasn't joined Building Permit Hub yet, so you won't find permitting information here for {{jurisdictionName}}.",
+            wantToUse: {
+              title: "Want to use Building Permit Hub in your community?",
+              description:
+                "We're working with local governments and First Nations across British Columbia to bring Building Permit Hub to more places. If you'd like to see your community on Building Permit Hub, you can suggest it to our team.",
+              buttonHelp:
+                "Clicking the button below opens a new email. You'll be able to review or edit the message before sending.",
+              buttonText: "Suggest your community",
+            },
+          },
         },
         permitCollaboration: {
           status: "Status",
@@ -431,7 +457,7 @@ const options = {
               submission:
                 "The collaboration feature allows the author of a permit application to invite collaborators by email. Invited collaborators must register for an account through BCeID if they do not have one already.<1/><1/> Collaborators can view and contribute only to the requirement blocks they are assigned. Notifications are sent to the collaborators when they are assigned to a requirement block, and their avatars are displayed next to the blocks they are assigned to.<1/><1/> Additionally, the designated submitter has access to the entire application and can submit it on behalf of the author. The author can manage and remove collaborators as needed.",
               review:
-                "The collaboration feature allows reviewers of a submitted permit application to invite additional reviewers, provided they are already part of the jurisdiction.<1/><1/> Reviewers can view and contribute to the assigned requirement blocks and update the status of each block. Notifications are sent when reviewers are assigned to a requirement block or when the status changes to “Ready”. Avatars are displayed next to the blocks to indicate who is assigned. Status updates are visible only to reviewers within the local jurisdiction.<1/><1/> The designated reviewer serves as the primary contact internally at the local jurisdiction, responsible for overseeing the submitted permit application.",
+                "The collaboration feature allows reviewers of a submitted permit application to invite additional reviewers, provided they are already part of the jurisdiction.<1/><1/> Reviewers can view and contribute to the assigned requirement blocks and update the status of each block. Notifications are sent when reviewers are assigned to a requirement block or when the status changes to 'Ready'. Avatars are displayed next to the blocks to indicate who is assigned. Status updates are visible only to reviewers within the local jurisdiction.<1/><1/> The designated reviewer serves as the primary contact internally at the local jurisdiction, responsible for overseeing the submitted permit application.",
             },
             designatedSubmitters: "Designated submitter(s)",
             designatedReviewers: "Designated reviewer(s)",
@@ -440,7 +466,7 @@ const options = {
             authorCanSubmit: "Author of this application is also allowed to submit: <1>{{author}}</1>.",
             assignees: "Assignee(s)",
             assigneeHelperText:
-              "To assign collaborators, look for the grey header at the top of each requirement block and click “Assign”.",
+              "To assign collaborators, look for the grey header at the top of each requirement block and click 'Assign'.",
             noDesignatedSubmitters: "None assigned",
             assignedTo: "Assigned to",
             assigneeEmail: "Email:",
@@ -466,7 +492,7 @@ const options = {
               noneAssigned: "None assigned",
               inviteWarning: {
                 title: "Assign a collaborator?",
-                body: "When you are inviting collaborators to participate in a building permit application through our system, it’s important to understand the specific roles and permissions involved. Only the person who creates the permit application, referred to as the “author,” has the ability to invite collaborators. These collaborators are then only able to access specific sections of the application—those that they are specifically assigned to. Importantly, while the author and one person they designate (Designated Submitter) can submit the completed application, all collaborators must have a verified Building Permit HUB account using BCeID to ensure security. Additionally, the author retains the exclusive right to remove or reassign collaborators. This ensures that control over the application remains centralized while still allowing for collaborative input where necessary.",
+                body: "When you are inviting collaborators to participate in a building permit application through our system, it's important to understand the specific roles and permissions involved. Only the person who creates the permit application, referred to as the 'author,' has the ability to invite collaborators. These collaborators are then only able to access specific sections of the application—those that they are specifically assigned to. Importantly, while the author and one person they designate (Designated Submitter) can submit the completed application, all collaborators must have a verified Building Permit HUB account using BCeID to ensure security. Additionally, the author retains the exclusive right to remove or reassign collaborators. This ensures that control over the application remains centralized while still allowing for collaborative input where necessary.",
               },
               newContactButton: "New contact",
               noResultsText: {
@@ -483,11 +509,30 @@ const options = {
           },
         },
         permitProject: {
+          pinProject: "Pin project",
+          unpinProject: "Unpin project",
+          phase: {
+            all: "All statuses",
+            empty: "Empty",
+            new_draft: "Draft",
+            newly_submitted: "Submitted",
+            resubmitted: "Resubmitted",
+            revisions_requested: "Revisions Requested",
+          },
+          index: {
+            title: "Projects",
+            pinnedProjects: "Pinned projects",
+            noPinnedProjects: "You have no pinned projects",
+            pinnedProjectsTbd: "Pinned projects TBD",
+            allProjects: "All projects",
+          },
           indexTitle: "My active projects",
           listTitle: "Permit projects",
           noneFound: "No projects yet",
-          noneFoundExplanation: "There are currently no permit projects matching your criteria.",
+          noneFoundExplanation: "There are currently no permit projects matching your search criteria",
           columns: {
+            title: "Project name",
+            location: "Location",
             description: "Description",
             number: "Application #",
             reference_number: "Reference #",
@@ -496,9 +541,10 @@ const options = {
             submitted_at: "Submitted at",
             viewed_at: "Viewed at",
             status: "Status",
-            full_address: "Full address",
+            phase: "Status",
             created_at: "Created at",
-            updated_at: "Updated at",
+            updated_at: "Last modified",
+            forcasted_completion_date: "Forecasted",
           },
           name: "Project Name",
           description: "Description",
@@ -510,7 +556,9 @@ const options = {
           createSuccessTitle: "Project Created Successfully",
           createSuccessDescription: 'The project "{{name}}" has been created.',
           createErrorTitle: "Failed to Create Project",
+          startNew: "Start New Project",
         },
+
         permitApplication: {
           noneFound: "No permits yet",
           noneFoundExplanation:
@@ -660,8 +708,9 @@ const options = {
             confirmation:
               "You confirm that the information you provided was completed to the best of your knowledge and ability",
             yourReference: "For reference, your BC Building Permit Hub Application # is {{ number }}",
-            noContactsAvailable:
-              "This jurisdiction is not ready to accept applications through this tool yet. Please check with your local jurisdiction.",
+            noContactsAvailableTitle: "No template has been scheduled for this permit type and work type combination",
+            noContactsAvailableDescription:
+              "To start an application in Sandbox mode, schedule a template for publishing for this permit type and work type combination.",
             whatsNext:
               "Upon receipt by the local jurisdiction, you will be notified via email or phone of any updates to your application's status or if additional documentation is required.",
             emailed:
@@ -1119,7 +1168,7 @@ const options = {
             baselineOccupancies: {
               heading: "Occupancy classifications for buildings with a baseline",
               instructions:
-                "Building projects with occupancy classifications subject to Step 2 (NECB Part 8) requirements or Subsection 10.2.2.1.(1)(a) or (b) of Division B of the BC Building Code must provide certain details to compare against a baseline energy model.<br /><br/>These occupancy classifications are:<br /><br /><ul><li><strong>A1</strong> Assembly (viewing performing arts)</li><li><strong>A2</strong> Assembly (not elsewhere categorized)</li><li><strong>A3</strong> Assembly (area)</li><li><strong>B1</strong> Detention</li><li><strong>B2</strong> Treatment</li><li><strong>B3</strong> Care</li><li><strong>F1</strong> High-hazard industrial</li><li><strong>F2</strong> Medium-hazard industrial</li><li><strong>F3</strong> Low-hazard industrial</li></ul>",
+                "Building projects with occupancy classifications or uses subject to Step 2 (NECB Part 8) requirements as outlined in Table 10.2.3.3.-A to 10.2.3.3.-F or Subsection 10.2.2.1.(1)(a) or (b) of Division B of the BC Building Code must provide certain details to compare against a baseline energy model. <br/><br/> Note that this checklist is not intended to be used for buildings complying exclusively under Subsection 10.2.2.1.(1)(a) or (b) of Division B of the BC Building Code and the building must contain at least one Step Code occupancy or use as outlined in Table 10.2.3.3.-A to 10.2.3.3.-J of Division B of the BC Building Code.<br/><br/>These occupancy classifications are:<br /><br /><ul><li><strong>A1</strong> Assembly (viewing performing arts)</li><li><strong>A2</strong> Assembly (not elsewhere categorized)</li><li><strong>A3</strong> Assembly (area)</li><li><strong>B1</strong> Detention</li><li><strong>B2</strong> Treatment</li><li><strong>B3</strong> Care</li><li><strong>F1</strong> High-hazard industrial</li><li><strong>F2</strong> Medium-hazard industrial</li><li><strong>F3</strong> Low-hazard industrial</li></ul>",
               isRelevant: "Does your project include any of the these occupancy classifications?",
               disabledCtaTooltip: "Please select an occupancy",
               occupancies: {
@@ -1264,7 +1313,7 @@ const options = {
             stepCodeOccupancies: {
               heading: "Occupancies subject to Steps 2, 3, or 4",
               instructions:
-                "If there are occupancies subject to Steps 2, 3, or 4 (not including Step 2 with a reference building) in your project, this form will collect additional details.<br/><br/>These occupancies are:<ul><li>Group C Hotel and motel</li><li>Group C Other residential</li><li>Group D Office</li><li>Group D Other</li><li>Group E Mercantile</li>",
+                "For occupancies subject to Steps 2, 3 or 4 as per Table 10.2.3.3.-G to Table 10.2.3.3.-J of Division B of the BC Building Code, this form will collect additional details.<br/><br/>These occupancies are:<ul><li>Group C Hotel and motel</li><li>Group C Other residential</li><li>Group D Office</li><li>Group D Other</li><li>Group E Mercantile</li>",
               isRelevant: "Does your project include any of the these occupancies?",
               disabledCtaTooltip: "Please select an occupancy",
               cannotSelectNoWhenBaselineEmpty:
@@ -1314,6 +1363,7 @@ const options = {
                   modelledFloorArea: "Modelled floor area (m<sup>2</sup>)",
                   ghg: "GHG emissions level",
                 },
+                hint: "Need to add an occupancy or change the occupancies in this table? Go to <stepCodeOccupanciesLink>Occupancies subject to Steps 2, 3, or 4</stepCodeOccupanciesLink> and select the occupancies that apply.",
               },
               modelledFloorArea: {
                 label: "What is the modelled floor area for {{occupancyName}} in square metres?",
@@ -2213,18 +2263,13 @@ const options = {
             jurisdictionLocalityTypeLabel: "Locality type of local jurisdiction",
             jurisdictionNameLabel: "Name of local jurisdiction",
             jurisdictionLocationLabel: "Location",
-            jurisdictionAbout: {
-              title: "My jurisdiction's About page",
-              description:
-                "Customize the informational page that submitters will see when they are in the Building Permit Hub.",
-            },
             users: {
               title: "Users",
               description: "Manage and invite reviewers and other staff for this jurisdiciton",
             },
             submissionsInboxSetup: {
               title: "Submissions inbox setup",
-              description: "Specify email addresses that should receive applications.",
+              description: "Specify email addresses that should receive applications",
               inboxEnabled: "Enable inbox",
               permitTypes: {
                 label: "Send permit applications for",
@@ -2242,7 +2287,7 @@ const options = {
             },
             stepCodeRequirements: {
               title: "Energy Step Code requirements",
-              description: "Define step code requirements.",
+              description: "Define step code requirements",
               setMinimum:
                 "Set the minimum acceptable levels of Energy Step Code and Zero Carbon Step Code for each permit type below:",
               part9Building: "Part 9 Building",
@@ -2280,13 +2325,33 @@ const options = {
               description: "Turn system features on or off for all users system-wide.",
               submissionInbox: "Submissions inbox",
               submissionInboxDescription:
-                "Enable review managers to accept and process permit applications. If you turn off this feature, submitters can’t submit applications, and review managers won’t receive new applications.",
+                "Enable review managers to accept and process permit applications. If you turn off this feature, submitters can't submit applications, and review managers won't receive new applications.",
               toggleOn: "On",
               toggleOff: "Off",
+              acceptPermitApplications: "Accept permit applications",
+              switchButtonInstructions:
+                "Turning this on lets users submit applications. The email addresses set in this section will receive submitted applications",
+            },
+            featureAccess: {
+              title: "Feature access and settings",
+              description: "Turn features on or off for all users in your jurisdiction",
+              submissionInbox: "Submissions inbox setup",
+              submissionInboxDescription: "Specify where submitted permit applications should be sent",
+              myJurisdictionAboutPage: "My Jurisdiction's About page",
+              myJurisdictionAboutPageDescription:
+                "Show a custom About page on Building Permit Hub with information specific to your jurisdiction's requirements, contact information, or common issues to watch for.<br><br> Only turn this page on after you've added your content. If it's turned on without custom content, the page will appear blank. <1> Edit your jurisdiction's About page content",
+              myJurisdictionAboutPageEdit: "Edit",
+              editJurisdictionAboutPage: "Edit my jurisdiction About page",
+              editJurisdictionEditButton: "Edit page",
+              toggleOn: "On",
+              toggleOff: "Off",
+              acceptPermitApplications: "Accept permit applications",
+              switchButtonInstructions:
+                "Turning this on lets users submit applications. The email addresses set in this section will receive submitted applications",
             },
             externalApiKeys: {
               title: "API settings",
-              description: "Manage API keys for the Building Permit Hub.",
+              description: "Manage API keys for the Building Permit Hub",
             },
           },
           superAdminTitle: "Admin home",
@@ -2299,6 +2364,149 @@ const options = {
           userManagementDescription: "Invite or remove Review Managers or Reviewers in the Building Permit Hub.",
           auditLogTitle: "Audit log",
           stepCodes: "Step Codes",
+        },
+        projectReadinessTools: {
+          title: "Project readiness tools",
+          pageHeading: "Prepare and check your project documents",
+          pageDescription: "Use these tools to help prepare a complete and compliant permit application",
+          checkYourProject: "Check your project against Provincial regulations",
+          prepareYourApplication: "Prepare your application package for submission",
+          letterOfAssuranceLink: "Create your Letters of Assurance",
+          lookupStepCodeLink: "Look up Step Code requirements for your project",
+          lookupStepCodeDescription:
+            "Enter an address to find the the Energy and Zero Carbon Step Code requirements for your project",
+          meetStepCodeLink: "Check if your project meets BC's Step Codes requirements",
+          meetStepCodeDescription:
+            "Generate a report that details a project's compliance with BC's Energy Step Code and Zero Carbon Step Code requirements",
+          checkDrawingsLink: "Check if your drawings follow the BC Building Code",
+          checkDrawingsDescription:
+            "Upload your drawings to get a report about where your drawings follow or don't follow certain sections of the BC Building Code",
+          signDocumentsLink: "Digitally sign and authenticate your permit documents",
+          signDocumentsDescription:
+            "Add secure digital signatures that meet provincial requirements for authenticity and integrity in building permit submissions",
+          createLoaDescription:
+            "Complete Letters of Assurance to confirm who is professionally responsible for design and field review on your project, as required by the BC Building Code for some building types",
+          compliantApplicationLink: "complete and compliant permit application",
+          letterOfAssurancePage: {
+            createYourLOAsTitle: "Create your Letters of Assurance",
+            createYourLOAsIntro:
+              "Some building permit applications need Letters of Assurance (LOAs). Letters of Assurance are legal documents that clearly identify the responsibilities of architects, engineers and other registered professionals when designing building components and reviewing them in the field.",
+            createYourLOAsInstructions: "Registered professionals can use the forms on this page to:",
+            createYourLOAsInstructionFill: "Fill out Letters of Assurance for your project",
+            whoThisIsForTitle: "Who this is for",
+            whoThisIsForDescription:
+              "If your project requires Letters of Assurance, each registered professional involved must sign and seal their form as part of the building permit process.",
+            whoThisIsForMayNeed: "You may need Letters of Assurance if your project:",
+            whoThisIsForComplex: "is a complex building (usually Part 3 of the Building Code)",
+            whoThisIsForSimpler:
+              "is a simpler building (Part 9 of the Building Code) where Letters of Assurance are required by your local government",
+            whoThisIsForInvolves: "involves registered professionals like architects or engineers",
+            whoThisIsForCheckWithLG:
+              "Check with your local government to find out if LOAs are required for your project. You can also read the <1>Letters of Assurance guide for BC Building Code 2018 and Vancouver Building By-law 2019 (PDF, 526 KB)</1> for more information.",
+            whenToSubmitTitle: "When to submit Letters of Assurance",
+            whenToSubmitDescription:
+              "Only submit Letters of Assurance if your project needs them under the Building Code or local bylaws.",
+            whenToSubmitIfRequired: "If required, submit these forms when you apply for your building permit:",
+            whenToSubmitScheduleA:
+              "<strong>Schedule A:</strong> signed by the owner and a Coordinating Registered Professional (usually the architect)",
+            whenToSubmitScheduleB:
+              "<strong>Schedule B:</strong> one form for each professional (like a structural or mechanical engineer) taking responsibility for a part of the project",
+            whenToSubmitNotEvery:
+              "Not every project needs all types of Schedule B. Your coordinating professional decides which are needed.",
+            whenToSubmitBeforeOccupy:
+              "Before you can occupy the building, additional Letters of Assurance are required:",
+            whenToSubmitScheduleCA:
+              "<strong>Schedule C-A:</strong> submitted by the coordinating professional to confirm everything meets the Building Code",
+            whenToSubmitScheduleCB:
+              "<strong>Schedule C-B:</strong> submitted by each professional who submitted a Schedule B earlier",
+            whatLOAsCoverTitle: "What Letters of Assurance cover",
+            whatLOAsCoverDescription:
+              "Each registered professional takes responsibility for a specific part of the project. For example:",
+            whatLOAsCoverArchitect: "<strong>Architect:</strong> overall design and coordination",
+            whatLOAsCoverStructural: "<strong>Structural engineer:</strong> the frame and foundation",
+            whatLOAsCoverMechanical:
+              "<strong>Mechanical engineer:</strong> heating, ventilation, and air conditioning (HVAC)",
+            whatLOAsCoverPlumbing: "<strong>Plumbing engineer or plumber:</strong> water and drainage systems",
+            whatLOAsCoverFire: "<strong>Fire suppression engineer:</strong> sprinklers or other systems (if needed)",
+            whatLOAsCoverGeotechnical: "<strong>Geotechnical engineer:</strong> ground stability and excavation",
+            whatLOAsCoverIfThree:
+              "If there are 3 or more professionals involved, you'll also need a Coordinating Registered Professional to oversee the design and field reviews.",
+            fillableLettersOfAssurance: "Fillable Letters of Assurance",
+            scheduleAFileLink: "Schedule A (PDF, 361 KB)",
+            scheduleADescription:
+              "Confirms that a Coordinating Registered Professional like an architect or engineer has been hired by the building owner. Submit as part of a building permit application.",
+            scheduleBFileLink: "Schedule B (PDF, 587 KB)",
+            scheduleBDescription:
+              "Confirms that a Registered Professional of Record takes responsibility for certain building components and applicable field reviews. Submit before construction begins on each building component.",
+            scheduleCAFileLink: "Schedule C-A (PDF, 260 KB)",
+            scheduleCADescription:
+              "Confirms the Coordinating Registered Professional fulfilled their obligations under Schedule A. Submit after project completion, but before an occupancy permit or final inspection.",
+            scheduleCBFileLink: "Schedule C-B (PDF, 259 KB)",
+            scheduleCBDescription:
+              "Confirms the Registered Professional of Record fulfilled their obligations under Schedule B. Submit after project completion, but before an occupancy permit or final inspection.",
+            previousLettersOfAssuranceTitle: "Previous Letters of Assurance",
+            previousLettersOfAssuranceDescription:
+              "For projects that were permitted prior to March 8, 2024 you can find Letters of Assurance on the BC Codes website:",
+            previousLettersOfAssuranceLink: "Projects December 11, 2018 to March 8, 2024",
+            previousLettersOfAssuranceLink2: "Projects December 20, 2012 to December 10, 2018",
+            pageTitle: "",
+            loaResponsibilities: {
+              buildingDesign:
+                "Building design – architect responsible for the overall building design and coordination.",
+              structural: "Structural– engineer designs the building\'s frame and foundation.",
+              mechanical: "Mechanical– engineer designs heating, ventilation, and air conditioning (HVAC).",
+              plumbing: "Plumbing – engineer or plumber designs water and drainage systems.",
+              fireSuppression: "Fire suppression systems – engineer designs systems like sprinklers (if required).",
+              geotechnical:
+                "Geotechnical - engineer reviews ground and slope stability for excavation, foundation, temporary retaining systems during constructions and finished building.",
+            },
+          },
+          checkStepCodeRequirementsScreen: {
+            pageHeading: "Check if your project meets BC's Step Codes requirements",
+            toolIntro: "You can use this tool to:",
+            toolPoint1: "generate a Step Codes compliance report for Part 3 and Part 9 Buildings",
+            toolPoint2:
+              "submit a completed Step Codes compliance report to the local government or First Nation responsible for approving permits",
+            loginButton: "Log in to start",
+            whoTitle: "Who this tool is for",
+            whoDescription: "This Step Codes reporting tool is designed for:",
+            whoPoint1: "energy modellers",
+            whoPoint2: "architects and other design professionals",
+            whenTitle: "When to create a Step Codes report",
+            whenDescription:
+              "The local government or First Nation responsible for approving permits may ask for Step Codes compliance information at different stages of your project. You can use this tool to generate a report instead of submitting the Excel checklists from the Energy Step Code website.",
+            whatToExpectTitle: "What to expect",
+            whatToExpectDescription:
+              "You'll be asked for energy modelling results for your project. Before starting, use energy modelling software to model your building's energy performance.",
+            whatsIncludedTitle: "What's included in a Step Code report:",
+            whatsIncludedPoint1: "the Energy and Zero Carbon steps your project must meet (if any)",
+            whatsIncludedPoint2: "whether your project meets the required steps",
+            downloadSampleLink: "Download a sample report",
+          },
+          startCheckStepCodeRequirementsScreen: {
+            back: "Back",
+            title: "Building categories",
+            description:
+              "This tool supports Step Code reporting for buildings that fall under Part 3 or Part 9 of the BC Building Code:",
+            part3Buildings: {
+              title: "Part 3 buildings",
+              description:
+                "Step-by-step entry of your energy modelling results. Estimated time to complete: 30-45 minutes",
+            },
+            part9Buildings: {
+              title: "Part 9 buildings",
+              description:
+                "Enter project details and upload your HOT2000 (H2K) file. Estimated time to complete: 5-10 minutes",
+            },
+            otherBuildingTypes: {
+              title: "Other building types",
+              description: "The BC Energy Step Code currently applies only to Part 3 and Part 9 buildings",
+            },
+            question: "Which part of the BC Building Code applies to your project?",
+            part3: "Part 3",
+            part9: "Part 9",
+            next: "Next",
+          },
         },
         admin: {},
         errors: {
@@ -2404,11 +2612,12 @@ const options = {
           email: "Email",
           // Leave in snake case so we can use: t(`user.roles.${role}`)
           roles: {
-            submitter: "submitter",
-            regional_review_manager: "regional review manager",
-            review_manager: "review manager",
-            reviewer: "reviewer",
-            super_admin: "super admin",
+            submitter: "Submitter",
+            regional_review_manager: "Regional Review Manager",
+            review_manager: "Review Manager",
+            reviewer: "Reviewer",
+            super_admin: "Super Admin",
+            technical_support: "Technical Support",
           },
           rolesExplanation: {
             submitter:
@@ -2420,6 +2629,8 @@ const options = {
               "A Reviewer is typically an employee within the local government or a designated authority responsible for examining building permit applications submitted by the Submitter. Reviewers assess the documentation for compliance with building codes, zoning laws, and other regulatory requirements. They may request additional information, approve, reject, or provide comments on the applications.",
             super_admin:
               "The Super Admin is the highest-level user within the system, with overarching control over the entire permit application platform. They have the authority to manage user roles, including creating and removing user accounts, and to modify the system configuration. This role is responsible for the maintenance of the system, including updates and enhancements, and ensuring that the system meets the operational and strategic objectives of the local government or the organization.",
+            technical_support:
+              "The Technical Support - LJ role is designed to assist local jurisdictions with technical aspects of the Building Permit Hub. This role acts as the first point of contact for troubleshooting and managing technical configurations related to the API and user access. They provide support to ensure that local jurisdictions can effectively integrate with the platform and maintain smooth operations.",
           },
           assignTo: "Assign to...",
           department: "Department",
@@ -2488,6 +2699,7 @@ const options = {
           changed: "changed",
           added: "added",
           removed: "removed",
+          filter: "Template",
           edit: {
             requirementsLibraryTab: "Requirements Library",
             earlyAccessRequirementsLibraryTab: "Early Access Requirements Library",
@@ -2710,7 +2922,7 @@ const options = {
             description: "Turn system features on or off for all users",
             submissionInbox: "Submissions inbox",
             submissionInboxDescription:
-              "Enable review managers to accept and process permit applications. If you turn off this feature, submitters can’t submit applications, and review managers won’t receive new applications.",
+              "Enable review managers to accept and process permit applications. If you turn off this feature, submitters can't submit applications, and review managers won't receive new applications.",
             toggleOn: "On",
             toggleOff: "Off",
           },
@@ -2776,6 +2988,16 @@ const options = {
             title: "Export energy step code configuration by jurisdiction",
             filename: "Energy step code configuration by jurisdiction",
           },
+          stepCodeMetrics: {
+            name: "Energy step code metrics for all jurisdictions",
+            description: "Energy step code metrics for all jurisdictions",
+            title: "Energy step code metrics for all jurisdictions",
+            filename: "Energy step code metrics for all jurisdictions",
+            filenamePart3: "Part 3 step code metrics",
+            filenamePart9: "Part 9 step code metrics",
+            downloadPart3: "Download Part 3 metrics",
+            downloadPart9: "Download Part 9 metrics",
+          },
           applicationMetrics: {
             name: "Basic Application metrics for all jurisdictions",
             description:
@@ -2840,6 +3062,10 @@ const options = {
           },
         },
         site: {
+          redirecting: "Redirecting...",
+          validating: "Validating...",
+          loggingOut: "Logging out...",
+          loading: "Loading...",
           title: "Building Permit Hub",
           titleLong: "Building Permit Hub",
           adminNavBarTitle: "Building Permit Hub - Admin Panel",
@@ -2910,6 +3136,7 @@ const options = {
           forHelp: "For help with the Building Permit Hub please contact:",
           reviewNotifications: "Review notifications",
           breadcrumb: {
+            checkStepCodeRequirements: "Check step code requirements",
             latest: "Latest",
             profile: "Profile",
             jurisdictions: "Jurisdictions",
@@ -2930,6 +3157,9 @@ const options = {
             digitalBuildingPermits: "Digital building permits",
             contact: "Contact us",
             configurationManagement: "Configuration management",
+            featureAccess: "Feature access",
+            myJurisdictionAboutPage: "My jurisdiction's about page",
+            submissionInboxSetup: "Submissions inbox setup",
             energyStep: "Energy Step Code requirements",
             submissionsInboxSetup: "Submissions inbox setup",
             confirmed: "E-mail confirmed",
@@ -2952,6 +3182,9 @@ const options = {
             update: "Update",
             globalFeatureAccess: "Global feature access",
             permitProjects: "Permit projects",
+            projectReadinessTools: "Prepare and check your project documents",
+            createYourLettersOfAssurance: "Create your Letters of Assurance",
+            start: "Start",
           },
         },
         automatedCompliance: {

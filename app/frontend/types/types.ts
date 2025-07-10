@@ -24,6 +24,7 @@ import {
   ENumberUnit,
   EPermitApplicationSocketEventTypes,
   EPermitApplicationStatus,
+  EPermitProjectPhase,
   ERequirementType,
   ESocketDomainTypes,
   ESocketEventTypes,
@@ -498,7 +499,7 @@ export interface IJurisdictionFilters {
 }
 
 export interface IJurisdictionSearchFilters {
-  submissionInboxSetUp?: boolean
+  inboxEnabled?: boolean
 }
 
 export interface IPermitApplicationSearchFilters {
@@ -511,6 +512,9 @@ export interface IPermitApplicationSearchFilters {
 
 export interface IPermitProjectSearchFilters {
   query?: string
+  showArchived?: boolean
+  phase?: EPermitProjectPhase
+  requirementTemplateIds?: string[]
   // Add other specific filters if needed, e.g., status, submitterId
 }
 

@@ -21,11 +21,25 @@ class Api::Part9Building::StepCodesController < Api::ApplicationController
   # POST /api/step_codes
   def create
     authorize Part9StepCode.new
-    @step_code = Part9StepCode.new(step_code_params)
-    if @step_code.save
-      render_success @step_code,
-                     "step_code.create_success",
-                     { blueprint: Part9StepCodeBlueprint } and return
+    # NOTE ABOUT "INSECURE MASS ASSIGNMENT": See step_code_params below
+    # h2k_file is given {} which allows any values
+    # however, this is not a sensitive field and is not used in any
+    # security critical processes. Clearing this code scanning warning only works temporarily.
+    Part9StepCode.transaction do
+      @step_code = Part9StepCode.create(step_code_params)
+      if @step_code.valid?
+        @step_code.pre_construction_checklist.data_entries.each do |de|
+          if de.h2k_file
+            StepCode::Part9::DataEntryFromHot2000.new(
+              xml: Nokogiri.XML(de.h2k_file.read),
+              data_entry: de
+            ).call
+          end
+        end
+        render_success @step_code,
+                       "step_code.h2k_imported",
+                       { blueprint: Part9StepCodeBlueprint } and return
+      end
     end
     render_error "step_code.create_error",
                  message_opts: {

@@ -98,7 +98,6 @@ export const LandingScreen = observer(({}: ILandingScreenProps) => {
             <IconBox icon={<CheckCircle size={32} />}>{t("landing.bestPractices")}</IconBox>
             <IconBox icon={<ClipboardText size={32} />}>{t("landing.easyToFollow")}</IconBox>
           </Flex>
-
           <Flex gap={10} alignItems="flex-start" direction={{ base: "column", md: "row" }}>
             <Flex
               as="section"
@@ -122,7 +121,7 @@ export const LandingScreen = observer(({}: ILandingScreenProps) => {
                 >
                   {t("landing.goTo", {
                     location:
-                      !currentUser || currentUser.isSubmitter ? t("landing.permitApp") : t("landing.adminPanel"),
+                      !currentUser || currentUser.isSubmitter ? t("landing.submitterPanel") : t("landing.adminPanel"),
                   })}
                 </RouterLinkButton>
               </Flex>
@@ -131,7 +130,6 @@ export const LandingScreen = observer(({}: ILandingScreenProps) => {
               <Heading as="h2" variant="yellowline">
                 {t("landing.whoForTitle")}
               </Heading>
-
               <UnorderedList spacing={1} pl={4}>
                 {whoFor.map((str) => (
                   <ListItem key={str}>{str}</ListItem>

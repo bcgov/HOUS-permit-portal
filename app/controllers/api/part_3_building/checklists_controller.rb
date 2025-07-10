@@ -13,6 +13,10 @@ class Api::Part3Building::ChecklistsController < Api::ApplicationController
   end
 
   def update
+    # NOTE ABOUT "INSECURE MASS ASSIGNMENT": See checklist_params below
+    # section_completion_status is given {} which allows any values
+    # however, this is not a sensitive field and is not used in any
+    # security critical processes. Clearing this code scanning warning only works temporarily.
     if @checklist.update(checklist_params)
       render_success @checklist,
                      nil,
@@ -130,14 +134,7 @@ class Api::Part3Building::ChecklistsController < Api::ApplicationController
         date_issued
         prepared_by
       ],
-      step_code_attributes: %i[
-        id
-        project_name
-        project_address
-        jurisdiction_name
-        project_identifier
-        permit_date
-      ]
+      step_code_attributes: %i[id full_address]
     )
   end
 end
