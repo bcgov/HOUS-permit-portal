@@ -224,6 +224,32 @@ export const PermitProjectStoreModel = types
       setQueryParam("phase", valueToSet)
       self.phaseFilter = valueToSet
     },
+    createPermitProject: flow(function* (projectData: {
+      name: string
+      description?: string
+      fullAddress?: string
+      pid?: string
+      pin?: string
+      propertyPlanJurisdictionId?: string
+    }) {
+      const response = yield self.environment.api.createPermitProject(projectData)
+      if (response.ok && response.data?.data) {
+        self.mergeUpdate(response.data.data, "permitProjectMap")
+        const newProjectId = response.data.data.id // Get id from response
+        const newProject = self.permitProjectMap.get(newProjectId) // Get the model instance from the map
+        if (newProject) {
+          self.setCurrentPermitProject(newProject.id)
+          return { ok: true, data: newProject }
+        } else {
+          // Should not happen if mergeUpdate and response were successful
+          console.error("Failed to retrieve new project from map after creation.")
+          return { ok: false, error: "Failed to retrieve project post-creation." }
+        }
+      } else {
+        console.error("Failed to create permit project:", response.problem, response.data)
+        return { ok: false, error: response.data?.meta?.message || response.problem }
+      }
+    }),
   }))
 
 export interface IPermitProjectStore extends Instance<typeof PermitProjectStoreModel> {}

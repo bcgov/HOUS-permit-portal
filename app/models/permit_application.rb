@@ -195,8 +195,7 @@ class PermitApplication < ApplicationRecord
   def search_data
     {
       number: number,
-      # nickname: nickname, # Temporarily commented out
-      nickname: "TEMP_NICKNAME_FOR_BISECT", # Placeholder
+      nickname: nickname,
       full_address: full_address,
       permit_classifications: formatted_permit_classifications,
       submitter: "#{submitter.name} #{submitter.email}",

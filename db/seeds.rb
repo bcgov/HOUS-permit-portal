@@ -342,4 +342,4 @@ if Rails.env.development?
 end
 
 puts "Seeding Permit Projects from Permit Applications..."
-# PermitProjectSeederService.call
+PermitProjectSeederService.call

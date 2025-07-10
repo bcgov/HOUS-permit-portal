@@ -45,6 +45,11 @@ export const StepCodeStoreModel = types
   .extend(withRootStore())
   .extend(withMerge())
   .views((self) => ({
+    setCurrentStepCode(stepCodeId) {
+      self.currentStepCode = stepCodeId
+    },
+  }))
+  .views((self) => ({
     get stepCodes() {
       return Array.from(self.stepCodesMap.values())
     },

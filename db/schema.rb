@@ -75,9 +75,6 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_08_203447) do
     t.index ["contactable_type", "contactable_id"], name: "index_contacts_on_contactable"
   end
 
-  create_table "data_migrations", primary_key: "version", id: :string, force: :cascade do |t|
-  end
-
   create_table "document_references", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "checklist_id"
     t.string "document_name"
@@ -222,8 +219,8 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_08_203447) do
     t.string "slug"
     t.integer "map_zoom"
     t.string "external_api_state", default: "g_off", null: false
-    t.boolean "inbox_enabled", default: false, null: false
     t.integer "heating_degree_days"
+    t.boolean "inbox_enabled", default: false, null: false
     t.boolean "show_about_page", default: false, null: false
     t.string "disambiguator"
     t.index ["prefix"], name: "index_jurisdictions_on_prefix", unique: true
@@ -572,7 +569,6 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_08_203447) do
     t.uuid "copied_from_id"
     t.uuid "assignee_id"
     t.boolean "public", default: false
-    t.string "created_by_test"
     t.index ["activity_id"], name: "index_requirement_templates_on_activity_id"
     t.index ["assignee_id"], name: "index_requirement_templates_on_assignee_id"
     t.index ["copied_from_id"], name: "index_requirement_templates_on_copied_from_id"
@@ -640,8 +636,8 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_08_203447) do
     t.datetime "updated_at", null: false
     t.jsonb "help_link_items", default: {"dictionary_link_item"=>{"href"=>"", "show"=>false, "title"=>"Dictionary of terms", "description"=>"See detailed explanations of terms that appear on building permits"}, "user_guide_link_item"=>{"href"=>"", "show"=>false, "title"=>"User and role guides", "description"=>"Step-by-step instructions on how to make the most out of the platform"}, "get_started_link_item"=>{"href"=>"", "show"=>false, "title"=>"Get started on Building Permit Hub", "description"=>"How to submit a building permit application through a streamlined and standardized approach across BC"}, "best_practices_link_item"=>{"href"=>"", "show"=>false, "title"=>"Best practices", "description"=>"How to use the Building Permit Hub efficiently for application submission"}}, null: false
     t.jsonb "revision_reason_options"
-    t.boolean "inbox_enabled", default: false, null: false
     t.uuid "small_scale_requirement_template_id"
+    t.boolean "inbox_enabled", default: false, null: false
     t.index ["small_scale_requirement_template_id"], name: "idx_on_small_scale_requirement_template_id_235b636c86"
   end
 

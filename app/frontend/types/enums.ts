@@ -657,3 +657,8 @@ export enum EPermitProjectPhase {
   resubmitted = "resubmitted",
   approved = "approved",
 }
+
+export enum EStepCodeType {
+  part3StepCode = "Part3StepCode",
+  part9StepCode = "Part9StepCode",
+}
