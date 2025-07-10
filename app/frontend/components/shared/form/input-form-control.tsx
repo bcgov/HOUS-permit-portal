@@ -21,6 +21,7 @@ import * as R from "ramda"
 import React, { useState } from "react"
 import { useController, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
+import { IOption, IOptionGroup } from "../../../types/types"
 import { DatePicker, IDatePickerProps } from "../date-picker"
 import { fieldArrayCompatibleErrorMessage } from "./form-helpers"
 
@@ -39,18 +40,8 @@ interface IInputFormControlProps<TInputProps = Partial<InputProps>> extends Form
   showOptional?: boolean
 }
 
-interface IOption {
-  value: string
-  label: string
-}
-
-interface IOptionGroup {
-  label: string
-  options: IOption[]
-}
-
 interface ISelectFormControlProps extends IInputFormControlProps<Partial<SelectProps>> {
-  options?: IOption[]
+  options?: IOption<string | number>[]
   optionGroups?: IOptionGroup[]
 }
 
@@ -210,7 +201,7 @@ export const TextAreaFormControl = (props: IInputFormControlProps) => {
   )
 }
 
-const InputFormControl = ({
+export const InputFormControl = ({
   label,
   fieldName,
   required,
@@ -296,14 +287,14 @@ export const SelectFormControl = ({
       )}
       <Select bg="greys.white" {...registerProps} {...inputProps}>
         {options?.map((option) => (
-          <option key={option.value} value={option.value}>
+          <option key={option.value.toString()} value={option.value}>
             {option.label}
           </option>
         ))}
         {optionGroups?.map((group) => (
           <optgroup key={group.label} label={group.label}>
             {group.options.map((option) => (
-              <option key={option.value} value={option.value}>
+              <option key={option.value.toString()} value={option.value}>
                 {option.label}
               </option>
             ))}
