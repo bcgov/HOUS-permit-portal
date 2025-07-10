@@ -1,6 +1,7 @@
 import { Button, Flex, FormControl, FormHelperText, Heading, Input, Text } from "@chakra-ui/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
+import * as R from "ramda"
 import React from "react"
 import { useForm } from "react-hook-form"
 import { Trans } from "react-i18next"
@@ -17,8 +18,8 @@ export const StepCodeSummary = observer(function StepCodeSummary() {
   const { permitApplicationId } = useParams()
   const navigate = useNavigate()
   const location = useLocation()
-  const isMixedUse = checklist.isMixedUse
-  const isBaseline = checklist.isBaseline
+  const isMixedUse = checklist.stepCodeOccupancies.length + checklist.baselineOccupancies.length > 1
+  const isBaseline = R.isEmpty(checklist.stepCodeOccupancies)
 
   const { handleSubmit, formState } = useForm()
   const { isSubmitting } = formState
