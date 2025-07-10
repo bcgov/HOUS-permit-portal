@@ -170,6 +170,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
   def upload_supporting_document
     authorize @permit_application
     begin
+      binding.pry
       success = @permit_application.update(supporting_document_params)
       if success
         regex_pattern =
@@ -488,7 +489,11 @@ class Api::PermitApplicationsController < Api::ApplicationController
     params.require(:permit_application).permit(
       supporting_documents_attributes: [
         :data_key,
-        file: [:id, :storage, metadata: {}]
+        file: [
+          :id,
+          :storage,
+          metadata: %i[filename size mime_type content_disposition]
+        ]
       ]
     )
   end
