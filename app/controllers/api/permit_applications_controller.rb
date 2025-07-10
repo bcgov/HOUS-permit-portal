@@ -170,7 +170,6 @@ class Api::PermitApplicationsController < Api::ApplicationController
   def upload_supporting_document
     authorize @permit_application
     begin
-      binding.pry
       success = @permit_application.update(supporting_document_params)
       if success
         regex_pattern =
