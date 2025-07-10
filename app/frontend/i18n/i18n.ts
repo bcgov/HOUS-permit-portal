@@ -1984,7 +1984,7 @@ Thank you,
                 stepRequired: "Level required",
                 stepProposed: "Proposed step achieved",
                 steps: {
-                  "0": "Not required",
+                  "0": "None",
                   "1": "EL 1",
                   "2": "EL 2",
                   "3": "EL 3",
