@@ -19,17 +19,13 @@ RSpec.describe ValidateUrlAttributes, type: :model do
     end
   end
 
-  # Run the migration before running the tests
-  before(:all) do
+  # Create and drop the dummy table around each example
+  around do |example|
     CreateDummyModels.new.change
-    ActiveRecord::Migration.maintain_test_schema!
-  end
-
-  # Rollback migration after running the tests
-  after(:all) do
-    if ActiveRecord::Base.connection.table_exists?(:dummy_models)
-      ActiveRecord::Migration.drop_table(:dummy_models)
-      ActiveRecord::Migration.maintain_test_schema!
+    begin
+      example.run
+    ensure
+      ActiveRecord::Migration.drop_table(:dummy_models, if_exists: true)
     end
   end
 
