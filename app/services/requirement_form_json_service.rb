@@ -209,6 +209,9 @@ class RequirementFormJsonService
       end
 
     json.merge!({ description: requirement.hint }) if requirement.hint
+    if requirement.instructions
+      json.merge!({ instructions: requirement.instructions })
+    end
 
     json.merge!({ validate: { required: true } }) if requirement.required
 

@@ -1,10 +1,9 @@
-import { Box, Flex, Stack, StackProps, useDisclosure } from "@chakra-ui/react"
+import { Stack, StackProps, useDisclosure } from "@chakra-ui/react"
 import React, { ReactNode } from "react"
 import { FieldValues } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { EEnergyStepCodeDependencyRequirementCode, ERequirementType } from "../../../../types/enums"
 import { isStepCodePackageFileRequirementCode } from "../../../../utils/utility-functions"
-import { EditBox } from "./edit-box"
 import { EditableHelperText, TEditableHelperTextProps } from "./editable-helper-text"
 import { EditableInstructionsText, TEditableInstructionsTextProps } from "./editable-instructions-text"
 import { EditableLabel, TEditableLabelProps } from "./editable-label"
@@ -52,25 +51,15 @@ export function EditableGroup<TFieldValues>({
   return (
     <Stack spacing={4} {...containerProps}>
       <EditableLabel {...editableLabelProps} />
-      <Flex flex={1}>
-        {editableInput ? (
-          <EditBox label={label} helperText={helperText}>
-            <EditableInstructionsText {...editableInstructionsTextProps} />
-            <Box mt={2}>{editableInput}</Box>
-            <EditableHelperText {...editableHelperTextProps} />
-          </EditBox>
-        ) : (
-          <Box>
-            {multiOptionEditableInput && (
-              <Stack>
-                <EditableInstructionsText {...editableInstructionsTextProps} />
-                {multiOptionEditableInput}
-                <EditableHelperText {...editableHelperTextProps} />
-              </Stack>
-            )}
-          </Box>
-        )}
-      </Flex>
+      <EditableInstructionsText {...editableInstructionsTextProps} />
+      {editableInput}
+      {editableInput && <EditableHelperText {...editableHelperTextProps} />}
+      {multiOptionEditableInput && (
+        <Stack>
+          {multiOptionEditableInput}
+          <EditableHelperText {...editableHelperTextProps} />
+        </Stack>
+      )}
       {isMultipleFilesCheckboxProps && (
         <IsMultipleFilesCheckbox isDisabled={isEditLimited} mt={2} {...isMultipleFilesCheckboxProps} />
       )}

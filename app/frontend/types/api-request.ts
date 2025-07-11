@@ -20,6 +20,7 @@ export interface IRequirementAttributes {
   label?: string
   inputType?: ERequirementType
   hint?: string
+  instructions?: string
   required?: boolean
   requirementCode: string
   elective?: boolean

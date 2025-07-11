@@ -178,6 +178,7 @@ export interface IDenormalizedRequirement {
   inputOptions: IRequirementOptions
   formJson?: IFormIORequirement
   hint?: string | null
+  instructions?: string | null
   elective?: boolean
   required?: boolean
   requirementCode: string
