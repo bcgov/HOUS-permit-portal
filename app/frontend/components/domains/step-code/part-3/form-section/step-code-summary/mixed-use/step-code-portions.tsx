@@ -9,7 +9,6 @@ const i18nPrefix = "stepCode.part3.stepCodeSummary.mixedUse.stepCode"
 export const StepCodePortionsPerformance = function MixedUseStepCodePortionsPerformanceResults() {
   const { checklist } = usePart3StepCode()
   const tediComplies = !!checklist.complianceReport.performance.complianceSummary.tedi?.stepCodePortion
-
   return (
     <Flex direction="column" gap={2}>
       <FormLabel>{t(`${i18nPrefix}.title`)}</FormLabel>
@@ -45,7 +44,7 @@ export const StepCodePortionsPerformance = function MixedUseStepCodePortionsPerf
         <GridData justifyContent="center">
           <Input
             isDisabled
-            value={checklist.complianceReport.performance.adjustedResults.tedi.stepCodePortion || "-"}
+            value={checklist.complianceReport.performance.adjustedResults.tedi?.stepCodePortion ?? "-"}
           />
         </GridData>
         <GridData justifyContent="center">

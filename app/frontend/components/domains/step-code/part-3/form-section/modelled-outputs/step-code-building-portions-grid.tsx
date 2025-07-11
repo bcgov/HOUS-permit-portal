@@ -1,4 +1,4 @@
-import { Box, Grid, HStack, Input, InputProps, Text } from "@chakra-ui/react"
+import { Box, Grid, HStack, Input, InputProps, Stack, Text } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useCallback, useMemo } from "react"
 import { useController, useFormContext } from "react-hook-form"
@@ -25,12 +25,26 @@ export const StepCodeBuildingPortionsGrid = observer(function StepCodeBuildingPo
   const i18nPrefix = "stepCode.part3.modelledOutputs.stepCodeBuildingPortionsTable"
   const { checklist } = usePart3StepCode()
   const totalStepCodeOccupancyFloorArea = Number(checklist?.totalStepCodeOccupancyFloorArea ?? "0")
-  const { control } = useFormContext<IMpdelledEnergyOutputChecklistForm>()
+  const {
+    control,
+    formState: { errors },
+  } = useFormContext<IMpdelledEnergyOutputChecklistForm>()
+  const errorMessage = errors.stepCodeAnnualThermalEnergyDemand?.message as string | undefined
   const {
     field: { value: stepCodeAnnualThermalEnergyDemand, onChange: onChangeStepCodeAnnualThermalEnergyDemand },
-  } = useController({ control, name: "stepCodeAnnualThermalEnergyDemand" })
+  } = useController({
+    control,
+    name: "stepCodeAnnualThermalEnergyDemand",
+    rules: {
+      required:
+        totalStepCodeOccupancyFloorArea > 0
+          ? t("ui.isRequired", { field: t(`${i18nPrefix}.annualThermalEnergyDemand`) })
+          : false,
+    },
+  })
 
   const formattedStepCodeAnnualThermalEnergyDemand = useMemo(() => {
+    if (isNaN(stepCodeAnnualThermalEnergyDemand)) return ""
     return numberToFormattedString(stepCodeAnnualThermalEnergyDemand)
   }, [stepCodeAnnualThermalEnergyDemand])
 
@@ -42,8 +56,7 @@ export const StepCodeBuildingPortionsGrid = observer(function StepCodeBuildingPo
   )
 
   const formattedStepCodeAnnualThermalEnergyDemandPerSquareMeter = useMemo(() => {
-    if (totalStepCodeOccupancyFloorArea === 0) return ""
-
+    if (totalStepCodeOccupancyFloorArea === 0 || isNaN(stepCodeAnnualThermalEnergyDemand)) return ""
     return numberToFormattedString(stepCodeAnnualThermalEnergyDemand / totalStepCodeOccupancyFloorArea)
   }, [stepCodeAnnualThermalEnergyDemand, totalStepCodeOccupancyFloorArea])
 
@@ -76,11 +89,18 @@ export const StepCodeBuildingPortionsGrid = observer(function StepCodeBuildingPo
         </HStack>
       </GridRowHeader>
       <GridData borderRightWidth={1}>
-        <Input
-          value={formattedStepCodeAnnualThermalEnergyDemand}
-          onChange={handleChangeStepCodeAnnualThermalEnergyDemand}
-          {...editableInputProps}
-        />
+        <Stack direction="column" spacing={1} align="center">
+          <Input
+            value={formattedStepCodeAnnualThermalEnergyDemand}
+            onChange={handleChangeStepCodeAnnualThermalEnergyDemand}
+            {...editableInputProps}
+          />
+          {errorMessage && (
+            <Text color="semantic.error" fontSize="sm">
+              {errorMessage}
+            </Text>
+          )}
+        </Stack>
       </GridData>
 
       {/* kWh/m2 */}

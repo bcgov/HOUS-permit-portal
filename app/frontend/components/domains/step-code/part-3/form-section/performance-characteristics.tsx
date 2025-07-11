@@ -325,7 +325,7 @@ export const PerformanceCharacteristics = observer(function Part3StepCodeFormPer
               </RowHeader>
               <GridData>
                 <FormControl>
-                  <Input value={windowFloorRatio || "-"} isDisabled textAlign="center" />
+                  <Input value={windowFloorRatio?.toFixed(3) || "-"} isDisabled textAlign="center" />
                 </FormControl>
               </GridData>
               <GridData>
