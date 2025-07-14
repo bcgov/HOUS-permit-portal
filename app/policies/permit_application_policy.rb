@@ -7,8 +7,8 @@ class PermitApplicationPolicy < ApplicationPolicy
          record.collaborator?(user_id: user.id, collaboration_type: :submission)
       true
     elsif user.review_staff?
-      user.jurisdictions.find(record.jurisdiction.id).present? &&
-        !record.draft? && record.sandbox == sandbox
+      user.member_of?(record.jurisdiction.id) && !record.draft? &&
+        record.sandbox == sandbox
     end
   end
 
@@ -30,7 +30,7 @@ class PermitApplicationPolicy < ApplicationPolicy
         user_id: user.id
       ).present?
     else
-      user.review_staff? && user.jurisdictions.find(record.jurisdiction_id)
+      user.review_staff? && user.member_of?(record.jurisdiction_id)
     end
   end
 
@@ -59,13 +59,13 @@ class PermitApplicationPolicy < ApplicationPolicy
       record.submission_requirement_block_edit_permissions(user_id: user.id) ==
         :all
     else
-      user.review_staff? && user.jurisdictions.find(record.jurisdiction_id)
+      user.review_staff? && user.member_of?(record.jurisdiction_id)
     end
   end
 
   def generate_missing_pdfs?
     user.super_admin? || (user.submitter? && record.submitter == user) ||
-      ((user.review_staff?) && user.jurisdictions.find(record.jurisdiction_id))
+      ((user.review_staff?) && user.member_of?(record.jurisdiction_id))
   end
 
   def finalize_revision_requests?
@@ -95,8 +95,7 @@ class PermitApplicationPolicy < ApplicationPolicy
     if permit_application.draft?
       permit_application.submitter_id == user.id
     else
-      user.review_staff? &&
-        user.jurisdictions.find(permit_application.jurisdiction_id)
+      user.review_staff? && user.member_of?(permit_application.jurisdiction_id)
     end
   end
 
