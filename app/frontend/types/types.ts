@@ -378,6 +378,7 @@ export interface IPermitApplicationSupportingDocumentsUpdate {
   zipfileSize: null | number
   zipfileName: null | string
   zipfileUrl: null | string
+  allSubmissionVersionCompletedSupportingDocuments?: IDownloadableFile[]
 }
 
 export interface IUserPushPayload {
