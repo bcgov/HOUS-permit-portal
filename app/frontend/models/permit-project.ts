@@ -1,7 +1,8 @@
+import { t } from "i18next"
 import { flow, Instance, toGenerator, types } from "mobx-state-tree"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
-import { EPermitApplicationStatus, EPermitProjectPhase } from "../types/enums"
+import { EPermitProjectPhase } from "../types/enums"
 import { IProjectDocument } from "../types/types" // Updated import
 import { PermitApplicationModel } from "./permit-application"
 
@@ -13,11 +14,17 @@ export const PermitProjectModel = types
     jurisdictionDisambiguatedName: types.string,
     forcastedCompletionDate: types.maybeNull(types.Date),
     phase: types.enumeration(Object.values(EPermitProjectPhase)),
-    permitApplications: types.array(types.reference(types.late(() => PermitApplicationModel))),
+    permitApplications: types.maybeNull(types.array(types.reference(types.late(() => PermitApplicationModel)))),
     projectDocuments: types.maybeNull(types.array(types.frozen<IProjectDocument>())), // Changed to IProjectDocument
     isPinned: types.optional(types.boolean, false),
     createdAt: types.Date,
     updatedAt: types.Date,
+    totalPermitsCount: types.optional(types.number, 0),
+    newDraftCount: types.optional(types.number, 0),
+    newlySubmittedCount: types.optional(types.number, 0),
+    resubmittedCount: types.optional(types.number, 0),
+    revisionsRequestedCount: types.optional(types.number, 0),
+    approvedCount: types.optional(types.number, 0),
   })
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -26,32 +33,21 @@ export const PermitProjectModel = types
       return self.fullAddress?.split(",")[0]
     },
     get phaseDescription() {
-      const total = self.permitApplications.length
+      const total = self.totalPermitsCount
       if (total === 0) return ""
-      const newDraftCount = self.permitApplications.filter(
-        (pa) => pa.status === EPermitApplicationStatus.newDraft
-      ).length
-      const revisionsCount = self.permitApplications.filter(
-        (pa) => pa.status === EPermitApplicationStatus.revisionsRequested
-      ).length
-      const newlySubmittedCount = self.permitApplications.filter(
-        (pa) => pa.status === EPermitApplicationStatus.newlySubmitted
-      ).length
-      const resubmittedCount = self.permitApplications.filter(
-        (pa) => pa.status === EPermitApplicationStatus.resubmitted
-      ).length
-      const submittedCount = newlySubmittedCount + resubmittedCount
+      const remainingCount = self.newDraftCount + self.revisionsRequestedCount
+      const submittedCount = self.newlySubmittedCount + self.resubmittedCount
 
       if (self.phase === EPermitProjectPhase.empty) {
         return ""
       } else if (self.phase === EPermitProjectPhase.newDraft) {
-        return `${newDraftCount + revisionsCount} of ${total} permits remaining`
+        return t("permitProject.phaseDescription.inProgress", { remaining: remainingCount, total })
       } else if (self.phase === EPermitProjectPhase.newlySubmitted || self.phase === EPermitProjectPhase.resubmitted) {
-        return `${submittedCount} permit${submittedCount === 1 ? "" : "s"} waiting for response`
+        return t("permitProject.phaseDescription.submitted", { count: submittedCount })
       } else if (self.phase === EPermitProjectPhase.revisionsRequested) {
-        return `${revisionsCount} permit${revisionsCount === 1 ? "" : "s"} returned for revision`
+        return t("permitProject.phaseDescription.waitingOnYou", { count: self.revisionsRequestedCount })
       } else if (self.phase === EPermitProjectPhase.approved) {
-        return `All ${total} permit${total === 1 ? "" : "s"} approved`
+        return t("permitProject.phaseDescription.approved", { count: total })
       } else {
         return ""
       }

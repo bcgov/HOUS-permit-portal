@@ -72,6 +72,7 @@ class PermitApplication < ApplicationRecord
   after_commit :send_submitted_webhook, if: :saved_change_to_status?
   after_commit :notify_user_reference_number_updated,
                if: :saved_change_to_reference_number?
+  after_commit :reindex_permit_project, if: :saved_change_to_status?
 
   scope :with_submitter_role,
         -> { joins(:submitter).where(users: { role: "submitter" }) }
@@ -684,6 +685,10 @@ class PermitApplication < ApplicationRecord
     end
 
     permit_project.jurisdiction.reindex
+  end
+
+  def reindex_permit_project
+    permit_project&.reindex
   end
 
   def submitter_must_have_role
