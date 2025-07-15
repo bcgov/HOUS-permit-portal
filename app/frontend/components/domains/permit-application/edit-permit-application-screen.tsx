@@ -347,7 +347,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
                   <SubmissionDownloadModal permitApplication={currentPermitApplication} />
                 )}
                 <Button rightIcon={<CaretRight />} onClick={() => navigate("/")}>
-                  {t("permitApplication.show.backToInbox")}
+                  {t("ui.back")}
                 </Button>
               </Stack>
             ) : (
