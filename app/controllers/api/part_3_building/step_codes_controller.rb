@@ -1,4 +1,6 @@
 class Api::Part3Building::StepCodesController < Api::ApplicationController
+  include StepCodeParamsConcern
+
   before_action :set_step_code, only: [:show]
 
   def show
@@ -26,15 +28,6 @@ class Api::Part3Building::StepCodesController < Api::ApplicationController
 
   def set_step_code
     @step_code = Part3StepCode.find(params[:id])
-  end
-
-  def step_code_params
-    params.require(:step_code).permit(
-      :permit_application_id,
-      :permit_project_id,
-      :creator_id,
-      checklist_attributes: [:id, { section_completion_status: {} }]
-    )
   end
 
   def step_code_params_with_creator
