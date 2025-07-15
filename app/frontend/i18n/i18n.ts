@@ -557,6 +557,7 @@ const options = {
           createSuccessDescription: 'The project "{{name}}" has been created.',
           createErrorTitle: "Failed to Create Project",
           startNew: "Start New Project",
+          phaseFilter: "Status",
         },
 
         permitApplication: {

@@ -36,7 +36,7 @@ module Api::Concerns::Search::PermitProjects
       filters: [
         :jurisdiction_id,
         :show_archived,
-        :phase,
+        phase: [],
         requirement_template_ids: []
       ],
       sort: %i[field direction]
@@ -65,9 +65,6 @@ module Api::Concerns::Search::PermitProjects
       ActiveModel::Type::Boolean.new.cast(
         search_filters.delete(:show_archived) || false
       )
-
-    phase = search_filters.delete(:phase)
-    search_filters[:phase] = phase if phase.present? && phase != "all"
 
     requirement_template_ids = search_filters.delete(:requirement_template_ids)
     if requirement_template_ids.present?

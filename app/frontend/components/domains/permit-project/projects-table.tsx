@@ -68,8 +68,8 @@ export const ProjectsTable = observer(() => {
           <HStack>
             <ActiveArchivedFilter searchModel={permitProjectStore} />
             <RequirementTemplateFilter searchModel={permitProjectStore} />
+            <PhaseFilter searchModel={permitProjectStore} />
           </HStack>
-          <PhaseFilter searchModel={permitProjectStore} />
         </Flex>
       </Flex>
 

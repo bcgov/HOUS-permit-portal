@@ -25,6 +25,17 @@ export const PermitProjectModel = types
     get shortAddress() {
       return self.fullAddress?.split(",")[0]
     },
+    get phaseDescription() {
+      if (self.phase === EPermitApplicationStatus.Draft) {
+        return ``
+      } else if (self.phase === EPermitApplicationStatus.Submitted) {
+        return
+      } else if (self.phase === EPermitApplicationStatus.Approved) {
+        return
+      } else if (self.phase === EPermitApplicationStatus.Rejected) {
+      } else {
+      }
+    },
   }))
   .actions((self) => ({
     setIsPinned(isPinned: boolean) {
