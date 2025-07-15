@@ -157,7 +157,7 @@ export const ReviewPermitApplicationScreen = observer(() => {
               rightIcon={<CaretRight />}
               onClick={() => navigate(`/jurisdictions/${currentPermitApplication.jurisdiction.slug}/submission-inbox`)}
             >
-              {t("ui.backToInbox")}
+              {t("ui.back")}
             </Button>
           </Stack>
         </Flex>
