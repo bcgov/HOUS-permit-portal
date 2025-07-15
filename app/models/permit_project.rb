@@ -17,6 +17,56 @@ class PermitProject < ApplicationRecord
 
   accepts_nested_attributes_for :project_documents, allow_destroy: true
 
+  after_commit :reindex
+
+  scope :with_status_counts,
+        -> do
+          select(
+            "permit_projects.*, " +
+              "(SELECT COUNT(*) FROM permit_applications pa WHERE pa.permit_project_id = permit_projects.id) AS total_permits_count, " +
+              "(SELECT COUNT(*) FROM permit_applications pa WHERE pa.permit_project_id = permit_projects.id AND pa.status = 0) AS new_draft_count, " +
+              "(SELECT COUNT(*) FROM permit_applications pa WHERE pa.permit_project_id = permit_projects.id AND pa.status = 1) AS newly_submitted_count, " +
+              "(SELECT COUNT(*) FROM permit_applications pa WHERE pa.permit_project_id = permit_projects.id AND pa.status = 3) AS revisions_requested_count, " +
+              "(SELECT COUNT(*) FROM permit_applications pa WHERE pa.permit_project_id = permit_projects.id AND pa.status = 4) AS resubmitted_count, " +
+              "(SELECT COUNT(*) FROM permit_applications pa WHERE pa.permit_project_id = permit_projects.id AND pa.status = 5) AS approved_count"
+          )
+        end
+
+  def total_permits_count
+    self[:total_permits_count] || permit_applications.count
+  end
+
+  def new_draft_count
+    self[:new_draft_count] ||
+      permit_applications.where(status: :new_draft).count
+  end
+
+  def newly_submitted_count
+    self[:newly_submitted_count] ||
+      permit_applications.where(status: :newly_submitted).count
+  end
+
+  def revisions_requested_count
+    self[:revisions_requested_count] ||
+      permit_applications.where(status: :revisions_requested).count
+  end
+
+  def resubmitted_count
+    self[:resubmitted_count] ||
+      permit_applications.where(status: :resubmitted).count
+  end
+
+  def approved_count
+    self[:approved_count] ||
+      (
+        begin
+          permit_applications.where(status: :approved).count
+        rescue StandardError
+          0
+        end
+      )
+  end
+
   def search_data
     {
       title: title,
@@ -35,7 +85,15 @@ class PermitProject < ApplicationRecord
         permit_applications
           .map { |pa| pa.requirement_template&.id }
           .compact
-          .uniq
+          .uniq,
+      total_permits_count: permit_applications.count,
+      new_draft_count: permit_applications.where(status: :new_draft).count,
+      newly_submitted_count:
+        permit_applications.where(status: :newly_submitted).count,
+      revisions_requested_count:
+        permit_applications.where(status: :revisions_requested).count,
+      resubmitted_count: permit_applications.where(status: :resubmitted).count,
+      approved_count: permit_applications.where(status: :approved).count
     }
   end
 
