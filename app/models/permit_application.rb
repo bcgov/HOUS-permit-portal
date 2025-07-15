@@ -608,47 +608,60 @@ class PermitApplication < ApplicationRecord
   end
 
   def assign_unique_number
-    last_number =
-      jurisdiction
-        .permit_applications
-        .where("number LIKE ?", "#{number_prefix}-%")
-        .order(Arel.sql("LENGTH(number) DESC"), number: :desc)
-        .limit(1)
-        .pluck(:number)
-        .first
+    new_number =
+      jurisdiction.with_lock do
+        last_number =
+          jurisdiction
+            .permit_applications
+            .where("number LIKE ?", "#{number_prefix}-%")
+            .order(Arel.sql("LENGTH(number) DESC"), number: :desc)
+            .limit(1)
+            .pluck(:number)
+            .first
 
-    # Notice that the last number comes from the specific jurisdiction
+        # Notice that the last number comes from the specific jurisdiction
 
-    if last_number
-      number_parts = last_number.split("-")
-      new_integer = number_parts[1..-1].join.to_i + 1 # Increment the sequence
+        loop do
+          if last_number
+            number_parts = last_number.split("-")
+            new_integer = number_parts[1..-1].join.to_i + 1 # Increment the sequence
 
-      # the remainder of dividing any number by 1000 always gives the last 3 digits
-      # Removing the last 3 digits (integer division by 1000), then taking the remainder above gives the middle 3
-      # Removing the last 6 digits (division), then taking the remainder as above gives the first 3 digits
+            # the remainder of dividing any number by 1000 always gives the last 3 digits
+            # Removing the last 3 digits (integer division by 1000), then taking the remainder above gives the middle 3
+            # Removing the last 6 digits (division), then taking the remainder as above gives the first 3 digits
 
-      # irb(main):008> 123456789 / 1_000
-      # => 123456
-      # irb(main):010> 123456 % 1000
-      # => 456
-      # irb(main):009> 123456789 / 1_000_000
-      # => 123
-      # irb(main):013> 123 % 1000
-      # => 123
+            # irb(main):008> 123456789 / 1_000
+            # => 123456
+            # irb(main):010> 123456 % 1000
+            # => 456
+            # irb(main):009> 123456789 / 1_000_000
+            # => 123
+            # irb(main):013> 123 % 1000
+            # => 123
 
-      # %03d pads with 0s
-      new_number =
-        format(
-          "%s-%03d-%03d-%03d",
-          number_prefix,
-          new_integer / 1_000_000 % 1000,
-          new_integer / 1000 % 1000,
-          new_integer % 1000
-        )
-    else
-      # Start with the initial number if there are no previous numbers
-      new_number = format("%s-001-000-000", number_prefix)
-    end
+            # %03d pads with 0s
+            new_number =
+              format(
+                "%s-%03d-%03d-%03d",
+                number_prefix,
+                new_integer / 1_000_000 % 1000,
+                new_integer / 1000 % 1000,
+                new_integer % 1000
+              )
+          else
+            # Start with the initial number if there are no previous numbers
+            new_number = format("%s-001-000-000", number_prefix)
+          end
+
+          unless PermitApplication.where.not(id: id).exists?(number: new_number)
+            break
+          end
+
+          last_number = new_number
+        end
+
+        new_number
+      end
 
     # Assign the new number to the permit application
     self.number = new_number if self.number.blank?
