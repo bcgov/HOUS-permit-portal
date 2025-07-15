@@ -78,6 +78,11 @@ const JurisdictionIndexScreen = lazy(() =>
 const JurisdictionScreen = lazy(() =>
   import("../jurisdictions/jurisdiction-screen").then((module) => ({ default: module.JurisdictionScreen }))
 )
+const JurisdictionStepCodeRequirementsScreen = lazy(() =>
+  import("../jurisdictions/step-code-requirements-screen").then((module) => ({
+    default: module.JurisdictionStepCodeRequirementsScreen,
+  }))
+)
 const LimitedJurisdictionIndexScreen = lazy(() =>
   import("../jurisdictions/limited-jurisdiction-index-screen").then((module) => ({
     default: module.LimitedJurisdictionIndexScreen,
@@ -107,6 +112,12 @@ const LettersOfAssuranceScreen = lazy(() =>
     default: module.LettersOfAssuranceScreen,
   }))
 )
+const LookUpStepCodesRequirementsForYourProjectScreen = lazy(() =>
+  import("../project-readiness-tools/look-up-step-codes-requirements-for-your-project").then((module) => ({
+    default: module.LookUpStepCodesRequirementsForYourProjectScreen,
+  }))
+)
+
 const PermitApplicationIndexScreen = lazy(() =>
   import("../permit-application").then((module) => ({ default: module.PermitApplicationIndexScreen }))
 )
@@ -383,7 +394,6 @@ const AppRoutes = observer(() => {
 
   // Step 2: Safely derive booleans from currentUser. These default to false if currentUser is null.
   const isReviewStaff = currentUser ? currentUser.isReviewStaff : false
-  const isReviewer = currentUser ? currentUser.isReviewer : false
   const isReviewManager = currentUser ? currentUser.isReviewManager : false
   const isRegionalReviewManager = currentUser ? currentUser.isRegionalReviewManager : false
   const isTechnicalSupport = currentUser ? currentUser.isTechnicalSupport : false
@@ -642,6 +652,11 @@ const AppRoutes = observer(() => {
           path="/project-readiness-tools/create-your-letters-of-assurance"
           element={<LettersOfAssuranceScreen />}
         />
+        <Route
+          path="/project-readiness-tools/look-up-step-codes-requirements-for-your-project"
+          element={<LookUpStepCodesRequirementsForYourProjectScreen />}
+        />
+
         <Route path="/confirmed" element={<EmailConfirmedScreen />} />
         <Route path="/welcome" element={<LandingScreen />} />
         <Route
@@ -651,6 +666,10 @@ const AppRoutes = observer(() => {
         <Route
           path="/jurisdictions"
           element={currentUser?.isSuperAdmin ? <JurisdictionIndexScreen /> : <LimitedJurisdictionIndexScreen />}
+        />
+        <Route
+          path="/jurisdictions/:slug/step-code-requirements"
+          element={<JurisdictionStepCodeRequirementsScreen />}
         />
         <Route path="/jurisdictions/:jurisdictionId" element={<JurisdictionScreen />} />
         <Route path="/part-3-step-code" element={<RedirectScreen path="start" />} />

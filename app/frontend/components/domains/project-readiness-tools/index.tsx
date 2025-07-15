@@ -5,15 +5,18 @@ import { useTranslation } from "react-i18next"
 
 export const ProjectReadinessToolsIndexScreen = () => {
   const { t } = useTranslation()
-  const mailto = "mailto:" + t("site.contactEmail")
-  const breadCrumbs = [
-    {
-      href: "/project-readiness-tools",
-      title: t("site.breadcrumb.projectReadinessTools"),
-    },
-  ]
 
   const projectReadinessPageItems = [
+    {
+      sectionTitle: t("home.projectReadinessTools.checkYourProjectAgainstProvincialRegulations"),
+      items: [
+        {
+          linkText: t("home.projectReadinessTools.lookUpStepCodesRequirementsForYourProject"),
+          description: t("home.projectReadinessTools.lookUpToolProjectDescription"),
+          href: "project-readiness-tools/look-up-step-codes-requirements-for-your-project",
+        },
+      ],
+    },
     {
       sectionTitle: t("home.projectReadinessTools.prepareYourApplication"),
       items: [
@@ -48,7 +51,7 @@ export const ProjectReadinessToolsIndexScreen = () => {
                     <Link href={item.href} color="text.link" fontWeight="semibold" fontSize="lg">
                       {item.linkText}
                     </Link>
-                    <Text mt="2" color="text.primary">
+                    <Text mt="2" fontSize="lg" color="text.primary">
                       {item.description}
                     </Text>
                   </Box>

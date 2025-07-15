@@ -41,6 +41,7 @@ import { RouterLink } from "../../shared/navigation/router-link"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { AddressSelect } from "../../shared/select/selectors/address-select"
 import { JurisdictionSelect } from "../../shared/select/selectors/jurisdiction-select"
+import { StepCodeLookupTool } from "../project-readiness-tools/step-code-lookup-tool"
 
 interface ILandingScreenProps {}
 
@@ -49,7 +50,7 @@ export const LandingScreen = observer(({}: ILandingScreenProps) => {
   const mailto = "mailto:" + t("site.contactEmail")
   const iNeedRef = useRef<HTMLDivElement>(null)
   const { sessionStore, userStore, siteConfigurationStore } = useMst()
-  const { smallScaleRequirementTemplateId } = siteConfigurationStore
+  const { landingPageEarlyAccessRequirementTemplates } = siteConfigurationStore
   const { loggedIn } = sessionStore
   const { currentUser } = userStore
 
@@ -91,6 +92,12 @@ export const LandingScreen = observer(({}: ILandingScreenProps) => {
           </Container>
         </Flex>
       </Flex>
+      <Box bg="greys.grey03">
+        <Flex as="section" direction="column" gap={20}>
+          <StepCodeLookupTool showJurisdictionOnPage={true} />
+        </Flex>
+      </Box>
+
       <Container maxW="container.lg" py={16} px={8}>
         <Flex as="section" direction="column" gap={20}>
           <Flex gap={6} direction={{ base: "column", md: "row" }}>
