@@ -11,19 +11,15 @@ class Api::PermitProjectsController < Api::ApplicationController
   skip_after_action :verify_authorized, only: %i[pinned]
 
   def index
-    perform_permit_project_search # This method now comes from the concern
-
-    # Apply your iterative authorization method to the Searchkick results.
-    # This will use PermitProjectPolicy#index? for each instance.
-    authorized_results =
-      apply_search_authorization(@permit_project_search.results)
+    perform_permit_project_search
+    authorized_results = apply_search_authorization(@permit_projects)
 
     render_success authorized_results,
                    nil,
                    {
-                     meta: page_meta(@permit_project_search),
                      blueprint: PermitProjectBlueprint,
-                     blueprint_opts: blueprint_options
+                     blueprint_opts: blueprint_options,
+                     meta: @meta
                    }
   end
 

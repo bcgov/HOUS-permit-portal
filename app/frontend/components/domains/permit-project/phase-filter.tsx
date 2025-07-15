@@ -1,7 +1,19 @@
-import { Box, Button, HStack, useRadio, useRadioGroup, UseRadioProps } from "@chakra-ui/react"
-import { Check } from "@phosphor-icons/react"
+import {
+  Button,
+  Checkbox,
+  Divider,
+  Input,
+  InputGroup,
+  InputLeftElement,
+  Menu,
+  MenuButton,
+  MenuList,
+  useCheckboxGroup,
+  VStack,
+} from "@chakra-ui/react"
+import { CaretDown, MagnifyingGlass } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
-import React from "react"
+import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { IPermitProjectStore } from "../../../stores/permit-project-store"
 import { EPermitProjectPhase } from "../../../types/enums"
@@ -10,39 +22,12 @@ interface IProps {
   searchModel: IPermitProjectStore
 }
 
-function RadioButton(props: UseRadioProps & { children: React.ReactNode }) {
-  const { getInputProps, getRadioProps } = useRadio(props)
-
-  const input = getInputProps()
-  const checkbox = getRadioProps()
-
-  return (
-    <Box as="label">
-      <input {...input} />
-      <Button
-        as="div"
-        {...checkbox}
-        cursor="pointer"
-        variant={props.isChecked ? "primary" : "greyButton"}
-        size="sm"
-        borderRadius="full"
-        leftIcon={props.isChecked ? <Check /> : undefined}
-        _focus={{
-          boxShadow: "outline",
-        }}
-      >
-        {props.children}
-      </Button>
-    </Box>
-  )
-}
-
 export const PhaseFilter = observer(function PhaseFilter({ searchModel }: IProps) {
   const { t } = useTranslation()
-  const { search } = searchModel
+  const { phaseFilter, setPhaseFilter, search } = searchModel
+  const [searchTerm, setSearchTerm] = useState("")
 
   const phases = [
-    "all",
     EPermitProjectPhase.empty,
     EPermitProjectPhase.newDraft,
     EPermitProjectPhase.revisionsRequested,
@@ -50,33 +35,64 @@ export const PhaseFilter = observer(function PhaseFilter({ searchModel }: IProps
     EPermitProjectPhase.resubmitted,
   ] as const
 
-  const { phaseFilter, setPhaseFilter } = searchModel
+  const options = phases.map((phase) => ({
+    value: phase,
+    label: t(`permitProject.phase.${phase}`),
+  }))
 
-  const onFilterChange = (phase: string) => {
-    setPhaseFilter(phase as EPermitProjectPhase | "all")
+  // @ts-ignore
+  const filteredOptions = options.filter((option) => option.label.toLowerCase().includes(searchTerm.toLowerCase()))
+
+  const handleChange = (nextValue: string[]) => {
+    setPhaseFilter(nextValue as EPermitProjectPhase[])
     search()
   }
 
-  const selectedPhase = phaseFilter || "all"
+  const handleReset = () => {
+    setPhaseFilter([] as EPermitProjectPhase[])
+    search()
+  }
 
-  const { getRootProps, getRadioProps } = useRadioGroup({
-    name: "phase-filter",
-    value: selectedPhase,
-    onChange: onFilterChange,
+  const { getCheckboxProps } = useCheckboxGroup({
+    value: phaseFilter || [],
+    onChange: handleChange,
   })
 
-  const group = getRootProps()
-
   return (
-    <HStack {...group}>
-      {phases.map((phase) => {
-        const radio = getRadioProps({ value: phase })
-        return (
-          <RadioButton key={phase} {...radio}>
-            {t(`permitProject.phase.${phase}`)}
-          </RadioButton>
-        )
-      })}
-    </HStack>
+    <Menu>
+      <MenuButton as={Button} variant="outline" rightIcon={<CaretDown />}>
+        {t("permitProject.phaseFilter")}
+      </MenuButton>
+      <MenuList p={4} zIndex="dropdown">
+        <VStack align="start" spacing={4}>
+          <InputGroup>
+            <InputLeftElement pointerEvents="none">
+              <MagnifyingGlass />
+            </InputLeftElement>
+            <Input placeholder={t("ui.search")} value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+          </InputGroup>
+          <Divider />
+          {filteredOptions.map((option) => {
+            const checkboxProps = getCheckboxProps({ value: option.value })
+            return (
+              <Checkbox key={option.value} {...checkboxProps}>
+                {option.label}
+              </Checkbox>
+            )
+          })}
+          <Divider />
+          <Button
+            onClick={handleReset}
+            variant="primary"
+            size="sm"
+            alignSelf="center"
+            w="full"
+            isDisabled={!phaseFilter || phaseFilter.length === 0}
+          >
+            {t("ui.reset")}
+          </Button>
+        </VStack>
+      </MenuList>
+    </Menu>
   )
 })

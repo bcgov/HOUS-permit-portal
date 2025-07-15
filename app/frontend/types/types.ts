@@ -513,7 +513,7 @@ export interface IPermitApplicationSearchFilters {
 export interface IPermitProjectSearchFilters {
   query?: string
   showArchived?: boolean
-  phase?: EPermitProjectPhase
+  phase?: EPermitProjectPhase[]
   requirementTemplateIds?: string[]
   // Add other specific filters if needed, e.g., status, submitterId
 }

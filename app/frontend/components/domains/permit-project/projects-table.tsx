@@ -68,12 +68,12 @@ export const ProjectsTable = observer(() => {
           <HStack>
             <ActiveArchivedFilter searchModel={permitProjectStore} />
             <RequirementTemplateFilter searchModel={permitProjectStore} />
+            <PhaseFilter searchModel={permitProjectStore} />
           </HStack>
-          <PhaseFilter searchModel={permitProjectStore} />
         </Flex>
       </Flex>
 
-      <SearchGrid templateColumns="2fr 1.5fr 1.5fr 1.5fr 1.5fr 1.5fr 0.5fr" gridRowClassName="project-grid-row">
+      <SearchGrid templateColumns="2fr 1.5fr 1.5fr 1.5fr 1.5fr 2fr 0.5fr" gridRowClassName="project-grid-row">
         <GridHeaders columns={Object.values(EPermitProjectSortFields)} includeActionColumn />
 
         {isSearching ? (
@@ -106,8 +106,13 @@ export const ProjectsTable = observer(() => {
                 {project.forcastedCompletionDate && format(project.forcastedCompletionDate, datefnsTableDateFormat)}
               </SearchGridItem>
               <SearchGridItem>
-                {/* @ts-ignore */}
-                <Text fontWeight="bold">{t(`permitProject.phase.${project.phase}`)}</Text>
+                <VStack align="flex-start">
+                  {/* @ts-ignore */}
+                  <Text fontWeight="bold">{t(`permitProject.phase.${project.phase}`)}</Text>
+                  <Text fontSize="sm" color="greys.grey01">
+                    {project.phaseDescription}
+                  </Text>
+                </VStack>
               </SearchGridItem>
               <SearchGridItem>
                 <Menu>

@@ -5,6 +5,12 @@ class PermitProjectBlueprint < Blueprinter::Base
          :full_address,
          :forcasted_completion_date,
          :phase,
+         :total_permits_count,
+         :new_draft_count,
+         :newly_submitted_count,
+         :revisions_requested_count,
+         :resubmitted_count,
+         :approved_count,
          :created_at,
          :updated_at
 

@@ -18,7 +18,7 @@ export const PermitProjectStoreModel = types
       pinnedProjectsArray: types.array(types.reference(PermitProjectModel)),
       tablePermitProjects: types.array(types.reference(PermitProjectModel)), // For table views
       currentPermitProject: types.maybeNull(types.reference(PermitProjectModel)),
-      phaseFilter: types.maybeNull(types.enumeration(Object.values(EPermitProjectPhase))),
+      phaseFilter: types.maybeNull(types.array(types.enumeration(Object.values(EPermitProjectPhase)))),
       requirementTemplateFilter: types.maybeNull(types.array(types.string)),
       isFetchingPinnedProjects: types.optional(types.boolean, false),
     }),
@@ -184,9 +184,9 @@ export const PermitProjectStoreModel = types
     }),
     setPermitProjectFilters(queryParams: URLSearchParams) {
       const requirementTemplateFilter = queryParams.get("requirementTemplateFilter")
-      const phase = queryParams.get("phase") as EPermitProjectPhase
-
-      self.phaseFilter = phase
+      const phaseStr = queryParams.get("phase")
+      const phase = phaseStr ? (phaseStr.split(",") as EPermitProjectPhase[]) : null
+      self.phaseFilter = phase ? cast(phase) : null
       if (requirementTemplateFilter) {
         self.setRequirementTemplateFilter(requirementTemplateFilter.split(","))
       }
@@ -217,12 +217,10 @@ export const PermitProjectStoreModel = types
         return { ok: false, error: response.data?.meta?.message || response.problem }
       }
     }),
-    setPhaseFilter: (phase: EPermitProjectPhase | "all") => {
-      if (!phase) return
-
-      const valueToSet = phase === "all" ? null : phase
-      setQueryParam("phase", valueToSet)
-      self.phaseFilter = valueToSet
+    setPhaseFilter(value: EPermitProjectPhase[]) {
+      self.phaseFilter = value.length > 0 ? cast(value) : null
+      const paramValue = value.length > 0 ? value.join(",") : null
+      setQueryParam("phase", paramValue)
     },
   }))
 

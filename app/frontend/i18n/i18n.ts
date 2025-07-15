@@ -526,6 +526,12 @@ const options = {
             pinnedProjectsTbd: "Pinned projects TBD",
             allProjects: "All projects",
           },
+          phaseDescription: {
+            inProgress: "{{remaining}} of {{total}} permits remaining",
+            submitted: "{{count}} permit{{#plural}}s{{/plural}} waiting for response",
+            waitingOnYou: "{{count}} permit{{#plural}}s{{/plural}} returned for revision",
+            approved: "All {{count}} permit{{#plural}}s{{/plural}} approved",
+          },
           indexTitle: "My active projects",
           listTitle: "Permit projects",
           noneFound: "No projects yet",
@@ -557,6 +563,7 @@ const options = {
           createSuccessDescription: 'The project "{{name}}" has been created.',
           createErrorTitle: "Failed to Create Project",
           startNew: "Start New Project",
+          phaseFilter: "Status",
         },
 
         permitApplication: {
