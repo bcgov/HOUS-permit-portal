@@ -1,7 +1,7 @@
 import { flow, Instance, toGenerator, types } from "mobx-state-tree"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
-import { EPermitApplicationStatus } from "../types/enums"
+import { EPermitApplicationStatus, EPermitProjectPhase } from "../types/enums"
 import { IProjectDocument } from "../types/types" // Updated import
 import { PermitApplicationModel } from "./permit-application"
 
@@ -12,7 +12,7 @@ export const PermitProjectModel = types
     fullAddress: types.maybeNull(types.string),
     jurisdictionDisambiguatedName: types.string,
     forcastedCompletionDate: types.maybeNull(types.Date),
-    phase: types.enumeration(Object.values(EPermitApplicationStatus)),
+    phase: types.enumeration(Object.values(EPermitProjectPhase)),
     permitApplications: types.array(types.reference(types.late(() => PermitApplicationModel))),
     projectDocuments: types.maybeNull(types.array(types.frozen<IProjectDocument>())), // Changed to IProjectDocument
     isPinned: types.optional(types.boolean, false),
@@ -26,14 +26,34 @@ export const PermitProjectModel = types
       return self.fullAddress?.split(",")[0]
     },
     get phaseDescription() {
-      if (self.phase === EPermitApplicationStatus.Draft) {
-        return ``
-      } else if (self.phase === EPermitApplicationStatus.Submitted) {
-        return
-      } else if (self.phase === EPermitApplicationStatus.Approved) {
-        return
-      } else if (self.phase === EPermitApplicationStatus.Rejected) {
+      const total = self.permitApplications.length
+      if (total === 0) return ""
+      const newDraftCount = self.permitApplications.filter(
+        (pa) => pa.status === EPermitApplicationStatus.newDraft
+      ).length
+      const revisionsCount = self.permitApplications.filter(
+        (pa) => pa.status === EPermitApplicationStatus.revisionsRequested
+      ).length
+      const newlySubmittedCount = self.permitApplications.filter(
+        (pa) => pa.status === EPermitApplicationStatus.newlySubmitted
+      ).length
+      const resubmittedCount = self.permitApplications.filter(
+        (pa) => pa.status === EPermitApplicationStatus.resubmitted
+      ).length
+      const submittedCount = newlySubmittedCount + resubmittedCount
+
+      if (self.phase === EPermitProjectPhase.empty) {
+        return ""
+      } else if (self.phase === EPermitProjectPhase.newDraft) {
+        return `${newDraftCount + revisionsCount} of ${total} permits remaining`
+      } else if (self.phase === EPermitProjectPhase.newlySubmitted || self.phase === EPermitProjectPhase.resubmitted) {
+        return `${submittedCount} permit${submittedCount === 1 ? "" : "s"} waiting for response`
+      } else if (self.phase === EPermitProjectPhase.revisionsRequested) {
+        return `${revisionsCount} permit${revisionsCount === 1 ? "" : "s"} returned for revision`
+      } else if (self.phase === EPermitProjectPhase.approved) {
+        return `All ${total} permit${total === 1 ? "" : "s"} approved`
       } else {
+        return ""
       }
     },
   }))
