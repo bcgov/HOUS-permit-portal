@@ -1,5 +1,3 @@
-require_relative "transformers/file_attachment_transformer" # Ensure the transformer is loaded
-
 class RequirementDocumentBlueprint < Blueprinter::Base
   identifier :id
 
@@ -7,5 +5,5 @@ class RequirementDocumentBlueprint < Blueprinter::Base
 
   field :requirement_block_id
 
-  field :file, transformer: FileAttachmentTransformer
+  field :file, transformer: Transformers::FileAttachmentTransformer
 end
