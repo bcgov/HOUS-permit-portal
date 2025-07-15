@@ -5,7 +5,6 @@ import React, { Suspense, useEffect } from "react"
 import { RemoveScroll } from "react-remove-scroll"
 import { useNavigate, useParams } from "react-router-dom"
 import { usePart3StepCode } from "../../../../hooks/resources/use-part-3-step-code"
-import { usePermitApplication } from "../../../../hooks/resources/use-permit-application"
 import { useMst } from "../../../../setup/root"
 import { SharedSpinner } from "../../../shared/base/shared-spinner"
 import { FloatingHelpDrawer } from "../../../shared/floating-help-drawer"
@@ -22,8 +21,6 @@ export const Part3StepCodeForm = observer(function Part3StepCodeForm() {
   } = useMst()
   const { stepCode } = usePart3StepCode()
   const navigate = useNavigate()
-
-  const { currentPermitApplication } = usePermitApplication()
 
   // handle redirect if no section is specified
   useEffect(() => {

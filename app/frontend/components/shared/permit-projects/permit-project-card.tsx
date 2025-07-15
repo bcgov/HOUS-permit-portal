@@ -40,7 +40,6 @@ export const PermitProjectCard = observer(({ permitProject }: IPermitProjectCard
   const nickname = permitProject.title
   // Details potentially from the first permit application
   const permitTypeAndActivity = displayApplication?.permitTypeAndActivity || "N/A"
-  const number = displayApplication?.number || "N/A" // Assuming 'number' might exist on permitApplication
   // Use project's own dates
   const createdAt = permitProject.createdAt
   const updatedAt = permitProject.updatedAt
@@ -48,8 +47,6 @@ export const PermitProjectCard = observer(({ permitProject }: IPermitProjectCard
   const viewedAt = displayApplication?.viewedAt
   const status = displayApplication?.status
 
-  // Determine if the display application is submitted.
-  const isDisplayApplicationSubmitted = displayApplication?.isSubmitted || false
   // Submitter details from the first permit application
   const projectSubmitter = displayApplication?.submitter
   const isSubmissionCollaboration = projectSubmitter?.id !== currentUser?.id

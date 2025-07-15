@@ -9,7 +9,6 @@ import {
   Input,
   Textarea,
   VStack,
-  useToast,
 } from "@chakra-ui/react"
 // import { zodResolver } from "@hookform/resolvers/zod" // Removed
 import { t } from "i18next"
@@ -45,7 +44,6 @@ export const NewPermitProjectScreen = observer(() => {
       propertyPlanJurisdictionId: "",
     },
   })
-  const toast = useToast()
   const navigate = useNavigate()
   const { permitProjectStore } = useMst()
 

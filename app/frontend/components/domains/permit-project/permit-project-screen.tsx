@@ -77,7 +77,7 @@ export const PermitProjectScreen = observer(() => {
     formState: { isSubmitting },
   } = methods
 
-  const { fields, append, remove, update } = useFieldArray({
+  const { fields, append, update } = useFieldArray({
     control,
     name: "projectDocumentsAttributes",
     keyName: "rhfId",
@@ -86,7 +86,6 @@ export const PermitProjectScreen = observer(() => {
   useEffect(() => {
     if (currentPermitProject) {
       reset({
-        description: currentPermitProject.description || "",
         projectDocumentsAttributes:
           currentPermitProject.projectDocuments?.map((doc) => ({
             id: doc.id,
@@ -170,7 +169,7 @@ export const PermitProjectScreen = observer(() => {
           </Heading>
           {/* Description could be made editable with RHF if needed */}
           <Text mb={3}>
-            <strong>Description:</strong> {currentPermitProject.description}
+            <strong>Title:</strong> {currentPermitProject.title}
           </Text>
         </Box>
 
