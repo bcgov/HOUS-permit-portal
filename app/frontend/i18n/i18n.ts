@@ -1429,7 +1429,7 @@ const options = {
             ourVision: {
               title: "Our Vision",
               description:
-                "The <strong>Building Permit Hub</strong> is here to make building permits faster and easier for everyone:",
+                "The Building Permit Hub is available to make building permits faster and easier for everyone:",
               audiences: {
                 localGovernments: "local governments",
                 builders: "builders",
@@ -1437,23 +1437,26 @@ const options = {
                 applicants: "anyone applying for a permit",
               },
               platformDescription:
-                "It's a <strong>free, voluntary</strong> platform that supports you from the moment a property is identified for your construction project — all the way through to occupancy.",
+                "It’s a free, voluntary platform that helps from the moment a site or idea is chosen, all the way through to an occupancy permit approval.",
               mission:
-                "We're here to accelerate housing approvals, strengthen partnerships, and lay the foundation for a <strong>connected, future-ready permitting system</strong> across the province.",
+                "Our goal is to make the process quicker and smoother, so people spend less time waiting and more time building. We work in partnership with local governments and industry groups to build tools that deliver real value.",
               flexibility:
-                "Every community is different, and that's why the Hub is built with <strong>choice and flexibility</strong>  in mind. Use the features that work best for your jurisdiction, whether you're just getting started or already have your own digital system.",
+                "As each community has its own needs, the Hub is designed to be flexible and adaptable to your needs. Use the features that work best for your jurisdiction, whether you’re just getting started or already have your own digital system.",
+              standardizedPermits:
+                "We are also working on <strong>standardized permits</strong> to make permitting more consistent across BC.",
+              simpleSoftware:
+                "This is about building a <strong>simple, helpful permitting software</strong> that supports housing and communities across the province.",
             },
             currentStatus: {
               title: "Where we are & What you can use today",
-              description: "The Hub is <strong>live and available</strong> to all jurisdictions in BC.",
+              description: "The Hub is <strong>available to</strong> all jurisdictions in BC.",
               features: {
                 title: "You can start using:",
-                smallScaleHousing: "<strong>small-scale multi-unit housing permit types</strong>",
-                automatedStepCode:
-                  "<strong>automated Step Code compliance tools</strong> (BC Building Code Part 3 & Part 9)",
-                collaborativeFlows: "<strong>collaborative submission and review flows</strong>",
-                customizablePermits: "<strong>customizable permit types tailored to your bylaws</strong>",
-                resubmissionTools: "<strong>resubmission and revision tools</strong>",
+                smallScaleHousing: "small-scale multi-unit housing and demolition permit types",
+                automatedStepCode: "automated Step Code compliance tools (BC Building Code Part 3 & Part 9) ",
+                collaborativeFlows: "collaborative submission and review flows",
+                customizablePermits: "customizable permit types tailored to your bylaws",
+                resubmissionTools: "resubmission and revision tools",
               },
               workflowNote:
                 "Whether you're digital, hybrid, or paper-based, you can participate in a way that fits your current workflow.",
@@ -1463,13 +1466,18 @@ const options = {
               description:
                 "We're co-developing this platform with local governments, First Nations, and industry partners.",
               feedbackNote:
-                "Your feedback — whether it's a new idea or something that isn't working — <strong>shapes what we build</strong>.",
+                "Your feedback — whether it's a new idea or something that isn't working — shapes what we build.",
               communityFeatures: {
-                title: "Some features that came directly from community feedback:",
+                title: "We are addressing features needs that came directly from the communities",
                 multipleUploads: "support for multiple file uploads",
                 fileScanning: "malicious file scanning",
                 flexibleTools: "flexible tools for tracking, reviewing, and collaborating",
               },
+              shareIdeas: "Help us keep improving — share your ideas or challenges with the team.",
+              reachOutToStartTheConversation: "Reach Out to Start the Conversation",
+              reachOutToStartTheConversationDescription:
+                "We’d love to hear what your community needs and explore how the Hub can help.",
+              reachOutToStartTheConversationEmail: "digital.codes.permits@gov.bc.ca",
             },
             whatsNext: {
               title: "What's coming next",

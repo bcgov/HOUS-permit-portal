@@ -19,7 +19,7 @@ export const OnboardingChecklistPageForLgAdoptingScreen = () => {
       <Divider mb={10} />
 
       {/* Our Vision */}
-      <Heading as="h2" size="md" mb="4">
+      <Heading as="h2" size="md" mb="6">
         {t(`${prefix}.ourVision.title`)}
       </Heading>
       <Text fontSize="lg" color="gray.700" mb="4">
@@ -31,14 +31,20 @@ export const OnboardingChecklistPageForLgAdoptingScreen = () => {
         <ListItem>{t(`${prefix}.ourVision.audiences.homeowners`)}</ListItem>
         <ListItem>{t(`${prefix}.ourVision.audiences.applicants`)}</ListItem>
       </UnorderedList>
-      <Text fontSize="lg" color="gray.700" mb="4">
+      <Text fontSize="lg" color="gray.700" mt={"8"}>
         <Trans i18nKey="home.joinTheBuildingPermitHub.ourVision.platformDescription" />
       </Text>
-      <Text fontSize="lg" color="gray.700" mb="4">
+      <Text fontSize="lg" color="gray.700" mb="10">
         <Trans i18nKey="home.joinTheBuildingPermitHub.ourVision.mission" />
       </Text>
-      <Text fontSize="lg" color="gray.700" mb="10">
+      <Text fontSize="lg" color="gray.700" mb="4">
         <Trans i18nKey="home.joinTheBuildingPermitHub.ourVision.flexibility" />
+      </Text>
+      <Text fontSize="lg" color="gray.700" mb="4">
+        <Trans i18nKey="home.joinTheBuildingPermitHub.ourVision.standardizedPermits" />
+      </Text>
+      <Text fontSize="lg" color="gray.700" mb="10">
+        <Trans i18nKey="home.joinTheBuildingPermitHub.ourVision.simpleSoftware" />
       </Text>
       <Divider mb={10} />
       {/* Where we are & What you can use today */}
@@ -48,7 +54,7 @@ export const OnboardingChecklistPageForLgAdoptingScreen = () => {
       <Text fontSize="lg" color="gray.700" mb="4">
         <Trans i18nKey="home.joinTheBuildingPermitHub.currentStatus.description" />
       </Text>
-      <Text fontWeight="bold" mb={2}>
+      <Text mb={2} fontSize="lg">
         {t(`${prefix}.currentStatus.features.title`)}
       </Text>
       <UnorderedList mb={4} pl={6}>
@@ -76,18 +82,32 @@ export const OnboardingChecklistPageForLgAdoptingScreen = () => {
       <Heading as="h2" size="md" mb="4">
         {t(`${prefix}.builtTogether.title`)}
       </Heading>
-      <Text fontSize="lg" color="gray.700" mb="2">
+      <Text fontSize="lg" color="gray.700">
         {t(`${prefix}.builtTogether.description`)}
       </Text>
-      <Text fontSize="lg" color="gray.700" mb="2">
+      <Text fontSize="lg" color="gray.700" mb="6">
         <Trans i18nKey="home.joinTheBuildingPermitHub.builtTogether.feedbackNote" />
       </Text>
-      <Text mb={2}>{t(`${prefix}.builtTogether.communityFeatures.title`)}</Text>
+      <Text fontSize="lg" mb={2}>
+        {t(`${prefix}.builtTogether.communityFeatures.title`)}
+      </Text>
       <UnorderedList mb={8} pl={6}>
         <ListItem>{t(`${prefix}.builtTogether.communityFeatures.multipleUploads`)}</ListItem>
         <ListItem>{t(`${prefix}.builtTogether.communityFeatures.fileScanning`)}</ListItem>
         <ListItem>{t(`${prefix}.builtTogether.communityFeatures.flexibleTools`)}</ListItem>
       </UnorderedList>
+      <Text fontSize="lg" color="gray.700" mb="6">
+        {t(`${prefix}.builtTogether.shareIdeas`)}
+      </Text>
+      <Heading as="h3" size="md">
+        {t(`${prefix}.builtTogether.reachOutToStartTheConversation`)}
+      </Heading>
+      <Text fontSize="lg" color="gray.700">
+        {t(`${prefix}.builtTogether.reachOutToStartTheConversationDescription`)}
+      </Text>
+      <Text fontSize="lg" color="gray.700">
+        {t(`${prefix}.builtTogether.reachOutToStartTheConversationEmail`)}
+      </Text>
       <Divider mb={10} />
       {/* What's coming next */}
       <Heading as="h2" size="md" mb="4">
