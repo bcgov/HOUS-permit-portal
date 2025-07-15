@@ -1317,7 +1317,7 @@ const options = {
               isRelevant: "Does your project include any of the these occupancies?",
               disabledCtaTooltip: "Please select an occupancy",
               cannotSelectNoWhenBaselineEmpty:
-                "Please must select at least one occupancy if no baseline occupancies are selected",
+                "Please select at least one occupancy if no baseline occupancies are selected",
               occupancies: {
                 label: "Which occupancies apply to this building? Select all that apply:",
                 error: "Select the occupancies from the list that apply to this building.",
