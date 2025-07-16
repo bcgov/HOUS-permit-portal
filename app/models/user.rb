@@ -40,10 +40,35 @@ class User < ApplicationRecord
 
   has_many :permit_applications,
            foreign_key: "submitter_id",
+           dependent: :destroy,
+           inverse_of: :submitter
+
+  has_many :created_step_codes,
+           class_name: "StepCode",
+           foreign_key: "creator_id",
+           inverse_of: :creator,
            dependent: :destroy
-  has_many :applied_jurisdictions,
+
+  has_many :permit_projects,
+           class_name: "PermitProject",
+           foreign_key: :owner_id,
+           dependent: :destroy,
+           inverse_of: :owner
+
+  has_many :pinned_projects, dependent: :destroy
+  has_many :pinned_permit_projects,
+           through: :pinned_projects,
+           source: :permit_project
+
+  # New intermediate association for jurisdictions applied for via permit applications
+  has_many :application_projects,
            through: :permit_applications,
+           source: :permit_project
+
+  has_many :applied_jurisdictions,
+           through: :application_projects,
            source: :jurisdiction
+
   has_many :license_agreements,
            class_name: "UserLicenseAgreement",
            dependent: :destroy
@@ -143,8 +168,18 @@ class User < ApplicationRecord
     review_manager? || regional_review_manager?
   end
 
+  def member_of?(jurisdiction_id)
+    jurisdictions.find_by(id: jurisdiction_id).present?
+  end
+
   def review_staff?
     reviewer? || review_manager? || regional_review_manager?
+  end
+
+  def review_staff_in_jurisdiction?(jurisdiction_to_check)
+    return false unless jurisdiction_to_check && jurisdictions.any? # Guard against nil jurisdiction
+
+    review_staff? && jurisdictions.exists?(jurisdiction_to_check.id)
   end
 
   def role_name

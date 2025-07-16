@@ -23,7 +23,7 @@ class JurisdictionPolicy < ApplicationPolicy
     user.super_admin? ||
       (
         (user.review_staff? || user.technical_support?) &&
-          user.jurisdictions.find(record.id)
+          user.member_of?(record.id)
       )
   end
 
@@ -31,7 +31,7 @@ class JurisdictionPolicy < ApplicationPolicy
     user.super_admin? ||
       (
         (user.manager? || user.technical_support?) &&
-          user.jurisdictions.find(record.id) && !record.g_off?
+          user.member_of?(record.id) && !record.g_off?
       )
   end
 

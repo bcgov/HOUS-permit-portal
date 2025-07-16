@@ -10,18 +10,20 @@ interface IProps {
   // Remove energyPrefix: string;
 }
 
-export const MixedUseEnergyPdf = (_props: IProps) => (
-  <>
-    <Text style={{ fontSize: 10.5, textAlign: "center" }}>{t(`${energyI18nPrefix}.multiOccupancy`)}</Text>
-    <View style={styles.fieldInputContainer}>
-      <Text style={styles.fieldLabel}>{t(`${energyI18nPrefix}.stepRequired`)}</Text>
-      <Input value="-" inputStyles={styles.fieldInput} />
-    </View>
-    {/* Placeholder for Steps graphic */}
-    <Text style={{ fontSize: 10.5, color: theme.colors.text.secondary }}>(Steps graphic omitted)</Text>
-    <View style={styles.fieldInputContainer}>
-      <Text style={styles.fieldLabel}>{t(`${energyI18nPrefix}.achieved`)}</Text>
-      <Input value="-" inputStyles={styles.fieldInput} />
-    </View>
-  </>
-)
+export const MixedUseEnergyPdf = (_props: IProps) => {
+  return (
+    <>
+      <Text style={{ fontSize: 10.5, textAlign: "center" }}>{t(`${energyI18nPrefix}.multiOccupancy`)}</Text>
+      <View style={styles.fieldInputContainer}>
+        <Text style={styles.fieldLabel}>{t(`${energyI18nPrefix}.stepRequired`)}</Text>
+        <Input value="-" inputStyles={styles.fieldInput} />
+      </View>
+      {/* Placeholder for Steps graphic */}
+      <Text style={{ fontSize: 10.5, color: theme.colors.text.secondary }}>(Steps graphic omitted)</Text>
+      <View style={styles.fieldInputContainer}>
+        <Text style={styles.fieldLabel}>{t(`${energyI18nPrefix}.achieved`)}</Text>
+        <Input value="-" inputStyles={styles.fieldInput} />
+      </View>
+    </>
+  )
+}
