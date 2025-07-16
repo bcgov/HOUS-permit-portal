@@ -123,6 +123,7 @@ class Api::RequirementBlocksController < Api::ApplicationController
         :label,
         :input_type,
         :hint,
+        :instructions,
         :required,
         :related_content,
         :required_for_in_person_hint,

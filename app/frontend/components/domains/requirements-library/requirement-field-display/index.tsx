@@ -31,6 +31,7 @@ export type TRequirementFieldDisplayProps = {
   label?: string
   options?: string[]
   helperText?: string
+  instructions?: string
   unit?: ENumberUnit | null
   selectProps?: Partial<SelectProps>
   addMultipleContactProps?: {

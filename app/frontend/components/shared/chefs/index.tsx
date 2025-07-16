@@ -36,7 +36,11 @@ Templates.current = {
   },
   label: {
     form: (ctx) => {
-      let template = defaultLabelTemplate(ctx)
+      let template = ""
+      if (ctx?.component?.instructions) {
+        template = `<div class="form-group-instructions">${ctx.component.instructions}</div>`
+      }
+      template = template.concat(defaultLabelTemplate(ctx))
       if (ctx?.component?.computedCompliance) {
         let result = ctx?.component?.computedComplianceResult
 
