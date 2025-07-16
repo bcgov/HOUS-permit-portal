@@ -594,6 +594,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_10_191449) do
     t.uuid "requirement_block_id", null: false
     t.integer "position"
     t.boolean "elective", default: false
+    t.text "instructions"
     t.index ["requirement_block_id"], name: "index_requirements_on_requirement_block_id"
   end
 
