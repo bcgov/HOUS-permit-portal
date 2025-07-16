@@ -19,6 +19,15 @@ class Api::ApplicationController < ActionController::API
 
   protected
 
+  def page_meta(search_results)
+    {
+      total_pages: search_results.total_pages,
+      total_count: search_results.total_count,
+      current_page: search_results.current_page,
+      per_page: search_results.limit_value
+    }
+  end
+
   def apply_search_authorization(results, policy_action = action_name)
     results.select { |result| policy(result).send("#{policy_action}?".to_sym) }
   end

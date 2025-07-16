@@ -29,13 +29,12 @@ export const MixedUseSummary = function StepCodePart3ChecklistPDFMixedUseSummary
     )
   }
 
-  const isBaseline = checklist.isBaseline
-
+  const isBaseline = R.isEmpty(checklist.stepCodeOccupancies)
   return (
     <Panel heading={t(`${i18nPrefix}.heading`)} break>
       {/* Whole Building Performance Section */}
       <View style={styles.sectionContainer}>
-        <Text style={styles.title}>{t("stepCode.part3.stepCodeSummary.mixedUse.wholeBuilding.title")}</Text>z
+        <Text style={styles.title}>{t("stepCode.part3.stepCodeSummary.mixedUse.wholeBuilding.title")}</Text>
         {isBaseline ? (
           <BaselineWholeBuildingPdf
             requirements={requirements}

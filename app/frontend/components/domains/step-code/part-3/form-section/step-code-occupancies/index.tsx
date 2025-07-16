@@ -39,7 +39,7 @@ export const StepCodeOccupancies = observer(function Part3StepCodeFormStepCodeOc
   const navigate = useNavigate()
   const location = useLocation()
 
-  const { handleSubmit, formState, control, reset } = useForm({
+  const { handleSubmit, formState, control, reset, trigger } = useForm({
     mode: "onSubmit",
     defaultValues: { stepCodeOccupancies: checklist.stepCodeOccupancies.map((oc) => oc.key) },
   })
@@ -119,6 +119,11 @@ export const StepCodeOccupancies = observer(function Part3StepCodeFormStepCodeOc
     }
   }, [isValid])
 
+  useEffect(() => {
+    // trigger validation when the isRelevant value changes, as it is a dependency for the validation
+    trigger("stepCodeOccupancies")
+  }, [isRelevant, trigger])
+
   const handleIsRelevantChange = (newValue: string) => {
     setIsRelevant(newValue)
     if (newValue === "no" && R.isEmpty(checklist.baselineOccupancies)) {
@@ -165,7 +170,14 @@ export const StepCodeOccupancies = observer(function Part3StepCodeFormStepCodeOc
                 </FormHelperText>
                 <Controller
                   name="stepCodeOccupancies"
-                  rules={{ required: t(`${i18nPrefix}.occupancies.error`) }}
+                  rules={{
+                    validate: (value) => {
+                      if (isRelevant === "yes" && (!value || value.length === 0)) {
+                        return t(`${i18nPrefix}.occupancies.error`)
+                      }
+                      return true
+                    },
+                  }}
                   control={control}
                   render={({ field: { onChange, value } }) => (
                     <CheckboxGroup defaultValue={value} onChange={onChange}>

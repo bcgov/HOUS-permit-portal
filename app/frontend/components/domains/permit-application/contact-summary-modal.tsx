@@ -93,9 +93,7 @@ export const ContactSummaryModal = ({ isOpen, onOpen, onClose, permitApplication
                 />
               )
             })}
-            {permitApplication.stepCode && (
-              <EnergyAdvisor checklist={permitApplication.stepCode.preConstructionChecklist} />
-            )}
+            {permitApplication.stepCode && <EnergyAdvisor checklist={permitApplication.stepCode.primaryChecklist} />}
           </SearchGrid>
         </ModalBody>
       </ModalContent>

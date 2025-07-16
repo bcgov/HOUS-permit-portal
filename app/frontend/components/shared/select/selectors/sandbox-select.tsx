@@ -1,10 +1,10 @@
-import { Select, SelectProps } from "@chakra-ui/react"
+import { Box, Radio, RadioGroup, RadioGroupProps, Stack, Text } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { IOption } from "../../../../types/types"
 
-interface ISandboxSelectProps extends Omit<SelectProps, "onChange"> {
+interface ISandboxSelectProps extends Omit<RadioGroupProps, "onChange" | "children"> {
   onChange: (value: string) => void
   value?: string // Make value optional
   options: IOption[]
@@ -19,22 +19,55 @@ export const SandboxSelect = observer(function SandboxSelect({
   ...rest
 }: ISandboxSelectProps) {
   const { t } = useTranslation()
-
   return (
-    <Select
+    <RadioGroup
       id="sandbox-select"
       aria-label="Select a sandbox"
       w="full"
-      onChange={(e) => onChange(e.target.value)}
+      onChange={onChange}
       value={value || ""}
       {...rest}
     >
-      {includeLive && <option value={""}>{t("sandbox.live")}</option>}
-      {options.map((s) => (
-        <option key={s.value} value={s.value}>
-          {s.label}
-        </option>
-      ))}
-    </Select>
+      <Stack>
+        {includeLive && (
+          <Radio
+            value=""
+            size="lg"
+            alignItems="flex-start"
+            color="greys.grey01"
+            bg="greys.grey04"
+            border="1px solid"
+            borderColor="greys.grey01"
+          >
+            <Box>
+              <Text fontWeight="bold">{t("sandbox.live")}</Text>
+            </Box>
+          </Radio>
+        )}
+        {options.map((s) => (
+          <Radio
+            key={s.value}
+            value={s.value}
+            size="lg"
+            alignItems="flex-start"
+            color="greys.grey01"
+            bg="greys.grey04"
+            border="1px solid"
+            borderColor="greys.grey01"
+          >
+            <Box>
+              <Text fontWeight="bold" mb={1}>
+                {s.label}
+              </Text>
+              {s.description && (
+                <Text color="gray.600" fontSize="sm">
+                  {s.description}
+                </Text>
+              )}
+            </Box>
+          </Radio>
+        ))}
+      </Stack>
+    </RadioGroup>
   )
 })

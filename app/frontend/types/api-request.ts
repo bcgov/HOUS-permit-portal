@@ -1,5 +1,5 @@
 import { IRevisionReason } from "../models/revision-reason"
-import { ELandingTemplateKeys, ENumberUnit, ERequirementType, ETagType, EVisibility } from "./enums"
+import { ENumberUnit, ERequirementType, ETagType, EVisibility } from "./enums"
 import {
   IHelpLinkItems,
   IOption,
@@ -8,6 +8,17 @@ import {
   TComputedCompliance,
   TConditional,
 } from "./types"
+
+// Define the common file structure for API attachments
+export interface IUppyAttachmentFile {
+  id: string
+  storage?: string
+  metadata: {
+    size: number
+    filename: string
+    mimeType: string
+  }
+}
 
 export interface IFormConditional {
   when: string
@@ -48,15 +59,7 @@ export interface IRequirementBlockParams {
   requirementDocumentsAttributes?: Array<{
     id?: string
     _destroy?: boolean
-    file: {
-      id: string
-      storage: string
-      metadata: {
-        size: number
-        filename: string
-        mimeType: string
-      }
-    }
+    file: IUppyAttachmentFile
   }>
 }
 
@@ -101,12 +104,12 @@ export interface IInvitePreviewersParams {
 }
 
 export interface ISiteConfigurationUpdateParams {
-  displaySitewideMessage?: boolean | null
-  inboxEnabled?: boolean | null
-  sitewideMessage?: string | null
+  displaySitewideMessage?: boolean
+  sitewideMessage?: string
+  inboxEnabled?: boolean
   helpLinkItems?: IHelpLinkItems
   revisionReasonsMap?: { [key: string]: IRevisionReason }
-  [ELandingTemplateKeys.SmallScale]?: string | null
+  landingPageEarlyAccessRequirementTemplateIds?: string[] | null
   revisionReasonsAttributes?: IRevisionReasonsAttributes[]
 }
 
@@ -127,4 +130,18 @@ export interface IExternalApiKeyParams {
 
 export interface IIntegrationMappingUpdateParams {
   simplifiedMap?: ISimplifiedRequirementsMap
+}
+
+// Added for Permit Project Updates
+export interface IProjectDocumentAttribute {
+  id?: string
+  permitProjectId?: string
+  file?: IUppyAttachmentFile
+  _destroy?: boolean
+}
+
+export interface IPermitProjectUpdateParams {
+  description?: string
+  // other PermitProject fields that can be updated
+  projectDocumentsAttributes?: IProjectDocumentAttribute[]
 }

@@ -33,7 +33,6 @@ interface ILoginScreenProps {
 
 export const LoginScreen = ({ isAdmin }: ILoginScreenProps) => {
   const { t } = useTranslation()
-  // const isMdOrLarger = useBreakpointValue({ base: false, md: true })
 
   return (
     <CenterContainer h="full" maxW={isAdmin ? "container.md" : "container.lg"}>

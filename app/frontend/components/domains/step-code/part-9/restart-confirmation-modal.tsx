@@ -14,14 +14,19 @@ import { ArrowCounterClockwise } from "@phosphor-icons/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React from "react"
+import { useNavigate } from "react-router-dom"
 import { useMst } from "../../../../setup/root"
 
 export const RestartConfirmationModal = observer(function RestartStepCodeConfirmationModal() {
   const { isOpen, onOpen, onClose } = useDisclosure()
   const { stepCodeStore } = useMst()
+  const navigate = useNavigate()
 
   const handleDeleteStepCode = async () => {
-    await stepCodeStore.deleteStepCode()
+    const response = await stepCodeStore.deleteStepCode()
+    if (response?.ok) {
+      navigate(0)
+    }
     onClose()
   }
 

@@ -5,7 +5,7 @@ RSpec.describe PermitApplication, type: :model do
     subject { build_stubbed(:permit_application) }
 
     it { should belong_to(:submitter).class_name("User") }
-    it { should belong_to(:jurisdiction) }
+    it { should belong_to(:permit_project).optional }
   end
 
   describe "enums" do

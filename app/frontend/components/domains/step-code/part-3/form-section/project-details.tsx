@@ -1,8 +1,10 @@
 import {
   Button,
+  Center,
   Flex,
   FormControl,
   FormControlProps,
+  FormErrorMessage,
   FormLabel,
   Input,
   InputGroup,
@@ -13,40 +15,89 @@ import {
 import { MapPin } from "@phosphor-icons/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
-import React from "react"
+import React, { useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { Trans } from "react-i18next"
 import { useLocation, useNavigate, useParams } from "react-router-dom"
 import { usePart3StepCode } from "../../../../../hooks/resources/use-part-3-step-code"
+import { EStepCodeParentType } from "../../../../../types/enums"
+import { SharedSpinner } from "../../../../shared/base/shared-spinner"
 import { SectionHeading } from "./shared/section-heading"
+
+interface IProjectDetailsForm {
+  fullAddress?: string
+  projectIdentifier?: string
+}
 
 export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails() {
   const i18nPrefix = "stepCode.part3.projectDetails"
-  const { permitApplicationId } = useParams()
-  const { checklist } = usePart3StepCode()
+  const { permitApplicationId: routePermitApplicationId } = useParams()
+  const { checklist, stepCode } = usePart3StepCode()
 
   const navigate = useNavigate()
   const location = useLocation()
 
-  const { handleSubmit, formState } = useForm()
-  const { isSubmitting } = formState
+  const {
+    handleSubmit,
+    register,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<IProjectDetailsForm>()
 
-  const onSubmit = async () => {
-    if (!checklist) return
+  useEffect(() => {
+    if (checklist && stepCode) {
+      reset({
+        fullAddress: stepCode.fullAddress || "",
+        projectIdentifier: stepCode.projectIdentifier || "",
+      })
+    }
+  }, [checklist, stepCode, reset])
 
-    const alternatePath = checklist.alternateNavigateAfterSavePath
-    checklist.setAlternateNavigateAfterSavePath(null)
+  const onSubmit = async (data: IProjectDetailsForm) => {
+    if (!checklist || !stepCode) return
 
-    const updateSucceeded = await checklist.completeSection("projectDetails")
+    const stepCodeAttributes: Partial<IProjectDetailsForm & { id: string }> = { id: stepCode.id }
+    let needsUpdate = false
 
-    if (updateSucceeded) {
-      if (alternatePath) {
-        navigate(alternatePath)
-      } else {
-        navigate(location.pathname.replace("project-details", "location-details"))
+    if (stepCode.parentType == EStepCodeParentType.User) {
+      if (!stepCode.fullAddress && data.fullAddress) {
+        stepCodeAttributes.fullAddress = data.fullAddress
+        needsUpdate = true
       }
     }
+
+    let checklistUpdateSucceeded = true
+    if (needsUpdate) {
+      checklistUpdateSucceeded = await checklist.update({ step_code_attributes: stepCodeAttributes })
+    }
+
+    if (checklistUpdateSucceeded) {
+      const alternatePath = checklist.alternateNavigateAfterSavePath
+      checklist.setAlternateNavigateAfterSavePath(null)
+      const sectionCompleteSucceeded = await checklist.completeSection("projectDetails")
+      if (sectionCompleteSucceeded) {
+        if (alternatePath) {
+          navigate(alternatePath)
+        } else {
+          navigate(location.pathname.replace("project-details", "location-details"))
+        }
+      }
+    } else {
+      console.error("Failed to update checklist project details")
+    }
   }
+
+  if (!checklist || !stepCode) {
+    return (
+      <Center p={10}>
+        <SharedSpinner />
+      </Center>
+    )
+  }
+
+  const isParentPermitProject = stepCode.parentType === EStepCodeParentType.PermitProject
+
+  const isEditable = (fieldValue: string | undefined | null) => !isParentPermitProject
 
   return (
     <>
@@ -56,32 +107,48 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
       </Flex>
       <form onSubmit={handleSubmit(onSubmit)} name="part3SectionForm">
         <Flex direction="column" gap={{ base: 6, xl: 6 }} pb={4}>
-          <Field label={t(`${i18nPrefix}.name`)} value={checklist.projectName} />
+          <Field label={t(`${i18nPrefix}.name`)} value={stepCode.projectName} />
+
           <Flex gap={{ base: 6, xl: 6 }} direction={{ base: "column", xl: "row" }}>
-            <FormControl width={{ base: "auto", xl: "430px" }}>
-              <FormLabel fontWeight="bold">{t(`${i18nPrefix}.address`)}</FormLabel>
-              <InputGroup>
-                <InputLeftElement pointerEvents="none">
-                  <MapPin />
-                </InputLeftElement>
-                <Input isDisabled value={checklist.projectAddress} />
-              </InputGroup>
-            </FormControl>
-            <Field flex={1} label={t(`${i18nPrefix}.jurisdiction`)} value={checklist.jurisdictionName} />
+            {isEditable(stepCode.fullAddress) ? (
+              <FormControl isInvalid={!!errors.fullAddress} width={{ base: "auto", xl: "430px" }}>
+                <FormLabel htmlFor="fullAddress">{t(`${i18nPrefix}.address`)}</FormLabel>
+                <InputGroup>
+                  <InputLeftElement pointerEvents="none">
+                    <MapPin />
+                  </InputLeftElement>
+                  <Input id="fullAddress" {...register("fullAddress")} />
+                </InputGroup>
+                <FormErrorMessage>{errors.fullAddress?.message}</FormErrorMessage>
+              </FormControl>
+            ) : (
+              <FormControl width={{ base: "auto", xl: "430px" }}>
+                <FormLabel fontWeight="bold">{t(`${i18nPrefix}.address`)}</FormLabel>
+                <InputGroup>
+                  <InputLeftElement pointerEvents="none">
+                    <MapPin />
+                  </InputLeftElement>
+                  <Input isDisabled value={stepCode.fullAddress || ""} />
+                </InputGroup>
+              </FormControl>
+            )}
+
+            <Field flex={1} label={t(`${i18nPrefix}.jurisdiction`)} value={stepCode.jurisdictionName} />
           </Flex>
+
           <Flex gap={{ base: 6, xl: 6 }} direction={{ base: "column", xl: "row" }}>
             <Flex
               gap={{ base: 6, xl: 6 }}
               width={{ base: "auto", xl: "430px" }}
               direction={{ base: "column", lg: "row" }}
             >
-              <Field label={t(`${i18nPrefix}.identifier`)} value={checklist.projectIdentifier} />
+              <Field label={t(`${i18nPrefix}.identifier`)} value={stepCode.projectIdentifier} />
               <Field
                 label={t(`${i18nPrefix}.stage`)}
                 value={checklist.projectStage ? t(`${i18nPrefix}.stages.${checklist.projectStage}`) : ""}
               />
             </Flex>
-            <Field flex={1} label={t(`${i18nPrefix}.date`)} value={checklist.permitDate || ""} />
+            <Field flex={1} label={t(`${i18nPrefix}.date`)} value={stepCode.permitDate || ""} />
           </Flex>
           <Field
             maxWidth={{ base: "none", xl: "430px" }}
@@ -100,7 +167,7 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
             <Trans
               i18nKey={`${i18nPrefix}.modify`}
               components={{
-                1: <Link href={`/permit-applications/${permitApplicationId}/edit`} />,
+                1: <Link href={`/permit-applications/${routePermitApplicationId}/edit`} />,
               }}
             />
           </Text>
@@ -112,14 +179,14 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
 
 interface IFieldProps extends FormControlProps {
   label: string
-  value: string
+  value: string | undefined
 }
 
 const Field = function Field({ label, value, ...props }: IFieldProps) {
   return (
     <FormControl {...props}>
       <FormLabel>{label}</FormLabel>
-      <Input isDisabled value={value} textOverflow="ellipsis" textAlign="left" />
+      <Input isDisabled value={value || ""} textOverflow="ellipsis" textAlign="left" />
     </FormControl>
   )
 }
