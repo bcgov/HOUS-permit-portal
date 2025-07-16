@@ -72,6 +72,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_10_191449) do
     t.string "professional_number"
     t.string "contactable_type"
     t.uuid "contactable_id"
+    t.string "contact_type"
     t.index ["contactable_type", "contactable_id"], name: "index_contacts_on_contactable"
   end
 

@@ -403,6 +403,11 @@ class RequirementFormJsonService
           get_contact_field_form_json(:organization, parent_key, false),
           get_contact_field_form_json(:title, parent_key, required)
         ]
+      ),
+      get_contact_type_component(
+        parent_key,
+        false,
+        get_general_contact_type_options
       )
     ]
   end
@@ -434,7 +439,12 @@ class RequirementFormJsonService
         ]
       ),
       get_contact_field_form_json(:professional_association, parent_key, false),
-      get_contact_field_form_json(:professional_number, parent_key, false)
+      get_contact_field_form_json(:professional_number, parent_key, false),
+      get_contact_type_component(
+        parent_key,
+        false,
+        get_professional_contact_type_options
+      )
     ]
   end
 
@@ -643,5 +653,37 @@ class RequirementFormJsonService
     components = snake_str.split("_")
     # capitalize the first letter of each component except the first
     components[0] + components[1..-1].map(&:capitalize).join
+  end
+
+  private
+
+  def get_general_contact_type_options
+    I18n
+      .t("formio.requirement.contact.contact_type_options.general")
+      .map { |key, value| { label: value, value: key.to_s.camelize(:lower) } }
+  end
+
+  def get_professional_contact_type_options
+    I18n
+      .t("formio.requirement.contact.contact_type_options.professional")
+      .map { |key, value| { label: value, value: key.to_s.camelize(:lower) } }
+  end
+
+  def get_contact_type_component(parent_key, required, options)
+    key = "#{parent_key}|contactType"
+    {
+      "label" => "Contact Type",
+      "widget" => "choicesjs",
+      "tableView" => true,
+      "key" => key,
+      "type" => "select",
+      "input" => true,
+      "data" => {
+        "values" => options
+      },
+      "validate" => {
+        "required" => required
+      }
+    }
   end
 end

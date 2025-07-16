@@ -323,6 +323,7 @@ const requirementsComponentMap = {
       },
       { type: ERequirementContactFieldItemType.title },
       { type: ERequirementContactFieldItemType.organization },
+      { type: ERequirementContactFieldItemType.contactType },
     ]
 
     return <GenericContactDisplay contactFieldItems={contactFieldItemTypes} {...props} />
@@ -350,6 +351,7 @@ const requirementsComponentMap = {
       { type: ERequirementContactFieldItemType.businessLicense },
       { type: ERequirementContactFieldItemType.professionalAssociation },
       { type: ERequirementContactFieldItemType.professionalNumber },
+      { type: ERequirementContactFieldItemType.contactType },
     ]
 
     return <GenericContactDisplay contactFieldItems={contactFieldItemTypes} {...props} />

@@ -6,6 +6,7 @@ class Contact < ApplicationRecord
                organization
                department
                professional_association
+               contact_type
              ],
              word_start: %i[
                first_name
@@ -14,6 +15,7 @@ class Contact < ApplicationRecord
                organization
                department
                professional_association
+               contact_type
              ]
 
   validates :email,
@@ -43,6 +45,7 @@ class Contact < ApplicationRecord
       organization: organization,
       department: department,
       professional_association: professional_association,
+      contact_type: contact_type,
       contactable_id: contactable_id,
       created_at: created_at
     }

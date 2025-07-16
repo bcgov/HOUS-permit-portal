@@ -322,6 +322,7 @@ export enum ERequirementContactFieldItemType {
   businessLicense = "businessLicense",
   professionalAssociation = "professionalAssociation",
   professionalNumber = "professionalNumber",
+  contactType = "contactType",
 }
 
 export enum EGovFeedbackResponseNoReason {

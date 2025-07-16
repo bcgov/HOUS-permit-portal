@@ -52,6 +52,7 @@ export type DeepPartial<T> = T extends object
 export type TLatLngTuple = [number, number]
 
 export interface IContact {
+  contactType: string
   id: string
   firstName: string
   lastName: string
@@ -81,6 +82,11 @@ export interface IPermitTypeSubmissionContact {
 export interface ISort<TField = string> {
   field: TField
   direction: ESortDirection
+}
+
+export interface IOptionGroup {
+  label: string
+  options: IOption[]
 }
 
 export interface IOption<TValue = string> {
