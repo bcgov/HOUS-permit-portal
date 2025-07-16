@@ -16,7 +16,7 @@ export const ProjectInfo = function StepCodePart3ChecklistPDFProjectInfo({ check
     <Panel heading={t(`${i18nPrefix}.heading`)}>
       <Field label={t(`${i18nPrefix}.name`)} value={checklist.projectName} />
       <View style={{ display: "flex", flexDirection: "row", gap: 6 }}>
-        <Field label={t(`${i18nPrefix}.address`)} value={checklist.projectAddress} style={{ flex: 1 }} />
+        <Field label={t(`${i18nPrefix}.address`)} value={checklist.fullAddress} style={{ flex: 1 }} />
         <Field label={t(`${i18nPrefix}.jurisdiction`)} value={checklist.jurisdictionName} style={{ flex: 1 }} />
       </View>
       <View style={{ display: "flex", flexDirection: "row", gap: 6 }}>

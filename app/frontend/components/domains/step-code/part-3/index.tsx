@@ -5,7 +5,6 @@ import React, { Suspense, useEffect } from "react"
 import { RemoveScroll } from "react-remove-scroll"
 import { useNavigate, useParams } from "react-router-dom"
 import { usePart3StepCode } from "../../../../hooks/resources/use-part-3-step-code"
-import { usePermitApplication } from "../../../../hooks/resources/use-permit-application"
 import { useMst } from "../../../../setup/root"
 import { SharedSpinner } from "../../../shared/base/shared-spinner"
 import { FloatingHelpDrawer } from "../../../shared/floating-help-drawer"
@@ -13,35 +12,15 @@ import { StepCodeNavBar } from "../nav-bar"
 import { Part3NavLinks } from "../nav-bar/part-3-nav-links"
 import { FormSection } from "./form-section"
 import { Sidebar } from "./sidebar"
-import { defaultSectionCompletionStatus } from "./sidebar/nav-sections"
 import { SideBarDrawer } from "./sidebar/side-bar-drawer"
 
 export const Part3StepCodeForm = observer(function Part3StepCodeForm() {
   const { permitApplicationId, section } = useParams()
   const {
     stepCodeStore: { createPart3StepCode },
-    permitApplicationStore: { getPermitApplicationById },
   } = useMst()
   const { stepCode } = usePart3StepCode()
   const navigate = useNavigate()
-  const isEarlyAccess = !permitApplicationId
-
-  const permitApplication = !isEarlyAccess && getPermitApplicationById(permitApplicationId)
-
-  usePermitApplication()
-
-  // create the step code if needed
-  useEffect(() => {
-    if (!!stepCode) return // step code already exists
-    if (!isEarlyAccess && !permitApplication?.isFullyLoaded) return // wait for permit application to load
-
-    if (!stepCode) {
-      createPart3StepCode({
-        permitApplicationId, // nil for early access
-        checklistAttributes: { sectionCompletionStatus: defaultSectionCompletionStatus },
-      })
-    }
-  }, [permitApplication?.isFullyLoaded, stepCode])
 
   // handle redirect if no section is specified
   useEffect(() => {

@@ -86,6 +86,8 @@ class Api::Part3Building::ChecklistsController < Api::ApplicationController
       :completed_by_title,
       :completed_by_email,
       :completed_by_organization_name,
+      :building_code_version,
+      :project_stage,
       section_completion_status: {
       },
       baseline_occupancies_attributes: %i[
@@ -131,7 +133,8 @@ class Api::Part3Building::ChecklistsController < Api::ApplicationController
         document_name
         date_issued
         prepared_by
-      ]
+      ],
+      step_code_attributes: %i[id full_address]
     )
   end
 end

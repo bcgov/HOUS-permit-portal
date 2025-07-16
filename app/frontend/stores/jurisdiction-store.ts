@@ -9,7 +9,7 @@ import { withRootStore } from "../lib/with-root-store"
 import { IJurisdiction, JurisdictionModel } from "../models/jurisdiction"
 import { EJurisdictionSortFields } from "../types/enums"
 import { IJurisdictionFilters } from "../types/types"
-import { isUUID, keysToCamelCase, setQueryParam, toCamelCase } from "../utils/utility-functions"
+import { isUUID, setQueryParam, toCamelCase } from "../utils/utility-functions"
 
 export const JurisdictionStoreModel = types
   .compose(
@@ -90,35 +90,9 @@ export const JurisdictionStoreModel = types
         })
       )
       if (response.ok) {
-        const camelizedData = keysToCamelCase(response.data.data) as IJurisdiction[]
-        let sortedData = camelizedData
-
-        if (self.sort && self.sort.field === "reverse_qualified_name") {
-          sortedData = camelizedData.sort((a: any, b: any) => {
-            const nameA = a.reverseQualifiedName?.toUpperCase() || ""
-            const nameB = b.reverseQualifiedName?.toUpperCase() || ""
-            if (self.sort.direction === "asc") {
-              return nameA.localeCompare(nameB)
-            } else {
-              return nameB.localeCompare(nameA)
-            }
-          })
-        }
-
-        self.mergeUpdateAll(sortedData, "jurisdictionMap")
-
-        const page = opts?.page ?? self.currentPage
-        const perPage = opts?.countPerPage ?? self.countPerPage
-        const startIndex = (page - 1) * perPage
-        const endIndex = startIndex + perPage
-        const paginatedData = sortedData.slice(startIndex, endIndex)
-
-        self.tableJurisdictions = cast(paginatedData.map((jurisdiction) => jurisdiction.id))
-
-        self.currentPage = page
-        self.countPerPage = perPage
-        self.totalPages = response.data.meta.totalPages
-        self.totalCount = response.data.meta.totalCount
+        self.mergeUpdateAll(response.data.data, "jurisdictionMap")
+        self.tableJurisdictions = cast(response.data.data.map((jurisdiction) => jurisdiction.id))
+        self.setPageFields(response.data.meta, opts)
       }
       return response.ok
     }),

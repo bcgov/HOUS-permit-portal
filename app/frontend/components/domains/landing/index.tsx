@@ -21,6 +21,7 @@ import { useMst } from "../../../setup/root"
 import { JurisdictionSearch } from "../../shared/jurisdiction-search"
 import { RouterLink } from "../../shared/navigation/router-link"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
+import { StepCodeLookupTool } from "../project-readiness-tools/step-code-lookup-tool"
 
 interface ILandingScreenProps {}
 
@@ -82,6 +83,12 @@ export const LandingScreen = observer(({}: ILandingScreenProps) => {
           </Container>
         </Flex>
       </Flex>
+      <Box bg="greys.grey03">
+        <Flex as="section" direction="column" gap={20}>
+          <StepCodeLookupTool showJurisdictionOnPage={true} />
+        </Flex>
+      </Box>
+
       <Container maxW="container.lg" py={16} px={8}>
         <Flex as="section" direction="column" gap={20}>
           <Flex gap={6} direction={{ base: "column", md: "row" }}>

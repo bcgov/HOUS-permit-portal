@@ -8,6 +8,7 @@ export const RequirementModel = types
     label: types.string,
     requirementCode: types.string,
     hint: types.maybeNull(types.string),
+    instructions: types.maybeNull(types.string),
     formJson: types.maybeNull(types.frozen<IFormIORequirement>()),
     inputType: types.enumeration<ERequirementType[]>(Object.values(ERequirementType)),
     inputOptions: types.frozen<IRequirementOptions>({}),

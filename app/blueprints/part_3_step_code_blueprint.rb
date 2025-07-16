@@ -1,8 +1,4 @@
-class Part3StepCodeBlueprint < Blueprinter::Base
-  identifier :id
-
-  fields :type
-
+class Part3StepCodeBlueprint < StepCodeBaseBlueprint
   association :checklist, blueprint: StepCode::Part3::ChecklistBlueprint
 
   field :energy_steps do |_step_code, _options|
