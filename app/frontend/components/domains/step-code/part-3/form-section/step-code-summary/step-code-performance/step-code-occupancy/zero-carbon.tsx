@@ -11,6 +11,7 @@ export const StepCodeZeroCarbonPerformance = observer(function StepCodeZeroCarbo
   const { checklist } = usePart3StepCode()
   const stepAchieved = checklist.complianceReport.performance.complianceSummary.zeroCarbonStepAchieved
   const occupancy: IStepCodeOccupancy = checklist.stepCodeOccupancies[0]
+  const achievedRequired = stepAchieved >= occupancy.zeroCarbonStepRequired
 
   return (
     <VStack flex={1} spacing={4} borderWidth={1} borderColor="border.light" rounded="md" p={4}>
@@ -37,8 +38,13 @@ export const StepCodeZeroCarbonPerformance = observer(function StepCodeZeroCarbo
         </FormLabel>
         <Input
           maxW={"124px"}
-          value={t(`stepCodeChecklist.edit.codeComplianceSummary.zeroCarbonStepCode.steps.${stepAchieved}`)}
           isDisabled
+          _disabled={{
+            fontWeight: "bold",
+            bg: !!achievedRequired ? "semantic.successLight" : "semantic.errorLight",
+            borderColor: !!achievedRequired ? "semantic.success" : "semantic.error",
+          }}
+          value={t(`stepCodeChecklist.edit.codeComplianceSummary.zeroCarbonStepCode.steps.${stepAchieved || 0}`)}
         />
       </FormControl>
     </VStack>

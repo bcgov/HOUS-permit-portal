@@ -160,9 +160,9 @@ export const ModelledEnergyOutputsGrid = observer(({ ...rest }: IProps) => {
             </GridRowHeader>
             <GridData colSpan={2}>
               <Input
-                value={
-                  fuelTypeIdsToAnnualEnergy[fuelType.id]?.toLocaleString?.("en-CA", { maximumFractionDigits: 3 }) ?? ""
-                }
+                value={(fuelTypeIdsToAnnualEnergy[fuelType.id] ?? 0).toLocaleString("en-CA", {
+                  maximumFractionDigits: 3,
+                })}
                 {...disabledInputProps}
               />
             </GridData>
@@ -171,9 +171,7 @@ export const ModelledEnergyOutputsGrid = observer(({ ...rest }: IProps) => {
             </GridData>
             <GridData colSpan={1} borderRightWidth={1}>
               <Input
-                value={
-                  fuelTypeIdsToEmissions[fuelType.id]?.toLocaleString?.("en-CA", { maximumFractionDigits: 3 }) ?? ""
-                }
+                value={(fuelTypeIdsToEmissions[fuelType.id] ?? 0).toLocaleString("en-CA", { maximumFractionDigits: 3 })}
                 {...disabledInputProps}
               />
             </GridData>

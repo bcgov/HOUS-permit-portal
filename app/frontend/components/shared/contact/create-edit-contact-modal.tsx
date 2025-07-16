@@ -146,8 +146,8 @@ export const CreateEditContactModal = ({
                 <TextFormControl label={t("contact.fields.lastName")} fieldName="lastName" required />
               </Flex>
               <Flex direction={{ base: "column", md: "row" }} gap={2}>
-                <EmailFormControl validate fieldName="email" />
-                <PhoneFormControl label={t("contact.fields.phone")} fieldName="phone" />
+                <EmailFormControl validate fieldName="email" required />
+                <PhoneFormControl label={t("contact.fields.phone")} fieldName="phone" required />
               </Flex>
               <TextFormControl label={t("contact.fields.extension")} fieldName="extension" />
               <PhoneFormControl label={t("contact.fields.cell")} fieldName="cell" />

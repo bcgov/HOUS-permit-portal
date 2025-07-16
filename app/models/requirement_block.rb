@@ -81,7 +81,7 @@ class RequirementBlock < ApplicationRecord
       id: id,
       key: key(section_key),
       type: "panel",
-      title: name,
+      title: display_name,
       description: display_description,
       collapsible: true,
       collapsed: false,

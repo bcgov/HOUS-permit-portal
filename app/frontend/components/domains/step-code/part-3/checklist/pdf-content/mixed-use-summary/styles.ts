@@ -19,7 +19,6 @@ export const styles = {
     padding: 6,
     fontSize: 10.5,
     borderStyle: "solid" as const,
-    borderWidth: 0,
     borderRightWidth: 0.75,
     borderBottomWidth: 0.75,
     borderColor: theme.colors.greys.grey02,

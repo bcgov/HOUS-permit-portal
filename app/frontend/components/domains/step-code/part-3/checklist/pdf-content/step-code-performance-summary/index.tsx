@@ -32,7 +32,6 @@ export const StepCodePerformanceSummary = function StepCodePart3ChecklistPDFStep
       occupancyName = t(`stepCode.part3.stepCodeOccupancyKeys.${checklist.stepCodeOccupancies?.[0]?.key}`)
     }
   }
-
   return (
     <Panel heading={t(`${i18nPrefix}.heading`)} break>
       <Field

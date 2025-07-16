@@ -3,7 +3,7 @@ class CollaboratorPolicy < ApplicationPolicy
     if record.collaboratorable_type == "User"
       record.collaboratorable_id == user.id
     elsif record.collaboratorable_type == "Jurisdiction"
-      user.jurisdictions.find(record.collaboratorable_id).present?
+      user.member_of?(record.collaboratorable_id)
     else
       false
     end

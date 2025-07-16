@@ -74,6 +74,7 @@ en:
           attributes:
             public:
               true_on_early_access_only: "can only be true for early access"
+              landing_published_requires_public: "cannot be set to false because a site configuration is set to use this template on the landing page."
             template_versions:
               published_required_for_early_access: "requires one or less published template version on early access"
         requirement_block:
@@ -483,6 +484,9 @@ en:
       update_error:
         title: Error
         message: "%{error_message}"
+      file_not_found_error:
+        title: Error
+        message: "There was an error saving your uploaded files, please re-upload and try again."
       save_success:
         title: ""
         message: "Permit application successfully updated!"
@@ -525,7 +529,22 @@ en:
       create_or_update_permit_block_status_error:
         title: Error
         message: "There was an error updating permit block status"
-
+    permit_project:
+      create_success:
+        title: ""
+        message: "Permit project pinned successfully"
+      create_error:
+        title: Error
+        message: "%{error_message}"
+      pin_success:
+        title: ""
+        message: "Permit project pinned successfully"
+      unpin_success:
+        title: ""
+        message: "Permit project unpinned successfully"
+      unpin_error:
+        title: Error
+        message: "There was an error unpinning the project"
     permit_collaboration:
       destroy_success:
         title: ""
@@ -553,12 +572,15 @@ en:
         tite: "Oops"
         message: "%{error_message}"
     step_code:
-      h2k_imported:
+      create_success:
         title: ""
-        message: "Your Hot2000 file has been successfully imported. Please review the imported fields."
+        message: "Step code created successfully!"
       create_error:
         title: Error
         message: "%{error_message}"
+      h2k_imported:
+        title: ""
+        message: "Your Hot2000 file has been successfully imported. Please review the imported fields."
     step_code_checklist:
       update_success:
         title: ""
@@ -579,6 +601,28 @@ en:
       not_found_error:
         title: "Error"
         message: 404 - The requested resource could not be found
+    s3:
+      multipart_init_failed:
+        title: "File Upload Error"
+        message: "Could not start the multipart upload."
+      missing_params_for_batch_presign:
+        title: "File Upload Error"
+        message: "Missing parameters for generating upload URLs."
+      batch_presign_failed:
+        title: "File Upload Error"
+        message: "Could not generate URLs for file parts."
+      missing_params_for_complete:
+        title: "File Upload Error"
+        message: "Missing parameters to complete the upload."
+      multipart_complete_failed:
+        title: "File Upload Error"
+        message: "Could not complete the multipart upload."
+      missing_params_for_abort:
+        title: "File Upload Error"
+        message: "Missing parameters to abort the upload."
+      multipart_abort_failed:
+        title: "File Upload Error"
+        message: "Could not abort the multipart upload."
     jurisdiction_template_version_customization:
       update_success:
         title: ""

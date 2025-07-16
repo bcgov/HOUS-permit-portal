@@ -1,9 +1,9 @@
 class ZipfileJob
   include Sidekiq::Worker
-  sidekiq_options lock: :until_and_while_executing,
+  sidekiq_options lock: :until_executed,
                   queue: :file_processing,
                   on_conflict: {
-                    client: :log,
+                    client: :reject,
                     server: :reject
                   }
 

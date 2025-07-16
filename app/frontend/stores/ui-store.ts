@@ -10,6 +10,7 @@ export const UIStoreModel = types
     flashMessage: types.optional(FlashMessageModel, {}),
     currentlySelectedJurisdictionId: types.maybeNull(types.string),
     rmJurisdictionSelectKey: types.optional(types.string, uuidv4()),
+    scrollToSelector: types.optional(types.string, ""),
   })
   .extend(withRootStore())
   .views((self) => ({}))
@@ -36,6 +37,9 @@ export const UIStoreModel = types
   .actions((self) => ({
     setCurrentlySelectedJurisdictionId(id: string) {
       self.currentlySelectedJurisdictionId = id
+    },
+    setScrollToSelector(selector: string) {
+      self.scrollToSelector = selector
     },
     updateRmJurisdictionSelectKey() {
       self.rmJurisdictionSelectKey = uuidv4()
