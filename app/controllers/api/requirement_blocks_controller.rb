@@ -12,11 +12,7 @@ class Api::RequirementBlocksController < Api::ApplicationController
     render_success authorized_results,
                    nil,
                    {
-                     meta: {
-                       total_pages: @search.total_pages,
-                       total_count: @search.total_count,
-                       current_page: @search.current_page
-                     },
+                     meta: page_meta(@search),
                      blueprint: RequirementBlockBlueprint
                    }
   end
@@ -49,7 +45,6 @@ class Api::RequirementBlocksController < Api::ApplicationController
 
   def update
     authorize @requirement_block
-
     if @requirement_block.update(requirement_block_params)
       render_success @requirement_block,
                      nil,
@@ -128,6 +123,7 @@ class Api::RequirementBlocksController < Api::ApplicationController
         :label,
         :input_type,
         :hint,
+        :instructions,
         :required,
         :related_content,
         :required_for_in_person_hint,

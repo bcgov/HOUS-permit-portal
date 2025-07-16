@@ -104,6 +104,17 @@ class PdfGenerationJob
 
     File.open(json_filename, "w") { |file| file.write(pdf_json_data) }
 
+    # REMOVE THIS FOR PRODUCTION
+    # begin
+    #   parsed_json = JSON.parse(pdf_json_data)
+    #   Rails.logger.error "############################### Failing PDF JSON data:\n"
+    #   Rails.logger.error "#{JSON.pretty_generate(parsed_json)}"
+    #   Rails.logger.error "###############################"
+    # rescue JSON::ParserError
+    #   Rails.logger.error "Failing PDF JSON data (could not be parsed):\n#{pdf_json_data}"
+    #   Rails.logger.error "###############################"
+    # end
+
     # Run Node.js script as a child process, passing JSON data as an argument
     stdout, stderr, status =
       Open3.popen3(
@@ -121,7 +132,7 @@ class PdfGenerationJob
         # Wait for the process to exit and get the exit status
         exit_status = wait_thr.value
 
-        File.delete(json_filename)
+        File.delete(json_filename) if Rails.env.production?
 
         # Check for errors or handle output based on the exit status
         if exit_status.success?
@@ -154,7 +165,7 @@ class PdfGenerationJob
 
             doc.update(file:) if doc.file.blank?
 
-            File.delete(path)
+            File.delete(path) if Rails.env.production?
           end
         else
           err = "Pdf generation process failed: #{exit_status}"

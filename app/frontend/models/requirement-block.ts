@@ -33,7 +33,9 @@ export const RequirementBlockModel = types
   .extend(withRootStore())
   .views((self) => ({
     get blocksWithEnergyStepCode() {
-      return self.requirements?.some((r) => r.inputType === ERequirementType.energyStepCode)
+      return self.requirements?.some(
+        (r) => r.inputType === ERequirementType.energyStepCode || r.inputType === ERequirementType.energyStepCodePart3
+      )
     },
     get blocksWithStepCodePackageFile() {
       return self.requirements?.some((r) => r.requirementCode === STEP_CODE_PACKAGE_FILE_REQUIREMENT_CODE)
@@ -60,9 +62,40 @@ export const RequirementBlockModel = types
 
     get requirementFormDefaults(): IRequirementAttributes[] {
       return self.requirements.map((requirement) => {
-        if (!requirement.conditional) return requirement as unknown as IRequirementAttributes
+        const {
+          id,
+          requirementCode,
+          label,
+          inputType,
+          hint,
+          instructions,
+          required,
+          relatedContent,
+          requiredForInPersonHint,
+          requiredForMultipleOwners,
+          elective,
+          position,
+          inputOptions,
+          conditional,
+        } = requirement
 
-        const { conditional } = requirement
+        const baseAttributes = {
+          id,
+          requirementCode,
+          label,
+          inputType,
+          hint,
+          instructions,
+          required,
+          relatedContent,
+          requiredForInPersonHint,
+          requiredForMultipleOwners,
+          elective,
+          position,
+          inputOptions,
+        }
+
+        if (!conditional) return baseAttributes as IRequirementAttributes
 
         const possibleThens = ["show", "hide", "require"]
         const when = conditional.when
@@ -75,9 +108,9 @@ export const RequirementBlockModel = types
         // energy step code dependency conditionals is not possible to edit from the front-end and has default values
         // which follows a slightly different structure so we make sure not to remove them or alter them
         return {
-          ...requirement,
+          ...baseAttributes,
           inputOptions: {
-            ...requirement.inputOptions,
+            ...inputOptions,
             conditional: isEnergyStepCodeDependency
               ? conditional
               : {

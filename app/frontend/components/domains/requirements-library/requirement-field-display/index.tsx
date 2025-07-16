@@ -31,6 +31,7 @@ export type TRequirementFieldDisplayProps = {
   label?: string
   options?: string[]
   helperText?: string
+  instructions?: string
   unit?: ENumberUnit | null
   selectProps?: Partial<SelectProps>
   addMultipleContactProps?: {
@@ -263,6 +264,10 @@ const requirementsComponentMap = {
     return <GenericFieldDisplay inputDisplay={<DummyStepCodeInput />} {...props} />
   },
 
+  [ERequirementType.energyStepCodePart3](props: TRequirementFieldDisplayProps) {
+    return <GenericFieldDisplay inputDisplay={<DummyStepCodeInput />} {...props} />
+  },
+
   [ERequirementType.pidInfo](props: TRequirementFieldDisplayProps) {
     const pidInfoFieldItemTypes: Array<{
       type: ERequirementType
@@ -318,6 +323,7 @@ const requirementsComponentMap = {
       },
       { type: ERequirementContactFieldItemType.title },
       { type: ERequirementContactFieldItemType.organization },
+      { type: ERequirementContactFieldItemType.contactType },
     ]
 
     return <GenericContactDisplay contactFieldItems={contactFieldItemTypes} {...props} />
@@ -345,6 +351,7 @@ const requirementsComponentMap = {
       { type: ERequirementContactFieldItemType.businessLicense },
       { type: ERequirementContactFieldItemType.professionalAssociation },
       { type: ERequirementContactFieldItemType.professionalNumber },
+      { type: ERequirementContactFieldItemType.contactType },
     ]
 
     return <GenericContactDisplay contactFieldItems={contactFieldItemTypes} {...props} />

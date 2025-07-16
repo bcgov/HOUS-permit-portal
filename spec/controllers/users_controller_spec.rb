@@ -14,10 +14,10 @@ RSpec.describe Api::UsersController, type: :controller do
   def profile_params(user, params)
     {
       user: {
-          first_name: params[:first_name] || user.first_name,
-          last_name: params[:last_name] || user.last_name,
-          certified: params[:certified] || user.certified,
-          department: params[:department] || user.department
+        first_name: params[:first_name] || user.first_name,
+        last_name: params[:last_name] || user.last_name,
+        certified: params[:certified] || user.certified,
+        department: params[:department] || user.department
       }
     }
   end
@@ -77,21 +77,22 @@ RSpec.describe Api::UsersController, type: :controller do
       create(:user, :review_manager, jurisdiction: jurisdiction)
     end
 
-    before do
-      sign_in review_manager
-    end
+    before { sign_in review_manager }
 
     context "when we try to update the department" do
       it "department should be updated in DB " do
-        patch :profile, params: profile_params(review_manager, {department: "Department"})
+        patch :profile,
+              params:
+                profile_params(review_manager, { department: "Department" })
         expect(review_manager.reload.department).to eq "Department"
       end
 
       it "department should come in the response" do
-        patch :profile, params: profile_params(review_manager, {department: "Department1"})
+        patch :profile,
+              params:
+                profile_params(review_manager, { department: "Department1" })
         expect(json_response.dig("data", "department")).to eq "Department1"
       end
     end
-
   end
 end

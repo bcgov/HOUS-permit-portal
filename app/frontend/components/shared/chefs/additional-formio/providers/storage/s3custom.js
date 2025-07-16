@@ -103,7 +103,7 @@ const s3custom = function Provider(formio) {
         // Return a file value, the file value must have a url
         const params = new URLSearchParams({
           ...(fileInfo.model && { model: fileInfo.model }),
-          ...(fileInfo.modelId && { model_id: fileInfo.modelId }),
+          ...(fileInfo.modelId && { modelId: fileInfo.modelId }),
         })
 
         const response = await fetch(`/api/s3/params/download?${params.toString()}`, {

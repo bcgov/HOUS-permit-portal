@@ -51,7 +51,7 @@ document.addEventListener("DOMContentLoaded", () => {
     renderApp(rootStore)
   } else if (import.meta.env.DEV) {
     setupReactotron(rootStore.environment.api).then((reactotron) => {
-      // @ts-ignore
+      // @ts-expect-error: trackMstNode is not part of the official Reactotron type definitions
       reactotron.trackMstNode(rootStore)
       // set reactotron into console
       window.console.tron = reactotron

@@ -81,13 +81,19 @@ export const ContactSummaryModal = ({ isOpen, onOpen, onClose, permitApplication
             </Box>
             {contacts.map((contact) => {
               const { title, name, email, phone, address } = contact
+              const displayAddress = typeof address === "string" ? address : address?.name
               return (
-                <Contact key={contact.id} title={title} name={name} email={email} phone={phone} address={address} />
+                <Contact
+                  key={contact.id}
+                  title={title}
+                  name={name}
+                  email={email}
+                  phone={phone}
+                  address={displayAddress}
+                />
               )
             })}
-            {permitApplication.stepCode && (
-              <EnergyAdvisor checklist={permitApplication.stepCode.preConstructionChecklist} />
-            )}
+            {permitApplication.stepCode && <EnergyAdvisor checklist={permitApplication.stepCode.primaryChecklist} />}
           </SearchGrid>
         </ModalBody>
       </ModalContent>

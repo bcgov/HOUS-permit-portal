@@ -33,6 +33,7 @@ import {
 } from "../utils/formio-component-traversal"
 
 import { format } from "date-fns"
+import { StepCodeModel } from "../stores/step-code-store"
 import { compareSubmissionData } from "../utils/formio-helpers"
 import { convertResourceArrayToRecord } from "../utils/utility-functions"
 import { ICollaborator } from "./collaborator"
@@ -42,7 +43,6 @@ import { IActivity, IPermitType } from "./permit-classification"
 import { IPermitCollaboration, PermitCollaborationModel } from "./permit-collaboration"
 import { IRequirement } from "./requirement"
 import { SandboxModel } from "./sandbox"
-import { StepCodeModel } from "./step-code"
 import { TemplateVersionModel } from "./template-version"
 import { IUser, UserModel } from "./user"
 
@@ -50,7 +50,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
   types
     .model("PermitApplicationModel", {
       id: types.identifier,
-      nickname: types.string,
+      nickname: types.maybeNull(types.string),
       number: types.string,
       fullAddress: types.maybeNull(types.string), // for now some seeds will not have this
       pin: types.maybeNull(types.string), // for now some seeds will not have this
@@ -97,6 +97,10 @@ export const PermitApplicationModel = types.snapshotProcessor(
     .extend(withEnvironment())
     .extend(withRootStore())
     .views((self) => ({
+      get isPart3() {
+        // TODO
+        return false
+      },
       get isDraft() {
         return (
           self.status === EPermitApplicationStatus.newDraft ||
@@ -171,6 +175,9 @@ export const PermitApplicationModel = types.snapshotProcessor(
       },
       get inboxEnabled() {
         return self.jurisdiction?.inboxEnabled && self.rootStore.siteConfigurationStore.inboxEnabled
+      },
+      get isDesignatedReviewerEnabled() {
+        return self.jurisdiction.allowDesignatedReviewer
       },
     }))
     .views((self) => ({
@@ -533,6 +540,39 @@ export const PermitApplicationModel = types.snapshotProcessor(
           }, {})
         )
       },
+      getDesignatedReviewer(userId: string) {
+        return Array.from(self.permitCollaborationMap.values()).find(
+          (collaboration) =>
+            collaboration.collaborationType === ECollaborationType.review &&
+            collaboration.collaborator.user.id === userId
+        )
+      },
+    }))
+    .views((self) => ({
+      get shouldShowDesignatedReviewerModal() {
+        const { userStore } = self.rootStore
+        const { currentUser } = userStore
+
+        const jurisdictionADR = self.jurisdiction.allowDesignatedReviewer
+
+        const featureEnabled = jurisdictionADR
+        const designatedReviewerCollaboration = self.getCollaborationDelegatee(ECollaborationType.review)
+        const designatedReviewerExists = designatedReviewerCollaboration?.collaborator?.user?.id != null
+
+        if (featureEnabled === false && designatedReviewerExists) {
+          return true
+        }
+
+        if (featureEnabled === true && designatedReviewerExists) {
+          return false
+        }
+
+        if (featureEnabled === true && !designatedReviewerExists) {
+          return true
+        }
+
+        return false
+      },
     }))
     .actions((self) => ({
       updatePermitCollaboration(permitCollaborationData: IPermitCollaboration) {
@@ -797,6 +837,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
       handleSocketSupportingDocsUpdate: (data: IPermitApplicationSupportingDocumentsUpdate) => {
         self.missingPdfs = cast(data.missingPdfs)
         self.supportingDocuments = data.supportingDocuments
+        self.allSubmissionVersionCompletedSupportingDocuments = data.allSubmissionVersionCompletedSupportingDocuments
         self.zipfileSize = data.zipfileSize
         self.zipfileName = data.zipfileName
         self.zipfileUrl = data.zipfileUrl
@@ -813,15 +854,6 @@ export const PermitApplicationModel = types.snapshotProcessor(
         }
         return response
       }),
-    }))
-    .actions((self) => ({
-      handleSocketSupportingDocsUpdate: (data: IPermitApplicationSupportingDocumentsUpdate) => {
-        self.missingPdfs = cast(data.missingPdfs)
-        self.supportingDocuments = data.supportingDocuments
-        self.zipfileSize = data.zipfileSize
-        self.zipfileName = data.zipfileName
-        self.zipfileUrl = data.zipfileUrl
-      },
     })),
   {
     preProcessor: (snapshot: any) => {

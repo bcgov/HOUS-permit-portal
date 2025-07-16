@@ -26,6 +26,7 @@ export enum ERequirementTemplateType {
 export enum EFileUploadAttachmentType {
   RequirementDocument = "RequirementDocument",
   SupportingDocument = "SupportingDocument",
+  ProjectDocument = "ProjectDocument",
 }
 
 export enum EPermitClassificationCode {
@@ -69,6 +70,7 @@ export enum EUserRoles {
   reviewManager = "review_manager",
   reviewer = "reviewer",
   superAdmin = "super_admin",
+  technicalSupport = "technical_support",
 }
 
 export enum ERequirementLibrarySortFields {
@@ -91,7 +93,7 @@ export enum EJurisdictionSortFields {
   reviewersSize = "reviewers_size",
   permitApplicationsSize = "permit_applications_size",
   regionalDistrict = "regional_district_name",
-  submissionInboxSetUp = "submission_inbox_set_up",
+  inboxEnabled = "inbox_enabled",
 }
 
 export enum EUserSortFields {
@@ -182,6 +184,7 @@ export enum ERequirementType {
   signature = "signature",
   textArea = "textarea",
   energyStepCode = "energy_step_code",
+  energyStepCodePart3 = "energy_step_code_part_3",
   pidInfo = "pid_info",
   phone = "phone",
   email = "email",
@@ -293,12 +296,14 @@ export enum EFossilFuelsPresence {
 }
 
 export enum EEnergyStep {
+  two = "2",
   three = "3",
   four = "4",
   five = "5",
 }
 
 export enum EZeroCarbonStep {
+  zero = "0",
   one = "1",
   two = "2",
   three = "3",
@@ -317,6 +322,7 @@ export enum ERequirementContactFieldItemType {
   businessLicense = "businessLicense",
   professionalAssociation = "professionalAssociation",
   professionalNumber = "professionalNumber",
+  contactType = "contactType",
 }
 
 export enum EGovFeedbackResponseNoReason {
@@ -371,6 +377,12 @@ export enum EEnergyStepCodeDependencyRequirementCode {
   energyStepCodeToolPart9 = "energy_step_code_tool_part_9",
   energyStepCodeReportFile = "energy_step_code_report_file",
   energyStepCodeH2000File = "energy_step_code_h2000_file",
+}
+
+export enum EEnergyStepCodePart3DependencyRequirementCode {
+  energyStepCodeMethod = "energy_step_code_method",
+  energyStepCodeToolPart3 = "energy_step_code_tool_part_3",
+  energyStepCodeReportFile = "energy_step_code_report_file",
 }
 
 export enum EAutoComplianceModule {
@@ -444,7 +456,209 @@ export enum EJurisdictionExternalApiState {
   gOff = "g_off",
 }
 
-export enum ELandingTemplateKeys {
-  SmallScale = "small_scale_requirement_template_id",
-  // FourPlus = "four_plus_template_version_id",
+export enum EPermitApplicationReviewStatus {
+  ReadyForReview = "ready_for_review",
+}
+
+export enum EClimateZone {
+  zone4 = "zone_4",
+  zone5 = "zone_5",
+  zone6 = "zone_6",
+  zone7a = "zone_7a",
+  zone7b = "zone_7b",
+  zone8 = "zone_8",
+}
+
+export enum EBuildingCodeVersion {
+  BCBC2002 = "BCBC_2024",
+  BCBC2018Rev5 = "BCBC_2018_rev_5",
+  BCBC2018Rev4 = "BCBC_2018_rev_4",
+  BCBC2018Rev3 = "BCBC_2018_rev_3",
+  BCBC2018Rev2 = "BCBC_2018_rev_2",
+  BCBC2018Rev1 = "BCBC_2018_rev_1",
+}
+
+export enum EProjectStage {
+  newDraft = "new_draft",
+  newlySubmitted = "newly_submitted",
+  revisionsRequested = "revisions_requested",
+  resubmitted = "resubmitted",
+}
+
+export enum EBaselineOccupancyKey {
+  performingArtsAssembly = "performing_arts_assembly",
+  otherAssembly = "other_assembly",
+  arenaAssembly = "arena_assembly",
+  openAirassembly = "open_air_assembly",
+  detention = "detention",
+  treatment = "treatment",
+  care = "care",
+  highHazardindustrial = "high_hazard_industrial",
+  mediumHazardIndustrial = "medium_hazard_industrial",
+  lowHazardIndustrial = "low_hazard_industrial",
+}
+
+export enum EStepCodeOccupancyKey {
+  hotelMotel = "hotel_motel",
+  residential = "residential",
+  office = "office",
+  other = "other",
+  mercantile = "mercantile",
+}
+
+export enum EBaselinePerformanceRequirement {
+  step2NECB = "step_2_necb",
+  ASHRAE = "ashrae",
+  percentBetterAshrae = "%_better_ashrae",
+  NECB = "necb",
+  percentBetterNECB = "%_better_necb",
+}
+export enum EIsSuiteSubMetered {
+  yes = "yes",
+  no = "no",
+  notApplicable = "not_applicable",
+}
+
+export enum EPart3StepCodeSoftware {
+  IESVE = "ies_ve",
+  energyPlus = "energy_plus",
+  designBuilder = "design_builder",
+  openStudio = "open_studio",
+  eQuest = "e_quest",
+  DOE2Other = "doe_2_other",
+  PHPP = "phpp",
+  other = "other",
+}
+
+export enum EPart3BuildingType {
+  mixedUse = "mixedUse",
+  stepCode = "stepCode",
+  baseline = "baseline",
+}
+
+export enum EHeatingSystemPlant {
+  none = "none",
+  airSourceHeatPump = "air_source_heat_pump",
+  groundSourceHeatPump = "ground_source_heat_pump",
+  airSourceVRF = "air_source_vrf",
+  groundSourceVRF = "ground_source_vrf",
+  gasBoiler = "gas_boiler",
+  districtSystem = "district_system",
+  other = "other",
+}
+
+export enum EHeatingSystemType {
+  electricBaseboard = "electric_baseboard",
+  hydronicBasebaord = "hydronic_basebaord",
+  hydronicFanCoils = "hydronic_fan_coils",
+  VAVReheat = "vav_reheat",
+  airSourceHeatPump = "air_source_heat_pump",
+  VRFUnits = "vrf_units",
+  radiantFloorCooling = "radiant_floor_cooling",
+  gasFiredRooftop = "gas_fired_rooftop",
+  electricResistanceRooftop = "electric_resistance_rooftop",
+  heatPumpRooftop = "heat_pump_rooftop",
+  other = "other",
+}
+
+export enum ECoolingSystemPlant {
+  none = "none",
+  airCooledChiller = "air_cooled_chiller",
+  waterCooledChiller = "water_cooled_chiller",
+  airSourceHeatPump = "air_source_heat_pump",
+  groundSourceHeatPump = "ground_source_heat_pump",
+  airSourceVRF = "air_source_vrf",
+  groundSourceVRF = "ground_source_vrf",
+  other = "other",
+}
+
+export enum ECoolingSystemType {
+  ptac = "ptac",
+  hydronicFanCoils = "hydronic_fan_coils",
+  hydronicBaseboards = "hydronic_baseboards",
+  VRFUnits = "vrf_units",
+  radiantFloorCeiling = "radiant_floor_ceiling",
+  none = "none",
+  other = "other",
+}
+
+export enum EDHWSystemType {
+  heatPumpSpaceHeating = "heat_pump_space_heating",
+  airSourceHeatPump = "air_source_heat_pump",
+  groundSourcHeatPump = "ground_source_heat_pump",
+  gasSpaceHeating = "gas_space_heating",
+  gas = "gas",
+  suiteElectric = "suite_electric",
+  suiteGas = "suite_gas",
+  other = "other",
+}
+
+export enum EFuelType {
+  electricity = "electricity",
+  naturalGas = "natural_gas",
+  districtEnergy = "district_energy",
+  propane = "propane",
+  lightFuelOil = "light_fuel_oil",
+  heavyFuelOil = "heavy_fuel_oil",
+  dieselFuel = "diesel_fuel",
+  woodFuel = "wood_fuel",
+  other = "other",
+}
+
+export enum EEnergyOutputUseType {
+  interiorLighting = "interior_lighting",
+  exteriorLighting = "exterior_lighting",
+  heatingGeneral = "heating_general",
+  cooling = "cooling",
+  pumps = "pumps",
+  fans = "fans",
+  domesticHotWater = "domestic_hot_water",
+  plugLoads = "plug_loads",
+  other = "other",
+}
+
+export enum EEnergyOutputSource {
+  modelled = "modelled",
+  reference = "reference",
+}
+
+export enum EDocumentReferenceDocumentType {
+  architecturalDrawing = "architectural_drawing",
+  mechanicalDrawing = "mechanical_drawing",
+  electricalDrawing = "electrical_drawing",
+  other = "other",
+}
+
+export enum EStepCodeType {
+  part3StepCode = "Part3StepCode",
+  part9StepCode = "Part9StepCode",
+}
+
+export enum EStepCodeParentType {
+  PermitProject = "PermitProject",
+  User = "User",
+}
+
+export enum EPermitProjectSortFields {
+  title = "title",
+  location = "location",
+  submitter = "submitter",
+  updatedAt = "updated_at",
+  forcastedCompletionDate = "forcasted_completion_date",
+  phase = "phase",
+}
+
+export enum EPermitProjectPhase {
+  all = "all",
+  empty = "empty",
+  newDraft = "new_draft",
+  newlySubmitted = "newly_submitted",
+  revisionsRequested = "revisions_requested",
+  resubmitted = "resubmitted",
+  approved = "approved",
+}
+
+export enum EStepCodeType {
+  part3StepCode = "Part3StepCode",
+  part9StepCode = "Part9StepCode",
 }

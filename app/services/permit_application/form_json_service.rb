@@ -57,6 +57,7 @@ class PermitApplication::FormJsonService
     @energy_step_keys ||= %w[
       energy_step_code_method
       energy_step_code_tool_part_9
+      energy_step_code_tool_part_3
       energy_step_code_report_file
       energy_step_code_h2000_file
     ]

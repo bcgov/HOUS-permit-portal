@@ -8,19 +8,23 @@ import { IExternalApiKey } from "../../models/external-api-key"
 import { IIntegrationMapping } from "../../models/integration-mapping"
 import { IJurisdiction } from "../../models/jurisdiction"
 import { IJurisdictionTemplateVersionCustomization } from "../../models/jurisdiction-template-version-customization"
+import { IPart3StepCodeChecklist } from "../../models/part-3-step-code-checklist"
+import { IPart9StepCode } from "../../models/part-9-step-code"
+import { IPart9StepCodeChecklist } from "../../models/part-9-step-code-checklist"
 import { IPermitApplication } from "../../models/permit-application"
 import { IActivity, IPermitType } from "../../models/permit-classification"
 import { IPermitCollaboration } from "../../models/permit-collaboration"
+import { IPermitProject } from "../../models/permit-project"
 import { IRequirementTemplate } from "../../models/requirement-template"
-import { IStepCode } from "../../models/step-code"
-import { IStepCodeChecklist } from "../../models/step-code-checklist"
 import { ITemplateVersion } from "../../models/template-version"
 import { IUser } from "../../models/user"
 import { ISiteConfigurationStore } from "../../stores/site-configuration-store"
+import { IStepCode } from "../../stores/step-code-store"
 import {
   IExternalApiKeyParams,
   IIntegrationMappingUpdateParams,
   IInvitePreviewersParams,
+  IPermitProjectUpdateParams,
   IRequirementBlockParams,
   IRequirementTemplateUpdateParams,
   ITagSearchParams,
@@ -44,8 +48,10 @@ import {
   EJurisdictionSortFields,
   EPermitApplicationSortFields,
   EPermitBlockStatus,
+  EPermitProjectSortFields,
   ERequirementLibrarySortFields,
   ERequirementTemplateSortFields,
+  EStepCodeType,
   ETemplateVersionStatus,
   EUserSortFields,
 } from "../../types/enums"
@@ -54,7 +60,9 @@ import {
   ICopyRequirementTemplateFormData,
   IJurisdictionFilters,
   IJurisdictionSearchFilters,
+  IPart9ChecklistSelectOptions,
   IPermitApplicationSearchFilters,
+  IPermitProjectSearchFilters,
   ITemplateVersionDiff,
   TAutoComplianceModuleConfigurations,
   TCreateRequirementTemplateFormData,
@@ -210,6 +218,42 @@ export class Api {
 
   async fetchPermitApplications(params?: TSearchParams<EPermitApplicationSortFields, IPermitApplicationSearchFilters>) {
     return this.client.post<IJurisdictionPermitApplicationResponse>(`/permit_applications/search`, params)
+  }
+
+  async fetchPermitProjects(params?: TSearchParams<EPermitProjectSortFields, IPermitProjectSearchFilters>) {
+    return this.client.post<ApiResponse<IPermitProject[]>>(`/permit_projects/search`, params)
+  }
+
+  async fetchPermitProject(id: string) {
+    return this.client.get<ApiResponse<IPermitProject>>(`/permit_projects/${id}`)
+  }
+
+  async fetchPinnedProjects() {
+    return this.client.get<ApiResponse<IPermitProject[]>>(`/permit_projects/pinned`)
+  }
+
+  async createPermitProject(projectData: {
+    name: string
+    description?: string
+    fullAddress?: string
+    pid?: string
+    pin?: string
+    propertyPlanJurisdictionId?: string
+    // Add other fields as necessary
+  }) {
+    return this.client.post<ApiResponse<IPermitProject>>("/permit_projects", { permitProject: projectData })
+  }
+
+  async updatePermitProject(id: string, params: IPermitProjectUpdateParams) {
+    return this.client.patch<ApiResponse<IPermitProject>>(`/permit_projects/${id}`, { permitProject: params })
+  }
+
+  async pinPermitProject(id: string) {
+    return this.client.post<ApiResponse<IPermitProject>>(`/permit_projects/${id}/pin`)
+  }
+
+  async unpinPermitProject(id: string) {
+    return this.client.delete<ApiResponse<IPermitProject>>(`/permit_projects/${id}/unpin`)
   }
 
   async fetchCollaboratorsByCollaboratorable(collaboratorableId: string, params?: TSearchParams<never, never>) {
@@ -406,6 +450,10 @@ export class Api {
     return this.client.post<IRequirementTemplateResponse>(`/requirement_templates/search`, params)
   }
 
+  async fetchRequirementTemplatesForFilter() {
+    return this.client.get<IApiResponse<{ id: string; nickname: string }[], {}>>(`/requirement_templates/for_filter`)
+  }
+
   async fetchRequirementTemplate(id: string) {
     return this.client.get<IApiResponse<IRequirementTemplate, {}>>(`/requirement_templates/${id}`)
   }
@@ -570,12 +618,34 @@ export class Api {
     )
   }
 
-  async fetchStepCodes() {
-    return this.client.get<ApiResponse<IStepCode[]>>("/step_codes")
+  async fetchPart9StepCodes() {
+    return this.client.get<ApiResponse<IStepCode[]>>("/part_9_building/step_codes")
   }
 
-  async createStepCode(stepCode: IStepCode) {
-    return this.client.post<ApiResponse<IStepCode>>("/step_codes", { stepCode })
+  async fetchPart9StepCodeSelectOptions() {
+    return this.client.get<ApiResponse<{ selectOptions: IPart9ChecklistSelectOptions }>>(
+      "/part_9_building/step_codes/select_options"
+    )
+  }
+
+  async createOrFindStepCodeForPermitApplication(
+    permitApplicationId: string,
+    stepCodeType: EStepCodeType,
+    attributes: {
+      checklistAttributes?: { sectionCompletionStatus: Record<string, any> }
+      name?: string
+      preConstructionChecklistAttributes?: any
+    }
+  ) {
+    return this.client.post<ApiResponse<IStepCode>>(
+      `/permit_applications/${permitApplicationId}/part_3_building/step_code`,
+      {
+        step_code: {
+          type: stepCodeType,
+          ...attributes,
+        },
+      }
+    )
   }
 
   async deleteStepCode(id: string) {
@@ -586,16 +656,33 @@ export class Api {
     return this.client.get<BlobPart>(`/step_codes/download_step_code_summary_csv`)
   }
 
+  async downloadStepCodeMetricsCsv(stepCodeType: EStepCodeType) {
+    return this.client.get<BlobPart>(`/step_codes/download_step_code_metrics_csv`, { stepCodeType })
+  }
+
   async downloadApplicationMetricsCsv() {
     return this.client.get<BlobPart>(`/permit_applications/download_application_metrics_csv`)
   }
 
-  async fetchStepCodeChecklist(id: string) {
-    return this.client.get<ApiResponse<IStepCodeChecklist>>(`/step_code_checklists/${id}`)
+  async fetchPart9Checklist(id: string) {
+    return this.client.get<ApiResponse<IPart9StepCodeChecklist>>(`/part_9_building/checklists/${id}`)
   }
 
-  async updateStepCodeChecklist(id: string, stepCodeChecklist: IStepCodeChecklist) {
-    return this.client.patch<ApiResponse<IStepCode>>(`/step_code_checklists/${id}`, { stepCodeChecklist })
+  async fetchPart3Checklist(id: string) {
+    return this.client.get<ApiResponse<IPart3StepCodeChecklist>>(`/part_3_building/checklists/${id}`)
+  }
+
+  async updatePart9Checklist(id: string, data: Partial<IPart9StepCodeChecklist>) {
+    return this.client.patch<ApiResponse<IPart9StepCode>>(`/part_9_building/checklists/${id}`, {
+      stepCodeChecklist: data,
+    })
+  }
+
+  // importing IPart3StepCodeChecklist causes circular dependency typescript error
+  async updatePart3Checklist(checklistId: string, checklist) {
+    return this.client.patch<ApiResponse<any>>(`/part_3_building/checklists/${checklistId}`, {
+      checklist,
+    })
   }
 
   async fetchSiteConfiguration() {
@@ -686,5 +773,28 @@ export class Api {
 
   async fetchCurrentUserAcceptedEulas() {
     return this.client.get<ApiResponse<IUser>>(`/users/current_user/license_agreements`)
+  }
+
+  async fetchPart3StepCode(id: string) {
+    return this.client.get<ApiResponse<IPart3StepCode>>(`/part_3_building/step_codes/${id}`)
+  }
+
+  async createPart3StepCode(data: {
+    permitApplicationId?: string
+    permitProjectId?: string
+    checklistAttributes: { sectionCompletionStatus: Record<string, any> }
+  }) {
+    if (data.permitApplicationId) {
+      return this.client.post<ApiResponse<IStepCode>>(
+        `/permit_applications/${data.permitApplicationId}/part_3_building/step_code`,
+        { stepCode: data }
+      )
+    } else {
+      return this.client.post<ApiResponse<IStepCode>>(`/part_3_building/step_codes`, { stepCode: data })
+    }
+  }
+
+  async createPart9StepCode(data: any) {
+    return this.client.post<ApiResponse<IStepCode>>(`/part_9_building/step_codes`, { stepCode: data })
   }
 }

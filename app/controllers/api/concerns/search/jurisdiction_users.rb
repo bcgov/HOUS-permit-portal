@@ -15,7 +15,14 @@ module Api::Concerns::Search::JurisdictionUsers
                 %w[review_manager regional_review_manager]
               elsif current_user.review_manager? ||
                     current_user.regional_review_manager?
-                %w[regional_review_manager review_manager reviewer]
+                %w[
+                  regional_review_manager
+                  review_manager
+                  reviewer
+                  technical_support
+                ]
+              elsif current_user.technical_support?
+                %w[review_manager reviewer technical_support]
               else
                 nil
               end
@@ -55,7 +62,9 @@ module Api::Concerns::Search::JurisdictionUsers
   end
 
   def discarded
-    user_search_params[:show_archived].present?
+    ActiveModel::Type::Boolean.new.cast(
+      user_search_params[:show_archived] || false
+    )
   end
 
   def user_order

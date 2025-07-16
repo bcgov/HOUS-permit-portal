@@ -46,7 +46,7 @@ export const LimitedJurisdictionIndexScreen = observer(function JurisdictionInde
             columns={[
               EJurisdictionSortFields.reverseQualifiedName,
               EJurisdictionSortFields.regionalDistrict,
-              EJurisdictionSortFields.submissionInboxSetUp,
+              EJurisdictionSortFields.inboxEnabled,
             ]}
           />
 
@@ -63,7 +63,7 @@ export const LimitedJurisdictionIndexScreen = observer(function JurisdictionInde
                   </SearchGridItem>
                   <SearchGridItem>{j.regionalDistrictName}</SearchGridItem>
                   <SearchGridItem>
-                    {j.submissionInboxSetUp && (
+                    {j.inboxEnabled && (
                       <Flex gap={1}>
                         <CheckCircle color="var(--chakra-colors-semantic-success)" size={18} /> {t("ui.yes")}
                       </Flex>

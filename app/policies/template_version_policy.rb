@@ -30,7 +30,7 @@ class TemplateVersionPolicy < ApplicationPolicy
 
   def create_or_update_jurisdiction_template_version_customization?
     (user.review_manager? || user.regional_review_manager?) &&
-      user.jurisdictions.find(record&.jurisdiction_id)
+      user.member_of?(record&.jurisdiction_id)
   end
 
   def show_integration_mapping?
