@@ -564,7 +564,7 @@ export interface IPermitTypeRequiredStep {
   workType?: string
   energyStepRequired: EEnergyStep
   zeroCarbonStepRequired: EZeroCarbonStep
-  activityLabel: string
+  activityName: string
 }
 
 export interface IStepCodeRequirementsTableProps {

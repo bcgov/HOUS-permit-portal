@@ -1,29 +1,25 @@
 import { Button, Container, Heading, HStack, Link, Text, VStack } from "@chakra-ui/react"
 import { CaretRight } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
-import React, { useEffect } from "react"
+import React from "react"
 import { useTranslation } from "react-i18next"
 import { useNavigate, useParams } from "react-router-dom"
+import { useJurisdiction } from "../../../hooks/resources/use-jurisdiction"
 import { useMst } from "../../../setup/root"
+import { ErrorScreen } from "../../shared/base/error-screen"
 import { LoadingScreen } from "../../shared/base/loading-screen"
 import { StepCodeRequirementsTable } from "../../shared/step-code-requirements-table"
 
 export const JurisdictionStepCodeRequirementsScreen = observer(() => {
   const { slug } = useParams()
   const { jurisdictionStore } = useMst()
-  const { fetchJurisdiction, setCurrentJurisdiction, currentJurisdiction } = jurisdictionStore
+  const { fetchJurisdiction } = jurisdictionStore
   const { t } = useTranslation()
   const navigate = useNavigate()
 
-  useEffect(() => {
-    const loadJurisdiction = async () => {
-      const jurisdiction = await fetchJurisdiction(slug)
-      if (jurisdiction) {
-        setCurrentJurisdiction(jurisdiction.id)
-      }
-    }
-    loadJurisdiction()
-  }, [slug])
+  const { currentJurisdiction, error } = useJurisdiction()
+
+  if (error) return <ErrorScreen error={error} />
 
   if (!currentJurisdiction) {
     return <LoadingScreen />

@@ -30,7 +30,7 @@ export const StepCodeRequirementsTable = observer(
       <Accordion allowMultiple defaultIndex={Object.keys(groupedByPermitType).map((_, i) => i)}>
         {Object.keys(groupedByPermitType).map((permitTypeName, index) => {
           const requirementsForPermitType = groupedByPermitType[permitTypeName]
-          const groupedByActivity = R.groupBy((r) => r.activityLabel || "", requirementsForPermitType)
+          const groupedByActivity = R.groupBy((r) => r.activityName || "", requirementsForPermitType)
 
           return (
             <AccordionItem key={index} borderWidth={1} borderColor="border.light" rounded="sm" mb={4}>
@@ -60,14 +60,14 @@ export const StepCodeRequirementsTable = observer(
                   </GridItem>
                 </Grid>
 
-                {Object.keys(groupedByActivity).map((activityLabel) => {
-                  const requirementsForActivity = groupedByActivity[activityLabel]
+                {Object.keys(groupedByActivity).map((activityName) => {
+                  const requirementsForActivity = groupedByActivity[activityName]
                   return (
-                    <React.Fragment key={activityLabel}>
+                    <React.Fragment key={activityName}>
                       <Divider my={4} />
                       <Grid templateColumns="2fr 5fr" gap={6} w="full" alignItems="center">
                         <GridItem>
-                          <Text>{activityLabel}</Text>
+                          <Text>{activityName}</Text>
                         </GridItem>
                         <GridItem>
                           <VStack spacing={2} align="stretch">
