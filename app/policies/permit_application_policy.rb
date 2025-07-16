@@ -67,7 +67,15 @@ class PermitApplicationPolicy < ApplicationPolicy
   end
 
   def finalize_revision_requests?
-    user.review_staff? && record.submitted?
+    return false unless user.review_staff? && record.submitted?
+
+    feature_enabled =
+      SiteConfiguration.allow_designated_reviewer? &&
+        record.jurisdiction.allow_designated_reviewer
+
+    return true if feature_enabled
+
+    record.permit_collaborations.review.exists?(user_id: user.id)
   end
 
   def create_permit_collaboration?

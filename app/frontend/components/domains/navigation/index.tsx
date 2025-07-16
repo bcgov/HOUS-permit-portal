@@ -73,6 +73,14 @@ const ReviewStaffMyJurisdictionAboutPageScreen = lazy(() =>
   }))
 )
 
+const DesignatedReviewerScreen = lazy(() =>
+  import("../home/review-manager/configuration-management-screen/feature-access-screen/designated-reviewer").then(
+    (module) => ({
+      default: module.DesignatedReviewerScreen,
+    })
+  )
+)
+
 const JurisdictionIndexScreen = lazy(() =>
   import("../jurisdictions/index").then((module) => ({ default: module.JurisdictionIndexScreen }))
 )
@@ -278,6 +286,12 @@ const AdminSubmissionInboxScreen = lazy(() =>
   }))
 )
 
+const AdminDesignatedReviewerScreen = lazy(() =>
+  import("../super-admin/site-configuration-management/designated-reviewer-screen").then((module) => ({
+    default: module.AdminDesignatedReviewerScreen,
+  }))
+)
+
 const ReportingScreen = lazy(() =>
   import("../super-admin/reporting/reporting-screen").then((module) => ({ default: module.ReportingScreen }))
 )
@@ -385,7 +399,7 @@ export const Navigation = observer(() => {
 
 const AppRoutes = observer(() => {
   const rootStore = useMst()
-  const { sessionStore, userStore, uiStore } = rootStore
+  const { siteConfigurationStore, sessionStore, userStore, uiStore } = rootStore
   const { loggedIn, tokenExpired, resetAuth, afterLoginPath, setAfterLoginPath } = sessionStore
   const location = useLocation()
   const background = location.state && location.state.background
@@ -394,7 +408,7 @@ const AppRoutes = observer(() => {
 
   const navigate = useNavigate()
   const { t } = useTranslation()
-
+  const { allowDesignatedReviewer } = siteConfigurationStore
   if (currentUser === undefined) {
     console.log("AppRoutes: currentUser is undefined, rendering LoadingScreen.")
     return <LoadingScreen />
@@ -453,6 +467,10 @@ const AppRoutes = observer(() => {
         path="/configuration-management/global-feature-access/submission-inbox"
         element={<AdminSubmissionInboxScreen />}
       />
+      <Route
+        path="/configuration-management/global-feature-access/access-control-for-revision-requests-to-submitters"
+        element={<AdminDesignatedReviewerScreen />}
+      />
       <Route path="/configuration-management/users/invite" element={<AdminInviteScreen />} />
       <Route path="/reporting" element={<ReportingScreen />} />
       <Route path="/reporting/export-template-summary" element={<ExportTemplateSummaryScreen />} />
@@ -491,6 +509,12 @@ const AppRoutes = observer(() => {
         path="/jurisdictions/:jurisdictionId/configuration-management/feature-access/my-jurisdiction-about-page"
         element={<ReviewStaffMyJurisdictionAboutPageScreen />}
       />
+      {allowDesignatedReviewer && (
+        <Route
+          path="/jurisdictions/:jurisdictionId/configuration-management/feature-access/limit-who-can-request-revisions-from-submitters"
+          element={<DesignatedReviewerScreen />}
+        />
+      )}
       <Route
         path="/jurisdictions/:jurisdictionId/configuration-management/energy-step"
         element={<EnergyStepRequirementsScreen />}

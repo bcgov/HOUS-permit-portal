@@ -105,9 +105,10 @@ export interface IInvitePreviewersParams {
 }
 
 export interface ISiteConfigurationUpdateParams {
-  displaySitewideMessage?: boolean
-  sitewideMessage?: string
-  inboxEnabled?: boolean
+  displaySitewideMessage?: boolean | null
+  inboxEnabled?: boolean | null
+  allowDesignatedReviewer?: boolean | null
+  sitewideMessage?: string | null
   helpLinkItems?: IHelpLinkItems
   revisionReasonsMap?: { [key: string]: IRevisionReason }
   landingPageEarlyAccessRequirementTemplateIds?: string[] | null

@@ -222,6 +222,7 @@ class Api::JurisdictionsController < Api::ApplicationController
       :checklist_html,
       :look_out_html,
       :show_about_page,
+      :allow_designated_reviewer,
       :contact_summary_html,
       :map_zoom,
       :inbox_enabled,
