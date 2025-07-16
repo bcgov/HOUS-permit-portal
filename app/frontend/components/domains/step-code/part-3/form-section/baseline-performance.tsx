@@ -34,17 +34,19 @@ export const BaselinePerformance = observer(function Part3StepCodeFormBaselinePe
 
   const formMethods = useForm({
     defaultValues: {
-      refAnnualThermalEnergyDemand: parseFloat(checklist.refAnnualThermalEnergyDemand),
-      referenceEnergyOutputsAttributes: checklist.fuelTypes.map((ft) => {
-        const energyOutput = checklist.referenceEnergyOutputs.find((o) => o.fuelTypeId == ft.id)
-        return {
-          id: energyOutput?.id,
-          fuelTypeId: ft.id,
-          annualEnergy: energyOutput && parseFloat(energyOutput.annualEnergy),
-        }
-      }),
+      refAnnualThermalEnergyDemand: parseFloat(checklist?.refAnnualThermalEnergyDemand ?? "0"),
+      referenceEnergyOutputsAttributes:
+        checklist?.fuelTypes?.map((ft) => {
+          const energyOutput = checklist.referenceEnergyOutputs?.find((o) => o.fuelTypeId === ft.id)
+          return {
+            id: energyOutput?.id,
+            fuelTypeId: ft.id,
+            annualEnergy: energyOutput ? parseFloat(energyOutput.annualEnergy) : 0,
+          }
+        }) ?? [],
     },
   })
+
   const { handleSubmit, formState, register, control, reset, watch } = formMethods
   const { isSubmitting, isValid, isSubmitted, errors } = formState
 

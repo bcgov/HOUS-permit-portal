@@ -102,11 +102,21 @@ export const StepCodeStoreModel = types
         console.error("Failed to fetch Part 9 Select Options:", response.problem, response.data)
       }
     }),
-    deleteStepCode: flow(function* () {
-      const response = yield self.environment.api.deleteStepCode(self.currentStepCode.id)
-      if (response.ok) {
-        self.stepCodesMap.delete(self.currentStepCode.id)
-        self.currentStepCode = null
+    deleteStepCode: flow(function* deleteStepCode() {
+      if (!self.currentStepCode) return
+
+      try {
+        const stepCodeId = self.currentStepCode.id
+        const response = yield self.environment.api.deleteStepCode(stepCodeId)
+
+        // WORKAROUND: something is preventing the step code from being deleted from the map without errors, so you must refresh the page to see the changes
+        // use navigate(0)
+        return response
+      } catch (e) {
+        if (import.meta.env.DEV) {
+          console.error(`Failed to delete step code:`, e)
+        }
+        throw e
       }
     }),
     downloadStepCodeSummary: flow(function* () {

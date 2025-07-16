@@ -22,11 +22,14 @@ export const Part3StepCodeModel = types
   .extend(withRootStore())
   .extend(withMerge())
   .views((self) => ({
+    get primaryChecklist() {
+      return self.checklist
+    },
     get checklistForPdf() {
       return self.checklist
     },
     get isComplete() {
-      return self.checklist?.isComplete
+      return self.checklist?.isAllComplete
     },
   }))
   .views((self) => ({}))

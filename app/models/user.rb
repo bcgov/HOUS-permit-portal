@@ -168,6 +168,10 @@ class User < ApplicationRecord
     review_manager? || regional_review_manager?
   end
 
+  def member_of?(jurisdiction_id)
+    jurisdictions.find_by(id: jurisdiction_id).present?
+  end
+
   def review_staff?
     reviewer? || review_manager? || regional_review_manager?
   end

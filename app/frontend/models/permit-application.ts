@@ -801,6 +801,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
       handleSocketSupportingDocsUpdate: (data: IPermitApplicationSupportingDocumentsUpdate) => {
         self.missingPdfs = cast(data.missingPdfs)
         self.supportingDocuments = data.supportingDocuments
+        self.allSubmissionVersionCompletedSupportingDocuments = data.allSubmissionVersionCompletedSupportingDocuments
         self.zipfileSize = data.zipfileSize
         self.zipfileName = data.zipfileName
         self.zipfileUrl = data.zipfileUrl
@@ -817,15 +818,6 @@ export const PermitApplicationModel = types.snapshotProcessor(
         }
         return response
       }),
-    }))
-    .actions((self) => ({
-      handleSocketSupportingDocsUpdate: (data: IPermitApplicationSupportingDocumentsUpdate) => {
-        self.missingPdfs = cast(data.missingPdfs)
-        self.supportingDocuments = data.supportingDocuments
-        self.zipfileSize = data.zipfileSize
-        self.zipfileName = data.zipfileName
-        self.zipfileUrl = data.zipfileUrl
-      },
     })),
   {
     preProcessor: (snapshot: any) => {

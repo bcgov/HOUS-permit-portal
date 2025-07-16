@@ -200,6 +200,11 @@ if PermitApplication.first.blank?
   StepCode::Part9::MEUIReferencesSeeder.seed!
   StepCode::Part9::TEDIReferencesSeeder.seed!
 
+  puts "Seeding default fuel types..."
+  Part3StepCode::FuelType::DEFAULTS.each do |ft|
+    Part3StepCode::FuelType.where(key: ft[:key]).first_or_create!(ft)
+  end
+
   # Creating Permit Applications
   puts "Seeding permit applications..."
   submitters = User.submitter

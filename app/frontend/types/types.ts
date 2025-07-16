@@ -83,8 +83,9 @@ export interface ISort<TField = string> {
 }
 
 export interface IOption<TValue = string> {
+  label: string
   value: TValue
-  label?: string
+  description?: string
 }
 
 export type TDebouncedFunction<T extends (...args: any[]) => any> = (...args: Parameters<T>) => void
@@ -166,6 +167,8 @@ export interface IFormIORequirement {
   conditional?: any
   components?: IFormIORequirement[]
   persistent?: string
+  requirementInputType?: string
+  energyStepCode?: string
 }
 
 export interface ISubmissionData {
@@ -215,6 +218,7 @@ export interface IDenormalizedTemplate {
   description?: string
   permitType: IPermitType
   activity: IActivity
+  firstNations: boolean
   requirementTemplateSections: IDenormalizedRequirementTemplateSection[]
 }
 
@@ -384,6 +388,7 @@ export interface IPermitApplicationSupportingDocumentsUpdate {
   zipfileSize: null | number
   zipfileName: null | string
   zipfileUrl: null | string
+  allSubmissionVersionCompletedSupportingDocuments?: IDownloadableFile[]
 }
 
 export interface IUserPushPayload {
