@@ -115,7 +115,7 @@ export const OnboardingChecklistPageForLgAdoptingScreen = observer(() => {
       <Heading as="h2" size="md" mb="4">
         {t(`${prefix}.whatsNext.title`)}
       </Heading>
-      <Image src={`/images/whats-coming-next.jpeg`} alt="What's coming next" mb="6" />
+      <Image src={`/images/whats-coming-next.jpeg`} alt="What's coming next" mb="12" />
       <Text fontSize="lg" color="gray.700" mb="2">
         {t(`${prefix}.whatsNext.timeline`)}
       </Text>
