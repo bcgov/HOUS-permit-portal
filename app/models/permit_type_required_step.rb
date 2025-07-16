@@ -2,6 +2,7 @@ class PermitTypeRequiredStep < ApplicationRecord
   belongs_to :jurisdiction
   belongs_to :permit_type
   delegate :name, to: :permit_type, prefix: true
+  delegate :name, to: :active, prefix: true
 
   has_many :step_code_checklists,
            class_name: "Part9StepCode::Checklist",

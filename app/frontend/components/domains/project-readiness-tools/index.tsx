@@ -6,17 +6,20 @@ import { RouterLink } from "../../shared/navigation/router-link"
 
 export const ProjectReadinessToolsIndexScreen = () => {
   const { t } = useTranslation()
-  const mailto = "mailto:" + t("site.contactEmail")
-  const breadCrumbs = [
-    {
-      href: "/project-readiness-tools",
-      title: t("site.breadcrumb.projectReadinessTools"),
-    },
-  ]
 
   const projectReadinessPageItems = [
     {
-      sectionTitle: t("projectReadinessTools.checkYourProject"),
+      sectionTitle: t("home.projectReadinessTools.checkYourProjectAgainstProvincialRegulations"),
+      items: [
+        {
+          linkText: t("home.projectReadinessTools.lookUpStepCodesRequirementsForYourProject"),
+          description: t("home.projectReadinessTools.lookUpToolProjectDescription"),
+          href: "project-readiness-tools/look-up-step-codes-requirements-for-your-project",
+        },
+      ],
+    },
+    {
+      sectionTitle: t("home.projectReadinessTools.prepareYourApplication"),
       items: [
         {
           linkText: t("projectReadinessTools.lookupStepCodeLink"),

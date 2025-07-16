@@ -260,6 +260,8 @@ const options = {
           confirm: "Confirm",
           modifiedBy: "Modified by",
           searchAddresses: "Search addresses",
+          enterAddress: "Enter address",
+          projectAddress: "Project address",
           typeToSearch: "Begin typing to search",
           close: "Close",
           asc: "Ascending",
@@ -379,6 +381,7 @@ const options = {
               description:
                 "Below are the step code requirements for each permit application type. <1>What does each step code level mean?<2></2></1>",
               permitType: "Permit type",
+              workType: "Work type",
               energyStepRequired: "Energy step code required",
               zeroCarbonStepRequired: "Zero carbon step required",
             },
@@ -2251,10 +2254,28 @@ Thank you,
           jurisdictionsTitle: "Jurisdictions",
           projectReadinessTools: {
             title: "Project readiness tools",
+            stepCodeLookupTool: {
+              title: "Where are you building?",
+              description: "Enter an address to check service availability and local requirements including Step Codes",
+              cantFindAddress: "Can't find your address?",
+              browseJurisdictions: "Browse list of jurisdictions",
+              checkWhatIsNeededToApplyForPermitsInThisCommunity:
+                "Check what's needed to apply for permits in this community",
+              startAPermitApplication: "Start a permit application",
+              lookUpEnergyStepCodeAndZeroCarbonStepCodeRequirements:
+                "Look up Energy Step Code and Zero Carbon Step Code requirements",
+            },
             pageHeading: "Prepare and check your project documents",
             pageDescription: "Use these tools to help prepare a complete and compliant permit application",
             checkYourProject: "Check your project against Provincial regulations",
             prepareYourApplication: "Prepare your application package for submission",
+            checkYourProjectAgainstProvincialRegulations: "Check your project against Provincial regulations",
+            lookUpStepCodesRequirementsForYourProject: "Look up Step Codes requirements for your project",
+            lookUpToolProjectDescription:
+              "Enter an address to find the Energy and Zero Carbon Step Code requirements for your project",
+            checkIfYourProjectMeetsBCsStepCodesRequirements: "Check if your project meets BC's Step Codes requirements",
+            generateAReportThatDetailsAProjectsComplianceWithBCsEnergyStepCodeAndZeroCarbonStepCodeRequirements:
+              "Generate a report that details a project's compliance with BC's Energy Step Code and Zero Carbon Step Code requirements",
             letterOfAssuranceLink: "Create your Letters of Assurance",
             letterOfAssuranceDescription:
               "Complete Letters of Assurance to confirm who is professionally responsible for design and field review on your project, as required by the BC Building Code for some building types",
@@ -2331,6 +2352,29 @@ Thank you,
                 geotechnical:
                   "Geotechnical - engineer reviews ground and slope stability for excavation, foundation, temporary retaining systems during constructions and finished building.",
               },
+            },
+            lookUpStepCodesRequirementsForYourProjectScreen: {
+              title: "Look up Step Codes requirements for your project",
+              description:
+                "The BC Energy Step Code and Zero Carbon Step Code set performance targets for new buildings. The Province sets minimum requirements for energy efficiency. Local governments and First Nations can choose to require higher steps.",
+              enterYourProjectAddress:
+                "Enter your project address to look up the applicable Energy and Zero Carbon Step Code requirements.",
+              checkAddress: "Check address",
+              cantFindYourAddress: "Can't find your address?",
+              browseListOfJurisdictions: "Browse list of jurisdictions",
+              generateAStepCodesReport: "Generate a Step Codes report",
+              ifYoureReadyToCreateA:
+                "If you're ready to create a Step Codes report to include in an application package, you can create a report using the separate reporting tool.",
+              checkIfYourProjectMeetsBCsStepCodesRequirements:
+                "Check if your project meets BC's Step Codes requirements",
+              stepCodeRequirementsFor: "Step Code Requirements for",
+              checkAnotherAddress: "Check another address",
+              startPermitApplication: "Start a permit application",
+              generateStepCodesReport: "Generate Step Codes report",
+              generateStepCodesReportDescription:
+                "If you're ready to create a Step Codes report to include in an application package, you can create a report using the separate reporting tool.",
+              stepCodeRequirementsDescription:
+                "This page shows which Energy and Zero Carbon Step Codes apply to new buildings in this community. Requirements may vary based on building type, occupancies, and local bylaws.",
             },
           },
           joinTheBuildingPermitHub: {
@@ -3479,8 +3523,10 @@ Thank you,
             permitProjects: "Permit projects",
             projectReadinessTools: "Prepare and check your project documents",
             createYourLettersOfAssurance: "Create your Letters of Assurance",
-            start: "Start",
+            lookUpStepCodesRequirementsForYourProject: "Look up Step Codes requirements for your project",
             onboardingChecklistPageForLgAdopting: "Onboarding checklist page for LG adopting",
+            stepCodeRequirements: "Step code requirements",
+            start: "Start",
           },
         },
         automatedCompliance: {
