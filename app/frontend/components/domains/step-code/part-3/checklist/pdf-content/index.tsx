@@ -1,5 +1,6 @@
 import { Page } from "@react-pdf/renderer"
 import { t } from "i18next"
+import * as R from "ramda"
 import React from "react"
 import { IPart3StepCodeChecklist } from "../../../../../../models/part-3-step-code-checklist"
 import { IPermitApplication } from "../../../../../../models/permit-application"
@@ -26,8 +27,8 @@ export const Part3PDFContent = function StepCodePart3ChecklistPDFContent({
   assetDirectoryPath,
 }: IProps) {
   // Use views from MST model
-  const isMixedUse = checklist.isMixedUse
-  const isBaseline = checklist.isBaseline
+  const isMixedUse = checklist.stepCodeOccupancies.length + checklist.baselineOccupancies.length > 1
+  const isBaseline = R.isEmpty(checklist.stepCodeOccupancies)
 
   return (
     <PDFDocument assetDirectoryPath={assetDirectoryPath}>

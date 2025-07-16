@@ -45,7 +45,7 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
   return (
     <Container maxW="container.xl" p={8} as={"main"}>
       <VStack align={"start"} spacing={5} w={"full"} h={"full"}>
-        {!currentJurisdiction.submissionInboxSetUp && (
+        {!currentJurisdiction.inboxEnabled && (
           <CalloutBanner type={"error"} title={t("permitApplication.submissionInbox.contactInviteWarning")} />
         )}
         <Flex justify={"space-between"} w={"full"}>

@@ -41,6 +41,7 @@ export const withMerge =
           existingResource["__mergeUpdate"](resourceDataToUpdate)
         } else {
           const newData = R.mergeDeepLeft(resourceDataToUpdate, existingResource)
+
           self[collectionName].put(newData)
         }
       },

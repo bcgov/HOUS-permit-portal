@@ -26,6 +26,7 @@ export enum ERequirementTemplateType {
 export enum EFileUploadAttachmentType {
   RequirementDocument = "RequirementDocument",
   SupportingDocument = "SupportingDocument",
+  ProjectDocument = "ProjectDocument",
 }
 
 export enum EPermitClassificationCode {
@@ -92,7 +93,7 @@ export enum EJurisdictionSortFields {
   reviewersSize = "reviewers_size",
   permitApplicationsSize = "permit_applications_size",
   regionalDistrict = "regional_district_name",
-  submissionInboxSetUp = "submission_inbox_set_up",
+  inboxEnabled = "inbox_enabled",
 }
 
 export enum EUserSortFields {
@@ -183,12 +184,12 @@ export enum ERequirementType {
   signature = "signature",
   textArea = "textarea",
   energyStepCode = "energy_step_code",
+  energyStepCodePart3 = "energy_step_code_part_3",
   pidInfo = "pid_info",
   phone = "phone",
   email = "email",
   generalContact = "general_contact",
   professionalContact = "professional_contact",
-  energyStepCodePart3 = "energy_step_code_part_3",
 }
 
 export enum ENumberUnit {
@@ -455,9 +456,8 @@ export enum EJurisdictionExternalApiState {
   gOff = "g_off",
 }
 
-export enum ELandingTemplateKeys {
-  SmallScale = "small_scale_requirement_template_id",
-  // FourPlus = "four_plus_template_version_id",
+export enum EPermitApplicationReviewStatus {
+  ReadyForReview = "ready_for_review",
 }
 
 export enum EClimateZone {
@@ -630,6 +630,35 @@ export enum EDocumentReferenceDocumentType {
 }
 
 export enum EStepCodeType {
-  Part3 = "Part3StepCode",
-  Part9 = "Part9StepCode",
+  part3StepCode = "Part3StepCode",
+  part9StepCode = "Part9StepCode",
+}
+
+export enum EStepCodeParentType {
+  PermitProject = "PermitProject",
+  User = "User",
+}
+
+export enum EPermitProjectSortFields {
+  title = "title",
+  location = "location",
+  submitter = "submitter",
+  updatedAt = "updated_at",
+  forcastedCompletionDate = "forcasted_completion_date",
+  phase = "phase",
+}
+
+export enum EPermitProjectPhase {
+  all = "all",
+  empty = "empty",
+  newDraft = "new_draft",
+  newlySubmitted = "newly_submitted",
+  revisionsRequested = "revisions_requested",
+  resubmitted = "resubmitted",
+  approved = "approved",
+}
+
+export enum EStepCodeType {
+  part3StepCode = "Part3StepCode",
+  part9StepCode = "Part9StepCode",
 }

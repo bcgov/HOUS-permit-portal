@@ -2,7 +2,7 @@ import { Box, Container, Divider, Flex, Heading, Image, Link, Text, VStack } fro
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
-import { useLocation } from "react-router-dom"
+import { matchPath, useLocation } from "react-router-dom"
 import { useMst } from "../../../setup/root"
 import { RouterLink } from "../navigation/router-link"
 
@@ -19,11 +19,13 @@ export const Footer = observer(() => {
     "/forgot-password",
     "/welcome",
     "/contact",
-    "/project-readiness-tools",
+    "/project-readiness-tools/*",
+    "/jurisdictions/:slug/step-code-requirements",
     "/letter-of-assurance",
+    "/onboarding-checklist-page-for-lg-adopting",
   ]
 
-  const shouldShowFooter = onlyShowFooterOnRoutes.some((route) => location.pathname.startsWith(route))
+  const shouldShowFooter = onlyShowFooterOnRoutes.some((route) => matchPath(route, location.pathname))
 
   return (
     <>

@@ -1,4 +1,4 @@
-import { Box, Grid, HStack, Input, InputProps, Text } from "@chakra-ui/react"
+import { Box, Grid, HStack, Input, InputProps, Stack, Text } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useCallback, useMemo } from "react"
 import { useController, useFormContext } from "react-hook-form"
@@ -26,35 +26,54 @@ export const AnnualEnergyWholeBuildingGrid = observer(function AnnualEnergyWhole
   const { t } = useTranslation()
   const { checklist } = usePart3StepCode()
   const totalOccupancyFloorArea = Number(checklist?.totalOccupancyFloorArea ?? 0)
-  const { control } = useFormContext<IMpdelledEnergyOutputChecklistForm>()
+  const {
+    control,
+    formState: { errors },
+  } = useFormContext<IMpdelledEnergyOutputChecklistForm>()
+  const thermalErrorMessage = errors.totalAnnualThermalEnergyDemand?.message as string | undefined
+  const coolingErrorMessage = errors.totalAnnualCoolingEnergyDemand?.message as string | undefined
 
   const {
     field: { value: totalAnnualThermalEnergyDemand, onChange: onChangeTotalAnnualThermalEnergyDemand },
   } = useController({
     control,
     name: "totalAnnualThermalEnergyDemand",
+    rules: {
+      required:
+        totalOccupancyFloorArea > 0
+          ? t("ui.isRequired", { field: t(`${i18nPrefix}.annualThermalEnergyDemand`) })
+          : false,
+    },
   })
   const {
     field: { value: totalAnnualCoolingEnergyDemand, onChange: onChangeTotalAnnualCoolingEnergyDemand },
   } = useController({
     control,
     name: "totalAnnualCoolingEnergyDemand",
+    rules: {
+      required:
+        totalOccupancyFloorArea > 0
+          ? t("ui.isRequired", { field: t(`${i18nPrefix}.annualCoolingEnergyDemand`) })
+          : false,
+    },
   })
   const formattedTotalAnnualThermalEnergyDemand = useMemo(() => {
+    if (isNaN(totalAnnualThermalEnergyDemand)) return ""
     return numberToFormattedString(totalAnnualThermalEnergyDemand)
   }, [totalAnnualThermalEnergyDemand])
 
   const formattedTotalAnnualCoolingEnergyDemand = useMemo(() => {
+    if (isNaN(totalAnnualCoolingEnergyDemand)) return ""
     return numberToFormattedString(totalAnnualCoolingEnergyDemand)
   }, [totalAnnualCoolingEnergyDemand])
   const formattedThermalEnergyDemandPerSquareMeter = useMemo(() => {
-    if (totalOccupancyFloorArea === 0) return ""
+    if (totalOccupancyFloorArea === 0 || isNaN(totalAnnualThermalEnergyDemand)) return ""
 
     return numberToFormattedString(totalAnnualThermalEnergyDemand / totalOccupancyFloorArea)
   }, [totalAnnualThermalEnergyDemand, totalOccupancyFloorArea])
 
   const formattedCoolingEnergyDemandPerSquareMeter = useMemo(() => {
-    if (totalOccupancyFloorArea === 0) return ""
+    if (totalOccupancyFloorArea === 0 || isNaN(totalAnnualCoolingEnergyDemand)) return ""
 
     return numberToFormattedString(totalAnnualCoolingEnergyDemand / totalOccupancyFloorArea)
   }, [totalAnnualCoolingEnergyDemand, totalOccupancyFloorArea])
@@ -103,11 +122,18 @@ export const AnnualEnergyWholeBuildingGrid = observer(function AnnualEnergyWhole
         </HStack>
       </GridRowHeader>
       <GridData>
-        <Input
-          value={formattedTotalAnnualThermalEnergyDemand}
-          onChange={handleChangeTotalAnnualThermalEnergyDemand}
-          {...editableInputProps}
-        />
+        <Stack direction="column" spacing={1} align="center">
+          <Input
+            value={formattedTotalAnnualThermalEnergyDemand}
+            onChange={handleChangeTotalAnnualThermalEnergyDemand}
+            {...editableInputProps}
+          />
+          {thermalErrorMessage && (
+            <Text color="semantic.error" fontSize="sm">
+              {thermalErrorMessage}
+            </Text>
+          )}
+        </Stack>
       </GridData>
       <GridData borderRightWidth={1}>
         <Input value={formattedThermalEnergyDemandPerSquareMeter} isReadOnly {...disabledInputProps} />
@@ -128,11 +154,18 @@ export const AnnualEnergyWholeBuildingGrid = observer(function AnnualEnergyWhole
         </HStack>
       </GridRowHeader>
       <GridData>
-        <Input
-          value={formattedTotalAnnualCoolingEnergyDemand}
-          onChange={handleChangeTotalAnnualCoolingEnergyDemand}
-          {...editableInputProps}
-        />
+        <Stack direction="column" spacing={1} align="center">
+          <Input
+            value={formattedTotalAnnualCoolingEnergyDemand}
+            onChange={handleChangeTotalAnnualCoolingEnergyDemand}
+            {...editableInputProps}
+          />
+          {coolingErrorMessage && (
+            <Text color="semantic.error" fontSize="sm">
+              {coolingErrorMessage}
+            </Text>
+          )}
+        </Stack>
       </GridData>
       <GridData borderRightWidth={1}>
         <Input value={formattedCoolingEnergyDemandPerSquareMeter} isReadOnly {...disabledInputProps} />

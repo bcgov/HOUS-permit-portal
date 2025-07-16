@@ -3,19 +3,22 @@ import { Instance, types } from "mobx-state-tree"
 import { withEnvironment } from "../lib/with-environment"
 import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
-import { EEnergyStep, EZeroCarbonStep } from "../types/enums"
+import { EEnergyStep, EStepCodeType, EZeroCarbonStep } from "../types/enums"
 import { Part9StepCodeChecklistModel } from "./part-9-step-code-checklist"
-
-export const Part9StepCodeType = "Part9StepCode"
+import { StepCodeBaseFields } from "./step-code-base"
 
 export const Part9StepCodeModel = types
-  .model("Part9StepCodeModel", {
-    id: types.identifier,
-    type: types.literal(Part9StepCodeType),
-    checklistsMap: types.map(Part9StepCodeChecklistModel),
-    zeroCarbonSteps: types.array(types.enumeration(Object.values(EZeroCarbonStep))),
-    energySteps: types.array(types.enumeration(Object.values(EEnergyStep))),
-  })
+  .compose(
+    "Part9StepCodeModel",
+    StepCodeBaseFields,
+    types.model({
+      id: types.identifier,
+      type: types.literal(EStepCodeType.part9StepCode),
+      checklistsMap: types.map(Part9StepCodeChecklistModel),
+      zeroCarbonSteps: types.array(types.enumeration(Object.values(EZeroCarbonStep))),
+      energySteps: types.array(types.enumeration(Object.values(EEnergyStep))),
+    })
+  )
   .extend(withEnvironment())
   .extend(withRootStore())
   .extend(withMerge())
@@ -28,6 +31,9 @@ export const Part9StepCodeModel = types
     },
   }))
   .views((self) => ({
+    get primaryChecklist() {
+      return self.checklists[0]
+    },
     get preConstructionChecklist() {
       return self.checklists[0]
     },

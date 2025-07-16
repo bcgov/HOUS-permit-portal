@@ -57,7 +57,8 @@ export const PermitTypeRadioSelect = observer(
       return (
         <CustomMessageBox
           status={EFlashMessageStatus.error}
-          description={t("translation:permitApplication.new.noContactsAvailable")}
+          title={t("translation:permitApplication.new.noContactsAvailableTitle")}
+          description={t("translation:permitApplication.new.noContactsAvailableDescription")}
         />
       )
     }

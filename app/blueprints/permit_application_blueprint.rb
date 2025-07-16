@@ -178,6 +178,19 @@ class PermitApplicationBlueprint < Blueprinter::Base
 
     fields :missing_pdfs, :zipfile_size, :zipfile_name, :zipfile_url
 
-    association :supporting_documents, blueprint: SupportingDocumentBlueprint
+    association :supporting_documents,
+                blueprint: SupportingDocumentBlueprint do |pa, options|
+      pa.supporting_documents_for_submitter_based_on_user_permissions(
+        pa.supporting_documents,
+        user: options[:current_user]
+      )
+    end
+    association :all_submission_version_completed_supporting_documents,
+                blueprint: SupportingDocumentBlueprint do |pa, options|
+      pa.supporting_documents_for_submitter_based_on_user_permissions(
+        pa.all_submission_version_completed_supporting_documents,
+        user: options[:current_user]
+      )
+    end
   end
 end

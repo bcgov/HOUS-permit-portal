@@ -16,7 +16,10 @@ class Part3StepCode::EnergyOutput < ApplicationRecord
             uniqueness: {
               scope: %i[checklist_id source]
             },
+            if: :modelled?,
             unless: :other?
+
+  before_validation :nil_use_type_for_reference
 
   enum source: %i[modelled reference]
   enum use_type: {
@@ -30,4 +33,8 @@ class Part3StepCode::EnergyOutput < ApplicationRecord
          plug_loads: 7,
          other: 8
        }
+
+  def nil_use_type_for_reference
+    self.use_type = nil if reference?
+  end
 end

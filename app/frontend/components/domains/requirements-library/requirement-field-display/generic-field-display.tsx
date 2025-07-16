@@ -28,6 +28,7 @@ export const GenericFieldDisplay = observer(function GroupedFieldDisplay({
   label,
   labelProps,
   helperText,
+  instructions,
   showAddLabelIndicator,
   requirementType,
   containerProps,
@@ -38,6 +39,7 @@ export const GenericFieldDisplay = observer(function GroupedFieldDisplay({
   return (
     <FormControl w={"100%"} isReadOnly {...containerProps}>
       <FormLabel
+        pointerEvents="none"
         {...defaultLabelProps}
         {...(labelProps as FormLabelProps)}
         color={!label && showAddLabelIndicator ? "error" : undefined}
@@ -55,6 +57,14 @@ export const GenericFieldDisplay = observer(function GroupedFieldDisplay({
             : getRequirementTypeLabel(requirementType, matchesStepCodePackageRequirementCode))}
       </FormLabel>
 
+      {!isQuillEmpty(instructions) && (
+        <EditorWithPreview
+          label={t("requirementsLibrary.modals.addInstructionsLabel")}
+          htmlValue={instructions}
+          containerProps={{ p: 0, ...helperTextStyles, ...editorContainerProps }}
+          isReadOnly
+        />
+      )}
       {inputDisplay}
       {!isQuillEmpty(helperText) && (
         <EditorWithPreview
