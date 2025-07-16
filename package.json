@@ -29,7 +29,7 @@
     "sass": "^1.70.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.4.3",
-    "vite": "^6.2.4",
+    "vite": "^6.3.5",
     "vite-plugin-ruby": "^5.1.1"
   },
   "dependencies": {
