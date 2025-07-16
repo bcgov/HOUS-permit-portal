@@ -1,4 +1,4 @@
 class SandboxBlueprint < Blueprinter::Base
   identifier :id
-  fields :name, :template_version_status_scope
+  fields :name, :template_version_status_scope, :description
 end

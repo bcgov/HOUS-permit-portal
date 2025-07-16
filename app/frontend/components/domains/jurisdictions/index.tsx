@@ -67,7 +67,7 @@ export const JurisdictionIndexScreen = observer(function JurisdictionIndex() {
                   <SearchGridItem>{j.reviewersSize}</SearchGridItem>
                   <SearchGridItem>{j.permitApplicationsSize}</SearchGridItem>
                   <SearchGridItem>
-                    {j.submissionInboxSetUp && (
+                    {j.inboxEnabled && (
                       <Flex gap={1}>
                         <CheckCircle color="var(--chakra-colors-semantic-success)" size={18} />
                         {t("ui.yes")}

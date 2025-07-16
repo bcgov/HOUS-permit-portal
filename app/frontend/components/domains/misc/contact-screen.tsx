@@ -1,8 +1,8 @@
 import { Box, Container, Heading, Link, ListItem, Text, UnorderedList, VStack } from "@chakra-ui/react"
-import { ArrowSquareOut } from "@phosphor-icons/react/dist/ssr"
 import i18next from "i18next"
 import React from "react"
-import { useTranslation } from "react-i18next"
+import { Trans, useTranslation } from "react-i18next"
+import { JurisdictionSearch } from "../../shared/jurisdiction-search"
 
 export const ContactScreen = () => {
   const { t } = useTranslation()
@@ -15,14 +15,11 @@ export const ContactScreen = () => {
   return (
     <Container maxW="container.lg" pt="16" pb="36" px="8">
       <Heading as="h1">{t("site.contact")}</Heading>
-      <Text>
-        <strong>{t("site.contactInstructions_1")}</strong>
-      </Text>
 
       <Heading as="h2" variant="yellowline" mt="16">
         {t("site.contactInstructions_2")}
       </Heading>
-      <Text>
+      <Text fontSize="lg">
         {t("site.contactInstructions_3")}
         {/*
 					<Link ml="1" href="">
@@ -31,51 +28,74 @@ export const ContactScreen = () => {
 				*/}
       </Text>
 
-      <VStack
-        as="section"
-        gap="0"
-        align="flex-start"
-        borderRadius="md"
-        border="1px solid"
-        borderColor="border.light"
-        width="500px"
-        maxWidth="full"
-        mt="16"
-      >
-        <Heading as="h3" m="0" bg="theme.blue" color="greys.white" py="3" px="6" borderTopRadius="md" width="full">
-          {t("site.contactTeamInstructionsTitle")}
-        </Heading>
-        <Box px="6" py="4">
-          <UnorderedList m="0" pl="4">
-            {contactTeamInstructions.map((inst) => (
-              <ListItem key={inst}>{inst}</ListItem>
-            ))}
-          </UnorderedList>
+      <Text mt={8} fontSize="lg">
+        {t("site.contactUs.responseAim")}
+      </Text>
 
-          <Text fontWeight="bold" mt="4" mb="2">
-            {t("site.contactTeamCTA")}
-            <Link href={mailto} isExternal ml="1">
-              {t("site.contactEmail")}
+      <Heading as="h2" variant="yellowline" mt="16">
+        {t("site.contactUs.hours.title")}
+      </Heading>
+      <Text fontSize="lg">{t("site.contactUs.hours.availability")}</Text>
+      <Text fontStyle="italic" fontSize="lg">
+        {t("site.contactUs.hours.note")}
+      </Text>
+
+      <Heading as="h2" variant="yellowline" mt="16">
+        {t("site.contactUs.quickHelp.title")}
+      </Heading>
+      <UnorderedList spacing={2} mt={4} fontSize="lg">
+        <ListItem>
+          <Text fontSize="lg">
+            <Trans i18nKey="site.contactUs.quickHelp.loginIssues" />
+          </Text>
+        </ListItem>
+        <ListItem>
+          <Text fontSize="lg">
+            <Trans i18nKey="site.contactUs.quickHelp.uploadProblems" />
+          </Text>
+        </ListItem>
+        <ListItem>
+          <Text fontSize="lg">
+            <Trans i18nKey="site.contactUs.quickHelp.applicationStatus" />
+          </Text>
+        </ListItem>
+      </UnorderedList>
+
+      <Heading as="h2" variant="yellowline" mt="16">
+        {t("site.contactUs.routing.title")}
+      </Heading>
+      <VStack align="start" spacing={6} mt={4} fontSize="lg">
+        <Box>
+          <Heading as="h3" size="sm">
+            {t("site.contactUs.routing.technical.title")}
+          </Heading>
+          <Text fontStyle="italic" fontSize="lg">
+            {t("site.contactUs.routing.technical.description")}
+          </Text>
+          <Text>
+            <Link href={mailto} isExternal>
+              {t("site.contactUs.routing.technical.email")}
             </Link>
           </Text>
+        </Box>
+        <Box>
+          <Heading as="h3" size="sm">
+            {t("site.contactUs.routing.permit.title")}
+          </Heading>
+          <Text fontStyle="italic" fontSize="lg">
+            {t("site.contactUs.routing.permit.description")}
+          </Text>
+          <Text fontSize="lg">{t("site.contactUs.routing.permit.instruction")}</Text>
         </Box>
       </VStack>
 
       <Heading as="h2" variant="yellowline" mt="16">
-        {t("site.contactNeedHelp")}
+        {t("site.contactUs.jurisdictionFinder.title")}
       </Heading>
-      <Text>
-        {t("site.contactNeedHelpInstructions")}
-        <Link
-          href="https://www2.gov.bc.ca/gov/content/home/get-help-with-government-services"
-          target="_blank"
-          rel="noopener noreferrer"
-          isExternal
-          ml="1"
-        >
-          {t("site.contactNeedHelpCTA")} <ArrowSquareOut />
-        </Link>
+      <Text mt={4} fontSize="lg">
+        <Trans i18nKey="site.contactUs.jurisdictionFinder.prompt" />
       </Text>
+      <JurisdictionSearch />
     </Container>
   )
 }

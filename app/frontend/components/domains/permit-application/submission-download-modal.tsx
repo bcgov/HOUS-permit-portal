@@ -39,7 +39,7 @@ export const SubmissionDownloadModal = observer(
     const { t } = useTranslation()
     const { permitApplicationStore } = useMst()
     const { allSubmissionVersionCompletedSupportingDocuments, zipfileUrl, zipfileName, stepCode } = permitApplication
-    const checklist = stepCode?.preConstructionChecklist
+    const checklist = stepCode?.primaryChecklist
 
     const { isOpen, onOpen, onClose } = useDisclosure()
 

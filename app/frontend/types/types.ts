@@ -25,6 +25,7 @@ import {
   ENumberUnit,
   EPermitApplicationSocketEventTypes,
   EPermitApplicationStatus,
+  EPermitProjectPhase,
   ERequirementType,
   ESocketDomainTypes,
   ESocketEventTypes,
@@ -83,8 +84,9 @@ export interface ISort<TField = string> {
 }
 
 export interface IOption<TValue = string> {
+  label: string
   value: TValue
-  label?: string
+  description?: string
 }
 
 export type TDebouncedFunction<T extends (...args: any[]) => any> = (...args: Parameters<T>) => void
@@ -166,6 +168,8 @@ export interface IFormIORequirement {
   conditional?: any
   components?: IFormIORequirement[]
   persistent?: string
+  requirementInputType?: string
+  energyStepCode?: string
 }
 
 export interface ISubmissionData {
@@ -215,6 +219,7 @@ export interface IDenormalizedTemplate {
   description?: string
   permitType: IPermitType
   activity: IActivity
+  firstNations: boolean
   requirementTemplateSections: IDenormalizedRequirementTemplateSection[]
 }
 
@@ -260,21 +265,30 @@ export interface IPart9ChecklistSelectOptions {
 
 export interface IPart3ChecklistSelectOptions {}
 export interface IFileData {
-  id: string
-  storage: string
+  id: string // Corresponds to file_id in the blueprint
+  storage?: string // Corresponds to file_data?.dig("storage")
   metadata: {
-    size: number
-    filename: string
-    mimeType: string
+    size: number // Corresponds to file_size
+    filename: string // Corresponds to file_name
+    mimeType?: string // Corresponds to file_type
   }
 }
 
-export interface IRequirementDocument {
-  id?: string
-  requirementBlockId: string
+export interface IBaseFileAttachment {
+  id: string
   file: IFileData
-  createdAt?: Date
-  _destroy?: boolean
+  createdAt: Date // Assuming string date from backend, MST will cast
+  // updatedAt?: Date; // Optional, if needed
+  _destroy?: boolean // Common for managing nested resources
+}
+
+export interface IRequirementDocument extends IBaseFileAttachment {
+  requirementBlockId: string
+  // _destroy is now in IBaseFileAttachment
+}
+
+export interface IProjectDocument extends IBaseFileAttachment {
+  permitProjectId: string // Foreign key to link to PermitProject
 }
 
 export interface IRequirementBlockCustomization {
@@ -375,6 +389,7 @@ export interface IPermitApplicationSupportingDocumentsUpdate {
   zipfileSize: null | number
   zipfileName: null | string
   zipfileUrl: null | string
+  allSubmissionVersionCompletedSupportingDocuments?: IDownloadableFile[]
 }
 
 export interface IUserPushPayload {
@@ -494,9 +509,19 @@ export interface IJurisdictionSearchFilters {
 }
 
 export interface IPermitApplicationSearchFilters {
-  requirementTemplateId?: string
-  templateVersionId?: string
   status?: EPermitApplicationStatus[]
+  templateVersionId?: string
+  requirementTemplateId?: string
+  hasCollaborator?: boolean
+  query?: string
+}
+
+export interface IPermitProjectSearchFilters {
+  query?: string
+  showArchived?: boolean
+  phase?: EPermitProjectPhase[]
+  requirementTemplateIds?: string[]
+  // Add other specific filters if needed, e.g., status, submitterId
 }
 
 export interface ITemplateVersionDiff {
