@@ -1,8 +1,10 @@
-import { Box, Container, Divider, Heading, ListItem, Text, UnorderedList } from "@chakra-ui/react"
+import { Box, Container, Divider, Heading, Image, ListItem, OrderedList, Text, UnorderedList } from "@chakra-ui/react"
+import { observer } from "mobx-react-lite"
 import React from "react"
 import { Trans, useTranslation } from "react-i18next"
+import { Link } from "react-router-dom"
 
-export const OnboardingChecklistPageForLgAdoptingScreen = () => {
+export const OnboardingChecklistPageForLgAdoptingScreen = observer(() => {
   const { t } = useTranslation()
   const prefix = "home.joinTheBuildingPermitHub"
 
@@ -105,7 +107,7 @@ export const OnboardingChecklistPageForLgAdoptingScreen = () => {
       <Text fontSize="lg" color="gray.700">
         {t(`${prefix}.builtTogether.reachOutToStartTheConversationDescription`)}
       </Text>
-      <Text fontSize="lg" color="gray.700">
+      <Text fontSize="lg" color="gray.700" mb="6">
         {t(`${prefix}.builtTogether.reachOutToStartTheConversationEmail`)}
       </Text>
       <Divider mb={10} />
@@ -113,49 +115,44 @@ export const OnboardingChecklistPageForLgAdoptingScreen = () => {
       <Heading as="h2" size="md" mb="4">
         {t(`${prefix}.whatsNext.title`)}
       </Heading>
+      <Image src={`/images/whats-coming-next.jpeg`} alt="What's coming next" mb="6" />
       <Text fontSize="lg" color="gray.700" mb="2">
         {t(`${prefix}.whatsNext.timeline`)}
       </Text>
       <UnorderedList mb={8} pl={0} listStyleType="none">
         <ListItem display="flex" alignItems="flex-start" mb={4}>
-          <Text mr={2}>🗂️</Text>
           <Box>
-            <Text fontWeight="bold">{t(`${prefix}.whatsNext.features.permitFolders.title`)}:</Text>
+            <Text fontWeight="bold">{t(`${prefix}.whatsNext.features.permitFolders.title`)}</Text>
             <Text>{t(`${prefix}.whatsNext.features.permitFolders.description`)}</Text>
           </Box>
         </ListItem>
         <ListItem display="flex" alignItems="flex-start" mb={4}>
-          <Text mr={2}>🧾</Text>
           <Box>
-            <Text fontWeight="bold">{t(`${prefix}.whatsNext.features.readinessTools.title`)}:</Text>
+            <Text fontWeight="bold">{t(`${prefix}.whatsNext.features.readinessTools.title`)}</Text>
             <Text>{t(`${prefix}.whatsNext.features.readinessTools.description`)}</Text>
           </Box>
         </ListItem>
         <ListItem display="flex" alignItems="flex-start" mb={4}>
-          <Text mr={2}>📄</Text>
           <Box>
-            <Text fontWeight="bold">{t(`${prefix}.whatsNext.features.documentUpload.title`)}:</Text>
+            <Text fontWeight="bold">{t(`${prefix}.whatsNext.features.documentUpload.title`)}</Text>
             <Text>{t(`${prefix}.whatsNext.features.documentUpload.description`)}</Text>
           </Box>
         </ListItem>
         <ListItem display="flex" alignItems="flex-start" mb={4}>
-          <Text mr={2}>🏠</Text>
           <Box>
-            <Text fontWeight="bold">{t(`${prefix}.whatsNext.features.designCatalogues.title`)}:</Text>
+            <Text fontWeight="bold">{t(`${prefix}.whatsNext.features.designCatalogues.title`)}</Text>
             <Text>{t(`${prefix}.whatsNext.features.designCatalogues.description`)}</Text>
           </Box>
         </ListItem>
         <ListItem display="flex" alignItems="flex-start" mb={4}>
-          <Text mr={2}>🌐</Text>
           <Box>
-            <Text fontWeight="bold">{t(`${prefix}.whatsNext.features.dashboards.title`)}:</Text>
+            <Text fontWeight="bold">{t(`${prefix}.whatsNext.features.dashboards.title`)}</Text>
             <Text>{t(`${prefix}.whatsNext.features.dashboards.description`)}</Text>
           </Box>
         </ListItem>
         <ListItem display="flex" alignItems="flex-start">
-          <Text mr={2}>🔄</Text>
           <Box>
-            <Text fontWeight="bold">{t(`${prefix}.whatsNext.features.statusTracking.title`)}:</Text>
+            <Text fontWeight="bold">{t(`${prefix}.whatsNext.features.statusTracking.title`)}</Text>
             <Text>{t(`${prefix}.whatsNext.features.statusTracking.description`)}</Text>
           </Box>
         </ListItem>
@@ -213,28 +210,75 @@ export const OnboardingChecklistPageForLgAdoptingScreen = () => {
       <UnorderedList mb={2} pl={0} listStyleType="none">
         <ListItem display="flex" alignItems="flex-start" mb={4}>
           <Box>
-            <Text fontWeight="bold">{t(`${prefix}.getStarted.steps.learnMore.title`)}:</Text>
-            <Text ml={4}>{t(`${prefix}.getStarted.steps.learnMore.guide`)}</Text>
+            <Text fontWeight="bold">{t(`${prefix}.getStarted.steps.learnMore.title`)}</Text>
+            <Text ml={4}>
+              <Trans
+                i18nKey="home.joinTheBuildingPermitHub.getStarted.steps.learnMore.guide"
+                components={{
+                  1: (
+                    <Link
+                      to={
+                        "https://www2.gov.bc.ca/gov/content/housing-tenancy/building-or-renovating/permits/building-permit-hub"
+                      }
+                      target="_blank"
+                      style={{ color: "#1a5a96", textDecoration: "underline" }}
+                    />
+                  ),
+                }}
+              />
+            </Text>
           </Box>
         </ListItem>
         <ListItem display="flex" alignItems="flex-start" mb={4}>
           <Box>
-            <Text fontWeight="bold">{t(`${prefix}.getStarted.steps.reachOut.title`)}:</Text>
+            <Text fontWeight="bold">{t(`${prefix}.getStarted.steps.reachOut.title`)}</Text>
             <Text ml={4}>
               {t(`${prefix}.getStarted.steps.reachOut.description`)}{" "}
               <Text as="span" color="blue.700">
-                <Text mr={2}>📧 {t(`${prefix}.getStarted.steps.reachOut.email`)}</Text>
+                <Text mr={2}>
+                  📧{" "}
+                  <Link
+                    to={`mailto:${t(`${prefix}.getStarted.steps.reachOut.email`)}`}
+                    style={{ color: "#1a5a96", textDecoration: "underline" }}
+                  >
+                    {t(`${prefix}.getStarted.steps.reachOut.email`)}
+                  </Link>
+                </Text>
               </Text>
             </Text>
           </Box>
         </ListItem>
         <ListItem display="flex" alignItems="flex-start">
           <Box>
-            <Text fontWeight="bold">{t(`${prefix}.getStarted.steps.beginOnboarding.title`)}:</Text>
+            <Text fontWeight="bold">{t(`${prefix}.getStarted.steps.beginOnboarding.title`)}</Text>
             <Text ml={4}>{t(`${prefix}.getStarted.steps.beginOnboarding.description`)}</Text>
           </Box>
         </ListItem>
       </UnorderedList>
+
+      <Text fontSize="lg" color="gray.700" mb="2">
+        {t(`${prefix}.getStarted.steps.onboardingProcess.title`)}
+      </Text>
+      <OrderedList mb={2} pl={6}>
+        <ListItem>
+          <Trans i18nKey="home.joinTheBuildingPermitHub.getStarted.steps.onboardingProcess.steps.introduction" />
+        </ListItem>
+        <ListItem>
+          <Trans i18nKey="home.joinTheBuildingPermitHub.getStarted.steps.onboardingProcess.steps.training" />
+        </ListItem>
+        <ListItem>
+          <Trans i18nKey="home.joinTheBuildingPermitHub.getStarted.steps.onboardingProcess.steps.initialFeedback" />
+        </ListItem>
+        <ListItem>
+          <Trans i18nKey="home.joinTheBuildingPermitHub.getStarted.steps.onboardingProcess.steps.assistance" />
+        </ListItem>
+        <ListItem>
+          <Trans i18nKey="home.joinTheBuildingPermitHub.getStarted.steps.onboardingProcess.steps.support" />
+        </ListItem>
+        <ListItem>
+          <Trans i18nKey="home.joinTheBuildingPermitHub.getStarted.steps.onboardingProcess.steps.continuousFeedback" />
+        </ListItem>
+      </OrderedList>
 
       {/* You're Not Alone */}
       <Heading as="h2" size="md" mb="4" mt={10}>
@@ -265,11 +309,17 @@ export const OnboardingChecklistPageForLgAdoptingScreen = () => {
         <ListItem>{t(`${prefix}.seeMore.options.success`)}</ListItem>
       </UnorderedList>
       <Text fontSize="lg" color="blue.700" mb={1}>
-        📧 <Trans i18nKey="home.joinTheBuildingPermitHub.seeMore.contact.email" />
+        📧{" "}
+        <Link
+          to={`mailto:${t(`${prefix}.seeMore.contact.email`)}`}
+          style={{ color: "#1a5a96", textDecoration: "underline" }}
+        >
+          {t(`${prefix}.seeMore.contact.email`)}
+        </Link>
       </Text>
       <Text fontSize="lg" color="gray.700" mb={8}>
-        📧 <Trans i18nKey="home.joinTheBuildingPermitHub.seeMore.contact.sessions" />
+        <Trans i18nKey="home.joinTheBuildingPermitHub.seeMore.contact.sessions" />
       </Text>
     </Container>
   )
-}
+})
