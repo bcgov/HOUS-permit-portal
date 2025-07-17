@@ -73,7 +73,7 @@ class PermitApplicationPolicy < ApplicationPolicy
       SiteConfiguration.allow_designated_reviewer? &&
         record.jurisdiction.allow_designated_reviewer
 
-    return true if feature_enabled
+    return true unless feature_enabled
 
     record.permit_collaborations.review.exists?(user_id: user.id)
   end
