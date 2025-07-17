@@ -3566,7 +3566,7 @@ Thank you,
           privacyPolicyOverviewDescription1:
             "The Building Permit Hub is committed to safeguarding your personal information and ensuring your data is handled responsibly. We are a government-supported platform created to streamline the building permit process across British Columbia, helping builders, homeowners, and local governments collaborate digitally.",
           privacyPolicyOverviewDescription2:
-            "This Privacy Policy outlines how we collect, use, disclose, and protect your personal information in accordance with the Freedom of Information and Protection of Privacy Act (FIPPA), and the Government of British Columbia's privacy standards.",
+            "This Privacy Policy outlines how we collect, use, disclose, and protect your personal information in accordance with the Freedom of Information and Protection of Privacy Act (FIPPA), and the Government of British Columbia’s website privacy statement.",
           privacyPolicyWhatInformationWeCollect: "What Information We Collect",
           privacyPolicyWhatInformationWeCollectDescription1:
             "We collect only the minimum information necessary to deliver services. Depending on how you use the Building Permit Hub, this may include:",
@@ -3581,7 +3581,7 @@ Thank you,
           privacyPolicyWhatInformationWeCollectDescription2:
             "Some data may also be collected from third parties (e.g., municipalities, LTSA, BC Assessment) where authorized or required for application processing.",
           privacyPolicyHowWeUseYourInformation: "How We Use Your Information",
-          privacyPolicyHowWeUseYourInformationDescription: "We use your personal information to:",
+          privacyPolicyHowWeUseYourInformationDescription: "We use your information to:",
           privacyPolicyHowWeUseYourInformationItem1: "Provide secure access to the Building Permit Hub",
           privacyPolicyHowWeUseYourInformationItem2:
             "Allow you to submit, track, and manage building permit applications",
@@ -3601,18 +3601,21 @@ Thank you,
           privacyPolicyWhoCanAccessYourInformationItem2:
             "Authorized Ministry of Housing and Municipal Affairs staff supporting the platform",
           privacyPolicyWhoCanAccessYourInformationItem3:
-            "Regulatory bodies (e.g., BC Hydro, Technical Safety BC) involved in compliance checks, where applicable",
+            "Our compliance tools allow you, with your authorization, to interact with regulatory bodies (e.g., BC Hydro and others) involved in compliance checks, where applicable.",
+          privacyPolicyWhoCanAccessYourInformationItem4:
+            "Our compliance tools allow you, with your authorization, to interact with 3rd party tools (e.g., BC Building Code Compliance tool and others) involved in compliance checks, where applicable.",
           privacyPolicyWhoCanAccessYourInformationDescription2:
             "Access is role-based and granted only to individuals who need the information to do their job.",
           privacyPolicyHowWeProtectYourInformation: "How We Protect Your Information",
           privacyPolicyHowWeProtectYourInformationDescription:
             "We use a combination of physical, technical, and administrative measures to safeguard your information:",
-          privacyPolicyHowWeProtectYourInformationItem1:
-            "All information is stored within Canada, in compliance with FIPPA",
-          privacyPolicyHowWeProtectYourInformationItem2: "Encryption is used for data transmission and storage",
-          privacyPolicyHowWeProtectYourInformationItem3:
-            "Access controls and audit logs are implemented to ensure accountability",
+          privacyPolicyHowWeProtectYourInformationItem1: "All information is stored within Canada",
+          privacyPolicyHowWeProtectYourInformationItem2:
+            "Your information is not transmitted outside of Canada without your authorization",
+          privacyPolicyHowWeProtectYourInformationItem3: "Encryption is used for data transmission and storage",
           privacyPolicyHowWeProtectYourInformationItem4:
+            "Access controls and audit logs are implemented to ensure accountability",
+          privacyPolicyHowWeProtectYourInformationItem5:
             "Information is retained only as long as necessary to fulfill its purpose",
           privacyPolicyYourRights: "Your Rights",
           privacyPolicyYourRightsDescription: "As a user of the Building Permit Hub, you have the right to:",
@@ -3627,25 +3630,27 @@ Thank you,
           privacyPolicyYourRightsContactPhone: "Phone: [Insert Contact]",
           privacyPolicyThirdPartyServicesAndIntegrations: "Third-Party Services and Integrations",
           privacyPolicyThirdPartyServicesAndIntegrationsDescription1:
-            "Where the Building Permit Hub connects with third-party systems (e.g., LTSA, form.io, Keycloak), information is shared strictly to support service delivery and is governed by inter-agency agreements and data-sharing policies.",
+            "Where the Building Permit Hub connects with third-party systems (e.g., LTSA, BCeID, BC Service Card, and others), information is shared strictly to support service delivery and is governed by inter-agency agreements and data-sharing policies.",
           privacyPolicyThirdPartyServicesAndIntegrationsDescription2:
             "We do not permit third parties to store or use your data for unrelated purposes.",
           privacyPolicyChangesToThisPolicy: "Changes to This Policy",
           privacyPolicyChangesToThisPolicyDescription:
-            "This Privacy Policy may be updated from time to time to reflect changes in legislation, technology, or service delivery. Significant changes will be communicated via email or in-app notification.",
+            "This Privacy Policy may be updated from time to time to reflect changes in legislation, technology, or service delivery. Significant changes will be communicated via email and on this page.",
           privacyPolicyContactUs: "Contact Us",
           privacyPolicyContactUsDescription:
             "If you have questions about this policy or how your personal information is handled, please contact us at:",
           privacyPolicyContactUsTitle: "Ministry of Housing and Municipal Affairs",
           privacyPolicyContactUsAddress1: "PO Box 9071 Stn Prov Govt",
           privacyPolicyContactUsAddress2: "Victoria, BC V8W 9E2",
-          privacyPolicyContactUsEmail: "Email: digital.codes.permits@gov.bc.ca",
+          privacyPolicyContactUsEmail: "Email:",
+          privacyPolicyContactUsEmailAddress: "digital.codes.permits@gov.bc.ca",
           breadcrumb: {
             checkStepCodeRequirements: "Check step code requirements",
             latest: "Latest",
             profile: "Profile",
             jurisdictions: "Jurisdictions",
             new: "Create new",
+            privacyPolicy: "Privacy Policy",
             invite: "Invite",
             templateVersions: "Template versions",
             requirementsLibrary: "Requirements library",
