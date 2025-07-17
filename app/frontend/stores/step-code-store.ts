@@ -88,6 +88,7 @@ export const StepCodeStoreModel = types
     fetchPart9StepCodes: flow(function* () {
       const response = yield self.environment.api.fetchPart9StepCodes()
       if (response.ok) {
+        self.selectOptions = response.data.meta.selectOptions
         self.mergeUpdateAll(response.data.data, "stepCodesMap")
       } else {
         console.error("Failed to fetch Part 9 Step Codes:", response.problem, response.data)

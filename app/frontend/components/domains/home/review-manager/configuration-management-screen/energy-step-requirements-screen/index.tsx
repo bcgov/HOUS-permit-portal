@@ -25,6 +25,8 @@ export const EnergyStepRequirementsScreen = observer(function EnergyStepRequirem
 
   const { currentJurisdiction, error } = useJurisdiction()
 
+  if (!isLoaded) return <LoadingScreen />
+
   return error ? (
     <ErrorScreen />
   ) : (
