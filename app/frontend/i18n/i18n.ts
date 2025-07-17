@@ -3558,14 +3558,99 @@ Thank you,
           pleaseContact: "Please contact your local government for questions related to your permit application.",
           forHelp: "For help with the Building Permit Hub please contact:",
           reviewNotifications: "Review notifications",
-          earlyAccessStepCodePreviewNotAvailable: "Early access preview of step code is not yet available.",
-
+          privacyPolicy: "Privacy Policy",
+          privacyPolicyEffectiveDate: "Effective Date: January 6, 2025",
+          privacyPolicyLastUpdated: "Last Updated: July 1, 2025",
+          privacyPolicyAppliesTo: "Applies To: Building Permit Hub",
+          privacyPolicyOverview: "Overview",
+          privacyPolicyOverviewDescription1:
+            "The Building Permit Hub is committed to safeguarding your personal information and ensuring your data is handled responsibly. We are a government-supported platform created to streamline the building permit process across British Columbia, helping builders, homeowners, and local governments collaborate digitally.",
+          privacyPolicyOverviewDescription2:
+            "This Privacy Policy outlines how we collect, use, disclose, and protect your personal information in accordance with the Freedom of Information and Protection of Privacy Act (FIPPA), and the Government of British Columbia’s website privacy statement.",
+          privacyPolicyWhatInformationWeCollect: "What Information We Collect",
+          privacyPolicyWhatInformationWeCollectDescription1:
+            "We collect only the minimum information necessary to deliver services. Depending on how you use the Building Permit Hub, this may include:",
+          privacyPolicyWhatInformationWeCollectItem1:
+            "Name, contact information, and user credentials (for account creation and secure access)",
+          privacyPolicyWhatInformationWeCollectItem2:
+            "Project and permit application details (e.g., property address, permit type, uploaded documents)",
+          privacyPolicyWhatInformationWeCollectItem3:
+            "Jurisdictional or regulatory information (e.g., zoning, bylaw data, step code compliance)",
+          privacyPolicyWhatInformationWeCollectItem4:
+            "System use analytics (to improve service performance and user experience)",
+          privacyPolicyWhatInformationWeCollectDescription2:
+            "Some data may also be collected from third parties (e.g., municipalities, LTSA, BC Assessment) where authorized or required for application processing.",
+          privacyPolicyHowWeUseYourInformation: "How We Use Your Information",
+          privacyPolicyHowWeUseYourInformationDescription: "We use your information to:",
+          privacyPolicyHowWeUseYourInformationItem1: "Provide secure access to the Building Permit Hub",
+          privacyPolicyHowWeUseYourInformationItem2:
+            "Allow you to submit, track, and manage building permit applications",
+          privacyPolicyHowWeUseYourInformationItem3: "Communicate with you about your applications or account",
+          privacyPolicyHowWeUseYourInformationItem4:
+            "Enable collaboration between local governments, First Nations, and regulators",
+          privacyPolicyHowWeUseYourInformationItem5:
+            "Improve service delivery through aggregated, non-identifiable usage analytics",
+          privacyPolicyHowWeUseYourInformationItem6:
+            "Meet our legal obligations under FIPPA and relevant building regulations",
+          privacyPolicyHowWeUseYourInformationDescription2:
+            "We do not use your information for marketing or advertising purposes.",
+          privacyPolicyWhoCanAccessYourInformation: "Who Can Access Your Information",
+          privacyPolicyWhoCanAccessYourInformationDescription: "Your information may be accessed by:",
+          privacyPolicyWhoCanAccessYourInformationItem1:
+            "Local governments and First Nations processing your permit application",
+          privacyPolicyWhoCanAccessYourInformationItem2:
+            "Authorized Ministry of Housing and Municipal Affairs staff supporting the platform",
+          privacyPolicyWhoCanAccessYourInformationItem3:
+            "Our compliance tools allow you, with your authorization, to interact with regulatory bodies (e.g., BC Hydro and others) involved in compliance checks, where applicable.",
+          privacyPolicyWhoCanAccessYourInformationItem4:
+            "Our compliance tools allow you, with your authorization, to interact with 3rd party tools (e.g., BC Building Code Compliance tool and others) involved in compliance checks, where applicable.",
+          privacyPolicyWhoCanAccessYourInformationDescription2:
+            "Access is role-based and granted only to individuals who need the information to do their job.",
+          privacyPolicyHowWeProtectYourInformation: "How We Protect Your Information",
+          privacyPolicyHowWeProtectYourInformationDescription:
+            "We use a combination of physical, technical, and administrative measures to safeguard your information:",
+          privacyPolicyHowWeProtectYourInformationItem1: "All information is stored within Canada",
+          privacyPolicyHowWeProtectYourInformationItem2:
+            "Your information is not transmitted outside of Canada without your authorization",
+          privacyPolicyHowWeProtectYourInformationItem3: "Encryption is used for data transmission and storage",
+          privacyPolicyHowWeProtectYourInformationItem4:
+            "Access controls and audit logs are implemented to ensure accountability",
+          privacyPolicyHowWeProtectYourInformationItem5:
+            "Information is retained only as long as necessary to fulfill its purpose",
+          privacyPolicyYourRights: "Your Rights",
+          privacyPolicyYourRightsDescription: "As a user of the Building Permit Hub, you have the right to:",
+          privacyPolicyYourRightsItem1: "Request access to your personal information",
+          privacyPolicyYourRightsItem2: "Correct inaccuracies in your records",
+          privacyPolicyYourRightsItem3: "Withdraw consent for non-essential uses",
+          privacyPolicyYourRightsItem4: "Learn how your information is being used",
+          privacyPolicyYourRightsContactIntro: "For assistance with any of these rights, please contact:",
+          privacyPolicyYourRightsContactTitle:
+            "Information and Privacy Officer, Ministry of Housing and Municipal Affairs",
+          privacyPolicyYourRightsContactEmail: "Email: [Insert Contact]",
+          privacyPolicyYourRightsContactPhone: "Phone: [Insert Contact]",
+          privacyPolicyThirdPartyServicesAndIntegrations: "Third-Party Services and Integrations",
+          privacyPolicyThirdPartyServicesAndIntegrationsDescription1:
+            "Where the Building Permit Hub connects with third-party systems (e.g., LTSA, BCeID, BC Service Card, and others), information is shared strictly to support service delivery and is governed by inter-agency agreements and data-sharing policies.",
+          privacyPolicyThirdPartyServicesAndIntegrationsDescription2:
+            "We do not permit third parties to store or use your data for unrelated purposes.",
+          privacyPolicyChangesToThisPolicy: "Changes to This Policy",
+          privacyPolicyChangesToThisPolicyDescription:
+            "This Privacy Policy may be updated from time to time to reflect changes in legislation, technology, or service delivery. Significant changes will be communicated via email and on this page.",
+          privacyPolicyContactUs: "Contact Us",
+          privacyPolicyContactUsDescription:
+            "If you have questions about this policy or how your personal information is handled, please contact us at:",
+          privacyPolicyContactUsTitle: "Ministry of Housing and Municipal Affairs",
+          privacyPolicyContactUsAddress1: "PO Box 9071 Stn Prov Govt",
+          privacyPolicyContactUsAddress2: "Victoria, BC V8W 9E2",
+          privacyPolicyContactUsEmail: "Email:",
+          privacyPolicyContactUsEmailAddress: "digital.codes.permits@gov.bc.ca",
           breadcrumb: {
             checkStepCodeRequirements: "Check step code requirements",
             latest: "Latest",
             profile: "Profile",
             jurisdictions: "Jurisdictions",
             new: "Create new",
+            privacyPolicy: "Privacy Policy",
             invite: "Invite",
             templateVersions: "Template versions",
             requirementsLibrary: "Requirements library",
