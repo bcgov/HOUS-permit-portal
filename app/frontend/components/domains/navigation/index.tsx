@@ -100,6 +100,9 @@ const LimitedJurisdictionIndexScreen = lazy(() =>
 const NewJurisdictionScreen = lazy(() =>
   import("../jurisdictions/new-jurisdiction-screen").then((module) => ({ default: module.NewJurisdictionScreen }))
 )
+const PrivacyPolicyScreen = lazy(() =>
+  import("../misc/privacy-policy-screen").then((module) => ({ default: module.PrivacyPolicyScreen }))
+)
 const JurisdictionSubmissionInboxScreen = lazy(() =>
   import("../jurisdictions/submission-inbox/jurisdiction-submisson-inbox-screen").then((module) => ({
     default: module.JurisdictionSubmissionInboxScreen,
@@ -710,6 +713,7 @@ const AppRoutes = observer(() => {
           <Route path="/accept-invitation" element={<AcceptInvitationScreen />} />
           <Route path="/contact" element={<ContactScreen />} />
           <Route path="/project-readiness-tools" element={<ProjectReadinessToolsIndexScreen />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicyScreen />} />
           <Route
             path="/project-readiness-tools/create-your-letters-of-assurance"
             element={<LettersOfAssuranceScreen />}
