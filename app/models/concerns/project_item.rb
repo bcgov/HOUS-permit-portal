@@ -3,17 +3,13 @@ module ProjectItem
 
   included do
     belongs_to :permit_project, touch: true, optional: true
-    has_one :jurisdiction, through: :permit_project
+    belongs_to :jurisdiction, optional: true # Added for direct association
     has_one :owner, through: :permit_project
 
     after_commit :reindex_permit_project
 
     # Delegations to PermitProject for core project details
-    delegate :title,
-             :jurisdiction,
-             :permit_date,
-             to: :permit_project,
-             allow_nil: true # allow_nil should be false if permit_project is truly non-optional and always present
+    delegate :title, :permit_date, to: :permit_project, allow_nil: true # allow_nil should be false if permit_project is truly non-optional and always present
 
     delegate :qualified_name,
              :heating_degree_days,
@@ -48,10 +44,9 @@ module ProjectItem
     # validates :permit_project, presence: true # Uncomment if strict presence is required by including models
 
     # Custom method for jurisdiction to ensure it safely accesses through permit_project
-    # This is somewhat redundant if using delegate with allow_nil: true but can be kept for clarity
-    # or if more complex logic were needed.
+    # or falls back to its own direct association.
     def jurisdiction
-      permit_project&.jurisdiction
+      permit_project&.jurisdiction || super
     end
 
     private
