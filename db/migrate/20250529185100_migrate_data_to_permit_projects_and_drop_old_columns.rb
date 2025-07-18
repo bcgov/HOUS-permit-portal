@@ -7,26 +7,7 @@ class MigrateDataToPermitProjectsAndDropOldColumns < ActiveRecord::Migration[
     # Might need to explicitly require if run in certain contexts, but usually not for db:migrate.
     PermitProjectSeederService.call
 
-    # Step 2: Drop old columns
-    # From permit_applications
-    if column_exists?(:permit_applications, :jurisdiction_id)
-      # Check if this is the *old* direct jurisdiction_id, not one related to property_plan_jurisdiction if that was also named jurisdiction_id
-      # Assuming this is the one we want to drop, that was for PA's direct jurisdiction
-      # We might need to be more specific if there's ambiguity with other jurisdiction references.
-      # For now, proceeding with simple removal if it exists.
-      remove_column :permit_applications, :jurisdiction_id, :uuid # remove_reference might fail if FK constraint name is unknown or already gone
-    end
-    if column_exists?(:permit_applications, :full_address)
-      remove_column :permit_applications, :full_address, :text
-    end
-    if column_exists?(:permit_applications, :pid)
-      remove_column :permit_applications, :pid, :string
-    end
-    if column_exists?(:permit_applications, :pin)
-      remove_column :permit_applications, :pin, :string
-    end
-
-    # From step_codes
+    # remove columns from step_codes
     if column_exists?(:step_codes, :project_name)
       remove_column :step_codes, :project_name, :string
     end
