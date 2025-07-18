@@ -223,8 +223,8 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_10_191449) do
     t.integer "heating_degree_days"
     t.boolean "inbox_enabled", default: false, null: false
     t.boolean "show_about_page", default: false, null: false
+    t.boolean "allow_designated_reviewer", default: false
     t.string "disambiguator"
-    t.boolean "allow_designated_reviewer"
     t.index ["prefix"], name: "index_jurisdictions_on_prefix", unique: true
     t.index ["regional_district_id"], name: "index_jurisdictions_on_regional_district_id"
     t.index ["slug"], name: "index_jurisdictions_on_slug", unique: true
@@ -393,6 +393,10 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_10_191449) do
     t.uuid "sandbox_id"
     t.datetime "newly_submitted_at", precision: nil
     t.uuid "permit_project_id"
+    t.uuid "jurisdiction_id"
+    t.text "full_address"
+    t.string "pid"
+    t.string "pin"
     t.index ["activity_id"], name: "index_permit_applications_on_activity_id"
     t.index ["number"], name: "index_permit_applications_on_number", unique: true
     t.index ["permit_project_id"], name: "index_permit_applications_on_permit_project_id"
