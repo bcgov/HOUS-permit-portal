@@ -817,6 +817,9 @@ Thank you,
             inboxDisabledTitle: "Inbox disabled",
             inboxDisabled:
               "Submissions for this local jurisdictions are currently disabled. You will be able to make edits to this permit application but will not be able to submit until this jurisdiction's is accepting submissions again and inboxes are enabled globally.",
+            inboxDisabledTitleEarlyAccess: "Early Access – Submissions Not Yet Enabled",
+            inboxDisabledEarlyAccess:
+              "This permit is available for early access to help your team get familiar with the application process. You can view and edit your application, but submission is currently disabled. Submissions will be enabled once this permit type is officially launched in your jurisdiction.",
             downloadApplication: "Download application",
             fetchingMissingPdf: "Fetching {{missingPdf}}...",
             missingPdfLabels: {
