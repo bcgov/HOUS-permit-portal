@@ -22,8 +22,7 @@ const StepCodeAddressSearch = observer(({ onJurisdictionFound }: IStepCodeAddres
   const [selectedSite, setSelectedSite] = useState<number | null>(null)
   const [searchKey, setSearchKey] = useState(0)
   const isHomePage = location.pathname === "/welcome" ? true : false
-  const { geocoderStore, jurisdictionStore } = useMst()
-  const { setCurrentJurisdiction } = jurisdictionStore
+  const { geocoderStore } = useMst()
   const methods = useForm<IStepCodeAddressSearchForm>({
     defaultValues: {
       address: null,
@@ -43,8 +42,6 @@ const StepCodeAddressSearch = observer(({ onJurisdictionFound }: IStepCodeAddres
       onJurisdictionFound?.(null)
       return
     }
-
-    setCurrentJurisdiction(jurisdiction.id)
 
     if (isHomePage) {
       onJurisdictionFound?.(jurisdiction)

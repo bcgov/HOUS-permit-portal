@@ -5,7 +5,7 @@ import { useMst } from "../../setup/root"
 import { isUUID } from "../../utils/utility-functions"
 
 export const useJurisdiction = () => {
-  const { jurisdictionId } = useParams()
+  const { jurisdictionId, slug } = useParams()
   const navigate = useNavigate()
   const { pathname } = useLocation()
   const { jurisdictionStore, userStore } = useMst()
@@ -70,10 +70,10 @@ export const useJurisdiction = () => {
           }
         } else {
           //assume slug
-          const jurisdiction = await fetchJurisdiction(jurisdictionId)
+          const jurisdiction = await fetchJurisdiction(slug)
           if (jurisdiction) {
             setError(null)
-            setCurrentJurisdictionBySlug(jurisdictionId)
+            setCurrentJurisdictionBySlug(slug)
           }
         }
       } catch (e) {

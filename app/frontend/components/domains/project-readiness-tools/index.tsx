@@ -16,26 +16,11 @@ export const ProjectReadinessToolsIndexScreen = () => {
           description: t("home.projectReadinessTools.lookUpToolProjectDescription"),
           href: "/project-readiness-tools/look-up-step-codes-requirements-for-your-project",
         },
-      ],
-    },
-    {
-      sectionTitle: t("home.projectReadinessTools.prepareYourApplication"),
-      items: [
-        {
-          linkText: t("projectReadinessTools.lookupStepCodeLink"),
-          description: t("projectReadinessTools.lookupStepCodeDescription"),
-          href: "#",
-        },
         {
           linkText: t("projectReadinessTools.meetStepCodeLink"),
           description: t("projectReadinessTools.meetStepCodeDescription"),
           href: "/project-readiness-tools/check-step-code-requirements",
         },
-        // {
-        //   linkText: t("projectReadinessTools.checkDrawingsLink"),
-        //   description: t("projectReadinessTools.checkDrawingsDescription"),
-        //   href: "#",
-        // },
       ],
     },
     {
