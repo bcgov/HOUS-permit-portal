@@ -35,8 +35,10 @@ export const StepCodeSummary = observer(function StepCodeSummary() {
     if (updateSucceeded) {
       if (alternatePath) {
         navigate(alternatePath)
-      } else {
+      } else if (permitApplicationId) {
         permitApplicationId && navigate(`/permit-applications/${permitApplicationId}/edit`)
+      } else {
+        navigate(`/step-codes`)
       }
     } else {
       console.error("Failed to complete stepCodeSummary section")

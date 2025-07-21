@@ -269,7 +269,6 @@ if PermitApplication.first.blank?
       activity_id: template_version.activity.id,
       permit_type_id: template_version.permit_type.id,
       template_version: template_version
-      # Removed direct assignment of jurisdiction, full_address, pid
     )
   end
 end

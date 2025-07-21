@@ -15,23 +15,24 @@ import {
 import { MapPin } from "@phosphor-icons/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
+import * as R from "ramda"
 import React, { useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { Trans } from "react-i18next"
 import { useLocation, useNavigate, useParams } from "react-router-dom"
 import { usePart3StepCode } from "../../../../../hooks/resources/use-part-3-step-code"
-import { EStepCodeParentType } from "../../../../../types/enums"
 import { SharedSpinner } from "../../../../shared/base/shared-spinner"
 import { SectionHeading } from "./shared/section-heading"
 
 interface IProjectDetailsForm {
   fullAddress?: string
+  projectName?: string
   projectIdentifier?: string
 }
 
 export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails() {
   const i18nPrefix = "stepCode.part3.projectDetails"
-  const { permitApplicationId: routePermitApplicationId } = useParams()
+  const { permitApplicationId } = useParams()
   const { checklist, stepCode } = usePart3StepCode()
 
   const navigate = useNavigate()
@@ -49,6 +50,8 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
       reset({
         fullAddress: stepCode.fullAddress || "",
         projectIdentifier: stepCode.projectIdentifier || "",
+        projectName: stepCode.projectName || "",
+        // todo: add jurisdiction?
       })
     }
   }, [checklist, stepCode, reset])
@@ -59,21 +62,28 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
     const stepCodeAttributes: Partial<IProjectDetailsForm & { id: string }> = { id: stepCode.id }
     let needsUpdate = false
 
-    if (stepCode.parentType == EStepCodeParentType.User) {
-      if (!stepCode.fullAddress && data.fullAddress) {
-        stepCodeAttributes.fullAddress = data.fullAddress
-        needsUpdate = true
-      }
+    if (editable) {
+      stepCodeAttributes.fullAddress = data.fullAddress
+
+      needsUpdate = true
     }
 
     let checklistUpdateSucceeded = true
     if (needsUpdate) {
-      checklistUpdateSucceeded = await checklist.update({ step_code_attributes: stepCodeAttributes })
+      checklistUpdateSucceeded = await checklist.update({ stepCodeAttributes })
     }
 
     if (checklistUpdateSucceeded) {
+      stepCode.setProjectDetails({
+        projectName: data.projectName,
+        fullAddress: data.fullAddress,
+        projectIdentifier: data.projectIdentifier,
+        // todo: add jurisdiction?
+      })
+
       const alternatePath = checklist.alternateNavigateAfterSavePath
       checklist.setAlternateNavigateAfterSavePath(null)
+      // const stepCodeUpdateSucceeded = await stepCode.update(stepCodeAttributes)
       const sectionCompleteSucceeded = await checklist.completeSection("projectDetails")
       if (sectionCompleteSucceeded) {
         if (alternatePath) {
@@ -95,9 +105,7 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
     )
   }
 
-  const isParentPermitProject = stepCode.parentType === EStepCodeParentType.PermitProject
-
-  const isEditable = (fieldValue: string | undefined | null) => !isParentPermitProject
+  const editable = R.isNil(permitApplicationId)
 
   return (
     <>
@@ -110,28 +118,23 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
           <Field label={t(`${i18nPrefix}.name`)} value={stepCode.projectName} />
 
           <Flex gap={{ base: 6, xl: 6 }} direction={{ base: "column", xl: "row" }}>
-            {isEditable(stepCode.fullAddress) ? (
-              <FormControl isInvalid={!!errors.fullAddress} width={{ base: "auto", xl: "430px" }}>
-                <FormLabel htmlFor="fullAddress">{t(`${i18nPrefix}.address`)}</FormLabel>
-                <InputGroup>
-                  <InputLeftElement pointerEvents="none">
-                    <MapPin />
-                  </InputLeftElement>
-                  <Input id="fullAddress" {...register("fullAddress")} />
-                </InputGroup>
-                <FormErrorMessage>{errors.fullAddress?.message}</FormErrorMessage>
-              </FormControl>
-            ) : (
-              <FormControl width={{ base: "auto", xl: "430px" }}>
-                <FormLabel fontWeight="bold">{t(`${i18nPrefix}.address`)}</FormLabel>
-                <InputGroup>
-                  <InputLeftElement pointerEvents="none">
-                    <MapPin />
-                  </InputLeftElement>
-                  <Input isDisabled value={stepCode.fullAddress || ""} />
-                </InputGroup>
-              </FormControl>
-            )}
+            <FormControl isInvalid={editable && !!errors.fullAddress} width={{ base: "auto", xl: "430px" }}>
+              <FormLabel {...(editable ? { htmlFor: "fullAddress" } : { fontWeight: "bold" })}>
+                {t(`${i18nPrefix}.address`)}
+              </FormLabel>
+              <InputGroup>
+                <InputLeftElement pointerEvents="none">
+                  <MapPin />
+                </InputLeftElement>
+                <Input
+                  isDisabled={!editable}
+                  {...(editable
+                    ? { id: "fullAddress", ...register("fullAddress") }
+                    : { value: stepCode.fullAddress || "" })}
+                />
+              </InputGroup>
+              {editable && <FormErrorMessage>{errors.fullAddress?.message}</FormErrorMessage>}
+            </FormControl>
 
             <Field flex={1} label={t(`${i18nPrefix}.jurisdiction`)} value={stepCode.jurisdictionName} />
           </Flex>
@@ -167,7 +170,7 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
             <Trans
               i18nKey={`${i18nPrefix}.modify`}
               components={{
-                1: <Link href={`/permit-applications/${routePermitApplicationId}/edit`} />,
+                1: <Link href={`/permit-applications/${permitApplicationId}/edit`} />,
               }}
             />
           </Text>

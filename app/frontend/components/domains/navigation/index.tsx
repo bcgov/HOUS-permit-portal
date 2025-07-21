@@ -238,6 +238,9 @@ const Part9StepCodeForm = lazy(() =>
 const Part3StepCodeForm = lazy(() =>
   import("../step-code/part-3").then((module) => ({ default: module.Part3StepCodeForm }))
 )
+const StepCodeIndexScreen = lazy(() =>
+  import("../step-code").then((module) => ({ default: module.StepCodeIndexScreen }))
+)
 const StepCodeChecklistPDFViewer = lazy(() =>
   import("../step-code/checklist/pdf-content/viewer").then((module) => ({
     default: module.StepCodeChecklistPDFViewer,
@@ -614,6 +617,7 @@ const AppRoutes = observer(() => {
           <Route
             element={<ProtectedRoute isAllowed={loggedIn && !mustAcceptEula} redirectPath={mustAcceptEula && "/"} />}
           >
+            <Route path="/step-codes" element={<StepCodeIndexScreen />} />
             <Route path="/permit-applications" element={<PermitApplicationIndexScreen />} />
             <Route path="/permit-projects" element={<PermitProjectIndexScreen />} />
             <Route path="/permit-projects/new" element={<NewPermitProjectScreen />} />

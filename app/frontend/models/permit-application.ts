@@ -73,7 +73,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
       selectedTabIndex: types.optional(types.number, 0),
       createdAt: types.Date,
       updatedAt: types.Date,
-      stepCode: types.maybeNull(types.reference(StepCodeModel)),
+      stepCode: types.maybeNull(types.reference(types.late(() => StepCodeModel))),
       supportingDocuments: types.maybeNull(types.frozen<IDownloadableFile[]>()),
       allSubmissionVersionCompletedSupportingDocuments: types.maybeNull(types.frozen<IDownloadableFile[]>()),
       zipfileSize: types.maybeNull(types.number),
