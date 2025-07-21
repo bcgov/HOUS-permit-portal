@@ -25,6 +25,7 @@ spec:
         app: "{{ $.Values.clamav.name }}"
         deployment: "{{ $.Values.clamav.name }}"
     spec:
+      automountServiceAccountToken: false
       containers:
         - image: "{{ .Values.clamav.registry }}/{{ .Values.clamav.image }}:{{ .Values.clamav.tag }}"
           imagePullPolicy: "{{ .Values.clamav.imagePullPolicy }}"

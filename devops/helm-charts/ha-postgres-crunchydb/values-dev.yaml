@@ -11,8 +11,26 @@ crunchy-postgres:
         cpu: 10m
         memory: 32Mi
 
+  dataSource:
+    enabled: false
+    # should have the same name and contain the same keys as the pgbackrest secret
+    secretName: s3-pgbackrest
+    repo:
+      name: repo2
+      path: "/habackup"
+      s3:
+        bucket: "bucketName"
+        endpoint: <REDACTED>
+        region: "not-used"
+      stanza: db
+     
   pgBackRest:
     retention: "1"
+    retentionS3: "30" # Ideally a larger number such as backups for 30 days
+    retentionFullType: count # Type of retention for full backups
+    retentionFullTypeS3: time # Type of retention for full backups
+    retentionArchive: "2" # Number of backups worth of continuous WAL to retain
+    retentionArchiveType: full # Type of retention for WAL archives
     repos:
       volume:
         storage: 256Mi
@@ -24,6 +42,7 @@ crunchy-postgres:
       requests:
         cpu: 1m
         memory: 64Mi
+
 
     s3:
       enabled: true
@@ -48,8 +67,8 @@ crunchy-postgres:
       # Please DO NOT push this value to GitHub
       keySecret: <REDACTED>
       fullSchedule: 0 9 * * *
-      incrementalSchedule: 0 0,5,13,17,21 * * *
-      
+      incrementalSchedule: "0 0 31 2 *" #set to FEB 31st so this will never run
+
   patroni:
     postgresql:
       parameters:
