@@ -2,21 +2,12 @@ class SiteConfiguration < ApplicationRecord
   # Ensures that only one SiteConfiguration record can be created
   before_create :ensure_single_record
   validate :validate_help_link_items
+  validate :validate_landing_page_early_access_requirement_templates_are_public
 
   has_many :revision_reasons
-
-  belongs_to :small_scale_requirement_template,
-             class_name: "RequirementTemplate",
-             optional: true
-
-  # In the future, add new landing page templates like so:
-  # belongs_to :medium_scale_requirement_template,
-  #            class_name: "RequirementTemplate",
-  #            optional: true
-
-  # belongs_to :large_scale_requirement_template,
-  #            class_name: "RequirementTemplate",
-  #            optional: true
+  has_many :landing_page_early_access_requirement_templates,
+           class_name: "EarlyAccessRequirementTemplate",
+           foreign_key: "site_configuration_id"
 
   accepts_nested_attributes_for :revision_reasons, allow_destroy: true
   validate :max_undiscarded_revision_reasons
@@ -35,6 +26,10 @@ class SiteConfiguration < ApplicationRecord
 
   def self.inbox_enabled?
     instance.inbox_enabled
+  end
+
+  def self.allow_designated_reviewer?
+    instance.allow_designated_reviewer
   end
 
   # This override allows discarding of reasons and updating them by reason_code
@@ -132,6 +127,17 @@ class SiteConfiguration < ApplicationRecord
             )
           )
         end
+      end
+    end
+  end
+
+  def validate_landing_page_early_access_requirement_templates_are_public
+    landing_page_early_access_requirement_templates.each do |template|
+      unless template.public
+        errors.add(
+          :landing_page_early_access_requirement_templates,
+          "must be public"
+        )
       end
     end
   end

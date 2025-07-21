@@ -23,4 +23,6 @@ export const PermitCollaborationModel = types.snapshotProcessor(
   }
 )
 
-export interface IPermitCollaboration extends Instance<typeof PermitCollaborationModel> {}
+export interface IPermitCollaboration extends Instance<typeof PermitCollaborationModel> {
+  collaborator: any
+}

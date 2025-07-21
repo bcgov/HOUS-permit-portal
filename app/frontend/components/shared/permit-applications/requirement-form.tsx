@@ -196,12 +196,20 @@ export const RequirementForm = observer(
 
     const handleOpenStepCodePart3 = async (_event) => {
       await triggerSave?.()
-      navigate("part-3-step-code")
+      if (isEarlyAccess) {
+        alert(t("site.earlyAccessStepCodePreviewNotAvailable"))
+      } else {
+        navigate("part-3-step-code")
+      }
     }
 
     const handleOpenStepCodePart9 = async (_event) => {
       await triggerSave?.()
-      navigate("part-9-step-code")
+      if (isEarlyAccess) {
+        alert(t("site.earlyAccessStepCodePreviewNotAvailable"))
+      } else {
+        navigate("part-9-step-code")
+      }
     }
 
     const handleOpenContactAutofill = async (event) => {
@@ -218,6 +226,7 @@ export const RequirementForm = observer(
       downloadFileFromStorage({
         model: EFileUploadAttachmentType.RequirementDocument,
         modelId: event.detail.id,
+        filename: event.detail.filename,
       })
     }
 
@@ -421,11 +430,18 @@ export const RequirementForm = observer(
               status={EFlashMessageStatus.warning}
             />
           )}
-          {!inboxEnabled && !sandbox && (
+          {!inboxEnabled && !sandbox && !isEarlyAccess && (
             <CustomMessageBox
               title={t("permitApplication.show.inboxDisabledTitle")}
               description={t("permitApplication.show.inboxDisabled")}
               status={EFlashMessageStatus.error}
+            />
+          )}
+          {!inboxEnabled && !sandbox && isEarlyAccess && (
+            <CustomMessageBox
+              title={t("permitApplication.show.inboxDisabledTitleEarlyAccess")}
+              description={t("permitApplication.show.inboxDisabledEarlyAccess")}
+              status={EFlashMessageStatus.warning}
             />
           )}
           {permitApplication?.isSubmitted ? (

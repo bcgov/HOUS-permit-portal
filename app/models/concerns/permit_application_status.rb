@@ -7,10 +7,9 @@ module PermitApplicationStatus
            newly_submitted: 1,
            revisions_requested: 3,
            resubmitted: 4
+           #  approved: 5
          },
          _default: 0
-
-    validate :inbox_must_be_enabled_on_non_sandboxed_when_submitted
 
     def self.draft_statuses
       %w[new_draft revisions_requested]
@@ -53,6 +52,17 @@ module PermitApplicationStatus
       newly_submitted? || resubmitted?
     end
 
+    def pertinence_score
+      {
+        "new_draft" => 30,
+        "newly_submitted" => 10,
+        "resubmitted" => 20,
+        "revisions_requested" => 40
+      }[
+        status
+      ] || -1
+    end
+
     def can_submit?
       return false unless inbox_enabled? || sandbox.present?
 
@@ -93,23 +103,6 @@ module PermitApplicationStatus
       zip_and_upload_supporting_documents
 
       send_submit_notifications
-    end
-
-    def inbox_must_be_enabled_on_non_sandboxed_when_submitted
-      return unless sandbox.nil?
-
-      return unless jurisdiction.present?
-
-      return if jurisdiction.inbox_enabled?
-
-      return unless PermitApplication.submitted_statuses.include?(status)
-
-      errors.add(
-        :jurisdiction,
-        I18n.t(
-          "activerecord.errors.models.permit_application.attributes.jurisdiction.inbox_not_enabled"
-        )
-      )
     end
   end
 end

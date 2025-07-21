@@ -60,6 +60,7 @@ export const Form = observer(function SubmissionInboxSetupForm({ jurisdiction }:
   useEffect(() => {
     jurisdiction &&
       setValue("permitTypeSubmissionContactsAttributes", [...jurisdiction.permitTypeSubmissionContacts, ...defaults()])
+    setValue("inboxEnabled", inboxEnabled) // Update inboxEnabled value
   }, [jurisdiction?.id])
 
   useEffect(() => {

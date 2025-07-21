@@ -13,11 +13,13 @@ enum EComponentType {
   container = "container",
   datagrid = "datagrid",
   date = "date",
+  datetime = "datetime",
   fieldset = "fieldset",
   columns = "columns",
   file = "simplefile",
   number = "number",
   panel = "panel",
+  radio = "radio",
   select = "select",
   checklist = "selectboxes",
   email = "simpleemail",
@@ -80,6 +82,14 @@ const FormComponent = function ApplicationPDFFormComponent({
       case EComponentType.datagrid: {
         return { value: null, label: null }
       }
+      case EComponentType.radio: {
+        const label = component.label
+        const selectedValue = R.path([...dataPath, component.key], permitApplication.submissionData.data)
+        const selectedOption = (component.values || []).find((option) => option.value === selectedValue)
+        const value = selectedOption ? selectedOption.label : selectedValue
+        return { value, label, isVisible: !R.isNil(value) && !R.isNil(label) }
+      }
+
       default:
         const label = component.label
         const value = R.path([...dataPath, component.key], permitApplication.submissionData.data)
@@ -91,7 +101,7 @@ const FormComponent = function ApplicationPDFFormComponent({
       dataPath = [component.key]
       const { components, columns } = component
       const componentFields = fields(components || columns)
-      const isValid = !R.isEmpty(component.title.trim()) && componentFields.length > 0
+      const isValid = !R.isEmpty((component.title || "").trim()) && componentFields.length > 0
       if (!isValid) return null
       const firstChild: any = R.head(components)
       const additionalChildren: any = R.tail(components)
@@ -252,11 +262,13 @@ const FormComponent = function ApplicationPDFFormComponent({
       return isVisible ? <InputField value={value?.display_name} label={label} type={component.type} /> : null
     }
     case EComponentType.select:
+    case EComponentType.radio:
     case EComponentType.text:
     case EComponentType.textarea:
     case EComponentType.number:
     case EComponentType.phone:
     case EComponentType.date:
+    case EComponentType.datetime:
     case EComponentType.email: {
       const { value, label, isVisible } = extractFieldInfo(component)
       return isVisible ? <InputField value={value} label={label} type={component.type} /> : null
@@ -339,15 +351,18 @@ const CheckboxField = function ApplicationPDFPanelCheckboxField({ value, label }
 }
 
 function Checkbox({ isChecked, label }) {
+  const checked = !!isChecked
   return (
     <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
       <View
         style={{
           width: 8,
           height: 8,
-          borderColor: theme.colors.border.dark,
-          borderWidth: isChecked ? 0 : 0.75,
-          backgroundColor: isChecked ? theme.colors.text.primary : theme.colors.greys.white,
+          backgroundColor: checked ? theme.colors.text.primary : theme.colors.greys.white,
+          ...(!checked && {
+            borderColor: theme.colors.border.dark,
+            borderWidth: 0.75,
+          }),
         }}
       />
 

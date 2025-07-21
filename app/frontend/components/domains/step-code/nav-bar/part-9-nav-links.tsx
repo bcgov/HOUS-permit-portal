@@ -5,6 +5,7 @@ import React from "react"
 import { useForm } from "react-hook-form"
 import { useNavigate } from "react-router-dom"
 import { usePart9StepCode } from "../../../../hooks/resources/use-part-9-step-code"
+import { useMst } from "../../../../setup/root"
 import { EStepCodeChecklistStatus } from "../../../../types/enums"
 import { RestartConfirmationModal } from "../part-9/restart-confirmation-modal"
 
@@ -12,11 +13,17 @@ export const Part9NavLinks = observer(function Part9StepCodeNavLinks() {
   const { stepCode } = usePart9StepCode()
   const checklist = stepCode?.preConstructionChecklist
   const navigate = useNavigate()
+  const { uiStore } = useMst()
   const { handleSubmit, register, formState } = useForm()
   const { isValid, isSubmitting } = formState
 
   const onComplete = async (values) => {
     await stepCode.updateChecklist(checklist.id, values)
+  }
+
+  const handleBack = () => {
+    uiStore.setScrollToSelector(".formio-component[class*='energy_step_code_method']")
+    navigate(-1)
   }
 
   const handleSave = async () => {
@@ -50,7 +57,7 @@ export const Part9NavLinks = observer(function Part9StepCodeNavLinks() {
           </form>
         </>
       ) : (
-        <Button variant="primary" onClick={() => navigate(-1)}>
+        <Button variant="primary" onClick={handleBack}>
           {t("stepCode.back")}
         </Button>
       )}

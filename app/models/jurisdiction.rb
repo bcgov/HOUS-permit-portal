@@ -40,13 +40,14 @@ class Jurisdiction < ApplicationRecord
     reviewers_size
     permit_applications_size
     user_ids
-    submission_inbox_set_up
+    inbox_enabled
     created_at
   ]
   SUPER_ADMIN_ADDITIONAL_DATA_FIELDS = %i[manager_emails]
   # Associations
   has_one :preference
-  has_many :permit_applications
+  has_many :permit_projects
+  has_many :permit_applications, through: :permit_projects
   has_many :contacts, as: :contactable, dependent: :destroy
   has_many :jurisdiction_memberships, dependent: :destroy
   has_many :users, through: :jurisdiction_memberships
@@ -61,6 +62,8 @@ class Jurisdiction < ApplicationRecord
   has_many :permit_type_required_steps, dependent: :destroy
   has_many :collaborators, as: :collaboratorable, dependent: :destroy
   has_many :sandboxes, dependent: :destroy
+  has_many :property_plan_local_jurisdictions, dependent: :destroy
+  has_many :jurisdiction_documents, dependent: :destroy
 
   validates :name, uniqueness: { scope: :locality_type, case_sensitive: false }
   validates :locality_type, presence: true
@@ -89,6 +92,7 @@ class Jurisdiction < ApplicationRecord
                                   }
 
   accepts_nested_attributes_for :permit_type_required_steps, allow_destroy: true
+  accepts_nested_attributes_for :jurisdiction_documents, allow_destroy: true
 
   before_create :assign_unique_prefix
 
@@ -161,9 +165,9 @@ class Jurisdiction < ApplicationRecord
 
   def search_data
     {
-      qualified_name: qualified_name,
-      reverse_qualified_name: reverse_qualified_name,
-      regional_district_name: regional_district_name,
+      qualified_name: qualified_name.upcase,
+      reverse_qualified_name: reverse_qualified_name.upcase,
+      regional_district_name: regional_district_name&.upcase,
       name: name,
       type: type,
       updated_at: updated_at,
@@ -171,7 +175,7 @@ class Jurisdiction < ApplicationRecord
       reviewers_size: reviewers_size,
       permit_applications_size: permit_applications_size,
       user_ids: users.pluck(:id),
-      submission_inbox_set_up: submission_inbox_set_up,
+      inbox_enabled: inbox_enabled,
       created_at: created_at,
       manager_emails: manager_emails
     }
@@ -196,6 +200,10 @@ class Jurisdiction < ApplicationRecord
 
   def reverse_qualified_name
     "#{name}, #{qualifier}"
+  end
+
+  def disambiguated_name
+    disambiguator.present? ? "#{name} (#{disambiguator.titleize})" : name
   end
 
   def review_managers_size
@@ -353,13 +361,16 @@ class Jurisdiction < ApplicationRecord
   def ensure_default_sandboxes
     if sandboxes.published.empty?
       sandboxes.build(
-        name: "Published Sandbox",
+        name: "Published",
+        description:
+          "Work with application forms that have already been published",
         template_version_status_scope: :published
       )
     end
     if sandboxes.scheduled.empty?
       sandboxes.build(
-        name: "Scheduled Sandbox",
+        name: "Scheduled",
+        description: "Work with application forms scheduled to be published",
         template_version_status_scope: :scheduled
       )
     end

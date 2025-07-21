@@ -1,6 +1,8 @@
 require "rails_helper"
 
-RSpec.describe Api::RequirementTemplatesController, type: :controller do
+RSpec.describe Api::RequirementTemplatesController,
+               type: :controller,
+               search: true do
   let(:demolition_activity) { create(:activity, code: :demolition) }
   let(:alteration_activity) { create(:activity, code: :site_alteration) }
   let(:high_permit_type) { create(:permit_type, code: :high_residential) }
@@ -89,14 +91,14 @@ RSpec.describe Api::RequirementTemplatesController, type: :controller do
                 visibility: "live"
               }
           expect(response).to have_http_status(:success)
-          expect(json_response["data"].map { |rt| rt["id"] }).to match_array(
-            [
-              requirement_template1.id,
-              requirement_template2.id,
-              requirement_template3.id,
-              requirement_template4.id
-            ]
-          )
+          present = json_response["data"].pluck("id")
+          expected = [
+            requirement_template1.id,
+            requirement_template2.id,
+            requirement_template3.id,
+            requirement_template4.id
+          ]
+          expect(present).to match_array(expected)
           expect(json_response["data"].map { |rt| rt["id"] }).not_to include(
             archived_template.id
           )

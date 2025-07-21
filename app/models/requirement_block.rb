@@ -27,11 +27,12 @@ class RequirementBlock < ApplicationRecord
   enum visibility: { any: 0, early_access: 1, live: 2 }, _default: 0
 
   validates :sku, uniqueness: true, presence: true
-  validates :name, presence: true, uniqueness: { scope: :first_nations }
+  validates :name, presence: true
   validates :display_name, presence: true
   validate :validate_step_code_dependencies
   validate :validate_requirements_conditional
   validate :early_access_on_appropriate_template
+  validate :unique_name_among_non_discarded
 
   before_validation :set_sku, on: :create
   before_validation :ensure_unique_name, on: :create
@@ -80,7 +81,7 @@ class RequirementBlock < ApplicationRecord
       id: id,
       key: key(section_key),
       type: "panel",
-      title: name,
+      title: display_name,
       description: display_description,
       collapsible: true,
       collapsed: false,
@@ -91,7 +92,8 @@ class RequirementBlock < ApplicationRecord
   def components_form_json(section_key)
     is_optional_block = requirements.all? { |req| !req.required }
     has_documents = requirement_documents.any?
-    requirement_map = requirements.map { |r| r.to_form_json(key(section_key)) }
+    requirement_map =
+      requirements.map { |r| r.to_form_json(key(section_key)) }.compact
 
     requirement_map.unshift(documents_component(section_key)) if has_documents
 
@@ -307,7 +309,11 @@ class RequirementBlock < ApplicationRecord
     new_name = base_name
 
     # Loop to find a unique name
-    while self.class.exists?(name: new_name)
+    while self
+            .class
+            .where(discarded_at: nil)
+            .where(first_nations: first_nations)
+            .exists?(name: new_name)
       new_name = increment_last_word(new_name)
     end
 
@@ -329,5 +335,17 @@ class RequirementBlock < ApplicationRecord
     end
 
     words.join(" ")
+  end
+
+  def unique_name_among_non_discarded
+    return if name.blank?
+    if self
+         .class
+         .where.not(id: id)
+         .where(first_nations: first_nations)
+         .where(discarded_at: nil)
+         .exists?(name: name)
+      errors.add(:name, "has already been taken")
+    end
   end
 end

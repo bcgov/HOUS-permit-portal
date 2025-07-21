@@ -4,6 +4,7 @@ class JurisdictionBlueprint < Blueprinter::Base
   view :base do
     fields :slug,
            :name,
+           :disambiguated_name,
            :locality_type,
            :qualifier,
            :qualified_name,
@@ -17,10 +18,11 @@ class JurisdictionBlueprint < Blueprinter::Base
            :permit_applications_size,
            :map_position,
            :inbox_enabled,
+           :show_about_page,
+           :allow_designated_reviewer,
            :map_zoom,
            :regional_district_name,
            :created_at,
-           :submission_inbox_set_up,
            :updated_at,
            :external_api_state
 
@@ -45,10 +47,7 @@ class JurisdictionBlueprint < Blueprinter::Base
   end
 
   view :minimal do
-    fields :qualified_name,
-           :submission_inbox_set_up,
-           :external_api_state,
-           :inbox_enabled
+    fields :qualified_name, :external_api_state, :inbox_enabled
 
     field :external_api_enabled do |jurisdiction, options|
       jurisdiction.external_api_enabled?

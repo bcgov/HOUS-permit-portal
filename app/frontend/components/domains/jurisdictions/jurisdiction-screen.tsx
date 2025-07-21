@@ -96,12 +96,19 @@ export const JurisdictionScreen = observer(() => {
   if (error) return <ErrorScreen error={error} />
   if (!currentJurisdiction) return <LoadingScreen />
 
-  const { qualifiedName, update } = currentJurisdiction
-
+  const { qualifiedName, update, showAboutPage } = currentJurisdiction
   const onSubmit = async (formData) => {
     await update(formData)
     reset(getDefaultJurisdictionValues())
   }
+
+  const contactEmail = t("site.contactEmail")
+  const emailBody = t("jurisdiction.notUsingBPH.wantToUse.emailBody", {
+    jurisdictionName: qualifiedName,
+  })
+  const mailtoHref = `mailto:${contactEmail}?subject=${t("jurisdiction.notUsingBPH.wantToUse.emailSubject", {
+    jurisdictionName: qualifiedName,
+  })}&body=${encodeURIComponent(emailBody)}`
 
   return (
     <Flex as="main" direction="column" w="full" bg="greys.white" pb="24">
@@ -110,136 +117,175 @@ export const JurisdictionScreen = observer(() => {
         <JurisdictionMap mapPosition={mapPositionWatch} mapZoom={mapZoomWatch} />
       </Show>
       <Container maxW="container.lg" py={{ base: 6, md: 16 }} px={8}>
-        {!currentJurisdiction.submissionInboxSetUp && (
+        {!currentJurisdiction.inboxEnabled && (
           <Box my={8}>
             <CustomMessageBox status={EFlashMessageStatus.warning} description={t("jurisdiction.notEnabled")} />
           </Box>
         )}
-        <FormProvider {...formMethods}>
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <Flex direction="column" gap={16}>
-              <Flex gap={14}>
-                <Show above="md">
-                  <EditableMap currentJurisdiction={currentJurisdiction} />
-                </Show>
-                <Flex as="section" flex={1} direction="column" gap={4}>
-                  <Heading>{t("jurisdiction.title")}</Heading>
-                  <JurisdictionQuillFormController
-                    control={control}
-                    label={t("jurisdiction.edit.displayDescriptionLabel")}
-                    initialTriggerText={t("jurisdiction.edit.addDescription")}
-                    name={"descriptionHtml"}
-                  />
-                  <RouterLinkButton to="/permit-applications/new" variant="primary">
-                    {t("jurisdiction.startApplication")}
-                  </RouterLinkButton>
-                </Flex>
-              </Flex>
-              <Flex direction={{ base: "column", md: "row" }} gap={6}>
-                <Flex
-                  as="section"
-                  direction="column"
-                  gap={4}
-                  flex={3}
-                  borderWidth={1}
-                  borderColor="border.light"
-                  rounded="lg"
-                  p={6}
-                >
-                  <Heading mb={0}>{t("jurisdiction.checklist")}</Heading>
-                  <Divider my={0} />
-                  <JurisdictionQuillFormController
-                    control={control}
-                    label={t("jurisdiction.edit.displayChecklistLabel")}
-                    initialTriggerText={t("jurisdiction.edit.addChecklist")}
-                    name={"checklistHtml"}
-                  />
-                </Flex>
-                <Flex
-                  as="section"
-                  direction="column"
-                  p={6}
-                  flex={2}
-                  gap={4}
-                  borderRadius="lg"
-                  background="theme.blueLight"
-                >
-                  <Heading as="h3">{t("jurisdiction.lookOut")}</Heading>
-                  <JurisdictionQuillFormController
-                    control={control}
-                    label={t("jurisdiction.edit.displayLookOutLabel")}
-                    initialTriggerText={t("jurisdiction.edit.addLookOut")}
-                    name={"lookOutHtml"}
-                  />
-                </Flex>
-              </Flex>
-              <Flex as="section" direction="column" gap={4}>
-                <Heading as="h2" fontSize="xl" my={0}>
-                  {t("jurisdiction.edit.stepCode.title")}
-                </Heading>
-                <Box>
-                  <Trans
-                    i18nKey={"jurisdiction.edit.stepCode.description"}
-                    components={{
-                      1: <Link href={t("stepCode.helpLink")} isExternal></Link>,
-                      2: <ArrowSquareOut />,
-                    }}
-                  />
-                </Box>
-
-                <StepCodeTable currentJurisdiction={currentJurisdiction} />
-              </Flex>
-              <Flex as="section" direction="column" borderRadius="lg" boxShadow="md">
-                <Box py={3} px={6} bg="theme.blueAlt" borderTopRadius="lg">
-                  <Heading as="h3" color="greys.white" fontSize="xl">
-                    {t("jurisdiction.contactInfo")}
-                  </Heading>
-                </Box>
-                <Flex direction="column" p={6} gap={9}>
-                  <JurisdictionQuillFormController
-                    control={control}
-                    label={t("jurisdiction.edit.displayContactSummaryLabel")}
-                    initialTriggerText={t("jurisdiction.edit.addContactSummary")}
-                    name={"contactSummaryHtml"}
-                  />
-
-                  <Can action="jurisdiction:manage" data={{ jurisdiction: currentJurisdiction }}>
-                    <Flex direction="column">
-                      <Button
-                        variant={"link"}
-                        aria-label={"edit contacts"}
-                        onClick={() => {
-                          setIsEditingContacts((current) => !current)
-                        }}
-                      >
-                        {isEditingContacts
-                          ? t("jurisdiction.edit.clickToShowContacts")
-                          : t("jurisdiction.edit.clickToEditContacts")}
-                      </Button>
-                      <Text>{t("jurisdiction.edit.firstContact")}</Text>
+        {!showAboutPage ? (
+          <>
+            <FormProvider {...formMethods}>
+              <form onSubmit={formMethods.handleSubmit(onSubmit)} className="space-y-8 divide-y divide-gray-200">
+                <Flex direction="column" gap={16}>
+                  <Flex gap={14}>
+                    <Show above="md">
+                      <EditableMap currentJurisdiction={currentJurisdiction} />
+                    </Show>
+                    <Flex as="section" flex={1} direction="column" gap={4}>
+                      <Heading>{t("jurisdiction.title")}</Heading>
+                      <JurisdictionQuillFormController
+                        control={control}
+                        label={t("jurisdiction.edit.displayDescriptionLabel")}
+                        initialTriggerText={t("jurisdiction.edit.addDescription")}
+                        name={"descriptionHtml"}
+                      />
+                      <RouterLinkButton to="/permit-applications/new" variant="primary">
+                        {t("jurisdiction.startApplication")}
+                      </RouterLinkButton>
                     </Flex>
+                  </Flex>
+                  <Flex direction={{ base: "column", md: "row" }} gap={6}>
+                    <Flex
+                      as="section"
+                      direction="column"
+                      gap={4}
+                      flex={3}
+                      borderWidth={1}
+                      borderColor="border.light"
+                      rounded="lg"
+                      p={6}
+                    >
+                      <Heading mb={0}>{t("jurisdiction.checklist")}</Heading>
+                      <Divider my={0} />
+                      <JurisdictionQuillFormController
+                        control={control}
+                        label={t("jurisdiction.edit.displayChecklistLabel")}
+                        initialTriggerText={t("jurisdiction.edit.addChecklist")}
+                        name={"checklistHtml"}
+                      />
+                    </Flex>
+                    <Flex
+                      as="section"
+                      direction="column"
+                      p={6}
+                      flex={2}
+                      gap={4}
+                      borderRadius="lg"
+                      background="theme.blueLight"
+                    >
+                      <Heading as="h3">{t("jurisdiction.lookOut")}</Heading>
+                      <JurisdictionQuillFormController
+                        control={control}
+                        label={t("jurisdiction.edit.displayLookOutLabel")}
+                        initialTriggerText={t("jurisdiction.edit.addLookOut")}
+                        name={"lookOutHtml"}
+                      />
+                    </Flex>
+                  </Flex>
+                  <Flex as="section" direction="column" gap={4}>
+                    <Heading as="h2" fontSize="xl" my={0}>
+                      {t("jurisdiction.edit.stepCode.title")}
+                    </Heading>
+                    <Box>
+                      <Trans
+                        i18nKey={"jurisdiction.edit.stepCode.description"}
+                        components={{
+                          1: <Link href={t("stepCode.helpLink") ?? "#"} isExternal></Link>,
+                          2: <ArrowSquareOut />,
+                        }}
+                      />
+                    </Box>
+
+                    <StepCodeTable currentJurisdiction={currentJurisdiction} />
+                  </Flex>
+                  <Flex as="section" direction="column" borderRadius="lg" boxShadow="md">
+                    <Box py={3} px={6} bg="theme.blueAlt" borderTopRadius="lg">
+                      <Heading as="h3" color="greys.white" fontSize="xl">
+                        {t("jurisdiction.contactInfo")}
+                      </Heading>
+                    </Box>
+                    <Flex direction="column" p={6} gap={9}>
+                      <JurisdictionQuillFormController
+                        control={control}
+                        label={t("jurisdiction.edit.displayContactSummaryLabel")}
+                        initialTriggerText={t("jurisdiction.edit.addContactSummary")}
+                        name={"contactSummaryHtml"}
+                      />
+
+                      <Can action="jurisdiction:manage" data={{ jurisdiction: currentJurisdiction }}>
+                        <Flex direction="column">
+                          <Button
+                            variant={"link"}
+                            aria-label={"edit contacts"}
+                            onClick={() => {
+                              setIsEditingContacts((current) => !current)
+                            }}
+                          >
+                            {isEditingContacts
+                              ? t("jurisdiction.edit.clickToShowContacts")
+                              : t("jurisdiction.edit.clickToEditContacts")}
+                          </Button>
+                          <Text>{t("jurisdiction.edit.firstContact")}</Text>
+                        </Flex>
+                      </Can>
+                      <ContactGrid isEditing={isEditingContacts} />
+                    </Flex>
+                  </Flex>
+                  <Can action={"jurisdiction:manage"} data={{ jurisdiction: currentJurisdiction }}>
+                    <Center w="full" position="fixed" bottom={0} left={0} right={0}>
+                      <Button
+                        size="lg"
+                        mb={4}
+                        variant="primary"
+                        type="submit"
+                        isDisabled={isSubmitting}
+                        isLoading={isSubmitting}
+                        loadingText={t("ui.loading")}
+                      >
+                        {t("ui.save")}
+                      </Button>
+                    </Center>
                   </Can>
-                  <ContactGrid isEditing={isEditingContacts} />
                 </Flex>
-              </Flex>
-              <Can action={"jurisdiction:manage"} data={{ jurisdiction: currentJurisdiction }}>
-                <Center w="full" position="fixed" bottom={0} left={0} right={0}>
-                  <Button
-                    size="lg"
-                    mb={4}
-                    variant="primary"
-                    type="submit"
-                    isDisabled={isSubmitting}
-                    isLoading={isSubmitting}
-                    loadingText={t("ui.loading")}
-                  >
-                    {t("ui.save")}
-                  </Button>
-                </Center>
-              </Can>
-            </Flex>
-          </form>
-        </FormProvider>
+              </form>
+            </FormProvider>
+          </>
+        ) : (
+          <Box>
+            <Heading as="h2" fontSize="2xl" fontWeight="bold" mb={6}>
+              {t("jurisdiction.notUsingBPH.title")}
+            </Heading>
+            <Text fontSize="lg" mb={2}>
+              {t("jurisdiction.notUsingBPH.description")}
+            </Text>
+            <Text fontSize="lg" mb={8}>
+              {t("jurisdiction.notUsingBPH.noInfo", { jurisdictionName: qualifiedName })}
+            </Text>
+            <Box bg="theme.blueLight" borderRadius="lg" p={8} mb={8}>
+              <Heading as="h3" fontSize="xl" fontWeight="bold" mb={4}>
+                {t("jurisdiction.notUsingBPH.wantToUse.title")}
+              </Heading>
+              <Text fontSize="md" mb={2}>
+                {t("jurisdiction.notUsingBPH.wantToUse.description")}
+              </Text>
+              <Text fontSize="md" mb={6}>
+                {t("jurisdiction.notUsingBPH.wantToUse.emailButtonDescription")}
+              </Text>
+              <Button
+                as="a"
+                href={mailtoHref}
+                colorScheme="blue"
+                size="lg"
+                fontWeight="bold"
+                rightIcon={<ArrowSquareOut />}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {t("jurisdiction.notUsingBPH.wantToUse.emailButtonText")}
+              </Button>
+            </Box>
+          </Box>
+        )}
       </Container>
     </Flex>
   )

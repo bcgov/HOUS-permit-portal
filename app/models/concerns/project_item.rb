@@ -1,0 +1,61 @@
+module ProjectItem
+  extend ActiveSupport::Concern
+
+  included do
+    belongs_to :permit_project, touch: true, optional: true
+    belongs_to :jurisdiction, optional: true # Added for direct association
+    has_one :owner, through: :permit_project
+
+    after_commit :reindex_permit_project
+
+    # Delegations to PermitProject for core project details
+    delegate :title, :permit_date, to: :permit_project, allow_nil: true # allow_nil should be false if permit_project is truly non-optional and always present
+
+    delegate :qualified_name,
+             :heating_degree_days,
+             :name,
+             to: :jurisdiction,
+             prefix: :jurisdiction, # Results in jurisdiction_name, jurisdiction_qualified_name, etc.
+             allow_nil: true
+
+    # Aliases for consistent naming
+    alias_method :project_name, :title
+
+    # Custom getters that prioritize permit_project but fall back to self
+    def full_address
+      permit_project&.full_address || read_attribute(:full_address)
+    end
+
+    def pid
+      permit_project&.pid || read_attribute(:pid)
+    end
+
+    def pin
+      permit_project&.pin || read_attribute(:pin)
+    end
+
+    def project_identifier
+      permit_project&.id
+    end
+
+    # Ensure permit_project is present if it's meant to be non-optional.
+    # This can also be handled at the database level or with model validations
+    # on the including class if `allow_nil: true` is used above for resilience.
+    # validates :permit_project, presence: true # Uncomment if strict presence is required by including models
+
+    # Custom method for jurisdiction to ensure it safely accesses through permit_project
+    # or falls back to its own direct association.
+    def jurisdiction
+      permit_project&.jurisdiction || super
+    end
+
+    private
+
+    def reindex_permit_project
+      return unless permit_project
+
+      permit_project.reload
+      permit_project.reindex
+    end
+  end
+end

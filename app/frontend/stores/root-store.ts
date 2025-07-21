@@ -18,6 +18,7 @@ import { IJurisdictionStore, JurisdictionStoreModel } from "./jurisdiction-store
 import { INotificationStore, NotificationStoreModel } from "./notification-store"
 import { IPermitApplicationStore, PermitApplicationStoreModel } from "./permit-application-store"
 import { IPermitClassificationStore, PermitClassificationStoreModel } from "./permit-classification-store"
+import { IPermitProjectStore, PermitProjectStoreModel } from "./permit-project-store"
 import { IRequirementBlockStoreModel, RequirementBlockStoreModel } from "./requirement-block-store"
 import { IRequirementTemplateStoreModel, RequirementTemplateStoreModel } from "./requirement-template-store"
 import { ISandboxStore, SandboxStoreModel } from "./sandbox-store"
@@ -35,6 +36,7 @@ export const RootStoreModel = types
     sessionStore: types.optional(SessionStoreModel, {}),
     userStore: types.optional(UserStoreModel, {}),
     permitApplicationStore: types.optional(PermitApplicationStoreModel, {}),
+    permitProjectStore: types.optional(PermitProjectStoreModel, {}),
     permitClassificationStore: types.optional(PermitClassificationStoreModel, {}),
     jurisdictionStore: types.optional(JurisdictionStoreModel, {}),
     requirementBlockStore: types.optional(RequirementBlockStoreModel, {}),
@@ -60,7 +62,7 @@ export const RootStoreModel = types
     loadLocalPersistedData: flow(function* () {
       unprotect(self)
       yield makePersistable(self.sessionStore, {
-        name: `${self.userStore.currentUser?.id}-SessionStore`,
+        name: `SessionStore`,
         properties: ["afterLoginPath"],
         storage: localStorage,
       })
@@ -110,6 +112,7 @@ export interface IRootStore extends IStateTreeNode {
   uiStore: IUIStore
   sessionStore: ISessionStore
   permitApplicationStore: IPermitApplicationStore
+  permitProjectStore: IPermitProjectStore
   permitClassificationStore: IPermitClassificationStore
   jurisdictionStore: IJurisdictionStore
   userStore: IUserStore

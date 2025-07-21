@@ -16,9 +16,12 @@ export const JurisdictionModel = types
     id: types.identifier,
     slug: types.maybeNull(types.string),
     name: types.maybeNull(types.string),
+    disambiguatedName: types.maybeNull(types.string),
     submissionEmail: types.maybeNull(types.string),
     qualifiedName: types.string,
     inboxEnabled: types.boolean,
+    showAboutPage: types.boolean,
+    allowDesignatedReviewer: types.boolean,
     reverseQualifiedName: types.maybeNull(types.string),
     regionalDistrictName: types.maybeNull(types.string),
     localityType: types.maybeNull(types.string),
@@ -44,7 +47,6 @@ export const JurisdictionModel = types
       types.enumeration(Object.values(EJurisdictionExternalApiState)),
       EJurisdictionExternalApiState.gOff
     ),
-    submissionInboxSetUp: types.boolean,
     permitTypeRequiredSteps: types.array(types.frozen<IPermitTypeRequiredStep>()),
     sandboxes: types.array(types.reference(SandboxModel)),
   })
@@ -89,7 +91,11 @@ export const JurisdictionModel = types
         : t(`${i18nPrefix}.notRequired`)
     },
     get sandboxOptions(): IOption[] {
-      return self.sandboxes.map((s) => ({ label: s.name, value: s.id }))
+      return self.sandboxes.map((s) => ({
+        label: s.name,
+        value: s.id,
+        description: s.description,
+      }))
     },
   }))
   .views((self) => ({
@@ -188,6 +194,4 @@ export const JurisdictionModel = types
     }),
   }))
 
-export interface IJurisdiction extends Instance<typeof JurisdictionModel> {
-  inboxEnabled: never
-}
+export interface IJurisdiction extends Instance<typeof JurisdictionModel> {}

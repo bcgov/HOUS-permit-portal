@@ -29,7 +29,7 @@
     "sass": "^1.70.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.4.3",
-    "vite": "^5.4.12",
+    "vite": "^6.3.5",
     "vite-plugin-ruby": "^5.1.1"
   },
   "dependencies": {
@@ -101,14 +101,15 @@
     "gen:theme-typings": "chakra-cli tokens app/frontend/styles/theme/index.ts",
     "postinstall": "npm run gen:theme-typings",
     "build:ssr": "bundle exec vite build --ssr",
-    "generate-pdf": "node public/vite-ssr/ssr.js"
+    "generate-pdf": "node public/vite-ssr/ssr.js",
+    "generate-pdf:debug": "node --inspect-brk public/vite-ssr/ssr.js"
   },
   "lint-staged": {
     "*.{js,css,md,ts,tsx}": [
       "prettier --write"
     ],
     "*.rb": [
-      "stree write"
+      "stree write --ignore-files='**/schema.rb'"
     ]
   }
 }

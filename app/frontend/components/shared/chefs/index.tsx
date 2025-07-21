@@ -36,7 +36,11 @@ Templates.current = {
   },
   label: {
     form: (ctx) => {
-      let template = defaultLabelTemplate(ctx)
+      let template = ""
+      if (ctx?.component?.instructions) {
+        template = `<div class="form-group-instructions">${ctx.component.instructions}</div>`
+      }
+      template = template.concat(defaultLabelTemplate(ctx))
       if (ctx?.component?.computedCompliance) {
         let result = ctx?.component?.computedComplianceResult
 
@@ -46,7 +50,15 @@ Templates.current = {
           if (ctx?.component?.computedCompliance?.module == "DigitalSealValidator") {
             //assume an array of one response or an array of responses for multiple files
             //utilize id in the compliance messge to check if the front end id matches the file
-            const currentFileMessages = result.filter((fileMessage) => ctx.value.find((v) => v.id == fileMessage.id))
+
+            const currentFileMessages = result.filter((fileMessage) =>
+              ctx.value.find((v) => {
+                const idSegments = fileMessage.id.split("/")
+                const fileMessageId = idSegments[idSegments.length - 1]
+                return fileMessageId == v.id
+              })
+            )
+
             const parsedMessage = currentFileMessages.map((fileMessage) => fileMessage.message).join(",")
             showWarning = currentFileMessages.some((fileMessage) => fileMessage.error)
             computedComplianceText = parsedMessage || t(`automatedCompliance.baseMessage`)
@@ -85,4 +97,4 @@ const defaultOptions = {
   },
 }
 
-export { Form, Formio, defaultOptions }
+export { defaultOptions, Form, Formio }

@@ -1051,6 +1051,42 @@
   }
 }
 
+.early-access-requirement-form .formio-component-simplefile ul.list-group::after {
+  content: "File uploads are disabled in early access previews";
+
+  margin-top: 10px;
+  margin-bottom: 10px;
+  margin-left: 10px;
+  font-size: 14px;
+  color: var(--chakra-colors-border-dark);
+  padding: 10px;
+  background-color: var(--chakra-colors-semantic-infoLight);
+  border-color: var(--chakra-colors-semantic-info);
+  border-radius: 5px;
+  border-width: 1px;
+  border-style: solid;
+}
+
+.formio-component-file .formio-component-button a {
+  cursor: pointer;
+}
+
+.form-group-instructions {
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+  color: #606060;
+
+  p {
+    margin-bottom: 0;
+  }
+}
+
+.formio-component.formio-component-columns.contact-field-set {
+  & > .formio-component-autofill-button {
+    // ... existing code ...
+  }
+}
+
 /* ======================================
 
 			Override formio styles (end)

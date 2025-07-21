@@ -41,7 +41,7 @@ import { BlockCollaboratorAssignmentManagement } from "./collaborator-management
 import { CollaboratorsSidebar } from "./collaborator-management/collaborators-sidebar"
 import { useCollaborationAssignmentNodes } from "./collaborator-management/hooks/use-collaboration-assignment-nodes"
 import { ContactSummaryModal } from "./contact-summary-modal"
-import { appendAnchorWithSvgToLabel } from "./energy-step-code-report-link"
+import { setupEnergyStepCodeReportLink } from "./energy-step-code-report-link"
 import { RevisionSideBar } from "./revision-sidebar"
 import { SubmissionDownloadModal } from "./submission-download-modal"
 
@@ -52,12 +52,25 @@ type TPermitApplicationMetadataForm = {
 }
 
 export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationScreenProps) => {
-  const { userStore } = useMst()
+  const { userStore, uiStore } = useMst()
+  const { scrollToSelector, setScrollToSelector } = uiStore
   const currentUser = userStore.currentUser
   const { currentPermitApplication, error } = usePermitApplication()
   const { t } = useTranslation()
   const formRef = useRef(null)
   const navigate = useNavigate()
+
+  useEffect(() => {
+    if (scrollToSelector) {
+      setTimeout(() => {
+        const element = document.querySelector(scrollToSelector)
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth", block: "center" })
+        }
+        setScrollToSelector("")
+      }, 100)
+    }
+  }, [scrollToSelector])
 
   const getDefaultPermitApplicationMetadataValues = () => ({ nickname: currentPermitApplication?.nickname })
 
@@ -113,16 +126,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
 
   const nicknameWatch = watch("nickname")
   const isStepCode = R.test(/step-code/, window.location.pathname)
-
-  const labelSelector = "div[class*='energy_step_code_report_file'] label"
-  const anchorUrl =
-    "https://www2.gov.bc.ca/gov/content/housing-tenancy/building-or-renovating/permits/building-permit-hub/29065#Reports"
-  const svgPathData =
-    "M224,104a8,8,0,0,1-16,0V59.32l-66.33,66.34a8,8,0,0,1-11.32-11.32L196.68,48H152a8,8,0,0,1,0-16h64a8,8,0,0,1,8,8Zm-40,24a8,8,0,0,0-8,8v72H48V80h72a8,8,0,0,0,0-16H48A16,16,0,0,0,32,80V208a16,16,0,0,0,16,16H176a16,16,0,0,0,16-16V136A8,8,0,0,0,184,128Z"
-  appendAnchorWithSvgToLabel(labelSelector, anchorUrl, svgPathData)
-  setTimeout(() => {
-    appendAnchorWithSvgToLabel(labelSelector, anchorUrl, svgPathData)
-  }, 2000)
+  setupEnergyStepCodeReportLink()
   const handleSave = async ({
     autosave,
     skipPristineCheck,
@@ -343,7 +347,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
                   <SubmissionDownloadModal permitApplication={currentPermitApplication} />
                 )}
                 <Button rightIcon={<CaretRight />} onClick={() => navigate("/")}>
-                  {t("permitApplication.show.backToInbox")}
+                  {t("ui.back")}
                 </Button>
               </Stack>
             ) : (
