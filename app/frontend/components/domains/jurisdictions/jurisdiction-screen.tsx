@@ -276,9 +276,8 @@ export const JurisdictionScreen = observer(() => {
               <Button
                 as="a"
                 href={mailtoHref}
-                colorScheme="blue"
+                variant="primary"
                 size="lg"
-                fontWeight="bold"
                 rightIcon={<ArrowSquareOut />}
                 target="_blank"
                 rel="noopener noreferrer"
