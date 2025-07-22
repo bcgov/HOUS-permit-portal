@@ -64,6 +64,8 @@ type TJurisdictionFieldValues = {
 export const JurisdictionScreen = observer(() => {
   const { t } = useTranslation()
   const { currentJurisdiction, error } = useJurisdiction()
+  const { userStore } = useMst()
+  const { currentUser } = userStore
 
   const getDefaultJurisdictionValues = () => {
     return {
@@ -122,7 +124,7 @@ export const JurisdictionScreen = observer(() => {
             <CustomMessageBox status={EFlashMessageStatus.warning} description={t("jurisdiction.notEnabled")} />
           </Box>
         )}
-        {!showAboutPage ? (
+        {currentUser?.isReviewStaff || showAboutPage ? (
           <>
             <FormProvider {...formMethods}>
               <form onSubmit={formMethods.handleSubmit(onSubmit)} className="space-y-8 divide-y divide-gray-200">
