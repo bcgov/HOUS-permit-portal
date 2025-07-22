@@ -13,7 +13,7 @@ interface IStepCodeAddressSearchForm {
 }
 
 interface IStepCodeAddressSearchProps {
-  onJurisdictionFound?: (jurisdiction: IJurisdiction) => void
+  onJurisdictionFound?: (jurisdiction: IJurisdiction | null) => void
 }
 
 const StepCodeAddressSearch = observer(({ onJurisdictionFound }: IStepCodeAddressSearchProps) => {
@@ -21,6 +21,7 @@ const StepCodeAddressSearch = observer(({ onJurisdictionFound }: IStepCodeAddres
   const navigate = useNavigate()
   const [selectedSite, setSelectedSite] = useState<number | null>(null)
   const [searchKey, setSearchKey] = useState(0)
+  const isHomePage = location.pathname === "/welcome" ? true : false
   const { geocoderStore } = useMst()
   const methods = useForm<IStepCodeAddressSearchForm>({
     defaultValues: {
@@ -30,19 +31,24 @@ const StepCodeAddressSearch = observer(({ onJurisdictionFound }: IStepCodeAddres
   const { control } = methods
 
   const handleCheckAddress = async () => {
-    if (selectedSite) {
-      const jurisdiction = await geocoderStore.fetchGeocodedJurisdiction(String(selectedSite))
-      if (jurisdiction) {
-        if (onJurisdictionFound) {
-          onJurisdictionFound(jurisdiction)
-          setSearchKey((k) => k + 1)
-          setSelectedSite(null)
-        } else {
-          navigate(`/jurisdictions/${jurisdiction.slug}/step-code-requirements`)
-        }
-      }
+    if (!selectedSite) {
+      onJurisdictionFound?.(null)
+      return
+    }
+
+    const jurisdiction = await geocoderStore.fetchGeocodedJurisdiction(String(selectedSite))
+
+    if (!jurisdiction) {
+      onJurisdictionFound?.(null)
+      return
+    }
+
+    if (isHomePage) {
+      onJurisdictionFound?.(jurisdiction)
+      setSearchKey((k) => k + 1)
+      setSelectedSite(null)
     } else {
-      onJurisdictionFound(null)
+      navigate(`/jurisdictions/${jurisdiction.slug}/step-code-requirements`)
     }
   }
 
