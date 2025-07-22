@@ -542,16 +542,22 @@ const AppRoutes = observer(() => {
           <Route path="/" element={<EULAScreen />} />
         )}
         {loggedIn && eulaAccepted && isUnconfirmed && (
-          // Onboarding step 2: confirm email
-          <Route path="/" element={<ProfileScreen />} />
+          // Onboarding step 2: confirm email - only ProfileScreen available
+          <>
+            <Route path="/" element={<ProfileScreen />} />
+            <Route path="/profile" element={<ProfileScreen />} />
+            <Route path="*" element={<RedirectScreen path="/" />} />
+          </>
         )}
-        {loggedIn ? (
-          <Route path="/" element={<HomeScreen />} />
-        ) : (
-          <Route path="/" element={<RedirectScreen path="/welcome" />} />
-        )}
+        {loggedIn && !isUnconfirmed && <Route path="/" element={<HomeScreen />} />}
+        {!loggedIn && <Route path="/" element={<RedirectScreen path="/welcome" />} />}
         <Route
-          element={<ProtectedRoute isAllowed={loggedIn && !mustAcceptEula} redirectPath={mustAcceptEula && "/"} />}
+          element={
+            <ProtectedRoute
+              isAllowed={loggedIn && !mustAcceptEula && !isUnconfirmed}
+              redirectPath={mustAcceptEula && "/"}
+            />
+          }
         >
           <Route path="/permit-applications" element={<PermitApplicationIndexScreen />} />
           <Route path="/permit-applications/new" element={<NewPermitApplicationScreen />} />
@@ -574,18 +580,18 @@ const AppRoutes = observer(() => {
           />
         </Route>
 
-        <Route element={<ProtectedRoute isAllowed={loggedIn} />}>
+        <Route element={<ProtectedRoute isAllowed={loggedIn && !isUnconfirmed} />}>
           <Route path="/profile" element={<ProfileScreen />} />
         </Route>
 
-        <Route element={<ProtectedRoute isAllowed={loggedIn && !currentUser?.isSuperAdmin} />}>
+        <Route element={<ProtectedRoute isAllowed={loggedIn && !currentUser?.isSuperAdmin && !isUnconfirmed} />}>
           <Route path="/profile/eula" element={<EULAScreen withClose />} />
         </Route>
 
         <Route
           element={
             <ProtectedRoute
-              isAllowed={isAllowedForAdminOrManager}
+              isAllowed={isAllowedForAdminOrManager && !isUnconfirmed}
               redirectPath={(mustAcceptEula && "/") || (loggedIn && "/not-found")}
             />
           }
@@ -595,7 +601,10 @@ const AppRoutes = observer(() => {
 
         <Route
           element={
-            <ProtectedRoute isAllowed={loggedIn && currentUser.isSuperAdmin} redirectPath={loggedIn && "/not-found"} />
+            <ProtectedRoute
+              isAllowed={loggedIn && currentUser.isSuperAdmin && !isUnconfirmed}
+              redirectPath={loggedIn && "/not-found"}
+            />
           }
         >
           {superAdminOnlyRoutes}
@@ -604,7 +613,7 @@ const AppRoutes = observer(() => {
         <Route
           element={
             <ProtectedRoute
-              isAllowed={isAllowedForManagerOrReviewer}
+              isAllowed={isAllowedForManagerOrReviewer && !isUnconfirmed}
               redirectPath={(mustAcceptEula && "/") || (loggedIn && "/not-found")}
             />
           }
@@ -615,7 +624,7 @@ const AppRoutes = observer(() => {
         <Route
           element={
             <ProtectedRoute
-              isAllowed={isAllowedForTechnicalSupportOrManager}
+              isAllowed={isAllowedForTechnicalSupportOrManager && !isUnconfirmed}
               redirectPath={(mustAcceptEula && "/") || (loggedIn && "/not-found")}
             />
           }
@@ -626,7 +635,7 @@ const AppRoutes = observer(() => {
         <Route
           element={
             <ProtectedRoute
-              isAllowed={isAllowedForReviewManagerOnly}
+              isAllowed={isAllowedForReviewManagerOnly && !isUnconfirmed}
               redirectPath={(mustAcceptEula && "/") || (loggedIn && "/not-found")}
               tempVar={"aaa" + isAllowedForReviewManagerOnly}
             />
@@ -659,9 +668,20 @@ const AppRoutes = observer(() => {
         />
         <Route
           path="/jurisdictions"
-          element={currentUser?.isSuperAdmin ? <JurisdictionIndexScreen /> : <LimitedJurisdictionIndexScreen />}
+          element={
+            loggedIn && isUnconfirmed ? (
+              <RedirectScreen path="/" />
+            ) : currentUser?.isSuperAdmin ? (
+              <JurisdictionIndexScreen />
+            ) : (
+              <LimitedJurisdictionIndexScreen />
+            )
+          }
         />
-        <Route path="/jurisdictions/:jurisdictionId" element={<JurisdictionScreen />} />
+        <Route
+          path="/jurisdictions/:jurisdictionId"
+          element={loggedIn && isUnconfirmed ? <RedirectScreen path="/" /> : <JurisdictionScreen />}
+        />
         <Route path="/part-3-step-code" element={<RedirectScreen path="start" />} />
         <Route path="/part-3-step-code/:section" element={<Part3StepCodeForm />} />
         <Route path="*" element={<NotFoundScreen />} />
