@@ -43,8 +43,7 @@ class PermitApplication < ApplicationRecord
   has_many :collaborators, through: :permit_collaborations
   has_many :permit_block_statuses, dependent: :destroy
 
-  # Standard has_one association if StepCode directly belongs_to PermitApplication
-  has_one :step_code, as: :parent, dependent: :destroy
+  has_one :step_code, dependent: :destroy
 
   scope :submitted, -> { joins(:submission_versions).distinct }
 

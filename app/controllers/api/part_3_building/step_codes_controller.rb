@@ -13,9 +13,9 @@ class Api::Part3Building::StepCodesController < Api::ApplicationController
     # binding.pry
     @step_code =
       (
-        if step_code_params[:parent_id]
+        if step_code_params[:permit_application_id]
           Part3StepCode.where(
-            parent_id: step_code_params[:parent_id]
+            permit_application_id: step_code_params[:permit_application_id]
           ).first_or_create!(step_code_params_for_create)
         else
           Part3StepCode.new(step_code_params_for_create)

@@ -11,9 +11,6 @@ class StepCode < ApplicationRecord
   belongs_to :permit_application, optional: true
   has_one :permit_project, through: :permit_application
 
-  # Validations
-  validates :compliance_path, presence: true, on: :update
-
   # Delegates for attributes from PermitApplication
   delegate :number,
            to: :permit_application,
