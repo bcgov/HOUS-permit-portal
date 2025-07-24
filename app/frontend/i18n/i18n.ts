@@ -273,6 +273,8 @@ const options = {
           autofill: "Autofill",
           help: "Help",
           pleaseSelect: "Please select",
+          noAddressFound: "We couldn’t find your jurisdiction. Type it in below.",
+          cityOrJurisdiction: "City or Jurisdiction",
           checked: "Checked",
           unchecked: "Unhecked",
           showAdvanced: "Show advanced",
