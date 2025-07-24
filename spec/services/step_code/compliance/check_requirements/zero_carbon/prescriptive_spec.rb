@@ -1,13 +1,6 @@
 RSpec.describe StepCode::Compliance::CheckRequirements::ZeroCarbon::Prescriptive do
   let(:step) { 3 }
-  let!(:step_code) do
-    create(
-      :part_9_step_code,
-      pre_construction_checklist_attributes: {
-        data_entries_attributes:
-      }
-    )
-  end
+  let!(:step_code) { create(:part_9_step_code, data_entries_attributes:) }
   subject(:compliance_checker) do
     StepCode::Compliance::CheckRequirements::ZeroCarbon::Prescriptive.new(
       checklist: step_code.pre_construction_checklist,
@@ -34,8 +27,18 @@ RSpec.describe StepCode::Compliance::CheckRequirements::ZeroCarbon::Prescriptive
   context "when heating requirement is not met" do
     let(:data_entries_attributes) do
       [
-        { heating_furnace: 0.9, heating_boiler: 0.2, heating_combo: 1.1 },
-        { heating_furnace: 0.9, heating_boiler: 0, heating_combo: 0.9 }
+        {
+          stage: :proposed,
+          heating_furnace: 0.9,
+          heating_boiler: 0.2,
+          heating_combo: 1.1
+        },
+        {
+          stage: :proposed,
+          heating_furnace: 0.9,
+          heating_boiler: 0,
+          heating_combo: 0.9
+        }
       ]
     end
 
@@ -46,12 +49,14 @@ RSpec.describe StepCode::Compliance::CheckRequirements::ZeroCarbon::Prescriptive
     let(:data_entries_attributes) do
       [
         {
+          stage: :proposed,
           heating_furnace: 0.9,
           heating_boiler: 0,
           heating_combo: 0.9,
           hot_water: 0.8
         },
         {
+          stage: :proposed,
           heating_furnace: 0.9,
           heating_boiler: 0,
           heating_combo: 0.9,
@@ -67,6 +72,7 @@ RSpec.describe StepCode::Compliance::CheckRequirements::ZeroCarbon::Prescriptive
     let(:data_entries_attributes) do
       [
         {
+          stage: :proposed,
           heating_furnace: 0.9,
           heating_boiler: 0,
           heating_combo: 0.9,
@@ -75,6 +81,7 @@ RSpec.describe StepCode::Compliance::CheckRequirements::ZeroCarbon::Prescriptive
           laundry: 0.6
         },
         {
+          stage: :proposed,
           heating_furnace: 0.9,
           heating_boiler: 0,
           heating_combo: 0.9,
@@ -92,6 +99,7 @@ RSpec.describe StepCode::Compliance::CheckRequirements::ZeroCarbon::Prescriptive
     let(:data_entries_attributes) do
       [
         {
+          stage: :proposed,
           heating_furnace: 0.9,
           heating_boiler: 0,
           heating_combo: 0.9,
@@ -100,6 +108,7 @@ RSpec.describe StepCode::Compliance::CheckRequirements::ZeroCarbon::Prescriptive
           laundry: 0.4
         },
         {
+          stage: :proposed,
           heating_furnace: 0.9,
           heating_boiler: 0,
           heating_combo: 0.9,
