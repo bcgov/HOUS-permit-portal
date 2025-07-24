@@ -10,28 +10,25 @@ export const OnboardingChecklistPageForLgAdoptingScreen = observer(() => {
 
   return (
     <Container maxW="container.lg" pb="36" px="8">
-      {/* Title */}
       <Heading as="h1" mt="16" mb="6">
         {t(`${prefix}.title`)}
       </Heading>
-      {/* Subtitle */}
-      <Text fontSize="lg" fontStyle="italic" color="gray.700" mb="8">
+      <Text fontSize="md" color="gray.700" mb="8">
         {t(`${prefix}.subtitle`)}
       </Text>
-      <Divider mb={10} />
 
       {/* Our Vision */}
       <Heading as="h2" size="md" mb="6">
         {t(`${prefix}.ourVision.title`)}
       </Heading>
-      <Text fontSize="lg" color="gray.700" mb="4">
-        <Trans i18nKey="home.joinTheBuildingPermitHub.ourVision.description" />
+      <Text fontSize="md" color="gray.700" mb="4">
+        <Trans i18nKey={`${prefix}.about.description`} />
       </Text>
       <UnorderedList mb={4} pl={6}>
-        <ListItem>{t(`${prefix}.ourVision.audiences.localGovernments`)}</ListItem>
-        <ListItem>{t(`${prefix}.ourVision.audiences.builders`)}</ListItem>
-        <ListItem>{t(`${prefix}.ourVision.audiences.homeowners`)}</ListItem>
-        <ListItem>{t(`${prefix}.ourVision.audiences.applicants`)}</ListItem>
+        <ListItem fontSize="md">{t(`${prefix}.about.audiences.localGovernments`)}</ListItem>
+        <ListItem fontSize="md">{t(`${prefix}.about.audiences.builders`)}</ListItem>
+        <ListItem fontSize="md">{t(`${prefix}.about.audiences.homeowners`)}</ListItem>
+        <ListItem fontSize="md">{t(`${prefix}.about.audiences.anyone`)}</ListItem>
       </UnorderedList>
       <Text fontSize="lg" color="gray.700" mt={"8"}>
         <Trans i18nKey="home.joinTheBuildingPermitHub.ourVision.platformDescription" />
@@ -60,29 +57,17 @@ export const OnboardingChecklistPageForLgAdoptingScreen = observer(() => {
         {t(`${prefix}.currentStatus.features.title`)}
       </Text>
       <UnorderedList mb={4} pl={6}>
-        <ListItem>
-          <Trans i18nKey="home.joinTheBuildingPermitHub.currentStatus.features.smallScaleHousing" />
-        </ListItem>
-        <ListItem>
-          <Trans i18nKey="home.joinTheBuildingPermitHub.currentStatus.features.automatedStepCode" />
-        </ListItem>
-        <ListItem>
-          <Trans i18nKey="home.joinTheBuildingPermitHub.currentStatus.features.collaborativeFlows" />
-        </ListItem>
-        <ListItem>
-          <Trans i18nKey="home.joinTheBuildingPermitHub.currentStatus.features.customizablePermits" />
-        </ListItem>
-        <ListItem>
-          <Trans i18nKey="home.joinTheBuildingPermitHub.currentStatus.features.resubmissionTools" />
-        </ListItem>
+        <ListItem fontSize="md">{t(`${prefix}.about.goals.speedUp`)}</ListItem>
+        <ListItem fontSize="md">{t(`${prefix}.about.goals.support`)}</ListItem>
+        <ListItem fontSize="md">{t(`${prefix}.about.goals.reduce`)}</ListItem>
       </UnorderedList>
-      <Text fontSize="lg" color="gray.700" mb="10">
-        {t(`${prefix}.currentStatus.workflowNote`)}
+      <Text fontSize="md" color="gray.700" mb="10">
+        <Trans i18nKey={`${prefix}.about.flexible`} />
       </Text>
-      <Divider mb={10} />
-      {/* Built together, with You */}
-      <Heading as="h2" size="md" mb="4">
-        {t(`${prefix}.builtTogether.title`)}
+
+      {/* Available features */}
+      <Heading as="h2" size="lg" variant="yellowline" mb={4}>
+        {t(`${prefix}.availableFeatures.title`)}
       </Heading>
       <Text fontSize="lg" color="gray.700">
         {t(`${prefix}.builtTogether.description`)}
@@ -157,55 +142,78 @@ export const OnboardingChecklistPageForLgAdoptingScreen = observer(() => {
           </Box>
         </ListItem>
       </UnorderedList>
-      <Divider mb={10} />
-      {/* Flexible Adoption to Fit You */}
-      <Heading as="h2" size="md" mb="4">
-        {t(`${prefix}.flexibleAdoption.title`)}
+
+      {/* New features in development */}
+      <Heading as="h2" size="lg" variant="yellowline" mb={4}>
+        {t(`${prefix}.newFeatures.title`)}
       </Heading>
-      <Text fontSize="lg" color="gray.700" mb="2">
-        {t(`${prefix}.flexibleAdoption.description`)}
+      <Text fontSize="md" color="gray.700" mb="4">
+        {t(`${prefix}.newFeatures.description`)}
       </Text>
-      <Text mb={2}>{t(`${prefix}.flexibleAdoption.examples.title`)}</Text>
-      <UnorderedList mb={2} pl={6}>
-        <ListItem>
-          <Trans i18nKey="home.joinTheBuildingPermitHub.flexibleAdoption.examples.stepCode" />
+      <UnorderedList mb={10} pl={0} listStyleType="none">
+        <ListItem mb={4}>
+          <Text fontWeight="bold" fontSize="md">
+            {t(`${prefix}.newFeatures.features.permitProjectFolders.title`)}
+          </Text>
+          <Text fontSize="md">{t(`${prefix}.newFeatures.features.permitProjectFolders.description`)}</Text>
+        </ListItem>
+        <ListItem mb={4}>
+          <Text fontWeight="bold" fontSize="md">
+            {t(`${prefix}.newFeatures.features.preApplicationTools.title`)}
+          </Text>
+          <Text fontSize="md">{t(`${prefix}.newFeatures.features.preApplicationTools.description`)}</Text>
+        </ListItem>
+        <ListItem mb={4}>
+          <Text fontWeight="bold" fontSize="md">
+            {t(`${prefix}.newFeatures.features.uploadDocuments.title`)}
+          </Text>
+          <Text fontSize="md">{t(`${prefix}.newFeatures.features.uploadDocuments.description`)}</Text>
+        </ListItem>
+        <ListItem mb={4}>
+          <Text fontWeight="bold" fontSize="md">
+            {t(`${prefix}.newFeatures.features.standardHousing.title`)}
+          </Text>
+          <Text fontSize="md">{t(`${prefix}.newFeatures.features.standardHousing.description`)}</Text>
+        </ListItem>
+        <ListItem mb={4}>
+          <Text fontWeight="bold" fontSize="md">
+            {t(`${prefix}.newFeatures.features.crossJurisdiction.title`)}
+          </Text>
+          <Text fontSize="md">{t(`${prefix}.newFeatures.features.crossJurisdiction.description`)}</Text>
         </ListItem>
         <ListItem>
-          <Trans i18nKey="home.joinTheBuildingPermitHub.flexibleAdoption.examples.specificTools" />
-        </ListItem>
-        <ListItem>
-          <Trans i18nKey="home.joinTheBuildingPermitHub.flexibleAdoption.examples.preApplication" />
+          <Text fontWeight="bold" fontSize="md">
+            {t(`${prefix}.newFeatures.features.realTimeStatus.title`)}
+          </Text>
+          <Text fontSize="md">{t(`${prefix}.newFeatures.features.realTimeStatus.description`)}</Text>
         </ListItem>
       </UnorderedList>
-      <Text fontSize="lg" color="gray.700" mb={8}>
-        <Trans i18nKey="home.joinTheBuildingPermitHub.flexibleAdoption.note" />
+
+      {/* Flexible use and adoption */}
+      <Heading as="h2" size="lg" variant="yellowline" mb={4}>
+        {t(`${prefix}.flexibleUse.title`)}
+      </Heading>
+      <Text fontSize="md" color="gray.700" mb="2">
+        {t(`${prefix}.flexibleUse.description`)}
       </Text>
-      <Divider mb={10} />
-      {/* Connected Through Integration */}
-      <Heading as="h2" size="md" mb="4">
+      <UnorderedList mb={4} pl={6}>
+        <ListItem fontSize="md">{t(`${prefix}.flexibleUse.examples.stepCode`)}</ListItem>
+        <ListItem fontSize="md">{t(`${prefix}.flexibleUse.examples.newFeatures`)}</ListItem>
+        <ListItem fontSize="md">{t(`${prefix}.flexibleUse.examples.preApplication`)}</ListItem>
+      </UnorderedList>
+      <Text fontSize="md" color="gray.700" mb="10">
+        <Trans i18nKey={`${prefix}.flexibleUse.note`} />
+      </Text>
+
+      {/* Integration with your existing systems */}
+      <Heading as="h2" size="lg" variant="yellowline" mb={4}>
         {t(`${prefix}.integration.title`)}
       </Heading>
-      <Text fontSize="lg" color="gray.700" mb="2">
+      <Text fontSize="md" color="gray.700" mb="2">
         {t(`${prefix}.integration.description`)}
       </Text>
-      <UnorderedList mb={8} pl={6}>
-        <ListItem>
-          <Trans i18nKey="home.joinTheBuildingPermitHub.integration.features.openApi" />
-        </ListItem>
-        <ListItem>
-          <Trans i18nKey="home.joinTheBuildingPermitHub.integration.features.directPush" />
-        </ListItem>
-        <ListItem>
-          <Trans i18nKey="home.joinTheBuildingPermitHub.integration.features.statusUpdates" />
-        </ListItem>
-      </UnorderedList>
-      <Divider mb={10} />
-      {/* How to Get Started */}
-      <Heading as="h2" size="md" mb="4">
-        {t(`${prefix}.getStarted.title`)}
-      </Heading>
-      <Text fontSize="lg" color="gray.700" mb="2">
-        {t(`${prefix}.getStarted.description`)}
+      <Text mb={2} fontSize="md">
+        {t(`${prefix}.integration.includes`)}
       </Text>
       <UnorderedList mb={2} pl={0} listStyleType="none">
         <ListItem display="flex" alignItems="flex-start" mb={4}>
@@ -284,29 +292,46 @@ export const OnboardingChecklistPageForLgAdoptingScreen = observer(() => {
       <Heading as="h2" size="md" mb="4" mt={10}>
         {t(`${prefix}.notAlone.title`)}
       </Heading>
-      <UnorderedList mb={2} pl={6}>
+      <OrderedList mb={10} pl={6} spacing={3}>
         <ListItem>
-          <Trans i18nKey="home.joinTheBuildingPermitHub.notAlone.stats.liveJurisdictions" />
+          <Text fontWeight="bold" fontSize="md">
+            {t(`${prefix}.howToJoin.step1.title`)}
+          </Text>
+          <Text fontSize="md">
+            <Trans
+              i18nKey={`${prefix}.howToJoin.step1.description`}
+              values={{ email: t(`${prefix}.howToJoin.step1.email`) }}
+              components={{
+                mailTo: (
+                  <Link
+                    to={`mailto:${t(`${prefix}.howToJoin.step1.email`)}`}
+                    style={{ color: "#1a5a96", textDecoration: "underline" }}
+                  />
+                ),
+              }}
+            />
+          </Text>
         </ListItem>
         <ListItem>
-          <Trans i18nKey="home.joinTheBuildingPermitHub.notAlone.stats.coCreation" />
+          <Text fontWeight="bold" fontSize="md">
+            {t(`${prefix}.howToJoin.step2.title`)}
+          </Text>
+          <Text fontSize="md">{t(`${prefix}.howToJoin.step2.description`)}</Text>
         </ListItem>
-      </UnorderedList>
-      <Text fontSize="lg" color="gray.700" mb={8}>
-        <Trans i18nKey="home.joinTheBuildingPermitHub.notAlone.feedback" />
-      </Text>
+      </OrderedList>
 
-      {/* Want to See More? */}
-      <Heading as="h2" size="md" mb="4">
-        {t(`${prefix}.seeMore.title`)}
+      {/* Learn more about Building Permit Hub */}
+      <Heading as="h2" size="lg" variant="yellowline" mb={4}>
+        {t(`${prefix}.learnMore.title`)}
       </Heading>
-      <Text fontSize="lg" color="gray.700" mb="2">
-        {t(`${prefix}.seeMore.description`)}
+      <Text fontSize="md" color="gray.700" mb="4">
+        {t(`${prefix}.learnMore.description`)}
       </Text>
-      <UnorderedList mb={2} pl={6}>
-        <ListItem>{t(`${prefix}.seeMore.options.demo`)}</ListItem>
-        <ListItem>{t(`${prefix}.seeMore.options.technical`)}</ListItem>
-        <ListItem>{t(`${prefix}.seeMore.options.success`)}</ListItem>
+      <UnorderedList mb={4} pl={6}>
+        <ListItem fontSize="md">{t(`${prefix}.learnMore.options.liveOnboarding`)}</ListItem>
+        <ListItem fontSize="md">{t(`${prefix}.learnMore.options.liveDemo`)}</ListItem>
+        <ListItem fontSize="md">{t(`${prefix}.learnMore.options.technicalQuestions`)}</ListItem>
+        <ListItem fontSize="md">{t(`${prefix}.learnMore.options.share`)}</ListItem>
       </UnorderedList>
       <Text fontSize="lg" color="blue.700" mb={1}>
         📧{" "}

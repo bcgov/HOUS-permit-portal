@@ -4,16 +4,16 @@ require "fileutils"
 
 class PdfGenerationJob
   include Sidekiq::Worker
-  sidekiq_options lock: :until_and_while_executing,
+  sidekiq_options lock: :until_executed,
                   queue: :file_processing,
                   on_conflict: {
-                    client: :log,
+                    client: :reject,
                     server: :reject
                   }
 
   def self.lock_args(args)
-    ## only lock on the first argument, which is the permit application id
-    ## this will prevent multiple jobs from running for the same permit application
+    # only lock on the first argument, which is the permit application id
+    # this will prevent multiple jobs from running for the same permit application
     [args[0]]
   end
 

@@ -56,7 +56,14 @@ export const EmailFormControl = ({
       <HStack gap={0}>
         {!hideLabel && (
           <>
-            <FormLabel>{label || t("auth.emailLabel")}</FormLabel>
+            <FormLabel>
+              {label || t("auth.emailLabel")}
+              {required && (
+                <Text as="span" color="semantic.error" ml={1}>
+                  *
+                </Text>
+              )}
+            </FormLabel>
             {!required && showOptional && (
               <Text ml={-2} mb={1}>
                 {t("ui.optional")}
@@ -105,7 +112,7 @@ export const EmailFormControl = ({
           />
         )}
       </Flex>
-      {errorMessage && !inputProps?.isDisabled && <FormErrorMessage>{errorMessage}</FormErrorMessage>}
+      {errorMessage && !inputProps?.isDisabled && <FormErrorMessage>{String(errorMessage)}</FormErrorMessage>}
     </FormControl>
   )
 }

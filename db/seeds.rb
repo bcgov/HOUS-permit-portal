@@ -86,6 +86,19 @@ User.find_or_create_by(omniauth_username: "submitter") do |user|
   user.omniauth_email = "submitter@example.com"
 end
 
+# invite a usable super admin
+# safeguard for development only
+if Rails.env.development?
+  email = "usable+super_admin@example.com"
+  User.invite!(email: email) do |u|
+    u.skip_confirmation_notification!
+    u.role = :super_admin
+    u.first_name = "Super"
+    u.last_name = "Admin"
+    u.save
+  end
+end
+
 User.reindex
 
 activity1 = Activity.find_by_code("new_construction")
@@ -324,19 +337,6 @@ early_access_requirement_templates.each do |eart|
       early_access_requirement_template: eart,
       previewer: user
     )
-  end
-end
-
-# invite a usable super admin
-# safeguard for development only
-if Rails.env.development?
-  email = "usable+super_admin@example.com"
-  User.invite!(email: email) do |u|
-    u.skip_confirmation_notification!
-    u.role = :super_admin
-    u.first_name = "Super"
-    u.last_name = "Admin"
-    u.save
   end
 end
 

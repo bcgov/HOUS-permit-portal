@@ -227,7 +227,14 @@ export const InputFormControl = ({
     <FormControl isInvalid={!!errorMessage} {...rest}>
       {label && (
         <HStack gap={0}>
-          <FormLabel>{label} </FormLabel>
+          <FormLabel>
+            {label}
+            {required && (
+              <Text as="span" color="semantic.error" ml={1}>
+                *
+              </Text>
+            )}
+          </FormLabel>
           {!required && showOptional && (
             <Text ml={-2} mb={2}>
               {t("ui.optional")}
