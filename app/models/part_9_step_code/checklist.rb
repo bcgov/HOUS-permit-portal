@@ -17,6 +17,8 @@ class Part9StepCode::Checklist < ApplicationRecord
   accepts_nested_attributes_for :building_characteristics_summary
   after_create :create_building_characteristics_summary
 
+  validates :compliance_path, presence: true, on: :update
+
   delegate :plan_author, :plan_version, :plan_date, to: :step_code
 
   enum stage: %i[pre_construction mid_construction as_built]

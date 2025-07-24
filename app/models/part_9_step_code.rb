@@ -8,8 +8,6 @@ class Part9StepCode < StepCode
           class_name: "Part9StepCode::Checklist",
           foreign_key: :step_code_id
 
-  validates :compliance_path, presence: true, on: :update
-
   accepts_nested_attributes_for :pre_construction_checklist
 
   before_create :set_plan_fields
