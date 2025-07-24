@@ -61,6 +61,7 @@ en:
             jurisdiction:
               no_contact: "is not ready to accept applications through this tool yet. Please check with your local jurisdiction."
               inbox_not_enabled: "inbox for this permit application is not enabled"
+              no_jurisdiction: "must be present if not associated with a project."
             pid_or_pin: "must have a PID or PIN."
             sandbox:
               incorrect_jurisdiction: "must belong to the jurisdiction. Please apply to your own jurisdiction to use this sandbox."

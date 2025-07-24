@@ -35,7 +35,6 @@ import { ErrorScreen } from "../../shared/base/error-screen"
 import { FileDownloadButton } from "../../shared/base/file-download-button" // Import the new button
 import { LoadingScreen } from "../../shared/base/loading-screen"
 import { PermitApplicationCard } from "../../shared/permit-applications/permit-application-card" // Import the card component
-import { ProjectReadinessTabContent } from "./project-readiness-tab-content"
 
 interface IProjectDocumentFormInput extends Omit<IProjectDocument, "createdAt" | "file" | "id"> {
   id?: string
@@ -259,9 +258,6 @@ export const PermitProjectScreen = observer(() => {
               {fields.length === 0 && !currentPermitProject.projectDocuments?.length && (
                 <Text>No documents uploaded to this project yet.</Text>
               )}
-            </TabPanel>
-            <TabPanel p={4}>
-              <ProjectReadinessTabContent />
             </TabPanel>
           </TabPanels>
         </Tabs>

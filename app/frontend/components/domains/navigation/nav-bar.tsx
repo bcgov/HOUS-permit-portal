@@ -89,6 +89,12 @@ function isLoginPath(path: string): boolean {
   return regex.test(path)
 }
 
+// TODO: refactor these into a single function that takes a regex
+function isStepCodePath(path: string): boolean {
+  const regex = /^\/part-(3|9)-step-code.*$/
+  return regex.test(path)
+}
+
 function shouldHideSubNavbarForPath(path: string): boolean {
   const matchers: Array<(path: string) => boolean> = [
     (path) => path === "/",
@@ -101,6 +107,7 @@ function shouldHideSubNavbarForPath(path: string): boolean {
     isDigitalPermitEditPath,
     isApiMappingPath,
     isLoginPath,
+    isStepCodePath,
   ]
 
   return matchers.some((matcher) => matcher(path))

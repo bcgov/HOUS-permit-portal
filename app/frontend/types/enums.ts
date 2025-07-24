@@ -634,11 +634,6 @@ export enum EStepCodeType {
   part9StepCode = "Part9StepCode",
 }
 
-export enum EStepCodeParentType {
-  PermitProject = "PermitProject",
-  User = "User",
-}
-
 export enum EPermitProjectSortFields {
   title = "title",
   location = "location",
@@ -656,9 +651,4 @@ export enum EPermitProjectPhase {
   revisionsRequested = "revisions_requested",
   resubmitted = "resubmitted",
   approved = "approved",
-}
-
-export enum EStepCodeType {
-  part3StepCode = "Part3StepCode",
-  part9StepCode = "Part9StepCode",
 }

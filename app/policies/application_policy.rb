@@ -1,9 +1,10 @@
 # frozen_string_literal: true
 
 class ApplicationPolicy
-  attr_reader :user, :sandbox, :record
+  attr_reader :user, :sandbox, :record, :user_context
 
   def initialize(user_context, record)
+    @user_context = user_context
     @user = user_context.user
     @sandbox = user_context.sandbox
     @record = record
