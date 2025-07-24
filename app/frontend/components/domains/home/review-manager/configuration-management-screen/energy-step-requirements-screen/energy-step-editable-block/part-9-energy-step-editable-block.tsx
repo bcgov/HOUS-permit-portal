@@ -21,15 +21,25 @@ interface IProps {
   jurisdiction: IJurisdiction
 }
 
-export const EnergyStepEditableBlock = observer(function EnergyStepEditableBlock({
+export const Part9EnergyStepEditableBlock = observer(function Part9EnergyStepEditableBlock({
   heading,
   permitTypeId,
   jurisdiction,
 }: IProps) {
   type TPermitTypeRequiredStepField = IPermitTypeRequiredStep & { _destroy?: boolean }
-  const getDefaultValues = () => ({
-    permitTypeRequiredStepsAttributes: [...(jurisdiction.permitTypeRequiredSteps as TPermitTypeRequiredStepField[])],
-  })
+  const getDefaultValues = () => {
+    const steps = jurisdiction.part9RequiredSteps as TPermitTypeRequiredStepField[]
+    if (R.isEmpty(steps)) {
+      return {
+        permitTypeRequiredStepsAttributes: [
+          { permitTypeId, default: true, energyStepRequired: undefined, zeroCarbonStepRequired: undefined },
+        ],
+      }
+    }
+    return {
+      permitTypeRequiredStepsAttributes: [...steps],
+    }
+  }
 
   interface IFormValues {
     permitTypeRequiredStepsAttributes: TPermitTypeRequiredStepField[]
@@ -47,16 +57,18 @@ export const EnergyStepEditableBlock = observer(function EnergyStepEditableBlock
 
   const { isSubmitting, isValid } = formState
   const fieldArrayName = "permitTypeRequiredStepsAttributes"
-  const { fields, append, insert, remove, update } = useFieldArray({
+  const { fields, append, remove, update } = useFieldArray({
     control,
     name: fieldArrayName,
     keyName: "key",
   })
+
   const watchRequiredSteps = watch(fieldArrayName)
 
   const permitTypeFields = R.filter((f) => f.permitTypeId == permitTypeId, fields as TPermitTypeRequiredStepField[])
   const customFields = R.filter((f) => !f.default, permitTypeFields)
-  const getIndex = (field) => R.findIndex((f) => f.key == field.key, fields)
+  const getIndex = (field) => R.findIndex((f) => f.key == field?.key, fields)
+
   const defaultIndex = getIndex(R.find((f) => f.default, permitTypeFields))
 
   const [isEditing, setIsEditing] = useState(false)
@@ -132,7 +144,7 @@ export const EnergyStepEditableBlock = observer(function EnergyStepEditableBlock
                 <FormLabel noOfLines={1}>{t(`${i18nPrefix}.stepRequired.energy.title`)}</FormLabel>
                 <Controller
                   control={control}
-                  rules={{ required: true }}
+                  rules={{ required: !isCustomizing }}
                   name={`${fieldArrayName}.${defaultIndex}.energyStepRequired`}
                   render={({ field: { onChange, value } }) => {
                     return (
@@ -145,7 +157,7 @@ export const EnergyStepEditableBlock = observer(function EnergyStepEditableBlock
                 <FormLabel noOfLines={1}>{t(`${i18nPrefix}.stepRequired.zeroCarbon.title`)}</FormLabel>
                 <Controller
                   control={control}
-                  rules={{ required: true }}
+                  rules={{ required: !isCustomizing }}
                   name={`${fieldArrayName}.${defaultIndex}.zeroCarbonStepRequired`}
                   render={({ field: { onChange, value } }) => {
                     return (
