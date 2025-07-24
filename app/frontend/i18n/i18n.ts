@@ -2436,10 +2436,10 @@ Thank you,
               description:
                 "The Building Permit Hub is available to make building permits faster and easier for everyone:",
               audiences: {
-                localGovernments: "local governments",
-                builders: "builders",
-                homeowners: "homeowners",
-                applicants: "anyone applying for a permit",
+                localGovernments: "Local governments",
+                builders: "Builders",
+                homeowners: "Homeowners",
+                anyone: "Anyone applying for a permit",
               },
               platformDescription:
                 "It’s a free, voluntary platform that helps from the moment a site or idea is chosen, all the way through to an occupancy permit approval.",
@@ -2463,11 +2463,9 @@ Thank you,
                 customizablePermits: "customizable permit types tailored to your bylaws",
                 resubmissionTools: "resubmission and revision tools",
               },
-              workflowNote:
-                "Whether you're digital, hybrid, or paper-based, you can participate in a way that fits your current workflow.",
             },
-            builtTogether: {
-              title: "Built together, with You",
+            coDeveloped: {
+              title: "Co-developed with BC communities",
               description:
                 "We're co-developing this platform with local governments, First Nations, and industry partners.",
               feedbackNote:
@@ -2492,30 +2490,26 @@ Thank you,
                   title: "Permit Project Folders",
                   description: "Work on multiple permits together or in sequence — ideal for complex projects",
                 },
-                readinessTools: {
-                  title: "Project Readiness Tools",
-                  description:
-                    "Pre-application tools like letters of assurance, lateral load and seismic calculators — usable outside the permit form.",
+                preApplicationTools: {
+                  title: "Pre-application tools",
+                  description: "Use calculators and other tools before starting a permit form.",
                 },
                 documentUpload: {
                   title: "Independent Document Upload",
                   description:
                     "Support documents that aren’t tied to specific form fields, helpful for large or complex submissions.",
                 },
-                designCatalogues: {
-                  title: "Standardized Design Catalogues",
-                  description:
-                    "Work with national partners to speed up reviews and encourage consistency across housing types.",
+                standardHousing: {
+                  title: "Standard housing design catalogues",
+                  description: "Reduce review time and support consistent approvals.",
                 },
-                dashboards: {
-                  title: "Cross-Jurisdiction Dashboards",
-                  description:
-                    "For submitters working across BC: one dashboard for all permit activity, no matter the community.",
+                crossJurisdiction: {
+                  title: "Cross-jurisdiction dashboards",
+                  description: "Give builders and staff a single view of activity across multiple communities.",
                 },
-                statusTracking: {
-                  title: "Enhanced Status Tracking",
-                  description:
-                    "More dynamic status updates — visible in real time for both jurisdictions and submitters.",
+                realTimeStatus: {
+                  title: "Real-time status updates",
+                  description: "Help staff and applicants track permit progress as it happens.",
                 },
               },
             },
@@ -2600,6 +2594,8 @@ Thank you,
                 email: "digital.codes.permits@gov.bc.ca",
                 sessions: "<strong>Live onboarding sessions available</strong>",
               },
+              contact: "You can reach our team by sending an email to <mailTo>{{email}}</mailTo>",
+              email: "digital.codes.permits@gov.bc.ca",
             },
           },
           siteConfigurationTitle: "Configuration management",
