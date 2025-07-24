@@ -763,7 +763,7 @@ const AppRoutes = observer(() => {
           }
         />
         <Route
-          path="/jurisdictions/:slug/step-code-requirements"
+          path="/jurisdictions/:jurisdictionId/step-code-requirements"
           element={<JurisdictionStepCodeRequirementsScreen />}
         />
         <Route
