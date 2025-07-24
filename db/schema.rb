@@ -76,6 +76,9 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_23_200843) do
     t.index ["contactable_type", "contactable_id"], name: "index_contacts_on_contactable"
   end
 
+  create_table "data_migrations", primary_key: "version", id: :string, force: :cascade do |t|
+  end
+
   create_table "document_references", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "checklist_id"
     t.string "document_name"
@@ -725,12 +728,14 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_23_200843) do
     t.string "plan_version"
     t.string "plan_date"
     t.string "type"
+    t.uuid "permit_project_id"
     t.uuid "creator_id", null: false
     t.string "full_address"
     t.string "pid"
     t.string "pin"
     t.index ["creator_id"], name: "index_step_codes_on_creator_id"
     t.index ["permit_application_id"], name: "index_step_codes_on_permit_application_id"
+    t.index ["permit_project_id"], name: "index_step_codes_on_permit_project_id"
   end
 
   create_table "submission_versions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -944,6 +949,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_23_200843) do
   add_foreign_key "step_code_building_characteristics_summaries", "part_9_step_code_checklists", column: "checklist_id"
   add_foreign_key "step_code_data_entries", "part_9_step_code_checklists", column: "checklist_id"
   add_foreign_key "step_codes", "permit_applications"
+  add_foreign_key "step_codes", "permit_projects"
   add_foreign_key "step_codes", "users", column: "creator_id"
   add_foreign_key "submission_versions", "permit_applications"
   add_foreign_key "supporting_documents", "permit_applications"
