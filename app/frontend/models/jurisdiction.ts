@@ -104,6 +104,11 @@ export const JurisdictionModel = types
 
       return R.reduceBy(groupRequirements, [], toPermitType, self.permitTypeRequiredSteps)
     },
+    get part9RequiredSteps() {
+      return self.permitTypeRequiredSteps.filter(
+        (r) => r.permitTypeId == self.rootStore.permitClassificationStore.part9BuildingPermitType.id
+      )
+    },
   }))
   .actions((self) => ({
     setTablePermitApplications: (permitApplications) => {
