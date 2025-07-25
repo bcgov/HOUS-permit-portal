@@ -60,7 +60,7 @@ RSpec.describe User, type: :model do
     it "a review manager can invite reviewers and review managers" do
       inviter = build(:user, :review_manager)
       expect(inviter.invitable_roles).to match_array(
-        %w[reviewer review_manager technical_support]
+        %w[reviewer review_manager technical_support regional_review_manager]
       )
     end
     it "a reviewer cannot invite anyone" do

@@ -158,7 +158,7 @@ class User < ApplicationRecord
         technical_support
       ]
     when "review_manager", "regional_review_manager", "technical_support"
-      %w[reviewer review_manager technical_support]
+      %w[reviewer review_manager technical_support regional_review_manager]
     else
       []
     end
