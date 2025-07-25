@@ -212,6 +212,7 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
                     <EmailFormControl
                       label={t("user.notificationsEmail")}
                       showIcon
+                      required
                       inputProps={{
                         isDisabled: true,
                         value: currentUser.unconfirmedEmail,
@@ -239,6 +240,7 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
                     <EmailFormControl
                       label={t("user.notificationsEmail")}
                       showIcon
+                      required
                       inputProps={{
                         isDisabled: true,
                         value: currentUser.email,
@@ -292,7 +294,7 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
                   {isEditingEmail ? (
                     <>
                       <Divider my={4} />
-                      <EmailFormControl showIcon label={t("user.newEmail")} fieldName="email" />
+                      <EmailFormControl showIcon label={t("user.newEmail")} fieldName="email" required />
                     </>
                   ) : (
                     <Button
