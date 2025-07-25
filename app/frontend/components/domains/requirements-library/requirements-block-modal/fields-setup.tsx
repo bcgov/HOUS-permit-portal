@@ -255,7 +255,7 @@ export const FieldsSetup = observer(function FieldsSetup({
               defaultValue={displayNameValue || ""}
               onSubmit={onDisplayNameChange}
               onCancel={onDisplayNameChange}
-              onChange={() => setShowDisplayNameError(false)}
+              onChange={onDisplayNameChange}
               color={R.isEmpty(displayNameValue) ? "text.link" : undefined}
               aria-label={"Edit Display Name"}
               flex={1}
