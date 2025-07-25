@@ -624,6 +624,10 @@ class RequirementFormJsonService
                "energy_step_code_report_file"
              )
             file_hash[:tooltip] = ENERGY_STEP_CODE_TOOLTIP_URL
+          elsif input_options["computed_compliance"].present?
+            file_hash[:tooltip] = I18n.t(
+              "formio.requirement.auto_compliance.tooltip"
+            )
           end
         end
       )
