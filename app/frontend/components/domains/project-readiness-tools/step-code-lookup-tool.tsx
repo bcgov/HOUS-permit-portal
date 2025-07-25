@@ -13,29 +13,32 @@ interface IStepCodeLookupToolProps {
 export const StepCodeLookupTool = ({ showJurisdictionOnPage = false }: IStepCodeLookupToolProps) => {
   const { t } = useTranslation()
   const [jurisdiction, setJurisdiction] = useState<IJurisdiction | null>(null)
+  const [showError, setShowError] = useState(false)
 
   const handleJurisdictionFound = (j: IJurisdiction) => {
     setJurisdiction(j)
+    setShowError(false)
   }
 
   return (
-    <VStack spacing={4} align="start" w="full" maxW="container.lg" mx="auto" py={10} px={8}>
-      <Heading as="h1" variant="yellowline">
-        {t("home.projectReadinessTools.stepCodeLookupTool.title")}
-      </Heading>
+    <VStack spacing={4} align="start" w="full" maxW="container.lg" mx="auto">
       <Text color="text.secondary" fontSize="lg">
         {t("home.projectReadinessTools.stepCodeLookupTool.description")}
       </Text>
-      <StepCodeAddressSearch onJurisdictionFound={showJurisdictionOnPage ? handleJurisdictionFound : undefined} />
+      <StepCodeAddressSearch
+        onJurisdictionFound={showJurisdictionOnPage ? handleJurisdictionFound : undefined}
+        setShowError={setShowError}
+        showError={showError}
+      />
 
-      <Text fontSize="lg">
+      <Text fontSize="lg" mb={10}>
         {t("home.projectReadinessTools.stepCodeLookupTool.cantFindAddress")}{" "}
         <Link as={RouterLink} to="/jurisdictions" color="text.link" textDecoration="underline">
           {t("home.projectReadinessTools.stepCodeLookupTool.browseJurisdictions")}
         </Link>
       </Text>
 
-      {showJurisdictionOnPage && jurisdiction && (
+      {showJurisdictionOnPage && jurisdiction && !showError && (
         <VStack w="full" bg="white" p={6} borderRadius="md" align="start" spacing={4}>
           <Heading as="h2" size="lg">
             {jurisdiction.name}

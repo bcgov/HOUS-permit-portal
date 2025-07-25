@@ -84,7 +84,12 @@ export const LandingScreen = observer(({}: ILandingScreenProps) => {
       </Flex>
       <Box bg="greys.grey03">
         <Flex as="section" direction="column" gap={20}>
-          <StepCodeLookupTool showJurisdictionOnPage={true} />
+          <VStack spacing={4} py={4} px={8} align="start" w="full" maxW="container.lg" mx="auto">
+            <Heading as="h1" variant="yellowline">
+              {t("home.projectReadinessTools.stepCodeLookupTool.title")}
+            </Heading>
+            <StepCodeLookupTool showJurisdictionOnPage={true} />
+          </VStack>
         </Flex>
       </Box>
 
