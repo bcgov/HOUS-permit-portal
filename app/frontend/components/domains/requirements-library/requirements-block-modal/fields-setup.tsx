@@ -1,5 +1,5 @@
-import { Box, Button, Flex, HStack, Tag, Text, useDisclosure, VStack } from "@chakra-ui/react"
-import { Info } from "@phosphor-icons/react"
+import { Alert, Box, Button, Flex, HStack, Tag, Text, useDisclosure, VStack } from "@chakra-ui/react"
+import { Info, WarningCircle } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React, { useState } from "react"
@@ -52,7 +52,12 @@ export const FieldsSetup = observer(function FieldsSetup({
   isEditable?: boolean
 }) {
   const { t } = useTranslation()
-  const { setValue, control, watch } = useFormContext<IRequirementBlockForm>()
+  const {
+    setValue,
+    control,
+    watch,
+    formState: { errors },
+  } = useFormContext<IRequirementBlockForm>()
   const { fields, append, remove, move } = useFieldArray<IRequirementBlockForm>({
     control,
     name: "requirementsAttributes",
@@ -250,6 +255,7 @@ export const FieldsSetup = observer(function FieldsSetup({
               defaultValue={displayNameValue || ""}
               onSubmit={onDisplayNameChange}
               onCancel={onDisplayNameChange}
+              onChange={() => setShowDisplayNameError(false)}
               color={R.isEmpty(displayNameValue) ? "text.link" : undefined}
               aria-label={"Edit Display Name"}
               flex={1}
@@ -258,6 +264,22 @@ export const FieldsSetup = observer(function FieldsSetup({
               {t(isInReorderMode ? "ui.done" : "ui.reorder")}
             </Button>
           </Flex>
+          {errors.displayName && (
+            <Alert
+              status="error"
+              rounded="md"
+              borderWidth={1}
+              borderColor="semantic.error"
+              bg="semantic.errorLight"
+              mt="4"
+              mx="6"
+              w="94%"
+              color="text.error"
+            >
+              <WarningCircle color="var(--chakra-colors-semantic-error)" />
+              <Text ml="2">{t("ui.isRequired", { field: t("requirementsLibrary.modals.displayNameError") })}</Text>
+            </Alert>
+          )}
           <Box pb={8}>
             <Box px={3} mt={4} mb={3}>
               <Controller
@@ -473,7 +495,7 @@ export const FieldsSetup = observer(function FieldsSetup({
                         />
                       </Box>
                       <FieldControlsHeader
-                        requirementCode={watchedRequirementCode}
+                        requirementCode={watchedRequirementCode as ERequirementType}
                         isRequirementInEditMode={isRequirementInEditMode(field.id)}
                         toggleRequirementToEdit={() => toggleRequirementToEdit(field.id)}
                         onRemove={() => onRemoveRequirement(index)}
