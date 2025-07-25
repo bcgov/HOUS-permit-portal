@@ -181,6 +181,7 @@ const options = {
           part9ChecklistsLink: "Part 9 checklists (PDF)",
         },
         ui: {
+          copyValue: "Copy value",
           apply: "Apply",
           okay: "Okay",
           filter: "Filter",

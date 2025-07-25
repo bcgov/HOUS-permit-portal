@@ -520,6 +520,7 @@ export interface IPermitApplicationSearchFilters {
   templateVersionId?: string
   requirementTemplateId?: string
   hasCollaborator?: boolean
+  permitProjectId?: string
   query?: string
 }
 

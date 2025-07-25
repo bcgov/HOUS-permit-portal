@@ -4,17 +4,20 @@ import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
 import { EPermitProjectPhase } from "../types/enums"
 import { IProjectDocument } from "../types/types" // Updated import
-import { PermitApplicationModel } from "./permit-application"
+import { JurisdictionModel } from "./jurisdiction"
+import { IPermitApplication, PermitApplicationModel } from "./permit-application"
 
 export const PermitProjectModel = types
   .model("PermitProjectModel", {
     id: types.identifier,
     title: types.string,
     fullAddress: types.maybeNull(types.string),
+    pid: types.maybeNull(types.string),
     jurisdictionDisambiguatedName: types.string,
     forcastedCompletionDate: types.maybeNull(types.Date),
     phase: types.enumeration(Object.values(EPermitProjectPhase)),
-    permitApplications: types.maybeNull(types.array(types.reference(types.late(() => PermitApplicationModel)))),
+    tablePermitApplications: types.maybeNull(types.array(types.reference(types.late(() => PermitApplicationModel)))),
+    recentPermitApplications: types.frozen<IPermitApplication[]>(),
     projectDocuments: types.maybeNull(types.array(types.frozen<IProjectDocument>())), // Changed to IProjectDocument
     isPinned: types.optional(types.boolean, false),
     createdAt: types.Date,
@@ -25,6 +28,7 @@ export const PermitProjectModel = types
     resubmittedCount: types.optional(types.number, 0),
     revisionsRequestedCount: types.optional(types.number, 0),
     approvedCount: types.optional(types.number, 0),
+    jurisdiction: types.maybeNull(types.reference(types.late(() => JurisdictionModel))),
   })
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -77,6 +81,9 @@ export const PermitProjectModel = types
         store.togglePinnedProject(self as IPermitProject)
       }
     }),
+    setTablePermitApplications(permitApplications: IPermitApplication[]) {
+      self.tablePermitApplications = permitApplications.map((p) => p.id) as any
+    },
   }))
 
 export interface IPermitProject extends Instance<typeof PermitProjectModel> {}

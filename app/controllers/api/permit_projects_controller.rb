@@ -18,7 +18,7 @@ class Api::PermitProjectsController < Api::ApplicationController
                    nil,
                    {
                      blueprint: PermitProjectBlueprint,
-                     blueprint_opts: blueprint_options,
+                     blueprint_opts: blueprint_options(view: :base),
                      meta: @meta
                    }
   end

@@ -78,6 +78,14 @@ class RequirementTemplate < ApplicationRecord
   validate :validate_step_code_related_dependencies
   validate :public_only_for_early_access_preview
 
+  before_validation :set_default_nickname
+
+  def set_default_nickname
+    return if nickname.present?
+
+    self.nickname ||= label
+  end
+
   def assignee
     nil
   end

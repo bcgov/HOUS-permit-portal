@@ -32,6 +32,7 @@ import { ActiveArchivedFilter } from "../../shared/filters/active-archived-filte
 import { SearchGrid } from "../../shared/grid/search-grid"
 import { SearchGridItem } from "../../shared/grid/search-grid-item"
 import { RouterLink } from "../../shared/navigation/router-link"
+import { PhaseBox } from "../../shared/permit-projects/phase-box"
 import { GridHeaders } from "./grid-header"
 import { PhaseFilter } from "./phase-filter"
 import { RequirementTemplateFilter } from "./requirement-template-filter"
@@ -106,13 +107,7 @@ export const ProjectsTable = observer(() => {
                 {project.forcastedCompletionDate && format(project.forcastedCompletionDate, datefnsTableDateFormat)}
               </SearchGridItem>
               <SearchGridItem>
-                <VStack align="flex-start">
-                  {/* @ts-ignore */}
-                  <Text fontWeight="bold">{t(`permitProject.phase.${project.phase}`)}</Text>
-                  <Text fontSize="sm" color="greys.grey01">
-                    {project.phaseDescription}
-                  </Text>
-                </VStack>
+                <PhaseBox project={project} />
               </SearchGridItem>
               <SearchGridItem>
                 <Menu>

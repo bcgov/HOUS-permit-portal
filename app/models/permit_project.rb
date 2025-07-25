@@ -17,6 +17,9 @@ class PermitProject < ApplicationRecord
 
   accepts_nested_attributes_for :project_documents, allow_destroy: true
 
+  validates :title, presence: true
+  before_validation :set_default_title
+
   after_commit :reindex
 
   scope :with_status_counts,
@@ -116,5 +119,19 @@ class PermitProject < ApplicationRecord
   def forcasted_completion_date
     # Example implementation, to be defined by user
     Time.zone.now + 14.days
+  end
+
+  def shortened_address
+    full_address.split(",").first
+  end
+
+  def recent_permit_applications
+    permit_applications.order(updated_at: :desc).limit(3)
+  end
+
+  private
+
+  def set_default_title
+    self.title = shortened_address if title.blank? && full_address.present?
   end
 end

@@ -59,11 +59,16 @@ export const PermitProjectStoreModel = types
         })
       }
 
+      if (permitProject.jurisdiction) {
+        self.rootStore.jurisdictionStore.mergeUpdate(permitProject.jurisdiction, "jurisdictionMap")
+      }
+
       // Return modified data with references instead of full objects
       return R.mergeRight(permitProject, {
         owner: permitProject.owner?.id || null,
         permitApplications:
           permitProject.permitApplications?.map((app) => (typeof app === "object" ? app.id : app)) || [],
+        jurisdiction: permitProject.jurisdiction?.id || null,
       })
     },
     setRequirementTemplateFilter(value: string[]) {
@@ -222,6 +227,13 @@ export const PermitProjectStoreModel = types
       const paramValue = value.length > 0 ? value.join(",") : null
       setQueryParam("phase", paramValue)
     },
+    updatePermitProject: flow(function* (id: string, params: IPermitProjectUpdateParams) {
+      const response = yield self.environment.api.updatePermitProject(id, params)
+      if (response.ok && response.data) {
+        self.mergeUpdate(response.data.data, "permitProjectMap")
+      }
+      return response
+    }),
   }))
 
 export interface IPermitProjectStore extends Instance<typeof PermitProjectStoreModel> {}

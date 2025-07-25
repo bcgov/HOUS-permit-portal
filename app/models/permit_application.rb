@@ -193,6 +193,10 @@ class PermitApplication < ApplicationRecord
     )
   end
 
+  def template_nickname
+    template_version.requirement_template.nickname
+  end
+
   def search_data
     {
       number: number,

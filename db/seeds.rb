@@ -256,10 +256,8 @@ if PermitApplication.first.blank?
       PermitProject.create!(
         owner: current_submitter,
         jurisdiction: north_van,
-        title: "Project at #{project_full_address} (#{i + 1})",
         full_address: project_full_address,
         pid: project_pid
-        # pin can be added if necessary, e.g., "NVPIN#{i+1}"
       )
 
     PermitApplication.create!(
