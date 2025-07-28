@@ -81,7 +81,7 @@ export const Part9EnergyStepEditableBlock = observer(function Part9EnergyStepEdi
   }
 
   const onAdd = () => {
-    append({ permitTypeId, energyStepRequired: undefined, zeroCarbonStepRequired: undefined, default: null })
+    append({ permitTypeId, energyStepRequired: undefined, zeroCarbonStepRequired: undefined, default: false })
   }
 
   const onRemove = (index: number, field?: TPermitTypeRequiredStepField) => {
