@@ -2317,6 +2317,9 @@ Thank you,
               startAPermitApplication: "Start a permit application",
               lookUpEnergyStepCodeAndZeroCarbonStepCodeRequirements:
                 "Look up Energy Step Code and Zero Carbon Step Code requirements",
+              notAcceptingPermitApplications: "Not currently accepting permit applications through Building Permit Hub",
+              permitInformationForThisCommunityIsntAvailable:
+                "Permit information for this community isn’t available: check with the local government to learn how to apply",
             },
             pageHeading: "Prepare and check your project documents",
             pageDescription: "Use these tools to help prepare a complete and compliant permit application",
