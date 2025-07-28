@@ -446,7 +446,7 @@ const StepCodeTable: React.FC<IStepCodeTableProps> = ({ currentJurisdiction }) =
 
   return (
     <Flex direction="column" gap={4}>
-      <Accordion>
+      <Accordion allowToggle>
         <AccordionItem borderWidth={1} borderColor="border.light" rounded="sm">
           <AccordionButton bg="greys.grey03" fontWeight="bold">
             <Box flex="1" textAlign="left">

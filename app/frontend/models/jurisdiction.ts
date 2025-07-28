@@ -98,12 +98,19 @@ export const JurisdictionModel = types
   }))
   .views((self) => ({
     get part9RequiredSteps() {
-      // TODO: fix this once we have a proper permit type code reference
-      if (self.permitTypeRequiredSteps.length === 0) return []
-      // return self.permitTypeRequiredSteps.filter((r) => r.permitTypeName.includes("Part 9"))
-      // The above is not necessary as long as data migration is run
-      // Once we add new required steps for other permit types, we can add a reference by code and fitler here, depending on the chosen architecture
-      return self.permitTypeRequiredSteps
+      // This assumes that the permitTypeRequiredSteps are all part 9
+      // Revisit this once adding part 3 required steps
+      const nonDefaults = self.permitTypeRequiredSteps.filter((r) => !r.default)
+      if (nonDefaults.length > 0) {
+        return nonDefaults
+      }
+
+      const defaults = self.permitTypeRequiredSteps.filter((r) => r.default)
+      if (defaults.length > 0) {
+        return defaults
+      }
+
+      return []
     },
   }))
   .actions((self) => ({
