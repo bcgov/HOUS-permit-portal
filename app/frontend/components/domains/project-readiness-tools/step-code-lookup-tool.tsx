@@ -46,7 +46,7 @@ export const StepCodeLookupTool = ({ showJurisdictionOnPage = false }: IStepCode
           {jurisdiction.showAboutPage ? (
             <RouterLink to={`/jurisdictions/${jurisdiction.slug}`}>
               <HStack spacing={4}>
-                <Info size={32} color="var(--chakra-colors-semantic-info)" />
+                <Info size={24} color="var(--chakra-colors-semantic-info)" />
                 <Text as="span" textDecoration="underline" fontSize="lg">
                   {t("home.projectReadinessTools.stepCodeLookupTool.checkWhatIsNeededToApplyForPermitsInThisCommunity")}
                 </Text>
@@ -56,7 +56,7 @@ export const StepCodeLookupTool = ({ showJurisdictionOnPage = false }: IStepCode
             <>
               <Divider />
               <HStack spacing={4}>
-                <Info size={32} color="var(--chakra-colors-semantic-info)" />
+                <Info size={24} color="var(--chakra-colors-semantic-info)" />
                 <Text as="span" fontSize="lg" ml={2}>
                   {t("home.projectReadinessTools.stepCodeLookupTool.permitInformationForThisCommunityIsntAvailable")}
                 </Text>
@@ -68,7 +68,7 @@ export const StepCodeLookupTool = ({ showJurisdictionOnPage = false }: IStepCode
               <Divider />
               <RouterLink to={`/permit-applications/new`}>
                 <HStack spacing={4}>
-                  <Files size={32} color="var(--chakra-colors-semantic-info)" />
+                  <Files size={24} color="var(--chakra-colors-semantic-info)" />
                   <Text as="span" textDecoration="underline" fontSize="lg">
                     {t("home.projectReadinessTools.stepCodeLookupTool.startAPermitApplication")}
                   </Text>
@@ -79,7 +79,7 @@ export const StepCodeLookupTool = ({ showJurisdictionOnPage = false }: IStepCode
             <>
               <Divider />
               <HStack spacing={4}>
-                <Files size={32} color="var(--chakra-colors-semantic-info)" />
+                <Files size={24} color="var(--chakra-colors-semantic-info)" />
                 <Text as="span" fontSize="lg" ml={2}>
                   {t("home.projectReadinessTools.stepCodeLookupTool.notAcceptingPermitApplications")}
                 </Text>
@@ -89,7 +89,7 @@ export const StepCodeLookupTool = ({ showJurisdictionOnPage = false }: IStepCode
           <Divider />
           <RouterLink to={`/jurisdictions/${jurisdiction.slug}/step-code-requirements`}>
             <HStack spacing={4}>
-              <Steps size={32} color="var(--chakra-colors-semantic-info)" />
+              <Steps size={24} color="var(--chakra-colors-semantic-info)" />
               <Text as="span" textDecoration="underline" fontSize="lg">
                 {t(
                   "home.projectReadinessTools.stepCodeLookupTool.lookUpEnergyStepCodeAndZeroCarbonStepCodeRequirements"
