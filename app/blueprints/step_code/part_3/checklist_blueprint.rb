@@ -7,7 +7,6 @@ class StepCode::Part3::ChecklistBlueprint < Blueprinter::Base
          :step_code_annual_thermal_energy_demand,
          :total_occupancy_floor_area,
          :total_step_code_occupancy_floor_area,
-         :jurisdiction_name,
          :building_height,
          :heating_degree_days,
          :ref_annual_thermal_energy_demand,
@@ -54,19 +53,6 @@ class StepCode::Part3::ChecklistBlueprint < Blueprinter::Base
          :completed_by_email,
          :completed_by_phone_number,
          :completed_by_organization_name
-  field :pid, name: :project_identifier
-  field :nickname, name: :project_name
-  field :full_address, name: :project_address
-
-  field :overheating_hours_limit do |_checklist, _options|
-    Constants::Part3StepCode::OVERHEATING_HOURS_LIMIT
-  end
-
-  field :permit_date do |checklist, _options|
-    checklist.newly_submitted_at&.strftime("%b%e, %Y")
-  end
-
-  field :status, name: :project_stage
 
   field :building_code_version do |checklist, _options|
     if checklist.newly_submitted_at.present?
@@ -109,6 +95,10 @@ class StepCode::Part3::ChecklistBlueprint < Blueprinter::Base
     StepCode::Part3::ComplianceReportBlueprint.render_as_hash(
       checklist.compliance_report.results
     )
+  end
+
+  field :overheating_hours_limit do |_checklist, _options|
+    Constants::Part3StepCode::OVERHEATING_HOURS_LIMIT
   end
 
   view :extended do

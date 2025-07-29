@@ -42,6 +42,7 @@ const EmailConfirmedScreen = lazy(() =>
 const LoginScreen = lazy(() =>
   import("../authentication/login-screen").then((module) => ({ default: module.LoginScreen }))
 )
+
 const HomeScreen = lazy(() => import("../home").then((module) => ({ default: module.HomeScreen })))
 
 const ConfigurationManagementScreen = lazy(() =>
@@ -72,11 +73,24 @@ const ReviewStaffMyJurisdictionAboutPageScreen = lazy(() =>
   }))
 )
 
+const DesignatedReviewerScreen = lazy(() =>
+  import("../home/review-manager/configuration-management-screen/feature-access-screen/designated-reviewer").then(
+    (module) => ({
+      default: module.DesignatedReviewerScreen,
+    })
+  )
+)
+
 const JurisdictionIndexScreen = lazy(() =>
   import("../jurisdictions/index").then((module) => ({ default: module.JurisdictionIndexScreen }))
 )
 const JurisdictionScreen = lazy(() =>
   import("../jurisdictions/jurisdiction-screen").then((module) => ({ default: module.JurisdictionScreen }))
+)
+const JurisdictionStepCodeRequirementsScreen = lazy(() =>
+  import("../jurisdictions/step-code-requirements-screen").then((module) => ({
+    default: module.JurisdictionStepCodeRequirementsScreen,
+  }))
 )
 const LimitedJurisdictionIndexScreen = lazy(() =>
   import("../jurisdictions/limited-jurisdiction-index-screen").then((module) => ({
@@ -85,6 +99,9 @@ const LimitedJurisdictionIndexScreen = lazy(() =>
 )
 const NewJurisdictionScreen = lazy(() =>
   import("../jurisdictions/new-jurisdiction-screen").then((module) => ({ default: module.NewJurisdictionScreen }))
+)
+const PrivacyPolicyScreen = lazy(() =>
+  import("../misc/privacy-policy-screen").then((module) => ({ default: module.PrivacyPolicyScreen }))
 )
 const JurisdictionSubmissionInboxScreen = lazy(() =>
   import("../jurisdictions/submission-inbox/jurisdiction-submisson-inbox-screen").then((module) => ({
@@ -107,6 +124,24 @@ const LettersOfAssuranceScreen = lazy(() =>
     default: module.LettersOfAssuranceScreen,
   }))
 )
+const LookUpStepCodesRequirementsForYourProjectScreen = lazy(() =>
+  import("../project-readiness-tools/look-up-step-codes-requirements-for-your-project").then((module) => ({
+    default: module.LookUpStepCodesRequirementsForYourProjectScreen,
+  }))
+)
+
+const CheckStepCodeRequirementsScreen = lazy(() =>
+  import("../project-readiness-tools/check-step-code-requirements").then((module) => ({
+    default: module.CheckStepCodeRequirementsScreen,
+  }))
+)
+const SelectStepCodeRequirementsScreen = lazy(() =>
+  import("../project-readiness-tools/check-step-code-requirements/select-step-code-requirements-screen").then(
+    (module) => ({
+      default: module.SelectStepCodeRequirementsScreen,
+    })
+  )
+)
 const OnboardingChecklistPageForLgAdoptingScreen = lazy(() =>
   import("../onboarding/onboarding-checklist-page-for-lg-adopting-screen").then((module) => ({
     default: module.OnboardingChecklistPageForLgAdoptingScreen,
@@ -114,6 +149,15 @@ const OnboardingChecklistPageForLgAdoptingScreen = lazy(() =>
 )
 const PermitApplicationIndexScreen = lazy(() =>
   import("../permit-application").then((module) => ({ default: module.PermitApplicationIndexScreen }))
+)
+const PermitProjectIndexScreen = lazy(() =>
+  import("../permit-project").then((module) => ({ default: module.PermitProjectIndexScreen }))
+)
+const NewPermitProjectScreen = lazy(() =>
+  import("../permit-project/new-permit-project-screen").then((module) => ({ default: module.NewPermitProjectScreen }))
+)
+const PermitProjectScreen = lazy(() =>
+  import("../permit-project/permit-project-screen").then((module) => ({ default: module.PermitProjectScreen }))
 )
 const EditPermitApplicationScreen = lazy(() =>
   import("../permit-application/edit-permit-application-screen").then((module) => ({
@@ -194,6 +238,9 @@ const Part9StepCodeForm = lazy(() =>
 const Part3StepCodeForm = lazy(() =>
   import("../step-code/part-3").then((module) => ({ default: module.Part3StepCodeForm }))
 )
+const StepCodeIndexScreen = lazy(() =>
+  import("../step-code").then((module) => ({ default: module.StepCodeIndexScreen }))
+)
 const StepCodeChecklistPDFViewer = lazy(() =>
   import("../step-code/checklist/pdf-content/viewer").then((module) => ({
     default: module.StepCodeChecklistPDFViewer,
@@ -242,6 +289,12 @@ const AdminGlobalFeatureAccessScreen = lazy(() =>
 const AdminSubmissionInboxScreen = lazy(() =>
   import("../super-admin/site-configuration-management/submission-inbox").then((module) => ({
     default: module.AdminSubmissionInboxScreen,
+  }))
+)
+
+const AdminDesignatedReviewerScreen = lazy(() =>
+  import("../super-admin/site-configuration-management/designated-reviewer-screen").then((module) => ({
+    default: module.AdminDesignatedReviewerScreen,
   }))
 )
 
@@ -321,7 +374,7 @@ export const Navigation = observer(() => {
     validateToken()
   }, [])
 
-  if (isLoggingOut) return <LoadingScreen />
+  if (isLoggingOut) return <LoadingScreen message={t("site.loggingOut")} />
 
   return (
     <BrowserRouter>
@@ -338,7 +391,7 @@ export const Navigation = observer(() => {
       <NavBar />
 
       {isValidating ? (
-        <LoadingScreen />
+        <LoadingScreen message={t("site.validating")} />
       ) : (
         <Suspense fallback={<LoadingScreen />}>
           <AppRoutes />
@@ -352,21 +405,27 @@ export const Navigation = observer(() => {
 
 const AppRoutes = observer(() => {
   const rootStore = useMst()
-  const { sessionStore, userStore, uiStore } = rootStore
-  const { loggedIn, tokenExpired } = sessionStore
+  const { siteConfigurationStore, sessionStore, userStore, uiStore } = rootStore
+  const { loggedIn, tokenExpired, resetAuth, afterLoginPath, setAfterLoginPath } = sessionStore
   const location = useLocation()
   const background = location.state && location.state.background
 
   const { currentUser } = userStore
-  const { afterLoginPath, setAfterLoginPath, resetAuth } = sessionStore
 
   const navigate = useNavigate()
   const { t } = useTranslation()
-
+  const { allowDesignatedReviewer } = siteConfigurationStore
   if (currentUser === undefined) {
     console.log("AppRoutes: currentUser is undefined, rendering LoadingScreen.")
     return <LoadingScreen />
   }
+
+  useEffect(() => {
+    if (loggedIn && afterLoginPath) {
+      navigate(afterLoginPath)
+      setAfterLoginPath(null)
+    }
+  }, [loggedIn, afterLoginPath])
 
   useEffect(() => {
     if (tokenExpired) {
@@ -377,18 +436,10 @@ const AppRoutes = observer(() => {
     }
   }, [tokenExpired])
 
-  useEffect(() => {
-    if (loggedIn && afterLoginPath) {
-      setAfterLoginPath(null)
-      navigate(afterLoginPath)
-    }
-  }, [afterLoginPath, loggedIn])
-
   useSyncPathWithStore()
 
   // Step 2: Safely derive booleans from currentUser. These default to false if currentUser is null.
   const isReviewStaff = currentUser ? currentUser.isReviewStaff : false
-  const isReviewer = currentUser ? currentUser.isReviewer : false
   const isReviewManager = currentUser ? currentUser.isReviewManager : false
   const isRegionalReviewManager = currentUser ? currentUser.isRegionalReviewManager : false
   const isTechnicalSupport = currentUser ? currentUser.isTechnicalSupport : false
@@ -421,6 +472,10 @@ const AppRoutes = observer(() => {
       <Route
         path="/configuration-management/global-feature-access/submission-inbox"
         element={<AdminSubmissionInboxScreen />}
+      />
+      <Route
+        path="/configuration-management/global-feature-access/access-control-for-revision-requests-to-submitters"
+        element={<AdminDesignatedReviewerScreen />}
       />
       <Route path="/configuration-management/users/invite" element={<AdminInviteScreen />} />
       <Route path="/reporting" element={<ReportingScreen />} />
@@ -460,6 +515,12 @@ const AppRoutes = observer(() => {
         path="/jurisdictions/:jurisdictionId/configuration-management/feature-access/my-jurisdiction-about-page"
         element={<ReviewStaffMyJurisdictionAboutPageScreen />}
       />
+      {allowDesignatedReviewer && (
+        <Route
+          path="/jurisdictions/:jurisdictionId/configuration-management/feature-access/limit-who-can-request-revisions-from-submitters"
+          element={<DesignatedReviewerScreen />}
+        />
+      )}
       <Route
         path="/jurisdictions/:jurisdictionId/configuration-management/energy-step"
         element={<EnergyStepRequirementsScreen />}
@@ -563,21 +624,36 @@ const AppRoutes = observer(() => {
           <Route path="/permit-applications/new" element={<NewPermitApplicationScreen />} />
           <Route path="/permit-applications/:permitApplicationId/edit" element={<EditPermitApplicationScreen />} />
           <Route
-            path="/permit-applications/:permitApplicationId/edit/part-9-step-code"
-            element={<Part9StepCodeForm />}
-          />
-          <Route
-            path="/permit-applications/:permitApplicationId/edit/part-3-step-code"
-            element={<Part3StepCodeForm />}
-          />
-          <Route
-            path="/permit-applications/:permitApplicationId/edit/part-3-step-code/:section"
-            element={<Part3StepCodeForm />}
-          />
-          <Route
-            path="/permit-applications/:permitApplicationId/sucessful-submission"
-            element={<SuccessfulSubmissionScreen />}
-          />
+            element={<ProtectedRoute isAllowed={loggedIn && !mustAcceptEula} redirectPath={mustAcceptEula && "/"} />}
+          >
+            <Route path="/step-codes" element={<StepCodeIndexScreen />} />
+            <Route path="/permit-applications" element={<PermitApplicationIndexScreen />} />
+            <Route path="/permit-projects" element={<PermitProjectIndexScreen />} />
+            <Route path="/permit-projects/new" element={<NewPermitProjectScreen />} />
+            <Route path="/permit-projects/:permitProjectId" element={<PermitProjectScreen />} />
+            <Route path="/permit-applications/new" element={<NewPermitApplicationScreen />} />
+            <Route path="/permit-applications/:permitApplicationId/edit" element={<EditPermitApplicationScreen />} />
+            <Route
+              path="/permit-applications/:permitApplicationId/edit/part-9-step-code"
+              element={<Part9StepCodeForm />}
+            />
+            <Route
+              path="/permit-applications/:permitApplicationId/edit/part-3-step-code"
+              element={<Part3StepCodeForm />}
+            />
+            <Route
+              path="/permit-applications/:permitApplicationId/edit/part-3-step-code/:section"
+              element={<Part3StepCodeForm />}
+            />
+            <Route
+              path="/permit-applications/:permitApplicationId/sucessful-submission"
+              element={<SuccessfulSubmissionScreen />}
+            />
+            <Route
+              path="/project-readiness-tools/check-step-code-requirements/select"
+              element={<SelectStepCodeRequirementsScreen />}
+            />
+          </Route>
         </Route>
 
         <Route element={<ProtectedRoute isAllowed={loggedIn && !isUnconfirmed} />}>
@@ -637,7 +713,6 @@ const AppRoutes = observer(() => {
             <ProtectedRoute
               isAllowed={isAllowedForReviewManagerOnly && !isUnconfirmed}
               redirectPath={(mustAcceptEula && "/") || (loggedIn && "/not-found")}
-              tempVar={"aaa" + isAllowedForReviewManagerOnly}
             />
           }
         >
@@ -652,9 +727,18 @@ const AppRoutes = observer(() => {
         <Route path="/accept-invitation" element={<AcceptInvitationScreen />} />
         <Route path="/contact" element={<ContactScreen />} />
         <Route path="/project-readiness-tools" element={<ProjectReadinessToolsIndexScreen />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicyScreen />} />
         <Route
           path="/project-readiness-tools/create-your-letters-of-assurance"
           element={<LettersOfAssuranceScreen />}
+        />
+        <Route
+          path="/project-readiness-tools/check-step-code-requirements"
+          element={<CheckStepCodeRequirementsScreen />}
+        />
+        <Route
+          path="/project-readiness-tools/look-up-step-codes-requirements-for-your-project"
+          element={<LookUpStepCodesRequirementsForYourProjectScreen />}
         />
         <Route
           path="/onboarding-checklist-page-for-lg-adopting"
@@ -679,10 +763,15 @@ const AppRoutes = observer(() => {
           }
         />
         <Route
+          path="/jurisdictions/:jurisdictionId/step-code-requirements"
+          element={<JurisdictionStepCodeRequirementsScreen />}
+        />
+        <Route
           path="/jurisdictions/:jurisdictionId"
           element={loggedIn && isUnconfirmed ? <RedirectScreen path="/" /> : <JurisdictionScreen />}
         />
         <Route path="/part-3-step-code" element={<RedirectScreen path="start" />} />
+        <Route path="/part-3-step-code/:stepCodeId/:section" element={<Part3StepCodeForm />} />
         <Route path="/part-3-step-code/:section" element={<Part3StepCodeForm />} />
         <Route path="*" element={<NotFoundScreen />} />
       </Routes>

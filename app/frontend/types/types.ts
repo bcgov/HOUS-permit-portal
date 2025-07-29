@@ -1,4 +1,5 @@
 import { Theme } from "@chakra-ui/react"
+import { IJurisdiction } from "../models/jurisdiction"
 import { IPermitApplication } from "../models/permit-application"
 import { IPermitBlockStatus } from "../models/permit-block-status"
 import { IActivity, IPermitType } from "../models/permit-classification"
@@ -24,6 +25,7 @@ import {
   ENumberUnit,
   EPermitApplicationSocketEventTypes,
   EPermitApplicationStatus,
+  EPermitProjectPhase,
   ERequirementType,
   ESocketDomainTypes,
   ESocketEventTypes,
@@ -50,6 +52,7 @@ export type DeepPartial<T> = T extends object
 export type TLatLngTuple = [number, number]
 
 export interface IContact {
+  contactType: string
   id: string
   firstName: string
   lastName: string
@@ -79,6 +82,11 @@ export interface IPermitTypeSubmissionContact {
 export interface ISort<TField = string> {
   field: TField
   direction: ESortDirection
+}
+
+export interface IOptionGroup {
+  label: string
+  options: IOption[]
 }
 
 export interface IOption<TValue = string> {
@@ -181,6 +189,7 @@ export interface IDenormalizedRequirement {
   inputOptions: IRequirementOptions
   formJson?: IFormIORequirement
   hint?: string | null
+  instructions?: string | null
   elective?: boolean
   required?: boolean
   requirementCode: string
@@ -263,21 +272,30 @@ export interface IPart9ChecklistSelectOptions {
 
 export interface IPart3ChecklistSelectOptions {}
 export interface IFileData {
-  id: string
-  storage: string
+  id: string // Corresponds to file_id in the blueprint
+  storage?: string // Corresponds to file_data?.dig("storage")
   metadata: {
-    size: number
-    filename: string
-    mimeType: string
+    size: number // Corresponds to file_size
+    filename: string // Corresponds to file_name
+    mimeType?: string // Corresponds to file_type
   }
 }
 
-export interface IRequirementDocument {
-  id?: string
-  requirementBlockId: string
+export interface IBaseFileAttachment {
+  id: string
   file: IFileData
-  createdAt?: Date
-  _destroy?: boolean
+  createdAt: Date // Assuming string date from backend, MST will cast
+  // updatedAt?: Date; // Optional, if needed
+  _destroy?: boolean // Common for managing nested resources
+}
+
+export interface IRequirementDocument extends IBaseFileAttachment {
+  requirementBlockId: string
+  // _destroy is now in IBaseFileAttachment
+}
+
+export interface IProjectDocument extends IBaseFileAttachment {
+  permitProjectId: string // Foreign key to link to PermitProject
 }
 
 export interface IRequirementBlockCustomization {
@@ -498,9 +516,19 @@ export interface IJurisdictionSearchFilters {
 }
 
 export interface IPermitApplicationSearchFilters {
-  requirementTemplateId?: string
-  templateVersionId?: string
   status?: EPermitApplicationStatus[]
+  templateVersionId?: string
+  requirementTemplateId?: string
+  hasCollaborator?: boolean
+  query?: string
+}
+
+export interface IPermitProjectSearchFilters {
+  query?: string
+  showArchived?: boolean
+  phase?: EPermitProjectPhase[]
+  requirementTemplateIds?: string[]
+  // Add other specific filters if needed, e.g., status, submitterId
 }
 
 export interface ITemplateVersionDiff {
@@ -565,8 +593,15 @@ export interface IPermitTypeRequiredStep {
   default: boolean
   permitTypeId: string
   permitTypeName?: string
+  workType?: string
   energyStepRequired: EEnergyStep
   zeroCarbonStepRequired: EZeroCarbonStep
+  activityName: string
+}
+
+export interface IStepCodeRequirementsTableProps {
+  requirements: IPermitTypeRequiredStep[]
+  currentJurisdiction: IJurisdiction
 }
 
 export type TCreateRequirementTemplateFormData = {

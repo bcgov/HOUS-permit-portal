@@ -99,11 +99,13 @@ export const CollaboratorsSidebar = observer(function CollaboratorsSidebar({
                 }
               </Text>
             </Stack>
-            <DesignatedSubmitters
-              permitApplication={permitApplication}
-              collaborationType={collaborationType}
-              canManage={permitApplication.canUserManageCollaborators(currentUser, collaborationType)}
-            />
+            {permitApplication.isDesignatedReviewerEnabled && (
+              <DesignatedSubmitters
+                permitApplication={permitApplication}
+                collaborationType={collaborationType}
+                canManage={permitApplication.canUserManageCollaborators(currentUser, collaborationType)}
+              />
+            )}
             <Assignees
               permitApplication={permitApplication}
               collaborationType={collaborationType}

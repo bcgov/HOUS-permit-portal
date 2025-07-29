@@ -1,15 +1,27 @@
 class StepCode < ApplicationRecord
-  belongs_to :permit_application, optional: true
+  include ProjectItem
+  has_parent :permit_application
 
-  delegate :number, to: :permit_application, prefix: :building_permit
+  belongs_to :creator,
+             class_name: "User",
+             foreign_key: "creator_id",
+             optional: true
+
+  # Associations
+  belongs_to :permit_application, optional: true
+  has_one :permit_project, through: :permit_application
+
+  # Delegates for attributes from PermitApplication
+  delegate :number,
+           to: :permit_application,
+           prefix: :building_permit,
+           allow_nil: true
+
   delegate :submitter,
-           :nickname,
-           :jurisdiction_name,
-           :full_address,
-           :pid,
            :newly_submitted_at,
            :status,
            :jurisdiction_heating_degree_days,
+           :permit_date,
            to: :permit_application,
            allow_nil: true
 

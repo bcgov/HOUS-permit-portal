@@ -112,9 +112,11 @@ export const JurisdictionSearch = observer(({}: IJurisdictionSearchProps) => {
               <Text fontSize="2xl" fontWeight="bold" textAlign="center">
                 {jurisdiction?.name}
               </Text>
-              <Box color="theme.yellow">
-                <CheckCircle size={32} />
-              </Box>
+              {jurisdiction.inbox_enabled && (
+                <Box color="theme.yellow">
+                  <CheckCircle size={32} />
+                </Box>
+              )}
             </HStack>
             <RouterLinkButton
               variant="ghost"

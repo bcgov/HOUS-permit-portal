@@ -84,6 +84,17 @@ function isApiMappingPath(path: string): boolean {
   return regex.test(path)
 }
 
+function isLoginPath(path: string): boolean {
+  const regex = /^\/login.*$/
+  return regex.test(path)
+}
+
+// TODO: refactor these into a single function that takes a regex
+function isStepCodePath(path: string): boolean {
+  const regex = /^\/part-(3|9)-step-code.*$/
+  return regex.test(path)
+}
+
 function shouldHideSubNavbarForPath(path: string): boolean {
   const matchers: Array<(path: string) => boolean> = [
     (path) => path === "/",
@@ -95,6 +106,8 @@ function shouldHideSubNavbarForPath(path: string): boolean {
     isPermitApplicationPath,
     isDigitalPermitEditPath,
     isApiMappingPath,
+    isLoginPath,
+    isStepCodePath,
   ]
 
   return matchers.some((matcher) => matcher(path))
@@ -213,7 +226,7 @@ export const NavBar = observer(function NavBar() {
       </Box>
       {!R.isEmpty(criticalNotifications) && <ActionRequiredBox notification={criticalNotifications[0]} />}
 
-      {!shouldHideSubNavbarForPath(path) && loggedIn && <SubNavBar />}
+      {!shouldHideSubNavbarForPath(path) && <SubNavBar />}
     </PopoverProvider>
   )
 })
@@ -392,6 +405,7 @@ const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
                         </Button>
                       </MenuItem>
                       <NavMenuItem label={t("site.myPermits")} to="/permit-applications" bg="greys.grey03" />
+                      <NavMenuItem label={t("site.myProjects")} to="/permit-projects" bg="greys.grey03" />
                       <MenuDivider my={0} borderColor="border.light" />
                     </>
                   )}

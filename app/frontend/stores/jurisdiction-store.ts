@@ -84,8 +84,6 @@ export const JurisdictionStoreModel = types
         self.environment.api.searchJurisdictions({
           query: self.query,
           sort: self.sort,
-          page: opts?.page ?? self.currentPage,
-          perPage: opts?.countPerPage ?? self.countPerPage,
           filters: {
             inboxEnabled,
           },
@@ -94,10 +92,7 @@ export const JurisdictionStoreModel = types
       if (response.ok) {
         self.mergeUpdateAll(response.data.data, "jurisdictionMap")
         self.tableJurisdictions = cast(response.data.data.map((jurisdiction) => jurisdiction.id))
-        self.currentPage = opts?.page ?? self.currentPage
-        self.countPerPage = opts?.countPerPage ?? self.countPerPage
-        self.totalPages = response.data.meta.totalPages
-        self.totalCount = response.data.meta.totalCount
+        self.setPageFields(response.data.meta, opts)
       }
       return response.ok
     }),

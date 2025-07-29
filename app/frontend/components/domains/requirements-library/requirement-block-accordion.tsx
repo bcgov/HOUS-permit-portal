@@ -18,17 +18,17 @@ import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React, { useEffect } from "react"
 import { useTranslation } from "react-i18next"
-import { ERequirementType, EVisibility } from "../../../types/enums"
+import { EFileUploadAttachmentType, ERequirementType, EVisibility } from "../../../types/enums"
 import {
   IDenormalizedRequirement,
   IDenormalizedRequirementBlock,
   IRequirementBlockCustomization,
 } from "../../../types/types"
 import { isQuillEmpty } from "../../../utils/utility-functions"
+import { FileDownloadButton } from "../../shared/base/file-download-button"
 import { Editor } from "../../shared/editor/editor"
 import { ElectiveTag } from "../../shared/elective-tag"
 import { FirstNationsTag } from "../../shared/first-nations-tag"
-import { RequirementDocumentDownloadButton } from "../../shared/requirement-template/requirement-document-download-button"
 import { RichTextTip } from "../../shared/rich-text-tip"
 import { VisibilityTag } from "../../shared/visibility-tag.tsx"
 import { RequirementFieldDisplay } from "./requirement-field-display"
@@ -177,7 +177,11 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
             >
               <Text fontWeight={700}>{t("requirementsLibrary.fields.requirementDocuments")}</Text>
               {requirementBlock.requirementDocuments?.map((document) => (
-                <RequirementDocumentDownloadButton key={document.id} document={document} />
+                <FileDownloadButton
+                  key={document.id}
+                  document={document}
+                  modelType={EFileUploadAttachmentType.RequirementDocument}
+                />
               ))}
             </Flex>
           )}
@@ -236,6 +240,7 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
                         requirementType={requirementType}
                         label={requirement.label}
                         helperText={requirement?.hint}
+                        instructions={requirement?.instructions}
                         unit={
                           requirementType === ERequirementType.number
                             ? (requirement?.inputOptions?.numberUnit ?? null)

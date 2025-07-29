@@ -26,6 +26,7 @@ export enum ERequirementTemplateType {
 export enum EFileUploadAttachmentType {
   RequirementDocument = "RequirementDocument",
   SupportingDocument = "SupportingDocument",
+  ProjectDocument = "ProjectDocument",
 }
 
 export enum EPermitClassificationCode {
@@ -321,6 +322,7 @@ export enum ERequirementContactFieldItemType {
   businessLicense = "businessLicense",
   professionalAssociation = "professionalAssociation",
   professionalNumber = "professionalNumber",
+  contactType = "contactType",
 }
 
 export enum EGovFeedbackResponseNoReason {
@@ -628,6 +630,25 @@ export enum EDocumentReferenceDocumentType {
 }
 
 export enum EStepCodeType {
-  Part3 = "Part3StepCode",
-  Part9 = "Part9StepCode",
+  part3StepCode = "Part3StepCode",
+  part9StepCode = "Part9StepCode",
+}
+
+export enum EPermitProjectSortFields {
+  title = "title",
+  location = "location",
+  submitter = "submitter",
+  updatedAt = "updated_at",
+  forcastedCompletionDate = "forcasted_completion_date",
+  phase = "phase",
+}
+
+export enum EPermitProjectPhase {
+  all = "all",
+  empty = "empty",
+  newDraft = "new_draft",
+  newlySubmitted = "newly_submitted",
+  revisionsRequested = "revisions_requested",
+  resubmitted = "resubmitted",
+  approved = "approved",
 }

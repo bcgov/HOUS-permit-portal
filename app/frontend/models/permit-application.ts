@@ -50,7 +50,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
   types
     .model("PermitApplicationModel", {
       id: types.identifier,
-      nickname: types.string,
+      nickname: types.maybeNull(types.string),
       number: types.string,
       fullAddress: types.maybeNull(types.string), // for now some seeds will not have this
       pin: types.maybeNull(types.string), // for now some seeds will not have this
@@ -73,7 +73,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
       selectedTabIndex: types.optional(types.number, 0),
       createdAt: types.Date,
       updatedAt: types.Date,
-      stepCode: types.maybeNull(types.reference(StepCodeModel)),
+      stepCode: types.maybeNull(types.reference(types.late(() => StepCodeModel))),
       supportingDocuments: types.maybeNull(types.frozen<IDownloadableFile[]>()),
       allSubmissionVersionCompletedSupportingDocuments: types.maybeNull(types.frozen<IDownloadableFile[]>()),
       zipfileSize: types.maybeNull(types.number),
@@ -175,6 +175,9 @@ export const PermitApplicationModel = types.snapshotProcessor(
       },
       get inboxEnabled() {
         return self.jurisdiction?.inboxEnabled && self.rootStore.siteConfigurationStore.inboxEnabled
+      },
+      get isDesignatedReviewerEnabled() {
+        return self.jurisdiction.allowDesignatedReviewer
       },
     }))
     .views((self) => ({
@@ -536,6 +539,39 @@ export const PermitApplicationModel = types.snapshotProcessor(
             return acc
           }, {})
         )
+      },
+      getDesignatedReviewer(userId: string) {
+        return Array.from(self.permitCollaborationMap.values()).find(
+          (collaboration) =>
+            collaboration.collaborationType === ECollaborationType.review &&
+            collaboration.collaborator.user.id === userId
+        )
+      },
+    }))
+    .views((self) => ({
+      get shouldShowDesignatedReviewerModal() {
+        const { userStore } = self.rootStore
+        const { currentUser } = userStore
+
+        const jurisdictionADR = self.jurisdiction.allowDesignatedReviewer
+
+        const featureEnabled = jurisdictionADR
+        const designatedReviewerCollaboration = self.getCollaborationDelegatee(ECollaborationType.review)
+        const designatedReviewerExists = designatedReviewerCollaboration?.collaborator?.user?.id != null
+
+        if (featureEnabled === false && designatedReviewerExists) {
+          return true
+        }
+
+        if (featureEnabled === true && designatedReviewerExists) {
+          return false
+        }
+
+        if (featureEnabled === true && !designatedReviewerExists) {
+          return true
+        }
+
+        return false
       },
     }))
     .actions((self) => ({
