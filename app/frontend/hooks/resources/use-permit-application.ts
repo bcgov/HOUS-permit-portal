@@ -18,6 +18,8 @@ export const usePermitApplication = ({ review }: { review?: boolean } = {}) => {
   useEffect(() => {
     ;(async () => {
       try {
+        if (!permitApplicationId) return
+
         setCurrentPermitApplication(null)
         if (isUUID(permitApplicationId)) {
           let permitApplication = await fetchPermitApplication(permitApplicationId, review)
