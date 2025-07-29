@@ -16,6 +16,7 @@ import React, { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { IPermitType } from "../../../models/permit-classification"
 import { useMst } from "../../../setup/root"
+import { EFlashMessageStatus } from "../../../types/enums"
 import { IOption } from "../../../types/types"
 import { CustomMessageBox } from "../base/custom-message-box"
 import { SharedSpinner } from "../base/shared-spinner"
@@ -55,7 +56,7 @@ export const PermitTypeRadioSelect = observer(
     if (R.isEmpty(permitTypeOptions)) {
       return (
         <CustomMessageBox
-          status="error"
+          status={EFlashMessageStatus.error}
           title={t("translation:permitApplication.new.noContactsAvailableTitle")}
           description={t("translation:permitApplication.new.noContactsAvailableDescription")}
         />
@@ -96,12 +97,8 @@ export const PermitTypeRadioCard = (props: IPermitTypeRadioCardProps) => {
         borderWidth="1px"
         borderRadius="sm"
         borderColor="border.light"
-        _checked={{
-          borderColor: "theme.blueAlt",
-        }}
-        _focus={{
-          boxShadow: "outline",
-        }}
+        _checked={{ borderColor: "theme.blueAlt" }}
+        _focus={{ boxShadow: "outline" }}
         p={4}
       >
         <Flex direction="column" w="full">

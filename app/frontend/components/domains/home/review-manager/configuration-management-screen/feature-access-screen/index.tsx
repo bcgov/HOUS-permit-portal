@@ -15,6 +15,11 @@ export const ReviewManagerFeatureAccessScreen = observer(() => {
       enabled: currentJurisdiction?.inboxEnabled,
       route: "submissions-inbox-setup",
     },
+    {
+      label: t(`${i18nPrefix}.myJurisdictionAboutPage`),
+      enabled: currentJurisdiction?.showAboutPage,
+      route: "my-jurisdiction-about-page",
+    },
     // Add more features as needed
   ]
 

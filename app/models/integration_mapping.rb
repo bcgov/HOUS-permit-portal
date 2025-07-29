@@ -23,16 +23,10 @@ class IntegrationMapping < ApplicationRecord
 
   attr_accessor :simplified_map_to_sync
 
-  def jurisdiction_template_version_customization
-    JurisdictionTemplateVersionCustomization.find_by(
-      jurisdiction:,
-      template_version:
-    )
-  end
-
-  def missing_requirements_mapping
+  def missing_requirements_mapping(sandbox = nil)
     missing_mapping = {}
-    template_version_customization = jurisdiction_template_version_customization
+    template_version_customization =
+      jurisdiction_template_version_customization(sandbox)
 
     requirements_mapping.each do |requirement_block_sku, requirement_block|
       requirement_block["requirements"]&.each do |requirement_code, requirement|
@@ -216,8 +210,9 @@ class IntegrationMapping < ApplicationRecord
     "/jurisdictions/#{jurisdiction.slug}/api-settings/api-mappings/digital-building-permits/#{template_version.id}/edit"
   end
 
-  def elective_filtered_requirements_mapping
-    template_version_customization = jurisdiction_template_version_customization
+  def elective_filtered_requirements_mapping(sandbox = nil)
+    template_version_customization =
+      jurisdiction_template_version_customization(sandbox)
 
     elective_filtered_mapping = {}
 
@@ -248,6 +243,14 @@ class IntegrationMapping < ApplicationRecord
     end
 
     elective_filtered_mapping
+  end
+
+  def jurisdiction_template_version_customization(sandbox = nil)
+    JurisdictionTemplateVersionCustomization.find_by(
+      jurisdiction:,
+      template_version:,
+      sandbox:
+    )
   end
 
   private

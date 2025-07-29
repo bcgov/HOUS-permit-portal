@@ -33,6 +33,7 @@ import {
 } from "../utils/formio-component-traversal"
 
 import { format } from "date-fns"
+import { StepCodeModel } from "../stores/step-code-store"
 import { compareSubmissionData } from "../utils/formio-helpers"
 import { convertResourceArrayToRecord } from "../utils/utility-functions"
 import { ICollaborator } from "./collaborator"
@@ -42,7 +43,6 @@ import { IActivity, IPermitType } from "./permit-classification"
 import { IPermitCollaboration, PermitCollaborationModel } from "./permit-collaboration"
 import { IRequirement } from "./requirement"
 import { SandboxModel } from "./sandbox"
-import { StepCodeModel } from "./step-code"
 import { TemplateVersionModel } from "./template-version"
 import { IUser, UserModel } from "./user"
 
@@ -97,6 +97,10 @@ export const PermitApplicationModel = types.snapshotProcessor(
     .extend(withEnvironment())
     .extend(withRootStore())
     .views((self) => ({
+      get isPart3() {
+        // TODO
+        return false
+      },
       get isDraft() {
         return (
           self.status === EPermitApplicationStatus.newDraft ||
@@ -797,6 +801,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
       handleSocketSupportingDocsUpdate: (data: IPermitApplicationSupportingDocumentsUpdate) => {
         self.missingPdfs = cast(data.missingPdfs)
         self.supportingDocuments = data.supportingDocuments
+        self.allSubmissionVersionCompletedSupportingDocuments = data.allSubmissionVersionCompletedSupportingDocuments
         self.zipfileSize = data.zipfileSize
         self.zipfileName = data.zipfileName
         self.zipfileUrl = data.zipfileUrl
@@ -813,15 +818,6 @@ export const PermitApplicationModel = types.snapshotProcessor(
         }
         return response
       }),
-    }))
-    .actions((self) => ({
-      handleSocketSupportingDocsUpdate: (data: IPermitApplicationSupportingDocumentsUpdate) => {
-        self.missingPdfs = cast(data.missingPdfs)
-        self.supportingDocuments = data.supportingDocuments
-        self.zipfileSize = data.zipfileSize
-        self.zipfileName = data.zipfileName
-        self.zipfileUrl = data.zipfileUrl
-      },
     })),
   {
     preProcessor: (snapshot: any) => {

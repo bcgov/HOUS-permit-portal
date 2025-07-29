@@ -4,16 +4,16 @@ require "fileutils"
 
 class PdfGenerationJob
   include Sidekiq::Worker
-  sidekiq_options lock: :until_and_while_executing,
+  sidekiq_options lock: :until_executed,
                   queue: :file_processing,
                   on_conflict: {
-                    client: :log,
+                    client: :reject,
                     server: :reject
                   }
 
   def self.lock_args(args)
-    ## only lock on the first argument, which is the permit application id
-    ## this will prevent multiple jobs from running for the same permit application
+    # only lock on the first argument, which is the permit application id
+    # this will prevent multiple jobs from running for the same permit application
     [args[0]]
   end
 
@@ -132,7 +132,7 @@ class PdfGenerationJob
         # Wait for the process to exit and get the exit status
         exit_status = wait_thr.value
 
-        File.delete(json_filename)
+        File.delete(json_filename) if Rails.env.production?
 
         # Check for errors or handle output based on the exit status
         if exit_status.success?
@@ -165,7 +165,7 @@ class PdfGenerationJob
 
             doc.update(file:) if doc.file.blank?
 
-            File.delete(path)
+            File.delete(path) if Rails.env.production?
           end
         else
           err = "Pdf generation process failed: #{exit_status}"

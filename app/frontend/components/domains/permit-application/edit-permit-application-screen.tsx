@@ -52,12 +52,25 @@ type TPermitApplicationMetadataForm = {
 }
 
 export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationScreenProps) => {
-  const { userStore } = useMst()
+  const { userStore, uiStore } = useMst()
+  const { scrollToSelector, setScrollToSelector } = uiStore
   const currentUser = userStore.currentUser
   const { currentPermitApplication, error } = usePermitApplication()
   const { t } = useTranslation()
   const formRef = useRef(null)
   const navigate = useNavigate()
+
+  useEffect(() => {
+    if (scrollToSelector) {
+      setTimeout(() => {
+        const element = document.querySelector(scrollToSelector)
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth", block: "center" })
+        }
+        setScrollToSelector("")
+      }, 100)
+    }
+  }, [scrollToSelector])
 
   const getDefaultPermitApplicationMetadataValues = () => ({ nickname: currentPermitApplication?.nickname })
 
@@ -67,6 +80,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   })
 
   const [completedBlocks, setCompletedBlocks] = useState({})
+
   const { isOpen: isContactsOpen, onOpen: onContactsOpen, onClose: onContactsClose } = useDisclosure()
 
   const [processEventOnLoad, setProcessEventOnLoad] = useState<CustomEvent | null>(null)
@@ -333,7 +347,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
                   <SubmissionDownloadModal permitApplication={currentPermitApplication} />
                 )}
                 <Button rightIcon={<CaretRight />} onClick={() => navigate("/")}>
-                  {t("permitApplication.show.backToInbox")}
+                  {t("ui.back")}
                 </Button>
               </Stack>
             ) : (

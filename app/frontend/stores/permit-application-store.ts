@@ -1,11 +1,12 @@
 import { t } from "i18next"
-import { flow, Instance, types } from "mobx-state-tree"
+import { flow, Instance, toGenerator, types } from "mobx-state-tree"
 import * as R from "ramda"
 import { TCreatePermitApplicationFormData } from "../components/domains/permit-application/new-permit-application-screen"
 import { createSearchModel } from "../lib/create-search-model"
 import { withEnvironment } from "../lib/with-environment"
 import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
+import { ICollaborator } from "../models/collaborator"
 import { IJurisdiction } from "../models/jurisdiction"
 import { IPermitApplication, PermitApplicationModel } from "../models/permit-application"
 import { IPermitBlockStatus } from "../models/permit-block-status"
@@ -25,7 +26,7 @@ import {
   IUserPushPayload,
   TSearchParams,
 } from "../types/types"
-import { convertResourceArrayToRecord, setQueryParam } from "../utils/utility-functions"
+import { convertResourceArrayToRecord, setQueryParam, startBlobDownload } from "../utils/utility-functions"
 
 const filterableStatus = Object.values(EPermitApplicationStatus)
 export type TFilterableStatus = (typeof filterableStatus)[number]
@@ -68,7 +69,6 @@ export const PermitApplicationStoreModel = types
     },
     // View to get all permitapplications as an array
     get permitApplications() {
-      // TODO: UNSTUB APPLICATIONS
       return Array.from(self.permitApplicationMap.values())
     },
     get hasResetableFilters() {
@@ -85,26 +85,12 @@ export const PermitApplicationStoreModel = types
   .actions((self) => ({
     setCurrentPermitApplication(permitApplicationId) {
       self.currentPermitApplication = permitApplicationId
-      self.currentPermitApplication &&
-        self.rootStore.stepCodeStore.setCurrentStepCode(self.currentPermitApplication.stepCode)
+      self.currentPermitApplication?.stepCode &&
+        self.rootStore.stepCodeStore.setCurrentStepCode(self.currentPermitApplication.stepCode.id)
     },
     setHasCollaboratorFilter(value: boolean) {
       setQueryParam("hasCollaborator", value.toString())
       self.hasCollaboratorFilter = value
-    },
-    resetFilters() {
-      self.hasCollaboratorFilter = false
-      self.templateVersionIdFilter = null
-      self.requirementTemplateIdFilter = null
-      if (typeof window !== "undefined") {
-        const url = new URL(window.location.href)
-        const staticParams = ["templateVersionId", "requirementTemplateId", "hasCollaborator"]
-        staticParams.forEach((param) => {
-          url.searchParams.delete(param)
-        })
-        window.history.replaceState(null, "", url.toString())
-      }
-      self.searchPermitApplications()
     },
     resetCurrentPermitApplication() {
       self.currentPermitApplication = null
@@ -152,6 +138,7 @@ export const PermitApplicationStoreModel = types
         (u: IUser) => u.id,
         permitApplicationsData.filter((pa) => pa.submitter).map((pa) => pa.submitter)
       )
+      // @ts-ignore
       self.rootStore.userStore.mergeUpdateAll(submittersUniq, "usersMap")
 
       self.rootStore.templateVersionStore.mergeUpdateAll(
@@ -184,8 +171,9 @@ export const PermitApplicationStoreModel = types
           R.map(R.prop("permitCollaborations")),
           R.reject(R.isNil),
           R.flatten,
+          // @ts-ignore
           R.map(R.prop("collaborator")),
-          R.uniqBy((c) => c.id)
+          R.uniqBy((c: ICollaborator) => c.id)
         )(permitApplicationsData),
         "collaboratorMap"
       )
@@ -209,7 +197,10 @@ export const PermitApplicationStoreModel = types
     },
     setStatusFilter(statuses: TFilterableStatus[] | undefined) {
       if (!statuses) return
+
       setQueryParam("status", statuses)
+
+      if (statuses.some((status) => !filterableStatus.includes(status))) return
       // @ts-ignore
       self.statusFilter = statuses
     },
@@ -238,7 +229,9 @@ export const PermitApplicationStoreModel = types
         formJson: overrides.formJson || requirementTemplate.publishedTemplateVersion.formJson,
         submissionData: overrides.submissionData || null,
         formattedComplianceData: overrides.formattedComplianceData || null,
-        formCustomizations: {} || overrides.formCustomizations || null,
+        formCustomizations: {},
+        // todo: consider formCustomizations?
+        // formCustomizations: overrides.formCustomizations || null,
         submittedAt: overrides.submittedAt || null,
         resubmittedAt: overrides.resubmittedAt || null,
         revisionsRequestedAt: overrides.revisionsRequestedAt || null,
@@ -294,6 +287,26 @@ export const PermitApplicationStoreModel = types
     removePermitApplication(id: string) {
       self.permitApplicationMap.delete(id)
     },
+    downloadApplicationMetrics: flow(function* () {
+      try {
+        const response = yield* toGenerator(self.environment.api.downloadApplicationMetricsCsv())
+        if (!response.ok) {
+          return response.ok
+        }
+
+        const blobData = response.data
+        const fileName = `${t("reporting.applicationMetrics.filename")}.csv`
+        const mimeType = "text/csv"
+        startBlobDownload(blobData, mimeType, fileName)
+
+        return response
+      } catch (error) {
+        if (import.meta.env.DEV) {
+          console.error(`Failed to download permit application metrics:`, error)
+        }
+        throw error
+      }
+    }),
     searchPermitApplications: flow(function* (opts?: { reset?: boolean; page?: number; countPerPage?: number }) {
       if (opts?.reset) {
         self.resetPages()
@@ -380,6 +393,22 @@ export const PermitApplicationStoreModel = types
           import.meta.env.DEV && console.log(`Unknown event type ${payload.eventType}`)
       }
     }),
+  }))
+  .actions((self) => ({
+    resetFilters() {
+      self.hasCollaboratorFilter = false
+      self.templateVersionIdFilter = null
+      self.requirementTemplateIdFilter = null
+      if (typeof window !== "undefined") {
+        const url = new URL(window.location.href)
+        const staticParams = ["templateVersionId", "requirementTemplateId", "hasCollaborator"]
+        staticParams.forEach((param) => {
+          url.searchParams.delete(param)
+        })
+        window.history.replaceState(null, "", url.toString())
+      }
+      self.searchPermitApplications()
+    },
   }))
 
 export interface IPermitApplicationStore extends Instance<typeof PermitApplicationStoreModel> {}

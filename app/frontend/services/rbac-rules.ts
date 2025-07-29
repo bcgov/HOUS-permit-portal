@@ -44,6 +44,10 @@ export const rules = {
     static: [],
     dynamic: {},
   },
+  [EUserRoles.technicalSupport]: {
+    static: [...sharedStaticRules, "user:invite", "jurisdiction:manage", "user:updateRole"],
+    dynamic: { ...sharedDynamicRules },
+  },
 }
 
 const userRule = (currentUser: IUser, data: { user: IUser }) => {

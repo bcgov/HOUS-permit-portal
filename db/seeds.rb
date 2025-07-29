@@ -17,7 +17,12 @@ puts "Seeding jurisdictions..."
 JurisdictionSeeder.seed
 jurisdictions = Jurisdiction.all
 
-north_van = Jurisdiction.find_by(name: "North Vancouver")
+north_van =
+  Jurisdiction.find_by(
+    name: "North Vancouver",
+    locality_type: "corporation of the city"
+  )
+
 van = Jurisdiction.find_by(name: "Vancouver")
 
 puts "Seeding users..."
@@ -86,6 +91,19 @@ User.find_or_create_by(omniauth_username: "submitter") do |user|
   user.omniauth_email = "submitter@example.com"
 end
 
+# invite a usable super admin
+# safeguard for development only
+if Rails.env.development?
+  email = "usable+super_admin@example.com"
+  User.invite!(email: email) do |u|
+    u.skip_confirmation_notification!
+    u.role = :super_admin
+    u.first_name = "Super"
+    u.last_name = "Admin"
+    u.save
+  end
+end
+
 User.reindex
 
 activity1 = Activity.find_by_code("new_construction")
@@ -110,7 +128,7 @@ Jurisdiction.all.each do |j|
         permit_type: permit_type
       )
   end
-  j.update(inbox_enabled: true)
+  j.update(inbox_enabled: true, show_about_page: true)
 end
 if PermitApplication.first.blank?
   jurisdictions
@@ -197,8 +215,13 @@ if PermitApplication.first.blank?
   RequirementBlock.find_each { |block| block.destroy unless block.valid? }
 
   # Energy Step Code Reference Tables
-  StepCode::MEUIReferencesSeeder.seed!
-  StepCode::TEDIReferencesSeeder.seed!
+  StepCode::Part9::MEUIReferencesSeeder.seed!
+  StepCode::Part9::TEDIReferencesSeeder.seed!
+
+  puts "Seeding default fuel types..."
+  Part3StepCode::FuelType::DEFAULTS.each do |ft|
+    Part3StepCode::FuelType.where(key: ft[:key]).first_or_create!(ft)
+  end
 
   # Creating Permit Applications
   puts "Seeding permit applications..."
@@ -296,19 +319,6 @@ early_access_requirement_templates.each do |eart|
       early_access_requirement_template: eart,
       previewer: user
     )
-  end
-end
-
-# invite a usable super admin
-# safeguard for development only
-if Rails.env.development?
-  email = "usable+super_admin@example.com"
-  User.invite!(email: email) do |u|
-    u.skip_confirmation_notification!
-    u.role = :super_admin
-    u.first_name = "Super"
-    u.last_name = "Admin"
-    u.save
   end
 end
 

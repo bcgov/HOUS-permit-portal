@@ -76,7 +76,7 @@ class SubmissionVersion < ApplicationRecord
     existing_document =
       supporting_documents.find_by(
         data_key: SupportingDocument::CHECKLIST_PDF_DATA_KEY
-      ).present?
+      )
 
     existing_document.blank? || existing_document.file.blank?
   end

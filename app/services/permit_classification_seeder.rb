@@ -14,7 +14,7 @@ class PermitClassificationSeeder
         name: "4+ Unit housing",
         code: "medium_residential",
         description: "Part 9 townhouses, small apartment buildings",
-        enabled: false,
+        enabled: true,
         type: "PermitType"
       },
       {

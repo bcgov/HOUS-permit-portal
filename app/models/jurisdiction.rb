@@ -40,7 +40,6 @@ class Jurisdiction < ApplicationRecord
     reviewers_size
     permit_applications_size
     user_ids
-    submission_inbox_set_up
     inbox_enabled
     created_at
   ]
@@ -172,7 +171,6 @@ class Jurisdiction < ApplicationRecord
       reviewers_size: reviewers_size,
       permit_applications_size: permit_applications_size,
       user_ids: users.pluck(:id),
-      submission_inbox_set_up: submission_inbox_set_up,
       inbox_enabled: inbox_enabled,
       created_at: created_at,
       manager_emails: manager_emails
@@ -292,8 +290,8 @@ class Jurisdiction < ApplicationRecord
     PermitType.all.each do |permit_type|
       permit_type_required_steps.create(
         permit_type:,
-        energy_step_required: ENV["MIN_ENERGY_STEP"],
-        zero_carbon_step_required: ENV["MIN_ZERO_CARBON_STEP"],
+        energy_step_required: ENV["PART_9_MIN_ENERGY_STEP"],
+        zero_carbon_step_required: ENV["PART_9_MIN_ZERO_CARBON_STEP"],
         default: true
       )
     end
@@ -355,13 +353,16 @@ class Jurisdiction < ApplicationRecord
   def ensure_default_sandboxes
     if sandboxes.published.empty?
       sandboxes.build(
-        name: "Published Sandbox",
+        name: "Published",
+        description:
+          "Work with application forms that have already been published",
         template_version_status_scope: :published
       )
     end
     if sandboxes.scheduled.empty?
       sandboxes.build(
-        name: "Scheduled Sandbox",
+        name: "Scheduled",
+        description: "Work with application forms scheduled to be published",
         template_version_status_scope: :scheduled
       )
     end

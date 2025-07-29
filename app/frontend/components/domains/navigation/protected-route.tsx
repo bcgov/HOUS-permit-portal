@@ -7,8 +7,9 @@ interface IProps {
   isAllowed: boolean
   redirectPath?: string
   children?: JSX.Element
+  tempVar?: string
 }
-export const ProtectedRoute = observer(({ isAllowed, redirectPath = "/login", children }: IProps) => {
+export const ProtectedRoute = observer(({ isAllowed, redirectPath = "/login", children, tempVar }: IProps) => {
   const location = useLocation()
   const { sessionStore } = useMst()
   const { setAfterLoginPath } = sessionStore
