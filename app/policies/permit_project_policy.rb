@@ -43,6 +43,10 @@ class PermitProjectPolicy < ApplicationPolicy
     user_is_owner_or_collaborator?
   end
 
+  def search_permit_applications?
+    user_is_owner_or_collaborator?
+  end
+
   private
 
   def user_is_owner?

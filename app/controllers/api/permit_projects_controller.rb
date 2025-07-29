@@ -1,7 +1,9 @@
 class Api::PermitProjectsController < Api::ApplicationController
-  include Api::Concerns::Search::PermitProjects # Include the new concern
+  include Api::Concerns::Search::PermitProjects
+  include Api::Concerns::Search::ProjectPermitApplications
 
-  before_action :set_permit_project, only: %i[show update pin unpin]
+  before_action :set_permit_project,
+                only: %i[show update pin unpin search_permit_applications]
 
   # TODO: If you create a search concern similar to Api::Concerns::Search::PermitApplications,
   # include it here for more advanced search parameter handling.
@@ -113,6 +115,22 @@ class Api::PermitProjectsController < Api::ApplicationController
     else
       render_error "permit_project.unpin_error", :not_found
     end
+  end
+
+  def search_permit_applications
+    authorize @permit_project
+    perform_permit_application_search
+    authorized_results =
+      apply_search_authorization(@permit_application_search.results, "index")
+    render_success authorized_results,
+                   nil,
+                   {
+                     meta: page_meta(@permit_application_search),
+                     blueprint: PermitApplicationBlueprint,
+                     blueprint_opts: {
+                       view: :base
+                     }
+                   }
   end
 
   private

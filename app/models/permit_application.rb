@@ -223,7 +223,8 @@ class PermitApplication < ApplicationRecord
           ),
       review_delegatee_name: review_delegatee_name,
       has_collaborator: has_collaborator?,
-      sandbox_id: sandbox_id
+      sandbox_id: sandbox_id,
+      permit_project_id: permit_project_id
     }
   end
 

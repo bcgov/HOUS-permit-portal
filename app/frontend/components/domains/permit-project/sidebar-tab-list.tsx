@@ -12,7 +12,7 @@ export interface ITabItem {
 
 interface IProjectSidebarTabListProps extends BoxProps {
   top?: number | string
-  tabsData: ITabItem[]
+  tabsData?: ITabItem[]
 }
 
 const tabProps = {
@@ -37,17 +37,21 @@ export const ProjectSidebarTabList = ({ top = 0, tabsData, ...rest }: IProjectSi
       h="100vh"
       alignSelf="flex-start"
       pb={navHeight}
-      as={TabList}
+      as={tabsData ? TabList : "div"}
       {...rest}
     >
-      <VStack align="stretch" spacing={1} w="full" pt={8}>
-        {tabsData.map((tabData) => (
-          <Tab key={tabData.label} {...tabProps}>
-            <Icon as={tabData.icon} mr={2} />
-            {tabData.label}
-          </Tab>
-        ))}
-      </VStack>
+      {tabsData ? (
+        <VStack align="stretch" spacing={1} w="full" pt={8}>
+          {tabsData.map((tabData) => (
+            <Tab key={tabData.label} {...tabProps}>
+              <Icon as={tabData.icon} mr={2} />
+              {tabData.label}
+            </Tab>
+          ))}
+        </VStack>
+      ) : (
+        children
+      )}
     </Box>
   )
 }

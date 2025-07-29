@@ -41,7 +41,7 @@ export const ProjectGridRow = observer(({ project }: IProjectGridRowProps) => {
           <Text>{project.shortAddress}</Text>
         </Flex>
       </SearchGridItem>
-      <SearchGridItem>todo</SearchGridItem>
+      <SearchGridItem>submitter</SearchGridItem>
       <SearchGridItem>{project.updatedAt && format(project.updatedAt, datefnsTableDateFormat)}</SearchGridItem>
       <SearchGridItem>
         {project.forcastedCompletionDate && format(project.forcastedCompletionDate, datefnsTableDateFormat)}

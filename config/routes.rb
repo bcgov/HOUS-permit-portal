@@ -200,6 +200,9 @@ Rails.application.routes.draw do
     resources :permit_projects, only: %i[show index update create] do
       get "pinned", on: :collection
       post "search", on: :collection, to: "permit_projects#index"
+      post "permit_applications/search",
+           on: :member,
+           to: "permit_projects#search_permit_applications"
       get "permits", on: :member, to: "permit_projects#show"
       get "overview", on: :member, to: "permit_projects#show"
       member do

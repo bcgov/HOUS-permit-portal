@@ -1,26 +1,14 @@
-import {
-  Box,
-  Button,
-  Flex,
-  Grid,
-  Heading,
-  HStack,
-  Icon,
-  Table,
-  Tbody,
-  Text,
-  Th,
-  Thead,
-  Tr,
-  VStack,
-} from "@chakra-ui/react"
+import { Box, Button, Flex, Grid, Heading, HStack, Icon, Text, VStack } from "@chakra-ui/react"
 import { CaretRight, Info, Plus, SquaresFour, Steps } from "@phosphor-icons/react"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { IPermitProject } from "../../../models/permit-project"
+import { EProjectPermitApplicationSortFields } from "../../../types/enums"
 import { CopyLinkButton } from "../../shared/base/copy-link-button"
+import { SearchGrid } from "../../shared/grid/search-grid"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
-import { PermitApplicationRow } from "../../shared/permit-applications/permit-application-row"
+import { PermitApplicationGridHeaders } from "./permit-application-grid-headers"
+import { PermitApplicationGridRow } from "./permit-application-grid-row"
 
 const ProjectInfoRow = ({ label, value, subLabel = null, isCopyable = false }) => (
   <Flex
@@ -52,7 +40,7 @@ interface IProps {
 }
 
 export const OverviewTabPanelContent = ({ permitProject }: IProps) => {
-  const { fullAddress, pid, createdAt, jurisdiction, projectNumber } = permitProject
+  const { fullAddress, pid, jurisdiction, projectNumber } = permitProject
   const { t } = useTranslation()
 
   return (
@@ -115,22 +103,15 @@ export const OverviewTabPanelContent = ({ permitProject }: IProps) => {
             {t("permitProject.overview.addPermit")}
           </Button>
         </Flex>
-        <Table>
-          <Thead>
-            <Tr borderTop={0}>
-              <Th>{t("permitProject.overview.permit")}</Th>
-              <Th>{t("permitProject.overview.assignedTo")}</Th>
-              <Th>{t("permitProject.overview.lastModified")}</Th>
-              <Th>{t("permitProject.overview.status")}</Th>
-              <Th></Th>
-            </Tr>
-          </Thead>
-          <Tbody>
-            {permitProject.recentPermitApplications.map((permitApplication) => (
-              <PermitApplicationRow key={permitApplication.id} permitApplication={permitApplication} />
-            ))}
-          </Tbody>
-        </Table>
+        <SearchGrid templateColumns="2fr 1.5fr 1.5fr 1.5fr 0.5fr" gridRowClassName="permit-application-grid-row">
+          <PermitApplicationGridHeaders
+            columns={Object.values(EProjectPermitApplicationSortFields)}
+            includeActionColumn
+          />
+          {permitProject.recentPermitApplications.map((permitApplication) => (
+            <PermitApplicationGridRow key={permitApplication.id} permitApplication={permitApplication} />
+          ))}
+        </SearchGrid>
         <Flex justify="flex-end" mt={4}>
           <RouterLinkButton
             variant="tertiary"

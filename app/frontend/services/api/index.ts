@@ -220,6 +220,16 @@ export class Api {
     return this.client.post<IJurisdictionPermitApplicationResponse>(`/permit_applications/search`, params)
   }
 
+  async fetchProjectPermitApplications(
+    permitProjectId: string,
+    params?: TSearchParams<EPermitApplicationSortFields, IPermitApplicationSearchFilters>
+  ) {
+    return this.client.post<IJurisdictionPermitApplicationResponse>(
+      `/permit_projects/${permitProjectId}/permit_applications/search`,
+      params
+    )
+  }
+
   async fetchPermitProjects(params?: TSearchParams<EPermitProjectSortFields, IPermitProjectSearchFilters>) {
     return this.client.post<ApiResponse<IPermitProject[]>>(`/permit_projects/search`, params)
   }

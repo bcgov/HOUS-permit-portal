@@ -18,6 +18,7 @@ import {
   EPermitApplicationSortFields,
   EPermitApplicationStatus,
   EPermitApplicationStatusGroup,
+  EProjectPermitApplicationSortFields,
 } from "../types/enums"
 import {
   IPermitApplicationComplianceUpdate,
@@ -45,7 +46,10 @@ export const PermitApplicationStoreModel = types
       requirementTemplateIdFilter: types.maybeNull(types.string),
       hasCollaboratorFilter: types.maybeNull(types.boolean),
     }),
-    createSearchModel<EPermitApplicationSortFields>("searchPermitApplications", "setPermitApplicationFilters")
+    createSearchModel<EProjectPermitApplicationSortFields | EPermitApplicationSortFields>(
+      "searchPermitApplications",
+      "setPermitApplicationFilters"
+    )
   )
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -59,7 +63,17 @@ export const PermitApplicationStoreModel = types
     },
   }))
   .views((self) => ({
-    getSortColumnHeader(field: EPermitApplicationSortFields) {
+    getProjectPermitApplicationSortColumnHeader(field: EProjectPermitApplicationSortFields) {
+      const map = {
+        [EProjectPermitApplicationSortFields.permit]: t("permitProject.overview.permit"),
+        [EProjectPermitApplicationSortFields.assignedTo]: t("permitProject.overview.assignedTo"),
+        [EProjectPermitApplicationSortFields.lastModified]: t("permitProject.overview.lastModified"),
+        [EProjectPermitApplicationSortFields.status]: t("permitProject.overview.status"),
+      }
+      return map[field]
+    },
+
+    getPermitApplicationSortColumnHeader(field: EPermitApplicationSortFields) {
       // @ts-ignore
       return t(`permitApplication.columns.${field}`)
     },
@@ -172,8 +186,8 @@ export const PermitApplicationStoreModel = types
           R.map(R.prop("permitCollaborations")),
           R.reject(R.isNil),
           R.flatten,
-          // @ts-ignore
           R.map(R.prop("collaborator")),
+          // @ts-ignore
           R.uniqBy((c: ICollaborator) => c.id)
         )(permitApplicationsData),
         "collaboratorMap"
@@ -223,16 +237,24 @@ export const PermitApplicationStoreModel = types
       } as TSearchParams<EPermitApplicationSortFields, IPermitApplicationSearchFilters>
 
       const currentJurisdictionId = self.rootStore?.jurisdictionStore?.currentJurisdiction?.id
+      const currentPermitProjectId = self.rootStore?.permitProjectStore?.currentPermitProject?.id
 
       const response = currentJurisdictionId
         ? yield self.environment.api.fetchJurisdictionPermitApplications(currentJurisdictionId, searchParams)
-        : yield self.environment.api.fetchPermitApplications(searchParams)
+        : currentPermitProjectId
+          ? yield self.environment.api.fetchProjectPermitApplications(currentPermitProjectId, searchParams)
+          : yield self.environment.api.fetchPermitApplications(searchParams)
 
       if (response.ok) {
         self.mergeUpdateAll(response.data.data, "permitApplicationMap")
-        ;(self?.rootStore?.jurisdictionStore?.currentJurisdiction ?? self).setTablePermitApplications(
-          response.data.data
-        )
+        const permitProject = self.rootStore.permitProjectStore.currentPermitProject
+        if (permitProject) {
+          permitProject.setTablePermitApplications(response.data.data)
+        } else {
+          ;(self?.rootStore?.jurisdictionStore?.currentJurisdiction ?? self).setTablePermitApplications(
+            response.data.data
+          )
+        }
 
         self.setPageFields(response.data.meta, opts)
       }

@@ -1,14 +1,24 @@
-import { Box, Button, Flex, Heading, Icon, Table, Tbody, Th, Thead, Tr } from "@chakra-ui/react"
+import { Box, Button, Flex, Heading, Icon } from "@chakra-ui/react"
 import { Plus } from "@phosphor-icons/react"
+import { observer } from "mobx-react-lite"
 import React from "react"
+import { useSearch } from "../../../hooks/use-search"
 import { IPermitProject } from "../../../models/permit-project"
-import { PermitApplicationRow } from "../../shared/permit-applications/permit-application-row"
+import { useMst } from "../../../setup/root"
+import { EProjectPermitApplicationSortFields } from "../../../types/enums"
+import { SearchGrid } from "../../shared/grid/search-grid"
+import { PermitApplicationGridHeaders } from "./permit-application-grid-headers"
+import { PermitApplicationGridRow } from "./permit-application-grid-row"
 
 interface IProps {
   permitProject: IPermitProject
 }
 
-export const PermitsTabPanelContent = ({ permitProject }: IProps) => {
+export const PermitsTabPanelContent = observer(({ permitProject }: IProps) => {
+  const { permitApplicationStore } = useMst()
+
+  useSearch(permitApplicationStore, [permitProject.id])
+
   return (
     <Flex direction="column" flex={1} bg="greys.white" p={10}>
       <Box as="section">
@@ -20,23 +30,16 @@ export const PermitsTabPanelContent = ({ permitProject }: IProps) => {
             Add permit
           </Button>
         </Flex>
-        <Table>
-          <Thead>
-            <Tr>
-              <Th>Permit</Th>
-              <Th>Assigned to</Th>
-              <Th>Last modified</Th>
-              <Th>Status</Th>
-              <Th></Th>
-            </Tr>
-          </Thead>
-          <Tbody>
-            {permitProject.recentPermitApplications?.map((permitApplication) => (
-              <PermitApplicationRow key={permitApplication.id} permitApplication={permitApplication} />
-            ))}
-          </Tbody>
-        </Table>
+        <SearchGrid templateColumns="2fr 1.5fr 1.5fr 1.5fr 0.5fr" gridRowClassName="permit-application-grid-row">
+          <PermitApplicationGridHeaders
+            columns={Object.values(EProjectPermitApplicationSortFields)}
+            includeActionColumn
+          />
+          {permitProject.tablePermitApplications?.map((permitApplication) => (
+            <PermitApplicationGridRow key={permitApplication.id} permitApplication={permitApplication} />
+          ))}
+        </SearchGrid>
       </Box>
     </Flex>
   )
-}
+})
