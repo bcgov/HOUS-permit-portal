@@ -13,7 +13,7 @@ import { EditableInputWithControls } from "../../shared/editable-input-with-cont
 import { PhaseBox } from "../../shared/permit-projects/phase-box"
 import { OverviewTabPanelContent } from "./overview-tab-panel-content"
 import { PermitsTabPanelContent } from "./permits-tab-panel-content"
-import { ITabItem, ProjectSidebar } from "./sidebar"
+import { ITabItem, ProjectSidebarTabList } from "./sidebar-tab-list"
 
 export const PermitProjectScreen = observer(() => {
   const { currentPermitProject, error } = usePermitProject()
@@ -116,7 +116,7 @@ export const PermitProjectScreen = observer(() => {
         </Container>
       </Flex>
       <Tabs w="full" flexGrow={1} index={getTabIndex()} onChange={handleTabChange} display="flex">
-        <ProjectSidebar top={`${headerHeight}px`} p={0} tabsData={TABS_DATA} />
+        <ProjectSidebarTabList top={`${headerHeight}px`} p={0} tabsData={TABS_DATA} />
         <TabPanels>
           <TabPanel>
             <OverviewTabPanelContent permitProject={currentPermitProject} />
