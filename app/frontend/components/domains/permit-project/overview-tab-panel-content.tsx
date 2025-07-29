@@ -14,9 +14,9 @@ import {
   Tr,
   VStack,
 } from "@chakra-ui/react"
-import { Info, Plus, SquaresFour, Steps } from "@phosphor-icons/react"
-import { format } from "date-fns"
+import { CaretRight, Info, Plus, SquaresFour, Steps } from "@phosphor-icons/react"
 import React from "react"
+import { useTranslation } from "react-i18next"
 import { IPermitProject } from "../../../models/permit-project"
 import { CopyLinkButton } from "../../shared/base/copy-link-button"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
@@ -53,6 +53,7 @@ interface IProps {
 
 export const OverviewTabPanelContent = ({ permitProject }: IProps) => {
   const { fullAddress, pid, createdAt, jurisdiction, projectNumber } = permitProject
+  const { t } = useTranslation()
 
   return (
     <Flex direction="column" flex={1} bg="greys.white" p={10}>
@@ -60,30 +61,38 @@ export const OverviewTabPanelContent = ({ permitProject }: IProps) => {
         <HStack align="center" spacing={4} mb={6}>
           <SquaresFour size={32} />
           <Heading as="h2" size="lg" mb={0}>
-            Overview
+            {t("permitProject.overview.title")}
           </Heading>
         </HStack>
         <Grid templateColumns={{ base: "1fr", lg: "2fr 1fr" }} gap={10}>
           <Box>
             <Heading as="h3" size="md" mb={6}>
-              Project information
+              {t("permitProject.overview.projectInformation")}
             </Heading>
 
-            <ProjectInfoRow label="Address" value={fullAddress || "Not available"} isCopyable />
-            <ProjectInfoRow label="Number" value={projectNumber} isCopyable />
-            <ProjectInfoRow label="PID" value={pid || "Not available"} subLabel="Parcel identifier" isCopyable />
-            <ProjectInfoRow label="Project created date" value={format(createdAt, "MMM d, yyyy")} />
+            <ProjectInfoRow
+              label={t("permitProject.overview.address")}
+              value={fullAddress || t("permitProject.overview.notAvailable")}
+              isCopyable
+            />
+            <ProjectInfoRow label={t("permitProject.overview.number")} value={projectNumber} isCopyable />
+            <ProjectInfoRow
+              label={t("permitProject.overview.pid")}
+              value={pid || t("permitProject.overview.notAvailable")}
+              subLabel={t("permitProject.overview.parcelIdentifier")}
+              isCopyable
+            />
 
             <VStack align="flex-start" spacing={4} mt={8}>
               <RouterLinkButton variant="link" to={`/jurisdictions/${jurisdiction?.id}`} leftIcon={<Info size={24} />}>
-                Check what's needed to apply for permits in this community
+                {t("permitProject.overview.checkPermitNeeds")}
               </RouterLinkButton>
               <RouterLinkButton
                 variant="link"
                 to={`/jurisdictions/${jurisdiction?.id}/step-code-requirements`}
                 leftIcon={<Steps size={24} />}
               >
-                Look up Energy Step Code and Zero Carbon Step Code requirements
+                {t("permitProject.overview.lookupStepCode")}
               </RouterLinkButton>
             </VStack>
           </Box>
@@ -100,19 +109,19 @@ export const OverviewTabPanelContent = ({ permitProject }: IProps) => {
       <Box as="section">
         <Flex justify="space-between" align="center" mb={6}>
           <Heading as="h3" size="md">
-            Recent permits
+            {t("permitProject.overview.recentPermits")}
           </Heading>
           <Button variant="primary" leftIcon={<Icon as={Plus} />}>
-            Add permit
+            {t("permitProject.overview.addPermit")}
           </Button>
         </Flex>
         <Table>
           <Thead>
-            <Tr>
-              <Th>Permit</Th>
-              <Th>Assigned to</Th>
-              <Th>Last modified</Th>
-              <Th>Status</Th>
+            <Tr borderTop={0}>
+              <Th>{t("permitProject.overview.permit")}</Th>
+              <Th>{t("permitProject.overview.assignedTo")}</Th>
+              <Th>{t("permitProject.overview.lastModified")}</Th>
+              <Th>{t("permitProject.overview.status")}</Th>
               <Th></Th>
             </Tr>
           </Thead>
@@ -123,7 +132,13 @@ export const OverviewTabPanelContent = ({ permitProject }: IProps) => {
           </Tbody>
         </Table>
         <Flex justify="flex-end" mt={4}>
-          <RouterLinkButton to={`/permit-projects/${permitProject.id}/permits`}>All permits</RouterLinkButton>
+          <RouterLinkButton
+            variant="tertiary"
+            rightIcon={<CaretRight />}
+            to={`/permit-projects/${permitProject.id}/permits`}
+          >
+            {t("permitProject.overview.allPermits")}
+          </RouterLinkButton>
         </Flex>
       </Box>
     </Flex>

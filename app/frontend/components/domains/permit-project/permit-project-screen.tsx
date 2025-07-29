@@ -15,11 +15,6 @@ import { OverviewTabPanelContent } from "./overview-tab-panel-content"
 import { PermitsTabPanelContent } from "./permits-tab-panel-content"
 import { ITabItem, ProjectSidebar } from "./sidebar"
 
-const TABS_DATA: ITabItem[] = [
-  { label: "Overview", icon: SquaresFour, to: "overview" },
-  { label: "Permits", icon: ClipboardText, to: "permits" },
-]
-
 export const PermitProjectScreen = observer(() => {
   const { currentPermitProject, error } = usePermitProject()
   const { permitProjectStore } = useMst()
@@ -27,6 +22,11 @@ export const PermitProjectScreen = observer(() => {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const params = useParams()
+
+  const TABS_DATA: ITabItem[] = [
+    { label: t("permitProject.details.overview"), icon: SquaresFour, to: "overview" },
+    { label: t("permitProject.details.permits"), icon: ClipboardText, to: "permits" },
+  ]
 
   const getDefaultValues = () => {
     return {
@@ -72,7 +72,7 @@ export const PermitProjectScreen = observer(() => {
 
   if (error) return <ErrorScreen error={error} />
   if (!currentPermitProject && !error) return <LoadingScreen />
-  if (!currentPermitProject) return <Text>Permit project not found.</Text>
+  if (!currentPermitProject) return <Text>{t("permitProject.details.notFound")}</Text>
 
   return (
     <Box>
@@ -82,14 +82,14 @@ export const PermitProjectScreen = observer(() => {
             <IconButton
               as={RouterLink}
               to="/permit-projects"
-              aria-label="Back to projects"
+              aria-label={t("permitProject.details.backToProjects")}
               icon={<CaretLeft size={24} />}
               variant="ghost"
               mr={2}
             />
             <EditableInputWithControls
               w="full"
-              initialHint={"Click to edit project name"}
+              initialHint={t("permitProject.details.editProjectNameHint")}
               value={watch("title") || ""}
               editableInputProps={{
                 fontWeight: 700,
@@ -98,17 +98,17 @@ export const PermitProjectScreen = observer(() => {
                 ...register("title", {
                   maxLength: {
                     value: 256,
-                    message: "invalid input",
+                    message: t("permitProject.details.invalidInput"),
                   },
                 }),
-                "aria-label": "Edit Project Name",
+                "aria-label": t("permitProject.details.editProjectName"),
                 onSubmit: handleSubmit(onSubmit),
               }}
               editablePreviewProps={{
                 fontWeight: 700,
                 fontSize: "3xl",
               }}
-              aria-label={"Edit Project Name"}
+              aria-label={t("permitProject.details.editProjectName")}
               onChange={(val) => setValue("title", val)}
             />
             <PhaseBox project={currentPermitProject} w="240px" />

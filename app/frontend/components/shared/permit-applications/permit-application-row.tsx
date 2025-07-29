@@ -16,11 +16,10 @@ export const PermitApplicationRow = ({ permitApplication }: IProps) => {
   return (
     <Tr borderBottom="1px" borderColor="border.light" _last={{ borderBottom: "none" }}>
       <Td>{permitApplication.templateNickname}</Td>
-      <Td>
-        <Avatar name={submitterName} size="sm" />
-      </Td>
+      <Td>{submitterName && <Avatar name={submitterName} size="sm" />}</Td>
       <Td>{format(updatedAt, "MMM-dd-yyyy HH:mm")}</Td>
       <Td>
+        {/* TODO: Add designated submitter data */}
         <PermitApplicationStatusTag permitApplication={permitApplication} />
       </Td>
       <Td>

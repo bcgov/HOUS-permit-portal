@@ -31,7 +31,7 @@ export const PermitsTabPanelContent = ({ permitProject }: IProps) => {
             </Tr>
           </Thead>
           <Tbody>
-            {permitProject.permitApplications?.map((permitApplication) => (
+            {permitProject.recentPermitApplications?.map((permitApplication) => (
               <PermitApplicationRow key={permitApplication.id} permitApplication={permitApplication} />
             ))}
           </Tbody>
