@@ -17,7 +17,12 @@ puts "Seeding jurisdictions..."
 JurisdictionSeeder.seed
 jurisdictions = Jurisdiction.all
 
-north_van = Jurisdiction.find_by(name: "North Vancouver")
+north_van =
+  Jurisdiction.find_by(
+    name: "North Vancouver",
+    locality_type: "corporation of the city"
+  )
+
 van = Jurisdiction.find_by(name: "Vancouver")
 
 puts "Seeding users..."
@@ -123,7 +128,7 @@ Jurisdiction.all.each do |j|
         permit_type: permit_type
       )
   end
-  j.update(inbox_enabled: true)
+  j.update(inbox_enabled: true, show_about_page: true)
 end
 if PermitApplication.first.blank?
   jurisdictions

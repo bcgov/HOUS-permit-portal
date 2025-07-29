@@ -2435,178 +2435,130 @@ Thank you,
           },
           joinTheBuildingPermitHub: {
             title: "Join Building Permit Hub",
-            subtitle: "A voluntary, modern permitting platform built with BC communities, for BC communities.",
-            ourVision: {
-              title: "Our vision",
+            subtitle: "A voluntary permitting platform built with BC communities, for BC communities",
+            about: {
+              title: "About Building Permit Hub",
               description:
-                "The Building Permit Hub is available to make building permits faster and easier for everyone:",
+                "Building Permit Hub is designed to make building permitting faster and easier for everyone:",
               audiences: {
                 localGovernments: "Local governments",
                 builders: "Builders",
                 homeowners: "Homeowners",
-                applicants: "Anyone applying for a permit",
+                anyone: "Anyone applying for a permit",
               },
-              platformDescription:
-                "It’s a free, voluntary platform that helps from the moment a site or idea is chosen, all the way through to an occupancy permit approval.",
-              mission:
-                "Our goal is to make the process quicker and smoother, so people spend less time waiting and more time building. We work in partnership with local governments and industry groups to build tools that deliver real value.",
-              flexibility:
-                "As each community has its own needs, Building Permit Hub is designed to be flexible and adaptable to your needs. Use the features that work best for your jurisdiction, whether you’re just getting started or already have your own digital system.",
-              standardizedPermits:
-                "We are also working on <strong>standardized permits</strong> to make permitting more consistent across BC.",
-              simpleSoftware:
-                "This is about building a <strong>simple, helpful permitting software</strong> that supports housing and communities across the province.",
+              freeAndVoluntary:
+                "Building Permit Hub is free and voluntary. It supports local government processes, from property identification through to permit approval.",
+              workingTo: "We're working to:",
+              goals: {
+                speedUp: "Speed up housing approvals",
+                support: "Support your existing workflows",
+                reduce: "Reduce duplication and delays",
+              },
+              flexible:
+                "Because every community is different, Building Permit Hub is designed to be flexible. You can use only the features that suit your team, whether you're digital, hybrid, or paper-based.",
             },
-            currentStatus: {
-              title: "Where we are and what you can use today",
-              description: "Building Permit Hub is <strong>available to</strong> all jurisdictions in BC.",
+            availableFeatures: {
+              title: "Available features",
+              description: "Building Permit Hub is live and ready for use.",
               features: {
-                title: "You can start using:",
-                smallScaleHousing: "Small-scale multi-unit housing and demolition permit types",
-                automatedStepCode: "Automated Step Code compliance tools (BC Building Code Part 3 & Part 9) ",
-                collaborativeFlows: "Collaborative submission and review flows",
+                title: "Current features include:",
+                permitApplications: "Permit applications for small-scale multi-unit housing permit types",
+                automatedStepCodes: "Automated Step Codes compliance tools for Part 3 & Part 9 buildings",
+                collaborativeWorkflows: "Collaborative workflows for application submission and review",
                 customizablePermits: "Customizable permit types tailored to your bylaws",
                 resubmissionTools: "Resubmission and revision tools",
               },
-              workflowNote:
-                "Whether you're digital, hybrid, or paper-based, you can participate in a way that fits your current workflow.",
             },
-            builtTogether: {
-              title: "Built together, with You",
+            coDeveloped: {
+              title: "Co-developed with BC communities",
               description:
-                "We're co-developing this platform with local governments, First Nations, and industry partners.",
-              feedbackNote:
-                "Your feedback — whether it's a new idea or something that isn't working — shapes what we build.",
-              communityFeatures: {
-                title: "We are addressing features needs that came directly from the communities",
-                multipleUploads: "Support for multiple file uploads",
-                fileScanning: "Malicious file scanning",
-                flexibleTools: "Flexible tools for tracking, reviewing, and collaborating",
+                "Building Permit Hub is being built in partnership with local governments, First Nations, and industry. Your feedback helps shape what we build next.",
+              recentFeatures: {
+                title: "Recent features based on community input:",
+                multipleFiles: "Support for uploading multiple files",
+                maliciousFiles: "Scanning for malicious files",
+                collaborationTools: "Collaboration tools for reviewing and tracking submissions",
               },
-              shareIdeas: "Help us keep improving — share your ideas or challenges with the team.",
-              reachOutToStartTheConversation: "Reach Out to Start the Conversation",
-              reachOutToStartTheConversationDescription:
-                "We’d love to hear what your community needs and explore how Building Permit Hub can help.",
-              reachOutToStartTheConversationEmail: "digital.codes.permits@gov.bc.ca",
             },
-            whatsNext: {
-              title: "What's coming next",
-              timeline: "Here’s what we’re working towards:",
+            newFeatures: {
+              title: "New features in development",
+              description: "Over the next 6 to 7 months, we're building:",
               features: {
-                permitFolders: {
-                  title: "Permit Project Folders",
-                  description: "Work on multiple permits together or in sequence — ideal for complex projects.",
+                permitProjectFolders: {
+                  title: "Permit project folders",
+                  description: "Group related permits for phased or complex builds.",
                 },
-                readinessTools: {
-                  title: "Project Readiness Tools",
-                  description:
-                    "Pre-application tools like letters of assurance, lateral load and seismic calculators — usable outside the permit form.",
+                preApplicationTools: {
+                  title: "Pre-application tools",
+                  description: "Use calculators and other tools before starting a permit form.",
                 },
-                documentUpload: {
-                  title: "Independent Document Upload",
-                  description:
-                    "Support documents that aren’t tied to specific form fields, helpful for large or complex submissions.",
+                uploadDocuments: {
+                  title: "Upload documents outside of application forms",
+                  description: "Attach supporting documents that aren't tied to a specific form field.",
                 },
-                designCatalogues: {
-                  title: "Standardized Design Catalogues",
-                  description:
-                    "Work with national partners to speed up reviews and encourage consistency across housing types.",
+                standardHousing: {
+                  title: "Standard housing design catalogues",
+                  description: "Reduce review time and support consistent approvals.",
                 },
-                dashboards: {
-                  title: "Cross-Jurisdiction Dashboards",
-                  description:
-                    "For submitters working across BC: one dashboard for all permit activity, no matter the community.",
+                crossJurisdiction: {
+                  title: "Cross-jurisdiction dashboards",
+                  description: "Give builders and staff a single view of activity across multiple communities.",
                 },
-                statusTracking: {
-                  title: "Enhanced Status Tracking",
-                  description:
-                    "More dynamic status updates — visible in real time for both jurisdictions and submitters.",
+                realTimeStatus: {
+                  title: "Real-time status updates",
+                  description: "Help staff and applicants track permit progress as it happens.",
                 },
               },
             },
-            flexibleAdoption: {
-              title: "Flexible adoption to fit you",
-              description: "You don't need to use the entire platform.",
+            flexibleUse: {
+              title: "Flexible use and adoption",
+              description:
+                "You can adopt just the Building Permit Hub features that support your current systems. For example:",
               examples: {
-                title: "Examples:",
-                stepCode: "Use just the Step Code tools, and we'll send the compliance reports directly to you",
-                specificTools: "Adopt specific tools like document upload or project folders as they become available",
-                preApplication:
-                  "Let your users benefit from our pre-application readiness tools, without needing to change your permitting system",
+                stepCode: "Receive Step Code compliance reports without changing your workflows",
+                newFeatures: "Adopt new features like document upload or project folders as they become available",
+                preApplication: "Give builders access to pre-application tools without changing how permits are issued",
               },
-              note: "We’re designing Building Permit Hub to meet jurisdictions’ needs — not to replace what already works. Have ideas or suggestions? We’d love to hear from you.",
+              note: "Building Permit Hub is designed to meet most jurisdictions' needs without replacing what already works.",
             },
             integration: {
-              title: "Connected through integration",
+              title: "Integration with your existing systems",
               description:
-                "Many jurisdictions have asked for integration into their existing software (For example: Tempest or CityView). We’re responding by:",
+                "We're building tools to support integration with common systems such as Tempest and CityView.",
+              includes: "This includes:",
               features: {
-                openApi: "Offering open API submission",
-                directPush: "Allowing Building Permit Hub to push applications directly into your permitting system",
-                statusUpdates:
-                  "Soon: receiving status updates back from your system, to display to applicants in real time",
+                openApi: "Open API for permit submissions",
+                automaticTransfer: "Automatic transfer of applications into your permitting system",
+                comingSoon:
+                  "(Coming soon) Sending status updates from your system back to the Hub for applicants to view",
               },
             },
-            getStarted: {
-              title: "How to get started",
-              description:
-                "It’s easy to get started with Building Permit Hub, and we’ll be here to help whenever you need us.",
-              steps: {
-                learnMore: {
-                  title: "Learn More",
-                  guide: "Learn more about <1>Building Permit Hub.</1>",
-                },
-                reachOut: {
-                  title: "Reach Out to Start the Conversation",
-                  description:
-                    "We’d love to hear what your community needs and explore how Building Permit Hub can help.",
-                  email: "digital.codes.permits@gov.bc.ca",
-                },
-                beginOnboarding: {
-                  title: "Begin Onboarding",
-                  description:
-                    "We’ll guide you through setup and rollout during onboarding — and you can move forward at a pace that works for you.",
-                },
-                onboardingProcess: {
-                  title: "Here’s what to expect from Onboarding process:",
-                  steps: {
-                    introduction:
-                      "<strong>Introduction</strong> — We’ll send a welcome email, schedule an introduction meeting to walk through Building Permit Hub, share the roadmap, and answer your questions",
-                    training:
-                      "<strong>Training</strong> — You’ll gain access to a sandbox or training mode, participate in a hands-on training session, receive user guides, and customize your pages and permits. We’ll also align on your estimated date for when you want to receive applications",
-                    initialFeedback:
-                      "<strong>Initial Feedback</strong> — About a week after training, we’ll check in to gather your feedback, answer any questions, and confirm next steps",
-                    assistance:
-                      "<strong>Assistance</strong> — We’ll do a final setup review together, verify everything is ready",
-                    support:
-                      "<strong>Support</strong> — We’ll check in the day after you go live and continue providing support and updates as needed",
-                    continuousFeedback:
-                      "<strong>Continuous Feedback</strong> — We’ll keep gathering and prioritizing your feedback to improve Building Permit Hub and keep you informed about the changes we’re making",
-                  },
-                },
-              },
-            },
-            notAlone: {
-              title: "You’re part of a growing network of communities",
-              stats: {
-                liveJurisdictions: "Over 5 jurisdictions are live",
-                coCreation: "Over 40 local governments and 7 First Nations helped co-create the foundation",
-              },
-              feedback:
-                "Feedback has been positive — and the number one request is more permits and broader support for project workflows. That’s exactly what we’re building.",
-            },
-            seeMore: {
-              title: "Want to see more?",
-              description: "We'd be happy to:",
-              options: {
-                demo: "Walk you through a live demo",
-                technical: "Answer technical questions",
-                success: "Share success stories from other communities",
-              },
-              contact: {
+            howToJoin: {
+              title: "How to join",
+              step1: {
+                title: "Step 1: Connect with our team",
+                description:
+                  "Tell us about your current process and what you're looking for by emailing our team: <mailTo>{{email}}</mailTo>",
                 email: "digital.codes.permits@gov.bc.ca",
-                sessions: "<strong>Live onboarding sessions available</strong>",
+                emailText: "digital.codes.permits@gov.bc.ca",
               },
+              step2: {
+                title: "Step 2: Start onboarding",
+                description: "We'll support you through readiness, setup, and rollout. Go at your own pace.",
+              },
+            },
+            learnMore: {
+              title: "Learn more about Building Permit Hub",
+              description:
+                "We're available to help you explore how Building Permit Hub might work in your community. We can:",
+              options: {
+                liveOnboarding: "Provide a live onboarding session",
+                liveDemo: "Walk you through a live demo",
+                technicalQuestions: "Answer technical questions",
+                share: "Share what other communities have done",
+              },
+              contact: "You can reach our team by sending an email to <mailTo>{{email}}</mailTo>",
+              email: "digital.codes.permits@gov.bc.ca",
             },
           },
           siteConfigurationTitle: "Configuration management",
