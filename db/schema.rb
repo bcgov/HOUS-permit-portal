@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_07_10_191449) do
+ActiveRecord::Schema[7.1].define(version: 2025_07_29_180133) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -455,8 +455,11 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_10_191449) do
     t.datetime "discarded_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "reference_identifier"
+    t.string "project_number"
     t.index ["jurisdiction_id"], name: "index_permit_projects_on_jurisdiction_id"
     t.index ["owner_id"], name: "index_permit_projects_on_owner_id"
+    t.index ["project_number"], name: "index_permit_projects_on_project_number", unique: true
   end
 
   create_table "permit_type_required_steps", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|

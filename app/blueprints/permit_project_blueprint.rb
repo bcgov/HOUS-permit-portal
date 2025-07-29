@@ -5,6 +5,7 @@ class PermitProjectBlueprint < Blueprinter::Base
     fields :title,
            :full_address,
            :pid,
+           :project_number,
            :jurisdiction_disambiguated_name,
            :phase,
            :is_pinned,

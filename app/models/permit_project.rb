@@ -1,6 +1,6 @@
 class PermitProject < ApplicationRecord
   include Discard::Model
-  searchkick word_middle: %i[title full_address pid pin] # Search configuration for PermitProject
+  searchkick word_middle: %i[title full_address pid pin project_number] # Search configuration for PermitProject
 
   belongs_to :owner, class_name: "User"
   belongs_to :jurisdiction # Direct association to Jurisdiction
@@ -18,7 +18,9 @@ class PermitProject < ApplicationRecord
   accepts_nested_attributes_for :project_documents, allow_destroy: true
 
   validates :title, presence: true
+  validates :project_number, presence: true, on: :update
   before_validation :set_default_title
+  before_validation :assign_unique_project_number, on: :create
 
   after_commit :reindex
 
@@ -76,6 +78,7 @@ class PermitProject < ApplicationRecord
       full_address: full_address,
       pid: pid,
       pin: pin,
+      project_number: project_number,
       owner_id: owner_id,
       jurisdiction_id: jurisdiction_id,
       collaborator_ids: collaborators.pluck(:user_id).uniq,
@@ -133,5 +136,32 @@ class PermitProject < ApplicationRecord
 
   def set_default_title
     self.title = shortened_address if title.blank? && full_address.present?
+  end
+
+  def assign_unique_project_number
+    return if project_number.present?
+    last_project = PermitProject.order(created_at: :desc).first
+    last_number = last_project&.project_number
+    new_number = ""
+    prefix = "OL"
+
+    loop do
+      if last_number.present?
+        year, number = last_number.split("-")
+        if year.to_i == Time.current.year
+          new_number = "#{year}-#{format("%05d", number.to_i + 1)}"
+        else
+          new_number = "#{Time.current.year}-#{format("%05d", 1)}"
+        end
+      else
+        new_number = "#{Time.current.year}-#{format("%05d", 1)}"
+      end
+
+      # In the unlikely event of a race condition, this ensures the number is unique
+      break unless PermitProject.exists?(project_number: new_number)
+      last_number = new_number
+    end
+
+    self.project_number = new_number
   end
 end

@@ -14,7 +14,7 @@ import {
   Tr,
   VStack,
 } from "@chakra-ui/react"
-import { GridFour, Info, Plus, Steps } from "@phosphor-icons/react"
+import { Info, Plus, SquaresFour, Steps } from "@phosphor-icons/react"
 import { format } from "date-fns"
 import React from "react"
 import { IPermitProject } from "../../../models/permit-project"
@@ -52,14 +52,13 @@ interface IProps {
 }
 
 export const OverviewTabPanelContent = ({ permitProject }: IProps) => {
-  const { fullAddress, pid, createdAt, jurisdiction } = permitProject
-  const reference = "OL-2025-00001" //  static data from image
+  const { fullAddress, pid, createdAt, jurisdiction, projectNumber } = permitProject
 
   return (
     <Flex direction="column" flex={1} bg="greys.white" p={10}>
       <Box as="section" mb={10}>
         <HStack align="center" spacing={4} mb={6}>
-          <GridFour size={32} />
+          <SquaresFour size={32} />
           <Heading as="h2" size="lg" mb={0}>
             Overview
           </Heading>
@@ -71,7 +70,7 @@ export const OverviewTabPanelContent = ({ permitProject }: IProps) => {
             </Heading>
 
             <ProjectInfoRow label="Address" value={fullAddress || "Not available"} isCopyable />
-            <ProjectInfoRow label="Reference" value={reference} subLabel="Assigned by jurisdiction" isCopyable />
+            <ProjectInfoRow label="Number" value={projectNumber} isCopyable />
             <ProjectInfoRow label="PID" value={pid || "Not available"} subLabel="Parcel identifier" isCopyable />
             <ProjectInfoRow label="Project created date" value={format(createdAt, "MMM d, yyyy")} />
 

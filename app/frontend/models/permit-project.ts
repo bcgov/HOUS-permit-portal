@@ -13,6 +13,7 @@ export const PermitProjectModel = types
     title: types.string,
     fullAddress: types.maybeNull(types.string),
     pid: types.maybeNull(types.string),
+    projectNumber: types.maybeNull(types.string),
     jurisdictionDisambiguatedName: types.string,
     forcastedCompletionDate: types.maybeNull(types.Date),
     phase: types.enumeration(Object.values(EPermitProjectPhase)),

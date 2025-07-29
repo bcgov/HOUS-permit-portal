@@ -1,5 +1,5 @@
 import { Box, Container, Flex, IconButton, TabPanel, TabPanels, Tabs, Text } from "@chakra-ui/react"
-import { CaretLeft, ClipboardText, GridFour } from "@phosphor-icons/react"
+import { CaretLeft, ClipboardText, SquaresFour } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useRef, useState } from "react"
 import { useForm } from "react-hook-form"
@@ -16,7 +16,7 @@ import { PermitsTabPanelContent } from "./permits-tab-panel-content"
 import { ITabItem, ProjectSidebar } from "./sidebar"
 
 const TABS_DATA: ITabItem[] = [
-  { label: "Overview", icon: GridFour, to: "overview" },
+  { label: "Overview", icon: SquaresFour, to: "overview" },
   { label: "Permits", icon: ClipboardText, to: "permits" },
 ]
 
