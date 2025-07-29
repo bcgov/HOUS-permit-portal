@@ -1,10 +1,15 @@
 class StepCode < ApplicationRecord
   include ProjectItem
-  belongs_to :permit_application, optional: true
+  has_parent :permit_application
+
   belongs_to :creator,
              class_name: "User",
              foreign_key: "creator_id",
              optional: true
+
+  # Associations
+  belongs_to :permit_application, optional: true
+  has_one :permit_project, through: :permit_application
 
   # Delegates for attributes from PermitApplication
   delegate :number,
@@ -19,14 +24,6 @@ class StepCode < ApplicationRecord
            :permit_date,
            to: :permit_application,
            allow_nil: true
-
-  def parent
-    permit_project || creator
-  end
-
-  def owner
-    permit_project&.owner || creator
-  end
 
   def builder
     "" #replace with a config on permit application

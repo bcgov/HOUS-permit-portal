@@ -94,6 +94,11 @@ function isProjectDetailPath(path: string): boolean {
   return regex.test(path)
 }
 
+function isStepCodePath(path: string): boolean {
+  const regex = /^\/part-(3|9)-step-code.*$/
+  return regex.test(path)
+}
+
 function shouldHideSubNavbarForPath(path: string): boolean {
   const matchers: Array<(path: string) => boolean> = [
     (path) => path === "/",
@@ -107,6 +112,7 @@ function shouldHideSubNavbarForPath(path: string): boolean {
     isApiMappingPath,
     isLoginPath,
     isProjectDetailPath,
+    isStepCodePath,
   ]
 
   return matchers.some((matcher) => matcher(path))

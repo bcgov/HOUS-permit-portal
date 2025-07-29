@@ -1,5 +1,5 @@
-import { Button, FormControl, HStack, InputGroup, Text } from "@chakra-ui/react"
-import { MapPin } from "@phosphor-icons/react"
+import { Alert, Button, FormControl, HStack, InputGroup, Text } from "@chakra-ui/react"
+import { MapPin, WarningCircle } from "@phosphor-icons/react"
 import debounce from "lodash/debounce"
 import { observer } from "mobx-react-lite"
 import React, { useCallback } from "react"
@@ -12,12 +12,14 @@ import { IOption } from "../../../../types/types"
 import { AsyncSelect, TAsyncSelectProps } from "../async-select"
 
 type TSitesSelectProps = {
-  onChange: (option: IOption) => void
+  onChange: (option: IOption | null) => void
   value: IOption
   addressName?: string
   onButtonClick: () => void
   isButtonDisabled: boolean
   buttonText: string
+  showError: boolean
+  setShowError: (show: boolean) => void
 } & Partial<TAsyncSelectProps>
 
 export const StepCodeLookupAddressSelect = observer(function ({
@@ -28,6 +30,8 @@ export const StepCodeLookupAddressSelect = observer(function ({
   onButtonClick,
   isButtonDisabled,
   buttonText,
+  showError,
+  setShowError,
   ...rest
 }: TSitesSelectProps) {
   const { geocoderStore } = useMst()
@@ -84,9 +88,19 @@ export const StepCodeLookupAddressSelect = observer(function ({
   return (
     <FormControl w="full" zIndex={2}>
       <InputGroup w="full">
-        <AsyncSelect<IOption, boolean>
+        <AsyncSelect<IOption, false>
           isClearable={true}
-          onChange={onChange}
+          onChange={(option) => {
+            onChange(option)
+            if (!option) {
+              setShowError(false)
+            }
+          }}
+          onInputChange={(inputValue, { action }) => {
+            if (action === "input-change") {
+              setShowError(false)
+            }
+          }}
           placeholder={placeholderText}
           value={value}
           defaultValue={value}
@@ -107,9 +121,25 @@ export const StepCodeLookupAddressSelect = observer(function ({
           loadOptions={debouncedFetchOptions}
           closeMenuOnSelect={true}
           isCreatable={false}
+          noOptionsMessage={() => null}
           {...rest}
         />
       </InputGroup>
+      {showError && (
+        <Alert
+          status="error"
+          rounded="md"
+          borderWidth={1}
+          borderColor="semantic.error"
+          bg="semantic.errorLight"
+          w="57%"
+          mt="4"
+          color="text.error"
+        >
+          <WarningCircle color="var(--chakra-colors-semantic-error)" />
+          <Text ml="2"> {t("ui.noAddressFound")}</Text>
+        </Alert>
+      )}
     </FormControl>
   )
 })

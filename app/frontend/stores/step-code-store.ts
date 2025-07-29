@@ -162,19 +162,9 @@ export const StepCodeStoreModel = types
     }),
     createPart3StepCode: flow(function* (values: {
       permitApplicationId?: string
-      permitProjectId?: string
       checklistAttributes: { sectionCompletionStatus: Record<string, any> }
     }) {
-      const { permitApplicationId, permitProjectId, checklistAttributes } = values
-      const payload: any = { checklistAttributes }
-      if (permitApplicationId) {
-        payload.permitApplicationId = permitApplicationId
-      }
-      if (permitProjectId) {
-        payload.permitProjectId = permitProjectId
-      }
-
-      const response = yield self.environment.api.createPart3StepCode(payload)
+      const response = yield self.environment.api.createPart3StepCode(values)
 
       if (response.ok) {
         self.mergeUpdate(response.data.data, "stepCodesMap")

@@ -5,10 +5,11 @@ import { useMst } from "../../setup/root"
 import { isUUID } from "../../utils/utility-functions"
 
 export const usePart3StepCode = () => {
-  const { stepCodeId } = useParams()
-  const { stepCodeStore } = useMst()
+  const { permitApplicationId, stepCodeId } = useParams()
+  const { stepCodeStore, permitApplicationStore } = useMst()
+  const { currentPermitApplication } = permitApplicationStore
   const { fetchPart3StepCode, getStepCode, setCurrentStepCode } = stepCodeStore
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(!permitApplicationId)
 
   useEffect(() => {
     const loadStepCode = async () => {
@@ -21,12 +22,18 @@ export const usePart3StepCode = () => {
         if (stepCode) {
           setCurrentStepCode(stepCode.id)
         }
+      } else if (currentPermitApplication) {
+        setCurrentStepCode(currentPermitApplication.stepCode?.id)
       }
       setIsLoading(false)
     }
 
-    loadStepCode()
-  }, [stepCodeId, fetchPart3StepCode, getStepCode, setCurrentStepCode])
+    if (!permitApplicationId) {
+      loadStepCode()
+    } else {
+      setIsLoading(false)
+    }
+  }, [permitApplicationId, stepCodeId, fetchPart3StepCode, getStepCode, setCurrentStepCode, currentPermitApplication])
 
   const stepCode = stepCodeStore.currentStepCode as IPart3StepCode
   const checklist = stepCode?.checklist

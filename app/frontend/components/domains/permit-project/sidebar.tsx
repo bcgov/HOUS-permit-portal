@@ -1,4 +1,4 @@
-import { Box, BoxProps, Icon, Tab, TabList, VStack } from "@chakra-ui/react"
+import { Box, BoxProps, Icon, Tab, VStack } from "@chakra-ui/react"
 import React from "react"
 
 export interface ITabItem {
@@ -20,7 +20,7 @@ const tabProps = {
   },
 }
 
-export const ProjectSidebar = ({ top = 0, tabsData, ...rest }: IProjectSidebarProps) => {
+export const ProjectSidebar = ({ top = 0, tabsData = [], ...rest }: IProjectSidebarProps) => {
   const navHeight = document.getElementById("mainNav")?.offsetHeight
 
   return (
@@ -34,7 +34,6 @@ export const ProjectSidebar = ({ top = 0, tabsData, ...rest }: IProjectSidebarPr
       h="100vh"
       alignSelf="flex-start"
       pb={navHeight}
-      as={TabList}
       {...rest}
     >
       <VStack align="stretch" spacing={1} w="full" pt={8}>

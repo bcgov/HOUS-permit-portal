@@ -1,7 +1,7 @@
 import { Box, Container, Heading, Link, Text } from "@chakra-ui/react"
 import React from "react"
 import { useTranslation } from "react-i18next"
-import StepCodeAddressSearch from "../../shared/step-code-address-search"
+import { StepCodeLookupTool } from "./step-code-lookup-tool"
 
 export const LookUpStepCodesRequirementsForYourProjectScreen = () => {
   const { t } = useTranslation()
@@ -17,16 +17,7 @@ export const LookUpStepCodesRequirementsForYourProjectScreen = () => {
       <Text fontSize="lg" color="text.primary" mb="8">
         {t("home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.enterYourProjectAddress")}
       </Text>
-
-      <StepCodeAddressSearch />
-
-      <Text mb={10} mt="12" fontSize="lg">
-        {t("home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.cantFindYourAddress")}{" "}
-        <Link href="/jurisdictions" color="text.link">
-          {t("home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.browseListOfJurisdictions")}
-        </Link>
-      </Text>
-
+      <StepCodeLookupTool showJurisdictionOnPage={true} />
       <Box>
         <Heading as="h2" size="lg" mb={5}>
           {t("home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.generateAStepCodesReport")}
