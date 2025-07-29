@@ -53,7 +53,7 @@ RSpec.describe RequirementBlock, type: :model do
            {
              id: requirement_block.id,
              key: requirement_block.key,
-             title: requirement_block.name,
+             title: requirement_block.display_name,
              description: nil,
              type: "panel",
              collapsible: true,
