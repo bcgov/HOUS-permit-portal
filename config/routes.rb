@@ -194,7 +194,7 @@ Rails.application.routes.draw do
       # New route for Part 3 Step Code
       post "part_3_building/step_code",
            on: :member,
-           to: "permit_applications#create_or_find_step_code"
+           to: "part_3_building/step_codes#create"
     end
 
     resources :permit_projects, only: %i[show index update create] do

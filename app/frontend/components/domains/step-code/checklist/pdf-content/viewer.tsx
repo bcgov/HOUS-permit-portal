@@ -5,6 +5,7 @@ import { usePermitApplication } from "../../../../../hooks/resources/use-permit-
 import { IPart3StepCodeChecklist } from "../../../../../models/part-3-step-code-checklist"
 import { IPart9StepCodeChecklist } from "../../../../../models/part-9-step-code-checklist"
 import { IPermitApplication } from "../../../../../models/permit-application"
+import { EStepCodeType } from "../../../../../types/enums"
 import { LoadingScreen } from "../../../../shared/base/loading-screen"
 import { Part3PDFContent } from "../../part-3/checklist/pdf-content"
 import { Part9PDFContent } from "../../part-9/checklist/pdf-content"

@@ -31,7 +31,11 @@ class PermitTypeRequiredStep < ApplicationRecord
     self.zero_carbon_step_required ||= ENV["PART_9_MIN_ZERO_CARBON_STEP"].to_i
   end
 
-  validates :permit_type_id, uniqueness: { scope: %i[jurisdiction_id default] }
+  validates :permit_type_id,
+            uniqueness: {
+              scope: %i[jurisdiction_id default]
+            },
+            if: :default?
 
   validates :energy_step_required,
             presence: true,

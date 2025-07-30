@@ -17,7 +17,12 @@ puts "Seeding jurisdictions..."
 JurisdictionSeeder.seed
 jurisdictions = Jurisdiction.all
 
-north_van = Jurisdiction.find_by(name: "North Vancouver")
+north_van =
+  Jurisdiction.find_by(
+    name: "North Vancouver",
+    locality_type: "corporation of the city"
+  )
+
 van = Jurisdiction.find_by(name: "Vancouver")
 
 puts "Seeding users..."
@@ -86,6 +91,19 @@ User.find_or_create_by(omniauth_username: "submitter") do |user|
   user.omniauth_email = "submitter@example.com"
 end
 
+# invite a usable super admin
+# safeguard for development only
+if Rails.env.development?
+  email = "usable+super_admin@example.com"
+  User.invite!(email: email) do |u|
+    u.skip_confirmation_notification!
+    u.role = :super_admin
+    u.first_name = "Super"
+    u.last_name = "Admin"
+    u.save
+  end
+end
+
 User.reindex
 
 activity1 = Activity.find_by_code("new_construction")
@@ -110,7 +128,7 @@ Jurisdiction.all.each do |j|
         permit_type: permit_type
       )
   end
-  j.update(inbox_enabled: true)
+  j.update(inbox_enabled: true, show_about_page: true)
 end
 if PermitApplication.first.blank?
   jurisdictions
@@ -269,7 +287,6 @@ if PermitApplication.first.blank?
       activity_id: template_version.activity.id,
       permit_type_id: template_version.permit_type.id,
       template_version: template_version
-      # Removed direct assignment of jurisdiction, full_address, pid
     )
   end
 end
@@ -324,19 +341,6 @@ early_access_requirement_templates.each do |eart|
       early_access_requirement_template: eart,
       previewer: user
     )
-  end
-end
-
-# invite a usable super admin
-# safeguard for development only
-if Rails.env.development?
-  email = "usable+super_admin@example.com"
-  User.invite!(email: email) do |u|
-    u.skip_confirmation_notification!
-    u.role = :super_admin
-    u.first_name = "Super"
-    u.last_name = "Admin"
-    u.save
   end
 end
 

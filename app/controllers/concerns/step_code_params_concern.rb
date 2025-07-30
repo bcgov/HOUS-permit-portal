@@ -9,9 +9,7 @@ module StepCodeParamsConcern
     params.require(:step_code).permit(
       :type, # Added type discriminator
       :name, # For Part9StepCode
-      :permit_application_id, # Generally set directly in controller, but can be permitted
-      :project_id, # Generally set directly in controller, but can be permitted. DEPRECATED, use permit_project_id
-      :permit_project_id, # Added to allow associating with an existing project
+      :permit_application_id,
       # Part 3 specific (or potentially shared if checklist_attributes becomes generic)
       checklist_attributes: [section_completion_status: {}],
       # Part 9 specific
@@ -25,18 +23,11 @@ module StepCodeParamsConcern
           h2k_file: {
           }
         ]
-      ],
-      # Nested attributes for PermitProject
-      permit_project_attributes: [
-        :id, # Allow :id for updates if project already exists and is being associated
-        :title, # Added title
-        :full_address,
-        :pid,
-        :pin,
-        :owner_id,
-        :property_plan_jurisdiction_id
-        # Add any other PermitProject attributes the frontend might send
       ]
     )
+  end
+
+  def step_code_params_for_create
+    step_code_params.merge(creator: current_user)
   end
 end

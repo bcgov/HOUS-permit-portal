@@ -88,6 +88,7 @@ export const StepCodeStoreModel = types
     fetchPart9StepCodes: flow(function* () {
       const response = yield self.environment.api.fetchPart9StepCodes()
       if (response.ok) {
+        self.selectOptions = response.data.meta.selectOptions
         self.mergeUpdateAll(response.data.data, "stepCodesMap")
       } else {
         console.error("Failed to fetch Part 9 Step Codes:", response.problem, response.data)
@@ -161,19 +162,9 @@ export const StepCodeStoreModel = types
     }),
     createPart3StepCode: flow(function* (values: {
       permitApplicationId?: string
-      permitProjectId?: string
       checklistAttributes: { sectionCompletionStatus: Record<string, any> }
     }) {
-      const { permitApplicationId, permitProjectId, checklistAttributes } = values
-      const payload: any = { checklistAttributes }
-      if (permitApplicationId) {
-        payload.permitApplicationId = permitApplicationId
-      }
-      if (permitProjectId) {
-        payload.permitProjectId = permitProjectId
-      }
-
-      const response = yield self.environment.api.createPart3StepCode(payload)
+      const response = yield self.environment.api.createPart3StepCode(values)
 
       if (response.ok) {
         self.mergeUpdate(response.data.data, "stepCodesMap")

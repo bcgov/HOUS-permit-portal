@@ -158,7 +158,7 @@ class User < ApplicationRecord
         technical_support
       ]
     when "review_manager", "regional_review_manager", "technical_support"
-      %w[reviewer review_manager technical_support]
+      %w[reviewer review_manager technical_support regional_review_manager]
     else
       []
     end
@@ -174,12 +174,6 @@ class User < ApplicationRecord
 
   def review_staff?
     reviewer? || review_manager? || regional_review_manager?
-  end
-
-  def review_staff_in_jurisdiction?(jurisdiction_to_check)
-    return false unless jurisdiction_to_check && jurisdictions.any? # Guard against nil jurisdiction
-
-    review_staff? && jurisdictions.exists?(jurisdiction_to_check.id)
   end
 
   def role_name
