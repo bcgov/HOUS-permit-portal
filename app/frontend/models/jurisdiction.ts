@@ -97,17 +97,20 @@ export const JurisdictionModel = types
     },
   }))
   .views((self) => ({
-    get requiredStepsByPermitType() {
-      const groupRequirements = (acc, r) =>
-        R.includes(r, self.permitTypeStepRequirements(r.permitTypeId)) ? acc.concat(r) : acc
-      const toPermitType = ({ permitTypeId }) => permitTypeId
-
-      return R.reduceBy(groupRequirements, [], toPermitType, self.permitTypeRequiredSteps)
-    },
     get part9RequiredSteps() {
-      return self.permitTypeRequiredSteps.filter(
-        (r) => r.permitTypeId == self.rootStore.permitClassificationStore.part9BuildingPermitType.id
-      )
+      // This assumes that the permitTypeRequiredSteps are all part 9
+      // Revisit this once adding part 3 required steps
+      const nonDefaults = self.permitTypeRequiredSteps.filter((r) => !r.default)
+      if (nonDefaults.length > 0) {
+        return nonDefaults
+      }
+
+      const defaults = self.permitTypeRequiredSteps.filter((r) => r.default)
+      if (defaults.length > 0) {
+        return defaults
+      }
+
+      return []
     },
   }))
   .actions((self) => ({
