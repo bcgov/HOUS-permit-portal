@@ -644,7 +644,6 @@ export enum EPermitProjectSortFields {
 }
 
 export enum EPermitProjectPhase {
-  all = "all",
   empty = "empty",
   newDraft = "new_draft",
   newlySubmitted = "newly_submitted",

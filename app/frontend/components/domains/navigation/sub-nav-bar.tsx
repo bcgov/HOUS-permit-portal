@@ -17,7 +17,6 @@ interface ISubNavBar extends FlexProps {
 export const SubNavBar = observer(({ staticBreadCrumbs, breadCrumbContainerProps, ...containerProps }: ISubNavBar) => {
   const location = useLocation()
   const path = location.pathname
-
   return (
     <Flex
       w="full"

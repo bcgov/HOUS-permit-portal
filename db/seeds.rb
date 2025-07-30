@@ -225,16 +225,16 @@ if PermitApplication.first.blank?
 
   # Creating Permit Applications
   puts "Seeding permit applications..."
-  submitters = User.submitter
+  review_managers = User.review_manager
   template_version = TemplateVersion.published.first
   20.times do |index|
-    current_submitter = submitters.sample
+    current_review_manager = review_managers.sample
     current_jurisdiction_id =
       index.even? ? jurisdictions.first(10).sample.id : north_van.id
 
     permit_project =
       PermitProject.create!(
-        owner: current_submitter,
+        owner: current_review_manager,
         jurisdiction_id: current_jurisdiction_id,
         title: "Project for Seed Application #{index + 1}",
         full_address: "123 Seed Street #{index + 1}, Seedville",
@@ -243,7 +243,7 @@ if PermitApplication.first.blank?
       )
 
     PermitApplication.create!(
-      submitter: current_submitter,
+      submitter: current_review_manager,
       permit_project: permit_project,
       activity_id: template_version.activity.id,
       permit_type_id: template_version.permit_type.id,
@@ -252,7 +252,7 @@ if PermitApplication.first.blank?
   end
   # Seed a North Vancouver Example
   4.times do |i| # Added index i for unique titles if needed
-    current_submitter = submitters.sample
+    current_review_manager = review_managers.sample
     project_pid =
       (
         if (north_van.locality_type == "corporation of the city")
@@ -264,25 +264,23 @@ if PermitApplication.first.blank?
     project_full_address =
       (
         if (north_van.locality_type == "corporation of the city")
-          "323 18TH ST E, NORTH VANCOUVER, BC, V7L 2X8"
+          "323 18Th St E, North Vancouver, BC, V7L 2X8"
         else
-          "5419 ESPERANZA DR, NORTH VANCOUVER, BC, V7R 3W3"
+          "5419 Esperanza Dr, North Vancouver, BC, V7R 3W3"
         end
       )
 
     permit_project =
       PermitProject.create!(
-        owner: current_submitter,
+        owner: current_review_manager,
         jurisdiction: north_van,
-        title: "Project at #{project_full_address} (#{i + 1})",
         full_address: project_full_address,
         pid: project_pid
-        # pin can be added if necessary, e.g., "NVPIN#{i+1}"
       )
 
     PermitApplication.create!(
       nickname: "Permit application #{i + 1}",
-      submitter: current_submitter,
+      submitter: current_review_manager,
       permit_project: permit_project,
       activity_id: template_version.activity.id,
       permit_type_id: template_version.permit_type.id,

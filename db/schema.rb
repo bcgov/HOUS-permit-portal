@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_07_23_200843) do
+ActiveRecord::Schema[7.1].define(version: 2025_07_29_180133) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -74,9 +74,6 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_23_200843) do
     t.uuid "contactable_id"
     t.string "contact_type"
     t.index ["contactable_type", "contactable_id"], name: "index_contacts_on_contactable"
-  end
-
-  create_table "data_migrations", primary_key: "version", id: :string, force: :cascade do |t|
   end
 
   create_table "document_references", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -377,14 +374,10 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_23_200843) do
   create_table "permit_applications", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.integer "status", default: 0
     t.uuid "submitter_id", null: false
-    t.uuid "jurisdiction_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.uuid "permit_type_id", null: false
     t.uuid "activity_id", null: false
-    t.string "full_address"
-    t.string "pid"
-    t.string "pin"
     t.jsonb "submission_data"
     t.string "number"
     t.datetime "signed_off_at"
@@ -400,8 +393,11 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_23_200843) do
     t.uuid "sandbox_id"
     t.datetime "newly_submitted_at", precision: nil
     t.uuid "permit_project_id"
+    t.uuid "jurisdiction_id"
+    t.text "full_address"
+    t.string "pid"
+    t.string "pin"
     t.index ["activity_id"], name: "index_permit_applications_on_activity_id"
-    t.index ["jurisdiction_id"], name: "index_permit_applications_on_jurisdiction_id"
     t.index ["number"], name: "index_permit_applications_on_number", unique: true
     t.index ["permit_project_id"], name: "index_permit_applications_on_permit_project_id"
     t.index ["permit_type_id"], name: "index_permit_applications_on_permit_type_id"
@@ -459,8 +455,11 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_23_200843) do
     t.datetime "discarded_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "reference_identifier"
+    t.string "project_number"
     t.index ["jurisdiction_id"], name: "index_permit_projects_on_jurisdiction_id"
     t.index ["owner_id"], name: "index_permit_projects_on_owner_id"
+    t.index ["project_number"], name: "index_permit_projects_on_project_number", unique: true
   end
 
   create_table "permit_type_required_steps", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -913,7 +912,6 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_23_200843) do
   add_foreign_key "part_3_step_code_checklists", "step_codes"
   add_foreign_key "part_9_step_code_checklists", "permit_type_required_steps", column: "step_requirement_id"
   add_foreign_key "part_9_step_code_checklists", "step_codes"
-  add_foreign_key "permit_applications", "jurisdictions"
   add_foreign_key "permit_applications", "permit_classifications", column: "activity_id"
   add_foreign_key "permit_applications", "permit_classifications", column: "permit_type_id"
   add_foreign_key "permit_applications", "permit_projects"

@@ -630,7 +630,7 @@ const AppRoutes = observer(() => {
             <Route path="/permit-applications" element={<PermitApplicationIndexScreen />} />
             <Route path="/permit-projects" element={<PermitProjectIndexScreen />} />
             <Route path="/permit-projects/new" element={<NewPermitProjectScreen />} />
-            <Route path="/permit-projects/:permitProjectId" element={<PermitProjectScreen />} />
+            <Route path="/permit-projects/:permitProjectId/*" element={<PermitProjectScreen />} />
             <Route path="/permit-applications/new" element={<NewPermitApplicationScreen />} />
             <Route path="/permit-applications/:permitApplicationId/edit" element={<EditPermitApplicationScreen />} />
             <Route
