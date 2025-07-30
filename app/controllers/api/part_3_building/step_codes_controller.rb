@@ -42,7 +42,33 @@ class Api::Part3Building::StepCodesController < Api::ApplicationController
   def step_code_params
     params.require(:step_code).permit(
       :permit_application_id,
-      checklist_attributes: [section_completion_status: {}]
+      checklist_attributes: [
+        {
+          section_completion_status: {
+            start: %i[complete relevant],
+            project_details: %i[complete relevant],
+            location_details: %i[complete relevant],
+            baseline_occupancies: %i[complete relevant],
+            baseline_details: %i[complete relevant],
+            district_energy: %i[complete relevant],
+            fuel_types: %i[complete relevant],
+            additional_fuel_types: %i[complete relevant],
+            baseline_performance: %i[complete relevant],
+            step_code_occupancies: %i[complete relevant],
+            step_code_performance_requirements: %i[complete relevant],
+            modelled_outputs: %i[complete relevant],
+            renewable_energy: %i[complete relevant],
+            overheating_requirements: %i[complete relevant],
+            residential_adjustments: %i[complete relevant],
+            document_references: %i[complete relevant],
+            performance_characteristics: %i[complete relevant],
+            hvac: %i[complete relevant],
+            contact: %i[complete relevant],
+            requirements_summary: %i[complete relevant],
+            step_code_summary: %i[complete relevant]
+          }
+        }
+      ]
     )
   end
 end

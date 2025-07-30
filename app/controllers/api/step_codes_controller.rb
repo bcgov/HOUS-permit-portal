@@ -50,8 +50,11 @@ class Api::StepCodesController < Api::ApplicationController
           :district_energy_consumption,
           :other_ghg_ef,
           :other_ghg_consumption,
-          h2k_file: {
-          }
+          h2k_file: [
+            :id,
+            :storage,
+            metadata: %i[filename size mime_type content_disposition]
+          ]
         ]
       ]
     )
