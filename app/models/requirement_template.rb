@@ -116,6 +116,8 @@ class RequirementTemplate < ApplicationRecord
   end
 
   def label
+    return "New template" if permit_type.nil? || activity.nil?
+
     "#{permit_type.name} | #{activity.name}#{first_nations ? " (" + I18n.t("activerecord.attributes.requirement_template.first_nations") + ")" : ""}"
   end
 
