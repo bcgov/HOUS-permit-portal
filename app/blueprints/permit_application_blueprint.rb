@@ -28,9 +28,8 @@ class PermitApplicationBlueprint < Blueprinter::Base
                 view: :base
     association :submitter, blueprint: UserBlueprint, view: :minimal
 
-    field :indexed_using_current_template_version do |pa, options|
-      # Indexed data is used to prevent N extra queries on every search
-      pa.indexed_using_current_template_version
+    field :using_current_template_version do |pa, options|
+      pa.using_current_template_version
     end
   end
 

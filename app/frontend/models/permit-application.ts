@@ -84,7 +84,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
       isFullyLoaded: types.optional(types.boolean, false),
       isDirty: types.optional(types.boolean, false),
       isLoading: types.optional(types.boolean, false),
-      indexedUsingCurrentTemplateVersion: types.maybeNull(types.boolean),
+      usingCurrentTemplateVersion: types.maybeNull(types.boolean),
       showingCompareAfter: types.optional(types.boolean, false),
       revisionMode: types.optional(types.boolean, false),
       diff: types.maybeNull(types.frozen<ITemplateVersionDiff>()),
@@ -196,10 +196,6 @@ export const PermitApplicationModel = types.snapshotProcessor(
       },
       get viewedAt() {
         return self.latestSubmissionVersion?.viewedAt
-      },
-      get usingCurrentTemplateVersion() {
-        if (self.templateVersion) return self.templateVersion.id == self.publishedTemplateVersion.id
-        return self.indexedUsingCurrentTemplateVersion
       },
       get jurisdictionName() {
         return self.jurisdiction.name

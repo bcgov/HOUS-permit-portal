@@ -579,6 +579,9 @@ Thank you,
         permitProject: {
           pinProject: "Pin project",
           unpinProject: "Unpin project",
+          formUpdateWarningTitle: "Form updated",
+          formUpdateWarningDescription:
+            "The jurisdiction has changed a permit application form. Review your draft application to confirm your responses.",
           phase: {
             all: "All statuses",
             empty: "Empty",

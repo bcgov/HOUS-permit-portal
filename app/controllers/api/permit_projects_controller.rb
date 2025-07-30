@@ -13,6 +13,7 @@ class Api::PermitProjectsController < Api::ApplicationController
   def index
     perform_permit_project_search
     authorized_results = apply_search_authorization(@permit_projects)
+    set_project_ids_with_outdated_drafts(authorized_results)
 
     render_success authorized_results,
                    nil,
@@ -116,16 +117,32 @@ class Api::PermitProjectsController < Api::ApplicationController
 
   private
 
+  def set_project_ids_with_outdated_drafts(projects)
+    project_ids = projects.map(&:id)
+    outdated_draft_permit_applications =
+      PermitApplication
+        .where(
+          permit_project_id: project_ids,
+          status: PermitApplication.draft_statuses
+        )
+        .where.not(template_version_id: TemplateVersion.cached_published_ids)
+
+    @project_ids_with_outdated_drafts =
+      outdated_draft_permit_applications.pluck(:permit_project_id).to_set
+  end
+
   def blueprint_options(view: :default)
     {
       view: view,
       current_user: current_user,
-      pinned_project_ids: current_user.pinned_permit_project_ids
+      pinned_project_ids: current_user.pinned_permit_project_ids,
+      project_ids_with_outdated_drafts: @project_ids_with_outdated_drafts
     }
   end
 
   def set_permit_project
     @permit_project = PermitProject.includes(:jurisdiction).find(params[:id])
+    set_project_ids_with_outdated_drafts([@permit_project])
   end
 
   def permit_project_params

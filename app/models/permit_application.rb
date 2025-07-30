@@ -216,7 +216,6 @@ class PermitApplication < ApplicationRecord
       requirement_template_id: template_version.requirement_template.id,
       created_at: created_at,
       updated_at: updated_at,
-      using_current_template_version: using_current_template_version,
       user_ids_with_submission_edit_permissions:
         [submitter.id] +
           users_by_collaboration_options(collaboration_type: :submission).pluck(
@@ -261,16 +260,12 @@ class PermitApplication < ApplicationRecord
       .compact
   end
 
-  def indexed_using_current_template_version
-    self.class.searchkick_index.retrieve(self)["using_current_template_version"]
-  end
-
   def formatted_permit_classifications
     "#{activity.name} - #{permit_type.name}"
   end
 
   def using_current_template_version
-    self.template_version === current_published_template_version
+    TemplateVersion.cached_published_ids.include?(template_version_id)
   end
 
   def current_published_template_version

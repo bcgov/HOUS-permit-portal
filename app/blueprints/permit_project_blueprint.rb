@@ -27,6 +27,10 @@ class PermitProjectBlueprint < Blueprinter::Base
     field :is_pinned do |permit_project, options|
       options[:pinned_project_ids]&.include?(permit_project.id)
     end
+
+    field :has_outdated_draft_applications do |permit_project, options|
+      options[:project_ids_with_outdated_drafts]&.include?(permit_project.id)
+    end
   end
 
   view :extended do

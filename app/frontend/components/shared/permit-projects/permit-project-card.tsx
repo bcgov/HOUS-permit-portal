@@ -34,7 +34,7 @@ export const PermitProjectCard = observer(({ permitProject }: IPermitProjectCard
   const currentUser = userStore.currentUser
 
   // Get the first permit application to display some of its details, if available
-  const displayApplication = permitProject.permitApplications?.[0]
+  const displayApplication = permitProject.recentPermitApplications?.[0]
 
   // Use project's own title as nickname
   const nickname = permitProject.title
@@ -54,8 +54,7 @@ export const PermitProjectCard = observer(({ permitProject }: IPermitProjectCard
   // Simplified routing for project card - link to project view/edit
   const routingButtonText = t("ui.view")
 
-  // Placeholder for new version warning logic, adapt if projects have versions
-  const showNewVersionWarning = false
+  const showNewVersionWarning = permitProject.hasOutdatedDraftApplications
 
   return (
     <Flex
