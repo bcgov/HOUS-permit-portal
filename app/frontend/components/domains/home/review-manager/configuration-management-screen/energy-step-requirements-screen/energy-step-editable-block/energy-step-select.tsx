@@ -66,22 +66,22 @@ export const EnergyStepSelect = observer(function EnergyStepSelect({
           <ConditionalWrapper condition={portal} wrapper={(children) => <Portal>{children}</Portal>}>
             <PopoverContent>
               <VStack align="start" spacing={0}>
-                {options.map((value, i) => (
+                {options.map((option) => (
                   <Flex
-                    key={value}
+                    key={option}
                     onClick={() => {
-                      onChange(value)
+                      onChange(option)
                       onClose()
                     }}
                     px={2}
                     py={1.5}
                     w="full"
-                    borderTopWidth={value ? undefined : 1}
+                    borderTopWidth={option ? undefined : 1}
                     borderColor="border.light"
                     cursor="pointer"
                     _hover={{ bg: "hover.blue" }}
                   >
-                    {value ? t(`${i18nPrefix}.stepRequired.energy.options.${value}`) : t(`${i18nPrefix}.notRequired`)}
+                    {option ? t(`${i18nPrefix}.stepRequired.energy.options.${option}`) : t(`${i18nPrefix}.notRequired`)}
                   </Flex>
                 ))}
               </VStack>

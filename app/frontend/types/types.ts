@@ -593,7 +593,7 @@ export interface IPermitTypeRequiredStep {
   id?: string
   default: boolean
   permitTypeId: string
-  permitTypeName: string
+  permitTypeName?: string
   workType?: string
   energyStepRequired: EEnergyStep
   zeroCarbonStepRequired: EZeroCarbonStep

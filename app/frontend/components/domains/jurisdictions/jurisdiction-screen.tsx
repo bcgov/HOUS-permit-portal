@@ -40,6 +40,7 @@ import { BlueTitleBar } from "../../shared/base/blue-title-bar"
 import { CustomMessageBox } from "../../shared/base/custom-message-box"
 import { ErrorScreen } from "../../shared/base/error-screen"
 import { LoadingScreen } from "../../shared/base/loading-screen"
+import { SharedSpinner } from "../../shared/base/shared-spinner"
 import { EditorWithPreview } from "../../shared/editor/custom-extensions/editor-with-preview"
 import { Editor } from "../../shared/editor/editor"
 import { JurisdictionMap } from "../../shared/module-wrappers/jurisdiction-map"
@@ -439,70 +440,68 @@ interface IStepCodeTableProps {
 
 const StepCodeTable: React.FC<IStepCodeTableProps> = ({ currentJurisdiction }) => {
   const { t } = useTranslation()
-  const { requiredStepsByPermitType } = currentJurisdiction
+  const { part9RequiredSteps } = currentJurisdiction
+
+  if (!part9RequiredSteps) return <SharedSpinner />
+
   return (
     <Flex direction="column" gap={4}>
-      {Object.keys(requiredStepsByPermitType).map(
-        (permitTypeId, index) =>
-          requiredStepsByPermitType[permitTypeId][0] && (
-            <Accordion key={index} allowToggle>
-              <AccordionItem borderWidth={1} borderColor="border.light" rounded="sm">
-                <AccordionButton bg="greys.grey03" fontWeight="bold">
-                  <Box flex="1" textAlign="left">
-                    {requiredStepsByPermitType[permitTypeId][0].permitTypeName}
-                  </Box>
-                  <AccordionIcon />
-                </AccordionButton>
-                <AccordionPanel pb={4}>
-                  <>
-                    <Flex justify="flex-end">
-                      <Grid templateColumns="2fr 1fr 2fr" gap={4} w="full" color="text.secondary">
-                        <GridItem textAlign="center" textTransform="uppercase" fontSize="xs">
-                          {t("jurisdiction.edit.stepCode.energyStepRequired")}
+      <Accordion allowToggle>
+        <AccordionItem borderWidth={1} borderColor="border.light" rounded="sm">
+          <AccordionButton bg="greys.grey03" fontWeight="bold">
+            <Box flex="1" textAlign="left">
+              {part9RequiredSteps[0].permitTypeName}
+            </Box>
+            <AccordionIcon />
+          </AccordionButton>
+          <AccordionPanel pb={4}>
+            <>
+              <Flex justify="flex-end">
+                <Grid templateColumns="2fr 1fr 2fr" gap={4} w="full" color="text.secondary">
+                  <GridItem textAlign="center" textTransform="uppercase" fontSize="xs">
+                    {t("jurisdiction.edit.stepCode.energyStepRequired")}
+                  </GridItem>
+                  <GridItem textAlign="center"></GridItem>
+                  <GridItem textAlign="center" textTransform="uppercase" fontSize="xs">
+                    {t("jurisdiction.edit.stepCode.zeroCarbonStepRequired")}
+                  </GridItem>
+                  {part9RequiredSteps.map((ptrs, i) => (
+                    <>
+                      <GridItem as={Center}>
+                        <Tag bg="semantic.successLight" color="inherit" rounded="xs" fontWeight="bold">
+                          {currentJurisdiction.energyStepRequiredTranslation(ptrs.energyStepRequired)}
+                        </Tag>
+                      </GridItem>
+                      <GridItem as={Center} fontStyle="italic" fontWeight="bold" fontSize="sm" px={4} mx="auto">
+                        {t("ui.and")}
+                      </GridItem>
+                      <GridItem as={Center}>
+                        <Tag bg="semantic.successLight" color="inherit" rounded="xs" fontWeight="bold">
+                          {currentJurisdiction.zeroCarbonLevelTranslation(ptrs.zeroCarbonStepRequired)}{" "}
+                        </Tag>
+                      </GridItem>
+                      {i !== part9RequiredSteps.length - 1 && (
+                        <GridItem
+                          colSpan={3}
+                          textTransform="uppercase"
+                          bg="theme.blueLight"
+                          fontStyle="italic"
+                          color="text.link"
+                          fontSize="sm"
+                          px={2}
+                          py={1}
+                        >
+                          {t("ui.or")}
                         </GridItem>
-                        <GridItem textAlign="center"></GridItem>
-                        <GridItem textAlign="center" textTransform="uppercase" fontSize="xs">
-                          {t("jurisdiction.edit.stepCode.zeroCarbonStepRequired")}
-                        </GridItem>
-                        {requiredStepsByPermitType[permitTypeId].map((ptrs, i) => (
-                          <>
-                            <GridItem as={Center}>
-                              <Tag bg="semantic.successLight" color="inherit" rounded="xs" fontWeight="bold">
-                                {currentJurisdiction.energyStepRequiredTranslation(ptrs.energyStepRequired)}
-                              </Tag>
-                            </GridItem>
-                            <GridItem as={Center} fontStyle="italic" fontWeight="bold" fontSize="sm" px={4} mx="auto">
-                              {t("ui.and")}
-                            </GridItem>
-                            <GridItem as={Center}>
-                              <Tag bg="semantic.successLight" color="inherit" rounded="xs" fontWeight="bold">
-                                {currentJurisdiction.zeroCarbonLevelTranslation(ptrs.zeroCarbonStepRequired)}{" "}
-                              </Tag>
-                            </GridItem>
-                            {i !== requiredStepsByPermitType[permitTypeId].length - 1 && (
-                              <GridItem
-                                colSpan={3}
-                                textTransform="uppercase"
-                                bg="theme.blueLight"
-                                fontStyle="italic"
-                                color="text.link"
-                                fontSize="sm"
-                                px={2}
-                                py={1}
-                              >
-                                {t("ui.or")}
-                              </GridItem>
-                            )}
-                          </>
-                        ))}
-                      </Grid>
-                    </Flex>
-                  </>
-                </AccordionPanel>
-              </AccordionItem>
-            </Accordion>
-          )
-      )}
+                      )}
+                    </>
+                  ))}
+                </Grid>
+              </Flex>
+            </>
+          </AccordionPanel>
+        </AccordionItem>
+      </Accordion>
     </Flex>
   )
 }

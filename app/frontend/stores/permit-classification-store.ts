@@ -3,7 +3,7 @@ import { withEnvironment } from "../lib/with-environment"
 import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
 import { ActivityModel, IActivity, IPermitType, PermitTypeModel } from "../models/permit-classification"
-import { EPermitClassificationType } from "../types/enums"
+import { EPermitClassificationCode, EPermitClassificationType } from "../types/enums"
 import { IOption } from "../types/types"
 
 export const PermitClassificationStoreModel = types
@@ -25,6 +25,11 @@ export const PermitClassificationStoreModel = types
     // View to get all PermitTypes as an array
     get permitTypes() {
       return Array.from(self.permitTypeMap.values())
+    },
+  }))
+  .views((self) => ({
+    get part9BuildingPermitType() {
+      return self.permitTypes.find((permitType) => permitType.code === EPermitClassificationCode.lowResidential)
     },
     // View to get an Activity by id
     getActivityById(id: string) {
