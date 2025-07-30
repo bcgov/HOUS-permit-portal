@@ -93,7 +93,7 @@ export const SectionsSidebar = observer(function SectionsSidebar({
                           onClick={() => onItemClick?.(sectionBlock.requirementBlock.id)}
                           cursor={"pointer"}
                         >
-                          {sectionBlock.requirementBlock?.name}
+                          {sectionBlock.requirementBlock?.displayName}
                         </Text>
                       )
                     })}
