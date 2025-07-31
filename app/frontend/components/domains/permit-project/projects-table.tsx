@@ -55,7 +55,7 @@ export const ProjectsTable = observer(() => {
         </Flex>
       </Flex>
 
-      <SearchGrid templateColumns="2fr 1.5fr 1.5fr 1.5fr 1.5fr 2fr 0.5fr" gridRowClassName="project-grid-row">
+      <SearchGrid templateColumns="2fr 1.5fr 1.5fr 2fr 1.5fr 2fr 0.5fr" gridRowClassName="project-grid-row">
         <GridHeaders columns={Object.values(EPermitProjectSortFields)} includeActionColumn />
 
         {isSearching ? (

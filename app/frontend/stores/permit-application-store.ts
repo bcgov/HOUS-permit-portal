@@ -306,7 +306,7 @@ export const PermitApplicationStoreModel = types
         isFullyLoaded: overrides.isFullyLoaded ?? false,
         isDirty: overrides.isDirty ?? false,
         isLoading: overrides.isLoading ?? false,
-        indexedUsingCurrentTemplateVersion: overrides.indexedUsingCurrentTemplateVersion || null,
+        usingCurrentTemplateVersion: overrides.usingCurrentTemplateVersion || null,
         showingCompareAfter: overrides.showingCompareAfter ?? false,
         revisionMode: overrides.revisionMode ?? false,
         diff: overrides.diff || null,

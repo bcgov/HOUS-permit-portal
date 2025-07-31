@@ -140,26 +140,44 @@ class PermitProject < ApplicationRecord
 
   def assign_unique_project_number
     return if project_number.present?
-    last_project = PermitProject.order(created_at: :desc).first
-    last_number = last_project&.project_number
-    new_number = ""
-    prefix = "OL"
 
-    loop do
-      if last_number.present?
-        year, number = last_number.split("-")
-        if year.to_i == Time.current.year
-          new_number = "#{year}-#{format("%05d", number.to_i + 1)}"
-        else
-          new_number = "#{Time.current.year}-#{format("%05d", 1)}"
-        end
+    prefix = jurisdiction.prefix
+    last_project_number =
+      PermitProject
+        .where("project_number LIKE ?", "#{prefix}-%")
+        .order(Arel.sql("LENGTH(project_number) DESC, project_number DESC"))
+        .limit(1)
+        .pluck(:project_number)
+        .first
+
+    new_integer =
+      if last_project_number
+        number_parts = last_project_number.split("-")
+        # Handles both PROJ-DDDDD and PROJ-DDDD-DDDD formats
+        number_parts[1..].join.to_i + 1
       else
-        new_number = "#{Time.current.year}-#{format("%05d", 1)}"
+        1
       end
 
-      # In the unlikely event of a race condition, this ensures the number is unique
-      break unless PermitProject.exists?(project_number: new_number)
-      last_number = new_number
+    new_number =
+      format(
+        "%s-%04d-%04d",
+        prefix,
+        new_integer / 10_000 % 10_000,
+        new_integer % 10_000
+      )
+
+    # In the unlikely event of a race condition, this ensures the number is unique
+    while PermitProject.exists?(project_number: new_number)
+      number_parts = new_number.split("-")
+      new_integer = number_parts[1..].join.to_i + 1
+      new_number =
+        format(
+          "%s-%04d-%04d",
+          prefix,
+          new_integer / 10_000 % 10_000,
+          new_integer % 10_000
+        )
     end
 
     self.project_number = new_number

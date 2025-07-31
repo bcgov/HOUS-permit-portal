@@ -1,6 +1,6 @@
 import {
   Avatar,
-  Box,
+  Grid,
   GridItem,
   Icon,
   IconButton,
@@ -17,7 +17,9 @@ import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
+import { datefnsTableDateTimeFormat } from "../../../constants"
 import { IPermitApplication } from "../../../models/permit-application"
+import { OutdatedFormWarning } from "../../shared/outdated-form-warning"
 import { PermitApplicationStatusTag } from "../../shared/permit-applications/permit-application-status-tag"
 
 interface IPermitApplicationGridRowProps {
@@ -27,31 +29,38 @@ interface IPermitApplicationGridRowProps {
 export const PermitApplicationGridRow = observer(({ permitApplication }: IPermitApplicationGridRowProps) => {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const { id, updatedAt, submitter } = permitApplication
-  const submitterName = submitter?.name
+  const { id, updatedAt, submitter, usingCurrentTemplateVersion } = permitApplication
+
+  const { name } = submitter
 
   return (
-    <Box
-      display="contents"
-      onClick={() => navigate(`/permit-applications/${id}`)}
+    <Grid
+      gridColumn="1 / -1"
+      templateColumns="subgrid"
+      display="grid"
+      onClick={() => navigate(`/permit-applications/${id}/edit`)}
       _hover={{
-        bg: "greys.grey04",
+        bg: "greys.grey03",
         cursor: "pointer",
       }}
       borderBottom="1px"
       borderColor="border.light"
       _last={{ borderBottom: "none" }}
     >
+      {!usingCurrentTemplateVersion && <OutdatedFormWarning colSpan={5} mx={4} mt={2} />}
       <GridItem display="flex" alignItems="center" px={4} py={2}>
         <VStack align="start" spacing={0}>
           <Text variant="secondary">{permitApplication.templateNickname}</Text>
         </VStack>
       </GridItem>
       <GridItem display="flex" alignItems="center" px={4} py={2}>
-        <Avatar name={submitterName} size="sm" />
+        {/* for some incomprehensible reason, MST wants to return a plain javascript object here for submitter after
+          the permit application sub-merge, not a model - so .name cant be used */}
+        <Avatar name={`${submitter?.firstName} ${submitter?.lastName}`} size="sm" />
+        {/* <Avatar name={submitter?.name} size="sm" /> */}
       </GridItem>
       <GridItem display="flex" alignItems="center" px={4} py={2}>
-        <Text>{format(updatedAt, "MMM-dd-yyyy HH:mm")}</Text>
+        <Text>{format(updatedAt, datefnsTableDateTimeFormat)}</Text>
       </GridItem>
       <GridItem display="flex" alignItems="center" px={4} py={2}>
         <PermitApplicationStatusTag permitApplication={permitApplication} />
@@ -71,6 +80,6 @@ export const PermitApplicationGridRow = observer(({ permitApplication }: IPermit
           </MenuList>
         </Menu>
       </GridItem>
-    </Box>
+    </Grid>
   )
 })

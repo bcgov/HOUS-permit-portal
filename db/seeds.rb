@@ -264,7 +264,7 @@ if PermitApplication.first.blank?
     project_full_address =
       (
         if (north_van.locality_type == "corporation of the city")
-          "323 18Th St E, North Vancouver, BC, V7L 2X8"
+          "323 18th St E, North Vancouver, BC, V7L 2X8"
         else
           "5419 Esperanza Dr, North Vancouver, BC, V7R 3W3"
         end

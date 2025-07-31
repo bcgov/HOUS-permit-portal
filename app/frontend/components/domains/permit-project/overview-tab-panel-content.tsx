@@ -1,5 +1,6 @@
 import { Box, Button, Flex, Grid, Heading, HStack, Icon, Text, VStack } from "@chakra-ui/react"
 import { CaretRight, Info, Plus, SquaresFour, Steps } from "@phosphor-icons/react"
+import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { IPermitProject } from "../../../models/permit-project"
@@ -39,7 +40,7 @@ interface IProps {
   permitProject: IPermitProject
 }
 
-export const OverviewTabPanelContent = ({ permitProject }: IProps) => {
+export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
   const { fullAddress, pid, jurisdiction, projectNumber } = permitProject
   const { t } = useTranslation()
 
@@ -124,4 +125,4 @@ export const OverviewTabPanelContent = ({ permitProject }: IProps) => {
       </Box>
     </Flex>
   )
-}
+})

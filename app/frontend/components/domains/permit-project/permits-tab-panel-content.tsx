@@ -6,6 +6,8 @@ import { useSearch } from "../../../hooks/use-search"
 import { IPermitProject } from "../../../models/permit-project"
 import { useMst } from "../../../setup/root"
 import { EProjectPermitApplicationSortFields } from "../../../types/enums"
+import { Paginator } from "../../shared/base/inputs/paginator"
+import { PerPageSelect } from "../../shared/base/inputs/per-page-select"
 import { SearchGrid } from "../../shared/grid/search-grid"
 import { PermitApplicationGridHeaders } from "./permit-application-grid-headers"
 import { PermitApplicationGridRow } from "./permit-application-grid-row"
@@ -16,6 +18,8 @@ interface IProps {
 
 export const PermitsTabPanelContent = observer(({ permitProject }: IProps) => {
   const { permitApplicationStore } = useMst()
+  const { currentPage, totalPages, totalCount, countPerPage, handleCountPerPageChange, handlePageChange } =
+    permitApplicationStore
 
   useSearch(permitApplicationStore, [permitProject.id])
 
@@ -39,6 +43,21 @@ export const PermitsTabPanelContent = observer(({ permitProject }: IProps) => {
             <PermitApplicationGridRow key={permitApplication.id} permitApplication={permitApplication} />
           ))}
         </SearchGrid>
+        <Flex w={"full"} justifyContent={"space-between"} mt={6}>
+          <PerPageSelect
+            handleCountPerPageChange={handleCountPerPageChange}
+            countPerPage={countPerPage}
+            totalCount={totalCount}
+          />
+          <Paginator
+            current={currentPage}
+            total={totalCount}
+            totalPages={totalPages}
+            pageSize={countPerPage}
+            handlePageChange={handlePageChange}
+            showLessItems={true}
+          />
+        </Flex>
       </Box>
     </Flex>
   )

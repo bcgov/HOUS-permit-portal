@@ -10,6 +10,7 @@ import { ECollaborationType } from "../../../types/enums"
 import { CopyableValue } from "../../shared/base/copyable-value"
 import { ErrorScreen } from "../../shared/base/error-screen"
 import { LoadingScreen } from "../../shared/base/loading-screen"
+import { NotFoundScreen } from "../../shared/base/not-found-screen"
 import { EditableInputWithControls } from "../../shared/editable-input-with-controls"
 import { BrowserSearchPrompt } from "../../shared/permit-applications/browser-search-prompt"
 import { PermitApplicationViewedAtTag } from "../../shared/permit-applications/permit-application-viewed-at-tag"
@@ -101,6 +102,8 @@ export const ReviewPermitApplicationScreen = observer(() => {
 
   // @ts-ignore
   const permitHeaderHeight = permitHeaderRef?.current?.offsetHeight ?? 0
+
+  if (currentPermitApplication.isDraft) return <NotFoundScreen />
 
   return (
     <Box as="main" id="reviewing-permit-application">
