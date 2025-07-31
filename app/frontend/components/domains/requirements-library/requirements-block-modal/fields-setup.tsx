@@ -16,6 +16,7 @@ import { IFormConditional, IRequirementAttributes } from "../../../../types/api-
 import {
   EEnergyStepCodeDependencyRequirementCode,
   EEnergyStepCodePart3DependencyRequirementCode,
+  EFlashMessageStatus,
   ENumberUnit,
   ERequirementType,
 } from "../../../../types/enums"
@@ -25,6 +26,7 @@ import {
   isMultiOptionRequirement,
   isStepCodePackageFileRequirementCode,
 } from "../../../../utils/utility-functions"
+import { CustomMessageBox } from "../../../shared/base/custom-message-box"
 import { EditableInputWithControls } from "../../../shared/editable-input-with-controls"
 import { EditorWithPreview } from "../../../shared/editor/custom-extensions/editor-with-preview"
 import { FieldsSetupDrawer } from "../fields-setup-drawer"
@@ -52,7 +54,12 @@ export const FieldsSetup = observer(function FieldsSetup({
   isEditable?: boolean
 }) {
   const { t } = useTranslation()
-  const { setValue, control, watch } = useFormContext<IRequirementBlockForm>()
+  const {
+    setValue,
+    control,
+    watch,
+    formState: { errors },
+  } = useFormContext<IRequirementBlockForm>()
   const { fields, append, remove, move } = useFieldArray<IRequirementBlockForm>({
     control,
     name: "requirementsAttributes",
@@ -250,6 +257,7 @@ export const FieldsSetup = observer(function FieldsSetup({
               defaultValue={displayNameValue || ""}
               onSubmit={onDisplayNameChange}
               onCancel={onDisplayNameChange}
+              onChange={onDisplayNameChange}
               color={R.isEmpty(displayNameValue) ? "text.link" : undefined}
               aria-label={"Edit Display Name"}
               flex={1}
@@ -258,6 +266,13 @@ export const FieldsSetup = observer(function FieldsSetup({
               {t(isInReorderMode ? "ui.done" : "ui.reorder")}
             </Button>
           </Flex>
+          {errors.displayName && (
+            <CustomMessageBox
+              m={6}
+              status={EFlashMessageStatus.error}
+              description={t(`requirementsLibrary.modals.displayNameError`)}
+            />
+          )}
           <Box pb={8}>
             <Box px={3} mt={4} mb={3}>
               <Controller
@@ -473,7 +488,7 @@ export const FieldsSetup = observer(function FieldsSetup({
                         />
                       </Box>
                       <FieldControlsHeader
-                        requirementCode={watchedRequirementCode}
+                        requirementCode={watchedRequirementCode as ERequirementType}
                         isRequirementInEditMode={isRequirementInEditMode(field.id)}
                         toggleRequirementToEdit={() => toggleRequirementToEdit(field.id)}
                         onRemove={() => onRemoveRequirement(index)}
