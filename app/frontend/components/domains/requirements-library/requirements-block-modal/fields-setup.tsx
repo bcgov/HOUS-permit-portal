@@ -1,5 +1,5 @@
-import { Alert, Box, Button, Flex, HStack, Tag, Text, useDisclosure, VStack } from "@chakra-ui/react"
-import { Info, WarningCircle } from "@phosphor-icons/react"
+import { Box, Button, Flex, HStack, Tag, Text, useDisclosure, VStack } from "@chakra-ui/react"
+import { Info } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React, { useState } from "react"
@@ -16,6 +16,7 @@ import { IFormConditional, IRequirementAttributes } from "../../../../types/api-
 import {
   EEnergyStepCodeDependencyRequirementCode,
   EEnergyStepCodePart3DependencyRequirementCode,
+  EFlashMessageStatus,
   ENumberUnit,
   ERequirementType,
 } from "../../../../types/enums"
@@ -25,6 +26,7 @@ import {
   isMultiOptionRequirement,
   isStepCodePackageFileRequirementCode,
 } from "../../../../utils/utility-functions"
+import { CustomMessageBox } from "../../../shared/base/custom-message-box"
 import { EditableInputWithControls } from "../../../shared/editable-input-with-controls"
 import { EditorWithPreview } from "../../../shared/editor/custom-extensions/editor-with-preview"
 import { FieldsSetupDrawer } from "../fields-setup-drawer"
@@ -265,20 +267,11 @@ export const FieldsSetup = observer(function FieldsSetup({
             </Button>
           </Flex>
           {errors.displayName && (
-            <Alert
-              status="error"
-              rounded="md"
-              borderWidth={1}
-              borderColor="semantic.error"
-              bg="semantic.errorLight"
-              mt="4"
-              mx="6"
-              w="94%"
-              color="text.error"
-            >
-              <WarningCircle color="var(--chakra-colors-semantic-error)" />
-              <Text ml="2">{t("ui.isRequired", { field: t("requirementsLibrary.modals.displayNameError") })}</Text>
-            </Alert>
+            <CustomMessageBox
+              m={6}
+              status={EFlashMessageStatus.error}
+              description={t(`requirementsLibrary.modals.displayNameError`)}
+            />
           )}
           <Box pb={8}>
             <Box px={3} mt={4} mb={3}>
