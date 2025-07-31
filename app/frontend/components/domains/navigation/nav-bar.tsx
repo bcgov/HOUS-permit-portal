@@ -89,7 +89,11 @@ function isLoginPath(path: string): boolean {
   return regex.test(path)
 }
 
-// TODO: refactor these into a single function that takes a regex
+function isProjectDetailPath(path: string): boolean {
+  const regex = /^\/permit-projects\/[a-f\d-]+/
+  return regex.test(path)
+}
+
 function isStepCodePath(path: string): boolean {
   const regex = /^\/part-(3|9)-step-code.*$/
   return regex.test(path)
@@ -107,6 +111,7 @@ function shouldHideSubNavbarForPath(path: string): boolean {
     isDigitalPermitEditPath,
     isApiMappingPath,
     isLoginPath,
+    isProjectDetailPath,
     isStepCodePath,
   ]
 
