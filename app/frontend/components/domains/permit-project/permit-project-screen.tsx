@@ -1,7 +1,7 @@
 import { Box, Container, Flex, IconButton, TabPanel, TabPanels, Tabs, Text } from "@chakra-ui/react"
 import { CaretLeft, ClipboardText, SquaresFour } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
-import React, { useEffect, useRef, useState } from "react"
+import React, { useEffect, useRef, useState, useTransition } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { Link as RouterLink, useLocation, useNavigate, useParams } from "react-router-dom"
@@ -56,13 +56,17 @@ export const PermitProjectScreen = observer(() => {
     reset(getDefaultValues())
   }, [currentPermitProject, reset]) // Recalculate if title changes, as it might affect height
 
+  const [isPending, startTransition] = useTransition()
+
   const getTabIndex = () => {
     const tabIndex = TABS_DATA.findIndex((tab) => location.pathname.includes(tab.to))
     return tabIndex === -1 ? 0 : tabIndex
   }
 
   const handleTabChange = (index: number) => {
-    navigate(TABS_DATA[index].to, { replace: true })
+    startTransition(() => {
+      navigate(TABS_DATA[index].to, { replace: true })
+    })
   }
 
   const onSubmit = async (data: { title: string }) => {
@@ -115,14 +119,14 @@ export const PermitProjectScreen = observer(() => {
           </Flex>
         </Container>
       </Flex>
-      <Tabs w="full" flexGrow={1} index={getTabIndex()} onChange={handleTabChange} display="flex">
+      <Tabs w="full" flexGrow={1} index={getTabIndex()} onChange={handleTabChange} display="flex" isLazy>
         <ProjectSidebarTabList top={`${headerHeight}px`} p={0} tabsData={TABS_DATA} />
         <TabPanels>
           <TabPanel>
-            <OverviewTabPanelContent permitProject={currentPermitProject} />
+            {isPending ? <LoadingScreen /> : <OverviewTabPanelContent permitProject={currentPermitProject} />}
           </TabPanel>
           <TabPanel>
-            <PermitsTabPanelContent permitProject={currentPermitProject} />
+            {isPending ? <LoadingScreen /> : <PermitsTabPanelContent permitProject={currentPermitProject} />}
           </TabPanel>
         </TabPanels>
       </Tabs>

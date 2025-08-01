@@ -46,10 +46,7 @@ export const JurisdictionStepCodeRequirementsScreen = observer(() => {
           )}
         </Text>
 
-        <StepCodeRequirementsTable
-          requirements={currentJurisdiction.permitTypeRequiredSteps}
-          currentJurisdiction={currentJurisdiction}
-        />
+        <StepCodeRequirementsTable currentJurisdiction={currentJurisdiction} />
 
         <HStack spacing={4} mt={6}>
           <Button variant="outline" onClick={handleCheckAnotherAddress}>

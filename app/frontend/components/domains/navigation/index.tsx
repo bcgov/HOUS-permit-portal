@@ -603,10 +603,11 @@ const AppRoutes = observer(() => {
           <Route path="/" element={<EULAScreen />} />
         )}
         {loggedIn && eulaAccepted && isUnconfirmed && (
-          // Onboarding step 2: confirm email - only ProfileScreen available
+          // Onboarding step 2: confirm email - only profile screens available
           <>
             <Route path="/" element={<ProfileScreen />} />
             <Route path="/profile" element={<ProfileScreen />} />
+            <Route path="/profile/eula" element={<EULAScreen withClose />} />
             <Route path="*" element={<RedirectScreen path="/" />} />
           </>
         )}
