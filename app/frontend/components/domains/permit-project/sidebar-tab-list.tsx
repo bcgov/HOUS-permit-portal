@@ -23,7 +23,7 @@ const tabProps = {
   },
 }
 
-export const ProjectSidebarTabList = ({ top = 0, tabsData, ...rest }: IProjectSidebarTabListProps) => {
+export const ProjectSidebarTabList = ({ top = 0, tabsData, children, ...rest }: IProjectSidebarTabListProps) => {
   const navHeight = document.getElementById("mainNav")?.offsetHeight
 
   return (

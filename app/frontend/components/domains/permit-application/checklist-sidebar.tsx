@@ -57,7 +57,9 @@ export const ChecklistSideBar = observer(({ permitApplication, completedBlocks }
                           c.requirementInputType === ERequirementType.energyStepCode ||
                           c.requirementInputType === ERequirementType.energyStepCodePart3
                       )
-                      const showCompleted = isEnergyStepCodeBlock ? stepCode?.isComplete : completedBlocks[block.key]
+                      const showCompleted = isEnergyStepCodeBlock
+                        ? stepCode?.isComplete || completedBlocks[block.key]
+                        : completedBlocks[block.key]
                       return (
                         <Tab
                           key={block.key}
