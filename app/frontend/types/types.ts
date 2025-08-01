@@ -1,5 +1,4 @@
 import { Theme } from "@chakra-ui/react"
-import { IJurisdiction } from "../models/jurisdiction"
 import { IPermitApplication } from "../models/permit-application"
 import { IPermitBlockStatus } from "../models/permit-block-status"
 import { IActivity, IPermitType } from "../models/permit-classification"
@@ -598,11 +597,6 @@ export interface IPermitTypeRequiredStep {
   energyStepRequired: EEnergyStep
   zeroCarbonStepRequired: EZeroCarbonStep
   activityName: string
-}
-
-export interface IStepCodeRequirementsTableProps {
-  requirements: IPermitTypeRequiredStep[]
-  currentJurisdiction: IJurisdiction
 }
 
 export type TCreateRequirementTemplateFormData = {
