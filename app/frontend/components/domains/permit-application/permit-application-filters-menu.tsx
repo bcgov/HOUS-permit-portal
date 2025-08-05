@@ -17,21 +17,10 @@ export const PermitApplicationFiltersMenu = observer(() => {
     searchPermitApplications()
   }
 
-  const toggleMenu = () => {
-    setIsOpen(!isOpen)
-  }
-
   return (
     <Flex direction="column" position="relative" zIndex={1}>
-      <Menu isOpen={isOpen}>
-        <MenuButton
-          as={Button}
-          variant="outline"
-          size="md"
-          leftIcon={<Funnel />}
-          rightIcon={<CaretDown />}
-          onClick={toggleMenu}
-        >
+      <Menu isOpen={isOpen} onOpen={() => setIsOpen(true)} onClose={() => setIsOpen(false)}>
+        <MenuButton as={Button} variant="outline" size="md" leftIcon={<Funnel />} rightIcon={<CaretDown />}>
           {t("ui.filter")}
         </MenuButton>
         <MenuList
@@ -42,6 +31,7 @@ export const PermitApplicationFiltersMenu = observer(() => {
           boxShadow="md"
           p={4}
           zIndex={1}
+          onClick={(e) => e.stopPropagation()}
         >
           <Flex direction="column">
             <Checkbox
@@ -53,7 +43,7 @@ export const PermitApplicationFiltersMenu = observer(() => {
             </Checkbox>
           </Flex>
           <Divider borderColor="greys.grey03" my={4} />
-          <Button size="sm" variant="tertiary" onClick={resetFilters}>
+          <Button size="sm" variant="tertiary" onClick={() => resetFilters()}>
             {t("ui.reset")}
           </Button>
         </MenuList>

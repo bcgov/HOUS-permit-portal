@@ -83,7 +83,7 @@ export const PermitApplicationStoreModel = types
       return Array.from(self.permitApplicationMap.values())
     },
     get hasResetableFilters() {
-      return !R.isNil(self.templateVersionIdFilter) || !R.isNil(self.requirementTemplateIdFilter)
+      return self.hasCollaboratorFilter || self.templateVersionIdFilter || !R.isEmpty(self.requirementTemplateIdFilter)
     },
     get statusFilterToGroup(): EPermitApplicationStatusGroup {
       const map = {
@@ -422,7 +422,8 @@ export const PermitApplicationStoreModel = types
   }))
   .actions((self) => ({
     resetFilters() {
-      self.hasCollaboratorFilter = false
+      self.statusFilter = [] as any
+      self.hasCollaboratorFilter = null
       self.templateVersionIdFilter = null
       self.requirementTemplateIdFilter = [] as any
       if (typeof window !== "undefined") {
