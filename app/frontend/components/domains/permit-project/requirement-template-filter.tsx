@@ -58,7 +58,7 @@ export const RequirementTemplateFilter = observer(function RequirementTemplateFi
   return (
     <Menu>
       <MenuButton as={Button} variant="outline" rightIcon={<CaretDown />} {...rest}>
-        {t("requirementTemplate.filter")}
+        {t("permitProject.index.requirementTemplateFilter")}
       </MenuButton>
       <MenuList p={4} zIndex="dropdown">
         <VStack align="start" spacing={4}>

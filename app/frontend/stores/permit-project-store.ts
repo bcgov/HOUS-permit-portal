@@ -15,7 +15,7 @@ export const PermitProjectStoreModel = types
   .compose(
     types.model("PermitProjectStoreModel", {
       permitProjectMap: types.map(PermitProjectModel),
-      pinnedProjectsArray: types.array(types.reference(PermitProjectModel)),
+      pinnedPermitProjects: types.optional(types.array(types.reference(PermitProjectModel)), []),
       tablePermitProjects: types.array(types.reference(PermitProjectModel)), // For table views
       currentPermitProject: types.maybeNull(types.reference(PermitProjectModel)),
       phaseFilter: types.maybeNull(types.array(types.enumeration(Object.values(EPermitProjectPhase)))),
@@ -38,10 +38,6 @@ export const PermitProjectStoreModel = types
     get permitProjects() {
       return Array.from(self.permitProjectMap.values())
     },
-    get pinnedProjects() {
-      return self.pinnedProjectsArray.map((p) => p)
-    },
-    // Add other views as needed
   }))
   .actions((self) => ({
     __beforeMergeUpdate(permitProject) {
@@ -68,7 +64,7 @@ export const PermitProjectStoreModel = types
         owner: permitProject.owner?.id || null,
         permitApplications:
           permitProject.permitApplications?.map((app) => (typeof app === "object" ? app.id : app)) || [],
-        jurisdiction: permitProject.jurisdiction?.id || null,
+        jurisdiction: permitProject.jurisdiction?.id,
       })
     },
     setRequirementTemplateFilter(value: string[]) {
@@ -93,15 +89,7 @@ export const PermitProjectStoreModel = types
       self.tablePermitProjects = cast(projects.map((p) => p.id))
     },
     setPinnedProjects: (projects: IPermitProject[]) => {
-      self.pinnedProjectsArray = cast(projects.map((p) => p.id))
-    },
-    togglePinnedProject(project: IPermitProject) {
-      const isPinned = self.pinnedProjectsArray.some((p) => p.id === project.id)
-      if (isPinned) {
-        self.pinnedProjectsArray.remove(project)
-      } else {
-        self.pinnedProjectsArray.push(project)
-      }
+      self.pinnedPermitProjects.replace(projects.map((p) => p.id) as any)
     },
   }))
   .actions((self) => ({
@@ -126,7 +114,7 @@ export const PermitProjectStoreModel = types
 
       if (response.ok && response.data) {
         self.mergeUpdateAll(response.data.data, "permitProjectMap")
-        self.setTablePermitProjects(response.data.data.map((p) => self.permitProjectMap.get(p.id)))
+        self.setTablePermitProjects(response.data.data)
         self.setPageFields(response.data.meta, opts)
       } else {
         console.error("Failed to search permit projects:", response)
@@ -144,6 +132,8 @@ export const PermitProjectStoreModel = types
           console.error("Failed to fetch pinned projects:", response)
         }
         return response.ok
+      } catch (error) {
+        console.error("Failed to fetch pinned projects:", error)
       } finally {
         self.isFetchingPinnedProjects = false
       }

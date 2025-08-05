@@ -646,7 +646,6 @@ export enum EPermitProjectSortFields {
   location = "location",
   submitter = "submitter",
   updatedAt = "updated_at",
-  forcastedCompletionDate = "forcasted_completion_date",
   phase = "phase",
 }
 

@@ -13,7 +13,7 @@ import { ModelSearchInput } from "../../shared/base/model-search-input"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
 import { ActiveArchivedFilter } from "../../shared/filters/active-archived-filter"
 import { SearchGrid } from "../../shared/grid/search-grid"
-import { GridHeaders } from "./grid-header"
+import { GridHeaders, PROJECTS_GRID_TEMPLATE_COLUMNS } from "./grid-header"
 import { PhaseFilter } from "./phase-filter"
 import { ProjectGridRow } from "./project-grid-row"
 import { RequirementTemplateFilter } from "./requirement-template-filter"
@@ -55,15 +55,15 @@ export const ProjectsTable = observer(() => {
         </Flex>
       </Flex>
 
-      <SearchGrid templateColumns="2fr 1.5fr 1.5fr 2fr 1.5fr 2fr 0.5fr" gridRowClassName="project-grid-row">
+      <SearchGrid templateColumns={PROJECTS_GRID_TEMPLATE_COLUMNS} gridRowClassName="project-grid-row">
         <GridHeaders columns={Object.values(EPermitProjectSortFields)} includeActionColumn />
 
         {isSearching ? (
-          <Flex gridColumn="span 7" justify="center" align="center" minH="200px">
+          <Flex gridColumn="span 6" justify="center" align="center" minH="200px">
             <SharedSpinner />
           </Flex>
         ) : R.isEmpty(tablePermitProjects) ? (
-          <GridItem gridColumn="span 7">
+          <GridItem gridColumn="span 6">
             <CustomMessageBox
               m={4}
               status={EFlashMessageStatus.info}

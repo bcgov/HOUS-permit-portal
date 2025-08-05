@@ -35,6 +35,11 @@ class PermitProjectBlueprint < Blueprinter::Base
 
   view :extended do
     include_view :base
+
+    field :is_fully_loaded do |pa, options|
+      true
+    end
+
     association :recent_permit_applications,
                 name: :recentPermitApplications,
                 blueprint: PermitApplicationBlueprint,

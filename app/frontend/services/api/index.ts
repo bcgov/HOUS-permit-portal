@@ -259,11 +259,11 @@ export class Api {
   }
 
   async pinPermitProject(id: string) {
-    return this.client.post<ApiResponse<IPermitProject>>(`/permit_projects/${id}/pin`)
+    return this.client.post<ApiResponse<IPermitProject[]>>(`/permit_projects/${id}/pin`)
   }
 
   async unpinPermitProject(id: string) {
-    return this.client.delete<ApiResponse<IPermitProject>>(`/permit_projects/${id}/unpin`)
+    return this.client.delete<ApiResponse<IPermitProject[]>>(`/permit_projects/${id}/unpin`)
   }
 
   async fetchCollaboratorsByCollaboratorable(collaboratorableId: string, params?: TSearchParams<never, never>) {

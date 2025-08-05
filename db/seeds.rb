@@ -350,3 +350,4 @@ end
 
 puts "Seeding Permit Projects from Permit Applications..."
 PermitProjectSeederService.call
+PermitProject.reindex

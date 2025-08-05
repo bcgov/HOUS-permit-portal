@@ -6,7 +6,6 @@ GridHeader.defaultProps = {
   py: 5,
   color: "text.secondary",
   fontWeight: 400,
-  borderTop: "1px solid",
   borderBottom: "1px solid",
   borderColor: "border.light",
   role: "columnheader",

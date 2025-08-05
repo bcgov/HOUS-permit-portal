@@ -4,7 +4,7 @@ import { observer } from "mobx-react-lite"
 import React, { useEffect, useRef, useState, useTransition } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { Link as RouterLink, useLocation, useNavigate, useParams } from "react-router-dom"
+import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom"
 import { usePermitProject } from "../../../hooks/resources/use-permit-project"
 import { useMst } from "../../../setup/root"
 import { ErrorScreen } from "../../shared/base/error-screen"
@@ -21,7 +21,6 @@ export const PermitProjectScreen = observer(() => {
   const location = useLocation()
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const params = useParams()
 
   const TABS_DATA: ITabItem[] = [
     { label: t("permitProject.details.overview"), icon: SquaresFour, to: "overview" },

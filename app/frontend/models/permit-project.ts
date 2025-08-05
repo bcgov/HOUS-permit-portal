@@ -15,7 +15,6 @@ export const PermitProjectModel = types
     pid: types.maybeNull(types.string),
     projectNumber: types.maybeNull(types.string),
     jurisdictionDisambiguatedName: types.string,
-    forcastedCompletionDate: types.maybeNull(types.Date),
     phase: types.enumeration(Object.values(EPermitProjectPhase)),
     tablePermitApplications: types.maybeNull(types.array(types.reference(types.late(() => PermitApplicationModel)))),
     recentPermitApplications: types.frozen<IPermitApplication[]>(),
@@ -30,7 +29,8 @@ export const PermitProjectModel = types
     revisionsRequestedCount: types.optional(types.number, 0),
     approvedCount: types.optional(types.number, 0),
     jurisdiction: types.maybeNull(types.reference(types.late(() => JurisdictionModel))),
-    hasOutdatedDraftApplications: types.optional(types.boolean, false),
+    hasOutdatedDraftApplications: types.maybeNull(types.boolean),
+    isFullyLoaded: types.optional(types.boolean, false),
   })
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -63,24 +63,21 @@ export const PermitProjectModel = types
     setIsPinned(isPinned: boolean) {
       self.isPinned = isPinned
     },
+  }))
+  .actions((self) => ({
     togglePin: flow(function* () {
       const originalIsPinned = self.isPinned
-      // Optimistic update
-      self.isPinned = !originalIsPinned
 
       const store = self.rootStore.permitProjectStore
-      store.togglePinnedProject(self as IPermitProject)
 
-      const response = !originalIsPinned
-        ? yield* toGenerator(self.environment.api.pinPermitProject(self.id))
-        : yield* toGenerator(self.environment.api.unpinPermitProject(self.id))
+      const response = originalIsPinned
+        ? yield* toGenerator(self.environment.api.unpinPermitProject(self.id))
+        : yield* toGenerator(self.environment.api.pinPermitProject(self.id))
 
       if (response.ok) {
-        store.mergeUpdate(response.data.data, "permitProjectMap")
-      } else {
-        // Revert on failure
-        self.isPinned = originalIsPinned
-        store.togglePinnedProject(self as IPermitProject)
+        self.setIsPinned(!originalIsPinned)
+        store.mergeUpdateAll(response.data.data, "permitProjectMap")
+        store.setPinnedProjects(response.data.data)
       }
     }),
     setTablePermitApplications(permitApplications: IPermitApplication[]) {
