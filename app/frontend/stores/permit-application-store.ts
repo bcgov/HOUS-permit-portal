@@ -268,7 +268,7 @@ export const PermitApplicationStoreModel = types
     ) {
       if (self.currentPermitApplication?.isEphemeral) return self.currentPermitApplication
       const permitApplication = PermitApplicationModel.create({
-        id: `ephemeral-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        id: `ephemeral-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
         nickname: overrides.nickname || "Ephemeral Application",
         number: overrides.number || "",
         fullAddress: overrides.fullAddress || null,
@@ -409,6 +409,7 @@ export const PermitApplicationStoreModel = types
         case EPermitApplicationSocketEventTypes.updatePermitBlockStatus:
           payloadData = payload.data as IPermitBlockStatus
           self.permitApplicationMap.get(payloadData?.permitApplicationId)?.updatePermitBlockStatus(payloadData)
+          break
         default:
           import.meta.env.DEV && console.log(`Unknown event type ${payload.eventType}`)
       }

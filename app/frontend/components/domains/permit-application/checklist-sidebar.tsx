@@ -3,7 +3,6 @@ import { CheckCircle, CircleDashed } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { IPermitApplication } from "../../../models/permit-application"
-import { ERequirementType } from "../../../types/enums"
 
 interface IChecklistSideBarProps {
   permitApplication: IPermitApplication
@@ -52,12 +51,8 @@ export const ChecklistSideBar = observer(({ permitApplication, completedBlocks }
                       {section.title}
                     </Heading>
                     {section?.components?.map((block) => {
-                      const isEnergyStepCodeBlock = block.components.some(
-                        (c) =>
-                          c.requirementInputType === ERequirementType.energyStepCode ||
-                          c.requirementInputType === ERequirementType.energyStepCodePart3
-                      )
-                      const showCompleted = isEnergyStepCodeBlock ? stepCode?.isComplete : completedBlocks[block.key]
+                      const usingStepCodeTool = !!stepCode
+                      const showCompleted = usingStepCodeTool ? stepCode?.isComplete : completedBlocks[block.key]
                       return (
                         <Tab
                           key={block.key}
