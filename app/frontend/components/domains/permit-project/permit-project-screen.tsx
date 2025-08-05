@@ -4,13 +4,13 @@ import { observer } from "mobx-react-lite"
 import React, { useEffect, useRef, useState, useTransition } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { Link as RouterLink, useLocation, useNavigate, useParams } from "react-router-dom"
+import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom"
 import { usePermitProject } from "../../../hooks/resources/use-permit-project"
 import { useMst } from "../../../setup/root"
 import { ErrorScreen } from "../../shared/base/error-screen"
 import { LoadingScreen } from "../../shared/base/loading-screen"
 import { EditableInputWithControls } from "../../shared/editable-input-with-controls"
-import { PhaseBox } from "../../shared/permit-projects/phase-box"
+import { RollupStatusBox } from "../../shared/permit-projects/rollup-status-box"
 import { OverviewTabPanelContent } from "./overview-tab-panel-content"
 import { PermitsTabPanelContent } from "./permits-tab-panel-content"
 import { ITabItem, ProjectSidebarTabList } from "./sidebar-tab-list"
@@ -21,7 +21,6 @@ export const PermitProjectScreen = observer(() => {
   const location = useLocation()
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const params = useParams()
 
   const TABS_DATA: ITabItem[] = [
     { label: t("permitProject.details.overview"), icon: SquaresFour, to: "overview" },
@@ -115,7 +114,7 @@ export const PermitProjectScreen = observer(() => {
               aria-label={t("permitProject.details.editProjectName")}
               onChange={(val) => setValue("title", val)}
             />
-            <PhaseBox project={currentPermitProject} w="240px" />
+            <RollupStatusBox project={currentPermitProject} w="240px" />
           </Flex>
         </Container>
       </Flex>

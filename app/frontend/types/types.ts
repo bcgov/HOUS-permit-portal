@@ -24,7 +24,7 @@ import {
   ENumberUnit,
   EPermitApplicationSocketEventTypes,
   EPermitApplicationStatus,
-  EPermitProjectPhase,
+  EPermitProjectRollupStatus,
   ERequirementType,
   ESocketDomainTypes,
   ESocketEventTypes,
@@ -526,7 +526,7 @@ export interface IPermitApplicationSearchFilters {
 export interface IPermitProjectSearchFilters {
   query?: string
   showArchived?: boolean
-  phase?: EPermitProjectPhase[]
+  rollupStatus?: EPermitProjectRollupStatus[]
   requirementTemplateIds?: string[]
   // Add other specific filters if needed, e.g., status, submitterId
 }

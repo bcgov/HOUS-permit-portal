@@ -75,8 +75,14 @@ export const PermitApplicationGridRow = observer(({ permitApplication }: IPermit
             aria-label={t("ui.options")}
           />
           <MenuList>
-            <MenuItem>{t("ui.view")}</MenuItem>
-            <MenuItem>{t("ui.delete")}</MenuItem>
+            <MenuItem
+              onClick={(e) => {
+                e.stopPropagation()
+                navigate(`/permit-applications/${id}/edit`)
+              }}
+            >
+              {t("ui.view")}
+            </MenuItem>
           </MenuList>
         </Menu>
       </GridItem>

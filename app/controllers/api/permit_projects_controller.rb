@@ -4,6 +4,7 @@ class Api::PermitProjectsController < Api::ApplicationController
 
   before_action :set_permit_project,
                 only: %i[show update pin unpin search_permit_applications]
+  before_action :set_pinned_projects, only: %i[pinned]
 
   # TODO: If you create a search concern similar to Api::Concerns::Search::PermitApplications,
   # include it here for more advanced search parameter handling.
@@ -77,26 +78,23 @@ class Api::PermitProjectsController < Api::ApplicationController
   end
 
   def pinned
-    pinned_projects =
-      apply_search_authorization(
-        current_user.pinned_permit_projects.includes(:jurisdiction)
-      )
-    render_success pinned_projects,
+    render_success @pinned_projects,
                    nil,
                    {
                      blueprint: PermitProjectBlueprint,
-                     blueprint_opts: blueprint_options
+                     blueprint_opts: blueprint_options(view: :base)
                    }
   end
 
   def pin
     authorize @permit_project, :pin?
     current_user.pinned_projects.create(permit_project: @permit_project)
-    render_success @permit_project,
+    set_pinned_projects
+    render_success @pinned_projects,
                    "permit_project.pin_success",
                    {
                      blueprint: PermitProjectBlueprint,
-                     blueprint_opts: blueprint_options(view: :extended)
+                     blueprint_opts: blueprint_options(view: :base)
                    }
   end
 
@@ -106,11 +104,12 @@ class Api::PermitProjectsController < Api::ApplicationController
       current_user.pinned_projects.find_by(permit_project: @permit_project)
     if pinned_project
       pinned_project.destroy
-      render_success @permit_project,
+      set_pinned_projects
+      render_success @pinned_projects,
                      "permit_project.unpin_success",
                      {
                        blueprint: PermitProjectBlueprint,
-                       blueprint_opts: blueprint_options(view: :extended)
+                       blueprint_opts: blueprint_options(view: :base)
                      }
     else
       render_error "permit_project.unpin_error", :not_found
@@ -134,6 +133,13 @@ class Api::PermitProjectsController < Api::ApplicationController
   end
 
   private
+
+  def set_pinned_projects
+    @pinned_projects =
+      apply_search_authorization(
+        current_user.pinned_permit_projects.includes(:jurisdiction).reload
+      )
+  end
 
   def set_project_ids_with_outdated_drafts(projects)
     project_ids = projects.map(&:id)

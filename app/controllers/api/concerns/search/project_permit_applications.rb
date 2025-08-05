@@ -67,11 +67,28 @@ module Api::Concerns::Search::ProjectPermitApplications
   end
 
   def permit_application_where_clause
-    filters = permit_application_search_params[:filters] || {}
+    search_filters =
+      (
+        permit_application_search_params[:filters].to_h || {}
+      ).deep_symbolize_keys.compact_blank
 
-    where = { permit_project_id: @permit_project.id }
-    where[:sandbox_id] = current_sandbox&.id if !current_user.super_admin?
+    and_conditions = []
+    and_conditions << { permit_project_id: @permit_project.id }
+    if !current_user.super_admin?
+      and_conditions << { sandbox_id: current_sandbox&.id }
+    end
 
-    (filters&.to_h || {}).deep_symbolize_keys.compact.merge!(where)
+    search_filters.each do |key, value|
+      case key
+      when :requirement_template_id
+        and_conditions << { requirement_template_id: value.split(",") }
+      when :status
+        and_conditions << { status: value }
+      else
+        and_conditions << { key => value }
+      end
+    end
+
+    { _and: and_conditions }
   end
 end

@@ -7,7 +7,7 @@ class PermitProjectBlueprint < Blueprinter::Base
            :pid,
            :project_number,
            :jurisdiction_disambiguated_name,
-           :phase,
+           :rollup_status,
            :is_pinned,
            :created_at,
            :updated_at
@@ -35,6 +35,11 @@ class PermitProjectBlueprint < Blueprinter::Base
 
   view :extended do
     include_view :base
+
+    field :is_fully_loaded do |pa, options|
+      true
+    end
+
     association :recent_permit_applications,
                 name: :recentPermitApplications,
                 blueprint: PermitApplicationBlueprint,

@@ -29,8 +29,6 @@ export const PermitApplicationGridHeaders = observer(
               justifyContent={"space-between"}
               cursor="pointer"
               onClick={() => toggleSort(column)}
-              borderRight={"1px solid"}
-              borderColor={"border.light"}
               px={4}
             >
               <Text textAlign="left">{getProjectPermitApplicationSortColumnHeader(column)}</Text>

@@ -5,10 +5,11 @@ import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
-import { datefnsTableDateFormat, datefnsTableDateTimeFormat } from "../../../constants"
+import { datefnsTableDateTimeFormat } from "../../../constants"
 import { IPermitProject } from "../../../models/permit-project"
+import { useMst } from "../../../setup/root"
 import { OutdatedFormWarning } from "../../shared/outdated-form-warning"
-import { PhaseBox } from "../../shared/permit-projects/phase-box"
+import { RollupStatusBox } from "../../shared/permit-projects/rollup-status-box"
 
 interface IProjectGridRowProps {
   project: IPermitProject
@@ -17,6 +18,7 @@ interface IProjectGridRowProps {
 export const ProjectGridRow = observer(({ project }: IProjectGridRowProps) => {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const { permitProjectStore } = useMst()
 
   return (
     <>
@@ -43,17 +45,12 @@ export const ProjectGridRow = observer(({ project }: IProjectGridRowProps) => {
             <Text>{project.shortAddress}</Text>
           </Flex>
         </GridItem>
-        <GridItem display="flex" alignItems="center" px={4} py={2}>
-          TODO
-        </GridItem>
+        <GridItem display="flex" alignItems="center" px={4} py={2}></GridItem>
         <GridItem display="flex" alignItems="center" px={4} py={2}>
           {project.updatedAt && format(project.updatedAt, datefnsTableDateTimeFormat)}
         </GridItem>
         <GridItem display="flex" alignItems="center" px={4} py={2}>
-          {project.forcastedCompletionDate && format(project.forcastedCompletionDate, datefnsTableDateFormat)}
-        </GridItem>
-        <GridItem display="flex" alignItems="center" px={4} py={2}>
-          <PhaseBox project={project} />
+          <RollupStatusBox project={project} />
         </GridItem>
         <GridItem display="flex" alignItems="center" justifyContent="flex-end" px={4} py={2}>
           <Menu>

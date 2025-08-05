@@ -2,7 +2,7 @@ import { t } from "i18next"
 import { flow, Instance, toGenerator, types } from "mobx-state-tree"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
-import { EPermitProjectPhase } from "../types/enums"
+import { EPermitProjectRollupStatus } from "../types/enums"
 import { IProjectDocument } from "../types/types" // Updated import
 import { JurisdictionModel } from "./jurisdiction"
 import { IPermitApplication, PermitApplicationModel } from "./permit-application"
@@ -15,8 +15,7 @@ export const PermitProjectModel = types
     pid: types.maybeNull(types.string),
     projectNumber: types.maybeNull(types.string),
     jurisdictionDisambiguatedName: types.string,
-    forcastedCompletionDate: types.maybeNull(types.Date),
-    phase: types.enumeration(Object.values(EPermitProjectPhase)),
+    rollupStatus: types.enumeration(Object.values(EPermitProjectRollupStatus)),
     tablePermitApplications: types.maybeNull(types.array(types.reference(types.late(() => PermitApplicationModel)))),
     recentPermitApplications: types.frozen<IPermitApplication[]>(),
     projectDocuments: types.maybeNull(types.array(types.frozen<IProjectDocument>())), // Changed to IProjectDocument
@@ -30,7 +29,8 @@ export const PermitProjectModel = types
     revisionsRequestedCount: types.optional(types.number, 0),
     approvedCount: types.optional(types.number, 0),
     jurisdiction: types.maybeNull(types.reference(types.late(() => JurisdictionModel))),
-    hasOutdatedDraftApplications: types.optional(types.boolean, false),
+    hasOutdatedDraftApplications: types.maybeNull(types.boolean),
+    isFullyLoaded: types.optional(types.boolean, false),
   })
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -38,22 +38,25 @@ export const PermitProjectModel = types
     get shortAddress() {
       return self.fullAddress?.split(",")[0]
     },
-    get phaseDescription() {
+    get rollupStatusDescription() {
       const total = self.totalPermitsCount
       if (total === 0) return ""
       const remainingCount = self.newDraftCount + self.revisionsRequestedCount
       const submittedCount = self.newlySubmittedCount + self.resubmittedCount
 
-      if (self.phase === EPermitProjectPhase.empty) {
+      if (self.rollupStatus === EPermitProjectRollupStatus.empty) {
         return ""
-      } else if (self.phase === EPermitProjectPhase.newDraft) {
-        return t("permitProject.phaseDescription.inProgress", { remaining: remainingCount, total })
-      } else if (self.phase === EPermitProjectPhase.newlySubmitted || self.phase === EPermitProjectPhase.resubmitted) {
-        return t("permitProject.phaseDescription.submitted", { count: submittedCount })
-      } else if (self.phase === EPermitProjectPhase.revisionsRequested) {
-        return t("permitProject.phaseDescription.waitingOnYou", { count: self.revisionsRequestedCount })
-      } else if (self.phase === EPermitProjectPhase.approved) {
-        return t("permitProject.phaseDescription.approved", { count: total })
+      } else if (self.rollupStatus === EPermitProjectRollupStatus.newDraft) {
+        return t("permitProject.rollupStatusDescription.inProgress", { remaining: remainingCount, total })
+      } else if (
+        self.rollupStatus === EPermitProjectRollupStatus.newlySubmitted ||
+        self.rollupStatus === EPermitProjectRollupStatus.resubmitted
+      ) {
+        return t("permitProject.rollupStatusDescription.submitted", { count: submittedCount })
+      } else if (self.rollupStatus === EPermitProjectRollupStatus.revisionsRequested) {
+        return t("permitProject.rollupStatusDescription.waitingOnYou", { count: self.revisionsRequestedCount })
+      } else if (self.rollupStatus === EPermitProjectRollupStatus.approved) {
+        return t("permitProject.rollupStatusDescription.approved", { count: total })
       } else {
         return ""
       }
@@ -63,24 +66,21 @@ export const PermitProjectModel = types
     setIsPinned(isPinned: boolean) {
       self.isPinned = isPinned
     },
+  }))
+  .actions((self) => ({
     togglePin: flow(function* () {
       const originalIsPinned = self.isPinned
-      // Optimistic update
-      self.isPinned = !originalIsPinned
 
       const store = self.rootStore.permitProjectStore
-      store.togglePinnedProject(self as IPermitProject)
 
-      const response = !originalIsPinned
-        ? yield* toGenerator(self.environment.api.pinPermitProject(self.id))
-        : yield* toGenerator(self.environment.api.unpinPermitProject(self.id))
+      const response = originalIsPinned
+        ? yield* toGenerator(self.environment.api.unpinPermitProject(self.id))
+        : yield* toGenerator(self.environment.api.pinPermitProject(self.id))
 
       if (response.ok) {
-        store.mergeUpdate(response.data.data, "permitProjectMap")
-      } else {
-        // Revert on failure
-        self.isPinned = originalIsPinned
-        store.togglePinnedProject(self as IPermitProject)
+        self.setIsPinned(!originalIsPinned)
+        store.mergeUpdateAll(response.data.data, "permitProjectMap")
+        store.setPinnedProjects(response.data.data)
       }
     }),
     setTablePermitApplications(permitApplications: IPermitApplication[]) {

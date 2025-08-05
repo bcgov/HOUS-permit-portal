@@ -7,7 +7,7 @@ import { useSearch } from "../../../hooks/use-search"
 import { useMst } from "../../../setup/root"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { PinnedProjectsGrid } from "./pinned-projects-grid"
-import { ProjectsTable } from "./projects-table"
+import { ProjectsGrid } from "./projects-grid"
 import { ITabItem, ProjectSidebarTabList } from "./sidebar-tab-list"
 
 interface IPermitProjectIndexScreenProps {}
@@ -42,7 +42,7 @@ export const PermitProjectIndexScreen = observer(({}: IPermitProjectIndexScreenP
 
                   <PinnedProjectsGrid />
 
-                  <ProjectsTable />
+                  <ProjectsGrid />
                 </VStack>
               </Container>
             </Flex>

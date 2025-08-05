@@ -10,6 +10,7 @@ interface IGridHeadersProps {
   columns: string[]
   includeActionColumn?: boolean
 }
+export const PROJECTS_GRID_TEMPLATE_COLUMNS = "2fr 1.5fr 1.5fr 2fr 2fr 0.5fr"
 
 export const GridHeaders = observer(function GridHeaders({ columns, includeActionColumn }: IGridHeadersProps) {
   const { permitProjectStore } = useMst()
@@ -26,8 +27,6 @@ export const GridHeaders = observer(function GridHeaders({ columns, includeActio
               justifyContent={"space-between"}
               cursor="pointer"
               onClick={() => toggleSort(field as EPermitProjectSortFields)}
-              borderRight={"1px solid"}
-              borderColor={"border.light"}
               px={4}
             >
               <Text textAlign="left">{getSortColumnHeader(field as EPermitProjectSortFields)}</Text>

@@ -11,14 +11,13 @@ import { Paginator } from "../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../shared/base/inputs/per-page-select"
 import { ModelSearchInput } from "../../shared/base/model-search-input"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
-import { ActiveArchivedFilter } from "../../shared/filters/active-archived-filter"
 import { SearchGrid } from "../../shared/grid/search-grid"
-import { GridHeaders } from "./grid-header"
-import { PhaseFilter } from "./phase-filter"
+import { GridHeaders, PROJECTS_GRID_TEMPLATE_COLUMNS } from "./grid-header"
 import { ProjectGridRow } from "./project-grid-row"
 import { RequirementTemplateFilter } from "./requirement-template-filter"
+import { RollupStatusFilter } from "./rollup-status-filter"
 
-export const ProjectsTable = observer(() => {
+export const ProjectsGrid = observer(() => {
   const { t } = useTranslation()
   const { permitProjectStore } = useMst()
   const {
@@ -48,22 +47,23 @@ export const ProjectsTable = observer(() => {
         </FormControl>
         <Flex justifyContent={"space-between"} w="full">
           <HStack>
-            <ActiveArchivedFilter searchModel={permitProjectStore} />
+            {/* currently we do not have the ability to archive projects */}
+            {/* <ActiveArchivedFilter searchModel={permitProjectStore} /> */}
             <RequirementTemplateFilter searchModel={permitProjectStore} />
-            <PhaseFilter searchModel={permitProjectStore} />
+            <RollupStatusFilter searchModel={permitProjectStore} />
           </HStack>
         </Flex>
       </Flex>
 
-      <SearchGrid templateColumns="2fr 1.5fr 1.5fr 2fr 1.5fr 2fr 0.5fr" gridRowClassName="project-grid-row">
+      <SearchGrid templateColumns={PROJECTS_GRID_TEMPLATE_COLUMNS} gridRowClassName="project-grid-row">
         <GridHeaders columns={Object.values(EPermitProjectSortFields)} includeActionColumn />
 
         {isSearching ? (
-          <Flex gridColumn="span 7" justify="center" align="center" minH="200px">
+          <Flex gridColumn="span 6" justify="center" align="center" minH="200px">
             <SharedSpinner />
           </Flex>
         ) : R.isEmpty(tablePermitProjects) ? (
-          <GridItem gridColumn="span 7">
+          <GridItem gridColumn="span 6">
             <CustomMessageBox
               m={4}
               status={EFlashMessageStatus.info}
