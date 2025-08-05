@@ -646,10 +646,10 @@ export enum EPermitProjectSortFields {
   location = "location",
   submitter = "submitter",
   updatedAt = "updated_at",
-  phase = "phase",
+  rollupStatus = "rollup_status",
 }
 
-export enum EPermitProjectPhase {
+export enum EPermitProjectRollupStatus {
   empty = "empty",
   newDraft = "new_draft",
   newlySubmitted = "newly_submitted",

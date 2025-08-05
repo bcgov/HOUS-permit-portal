@@ -2,7 +2,7 @@ import { t } from "i18next"
 import { flow, Instance, toGenerator, types } from "mobx-state-tree"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
-import { EPermitProjectPhase } from "../types/enums"
+import { EPermitProjectRollupStatus } from "../types/enums"
 import { IProjectDocument } from "../types/types" // Updated import
 import { JurisdictionModel } from "./jurisdiction"
 import { IPermitApplication, PermitApplicationModel } from "./permit-application"
@@ -15,7 +15,7 @@ export const PermitProjectModel = types
     pid: types.maybeNull(types.string),
     projectNumber: types.maybeNull(types.string),
     jurisdictionDisambiguatedName: types.string,
-    phase: types.enumeration(Object.values(EPermitProjectPhase)),
+    rollupStatus: types.enumeration(Object.values(EPermitProjectRollupStatus)),
     tablePermitApplications: types.maybeNull(types.array(types.reference(types.late(() => PermitApplicationModel)))),
     recentPermitApplications: types.frozen<IPermitApplication[]>(),
     projectDocuments: types.maybeNull(types.array(types.frozen<IProjectDocument>())), // Changed to IProjectDocument
@@ -38,22 +38,25 @@ export const PermitProjectModel = types
     get shortAddress() {
       return self.fullAddress?.split(",")[0]
     },
-    get phaseDescription() {
+    get rollupStatusDescription() {
       const total = self.totalPermitsCount
       if (total === 0) return ""
       const remainingCount = self.newDraftCount + self.revisionsRequestedCount
       const submittedCount = self.newlySubmittedCount + self.resubmittedCount
 
-      if (self.phase === EPermitProjectPhase.empty) {
+      if (self.rollupStatus === EPermitProjectRollupStatus.empty) {
         return ""
-      } else if (self.phase === EPermitProjectPhase.newDraft) {
-        return t("permitProject.phaseDescription.inProgress", { remaining: remainingCount, total })
-      } else if (self.phase === EPermitProjectPhase.newlySubmitted || self.phase === EPermitProjectPhase.resubmitted) {
-        return t("permitProject.phaseDescription.submitted", { count: submittedCount })
-      } else if (self.phase === EPermitProjectPhase.revisionsRequested) {
-        return t("permitProject.phaseDescription.waitingOnYou", { count: self.revisionsRequestedCount })
-      } else if (self.phase === EPermitProjectPhase.approved) {
-        return t("permitProject.phaseDescription.approved", { count: total })
+      } else if (self.rollupStatus === EPermitProjectRollupStatus.newDraft) {
+        return t("permitProject.rollupStatusDescription.inProgress", { remaining: remainingCount, total })
+      } else if (
+        self.rollupStatus === EPermitProjectRollupStatus.newlySubmitted ||
+        self.rollupStatus === EPermitProjectRollupStatus.resubmitted
+      ) {
+        return t("permitProject.rollupStatusDescription.submitted", { count: submittedCount })
+      } else if (self.rollupStatus === EPermitProjectRollupStatus.revisionsRequested) {
+        return t("permitProject.rollupStatusDescription.waitingOnYou", { count: self.revisionsRequestedCount })
+      } else if (self.rollupStatus === EPermitProjectRollupStatus.approved) {
+        return t("permitProject.rollupStatusDescription.approved", { count: total })
       } else {
         return ""
       }

@@ -9,7 +9,7 @@ import { datefnsTableDateTimeFormat } from "../../../constants"
 import { IPermitProject } from "../../../models/permit-project"
 import { useMst } from "../../../setup/root"
 import { OutdatedFormWarning } from "../../shared/outdated-form-warning"
-import { PhaseBox } from "../../shared/permit-projects/phase-box"
+import { RollupStatusBox } from "../../shared/permit-projects/rollup-status-box"
 
 interface IProjectGridRowProps {
   project: IPermitProject
@@ -50,7 +50,7 @@ export const ProjectGridRow = observer(({ project }: IProjectGridRowProps) => {
           {project.updatedAt && format(project.updatedAt, datefnsTableDateTimeFormat)}
         </GridItem>
         <GridItem display="flex" alignItems="center" px={4} py={2}>
-          <PhaseBox project={project} />
+          <RollupStatusBox project={project} />
         </GridItem>
         <GridItem display="flex" alignItems="center" justifyContent="flex-end" px={4} py={2}>
           <Menu>

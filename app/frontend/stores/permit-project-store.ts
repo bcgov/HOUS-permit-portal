@@ -7,7 +7,7 @@ import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
 import { IPermitProject, PermitProjectModel } from "../models/permit-project"
 import { IPermitProjectUpdateParams, IProjectDocumentAttribute } from "../types/api-request" // Import new types
-import { EPermitProjectPhase, EPermitProjectSortFields } from "../types/enums" // Import from enums
+import { EPermitProjectRollupStatus, EPermitProjectSortFields } from "../types/enums" // Import from enums
 import { IPermitProjectSearchFilters, IProjectDocument, TSearchParams } from "../types/types" // Import IPermitProjectSearchFilters and IProjectDocument from types
 import { setQueryParam } from "../utils/utility-functions"
 
@@ -18,7 +18,7 @@ export const PermitProjectStoreModel = types
       pinnedPermitProjects: types.optional(types.array(types.reference(PermitProjectModel)), []),
       tablePermitProjects: types.array(types.reference(PermitProjectModel)), // For table views
       currentPermitProject: types.maybeNull(types.reference(PermitProjectModel)),
-      phaseFilter: types.maybeNull(types.array(types.enumeration(Object.values(EPermitProjectPhase)))),
+      rollupStatusFilter: types.maybeNull(types.array(types.enumeration(Object.values(EPermitProjectRollupStatus)))),
       requirementTemplateFilter: types.maybeNull(types.array(types.string)),
       isFetchingPinnedProjects: types.optional(types.boolean, false),
     }),
@@ -105,7 +105,7 @@ export const PermitProjectStoreModel = types
         filters: {
           showArchived: self.showArchived,
           query: self.query,
-          phase: self.phaseFilter,
+          rollupStatus: self.rollupStatusFilter,
           requirementTemplateIds: self.requirementTemplateFilter,
         },
       }
@@ -179,9 +179,9 @@ export const PermitProjectStoreModel = types
     }),
     setPermitProjectFilters(queryParams: URLSearchParams) {
       const requirementTemplateFilter = queryParams.get("requirementTemplateFilter")
-      const phaseStr = queryParams.get("phase")
-      const phase = phaseStr ? (phaseStr.split(",") as EPermitProjectPhase[]) : null
-      self.phaseFilter = phase ? cast(phase) : null
+      const rollupStatusStr = queryParams.get("rollupStatus")
+      const rollupStatus = rollupStatusStr ? (rollupStatusStr.split(",") as EPermitProjectRollupStatus[]) : null
+      self.rollupStatusFilter = rollupStatus ? cast(rollupStatus) : null
       if (requirementTemplateFilter) {
         self.setRequirementTemplateFilter(requirementTemplateFilter.split(","))
       }
@@ -212,10 +212,10 @@ export const PermitProjectStoreModel = types
         return { ok: false, error: response.data?.meta?.message || response.problem }
       }
     }),
-    setPhaseFilter(value: EPermitProjectPhase[]) {
-      self.phaseFilter = value.length > 0 ? cast(value) : null
+    setRollupStatusFilter(value: EPermitProjectRollupStatus[]) {
+      self.rollupStatusFilter = value.length > 0 ? cast(value) : null
       const paramValue = value.length > 0 ? value.join(",") : null
-      setQueryParam("phase", paramValue)
+      setQueryParam("rollupStatus", paramValue)
     },
     updatePermitProject: flow(function* (id: string, params: IPermitProjectUpdateParams) {
       const response = yield self.environment.api.updatePermitProject(id, params)

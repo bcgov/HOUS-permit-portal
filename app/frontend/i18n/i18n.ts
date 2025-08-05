@@ -582,7 +582,7 @@ Thank you,
           formUpdateWarningTitle: "Form updated",
           formUpdateWarningDescription:
             "The jurisdiction has changed a permit application form. Review your draft application to confirm your responses.",
-          phase: {
+          rollupStatus: {
             all: "All statuses",
             empty: "Empty",
             new_draft: "Draft",
@@ -629,7 +629,7 @@ Thank you,
             invalidInput: "invalid input",
             editProjectName: "Edit Project Name",
           },
-          phaseDescription: {
+          rollupStatusDescription: {
             inProgress: "{{remaining}} of {{total}} permits remaining",
             submitted: "{{count}} permit{{#plural}}s{{/plural}} waiting for response",
             waitingOnYou: "{{count}} permit{{#plural}}s{{/plural}} returned for revision",
@@ -650,7 +650,7 @@ Thank you,
             submitted_at: "Submitted at",
             viewed_at: "Viewed at",
             status: "Status",
-            phase: "Status",
+            rollup_status: "Status",
             created_at: "Created at",
             updated_at: "Last modified",
             forcasted_completion_date: "Forecasted",
@@ -666,7 +666,7 @@ Thank you,
           createSuccessDescription: 'The project "{{name}}" has been created.',
           createErrorTitle: "Failed to Create Project",
           startNew: "Start New Project",
-          phaseFilter: "Status",
+          rollupStatusFilter: "Status",
         },
 
         permitApplication: {

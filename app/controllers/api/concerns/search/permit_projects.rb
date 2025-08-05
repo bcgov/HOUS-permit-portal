@@ -49,7 +49,7 @@ module Api::Concerns::Search::PermitProjects
       filters: [
         :jurisdiction_id,
         :show_archived,
-        phase: [],
+        rollup_status: [],
         requirement_template_ids: []
       ],
       sort: %i[field direction]

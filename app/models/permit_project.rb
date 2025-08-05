@@ -85,7 +85,7 @@ class PermitProject < ApplicationRecord
       created_at: created_at,
       updated_at: updated_at,
       discarded: discarded_at.present?,
-      phase: phase,
+      rollup_status: rollup_status,
       forcasted_completion_date: forcasted_completion_date,
       requirement_template_ids:
         permit_applications
@@ -113,7 +113,7 @@ class PermitProject < ApplicationRecord
   # TODO: Re-evaluate and re-implement search_data based on primary_project_item
   # and the possibility of multiple items of different types in the future.
 
-  def phase
+  def rollup_status
     return "empty" if permit_applications.blank?
 
     permit_applications.max_by(&:pertinence_score).status

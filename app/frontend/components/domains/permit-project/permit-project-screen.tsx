@@ -10,7 +10,7 @@ import { useMst } from "../../../setup/root"
 import { ErrorScreen } from "../../shared/base/error-screen"
 import { LoadingScreen } from "../../shared/base/loading-screen"
 import { EditableInputWithControls } from "../../shared/editable-input-with-controls"
-import { PhaseBox } from "../../shared/permit-projects/phase-box"
+import { RollupStatusBox } from "../../shared/permit-projects/rollup-status-box"
 import { OverviewTabPanelContent } from "./overview-tab-panel-content"
 import { PermitsTabPanelContent } from "./permits-tab-panel-content"
 import { ITabItem, ProjectSidebarTabList } from "./sidebar-tab-list"
@@ -114,7 +114,7 @@ export const PermitProjectScreen = observer(() => {
               aria-label={t("permitProject.details.editProjectName")}
               onChange={(val) => setValue("title", val)}
             />
-            <PhaseBox project={currentPermitProject} w="240px" />
+            <RollupStatusBox project={currentPermitProject} w="240px" />
           </Flex>
         </Container>
       </Flex>

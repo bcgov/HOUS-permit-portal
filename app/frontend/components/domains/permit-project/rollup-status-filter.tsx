@@ -16,52 +16,52 @@ import { observer } from "mobx-react-lite"
 import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { IPermitProjectStore } from "../../../stores/permit-project-store"
-import { EPermitProjectPhase } from "../../../types/enums"
+import { EPermitProjectRollupStatus } from "../../../types/enums"
 
 interface IProps {
   searchModel: IPermitProjectStore
 }
 
-export const PhaseFilter = observer(function PhaseFilter({ searchModel }: IProps) {
+export const RollupStatusFilter = observer(function RollupStatusFilter({ searchModel }: IProps) {
   const { t } = useTranslation()
-  const { phaseFilter, setPhaseFilter, search } = searchModel
+  const { rollupStatusFilter, setRollupStatusFilter, search } = searchModel
   const [searchTerm, setSearchTerm] = useState("")
 
-  const phases = [
-    EPermitProjectPhase.empty,
-    EPermitProjectPhase.newDraft,
-    EPermitProjectPhase.revisionsRequested,
-    EPermitProjectPhase.newlySubmitted,
-    EPermitProjectPhase.resubmitted,
+  const rollupStatuses = [
+    EPermitProjectRollupStatus.empty,
+    EPermitProjectRollupStatus.newDraft,
+    EPermitProjectRollupStatus.revisionsRequested,
+    EPermitProjectRollupStatus.newlySubmitted,
+    EPermitProjectRollupStatus.resubmitted,
   ] as const
 
-  const options = phases.map((phase) => ({
-    value: phase,
-    label: t(`permitProject.phase.${phase}`),
+  const options = rollupStatuses.map((rollupStatus) => ({
+    value: rollupStatus,
+    label: t(`permitProject.rollupStatus.${rollupStatus}`),
   }))
 
   // @ts-ignore
   const filteredOptions = options.filter((option) => option.label.toLowerCase().includes(searchTerm.toLowerCase()))
 
   const handleChange = (nextValue: string[]) => {
-    setPhaseFilter(nextValue as EPermitProjectPhase[])
+    setRollupStatusFilter(nextValue as EPermitProjectRollupStatus[])
     search()
   }
 
   const handleReset = () => {
-    setPhaseFilter([] as EPermitProjectPhase[])
+    setRollupStatusFilter([] as EPermitProjectRollupStatus[])
     search()
   }
 
   const { getCheckboxProps } = useCheckboxGroup({
-    value: phaseFilter || [],
+    value: rollupStatusFilter || [],
     onChange: handleChange,
   })
 
   return (
     <Menu>
       <MenuButton as={Button} variant="outline" rightIcon={<CaretDown />}>
-        {t("permitProject.phaseFilter")}
+        {t("permitProject.rollupStatusFilter")}
       </MenuButton>
       <MenuList p={4} zIndex="dropdown">
         <VStack align="start" spacing={4}>
@@ -87,7 +87,7 @@ export const PhaseFilter = observer(function PhaseFilter({ searchModel }: IProps
             size="sm"
             alignSelf="center"
             w="full"
-            isDisabled={!phaseFilter || phaseFilter.length === 0}
+            isDisabled={!rollupStatusFilter || rollupStatusFilter.length === 0}
           >
             {t("ui.reset")}
           </Button>

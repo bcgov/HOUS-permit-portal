@@ -14,9 +14,9 @@ import { SharedSpinner } from "../../shared/base/shared-spinner"
 import { ActiveArchivedFilter } from "../../shared/filters/active-archived-filter"
 import { SearchGrid } from "../../shared/grid/search-grid"
 import { GridHeaders, PROJECTS_GRID_TEMPLATE_COLUMNS } from "./grid-header"
-import { PhaseFilter } from "./phase-filter"
 import { ProjectGridRow } from "./project-grid-row"
 import { RequirementTemplateFilter } from "./requirement-template-filter"
+import { RollupStatusFilter } from "./rollup-status-filter"
 
 export const ProjectsTable = observer(() => {
   const { t } = useTranslation()
@@ -50,7 +50,7 @@ export const ProjectsTable = observer(() => {
           <HStack>
             <ActiveArchivedFilter searchModel={permitProjectStore} />
             <RequirementTemplateFilter searchModel={permitProjectStore} />
-            <PhaseFilter searchModel={permitProjectStore} />
+            <RollupStatusFilter searchModel={permitProjectStore} />
           </HStack>
         </Flex>
       </Flex>
