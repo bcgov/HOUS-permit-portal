@@ -38,12 +38,9 @@ export const PermitApplicationStoreModel = types
       permitApplicationMap: types.map(PermitApplicationModel),
       tablePermitApplications: types.array(types.reference(PermitApplicationModel)),
       currentPermitApplication: types.maybeNull(types.reference(PermitApplicationModel)),
-      statusFilter: types.optional(types.array(types.enumeration(filterableStatus)), [
-        EPermitApplicationStatus.newDraft,
-        EPermitApplicationStatus.revisionsRequested,
-      ]),
+      statusFilter: types.optional(types.array(types.enumeration(filterableStatus)), []),
       templateVersionIdFilter: types.maybeNull(types.string),
-      requirementTemplateIdFilter: types.maybeNull(types.string),
+      requirementTemplateIdFilter: types.optional(types.array(types.string), []),
       hasCollaboratorFilter: types.maybeNull(types.boolean),
     }),
     createSearchModel<EProjectPermitApplicationSortFields | EPermitApplicationSortFields>(
@@ -219,10 +216,18 @@ export const PermitApplicationStoreModel = types
       // @ts-ignore
       self.statusFilter = statuses
     },
+    setRequirementTemplateIdFilter(requirementTemplateIds: string[] | undefined) {
+      if (!requirementTemplateIds) return
+      setQueryParam("requirementTemplateId", requirementTemplateIds)
+      // @ts-ignore
+      self.requirementTemplateIdFilter = requirementTemplateIds
+    },
     searchPermitApplications: flow(function* (opts?: { reset?: boolean; page?: number; countPerPage?: number }) {
       if (opts?.reset) {
         self.resetPages()
       }
+      const requirementTemplateId =
+        self.requirementTemplateIdFilter.length > 0 ? self.requirementTemplateIdFilter.join(",") : null
       const searchParams = {
         query: self.query,
         sort: self.sort,
@@ -231,7 +236,7 @@ export const PermitApplicationStoreModel = types
         filters: {
           status: self.statusFilter,
           templateVersionId: self.templateVersionIdFilter,
-          requirementTemplateId: self.requirementTemplateIdFilter,
+          requirementTemplateId,
           hasCollaborator: self.hasCollaboratorFilter,
         },
       } as TSearchParams<EPermitApplicationSortFields, IPermitApplicationSearchFilters>
@@ -379,11 +384,11 @@ export const PermitApplicationStoreModel = types
     setPermitApplicationFilters(queryParams: URLSearchParams) {
       const statusFilter = queryParams.get("status")?.split(",") as TFilterableStatus[]
       const templateVersionIdFilter = queryParams.get("templateVersionId")
-      const requirementTemplateIdFilter = queryParams.get("requirementTemplateId")
+      const requirementTemplateIdFilter = queryParams.get("requirementTemplateId")?.split(",")
       const hasCollaboratorFilter = queryParams.get("hasCollaborator") === "true"
 
       self.setStatusFilter(statusFilter)
-      self.requirementTemplateIdFilter = requirementTemplateIdFilter
+      self.setRequirementTemplateIdFilter(requirementTemplateIdFilter)
       self.templateVersionIdFilter = templateVersionIdFilter
       self.hasCollaboratorFilter = hasCollaboratorFilter
     },
@@ -419,7 +424,7 @@ export const PermitApplicationStoreModel = types
     resetFilters() {
       self.hasCollaboratorFilter = false
       self.templateVersionIdFilter = null
-      self.requirementTemplateIdFilter = null
+      self.requirementTemplateIdFilter = [] as any
       if (typeof window !== "undefined") {
         const url = new URL(window.location.href)
         const staticParams = ["templateVersionId", "requirementTemplateId", "hasCollaborator"]

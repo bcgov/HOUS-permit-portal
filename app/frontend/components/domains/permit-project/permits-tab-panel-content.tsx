@@ -12,6 +12,8 @@ import { PerPageSelect } from "../../shared/base/inputs/per-page-select"
 import { SearchGrid } from "../../shared/grid/search-grid"
 import { PermitApplicationGridHeaders } from "./permit-application-grid-headers"
 import { PermitApplicationGridRow } from "./permit-application-grid-row"
+import { RequirementTemplateFilter } from "./requirement-template-filter"
+import { StatusFilter } from "./status-filter"
 
 interface IProps {
   permitProject: IPermitProject
@@ -36,6 +38,10 @@ export const PermitsTabPanelContent = observer(({ permitProject }: IProps) => {
           <Button variant="primary" leftIcon={<Icon as={Plus} />}>
             {t("permitProject.permits.addPermit")}
           </Button>
+        </Flex>
+        <Flex gap={2} mb={6}>
+          <RequirementTemplateFilter searchModel={permitApplicationStore} />
+          <StatusFilter searchModel={permitApplicationStore} />
         </Flex>
         <SearchGrid templateColumns="2fr 1.5fr 1.5fr 1.5fr 0.5fr" gridRowClassName="permit-application-grid-row">
           <PermitApplicationGridHeaders

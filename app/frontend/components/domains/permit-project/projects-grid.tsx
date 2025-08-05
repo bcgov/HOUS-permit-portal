@@ -11,14 +11,13 @@ import { Paginator } from "../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../shared/base/inputs/per-page-select"
 import { ModelSearchInput } from "../../shared/base/model-search-input"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
-import { ActiveArchivedFilter } from "../../shared/filters/active-archived-filter"
 import { SearchGrid } from "../../shared/grid/search-grid"
 import { GridHeaders, PROJECTS_GRID_TEMPLATE_COLUMNS } from "./grid-header"
 import { ProjectGridRow } from "./project-grid-row"
 import { RequirementTemplateFilter } from "./requirement-template-filter"
 import { RollupStatusFilter } from "./rollup-status-filter"
 
-export const ProjectsTable = observer(() => {
+export const ProjectsGrid = observer(() => {
   const { t } = useTranslation()
   const { permitProjectStore } = useMst()
   const {
@@ -48,7 +47,8 @@ export const ProjectsTable = observer(() => {
         </FormControl>
         <Flex justifyContent={"space-between"} w="full">
           <HStack>
-            <ActiveArchivedFilter searchModel={permitProjectStore} />
+            {/* currently we do not have the ability to archive projects */}
+            {/* <ActiveArchivedFilter searchModel={permitProjectStore} /> */}
             <RequirementTemplateFilter searchModel={permitProjectStore} />
             <RollupStatusFilter searchModel={permitProjectStore} />
           </HStack>

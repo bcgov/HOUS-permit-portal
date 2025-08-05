@@ -28,7 +28,7 @@ export const ProjectSidebarTabList = ({ top = 0, tabsData, children, ...rest }: 
 
   return (
     <Box
-      w="280px"
+      minW="240px"
       bg="greys.grey03"
       borderRight="1px"
       borderColor="border.light"
