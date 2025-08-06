@@ -19,6 +19,10 @@ class PermitProjectBlueprint < Blueprinter::Base
     field :resubmitted_count, default: 0
     field :approved_count, default: 0
 
+    field :is_fully_loaded do |permit_project, options|
+      false
+    end
+
     field :jurisdiction_disambiguated_name do |permit_project, _options|
       permit_project.jurisdiction.disambiguated_name
     end
@@ -35,6 +39,10 @@ class PermitProjectBlueprint < Blueprinter::Base
 
   view :extended do
     include_view :base
+
+    field :is_fully_loaded do |permit_project, options|
+      true
+    end
 
     association :recent_permit_applications,
                 name: :recentPermitApplications,
