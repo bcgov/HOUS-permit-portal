@@ -30,7 +30,6 @@ export const PermitProjectModel = types
     approvedCount: types.optional(types.number, 0),
     jurisdiction: types.maybeNull(types.reference(types.late(() => JurisdictionModel))),
     hasOutdatedDraftApplications: types.maybeNull(types.boolean),
-    isFullyLoaded: types.optional(types.boolean, false),
   })
   .extend(withEnvironment())
   .extend(withRootStore())

@@ -39,7 +39,7 @@ export const PermitsTabPanelContent = observer(({ permitProject }: IProps) => {
             {t("permitProject.permits.addPermit")}
           </Button>
         </Flex>
-        <Flex gap={2} mb={6}>
+        <Flex gap={2} mb={2}>
           <RequirementTemplateFilter searchModel={permitApplicationStore} />
           <StatusFilter searchModel={permitApplicationStore} />
         </Flex>

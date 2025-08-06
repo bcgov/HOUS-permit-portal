@@ -17,7 +17,7 @@ export const usePermitProject = () => {
 
   useEffect(() => {
     const loadPermitProject = async () => {
-      if (currentPermitProject?.id === permitProjectId && currentPermitProject.isFullyLoaded) return
+      if (currentPermitProject?.id === permitProjectId) return
 
       try {
         setCurrentPermitProject(null)
