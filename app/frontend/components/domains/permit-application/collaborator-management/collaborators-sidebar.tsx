@@ -99,22 +99,11 @@ export const CollaboratorsSidebar = observer(function CollaboratorsSidebar({
                 }
               </Text>
             </Stack>
-            {collaborationType === ECollaborationType.submission ? (
-              <DesignatedSubmitters
-                permitApplication={permitApplication}
-                collaborationType={collaborationType}
-                canManage={canManage}
-              />
-            ) : (
-              collaborationType === ECollaborationType.review &&
-              permitApplication.isDesignatedReviewerEnabled && (
-                <DesignatedReviewers
-                  permitApplication={permitApplication}
-                  collaborationType={collaborationType}
-                  canManage={canManage}
-                />
-              )
-            )}
+            <DesignatedCollaborators
+              permitApplication={permitApplication}
+              collaborationType={collaborationType}
+              canManage={permitApplication.canUserManageCollaborators(currentUser, collaborationType)}
+            />
             <Assignees
               permitApplication={permitApplication}
               collaborationType={collaborationType}
@@ -127,7 +116,7 @@ export const CollaboratorsSidebar = observer(function CollaboratorsSidebar({
   )
 })
 
-const DesignatedReviewers = observer(function DesignatedReviewers({
+const DesignatedCollaborators = observer(function DesignatedCollaborators({
   permitApplication,
   collaborationType,
   canManage,
@@ -135,45 +124,18 @@ const DesignatedReviewers = observer(function DesignatedReviewers({
   canManage: boolean
 }) {
   const { t } = useTranslation()
-  const delegateeCollaboration = permitApplication.getDesignatedReviewer()
-
-  return (
-    <Stack spacing={2}>
-      <Text as={"h3"} fontSize={"md"} fontWeight={700}>
-        {t("permitCollaboration.sidebar.designatedReviewers")}
-      </Text>
-      <CollaborationCard
-        rightElement={
-          canManage ? (
-            <DesignatedCollaboratorAssignmentPopover
-              permitApplication={permitApplication}
-              collaborationType={collaborationType}
-            />
-          ) : undefined
-        }
-        onReinvite={canManage ? permitApplication.reinvitePermitCollaboration : undefined}
-        permitCollaboration={delegateeCollaboration}
-      />
-    </Stack>
-  )
-})
-
-const DesignatedSubmitters = observer(function DesignatedSubmitters({
-  permitApplication,
-  collaborationType,
-  canManage,
-}: IProps & {
-  canManage: boolean
-}) {
-  const { t } = useTranslation()
-  const delegateeCollaboration = permitApplication.getDesignatedSubmitter()
+  const delegateeCollaboration = permitApplication.getCollaborationDelegatee(collaborationType)
 
   let name = delegateeCollaboration?.collaborator?.user?.name
   let organization = delegateeCollaboration?.collaborator?.user?.organization
+  const isSubmissionCollaboration = collaborationType === ECollaborationType.submission
+  if (collaborationType === ECollaborationType.review && !permitApplication.isDesignatedReviewerEnabled) {
+    return <></>
+  }
   return (
     <Stack spacing={2}>
       <Text as={"h3"} fontSize={"md"} fontWeight={700}>
-        {t("permitCollaboration.sidebar.designatedSubmitters")}
+        {t(`permitCollaboration.sidebar.designated${isSubmissionCollaboration ? "Submitters" : "Reviewers"}`)}
       </Text>
       <CollaborationCard
         rightElement={
@@ -187,23 +149,25 @@ const DesignatedSubmitters = observer(function DesignatedSubmitters({
         onReinvite={canManage ? permitApplication.reinvitePermitCollaboration : undefined}
         permitCollaboration={delegateeCollaboration}
       />
-      <Text fontSize={"sm"} color={"text.secondary"}>
-        <Trans
-          t={t}
-          i18nKey={
-            organization
-              ? "permitCollaboration.sidebar.authorCanSubmitWithOrganization"
-              : "permitCollaboration.sidebar.authorCanSubmit"
-          }
-          components={{
-            1: <Text as={"span"} fontWeight={700} />,
-          }}
-          values={{
-            author: name,
-            organization: organization,
-          }}
-        />
-      </Text>
+      {isSubmissionCollaboration && (
+        <Text fontSize={"sm"} color={"text.secondary"}>
+          <Trans
+            t={t}
+            i18nKey={
+              organization
+                ? "permitCollaboration.sidebar.authorCanSubmitWithOrganization"
+                : "permitCollaboration.sidebar.authorCanSubmit"
+            }
+            components={{
+              1: <Text as={"span"} fontWeight={700} />,
+            }}
+            values={{
+              author: name,
+              organization: organization,
+            }}
+          />
+        </Text>
+      )}
     </Stack>
   )
 })

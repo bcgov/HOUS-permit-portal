@@ -443,10 +443,10 @@ export const PermitApplicationModel = types.snapshotProcessor(
       },
     }))
     .views((self) => ({
-      getDesignatedReviewer() {
+      get designatedReviewer() {
         return self.getCollaborationDelegatee(ECollaborationType.review)
       },
-      getDesignatedSubmitter() {
+      get designatedSubmitter() {
         return self.getCollaborationDelegatee(ECollaborationType.submission)
       },
     }))
@@ -455,7 +455,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
         const currentUser = self.rootStore.userStore.currentUser
         return (
           currentUser?.id === self.submitter?.id ||
-          currentUser?.id === self?.getDesignatedSubmitter()?.collaborator?.user?.id
+          currentUser?.id === self?.designatedSubmitter?.collaborator?.user?.id
         )
       },
       getCollaborationAssigneesByBlockIdMap(collaborationType: ECollaborationType) {
@@ -489,7 +489,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
           return true
         }
 
-        const delegateePermitCollaboration = self.getDesignatedSubmitter()
+        const delegateePermitCollaboration = self.designatedSubmitter
 
         return delegateePermitCollaboration?.collaborator?.user?.id == user.id
       },
@@ -549,7 +549,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
 
         const featureEnabled = self.jurisdiction.allowDesignatedReviewer
 
-        const designatedReviewerCollaboration = self.getDesignatedReviewer()
+        const designatedReviewerCollaboration = self.designatedReviewer
 
         const designatedReviewerExists = !!designatedReviewerCollaboration?.collaborator?.user
         if (currentUser?.id === designatedReviewerCollaboration?.collaborator?.user?.id) {
@@ -607,10 +607,10 @@ export const PermitApplicationModel = types.snapshotProcessor(
 
         if (permitCollaboration.collaboratorType === ECollaboratorType.delegatee) {
           if (permitCollaboration.collaborationType === ECollaborationType.submission) {
-            const existingDelegatee = self.getDesignatedSubmitter()
+            const existingDelegatee = self.designatedSubmitter
             existingDelegatee && self.permitCollaborationMap.delete(existingDelegatee.id)
           } else {
-            const existingDelegatee = self.getDesignatedReviewer()
+            const existingDelegatee = self.designatedReviewer
             existingDelegatee && self.permitCollaborationMap.delete(existingDelegatee.id)
           }
         }

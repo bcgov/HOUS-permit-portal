@@ -345,7 +345,7 @@ export const RevisionSideBar = observer(
         <DesignatedReviewerModal
           isOpen={isDesignatedReviewerModalOpen}
           onClose={onDesignatedReviewerModalClose}
-          designatedReviewer={permitApplication.getDesignatedReviewer()}
+          designatedReviewer={permitApplication.designatedReviewer}
         />
         {sendRevisionContainerRef && tabIndex == 0 && (
           <Portal containerRef={sendRevisionContainerRef}>
