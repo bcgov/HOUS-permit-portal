@@ -26,7 +26,6 @@ import { useMountStatus } from "../../../hooks/use-mount-status"
 import { IPermitApplication } from "../../../models/permit-application"
 import { useMst } from "../../../setup/root"
 import { IRevisionRequestsAttributes } from "../../../types/api-request"
-import { ECollaborationType } from "../../../types/enums"
 import { IFormIORequirement, IRevisionRequest, ISubmissionVersion } from "../../../types/types"
 import { getRequirementByKey } from "../../../utils/formio-component-traversal"
 import { getSinglePreviousSubmissionData } from "../../../utils/formio-submission-traversal"
@@ -346,7 +345,7 @@ export const RevisionSideBar = observer(
         <DesignatedReviewerModal
           isOpen={isDesignatedReviewerModalOpen}
           onClose={onDesignatedReviewerModalClose}
-          designatedReviewer={permitApplication.getCollaborationDelegatee(ECollaborationType.review)}
+          designatedReviewer={permitApplication.getDesignatedReviewer()}
         />
         {sendRevisionContainerRef && tabIndex == 0 && (
           <Portal containerRef={sendRevisionContainerRef}>

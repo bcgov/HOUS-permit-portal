@@ -254,8 +254,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
 
   const doesUserHaveSubmissionPermission =
     currentUser?.id === currentPermitApplication.submitter?.id ||
-    currentUser?.id ===
-      currentPermitApplication?.getCollaborationDelegatee(ECollaborationType.submission)?.collaborator?.user?.id
+    currentUser?.id === currentPermitApplication?.getDesignatedSubmitter()?.collaborator?.user?.id
 
   return (
     <Box as="main" id="submitter-view-permit">
