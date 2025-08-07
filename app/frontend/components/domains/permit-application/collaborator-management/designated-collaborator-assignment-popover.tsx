@@ -30,7 +30,10 @@ export const DesignatedCollaboratorAssignmentPopover = observer(function Designa
   const { userStore } = useMst()
   const { currentUser } = userStore
   const { t } = useTranslation()
-  const existingDelegateeCollaboration = permitApplication.getCollaborationDelegatee(collaborationType)
+  const existingDelegateeCollaboration =
+    collaborationType === ECollaborationType.submission
+      ? permitApplication.designatedSubmitter
+      : permitApplication.designatedReviewer
   const existingCollaboratorIds = new Set<string>(
     existingDelegateeCollaboration ? [existingDelegateeCollaboration.collaborator?.id] : []
   )
