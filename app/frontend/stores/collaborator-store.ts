@@ -16,7 +16,7 @@ export const CollaboratorStoreModel = types
       collaboratorSearchList: types.array(types.reference(CollaboratorModel)),
       searchContext: types.maybeNull(types.enumeration(Object.values(ECollaborationType))),
     }),
-    createSearchModel<never>("searchCollaborators", undefined, true)
+    createSearchModel<never>("searchCollaborators", undefined)
   )
   .extend(withEnvironment())
   .extend(withRootStore())

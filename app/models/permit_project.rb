@@ -22,6 +22,8 @@ class PermitProject < ApplicationRecord
   before_validation :set_default_title
   before_validation :assign_unique_project_number, on: :create
 
+  delegate :name, to: :owner, prefix: true
+
   after_commit :reindex
 
   scope :with_status_counts,
@@ -130,6 +132,15 @@ class PermitProject < ApplicationRecord
 
   def recent_permit_applications
     permit_applications.order(updated_at: :desc).limit(3)
+  end
+
+  def submission_collaborators
+    Collaborator.joins(:permit_collaborations).where(
+      permit_collaborations: {
+        permit_application_id: permit_applications.select(:id),
+        collaboration_type: :submission
+      }
+    )
   end
 
   private

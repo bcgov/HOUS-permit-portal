@@ -91,6 +91,16 @@ User.find_or_create_by(omniauth_username: "submitter") do |user|
   user.omniauth_email = "submitter@example.com"
 end
 
+4.times do |i|
+  User.find_or_create_by(email: "submitter_#{i + 1}@example.com") do |user|
+    user.role = :submitter
+    user.first_name = "Submitter"
+    user.last_name = "Number#{i + 1}"
+    user.password = "P@ssword1"
+    user.confirmed_at = Time.now
+  end
+end
+
 # invite a usable super admin
 # safeguard for development only
 if Rails.env.development?
@@ -226,7 +236,9 @@ if PermitApplication.first.blank?
   # Creating Permit Applications
   puts "Seeding permit applications..."
   review_managers = User.review_manager
-  template_version = TemplateVersion.published.first
+  published_template_versions = TemplateVersion.published
+  submitters = User.submitter
+
   20.times do |index|
     current_review_manager = review_managers.sample
     current_jurisdiction_id =
@@ -242,13 +254,63 @@ if PermitApplication.first.blank?
         pin: "SEEDPIN#{index + 1}"
       )
 
-    PermitApplication.create!(
-      submitter: current_review_manager,
-      permit_project: permit_project,
-      activity_id: template_version.activity.id,
-      permit_type_id: template_version.permit_type.id,
-      template_version: template_version
-    )
+    # Create one main permit application
+    template_version = published_template_versions.sample
+    permit_application =
+      PermitApplication.create!(
+        submitter: current_review_manager,
+        permit_project: permit_project,
+        activity_id: template_version.activity.id,
+        permit_type_id: template_version.permit_type.id,
+        template_version: template_version
+      )
+
+    # Assign a random collaborator as a submission delegatee to the main application
+    collaborator_user = (submitters.to_a - [current_review_manager]).sample
+    if collaborator_user
+      collaborator =
+        Collaborator.find_or_create_by!(
+          user: collaborator_user,
+          collaboratorable_id: current_review_manager.id,
+          collaboratorable_type: "User"
+        )
+      PermitCollaboration.create!(
+        permit_application: permit_application,
+        collaborator: collaborator,
+        collaboration_type: :submission,
+        collaborator_type: :delegatee
+      )
+    end
+
+    # Create additional draft permits
+    rand(2..5).times do
+      draft_template_version = published_template_versions.sample
+      draft_permit_application =
+        PermitApplication.create!(
+          submitter: current_review_manager,
+          permit_project: permit_project,
+          activity_id: draft_template_version.activity.id,
+          permit_type_id: draft_template_version.permit_type.id,
+          template_version: draft_template_version,
+          status: :new_draft
+        )
+      # Assign a random collaborator as a submission delegatee to the draft application
+      collaborator_user = (submitters.to_a - [current_review_manager]).sample
+      if collaborator_user
+        collaborator =
+          Collaborator.find_or_create_by!(
+            user: collaborator_user,
+            collaboratorable_id: current_review_manager.id,
+            collaboratorable_type: "User"
+          )
+        PermitCollaboration.create!(
+          permit_application: draft_permit_application,
+          collaborator: collaborator,
+          collaboration_type: :submission,
+          collaborator_type: :delegatee
+        )
+      end
+    end
   end
   # Seed a North Vancouver Example
   4.times do |i| # Added index i for unique titles if needed
@@ -278,14 +340,64 @@ if PermitApplication.first.blank?
         pid: project_pid
       )
 
-    PermitApplication.create!(
-      nickname: "Permit application #{i + 1}",
-      submitter: current_review_manager,
-      permit_project: permit_project,
-      activity_id: template_version.activity.id,
-      permit_type_id: template_version.permit_type.id,
-      template_version: template_version
-    )
+    # Create one main permit application
+    template_version = published_template_versions.sample
+    permit_application =
+      PermitApplication.create!(
+        nickname: "Permit application #{i + 1}",
+        submitter: current_review_manager,
+        permit_project: permit_project,
+        activity_id: template_version.activity.id,
+        permit_type_id: template_version.permit_type.id,
+        template_version: template_version
+      )
+
+    # Assign a random collaborator as a submission delegatee
+    collaborator_user = (submitters.to_a - [current_review_manager]).sample
+    if collaborator_user
+      collaborator =
+        Collaborator.find_or_create_by!(
+          user: collaborator_user,
+          collaboratorable_id: current_review_manager.id,
+          collaboratorable_type: "User"
+        )
+      PermitCollaboration.create!(
+        permit_application: permit_application,
+        collaborator: collaborator,
+        collaboration_type: :submission,
+        collaborator_type: :delegatee
+      )
+    end
+
+    # Create additional draft permits
+    rand(2..5).times do
+      draft_template_version = published_template_versions.sample
+      draft_permit_application =
+        PermitApplication.create!(
+          submitter: current_review_manager,
+          permit_project: permit_project,
+          activity_id: draft_template_version.activity.id,
+          permit_type_id: draft_template_version.permit_type.id,
+          template_version: draft_template_version,
+          status: :new_draft
+        )
+      # Assign a random collaborator as a submission delegatee to the draft application
+      collaborator_user = (submitters.to_a - [current_review_manager]).sample
+      if collaborator_user
+        collaborator =
+          Collaborator.find_or_create_by!(
+            user: collaborator_user,
+            collaboratorable_id: current_review_manager.id,
+            collaboratorable_type: "User"
+          )
+        PermitCollaboration.create!(
+          permit_application: draft_permit_application,
+          collaborator: collaborator,
+          collaboration_type: :submission,
+          collaborator_type: :delegatee
+        )
+      end
+    end
   end
 end
 PermitApplication.reindex
@@ -293,10 +405,10 @@ PermitApplication.reindex
 puts "Seeding jurisdiction customizations..."
 TemplateVersion
   .limit(3)
-  .each do |template_version|
+  .each do |tv|
     JurisdictionTemplateVersionCustomization.find_or_create_by!(
       jurisdiction: north_van,
-      template_version: template_version
+      template_version: tv
     ) do |customization|
       # any other data to add
     end

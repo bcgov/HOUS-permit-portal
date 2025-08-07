@@ -17,7 +17,7 @@ export const PermitProjectModel = types
     jurisdictionDisambiguatedName: types.string,
     rollupStatus: types.enumeration(Object.values(EPermitProjectRollupStatus)),
     tablePermitApplications: types.maybeNull(types.array(types.reference(types.late(() => PermitApplicationModel)))),
-    recentPermitApplications: types.frozen<IPermitApplication[]>(),
+    recentPermitApplications: types.maybeNull(types.array(types.reference(types.late(() => PermitApplicationModel)))),
     projectDocuments: types.maybeNull(types.array(types.frozen<IProjectDocument>())), // Changed to IProjectDocument
     isPinned: types.optional(types.boolean, false),
     createdAt: types.Date,
@@ -31,6 +31,7 @@ export const PermitProjectModel = types
     jurisdiction: types.maybeNull(types.reference(types.late(() => JurisdictionModel))),
     hasOutdatedDraftApplications: types.maybeNull(types.boolean),
     isFullyLoaded: types.optional(types.boolean, false),
+    ownerName: types.maybeNull(types.string),
   })
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -86,6 +87,13 @@ export const PermitProjectModel = types
     setTablePermitApplications(permitApplications: IPermitApplication[]) {
       self.tablePermitApplications = permitApplications.map((p) => p.id) as any
     },
+    fetchSubmissionCollaboratorOptions: flow(function* () {
+      const response = yield* toGenerator(self.environment.api.fetchSubmissionCollaboratorOptions(self.id))
+      if (response.ok) {
+        return response.data.data
+      }
+      return []
+    }),
   }))
 
 export interface IPermitProject extends Instance<typeof PermitProjectModel> {}

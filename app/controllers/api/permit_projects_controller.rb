@@ -3,7 +3,14 @@ class Api::PermitProjectsController < Api::ApplicationController
   include Api::Concerns::Search::ProjectPermitApplications
 
   before_action :set_permit_project,
-                only: %i[show update pin unpin search_permit_applications]
+                only: %i[
+                  show
+                  update
+                  pin
+                  unpin
+                  search_permit_applications
+                  submission_collaborator_options
+                ]
   before_action :set_pinned_projects, only: %i[pinned]
 
   # TODO: If you create a search concern similar to Api::Concerns::Search::PermitApplications,
@@ -126,6 +133,18 @@ class Api::PermitProjectsController < Api::ApplicationController
                    {
                      meta: page_meta(@permit_application_search),
                      blueprint: PermitApplicationBlueprint,
+                     blueprint_opts: {
+                       view: :project_base
+                     }
+                   }
+  end
+
+  def submission_collaborator_options
+    authorize @permit_project
+    render_success @permit_project.submission_collaborators,
+                   nil,
+                   {
+                     blueprint: CollaboratorOptionBlueprint,
                      blueprint_opts: {
                        view: :base
                      }
