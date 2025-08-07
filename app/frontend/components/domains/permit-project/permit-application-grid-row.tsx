@@ -29,9 +29,7 @@ interface IPermitApplicationGridRowProps {
 export const PermitApplicationGridRow = observer(({ permitApplication }: IPermitApplicationGridRowProps) => {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const { id, updatedAt, submitter, usingCurrentTemplateVersion } = permitApplication
-
-  const { name } = submitter
+  const { id, updatedAt, designatedSubmitter, usingCurrentTemplateVersion } = permitApplication
 
   return (
     <Grid
@@ -54,10 +52,7 @@ export const PermitApplicationGridRow = observer(({ permitApplication }: IPermit
         </VStack>
       </GridItem>
       <GridItem display="flex" alignItems="center" px={4} py={2}>
-        {/* for some incomprehensible reason, MST wants to return a plain javascript object here for submitter after
-          the permit application sub-merge, not a model - so .name cant be used */}
-        <Avatar name={`${submitter?.firstName} ${submitter?.lastName}`} size="sm" />
-        {/* <Avatar name={submitter?.name} size="sm" /> */}
+        <Avatar name={designatedSubmitter?.collaborator?.user?.name} size="sm" />
       </GridItem>
       <GridItem display="flex" alignItems="center" px={4} py={2}>
         <Text>{format(updatedAt, datefnsTableDateTimeFormat)}</Text>

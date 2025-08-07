@@ -54,6 +54,13 @@ export const PermitProjectStoreModel = types
           }
         })
       }
+      if (permitProject.recentPermitApplications && Array.isArray(permitProject.recentPermitApplications)) {
+        permitProject.recentPermitApplications.forEach((app) => {
+          if (typeof app === "object") {
+            self.rootStore.permitApplicationStore.mergeUpdate(app, "permitApplicationMap")
+          }
+        })
+      }
 
       if (permitProject.jurisdiction) {
         self.rootStore.jurisdictionStore.mergeUpdate(permitProject.jurisdiction, "jurisdictionMap")
@@ -64,6 +71,8 @@ export const PermitProjectStoreModel = types
         owner: permitProject.owner?.id || null,
         permitApplications:
           permitProject.permitApplications?.map((app) => (typeof app === "object" ? app.id : app)) || [],
+        recentPermitApplications:
+          permitProject.recentPermitApplications?.map((app) => (typeof app === "object" ? app.id : app)) || [],
         jurisdiction: permitProject.jurisdiction?.id,
       })
     },
@@ -162,8 +171,15 @@ export const PermitProjectStoreModel = types
           const attribute: IProjectDocumentAttribute = {
             id: doc.id,
             permitProjectId: doc.permitProjectId,
-            // TODO: fix this
-            file: doc.file,
+            file: doc.file
+              ? {
+                  ...doc.file,
+                  metadata: {
+                    ...doc.file.metadata,
+                    mimeType: doc.file.metadata.mimeType ?? "",
+                  },
+                }
+              : undefined,
             _destroy: doc._destroy,
           }
           return attribute

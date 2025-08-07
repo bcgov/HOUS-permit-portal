@@ -75,7 +75,7 @@ class PermitApplicationPolicy < ApplicationPolicy
 
     return true unless feature_enabled
 
-    record.permit_collaborations.review.exists?(user_id: user.id)
+    record.permit_collaborations.review.exists?(collaborator_id: user.id)
   end
 
   def create_permit_collaboration?

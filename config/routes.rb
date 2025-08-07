@@ -208,6 +208,7 @@ Rails.application.routes.draw do
       member do
         post :pin
         delete :unpin
+        get :submission_collaborator_options
       end
     end
 

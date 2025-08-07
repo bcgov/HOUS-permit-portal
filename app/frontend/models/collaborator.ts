@@ -3,12 +3,18 @@ import { ECollaboratorableType } from "../types/enums"
 import { UserModel } from "./user"
 
 export const CollaboratorModel = types.snapshotProcessor(
-  types.model("CollaboratorModel", {
-    id: types.identifier,
-    collaboratorableType: types.enumeration(Object.values(ECollaboratorableType)),
-    collaboratorableId: types.string,
-    user: types.reference(types.late(() => UserModel)),
-  }),
+  types
+    .model("CollaboratorModel", {
+      id: types.identifier,
+      collaboratorableType: types.enumeration(Object.values(ECollaboratorableType)),
+      collaboratorableId: types.string,
+      user: types.reference(types.late(() => UserModel)),
+    })
+    .views((self) => ({
+      get userName() {
+        return self.user?.name
+      },
+    })),
   {
     preProcessor(snapshot: any) {
       return {
