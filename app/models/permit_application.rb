@@ -31,7 +31,7 @@ class PermitApplication < ApplicationRecord
   belongs_to :activity
   belongs_to :template_version
   belongs_to :sandbox, optional: true
-  belongs_to :permit_project, optional: true
+  belongs_to :permit_project, optional: true, touch: true
 
   has_one :requirement_template, through: :template_version
 
@@ -224,8 +224,18 @@ class PermitApplication < ApplicationRecord
       review_delegatee_name: review_delegatee_name,
       has_collaborator: has_collaborator?,
       sandbox_id: sandbox_id,
-      permit_project_id: permit_project_id
+      permit_project_id: permit_project_id,
+      submission_delegatee_id: submission_delegatee&.id
     }
+  end
+
+  def submission_delegatee
+    collaborators.where(
+      permit_collaborations: {
+        collaboration_type: :submission,
+        collaborator_type: :delegatee
+      }
+    ).first
   end
 
   def collaborator?(user_id:, collaboration_type:, collaborator_type: nil)
@@ -723,8 +733,6 @@ class PermitApplication < ApplicationRecord
   def reindex_permit_project
     permit_project&.reindex
   end
-
-  private
 
   def jurisdiction_or_permit_project_present
     if jurisdiction.nil? && permit_project.nil?

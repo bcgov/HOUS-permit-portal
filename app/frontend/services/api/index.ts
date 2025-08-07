@@ -8,6 +8,7 @@ import { IExternalApiKey } from "../../models/external-api-key"
 import { IIntegrationMapping } from "../../models/integration-mapping"
 import { IJurisdiction } from "../../models/jurisdiction"
 import { IJurisdictionTemplateVersionCustomization } from "../../models/jurisdiction-template-version-customization"
+import { IPart3StepCode } from "../../models/part-3-step-code"
 import { IPart3StepCodeChecklist } from "../../models/part-3-step-code-checklist"
 import { IPart9StepCode } from "../../models/part-9-step-code"
 import { IPart9StepCodeChecklist } from "../../models/part-9-step-code-checklist"
@@ -264,6 +265,10 @@ export class Api {
 
   async unpinPermitProject(id: string) {
     return this.client.delete<ApiResponse<IPermitProject[]>>(`/permit_projects/${id}/unpin`)
+  }
+
+  async fetchSubmissionCollaboratorOptions(id: string) {
+    return this.client.get<IOptionResponse>(`/permit_projects/${id}/submission_collaborator_options`)
   }
 
   async fetchCollaboratorsByCollaboratorable(collaboratorableId: string, params?: TSearchParams<never, never>) {

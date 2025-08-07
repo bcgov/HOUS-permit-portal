@@ -99,13 +99,11 @@ export const CollaboratorsSidebar = observer(function CollaboratorsSidebar({
                 }
               </Text>
             </Stack>
-            {permitApplication.isDesignatedReviewerEnabled && (
-              <DesignatedSubmitters
-                permitApplication={permitApplication}
-                collaborationType={collaborationType}
-                canManage={permitApplication.canUserManageCollaborators(currentUser, collaborationType)}
-              />
-            )}
+            <DesignatedCollaborators
+              permitApplication={permitApplication}
+              collaborationType={collaborationType}
+              canManage={permitApplication.canUserManageCollaborators(currentUser, collaborationType)}
+            />
             <Assignees
               permitApplication={permitApplication}
               collaborationType={collaborationType}
@@ -118,7 +116,7 @@ export const CollaboratorsSidebar = observer(function CollaboratorsSidebar({
   )
 })
 
-const DesignatedSubmitters = observer(function DesignatedSubmitters({
+const DesignatedCollaborators = observer(function DesignatedCollaborators({
   permitApplication,
   collaborationType,
   canManage,
@@ -131,6 +129,9 @@ const DesignatedSubmitters = observer(function DesignatedSubmitters({
   let name = delegateeCollaboration?.collaborator?.user?.name
   let organization = delegateeCollaboration?.collaborator?.user?.organization
   const isSubmissionCollaboration = collaborationType === ECollaborationType.submission
+  if (collaborationType === ECollaborationType.review && !permitApplication.isDesignatedReviewerEnabled) {
+    return <></>
+  }
   return (
     <Stack spacing={2}>
       <Text as={"h3"} fontSize={"md"} fontWeight={700}>

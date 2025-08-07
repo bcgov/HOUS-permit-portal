@@ -47,6 +47,10 @@ class PermitProjectPolicy < ApplicationPolicy
     user_is_owner_or_collaborator?
   end
 
+  def submission_collaborator_options?
+    user_is_owner?
+  end
+
   private
 
   def user_is_owner?
