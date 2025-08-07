@@ -33,6 +33,13 @@ class PermitApplicationBlueprint < Blueprinter::Base
     end
   end
 
+  view :project_base do
+    include_view :base
+    association :permit_collaborations,
+                blueprint: PermitCollaborationBlueprint,
+                view: :base
+  end
+
   view :jurisdiction_review_inbox do
     include_view :base
 

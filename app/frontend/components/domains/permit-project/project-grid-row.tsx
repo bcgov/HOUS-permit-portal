@@ -1,4 +1,4 @@
-import { Flex, Grid, GridItem, IconButton, Menu, MenuButton, MenuItem, MenuList, Text } from "@chakra-ui/react"
+import { Avatar, Flex, Grid, GridItem, IconButton, Menu, MenuButton, MenuItem, MenuList, Text } from "@chakra-ui/react"
 import { DotsThreeVertical } from "@phosphor-icons/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
@@ -45,7 +45,9 @@ export const ProjectGridRow = observer(({ project }: IProjectGridRowProps) => {
             <Text>{project.shortAddress}</Text>
           </Flex>
         </GridItem>
-        <GridItem display="flex" alignItems="center" px={4} py={2}></GridItem>
+        <GridItem display="flex" alignItems="center" px={4} py={2}>
+          <Avatar name={project.ownerName} size="sm" />
+        </GridItem>
         <GridItem display="flex" alignItems="center" px={4} py={2}>
           {project.updatedAt && format(project.updatedAt, datefnsTableDateTimeFormat)}
         </GridItem>
