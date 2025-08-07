@@ -382,6 +382,11 @@ class RequirementFormJsonService
   def get_general_contact_field_components(parent_key = nil)
     required = self.requirement.required
     [
+      get_contact_type_component(
+        parent_key,
+        true,
+        get_general_contact_type_options
+      ),
       get_columns_form_json(
         "name_columns",
         [
@@ -403,11 +408,6 @@ class RequirementFormJsonService
           get_contact_field_form_json(:organization, parent_key, false),
           get_contact_field_form_json(:title, parent_key, required)
         ]
-      ),
-      get_contact_type_component(
-        parent_key,
-        false,
-        get_general_contact_type_options
       )
     ]
   end
@@ -415,6 +415,11 @@ class RequirementFormJsonService
   def get_professional_contact_field_components(parent_key = nil)
     required = self.requirement.required
     [
+      get_contact_type_component(
+        parent_key,
+        true,
+        get_professional_contact_type_options
+      ),
       get_columns_form_json(
         "name_columns",
         [
@@ -439,12 +444,7 @@ class RequirementFormJsonService
         ]
       ),
       get_contact_field_form_json(:professional_association, parent_key, false),
-      get_contact_field_form_json(:professional_number, parent_key, false),
-      get_contact_type_component(
-        parent_key,
-        false,
-        get_professional_contact_type_options
-      )
+      get_contact_field_form_json(:professional_number, parent_key, false)
     ]
   end
 
