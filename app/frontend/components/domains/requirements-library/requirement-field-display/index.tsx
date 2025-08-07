@@ -306,6 +306,17 @@ const requirementsComponentMap = {
 
   [ERequirementType.generalContact](props: TRequirementFieldDisplayProps) {
     const contactFieldItemTypes: Array<{ type: ERequirementContactFieldItemType; containerProps?: BoxProps }> = [
+      {
+        type: ERequirementContactFieldItemType.contactType,
+        containerProps: {
+          gridColumn: "1 / span 2",
+          sx: {
+            ".chakra-form-control input": {
+              maxW: "full",
+            },
+          },
+        },
+      },
       { type: ERequirementContactFieldItemType.firstName },
       { type: ERequirementContactFieldItemType.lastName },
       { type: ERequirementContactFieldItemType.email },
@@ -323,7 +334,6 @@ const requirementsComponentMap = {
       },
       { type: ERequirementContactFieldItemType.title },
       { type: ERequirementContactFieldItemType.organization },
-      { type: ERequirementContactFieldItemType.contactType },
     ]
 
     return <GenericContactDisplay contactFieldItems={contactFieldItemTypes} {...props} />
@@ -331,6 +341,17 @@ const requirementsComponentMap = {
 
   [ERequirementType.professionalContact](props: TRequirementFieldDisplayProps) {
     const contactFieldItemTypes: Array<{ type: ERequirementContactFieldItemType; containerProps?: BoxProps }> = [
+      {
+        type: ERequirementContactFieldItemType.contactType,
+        containerProps: {
+          gridColumn: "1 / span 2",
+          sx: {
+            ".chakra-form-control input": {
+              maxW: "full",
+            },
+          },
+        },
+      },
       { type: ERequirementContactFieldItemType.firstName },
       { type: ERequirementContactFieldItemType.lastName },
       { type: ERequirementContactFieldItemType.email },
@@ -351,7 +372,6 @@ const requirementsComponentMap = {
       { type: ERequirementContactFieldItemType.businessLicense },
       { type: ERequirementContactFieldItemType.professionalAssociation },
       { type: ERequirementContactFieldItemType.professionalNumber },
-      { type: ERequirementContactFieldItemType.contactType },
     ]
 
     return <GenericContactDisplay contactFieldItems={contactFieldItemTypes} {...props} />

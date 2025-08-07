@@ -318,6 +318,7 @@ export enum EZeroCarbonStep {
 }
 
 export enum ERequirementContactFieldItemType {
+  contactType = "contactType",
   firstName = "firstName",
   lastName = "lastName",
   email = "email",
@@ -329,7 +330,6 @@ export enum ERequirementContactFieldItemType {
   businessLicense = "businessLicense",
   professionalAssociation = "professionalAssociation",
   professionalNumber = "professionalNumber",
-  contactType = "contactType",
 }
 
 export enum EGovFeedbackResponseNoReason {
