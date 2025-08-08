@@ -135,12 +135,15 @@ class PermitProject < ApplicationRecord
   end
 
   def submission_collaborators
-    Collaborator.joins(:permit_collaborations).where(
-      permit_collaborations: {
-        permit_application_id: permit_applications.select(:id),
-        collaboration_type: :submission
-      }
-    )
+    Collaborator
+      .joins(:permit_collaborations)
+      .where(
+        permit_collaborations: {
+          permit_application_id: permit_applications.select(:id),
+          collaboration_type: :submission
+        }
+      )
+      .distinct
   end
 
   private

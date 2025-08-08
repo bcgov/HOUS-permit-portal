@@ -21,6 +21,7 @@ export const PermitProjectStoreModel = types
       rollupStatusFilter: types.maybeNull(types.array(types.enumeration(Object.values(EPermitProjectRollupStatus)))),
       requirementTemplateFilter: types.maybeNull(types.array(types.string)),
       isFetchingPinnedProjects: types.optional(types.boolean, false),
+      jurisdictionFilter: types.optional(types.array(types.string), []),
     }),
     createSearchModel<EPermitProjectSortFields>("searchPermitProjects", "setPermitProjectFilters")
   )
@@ -40,6 +41,10 @@ export const PermitProjectStoreModel = types
     },
   }))
   .actions((self) => ({
+    jurisdictionOptions: flow(function* () {
+      const response = yield* toGenerator(self.environment.api.fetchPermitProjectJurisdictionOptions())
+      return response
+    }),
     __beforeMergeUpdate(permitProject) {
       // Handle submitter
       if (permitProject.owner && typeof permitProject.owner === "object") {
@@ -81,6 +86,11 @@ export const PermitProjectStoreModel = types
       const paramValue = value && value.length > 0 ? value.join(",") : null
       setQueryParam("requirementTemplateFilter", paramValue)
     },
+    setJurisdictionFilter(value: string[]) {
+      self.jurisdictionFilter = cast(value)
+      const paramValue = value && value.length > 0 ? value.join(",") : null
+      setQueryParam("jurisdictionFilter", paramValue)
+    },
     setCurrentPermitProject(permitProjectId: string | null) {
       if (permitProjectId === null) {
         self.currentPermitProject = null
@@ -116,6 +126,7 @@ export const PermitProjectStoreModel = types
           query: self.query,
           rollupStatus: self.rollupStatusFilter,
           requirementTemplateIds: self.requirementTemplateFilter,
+          jurisdictionId: self.jurisdictionFilter,
         },
       }
 
@@ -197,9 +208,13 @@ export const PermitProjectStoreModel = types
       const requirementTemplateFilter = queryParams.get("requirementTemplateFilter")
       const rollupStatusStr = queryParams.get("rollupStatus")
       const rollupStatus = rollupStatusStr ? (rollupStatusStr.split(",") as EPermitProjectRollupStatus[]) : null
+      const jurisdictionFilter = queryParams.get("jurisdictionFilter")?.split(",")
       self.rollupStatusFilter = rollupStatus ? cast(rollupStatus) : null
       if (requirementTemplateFilter) {
         self.setRequirementTemplateFilter(requirementTemplateFilter.split(","))
+      }
+      if (jurisdictionFilter) {
+        self.setJurisdictionFilter(jurisdictionFilter)
       }
     },
     createPermitProject: flow(function* (projectData: {

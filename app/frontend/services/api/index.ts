@@ -243,6 +243,10 @@ export class Api {
     return this.client.get<ApiResponse<IPermitProject[]>>(`/permit_projects/pinned`)
   }
 
+  async fetchPermitProjectJurisdictionOptions() {
+    return this.client.get<IOptionResponse>(`/permit_projects/jurisdiction_options`)
+  }
+
   async createPermitProject(projectData: {
     name: string
     description?: string
