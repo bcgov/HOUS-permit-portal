@@ -17,13 +17,14 @@ class Api::PermitProjectsController < Api::ApplicationController
   # include it here for more advanced search parameter handling.
   # e.g., include Api::Concerns::Search::PermitProjects
 
-  skip_after_action :verify_policy_scoped, only: %i[index pinned]
+  skip_after_action :verify_policy_scoped,
+                    only: %i[index pinned jurisdiction_options]
   skip_after_action :verify_authorized, only: %i[pinned]
 
   def index
     perform_permit_project_search
     authorized_results = apply_search_authorization(@permit_projects)
-    set_project_ids_with_outdated_drafts(authorized_results)
+    compute_project_ids_with_outdated_drafts(authorized_results)
 
     render_success authorized_results,
                    nil,
@@ -151,6 +152,15 @@ class Api::PermitProjectsController < Api::ApplicationController
                    }
   end
 
+  def jurisdiction_options
+    authorize PermitProject
+    # Use policy_scope as the single source of truth for accessible projects
+    jurisdicion_ids = policy_scope(PermitProject).select(:jurisdiction_id)
+    jurisdictions = Jurisdiction.where(id: jurisdicion_ids).distinct
+    options = jurisdictions.map { |j| { label: j.qualified_name, value: j.id } }
+    render_success options, nil, { blueprint: OptionBlueprint }
+  end
+
   private
 
   def set_pinned_projects
@@ -160,7 +170,7 @@ class Api::PermitProjectsController < Api::ApplicationController
       )
   end
 
-  def set_project_ids_with_outdated_drafts(projects)
+  def compute_project_ids_with_outdated_drafts(projects)
     project_ids = projects.map(&:id)
     outdated_draft_permit_applications =
       PermitApplication
@@ -185,7 +195,7 @@ class Api::PermitProjectsController < Api::ApplicationController
 
   def set_permit_project
     @permit_project = PermitProject.includes(:jurisdiction).find(params[:id])
-    set_project_ids_with_outdated_drafts([@permit_project])
+    compute_project_ids_with_outdated_drafts([@permit_project])
   end
 
   def permit_project_params

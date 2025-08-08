@@ -528,6 +528,7 @@ export interface IPermitProjectSearchFilters {
   showArchived?: boolean
   rollupStatus?: EPermitProjectRollupStatus[]
   requirementTemplateIds?: string[]
+  jurisdictionId?: string[]
   // Add other specific filters if needed, e.g., status, submitterId
 }
 

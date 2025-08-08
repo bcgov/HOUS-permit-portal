@@ -13,6 +13,7 @@ import { ModelSearchInput } from "../../shared/base/model-search-input"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
 import { SearchGrid } from "../../shared/grid/search-grid"
 import { GridHeaders, PROJECTS_GRID_TEMPLATE_COLUMNS } from "./grid-header"
+import { JurisdictionFilter } from "./jurisdiction-filter"
 import { ProjectGridRow } from "./project-grid-row"
 import { RequirementTemplateFilter } from "./requirement-template-filter"
 import { RollupStatusFilter } from "./rollup-status-filter"
@@ -51,6 +52,7 @@ export const ProjectsGrid = observer(() => {
             {/* <ActiveArchivedFilter searchModel={permitProjectStore} /> */}
             <RequirementTemplateFilter searchModel={permitProjectStore} />
             <RollupStatusFilter searchModel={permitProjectStore} />
+            <JurisdictionFilter searchModel={permitProjectStore} />
           </HStack>
         </Flex>
       </Flex>

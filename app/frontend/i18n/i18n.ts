@@ -667,6 +667,7 @@ Thank you,
           createErrorTitle: "Failed to Create Project",
           startNew: "Start New Project",
           rollupStatusFilter: "Status",
+          jurisdictionFilter: "Location",
         },
 
         permitApplication: {

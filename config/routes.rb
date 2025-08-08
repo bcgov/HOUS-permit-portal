@@ -199,6 +199,7 @@ Rails.application.routes.draw do
 
     resources :permit_projects, only: %i[show index update create] do
       get "pinned", on: :collection
+      get "jurisdiction_options", on: :collection
       post "search", on: :collection, to: "permit_projects#index"
       post "permit_applications/search",
            on: :member,
