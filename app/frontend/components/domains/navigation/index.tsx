@@ -147,6 +147,11 @@ const OnboardingChecklistPageForLgAdoptingScreen = lazy(() =>
     default: module.OnboardingChecklistPageForLgAdoptingScreen,
   }))
 )
+const SingleZoneCoolingHeatingToolScreen = lazy(() =>
+  import("../single-zone-cooling-heating-tool/single-zone-cooling-heating-tool-screen").then((module) => ({
+    default: module.SingleZoneCoolingHeatingToolScreen,
+  }))
+)
 const PermitApplicationIndexScreen = lazy(() =>
   import("../permit-application").then((module) => ({ default: module.PermitApplicationIndexScreen }))
 )
@@ -745,6 +750,7 @@ const AppRoutes = observer(() => {
           path="/onboarding-checklist-page-for-lg-adopting"
           element={<OnboardingChecklistPageForLgAdoptingScreen />}
         />
+        <Route path="/single-zone-cooling-heating-tool" element={<SingleZoneCoolingHeatingToolScreen />} />
         <Route path="/confirmed" element={<EmailConfirmedScreen />} />
         <Route path="/welcome" element={<LandingScreen />} />
         <Route
