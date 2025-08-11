@@ -9,16 +9,16 @@ import { IPart3StepCode, Part3StepCodeModel } from "../models/part-3-step-code"
 import { IPart9StepCode, Part9StepCodeModel } from "../models/part-9-step-code"
 import { EEnergyStep, EStepCodeSortFields, EStepCodeType, EZeroCarbonStep } from "../types/enums"
 import { IPart3ChecklistSelectOptions, IPart9ChecklistSelectOptions, TSearchParams } from "../types/types"
-import { startBlobDownload } from "../utils/utility-functions"
+import { setQueryParam, startBlobDownload } from "../utils/utility-functions"
 
 export const StepCodeModel = types.union(
   {
     dispatcher: (snapshot) => {
       // Return the appropriate model based on the `type` field in the snapshot
       switch (snapshot.type) {
-        case "Part9StepCode": // Using string literal
+        case EStepCodeType.part9StepCode: // Using string literal
           return Part9StepCodeModel
-        case "Part3StepCode": // Using string literal
+        case EStepCodeType.part3StepCode: // Using string literal
           return Part3StepCodeModel
         default:
           // It's good practice to have a default, even if you expect it to never be hit.
@@ -43,8 +43,9 @@ export const StepCodeStoreModel = types
       isLoaded: types.maybeNull(types.boolean),
       selectOptions: types.frozen<Partial<IPart9ChecklistSelectOptions & IPart3ChecklistSelectOptions>>(),
       currentStepCode: types.maybeNull(types.reference(StepCodeModel)),
+      typeFilter: types.optional(types.array(types.enumeration(Object.values(EStepCodeType) as any)), []),
     }),
-    createSearchModel<EStepCodeSortFields>("searchStepCodes")
+    createSearchModel<EStepCodeSortFields>("searchStepCodes", "setStepCodeFilters")
   )
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -65,6 +66,7 @@ export const StepCodeStoreModel = types
       const map = {
         [EStepCodeSortFields.projectName]: t("stepCode.columns.project"),
         [EStepCodeSortFields.type]: t("stepCode.columns.type"),
+        [EStepCodeSortFields.fullAddress]: t("stepCode.columns.fullAddress"),
         [EStepCodeSortFields.updatedAt]: t("stepCode.columns.updatedAt"),
       }
       return map[field]
@@ -85,6 +87,12 @@ export const StepCodeStoreModel = types
     setTableStepCodes(stepCodes: Array<IPart9StepCode | IPart3StepCode>) {
       // @ts-ignore
       self.tableStepCodes.replace(stepCodes.map((s) => s.id))
+    },
+    setTypeFilter(types: EStepCodeType[] | undefined) {
+      if (!types) return
+      setQueryParam("type", types)
+      // @ts-ignore
+      self.typeFilter = types
     },
   }))
   .actions((self) => ({
@@ -121,7 +129,9 @@ export const StepCodeStoreModel = types
         sort: self.sort,
         page: opts?.page ?? self.currentPage,
         perPage: opts?.countPerPage ?? self.countPerPage,
-        filters: {} as any,
+        filters: {
+          type: self.typeFilter,
+        } as any,
       }
       const response = yield self.environment.api.searchStepCodes(params)
       if (response.ok) {
@@ -133,6 +143,10 @@ export const StepCodeStoreModel = types
       }
       return response.ok
     }),
+    setStepCodeFilters(queryParams: URLSearchParams) {
+      const typeFilter = queryParams.get("type")?.split(",") as EStepCodeType[]
+      self.setTypeFilter(typeFilter)
+    },
     fetchPart9SelectOptions: flow(function* () {
       const response = yield self.environment.api.fetchPart9StepCodeSelectOptions()
       if (response.ok) {

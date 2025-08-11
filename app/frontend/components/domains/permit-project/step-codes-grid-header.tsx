@@ -7,7 +7,7 @@ import { EStepCodeSortFields } from "../../../types/enums"
 import { GridHeader } from "../../shared/grid/grid-header"
 import { SortIcon } from "../../shared/sort-icon"
 
-export const STEP_CODES_GRID_TEMPLATE_COLUMNS = "1fr 2fr 1fr"
+export const STEP_CODES_GRID_TEMPLATE_COLUMNS = "1fr 1fr 1fr 1fr"
 
 export const StepCodesGridHeaders = observer((props: GridItemProps) => {
   const { t } = useTranslation()

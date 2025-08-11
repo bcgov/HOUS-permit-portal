@@ -1,4 +1,4 @@
-import { Flex, FormControl, GridItem } from "@chakra-ui/react"
+import { Flex, GridItem } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React from "react"
@@ -8,10 +8,8 @@ import { EFlashMessageStatus } from "../../../types/enums"
 import { CustomMessageBox } from "../../shared/base/custom-message-box"
 import { Paginator } from "../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../shared/base/inputs/per-page-select"
-import { ModelSearchInput } from "../../shared/base/model-search-input"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
 import { SearchGrid } from "../../shared/grid/search-grid"
-import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { STEP_CODES_GRID_TEMPLATE_COLUMNS, StepCodesGridHeaders } from "./step-codes-grid-header"
 import { StepCodesGridRow } from "./step-codes-grid-row"
 
@@ -31,19 +29,6 @@ export const StepCodesGrid = observer(() => {
 
   return (
     <>
-      <RouterLinkButton to="/project-readiness-tools/check-step-code-requirements">
-        {t("stepCode.createButton")}
-      </RouterLinkButton>
-      <Flex direction="column" gap={4} w="full">
-        <FormControl w="full">
-          <ModelSearchInput
-            searchModel={stepCodeStore}
-            inputProps={{ placeholder: t("ui.search"), width: "full" }}
-            inputGroupProps={{ width: "full" }}
-          />
-        </FormControl>
-      </Flex>
-
       <SearchGrid templateColumns={STEP_CODES_GRID_TEMPLATE_COLUMNS} gridRowClassName="step-code-grid-row">
         <StepCodesGridHeaders />
         {isSearching ? (

@@ -11,7 +11,7 @@ export const StepCodesGridRow = observer(({ stepCode }: { stepCode: IStepCode })
   const navigate = useNavigate()
   const permitApplicationId = (stepCode as any)?.permitApplication?.id
   const { t } = useTranslation()
-  const { type, projectName, updatedAt } = stepCode
+  const { type, projectName, fullAddress, updatedAt } = stepCode
   // Navigate to standalone Part 3 route when applicable, otherwise fallback to the permit-application edit routes
   const targetPath =
     type === "Part3StepCode"
@@ -36,6 +36,9 @@ export const StepCodesGridRow = observer(({ stepCode }: { stepCode: IStepCode })
       </GridItem>
       <GridItem display="flex" alignItems="center" px={4} py={2}>
         <Text>{projectName}</Text>
+      </GridItem>
+      <GridItem display="flex" alignItems="center" px={4} py={2}>
+        <Text>{fullAddress}</Text>
       </GridItem>
       <GridItem display="flex" alignItems="center" px={4} py={2}>
         <Text>{updatedAt ? format(updatedAt, datefnsTableDateTimeFormat) : ""}</Text>

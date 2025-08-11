@@ -1183,18 +1183,27 @@ Thank you,
           },
         },
         stepCode: {
-          createButton: "Create Step Code",
+          createButton: "Start now",
           types: {
             Part3StepCode: "Part 3",
             Part9StepCode: "Part 9",
           },
           index: {
             title: "Step Codes",
+            createReportTitle: "Create a Step Codes compliance report for your project",
+            createReportDescriptionPrefix:
+              "Create a report that details a project's compliance with BC's Energy Step Code and Zero Carbon Step Code requirements. When a report is finished, you'll find it in",
+            documentsLabel: "Documents",
+            lookupTitle: "Look up local Step Codes requirements for your project",
+            lookupDescriptionPrefix: "To check which Step Codes apply before generating a report,",
+            lookupDescriptionLinkLabel: "look up Step Codes requirements for your project's jurisdiction",
           },
+
           noneFound: "No Step Codes found",
           columns: {
             project: "Project",
             type: "Type",
+            fullAddress: "Address",
             updatedAt: "Last modified",
           },
           part3: {

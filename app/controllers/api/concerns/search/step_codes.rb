@@ -25,7 +25,13 @@ module Api::Concerns::Search::StepCodes
   private
 
   def step_code_search_params
-    params.permit(:query, :page, :per_page, sort: %i[field direction])
+    params.permit(
+      :query,
+      :page,
+      :per_page,
+      { sort: %i[field direction] },
+      { filters: { type: [] } }
+    )
   end
 
   def step_code_query
@@ -43,6 +49,18 @@ module Api::Concerns::Search::StepCodes
   end
 
   def step_code_where_clause
-    { creator_id: current_user.id }
+    search_filters = (step_code_search_params[:filters] || {}).deep_dup
+
+    # Base visibility: only records created by current user
+    base_conditions = [{ creator_id: current_user.id }]
+
+    final_where = { _and: [{ _or: base_conditions }] }
+
+    # OR within a filter (arrays), AND across different filters
+    if search_filters[:type].present?
+      final_where[:_and] << { type: search_filters[:type] }
+    end
+
+    final_where
   end
 end
