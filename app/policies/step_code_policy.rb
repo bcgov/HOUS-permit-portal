@@ -52,32 +52,7 @@ class StepCodePolicy < ApplicationPolicy
   class Scope < Scope
     # NOTE: Be explicit about which records you allow access to!
     def resolve
-      # A user can see step codes they created OR those linked to a permit application they can access
-      # Submitters see their own; reviewers see those in their sandbox and jurisdiction; super_admin sees all.
-      return scope.all if user.super_admin?
-
-      # Join through permit_application where user is submitter or collaborator
-      permitted_ids =
-        PermitApplication
-          .left_joins(:collaborators)
-          .where(
-            "permit_applications.submitter_id = :uid OR collaborators.user_id = :uid",
-            uid: user.id
-          )
-          .select(:id)
-
-      scoped =
-        scope.left_joins(:permit_application).where(
-          "step_codes.creator_id = :uid OR permit_applications.id IN (:pa_ids)",
-          uid: user.id,
-          pa_ids: permitted_ids
-        )
-
-      if sandbox.present?
-        scoped = scoped.where(permit_applications: { sandbox_id: sandbox.id })
-      end
-
-      scoped.distinct
+      scope.where(creator: user)
     end
   end
 end

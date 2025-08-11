@@ -65,7 +65,7 @@ export const StepCodeStoreModel = types
       const map = {
         [EStepCodeSortFields.projectName]: t("stepCode.columns.project"),
         [EStepCodeSortFields.type]: t("stepCode.columns.type"),
-        [EStepCodeSortFields.updatedAt]: t("stepCode.columns.updatedAt"),
+        [EStepCodeSortFields.lastModified]: t("stepCode.columns.lastModified"),
       }
       return map[field]
     },

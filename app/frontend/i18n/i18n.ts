@@ -1185,8 +1185,8 @@ Thank you,
         stepCode: {
           createButton: "Create Step Code",
           types: {
-            Part3StepCode: "Part 3 Step Code",
-            Part9StepCode: "Part 9 Step Code",
+            Part3StepCode: "Part 3",
+            Part9StepCode: "Part 9",
           },
           index: {
             title: "Step Codes",
@@ -1194,11 +1194,8 @@ Thank you,
           noneFound: "No Step Codes found",
           columns: {
             project: "Project",
-            address: "Address",
             type: "Type",
-            permitDate: "Permit date",
-            createdAt: "Created",
-            updatedAt: "Updated",
+            lastModified: "Last modified",
           },
           part3: {
             title: "Energy and Zero Carbon Step Codes for Step 3 Buildings",
@@ -2067,10 +2064,6 @@ Thank you,
             otherGhgConsumption: "Other GHG consumption",
             create: "Create",
             addData: "Add data",
-          },
-          index: {
-            heading: "Step Codes",
-            newStepCode: "New step code",
           },
         },
         stepCodeChecklist: {

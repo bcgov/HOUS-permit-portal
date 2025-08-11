@@ -661,5 +661,5 @@ export enum EPermitProjectRollupStatus {
 export enum EStepCodeSortFields {
   type = "type",
   projectName = "project_name",
-  updatedAt = "updated_at",
+  lastModified = "last_modified",
 }

@@ -11,9 +11,9 @@ import { ProjectTabPanelContent } from "./project-tab-panel-content"
 import { ITabItem, ProjectSidebarTabList } from "./sidebar-tab-list"
 import { StepCodeTabPanelContent } from "./step-code-tab-panel-content"
 
-interface IPermitProjectIndexScreenProps {}
+interface IProjectDashboardScreenProps {}
 
-export const PermitProjectIndexScreen = observer(({}: IPermitProjectIndexScreenProps) => {
+export const ProjectDashboardScreen = observer(({}: IProjectDashboardScreenProps) => {
   const { t } = useTranslation()
   const { permitProjectStore } = useMst()
   const location = useLocation()

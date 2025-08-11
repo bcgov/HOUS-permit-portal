@@ -150,8 +150,8 @@ const OnboardingChecklistPageForLgAdoptingScreen = lazy(() =>
 const PermitApplicationIndexScreen = lazy(() =>
   import("../permit-application").then((module) => ({ default: module.PermitApplicationIndexScreen }))
 )
-const PermitProjectIndexScreen = lazy(() =>
-  import("../permit-project").then((module) => ({ default: module.PermitProjectIndexScreen }))
+const ProjectDashboardScreen = lazy(() =>
+  import("../permit-project").then((module) => ({ default: module.ProjectDashboardScreen }))
 )
 const NewPermitProjectScreen = lazy(() =>
   import("../permit-project/new-permit-project-screen").then((module) => ({ default: module.NewPermitProjectScreen }))
@@ -629,13 +629,13 @@ const AppRoutes = observer(() => {
           <Route
             element={<ProtectedRoute isAllowed={loggedIn && !mustAcceptEula} redirectPath={mustAcceptEula && "/"} />}
           >
-            <Route path="/step-codes" element={<PermitProjectIndexScreen />} />
+            <Route path="/step-codes" element={<ProjectDashboardScreen />} />
             <Route path="/permit-applications" element={<PermitApplicationIndexScreen />} />
             {/* Already handled above with path-based tabs */}
-            <Route path="/projects" element={<PermitProjectIndexScreen />} />
+            <Route path="/projects" element={<ProjectDashboardScreen />} />
             <Route path="/projects/new" element={<NewPermitProjectScreen />} />
             <Route path="/projects/:permitProjectId/*" element={<PermitProjectScreen />} />
-            <Route path="/step-codes/*" element={<PermitProjectIndexScreen />} />
+            <Route path="/step-codes/*" element={<ProjectDashboardScreen />} />
             <Route path="/permit-applications/new" element={<NewPermitApplicationScreen />} />
             <Route path="/permit-applications/:permitApplicationId/edit" element={<EditPermitApplicationScreen />} />
             <Route
