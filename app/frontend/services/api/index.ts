@@ -52,6 +52,7 @@ import {
   EPermitProjectSortFields,
   ERequirementLibrarySortFields,
   ERequirementTemplateSortFields,
+  EStepCodeSortFields,
   EStepCodeType,
   ETemplateVersionStatus,
   EUserSortFields,
@@ -639,6 +640,10 @@ export class Api {
 
   async fetchPart9StepCodes() {
     return this.client.get<ApiResponse<IStepCode[]>>("/part_9_building/step_codes")
+  }
+
+  async searchStepCodes(params?: TSearchParams<EStepCodeSortFields>) {
+    return this.client.post<ApiResponse<IStepCode[]>>("/step_codes/search", params)
   }
 
   async fetchPart9StepCodeSelectOptions() {

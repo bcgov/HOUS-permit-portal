@@ -84,7 +84,7 @@ export const PermitProjectScreen = observer(() => {
           <Flex align="center" h={24}>
             <IconButton
               as={RouterLink}
-              to="/permit-projects"
+              to="/projects"
               aria-label={t("permitProject.details.backToProjects")}
               icon={<CaretLeft size={24} />}
               variant="ghost"

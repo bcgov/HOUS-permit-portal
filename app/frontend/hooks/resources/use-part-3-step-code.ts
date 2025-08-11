@@ -15,8 +15,8 @@ export const usePart3StepCode = () => {
     const loadStepCode = async () => {
       setIsLoading(true)
       if (isUUID(stepCodeId)) {
-        let stepCode = getStepCode(stepCodeId)
-        if (!stepCode) {
+        let stepCode = getStepCode(stepCodeId) as IPart3StepCode
+        if (!stepCode || !stepCode.isFullyLoaded) {
           stepCode = await fetchPart3StepCode(stepCodeId)
         }
         if (stepCode) {

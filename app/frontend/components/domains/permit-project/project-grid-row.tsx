@@ -26,7 +26,7 @@ export const ProjectGridRow = observer(({ project }: IProjectGridRowProps) => {
         gridColumn="1 / -1"
         templateColumns="subgrid"
         display="grid"
-        onClick={() => navigate(`/permit-projects/${project.id}`)}
+        onClick={() => navigate(`/projects/${project.id}`)}
         _hover={{
           bg: "greys.grey03",
           cursor: "pointer",
