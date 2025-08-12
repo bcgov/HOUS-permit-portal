@@ -1185,8 +1185,8 @@ Thank you,
         stepCode: {
           createButton: "Start now",
           types: {
-            Part3StepCode: "Part 3",
-            Part9StepCode: "Part 9",
+            Part3StepCode: "BCBC Part 3",
+            Part9StepCode: "BCBC Part 9",
           },
           index: {
             title: "Step Codes",

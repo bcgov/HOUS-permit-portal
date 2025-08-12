@@ -12,10 +12,8 @@ interface IProps {
 export const StepCodeTypeFilter = observer(function StepCodeTypeFilter({ searchModel }: IProps) {
   const { t } = useTranslation()
   const { typeFilter, setTypeFilter, searchStepCodes } = searchModel
-
-  const types = [EStepCodeType.part3StepCode, EStepCodeType.part9StepCode] as const
-
-  const options = types.map((type) => ({
+  const stepCodeTypes = Object.values(EStepCodeType)
+  const options = stepCodeTypes.map((type) => ({
     value: type,
     label: type === EStepCodeType.part3StepCode ? t("stepCode.types.Part3StepCode") : t("stepCode.types.Part9StepCode"),
   }))
@@ -32,7 +30,7 @@ export const StepCodeTypeFilter = observer(function StepCodeTypeFilter({ searchM
 
   return (
     <CheckboxFilter
-      value={typeFilter || []}
+      value={(typeFilter || []).filter(Boolean)}
       onChange={handleChange}
       onReset={handleReset}
       options={options}

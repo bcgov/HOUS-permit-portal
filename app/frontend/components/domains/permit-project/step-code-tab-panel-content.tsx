@@ -25,35 +25,37 @@ export const StepCodeTabPanelContent = observer(() => {
             <Heading>{t("stepCode.index.title")}</Heading>
           </Flex>
           <Box w="full" bg="theme.blueLight" p={6} borderRadius="md">
-            <Heading as="h3" mb={6}>
-              {t("stepCode.index.createReportTitle")}
-            </Heading>
-            <Text mb={3}>
-              {t("stepCode.index.createReportDescriptionPrefix")}{" "}
-              <Link as={RouterLink} to="/documents" color="text.link" textDecoration="underline">
-                {t("stepCode.index.documentsLabel")}
-              </Link>
-              .
-            </Text>
-            <RouterLinkButton rightIcon={<CaretRight />} to="/project-readiness-tools/check-step-code-requirements">
-              {t("stepCode.createButton")}
-            </RouterLinkButton>
-            <Divider borderColor="greys.grey03" my={4} />
-            <Heading as="h3" mt={2} mb={1}>
-              {t("stepCode.index.lookupTitle")}
-            </Heading>
-            <Text mt={1}>
-              {t("stepCode.index.lookupDescriptionPrefix")}{" "}
-              <Link
-                as={RouterLink}
-                to="/project-readiness-tools/look-up-step-codes-requirements-for-your-project"
-                color="text.link"
-                textDecoration="underline"
-              >
-                {t("stepCode.index.lookupDescriptionLinkLabel")}
-              </Link>
-              .
-            </Text>
+            <Box maxW="lg">
+              <Heading as="h3" mb={6}>
+                {t("stepCode.index.createReportTitle")}
+              </Heading>
+              <Text mb={3}>
+                {t("stepCode.index.createReportDescriptionPrefix")}{" "}
+                <Link as={RouterLink} to="/documents" color="text.link" textDecoration="underline">
+                  {t("stepCode.index.documentsLabel")}
+                </Link>
+                .
+              </Text>
+              <RouterLinkButton rightIcon={<CaretRight />} to="/project-readiness-tools/check-step-code-requirements">
+                {t("stepCode.createButton")}
+              </RouterLinkButton>
+              <Divider borderColor="greys.grey03" my={4} />
+              <Heading as="h3" mt={2} mb={1}>
+                {t("stepCode.index.lookupTitle")}
+              </Heading>
+              <Text mt={1}>
+                {t("stepCode.index.lookupDescriptionPrefix")}{" "}
+                <Link
+                  as={RouterLink}
+                  to="/project-readiness-tools/look-up-step-codes-requirements-for-your-project"
+                  color="text.link"
+                  textDecoration="underline"
+                >
+                  {t("stepCode.index.lookupDescriptionLinkLabel")}
+                </Link>
+                .
+              </Text>
+            </Box>
           </Box>
           <Flex direction="column" gap={4} w="full">
             <FormControl w="full">

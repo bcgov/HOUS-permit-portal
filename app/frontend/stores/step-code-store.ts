@@ -88,11 +88,15 @@ export const StepCodeStoreModel = types
       // @ts-ignore
       self.tableStepCodes.replace(stepCodes.map((s) => s.id))
     },
-    setTypeFilter(types: EStepCodeType[] | undefined) {
-      if (!types) return
-      setQueryParam("type", types)
+    setTypeFilter(nextTypes: EStepCodeType[] | undefined) {
+      if (!nextTypes || nextTypes.length === 0) {
+        setQueryParam("type", [])
+        self.typeFilter.clear()
+        return
+      }
+      setQueryParam("type", nextTypes)
       // @ts-ignore
-      self.typeFilter = types
+      self.typeFilter.replace(nextTypes)
     },
   }))
   .actions((self) => ({
@@ -144,7 +148,8 @@ export const StepCodeStoreModel = types
       return response.ok
     }),
     setStepCodeFilters(queryParams: URLSearchParams) {
-      const typeFilter = queryParams.get("type")?.split(",") as EStepCodeType[]
+      const rawType = queryParams.get("type")
+      const typeFilter = rawType ? (rawType.split(",").filter(Boolean) as EStepCodeType[]) : []
       self.setTypeFilter(typeFilter)
     },
     fetchPart9SelectOptions: flow(function* () {
