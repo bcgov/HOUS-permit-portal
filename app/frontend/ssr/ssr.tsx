@@ -28,15 +28,20 @@ const main = async () => {
     if (!pdfData.meta?.generationPaths) {
       throw new Error("No generationPaths provided in pdfData.meta")
     }
-    if (!pdfData.permitApplication) {
+    // Only require permitApplication if a permit application PDF is being generated
+    const generationPaths = pdfData.meta.generationPaths
+    const requiresPermitApplication = Boolean(generationPaths?.permitApplication)
+    if (requiresPermitApplication && !pdfData.permitApplication) {
       throw new Error("No permit application")
     }
 
-    pdfData.permitApplication.formattedFormJson = combineComplianceHints(
-      pdfData.permitApplication?.formJson ?? {},
-      pdfData.permitApplication?.formCustomizations ?? {},
-      pdfData.permitApplication?.formattedComplianceData ?? {}
-    )
+    if (pdfData.permitApplication) {
+      pdfData.permitApplication.formattedFormJson = combineComplianceHints(
+        pdfData.permitApplication?.formJson ?? {},
+        pdfData.permitApplication?.formCustomizations ?? {},
+        pdfData.permitApplication?.formattedComplianceData ?? {}
+      )
+    }
 
     const { permitApplication: permitApplicationPDFPath, stepCodeChecklist: stepCodeChecklistPDFPath } =
       pdfData.meta.generationPaths
@@ -53,7 +58,10 @@ const main = async () => {
     }
 
     if (stepCodeChecklistPDFPath) {
-      const permitTypeCode = pdfData.permitApplication?.permitType?.code
+      const permitTypeCode =
+        pdfData.permitApplication?.permitType?.code ||
+        pdfData?.meta?.permitTypeCode ||
+        (pdfData?.checklist?.stepCodeType === "Part9StepCode" ? "low_residential" : "medium_residential")
       const ChecklistComponent = ChecklistComponentMap[permitTypeCode]
 
       if (!pdfData.checklist) {

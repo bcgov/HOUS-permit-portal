@@ -369,3 +369,20 @@ export function formattedStringToNumber(value: string): number {
   const parsedValue = Number(rawValue)
   return !isNaN(parsedValue) ? parsedValue : 0
 }
+
+// Step Code helpers (shared across PDF and HTML components)
+export function getStepCodeOccupancies(checklist: any) {
+  const stepCodeOccs = Array.isArray(checklist?.stepCodeOccupancies) ? checklist.stepCodeOccupancies : []
+  const baselineOccs = Array.isArray(checklist?.baselineOccupancies) ? checklist.baselineOccupancies : []
+  return { stepCodeOccs, baselineOccs }
+}
+
+export function isMixedUseChecklist(checklist: any): boolean {
+  const { stepCodeOccs, baselineOccs } = getStepCodeOccupancies(checklist)
+  return stepCodeOccs.length + baselineOccs.length > 1
+}
+
+export function isBaselineChecklist(checklist: any): boolean {
+  const { stepCodeOccs } = getStepCodeOccupancies(checklist)
+  return stepCodeOccs.length === 0
+}

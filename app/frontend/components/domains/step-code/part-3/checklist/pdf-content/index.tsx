@@ -1,9 +1,9 @@
 import { Page } from "@react-pdf/renderer"
 import { t } from "i18next"
-import * as R from "ramda"
 import React from "react"
 import { IPart3StepCodeChecklist } from "../../../../../../models/part-3-step-code-checklist"
 import { IPermitApplication } from "../../../../../../models/permit-application"
+import { isBaselineChecklist, isMixedUseChecklist } from "../../../../../../utils/utility-functions"
 import { PDFDocument } from "../../../../../shared/pdf"
 import { CoverPage } from "../../../../../shared/permit-applications/pdf-content/cover"
 import { Footer } from "../../../../../shared/permit-applications/pdf-content/shared/footer"
@@ -26,9 +26,9 @@ export const Part3PDFContent = function StepCodePart3ChecklistPDFContent({
   permitApplication,
   assetDirectoryPath,
 }: IProps) {
-  // Use views from MST model
-  const isMixedUse = checklist.stepCodeOccupancies.length + checklist.baselineOccupancies.length > 1
-  const isBaseline = R.isEmpty(checklist.stepCodeOccupancies)
+  // Use views from MST model (hardened helpers)
+  const isMixedUse = isMixedUseChecklist(checklist as any)
+  const isBaseline = isBaselineChecklist(checklist as any)
 
   return (
     <PDFDocument assetDirectoryPath={assetDirectoryPath}>

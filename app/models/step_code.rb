@@ -19,6 +19,7 @@ class StepCode < ApplicationRecord
   # Associations
   belongs_to :permit_application, optional: true
   has_one :permit_project, through: :permit_application
+  has_many :report_documents, dependent: :destroy, inverse_of: :step_code
 
   # Delegates for attributes from PermitApplication
   delegate :number,

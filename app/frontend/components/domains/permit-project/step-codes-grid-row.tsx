@@ -1,4 +1,5 @@
-import { Grid, GridItem, Text } from "@chakra-ui/react"
+import { Grid, GridItem, IconButton, Menu, MenuButton, MenuItem, MenuList, Text } from "@chakra-ui/react"
+import { DotsThreeVertical } from "@phosphor-icons/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -6,6 +7,8 @@ import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { datefnsTableDateTimeFormat } from "../../../constants"
 import { IStepCode } from "../../../stores/step-code-store"
+import { EFileUploadAttachmentType } from "../../../types/enums"
+import { FileDownloadButton } from "../../shared/base/file-download-button"
 
 export const StepCodesGridRow = observer(({ stepCode }: { stepCode: IStepCode }) => {
   const navigate = useNavigate()
@@ -42,6 +45,35 @@ export const StepCodesGridRow = observer(({ stepCode }: { stepCode: IStepCode })
       </GridItem>
       <GridItem display="flex" alignItems="center" px={4} py={2}>
         <Text>{updatedAt ? format(updatedAt, datefnsTableDateTimeFormat) : ""}</Text>
+      </GridItem>
+      <GridItem
+        display="flex"
+        alignItems="center"
+        justifyContent="flex-end"
+        px={2}
+        py={2}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <Menu>
+          <MenuButton
+            as={IconButton}
+            aria-label={t("ui.options")}
+            icon={<DotsThreeVertical size={20} />}
+            variant="ghost"
+          />
+          <MenuList>
+            {(stepCode as any)?.reportDocuments?.length > 0 && (
+              <MenuItem onClick={(e) => e.stopPropagation()}>
+                <FileDownloadButton
+                  modelType={EFileUploadAttachmentType.ReportDocument}
+                  document={(stepCode as any).reportDocuments[0]}
+                  variant="ghost"
+                  size="sm"
+                />
+              </MenuItem>
+            )}
+          </MenuList>
+        </Menu>
       </GridItem>
     </Grid>
   )

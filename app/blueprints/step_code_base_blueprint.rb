@@ -15,4 +15,6 @@ class StepCodeBaseBlueprint < Blueprinter::Base
               view: :base
 
   association :creator, blueprint: UserBlueprint
+
+  association :report_documents, blueprint: ReportDocumentBlueprint
 end

@@ -8,7 +8,7 @@ import { Divider } from "../../../../domains/step-code/part-9/checklist/pdf-cont
 import { page } from "../shared/styles/page"
 
 interface IProps {
-  permitApplication: IPermitApplication
+  permitApplication?: IPermitApplication
   subTitle: string
   assetDirectoryPath?: string
 }
@@ -44,8 +44,8 @@ export const CoverPage = function PermitApplicationPDFCoverPage({
             }}
           >
             <View style={{ gap: 6, fontSize: 12 }}>
-              <Text style={{ fontWeight: 700 }}>{permitApplication.fullAddress}</Text>
-              <Text>{permitApplication.jurisdiction.name}</Text>
+              <Text style={{ fontWeight: 700 }}>{permitApplication?.fullAddress ?? ""}</Text>
+              <Text>{permitApplication?.jurisdiction?.name ?? ""}</Text>
             </View>
           </View>
         </View>
@@ -61,20 +61,24 @@ export const CoverPage = function PermitApplicationPDFCoverPage({
             paddingBottom: 7.5,
           }}
         >
-          <Row label={t("permitApplication.pdf.id")} value={permitApplication.number} />
-          <Row
-            label={t("permitApplication.pdf.submissionDate")}
-            value={format(permitApplication.submittedAt, "yyyy-MM-dd")}
-          />
-          <Row
-            label={t("permitApplication.pdf.applicant")}
-            value={`${permitApplication.submitter.firstName} ${permitApplication.submitter.lastName}`}
-          />
-          <Row
-            label={t("permitApplication.pdf.permitType")}
-            value={`${permitApplication.permitType.name} | ${permitApplication.activity.name}`}
-            isLast
-          />
+          {!!permitApplication && (
+            <>
+              <Row label={t("permitApplication.pdf.id")} value={permitApplication.number} />
+              <Row
+                label={t("permitApplication.pdf.submissionDate")}
+                value={format(permitApplication.submittedAt, "yyyy-MM-dd")}
+              />
+              <Row
+                label={t("permitApplication.pdf.applicant")}
+                value={`${permitApplication.submitter.firstName} ${permitApplication.submitter.lastName}`}
+              />
+              <Row
+                label={t("permitApplication.pdf.permitType")}
+                value={`${permitApplication.permitType.name} | ${permitApplication.activity.name}`}
+                isLast
+              />
+            </>
+          )}
         </View>
       </View>
     </Page>

@@ -11,6 +11,12 @@ class StepCodePolicy < ApplicationPolicy
     user.super_admin?
   end
 
+  def download_report_pdf?
+    return false unless user
+
+    record.creator == user
+  end
+
   def create?
     user.present?
   end

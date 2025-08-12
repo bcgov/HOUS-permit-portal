@@ -5,7 +5,7 @@ import React from "react"
 import { IPermitApplication } from "../../../../../../models/permit-application"
 import { theme } from "../../../../../../styles/theme"
 
-export const Footer = ({ permitApplication }: { permitApplication: IPermitApplication }) => {
+export const Footer = ({ permitApplication }: { permitApplication?: IPermitApplication }) => {
   return (
     <View
       style={{
@@ -18,24 +18,29 @@ export const Footer = ({ permitApplication }: { permitApplication: IPermitApplic
         borderColor: theme.colors.text.secondary,
       }}
       fixed
-      render={({ pageNumber, totalPages }) => (
-        <>
-          <Field label={t("permitApplication.pdf.id")} value={permitApplication.number} />
-          <Field
-            label={t("permitApplication.pdf.submissionDate")}
-            value={format(permitApplication.submittedAt, "yyyy-MM-dd")}
-          />
-          <Field
-            label={t("permitApplication.pdf.applicant")}
-            value={`${permitApplication.submitter.firstName} ${permitApplication.submitter.lastName}`}
-          />
-          <Field label={t("permitApplication.pdf.jurisdiction")} value={permitApplication.jurisdiction.name} />
-          <Field
-            label={t("permitApplication.pdf.page", { pageNumber: pageNumber, totalPages: totalPages })}
-            value={t("site.titleLong")}
-          />
-        </>
-      )}
+      render={(props) => {
+        const { pageNumber } = props as { pageNumber: number }
+        const totalPages = (props as any).totalPages as number | undefined
+        return (
+          <>
+            {!!permitApplication && (
+              <>
+                <Field label={t("permitApplication.pdf.id")} value={permitApplication.number} />
+                <Field
+                  label={t("permitApplication.pdf.submissionDate")}
+                  value={format(permitApplication.submittedAt, "yyyy-MM-dd")}
+                />
+                <Field
+                  label={t("permitApplication.pdf.applicant")}
+                  value={`${permitApplication.submitter.firstName} ${permitApplication.submitter.lastName}`}
+                />
+                <Field label={t("permitApplication.pdf.jurisdiction")} value={permitApplication.jurisdiction.name} />
+              </>
+            )}
+            <Field label={t("permitApplication.pdf.page", { pageNumber, totalPages })} value={t("site.titleLong")} />
+          </>
+        )
+      }}
     />
   )
 }

@@ -1,12 +1,12 @@
 import { Button, Flex, FormControl, FormHelperText, Heading, Input, Text } from "@chakra-ui/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
-import * as R from "ramda"
 import React from "react"
 import { useForm } from "react-hook-form"
 import { Trans } from "react-i18next"
 import { useLocation, useNavigate, useParams } from "react-router-dom"
 import { usePart3StepCode } from "../../../../../../hooks/resources/use-part-3-step-code"
+import { isBaselineChecklist, isMixedUseChecklist } from "../../../../../../utils/utility-functions"
 import { RouterLink } from "../../../../../shared/navigation/router-link"
 import { SectionHeading } from "../shared/section-heading"
 import { MixedUsePerformance } from "./mixed-use"
@@ -18,8 +18,8 @@ export const StepCodeSummary = observer(function StepCodeSummary() {
   const { permitApplicationId } = useParams()
   const navigate = useNavigate()
   const location = useLocation()
-  const isMixedUse = checklist.stepCodeOccupancies.length + checklist.baselineOccupancies.length > 1
-  const isBaseline = R.isEmpty(checklist.stepCodeOccupancies)
+  const isMixedUse = isMixedUseChecklist(checklist as any)
+  const isBaseline = isBaselineChecklist(checklist as any)
 
   const { handleSubmit, formState } = useForm()
   const { isSubmitting } = formState
@@ -87,7 +87,7 @@ export const StepCodeSummary = observer(function StepCodeSummary() {
       <form onSubmit={handleSubmit(onSubmit)} name="part3SectionForm">
         <FormControl>
           <Button type="submit" variant="primary" isLoading={isSubmitting} isDisabled={isSubmitting}>
-            {t(`${i18nPrefix}.cta`)}
+            {permitApplicationId ? t(`${i18nPrefix}.cta`) : t(`${i18nPrefix}.standaloneCta`)}
           </Button>
         </FormControl>
       </form>

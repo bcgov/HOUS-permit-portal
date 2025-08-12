@@ -703,9 +703,10 @@ export class Api {
   }
 
   // importing IPart3StepCodeChecklist causes circular dependency typescript error
-  async updatePart3Checklist(checklistId: string, checklist) {
+  async updatePart3Checklist(checklistId: string, checklist, options?: Record<string, any>) {
     return this.client.patch<ApiResponse<any>>(`/part_3_building/checklists/${checklistId}`, {
       checklist,
+      ...(options ?? {}),
     })
   }
 

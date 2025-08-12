@@ -15,6 +15,7 @@ export const FileDownloadButton: React.FC<FileDownloadButtonProps> = ({ document
     downloadFileFromStorage({
       model: modelType,
       modelId: document.id,
+      filename: document.file?.metadata?.filename ?? "download.pdf",
     })
   }
 
