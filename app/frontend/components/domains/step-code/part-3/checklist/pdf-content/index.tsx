@@ -17,13 +17,15 @@ import { StepCodePerformanceSummary } from "./step-code-performance-summary/inde
 
 interface IProps {
   checklist: IPart3StepCodeChecklist
-  permitApplication: IPermitApplication
+  permitApplication?: IPermitApplication
+  stepCode?: { fullAddress?: string; jurisdictionName?: string }
   assetDirectoryPath?: string
 }
 
 export const Part3PDFContent = function StepCodePart3ChecklistPDFContent({
   checklist,
   permitApplication,
+  stepCode,
   assetDirectoryPath,
 }: IProps) {
   // Use views from MST model (hardened helpers)
@@ -34,11 +36,12 @@ export const Part3PDFContent = function StepCodePart3ChecklistPDFContent({
     <PDFDocument assetDirectoryPath={assetDirectoryPath}>
       <CoverPage
         permitApplication={permitApplication}
+        stepCode={stepCode}
         subTitle={t("stepCodeChecklist.pdf.forPart3")}
         assetDirectoryPath={assetDirectoryPath}
       />
       <Page size="LETTER" style={page}>
-        <ProjectInfo checklist={checklist} />
+        <ProjectInfo stepCode={stepCode} checklist={checklist} />
         {/* Placeholder for Step Code Performance Summary */}
         <StepCodePerformanceSummary checklist={checklist} />
         {/* Placeholder for Mixed Use/Baseline Summary (conditional) */}

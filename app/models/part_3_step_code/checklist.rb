@@ -11,7 +11,7 @@ class Part3StepCode::Checklist < ApplicationRecord
              class_name: "Part3StepCode",
              foreign_key: "step_code_id",
              inverse_of: :checklist
-  accepts_nested_attributes_for :step_code
+  accepts_nested_attributes_for :step_code, update_only: true
 
   has_many :occupancy_classifications, dependent: :destroy
   has_many :baseline_occupancies,

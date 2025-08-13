@@ -676,6 +676,21 @@ export class Api {
     return this.client.delete<ApiResponse<IStepCode>>(`/step_codes/${id}`)
   }
 
+  async updateStepCode(
+    id: string,
+    data: Partial<{
+      fullAddress: string
+      referenceNumber: string
+      title: string
+      permitDate: string
+      phase: string
+      buildingCodeVersion: string
+      jurisdictionId: string
+    }>
+  ) {
+    return this.client.patch<ApiResponse<IStepCode>>(`/step_codes/${id}`, { stepCode: data })
+  }
+
   async downloadStepCodeSummaryCsv() {
     return this.client.get<BlobPart>(`/step_codes/download_step_code_summary_csv`)
   }

@@ -16,18 +16,26 @@ import { MapPin } from "@phosphor-icons/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
-import React, { useEffect } from "react"
-import { useForm } from "react-hook-form"
+import React, { useEffect, useState } from "react"
+import { Controller, FormProvider, useForm } from "react-hook-form"
 import { Trans } from "react-i18next"
 import { useLocation, useNavigate, useParams } from "react-router-dom"
 import { usePart3StepCode } from "../../../../../hooks/resources/use-part-3-step-code"
+import { useJurisdictionFromSite } from "../../../../../hooks/use-jurisdiction-from-site"
+import { IOption } from "../../../../../types/types"
 import { SharedSpinner } from "../../../../shared/base/shared-spinner"
+import { DatePickerFormControl } from "../../../../shared/form/input-form-control"
+import { SitesSelect } from "../../../../shared/select/selectors/sites-select"
 import { SectionHeading } from "./shared/section-heading"
 
 interface IProjectDetailsForm {
   fullAddress?: string
-  projectName?: string
-  projectIdentifier?: string
+  title?: string
+  referenceNumber?: string
+  permitDate?: string
+  phase?: string
+  site?: IOption
+  jurisdictionId?: string
 }
 
 export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails() {
@@ -38,62 +46,65 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
   const navigate = useNavigate()
   const location = useLocation()
 
+  const getDefaultValues = () => {
+    return {
+      fullAddress: stepCode?.fullAddress || "",
+      referenceNumber: stepCode?.referenceNumber || "",
+      title: stepCode?.title || "",
+      permitDate: stepCode?.permitDate || "",
+      phase: stepCode?.phase || "",
+      jurisdictionId: stepCode?.jurisdiction?.id || "",
+    }
+  }
+
+  const formMethods = useForm<IProjectDetailsForm>({
+    defaultValues: getDefaultValues(),
+  })
+
   const {
     handleSubmit,
     register,
     reset,
+    control,
+    watch,
+    setValue,
     formState: { errors, isSubmitting },
-  } = useForm<IProjectDetailsForm>()
+  } = formMethods
+
+  const [editingAddress, setEditingAddress] = useState<boolean>(!Boolean(stepCode?.fullAddress))
 
   useEffect(() => {
     if (checklist && stepCode) {
-      reset({
-        fullAddress: stepCode.fullAddress || "",
-        projectIdentifier: stepCode.projectIdentifier || "",
-        projectName: stepCode.projectName || "",
-        // todo: add jurisdiction?
-      })
+      reset(getDefaultValues())
+      setEditingAddress(!Boolean(stepCode?.fullAddress))
     }
   }, [checklist, stepCode, reset])
+
+  // Note: SitesSelect onChange will trigger fetchGeocodedJurisdiction; no need to subscribe to RHF internals
+  useJurisdictionFromSite(watch, setValue, { siteFieldName: "site", jurisdictionIdFieldName: "jurisdictionId" })
 
   const onSubmit = async (data: IProjectDetailsForm) => {
     if (!checklist || !stepCode) return
 
-    const stepCodeAttributes: Partial<IProjectDetailsForm & { id: string }> = { id: stepCode.id }
-    let needsUpdate = false
-
     if (editable) {
-      stepCodeAttributes.fullAddress = data.fullAddress
-
-      needsUpdate = true
-    }
-
-    let checklistUpdateSucceeded = true
-    if (needsUpdate) {
-      checklistUpdateSucceeded = await checklist.update({ stepCodeAttributes })
-    }
-
-    if (checklistUpdateSucceeded) {
-      stepCode.setProjectDetails({
-        projectName: data.projectName,
+      const ok = await (stepCode as any).update({
         fullAddress: data.fullAddress,
-        projectIdentifier: data.projectIdentifier,
-        // todo: add jurisdiction?
+        referenceNumber: data.referenceNumber,
+        title: data.title,
+        permitDate: data.permitDate,
+        phase: data.phase,
+        jurisdictionId: data.jurisdictionId,
       })
-
-      const alternatePath = checklist.alternateNavigateAfterSavePath
-      checklist.setAlternateNavigateAfterSavePath(null)
-      // const stepCodeUpdateSucceeded = await stepCode.update(stepCodeAttributes)
-      const sectionCompleteSucceeded = await checklist.completeSection("projectDetails")
-      if (sectionCompleteSucceeded) {
-        if (alternatePath) {
-          navigate(alternatePath)
-        } else {
-          navigate(location.pathname.replace("project-details", "location-details"))
-        }
+    }
+    const alternatePath = checklist.alternateNavigateAfterSavePath
+    checklist.setAlternateNavigateAfterSavePath(null)
+    const sectionCompleteSucceeded = await checklist.completeSection("projectDetails")
+    if (sectionCompleteSucceeded) {
+      if (alternatePath) {
+        navigate(alternatePath)
+      } else {
+        navigate(location.pathname.replace("project-details", "location-details"))
       }
-    } else {
-      console.error("Failed to update checklist project details")
     }
   }
 
@@ -113,69 +124,154 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
         <SectionHeading>{t(`${i18nPrefix}.heading`)}</SectionHeading>
         <Text fontSize="md">{t(`${i18nPrefix}.instructions`)}</Text>
       </Flex>
-      <form onSubmit={handleSubmit(onSubmit)} name="part3SectionForm">
-        <Flex direction="column" gap={{ base: 6, xl: 6 }} pb={4}>
-          <Field label={t(`${i18nPrefix}.name`)} value={stepCode.projectName} />
+      <FormProvider {...formMethods}>
+        <form onSubmit={handleSubmit(onSubmit)} name="part3SectionForm">
+          <Flex direction="column" gap={{ base: 6, xl: 6 }} pb={4}>
+            {editable ? (
+              <FormControl>
+                <FormLabel htmlFor="title">{t(`${i18nPrefix}.name`)}</FormLabel>
+                <Input id="title" {...register("title")} />
+              </FormControl>
+            ) : (
+              <Field label={t(`${i18nPrefix}.name`)} value={stepCode.title} />
+            )}
 
-          <Flex gap={{ base: 6, xl: 6 }} direction={{ base: "column", xl: "row" }}>
-            <FormControl isInvalid={editable && !!errors.fullAddress} width={{ base: "auto", xl: "430px" }}>
-              <FormLabel {...(editable ? { htmlFor: "fullAddress" } : { fontWeight: "bold" })}>
-                {t(`${i18nPrefix}.address`)}
-              </FormLabel>
-              <InputGroup>
-                <InputLeftElement pointerEvents="none">
-                  <MapPin />
-                </InputLeftElement>
-                <Input
-                  isDisabled={!editable}
-                  {...(editable
-                    ? { id: "fullAddress", ...register("fullAddress") }
-                    : { value: stepCode.fullAddress || "" })}
-                />
-              </InputGroup>
-              {editable && <FormErrorMessage>{errors.fullAddress?.message}</FormErrorMessage>}
-            </FormControl>
+            <Flex gap={{ base: 6, xl: 6 }} direction="column">
+              <FormControl isInvalid={editable && !!errors.fullAddress}>
+                {editable ? (
+                  editingAddress || !stepCode.fullAddress ? (
+                    <Controller
+                      name="site"
+                      control={control}
+                      render={({ field: { onChange, value } }) => (
+                        <SitesSelect
+                          onChange={(opt) => {
+                            onChange(opt)
+                            setValue("fullAddress", opt?.label || "")
+                          }}
+                          placeholder={undefined}
+                          selectedOption={value}
+                          styles={{
+                            container: (css) => ({ ...css, width: "100%" }),
+                            menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                          }}
+                          menuPortalTarget={document.body}
+                        />
+                      )}
+                    />
+                  ) : (
+                    <Flex direction="column" gap={2}>
+                      <FormLabel>{t(`${i18nPrefix}.address`)}</FormLabel>
+                      <Flex gap={2} alignItems="center">
+                        <InputGroup>
+                          <InputLeftElement pointerEvents="none">
+                            <MapPin />
+                          </InputLeftElement>
+                          <Input isDisabled value={stepCode.fullAddress || ""} />
+                        </InputGroup>
+                        <Button size="sm" variant="link" onClick={() => setEditingAddress(true)}>
+                          {t("ui.change", { defaultValue: "Change" })}
+                        </Button>
+                      </Flex>
+                    </Flex>
+                  )
+                ) : (
+                  <Flex direction="column" gap={2}>
+                    <FormLabel>{t(`${i18nPrefix}.address`)}</FormLabel>
+                    <InputGroup>
+                      <InputLeftElement pointerEvents="none">
+                        <MapPin />
+                      </InputLeftElement>
+                      <Input isDisabled value={stepCode.fullAddress || ""} />
+                    </InputGroup>
+                  </Flex>
+                )}
+                {editable && <FormErrorMessage>{errors.fullAddress?.message}</FormErrorMessage>}
+              </FormControl>
+              {editable && (
+                // keep fullAddress in form state when using the SitesSelect
+                <input type="hidden" {...register("fullAddress")} />
+              )}
 
-            <Field flex={1} label={t(`${i18nPrefix}.jurisdiction`)} value={stepCode.jurisdictionName} />
-          </Flex>
-
-          <Flex gap={{ base: 6, xl: 6 }} direction={{ base: "column", xl: "row" }}>
-            <Flex
-              gap={{ base: 6, xl: 6 }}
-              width={{ base: "auto", xl: "430px" }}
-              direction={{ base: "column", lg: "row" }}
-            >
-              <Field label={t(`${i18nPrefix}.identifier`)} value={stepCode.projectIdentifier} />
-              <Field
-                label={t(`${i18nPrefix}.stage`)}
-                value={checklist.projectStage ? t(`${i18nPrefix}.stages.${checklist.projectStage}`) : ""}
-              />
+              <FormControl flex={1}>
+                <FormLabel>{t(`${i18nPrefix}.jurisdiction`)}</FormLabel>
+                <Input isDisabled value={stepCode.jurisdiction?.qualifiedName || ""} />
+              </FormControl>
             </Flex>
-            <Field flex={1} label={t(`${i18nPrefix}.date`)} value={stepCode.permitDate || ""} />
-          </Flex>
-          <Field
-            maxWidth={{ base: "none", xl: "430px" }}
-            label={t(`${i18nPrefix}.version`)}
-            value={t(`${i18nPrefix}.buildingCodeVersions.${checklist.buildingCodeVersion}`)}
-          />
-          <Flex direction="column" gap={2}>
-            <Text fontSize="md" fontWeight="bold">
-              {t(`${i18nPrefix}.confirm`)}
-            </Text>
-            <Button type="submit" variant="primary" isLoading={isSubmitting} isDisabled={isSubmitting}>
-              {t("stepCode.part3.cta")}
-            </Button>
-          </Flex>
-          <Text fontSize="md">
-            <Trans
-              i18nKey={`${i18nPrefix}.modify`}
-              components={{
-                1: <Link href={`/permit-applications/${permitApplicationId}/edit`} />,
-              }}
+
+            <Flex gap={{ base: 6, xl: 6 }} direction={{ base: "column", xl: "row" }}>
+              <Flex
+                gap={{ base: 6, xl: 6 }}
+                width={{ base: "auto", xl: "430px" }}
+                direction={{ base: "column", lg: "row" }}
+              >
+                {editable ? (
+                  <FormControl>
+                    <FormLabel htmlFor="referenceNumber">{t(`${i18nPrefix}.identifier`)}</FormLabel>
+                    <Input
+                      id="referenceNumber"
+                      {...register("referenceNumber")}
+                      defaultValue={stepCode.referenceNumber || ""}
+                    />
+                  </FormControl>
+                ) : (
+                  <Field label={t(`${i18nPrefix}.identifier`)} value={stepCode.referenceNumber} />
+                )}
+                {editable ? (
+                  <FormControl>
+                    <FormLabel htmlFor="phase">{t(`${i18nPrefix}.stage`)}</FormLabel>
+                    <Input id="phase" {...register("phase")} defaultValue={stepCode.phase || ""} />
+                  </FormControl>
+                ) : (
+                  <Field label={t(`${i18nPrefix}.stage`)} value={stepCode.phase} />
+                )}
+              </Flex>
+              {editable ? (
+                <DatePickerFormControl
+                  flex={1}
+                  label={t(`${i18nPrefix}.date`) as string}
+                  fieldName="permitDate"
+                  showOptional={false}
+                />
+              ) : (
+                <DatePickerFormControl
+                  flex={1}
+                  label={t(`${i18nPrefix}.date`) as string}
+                  fieldName="permitDate"
+                  showOptional={false}
+                  inputProps={{
+                    readOnly: true,
+                  }}
+                  isReadOnly
+                />
+              )}
+            </Flex>
+            <Field
+              maxWidth={{ base: "none", xl: "430px" }}
+              label={t(`${i18nPrefix}.version`)}
+              value={t(`${i18nPrefix}.buildingCodeVersions.${checklist.buildingCodeVersion}`)}
             />
-          </Text>
-        </Flex>
-      </form>
+            <Flex direction="column" gap={2}>
+              <Text fontSize="md" fontWeight="bold">
+                {t(`${i18nPrefix}.confirm`)}
+              </Text>
+              <Button type="submit" variant="primary" isLoading={isSubmitting} isDisabled={isSubmitting}>
+                {t("stepCode.part3.cta")}
+              </Button>
+            </Flex>
+            {!editable && (
+              <Text fontSize="md">
+                <Trans
+                  i18nKey={`${i18nPrefix}.modify`}
+                  components={{
+                    1: <Link href={`/permit-applications/${permitApplicationId}/edit`} />,
+                  }}
+                />
+              </Text>
+            )}
+          </Flex>
+        </form>
+      </FormProvider>
     </>
   )
 })

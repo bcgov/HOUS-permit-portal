@@ -59,6 +59,23 @@ class StepCodeReportGenerationJob
       step_code.is_a?(Part9StepCode) ? "low_residential" : "medium_residential"
     pdf_json_data = {
       checklist: checklist_json && camelize_response(checklist_json),
+      stepCode:
+        camelize_response(
+          {
+            id: step_code.id,
+            full_address: step_code.full_address,
+            reference_number: step_code.reference_number,
+            title: step_code.title,
+            permit_date: step_code.permit_date,
+            pid: step_code.pid,
+            pin: step_code.pin,
+            jurisdiction_name:
+              (
+                step_code.respond_to?(:jurisdiction_name) &&
+                  step_code.jurisdiction_name
+              )
+          }.compact
+        ),
       meta: {
         generationPaths: {
           stepCodeChecklist:

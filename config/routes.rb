@@ -236,7 +236,9 @@ Rails.application.routes.draw do
 
     resources :end_user_license_agreement, only: %i[index]
 
-    resources :step_codes, only: %i[index create destroy], shallow: true do
+    resources :step_codes,
+              only: %i[index create destroy update],
+              shallow: true do
       get "download_step_code_summary_csv",
           on: :collection,
           to: "step_codes#download_step_code_summary_csv"
@@ -247,6 +249,7 @@ Rails.application.routes.draw do
       post "download_report_pdf",
            on: :member,
            to: "step_codes#download_report_pdf"
+      patch "update", on: :member, to: "step_codes#update"
     end
 
     namespace :part_9_building do

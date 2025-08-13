@@ -76,6 +76,7 @@ const main = async () => {
       await ReactPDF.renderToFile(
         <ChecklistComponent
           permitApplication={pdfData.permitApplication}
+          stepCode={pdfData.stepCode}
           checklist={pdfData.checklist}
           assetDirectoryPath={assetDirectoryPath}
         />,

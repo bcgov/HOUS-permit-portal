@@ -9,12 +9,14 @@ import { page } from "../shared/styles/page"
 
 interface IProps {
   permitApplication?: IPermitApplication
+  stepCode?: { fullAddress?: string; jurisdictionName?: string }
   subTitle: string
   assetDirectoryPath?: string
 }
 
 export const CoverPage = function PermitApplicationPDFCoverPage({
   permitApplication,
+  stepCode,
   subTitle,
   assetDirectoryPath,
 }: IProps) {
@@ -44,8 +46,8 @@ export const CoverPage = function PermitApplicationPDFCoverPage({
             }}
           >
             <View style={{ gap: 6, fontSize: 12 }}>
-              <Text style={{ fontWeight: 700 }}>{permitApplication?.fullAddress ?? ""}</Text>
-              <Text>{permitApplication?.jurisdiction?.name ?? ""}</Text>
+              <Text style={{ fontWeight: 700 }}>{permitApplication?.fullAddress ?? stepCode?.fullAddress ?? ""}</Text>
+              <Text>{permitApplication?.jurisdiction?.name ?? stepCode?.jurisdictionName ?? ""}</Text>
             </View>
           </View>
         </View>

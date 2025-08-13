@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_08_12_120000) do
+ActiveRecord::Schema[7.1].define(version: 2025_08_13_140000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -740,7 +740,14 @@ ActiveRecord::Schema[7.1].define(version: 2025_08_12_120000) do
     t.string "full_address"
     t.string "pid"
     t.string "pin"
+    t.uuid "jurisdiction_id"
+    t.string "reference_number"
+    t.string "title"
+    t.date "permit_date"
+    t.string "phase"
+    t.string "building_code_version"
     t.index ["creator_id"], name: "index_step_codes_on_creator_id"
+    t.index ["jurisdiction_id"], name: "index_step_codes_on_jurisdiction_id"
     t.index ["permit_application_id"], name: "index_step_codes_on_permit_application_id"
     t.index ["permit_project_id"], name: "index_step_codes_on_permit_project_id"
   end
@@ -954,6 +961,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_08_12_120000) do
   add_foreign_key "sandboxes", "jurisdictions"
   add_foreign_key "step_code_building_characteristics_summaries", "part_9_step_code_checklists", column: "checklist_id"
   add_foreign_key "step_code_data_entries", "part_9_step_code_checklists", column: "checklist_id"
+  add_foreign_key "step_codes", "jurisdictions"
   add_foreign_key "step_codes", "permit_applications"
   add_foreign_key "step_codes", "permit_projects"
   add_foreign_key "step_codes", "users", column: "creator_id"
