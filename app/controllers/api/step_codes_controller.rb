@@ -35,23 +35,6 @@ class Api::StepCodesController < Api::ApplicationController
     render json: {}, status: :ok
   end
 
-  # POST /api/step_codes/:id/download_report_pdf
-  def download_report_pdf
-    step_code = StepCode.find(params[:id])
-    authorize step_code, :download_report_pdf?
-
-    # Stubbed response for next step implementation
-    render_success(
-      {},
-      nil,
-      {
-        meta: {
-          message: "Report PDF generation is queued for implementation."
-        }
-      }
-    )
-  end
-
   def download_step_code_summary_csv
     authorize :step_code, :download_step_code_summary_csv?
 

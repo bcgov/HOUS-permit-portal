@@ -11,12 +11,6 @@ class StepCodePolicy < ApplicationPolicy
     user.super_admin?
   end
 
-  def download_report_pdf?
-    return false unless user
-
-    record.creator == user
-  end
-
   def create?
     user.present?
   end
@@ -46,11 +40,6 @@ class StepCodePolicy < ApplicationPolicy
     return true if user == record.creator
 
     return true if record.permit_application.submitter == user
-
-    # TODO: ALLOW COLLABORATORS TO UPDATE IF THEY ARE ASSIGNED TO THE STEP CODE BLOCK
-    if (record.permit_application.collaborators.include?(user) && false)
-      return true
-    end
 
     false
   end

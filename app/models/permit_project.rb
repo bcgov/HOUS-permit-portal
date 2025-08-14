@@ -68,6 +68,11 @@ class PermitProject < ApplicationRecord
     nil
   end
 
+  def phase
+    # To be implemented later
+    nil
+  end
+
   def approved_count
     self[:approved_count] ||
       (

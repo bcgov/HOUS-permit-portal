@@ -104,7 +104,7 @@ export const StepCodeStoreModel = types
       let normalized = stepCode as any
 
       // Part 9: convert checklists array to map for stable references
-      if (normalized.type === "Part9StepCode") {
+      if (normalized.type === EStepCodeType.part9StepCode) {
         const checklistsMap = (normalized as IPart9StepCode).checklists?.reduce(
           (acc, checklist) => {
             acc[checklist.id] = checklist

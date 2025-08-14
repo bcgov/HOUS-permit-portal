@@ -246,9 +246,6 @@ Rails.application.routes.draw do
           on: :collection,
           to: "step_codes#download_step_code_metrics_csv"
       post "search", on: :collection, to: "step_codes#index"
-      post "download_report_pdf",
-           on: :member,
-           to: "step_codes#download_report_pdf"
       patch "update", on: :member, to: "step_codes#update"
     end
 

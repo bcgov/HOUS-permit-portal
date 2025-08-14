@@ -45,6 +45,10 @@ module ProjectItem
       parent&.reference_number || self[:reference_number]
     end
 
+    def phase
+      parent&.phase || self[:phase]
+    end
+
     # Custom method for jurisdiction to ensure it safely accesses through permit_project
     # or falls back to its own direct association.
     def jurisdiction
