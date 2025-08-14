@@ -3720,7 +3720,14 @@ Thank you,
           },
           coverSheet: {
             title: "CSA Standard F280-12 Compliance",
+            helpText:
+              "NBC 2015: 9.33.5.1.; 9.36.3.2. & 9.36.5.15; NBC 2020; 9.33.5.1.; 9.36.3.2.; 9.36.5.15 (5); 9.36.8.9. (1); ",
+            drawingIssueFor: "These documents issued for the use of",
+            drawingIssueForHelpText:
+              "and may not be used by any other persons without authorization. Documents for permit and/or construction are signed in red.",
+            projectNumber: "Project Number",
             buildingLocation: {
+              title: "Building Location",
               helpText: "Enter the building location details.",
               model: "Model",
               site: "Site",
@@ -3743,17 +3750,29 @@ Thank you,
             },
             heating: {
               title: "Heating",
-              building: "Minimum Heating Capacity",
+              units: "btuh",
+              unitsHelpText: "(total building heat loss as per 5.2.7)",
               helpText:
-                "The total heat output of all heating systems installed in a building shall not be less than 100% of the total building heat loss as determined in Clause 5.2.7.",
+                "5.3.1: The total heat output capacity of all heating systems installed in a building shall not be less than 100% of the total building heat loss as determined in Clause 5.2.7.",
+              helpText2:
+                "5.3.2: The combined heating delivery of the heating systems that serve a room or space shall not be less than 100% of the space heat loss, as determined in Clause 5.2.6. (If room by room submittal, see page 2 for individual space heating requirements)",
+              building: "Minimum Heating Capacity",
             },
             cooling: {
               title: "Cooling",
+              units: "btuh",
+              unitsHelpText: "(Nominal Cooling Capacity as per 6.3.1)",
               nominal: "Nominal Cooling Capacity:",
               minimumCoolingCapacity: "Minimum Cooling Capacity:",
               maximumCoolingCapacity: "Maximum Cooling Capacity:",
               helpText:
-                "The combined heating delivery of the heating systems that serve a room or space shall not be less than 100% of the space heat loss, as determined in Clause 5.2.6.",
+                "6.3.2: Except as provided in Clause 6.3.3., the cooling system capacity shall not be less than 80% of the nominal cooling capacity for the building, as determined in Clause 6.3.1.. In no case shall it be less than the nominal cooling capacity of the building minus 1800 W (0.51 tons).",
+              helpText2:
+                "6.3.3: Where the cooling system is added to an existing heating system, it's capacity in Watts shall not exceed 18 times the capacity of the air-handling capacity of the existing system in L/s. (Cooling capacity in Tons not more than 1.0 per 400 CFM of air handling capacity)",
+              helpText3:
+                "6.3.4: Except for ground-source and water source heat pumps used for cooling, and as permitted in Clause 6.3.5, the installed cooling capacity shall not exceed 125% of the nominal cooling capacity for the building, as determined in Clause 6.3.1.",
+              helpText4:
+                "6.3.5: If the nominal cooling system capacity for the building, as determined in Clause 6.3.1. is less than 6,000 W (1.7 tons), the installed cooling system capacity may exceed the nominal cooling system capacity for the building by up to 1750 W (0.49 tons).",
             },
             attachedDocuments: {
               title: "Attached Documents",

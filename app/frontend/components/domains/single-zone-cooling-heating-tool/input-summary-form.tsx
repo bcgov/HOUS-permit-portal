@@ -2,6 +2,7 @@ import { Box, Button, Divider, Grid, Heading } from "@chakra-ui/react"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { SelectFormControl, TextFormControl } from "../../shared/form/input-form-control"
+import { BuildingLocationFields } from "./building-location-fields"
 
 interface IInputSummaryFormProps {
   onCalculate: () => void
@@ -16,7 +17,7 @@ export const InputSummaryForm = ({ onCalculate }: IInputSummaryFormProps) => {
       <Heading as="h2" size="lg" mb={6}>
         {t(`${prefix}.title`)}
       </Heading>
-
+      <BuildingLocationFields i18nPrefix="singleZoneCoolingHeatingTool.inputSummary.buildingLocation" />
       <Divider my={10} />
       <Heading as="h3" size="md" mb={4}>
         {t(`${prefix}.calculationBasedOn.title`)}
