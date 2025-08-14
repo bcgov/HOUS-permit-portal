@@ -1,4 +1,8 @@
 class StepCodePolicy < ApplicationPolicy
+  def index?
+    record.creator == user
+  end
+
   def download_step_code_summary_csv?
     user.super_admin?
   end

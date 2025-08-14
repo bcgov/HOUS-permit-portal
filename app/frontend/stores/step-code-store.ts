@@ -1,23 +1,24 @@
 import { t } from "i18next"
 import { Instance, flow, toGenerator, types } from "mobx-state-tree"
 import * as R from "ramda"
+import { createSearchModel } from "../lib/create-search-model"
 import { withEnvironment } from "../lib/with-environment"
 import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
 import { IPart3StepCode, Part3StepCodeModel } from "../models/part-3-step-code"
 import { IPart9StepCode, Part9StepCodeModel } from "../models/part-9-step-code"
-import { EEnergyStep, EStepCodeType, EZeroCarbonStep } from "../types/enums"
-import { IPart3ChecklistSelectOptions, IPart9ChecklistSelectOptions } from "../types/types"
-import { startBlobDownload } from "../utils/utility-functions"
+import { EEnergyStep, EStepCodeSortFields, EStepCodeType, EZeroCarbonStep } from "../types/enums"
+import { IPart3ChecklistSelectOptions, IPart9ChecklistSelectOptions, TSearchParams } from "../types/types"
+import { setQueryParam, startBlobDownload } from "../utils/utility-functions"
 
 export const StepCodeModel = types.union(
   {
     dispatcher: (snapshot) => {
       // Return the appropriate model based on the `type` field in the snapshot
       switch (snapshot.type) {
-        case "Part9StepCode": // Using string literal
+        case EStepCodeType.part9StepCode: // Using string literal
           return Part9StepCodeModel
-        case "Part3StepCode": // Using string literal
+        case EStepCodeType.part3StepCode: // Using string literal
           return Part3StepCodeModel
         default:
           // It's good practice to have a default, even if you expect it to never be hit.
@@ -35,12 +36,17 @@ export const StepCodeModel = types.union(
 export type IStepCode = Instance<typeof StepCodeModel>
 
 export const StepCodeStoreModel = types
-  .model("StepCodeStore", {
-    stepCodesMap: types.map(StepCodeModel),
-    isLoaded: types.maybeNull(types.boolean),
-    selectOptions: types.frozen<Partial<IPart9ChecklistSelectOptions & IPart3ChecklistSelectOptions>>(),
-    currentStepCode: types.maybeNull(types.reference(StepCodeModel)),
-  })
+  .compose(
+    types.model("StepCodeStore", {
+      stepCodesMap: types.map(StepCodeModel),
+      tableStepCodes: types.optional(types.array(types.reference(StepCodeModel)), []),
+      isLoaded: types.maybeNull(types.boolean),
+      selectOptions: types.frozen<Partial<IPart9ChecklistSelectOptions & IPart3ChecklistSelectOptions>>(),
+      currentStepCode: types.maybeNull(types.reference(StepCodeModel)),
+      typeFilter: types.optional(types.array(types.enumeration(Object.values(EStepCodeType) as any)), []),
+    }),
+    createSearchModel<EStepCodeSortFields>("searchStepCodes", "setStepCodeFilters")
+  )
   .extend(withEnvironment())
   .extend(withRootStore())
   .extend(withMerge())
@@ -56,6 +62,15 @@ export const StepCodeStoreModel = types
     getStepCode(id: string) {
       return self.stepCodesMap.get(id)
     },
+    getSortColumnHeader(field: EStepCodeSortFields) {
+      const map = {
+        [EStepCodeSortFields.projectName]: t("stepCode.columns.project"),
+        [EStepCodeSortFields.type]: t("stepCode.columns.type"),
+        [EStepCodeSortFields.fullAddress]: t("stepCode.columns.fullAddress"),
+        [EStepCodeSortFields.updatedAt]: t("stepCode.columns.updatedAt"),
+      }
+      return map[field]
+    },
     getEnergyStepOptions(allowNull: boolean = false): EEnergyStep[] {
       const energySteps = self.currentStepCode?.energySteps || self.selectOptions.energySteps
       return (allowNull ? [...energySteps, null] : energySteps) as EEnergyStep[]
@@ -68,6 +83,20 @@ export const StepCodeStoreModel = types
   .actions((self) => ({
     setCurrentStepCode(stepCodeId) {
       self.currentStepCode = stepCodeId
+    },
+    setTableStepCodes(stepCodes: Array<IPart9StepCode | IPart3StepCode>) {
+      // @ts-ignore
+      self.tableStepCodes.replace(stepCodes.map((s) => s.id))
+    },
+    setTypeFilter(nextTypes: EStepCodeType[] | undefined) {
+      if (!nextTypes || nextTypes.length === 0) {
+        setQueryParam("type", [])
+        self.typeFilter.clear()
+        return
+      }
+      setQueryParam("type", nextTypes)
+      // @ts-ignore
+      self.typeFilter.replace(nextTypes)
     },
   }))
   .actions((self) => ({
@@ -95,6 +124,34 @@ export const StepCodeStoreModel = types
       }
       self.isLoaded = true
     }),
+    searchStepCodes: flow(function* (opts?: { reset?: boolean; page?: number; countPerPage?: number }) {
+      if (opts?.reset) {
+        self.resetPages()
+      }
+      const params: TSearchParams<EStepCodeSortFields> = {
+        query: self.query,
+        sort: self.sort,
+        page: opts?.page ?? self.currentPage,
+        perPage: opts?.countPerPage ?? self.countPerPage,
+        filters: {
+          type: self.typeFilter,
+        } as any,
+      }
+      const response = yield self.environment.api.searchStepCodes(params)
+      if (response.ok) {
+        self.mergeUpdateAll(response.data.data, "stepCodesMap")
+        self.setTableStepCodes(response.data.data)
+        self.setPageFields(response.data.meta, opts)
+      } else {
+        console.error("Failed to search Step Codes:", response.problem, response.data)
+      }
+      return response.ok
+    }),
+    setStepCodeFilters(queryParams: URLSearchParams) {
+      const rawType = queryParams.get("type")
+      const typeFilter = rawType ? (rawType.split(",").filter(Boolean) as EStepCodeType[]) : []
+      self.setTypeFilter(typeFilter)
+    },
     fetchPart9SelectOptions: flow(function* () {
       const response = yield self.environment.api.fetchPart9StepCodeSelectOptions()
       if (response.ok) {

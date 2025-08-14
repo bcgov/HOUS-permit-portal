@@ -50,7 +50,7 @@ export const NewPermitProjectScreen = observer(() => {
   const onSubmit = async (data: TPermitProjectFormData) => {
     const result = await permitProjectStore.createPermitProject(data)
     if (result.ok && result.data) {
-      navigate(`/permit-projects/${result.data.id}`)
+      navigate(`/projects/${result.data.id}`)
     }
   }
 

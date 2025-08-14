@@ -82,11 +82,14 @@ export function keysToCamelCase(obj) {
 
 export function setQueryParam(key: string, value: string | string[]) {
   const searchParams = new URLSearchParams(window.location.search)
-  if (!value) {
+  const isEmptyArray = Array.isArray(value) && value.length === 0
+  const isEmptyString = typeof value === "string" && value.trim() === ""
+
+  if (!value || isEmptyArray || isEmptyString) {
     searchParams.delete(key)
   } else {
-    // @ts-ignore
-    searchParams.set(key, value)
+    const serialized = Array.isArray(value) ? value.join(",") : value
+    searchParams.set(key, serialized)
   }
   const stringParams = searchParams.toString()
   const newUrl = `${window.location.pathname}${stringParams ? "?" + stringParams : ""}`
