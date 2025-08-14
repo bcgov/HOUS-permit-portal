@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { datefnsTableDateTimeFormat } from "../../../constants"
 import { IStepCode } from "../../../stores/step-code-store"
-import { EFileUploadAttachmentType } from "../../../types/enums"
+import { EFileUploadAttachmentType, EStepCodeType } from "../../../types/enums"
 import { FileDownloadButton } from "../../shared/base/file-download-button"
 
 export const StepCodesGridRow = observer(({ stepCode }: { stepCode: IStepCode }) => {
@@ -35,7 +35,7 @@ export const StepCodesGridRow = observer(({ stepCode }: { stepCode: IStepCode })
       _last={{ borderBottom: "none" }}
     >
       <GridItem display="flex" alignItems="center" px={4} py={2}>
-        <Text>{t(`stepCode.types.${type}`)}</Text>
+        <Text>{t(`stepCode.types.${type as EStepCodeType}`)}</Text>
       </GridItem>
       <GridItem display="flex" alignItems="center" px={4} py={2}>
         <Text>{projectName}</Text>
@@ -62,14 +62,19 @@ export const StepCodesGridRow = observer(({ stepCode }: { stepCode: IStepCode })
             variant="ghost"
           />
           <MenuList>
-            {(stepCode as any)?.reportDocuments?.length > 0 && (
+            {(stepCode as any)?.reportDocuments?.length > 0 ? (
               <MenuItem onClick={(e) => e.stopPropagation()}>
                 <FileDownloadButton
                   modelType={EFileUploadAttachmentType.ReportDocument}
-                  document={(stepCode as any).reportDocuments[0]}
+                  document={(stepCode as any).reportDocuments[stepCode.reportDocuments.length - 1]}
                   variant="ghost"
                   size="sm"
+                  simpleLabel
                 />
+              </MenuItem>
+            ) : (
+              <MenuItem _hover={{ cursor: "not-allowed" }}>
+                <Text>{t("stepCode.index.noReportAvailable")}</Text>
               </MenuItem>
             )}
           </MenuList>

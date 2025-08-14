@@ -66,6 +66,7 @@ class StepCodeReportGenerationJob
             full_address: step_code.full_address,
             reference_number: step_code.reference_number,
             title: step_code.title,
+            phase: step_code.phase,
             permit_date: step_code.permit_date,
             pid: step_code.pid,
             pin: step_code.pin,

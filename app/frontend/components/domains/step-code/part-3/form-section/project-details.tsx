@@ -10,6 +10,7 @@ import {
   InputGroup,
   InputLeftElement,
   Link,
+  Select,
   Text,
 } from "@chakra-ui/react"
 import { MapPin } from "@phosphor-icons/react"
@@ -220,7 +221,20 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
                 {editable ? (
                   <FormControl>
                     <FormLabel htmlFor="phase">{t(`${i18nPrefix}.stage`)}</FormLabel>
-                    <Input id="phase" {...register("phase")} defaultValue={stepCode.phase || ""} />
+                    <Select
+                      id="phase"
+                      placeholder="Select stage"
+                      {...register("phase")}
+                      defaultValue={stepCode.phase || ""}
+                    >
+                      <option value="pre_construction">
+                        {t("stepCodeChecklist.edit.projectInfo.stages.pre_construction")}
+                      </option>
+                      <option value="mid_construction">
+                        {t("stepCodeChecklist.edit.projectInfo.stages.mid_construction")}
+                      </option>
+                      <option value="as_built">{t("stepCodeChecklist.edit.projectInfo.stages.as_built")}</option>
+                    </Select>
                   </FormControl>
                 ) : (
                   <Field label={t(`${i18nPrefix}.stage`)} value={stepCode.phase} />

@@ -13,7 +13,6 @@ interface IProps {
 export const ProjectInfo = function StepCodePart3ChecklistPDFProjectInfo({ checklist, stepCode }: IProps) {
   type TPrefix = "stepCode.part3.projectDetails"
   const i18nPrefix: TPrefix = "stepCode.part3.projectDetails"
-
   return (
     <Panel heading={t(`${i18nPrefix}.heading`)}>
       <Field label={t(`${i18nPrefix}.name`)} value={stepCode.title} />
@@ -25,7 +24,7 @@ export const ProjectInfo = function StepCodePart3ChecklistPDFProjectInfo({ check
         <Field label={t(`${i18nPrefix}.identifier`)} value={stepCode.referenceNumber} style={{ flex: 1 }} />
         <Field
           label={t(`${i18nPrefix}.stage`)}
-          value={checklist.projectStage ? t(`${i18nPrefix}.stages.${checklist.projectStage}`) : ""}
+          value={stepCode.phase ? t(`${i18nPrefix}.stages.${stepCode.phase}`) : ""}
           style={{ flex: 1 }}
         />
         <Field label={t(`${i18nPrefix}.date`)} value={stepCode.permitDate || ""} style={{ flex: 1 }} />
