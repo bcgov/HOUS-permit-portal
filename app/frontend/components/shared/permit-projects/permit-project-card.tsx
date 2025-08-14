@@ -143,7 +143,7 @@ export const PermitProjectCard = observer(({ permitProject }: IPermitProjectCard
             fontSize="lg"
             fontWeight="bold"
             color="text.link"
-            to={`/permit-projects/${permitProject.id}`} // Link to project detail/edit page
+            to={`/projects/${permitProject.id}`} // Link to project detail/edit page
             rightIcon={<CaretRight size={16} />}
           >
             {nickname}
@@ -205,7 +205,7 @@ export const PermitProjectCard = observer(({ permitProject }: IPermitProjectCard
         <Flex direction="column" align="flex-end" gap={4} flex={{ base: 0, md: 1 }} maxW={{ base: "100%", md: "25%" }}>
           <Show above="md">{status && <PermitApplicationStatusTag permitApplication={{ status } as any} />}</Show>
           <RouterLinkButton
-            to={`/permit-projects/${permitProject.id}`} // Link to project detail/edit page
+            to={`/projects/${permitProject.id}`} // Link to project detail/edit page
             variant="primary"
             w={{ base: "full", md: "fit-content" }}
             // Adapt icon based on project state or collaboration status if needed

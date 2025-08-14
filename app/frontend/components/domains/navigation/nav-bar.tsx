@@ -90,7 +90,7 @@ function isLoginPath(path: string): boolean {
 }
 
 function isProjectDetailPath(path: string): boolean {
-  const regex = /^\/permit-projects\/[a-f\d-]+/
+  const regex = /^\/projects\/[a-f\d-]+/
   return regex.test(path)
 }
 
@@ -410,7 +410,7 @@ const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
                         </Button>
                       </MenuItem>
                       <NavMenuItem label={t("site.myPermits")} to="/permit-applications" bg="greys.grey03" />
-                      <NavMenuItem label={t("site.myProjects")} to="/permit-projects" bg="greys.grey03" />
+                      <NavMenuItem label={t("site.myProjects")} to="/projects" bg="greys.grey03" />
                       <MenuDivider my={0} borderColor="border.light" />
                     </>
                   )}

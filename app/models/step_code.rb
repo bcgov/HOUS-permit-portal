@@ -2,6 +2,15 @@ class StepCode < ApplicationRecord
   include ProjectItem
   has_parent :permit_application
 
+  # Enable search for StepCodes
+  searchkick word_middle: %i[
+               project_name
+               full_address
+               jurisdiction_name
+               type
+               building_permit_number
+             ]
+
   belongs_to :creator,
              class_name: "User",
              foreign_key: "creator_id",
@@ -41,5 +50,26 @@ class StepCode < ApplicationRecord
   def checklist_blueprint
     raise NotImplementedError,
           "Subclasses must implement the checklist_blueprint method"
+  end
+
+  # Fields to be indexed by Searchkick
+  def search_data
+    {
+      id: id,
+      type: type,
+      project_name: project_name,
+      project_identifier: project_identifier,
+      full_address: full_address,
+      jurisdiction_name: jurisdiction_name,
+      building_permit_number: permit_application&.number,
+      permit_date: permit_application&.permit_date,
+      created_at: created_at,
+      updated_at: updated_at,
+      creator_id: creator_id,
+      submitter_id: permit_application&.submitter_id,
+      permit_project_id: permit_project&.id,
+      jurisdiction_id: jurisdiction&.id,
+      sandbox_id: permit_application&.sandbox_id
+    }
   end
 end
