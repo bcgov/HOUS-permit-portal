@@ -65,7 +65,7 @@ export const PermitApplicationStoreModel = types
       const map = {
         [EProjectPermitApplicationSortFields.permit]: t("permitProject.overview.permit"),
         [EProjectPermitApplicationSortFields.assignedTo]: t("permitProject.overview.assignedTo"),
-        [EProjectPermitApplicationSortFields.lastModified]: t("permitProject.overview.lastModified"),
+        [EProjectPermitApplicationSortFields.updatedAt]: t("permitProject.overview.updatedAt"),
         [EProjectPermitApplicationSortFields.status]: t("permitProject.overview.status"),
       }
       return map[field]

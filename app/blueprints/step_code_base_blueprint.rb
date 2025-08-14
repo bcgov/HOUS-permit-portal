@@ -2,6 +2,8 @@ class StepCodeBaseBlueprint < Blueprinter::Base
   identifier :id
 
   fields :type,
+         :created_at,
+         :updated_at,
          :project_name,
          :project_identifier,
          :full_address,

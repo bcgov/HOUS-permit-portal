@@ -181,21 +181,21 @@ class IntegrationMapping < ApplicationRecord
       )
     end
 
-    external_api_keys = ExternalApiKey.active.where(jurisdiction: jurisdiction)
+    notifiables = ExternalApiKey.active.where(jurisdiction: jurisdiction)
 
     # Notify external API key integrations
-    external_api_keys.uniq.each do |external_api_key|
-      next unless external_api_key.notification_email.present?
+    notifiables.uniq.each do |notifiable|
+      next unless notifiable.notification_email.present?
 
-      unless external_api_key.notification_email.present? &&
-               external_api_key.jurisdiction.external_api_enabled? &&
+      unless notifiable.notification_email.present? &&
+               notifiable.jurisdiction.external_api_enabled? &&
                (template_version.published? || template_version.scheduled?)
         return
       end
 
       # Create a notification record instead of sending the email immediately
       IntegrationMappingNotification.create(
-        notifiable: external_api_key,
+        notifiable: notifiable,
         template_version: template_version # Associate the template version
       )
     end

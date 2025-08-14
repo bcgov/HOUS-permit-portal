@@ -1,10 +1,24 @@
 class Api::StepCodesController < Api::ApplicationController
   include StepCodeParamsConcern
+  include Api::Concerns::Search::StepCodes
 
   # DELETE /api/step_codes/:id
   # PATCH /api/step_codes/:id
 
   before_action :set_step_code, only: %i[update destroy]
+  skip_after_action :verify_policy_scoped, only: %i[index]
+
+  # GET /api/step_codes (or POST /api/step_codes/search similar to other controllers)
+  def index
+    perform_step_code_search
+    authorized_results = apply_search_authorization(@step_code_search, :index)
+    render_success authorized_results,
+                   nil,
+                   {
+                     meta: page_meta(@step_code_search),
+                     blueprint: StepCodeBlueprint
+                   }
+  end
 
   def update
     authorize @step_code

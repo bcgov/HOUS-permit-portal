@@ -1,0 +1,2 @@
+class StepCodeBlueprint < StepCodeBaseBlueprint
+end

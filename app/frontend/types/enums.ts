@@ -143,7 +143,7 @@ export enum EPermitApplicationSortFields {
 export enum EProjectPermitApplicationSortFields {
   permit = "permit",
   assignedTo = "assigned_to",
-  lastModified = "last_modified",
+  updatedAt = "updated_at",
   status = "status",
 }
 
@@ -656,4 +656,11 @@ export enum EPermitProjectRollupStatus {
   revisionsRequested = "revisions_requested",
   resubmitted = "resubmitted",
   approved = "approved",
+}
+
+export enum EStepCodeSortFields {
+  type = "type",
+  projectName = "project_name",
+  fullAddress = "full_address",
+  updatedAt = "updated_at",
 }

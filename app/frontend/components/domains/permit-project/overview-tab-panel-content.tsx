@@ -114,11 +114,7 @@ export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
           ))}
         </SearchGrid>
         <Flex justify="flex-end" mt={4}>
-          <RouterLinkButton
-            variant="tertiary"
-            rightIcon={<CaretRight />}
-            to={`/permit-projects/${permitProject.id}/permits`}
-          >
+          <RouterLinkButton variant="tertiary" rightIcon={<CaretRight />} to={`/projects/${permitProject.id}/permits`}>
             {t("permitProject.overview.allPermits")}
           </RouterLinkButton>
         </Flex>
