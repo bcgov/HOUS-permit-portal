@@ -1,0 +1,97 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    image.openshift.io/triggers: '{{ printf "[{\"from\":{\"kind\":\"ImageStreamTag\",\"name\":\"%s:latest\"},\"fieldPath\":\"spec.template.spec.containers[?(@.name==\\\"%s\\\")].image\"}]" $.Values.clamav.image $.Values.clamav.name }}'
+  labels:
+    app: "{{ $.Values.clamav.name }}"
+  name: "{{ $.Values.clamav.name }}"
+spec:
+  progressDeadlineSeconds: 600
+  replicas: {{ .Values.clamav.replicaCount }}
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: "{{ $.Values.clamav.name }}"
+      deployment: "{{ $.Values.clamav.name }}"
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: "{{ $.Values.clamav.name }}"
+        deployment: "{{ $.Values.clamav.name }}"
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - image: "{{ .Values.clamav.registry }}/{{ .Values.clamav.image }}:{{ .Values.clamav.tag }}"
+          imagePullPolicy: "{{ .Values.clamav.imagePullPolicy }}"
+          name: "{{ .Values.clamav.name }}"
+          ports:
+            - containerPort: 3310
+              protocol: TCP
+          resources:
+            requests:
+              cpu: {{ .Values.clamav.resources.requests.cpu }}
+              memory: {{ .Values.clamav.resources.requests.memory }}
+          volumeMounts:
+            - mountPath: /opt/app-root/src
+              name: signatures
+            - mountPath: /run/clamav
+              name: run
+            - mountPath: /etc/clamd.conf
+              name: config-volume
+              readOnly: true
+              subPath: clamd.conf
+            - mountPath: /etc/freshclam.conf
+              name: config-volume
+              readOnly: true
+              subPath: freshclam.conf
+          startupProbe:
+            exec:
+              command:
+                - /opt/app-root/clamdcheck.sh
+            failureThreshold: 30
+            periodSeconds: 10
+            initialDelaySeconds: 60
+          livenessProbe:
+            exec:
+              command:
+                - /opt/app-root/clamdcheck.sh
+            failureThreshold: 2
+            periodSeconds: 30
+            successThreshold: 1
+            timeoutSeconds: 3
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccountName: {{ .Values.serviceAccountName }}
+      terminationGracePeriodSeconds: 30
+      volumes:
+        - name: config-volume
+          configMap:
+            name: {{ include "clamav.fullname" . }}
+        - name: signatures
+          emptyDir: {}
+        - name: run
+          emptyDir: {}
+      {{- with .Values.clamav.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      # Prevent clamav pods running on the same host.
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - topologyKey: "kubernetes.io/hostname"
+              labelSelector:
+                matchLabels:
+                  {{- include "clamav.selectorLabels" . | nindent 18 }}
+      {{- with .Values.clamav.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
