@@ -138,57 +138,59 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
             )}
 
             <Flex gap={{ base: 6, xl: 6 }} direction="column">
-              <FormControl isInvalid={editable && !!errors.fullAddress}>
-                {editable ? (
-                  editingAddress || !stepCode.fullAddress ? (
-                    <Controller
-                      name="site"
-                      control={control}
-                      render={({ field: { onChange, value } }) => (
-                        <SitesSelect
-                          onChange={(opt) => {
-                            onChange(opt)
-                            setValue("fullAddress", opt?.label || "")
-                          }}
-                          placeholder={undefined}
-                          selectedOption={value}
-                          styles={{
-                            container: (css) => ({ ...css, width: "100%" }),
-                            menuPortal: (base) => ({ ...base, zIndex: 9999 }),
-                          }}
-                          menuPortalTarget={document.body}
-                        />
-                      )}
-                    />
+              <Flex gap={2} alignItems="flex-end">
+                <FormControl isInvalid={editable && !!errors.fullAddress}>
+                  {editable ? (
+                    editingAddress || !stepCode.fullAddress ? (
+                      <Controller
+                        name="site"
+                        control={control}
+                        render={({ field: { onChange, value } }) => (
+                          <SitesSelect
+                            onChange={(opt) => {
+                              onChange(opt)
+                              setValue("fullAddress", opt?.label || "")
+                            }}
+                            placeholder={undefined}
+                            selectedOption={value}
+                            styles={{
+                              container: (css) => ({ ...css, width: "100%" }),
+                              menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                            }}
+                            menuPortalTarget={document.body}
+                          />
+                        )}
+                      />
+                    ) : (
+                      <Flex direction="column" gap={2}>
+                        <FormLabel>{t(`${i18nPrefix}.address`)}</FormLabel>
+                        <Flex gap={2} alignItems="center">
+                          <InputGroup>
+                            <InputLeftElement pointerEvents="none">
+                              <MapPin />
+                            </InputLeftElement>
+                            <Input isDisabled value={stepCode.fullAddress || ""} />
+                          </InputGroup>
+                        </Flex>
+                      </Flex>
+                    )
                   ) : (
                     <Flex direction="column" gap={2}>
                       <FormLabel>{t(`${i18nPrefix}.address`)}</FormLabel>
-                      <Flex gap={2} alignItems="center">
-                        <InputGroup>
-                          <InputLeftElement pointerEvents="none">
-                            <MapPin />
-                          </InputLeftElement>
-                          <Input isDisabled value={stepCode.fullAddress || ""} />
-                        </InputGroup>
-                        <Button size="sm" variant="link" onClick={() => setEditingAddress(true)}>
-                          {t("ui.change", { defaultValue: "Change" })}
-                        </Button>
-                      </Flex>
+                      <InputGroup>
+                        <InputLeftElement pointerEvents="none">
+                          <MapPin />
+                        </InputLeftElement>
+                        <Input isDisabled value={stepCode.fullAddress || ""} />
+                      </InputGroup>
                     </Flex>
-                  )
-                ) : (
-                  <Flex direction="column" gap={2}>
-                    <FormLabel>{t(`${i18nPrefix}.address`)}</FormLabel>
-                    <InputGroup>
-                      <InputLeftElement pointerEvents="none">
-                        <MapPin />
-                      </InputLeftElement>
-                      <Input isDisabled value={stepCode.fullAddress || ""} />
-                    </InputGroup>
-                  </Flex>
-                )}
-                {editable && <FormErrorMessage>{errors.fullAddress?.message}</FormErrorMessage>}
-              </FormControl>
+                  )}
+                  {editable && <FormErrorMessage>{errors.fullAddress?.message}</FormErrorMessage>}
+                </FormControl>
+                <Button mb={3} size="sm" variant="link" onClick={() => setEditingAddress((prev) => !prev)}>
+                  {editingAddress ? t("ui.cancel") : t("ui.change")}
+                </Button>
+              </Flex>
               {editable && (
                 // keep fullAddress in form state when using the SitesSelect
                 <input type="hidden" {...register("fullAddress")} />
