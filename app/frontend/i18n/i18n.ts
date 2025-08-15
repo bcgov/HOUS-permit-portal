@@ -1435,13 +1435,13 @@ Thank you,
             baselinePerformance: {
               heading: "Baseline energy model performance",
               refAnnualThermalEnergyDemand: {
-                label: "Total annual thermal energy demand for baseline building",
+                label: "Total annual thermal energy use for baseline building",
                 units: "kWh",
                 hint: "Results for the baseline or reference building or building portion",
-                error: "Enter the total annual thermal energy demand for the baseline buidling",
+                error: "Enter the total annual thermal energy use for the baseline buidling",
               },
               refEnergyOutputs: {
-                label: "In the table, enter the annual energy demand for each fuel type",
+                label: "In the table, enter the annual energy use for each fuel type",
                 fuelType: "Fuel type",
                 annualEnergy: "Annual energy (kWh)",
                 emissionsFactor: "Emissions factor (kgCO<sub>2e</sub>/kWh)",
@@ -1475,13 +1475,13 @@ Thank you,
               hotel_motel: "Group C Hotel and motel",
               residential: "Group C Other residential",
               office: "Group D Office",
-              other: "Group D Other",
+              other: "Group D Other business and personal services occupancies",
               mercantile: "Group E Mercantile",
             },
             stepCodePerformanceRequirements: {
               heading: "Performance requirements for Step 2, 3, and 4 Buildings",
               instructions:
-                "If there are occupancies subject to Steps 2, 3, or 4 (not including Step 2 with a reference building) in your project, this section will collect additional details.",
+                "If there are occupancies subject to Steps 2, 3, or 4 (not including Step 2 with a reference building as outlined in Tables 10.2.3.3.-A to 10.2.3.3.-F) in your project, this section will collect additional details.",
               stepCodeRequirement: {
                 isCustom: {
                   label:
