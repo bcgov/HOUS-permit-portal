@@ -3,6 +3,8 @@ import { types } from "mobx-state-tree"
 // Define the base fields shared between Part3 and Part9 StepCode models
 export const StepCodeBaseFields = types
   .model("StepCodeBaseFields", {
+    createdAt: types.maybeNull(types.Date),
+    updatedAt: types.maybeNull(types.Date),
     projectName: types.maybeNull(types.string),
     projectIdentifier: types.maybeNull(types.string),
     fullAddress: types.maybeNull(types.string),

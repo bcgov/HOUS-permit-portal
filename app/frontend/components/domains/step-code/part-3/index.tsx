@@ -48,6 +48,10 @@ export const Part3StepCodeForm = observer(function Part3StepCodeForm() {
 
     if (stepCode.checklist) {
       const navLink = stepCode.checklist.currentNavLink
+      // Ensure a default after-save path is set for all sections
+      if (!stepCode.checklist.alternateNavigateAfterSavePath) {
+        stepCode.checklist.setAlternateNavigateAfterSavePath("/step-codes")
+      }
       navigate(navLink?.location || "start")
     } else {
       navigate("start")

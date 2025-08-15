@@ -1,5 +1,5 @@
 class Api::EndUserLicenseAgreementController < Api::ApplicationController
-  skip_after_action :verify_policy_scoped
+  skip_after_action :verify_policy_scoped, only: [:index]
   skip_before_action :require_confirmation
 
   def index

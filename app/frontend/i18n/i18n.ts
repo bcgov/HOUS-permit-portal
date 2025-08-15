@@ -597,6 +597,7 @@ Thank you,
             pinnedPermitProjectsTbd: "Pinned projects TBD",
             allProjects: "All projects",
             requirementTemplateFilter: "Permit",
+            noneFoundExplanation: "There are currently no permit projects matching your search criteria",
           },
           overview: {
             title: "Overview",
@@ -612,7 +613,7 @@ Thank you,
             addPermit: "Add permit",
             permit: "Permit",
             assignedTo: "Assigned to",
-            lastModified: "Last modified",
+            updatedAt: "Last modified",
             status: "Status",
             allPermits: "All permits",
           },
@@ -669,7 +670,6 @@ Thank you,
           rollupStatusFilter: "Status",
           jurisdictionFilter: "Location",
         },
-
         permitApplication: {
           noneFound: "No permits yet",
           noneFoundExplanation:
@@ -1183,6 +1183,29 @@ Thank you,
           },
         },
         stepCode: {
+          createButton: "Start now",
+          types: {
+            Part3StepCode: "BCBC Part 3",
+            Part9StepCode: "BCBC Part 9",
+          },
+          index: {
+            title: "Step Codes",
+            createReportTitle: "Create a Step Codes compliance report for your project",
+            createReportDescriptionPrefix:
+              "Create a report that details a project's compliance with BC's Energy Step Code and Zero Carbon Step Code requirements. When a report is finished, you'll find it in",
+            documentsLabel: "Documents",
+            lookupTitle: "Look up local Step Codes requirements for your project",
+            lookupDescriptionPrefix: "To check which Step Codes apply before generating a report,",
+            lookupDescriptionLinkLabel: "look up Step Codes requirements for your project's jurisdiction",
+          },
+
+          noneFound: "No Step Codes found",
+          columns: {
+            project: "Project",
+            type: "Type",
+            fullAddress: "Address",
+            updatedAt: "Last modified",
+          },
           part3: {
             title: "Energy and Zero Carbon Step Codes for Step 3 Buildings",
             errorTitle: "There is a problem",
@@ -2050,10 +2073,6 @@ Thank you,
             otherGhgConsumption: "Other GHG consumption",
             create: "Create",
             addData: "Add data",
-          },
-          index: {
-            heading: "Step Codes",
-            newStepCode: "New step code",
           },
         },
         stepCodeChecklist: {
@@ -3648,6 +3667,7 @@ Thank you,
           privacyPolicyContactUsEmail: "Email:",
           privacyPolicyContactUsEmailAddress: "digital.codes.permits@gov.bc.ca",
           breadcrumb: {
+            projects: "Projects",
             checkStepCodeRequirements: "Check step code requirements",
             latest: "Latest",
             profile: "Profile",
