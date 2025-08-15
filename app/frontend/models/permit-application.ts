@@ -73,7 +73,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
       selectedTabIndex: types.optional(types.number, 0),
       createdAt: types.Date,
       updatedAt: types.Date,
-      stepCode: types.maybeNull(types.reference(StepCodeModel)),
+      stepCode: types.maybeNull(types.reference(types.late(() => StepCodeModel))),
       supportingDocuments: types.maybeNull(types.frozen<IDownloadableFile[]>()),
       allSubmissionVersionCompletedSupportingDocuments: types.maybeNull(types.frozen<IDownloadableFile[]>()),
       zipfileSize: types.maybeNull(types.number),
@@ -84,7 +84,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
       isFullyLoaded: types.optional(types.boolean, false),
       isDirty: types.optional(types.boolean, false),
       isLoading: types.optional(types.boolean, false),
-      indexedUsingCurrentTemplateVersion: types.maybeNull(types.boolean),
+      usingCurrentTemplateVersion: types.maybeNull(types.boolean),
       showingCompareAfter: types.optional(types.boolean, false),
       revisionMode: types.optional(types.boolean, false),
       diff: types.maybeNull(types.frozen<ITemplateVersionDiff>()),
@@ -93,6 +93,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
       permitCollaborationMap: types.map(PermitCollaborationModel),
       permitBlockStatusMap: types.map(PermitBlockStatusModel),
       isViewingPastRequests: types.optional(types.boolean, false),
+      templateNickname: types.maybeNull(types.string),
     })
     .extend(withEnvironment())
     .extend(withRootStore())
@@ -195,10 +196,6 @@ export const PermitApplicationModel = types.snapshotProcessor(
       },
       get viewedAt() {
         return self.latestSubmissionVersion?.viewedAt
-      },
-      get usingCurrentTemplateVersion() {
-        if (self.templateVersion) return self.templateVersion.id == self.publishedTemplateVersion.id
-        return self.indexedUsingCurrentTemplateVersion
       },
       get jurisdictionName() {
         return self.jurisdiction.name
@@ -426,11 +423,9 @@ export const PermitApplicationModel = types.snapshotProcessor(
     }))
     .views((self) => ({
       getCollaborationsByType(collaborationType: ECollaborationType) {
-        return R.pipe(
-          Array.from<IPermitCollaboration>,
-          R.filter(R.propEq(collaborationType, "collaborationType")),
-          mutableSortPermitCollaborations
-        )(self.permitCollaborationMap.values())
+        const collaborations = Array.from(self.permitCollaborationMap.values())
+        const filtered = collaborations.filter((c) => c.collaborationType === collaborationType)
+        return mutableSortPermitCollaborations(filtered)
       },
     }))
     .views((self) => ({
@@ -448,11 +443,19 @@ export const PermitApplicationModel = types.snapshotProcessor(
       },
     }))
     .views((self) => ({
+      get designatedReviewer() {
+        return self.getCollaborationDelegatee(ECollaborationType.review)
+      },
+      get designatedSubmitter() {
+        return self.getCollaborationDelegatee(ECollaborationType.submission)
+      },
+    }))
+    .views((self) => ({
       get currentUserShouldSeeApplicationDiff() {
         const currentUser = self.rootStore.userStore.currentUser
         return (
           currentUser?.id === self.submitter?.id ||
-          currentUser?.id === self?.getCollaborationDelegatee(ECollaborationType.submission)?.collaborator?.user?.id
+          currentUser?.id === self?.designatedSubmitter?.collaborator?.user?.id
         )
       },
       getCollaborationAssigneesByBlockIdMap(collaborationType: ECollaborationType) {
@@ -480,15 +483,19 @@ export const PermitApplicationModel = types.snapshotProcessor(
         return self.getCollaborationAssigneesByBlockIdMap(collaborationType)[requirementBlockId] ?? []
       },
       canUserSubmit(user: IUser) {
-        if (self.submitter.id === user.id) {
+        if (!user) return false
+
+        if (self.submitter?.id === user.id) {
           return true
         }
 
-        const delegateePermitCollaboration = self.getCollaborationDelegatee(ECollaborationType.submission)
+        const delegateePermitCollaboration = self.designatedSubmitter
 
         return delegateePermitCollaboration?.collaborator?.user?.id == user.id
       },
       canUserManageCollaborators(user: IUser, collaborationType: ECollaborationType) {
+        if (!user) return false
+
         if (collaborationType === ECollaborationType.review) {
           return !self.isDraft && user.isReviewStaff
         }
@@ -497,12 +504,6 @@ export const PermitApplicationModel = types.snapshotProcessor(
       },
       delegateeUser(collaborationType: ECollaborationType) {
         return self.getCollaborationDelegatee(collaborationType)?.collaborator?.user
-      },
-      assigneeUsers(collaborationType: ECollaborationType) {
-        return (
-          self.getCollaborationAssignees(collaborationType)?.map((collaboration) => collaboration.collaborator.user) ??
-          []
-        )
       },
       getCollaborationUniqueUserCount(collaborationType: ECollaborationType) {
         return R.uniqBy(
@@ -540,38 +541,22 @@ export const PermitApplicationModel = types.snapshotProcessor(
           }, {})
         )
       },
-      getDesignatedReviewer(userId: string) {
-        return Array.from(self.permitCollaborationMap.values()).find(
-          (collaboration) =>
-            collaboration.collaborationType === ECollaborationType.review &&
-            collaboration.collaborator.user.id === userId
-        )
-      },
     }))
     .views((self) => ({
       get shouldShowDesignatedReviewerModal() {
         const { userStore } = self.rootStore
-        const { currentUser } = userStore
+        const currentUser = userStore.currentUser
 
-        const jurisdictionADR = self.jurisdiction.allowDesignatedReviewer
+        const featureEnabled = self.jurisdiction.allowDesignatedReviewer
 
-        const featureEnabled = jurisdictionADR
-        const designatedReviewerCollaboration = self.getCollaborationDelegatee(ECollaborationType.review)
-        const designatedReviewerExists = designatedReviewerCollaboration?.collaborator?.user?.id != null
+        const designatedReviewerCollaboration = self.designatedReviewer
 
-        if (featureEnabled === false && designatedReviewerExists) {
-          return true
-        }
-
-        if (featureEnabled === true && designatedReviewerExists) {
+        const designatedReviewerExists = !!designatedReviewerCollaboration?.collaborator?.user
+        if (currentUser?.id === designatedReviewerCollaboration?.collaborator?.user?.id) {
           return false
         }
 
-        if (featureEnabled === true && !designatedReviewerExists) {
-          return true
-        }
-
-        return false
+        return featureEnabled ? !designatedReviewerExists : designatedReviewerExists
       },
     }))
     .actions((self) => ({
@@ -621,9 +606,13 @@ export const PermitApplicationModel = types.snapshotProcessor(
         const { data: permitCollaboration } = response.data
 
         if (permitCollaboration.collaboratorType === ECollaboratorType.delegatee) {
-          const existingDelegatee = self.getCollaborationDelegatee(permitCollaboration.collaborationType)
-
-          existingDelegatee && self.permitCollaborationMap.delete(existingDelegatee.id)
+          if (permitCollaboration.collaborationType === ECollaborationType.submission) {
+            const existingDelegatee = self.designatedSubmitter
+            existingDelegatee && self.permitCollaborationMap.delete(existingDelegatee.id)
+          } else {
+            const existingDelegatee = self.designatedReviewer
+            existingDelegatee && self.permitCollaborationMap.delete(existingDelegatee.id)
+          }
         }
         self.updatePermitCollaboration(permitCollaboration)
 

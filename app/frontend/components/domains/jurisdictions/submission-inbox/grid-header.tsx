@@ -4,6 +4,7 @@ import React from "react"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../../setup/root"
 import { EPermitApplicationReviewerSortFields, EPermitApplicationSortFields } from "../../../../types/enums"
+import { ISort } from "../../../../types/types"
 import { ModelSearchInput } from "../../../shared/base/model-search-input"
 import { GridHeader } from "../../../shared/grid/grid-header"
 import { SortIcon } from "../../../shared/sort-icon"
@@ -11,7 +12,7 @@ import { SortIcon } from "../../../shared/sort-icon"
 export const GridHeaders = observer(function GridHeaders() {
   const { permitApplicationStore } = useMst()
 
-  const getSortColumnHeader = permitApplicationStore?.getSortColumnHeader
+  const getSortColumnHeader = permitApplicationStore?.getPermitApplicationSortColumnHeader
 
   const { toggleSort, sort } = permitApplicationStore
 
@@ -51,7 +52,10 @@ export const GridHeaders = observer(function GridHeaders() {
                   px={4}
                 >
                   <Text textAlign="left">{getSortColumnHeader(castField)}</Text>
-                  <SortIcon<EPermitApplicationSortFields> field={castField} currentSort={sort} />
+                  <SortIcon<EPermitApplicationSortFields>
+                    field={castField}
+                    currentSort={sort as ISort<EPermitApplicationSortFields>}
+                  />
                 </Flex>
               </GridHeader>
             )

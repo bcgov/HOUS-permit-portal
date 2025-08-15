@@ -141,6 +141,12 @@ export const CreateEditContactModal = ({
         <ModalBody py={6}>
           <FormProvider {...formMethods}>
             <Flex direction="column" gap={2} border="1px solid" borderColor="border.light" p={4}>
+              <SelectFormControl
+                label={t("contact.fields.contactType")}
+                fieldName="contactType"
+                optionGroups={contactTypeOptionGroups}
+                required
+              />
               <Flex direction={{ base: "column", md: "row" }} gap={2}>
                 <TextFormControl label={t("contact.fields.firstName")} fieldName="firstName" required />
                 <TextFormControl label={t("contact.fields.lastName")} fieldName="lastName" required />
@@ -168,11 +174,6 @@ export const CreateEditContactModal = ({
                 />
                 <TextFormControl label={t("contact.fields.professionalNumber")} fieldName="professionalNumber" />
               </Grid>
-              <SelectFormControl
-                label={t("contact.fields.contactType")}
-                fieldName="contactType"
-                optionGroups={contactTypeOptionGroups}
-              />
               <Flex w="full" justify="space-between">
                 <Button
                   variant="primary"

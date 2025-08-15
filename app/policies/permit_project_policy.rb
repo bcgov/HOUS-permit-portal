@@ -2,8 +2,14 @@ class PermitProjectPolicy < ApplicationPolicy
   # Scope class for Pundit scopes
   class Scope < Scope
     def resolve
-      # Option 1: User can only see projects they own.
-      scope.where(owner_id: user.id)
+      # Projects the user owns OR collaborates on
+      scope
+        .left_joins(:collaborators)
+        .where(
+          "permit_projects.owner_id = :uid OR collaborators.user_id = :uid",
+          uid: user.id
+        )
+        .distinct
     end
   end
 
@@ -41,6 +47,19 @@ class PermitProjectPolicy < ApplicationPolicy
 
   def unpin?
     user_is_owner_or_collaborator?
+  end
+
+  def search_permit_applications?
+    user_is_owner_or_collaborator?
+  end
+
+  def submission_collaborator_options?
+    user_is_owner?
+  end
+
+  def jurisdiction_options?
+    # Collection action – rely on policy_scope to restrict data
+    true
   end
 
   private

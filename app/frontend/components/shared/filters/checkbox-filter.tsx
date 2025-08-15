@@ -15,53 +15,41 @@ import { CaretDown, MagnifyingGlass } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
-import { IPermitProjectStore } from "../../../stores/permit-project-store"
-import { EPermitProjectPhase } from "../../../types/enums"
 
-interface IProps {
-  searchModel: IPermitProjectStore
+interface IOption {
+  value: string
+  label: string
 }
 
-export const PhaseFilter = observer(function PhaseFilter({ searchModel }: IProps) {
+interface IProps {
+  value: string[]
+  onChange: (value: string[]) => void
+  onReset: () => void
+  options: IOption[]
+  title: string
+}
+
+export const CheckboxFilter = observer(function CheckboxFilter({ value, onChange, onReset, options, title }: IProps) {
   const { t } = useTranslation()
-  const { phaseFilter, setPhaseFilter, search } = searchModel
   const [searchTerm, setSearchTerm] = useState("")
+  const [isMenuOpen, setIsMenuOpen] = React.useState(false)
 
-  const phases = [
-    EPermitProjectPhase.empty,
-    EPermitProjectPhase.newDraft,
-    EPermitProjectPhase.revisionsRequested,
-    EPermitProjectPhase.newlySubmitted,
-    EPermitProjectPhase.resubmitted,
-  ] as const
-
-  const options = phases.map((phase) => ({
-    value: phase,
-    label: t(`permitProject.phase.${phase}`),
-  }))
-
-  // @ts-ignore
   const filteredOptions = options.filter((option) => option.label.toLowerCase().includes(searchTerm.toLowerCase()))
 
-  const handleChange = (nextValue: string[]) => {
-    setPhaseFilter(nextValue as EPermitProjectPhase[])
-    search()
-  }
-
-  const handleReset = () => {
-    setPhaseFilter([] as EPermitProjectPhase[])
-    search()
-  }
-
   const { getCheckboxProps } = useCheckboxGroup({
-    value: phaseFilter || [],
-    onChange: handleChange,
+    value,
+    onChange,
   })
 
   return (
-    <Menu>
+    <Menu
+      isOpen={isMenuOpen}
+      onOpen={() => setIsMenuOpen(true)}
+      onClose={() => setIsMenuOpen(false)}
+      closeOnSelect={false}
+    >
       <MenuButton as={Button} variant="outline" rightIcon={<CaretDown />}>
-        {t("permitProject.phaseFilter")}
+        {title}
       </MenuButton>
       <MenuList p={4} zIndex="dropdown">
         <VStack align="start" spacing={4}>
@@ -82,12 +70,12 @@ export const PhaseFilter = observer(function PhaseFilter({ searchModel }: IProps
           })}
           <Divider />
           <Button
-            onClick={handleReset}
+            onClick={onReset}
             variant="primary"
             size="sm"
             alignSelf="center"
             w="full"
-            isDisabled={!phaseFilter || phaseFilter.length === 0}
+            isDisabled={!value || value.length === 0}
           >
             {t("ui.reset")}
           </Button>

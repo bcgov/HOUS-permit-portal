@@ -34,7 +34,7 @@ export const PermitProjectCard = observer(({ permitProject }: IPermitProjectCard
   const currentUser = userStore.currentUser
 
   // Get the first permit application to display some of its details, if available
-  const displayApplication = permitProject.permitApplications?.[0]
+  const displayApplication = permitProject.recentPermitApplications?.[0]
 
   // Use project's own title as nickname
   const nickname = permitProject.title
@@ -54,8 +54,7 @@ export const PermitProjectCard = observer(({ permitProject }: IPermitProjectCard
   // Simplified routing for project card - link to project view/edit
   const routingButtonText = t("ui.view")
 
-  // Placeholder for new version warning logic, adapt if projects have versions
-  const showNewVersionWarning = false
+  const showNewVersionWarning = permitProject.hasOutdatedDraftApplications
 
   return (
     <Flex
@@ -144,7 +143,7 @@ export const PermitProjectCard = observer(({ permitProject }: IPermitProjectCard
             fontSize="lg"
             fontWeight="bold"
             color="text.link"
-            to={`/permit-projects/${permitProject.id}`} // Link to project detail/edit page
+            to={`/projects/${permitProject.id}`} // Link to project detail/edit page
             rightIcon={<CaretRight size={16} />}
           >
             {nickname}
@@ -206,7 +205,7 @@ export const PermitProjectCard = observer(({ permitProject }: IPermitProjectCard
         <Flex direction="column" align="flex-end" gap={4} flex={{ base: 0, md: 1 }} maxW={{ base: "100%", md: "25%" }}>
           <Show above="md">{status && <PermitApplicationStatusTag permitApplication={{ status } as any} />}</Show>
           <RouterLinkButton
-            to={`/permit-projects/${permitProject.id}`} // Link to project detail/edit page
+            to={`/projects/${permitProject.id}`} // Link to project detail/edit page
             variant="primary"
             w={{ base: "full", md: "fit-content" }}
             // Adapt icon based on project state or collaboration status if needed

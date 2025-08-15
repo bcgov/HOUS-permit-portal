@@ -47,10 +47,10 @@ module Api::Concerns::Search::PermitProjects
       :page,
       :per_page,
       filters: [
-        :jurisdiction_id,
         :show_archived,
-        phase: [],
-        requirement_template_ids: []
+        { jurisdiction_id: [] },
+        { rollup_status: [] },
+        { requirement_template_ids: [] }
       ],
       sort: %i[field direction]
     )
@@ -82,6 +82,11 @@ module Api::Concerns::Search::PermitProjects
     requirement_template_ids = search_filters.delete(:requirement_template_ids)
     if requirement_template_ids.present?
       search_filters[:requirement_template_ids] = requirement_template_ids
+    end
+
+    jurisdiction_ids = search_filters.delete(:jurisdiction_id)
+    if jurisdiction_ids.present?
+      search_filters[:jurisdiction_id] = jurisdiction_ids
     end
 
     search_filters[:discarded] = show_archived

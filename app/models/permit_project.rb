@@ -1,6 +1,6 @@
 class PermitProject < ApplicationRecord
   include Discard::Model
-  searchkick word_middle: %i[title full_address pid pin] # Search configuration for PermitProject
+  searchkick word_middle: %i[title full_address pid pin project_number] # Search configuration for PermitProject
 
   belongs_to :owner, class_name: "User"
   belongs_to :jurisdiction # Direct association to Jurisdiction
@@ -16,6 +16,13 @@ class PermitProject < ApplicationRecord
   has_many :pinning_users, through: :pinned_projects, source: :user
 
   accepts_nested_attributes_for :project_documents, allow_destroy: true
+
+  validates :title, presence: true
+  validates :project_number, presence: true, on: :update
+  before_validation :set_default_title
+  before_validation :assign_unique_project_number, on: :create
+
+  delegate :name, to: :owner, prefix: true
 
   after_commit :reindex
 
@@ -73,13 +80,14 @@ class PermitProject < ApplicationRecord
       full_address: full_address,
       pid: pid,
       pin: pin,
+      project_number: project_number,
       owner_id: owner_id,
       jurisdiction_id: jurisdiction_id,
       collaborator_ids: collaborators.pluck(:user_id).uniq,
       created_at: created_at,
       updated_at: updated_at,
       discarded: discarded_at.present?,
-      phase: phase,
+      rollup_status: rollup_status,
       forcasted_completion_date: forcasted_completion_date,
       requirement_template_ids:
         permit_applications
@@ -107,7 +115,7 @@ class PermitProject < ApplicationRecord
   # TODO: Re-evaluate and re-implement search_data based on primary_project_item
   # and the possibility of multiple items of different types in the future.
 
-  def phase
+  def rollup_status
     return "empty" if permit_applications.blank?
 
     permit_applications.max_by(&:pertinence_score).status
@@ -116,5 +124,76 @@ class PermitProject < ApplicationRecord
   def forcasted_completion_date
     # Example implementation, to be defined by user
     Time.zone.now + 14.days
+  end
+
+  def shortened_address
+    full_address.split(",").first
+  end
+
+  def recent_permit_applications
+    permit_applications.order(updated_at: :desc).limit(3)
+  end
+
+  def submission_collaborators
+    Collaborator
+      .joins(:permit_collaborations)
+      .where(
+        permit_collaborations: {
+          permit_application_id: permit_applications.select(:id),
+          collaboration_type: :submission
+        }
+      )
+      .distinct
+  end
+
+  private
+
+  def set_default_title
+    self.title = shortened_address if title.blank? && full_address.present?
+  end
+
+  def assign_unique_project_number
+    return if project_number.present?
+
+    prefix = jurisdiction.prefix
+    last_project_number =
+      PermitProject
+        .where("project_number LIKE ?", "#{prefix}-%")
+        .order(Arel.sql("LENGTH(project_number) DESC, project_number DESC"))
+        .limit(1)
+        .pluck(:project_number)
+        .first
+
+    new_integer =
+      if last_project_number
+        number_parts = last_project_number.split("-")
+        # Handles both PROJ-DDDDD and PROJ-DDDD-DDDD formats
+        number_parts[1..].join.to_i + 1
+      else
+        1
+      end
+
+    new_number =
+      format(
+        "%s-%04d-%04d",
+        prefix,
+        new_integer / 10_000 % 10_000,
+        new_integer % 10_000
+      )
+
+    # In the unlikely event of a race condition, this ensures the number is unique
+    while PermitProject.exists?(project_number: new_number)
+      number_parts = new_number.split("-")
+      new_integer = number_parts[1..].join.to_i + 1
+      new_number =
+        format(
+          "%s-%04d-%04d",
+          prefix,
+          new_integer / 10_000 % 10_000,
+          new_integer % 10_000
+        )
+    end
+
+    self.project_number = new_number
   end
 end

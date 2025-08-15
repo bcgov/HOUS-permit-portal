@@ -10,8 +10,17 @@ class Api::Part3Building::StepCodesController < Api::ApplicationController
 
   def create
     authorize Part3StepCode.new
-    @step_code = Part3StepCode.new(step_code_params_with_creator)
-
+    # binding.pry
+    @step_code =
+      (
+        if step_code_params[:permit_application_id]
+          Part3StepCode.where(
+            permit_application_id: step_code_params[:permit_application_id]
+          ).first_or_create!(step_code_params_for_create)
+        else
+          Part3StepCode.new(step_code_params_for_create)
+        end
+      )
     if @step_code.save
       render_success @step_code,
                      "step_code.create_success",
@@ -28,9 +37,5 @@ class Api::Part3Building::StepCodesController < Api::ApplicationController
 
   def set_step_code
     @step_code = Part3StepCode.find(params[:id])
-  end
-
-  def step_code_params_with_creator
-    step_code_params.merge(creator: current_user)
   end
 end

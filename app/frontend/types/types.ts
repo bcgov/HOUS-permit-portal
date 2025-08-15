@@ -1,5 +1,4 @@
 import { Theme } from "@chakra-ui/react"
-import { IJurisdiction } from "../models/jurisdiction"
 import { IPermitApplication } from "../models/permit-application"
 import { IPermitBlockStatus } from "../models/permit-block-status"
 import { IActivity, IPermitType } from "../models/permit-classification"
@@ -25,7 +24,7 @@ import {
   ENumberUnit,
   EPermitApplicationSocketEventTypes,
   EPermitApplicationStatus,
-  EPermitProjectPhase,
+  EPermitProjectRollupStatus,
   ERequirementType,
   ESocketDomainTypes,
   ESocketEventTypes,
@@ -520,14 +519,16 @@ export interface IPermitApplicationSearchFilters {
   templateVersionId?: string
   requirementTemplateId?: string
   hasCollaborator?: boolean
+  permitProjectId?: string
   query?: string
 }
 
 export interface IPermitProjectSearchFilters {
   query?: string
   showArchived?: boolean
-  phase?: EPermitProjectPhase[]
+  rollupStatus?: EPermitProjectRollupStatus[]
   requirementTemplateIds?: string[]
+  jurisdictionId?: string[]
   // Add other specific filters if needed, e.g., status, submitterId
 }
 
@@ -592,16 +593,11 @@ export interface IPermitTypeRequiredStep {
   id?: string
   default: boolean
   permitTypeId: string
-  permitTypeName: string
+  permitTypeName?: string
   workType?: string
   energyStepRequired: EEnergyStep
   zeroCarbonStepRequired: EZeroCarbonStep
   activityName: string
-}
-
-export interface IStepCodeRequirementsTableProps {
-  requirements: IPermitTypeRequiredStep[]
-  currentJurisdiction: IJurisdiction
 }
 
 export type TCreateRequirementTemplateFormData = {

@@ -1,24 +1,36 @@
 class Api::PermitProjectsController < Api::ApplicationController
-  include Api::Concerns::Search::PermitProjects # Include the new concern
+  include Api::Concerns::Search::PermitProjects
+  include Api::Concerns::Search::ProjectPermitApplications
 
-  before_action :set_permit_project, only: %i[show update pin unpin]
+  before_action :set_permit_project,
+                only: %i[
+                  show
+                  update
+                  pin
+                  unpin
+                  search_permit_applications
+                  submission_collaborator_options
+                ]
+  before_action :set_pinned_projects, only: %i[pinned]
 
   # TODO: If you create a search concern similar to Api::Concerns::Search::PermitApplications,
   # include it here for more advanced search parameter handling.
   # e.g., include Api::Concerns::Search::PermitProjects
 
-  skip_after_action :verify_policy_scoped, only: %i[index pinned]
+  skip_after_action :verify_policy_scoped,
+                    only: %i[index pinned jurisdiction_options]
   skip_after_action :verify_authorized, only: %i[pinned]
 
   def index
     perform_permit_project_search
     authorized_results = apply_search_authorization(@permit_projects)
+    compute_project_ids_with_outdated_drafts(authorized_results)
 
     render_success authorized_results,
                    nil,
                    {
                      blueprint: PermitProjectBlueprint,
-                     blueprint_opts: blueprint_options,
+                     blueprint_opts: blueprint_options(view: :base),
                      meta: @meta
                    }
   end
@@ -74,26 +86,23 @@ class Api::PermitProjectsController < Api::ApplicationController
   end
 
   def pinned
-    pinned_projects =
-      apply_search_authorization(
-        current_user.pinned_permit_projects.includes(:jurisdiction)
-      )
-    render_success pinned_projects,
+    render_success @pinned_projects,
                    nil,
                    {
                      blueprint: PermitProjectBlueprint,
-                     blueprint_opts: blueprint_options
+                     blueprint_opts: blueprint_options(view: :base)
                    }
   end
 
   def pin
     authorize @permit_project, :pin?
     current_user.pinned_projects.create(permit_project: @permit_project)
-    render_success @permit_project,
+    set_pinned_projects
+    render_success @pinned_projects,
                    "permit_project.pin_success",
                    {
                      blueprint: PermitProjectBlueprint,
-                     blueprint_opts: blueprint_options(view: :extended)
+                     blueprint_opts: blueprint_options(view: :base)
                    }
   end
 
@@ -103,29 +112,90 @@ class Api::PermitProjectsController < Api::ApplicationController
       current_user.pinned_projects.find_by(permit_project: @permit_project)
     if pinned_project
       pinned_project.destroy
-      render_success @permit_project,
+      set_pinned_projects
+      render_success @pinned_projects,
                      "permit_project.unpin_success",
                      {
                        blueprint: PermitProjectBlueprint,
-                       blueprint_opts: blueprint_options(view: :extended)
+                       blueprint_opts: blueprint_options(view: :base)
                      }
     else
       render_error "permit_project.unpin_error", :not_found
     end
   end
 
+  def search_permit_applications
+    authorize @permit_project
+    perform_permit_application_search
+    authorized_results =
+      apply_search_authorization(@permit_application_search.results, "index")
+    render_success authorized_results,
+                   nil,
+                   {
+                     meta: page_meta(@permit_application_search),
+                     blueprint: PermitApplicationBlueprint,
+                     blueprint_opts: {
+                       view: :project_base
+                     }
+                   }
+  end
+
+  def submission_collaborator_options
+    authorize @permit_project
+    render_success @permit_project.submission_collaborators,
+                   nil,
+                   {
+                     blueprint: CollaboratorOptionBlueprint,
+                     blueprint_opts: {
+                       view: :base
+                     }
+                   }
+  end
+
+  def jurisdiction_options
+    authorize PermitProject
+    # Use policy_scope as the single source of truth for accessible projects
+    jurisdicion_ids = policy_scope(PermitProject).select(:jurisdiction_id)
+    jurisdictions = Jurisdiction.where(id: jurisdicion_ids).distinct
+    options = jurisdictions.map { |j| { label: j.qualified_name, value: j.id } }
+    render_success options, nil, { blueprint: OptionBlueprint }
+  end
+
   private
+
+  def set_pinned_projects
+    @pinned_projects =
+      apply_search_authorization(
+        current_user.pinned_permit_projects.includes(:jurisdiction).reload
+      )
+  end
+
+  def compute_project_ids_with_outdated_drafts(projects)
+    project_ids = projects.map(&:id)
+    outdated_draft_permit_applications =
+      PermitApplication
+        .where(
+          permit_project_id: project_ids,
+          status: PermitApplication.draft_statuses
+        )
+        .where.not(template_version_id: TemplateVersion.cached_published_ids)
+
+    @project_ids_with_outdated_drafts =
+      outdated_draft_permit_applications.pluck(:permit_project_id).to_set
+  end
 
   def blueprint_options(view: :default)
     {
       view: view,
       current_user: current_user,
-      pinned_project_ids: current_user.pinned_permit_project_ids
+      pinned_project_ids: current_user.pinned_permit_project_ids,
+      project_ids_with_outdated_drafts: @project_ids_with_outdated_drafts
     }
   end
 
   def set_permit_project
     @permit_project = PermitProject.includes(:jurisdiction).find(params[:id])
+    compute_project_ids_with_outdated_drafts([@permit_project])
   end
 
   def permit_project_params

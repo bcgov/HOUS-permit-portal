@@ -5,6 +5,7 @@ import React, { Suspense, useEffect } from "react"
 import { RemoveScroll } from "react-remove-scroll"
 import { useNavigate, useParams } from "react-router-dom"
 import { usePart3StepCode } from "../../../../hooks/resources/use-part-3-step-code"
+import { usePermitApplication } from "../../../../hooks/resources/use-permit-application"
 import { useMst } from "../../../../setup/root"
 import { SharedSpinner } from "../../../shared/base/shared-spinner"
 import { FloatingHelpDrawer } from "../../../shared/floating-help-drawer"
@@ -12,15 +13,33 @@ import { StepCodeNavBar } from "../nav-bar"
 import { Part3NavLinks } from "../nav-bar/part-3-nav-links"
 import { FormSection } from "./form-section"
 import { Sidebar } from "./sidebar"
+import { defaultSectionCompletionStatus } from "./sidebar/nav-sections"
 import { SideBarDrawer } from "./sidebar/side-bar-drawer"
 
 export const Part3StepCodeForm = observer(function Part3StepCodeForm() {
-  const { permitApplicationId, section } = useParams()
+  const { permitApplicationId, section, stepCodeId } = useParams()
   const {
     stepCodeStore: { createPart3StepCode },
   } = useMst()
   const { stepCode } = usePart3StepCode()
   const navigate = useNavigate()
+  const isEarlyAccess = !permitApplicationId
+
+  const { currentPermitApplication } = usePermitApplication()
+
+  // create the step code if needed
+  useEffect(() => {
+    if (stepCodeId) return // step code was already created in the previous screen
+    if (!!stepCode) return // step code already exists
+    if (!isEarlyAccess && !currentPermitApplication?.isFullyLoaded) return // wait for permit application to load
+
+    if (!stepCode) {
+      createPart3StepCode({
+        permitApplicationId, // nil for early access
+        checklistAttributes: { sectionCompletionStatus: defaultSectionCompletionStatus },
+      })
+    }
+  }, [currentPermitApplication?.isFullyLoaded, stepCode])
 
   // handle redirect if no section is specified
   useEffect(() => {
@@ -29,6 +48,10 @@ export const Part3StepCodeForm = observer(function Part3StepCodeForm() {
 
     if (stepCode.checklist) {
       const navLink = stepCode.checklist.currentNavLink
+      // Ensure a default after-save path is set for all sections
+      if (!stepCode.checklist.alternateNavigateAfterSavePath) {
+        stepCode.checklist.setAlternateNavigateAfterSavePath("/step-codes")
+      }
       navigate(navLink?.location || "start")
     } else {
       navigate("start")

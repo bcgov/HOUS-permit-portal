@@ -19,9 +19,9 @@ export const JurisdictionModel = types
     disambiguatedName: types.maybeNull(types.string),
     submissionEmail: types.maybeNull(types.string),
     qualifiedName: types.string,
-    inboxEnabled: types.boolean,
-    showAboutPage: types.boolean,
-    allowDesignatedReviewer: types.boolean,
+    inboxEnabled: types.optional(types.boolean, false),
+    showAboutPage: types.optional(types.boolean, false),
+    allowDesignatedReviewer: types.optional(types.boolean, false),
     reverseQualifiedName: types.maybeNull(types.string),
     regionalDistrictName: types.maybeNull(types.string),
     localityType: types.maybeNull(types.string),
@@ -99,12 +99,20 @@ export const JurisdictionModel = types
     },
   }))
   .views((self) => ({
-    get requiredStepsByPermitType() {
-      const groupRequirements = (acc, r) =>
-        R.includes(r, self.permitTypeStepRequirements(r.permitTypeId)) ? acc.concat(r) : acc
-      const toPermitType = ({ permitTypeId }) => permitTypeId
+    get part9RequiredSteps() {
+      // This assumes that the permitTypeRequiredSteps are all part 9
+      // Revisit this once adding part 3 required steps
+      const nonDefaults = self.permitTypeRequiredSteps.filter((r) => !r.default)
+      if (nonDefaults.length > 0) {
+        return nonDefaults
+      }
 
-      return R.reduceBy(groupRequirements, [], toPermitType, self.permitTypeRequiredSteps)
+      const defaults = self.permitTypeRequiredSteps.filter((r) => r.default)
+      if (defaults.length > 0) {
+        return defaults
+      }
+
+      return []
     },
   }))
   .actions((self) => ({

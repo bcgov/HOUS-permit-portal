@@ -1,81 +1,40 @@
-import { Box, Flex, Heading, IconButton, Menu, MenuButton, MenuItem, MenuList, Text, VStack } from "@chakra-ui/react"
-import { DotsThreeVertical } from "@phosphor-icons/react"
-import { format } from "date-fns"
+import { Flex, Heading, VStack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
-import * as R from "ramda"
 import React from "react"
 import { useTranslation } from "react-i18next"
-import { datefnsTableDateFormat } from "../../../constants"
 import { IPermitProject } from "../../../models/permit-project"
 import { useMst } from "../../../setup/root"
 import { EFlashMessageStatus, EPermitProjectSortFields } from "../../../types/enums"
 import { CustomMessageBox } from "../../shared/base/custom-message-box"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
 import { SearchGrid } from "../../shared/grid/search-grid"
-import { SearchGridItem } from "../../shared/grid/search-grid-item"
-import { RouterLink } from "../../shared/navigation/router-link"
-import { GridHeaders } from "./grid-header"
+import { GridHeaders, PROJECTS_GRID_TEMPLATE_COLUMNS } from "./grid-header"
+import { ProjectGridRow } from "./project-grid-row"
 
 export const PinnedProjectsGrid = observer(() => {
   const { t } = useTranslation()
   const { permitProjectStore } = useMst()
-  const { isFetchingPinnedProjects, pinnedProjects } = permitProjectStore
+  const { isFetchingPinnedProjects, pinnedPermitProjects } = permitProjectStore
 
   return (
     <VStack align="stretch" spacing={4}>
       <Heading as="h2" size="lg">
-        {t("permitProject.index.pinnedProjects", "Pinned projects")}
+        {t("permitProject.index.pinnedPermitProjects", "Pinned projects")}
       </Heading>
       {isFetchingPinnedProjects ? (
         <Flex justify="center" align="center" minH="200px">
           <SharedSpinner />
         </Flex>
-      ) : R.isEmpty(pinnedProjects) ? (
+      ) : pinnedPermitProjects.length === 0 ? (
         <CustomMessageBox
           status={EFlashMessageStatus.info}
           description={t("permitProject.index.noPinnedProjects", "You have no pinned projects")}
         />
       ) : (
-        <SearchGrid templateColumns="2fr 1.5fr 1.5fr 1.5fr 1.5fr 1.5fr 0.5fr" gridRowClassName="project-grid-row">
+        <SearchGrid templateColumns={PROJECTS_GRID_TEMPLATE_COLUMNS} gridRowClassName="project-grid-row">
           <GridHeaders columns={Object.values(EPermitProjectSortFields)} includeActionColumn />
-          {pinnedProjects.map((project: IPermitProject) => (
-            <Box key={project.id} display="contents" role="row" className="project-grid-row">
-              <SearchGridItem>
-                <RouterLink to={`/permit-projects/${project.id}`}>{project.title}</RouterLink>
-              </SearchGridItem>
-              <SearchGridItem>
-                <Flex direction="column">
-                  <Text fontWeight="bold">{project.jurisdictionDisambiguatedName}</Text>
-                  <Text>{project.shortAddress}</Text>
-                </Flex>
-              </SearchGridItem>
-              <SearchGridItem>submitter</SearchGridItem>
-              <SearchGridItem>{project.updatedAt && format(project.updatedAt, datefnsTableDateFormat)}</SearchGridItem>
-              <SearchGridItem>
-                {project.forcastedCompletionDate && format(project.forcastedCompletionDate, datefnsTableDateFormat)}
-              </SearchGridItem>
-              <SearchGridItem>
-                {/* @ts-ignore */}
-                <Text fontWeight="bold">{t(`permitProject.phase.${project.phase}`)}</Text>
-              </SearchGridItem>
-              <SearchGridItem>
-                <Menu>
-                  <MenuButton
-                    as={IconButton}
-                    aria-label={t("ui.options")}
-                    icon={<DotsThreeVertical size={24} />}
-                    variant="ghost"
-                  />
-                  <MenuList>
-                    <MenuItem onClick={() => project.togglePin()}>
-                      {project.isPinned
-                        ? t("permitProject.unpinProject", "Unpin project")
-                        : t("permitProject.pinProject", "Pin project")}
-                    </MenuItem>
-                  </MenuList>
-                </Menu>
-              </SearchGridItem>
-            </Box>
+          {pinnedPermitProjects.map((project: IPermitProject) => (
+            <ProjectGridRow key={project.id} project={project} />
           ))}
         </SearchGrid>
       )}

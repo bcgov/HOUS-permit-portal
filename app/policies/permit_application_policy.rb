@@ -62,7 +62,7 @@ class PermitApplicationPolicy < ApplicationPolicy
   end
 
   def generate_missing_pdfs?
-    user.super_admin? || (user.submitter? && record.submitter == user) ||
+    user.super_admin? || record.submitter == user ||
       ((user.review_staff?) && user.member_of?(record.jurisdiction_id))
   end
 
@@ -75,7 +75,7 @@ class PermitApplicationPolicy < ApplicationPolicy
 
     return true unless feature_enabled
 
-    record.permit_collaborations.review.exists?(user_id: user.id)
+    record.permit_collaborations.review.exists?(collaborator_id: user.id)
   end
 
   def create_permit_collaboration?

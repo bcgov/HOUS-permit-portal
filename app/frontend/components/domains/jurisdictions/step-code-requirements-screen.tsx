@@ -16,14 +16,7 @@ export const JurisdictionStepCodeRequirementsScreen = observer(() => {
   const { fetchJurisdiction } = jurisdictionStore
   const { t } = useTranslation()
   const navigate = useNavigate()
-
   const { currentJurisdiction, error } = useJurisdiction()
-
-  if (error) return <ErrorScreen error={error} />
-
-  if (!currentJurisdiction) {
-    return <LoadingScreen />
-  }
 
   const handleCheckAnotherAddress = () => {
     navigate(-1)
@@ -31,6 +24,12 @@ export const JurisdictionStepCodeRequirementsScreen = observer(() => {
 
   const handleStartPermitApplication = () => {
     navigate(`/permit-applications/new`)
+  }
+
+  if (error) return <ErrorScreen error={error} />
+
+  if (!currentJurisdiction) {
+    return <LoadingScreen />
   }
 
   return (
@@ -47,10 +46,7 @@ export const JurisdictionStepCodeRequirementsScreen = observer(() => {
           )}
         </Text>
 
-        <StepCodeRequirementsTable
-          requirements={currentJurisdiction.permitTypeRequiredSteps}
-          currentJurisdiction={currentJurisdiction}
-        />
+        <StepCodeRequirementsTable currentJurisdiction={currentJurisdiction} />
 
         <HStack spacing={4} mt={6}>
           <Button variant="outline" onClick={handleCheckAnotherAddress}>

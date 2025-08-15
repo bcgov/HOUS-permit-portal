@@ -1,18 +1,24 @@
-import { Box, Container, Flex, Heading, Text, VStack } from "@chakra-ui/react"
+import { Flex, TabPanel, TabPanels, Tabs } from "@chakra-ui/react"
+import { ClipboardText, FolderSimple } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
-import React, { useEffect } from "react"
+import React, { useEffect, useTransition } from "react"
 import { useTranslation } from "react-i18next"
+import { useLocation, useNavigate } from "react-router-dom"
 import { useSearch } from "../../../hooks/use-search"
 import { useMst } from "../../../setup/root"
-import { RouterLinkButton } from "../../shared/navigation/router-link-button"
-import { PinnedProjectsGrid } from "./pinned-projects-grid"
-import { ProjectsTable } from "./projects-table"
+import { LoadingScreen } from "../../shared/base/loading-screen"
+import { ProjectTabPanelContent } from "./project-tab-panel-content"
+import { ITabItem, ProjectSidebarTabList } from "./sidebar-tab-list"
+import { StepCodeTabPanelContent } from "./step-code-tab-panel-content"
 
-interface IPermitProjectIndexScreenProps {}
+interface IProjectDashboardScreenProps {}
 
-export const PermitProjectIndexScreen = observer(({}: IPermitProjectIndexScreenProps) => {
+export const ProjectDashboardScreen = observer(({}: IProjectDashboardScreenProps) => {
   const { t } = useTranslation()
   const { permitProjectStore } = useMst()
+  const location = useLocation()
+  const navigate = useNavigate()
+  const [isPending, startTransition] = useTransition()
 
   useSearch(permitProjectStore, [])
 
@@ -20,41 +26,28 @@ export const PermitProjectIndexScreen = observer(({}: IPermitProjectIndexScreenP
     permitProjectStore.fetchPinnedProjects()
   }, [])
 
-  const navHeight = document.getElementById("mainNav")?.offsetHeight
+  const TABS_DATA: ITabItem[] = [
+    { label: t("permitProject.index.title", "Projects"), icon: FolderSimple, to: "projects" },
+    { label: t("stepCode.index.title", "Step Codes"), icon: ClipboardText, to: "step-codes" },
+  ]
+
+  const getTabIndex = () => (location.pathname.endsWith("/step-codes") ? 1 : 0)
+
+  const handleTabChange = (index: number) => {
+    startTransition(() => {
+      navigate(index === 1 ? "/step-codes" : "/projects", { replace: true })
+    })
+  }
 
   return (
     <Flex as="main" direction="row" w="full" flexGrow={1}>
-      <Box
-        as="aside"
-        w="280px"
-        bg="greys.grey04"
-        p={6}
-        pb={navHeight}
-        borderRight="1px"
-        borderColor="border.light"
-        position="sticky"
-        top={0}
-        h="100vh"
-        alignSelf="flex-start"
-      >
-        <Text>Sidebar nav TBD</Text>
-      </Box>
-      <Flex direction="column" flex={1} bg="greys.white" pb={24} overflowY="auto" h={"full"}>
-        <Container maxW="container.xl" py={8} h={"full"}>
-          <VStack spacing={6} align="stretch">
-            <Flex justify="space-between" align="center">
-              <Heading as="h1">{t("permitProject.index.title", "Projects")}</Heading>
-              <RouterLinkButton to="/permit-projects/new" variant="primary">
-                {t("permitProject.startNew", "Start New Project")}
-              </RouterLinkButton>
-            </Flex>
-
-            <PinnedProjectsGrid />
-
-            <ProjectsTable />
-          </VStack>
-        </Container>
-      </Flex>
+      <Tabs w="full" flexGrow={1} index={getTabIndex()} onChange={handleTabChange} display="flex" isLazy>
+        <ProjectSidebarTabList p={0} tabsData={TABS_DATA} />
+        <TabPanels>
+          <TabPanel p={0}>{isPending ? <LoadingScreen /> : <ProjectTabPanelContent />}</TabPanel>
+          <TabPanel p={0}>{isPending ? <LoadingScreen /> : <StepCodeTabPanelContent />}</TabPanel>
+        </TabPanels>
+      </Tabs>
     </Flex>
   )
 })

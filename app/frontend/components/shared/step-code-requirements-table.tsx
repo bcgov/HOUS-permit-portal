@@ -6,127 +6,84 @@ import {
   AccordionPanel,
   Box,
   Center,
-  Divider,
+  Flex,
   Grid,
   GridItem,
   Tag,
-  Text,
-  VStack,
 } from "@chakra-ui/react"
-import { observer } from "mobx-react-lite"
-import * as R from "ramda"
 import React from "react"
 import { useTranslation } from "react-i18next"
-import { IStepCodeRequirementsTableProps } from "../../types/types"
+import { IJurisdiction } from "../../models/jurisdiction"
+import { SharedSpinner } from "./base/shared-spinner"
 
-const i18nPrefix = "home.jurisdictions.config.stepCodeRequirements.stepRequired"
+export interface IStepCodeRequirementsTableProps {
+  currentJurisdiction: IJurisdiction
+}
 
-export const StepCodeRequirementsTable = observer(
-  ({ requirements, currentJurisdiction }: IStepCodeRequirementsTableProps) => {
-    const { t } = useTranslation()
-    const groupedByPermitType = R.groupBy((r) => r.permitTypeName, requirements || [])
+export const StepCodeRequirementsTable: React.FC<IStepCodeRequirementsTableProps> = ({ currentJurisdiction }) => {
+  const { t } = useTranslation()
+  const { part9RequiredSteps } = currentJurisdiction
 
-    return (
-      <Accordion allowMultiple defaultIndex={Object.keys(groupedByPermitType).map((_, i) => i)}>
-        {Object.keys(groupedByPermitType).map((permitTypeName, index) => {
-          const requirementsForPermitType = groupedByPermitType[permitTypeName]
-          const groupedByActivity = R.groupBy((r) => r.activityName || "", requirementsForPermitType)
+  if (!part9RequiredSteps) return <SharedSpinner />
 
-          return (
-            <AccordionItem key={index} borderWidth={1} borderColor="border.light" rounded="sm" mb={4}>
-              <AccordionButton bg="greys.grey03" fontWeight="bold">
-                <Box flex="1" textAlign="left">
-                  {permitTypeName}
-                </Box>
-                <AccordionIcon />
-              </AccordionButton>
-              <AccordionPanel pb={4}>
-                <Grid templateColumns="2fr 5fr" gap={6} w="full">
-                  <GridItem>
-                    <Text textTransform="uppercase" fontSize="xs" color="text.secondary">
-                      {t("jurisdiction.edit.stepCode.workType")}
-                    </Text>
+  return (
+    <Flex direction="column" gap={4}>
+      <Accordion allowToggle defaultIndex={[0]}>
+        <AccordionItem borderWidth={1} borderColor="border.light" rounded="sm">
+          <AccordionButton bg="greys.grey03" fontWeight="bold">
+            <Box flex="1" textAlign="left">
+              {part9RequiredSteps[0].permitTypeName}
+            </Box>
+            <AccordionIcon />
+          </AccordionButton>
+          <AccordionPanel pb={4}>
+            <>
+              <Flex justify="flex-end">
+                <Grid templateColumns="2fr 1fr 2fr" gap={4} w="full" color="text.secondary">
+                  <GridItem textAlign="center" textTransform="uppercase" fontSize="xs">
+                    {t("jurisdiction.edit.stepCode.energyStepRequired")}
                   </GridItem>
-                  <GridItem>
-                    <Grid templateColumns="repeat(3, 1fr)" gap={4}>
-                      <GridItem textAlign="center" textTransform="uppercase" fontSize="xs" color="text.secondary">
-                        {t("jurisdiction.edit.stepCode.energyStepRequired")}
-                      </GridItem>
-                      <GridItem />
-                      <GridItem textAlign="center" textTransform="uppercase" fontSize="xs" color="text.secondary">
-                        {t("jurisdiction.edit.stepCode.zeroCarbonStepRequired")}
-                      </GridItem>
-                    </Grid>
+                  <GridItem textAlign="center"></GridItem>
+                  <GridItem textAlign="center" textTransform="uppercase" fontSize="xs">
+                    {t("jurisdiction.edit.stepCode.zeroCarbonStepRequired")}
                   </GridItem>
+                  {part9RequiredSteps.map((ptrs, i) => (
+                    <>
+                      <GridItem as={Center}>
+                        <Tag bg="semantic.successLight" color="inherit" rounded="xs" fontWeight="bold">
+                          {currentJurisdiction.energyStepRequiredTranslation(ptrs.energyStepRequired)}
+                        </Tag>
+                      </GridItem>
+                      <GridItem as={Center} fontStyle="italic" fontWeight="bold" fontSize="sm" px={4} mx="auto">
+                        {t("ui.and")}
+                      </GridItem>
+                      <GridItem as={Center}>
+                        <Tag bg="semantic.successLight" color="inherit" rounded="xs" fontWeight="bold">
+                          {currentJurisdiction.zeroCarbonLevelTranslation(ptrs.zeroCarbonStepRequired)}{" "}
+                        </Tag>
+                      </GridItem>
+                      {i !== part9RequiredSteps.length - 1 && (
+                        <GridItem
+                          colSpan={3}
+                          textTransform="uppercase"
+                          bg="theme.blueLight"
+                          fontStyle="italic"
+                          color="text.link"
+                          fontSize="sm"
+                          px={2}
+                          py={1}
+                        >
+                          {t("ui.or")}
+                        </GridItem>
+                      )}
+                    </>
+                  ))}
                 </Grid>
-
-                {Object.keys(groupedByActivity).map((activityName) => {
-                  const requirementsForActivity = groupedByActivity[activityName]
-                  return (
-                    <React.Fragment key={activityName}>
-                      <Divider my={4} />
-                      <Grid templateColumns="2fr 5fr" gap={6} w="full" alignItems="center">
-                        <GridItem>
-                          <Text>{activityName}</Text>
-                        </GridItem>
-                        <GridItem>
-                          <VStack spacing={2} align="stretch">
-                            {requirementsForActivity.map((ptrs, i) => (
-                              <React.Fragment key={ptrs.id}>
-                                <Grid templateColumns="repeat(3, 1fr)" gap={4} alignItems="center">
-                                  <GridItem as={Center}>
-                                    <Tag
-                                      bg="semantic.successLight"
-                                      color="inherit"
-                                      rounded="sm"
-                                      fontWeight="bold"
-                                      p={2}
-                                    >
-                                      {currentJurisdiction.energyStepRequiredTranslation(ptrs.energyStepRequired)}
-                                    </Tag>
-                                  </GridItem>
-                                  <GridItem as={Center} fontStyle="italic" fontWeight="bold" fontSize="sm">
-                                    {t("ui.and")}
-                                  </GridItem>
-                                  <GridItem as={Center}>
-                                    <Tag
-                                      bg="semantic.successLight"
-                                      color="inherit"
-                                      rounded="sm"
-                                      fontWeight="bold"
-                                      p={2}
-                                    >
-                                      {currentJurisdiction.zeroCarbonLevelTranslation(ptrs.zeroCarbonStepRequired)}
-                                    </Tag>
-                                  </GridItem>
-                                </Grid>
-                                {i < requirementsForActivity.length - 1 && (
-                                  <Box
-                                    bg="theme.blueLight"
-                                    color="text.link"
-                                    fontSize="sm"
-                                    p={2}
-                                    textAlign="left"
-                                    w="full"
-                                    fontStyle="italic"
-                                    textTransform="uppercase"
-                                  >
-                                    {t("ui.or")}
-                                  </Box>
-                                )}
-                              </React.Fragment>
-                            ))}
-                          </VStack>
-                        </GridItem>
-                      </Grid>
-                    </React.Fragment>
-                  )
-                })}
-              </AccordionPanel>
-            </AccordionItem>
-          )
-        })}
+              </Flex>
+            </>
+          </AccordionPanel>
+        </AccordionItem>
       </Accordion>
-    )
-  }
-)
+    </Flex>
+  )
+}

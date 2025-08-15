@@ -140,6 +140,13 @@ export enum EPermitApplicationSortFields {
   status = "status",
 }
 
+export enum EProjectPermitApplicationSortFields {
+  permit = "permit",
+  assignedTo = "assigned_to",
+  updatedAt = "updated_at",
+  status = "status",
+}
+
 export enum EPermitApplicationSubmitterSortFields {
   number = "number",
   permitClassification = "permit_classification",
@@ -311,6 +318,7 @@ export enum EZeroCarbonStep {
 }
 
 export enum ERequirementContactFieldItemType {
+  contactType = "contactType",
   firstName = "firstName",
   lastName = "lastName",
   email = "email",
@@ -322,7 +330,6 @@ export enum ERequirementContactFieldItemType {
   businessLicense = "businessLicense",
   professionalAssociation = "professionalAssociation",
   professionalNumber = "professionalNumber",
-  contactType = "contactType",
 }
 
 export enum EGovFeedbackResponseNoReason {
@@ -634,22 +641,15 @@ export enum EStepCodeType {
   part9StepCode = "Part9StepCode",
 }
 
-export enum EStepCodeParentType {
-  PermitProject = "PermitProject",
-  User = "User",
-}
-
 export enum EPermitProjectSortFields {
   title = "title",
   location = "location",
   submitter = "submitter",
   updatedAt = "updated_at",
-  forcastedCompletionDate = "forcasted_completion_date",
-  phase = "phase",
+  rollupStatus = "rollup_status",
 }
 
-export enum EPermitProjectPhase {
-  all = "all",
+export enum EPermitProjectRollupStatus {
   empty = "empty",
   newDraft = "new_draft",
   newlySubmitted = "newly_submitted",
@@ -658,7 +658,9 @@ export enum EPermitProjectPhase {
   approved = "approved",
 }
 
-export enum EStepCodeType {
-  part3StepCode = "Part3StepCode",
-  part9StepCode = "Part9StepCode",
+export enum EStepCodeSortFields {
+  type = "type",
+  projectName = "project_name",
+  fullAddress = "full_address",
+  updatedAt = "updated_at",
 }

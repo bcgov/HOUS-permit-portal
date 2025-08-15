@@ -1,8 +1,13 @@
 module ProjectItem
   extend ActiveSupport::Concern
 
+  class_methods do
+    def has_parent(parent_association)
+      alias_attribute :parent, parent_association
+    end
+  end
+
   included do
-    belongs_to :permit_project, touch: true, optional: true
     belongs_to :jurisdiction, optional: true # Added for direct association
     has_one :owner, through: :permit_project
 
@@ -23,30 +28,25 @@ module ProjectItem
 
     # Custom getters that prioritize permit_project but fall back to self
     def full_address
-      permit_project&.full_address || read_attribute(:full_address)
+      parent&.full_address || read_attribute(:full_address)
     end
 
     def pid
-      permit_project&.pid || read_attribute(:pid)
+      parent&.pid || read_attribute(:pid)
     end
 
     def pin
-      permit_project&.pin || read_attribute(:pin)
+      parent&.pin || read_attribute(:pin)
     end
 
     def project_identifier
       permit_project&.id
     end
 
-    # Ensure permit_project is present if it's meant to be non-optional.
-    # This can also be handled at the database level or with model validations
-    # on the including class if `allow_nil: true` is used above for resilience.
-    # validates :permit_project, presence: true # Uncomment if strict presence is required by including models
-
     # Custom method for jurisdiction to ensure it safely accesses through permit_project
     # or falls back to its own direct association.
     def jurisdiction
-      permit_project&.jurisdiction || super
+      parent&.jurisdiction || super
     end
 
     private

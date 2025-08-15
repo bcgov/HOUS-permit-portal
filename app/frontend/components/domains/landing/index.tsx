@@ -18,7 +18,6 @@ import { observer } from "mobx-react-lite"
 import React, { ReactNode, useEffect, useRef } from "react"
 import { Trans, useTranslation } from "react-i18next"
 import { useMst } from "../../../setup/root"
-import { JurisdictionSearch } from "../../shared/jurisdiction-search"
 import { RouterLink } from "../../shared/navigation/router-link"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { StepCodeLookupTool } from "../project-readiness-tools/step-code-lookup-tool"
@@ -85,7 +84,12 @@ export const LandingScreen = observer(({}: ILandingScreenProps) => {
       </Flex>
       <Box bg="greys.grey03">
         <Flex as="section" direction="column" gap={20}>
-          <StepCodeLookupTool showJurisdictionOnPage={true} />
+          <VStack spacing={4} py={4} px={8} align="start" w="full" maxW="container.lg" mx="auto">
+            <Heading as="h1" variant="yellowline">
+              {t("home.projectReadinessTools.stepCodeLookupTool.title")}
+            </Heading>
+            <StepCodeLookupTool showJurisdictionOnPage={true} />
+          </VStack>
         </Flex>
       </Box>
 
@@ -161,7 +165,6 @@ export const LandingScreen = observer(({}: ILandingScreenProps) => {
         <Container maxW="container.lg" py={10} px={8}>
           <VStack as="section" direction="column" gap={6}>
             <AvailableJurisdictionsMessageBox />
-            <JurisdictionSearch />
             <Heading as="h3" fontSize="md" mt="8">
               {t("landing.whenNotNecessaryQ")}
             </Heading>

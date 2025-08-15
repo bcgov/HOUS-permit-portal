@@ -14,7 +14,7 @@ export const Part3NavLinks = function Part3StepCodeNavLinks() {
     const formName = "part3SectionForm"
     const formElement = document.forms[formName]
 
-    const editPath = permitApplicationId ? `/permit-applications/${permitApplicationId}/edit` : "/"
+    const editPath = permitApplicationId ? `/permit-applications/${permitApplicationId}/edit` : "/step-codes"
     checklist.setAlternateNavigateAfterSavePath(editPath)
 
     if (formElement) {

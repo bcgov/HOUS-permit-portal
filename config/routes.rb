@@ -194,15 +194,22 @@ Rails.application.routes.draw do
       # New route for Part 3 Step Code
       post "part_3_building/step_code",
            on: :member,
-           to: "permit_applications#create_or_find_step_code"
+           to: "part_3_building/step_codes#create"
     end
 
     resources :permit_projects, only: %i[show index update create] do
       get "pinned", on: :collection
+      get "jurisdiction_options", on: :collection
       post "search", on: :collection, to: "permit_projects#index"
+      post "permit_applications/search",
+           on: :member,
+           to: "permit_projects#search_permit_applications"
+      get "permits", on: :member, to: "permit_projects#show"
+      get "overview", on: :member, to: "permit_projects#show"
       member do
         post :pin
         delete :unpin
+        get :submission_collaborator_options
       end
     end
 
@@ -229,13 +236,14 @@ Rails.application.routes.draw do
 
     resources :end_user_license_agreement, only: %i[index]
 
-    resources :step_codes, only: %i[create destroy], shallow: true do
+    resources :step_codes, only: %i[index create destroy], shallow: true do
       get "download_step_code_summary_csv",
           on: :collection,
           to: "step_codes#download_step_code_summary_csv"
       get "download_step_code_metrics_csv",
           on: :collection,
           to: "step_codes#download_step_code_metrics_csv"
+      post "search", on: :collection, to: "step_codes#index"
     end
 
     namespace :part_9_building do

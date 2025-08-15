@@ -5,6 +5,7 @@ class PermitApplication < ApplicationRecord
   include ZipfileUploader.Attachment(:zipfile)
   include PermitApplicationStatus
   include ProjectItem
+  has_parent :permit_project
 
   SEARCH_INCLUDES = %i[
     permit_type
@@ -30,6 +31,7 @@ class PermitApplication < ApplicationRecord
   belongs_to :activity
   belongs_to :template_version
   belongs_to :sandbox, optional: true
+  belongs_to :permit_project, optional: true, touch: true
 
   has_one :requirement_template, through: :template_version
 
@@ -41,7 +43,6 @@ class PermitApplication < ApplicationRecord
   has_many :collaborators, through: :permit_collaborations
   has_many :permit_block_statuses, dependent: :destroy
 
-  # Standard has_one association if StepCode directly belongs_to PermitApplication
   has_one :step_code, dependent: :destroy
 
   scope :submitted, -> { joins(:submission_versions).distinct }
@@ -52,8 +53,8 @@ class PermitApplication < ApplicationRecord
 
   # Custom validation
 
+  validate :jurisdiction_or_permit_project_present
   validate :jurisdiction_has_matching_submission_contact
-  # validates :nickname, presence: true
   validates :number, presence: true
   validates :reference_number, length: { maximum: 300 }, allow_nil: true
   validate :sandbox_belongs_to_jurisdiction
@@ -64,6 +65,7 @@ class PermitApplication < ApplicationRecord
   delegate :published_template_version, to: :template_version
 
   before_validation :assign_unique_number, on: :create
+  before_validation :assign_default_nickname, on: :create
   before_validation :set_template_version, on: :create
   before_validation :populate_base_form_data, on: :create
   before_save :take_form_customizations_snapshot_if_submitted
@@ -193,6 +195,10 @@ class PermitApplication < ApplicationRecord
     )
   end
 
+  def template_nickname
+    template_version.requirement_template.nickname
+  end
+
   def search_data
     {
       number: number,
@@ -210,7 +216,6 @@ class PermitApplication < ApplicationRecord
       requirement_template_id: template_version.requirement_template.id,
       created_at: created_at,
       updated_at: updated_at,
-      using_current_template_version: using_current_template_version,
       user_ids_with_submission_edit_permissions:
         [submitter.id] +
           users_by_collaboration_options(collaboration_type: :submission).pluck(
@@ -218,8 +223,19 @@ class PermitApplication < ApplicationRecord
           ),
       review_delegatee_name: review_delegatee_name,
       has_collaborator: has_collaborator?,
-      sandbox_id: sandbox_id
+      sandbox_id: sandbox_id,
+      permit_project_id: permit_project_id,
+      submission_delegatee_id: submission_delegatee&.id
     }
+  end
+
+  def submission_delegatee
+    collaborators.where(
+      permit_collaborations: {
+        collaboration_type: :submission,
+        collaborator_type: :delegatee
+      }
+    ).first
   end
 
   def collaborator?(user_id:, collaboration_type:, collaborator_type: nil)
@@ -255,16 +271,12 @@ class PermitApplication < ApplicationRecord
       .compact
   end
 
-  def indexed_using_current_template_version
-    self.class.searchkick_index.retrieve(self)["using_current_template_version"]
-  end
-
   def formatted_permit_classifications
-    "#{permit_type.name} - #{activity.name}"
+    "#{activity.name} - #{permit_type.name}"
   end
 
   def using_current_template_version
-    self.template_version === current_published_template_version
+    TemplateVersion.cached_published_ids.include?(template_version_id)
   end
 
   def current_published_template_version
@@ -619,14 +631,12 @@ class PermitApplication < ApplicationRecord
 
   def assign_default_nickname
     if nickname.blank? # Only attempt to default if nickname is not already provided
-      if permit_project&.title.present?
+      if permit_project.present?
         self.nickname =
           "#{formatted_permit_classifications} Application for #{permit_project.title}"
-      elsif permit_project && permit_project.title.blank?
-        # Log a warning if project exists but its title is blank, as nickname won't be defaulted from it.
-        Rails.logger.warn "PermitApplication (ID: #{id || "new"}) - Default nickname assignment: Associated PermitProject (ID: #{permit_project.id}) has a blank title. `nickname` may fail presence validation if not set from params or factory."
+      else
+        self.nickname = "#{full_address} - #{formatted_permit_classifications}"
       end
-      # If permit_project is nil, or its title is blank, nickname remains blank and will be caught by presence validation if not set elsewhere.
     end
   end
 
@@ -722,6 +732,17 @@ class PermitApplication < ApplicationRecord
 
   def reindex_permit_project
     permit_project&.reindex
+  end
+
+  def jurisdiction_or_permit_project_present
+    if jurisdiction.nil? && permit_project.nil?
+      errors.add(
+        :jurisdiction,
+        I18n.t(
+          "activerecord.errors.models.permit_application.attributes.jurisdiction.no_jurisdiction"
+        )
+      )
+    end
   end
 
   def submitter_must_have_role

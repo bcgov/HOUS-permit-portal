@@ -2,17 +2,17 @@ class StepCodeBaseBlueprint < Blueprinter::Base
   identifier :id
 
   fields :type,
+         :created_at,
+         :updated_at,
          :project_name,
          :project_identifier,
          :full_address,
          :jurisdiction_name,
          :permit_date
 
-  field :parent_type do |step_code, _options|
-    step_code.parent&.class&.name
-  end
+  association :permit_application,
+              blueprint: PermitApplicationBlueprint,
+              view: :base
 
-  field :parent_id do |step_code, _options|
-    step_code.parent&.id
-  end
+  association :creator, blueprint: UserBlueprint
 end

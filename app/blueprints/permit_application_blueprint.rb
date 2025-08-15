@@ -17,7 +17,8 @@ class PermitApplicationBlueprint < Blueprinter::Base
            :submitted_at,
            :resubmitted_at,
            :revisions_requested_at,
-           :missing_pdfs
+           :missing_pdfs,
+           :template_nickname
 
     association :permit_type, blueprint: PermitClassificationBlueprint
     association :activity, blueprint: PermitClassificationBlueprint
@@ -27,10 +28,16 @@ class PermitApplicationBlueprint < Blueprinter::Base
                 view: :base
     association :submitter, blueprint: UserBlueprint, view: :minimal
 
-    field :indexed_using_current_template_version do |pa, options|
-      # Indexed data is used to prevent N extra queries on every search
-      pa.indexed_using_current_template_version
+    field :using_current_template_version do |pa, options|
+      pa.using_current_template_version
     end
+  end
+
+  view :project_base do
+    include_view :base
+    association :permit_collaborations,
+                blueprint: PermitCollaborationBlueprint,
+                view: :base
   end
 
   view :jurisdiction_review_inbox do

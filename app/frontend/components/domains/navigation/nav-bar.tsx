@@ -89,6 +89,16 @@ function isLoginPath(path: string): boolean {
   return regex.test(path)
 }
 
+function isProjectDetailPath(path: string): boolean {
+  const regex = /^\/projects\/[a-f\d-]+/
+  return regex.test(path)
+}
+
+function isStepCodePath(path: string): boolean {
+  const regex = /^\/part-(3|9)-step-code.*$/
+  return regex.test(path)
+}
+
 function shouldHideSubNavbarForPath(path: string): boolean {
   const matchers: Array<(path: string) => boolean> = [
     (path) => path === "/",
@@ -101,6 +111,8 @@ function shouldHideSubNavbarForPath(path: string): boolean {
     isDigitalPermitEditPath,
     isApiMappingPath,
     isLoginPath,
+    isProjectDetailPath,
+    isStepCodePath,
   ]
 
   return matchers.some((matcher) => matcher(path))
@@ -398,7 +410,7 @@ const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
                         </Button>
                       </MenuItem>
                       <NavMenuItem label={t("site.myPermits")} to="/permit-applications" bg="greys.grey03" />
-                      <NavMenuItem label={t("site.myProjects")} to="/permit-projects" bg="greys.grey03" />
+                      <NavMenuItem label={t("site.myProjects")} to="/projects" bg="greys.grey03" />
                       <MenuDivider my={0} borderColor="border.light" />
                     </>
                   )}

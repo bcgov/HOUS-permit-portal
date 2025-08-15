@@ -8,6 +8,7 @@ import { IExternalApiKey } from "../../models/external-api-key"
 import { IIntegrationMapping } from "../../models/integration-mapping"
 import { IJurisdiction } from "../../models/jurisdiction"
 import { IJurisdictionTemplateVersionCustomization } from "../../models/jurisdiction-template-version-customization"
+import { IPart3StepCode } from "../../models/part-3-step-code"
 import { IPart3StepCodeChecklist } from "../../models/part-3-step-code-checklist"
 import { IPart9StepCode } from "../../models/part-9-step-code"
 import { IPart9StepCodeChecklist } from "../../models/part-9-step-code-checklist"
@@ -51,6 +52,7 @@ import {
   EPermitProjectSortFields,
   ERequirementLibrarySortFields,
   ERequirementTemplateSortFields,
+  EStepCodeSortFields,
   EStepCodeType,
   ETemplateVersionStatus,
   EUserSortFields,
@@ -220,6 +222,16 @@ export class Api {
     return this.client.post<IJurisdictionPermitApplicationResponse>(`/permit_applications/search`, params)
   }
 
+  async fetchProjectPermitApplications(
+    permitProjectId: string,
+    params?: TSearchParams<EPermitApplicationSortFields, IPermitApplicationSearchFilters>
+  ) {
+    return this.client.post<IJurisdictionPermitApplicationResponse>(
+      `/permit_projects/${permitProjectId}/permit_applications/search`,
+      params
+    )
+  }
+
   async fetchPermitProjects(params?: TSearchParams<EPermitProjectSortFields, IPermitProjectSearchFilters>) {
     return this.client.post<ApiResponse<IPermitProject[]>>(`/permit_projects/search`, params)
   }
@@ -230,6 +242,10 @@ export class Api {
 
   async fetchPinnedProjects() {
     return this.client.get<ApiResponse<IPermitProject[]>>(`/permit_projects/pinned`)
+  }
+
+  async fetchPermitProjectJurisdictionOptions() {
+    return this.client.get<IOptionResponse>(`/permit_projects/jurisdiction_options`)
   }
 
   async createPermitProject(projectData: {
@@ -249,11 +265,15 @@ export class Api {
   }
 
   async pinPermitProject(id: string) {
-    return this.client.post<ApiResponse<IPermitProject>>(`/permit_projects/${id}/pin`)
+    return this.client.post<ApiResponse<IPermitProject[]>>(`/permit_projects/${id}/pin`)
   }
 
   async unpinPermitProject(id: string) {
-    return this.client.delete<ApiResponse<IPermitProject>>(`/permit_projects/${id}/unpin`)
+    return this.client.delete<ApiResponse<IPermitProject[]>>(`/permit_projects/${id}/unpin`)
+  }
+
+  async fetchSubmissionCollaboratorOptions(id: string) {
+    return this.client.get<IOptionResponse>(`/permit_projects/${id}/submission_collaborator_options`)
   }
 
   async fetchCollaboratorsByCollaboratorable(collaboratorableId: string, params?: TSearchParams<never, never>) {
@@ -620,6 +640,10 @@ export class Api {
 
   async fetchPart9StepCodes() {
     return this.client.get<ApiResponse<IStepCode[]>>("/part_9_building/step_codes")
+  }
+
+  async searchStepCodes(params?: TSearchParams<EStepCodeSortFields>) {
+    return this.client.post<ApiResponse<IStepCode[]>>("/step_codes/search", params)
   }
 
   async fetchPart9StepCodeSelectOptions() {
