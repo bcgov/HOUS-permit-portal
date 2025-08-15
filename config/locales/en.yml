@@ -582,6 +582,12 @@ en:
       h2k_imported:
         title: ""
         message: "Your Hot2000 file has been successfully imported. Please review the imported fields."
+      update_success:
+        title: ""
+        message: "Step code updated successfully!"
+      update_error:
+        title: Error
+        message: "Error updating step code"
     step_code_checklist:
       update_success:
         title: ""

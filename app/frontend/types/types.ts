@@ -290,7 +290,10 @@ export interface IBaseFileAttachment {
 
 export interface IRequirementDocument extends IBaseFileAttachment {
   requirementBlockId: string
-  // _destroy is now in IBaseFileAttachment
+}
+
+export interface IReportDocument extends IBaseFileAttachment {
+  stepCodeId: string
 }
 
 export interface IProjectDocument extends IBaseFileAttachment {

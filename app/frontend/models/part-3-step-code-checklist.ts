@@ -221,13 +221,19 @@ export const Part3StepCodeChecklistModel = types
     completeSection: flow(function* (key: TPart3NavLinkKey) {
       let updatedStatus = R.clone(self.sectionCompletionStatus)
       updatedStatus[key] = { complete: true, relevant: true }
-      const response = yield self.environment.api.updatePart3Checklist(self.id, {
-        sectionCompletionStatus: updatedStatus,
-      })
+
+      const requestOptions = key === "stepCodeSummary" ? { reportGenerationRequested: true } : undefined
+
+      const response = yield self.environment.api.updatePart3Checklist(
+        self.id,
+        { sectionCompletionStatus: updatedStatus },
+        requestOptions
+      )
       if (response.ok) {
         self.sectionCompletionStatus = updatedStatus
         return true
       }
+      return false
     }),
     bulkUpdateCompletionStatus: flow(function* (updatedSections: DeepPartial<IPart3SectionCompletionStatus>) {
       let updatedStatus = R.clone(self.sectionCompletionStatus)

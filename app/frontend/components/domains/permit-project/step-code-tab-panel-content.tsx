@@ -25,7 +25,7 @@ export const StepCodeTabPanelContent = observer(() => {
             <Heading>{t("stepCode.index.title")}</Heading>
           </Flex>
           <Box w="full" bg="theme.blueLight" p={6} borderRadius="md">
-            <Box maxW="lg">
+            <Box maxW="xl">
               <Heading as="h3" mb={6}>
                 {t("stepCode.index.createReportTitle")}
               </Heading>
