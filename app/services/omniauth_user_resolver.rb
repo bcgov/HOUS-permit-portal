@@ -75,7 +75,9 @@ class OmniauthUserResolver
       omniauth_provider:,
       omniauth_uid:,
       omniauth_email:,
-      omniauth_username:
+      omniauth_username:,
+      first_name:,
+      last_name:
     )
     invited_user.accept_invitation! if invited_user.valid?
   end
@@ -106,11 +108,27 @@ class OmniauthUserResolver
   end
 
   def first_name
-    @first_name ||= auth.info.first_name
+    @first_name ||= names[:first]
   end
 
   def last_name
-    @last_name ||= auth.info.last_name
+    @last_name ||= names[:last]
+  end
+
+  def names
+    @names ||= extract_first_and_last_name
+  end
+
+  def extract_first_and_last_name
+    raw_first_name = auth.info.first_name.to_s.strip
+    raw_last_name = auth.info.last_name.to_s.strip
+
+    parts = raw_first_name.split(" ")
+
+    {
+      first: parts.first || "",
+      last: raw_last_name.presence || parts[1..].join(" ")
+    }
   end
 
   def omniauth_uid
