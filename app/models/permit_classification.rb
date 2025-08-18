@@ -14,6 +14,17 @@ class PermitClassification < ApplicationRecord
          addition_alteration_renovation
          site_alteration
          demolition
+         manufactured_home
+         mechanical
+         plumbing
+         electrical
+         gas
+         solid_fuel_burning_appliance
+         fire_alarm
+         fire_suppression
+         tree_cutting_and_tree_removal
+         retaining_wall
+         relocation
        ]
 
   def image_url

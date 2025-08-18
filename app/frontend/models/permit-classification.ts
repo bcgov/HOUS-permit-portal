@@ -8,6 +8,7 @@ export const PermitClassificationModel = types.model("PermitClassificationModel"
   description: types.string,
   enabled: types.boolean,
   imageUrl: types.string,
+  category: types.maybeNull(types.string),
 })
 
 // Subclass Model for PermitType

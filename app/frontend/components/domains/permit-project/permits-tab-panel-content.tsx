@@ -1,4 +1,4 @@
-import { Box, Button, Flex, Heading, Icon } from "@chakra-ui/react"
+import { Box, Flex, Heading, Icon } from "@chakra-ui/react"
 import { Plus } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -10,6 +10,7 @@ import { EProjectPermitApplicationSortFields } from "../../../types/enums"
 import { Paginator } from "../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../shared/base/inputs/per-page-select"
 import { SearchGrid } from "../../shared/grid/search-grid"
+import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { PermitApplicationGridHeaders } from "./permit-application-grid-headers"
 import { PermitApplicationGridRow } from "./permit-application-grid-row"
 import { RequirementTemplateFilter } from "./requirement-template-filter"
@@ -36,9 +37,13 @@ export const PermitsTabPanelContent = observer(({ permitProject }: IProps) => {
           <Heading as="h3" size="md">
             {t("permitProject.permits.title")}
           </Heading>
-          <Button variant="primary" leftIcon={<Icon as={Plus} />}>
-            {t("permitProject.permits.addPermit")}
-          </Button>
+          <RouterLinkButton
+            variant="primary"
+            leftIcon={<Icon as={Plus} />}
+            to={`/projects/${permitProject.id}/add-permits`}
+          >
+            {t("permitProject.addPermits")}
+          </RouterLinkButton>
         </Flex>
         <Flex gap={2} mb={2}>
           <RequirementTemplateFilter searchModel={permitApplicationStore} />

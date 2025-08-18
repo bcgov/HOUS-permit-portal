@@ -7,9 +7,12 @@ import {
   FormErrorMessage,
   FormLabel,
   Heading,
+  HStack,
   Input,
+  Text,
   VStack,
 } from "@chakra-ui/react"
+import { CaretLeft } from "@phosphor-icons/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -18,6 +21,8 @@ import { useNavigate } from "react-router-dom"
 import { useJurisdictionFromSite } from "../../../hooks/use-jurisdiction-from-site"
 import { useMst } from "../../../setup/root"
 import { IOption } from "../../../types/types"
+import { BackButton } from "../../shared/buttons/back-button"
+import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { SitesSelect } from "../../shared/select/selectors/sites-select"
 
 type TCreatePermitProjectFormData = {
@@ -61,16 +66,24 @@ export const NewPermitProjectScreen = observer(() => {
 
   return (
     <Container maxW="container.lg" py={10}>
-      <Heading mb={6}>{t("permitProject.new.title")}</Heading>
+      <Flex direction="column" gap={2}>
+        <RouterLinkButton variant="link" to="/projects" leftIcon={<CaretLeft size={24} />}>
+          {t("permitProject.back")}
+        </RouterLinkButton>
+        <Heading mb={6}>{t("permitProject.new.title")}</Heading>
+      </Flex>
       <FormProvider {...formMethods}>
         <Box as="form" onSubmit={handleSubmit(onSubmit)}>
           <VStack spacing={8} align="stretch">
-            <Flex direction="column" gap={2}>
+            <Flex direction="column" gap={2} w={{ base: "full", md: "50%" }}>
               <Heading as="h2" variant="yellowline">
-                {t("permitProject.new.nameLabel")}
+                {t("permitProject.new.nameHeading")}
               </Heading>
+              <Text>{t("permitProject.new.nameDescription")}</Text>
               <FormControl isInvalid={!!errors.title}>
-                <FormLabel htmlFor="title">{t("permitProject.name")}</FormLabel>
+                <FormLabel htmlFor="title" mt={4}>
+                  {t("permitProject.new.nameLabel")}
+                </FormLabel>
                 <Input
                   id="title"
                   {...register("title", {
@@ -83,7 +96,7 @@ export const NewPermitProjectScreen = observer(() => {
 
             <Flex direction="column" gap={2}>
               <Heading as="h2" variant="yellowline">
-                {t("permitProject.new.fullAddressLabel")}
+                {t("permitProject.new.fullAddressHeading")}
               </Heading>
               <Controller
                 name="site"
@@ -94,9 +107,12 @@ export const NewPermitProjectScreen = observer(() => {
               />
             </Flex>
 
-            <Button mt={2} variant="primary" isLoading={isSubmitting} isDisabled={!isValid} type="submit">
-              {t("permitProject.new.createButton")}
-            </Button>
+            <HStack>
+              <BackButton>{t("ui.back")}</BackButton>
+              <Button variant="primary" isLoading={isSubmitting} isDisabled={!isValid} type="submit">
+                {t("permitProject.new.createButton")}
+              </Button>
+            </HStack>
           </VStack>
         </Box>
       </FormProvider>

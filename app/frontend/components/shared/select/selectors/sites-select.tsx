@@ -46,8 +46,8 @@ export const SitesSelect = observer(function ({
   const fetchSiteOptions = (address: string, callback: (options) => void) => {
     if (address.length > 3) {
       fetchOptions(address).then((options: IOption[]) => {
-        setValue(siteName, null)
         setValue(pidName, null)
+        setValue(siteName, null)
         callback(options)
       })
     } else callback([])

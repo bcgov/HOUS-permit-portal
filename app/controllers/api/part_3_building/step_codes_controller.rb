@@ -10,7 +10,6 @@ class Api::Part3Building::StepCodesController < Api::ApplicationController
 
   def create
     authorize Part3StepCode.new
-    # binding.pry
     @step_code =
       (
         if step_code_params[:permit_application_id]
