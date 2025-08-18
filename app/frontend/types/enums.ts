@@ -26,6 +26,8 @@ export enum ERequirementTemplateType {
 export enum EFileUploadAttachmentType {
   RequirementDocument = "RequirementDocument",
   SupportingDocument = "SupportingDocument",
+  ProjectDocument = "ProjectDocument",
+  ReportDocument = "ReportDocument",
 }
 
 export enum EPermitClassificationCode {
@@ -136,6 +138,13 @@ export enum EPermitApplicationSortFields {
   submitter = "submitter",
   submittedAt = "submitted_at",
   viewedAt = "viewed_at",
+  status = "status",
+}
+
+export enum EProjectPermitApplicationSortFields {
+  permit = "permit",
+  assignedTo = "assigned_to",
+  updatedAt = "updated_at",
   status = "status",
 }
 
@@ -310,6 +319,7 @@ export enum EZeroCarbonStep {
 }
 
 export enum ERequirementContactFieldItemType {
+  contactType = "contactType",
   firstName = "firstName",
   lastName = "lastName",
   email = "email",
@@ -628,6 +638,30 @@ export enum EDocumentReferenceDocumentType {
 }
 
 export enum EStepCodeType {
-  Part3 = "Part3StepCode",
-  Part9 = "Part9StepCode",
+  part3StepCode = "Part3StepCode",
+  part9StepCode = "Part9StepCode",
+}
+
+export enum EPermitProjectSortFields {
+  title = "title",
+  location = "location",
+  submitter = "submitter",
+  updatedAt = "updated_at",
+  rollupStatus = "rollup_status",
+}
+
+export enum EPermitProjectRollupStatus {
+  empty = "empty",
+  newDraft = "new_draft",
+  newlySubmitted = "newly_submitted",
+  revisionsRequested = "revisions_requested",
+  resubmitted = "resubmitted",
+  approved = "approved",
+}
+
+export enum EStepCodeSortFields {
+  type = "type",
+  projectName = "project_name",
+  fullAddress = "full_address",
+  updatedAt = "updated_at",
 }

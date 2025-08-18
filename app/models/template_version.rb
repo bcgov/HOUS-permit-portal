@@ -28,6 +28,14 @@ class TemplateVersion < ApplicationRecord
   after_save :reindex_models_if_published, if: :saved_change_to_status?
   after_save :create_integration_mappings
   after_save :notify_users_of_missing_requirements_mappings
+  after_save :clear_published_ids_cache,
+             if: -> do
+               saved_change_to_status? &&
+                 (
+                   status == "published" ||
+                     status_before_last_save == "published"
+                 )
+             end
 
   scope :for_sandbox,
         ->(sandbox) do
@@ -37,6 +45,14 @@ class TemplateVersion < ApplicationRecord
             all
           end
         end
+
+  def self.cached_published_ids
+    Rails
+      .cache
+      .fetch("published_template_version_ids", expires_in: 24.hours) do
+        where(status: :published).pluck(:id)
+      end
+  end
 
   def customizations
     # Convenience method to prevent carpal tunnel syndrome
@@ -177,5 +193,9 @@ class TemplateVersion < ApplicationRecord
     requirement_template&.reindex if published?
     permit_applications&.reindex if published?
     previous_version&.permit_applications&.reindex if published?
+  end
+
+  def clear_published_ids_cache
+    Rails.cache.delete("published_template_version_ids")
   end
 end

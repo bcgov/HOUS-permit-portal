@@ -5,7 +5,6 @@ import React from "react"
 import { useTranslation } from "react-i18next"
 import { useFlashQueryParam } from "../../../hooks/use-flash-query-param"
 import { useQuery } from "../../../hooks/use-query"
-import { useResetQueryParams } from "../../../hooks/use-reset-query-params"
 import { useSearch } from "../../../hooks/use-search"
 import { IPermitApplication } from "../../../models/permit-application"
 import { useMst } from "../../../setup/root"
@@ -58,7 +57,6 @@ export const PermitApplicationIndexScreen = observer(({}: IPermitApplicationInde
     JSON.stringify(currentSandboxId),
   ])
   useFlashQueryParam()
-  const resetQueryParams = useResetQueryParams()
 
   return (
     <Flex as="main" direction="column" w="full" bg="greys.white" pb="24">
@@ -85,7 +83,7 @@ export const PermitApplicationIndexScreen = observer(({}: IPermitApplicationInde
             </Heading>
             <Flex align="flex-end" gap={4} direction={{ base: "column", md: "row" }}>
               {hasResetableFilters && (
-                <Button variant="link" mb={2} onClick={resetQueryParams}>
+                <Button variant="link" mb={2} onClick={permitApplicationStore.resetFilters}>
                   {t("ui.resetFilters")}
                 </Button>
               )}

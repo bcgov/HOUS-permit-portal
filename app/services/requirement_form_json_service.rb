@@ -209,6 +209,9 @@ class RequirementFormJsonService
       end
 
     json.merge!({ description: requirement.hint }) if requirement.hint
+    if requirement.instructions
+      json.merge!({ instructions: requirement.instructions })
+    end
 
     json.merge!({ validate: { required: true } }) if requirement.required
 
@@ -379,6 +382,11 @@ class RequirementFormJsonService
   def get_general_contact_field_components(parent_key = nil)
     required = self.requirement.required
     [
+      get_contact_type_component(
+        parent_key,
+        true,
+        get_general_contact_type_options
+      ),
       get_columns_form_json(
         "name_columns",
         [
@@ -407,6 +415,11 @@ class RequirementFormJsonService
   def get_professional_contact_field_components(parent_key = nil)
     required = self.requirement.required
     [
+      get_contact_type_component(
+        parent_key,
+        true,
+        get_professional_contact_type_options
+      ),
       get_columns_form_json(
         "name_columns",
         [
@@ -644,5 +657,37 @@ class RequirementFormJsonService
     components = snake_str.split("_")
     # capitalize the first letter of each component except the first
     components[0] + components[1..-1].map(&:capitalize).join
+  end
+
+  private
+
+  def get_general_contact_type_options
+    I18n
+      .t("formio.requirement.contact.contact_type_options.general")
+      .map { |key, value| { label: value, value: key.to_s.camelize(:lower) } }
+  end
+
+  def get_professional_contact_type_options
+    I18n
+      .t("formio.requirement.contact.contact_type_options.professional")
+      .map { |key, value| { label: value, value: key.to_s.camelize(:lower) } }
+  end
+
+  def get_contact_type_component(parent_key, required, options)
+    key = "#{parent_key}|contactType"
+    {
+      "label" => "Contact Type",
+      "widget" => "choicesjs",
+      "tableView" => true,
+      "key" => key,
+      "type" => "select",
+      "input" => true,
+      "data" => {
+        "values" => options
+      },
+      "validate" => {
+        "required" => required
+      }
+    }
   end
 end

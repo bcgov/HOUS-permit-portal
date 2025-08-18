@@ -88,39 +88,39 @@ export const OnboardingChecklistPageForLgAdoptingScreen = observer(() => {
       </Text>
       <UnorderedList mb={10} pl={0} listStyleType="none">
         <ListItem mb={4}>
-          <Text fontWeight="bold" fontSize="md">
+          <Heading as="h3" fontWeight="bold" fontSize="md">
             {t(`${prefix}.newFeatures.features.permitProjectFolders.title`)}
-          </Text>
+          </Heading>
           <Text fontSize="md">{t(`${prefix}.newFeatures.features.permitProjectFolders.description`)}</Text>
         </ListItem>
         <ListItem mb={4}>
-          <Text fontWeight="bold" fontSize="md">
+          <Heading as="h3" fontWeight="bold" fontSize="md">
             {t(`${prefix}.newFeatures.features.preApplicationTools.title`)}
-          </Text>
+          </Heading>
           <Text fontSize="md">{t(`${prefix}.newFeatures.features.preApplicationTools.description`)}</Text>
         </ListItem>
         <ListItem mb={4}>
-          <Text fontWeight="bold" fontSize="md">
+          <Heading as="h3" fontWeight="bold" fontSize="md">
             {t(`${prefix}.newFeatures.features.uploadDocuments.title`)}
-          </Text>
+          </Heading>
           <Text fontSize="md">{t(`${prefix}.newFeatures.features.uploadDocuments.description`)}</Text>
         </ListItem>
         <ListItem mb={4}>
-          <Text fontWeight="bold" fontSize="md">
+          <Heading as="h3" fontWeight="bold" fontSize="md">
             {t(`${prefix}.newFeatures.features.standardHousing.title`)}
-          </Text>
+          </Heading>
           <Text fontSize="md">{t(`${prefix}.newFeatures.features.standardHousing.description`)}</Text>
         </ListItem>
         <ListItem mb={4}>
-          <Text fontWeight="bold" fontSize="md">
+          <Heading as="h3" fontWeight="bold" fontSize="md">
             {t(`${prefix}.newFeatures.features.crossJurisdiction.title`)}
-          </Text>
+          </Heading>
           <Text fontSize="md">{t(`${prefix}.newFeatures.features.crossJurisdiction.description`)}</Text>
         </ListItem>
         <ListItem>
-          <Text fontWeight="bold" fontSize="md">
+          <Heading as="h3" fontWeight="bold" fontSize="md">
             {t(`${prefix}.newFeatures.features.realTimeStatus.title`)}
-          </Text>
+          </Heading>
           <Text fontSize="md">{t(`${prefix}.newFeatures.features.realTimeStatus.description`)}</Text>
         </ListItem>
       </UnorderedList>
@@ -163,13 +163,13 @@ export const OnboardingChecklistPageForLgAdoptingScreen = observer(() => {
       </Heading>
       <OrderedList mb={10} pl={6} spacing={3}>
         <ListItem>
-          <Text fontWeight="bold" fontSize="md">
+          <Heading as="h3" fontWeight="bold" fontSize="md">
             {t(`${prefix}.howToJoin.step1.title`)}
-          </Text>
+          </Heading>
           <Text fontSize="md">
             <Trans
               i18nKey={`${prefix}.howToJoin.step1.description`}
-              values={{ email: t(`${prefix}.howToJoin.step1.email`) }}
+              values={{ email: t(`${prefix}.howToJoin.step1.emailText`) }}
               components={{
                 mailTo: (
                   <Link
@@ -182,9 +182,9 @@ export const OnboardingChecklistPageForLgAdoptingScreen = observer(() => {
           </Text>
         </ListItem>
         <ListItem>
-          <Text fontWeight="bold" fontSize="md">
+          <Heading as="h3" fontWeight="bold" fontSize="md">
             {t(`${prefix}.howToJoin.step2.title`)}
-          </Text>
+          </Heading>
           <Text fontSize="md">{t(`${prefix}.howToJoin.step2.description`)}</Text>
         </ListItem>
       </OrderedList>
@@ -205,7 +205,7 @@ export const OnboardingChecklistPageForLgAdoptingScreen = observer(() => {
       <Text fontSize="md" color="gray.700" mb="8">
         <Trans
           i18nKey={`${prefix}.learnMore.contact`}
-          values={{ email: t(`${prefix}.learnMore.email`) }}
+          values={{ email: t(`${prefix}.learnMore.emailText`) }}
           components={{
             mailTo: (
               <Link

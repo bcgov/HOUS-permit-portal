@@ -24,6 +24,7 @@ import React, { useEffect, useState } from "react"
 import { Controller, FormProvider, useForm, useFormContext } from "react-hook-form"
 import { Trans, useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
+import { useJurisdictionFromSite } from "../../../hooks/use-jurisdiction-from-site"
 import { IJurisdiction } from "../../../models/jurisdiction"
 import { useMst } from "../../../setup/root"
 import { EFlashMessageStatus } from "../../../types/enums"
@@ -103,9 +104,9 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
 
   const permitTypeIdWatch = watch("permitTypeId")
   const pidWatch = watch("pid")
-  const pinWatch = watch("pin")
   const siteWatch = watch("site")
   const jurisdictionIdWatch = watch("jurisdictionId")
+  useJurisdictionFromSite(watch, setValue, { siteFieldName: "site", jurisdictionIdFieldName: "jurisdictionId" })
   const firstNationsWatch = watch("firstNations")
 
   useEffect(() => {

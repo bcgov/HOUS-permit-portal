@@ -18,6 +18,7 @@ import {
   EPermitApplicationSortFields,
   EPermitApplicationStatus,
   EPermitApplicationStatusGroup,
+  EProjectPermitApplicationSortFields,
 } from "../types/enums"
 import {
   IPermitApplicationComplianceUpdate,
@@ -37,15 +38,16 @@ export const PermitApplicationStoreModel = types
       permitApplicationMap: types.map(PermitApplicationModel),
       tablePermitApplications: types.array(types.reference(PermitApplicationModel)),
       currentPermitApplication: types.maybeNull(types.reference(PermitApplicationModel)),
-      statusFilter: types.optional(types.array(types.enumeration(filterableStatus)), [
-        EPermitApplicationStatus.newDraft,
-        EPermitApplicationStatus.revisionsRequested,
-      ]),
+      statusFilter: types.optional(types.array(types.enumeration(filterableStatus)), []),
       templateVersionIdFilter: types.maybeNull(types.string),
-      requirementTemplateIdFilter: types.maybeNull(types.string),
+      requirementTemplateIdFilter: types.optional(types.array(types.string), []),
       hasCollaboratorFilter: types.maybeNull(types.boolean),
+      submissionDelagateeIdFilter: types.optional(types.array(types.string), []),
     }),
-    createSearchModel<EPermitApplicationSortFields>("searchPermitApplications", "setPermitApplicationFilters")
+    createSearchModel<EProjectPermitApplicationSortFields | EPermitApplicationSortFields>(
+      "searchPermitApplications",
+      "setPermitApplicationFilters"
+    )
   )
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -59,7 +61,17 @@ export const PermitApplicationStoreModel = types
     },
   }))
   .views((self) => ({
-    getSortColumnHeader(field: EPermitApplicationSortFields) {
+    getProjectPermitApplicationSortColumnHeader(field: EProjectPermitApplicationSortFields) {
+      const map = {
+        [EProjectPermitApplicationSortFields.permit]: t("permitProject.overview.permit"),
+        [EProjectPermitApplicationSortFields.assignedTo]: t("permitProject.overview.assignedTo"),
+        [EProjectPermitApplicationSortFields.updatedAt]: t("permitProject.overview.updatedAt"),
+        [EProjectPermitApplicationSortFields.status]: t("permitProject.overview.status"),
+      }
+      return map[field]
+    },
+
+    getPermitApplicationSortColumnHeader(field: EPermitApplicationSortFields) {
       // @ts-ignore
       return t(`permitApplication.columns.${field}`)
     },
@@ -72,7 +84,7 @@ export const PermitApplicationStoreModel = types
       return Array.from(self.permitApplicationMap.values())
     },
     get hasResetableFilters() {
-      return !R.isNil(self.templateVersionIdFilter) || !R.isNil(self.requirementTemplateIdFilter)
+      return self.hasCollaboratorFilter || self.templateVersionIdFilter || !R.isEmpty(self.requirementTemplateIdFilter)
     },
     get statusFilterToGroup(): EPermitApplicationStatusGroup {
       const map = {
@@ -131,6 +143,7 @@ export const PermitApplicationStoreModel = types
         (j: IJurisdiction) => j.id,
         permitApplicationsData.filter((pa) => pa.jurisdiction).map((pa) => pa.jurisdiction)
       )
+      // @ts-ignore
       self.rootStore.jurisdictionStore.mergeUpdateAll(jurisdictionsUniq, "jurisdictionMap")
 
       //find all unique submitters
@@ -171,8 +184,8 @@ export const PermitApplicationStoreModel = types
           R.map(R.prop("permitCollaborations")),
           R.reject(R.isNil),
           R.flatten,
-          // @ts-ignore
           R.map(R.prop("collaborator")),
+          // @ts-ignore
           R.uniqBy((c: ICollaborator) => c.id)
         )(permitApplicationsData),
         "collaboratorMap"
@@ -204,6 +217,62 @@ export const PermitApplicationStoreModel = types
       // @ts-ignore
       self.statusFilter = statuses
     },
+    setRequirementTemplateIdFilter(requirementTemplateIds: string[] | undefined) {
+      if (!requirementTemplateIds) return
+      setQueryParam("requirementTemplateId", requirementTemplateIds)
+      // @ts-ignore
+      self.requirementTemplateIdFilter = requirementTemplateIds
+    },
+    setSubmissionCollaboratorIdFilter(submissionDelegateeId: string[] | undefined) {
+      if (!submissionDelegateeId) return
+      setQueryParam("submissionDelagateeId", submissionDelegateeId)
+      // @ts-ignore
+      self.submissionDelagateeIdFilter = submissionDelegateeId
+    },
+    searchPermitApplications: flow(function* (opts?: { reset?: boolean; page?: number; countPerPage?: number }) {
+      if (opts?.reset) {
+        self.resetPages()
+      }
+      const requirementTemplateId =
+        self.requirementTemplateIdFilter.length > 0 ? self.requirementTemplateIdFilter.join(",") : null
+      const searchParams = {
+        query: self.query,
+        sort: self.sort,
+        page: opts?.page ?? self.currentPage,
+        perPage: opts?.countPerPage ?? self.countPerPage,
+        filters: {
+          status: self.statusFilter,
+          templateVersionId: self.templateVersionIdFilter,
+          requirementTemplateId,
+          hasCollaborator: self.hasCollaboratorFilter,
+          submissionDelegateeId: self.submissionDelagateeIdFilter,
+        },
+      } as TSearchParams<EPermitApplicationSortFields, IPermitApplicationSearchFilters>
+
+      const currentJurisdictionId = self.rootStore?.jurisdictionStore?.currentJurisdiction?.id
+      const currentPermitProjectId = self.rootStore?.permitProjectStore?.currentPermitProject?.id
+
+      const response = currentJurisdictionId
+        ? yield self.environment.api.fetchJurisdictionPermitApplications(currentJurisdictionId, searchParams)
+        : currentPermitProjectId
+          ? yield self.environment.api.fetchProjectPermitApplications(currentPermitProjectId, searchParams)
+          : yield self.environment.api.fetchPermitApplications(searchParams)
+
+      if (response.ok) {
+        self.mergeUpdateAll(response.data.data, "permitApplicationMap")
+        const permitProject = self.rootStore.permitProjectStore.currentPermitProject
+        if (permitProject) {
+          permitProject.setTablePermitApplications(response.data.data)
+        } else {
+          ;(self?.rootStore?.jurisdictionStore?.currentJurisdiction ?? self).setTablePermitApplications(
+            response.data.data
+          )
+        }
+
+        self.setPageFields(response.data.meta, opts)
+      }
+      return response.ok
+    }),
   }))
   .actions((self) => ({
     getEphemeralPermitApplication(
@@ -212,7 +281,7 @@ export const PermitApplicationStoreModel = types
     ) {
       if (self.currentPermitApplication?.isEphemeral) return self.currentPermitApplication
       const permitApplication = PermitApplicationModel.create({
-        id: `ephemeral-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        id: `ephemeral-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
         nickname: overrides.nickname || "Ephemeral Application",
         number: overrides.number || "",
         fullAddress: overrides.fullAddress || null,
@@ -250,7 +319,7 @@ export const PermitApplicationStoreModel = types
         isFullyLoaded: overrides.isFullyLoaded ?? false,
         isDirty: overrides.isDirty ?? false,
         isLoading: overrides.isLoading ?? false,
-        indexedUsingCurrentTemplateVersion: overrides.indexedUsingCurrentTemplateVersion || null,
+        usingCurrentTemplateVersion: overrides.usingCurrentTemplateVersion || null,
         showingCompareAfter: overrides.showingCompareAfter ?? false,
         revisionMode: overrides.revisionMode ?? false,
         diff: overrides.diff || null,
@@ -260,11 +329,11 @@ export const PermitApplicationStoreModel = types
         permitBlockStatusMap: overrides.permitBlockStatusMap || {},
         isViewingPastRequests: overrides.isViewingPastRequests ?? false,
         // Initialize maps properly if overrides provide arrays
-        ...(overrides.permitCollaborations && {
-          permitCollaborationMap: convertResourceArrayToRecord(overrides.permitCollaborations),
+        ...((overrides as any).permitCollaborations && {
+          permitCollaborationMap: convertResourceArrayToRecord((overrides as any).permitCollaborations),
         }),
-        ...(overrides.permitBlockStatuses && {
-          permitBlockStatusMap: convertResourceArrayToRecord(overrides.permitBlockStatuses),
+        ...((overrides as any).permitBlockStatuses && {
+          permitBlockStatusMap: convertResourceArrayToRecord((overrides as any).permitBlockStatuses),
         }),
       })
 
@@ -307,42 +376,6 @@ export const PermitApplicationStoreModel = types
         throw error
       }
     }),
-    searchPermitApplications: flow(function* (opts?: { reset?: boolean; page?: number; countPerPage?: number }) {
-      if (opts?.reset) {
-        self.resetPages()
-      }
-      const searchParams = {
-        query: self.query,
-        sort: self.sort,
-        page: opts?.page ?? self.currentPage,
-        perPage: opts?.countPerPage ?? self.countPerPage,
-        filters: {
-          status: self.statusFilter,
-          templateVersionId: self.templateVersionIdFilter,
-          requirementTemplateId: self.requirementTemplateIdFilter,
-          hasCollaborator: self.hasCollaboratorFilter,
-        },
-      } as TSearchParams<EPermitApplicationSortFields, IPermitApplicationSearchFilters>
-
-      const currentJurisdictionId = self.rootStore?.jurisdictionStore?.currentJurisdiction?.id
-
-      const response = currentJurisdictionId
-        ? yield self.environment.api.fetchJurisdictionPermitApplications(currentJurisdictionId, searchParams)
-        : yield self.environment.api.fetchPermitApplications(searchParams)
-
-      if (response.ok) {
-        self.mergeUpdateAll(response.data.data, "permitApplicationMap")
-        ;(self?.rootStore?.jurisdictionStore?.currentJurisdiction ?? self).setTablePermitApplications(
-          response.data.data
-        )
-
-        self.currentPage = opts?.page ?? self.currentPage
-        self.totalPages = response.data.meta.totalPages
-        self.totalCount = response.data.meta.totalCount
-        self.countPerPage = opts?.countPerPage ?? self.countPerPage
-      }
-      return response.ok
-    }),
     fetchPermitApplication: flow(function* (id: string, review?: boolean) {
       // If the user is review staff, we still need to hit the show endpoint to update viewedAt
       const { ok, data: response } = yield self.environment.api.fetchPermitApplication(id, review)
@@ -359,11 +392,13 @@ export const PermitApplicationStoreModel = types
     setPermitApplicationFilters(queryParams: URLSearchParams) {
       const statusFilter = queryParams.get("status")?.split(",") as TFilterableStatus[]
       const templateVersionIdFilter = queryParams.get("templateVersionId")
-      const requirementTemplateIdFilter = queryParams.get("requirementTemplateId")
+      const requirementTemplateIdFilter = queryParams.get("requirementTemplateId")?.split(",")
       const hasCollaboratorFilter = queryParams.get("hasCollaborator") === "true"
+      const submissionDelagateeIdFilter = queryParams.get("submissionDelagateeId")?.split(",")
 
       self.setStatusFilter(statusFilter)
-      self.requirementTemplateIdFilter = requirementTemplateIdFilter
+      self.setRequirementTemplateIdFilter(requirementTemplateIdFilter)
+      self.setSubmissionCollaboratorIdFilter(submissionDelagateeIdFilter)
       self.templateVersionIdFilter = templateVersionIdFilter
       self.hasCollaboratorFilter = hasCollaboratorFilter
     },
@@ -389,6 +424,7 @@ export const PermitApplicationStoreModel = types
         case EPermitApplicationSocketEventTypes.updatePermitBlockStatus:
           payloadData = payload.data as IPermitBlockStatus
           self.permitApplicationMap.get(payloadData?.permitApplicationId)?.updatePermitBlockStatus(payloadData)
+          break
         default:
           import.meta.env.DEV && console.log(`Unknown event type ${payload.eventType}`)
       }
@@ -396,12 +432,14 @@ export const PermitApplicationStoreModel = types
   }))
   .actions((self) => ({
     resetFilters() {
-      self.hasCollaboratorFilter = false
+      self.statusFilter = [] as any
+      self.hasCollaboratorFilter = null
       self.templateVersionIdFilter = null
-      self.requirementTemplateIdFilter = null
+      self.requirementTemplateIdFilter = [] as any
+      self.submissionDelagateeIdFilter = [] as any
       if (typeof window !== "undefined") {
         const url = new URL(window.location.href)
-        const staticParams = ["templateVersionId", "requirementTemplateId", "hasCollaborator"]
+        const staticParams = ["templateVersionId", "requirementTemplateId", "hasCollaborator", "submissionDelagateeId"]
         staticParams.forEach((param) => {
           url.searchParams.delete(param)
         })

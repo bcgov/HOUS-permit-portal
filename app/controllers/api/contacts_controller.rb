@@ -89,7 +89,8 @@ class Api::ContactsController < Api::ApplicationController
       :address,
       :business_name,
       :professional_association,
-      :professional_number
+      :professional_number,
+      :contact_type
     )
   end
 

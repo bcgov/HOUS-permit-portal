@@ -17,23 +17,21 @@ import { defaultSectionCompletionStatus } from "./sidebar/nav-sections"
 import { SideBarDrawer } from "./sidebar/side-bar-drawer"
 
 export const Part3StepCodeForm = observer(function Part3StepCodeForm() {
-  const { permitApplicationId, section } = useParams()
+  const { permitApplicationId, section, stepCodeId } = useParams()
   const {
     stepCodeStore: { createPart3StepCode },
-    permitApplicationStore: { getPermitApplicationById },
   } = useMst()
   const { stepCode } = usePart3StepCode()
   const navigate = useNavigate()
   const isEarlyAccess = !permitApplicationId
 
-  const permitApplication = !isEarlyAccess && getPermitApplicationById(permitApplicationId)
-
-  usePermitApplication()
+  const { currentPermitApplication } = usePermitApplication()
 
   // create the step code if needed
   useEffect(() => {
+    if (stepCodeId) return // step code was already created in the previous screen
     if (!!stepCode) return // step code already exists
-    if (!isEarlyAccess && !permitApplication?.isFullyLoaded) return // wait for permit application to load
+    if (!isEarlyAccess && !currentPermitApplication?.isFullyLoaded) return // wait for permit application to load
 
     if (!stepCode) {
       createPart3StepCode({
@@ -41,7 +39,7 @@ export const Part3StepCodeForm = observer(function Part3StepCodeForm() {
         checklistAttributes: { sectionCompletionStatus: defaultSectionCompletionStatus },
       })
     }
-  }, [permitApplication?.isFullyLoaded, stepCode])
+  }, [currentPermitApplication?.isFullyLoaded, stepCode])
 
   // handle redirect if no section is specified
   useEffect(() => {
@@ -50,6 +48,10 @@ export const Part3StepCodeForm = observer(function Part3StepCodeForm() {
 
     if (stepCode.checklist) {
       const navLink = stepCode.checklist.currentNavLink
+      // Ensure a default after-save path is set for all sections
+      if (!stepCode.checklist.alternateNavigateAfterSavePath) {
+        stepCode.checklist.setAlternateNavigateAfterSavePath("/step-codes")
+      }
       navigate(navLink?.location || "start")
     } else {
       navigate("start")

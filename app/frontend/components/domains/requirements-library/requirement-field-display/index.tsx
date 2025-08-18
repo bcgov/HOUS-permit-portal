@@ -31,6 +31,7 @@ export type TRequirementFieldDisplayProps = {
   label?: string
   options?: string[]
   helperText?: string
+  instructions?: string
   unit?: ENumberUnit | null
   selectProps?: Partial<SelectProps>
   addMultipleContactProps?: {
@@ -305,6 +306,17 @@ const requirementsComponentMap = {
 
   [ERequirementType.generalContact](props: TRequirementFieldDisplayProps) {
     const contactFieldItemTypes: Array<{ type: ERequirementContactFieldItemType; containerProps?: BoxProps }> = [
+      {
+        type: ERequirementContactFieldItemType.contactType,
+        containerProps: {
+          gridColumn: "1 / span 2",
+          sx: {
+            ".chakra-form-control input": {
+              maxW: "full",
+            },
+          },
+        },
+      },
       { type: ERequirementContactFieldItemType.firstName },
       { type: ERequirementContactFieldItemType.lastName },
       { type: ERequirementContactFieldItemType.email },
@@ -329,6 +341,17 @@ const requirementsComponentMap = {
 
   [ERequirementType.professionalContact](props: TRequirementFieldDisplayProps) {
     const contactFieldItemTypes: Array<{ type: ERequirementContactFieldItemType; containerProps?: BoxProps }> = [
+      {
+        type: ERequirementContactFieldItemType.contactType,
+        containerProps: {
+          gridColumn: "1 / span 2",
+          sx: {
+            ".chakra-form-control input": {
+              maxW: "full",
+            },
+          },
+        },
+      },
       { type: ERequirementContactFieldItemType.firstName },
       { type: ERequirementContactFieldItemType.lastName },
       { type: ERequirementContactFieldItemType.email },

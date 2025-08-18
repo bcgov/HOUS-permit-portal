@@ -91,6 +91,16 @@ User.find_or_create_by(omniauth_username: "submitter") do |user|
   user.omniauth_email = "submitter@example.com"
 end
 
+4.times do |i|
+  User.find_or_create_by(email: "submitter_#{i + 1}@example.com") do |user|
+    user.role = :submitter
+    user.first_name = "Submitter"
+    user.last_name = "Number#{i + 1}"
+    user.password = "P@ssword1"
+    user.confirmed_at = Time.now
+  end
+end
+
 # invite a usable super admin
 # safeguard for development only
 if Rails.env.development?
@@ -225,23 +235,87 @@ if PermitApplication.first.blank?
 
   # Creating Permit Applications
   puts "Seeding permit applications..."
+  review_managers = User.review_manager
+  published_template_versions = TemplateVersion.published
   submitters = User.submitter
-  template_version = TemplateVersion.published.first
+
   20.times do |index|
-    PermitApplication.create!(
-      submitter_id: submitters.sample.id,
-      full_address: "123 Address st",
-      pid: "999999999",
-      jurisdiction_id:
-        index.even? ? jurisdictions.first(10).sample.id : north_van.id,
-      activity_id: template_version.activity.id,
-      permit_type_id: template_version.permit_type.id,
-      template_version: template_version
-    )
+    current_review_manager = review_managers.sample
+    current_jurisdiction_id =
+      index.even? ? jurisdictions.first(10).sample.id : north_van.id
+
+    permit_project =
+      PermitProject.create!(
+        owner: current_review_manager,
+        jurisdiction_id: current_jurisdiction_id,
+        title: "Project for Seed Application #{index + 1}",
+        full_address: "123 Seed Street #{index + 1}, Seedville",
+        pid: "SEEDPID#{index + 1}",
+        pin: "SEEDPIN#{index + 1}"
+      )
+
+    # Create one main permit application
+    template_version = published_template_versions.sample
+    permit_application =
+      PermitApplication.create!(
+        submitter: current_review_manager,
+        permit_project: permit_project,
+        activity_id: template_version.activity.id,
+        permit_type_id: template_version.permit_type.id,
+        template_version: template_version
+      )
+
+    # Assign a random collaborator as a submission delegatee to the main application
+    collaborator_user = (submitters.to_a - [current_review_manager]).sample
+    if collaborator_user
+      collaborator =
+        Collaborator.find_or_create_by!(
+          user: collaborator_user,
+          collaboratorable_id: current_review_manager.id,
+          collaboratorable_type: "User"
+        )
+      PermitCollaboration.create!(
+        permit_application: permit_application,
+        collaborator: collaborator,
+        collaboration_type: :submission,
+        collaborator_type: :delegatee
+      )
+    end
+
+    # Create additional draft permits
+    rand(2..5).times do
+      draft_template_version = published_template_versions.sample
+      draft_permit_application =
+        PermitApplication.create!(
+          submitter: current_review_manager,
+          permit_project: permit_project,
+          activity_id: draft_template_version.activity.id,
+          permit_type_id: draft_template_version.permit_type.id,
+          template_version: draft_template_version,
+          status: :new_draft
+        )
+      # Assign a random collaborator as a submission delegatee to the draft application
+      collaborator_user = (submitters.to_a - [current_review_manager]).sample
+      if collaborator_user
+        collaborator =
+          Collaborator.find_or_create_by!(
+            user: collaborator_user,
+            collaboratorable_id: current_review_manager.id,
+            collaboratorable_type: "User"
+          )
+        PermitCollaboration.create!(
+          permit_application: draft_permit_application,
+          collaborator: collaborator,
+          collaboration_type: :submission,
+          collaborator_type: :delegatee
+        )
+      end
+    end
   end
   # Seed a North Vancouver Example
-  4.times do
-    pid =
+  4.times do |i| # Added index i for unique titles if needed
+    current_review_manager = review_managers.sample
+    project_pid =
       (
         if (north_van.locality_type == "corporation of the city")
           "013228544"
@@ -249,23 +323,81 @@ if PermitApplication.first.blank?
           "008535981"
         end
       )
-    full_address =
+    project_full_address =
       (
         if (north_van.locality_type == "corporation of the city")
-          "323 18TH ST E, NORTH VANCOUVER, BC, V7L 2X8"
+          "323 18th St E, North Vancouver, BC, V7L 2X8"
         else
-          "5419 ESPERANZA DR, NORTH VANCOUVER, BC, V7R 3W3"
+          "5419 Esperanza Dr, North Vancouver, BC, V7R 3W3"
         end
       )
-    PermitApplication.create!(
-      submitter: submitters.sample,
-      jurisdiction: north_van,
-      activity_id: template_version.activity.id,
-      permit_type_id: template_version.permit_type.id,
-      full_address: full_address,
-      template_version: template_version,
-      pid: pid
-    )
+
+    permit_project =
+      PermitProject.create!(
+        owner: current_review_manager,
+        jurisdiction: north_van,
+        full_address: project_full_address,
+        pid: project_pid
+      )
+
+    # Create one main permit application
+    template_version = published_template_versions.sample
+    permit_application =
+      PermitApplication.create!(
+        nickname: "Permit application #{i + 1}",
+        submitter: current_review_manager,
+        permit_project: permit_project,
+        activity_id: template_version.activity.id,
+        permit_type_id: template_version.permit_type.id,
+        template_version: template_version
+      )
+
+    # Assign a random collaborator as a submission delegatee
+    collaborator_user = (submitters.to_a - [current_review_manager]).sample
+    if collaborator_user
+      collaborator =
+        Collaborator.find_or_create_by!(
+          user: collaborator_user,
+          collaboratorable_id: current_review_manager.id,
+          collaboratorable_type: "User"
+        )
+      PermitCollaboration.create!(
+        permit_application: permit_application,
+        collaborator: collaborator,
+        collaboration_type: :submission,
+        collaborator_type: :delegatee
+      )
+    end
+
+    # Create additional draft permits
+    rand(2..5).times do
+      draft_template_version = published_template_versions.sample
+      draft_permit_application =
+        PermitApplication.create!(
+          submitter: current_review_manager,
+          permit_project: permit_project,
+          activity_id: draft_template_version.activity.id,
+          permit_type_id: draft_template_version.permit_type.id,
+          template_version: draft_template_version,
+          status: :new_draft
+        )
+      # Assign a random collaborator as a submission delegatee to the draft application
+      collaborator_user = (submitters.to_a - [current_review_manager]).sample
+      if collaborator_user
+        collaborator =
+          Collaborator.find_or_create_by!(
+            user: collaborator_user,
+            collaboratorable_id: current_review_manager.id,
+            collaboratorable_type: "User"
+          )
+        PermitCollaboration.create!(
+          permit_application: draft_permit_application,
+          collaborator: collaborator,
+          collaboration_type: :submission,
+          collaborator_type: :delegatee
+        )
+      end
+    end
   end
 end
 PermitApplication.reindex
@@ -273,10 +405,10 @@ PermitApplication.reindex
 puts "Seeding jurisdiction customizations..."
 TemplateVersion
   .limit(3)
-  .each do |template_version|
+  .each do |tv|
     JurisdictionTemplateVersionCustomization.find_or_create_by!(
       jurisdiction: north_van,
-      template_version: template_version
+      template_version: tv
     ) do |customization|
       # any other data to add
     end
@@ -327,3 +459,7 @@ if Rails.env.development?
   site_config = SiteConfiguration.instance
   site_config.update(inbox_enabled: true)
 end
+
+puts "Seeding Permit Projects from Permit Applications..."
+PermitProjectSeederService.call
+PermitProject.reindex

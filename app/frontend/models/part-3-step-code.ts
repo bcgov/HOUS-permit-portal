@@ -2,19 +2,23 @@ import { Instance, types } from "mobx-state-tree"
 import { withEnvironment } from "../lib/with-environment"
 import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
-import { EEnergyStep, EZeroCarbonStep } from "../types/enums"
+import { EEnergyStep, EStepCodeType, EZeroCarbonStep } from "../types/enums"
 import { Part3StepCodeChecklistModel } from "./part-3-step-code-checklist"
-
-export const Part3StepCodeType = "Part3StepCode"
+import { StepCodeBaseFields } from "./step-code-base"
 
 export const Part3StepCodeModel = types
-  .model("Part3StepCodeModel", {
-    id: types.identifier,
-    type: types.literal(Part3StepCodeType),
-    checklist: types.maybeNull(types.late(() => Part3StepCodeChecklistModel)),
-    zeroCarbonSteps: types.array(types.enumeration(Object.values(EZeroCarbonStep))),
-    energySteps: types.array(types.enumeration(Object.values(EEnergyStep))),
-  })
+  .compose(
+    "Part3StepCodeModel",
+    StepCodeBaseFields,
+    types.model({
+      id: types.identifier,
+      type: types.literal(EStepCodeType.part3StepCode),
+      checklist: types.maybeNull(types.late(() => Part3StepCodeChecklistModel)),
+      zeroCarbonSteps: types.array(types.enumeration(Object.values(EZeroCarbonStep))),
+      energySteps: types.array(types.enumeration(Object.values(EEnergyStep))),
+      isFullyLoaded: types.optional(types.boolean, false),
+    })
+  )
   .extend(withEnvironment())
   .extend(withRootStore())
   .extend(withMerge())

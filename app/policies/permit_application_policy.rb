@@ -1,8 +1,6 @@
 class PermitApplicationPolicy < ApplicationPolicy
   # All user types can use the search permit application
   def index?
-    return true if user.super_admin?
-
     if record.submitter == user ||
          record.collaborator?(user_id: user.id, collaboration_type: :submission)
       true
@@ -64,12 +62,20 @@ class PermitApplicationPolicy < ApplicationPolicy
   end
 
   def generate_missing_pdfs?
-    user.super_admin? || (user.submitter? && record.submitter == user) ||
+    user.super_admin? || record.submitter == user ||
       ((user.review_staff?) && user.member_of?(record.jurisdiction_id))
   end
 
   def finalize_revision_requests?
-    user.review_staff? && record.submitted?
+    return false unless user.review_staff? && record.submitted?
+
+    feature_enabled =
+      SiteConfiguration.allow_designated_reviewer? &&
+        record.jurisdiction.allow_designated_reviewer
+
+    return true unless feature_enabled
+
+    record.permit_collaborations.review.exists?(collaborator_id: user.id)
   end
 
   def create_permit_collaboration?

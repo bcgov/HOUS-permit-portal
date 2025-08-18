@@ -28,10 +28,11 @@ import { UnitSelect } from "../../../shared/select/selectors/unit-select"
 import { EditableGroup, TEditableGroupProps } from "./editable-group"
 import { GenericContactEdit } from "./generic-contact-edit"
 import { PidInfoEdit } from "./pid-info-edit"
-import { IControlProps, TIsMultipleFilesCheckboxProps } from "./types"
+import { IControlProps, TEditableInstructionsTextProps, TIsMultipleFilesCheckboxProps } from "./types"
 
 export type TRequirementEditProps<TFieldValues extends FieldValues> = TEditableGroupProps<TFieldValues> & {
   unitSelectProps?: IControlProps<TFieldValues>
+  editableInstructionsTextProps?: TEditableInstructionsTextProps<TFieldValues>
   multiOptionProps?: {
     useFieldArrayProps: UseFieldArrayProps<TFieldValues>
     onOptionValueChange: (optionIndex: number, optionValue: string) => void
@@ -452,6 +453,7 @@ const requirementsComponentMap = {
         },
       },
       { type: ERequirementContactFieldItemType.professionalAssociation },
+      { type: ERequirementContactFieldItemType.contactType },
       {
         type: ERequirementContactFieldItemType.professionalNumber,
         containerProps: {

@@ -9,6 +9,17 @@ import {
   TConditional,
 } from "./types"
 
+// Define the common file structure for API attachments
+export interface IUppyAttachmentFile {
+  id: string
+  storage?: string
+  metadata: {
+    size: number
+    filename: string
+    mimeType: string
+  }
+}
+
 export interface IFormConditional {
   when: string
   operand: string
@@ -20,6 +31,7 @@ export interface IRequirementAttributes {
   label?: string
   inputType?: ERequirementType
   hint?: string
+  instructions?: string
   required?: boolean
   requirementCode: string
   elective?: boolean
@@ -48,15 +60,7 @@ export interface IRequirementBlockParams {
   requirementDocumentsAttributes?: Array<{
     id?: string
     _destroy?: boolean
-    file: {
-      id: string
-      storage: string
-      metadata: {
-        size: number
-        filename: string
-        mimeType: string
-      }
-    }
+    file: IUppyAttachmentFile
   }>
 }
 
@@ -101,9 +105,10 @@ export interface IInvitePreviewersParams {
 }
 
 export interface ISiteConfigurationUpdateParams {
-  displaySitewideMessage?: boolean
-  sitewideMessage?: string
-  inboxEnabled?: boolean
+  displaySitewideMessage?: boolean | null
+  inboxEnabled?: boolean | null
+  allowDesignatedReviewer?: boolean | null
+  sitewideMessage?: string | null
   helpLinkItems?: IHelpLinkItems
   revisionReasonsMap?: { [key: string]: IRevisionReason }
   landingPageEarlyAccessRequirementTemplateIds?: string[] | null
@@ -127,4 +132,19 @@ export interface IExternalApiKeyParams {
 
 export interface IIntegrationMappingUpdateParams {
   simplifiedMap?: ISimplifiedRequirementsMap
+}
+
+// Added for Permit Project Updates
+export interface IProjectDocumentAttribute {
+  id?: string
+  permitProjectId?: string
+  file?: IUppyAttachmentFile
+  _destroy?: boolean
+}
+
+export interface IPermitProjectUpdateParams {
+  description?: string
+  title?: string
+  // other PermitProject fields that can be updated
+  projectDocumentsAttributes?: IProjectDocumentAttribute[]
 }

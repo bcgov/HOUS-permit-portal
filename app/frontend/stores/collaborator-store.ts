@@ -16,7 +16,7 @@ export const CollaboratorStoreModel = types
       collaboratorSearchList: types.array(types.reference(CollaboratorModel)),
       searchContext: types.maybeNull(types.enumeration(Object.values(ECollaborationType))),
     }),
-    createSearchModel<never>("searchCollaborators", undefined, true)
+    createSearchModel<never>("searchCollaborators", undefined)
   )
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -110,10 +110,7 @@ export const CollaboratorStoreModel = types
         self.mergeUpdateAll(response.data.data, "collaboratorMap")
         self.setCollaboratorSearchList(response.data.data)
 
-        self.currentPage = opts?.page ?? self.currentPage
-        self.totalPages = response.data.meta.totalPages
-        self.totalCount = response.data.meta.totalCount
-        self.countPerPage = opts?.countPerPage ?? self.countPerPage
+        self.setPageFields(response.data.meta, opts)
       }
       return response.ok
     }),

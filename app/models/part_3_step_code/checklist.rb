@@ -1,7 +1,17 @@
 class Part3StepCode::Checklist < ApplicationRecord
   self.table_name = "part_3_step_code_checklists"
 
-  belongs_to :step_code, optional: true
+  delegate :newly_submitted_at,
+           :building_permit_number,
+           to: :step_code,
+           allow_nil: true
+
+  belongs_to :step_code,
+             optional: true,
+             class_name: "Part3StepCode",
+             foreign_key: "step_code_id",
+             inverse_of: :checklist
+  accepts_nested_attributes_for :step_code, update_only: true
 
   has_many :occupancy_classifications, dependent: :destroy
   has_many :baseline_occupancies,
@@ -32,15 +42,6 @@ class Part3StepCode::Checklist < ApplicationRecord
            class_name: "Part3StepCode::EnergyOutput",
            dependent: :destroy
   accepts_nested_attributes_for :modelled_energy_outputs, allow_destroy: true
-
-  delegate :building_permit_number,
-           :nickname,
-           :jurisdiction_name,
-           :full_address,
-           :pid,
-           :status,
-           :newly_submitted_at,
-           to: :step_code
 
   enum building_code_version: %i[
          revision_1
@@ -173,6 +174,8 @@ class Part3StepCode::Checklist < ApplicationRecord
   private
 
   def set_climate_info
+    return unless step_code&.permit_application
+
     self.heating_degree_days ||= step_code.jurisdiction_heating_degree_days
     self.climate_zone ||=
       StepCode::Part3::V0::Requirements::References::ClimateZone.value(

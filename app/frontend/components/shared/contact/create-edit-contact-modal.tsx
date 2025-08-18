@@ -1,6 +1,7 @@
 import {
   Button,
   Flex,
+  Grid,
   Heading,
   Modal,
   ModalBody,
@@ -18,7 +19,7 @@ import { useMst } from "../../../setup/root"
 import { IContact } from "../../../types/types"
 import { convertE164PhoneToInputDefault } from "../../../utils/utility-functions"
 import { EmailFormControl } from "../form/email-form-control"
-import { PhoneFormControl, TextFormControl } from "../form/input-form-control"
+import { PhoneFormControl, SelectFormControl, TextFormControl } from "../form/input-form-control"
 import { RemoveConfirmationModal } from "../modals/remove-confirmation-modal"
 
 export type TContactFormData = {
@@ -36,6 +37,7 @@ export type TContactFormData = {
   businessName: string
   professionalAssociation: string
   professionalNumber: string
+  contactType: string
 }
 
 type UseDisclosureReturnType = ReturnType<typeof useDisclosure>
@@ -57,6 +59,28 @@ export const CreateEditContactModal = ({
   const { contactStore } = useMst()
   const { createContact, updateContact, destroyContact } = contactStore
 
+  const generalContactTypes = t("contact.contactTypes.general", { returnObjects: true }) as Record<string, string>
+  const professionalContactTypes = t("contact.contactTypes.professional", { returnObjects: true }) as Record<
+    string,
+    string
+  >
+  const contactTypeOptionGroups = [
+    {
+      label: "General",
+      options: Object.entries(generalContactTypes).map(([value, label]) => ({
+        value: value,
+        label: label,
+      })),
+    },
+    {
+      label: "Professional",
+      options: Object.entries(professionalContactTypes).map(([value, label]) => ({
+        value: value,
+        label: label,
+      })),
+    },
+  ]
+
   const getDefaultValues = () => {
     return {
       firstName: contact?.firstName ?? "",
@@ -72,6 +96,7 @@ export const CreateEditContactModal = ({
       businessName: contact?.businessName ?? "",
       professionalAssociation: contact?.professionalAssociation ?? "",
       professionalNumber: contact?.professionalNumber ?? "",
+      contactType: contact?.contactType ?? "",
     }
   }
 
@@ -116,6 +141,12 @@ export const CreateEditContactModal = ({
         <ModalBody py={6}>
           <FormProvider {...formMethods}>
             <Flex direction="column" gap={2} border="1px solid" borderColor="border.light" p={4}>
+              <SelectFormControl
+                label={t("contact.fields.contactType")}
+                fieldName="contactType"
+                optionGroups={contactTypeOptionGroups}
+                required
+              />
               <Flex direction={{ base: "column", md: "row" }} gap={2}>
                 <TextFormControl label={t("contact.fields.firstName")} fieldName="firstName" required />
                 <TextFormControl label={t("contact.fields.lastName")} fieldName="lastName" required />
@@ -128,18 +159,21 @@ export const CreateEditContactModal = ({
               <PhoneFormControl label={t("contact.fields.cell")} fieldName="cell" />
               <TextFormControl label={t("contact.fields.title")} fieldName="title" />
               <TextFormControl label={t("contact.fields.address")} fieldName="address" />
-              <Flex direction={{ base: "column", md: "row" }} gap={2}>
+              <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={4}>
                 <TextFormControl label={t("contact.fields.organization")} fieldName="organization" />
                 <TextFormControl label={t("contact.fields.department")} fieldName="department" />
-              </Flex>
-              <TextFormControl label={t("contact.fields.businessName")} fieldName="businessName" />
-              <Flex direction={{ base: "column", md: "row" }} gap={2}>
+              </Grid>
+              <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={4}>
+                <TextFormControl label={t("contact.fields.businessName")} fieldName="businessName" />
+                <TextFormControl label={t("contact.fields.businessLicense")} fieldName="businessLicense" />
+              </Grid>
+              <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={4}>
                 <TextFormControl
                   label={t("contact.fields.professionalAssociation")}
                   fieldName="professionalAssociation"
                 />
                 <TextFormControl label={t("contact.fields.professionalNumber")} fieldName="professionalNumber" />
-              </Flex>
+              </Grid>
               <Flex w="full" justify="space-between">
                 <Button
                   variant="primary"

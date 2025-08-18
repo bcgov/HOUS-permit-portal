@@ -78,6 +78,14 @@ class RequirementTemplate < ApplicationRecord
   validate :validate_step_code_related_dependencies
   validate :public_only_for_early_access_preview
 
+  before_validation :set_default_nickname
+
+  def set_default_nickname
+    return if nickname.present?
+
+    self.nickname ||= label
+  end
+
   def assignee
     nil
   end
@@ -108,6 +116,8 @@ class RequirementTemplate < ApplicationRecord
   end
 
   def label
+    return "New template" if permit_type.nil? || activity.nil?
+
     "#{permit_type.name} | #{activity.name}#{first_nations ? " (" + I18n.t("activerecord.attributes.requirement_template.first_nations") + ")" : ""}"
   end
 

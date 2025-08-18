@@ -30,7 +30,8 @@ RSpec.describe Api::Concerns::Search::PermitApplications,
       :permit_application,
       3,
       submitter: submitter,
-      jurisdiction: jurisdiction
+      permit_project:
+        create(:permit_project, jurisdiction: jurisdiction, owner: submitter)
     )
   end
 
@@ -40,7 +41,8 @@ RSpec.describe Api::Concerns::Search::PermitApplications,
       3,
       :revisions_requested,
       submitter: submitter,
-      jurisdiction: jurisdiction
+      permit_project:
+        create(:permit_project, jurisdiction: jurisdiction, owner: submitter)
     )
   end
 
@@ -50,7 +52,8 @@ RSpec.describe Api::Concerns::Search::PermitApplications,
       3,
       :newly_submitted,
       submitter: submitter,
-      jurisdiction: jurisdiction
+      permit_project:
+        create(:permit_project, jurisdiction: jurisdiction, owner: submitter)
     )
   end
 
@@ -60,7 +63,8 @@ RSpec.describe Api::Concerns::Search::PermitApplications,
       3,
       :resubmitted,
       submitter: submitter,
-      jurisdiction: jurisdiction
+      permit_project:
+        create(:permit_project, jurisdiction: jurisdiction, owner: submitter)
     )
   end
 
@@ -70,7 +74,12 @@ RSpec.describe Api::Concerns::Search::PermitApplications,
       3,
       :newly_submitted,
       submitter: submitter,
-      jurisdiction: other_jurisdiction
+      permit_project:
+        create(
+          :permit_project,
+          jurisdiction: other_jurisdiction,
+          owner: submitter
+        )
     )
   end
 
@@ -80,7 +89,12 @@ RSpec.describe Api::Concerns::Search::PermitApplications,
       3,
       :resubmitted,
       submitter: submitter,
-      jurisdiction: other_jurisdiction
+      permit_project:
+        create(
+          :permit_project,
+          jurisdiction: other_jurisdiction,
+          owner: submitter
+        )
     )
   end
 
@@ -89,7 +103,12 @@ RSpec.describe Api::Concerns::Search::PermitApplications,
       :permit_application,
       3,
       submitter: other_submitter,
-      jurisdiction: jurisdiction
+      permit_project:
+        create(
+          :permit_project,
+          jurisdiction: jurisdiction,
+          owner: other_submitter
+        )
     )
   end
 
@@ -98,7 +117,12 @@ RSpec.describe Api::Concerns::Search::PermitApplications,
       :permit_application,
       3,
       submitter: other_submitter,
-      jurisdiction: other_jurisdiction
+      permit_project:
+        create(
+          :permit_project,
+          jurisdiction: other_jurisdiction,
+          owner: other_submitter
+        )
     )
   end
 
@@ -123,6 +147,9 @@ RSpec.describe Api::Concerns::Search::PermitApplications,
       end
 
       it "returns only own permit applications" do
+        expected_pa = draft_permit_applications.first
+        # Then inspect its search_data:
+        puts expected_pa.search_data.to_json
         controller.perform_permit_application_search
         expect(
           controller.instance_variable_get(:@permit_application_search).results

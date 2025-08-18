@@ -1,6 +1,5 @@
 import { Text, View } from "@react-pdf/renderer"
 import { t } from "i18next"
-import * as R from "ramda"
 import React from "react"
 import { IPart3StepCodeChecklist } from "../../../../../../../models/part-3-step-code-checklist"
 import { Field } from "../../../../part-9/checklist/pdf-content/shared/field"
@@ -21,15 +20,16 @@ interface IProps {
 export const StepCodePerformanceSummary = function StepCodePart3ChecklistPDFStepCodePerformanceSummary({
   checklist,
 }: IProps) {
-  const isMixedUse = checklist.stepCodeOccupancies.length + checklist.baselineOccupancies.length > 1
-  const isBaseline = R.isEmpty(checklist.stepCodeOccupancies)
-
+  const stepCodeOccs = Array.isArray(checklist?.stepCodeOccupancies) ? checklist.stepCodeOccupancies : []
+  const baselineOccs = Array.isArray(checklist?.baselineOccupancies) ? checklist.baselineOccupancies : []
+  const isMixedUse = stepCodeOccs.length + baselineOccs.length > 1
+  const isBaseline = stepCodeOccs.length === 0
   let occupancyName: string
   if (!isMixedUse) {
     if (isBaseline) {
-      occupancyName = t(`stepCode.part3.baselineOccupancyKeys.${checklist.baselineOccupancies?.[0]?.key}`)
+      occupancyName = t(`stepCode.part3.baselineOccupancyKeys.${baselineOccs?.[0]?.key}`)
     } else {
-      occupancyName = t(`stepCode.part3.stepCodeOccupancyKeys.${checklist.stepCodeOccupancies?.[0]?.key}`)
+      occupancyName = t(`stepCode.part3.stepCodeOccupancyKeys.${stepCodeOccs?.[0]?.key}`)
     }
   }
   return (

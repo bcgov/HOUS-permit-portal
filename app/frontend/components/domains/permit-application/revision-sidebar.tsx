@@ -34,6 +34,7 @@ import ConfirmationModal from "../../shared/modals/confirmation-modal"
 import { ScrollLink } from "../../shared/permit-applications/scroll-link"
 import { RevisionModal } from "../../shared/revisions/revision-modal"
 import SubmissionVersionSelect from "../../shared/select/selectors/submission-version-select"
+import { DesignatedReviewerModal } from "./designated-reviewer-modal"
 
 interface IRevisionSideBarProps {
   permitApplication: IPermitApplication
@@ -129,6 +130,11 @@ export const RevisionSideBar = observer(
     }, [isMounted])
 
     const { isOpen, onOpen, onClose } = useDisclosure()
+    const {
+      isOpen: isDesignatedReviewerModalOpen,
+      onOpen: onDesignatedReviewerModalOpen,
+      onClose: onDesignatedReviewerModalClose,
+    } = useDisclosure()
 
     const onFinalizeRevisions = async () => {
       const ok = await permitApplication.finalizeRevisionRequests()
@@ -181,17 +187,27 @@ export const RevisionSideBar = observer(
           <ConfirmationModal
             promptHeader={t("permitApplication.show.revision.confirmHeader")}
             promptMessage={t("permitApplication.show.revision.confirmMessage")}
-            renderTrigger={(onOpen) => (
-              <Button
-                variant="primary"
-                border={0}
-                rightIcon={<PaperPlaneTilt />}
-                onClick={onOpen}
-                isDisabled={permitApplication.isRevisionsRequested || fields?.length == 0}
-              >
-                {t("permitApplication.show.revision.send")}
-              </Button>
-            )}
+            renderTrigger={(onConfirmationModalOpen) => {
+              const showDesignatedReviewerModal = permitApplication.shouldShowDesignatedReviewerModal
+              const handleClick = () => {
+                if (showDesignatedReviewerModal) {
+                  onDesignatedReviewerModalOpen()
+                } else {
+                  onConfirmationModalOpen()
+                }
+              }
+              return (
+                <Button
+                  variant="primary"
+                  border={0}
+                  rightIcon={<PaperPlaneTilt />}
+                  onClick={handleClick}
+                  isDisabled={permitApplication.isRevisionsRequested || fields?.length == 0}
+                >
+                  {t("permitApplication.show.revision.send")}
+                </Button>
+              )
+            }}
             onConfirm={onFinalizeRevisions}
           />
           {onCancel && (
@@ -326,6 +342,11 @@ export const RevisionSideBar = observer(
             disableInput={forSubmitter || isViewingPastRequests}
           />
         )}
+        <DesignatedReviewerModal
+          isOpen={isDesignatedReviewerModalOpen}
+          onClose={onDesignatedReviewerModalClose}
+          designatedReviewer={permitApplication.designatedReviewer}
+        />
         {sendRevisionContainerRef && tabIndex == 0 && (
           <Portal containerRef={sendRevisionContainerRef}>
             <Flex gap={4} align="center">

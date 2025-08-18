@@ -38,8 +38,6 @@ export const SearchGrid = ({
         },
         ...sx,
       }}
-      border={"1px solid"}
-      borderColor={"border.light"}
       borderRadius={"sm"}
       {...containerProps}
     >

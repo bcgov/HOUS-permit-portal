@@ -69,4 +69,13 @@ class ExternalApi::ApplicationController < ActionController::API
       }
     ) and return
   end
+
+  def page_meta(search_results)
+    {
+      total_pages: search_results.total_pages,
+      total_count: search_results.total_count,
+      current_page: search_results.current_page,
+      per_page: search_results.limit_value
+    }
+  end
 end

@@ -4,13 +4,14 @@ class PermitApplication < ApplicationRecord
   include StepCodeFieldExtraction
   include ZipfileUploader.Attachment(:zipfile)
   include PermitApplicationStatus
+  include ProjectItem
+  has_parent :permit_project
 
   SEARCH_INCLUDES = %i[
     permit_type
     submission_versions
     step_code
     activity
-    jurisdiction
     submitter
     permit_collaborations
   ]
@@ -26,20 +27,23 @@ class PermitApplication < ApplicationRecord
              text_end: %i[number]
 
   belongs_to :submitter, class_name: "User"
-  belongs_to :jurisdiction
   belongs_to :permit_type
   belongs_to :activity
   belongs_to :template_version
   belongs_to :sandbox, optional: true
+  belongs_to :permit_project, optional: true, touch: true
+
+  has_one :requirement_template, through: :template_version
 
   # The front end form update provides a json paylioad of items we want to force update on the front-end since form io maintains its own state and does not 'rerender' if we send the form data back
   attr_accessor :front_end_form_update
 
-  has_one :step_code, dependent: :destroy
   has_many :submission_versions, dependent: :destroy
   has_many :permit_collaborations, dependent: :destroy
   has_many :collaborators, through: :permit_collaborations
   has_many :permit_block_statuses, dependent: :destroy
+
+  has_one :step_code, dependent: :destroy
 
   scope :submitted, -> { joins(:submission_versions).distinct }
 
@@ -49,24 +53,19 @@ class PermitApplication < ApplicationRecord
 
   # Custom validation
 
+  validate :jurisdiction_or_permit_project_present
   validate :jurisdiction_has_matching_submission_contact
-  validates :nickname, presence: true
   validates :number, presence: true
   validates :reference_number, length: { maximum: 300 }, allow_nil: true
   validate :sandbox_belongs_to_jurisdiction
   validate :template_version_of_live_template
 
-  delegate :qualified_name,
-           :heating_degree_days,
-           :name,
-           to: :jurisdiction,
-           prefix: true
   delegate :code, :name, to: :permit_type, prefix: true
   delegate :code, :name, to: :activity, prefix: true
   delegate :published_template_version, to: :template_version
 
-  before_validation :assign_default_nickname, on: :create
   before_validation :assign_unique_number, on: :create
+  before_validation :assign_default_nickname, on: :create
   before_validation :set_template_version, on: :create
   before_validation :populate_base_form_data, on: :create
   before_save :take_form_customizations_snapshot_if_submitted
@@ -75,6 +74,7 @@ class PermitApplication < ApplicationRecord
   after_commit :send_submitted_webhook, if: :saved_change_to_status?
   after_commit :notify_user_reference_number_updated,
                if: :saved_change_to_reference_number?
+  after_commit :reindex_permit_project, if: :saved_change_to_status?
 
   scope :with_submitter_role,
         -> { joins(:submitter).where(users: { role: "submitter" }) }
@@ -195,36 +195,47 @@ class PermitApplication < ApplicationRecord
     )
   end
 
+  def template_nickname
+    template_version.requirement_template.nickname
+  end
+
   def search_data
     {
       number: number,
       nickname: nickname,
-      permit_classifications: "#{permit_type.name} #{activity.name}",
+      full_address: full_address,
+      permit_classifications: formatted_permit_classifications,
       submitter: "#{submitter.name} #{submitter.email}",
       submitted_at: submitted_at,
       resubmitted_at: resubmitted_at,
       viewed_at: viewed_at,
       status: status,
-      jurisdiction_id: jurisdiction.id,
+      jurisdiction_id: jurisdiction&.id,
       submitter_id: submitter.id,
       template_version_id: template_version.id,
       requirement_template_id: template_version.requirement_template.id,
       created_at: created_at,
       updated_at: updated_at,
-      using_current_template_version: using_current_template_version,
       user_ids_with_submission_edit_permissions:
         [submitter.id] +
           users_by_collaboration_options(collaboration_type: :submission).pluck(
             :id
           ),
-      review_delegatee_name:
-        users_by_collaboration_options(
-          collaboration_type: :review,
-          collaborator_type: :delegatee
-        ).first&.name,
+      review_delegatee_name: review_delegatee_name,
       has_collaborator: has_collaborator?,
-      sandbox_id: sandbox_id
+      sandbox_id: sandbox_id,
+      permit_project_id: permit_project_id,
+      submission_delegatee_id: submission_delegatee&.id
     }
+  end
+
+  def submission_delegatee
+    collaborators.where(
+      permit_collaborations: {
+        collaboration_type: :submission,
+        collaborator_type: :delegatee
+      }
+    ).first
   end
 
   def collaborator?(user_id:, collaboration_type:, collaborator_type: nil)
@@ -260,16 +271,12 @@ class PermitApplication < ApplicationRecord
       .compact
   end
 
-  def indexed_using_current_template_version
-    self.class.searchkick_index.retrieve(self)["using_current_template_version"]
-  end
-
   def formatted_permit_classifications
-    "#{permit_type.name} - #{activity.name}"
+    "#{activity.name} - #{permit_type.name}"
   end
 
   def using_current_template_version
-    self.template_version === current_published_template_version
+    TemplateVersion.cached_published_ids.include?(template_version_id)
   end
 
   def current_published_template_version
@@ -286,8 +293,8 @@ class PermitApplication < ApplicationRecord
       form_customizations_snapshot
     else
       jurisdiction
-        .jurisdiction_template_version_customizations
-        .find_by(template_version: template_version, sandbox_id: sandbox_id)
+        &.jurisdiction_template_version_customizations
+        &.find_by(template_version: template_version, sandbox_id: sandbox_id)
         &.customizations
     end
   end
@@ -298,7 +305,7 @@ class PermitApplication < ApplicationRecord
   end
 
   def number_prefix
-    jurisdiction.prefix
+    jurisdiction&.prefix
   end
 
   def notifiable_users
@@ -316,13 +323,17 @@ class PermitApplication < ApplicationRecord
     if submitted?
       relevant_collaborators =
         relevant_collaborators +
-          jurisdiction.review_managers if jurisdiction.review_managers.present?
+          (
+            jurisdiction&.review_managers || []
+          ) if jurisdiction&.review_managers.present?
       relevant_collaborators =
         relevant_collaborators +
-          jurisdiction.regional_review_managers if jurisdiction.regional_review_managers.present?
+          (
+            jurisdiction&.regional_review_managers || []
+          ) if jurisdiction&.regional_review_managers.present?
       relevant_collaborators =
         relevant_collaborators +
-          jurisdiction.reviewers if jurisdiction.reviewers.present?
+          (jurisdiction&.reviewers || []) if jurisdiction&.reviewers.present?
     end
 
     relevant_collaborators
@@ -444,6 +455,7 @@ class PermitApplication < ApplicationRecord
   def resubmitted_at
     return nil if submission_versions.length <= 1
     return latest_submission_version.created_at
+    #
   end
 
   def submit_event_notification_data
@@ -508,7 +520,7 @@ class PermitApplication < ApplicationRecord
   end
 
   def step_code_requirements
-    jurisdiction.permit_type_required_steps.where(permit_type_id:)
+    jurisdiction&.permit_type_required_steps&.where(permit_type_id:)
   end
 
   def energy_step_code_required?
@@ -596,6 +608,21 @@ class PermitApplication < ApplicationRecord
     end
   end
 
+  def review_delegatee_name
+    users_by_collaboration_options(
+      collaboration_type: :review,
+      collaborator_type: :delegatee
+    ).first&.name
+  end
+
+  def jurisdiction_name
+    jurisdiction&.qualified_name
+  end
+
+  def search_document_id
+    self.id # Ensures Searchkick uses the PermitApplication's own ID
+  end
+
   private
 
   def update_collaboration_assignments
@@ -603,8 +630,14 @@ class PermitApplication < ApplicationRecord
   end
 
   def assign_default_nickname
-    self.nickname =
-      "#{jurisdiction_qualified_name}: #{full_address || pid || pin || id}" if self.nickname.blank?
+    if nickname.blank? # Only attempt to default if nickname is not already provided
+      if permit_project.present?
+        self.nickname =
+          "#{formatted_permit_classifications} Application for #{permit_project.title}"
+      else
+        self.nickname = "#{full_address} - #{formatted_permit_classifications}"
+      end
+    end
   end
 
   def assign_unique_number
@@ -673,8 +706,8 @@ class PermitApplication < ApplicationRecord
 
     current_customizations =
       jurisdiction
-        .jurisdiction_template_version_customizations
-        .find_by(template_version: template_version)
+        &.jurisdiction_template_version_customizations
+        &.find_by(template_version: template_version)
         &.customizations
 
     return unless current_customizations.present?
@@ -689,10 +722,27 @@ class PermitApplication < ApplicationRecord
   end
 
   def reindex_jurisdiction_permit_application_size
-    return unless jurisdiction.present?
-    return unless new_record? || destroyed? || saved_change_to_jurisdiction_id?
+    return unless permit_project&.jurisdiction.present?
+    unless new_record? || destroyed? || saved_change_to_permit_project_id?
+      return
+    end
 
-    jurisdiction.reindex
+    permit_project.jurisdiction.reindex
+  end
+
+  def reindex_permit_project
+    permit_project&.reindex
+  end
+
+  def jurisdiction_or_permit_project_present
+    if jurisdiction.nil? && permit_project.nil?
+      errors.add(
+        :jurisdiction,
+        I18n.t(
+          "activerecord.errors.models.permit_application.attributes.jurisdiction.no_jurisdiction"
+        )
+      )
+    end
   end
 
   def submitter_must_have_role
@@ -707,6 +757,7 @@ class PermitApplication < ApplicationRecord
   end
 
   def jurisdiction_has_matching_submission_contact
+    return unless jurisdiction
     matching_contacts =
       PermitTypeSubmissionContact.where(
         jurisdiction: jurisdiction,
@@ -714,7 +765,7 @@ class PermitApplication < ApplicationRecord
       )
     if matching_contacts.empty?
       errors.add(
-        :jurisdiction,
+        :jurisdiction_id,
         I18n.t(
           "activerecord.errors.models.permit_application.attributes.jurisdiction.no_contact"
         )
@@ -724,6 +775,7 @@ class PermitApplication < ApplicationRecord
 
   def sandbox_belongs_to_jurisdiction
     return unless sandbox
+    return unless jurisdiction
 
     unless jurisdiction.sandboxes.include?(sandbox)
       errors.add(
