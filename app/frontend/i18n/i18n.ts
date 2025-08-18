@@ -1390,7 +1390,7 @@ Thank you,
             fuelTypes: {
               heading: "Fuel types",
               instructions:
-                "If your project uses fuel types other than electricity, natural gas, or district energy, you can provide details about them here. <br /><br />These additional fuel types are not listed in the BC Building Code. They are provided as a reference that can be used for compliance with the Zero Carbon Step Code at the discretion of the Authority Having Jurisdiction (AHJ).",
+                "If your project uses fuel types other than electricity, natural gas, or district energy, you can provide details about them here.",
               isRelevant:
                 "Does this project use any fuel types other than electricity, natural gas, or district energy?",
               fuelTypes: {
@@ -1412,7 +1412,7 @@ Thank you,
             additionalFuelTypes: {
               heading: "Additional fuel types",
               instructions:
-                "If your project uses other fuel types, you can enter them below. These fuel types are not included in the BC Building Code. The Authority Having Jurisdiction (AHJ) will decide if they meet the requirements of the Zero Carbon Step Code.<br/><br/>For your reference, emissions factors for some fuels have been imported from <download>National Inventory Report 1990-2020: Greenhouse Gas Sources and Sinks in Canada – Part 2. En81-4- 2020-2-eng.pdf</download>",
+                "If your project uses other fuel types, you can enter them below. Any fuel types used that are not listed in the BC Building Code are to be discussed with the AHJ for approval.<br/><br/>For your reference, emissions factors for some fuels have been imported from <download>National Inventory Report 1990-2020: Greenhouse Gas Sources and Sinks in Canada – Part 2. En81-4- 2020-2-eng.pdf</download>",
               description: {
                 label: "Fuel type",
                 hint: "Enter only one fuel type, additional types can be added later",
@@ -1435,13 +1435,13 @@ Thank you,
             baselinePerformance: {
               heading: "Baseline energy model performance",
               refAnnualThermalEnergyDemand: {
-                label: "Total annual thermal energy demand for baseline building",
+                label: "Total annual thermal energy use for baseline building",
                 units: "kWh",
                 hint: "Results for the baseline or reference building or building portion",
-                error: "Enter the total annual thermal energy demand for the baseline buidling",
+                error: "Enter the total annual thermal energy use for the baseline buidling",
               },
               refEnergyOutputs: {
-                label: "In the table, enter the annual energy demand for each fuel type",
+                label: "In the table, enter the annual energy use for each fuel type",
                 fuelType: "Fuel type",
                 annualEnergy: "Annual energy (kWh)",
                 emissionsFactor: "Emissions factor (kgCO<sub>2e</sub>/kWh)",
@@ -1475,13 +1475,13 @@ Thank you,
               hotel_motel: "Group C Hotel and motel",
               residential: "Group C Other residential",
               office: "Group D Office",
-              other: "Group D Other",
+              other: "Group D Other business and personal services occupancies",
               mercantile: "Group E Mercantile",
             },
             stepCodePerformanceRequirements: {
               heading: "Performance requirements for Step 2, 3, and 4 Buildings",
               instructions:
-                "If there are occupancies subject to Steps 2, 3, or 4 (not including Step 2 with a reference building) in your project, this section will collect additional details.",
+                "If there are occupancies subject to Steps 2, 3, or 4 (not including Step 2 with a reference building as outlined in Tables 10.2.3.3.-A to 10.2.3.3.-F) in your project, this section will collect additional details.",
               stepCodeRequirement: {
                 isCustom: {
                   label:
