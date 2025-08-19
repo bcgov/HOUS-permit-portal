@@ -14,27 +14,36 @@ export const InputSummaryForm = ({ onCalculate }: IInputSummaryFormProps) => {
 
   return (
     <Box as="form" p={4} borderWidth="1px" borderRadius="lg">
-      <Heading as="h2" size="lg" mb={6}>
-        {t(`${prefix}.title`)}
-      </Heading>
+      <Box mb={6} backgroundColor="gray.100" p={4} borderRadius="md">
+        <Heading as="h2" size="lg" mb={6} textAlign="center" textTransform="uppercase">
+          {t(`${prefix}.title`)}
+        </Heading>
+      </Box>
+
       <BuildingLocationFields i18nPrefix="singleZoneCoolingHeatingTool.inputSummary.buildingLocation" />
       <Divider my={10} />
-      <Heading as="h3" size="md" mb={4}>
-        {t(`${prefix}.calculationBasedOn.title`)}
-      </Heading>
-      <Grid templateColumns="repeat(2, 1fr)" gap={6}>
+      <Box mb={6} backgroundColor="gray.100" p={4} borderRadius="md">
+        <Heading as="h3" size="md" mb={4} textAlign="center" textTransform="uppercase">
+          {t(`${prefix}.calculationBasedOn.title`)}
+        </Heading>
+      </Box>
+      <Grid templateColumns="repeat(2, 1fr)" gap={6} mb={6}>
         <TextFormControl
           fieldName="calculationBasedOn.dimensionalInfo"
           label={t(`${prefix}.calculationBasedOn.dimensionalInfo`)}
         />
-        <TextFormControl fieldName="calculationBasedOn.stories" label={t(`${prefix}.calculationBasedOn.stories`)} />
-        <TextFormControl fieldName="climateData.weather" label={t(`${prefix}.climateData.weather`)} />
       </Grid>
-      <Grid templateColumns="repeat(2, 1fr)" gap={6}>
+      <Grid templateColumns="repeat(3, 1fr)" gap={6}>
+        <TextFormControl
+          fieldName="calculationBasedOn.attachment"
+          label={t(`${prefix}.calculationBasedOn.attachment`)}
+        />
         <TextFormControl
           fieldName="calculationBasedOn.frontFacing"
           label={t(`${prefix}.calculationBasedOn.frontFacing`)}
         />
+        <TextFormControl fieldName="calculationBasedOn.stories" label={t(`${prefix}.calculationBasedOn.stories`)} />
+
         <SelectFormControl
           fieldName="calculationBasedOn.assumed"
           label={t(`${prefix}.calculationBasedOn.assumed`)}

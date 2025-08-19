@@ -11,6 +11,11 @@ export const SingleZoneCoolingHeatingToolScreen = observer(() => {
   const { t } = useTranslation()
   const formMethods = useForm()
   const [showResults, setShowResults] = useState(false)
+  const [activeTabIndex, setActiveTabIndex] = useState(0)
+
+  const handleNextFromCoverSheet = () => {
+    setActiveTabIndex(1) // Switch to input summary tab
+  }
 
   const handleCalculate = () => {
     setShowResults(true)
@@ -32,14 +37,14 @@ export const SingleZoneCoolingHeatingToolScreen = observer(() => {
         {t("singleZoneCoolingHeatingTool.title")}
       </Heading>
       <FormProvider {...formMethods}>
-        <Tabs isLazy>
+        <Tabs isLazy index={activeTabIndex} onChange={setActiveTabIndex}>
           <TabList>
             <Tab>{t("singleZoneCoolingHeatingTool.tabs.compliance")}</Tab>
             <Tab>{t("singleZoneCoolingHeatingTool.tabs.inputSummary")}</Tab>
           </TabList>
           <TabPanels>
             <TabPanel>
-              <CoverSheetForm />
+              <CoverSheetForm onNext={handleNextFromCoverSheet} />
             </TabPanel>
             <TabPanel>
               <InputSummaryForm onCalculate={handleCalculate} />

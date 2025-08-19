@@ -1,44 +1,32 @@
-import { Box, Checkbox, Divider, Flex, Grid, Heading, Radio, RadioGroup, Stack, Text } from "@chakra-ui/react"
+import { Box, Button, Checkbox, Divider, Flex, Grid, Heading, Radio, RadioGroup, Stack, Text } from "@chakra-ui/react"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { NumberFormControl, TextFormControl } from "../../shared/form/input-form-control"
 import { BuildingLocationFields } from "./building-location-fields"
 
-export const CoverSheetForm = () => {
+interface ICoverSheetFormProps {
+  onNext: () => void
+}
+
+export const CoverSheetForm = ({ onNext }: ICoverSheetFormProps) => {
   const { t } = useTranslation()
   const prefix = "singleZoneCoolingHeatingTool.coverSheet"
 
   return (
     <Box as="form" p={4} borderWidth="1px" borderRadius="lg">
       <Box mb={6} backgroundColor="gray.100" p={4} borderRadius="md">
-        <Heading as="h2" size="lg" mb={6}>
+        <Heading as="h2" size="lg" mb={6} textAlign="center" textTransform="uppercase">
           {t(`${prefix}.title`)}
         </Heading>
         <Text as="p" mb={2}>
           {t(`${prefix}.helpText`)}
         </Text>
       </Box>
-      <Box display="flex" gap={10} mb={6}>
-        <Box width="80%">
-          <TextFormControl fieldName="drawingIssueFor" required label={t(`${prefix}.drawingIssueFor`)} />
-          <Text as="p" mb={2}>
-            {t(`${prefix}.drawingIssueForHelpText`)}
-          </Text>
-        </Box>
-        <Box width="20%">
-          <TextFormControl fieldName="projectNumber" required label={t(`${prefix}.projectNumber`)} />
-        </Box>
-      </Box>
       <Divider my={10} />
-      <Box mb={6} backgroundColor="gray.100" p={4} borderRadius="md">
-        <Heading as="h2" size="lg" mb={6}>
-          {t(`${prefix}.buildingLocation.title`)}
-        </Heading>
-      </Box>
       <BuildingLocationFields i18nPrefix="singleZoneCoolingHeatingTool.coverSheet.buildingLocation" />
       <Divider my={10} />
       <Box mb={6} backgroundColor="gray.100" p={4} borderRadius="md">
-        <Heading as="h3" size="md" mb={4}>
+        <Heading as="h3" size="md" mb={4} textAlign="center" textTransform="uppercase">
           {t(`${prefix}.compliance.title`)}
         </Heading>
       </Box>
@@ -65,7 +53,7 @@ export const CoverSheetForm = () => {
       </Flex>
       <Divider my={10} />
       <Box mb={6} backgroundColor="gray.100" p={4} borderRadius="md">
-        <Heading as="h3" size="md" mb={4}>
+        <Heading as="h3" size="md" mb={4} textAlign="center" textTransform="uppercase">
           {t(`${prefix}.heating.title`)}
         </Heading>
       </Box>
@@ -93,7 +81,7 @@ export const CoverSheetForm = () => {
       </Text>
       <Divider my={10} />
       <Box mb={6} backgroundColor="gray.100" p={4} borderRadius="md">
-        <Heading as="h3" size="md" mb={4}>
+        <Heading as="h3" size="md" mb={4} textAlign="center" textTransform="uppercase">
           {t(`${prefix}.cooling.title`)}
         </Heading>
       </Box>
@@ -144,67 +132,118 @@ export const CoverSheetForm = () => {
       </Text>
       <Divider my={10} />
       <Box mb={6} backgroundColor="gray.100" p={4} borderRadius="md">
-        <Heading as="h3" size="md" mb={4}>
+        <Heading as="h3" size="md" mb={4} textAlign="center" textTransform="uppercase">
           {t(`${prefix}.attachedDocuments.title`)}
         </Heading>
       </Box>
 
-      <Heading as="h3" size="md" mt={10} mb={4}>
-        {t(`${prefix}.attachedDocuments.title`)}
-      </Heading>
-      <Text as="p" mt={8} mb={2}>
+      <Flex gap={6} mt={8} mb={2}>
         <Checkbox defaultChecked>{t(`${prefix}.attachedDocuments.designSummary`)}</Checkbox>
-      </Text>
-      <Text as="p" mt={8} mb={2}>
         <Checkbox defaultChecked>{t(`${prefix}.attachedDocuments.roomByRoomResults`)}</Checkbox>
-      </Text>
+      </Flex>
 
-      <Text as="p" mt={8} mb={2}>
+      <Text as="p" mt={4} mb={2}>
+        {t(`${prefix}.other`)}
+        <TextFormControl fieldName="other" />
+      </Text>
+      <Text as="p" mt={4} mb={2}>
         {t(`${prefix}.notes`)}
         <TextFormControl fieldName="notes" />
       </Text>
       <Divider my={10} />
-      <Heading as="h3" size="md" mt={10} mb={4}>
-        {t(`${prefix}.calculationPerformedBy.title`)}
-      </Heading>
-      <Text as="p" mt={8} mb={2}>
-        {t(`${prefix}.calculationPerformedBy.helpText`)}
-      </Text>
+      <Box mb={6} backgroundColor="gray.100" p={4} borderRadius="md">
+        <Heading as="h3" size="md" mb={4} textAlign="center" textTransform="uppercase">
+          {t(`${prefix}.calculationPerformedBy.title`)}
+        </Heading>
+      </Box>
       <Grid templateColumns="repeat(2, 1fr)" gap={6}>
-        <TextFormControl fieldName="calculationPerformedBy.name" label={t(`${prefix}.calculationPerformedBy.name`)} />
         <TextFormControl
+          required
+          fieldName="calculationPerformedBy.name"
+          label={t(`${prefix}.calculationPerformedBy.name`)}
+        />
+        <Box>
+          <TextFormControl
+            required
+            fieldName="calculationPerformedBy.attestation"
+            label={t(`${prefix}.calculationPerformedBy.attestation`)}
+          />
+          <Text as="p" mt={1} mb={2}>
+            {t(`${prefix}.calculationPerformedBy.helpText`)}
+          </Text>
+        </Box>
+
+        <TextFormControl
+          required
+          fieldName="calculationPerformedBy.address"
+          label={t(`${prefix}.calculationPerformedBy.address`)}
+        />
+        <TextFormControl
+          required
           fieldName="calculationPerformedBy.company"
           label={t(`${prefix}.calculationPerformedBy.company`)}
         />
         <TextFormControl
-          fieldName="calculationPerformedBy.address"
-          label={t(`${prefix}.calculationPerformedBy.address`)}
+          required
+          fieldName="calculationPerformedBy.city"
+          label={t(`${prefix}.calculationPerformedBy.city`)}
         />
-        <TextFormControl fieldName="calculationPerformedBy.city" label={t(`${prefix}.calculationPerformedBy.city`)} />
         <TextFormControl
+          required
           fieldName="calculationPerformedBy.postalCode"
           label={t(`${prefix}.calculationPerformedBy.postalCode`)}
         />
-        <TextFormControl fieldName="calculationPerformedBy.phone" label={t(`${prefix}.calculationPerformedBy.phone`)} />
-        <TextFormControl fieldName="calculationPerformedBy.email" label={t(`${prefix}.calculationPerformedBy.email`)} />
         <TextFormControl
-          fieldName="calculationPerformedBy.designersSignature"
-          label={t(`${prefix}.calculationPerformedBy.designersSignature`)}
+          required
+          fieldName="calculationPerformedBy.phone"
+          label={t(`${prefix}.calculationPerformedBy.phone`)}
         />
         <TextFormControl
+          required
+          fieldName="calculationPerformedBy.email"
+          label={t(`${prefix}.calculationPerformedBy.email`)}
+        />
+        <TextFormControl
+          required
+          fieldName="calculationPerformedBy.fax"
+          label={t(`${prefix}.calculationPerformedBy.fax`)}
+        />
+        <Box width="100%" height="300px" border="1px solid" borderColor="gray.300" p={2} borderRadius="md">
+          <Text as="p" mt={1} mb={2}>
+            {t(`${prefix}.calculationPerformedBy.designersSignature`)}
+          </Text>
+        </Box>
+
+        <TextFormControl
+          required
           fieldName="calculationPerformedBy.reference1"
           label={t(`${prefix}.calculationPerformedBy.reference1`)}
         />
         <TextFormControl
+          required
           fieldName="calculationPerformedBy.reference2"
           label={t(`${prefix}.calculationPerformedBy.reference2`)}
         />
-        <TextFormControl fieldName="calculationPerformedBy.date" label={t(`${prefix}.calculationPerformedBy.date`)} />
         <TextFormControl
-          fieldName="calculationPerformedBy.signatureDate"
-          label={t(`${prefix}.calculationPerformedBy.signatureDate`)}
+          required
+          fieldName="calculationPerformedBy.date"
+          label={t(`${prefix}.calculationPerformedBy.date`)}
+        />
+        <TextFormControl
+          required
+          fieldName="calculationPerformedBy.reissuedDate"
+          label={t(`${prefix}.calculationPerformedBy.reissuedDate`)}
         />
       </Grid>
+      <Divider my={10} />
+      <Box width="100%" height="300px" border="1px solid" borderColor="gray.300" p={2} borderRadius="md">
+        <Text as="p" mt={1} mb={2}>
+          {t(`${prefix}.calculationPerformedBy.softwareInfo`)}
+        </Text>
+      </Box>
+      <Button mt={10} mb={10} colorScheme="blue" onClick={onNext}>
+        {t(`${prefix}.calculationPerformedBy.next`)}
+      </Button>
     </Box>
   )
 }
