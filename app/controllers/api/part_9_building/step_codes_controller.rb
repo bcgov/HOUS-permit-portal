@@ -21,26 +21,28 @@ class Api::Part9Building::StepCodesController < Api::ApplicationController
   # POST /api/step_codes
   def create
     authorize Part9StepCode.new
-    Part9StepCode.transaction do
-      @step_code = Part9StepCode.create(step_code_params)
-      if @step_code.valid?
-        @step_code.pre_construction_checklist.data_entries.each do |de|
-          if de.h2k_file
-            StepCode::Part9::DataEntryFromHot2000.new(
-              xml: Nokogiri.XML(de.h2k_file.read),
-              data_entry: de
-            ).call
+    begin
+      Part9StepCode.transaction do
+        @step_code =
+          if step_code_params[:permit_application_id]
+            Part9StepCode.where(
+              permit_application_id: step_code_params[:permit_application_id]
+            ).first_or_create!(step_code_params_for_create)
+          else
+            Part9StepCode.create!(step_code_params_for_create)
           end
-        end
+
+        # H2K processing occurs in Part9StepCode.after_create callback
         render_success @step_code,
                        "step_code.h2k_imported",
                        { blueprint: Part9StepCodeBlueprint } and return
       end
+    rescue ActiveRecord::RecordInvalid => e
+      render_error "step_code.create_error",
+                   message_opts: {
+                     error_message: e.record.errors.full_messages.join(", ")
+                   }
     end
-    render_error "step_code.create_error",
-                 message_opts: {
-                   error_message: @step_code.errors.full_messages.join(", ")
-                 }
   end
 
   private

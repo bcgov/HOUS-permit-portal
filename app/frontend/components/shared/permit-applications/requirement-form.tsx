@@ -332,7 +332,6 @@ export const RequirementForm = observer(
       if (onCompletedBlocksChange) {
         onCompletedBlocksChange(getCompletedBlocksFromForm(formRef.current))
       }
-      setErrorBoxData(mapErrorBoxData(formRef.current.errors))
     }
 
     const formReady = (rootComponent) => {

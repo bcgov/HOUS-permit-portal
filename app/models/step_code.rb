@@ -8,7 +8,7 @@ class StepCode < ApplicationRecord
                full_address
                jurisdiction_name
                type
-               building_permit_number
+               permit_application_number
              ]
 
   belongs_to :creator,
@@ -22,15 +22,13 @@ class StepCode < ApplicationRecord
   has_many :report_documents, dependent: :destroy, inverse_of: :step_code
 
   # Delegates for attributes from PermitApplication
-  delegate :number,
-           to: :permit_application,
-           prefix: :building_permit,
-           allow_nil: true
+  delegate :number, to: :permit_application, prefix: true, allow_nil: true
 
   delegate :submitter,
            :newly_submitted_at,
            :status,
            :jurisdiction_heating_degree_days,
+           :reference_number,
            to: :permit_application,
            allow_nil: true
 
@@ -61,7 +59,6 @@ class StepCode < ApplicationRecord
       reference_number: reference_number,
       full_address: full_address,
       jurisdiction_name: jurisdiction_name,
-      building_permit_number: permit_application&.number,
       permit_date: permit_application&.permit_date,
       created_at: created_at,
       updated_at: updated_at,
