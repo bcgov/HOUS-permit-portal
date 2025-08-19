@@ -10,6 +10,8 @@ FactoryBot.define do
 
     permit_project do
       attrs = {}
+      # Ensure policy "create?" passes by default: make the submitter the owner of the project
+      attrs[:owner] = submitter
       attrs[:jurisdiction] = jurisdiction if jurisdiction.present?
       attrs[:pid] = pid if pid.present?
       attrs[:pin] = pin if pin.present?
