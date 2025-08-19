@@ -27,6 +27,7 @@ export enum EFileUploadAttachmentType {
   RequirementDocument = "RequirementDocument",
   SupportingDocument = "SupportingDocument",
   ProjectDocument = "ProjectDocument",
+  ReportDocument = "ReportDocument",
 }
 
 export enum EPermitClassificationCode {

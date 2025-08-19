@@ -4,7 +4,7 @@ class StepCode < ApplicationRecord
 
   # Enable search for StepCodes
   searchkick word_middle: %i[
-               project_name
+               title
                full_address
                jurisdiction_name
                type
@@ -19,6 +19,7 @@ class StepCode < ApplicationRecord
   # Associations
   belongs_to :permit_application, optional: true
   has_one :permit_project, through: :permit_application
+  has_many :report_documents, dependent: :destroy, inverse_of: :step_code
 
   # Delegates for attributes from PermitApplication
   delegate :number,
@@ -30,7 +31,6 @@ class StepCode < ApplicationRecord
            :newly_submitted_at,
            :status,
            :jurisdiction_heating_degree_days,
-           :permit_date,
            to: :permit_application,
            allow_nil: true
 
@@ -57,8 +57,8 @@ class StepCode < ApplicationRecord
     {
       id: id,
       type: type,
-      project_name: project_name,
-      project_identifier: project_identifier,
+      title: title,
+      reference_number: reference_number,
       full_address: full_address,
       jurisdiction_name: jurisdiction_name,
       building_permit_number: permit_application&.number,

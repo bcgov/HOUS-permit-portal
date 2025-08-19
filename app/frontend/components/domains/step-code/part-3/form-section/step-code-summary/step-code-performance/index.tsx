@@ -1,9 +1,9 @@
 import { Flex, FormControl, FormLabel, HStack, Input } from "@chakra-ui/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
-import * as R from "ramda"
 import React from "react"
 import { usePart3StepCode } from "../../../../../../../hooks/resources/use-part-3-step-code"
+import { isBaselineChecklist, isMixedUseChecklist } from "../../../../../../../utils/utility-functions"
 import { BaselineEnergyPerformance } from "./baseline-occupancy/energy"
 import { BaselineZeroCarbonPerformance } from "./baseline-occupancy/zero-carbon"
 import { MixedUseEnergyPerformance } from "./mixed-use/energy"
@@ -15,8 +15,8 @@ const i18nPrefix = "stepCode.part3.stepCodeSummary.stepCode"
 
 export const StepCodePerformance = observer(function StepCodePerformanceResults() {
   const { checklist } = usePart3StepCode()
-  const isMixedUse = checklist.stepCodeOccupancies.length > 1 || checklist.baselineOccupancies.length > 1
-  const isBaseline = R.isEmpty(checklist.stepCodeOccupancies)
+  const isMixedUse = isMixedUseChecklist(checklist as any)
+  const isBaseline = isBaselineChecklist(checklist as any)
 
   let occupancyName: string
   if (!isMixedUse) {

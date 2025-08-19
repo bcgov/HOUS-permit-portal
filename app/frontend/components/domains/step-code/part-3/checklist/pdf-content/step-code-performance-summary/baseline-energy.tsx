@@ -13,8 +13,10 @@ interface IProps {
 }
 
 export const BaselineEnergyPdf = ({ checklist }: IProps) => {
-  const occupancy: IBaselineOccupancy = checklist.baselineOccupancies[0]
-  const stepAchieved = checklist.complianceReport.performance.complianceSummary.performanceRequirementAchieved
+  const occupancy: IBaselineOccupancy | undefined = Array.isArray(checklist?.baselineOccupancies)
+    ? checklist.baselineOccupancies[0]
+    : undefined
+  const stepAchieved = checklist?.complianceReport?.performance?.complianceSummary?.performanceRequirementAchieved
   const resultKey = !!stepAchieved ? "success" : "failure"
   const achievedValue = stepAchieved
     ? t(`stepCode.part3.performanceRequirements.${stepAchieved}`)
@@ -28,7 +30,7 @@ export const BaselineEnergyPdf = ({ checklist }: IProps) => {
           value={
             occupancy?.performanceRequirement
               ? t(`stepCode.part3.performanceRequirements.${occupancy.performanceRequirement}`)
-              : "-" // Use fallback value if requirement is missing
+              : "-"
           }
           inputStyles={styles.fieldInput}
         />
