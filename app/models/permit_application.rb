@@ -300,6 +300,8 @@ class PermitApplication < ApplicationRecord
   end
 
   def update_viewed_at
+    return unless latest_submission_version.present?
+
     latest_submission_version.update(viewed_at: Time.current)
     reindex
   end
@@ -631,12 +633,7 @@ class PermitApplication < ApplicationRecord
 
   def assign_default_nickname
     if nickname.blank? # Only attempt to default if nickname is not already provided
-      if permit_project.present?
-        self.nickname =
-          "#{formatted_permit_classifications} Application for #{permit_project.title}"
-      else
-        self.nickname = "#{full_address} - #{formatted_permit_classifications}"
-      end
+      self.nickname = requirement_template.nickname
     end
   end
 

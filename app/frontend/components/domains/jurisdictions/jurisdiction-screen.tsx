@@ -35,7 +35,6 @@ import { LoadingScreen } from "../../shared/base/loading-screen"
 import { EditorWithPreview } from "../../shared/editor/custom-extensions/editor-with-preview"
 import { Editor } from "../../shared/editor/editor"
 import { JurisdictionMap } from "../../shared/module-wrappers/jurisdiction-map"
-import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { StepCodeRequirementsTable } from "../../shared/step-code-requirements-table"
 import { Can } from "../../shared/user/can"
 import { ContactGrid } from "./contacts/contact-grid"
@@ -134,9 +133,7 @@ export const JurisdictionScreen = observer(() => {
                         initialTriggerText={t("jurisdiction.edit.addDescription")}
                         name={"descriptionHtml"}
                       />
-                      <RouterLinkButton to="/permit-applications/new" variant="primary">
-                        {t("jurisdiction.startApplication")}
-                      </RouterLinkButton>
+                      {/* Disabled: start application CTA */}
                     </Flex>
                   </Flex>
                   <Flex direction={{ base: "column", md: "row" }} gap={6}>

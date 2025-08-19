@@ -1,7 +1,6 @@
 import { t } from "i18next"
 import { flow, Instance, toGenerator, types } from "mobx-state-tree"
 import * as R from "ramda"
-import { TCreatePermitApplicationFormData } from "../components/domains/permit-application/new-permit-application-screen"
 import { createSearchModel } from "../lib/create-search-model"
 import { withEnvironment } from "../lib/with-environment"
 import { withMerge } from "../lib/with-merge"
