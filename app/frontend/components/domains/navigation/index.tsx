@@ -630,6 +630,7 @@ const AppRoutes = observer(() => {
             element={<ProtectedRoute isAllowed={loggedIn && !mustAcceptEula} redirectPath={mustAcceptEula && "/"} />}
           >
             <Route path="/step-codes" element={<ProjectDashboardScreen />} />
+            <Route path="/documents" element={<ProjectDashboardScreen />} />
             {/* Already handled above with path-based tabs */}
             <Route path="/projects" element={<ProjectDashboardScreen />} />
             <Route path="/projects/new" element={<NewPermitProjectScreen />} />
