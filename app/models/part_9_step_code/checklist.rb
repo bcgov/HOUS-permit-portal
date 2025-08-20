@@ -21,6 +21,14 @@ class Part9StepCode::Checklist < ApplicationRecord
 
   delegate :plan_author, :plan_version, :plan_date, to: :step_code
 
+  delegate :jurisdiction_name, to: :step_code
+  delegate :permit_date, to: :step_code
+  delegate :title, to: :step_code
+  delegate :full_address, to: :step_code
+  delegate :pid, to: :step_code
+  delegate :reference_number, to: :step_code
+  delegate :permit_application_number, to: :step_code
+
   enum stage: %i[pre_construction mid_construction as_built]
   enum status: %i[draft complete]
   enum compliance_path: %i[step_code_ers step_code_necb passive_house step_code]

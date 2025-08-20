@@ -92,7 +92,7 @@ class StepCodeExportService
           next unless checklist
 
           csv << [
-            step_code.building_permit_number,
+            step_code.reference_number,
             step_code.jurisdiction_name,
             step_code.full_address,
             checklist.building_height,
@@ -188,7 +188,7 @@ class StepCodeExportService
           zero_carbon_step = compliance_report&.dig(:zero_carbon)&.step
 
           csv << [
-            step_code.building_permit_number,
+            step_code.reference_number,
             step_code.jurisdiction_name,
             step_code.full_address,
             checklist.building_type,

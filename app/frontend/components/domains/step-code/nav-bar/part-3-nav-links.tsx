@@ -1,12 +1,13 @@
 import { Button, HStack } from "@chakra-ui/react"
 import { t } from "i18next"
 import React from "react"
-import { useParams } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import { usePart3StepCode } from "../../../../hooks/resources/use-part-3-step-code"
 
 export const Part3NavLinks = function Part3StepCodeNavLinks() {
   const { checklist } = usePart3StepCode()
   const { permitApplicationId } = useParams()
+  const navigate = useNavigate()
 
   const handleSave = async () => {
     if (!checklist) return
@@ -25,6 +26,7 @@ export const Part3NavLinks = function Part3StepCodeNavLinks() {
       // Reset the path if the form wasn't found, as the save won't happen
       checklist.setAlternateNavigateAfterSavePath(null)
     }
+    navigate(editPath)
   }
 
   return (

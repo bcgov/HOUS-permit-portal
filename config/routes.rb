@@ -194,7 +194,7 @@ Rails.application.routes.draw do
       # New route for Part 3 Step Code
       post "part_3_building/step_code",
            on: :member,
-           to: "part_3_building/step_codes#create"
+           to: "part3_building/step_codes#create"
     end
 
     resources :permit_projects, only: %i[show index update create] do
@@ -249,14 +249,16 @@ Rails.application.routes.draw do
       patch "update", on: :member, to: "step_codes#update"
     end
 
-    namespace :part_9_building do
+    # Controller namespace is Api::Part9Building::*, but we expose path with underscore for continuity
+    namespace :part9_building, path: "part_9_building" do
       resources :checklists, only: %i[show update]
       resources :step_codes, only: %i[index create] do
         get :select_options, on: :collection
       end
     end
 
-    namespace :part_3_building do
+    # Controller namespace is Api::Part3Building::*, but we expose path with underscore for continuity
+    namespace :part3_building, path: "part_3_building" do
       resources :step_codes, only: %i[create show]
       resources :checklists, only: %i[show update]
     end

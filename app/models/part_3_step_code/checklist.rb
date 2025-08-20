@@ -2,7 +2,7 @@ class Part3StepCode::Checklist < ApplicationRecord
   self.table_name = "part_3_step_code_checklists"
 
   delegate :newly_submitted_at,
-           :building_permit_number,
+           :reference_number,
            to: :step_code,
            allow_nil: true
 

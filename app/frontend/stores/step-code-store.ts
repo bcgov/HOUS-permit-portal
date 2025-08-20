@@ -243,47 +243,12 @@ export const StepCodeStoreModel = types
         return { ok: false, error: response.data?.errors || response.problem }
       }
     }),
-    createPart9StepCode: flow(function* (
-      values: Omit<IPart9StepCode, "id" | "type" | "checklistsMap" | "checklists" | "createdAt" | "updatedAt"> & {
-        permitApplicationId?: string
-        permitProjectId?: string
-        name?: string
-        permitProjectAttributes?: {
-          name?: string
-          description?: string
-          fullAddress?: string
-          pid?: string
-          pin?: string
-          propertyPlanJurisdictionId?: string
-        }
-      }
-    ) {
-      const { permitApplicationId, permitProjectId, permitProjectAttributes, ...part9Attributes } = values
-      let response
-      let payload: any = { ...part9Attributes }
-
-      if (permitApplicationId) {
-        response = yield self.environment.api.createOrFindStepCodeForPermitApplication(
-          permitApplicationId,
-          EStepCodeType.part9StepCode,
-          payload
-        )
-      } else if (permitProjectId) {
-        payload.permitProjectId = permitProjectId
-        if (values.name) payload.name = values.name
-        response = yield self.environment.api.createPart9StepCode(payload)
-      } else if (permitProjectAttributes) {
-        payload.permitProjectAttributes = permitProjectAttributes
-        response = yield self.environment.api.createPart9StepCode(payload)
-      } else {
-        console.error(
-          "Part 9 Step Code creation requires permitApplicationId, permitProjectId, or permitProjectAttributes."
-        )
-        return {
-          ok: false,
-          error: "Missing permitApplicationId, permitProjectId, or permitProjectAttributes",
-        }
-      }
+    createPart9StepCode: flow(function* (values: {
+      permitApplicationId?: string
+      preConstructionChecklistAttributes?: any
+      name?: string
+    }) {
+      const response = yield self.environment.api.createPart9StepCode(values)
 
       if (response.ok) {
         self.mergeUpdate(response.data.data, "stepCodesMap")

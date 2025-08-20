@@ -8,6 +8,7 @@ export interface ITabItem {
   label: string
   icon: React.ElementType
   to: string
+  tabIndex: number
 }
 
 interface IProjectSidebarTabListProps extends BoxProps {

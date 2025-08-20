@@ -712,6 +712,11 @@ Thank you,
             fullAddressHeading: "Enter your project location",
           },
         },
+        document: {
+          index: {
+            title: "Documents",
+          },
+        },
         permitApplication: {
           noneFound: "No permits yet",
           noneFoundExplanation:
@@ -3711,6 +3716,7 @@ Thank you,
           privacyPolicyContactUsEmailAddress: "digital.codes.permits@gov.bc.ca",
           breadcrumb: {
             projects: "Projects",
+            documents: "Documents",
             checkStepCodeRequirements: "Check step code requirements",
             latest: "Latest",
             profile: "Profile",
@@ -3766,6 +3772,7 @@ Thank you,
             onboardingChecklistPageForLgAdopting: "Onboarding checklist page for LG adopting",
             stepCodeRequirements: "Step code requirements",
             start: "Start",
+            select: "Select",
           },
           earlyAccessStepCodePreviewNotAvailable: "Early access step code preview not available",
         },

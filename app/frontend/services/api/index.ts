@@ -651,25 +651,7 @@ export class Api {
     )
   }
 
-  async createOrFindStepCodeForPermitApplication(
-    permitApplicationId: string,
-    stepCodeType: EStepCodeType,
-    attributes: {
-      checklistAttributes?: { sectionCompletionStatus: Record<string, any> }
-      name?: string
-      preConstructionChecklistAttributes?: any
-    }
-  ) {
-    return this.client.post<ApiResponse<IStepCode>>(
-      `/permit_applications/${permitApplicationId}/part_3_building/step_code`,
-      {
-        step_code: {
-          type: stepCodeType,
-          ...attributes,
-        },
-      }
-    )
-  }
+  // Removed legacy method createOrFindStepCodeForPermitApplication; Part 9 mirrors Part 3 creation now
 
   async deleteStepCode(id: string) {
     return this.client.delete<ApiResponse<IStepCode>>(`/step_codes/${id}`)
@@ -833,7 +815,18 @@ export class Api {
     }
   }
 
-  async createPart9StepCode(data: any) {
-    return this.client.post<ApiResponse<IStepCode>>(`/part_9_building/step_codes`, { stepCode: data })
+  async createPart9StepCode(data: {
+    permitApplicationId?: string
+    preConstructionChecklistAttributes?: any
+    name?: string
+  }) {
+    if (data.permitApplicationId) {
+      return this.client.post<ApiResponse<IStepCode>>(
+        `/permit_applications/${data.permitApplicationId}/part_9_building/step_code`,
+        { stepCode: data }
+      )
+    } else {
+      return this.client.post<ApiResponse<IStepCode>>(`/part_9_building/step_codes`, { stepCode: data })
+    }
   }
 }

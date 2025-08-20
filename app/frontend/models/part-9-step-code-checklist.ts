@@ -29,9 +29,9 @@ export const Part9StepCodeChecklistModel = types.snapshotProcessor(
       stage: types.enumeration<EStepCodeChecklistStage[]>(Object.values(EStepCodeChecklistStage)),
       status: types.enumeration<EStepCodeChecklistStatus[]>(Object.values(EStepCodeChecklistStatus)),
       // permit application info
-      buildingPermitNumber: types.maybeNull(types.string),
+      permitApplicationNumber: types.maybeNull(types.string),
       builder: types.maybeNull(types.string),
-      address: types.maybeNull(types.string),
+      fullAddress: types.maybeNull(types.string),
       jurisdictionName: types.maybeNull(types.string),
       pid: types.maybeNull(types.string),
       // plan, assumed to be based on drawing upload on the permit application

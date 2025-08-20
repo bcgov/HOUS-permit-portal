@@ -1,5 +1,5 @@
 import { Flex, TabPanel, TabPanels, Tabs } from "@chakra-ui/react"
-import { ClipboardText, FolderSimple } from "@phosphor-icons/react"
+import { ClipboardText, File, FolderSimple } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useTransition } from "react"
 import { useTranslation } from "react-i18next"
@@ -7,6 +7,7 @@ import { useLocation, useNavigate } from "react-router-dom"
 import { useSearch } from "../../../hooks/use-search"
 import { useMst } from "../../../setup/root"
 import { LoadingScreen } from "../../shared/base/loading-screen"
+import { DocumentsTabPanelContent } from "./documents-tab-panel-content"
 import { ProjectTabPanelContent } from "./project-tab-panel-content"
 import { ITabItem, ProjectSidebarTabList } from "./sidebar-tab-list"
 import { StepCodeTabPanelContent } from "./step-code-tab-panel-content"
@@ -27,15 +28,19 @@ export const ProjectDashboardScreen = observer(({}: IProjectDashboardScreenProps
   }, [])
 
   const TABS_DATA: ITabItem[] = [
-    { label: t("permitProject.index.title", "Projects"), icon: FolderSimple, to: "projects" },
-    { label: t("stepCode.index.title", "Step Codes"), icon: ClipboardText, to: "step-codes" },
+    { label: t("permitProject.index.title", "Projects"), icon: FolderSimple, to: "projects", tabIndex: 0 },
+    { label: t("stepCode.index.title", "Step Codes"), icon: ClipboardText, to: "step-codes", tabIndex: 1 },
+    { label: t("document.index.title", "Documents"), icon: File, to: "documents", tabIndex: 2 },
   ]
 
-  const getTabIndex = () => (location.pathname.endsWith("/step-codes") ? 1 : 0)
+  const getTabIndex = () => {
+    const tabIndex = TABS_DATA.find((tab) => location.pathname.endsWith(tab.to))?.tabIndex
+    return tabIndex ?? 0
+  }
 
   const handleTabChange = (index: number) => {
     startTransition(() => {
-      navigate(index === 1 ? "/step-codes" : "/projects", { replace: true })
+      navigate(index === 0 ? "/projects" : index === 1 ? "/step-codes" : "/documents", { replace: true })
     })
   }
 
@@ -46,6 +51,7 @@ export const ProjectDashboardScreen = observer(({}: IProjectDashboardScreenProps
         <TabPanels>
           <TabPanel p={0}>{isPending ? <LoadingScreen /> : <ProjectTabPanelContent />}</TabPanel>
           <TabPanel p={0}>{isPending ? <LoadingScreen /> : <StepCodeTabPanelContent />}</TabPanel>
+          <TabPanel p={0}>{isPending ? <LoadingScreen /> : <DocumentsTabPanelContent />}</TabPanel>
         </TabPanels>
       </Tabs>
     </Flex>
