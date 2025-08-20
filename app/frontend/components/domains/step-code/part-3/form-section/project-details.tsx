@@ -153,10 +153,6 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
                             }}
                             placeholder={undefined}
                             selectedOption={value}
-                            styles={{
-                              container: (css) => ({ ...css, width: "100%" }),
-                              menuPortal: (base) => ({ ...base, zIndex: 9999 }),
-                            }}
                             menuPortalTarget={document.body}
                           />
                         )}

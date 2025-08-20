@@ -16,7 +16,7 @@ import {
   Text,
   UnorderedList,
 } from "@chakra-ui/react"
-import { ArrowSquareOut, Info } from "@phosphor-icons/react"
+import { ArrowSquareOut } from "@phosphor-icons/react"
 import i18next from "i18next"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
@@ -36,8 +36,6 @@ import { ActivityList } from "../../shared/permit-classification/activity-list"
 import { PermitTypeRadioSelect } from "../../shared/permit-classification/permit-type-radio-select"
 import { JurisdictionSelect } from "../../shared/select/selectors/jurisdiction-select"
 import { SitesSelect } from "../../shared/select/selectors/sites-select"
-import { Can } from "../../shared/user/can"
-import { NewPermitApplicationSandboxSelect } from "./new-permit-application-sandbox-select"
 
 export type TSearchAddressFormData = {
   addressString: string
@@ -46,14 +44,14 @@ export type TSearchAddressFormData = {
 interface INewPermitApplicationScreenProps {}
 
 export type TCreatePermitApplicationFormData = {
-  pid: string
+  pid?: string
   pin?: string
   permitTypeId: string
   activityId: string
-  jurisdictionId: string
+  jurisdictionId?: string
   site?: IOption
   firstNations: boolean
-  sandboxId: string
+  sandboxId?: string
 }
 
 export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScreenProps) => {
@@ -182,26 +180,6 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
               </Flex>
               {jurisdictionIdWatch && (
                 <Flex as="section" direction="column" gap={8}>
-                  {jurisdiction?.sandboxOptions && (
-                    <Can action="jurisdiction:create">
-                      <Flex
-                        gap={4}
-                        borderRadius="lg"
-                        border="1px solid"
-                        borderColor="semantic.special"
-                        background="semantic.specialLight"
-                        p={6}
-                      >
-                        <Info />
-                        <Flex direction="column">
-                          <Heading>{t("sandbox.switch.superAdminAvailable")}</Heading>
-                          <Text mb={4}>{t("sandbox.switch.testingPurposes")}</Text>
-
-                          <NewPermitApplicationSandboxSelect options={jurisdiction.sandboxOptions} />
-                        </Flex>
-                      </Flex>
-                    </Can>
-                  )}
                   <Heading as="h2" variant="yellowline">
                     {t("permitApplication.new.firstNationsTitle")}
                   </Heading>

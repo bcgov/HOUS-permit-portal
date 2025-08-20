@@ -159,17 +159,18 @@ const NewPermitProjectScreen = lazy(() =>
 const PermitProjectScreen = lazy(() =>
   import("../permit-project/permit-project-screen").then((module) => ({ default: module.PermitProjectScreen }))
 )
+const AddPermitApplicationToProjectScreen = lazy(() =>
+  import("../permit-project/add-permit-application-screen").then((module) => ({
+    default: module.AddPermitApplicationToProjectScreen,
+  }))
+)
 const EditPermitApplicationScreen = lazy(() =>
   import("../permit-application/edit-permit-application-screen").then((module) => ({
     default: module.EditPermitApplicationScreen,
   }))
 )
 
-const NewPermitApplicationScreen = lazy(() =>
-  import("../permit-application/new-permit-application-screen").then((module) => ({
-    default: module.NewPermitApplicationScreen,
-  }))
-)
+// Disabled: New Permit Application screen removed
 const ReviewPermitApplicationScreen = lazy(() =>
   import("../permit-application/review-permit-application-screen").then((module) => ({
     default: module.ReviewPermitApplicationScreen,
@@ -623,20 +624,19 @@ const AppRoutes = observer(() => {
           <Route path="/permit-projects" element={<RedirectScreen path="/projects" />} />
           <Route path="/permit-projects/projects/*" element={<RedirectScreen path="/projects" />} />
           <Route path="/permit-projects/step-codes/*" element={<RedirectScreen path="/step-codes" />} />
-          <Route path="/permit-applications" element={<PermitApplicationIndexScreen />} />
-          <Route path="/permit-applications/new" element={<NewPermitApplicationScreen />} />
+          {/* Disabled: New Permit Application screen */}
           <Route path="/permit-applications/:permitApplicationId/edit" element={<EditPermitApplicationScreen />} />
           <Route
             element={<ProtectedRoute isAllowed={loggedIn && !mustAcceptEula} redirectPath={mustAcceptEula && "/"} />}
           >
             <Route path="/step-codes" element={<ProjectDashboardScreen />} />
-            <Route path="/permit-applications" element={<PermitApplicationIndexScreen />} />
             {/* Already handled above with path-based tabs */}
             <Route path="/projects" element={<ProjectDashboardScreen />} />
             <Route path="/projects/new" element={<NewPermitProjectScreen />} />
             <Route path="/projects/:permitProjectId/*" element={<PermitProjectScreen />} />
+            <Route path="/projects/:permitProjectId/add-permits" element={<AddPermitApplicationToProjectScreen />} />
             <Route path="/step-codes/*" element={<ProjectDashboardScreen />} />
-            <Route path="/permit-applications/new" element={<NewPermitApplicationScreen />} />
+            {/* Disabled: New Permit Application screen */}
             <Route path="/permit-applications/:permitApplicationId/edit" element={<EditPermitApplicationScreen />} />
             <Route
               path="/permit-applications/:permitApplicationId/edit/part-9-step-code"

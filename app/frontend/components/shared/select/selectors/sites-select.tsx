@@ -18,6 +18,7 @@ type TSitesSelectProps = {
   selectedOption: IOption
   pidName?: string
   siteName?: string
+  pidRequired?: boolean
 } & Partial<TAsyncSelectProps>
 
 // Please be advised that this is expected to be used within a form context!
@@ -28,6 +29,7 @@ export const SitesSelect = observer(function ({
   stylesToMerge,
   pidName = "pid",
   siteName = "site",
+  pidRequired = false,
   ...rest
 }: TSitesSelectProps) {
   const { t } = useTranslation()
@@ -98,6 +100,15 @@ export const SitesSelect = observer(function ({
               Option,
               Input,
             }}
+            // Ensure full-width container and menu portal z-index by default
+            styles={{
+              container: (css) => ({
+                ...css,
+                width: "100%",
+              }),
+              menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+              ...(rest.styles as any),
+            }}
             stylesToMerge={{
               control: {
                 borderRadius: "4px",
@@ -114,6 +125,10 @@ export const SitesSelect = observer(function ({
             loadOptions={debouncedFetchOptions}
             closeMenuOnSelect={true}
             isCreatable={false}
+            // Render menu in a portal by default to avoid clipping in overflow contexts
+            menuPortalTarget={
+              (rest as any).menuPortalTarget ?? (typeof document !== "undefined" ? document.body : undefined)
+            }
             {...rest}
           />
         </InputGroup>
@@ -128,7 +143,9 @@ export const SitesSelect = observer(function ({
               control={control}
               rules={{
                 required:
-                  pidOptions.length > 0 ? t("ui.isRequired", { field: t("permitApplication.pidLabel") }) : false,
+                  pidRequired || pidOptions.length > 0
+                    ? (t("ui.isRequired", { field: t("permitApplication.pidLabel") }) as string)
+                    : false,
               }}
               render={({ field: { onChange, value } }) => {
                 return (

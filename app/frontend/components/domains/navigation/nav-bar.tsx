@@ -410,12 +410,6 @@ const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
                   {currentUser?.isTechnicalSupport && reviewStaffOnlyItems}
                   {!currentUser?.isSubmitter && (
                     <>
-                      <MenuItem bg="greys.grey03" onClick={(e) => navigate("/permit-applications/new")}>
-                        <Button as={Box} variant="primary">
-                          {t("site.newApplication")}
-                        </Button>
-                      </MenuItem>
-                      <NavMenuItem label={t("site.myPermits")} to="/permit-applications" bg="greys.grey03" />
                       <NavMenuItem label={t("site.myProjects")} to="/projects" bg="greys.grey03" />
                       <MenuDivider my={0} borderColor="border.light" />
                     </>

@@ -12,7 +12,7 @@ class Api::PermitClassificationsController < Api::ApplicationController
       permit_classifications =
         if classification_option_params[:published].present?
           query =
-            RequirementTemplate
+            LiveRequirementTemplate
               .for_sandbox(current_sandbox)
               .joins(:permit_type)
               .joins(:activity)

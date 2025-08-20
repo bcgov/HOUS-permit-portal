@@ -15,7 +15,9 @@ class PermitApplicationPolicy < ApplicationPolicy
   end
 
   def create?
-    true
+    # Only allow creating a permit application if it is under a permit project
+    # owned by the current user
+    record.permit_project.present? && record.permit_project.owner_id == user.id
   end
 
   def mark_as_viewed?

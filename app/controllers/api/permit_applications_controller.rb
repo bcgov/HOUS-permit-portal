@@ -447,6 +447,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
       :pin,
       :pid,
       :first_nations,
+      :permit_project_id,
       submission_data: {
       }
     )

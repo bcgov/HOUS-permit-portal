@@ -200,11 +200,11 @@ class Api::PermitProjectsController < Api::ApplicationController
 
   def permit_project_params
     params.require(:permit_project).permit(
-      :title, # Changed from name and description
-      :full_address, # Added full_address
-      :pid, # Added pid
-      :pin, # Added pin
-      :property_plan_jurisdiction_id, # Added property_plan_jurisdiction_id
+      :title,
+      :full_address,
+      :pid,
+      :pin,
+      :jurisdiction_id,
       project_documents_attributes: [
         :id,
         :permit_project_id,

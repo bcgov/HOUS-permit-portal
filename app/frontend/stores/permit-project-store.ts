@@ -218,10 +218,10 @@ export const PermitProjectStoreModel = types
       }
     },
     createPermitProject: flow(function* (projectData: {
-      name: string
-      description?: string
+      title: string
       fullAddress?: string
       pid?: string
+      jurisdictionId?: string
       pin?: string
       propertyPlanJurisdictionId?: string
     }) {

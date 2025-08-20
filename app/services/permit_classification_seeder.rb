@@ -25,20 +25,30 @@ class PermitClassificationSeeder
         type: "PermitType"
       },
       {
-        name: "New Construction",
+        name: "New construction",
         code: "new_construction",
         description:
           "Includes the addition to an existing building (infill development) but not the renovation of an existing home to include a secondary suite.",
         enabled: true,
-        type: "Activity"
+        type: "Activity",
+        category: "buildings_and_structures"
       },
       {
-        name: "Addition, Alteration, or Renovation",
+        name: "Renovation, alteration, or addition",
         code: "addition_alteration_renovation",
         description:
           "Modification of an existing residential dwelling to include a (secondary) suite (within the existing building footprint).",
         enabled: true,
-        type: "Activity"
+        type: "Activity",
+        category: "buildings_and_structures"
+      },
+      {
+        name: "Manufactured home",
+        code: "manufactured_home",
+        description: "Placeholder description",
+        enabled: true,
+        type: "Activity",
+        category: "buildings_and_structures"
       },
       {
         name: "Site Alteration",
@@ -54,7 +64,88 @@ class PermitClassificationSeeder
         description:
           "Involves the systematic tearing down of buildings and other structures, including clearing debris and preparing the site for future construction or restoration activities.",
         enabled: true,
-        type: "Activity"
+        type: "Activity",
+        category: "site_preparation"
+      },
+      {
+        name: "Tree-cutting and tree removal",
+        code: "tree_cutting_and_tree_removal",
+        description: "Placeholder description",
+        enabled: true,
+        type: "Activity",
+        category: "site_preparation"
+      },
+      {
+        name: "Retaining wall",
+        code: "retaining_wall",
+        description: "Placeholder description",
+        enabled: true,
+        type: "Activity",
+        category: "site_preparation"
+      },
+      {
+        name: "Relocation",
+        code: "relocation",
+        description: "Placeholder description",
+        enabled: true,
+        type: "Activity",
+        category: "site_preparation"
+      },
+      {
+        name: "Mechanical",
+        code: "mechanical",
+        description: "Placeholder description",
+        enabled: true,
+        type: "Activity",
+        category: "trades"
+      },
+      {
+        name: "Plumbing",
+        code: "plumbing",
+        description: "Placeholder description",
+        enabled: true,
+        type: "Activity",
+        category: "trades"
+      },
+      {
+        name: "Electrical",
+        code: "electrical",
+        description: "Placeholder description",
+        enabled: true,
+        type: "Activity",
+        category: "trades"
+      },
+      {
+        name: "Gas",
+        code: "gas",
+        description: "Placeholder description",
+        enabled: true,
+        type: "Activity",
+        category: "trades"
+      },
+      {
+        name: "Solid fuel burning appliance",
+        code: "solid_fuel_burning_appliance",
+        description: "Placeholder description",
+        enabled: true,
+        type: "Activity",
+        category: "trades"
+      },
+      {
+        name: "Fire alarm",
+        code: "fire_alarm",
+        description: "Placeholder description",
+        enabled: true,
+        type: "Activity",
+        category: "trades"
+      },
+      {
+        name: "Fire suppression",
+        code: "fire_suppression",
+        description: "Placeholder description",
+        enabled: true,
+        type: "Activity",
+        category: "trades"
       }
     ]
 

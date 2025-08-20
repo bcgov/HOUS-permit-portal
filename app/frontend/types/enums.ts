@@ -38,6 +38,17 @@ export enum EPermitClassificationCode {
   additionAlterationRenovation = "addition_alteration_renovation",
   siteAlteration = "site_alteration",
   demolition = "demolition",
+  manufacturedHome = "manufactured_home",
+  mechanical = "mechanical",
+  plumbing = "plumbing",
+  electrical = "electrical",
+  gas = "gas",
+  solidFuelBurningAppliance = "solid_fuel_burning_appliance",
+  fireAlarm = "fire_alarm",
+  fireSuppression = "fire_suppression",
+  treeCuttingAndTreeRemoval = "tree_cutting_and_tree_removal",
+  retainingWall = "retaining_wall",
+  relocation = "relocation",
 }
 
 export enum EPermitApplicationStatus {
@@ -664,4 +675,10 @@ export enum EStepCodeSortFields {
   projectName = "project_name",
   fullAddress = "full_address",
   updatedAt = "updated_at",
+}
+
+export enum EClassificationCategory {
+  buildingsAndStructures = "buildings_and_structures",
+  trades = "trades",
+  sitePreparation = "site_preparation",
 }

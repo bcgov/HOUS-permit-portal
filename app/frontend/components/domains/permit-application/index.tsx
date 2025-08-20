@@ -19,7 +19,6 @@ import { Paginator } from "../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../shared/base/inputs/per-page-select"
 import { ModelSearchInput } from "../../shared/base/model-search-input"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
-import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { PermitApplicationCard } from "../../shared/permit-applications/permit-application-card"
 import { PermitApplicationStatusTabs } from "../../shared/permit-applications/permit-application-status-tabs"
 import { SortSelect } from "../../shared/select/selectors/sort-select"
@@ -64,13 +63,7 @@ export const PermitApplicationIndexScreen = observer(({}: IPermitApplicationInde
       <BlueTitleBar title={t("permitApplication.indexTitle")} />
       <Container maxW="container.lg" pb={4}>
         <Flex as="section" direction="column" p={6} gap={6} flex={1}>
-          <RouterLinkButton
-            to="/permit-applications/new"
-            variant="primary"
-            alignSelf={{ base: "center", md: "flex-start" }}
-          >
-            {t("permitApplication.start")}
-          </RouterLinkButton>
+          {/* Disabled: New Permit Application entry point */}
           <Flex
             gap={6}
             align={{ base: "flex-start", md: "flex-end" }}

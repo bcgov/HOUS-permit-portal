@@ -66,14 +66,7 @@ export const StepCodeLookupTool = ({ showJurisdictionOnPage = false }: IStepCode
           {jurisdiction.inboxEnabled ? (
             <>
               <Divider />
-              <RouterLink to={`/permit-applications/new`}>
-                <HStack spacing={4}>
-                  <Files size={24} color="var(--chakra-colors-semantic-info)" />
-                  <Text as="span" textDecoration="underline" fontSize="lg">
-                    {t("home.projectReadinessTools.stepCodeLookupTool.startAPermitApplication")}
-                  </Text>
-                </HStack>
-              </RouterLink>
+              {/* Disabled: direct link to create new permit application */}
             </>
           ) : (
             <>

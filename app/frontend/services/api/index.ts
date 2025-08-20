@@ -249,13 +249,12 @@ export class Api {
   }
 
   async createPermitProject(projectData: {
-    name: string
-    description?: string
+    title: string
     fullAddress?: string
     pid?: string
+    jurisdictionId?: string
     pin?: string
     propertyPlanJurisdictionId?: string
-    // Add other fields as necessary
   }) {
     return this.client.post<ApiResponse<IPermitProject>>("/permit_projects", { permitProject: projectData })
   }
