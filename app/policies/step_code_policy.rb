@@ -12,7 +12,13 @@ class StepCodePolicy < ApplicationPolicy
   end
 
   def create?
-    user.present?
+    return false unless user
+
+    # If creating a standalone step code (no permit application), any logged-in user may create
+    return true if record.permit_application.nil?
+
+    # If tied to a permit application, only the submitter of that permit application may create
+    record.permit_application.submitter == user
   end
 
   def destroy?

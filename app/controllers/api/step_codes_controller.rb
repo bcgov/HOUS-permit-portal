@@ -22,6 +22,16 @@ class Api::StepCodesController < Api::ApplicationController
 
   def update
     authorize @step_code
+    # disallow updating step code if it's tied to a permit application and the user is not the submitter (for now)
+    if step_code_params[:permit_application_id].present?
+      target_pa =
+        PermitApplication.find_by(id: step_code_params[:permit_application_id])
+      unless target_pa && target_pa.submitter_id == current_user.id
+        render_error "misc.user_not_authorized_error", { status: 403 } and
+          return
+      end
+    end
+
     @step_code.update!(step_code_params)
     render_success @step_code,
                    "step_code.update_success",

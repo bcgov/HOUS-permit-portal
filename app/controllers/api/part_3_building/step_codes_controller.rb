@@ -9,7 +9,8 @@ class Api::Part3Building::StepCodesController < Api::ApplicationController
   end
 
   def create
-    authorize Part3StepCode.new
+    temp_step_code = Part3StepCode.new(step_code_params_for_create)
+    authorize temp_step_code
     begin
       Part3StepCode.transaction do
         @step_code =

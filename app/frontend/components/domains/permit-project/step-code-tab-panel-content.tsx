@@ -36,7 +36,10 @@ export const StepCodeTabPanelContent = observer(() => {
                 </Link>
                 .
               </Text>
-              <RouterLinkButton rightIcon={<CaretRight />} to="/project-readiness-tools/check-step-code-requirements">
+              <RouterLinkButton
+                rightIcon={<CaretRight />}
+                to="/project-readiness-tools/check-step-code-requirements/select"
+              >
                 {t("stepCode.createButton")}
               </RouterLinkButton>
               <Divider borderColor="greys.grey03" my={4} />

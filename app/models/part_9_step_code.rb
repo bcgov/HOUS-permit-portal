@@ -75,17 +75,23 @@ class Part9StepCode < StepCode
     return unless pre_construction_checklist&.data_entries
 
     pre_construction_checklist.data_entries.each do |data_entry|
-      next unless data_entry.h2k_file.present?
-
-      begin
-        data_entry.h2k_file.open do |io|
+      if data_entry.h2k_file&.attached? # Check if h2k_file is present and attached (if using Active Storage)
+        begin
+          # Assuming h2k_file.read gives the XML content
+          # You might need to adjust how you access the file content based on your setup (e.g., Active Storage, Shrine)
+          xml_content = data_entry.h2k_file.download # For Active Storage, or .read if it's a direct file object
           StepCode::Part9::DataEntryFromHot2000.new(
-            xml: Nokogiri.XML(io.read),
+            xml: Nokogiri.XML(xml_content),
             data_entry: data_entry
           ).call
+        rescue => e
+          # Log the error, but don't let it break the callback chain for other entries
+          # or the entire transaction unless that's desired.
+          Rails.logger.error "Error processing H2K file for DataEntry #{data_entry.id} in Part9StepCode #{id}: #{e.message}"
+          # Optionally, add an error to the StepCode object if you want to surface this failure,
+          # though after_create runs inside the transaction, so direct errors might not be ideal here.
+          # errors.add(:base, "Failed to process H2K file for one of the data entries.")
         end
-      rescue => e
-        Rails.logger.error "Error processing H2K file for DataEntry #{data_entry.id} in Part9StepCode #{id}: #{e.message}"
       end
     end
   end
