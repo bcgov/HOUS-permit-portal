@@ -101,17 +101,28 @@ export const StepCodeStoreModel = types
   }))
   .actions((self) => ({
     __beforeMergeUpdate(stepCode: IPart9StepCode | IPart3StepCode) {
-      if (stepCode.type === "Part9StepCode") {
-        const checklistsMap = (stepCode as IPart9StepCode).checklists?.reduce((checklistsMap, checklist) => {
-          checklistsMap[checklist.id] = checklist
-          return checklistsMap
-        }, {})
-        return R.mergeRight(stepCode, {
-          checklistsMap,
-        })
-      } else {
-        return stepCode
+      let normalized = stepCode as any
+
+      // Part 9: convert checklists array to map for stable references
+      if (normalized.type === EStepCodeType.part9StepCode) {
+        const checklistsMap = (normalized as IPart9StepCode).checklists?.reduce(
+          (acc, checklist) => {
+            acc[checklist.id] = checklist
+            return acc
+          },
+          {} as Record<string, any>
+        )
+        normalized = R.mergeRight(normalized, { checklistsMap })
       }
+
+      // Jurisdiction: merge object into store, replace with reference id (applies to all types)
+      const jurisdiction = normalized.jurisdiction
+      if (jurisdiction && typeof jurisdiction === "object" && jurisdiction.id) {
+        self.rootStore.jurisdictionStore.mergeUpdate(jurisdiction, "jurisdictionMap")
+        normalized = R.mergeRight(normalized, { jurisdiction: jurisdiction.id })
+      }
+
+      return normalized
     },
 
     fetchPart9StepCodes: flow(function* () {

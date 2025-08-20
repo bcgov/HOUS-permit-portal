@@ -27,7 +27,8 @@ class Api::StorageController < Api::ApplicationController
     "SupportingDocument" => SupportingDocument,
     "RequirementDocument" => RequirementDocument,
     "ProjectDocument" => ProjectDocument,
-    "JurisdictionDocument" => JurisdictionDocument
+    "JurisdictionDocument" => JurisdictionDocument,
+    "ReportDocument" => ReportDocument
   }.freeze
 
   def download

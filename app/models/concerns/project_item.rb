@@ -23,30 +23,41 @@ module ProjectItem
              prefix: :jurisdiction, # Results in jurisdiction_name, jurisdiction_qualified_name, etc.
              allow_nil: true
 
-    # Aliases for consistent naming
-    alias_method :project_name, :title
-
     # Custom getters that prioritize permit_project but fall back to self
+    # Canonical title getter; prefers parent when present
+    def title
+      parent&.title || self[:title]
+    end
+
     def full_address
-      parent&.full_address || read_attribute(:full_address)
+      parent&.full_address || self[:full_address]
     end
 
     def pid
-      parent&.pid || read_attribute(:pid)
+      parent&.pid || self[:pid]
     end
 
     def pin
-      parent&.pin || read_attribute(:pin)
+      parent&.pin || self[:pin]
     end
 
-    def project_identifier
-      permit_project&.id
+    def reference_number
+      parent&.reference_number || self[:reference_number]
+    end
+
+    def phase
+      parent&.phase || self[:phase]
     end
 
     # Custom method for jurisdiction to ensure it safely accesses through permit_project
     # or falls back to its own direct association.
     def jurisdiction
       parent&.jurisdiction || super
+    end
+
+    # Prefer parent permit_date when present, otherwise use standalone value
+    def permit_date
+      parent&.permit_date || self[:permit_date]
     end
 
     private

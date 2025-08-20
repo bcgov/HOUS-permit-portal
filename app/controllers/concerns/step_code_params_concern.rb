@@ -10,6 +10,14 @@ module StepCodeParamsConcern
       :type, # Added type discriminator
       :name, # For Part9StepCode
       :permit_application_id,
+      # Standalone-editable fields
+      :full_address,
+      :reference_number,
+      :title,
+      :permit_date,
+      :phase,
+      :building_code_version,
+      :jurisdiction_id,
       # Part 3 specific (or potentially shared if checklist_attributes becomes generic)
       checklist_attributes: [
         { section_completion_status: section_completion_status_params }
@@ -113,7 +121,7 @@ module StepCodeParamsConcern
       :completed_by_email,
       :completed_by_organization_name,
       :building_code_version,
-      :project_stage,
+      :phase,
       section_completion_status: section_completion_status_params,
       baseline_occupancies_attributes: %i[
         _destroy
@@ -158,8 +166,7 @@ module StepCodeParamsConcern
         document_name
         date_issued
         prepared_by
-      ],
-      step_code_attributes: %i[id full_address]
+      ]
     )
   end
 end

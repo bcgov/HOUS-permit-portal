@@ -41,11 +41,6 @@ class StepCodePolicy < ApplicationPolicy
 
     return true if record.permit_application.submitter == user
 
-    # TODO: ALLOW COLLABORATORS TO UPDATE IF THEY ARE ASSIGNED TO THE STEP CODE BLOCK
-    if (record.permit_application.collaborators.include?(user) && false)
-      return true
-    end
-
     false
   end
 

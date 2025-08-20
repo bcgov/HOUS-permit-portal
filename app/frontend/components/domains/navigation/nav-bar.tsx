@@ -89,6 +89,11 @@ function isLoginPath(path: string): boolean {
   return regex.test(path)
 }
 
+function isAdminPath(path: string): boolean {
+  const regex = /^\/admin.*$/
+  return regex.test(path)
+}
+
 function isProjectDetailPath(path: string): boolean {
   const regex = /^\/projects\/[a-f\d-]+/
   return regex.test(path)
@@ -113,6 +118,7 @@ function shouldHideSubNavbarForPath(path: string): boolean {
     isLoginPath,
     isProjectDetailPath,
     isStepCodePath,
+    isAdminPath,
   ]
 
   return matchers.some((matcher) => matcher(path))

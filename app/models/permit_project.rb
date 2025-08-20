@@ -63,6 +63,16 @@ class PermitProject < ApplicationRecord
       permit_applications.where(status: :resubmitted).count
   end
 
+  def reference_number
+    # To be overridden by PermitApplication using ProjectItem
+    nil
+  end
+
+  def phase
+    # To be implemented later
+    nil
+  end
+
   def approved_count
     self[:approved_count] ||
       (
