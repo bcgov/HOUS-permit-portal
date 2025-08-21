@@ -23,8 +23,8 @@ export const PermitProjectScreen = observer(() => {
   const navigate = useNavigate()
 
   const TABS_DATA: ITabItem[] = [
-    { label: t("permitProject.details.overview"), icon: SquaresFour, to: "overview" },
-    { label: t("permitProject.details.permits"), icon: ClipboardText, to: "permits" },
+    { label: t("permitProject.details.overview"), icon: SquaresFour, to: "overview", tabIndex: 0 },
+    { label: t("permitProject.details.permits"), icon: ClipboardText, to: "permits", tabIndex: 1 },
   ]
 
   const getDefaultValues = () => {
@@ -92,7 +92,7 @@ export const PermitProjectScreen = observer(() => {
             />
             <EditableInputWithControls
               w="full"
-              initialHint={t("permitProject.details.editProjectNameHint")}
+              initialHint={t("permitProject.details.editPermitProjectTitleHint")}
               value={watch("title") || ""}
               editableInputProps={{
                 fontWeight: 700,
@@ -104,14 +104,14 @@ export const PermitProjectScreen = observer(() => {
                     message: t("permitProject.details.invalidInput"),
                   },
                 }),
-                "aria-label": t("permitProject.details.editProjectName"),
+                "aria-label": t("permitProject.details.editPermitProjectTitle"),
                 onSubmit: handleSubmit(onSubmit),
               }}
               editablePreviewProps={{
                 fontWeight: 700,
                 fontSize: "3xl",
               }}
-              aria-label={t("permitProject.details.editProjectName")}
+              aria-label={t("permitProject.details.editPermitProjectTitle")}
               onChange={(val) => setValue("title", val)}
             />
             <RollupStatusBox project={currentPermitProject} w="240px" />

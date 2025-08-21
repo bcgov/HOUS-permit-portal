@@ -53,6 +53,11 @@ class PermitProjectPolicy < ApplicationPolicy
     user_is_owner_or_collaborator?
   end
 
+  # Allow bulk creation of permit applications under a project
+  def create_permit_applications?
+    user_is_owner?
+  end
+
   def submission_collaborator_options?
     user_is_owner?
   end

@@ -14,7 +14,7 @@ export const StepCodesGridRow = observer(({ stepCode }: { stepCode: IStepCode })
   const navigate = useNavigate()
   const permitApplicationId = (stepCode as any)?.permitApplication?.id
   const { t } = useTranslation()
-  const { type, projectName, fullAddress, updatedAt } = stepCode
+  const { type, permitProjectTitle, fullAddress, updatedAt } = stepCode
   // Navigate to standalone Part 3 route when applicable, otherwise fallback to the permit-application edit routes
   const targetPath =
     type === "Part3StepCode"
@@ -38,7 +38,7 @@ export const StepCodesGridRow = observer(({ stepCode }: { stepCode: IStepCode })
         <Text>{t(`stepCode.types.${type as EStepCodeType}`)}</Text>
       </GridItem>
       <GridItem display="flex" alignItems="center" px={4} py={2}>
-        <Text>{projectName}</Text>
+        <Text>{permitProjectTitle}</Text>
       </GridItem>
       <GridItem display="flex" alignItems="center" px={4} py={2}>
         <Text>{fullAddress}</Text>
@@ -77,6 +77,9 @@ export const StepCodesGridRow = observer(({ stepCode }: { stepCode: IStepCode })
                 <Text>{t("stepCode.index.noReportAvailable")}</Text>
               </MenuItem>
             )}
+            <MenuItem onClick={() => targetPath && navigate(targetPath)}>
+              <Text>{t("ui.view")}</Text>
+            </MenuItem>
           </MenuList>
         </Menu>
       </GridItem>

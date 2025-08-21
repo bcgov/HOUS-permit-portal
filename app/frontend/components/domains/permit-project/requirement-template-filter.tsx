@@ -14,25 +14,25 @@ export const RequirementTemplateFilter = observer(function RequirementTemplateFi
 }: IProps<TSearchModel>) {
   const { t } = useTranslation()
   const { requirementTemplateStore } = useMst()
-  const { requirementTemplateIdFilter, setRequirementTemplateIdFilter, search } = searchModel as any
+  const { requirementTemplateFilter, setRequirementTemplateFilter, search } = searchModel as any
 
   useEffect(() => {
     requirementTemplateStore.fetchFilterOptions()
   }, [])
 
   const handleChange = (nextValue: string[]) => {
-    setRequirementTemplateIdFilter(nextValue)
+    setRequirementTemplateFilter(nextValue)
     search()
   }
 
   const handleReset = () => {
-    setRequirementTemplateIdFilter([])
+    setRequirementTemplateFilter([])
     search()
   }
 
   return (
     <CheckboxFilter
-      value={requirementTemplateIdFilter || []}
+      value={requirementTemplateFilter || []}
       onChange={handleChange}
       onReset={handleReset}
       options={requirementTemplateStore.filterOptions}

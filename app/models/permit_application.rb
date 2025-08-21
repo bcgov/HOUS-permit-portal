@@ -65,8 +65,8 @@ class PermitApplication < ApplicationRecord
   delegate :published_template_version, to: :template_version
 
   before_validation :assign_unique_number, on: :create
-  before_validation :assign_default_nickname, on: :create
   before_validation :set_template_version, on: :create
+  before_validation :assign_default_nickname, on: :create
   before_validation :populate_base_form_data, on: :create
   before_save :take_form_customizations_snapshot_if_submitted
 
@@ -625,6 +625,10 @@ class PermitApplication < ApplicationRecord
     self.id # Ensures Searchkick uses the PermitApplication's own ID
   end
 
+  def short_address
+    full_address.split(",").first
+  end
+
   private
 
   def update_collaboration_assignments
@@ -643,8 +647,11 @@ class PermitApplication < ApplicationRecord
         last_number =
           jurisdiction
             .permit_applications
-            .where("number LIKE ?", "#{number_prefix}-%")
-            .order(Arel.sql("LENGTH(number) DESC"), number: :desc)
+            .where("permit_applications.number LIKE ?", "#{number_prefix}-%")
+            .order(
+              Arel.sql("LENGTH(permit_applications.number) DESC"),
+              Arel.sql("permit_applications.number DESC")
+            )
             .limit(1)
             .pluck(:number)
             .first

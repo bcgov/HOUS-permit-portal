@@ -1,6 +1,6 @@
 class PermitProject < ApplicationRecord
   include Discard::Model
-  searchkick word_middle: %i[title full_address pid pin project_number] # Search configuration for PermitProject
+  searchkick word_middle: %i[title full_address pid pin number] # Search configuration for PermitProject
 
   belongs_to :owner, class_name: "User"
   belongs_to :jurisdiction # Direct association to Jurisdiction
@@ -18,9 +18,10 @@ class PermitProject < ApplicationRecord
   accepts_nested_attributes_for :project_documents, allow_destroy: true
 
   validates :title, presence: true
-  validates :project_number, presence: true, on: :update
+  validates :number, presence: true, on: :update
   before_validation :set_default_title
-  before_validation :assign_unique_project_number, on: :create
+
+  before_validation :assign_unique_number, if: -> { number.blank? }
 
   delegate :name, to: :owner, prefix: true
 
@@ -90,7 +91,7 @@ class PermitProject < ApplicationRecord
       full_address: full_address,
       pid: pid,
       pin: pin,
-      project_number: project_number,
+      number: number,
       owner_id: owner_id,
       jurisdiction_id: jurisdiction_id,
       collaborator_ids: collaborators.pluck(:user_id).uniq,
@@ -162,21 +163,21 @@ class PermitProject < ApplicationRecord
     self.title = shortened_address if title.blank? && full_address.present?
   end
 
-  def assign_unique_project_number
-    return if project_number.present?
+  def assign_unique_number
+    return if number.present?
 
     prefix = jurisdiction.prefix
-    last_project_number =
+    last_number =
       PermitProject
-        .where("project_number LIKE ?", "#{prefix}-%")
-        .order(Arel.sql("LENGTH(project_number) DESC, project_number DESC"))
+        .where("number LIKE ?", "#{prefix}-%")
+        .order(Arel.sql("LENGTH(number) DESC, number DESC"))
         .limit(1)
-        .pluck(:project_number)
+        .pluck(:number)
         .first
 
     new_integer =
-      if last_project_number
-        number_parts = last_project_number.split("-")
+      if last_number
+        number_parts = last_number.split("-")
         # Handles both PROJ-DDDDD and PROJ-DDDD-DDDD formats
         number_parts[1..].join.to_i + 1
       else
@@ -192,7 +193,7 @@ class PermitProject < ApplicationRecord
       )
 
     # In the unlikely event of a race condition, this ensures the number is unique
-    while PermitProject.exists?(project_number: new_number)
+    while PermitProject.exists?(number: new_number)
       number_parts = new_number.split("-")
       new_integer = number_parts[1..].join.to_i + 1
       new_number =
@@ -204,6 +205,6 @@ class PermitProject < ApplicationRecord
         )
     end
 
-    self.project_number = new_number
+    self.number = new_number
   end
 end
