@@ -37,6 +37,7 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
   const [activities, setActivities] = useState<IOption<IActivity>[]>([])
   const [selectedActivityIds, setSelectedActivityIds] = useState<string[]>([])
   const [query, setQuery] = useState("")
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   // Load default permit type (low_residential) and then its activities
   useEffect(() => {
@@ -77,17 +78,20 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
   const onSubmit = async () => {
     if (!permitType || !currentPermitProject) return
 
-    const baseParams = {
-      permitTypeId: permitType.id,
-      firstNations: false,
-      permitProjectId: currentPermitProject.id,
+    try {
+      setIsSubmitting(true)
+      const params = selectedActivityIds.map((activityId) => ({
+        activityId,
+        permitTypeId: permitType.id,
+        firstNations: false,
+      }))
+      const response = await (currentPermitProject as any).bulkCreatePermitApplications(params)
+      if (response?.ok) {
+        navigate(`/projects/${currentPermitProject.id}`)
+      }
+    } finally {
+      setIsSubmitting(false)
     }
-
-    for (const activityId of selectedActivityIds) {
-      await permitApplicationStore.createPermitApplication({ ...baseParams, activityId })
-    }
-
-    navigate(`/projects/${currentPermitProject.id}`)
   }
 
   const clearSelection = () => {
@@ -104,14 +108,16 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
       </Flex>
 
       {/* Before you begin */}
+
       <Flex as="section" direction="column" gap={4} mb={8}>
+        {/* 
         <Box w={{ base: "full", md: "50%" }}>
           <Heading as="h2" variant="yellowline">
             {t("permitProject.addPermits.beforeYouBegin.heading")}
           </Heading>
 
           <Text>{t("permitProject.addPermits.beforeYouBegin.intro")}</Text>
-          {/* <Text>
+          <Text>
             {t("permitProject.addPermits.beforeYouBegin.moreInfo")}{" "}
             <RouterLinkButton variant="link" to="/jurisdictions">
               {t("permitProject.addPermits.beforeYouBegin.findYourLocalJurisdiction")}
@@ -144,8 +150,9 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
               {t("permitProject.addPermits.beforeYouBegin.variances")}
             </Link>
           </ListItem>
-        </UnorderedList> */}
+        </UnorderedList> 
         </Box>
+        */}
 
         {currentPermitProject?.jurisdiction?.sandboxOptions && (
           <Can action="jurisdiction:create">
@@ -175,7 +182,6 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
             {t("permitProject.addPermits.projectInformation.heading")}
           </Heading>
 
-          {/* Project info rows */}
           <Flex direction="column" mt={4}>
             <ProjectInfoRow
               label={t("permitProject.addPermits.projectInformation.title")}
@@ -214,6 +220,19 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
             <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t("ui.search")} bg="white" />
           </InputGroup>
 
+          {/* Action controls above the activity list */}
+          <Flex w="full" gap={4} mb={4}>
+            <Button variant="secondary" onClick={clearSelection} isDisabled={selectedActivityIds.length === 0}>
+              {t("ui.clearSelection")}
+            </Button>
+            <AddPermitsFAB
+              onClick={onSubmit}
+              count={selectedActivityIds.length}
+              disabled={isSubmitting || selectedActivityIds.length === 0 || !permitType}
+              label={t("permitProject.addPermits.title")}
+            />
+          </Flex>
+
           {groupedActivities.map((group) => (
             <Box key={group.key} mb={10}>
               <Heading as="h3" fontSize="lg" mb={4}>
@@ -231,12 +250,12 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
                       border="1px solid"
                       borderColor={checked ? "theme.blueAlt" : "border.light"}
                       bg="white"
-                      maxW={{ base: "100%", md: "48%" }}
+                      w={{ base: "100%", md: "48%" }}
                       transition="all 0.2s ease-in-out"
                       _hover={{ bg: "hover.blue" }}
                       cursor="pointer"
                     >
-                      <Flex direction="column" justify="space-between" align="end" gap={4}>
+                      <Flex direction="column" justify="space-between" align="start" gap={4}>
                         <Box>
                           <Heading as="h3" fontSize="lg" mb={2}>
                             {opt.value.name}
@@ -252,6 +271,7 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
                           px={4}
                           py={2}
                           borderRadius="md"
+                          alignSelf="flex-end"
                         >
                           <Checkbox
                             isChecked={checked}
@@ -267,19 +287,20 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
               </Flex>
             </Box>
           ))}
-        </Box>
-      </Flex>
 
-      <Flex position="fixed" bottom={6} right={6} gap={4} align="center">
-        <Button variant="secondary" onClick={clearSelection} isDisabled={selectedActivityIds.length === 0}>
-          {t("ui.clearSelection")}
-        </Button>
-        <AddPermitsFAB
-          onClick={onSubmit}
-          count={selectedActivityIds.length}
-          disabled={selectedActivityIds.length === 0 || !permitType}
-          label={t("permitProject.addPermits.title")}
-        />
+          {/* Action controls below the activity list */}
+          <Flex w="full" gap={4} mt={2}>
+            <Button variant="secondary" onClick={clearSelection} isDisabled={selectedActivityIds.length === 0}>
+              {t("ui.clearSelection")}
+            </Button>
+            <AddPermitsFAB
+              onClick={onSubmit}
+              count={selectedActivityIds.length}
+              disabled={isSubmitting || selectedActivityIds.length === 0 || !permitType}
+              label={t("permitProject.addPermits.title")}
+            />
+          </Flex>
+        </Box>
       </Flex>
     </Container>
   )
@@ -303,7 +324,7 @@ const AddPermitsFAB = ({ label, count, disabled, onClick }: IAddPermitsFABProps)
       _disabled={{ opacity: 0.6, cursor: "not-allowed" }}
       borderRadius="md"
       px={6}
-      h={12}
+      h={10}
       display="inline-flex"
       alignItems="center"
       gap={3}

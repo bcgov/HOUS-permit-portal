@@ -14,7 +14,7 @@ export const StepCodeBaseFields = types
     jurisdiction: types.maybeNull(types.reference(types.late(() => JurisdictionModel))),
     permitDate: types.maybeNull(types.Date),
     phase: types.maybeNull(types.string),
-    // Keep documents as frozen objects to avoid circular type imports
+    permitProjectTitle: types.maybeNull(types.string),
     reportDocuments: types.maybeNull(types.array(types.frozen<IReportDocument>())),
   })
   .actions((self) => ({

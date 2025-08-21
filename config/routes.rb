@@ -195,6 +195,11 @@ Rails.application.routes.draw do
       post "part_3_building/step_code",
            on: :member,
            to: "part3_building/step_codes#create"
+
+      # New route for Part 9 Step Code
+      post "part_9_building/step_code",
+           on: :member,
+           to: "part9_building/step_codes#create"
     end
 
     resources :permit_projects, only: %i[show index update create] do
@@ -204,6 +209,9 @@ Rails.application.routes.draw do
       post "permit_applications/search",
            on: :member,
            to: "permit_projects#search_permit_applications"
+      post "permit_applications",
+           on: :member,
+           to: "permit_projects#create_permit_applications"
       get "permits", on: :member, to: "permit_projects#show"
       get "overview", on: :member, to: "permit_projects#show"
       member do
