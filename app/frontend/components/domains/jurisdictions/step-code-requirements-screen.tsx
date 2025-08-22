@@ -16,7 +16,7 @@ export const JurisdictionStepCodeRequirementsScreen = observer(() => {
   const { currentJurisdiction, error } = useJurisdiction()
 
   const handleCheckAnotherAddress = () => {
-    navigate(-1)
+    navigate("/project-readiness-tools/look-up-step-codes-requirements-for-your-project/")
   }
 
   if (error) return <ErrorScreen error={error} />

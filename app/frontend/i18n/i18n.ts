@@ -2422,6 +2422,7 @@ Thank you,
               checkWhatIsNeededToApplyForPermitsInThisCommunity:
                 "Check what's needed to apply for permits in this community",
               startAPermitApplication: "Start a permit application",
+              projectsNew: "Start a new project",
               lookUpEnergyStepCodeAndZeroCarbonStepCodeRequirements:
                 "Look up Energy Step Code and Zero Carbon Step Code requirements",
               notAcceptingPermitApplications: "Not currently accepting permit applications through Building Permit Hub",
