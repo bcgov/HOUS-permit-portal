@@ -23,6 +23,7 @@ import { useMst } from "../../../setup/root"
 import { IOption } from "../../../types/types"
 import { BackButton } from "../../shared/buttons/back-button"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
+import { ManualModeInputs } from "../../shared/select/selectors/manual-mode-inputs"
 import { SitesSelect } from "../../shared/select/selectors/sites-select"
 
 type TCreatePermitProjectFormData = {
@@ -49,7 +50,13 @@ export const NewPermitProjectScreen = observer(() => {
   const navigate = useNavigate()
   const { permitProjectStore } = useMst()
 
-  useJurisdictionFromSite(watch, setValue, { siteFieldName: "site", jurisdictionIdFieldName: "jurisdictionId" })
+  const [manualMode, setManualMode] = React.useState(false)
+
+  useJurisdictionFromSite(watch, setValue, {
+    siteFieldName: "site",
+    jurisdictionIdFieldName: "jurisdictionId",
+    disabled: manualMode,
+  })
 
   const onSubmit = async (values: TCreatePermitProjectFormData) => {
     const params = {
@@ -101,10 +108,12 @@ export const NewPermitProjectScreen = observer(() => {
               <Controller
                 name="site"
                 control={control}
-                render={({ field: { onChange, value } }) => (
-                  <SitesSelect onChange={onChange} selectedOption={value} pidRequired />
-                )}
+                render={({ field: { onChange, value } }) => <SitesSelect onChange={onChange} selectedOption={value} />}
               />
+              {manualMode && <ManualModeInputs />}
+              <Button variant="link" onClick={() => setManualMode((prev) => !prev)}>
+                {t("permitProject.new.jurisdiction")}
+              </Button>
             </Flex>
 
             <HStack>

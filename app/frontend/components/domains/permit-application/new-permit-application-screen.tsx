@@ -3,12 +3,9 @@ import {
   Button,
   Container,
   Flex,
-  FormControl,
   FormLabel,
   Heading,
   Image,
-  Input,
-  InputGroup,
   Link,
   ListItem,
   Radio,
@@ -21,7 +18,7 @@ import i18next from "i18next"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React, { useEffect, useState } from "react"
-import { Controller, FormProvider, useForm, useFormContext } from "react-hook-form"
+import { Controller, FormProvider, useForm } from "react-hook-form"
 import { Trans, useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { useJurisdictionFromSite } from "../../../hooks/use-jurisdiction-from-site"
@@ -34,7 +31,7 @@ import { CustomMessageBox } from "../../shared/base/custom-message-box"
 import { BackButton } from "../../shared/buttons/back-button"
 import { ActivityList } from "../../shared/permit-classification/activity-list"
 import { PermitTypeRadioSelect } from "../../shared/permit-classification/permit-type-radio-select"
-import { JurisdictionSelect } from "../../shared/select/selectors/jurisdiction-select"
+import { ManualModeInputs } from "../../shared/select/selectors/manual-mode-inputs"
 import { SitesSelect } from "../../shared/select/selectors/sites-select"
 
 export type TSearchAddressFormData = {
@@ -173,9 +170,9 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
                     )
                   }}
                 />
-                {pinMode && <PinModeInputs disabled={fetchingPids} />}
+                {pinMode && <ManualModeInputs disabled={fetchingPids} />}
                 <Button variant="link" onClick={() => setPinMode((prev) => !prev)}>
-                  {pinMode ? t("permitApplication.new.dontHavePin") : t("permitApplication.new.onlyHavePin")}
+                  {pinMode ? t("permitApplication.new.dontHavePin") : t("permitApplication.pdf.jurisdiction")}
                 </Button>
               </Flex>
               {jurisdictionIdWatch && (
@@ -276,63 +273,7 @@ interface IPinModeInputsProps {
 }
 
 export const PinModeInputs = observer(({ disabled }: IPinModeInputsProps) => {
-  const { register, control, setValue } = useFormContext()
-  const { jurisdictionStore, geocoderStore } = useMst()
-  const { addJurisdiction, getJurisdictionById } = jurisdictionStore
-  const { fetchPinVerification } = geocoderStore
-  const { t } = useTranslation()
-
-  const [pinValid, setPinValid] = useState<"unchecked" | "valid" | "invalid">("unchecked")
-  //upon inputing pin and losing focus, we should call pin validation
-  const handleBlur = async (e) => {
-    if (R.isEmpty(e?.target?.value)) {
-      setPinValid("unchecked")
-    } else {
-      try {
-        const verified = await fetchPinVerification(e?.target?.value)
-        verified ? setPinValid("valid") : setPinValid("invalid")
-      } catch (e) {
-        setPinValid("invalid")
-      }
-    }
-  }
-
-  return (
-    <Flex direction="column" bg="greys.grey03" px={6} py={2} gap={4}>
-      {t("permitApplication.new.pinRequired")}
-      <Flex gap={4}>
-        <FormControl>
-          <FormLabel>{t("permitApplication.fields.pin")}</FormLabel>
-          <Input {...register("pin")} onBlur={handleBlur} bg="greys.white" disabled={disabled} />
-          {pinValid == "valid" && <Text key={"valid"}>{t("permitApplication.new.pinVerified")}</Text>}
-          {pinValid == "invalid" && <Text key={"invalid"}>{t("permitApplication.new.pinUnableToVerify")}</Text>}
-        </FormControl>
-
-        <Controller
-          name="jurisdictionId"
-          control={control}
-          render={({ field: { onChange, value } }) => {
-            return (
-              <FormControl w="full" zIndex={1}>
-                <FormLabel>{t("jurisdiction.index.title")}</FormLabel>
-                <InputGroup w="full">
-                  <JurisdictionSelect
-                    onChange={(selectValue) => {
-                      if (selectValue) addJurisdiction(selectValue)
-                      onChange(selectValue?.id)
-                    }}
-                    onFetch={() => setValue("jurisdictionId", null)}
-                    selectedOption={value ? { label: getJurisdictionById(value)?.reverseQualifiedName, value } : null}
-                    menuPortalTarget={document.body}
-                  />
-                </InputGroup>
-              </FormControl>
-            )
-          }}
-        />
-      </Flex>
-    </Flex>
-  )
+  return <ManualModeInputs disabled={disabled} />
 })
 
 const DisclaimerInfo = () => {
