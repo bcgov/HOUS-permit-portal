@@ -54,6 +54,14 @@ export const Part3StepCodeForm = observer(function Part3StepCodeForm() {
     }
   }, [stepCode])
 
+  // ensure scroll resets on section change at the container level
+  useEffect(() => {
+    const scroller = document.getElementById("stepCodeScroll")
+    if (scroller) {
+      scroller.scrollTo({ top: 0, left: 0, behavior: "auto" })
+    }
+  }, [section])
+
   return (
     <RemoveScroll>
       <Flex
@@ -77,7 +85,7 @@ export const Part3StepCodeForm = observer(function Part3StepCodeForm() {
           }
         >
           {stepCode && (
-            <Flex flex={1} w="full" id="stepCodeScroll" overflow="auto" position="relative">
+            <Flex flex={1} w="full" overflow="auto" position="relative">
               <Show above="lg">
                 <Flex
                   w={"sidebar.width"}
@@ -98,6 +106,7 @@ export const Part3StepCodeForm = observer(function Part3StepCodeForm() {
                 pl={{ base: 0, xl: 20 }}
                 pt={10}
                 pb={10}
+                id="stepCodeScroll"
               >
                 <Hide above="lg">
                   <SideBarDrawer triggerProps={{ ml: 6, size: "md" }} />

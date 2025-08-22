@@ -41,12 +41,12 @@ export const PermitProjectModel = types
     },
     get rollupStatusDescription() {
       const total = self.totalPermitsCount
-      if (total === 0) return ""
+
       const remainingCount = self.newDraftCount + self.revisionsRequestedCount
       const submittedCount = self.newlySubmittedCount + self.resubmittedCount
 
       if (self.rollupStatus === EPermitProjectRollupStatus.empty) {
-        return ""
+        return t("permitProject.rollupStatusDescription.empty")
       } else if (self.rollupStatus === EPermitProjectRollupStatus.newDraft) {
         return t("permitProject.rollupStatusDescription.inProgress", { remaining: remainingCount, total })
       } else if (

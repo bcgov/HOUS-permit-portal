@@ -1,5 +1,5 @@
 import { observer } from "mobx-react-lite"
-import React from "react"
+import React, { useEffect } from "react"
 import { useParams } from "react-router-dom"
 import { BaselineOccupancies } from "./baseline-occupancies"
 import { BaselineDetails } from "./baseline-occupancies/baseline-details"
@@ -25,6 +25,15 @@ import { StepCodeSummary } from "./step-code-summary"
 
 export const FormSection = observer(function Part3StepCodeFormSection() {
   const { section } = useParams()
+
+  useEffect(() => {
+    const scroller = document.getElementById("stepCodeScroll")
+    if (scroller) {
+      scroller.scrollTo({ top: 0, left: 0, behavior: "auto" })
+    } else {
+      window.scrollTo({ top: 0, left: 0, behavior: "auto" })
+    }
+  }, [section])
 
   switch (section) {
     case "start":

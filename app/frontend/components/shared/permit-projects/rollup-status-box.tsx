@@ -12,7 +12,6 @@ export const RollupStatusBox = ({ project, ...rest }: IProps) => {
   const { t } = useTranslation()
 
   const { rollupStatus } = project
-
   return (
     <Flex align="center" justify="space-between" minW="220px" {...rest}>
       <Flex direction="column" align="flex-start">

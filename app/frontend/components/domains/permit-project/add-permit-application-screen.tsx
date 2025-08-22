@@ -8,7 +8,9 @@ import {
   Input,
   InputGroup,
   InputLeftElement,
+  ListItem,
   Text,
+  UnorderedList,
 } from "@chakra-ui/react"
 import { CaretLeft, Info, MagnifyingGlass } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
@@ -110,49 +112,35 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
       {/* Before you begin */}
 
       <Flex as="section" direction="column" gap={4} mb={8}>
-        {/* 
         <Box w={{ base: "full", md: "50%" }}>
           <Heading as="h2" variant="yellowline">
             {t("permitProject.addPermits.beforeYouBegin.heading")}
           </Heading>
 
           <Text>{t("permitProject.addPermits.beforeYouBegin.intro")}</Text>
+
+          <UnorderedList ml="0" spacing={2} styleType="disc">
+            <ListItem>{t("permitProject.addPermits.beforeYouBegin.bcBuildingCode")}</ListItem>
+            <ListItem>{t("permitProject.addPermits.beforeYouBegin.localZoningBylaws")}</ListItem>
+            <ListItem>{t("permitProject.addPermits.beforeYouBegin.ocp")}</ListItem>
+            <ListItem>{t("permitProject.addPermits.beforeYouBegin.dpaRules")}</ListItem>
+          </UnorderedList>
+
           <Text>
             {t("permitProject.addPermits.beforeYouBegin.moreInfo")}{" "}
             <RouterLinkButton variant="link" to="/jurisdictions">
               {t("permitProject.addPermits.beforeYouBegin.findYourLocalJurisdiction")}
             </RouterLinkButton>
           </Text>
-
-        <UnorderedList ml="0" spacing={2} styleType="disc">
-          <ListItem>
-            <Link isExternal href="#">
-              {t("permitProject.addPermits.beforeYouBegin.provincialBuildingCode")}
-            </Link>
-          </ListItem>
-          <ListItem>
-            <Link isExternal href="#">
-              {t("permitProject.addPermits.beforeYouBegin.localZoningBylaw")}
-            </Link>
-          </ListItem>
-          <ListItem>
-            <Link isExternal href="#">
-              {t("permitProject.addPermits.beforeYouBegin.ocpRegulations")}
-            </Link>
-          </ListItem>
-          <ListItem>
-            <Link isExternal href="#">
-              {t("permitProject.addPermits.beforeYouBegin.developmentPermitAreas")}
-            </Link>
-          </ListItem>
-          <ListItem>
-            <Link isExternal href="#">
-              {t("permitProject.addPermits.beforeYouBegin.variances")}
-            </Link>
-          </ListItem>
-        </UnorderedList> 
         </Box>
-        */}
+
+        <Box w={{ base: "full", md: "50%" }}>
+          <Heading as="h2" variant="yellowline">
+            {(t as any)("permitProject.addPermits.about.heading")}
+          </Heading>
+          <Text mb={2}>{(t as any)("permitProject.addPermits.about.p1")}</Text>
+          <Text>{(t as any)("permitProject.addPermits.about.p2")}</Text>
+        </Box>
 
         {currentPermitProject?.jurisdiction?.sandboxOptions && (
           <Can action="jurisdiction:create">
