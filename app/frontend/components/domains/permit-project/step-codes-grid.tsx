@@ -36,7 +36,7 @@ export const StepCodesGrid = observer(() => {
             <SharedSpinner />
           </Flex>
         ) : R.isEmpty(tableStepCodes) ? (
-          <GridItem gridColumn="span 3">
+          <GridItem gridColumn="span 5">
             <CustomMessageBox m={4} status={EFlashMessageStatus.info} description={t("stepCode.noneFound")} />
           </GridItem>
         ) : (

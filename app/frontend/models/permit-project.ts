@@ -13,7 +13,7 @@ export const PermitProjectModel = types
     title: types.string,
     fullAddress: types.maybeNull(types.string),
     pid: types.maybeNull(types.string),
-    projectNumber: types.maybeNull(types.string),
+    number: types.maybeNull(types.string),
     jurisdictionDisambiguatedName: types.string,
     rollupStatus: types.enumeration(Object.values(EPermitProjectRollupStatus)),
     tablePermitApplications: types.maybeNull(types.array(types.reference(types.late(() => PermitApplicationModel)))),
@@ -41,12 +41,12 @@ export const PermitProjectModel = types
     },
     get rollupStatusDescription() {
       const total = self.totalPermitsCount
-      if (total === 0) return ""
+
       const remainingCount = self.newDraftCount + self.revisionsRequestedCount
       const submittedCount = self.newlySubmittedCount + self.resubmittedCount
 
       if (self.rollupStatus === EPermitProjectRollupStatus.empty) {
-        return ""
+        return t("permitProject.rollupStatusDescription.empty")
       } else if (self.rollupStatus === EPermitProjectRollupStatus.newDraft) {
         return t("permitProject.rollupStatusDescription.inProgress", { remaining: remainingCount, total })
       } else if (
@@ -93,6 +93,18 @@ export const PermitProjectModel = types
         return response.data.data
       }
       return []
+    }),
+    bulkCreatePermitApplications: flow(function* (
+      params: Array<{ activityId: string; permitTypeId: string; firstNations: boolean }>
+    ) {
+      const response = yield* toGenerator(self.environment.api.createProjectPermitApplications(self.id, params))
+      if (response.ok) {
+        // Merge created applications into store
+        self.rootStore.permitApplicationStore.mergeUpdateAll(response.data.data, "permitApplicationMap")
+        // Update table list when viewing project context
+        self.setTablePermitApplications(response.data.data as any)
+      }
+      return response
     }),
   }))
 

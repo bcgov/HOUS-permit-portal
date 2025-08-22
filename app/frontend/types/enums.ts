@@ -672,7 +672,7 @@ export enum EPermitProjectRollupStatus {
 
 export enum EStepCodeSortFields {
   type = "type",
-  projectName = "project_name",
+  permitProjectTitle = "permit_project_title",
   fullAddress = "full_address",
   updatedAt = "updated_at",
 }

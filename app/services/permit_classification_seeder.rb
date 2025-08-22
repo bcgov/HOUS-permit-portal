@@ -94,7 +94,8 @@ class PermitClassificationSeeder
       {
         name: "Mechanical",
         code: "mechanical",
-        description: "Placeholder description",
+        description:
+          "Install, change, or repair heating, ventilation, or air conditioning (HVAC) systems.",
         enabled: true,
         type: "Activity",
         category: "trades"
@@ -102,7 +103,8 @@ class PermitClassificationSeeder
       {
         name: "Plumbing",
         code: "plumbing",
-        description: "Placeholder description",
+        description:
+          "Install, change, or repair plumbing systems, including water supply, drainage, and services to a building.",
         enabled: true,
         type: "Activity",
         category: "trades"
@@ -110,7 +112,8 @@ class PermitClassificationSeeder
       {
         name: "Electrical",
         code: "electrical",
-        description: "Placeholder description",
+        description:
+          "Electrical work, including installation, changes, or repairs to wiring, panels, or lighting. Applies to both permanent and temporary services.",
         enabled: true,
         type: "Activity",
         category: "trades"
@@ -118,7 +121,8 @@ class PermitClassificationSeeder
       {
         name: "Gas",
         code: "gas",
-        description: "Placeholder description",
+        description:
+          "Install, change, or repair gas piping, appliances, venting, or connections.",
         enabled: true,
         type: "Activity",
         category: "trades"
@@ -126,7 +130,8 @@ class PermitClassificationSeeder
       {
         name: "Solid fuel burning appliance",
         code: "solid_fuel_burning_appliance",
-        description: "Placeholder description",
+        description:
+          "Install, change, or repair a wood stove, pellet stove, or another solid fuel-burning appliance.",
         enabled: true,
         type: "Activity",
         category: "trades"
@@ -134,7 +139,8 @@ class PermitClassificationSeeder
       {
         name: "Fire alarm",
         code: "fire_alarm",
-        description: "Placeholder description",
+        description:
+          "Install, change, or repair a fire alarm system, including detectors, panels, and wiring.",
         enabled: true,
         type: "Activity",
         category: "trades"
@@ -142,7 +148,8 @@ class PermitClassificationSeeder
       {
         name: "Fire suppression",
         code: "fire_suppression",
-        description: "Placeholder description",
+        description:
+          "Install, change, or repair a sprinkler or other fire suppression system in a building.",
         enabled: true,
         type: "Activity",
         category: "trades"

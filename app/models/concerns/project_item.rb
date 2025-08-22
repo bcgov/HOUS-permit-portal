@@ -14,7 +14,8 @@ module ProjectItem
     after_commit :reindex_permit_project
 
     # Delegations to PermitProject for core project details
-    delegate :title, :permit_date, to: :permit_project, allow_nil: true # allow_nil should be false if permit_project is truly non-optional and always present
+    delegate :permit_date, to: :permit_project, allow_nil: true # allow_nil should be false if permit_project is truly non-optional and always present
+    delegate :title, to: :permit_project, prefix: true, allow_nil: true
 
     delegate :qualified_name,
              :heating_degree_days,

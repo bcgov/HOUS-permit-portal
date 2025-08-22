@@ -5,6 +5,7 @@ import { useMst } from "../setup/root"
 interface IUseJurisdictionFromSiteOptions {
   siteFieldName?: string
   jurisdictionIdFieldName?: string
+  disabled?: boolean
 }
 
 // Watches a RHF "site" field and populates the RHF "jurisdictionId" field using geocoder
@@ -20,8 +21,12 @@ export function useJurisdictionFromSite(
   const { addJurisdiction } = jurisdictionStore
 
   const siteWatch = watch(siteFieldName)
+  const isDisabled = options.disabled === true
 
   useEffect(() => {
+    if (isDisabled) {
+      return
+    }
     const siteValue: string | undefined = siteWatch?.value
     if (R.isNil(siteValue) || siteValue === "") {
       // Do not overwrite an existing default jurisdictionId when no site is selected
@@ -47,5 +52,5 @@ export function useJurisdictionFromSite(
     return () => {
       isActive = false
     }
-  }, [siteWatch?.value])
+  }, [siteWatch?.value, isDisabled])
 }

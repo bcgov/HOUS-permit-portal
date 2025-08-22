@@ -2,7 +2,6 @@ import { Box, Container, Heading, ListItem, Text, UnorderedList } from "@chakra-
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../../setup/root"
-import { RouterLink } from "../../../shared/navigation/router-link"
 import { RouterLinkButton } from "../../../shared/navigation/router-link-button"
 
 export const CheckStepCodeRequirementsScreen = () => {
@@ -49,9 +48,9 @@ export const CheckStepCodeRequirementsScreen = () => {
           <ListItem>{t("projectReadinessTools.checkStepCodeRequirementsScreen.whatsIncludedPoint1")}</ListItem>
           <ListItem>{t("projectReadinessTools.checkStepCodeRequirementsScreen.whatsIncludedPoint2")}</ListItem>
         </UnorderedList>
-        <RouterLink to="#" color="text.link">
+        {/* <RouterLink to="#" color="text.link">
           {t("projectReadinessTools.checkStepCodeRequirementsScreen.downloadSampleLink")}
-        </RouterLink>
+        </RouterLink> */}
       </Box>
     </Container>
   )

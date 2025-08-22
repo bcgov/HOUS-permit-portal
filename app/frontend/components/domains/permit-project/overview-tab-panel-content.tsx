@@ -4,7 +4,12 @@ import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { IPermitProject } from "../../../models/permit-project"
-import { EProjectPermitApplicationSortFields } from "../../../types/enums"
+import {
+  EFlashMessageStatus,
+  EPermitProjectRollupStatus,
+  EProjectPermitApplicationSortFields,
+} from "../../../types/enums"
+import { CustomMessageBox } from "../../shared/base/custom-message-box"
 import { SearchGrid } from "../../shared/grid/search-grid"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import ProjectInfoRow from "../../shared/project/project-info-row"
@@ -18,7 +23,7 @@ interface IProps {
 }
 
 export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
-  const { fullAddress, pid, jurisdiction, projectNumber } = permitProject
+  const { fullAddress, pid, jurisdiction, number } = permitProject
   const { t } = useTranslation()
 
   return (
@@ -42,7 +47,7 @@ export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
               isBold
               isCopyable
             />
-            <ProjectInfoRow label={t("permitProject.overview.number")} value={projectNumber} isCopyable />
+            <ProjectInfoRow label={t("permitProject.overview.number")} value={number} isCopyable />
             <ProjectInfoRow
               label={t("permitProject.overview.pid")}
               value={pid || t("permitProject.overview.notAvailable")}
@@ -86,20 +91,30 @@ export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
             {t("permitProject.addPermits.title")}
           </RouterLinkButton>
         </Flex>
-        <SearchGrid templateColumns="2fr 1.5fr 1.5fr 1.5fr 0.5fr" gridRowClassName="permit-application-grid-row">
-          <PermitApplicationGridHeaders
-            columns={Object.values(EProjectPermitApplicationSortFields)}
-            includeActionColumn
-          />
-          {permitProject.recentPermitApplications.map((permitApplication) => (
-            <PermitApplicationGridRow key={permitApplication.id} permitApplication={permitApplication} />
-          ))}
-        </SearchGrid>
-        <Flex justify="flex-end" mt={4}>
-          <RouterLinkButton variant="tertiary" rightIcon={<CaretRight />} to={`/projects/${permitProject.id}/permits`}>
-            {t("permitProject.overview.allPermits")}
-          </RouterLinkButton>
-        </Flex>
+        {permitProject.rollupStatus === EPermitProjectRollupStatus.empty ? (
+          <CustomMessageBox status={EFlashMessageStatus.info} description={t("permitProject.index.empty")} mt={2} />
+        ) : (
+          <>
+            <SearchGrid templateColumns="2fr 1.5fr 1.5fr 1.5fr 0.5fr" gridRowClassName="permit-application-grid-row">
+              <PermitApplicationGridHeaders
+                columns={Object.values(EProjectPermitApplicationSortFields)}
+                includeActionColumn
+              />
+              {permitProject.recentPermitApplications.map((permitApplication) => (
+                <PermitApplicationGridRow key={permitApplication.id} permitApplication={permitApplication} />
+              ))}
+            </SearchGrid>
+            <Flex justify="flex-end" mt={4}>
+              <RouterLinkButton
+                variant="tertiary"
+                rightIcon={<CaretRight />}
+                to={`/projects/${permitProject.id}/permits`}
+              >
+                {t("permitProject.overview.allPermits")}
+              </RouterLinkButton>
+            </Flex>
+          </>
+        )}
       </Box>
     </Flex>
   )

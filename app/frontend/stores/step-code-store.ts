@@ -64,7 +64,7 @@ export const StepCodeStoreModel = types
     },
     getSortColumnHeader(field: EStepCodeSortFields) {
       const map = {
-        [EStepCodeSortFields.projectName]: t("stepCode.columns.project"),
+        [EStepCodeSortFields.permitProjectTitle]: t("stepCode.columns.project"),
         [EStepCodeSortFields.type]: t("stepCode.columns.type"),
         [EStepCodeSortFields.fullAddress]: t("stepCode.columns.fullAddress"),
         [EStepCodeSortFields.updatedAt]: t("stepCode.columns.updatedAt"),

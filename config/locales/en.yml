@@ -482,6 +482,12 @@ en:
       create_success:
         title: ""
         message: "New permit application started!"
+      bulk_create_success:
+        title: ""
+        message: "Permit applications created successfully!"
+      bulk_create_error:
+        title: Error
+        message: "There was an error creating the permit applications"
       update_error:
         title: Error
         message: "%{error_message}"
@@ -531,6 +537,9 @@ en:
         title: Error
         message: "There was an error updating permit block status"
     permit_project:
+      update_error:
+        title: Error
+        message: "%{error_message}"
       create_success:
         title: ""
         message: "Permit project pinned successfully"

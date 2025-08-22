@@ -296,6 +296,16 @@ export class Api {
     return this.client.post<ApiResponse<IPermitApplication>>("/permit_applications", { permitApplication: params })
   }
 
+  async createProjectPermitApplications(
+    permitProjectId: string,
+    params: Array<{ activityId: string; permitTypeId: string; firstNations: boolean }>
+  ) {
+    return this.client.post<ApiResponse<IPermitApplication[]>>(
+      `/permit_projects/${permitProjectId}/permit_applications`,
+      { permitApplications: params }
+    )
+  }
+
   async createRequirementBlock(params: IRequirementBlockParams) {
     return this.client.post<IRequirementBlockResponse>(`/requirement_blocks`, { requirementBlock: params })
   }
