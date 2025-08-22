@@ -50,7 +50,10 @@ class PermitApplicationPolicy < ApplicationPolicy
   end
 
   def upload_supporting_document?
-    record.draft? && record.submitter == user
+    record.draft? &&
+      record.submission_requirement_block_edit_permissions(
+        user_id: user.id
+      ).present?
   end
 
   def submit?

@@ -141,8 +141,15 @@ class PermitProject < ApplicationRecord
     full_address.split(",").first
   end
 
-  def recent_permit_applications
-    permit_applications.order(updated_at: :desc).limit(3)
+  def recent_permit_applications(user = nil)
+    scope = permit_applications.order(updated_at: :desc)
+    return scope.limit(3) if user.nil? || owner_id == user.id
+
+    scope
+      .joins(permit_collaborations: :collaborator)
+      .where(collaborators: { user_id: user.id })
+      .distinct
+      .limit(3)
   end
 
   def submission_collaborators

@@ -27,9 +27,10 @@ interface IProps {
 }
 
 export const PermitsTabPanelContent = observer(({ permitProject }: IProps) => {
-  const { permitApplicationStore } = useMst()
+  const { permitApplicationStore, userStore } = useMst()
   const { currentPage, totalPages, totalCount, countPerPage, handleCountPerPageChange, handlePageChange } =
     permitApplicationStore
+  const { currentUser } = userStore
 
   useSearch(permitApplicationStore, [permitProject.id])
 
@@ -57,7 +58,9 @@ export const PermitsTabPanelContent = observer(({ permitProject }: IProps) => {
             <Flex gap={2} mb={2}>
               <RequirementTemplateFilter searchModel={permitApplicationStore} />
               <StatusFilter searchModel={permitApplicationStore} />
-              <SubmissionDelegateeFilter searchModel={permitApplicationStore} permitProject={permitProject} />
+              {permitProject.isOwner && (
+                <SubmissionDelegateeFilter searchModel={permitApplicationStore} permitProject={permitProject} />
+              )}
             </Flex>
             <SearchGrid templateColumns="2fr 1.5fr 1.5fr 1.5fr 0.5fr" gridRowClassName="permit-application-grid-row">
               <PermitApplicationGridHeaders
