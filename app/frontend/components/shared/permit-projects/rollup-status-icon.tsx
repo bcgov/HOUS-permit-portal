@@ -1,4 +1,4 @@
-import { CheckCircle, CircleDashed, Clock, Empty, FlagBanner, IconProps } from "@phosphor-icons/react"
+import { CheckCircle, CircleDashed, Clock, FlagBanner, FolderDashed, IconProps } from "@phosphor-icons/react"
 import React from "react"
 import { EPermitProjectRollupStatus } from "../../../types/enums"
 
@@ -13,7 +13,7 @@ const rollupStatusToIconMap: Record<EPermitProjectRollupStatus, React.ElementTyp
   [EPermitProjectRollupStatus.revisionsRequested]: FlagBanner,
   [EPermitProjectRollupStatus.resubmitted]: Clock,
   [EPermitProjectRollupStatus.approved]: CheckCircle,
-  [EPermitProjectRollupStatus.empty]: Empty,
+  [EPermitProjectRollupStatus.empty]: FolderDashed,
 }
 export function RollupStatusIcon({ rollupStatus, iconProps }: IProps) {
   const Icon = rollupStatusToIconMap[rollupStatus]

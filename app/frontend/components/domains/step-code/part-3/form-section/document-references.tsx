@@ -178,7 +178,9 @@ export const DocumentReferences = observer(function DocumentaReferences() {
         <Box as="form" onSubmit={onSubmit} name="part3SectionForm">
           <Accordion
             index={openAccordionIndexes}
-            onChange={setOpenAccordionIndexes}
+            onChange={(expandedIndex) =>
+              setOpenAccordionIndexes(Array.isArray(expandedIndex) ? expandedIndex : [expandedIndex])
+            }
             as={Stack}
             spacing={2}
             allowMultiple
