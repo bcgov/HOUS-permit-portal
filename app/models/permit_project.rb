@@ -164,6 +164,12 @@ class PermitProject < ApplicationRecord
       .distinct
   end
 
+  def visible_project_documents(user = nil)
+    # limit project documents to owner for now
+    return ProjectDocument.none if user.nil? || owner_id != user.id
+    return project_documents if user.id == owner_id
+  end
+
   private
 
   def set_default_title

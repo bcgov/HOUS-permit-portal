@@ -51,7 +51,10 @@ class PermitProjectBlueprint < Blueprinter::Base
                 view: :project_base do |permit_project, _options|
       permit_project.recent_permit_applications(_options[:current_user])
     end
-    association :project_documents, blueprint: ProjectDocumentBlueprint
+    association :project_documents,
+                blueprint: ProjectDocumentBlueprint do |permit_project, options|
+      permit_project.visible_project_documents(options[:current_user])
+    end
     association :jurisdiction, blueprint: JurisdictionBlueprint, view: :base
   end
 end
