@@ -89,6 +89,7 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
       }))
       const response = await (currentPermitProject as any).bulkCreatePermitApplications(params)
       if (response?.ok) {
+        currentPermitProject.resetIsFullyLoaded()
         navigate(`/projects/${currentPermitProject.id}`)
       }
     } finally {

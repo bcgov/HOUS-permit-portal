@@ -144,7 +144,8 @@ class Api::PermitProjectsController < Api::ApplicationController
                      meta: page_meta(@permit_application_search),
                      blueprint: PermitApplicationBlueprint,
                      blueprint_opts: {
-                       view: :project_base
+                       view: :project_base,
+                       current_user: current_user
                      }
                    }
   end

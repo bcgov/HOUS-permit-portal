@@ -32,6 +32,7 @@ export const PermitProjectModel = types
     hasOutdatedDraftApplications: types.maybeNull(types.boolean),
     isFullyLoaded: types.optional(types.boolean, false),
     ownerName: types.maybeNull(types.string),
+    ownerId: types.maybeNull(types.string),
   })
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -62,10 +63,16 @@ export const PermitProjectModel = types
         return ""
       }
     },
+    get isOwner() {
+      return self.ownerId === self.rootStore.userStore.currentUser?.id
+    },
   }))
   .actions((self) => ({
     setIsPinned(isPinned: boolean) {
       self.isPinned = isPinned
+    },
+    resetIsFullyLoaded() {
+      self.isFullyLoaded = false
     },
   }))
   .actions((self) => ({
