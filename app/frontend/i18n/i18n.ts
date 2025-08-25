@@ -3522,7 +3522,7 @@ Thank you,
             sandbox: "Sandbox",
           },
           notificationEmailHint:
-            "This email will be used to notify your local integration partner about upcoming changes to API mappings. <strong>Note:</strong> Jurisdiction review managers will be notified via their registered email irrespective of this field",
+            "This email will be used to notify your local integration partner about upcoming changes to API mappings. Note: Jurisdiction review managers will be notified via their registered email irrespective of this field",
           fieldPlaceholders: {
             webhookUrl: "https://example.com/webhook",
           },
