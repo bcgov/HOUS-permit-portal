@@ -142,8 +142,10 @@ class PermitProject < ApplicationRecord
   end
 
   def recent_permit_applications(user = nil)
+    return PermitApplication.none if user.nil?
+
     scope = permit_applications.order(updated_at: :desc)
-    return scope.limit(3) if user.nil? || owner_id == user.id
+    return scope.limit(3) if owner_id == user.id
 
     scope
       .joins(permit_collaborations: :collaborator)
@@ -152,22 +154,35 @@ class PermitProject < ApplicationRecord
       .limit(3)
   end
 
-  def submission_collaborators
-    Collaborator
-      .joins(:permit_collaborations)
-      .where(
-        permit_collaborations: {
-          permit_application_id: permit_applications.select(:id),
-          collaboration_type: :submission
-        }
+  def submission_collaborators(user = nil)
+    return Collaborator.none if user.nil?
+
+    if owner_id == user.id
+      return(
+        Collaborator
+          .joins(:permit_collaborations)
+          .where(
+            permit_collaborations: {
+              permit_application_id: permit_applications.select(:id),
+              collaboration_type: :submission
+            }
+          )
+          .distinct
       )
-      .distinct
+    end
+
+    Collaborator.none
   end
 
-  def visible_project_documents(user = nil)
-    # limit project documents to owner for now
-    return ProjectDocument.none if user.nil? || owner_id != user.id
-    return project_documents if user.id == owner_id
+  def project_documents(user = nil)
+    # Limit project documents to owner for now
+    base = association(:project_documents).reader
+    return ProjectDocument.none if user.nil?
+
+    return base if owner_id == user.id
+
+    # Not the owner: return an empty result, preferring in-memory if already loaded
+    base.loaded? ? [] : ProjectDocument.none
   end
 
   private

@@ -70,8 +70,8 @@ class PermitApplicationBlueprint < Blueprinter::Base
       true
     end
 
-    field :form_json do |pa, _options|
-      pa.form_json(current_user: _options[:current_user])
+    field :form_json do |pa, options|
+      pa.form_json(current_user: options[:current_user])
     end
 
     field :submission_data do |pa, options|

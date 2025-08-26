@@ -152,7 +152,7 @@ class Api::PermitProjectsController < Api::ApplicationController
 
   def submission_collaborator_options
     authorize @permit_project
-    render_success @permit_project.submission_collaborators,
+    render_success @permit_project.submission_collaborators(current_user),
                    nil,
                    {
                      blueprint: CollaboratorOptionBlueprint,

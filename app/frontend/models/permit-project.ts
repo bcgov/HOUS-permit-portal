@@ -101,6 +101,8 @@ export const PermitProjectModel = types
       }
       return []
     }),
+  }))
+  .actions((self) => ({
     bulkCreatePermitApplications: flow(function* (
       params: Array<{ activityId: string; permitTypeId: string; firstNations: boolean }>
     ) {
