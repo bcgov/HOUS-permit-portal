@@ -21,9 +21,8 @@ class Api::PermitApplicationsController < Api::ApplicationController
   skip_after_action :verify_policy_scoped, only: [:index]
 
   def index
-    perform_permit_application_search
-    authorized_results =
-      apply_search_authorization(@permit_application_search.results)
+    # Results are already authorized by the policy_scope in the search concern
+    authorized_results = @permit_application_search.results
     render_success authorized_results,
                    nil,
                    {

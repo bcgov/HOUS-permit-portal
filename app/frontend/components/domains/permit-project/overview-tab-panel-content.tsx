@@ -95,7 +95,10 @@ export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
           <CustomMessageBox status={EFlashMessageStatus.info} description={t("permitProject.index.empty")} mt={2} />
         ) : (
           <>
-            <SearchGrid templateColumns="2fr 1.5fr 1.5fr 1.5fr 0.5fr" gridRowClassName="permit-application-grid-row">
+            <SearchGrid
+              templateColumns="2fr 1.5fr 1.5fr 1.5fr 1.5fr 0.5fr"
+              gridRowClassName="permit-application-grid-row"
+            >
               <PermitApplicationGridHeaders
                 columns={Object.values(EProjectPermitApplicationSortFields)}
                 includeActionColumn

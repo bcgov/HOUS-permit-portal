@@ -22,7 +22,8 @@ module Api::Concerns::Search::JurisdictionPermitApplications
               nil
             end
           ),
-        includes: PermitApplication::SEARCH_INCLUDES
+        includes: PermitApplication::SEARCH_INCLUDES,
+        scope_results: ->(relation) { policy_scope(relation) }
       )
   end
 

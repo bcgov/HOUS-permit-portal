@@ -154,7 +154,31 @@ class PermitApplicationPolicy < ApplicationPolicy
 
   class Scope < Scope
     def resolve
-      scope.where(submitter: user, sandbox: sandbox)
+      submission_type =
+        PermitCollaboration.collaboration_types.fetch(:submission)
+
+      exists_sql = <<-SQL.squish
+        EXISTS (
+          SELECT 1 FROM permit_collaborations pc
+          JOIN collaborators c ON c.id = pc.collaborator_id
+          WHERE pc.permit_application_id = permit_applications.id
+            AND pc.collaboration_type = :submission_type
+            AND c.user_id = :uid
+        )
+      SQL
+
+      clauses = ["permit_applications.submitter_id = :uid", exists_sql]
+
+      values = { uid: user.id, submission_type: submission_type }
+
+      if user.review_staff? && sandbox.present?
+        clauses << "permit_applications.jurisdiction_id IN (:jur_ids) AND permit_applications.status IN (:submitted_statuses) AND permit_applications.sandbox_id = :sandbox_id"
+        values[:jur_ids] = user.jurisdictions.select(:id)
+        values[:submitted_statuses] = PermitApplication.submitted_statuses
+        values[:sandbox_id] = sandbox.id
+      end
+
+      scope.where(clauses.map { |c| "(#{c})" }.join(" OR "), values).distinct
     end
   end
 end

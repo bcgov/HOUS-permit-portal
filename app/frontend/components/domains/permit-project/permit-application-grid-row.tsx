@@ -55,6 +55,9 @@ export const PermitApplicationGridRow = observer(({ permitApplication }: IPermit
         <Avatar name={designatedSubmitter?.collaborator?.user?.name} size="sm" />
       </GridItem>
       <GridItem display="flex" alignItems="center" px={4} py={2}>
+        <Text>{permitApplication.number}</Text>
+      </GridItem>
+      <GridItem display="flex" alignItems="center" px={4} py={2}>
         <Text>{format(updatedAt, datefnsTableDateTimeFormat)}</Text>
       </GridItem>
       <GridItem display="flex" alignItems="center" px={4} py={2}>
