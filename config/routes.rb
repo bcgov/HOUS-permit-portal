@@ -176,7 +176,6 @@ Rails.application.routes.draw do
       post "permit_collaborations/invite",
            on: :member,
            to: "permit_applications#invite_new_collaborator"
-      post "search", on: :collection, to: "permit_applications#index"
       post "submit", on: :member
       post "mark_as_viewed", on: :member
       patch "upload_supporting_document", on: :member

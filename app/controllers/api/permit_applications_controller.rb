@@ -20,20 +20,6 @@ class Api::PermitApplicationsController < Api::ApplicationController
                 ]
   skip_after_action :verify_policy_scoped, only: [:index]
 
-  def index
-    # Results are already authorized by the policy_scope in the search concern
-    authorized_results = @permit_application_search.results
-    render_success authorized_results,
-                   nil,
-                   {
-                     meta: page_meta(@permit_application_search),
-                     blueprint: PermitApplicationBlueprint,
-                     blueprint_opts: {
-                       view: :base
-                     }
-                   }
-  end
-
   def mark_as_viewed
     authorize @permit_application
     @permit_application.update_viewed_at
