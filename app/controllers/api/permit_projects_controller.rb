@@ -136,22 +136,23 @@ class Api::PermitProjectsController < Api::ApplicationController
   def search_permit_applications
     authorize @permit_project
     perform_permit_application_search
-    authorized_results =
-      apply_search_authorization(@permit_application_search.results, "index")
+    # Results are already authorized by the policy_scope in the search concern
+    authorized_results = @permit_application_search.results
     render_success authorized_results,
                    nil,
                    {
                      meta: page_meta(@permit_application_search),
                      blueprint: PermitApplicationBlueprint,
                      blueprint_opts: {
-                       view: :project_base
+                       view: :project_base,
+                       current_user: current_user
                      }
                    }
   end
 
   def submission_collaborator_options
     authorize @permit_project
-    render_success @permit_project.submission_collaborators,
+    render_success @permit_project.submission_collaborators(current_user),
                    nil,
                    {
                      blueprint: CollaboratorOptionBlueprint,

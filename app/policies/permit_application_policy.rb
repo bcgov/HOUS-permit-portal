@@ -1,6 +1,5 @@
 class PermitApplicationPolicy < ApplicationPolicy
-  # All user types can use the search permit application
-  def index?
+  def show?
     if record.submitter == user ||
          record.collaborator?(user_id: user.id, collaboration_type: :submission)
       true
@@ -8,10 +7,6 @@ class PermitApplicationPolicy < ApplicationPolicy
       user.member_of?(record.jurisdiction.id) && !record.draft? &&
         record.sandbox == sandbox
     end
-  end
-
-  def show?
-    index?
   end
 
   def create?
@@ -50,7 +45,10 @@ class PermitApplicationPolicy < ApplicationPolicy
   end
 
   def upload_supporting_document?
-    record.draft? && record.submitter == user
+    record.draft? &&
+      record.submission_requirement_block_edit_permissions(
+        user_id: user.id
+      ).present?
   end
 
   def submit?
@@ -151,7 +149,56 @@ class PermitApplicationPolicy < ApplicationPolicy
 
   class Scope < Scope
     def resolve
-      scope.where(submitter: user, sandbox: sandbox)
+      submission_type =
+        PermitCollaboration.collaboration_types.fetch(:submission)
+
+      exists_sql = <<-SQL.squish
+        EXISTS (
+          SELECT 1 FROM permit_collaborations pc
+          JOIN collaborators c ON c.id = pc.collaborator_id
+          WHERE pc.permit_application_id = permit_applications.id
+            AND pc.collaboration_type = :submission_type
+            AND c.user_id = :uid
+        )
+      SQL
+
+      owner_exists_sql = <<-SQL.squish
+        EXISTS (
+          SELECT 1 FROM permit_projects pp
+          WHERE pp.id = permit_applications.permit_project_id
+            AND pp.owner_id = :uid
+        )
+      SQL
+
+      clauses = [
+        "permit_applications.submitter_id = :uid",
+        exists_sql,
+        owner_exists_sql
+      ]
+
+      values = { uid: user.id, submission_type: submission_type }
+
+      if user.review_staff?
+        review_exists_sql = <<-SQL.squish
+          EXISTS (
+            SELECT 1 FROM permit_projects pp
+            WHERE pp.id = permit_applications.permit_project_id
+              AND pp.jurisdiction_id IN (:jur_ids)
+          )
+        SQL
+
+        clauses << "#{review_exists_sql} AND permit_applications.status IN (:submitted_statuses)"
+        values[:jur_ids] = user.jurisdictions.pluck(:id)
+        values[:submitted_statuses] = PermitApplication
+          .submitted_statuses
+          .map { |name| PermitApplication.statuses.fetch(name) }
+        if sandbox.present?
+          clauses.last << " AND permit_applications.sandbox_id = :sandbox_id"
+          values[:sandbox_id] = sandbox.id
+        end
+      end
+
+      scope.where(clauses.map { |c| "(#{c})" }.join(" OR "), values).distinct
     end
   end
 end

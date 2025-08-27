@@ -28,7 +28,7 @@ class PermitApplicationBlueprint < Blueprinter::Base
                 view: :base
     association :submitter, blueprint: UserBlueprint, view: :minimal
 
-    field :using_current_template_version do |pa, options|
+    field :using_current_template_version do |pa, _options|
       pa.using_current_template_version
     end
   end
@@ -37,7 +37,9 @@ class PermitApplicationBlueprint < Blueprinter::Base
     include_view :base
     association :permit_collaborations,
                 blueprint: PermitCollaborationBlueprint,
-                view: :base
+                view: :base do |pa, options|
+      pa.permit_collaborations(options[:current_user])
+    end
   end
 
   view :jurisdiction_review_inbox do
@@ -64,7 +66,7 @@ class PermitApplicationBlueprint < Blueprinter::Base
 
     association :submitter, blueprint: UserBlueprint, view: :minimal
 
-    field :is_fully_loaded do |pa, options|
+    field :is_fully_loaded do |_pa, _options|
       true
     end
 
@@ -97,7 +99,9 @@ class PermitApplicationBlueprint < Blueprinter::Base
     association :step_code, blueprint: ->(step_code) { step_code.blueprint }
     association :permit_collaborations,
                 blueprint: PermitCollaborationBlueprint,
-                view: :base
+                view: :base do |pa, options|
+      pa.permit_collaborations(options[:current_user])
+    end
     association :permit_block_statuses, blueprint: PermitBlockStatusBlueprint
     association :submission_versions,
                 blueprint: SubmissionVersionBlueprint,
@@ -128,7 +132,7 @@ class PermitApplicationBlueprint < Blueprinter::Base
     include_view :extended
     # reinclude fields to show all data for reviewers, which were filtered out in the extended view due to collaboration
     field :form_json
-    field :submission_data do |pa, options|
+    field :submission_data do |pa, _options|
       pa.formatted_submission_data
     end
     association :all_submission_version_completed_supporting_documents,

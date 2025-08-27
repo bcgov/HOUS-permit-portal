@@ -616,6 +616,7 @@ Thank you,
             recentPermits: "Recent permits",
             permit: "Permit",
             assignedTo: "Assigned to",
+            permitApplicationNumber: "Application #",
             updatedAt: "Last modified",
             status: "Status",
             allPermits: "All permits",
@@ -1511,7 +1512,7 @@ Thank you,
             stepCodeOccupancies: {
               heading: "Occupancies subject to Steps 2, 3, or 4",
               instructions:
-                "For occupancies subject to Steps 2, 3 or 4 as per Table 10.2.3.3.-G to Table 10.2.3.3.-J of Division B of the BC Building Code, this form will collect additional details.<br/><br/>These occupancies are:<ul><li>Group C Hotel and motel</li><li>Group C Other residential</li><li>Group D Office</li><li>Group D Other</li><li>Group E Mercantile</li>",
+                "For occupancies subject to Steps 2, 3 or 4 as per Table 10.2.3.3.-G to Table 10.2.3.3.-J of Division B of the BC Building Code, this form will collect additional details.<br/><br/>These occupancies are:<ul><li>Group C Hotel and motel</li><li>Group C Other residential</li><li>Group D Office</li><li>Group D Other business and personal services occupancies</li><li>Group E Mercantile</li>",
               isRelevant: "Does your project include any of the these occupancies?",
               disabledCtaTooltip: "Please select an occupancy",
               cannotSelectNoWhenBaselineEmpty:

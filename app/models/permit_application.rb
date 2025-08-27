@@ -7,13 +7,13 @@ class PermitApplication < ApplicationRecord
   include ProjectItem
   has_parent :permit_project
 
-  SEARCH_INCLUDES = %i[
-    permit_type
-    submission_versions
-    step_code
-    activity
-    submitter
-    permit_collaborations
+  SEARCH_INCLUDES = [
+    :permit_type,
+    :submission_versions,
+    :step_code,
+    :activity,
+    :submitter,
+    { permit_collaborations: :collaborator }
   ]
 
   searchkick word_middle: %i[
@@ -148,6 +148,22 @@ class PermitApplication < ApplicationRecord
       .joins(collaborations: :permit_collaborations)
       .where(base_where_clause)
       .distinct
+  end
+
+  # Returns collaborations visible to the provided user.
+  # - If user is nil or the submitter, returns all collaborations.
+  # - If user is a collaborator, returns only their collaborations.
+  # Uses in-memory filtering when preloaded; falls back to a single SQL join otherwise.
+  def permit_collaborations(user = nil)
+    base = association(:permit_collaborations).reader
+
+    return base if user.nil? || submitter_id == user.id
+
+    if base.loaded?
+      base.select { |pc| pc.collaborator&.user_id == user.id }
+    else
+      base.joins(:collaborator).where(collaborators: { user_id: user.id })
+    end
   end
 
   # Helper method to get the latest SubmissionVersion
