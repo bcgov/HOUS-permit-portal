@@ -2433,6 +2433,7 @@ Thank you,
               checkWhatIsNeededToApplyForPermitsInThisCommunity:
                 "Check what's needed to apply for permits in this community",
               startAPermitApplication: "Start a permit application",
+              projectsNew: "Start a new project",
               lookUpEnergyStepCodeAndZeroCarbonStepCodeRequirements:
                 "Look up Energy Step Code and Zero Carbon Step Code requirements",
               notAcceptingPermitApplications: "Not currently accepting permit applications through Building Permit Hub",
@@ -3522,7 +3523,7 @@ Thank you,
             sandbox: "Sandbox",
           },
           notificationEmailHint:
-            "This email will be used to notify your local integration partner about upcoming changes to API mappings. <strong>Note:</strong> Jurisdiction review managers will be notified via their registered email irrespective of this field",
+            "This email will be used to notify your local integration partner about upcoming changes to API mappings. Note: Jurisdiction review managers will be notified via their registered email irrespective of this field",
           fieldPlaceholders: {
             webhookUrl: "https://example.com/webhook",
           },

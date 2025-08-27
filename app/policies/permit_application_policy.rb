@@ -1,6 +1,12 @@
 class PermitApplicationPolicy < ApplicationPolicy
   def show?
-    index?
+    if record.submitter == user ||
+         record.collaborator?(user_id: user.id, collaboration_type: :submission)
+      true
+    elsif user.review_staff?
+      user.member_of?(record.jurisdiction.id) && !record.draft? &&
+        record.sandbox == sandbox
+    end
   end
 
   def create?

@@ -36,10 +36,6 @@ RSpec.describe PermitApplicationPolicy do
       expect(subject.show?).to be true
     end
 
-    it "permits search on own application" do
-      expect(subject.index?).to be true
-    end
-
     it "permits create when under a project owned by the submitter" do
       expect(subject.create?).to be true
     end

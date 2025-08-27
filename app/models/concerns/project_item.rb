@@ -3,7 +3,11 @@ module ProjectItem
 
   class_methods do
     def has_parent(parent_association)
-      alias_attribute :parent, parent_association
+      # Define an instance method rather than using alias_attribute since
+      # alias_attribute only supports real DB attributes (not associations).
+      # Using define_method also avoids ordering issues with when the
+      # association is declared on the including class.
+      define_method(:parent) { public_send(parent_association) }
     end
   end
 
