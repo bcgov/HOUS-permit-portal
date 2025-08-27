@@ -1,15 +1,4 @@
 class PermitApplicationPolicy < ApplicationPolicy
-  # All user types can use the search permit application
-  def index?
-    if record.submitter == user ||
-         record.collaborator?(user_id: user.id, collaboration_type: :submission)
-      true
-    elsif user.review_staff?
-      user.member_of?(record.jurisdiction.id) && !record.draft? &&
-        record.sandbox == sandbox
-    end
-  end
-
   def show?
     index?
   end
@@ -167,15 +156,40 @@ class PermitApplicationPolicy < ApplicationPolicy
         )
       SQL
 
-      clauses = ["permit_applications.submitter_id = :uid", exists_sql]
+      owner_exists_sql = <<-SQL.squish
+        EXISTS (
+          SELECT 1 FROM permit_projects pp
+          WHERE pp.id = permit_applications.permit_project_id
+            AND pp.owner_id = :uid
+        )
+      SQL
+
+      clauses = [
+        "permit_applications.submitter_id = :uid",
+        exists_sql,
+        owner_exists_sql
+      ]
 
       values = { uid: user.id, submission_type: submission_type }
 
-      if user.review_staff? && sandbox.present?
-        clauses << "permit_applications.jurisdiction_id IN (:jur_ids) AND permit_applications.status IN (:submitted_statuses) AND permit_applications.sandbox_id = :sandbox_id"
-        values[:jur_ids] = user.jurisdictions.select(:id)
-        values[:submitted_statuses] = PermitApplication.submitted_statuses
-        values[:sandbox_id] = sandbox.id
+      if user.review_staff?
+        review_exists_sql = <<-SQL.squish
+          EXISTS (
+            SELECT 1 FROM permit_projects pp
+            WHERE pp.id = permit_applications.permit_project_id
+              AND pp.jurisdiction_id IN (:jur_ids)
+          )
+        SQL
+
+        clauses << "#{review_exists_sql} AND permit_applications.status IN (:submitted_statuses)"
+        values[:jur_ids] = user.jurisdictions.pluck(:id)
+        values[:submitted_statuses] = PermitApplication
+          .submitted_statuses
+          .map { |name| PermitApplication.statuses.fetch(name) }
+        if sandbox.present?
+          clauses.last << " AND permit_applications.sandbox_id = :sandbox_id"
+          values[:sandbox_id] = sandbox.id
+        end
       end
 
       scope.where(clauses.map { |c| "(#{c})" }.join(" OR "), values).distinct

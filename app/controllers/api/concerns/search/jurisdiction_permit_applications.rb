@@ -2,29 +2,30 @@ module Api::Concerns::Search::JurisdictionPermitApplications
   extend ActiveSupport::Concern
 
   def perform_permit_application_search
+    search_conditions = {
+      order: order,
+      match: :word_start,
+      where: {
+        jurisdiction_id: @jurisdiction&.id
+      },
+      page: permit_application_search_params[:page],
+      per_page:
+        (
+          if permit_application_search_params[:page]
+            (
+              permit_application_search_params[:per_page] ||
+                Kaminari.config.default_per_page
+            )
+          else
+            nil
+          end
+        ),
+      includes: PermitApplication::SEARCH_INCLUDES,
+      scope_results: ->(relation) { policy_scope(relation) }
+    }
+
     @permit_application_search =
-      PermitApplication.search(
-        query,
-        where: {
-          jurisdiction_id: @jurisdiction&.id
-        },
-        order: order,
-        match: :word_start,
-        page: permit_application_search_params[:page],
-        per_page:
-          (
-            if permit_application_search_params[:page]
-              (
-                permit_application_search_params[:per_page] ||
-                  Kaminari.config.default_per_page
-              )
-            else
-              nil
-            end
-          ),
-        includes: PermitApplication::SEARCH_INCLUDES,
-        scope_results: ->(relation) { policy_scope(relation) }
-      )
+      PermitApplication.search(query, **search_conditions)
   end
 
   private
