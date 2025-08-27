@@ -65,7 +65,7 @@ class ExternalApiKey < ApplicationRecord
   end
 
   def enabled?
-    jurisdiction.external_api_enabled && !expired? && !revoked?
+    jurisdiction.external_api_enabled? && !expired? && !revoked?
   end
 
   def revoke
