@@ -203,7 +203,7 @@ export enum ERequirementType {
   bcaddress = "bcaddress",
   signature = "signature",
   textArea = "textarea",
-  energyStepCode = "energy_step_code",
+  energyStepCodePart9 = "energy_step_code",
   energyStepCodePart3 = "energy_step_code_part_3",
   pidInfo = "pid_info",
   phone = "phone",

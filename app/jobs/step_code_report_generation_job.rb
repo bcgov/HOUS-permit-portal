@@ -54,6 +54,14 @@ class StepCodeReportGenerationJob
       rescue NotImplementedError
         nil
       end
+
+    # Guard: SSR requires checklist data; skip generation if checklist is absent
+    if checklist_json.blank?
+      Rails.logger.info(
+        "Skipping StepCodeReportGenerationJob for #{step_code.id}: checklist not present for standalone StepCode."
+      )
+      return
+    end
     # Derive a permitTypeCode compatible with SSR ChecklistComponentMap
     permit_type_code =
       step_code.is_a?(Part9StepCode) ? "low_residential" : "medium_residential"

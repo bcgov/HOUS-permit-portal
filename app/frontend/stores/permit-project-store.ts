@@ -19,7 +19,6 @@ export const PermitProjectStoreModel = types
       tablePermitProjects: types.array(types.reference(PermitProjectModel)), // For table views
       currentPermitProject: types.maybeNull(types.reference(PermitProjectModel)),
       rollupStatusFilter: types.maybeNull(types.array(types.enumeration(Object.values(EPermitProjectRollupStatus)))),
-      requirementTemplateFilter: types.maybeNull(types.array(types.string)),
       isFetchingPinnedProjects: types.optional(types.boolean, false),
       jurisdictionFilter: types.optional(types.array(types.string), []),
     }),
@@ -81,11 +80,6 @@ export const PermitProjectStoreModel = types
         jurisdiction: permitProject.jurisdiction?.id,
       })
     },
-    setRequirementTemplateFilter(value: string[]) {
-      self.requirementTemplateFilter = cast(value)
-      const paramValue = value && value.length > 0 ? value.join(",") : null
-      setQueryParam("requirementTemplateFilter", paramValue)
-    },
     setJurisdictionFilter(value: string[]) {
       self.jurisdictionFilter = cast(value)
       const paramValue = value && value.length > 0 ? value.join(",") : null
@@ -125,7 +119,6 @@ export const PermitProjectStoreModel = types
           showArchived: self.showArchived,
           query: self.query,
           rollupStatus: self.rollupStatusFilter,
-          requirementTemplateIds: self.requirementTemplateFilter,
           jurisdictionId: self.jurisdictionFilter,
         },
       }
@@ -210,9 +203,7 @@ export const PermitProjectStoreModel = types
       const rollupStatus = rollupStatusStr ? (rollupStatusStr.split(",") as EPermitProjectRollupStatus[]) : null
       const jurisdictionFilter = queryParams.get("jurisdictionFilter")?.split(",")
       self.rollupStatusFilter = rollupStatus ? cast(rollupStatus) : null
-      if (requirementTemplateFilter) {
-        self.setRequirementTemplateFilter(requirementTemplateFilter.split(","))
-      }
+
       if (jurisdictionFilter) {
         self.setJurisdictionFilter(jurisdictionFilter)
       }

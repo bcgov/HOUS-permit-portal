@@ -26,6 +26,7 @@ import { useJurisdictionFromSite } from "../../../../../hooks/use-jurisdiction-f
 import { IOption } from "../../../../../types/types"
 import { SharedSpinner } from "../../../../shared/base/shared-spinner"
 import { DatePickerFormControl } from "../../../../shared/form/input-form-control"
+import { ManualModeInputs } from "../../../../shared/select/selectors/manual-mode-inputs"
 import { SitesSelect } from "../../../../shared/select/selectors/sites-select"
 import { SectionHeading } from "./shared/section-heading"
 
@@ -73,6 +74,7 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
   } = formMethods
 
   const [editingAddress, setEditingAddress] = useState<boolean>(!Boolean(stepCode?.fullAddress))
+  const [manualMode, setManualMode] = useState<boolean>(false)
 
   useEffect(() => {
     if (checklist && stepCode) {
@@ -81,8 +83,8 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
     }
   }, [checklist, stepCode, reset])
 
-  // Note: SitesSelect onChange will trigger fetchGeocodedJurisdiction; no need to subscribe to RHF internals
-  useJurisdictionFromSite(watch, setValue, { siteFieldName: "site", jurisdictionIdFieldName: "jurisdictionId" })
+  // Hook now returns the jurisdiction it resolved
+  const selectedJurisdiction = useJurisdictionFromSite(watch, setValue)
 
   const onSubmit = async (data: IProjectDetailsForm) => {
     if (!checklist || !stepCode) return
@@ -139,53 +141,58 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
 
             <Flex gap={{ base: 6, xl: 6 }} direction="column">
               <Flex gap={2} alignItems="flex-end">
-                <FormControl isInvalid={editable && !!errors.fullAddress}>
-                  {editable ? (
-                    editingAddress || !stepCode.fullAddress ? (
-                      <Controller
-                        name="site"
-                        control={control}
-                        render={({ field: { onChange, value } }) => (
-                          <SitesSelect
-                            onChange={(opt) => {
-                              onChange(opt)
-                              setValue("fullAddress", opt?.label || "")
-                            }}
-                            placeholder={undefined}
-                            selectedOption={value}
-                            menuPortalTarget={document.body}
-                          />
-                        )}
-                      />
+                <Flex direction="column" gap={2} w="full">
+                  <FormControl isInvalid={editable && !!errors.fullAddress}>
+                    {editable ? (
+                      editingAddress || !stepCode.fullAddress ? (
+                        <Controller
+                          name="site"
+                          control={control}
+                          render={({ field: { onChange, value } }) => (
+                            <SitesSelect
+                              onChange={(opt) => {
+                                onChange(opt)
+                                setValue("fullAddress", opt?.label || "")
+                              }}
+                              placeholder={undefined}
+                              selectedOption={value}
+                              menuPortalTarget={document.body}
+                            />
+                          )}
+                        />
+                      ) : (
+                        <Flex direction="column" gap={2}>
+                          <FormLabel>{t(`${i18nPrefix}.address`)}</FormLabel>
+                          <Flex gap={2} alignItems="center">
+                            <InputGroup>
+                              <InputLeftElement pointerEvents="none">
+                                <MapPin />
+                              </InputLeftElement>
+                              <Input isDisabled value={stepCode.fullAddress || ""} />
+                            </InputGroup>
+                          </Flex>
+                        </Flex>
+                      )
                     ) : (
                       <Flex direction="column" gap={2}>
                         <FormLabel>{t(`${i18nPrefix}.address`)}</FormLabel>
-                        <Flex gap={2} alignItems="center">
-                          <InputGroup>
-                            <InputLeftElement pointerEvents="none">
-                              <MapPin />
-                            </InputLeftElement>
-                            <Input isDisabled value={stepCode.fullAddress || ""} />
-                          </InputGroup>
-                        </Flex>
+                        <InputGroup>
+                          <InputLeftElement pointerEvents="none">
+                            <MapPin />
+                          </InputLeftElement>
+                          <Input isDisabled value={stepCode.fullAddress || ""} />
+                        </InputGroup>
                       </Flex>
-                    )
-                  ) : (
-                    <Flex direction="column" gap={2}>
-                      <FormLabel>{t(`${i18nPrefix}.address`)}</FormLabel>
-                      <InputGroup>
-                        <InputLeftElement pointerEvents="none">
-                          <MapPin />
-                        </InputLeftElement>
-                        <Input isDisabled value={stepCode.fullAddress || ""} />
-                      </InputGroup>
-                    </Flex>
+                    )}
+                    {manualMode && <ManualModeInputs />}
+                    {editable && <FormErrorMessage>{errors.fullAddress?.message}</FormErrorMessage>}
+                  </FormControl>
+                  {editable && (
+                    <Button mb={3} size="sm" variant="link" onClick={() => setManualMode((prev) => !prev)}>
+                      {t("ui.toggleManualMode")}
+                    </Button>
                   )}
-                  {editable && <FormErrorMessage>{errors.fullAddress?.message}</FormErrorMessage>}
-                </FormControl>
-                <Button mb={3} size="sm" variant="link" onClick={() => setEditingAddress((prev) => !prev)}>
-                  {editingAddress ? t("ui.cancel") : t("ui.change")}
-                </Button>
+                </Flex>
               </Flex>
               {editable && (
                 // keep fullAddress in form state when using the SitesSelect
@@ -194,7 +201,15 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
 
               <FormControl flex={1}>
                 <FormLabel>{t(`${i18nPrefix}.jurisdiction`)}</FormLabel>
-                <Input isDisabled value={stepCode.jurisdiction?.qualifiedName || ""} />
+                <Input
+                  isDisabled
+                  value={
+                    selectedJurisdiction?.qualifiedName ||
+                    stepCode.jurisdictionName ||
+                    stepCode.jurisdiction?.qualifiedName ||
+                    ""
+                  }
+                />
               </FormControl>
             </Flex>
 

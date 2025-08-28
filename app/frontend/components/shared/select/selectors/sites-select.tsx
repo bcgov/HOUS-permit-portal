@@ -86,7 +86,7 @@ export const SitesSelect = observer(function ({
   const debouncedFetchOptions = useCallback(debounce(fetchSiteOptions, 1000), [])
 
   return (
-    <Flex direction={{ base: "column", md: "row" }} bg="greys.grey03" px={6} py={2} gap={4}>
+    <Flex direction={{ base: "column", md: "row" }} bg="greys.grey03" px={6} py={2} gap={4} w="full">
       <FormControl>
         <FormLabel>{t("permitApplication.addressLabel")}</FormLabel>
         <InputGroup>

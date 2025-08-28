@@ -87,7 +87,7 @@ export const FieldsSetup = observer(function FieldsSetup({
     matchesStepCodePackageRequirementCode?: boolean
   ) => {
     if (
-      requirementType !== ERequirementType.energyStepCode &&
+      requirementType !== ERequirementType.energyStepCodePart9 &&
       requirementType !== ERequirementType.energyStepCodePart3
     ) {
       const isStepCodePackageFile = requirementType === ERequirementType.file && matchesStepCodePackageRequirementCode
@@ -118,7 +118,7 @@ export const FieldsSetup = observer(function FieldsSetup({
       return
     }
 
-    if (requirementType == ERequirementType.energyStepCode) {
+    if (requirementType == ERequirementType.energyStepCodePart9) {
       // handle energy_step_code requirement as it's a special case where we have to add multiple other requirements
       // with additional defaults
       const energyStepCodeDependencyDefaults = Object.values(EEnergyStepCodeDependencyRequirementCode)
@@ -178,7 +178,7 @@ export const FieldsSetup = observer(function FieldsSetup({
     }> = []
 
     if (hasEnergyStepCodeRequirement) {
-      disabledTypes.push({ requirementType: ERequirementType.energyStepCode })
+      disabledTypes.push({ requirementType: ERequirementType.energyStepCodePart9 })
     }
 
     if (hasEnergyStepCodePart3Requirement) {
@@ -203,7 +203,7 @@ export const FieldsSetup = observer(function FieldsSetup({
     }
 
     const isEnergyStepCodeRequirement =
-      requirement.inputType === ERequirementType.energyStepCode ||
+      requirement.inputType === ERequirementType.energyStepCodePart9 ||
       requirement.inputType === ERequirementType.energyStepCodePart3
     if (!isEnergyStepCodeRequirement) {
       remove(index)

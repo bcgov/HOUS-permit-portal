@@ -1,10 +1,10 @@
 import { Grid, GridItem, IconButton, Menu, MenuButton, MenuItem, MenuList, Text } from "@chakra-ui/react"
-import { DotsThreeVertical } from "@phosphor-icons/react"
+import { ArrowSquareOut, DotsThreeVertical } from "@phosphor-icons/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
-import { useNavigate } from "react-router-dom"
+import { Link as ReactRouterLink, useNavigate } from "react-router-dom"
 import { datefnsTableDateTimeFormat } from "../../../constants"
 import { IStepCode } from "../../../stores/step-code-store"
 import { EFileUploadAttachmentType, EStepCodeType } from "../../../types/enums"
@@ -12,16 +12,8 @@ import { FileDownloadButton } from "../../shared/base/file-download-button"
 
 export const StepCodesGridRow = observer(({ stepCode }: { stepCode: IStepCode }) => {
   const navigate = useNavigate()
-  const permitApplicationId = (stepCode as any)?.permitApplication?.id
   const { t } = useTranslation()
-  const { type, permitProjectTitle, fullAddress, updatedAt } = stepCode
-  // Navigate to standalone Part 3 route when applicable, otherwise fallback to the permit-application edit routes
-  const targetPath =
-    type === "Part3StepCode"
-      ? `/part-3-step-code/${stepCode.id}/start`
-      : permitApplicationId
-        ? `/permit-applications/${permitApplicationId}/edit/part-9-step-code`
-        : undefined
+  const { type, permitProjectTitle, fullAddress, updatedAt, targetPath } = stepCode as any
 
   return (
     <Grid
@@ -63,22 +55,31 @@ export const StepCodesGridRow = observer(({ stepCode }: { stepCode: IStepCode })
           />
           <MenuList>
             {(stepCode as any)?.reportDocuments?.length > 0 ? (
-              <MenuItem onClick={(e) => e.stopPropagation()}>
-                <FileDownloadButton
-                  modelType={EFileUploadAttachmentType.ReportDocument}
-                  document={(stepCode as any).reportDocuments[stepCode.reportDocuments.length - 1]}
-                  variant="ghost"
-                  size="sm"
-                  simpleLabel
-                />
-              </MenuItem>
+              <FileDownloadButton
+                as={MenuItem}
+                modelType={EFileUploadAttachmentType.ReportDocument}
+                document={(stepCode as any).reportDocuments[stepCode.reportDocuments.length - 1]}
+                variant="ghost"
+                size="sm"
+                simpleLabel
+                w="full"
+                display="flex"
+                justifyContent="flex-start"
+                textAlign="left"
+              />
             ) : (
               <MenuItem _hover={{ cursor: "not-allowed" }}>
                 <Text>{t("stepCode.index.noReportAvailable")}</Text>
               </MenuItem>
             )}
-            <MenuItem onClick={() => targetPath && navigate(targetPath)}>
-              <Text>{t("ui.view")}</Text>
+            <MenuItem
+              as={ReactRouterLink}
+              to={targetPath || "#"}
+              isDisabled={!targetPath}
+              icon={<ArrowSquareOut size={16} />}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {t("ui.open")}
             </MenuItem>
           </MenuList>
         </Menu>

@@ -18,11 +18,17 @@ export const CheckStepCodeRequirementsScreen = () => {
           <ListItem>{t("projectReadinessTools.checkStepCodeRequirementsScreen.toolPoint1")}</ListItem>
           <ListItem>{t("projectReadinessTools.checkStepCodeRequirementsScreen.toolPoint2")}</ListItem>
         </UnorderedList>
-        <RouterLinkButton variant="primary" mt={8} to="/project-readiness-tools/check-step-code-requirements/select">
+        <RouterLinkButton
+          size="lg"
+          variant="primary"
+          mt={4}
+          ml={4}
+          to="/project-readiness-tools/check-step-code-requirements/select"
+        >
           {currentUser ? t("ui.start") : t("projectReadinessTools.checkStepCodeRequirementsScreen.loginButton")}
         </RouterLinkButton>
 
-        <Heading as="h2" size="lg" mt={16}>
+        <Heading as="h2" size="lg" mt={8}>
           {t("projectReadinessTools.checkStepCodeRequirementsScreen.whoTitle")}
         </Heading>
         <Text mt={4}>{t("projectReadinessTools.checkStepCodeRequirementsScreen.whoDescription")}</Text>
@@ -31,12 +37,12 @@ export const CheckStepCodeRequirementsScreen = () => {
           <ListItem>{t("projectReadinessTools.checkStepCodeRequirementsScreen.whoPoint2")}</ListItem>
         </UnorderedList>
 
-        <Heading as="h2" size="lg" mt={16}>
+        <Heading as="h2" size="lg" mt={8}>
           {t("projectReadinessTools.checkStepCodeRequirementsScreen.whenTitle")}
         </Heading>
         <Text mt={4}>{t("projectReadinessTools.checkStepCodeRequirementsScreen.whenDescription")}</Text>
 
-        <Heading as="h2" size="lg" mt={16}>
+        <Heading as="h2" size="lg" mt={8}>
           {t("projectReadinessTools.checkStepCodeRequirementsScreen.whatToExpectTitle")}
         </Heading>
         <Text mt={4}>{t("projectReadinessTools.checkStepCodeRequirementsScreen.whatToExpectDescription")}</Text>

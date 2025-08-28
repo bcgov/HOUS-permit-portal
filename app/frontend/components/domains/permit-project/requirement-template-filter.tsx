@@ -9,30 +9,30 @@ interface IProps<TSearchModel extends ISearch> {
   searchModel: TSearchModel
 }
 
-export const RequirementTemplateFilter = observer(function RequirementTemplateFilter<TSearchModel extends ISearch>({
+export const RequirementTemplateFilter = observer(function RequirementTemplateIdFilter<TSearchModel extends ISearch>({
   searchModel,
 }: IProps<TSearchModel>) {
   const { t } = useTranslation()
   const { requirementTemplateStore } = useMst()
-  const { requirementTemplateFilter, setRequirementTemplateFilter, search } = searchModel as any
+  const { requirementTemplateIdFilter, setRequirementTemplateIdFilter, search } = searchModel as any
 
   useEffect(() => {
     requirementTemplateStore.fetchFilterOptions()
   }, [])
 
   const handleChange = (nextValue: string[]) => {
-    setRequirementTemplateFilter(nextValue)
+    setRequirementTemplateIdFilter(nextValue)
     search()
   }
 
   const handleReset = () => {
-    setRequirementTemplateFilter([])
+    setRequirementTemplateIdFilter([])
     search()
   }
 
   return (
     <CheckboxFilter
-      value={requirementTemplateFilter || []}
+      value={requirementTemplateIdFilter || []}
       onChange={handleChange}
       onReset={handleReset}
       options={requirementTemplateStore.filterOptions}

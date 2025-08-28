@@ -4,6 +4,6 @@ class OptionsBlueprint < Blueprinter::Base
   end
 
   field :label do |record, _options|
-    record.label
+    record.nickname
   end
 end
