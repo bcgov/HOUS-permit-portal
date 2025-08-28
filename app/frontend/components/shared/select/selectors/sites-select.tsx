@@ -95,6 +95,8 @@ export const SitesSelect = observer(function ({
             onChange={handleChange}
             placeholder="Search Addresses"
             value={selectedOption}
+            menuPosition="fixed"
+            menuShouldScrollIntoView={false}
             components={{
               Control,
               Option,
@@ -170,6 +172,13 @@ export const SitesSelect = observer(function ({
                     formatCreateLabel={(inputValue: string) =>
                       t("permitApplication.usePid", { inputValue: formatPidLabel(inputValue) })
                     }
+                    menuPortalTarget={document.body}
+                    menuPosition="fixed"
+                    styles={{
+                      menuPortal: (base) => ({ ...base, zIndex: 10000 }),
+                      menu: (base) => ({ ...base, zIndex: 10000 }),
+                      /* keep existing styles */
+                    }}
                     isClearable
                     isSearchable
                   />

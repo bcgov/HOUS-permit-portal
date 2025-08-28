@@ -67,6 +67,7 @@ class Api::GeocoderController < Api::ApplicationController
         pid = geocoder_params[:pid]
       end
       raise StandardError unless pid.present?
+
       attributes =
         Wrappers::LtsaParcelMapBc.new.get_feature_attributes_by_pid(pid: pid)
       jurisdiction =

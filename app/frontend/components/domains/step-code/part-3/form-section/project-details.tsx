@@ -23,6 +23,7 @@ import { Trans } from "react-i18next"
 import { useLocation, useNavigate, useParams } from "react-router-dom"
 import { usePart3StepCode } from "../../../../../hooks/resources/use-part-3-step-code"
 import { useJurisdictionFromSite } from "../../../../../hooks/use-jurisdiction-from-site"
+import { useMst } from "../../../../../setup/root"
 import { IOption } from "../../../../../types/types"
 import { SharedSpinner } from "../../../../shared/base/shared-spinner"
 import { DatePickerFormControl } from "../../../../shared/form/input-form-control"
@@ -75,6 +76,7 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
 
   const [editingAddress, setEditingAddress] = useState<boolean>(!Boolean(stepCode?.fullAddress))
   const [manualMode, setManualMode] = useState<boolean>(false)
+  const { jurisdictionStore } = useMst()
 
   useEffect(() => {
     if (checklist && stepCode) {
@@ -83,8 +85,11 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
     }
   }, [checklist, stepCode, reset])
 
-  // Hook now returns the jurisdiction it resolved
-  const selectedJurisdiction = useJurisdictionFromSite(watch, setValue)
+  // Hook now returns the jurisdiction it resolved; disable when in manual mode
+  const hookJurisdiction = useJurisdictionFromSite(watch, setValue, { disabled: manualMode })
+  const jurisdictionId = watch("jurisdictionId") as string | undefined
+  const selectedJurisdiction =
+    manualMode && jurisdictionId ? jurisdictionStore.getJurisdictionById(jurisdictionId) : hookJurisdiction
 
   const onSubmit = async (data: IProjectDetailsForm) => {
     if (!checklist || !stepCode) return
@@ -141,7 +146,7 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
 
             <Flex gap={{ base: 6, xl: 6 }} direction="column">
               <Flex gap={2} alignItems="flex-end">
-                <Flex direction="column" gap={2} w="full">
+                <Flex direction="column" gap={4} w="full">
                   <FormControl isInvalid={editable && !!errors.fullAddress}>
                     {editable ? (
                       editingAddress || !stepCode.fullAddress ? (
