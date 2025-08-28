@@ -260,7 +260,7 @@ const requirementsComponentMap = {
     return <GenericFieldDisplay inputDisplay={<DummyFileInput />} {...props} />
   },
 
-  [ERequirementType.energyStepCode](props: TRequirementFieldDisplayProps) {
+  [ERequirementType.energyStepCodePart9](props: TRequirementFieldDisplayProps) {
     return <GenericFieldDisplay inputDisplay={<DummyStepCodeInput />} {...props} />
   },
 

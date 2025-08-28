@@ -1,5 +1,6 @@
 import * as R from "ramda"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
+import { IJurisdiction } from "../models/jurisdiction"
 import { useMst } from "../setup/root"
 
 interface IUseJurisdictionFromSiteOptions {
@@ -14,6 +15,7 @@ export function useJurisdictionFromSite(
   setValue: (name: string, value: any) => void,
   options: IUseJurisdictionFromSiteOptions = {}
 ) {
+  const [jurisdiction, setJurisdiction] = useState<IJurisdiction | null>(null)
   const siteFieldName = options.siteFieldName ?? "site"
   const jurisdictionIdFieldName = options.jurisdictionIdFieldName ?? "jurisdictionId"
   const { geocoderStore, jurisdictionStore } = useMst()
@@ -30,6 +32,7 @@ export function useJurisdictionFromSite(
     const siteValue: string | undefined = siteWatch?.value
     if (R.isNil(siteValue) || siteValue === "") {
       // Do not overwrite an existing default jurisdictionId when no site is selected
+      setJurisdiction(null)
       return
     }
 
@@ -41,11 +44,14 @@ export function useJurisdictionFromSite(
         if (jurisdiction) {
           addJurisdiction(jurisdiction)
           setValue(jurisdictionIdFieldName, jurisdiction.id)
+          setJurisdiction(jurisdiction)
         } else {
           setValue(jurisdictionIdFieldName, null)
+          setJurisdiction(null)
         }
       } catch (_e) {
         setValue(jurisdictionIdFieldName, null)
+        setJurisdiction(null)
       }
     })()
 
@@ -53,4 +59,6 @@ export function useJurisdictionFromSite(
       isActive = false
     }
   }, [siteWatch?.value, isDisabled])
+
+  return jurisdiction
 }

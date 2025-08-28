@@ -32,9 +32,16 @@ export const RequirementBlockModel = types
   .extend(withEnvironment())
   .extend(withRootStore())
   .views((self) => ({
+    get blocksWithPart3StepCode() {
+      return self.requirements?.some((r) => r.inputType === ERequirementType.energyStepCodePart3)
+    },
+    get blocksWithPart9StepCode() {
+      return self.requirements?.some((r) => r.inputType === ERequirementType.energyStepCodePart9)
+    },
     get blocksWithEnergyStepCode() {
       return self.requirements?.some(
-        (r) => r.inputType === ERequirementType.energyStepCode || r.inputType === ERequirementType.energyStepCodePart3
+        (r) =>
+          r.inputType === ERequirementType.energyStepCodePart9 || r.inputType === ERequirementType.energyStepCodePart3
       )
     },
     get blocksWithStepCodePackageFile() {

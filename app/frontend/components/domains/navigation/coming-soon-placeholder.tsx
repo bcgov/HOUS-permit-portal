@@ -1,7 +1,7 @@
 import { Container, Flex, Heading, Text, VStack } from "@chakra-ui/react"
 import React from "react"
 
-export function DocumentsTabPanelContent() {
+export function ComingSoonPlaceholder() {
   return (
     <Flex direction="column" flex={1} bg="greys.white" pb={24} overflowY="auto" h={"full"}>
       <Container maxW="container.xl" py={8} h={"full"}>

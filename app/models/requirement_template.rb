@@ -358,6 +358,7 @@ class RequirementTemplate < ApplicationRecord
 
   def log_creation_in_specs
     return unless defined?(RSpec.current_example)
+
     puts ">>>> RequirementTemplate created by: #{RSpec.current_example.full_description}"
   end
 end

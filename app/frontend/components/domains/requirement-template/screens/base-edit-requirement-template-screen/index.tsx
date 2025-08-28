@@ -252,6 +252,20 @@ export const BaseEditRequirementTemplateScreen = observer(function BaseEditRequi
     )
   }
 
+  function getPart3StepCodeBlocks() {
+    return allTemplateSectionBlocks.filter(
+      (sectionBlock) =>
+        requirementBlockStore.getRequirementBlockById(sectionBlock.requirementBlockId)?.blocksWithPart3StepCode
+    )
+  }
+
+  function getPart9StepCodeBlocks() {
+    return allTemplateSectionBlocks.filter(
+      (sectionBlock) =>
+        requirementBlockStore.getRequirementBlockById(sectionBlock.requirementBlockId)?.blocksWithPart9StepCode
+    )
+  }
+
   function getStepCodePackageFileBlocks() {
     return allTemplateSectionBlocks.filter(
       (sectionBlock) =>
@@ -262,9 +276,13 @@ export const BaseEditRequirementTemplateScreen = observer(function BaseEditRequi
   function getStepCodeRelatedWarningBannerErrors() {
     const energyStepCodeBlocks = getEnergyStepCodeBlocks()
     const stepCodePackageFileBlocks = getStepCodePackageFileBlocks()
+    const part3StepCodeBlocks = getPart3StepCodeBlocks()
+    const part9StepCodeBlocks = getPart9StepCodeBlocks()
 
     const hasAnyEnergyStepCodeBlocks = energyStepCodeBlocks.length > 0
     const hasDuplicateEnergyStepCodeBlocks = energyStepCodeBlocks.length > 1
+    const hasAnyPart3StepCodeBlocks = part3StepCodeBlocks.length > 0
+    const hasAnyPart9StepCodeBlocks = part9StepCodeBlocks.length > 0
     const hasAnyStepCodePackageFileBlock = stepCodePackageFileBlocks.length > 0
     const hasDuplicateStepCodePackageFileBlock = stepCodePackageFileBlocks.length > 1
 
@@ -274,7 +292,7 @@ export const BaseEditRequirementTemplateScreen = observer(function BaseEditRequi
       return errors
     }
 
-    if (hasAnyEnergyStepCodeBlocks) {
+    if (hasAnyPart9StepCodeBlocks) {
       if (!hasAnyStepCodePackageFileBlock) {
         errors.push({
           title: t("requirementTemplate.edit.stepCodeErrors.stepCodePackageRequired"),

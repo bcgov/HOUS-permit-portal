@@ -45,6 +45,13 @@ export const Part9StepCodeModel = types
     get isComplete() {
       return self.preConstructionChecklist?.isComplete
     },
+    get targetPath() {
+      const permitApplicationId = (self as any)?.permitApplication?.id as string | undefined
+      if (permitApplicationId) {
+        return `/permit-applications/${permitApplicationId}/edit/part-9-step-code`
+      }
+      return `/part-9-step-code/${self.id}`
+    },
   }))
   .actions((self) => ({
     updateChecklist: flow(function* (id, values) {

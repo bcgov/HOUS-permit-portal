@@ -86,7 +86,7 @@ export const SitesSelect = observer(function ({
   const debouncedFetchOptions = useCallback(debounce(fetchSiteOptions, 1000), [])
 
   return (
-    <Flex direction={{ base: "column", md: "row" }} bg="greys.grey03" px={6} py={2} gap={4}>
+    <Flex direction={{ base: "column", md: "row" }} bg="greys.grey03" px={6} py={2} gap={4} w="full">
       <FormControl>
         <FormLabel>{t("permitApplication.addressLabel")}</FormLabel>
         <InputGroup>
@@ -95,6 +95,8 @@ export const SitesSelect = observer(function ({
             onChange={handleChange}
             placeholder="Search Addresses"
             value={selectedOption}
+            menuPosition="fixed"
+            menuShouldScrollIntoView={false}
             components={{
               Control,
               Option,
@@ -170,6 +172,13 @@ export const SitesSelect = observer(function ({
                     formatCreateLabel={(inputValue: string) =>
                       t("permitApplication.usePid", { inputValue: formatPidLabel(inputValue) })
                     }
+                    menuPortalTarget={document.body}
+                    menuPosition="fixed"
+                    styles={{
+                      menuPortal: (base) => ({ ...base, zIndex: 10000 }),
+                      menu: (base) => ({ ...base, zIndex: 10000 }),
+                      /* keep existing styles */
+                    }}
                     isClearable
                     isSearchable
                   />

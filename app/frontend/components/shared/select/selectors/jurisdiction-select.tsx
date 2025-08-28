@@ -65,11 +65,18 @@ export const JurisdictionSelect = observer(function ({
       width: "100%", // Ensure the menu matches the width of the control/container
       background: "var(--chakra-colors-greys-grey10)",
       ...(stylesToMerge?.menu ?? {}),
+      zIndex: 9999,
     }),
     input: (provided) => ({
       ...provided,
       display: "flex",
       ...(stylesToMerge?.input ?? {}),
+    }),
+    menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+    menuList: (provided) => ({
+      ...provided,
+      maxHeight: "260px",
+      ...(stylesToMerge?.menuList ?? {}),
     }),
     valueContainer: (provided) => ({
       ...provided,

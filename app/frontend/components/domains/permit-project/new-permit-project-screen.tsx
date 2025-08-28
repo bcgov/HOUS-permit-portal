@@ -112,7 +112,7 @@ export const NewPermitProjectScreen = observer(() => {
               />
               {manualMode && <ManualModeInputs />}
               <Button variant="link" onClick={() => setManualMode((prev) => !prev)}>
-                {t("permitProject.new.jurisdiction")}
+                {t("ui.toggleManualMode")}
               </Button>
             </Flex>
 
