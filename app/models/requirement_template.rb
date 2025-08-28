@@ -77,7 +77,6 @@ class RequirementTemplate < ApplicationRecord
   validate :validate_uniqueness_of_blocks
   validate :validate_step_code_related_dependencies
   validate :public_only_for_early_access_preview
-  validate :validate_nickname_uniqueness
 
   before_validation :set_default_nickname
 
@@ -361,13 +360,5 @@ class RequirementTemplate < ApplicationRecord
     return unless defined?(RSpec.current_example)
 
     puts ">>>> RequirementTemplate created by: #{RSpec.current_example.full_description}"
-  end
-
-  def validate_nickname_uniqueness
-    return if nickname.blank? || instance_of?(EarlyAccessRequirementTemplate)
-
-    if LiveRequirementTemplate.where.not(id: id).exists?(nickname: nickname)
-      errors.add(:nickname, :taken)
-    end
   end
 end

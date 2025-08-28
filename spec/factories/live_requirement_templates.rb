@@ -1,5 +1,6 @@
 FactoryBot.define do
   factory :live_requirement_template do
+    sequence(:nickname) { |n| "Live Template #{n}" }
     permit_type do
       PermitType.first || association(:permit_type, code: :low_residential)
     end
