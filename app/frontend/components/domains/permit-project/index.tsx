@@ -7,7 +7,7 @@ import { useLocation, useNavigate } from "react-router-dom"
 import { useSearch } from "../../../hooks/use-search"
 import { useMst } from "../../../setup/root"
 import { LoadingScreen } from "../../shared/base/loading-screen"
-import { DocumentsTabPanelContent } from "./documents-tab-panel-content"
+import { ComingSoonPlaceholder } from "../navigation/coming-soon-placeholder"
 import { ProjectTabPanelContent } from "./project-tab-panel-content"
 import { ITabItem, ProjectSidebarTabList } from "./sidebar-tab-list"
 import { StepCodeTabPanelContent } from "./step-code-tab-panel-content"
@@ -51,7 +51,7 @@ export const ProjectDashboardScreen = observer(({}: IProjectDashboardScreenProps
         <TabPanels>
           <TabPanel p={0}>{isPending ? <LoadingScreen /> : <ProjectTabPanelContent />}</TabPanel>
           <TabPanel p={0}>{isPending ? <LoadingScreen /> : <StepCodeTabPanelContent />}</TabPanel>
-          <TabPanel p={0}>{isPending ? <LoadingScreen /> : <DocumentsTabPanelContent />}</TabPanel>
+          <TabPanel p={0}>{isPending ? <LoadingScreen /> : <ComingSoonPlaceholder />}</TabPanel>
         </TabPanels>
       </Tabs>
     </Flex>
