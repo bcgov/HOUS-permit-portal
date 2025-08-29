@@ -45,7 +45,7 @@ class PermitClassificationSeeder
       {
         name: "Manufactured home",
         code: "manufactured_home",
-        description: "Placeholder description",
+        description: "",
         enabled: true,
         type: "Activity",
         category: "buildings_and_structures"
@@ -70,7 +70,7 @@ class PermitClassificationSeeder
       {
         name: "Tree-cutting and tree removal",
         code: "tree_cutting_and_tree_removal",
-        description: "Placeholder description",
+        description: "",
         enabled: true,
         type: "Activity",
         category: "site_preparation"
@@ -78,7 +78,7 @@ class PermitClassificationSeeder
       {
         name: "Retaining wall",
         code: "retaining_wall",
-        description: "Placeholder description",
+        description: "",
         enabled: true,
         type: "Activity",
         category: "site_preparation"
@@ -86,7 +86,7 @@ class PermitClassificationSeeder
       {
         name: "Relocation",
         code: "relocation",
-        description: "Placeholder description",
+        description: "",
         enabled: true,
         type: "Activity",
         category: "site_preparation"

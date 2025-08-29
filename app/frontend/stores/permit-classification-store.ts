@@ -44,20 +44,37 @@ export const PermitClassificationStoreModel = types
     get categoryOptions() {
       const labelByKey = new Map<string, string>()
       self.permitTypes.forEach((pt) => {
-        // @ts-ignore
         const key = pt.category as string | null
-        // @ts-ignore
         const label = (pt.categoryLabel as string | null) || key
         if (key) labelByKey.set(key, label)
       })
       self.activities.forEach((a) => {
-        // @ts-ignore
         const key = a.category as string | null
-        // @ts-ignore
         const label = (a.categoryLabel as string | null) || key
         if (key) labelByKey.set(key, label)
       })
       return Array.from(labelByKey.entries()).map(([value, label]) => ({ label, value }))
+    },
+  }))
+  .views((self) => ({
+    get groupedActivities() {
+      const items = self.activities as IActivity[]
+      const labeledGroups = new Map<string, IActivity[]>()
+      const uncategorized: IActivity[] = []
+      items.forEach((item) => {
+        // @ts-ignore
+        const label = (item.categoryLabel as string | null) || ""
+        if (label) {
+          if (!labeledGroups.has(label)) labeledGroups.set(label, [])
+          labeledGroups.get(label)!.push(item)
+        } else {
+          uncategorized.push(item)
+        }
+      })
+      const labeled = Array.from(labeledGroups.entries())
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([label, list]) => ({ label, list }))
+      return { labeled, uncategorized }
     },
   }))
   .actions((self) => ({

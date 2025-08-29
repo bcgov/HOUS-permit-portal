@@ -2,6 +2,7 @@ import { Button, Flex, HStack, Stack, Tag, Text } from "@chakra-ui/react"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { IPermitClassification } from "../../../../models/permit-classification"
+import { ConfirmationModal } from "../../../shared/confirmation-modal"
 
 interface IProps {
   classification: IPermitClassification
@@ -31,13 +32,8 @@ export const PermitClassificationItem: React.FC<IProps> = ({ classification, onE
           <Tag size="sm" bg="greys.grey03" color="text.secondary">
             {classification.code}
           </Tag>
-          {!!classification.categoryLabel && (
-            <Tag size="sm" variant="subtle" color="text.secondary" bg="greys.grey03">
-              {classification.categoryLabel}
-            </Tag>
-          )}
-          <Tag size="sm" colorScheme={classification.enabled ? "green" : "gray"} variant="subtle">
-            {classification.enabled ? "Enabled" : "Disabled"}
+          <Tag size="sm" variant={classification.enabled ? "success" : "error"}>
+            {classification.enabled ? t("ui.enabled") : t("ui.disabled")}
           </Tag>
         </HStack>
         {!!classification.description && (
@@ -50,9 +46,22 @@ export const PermitClassificationItem: React.FC<IProps> = ({ classification, onE
         <Button onClick={onEdit} size="sm" variant="primary">
           {t("ui.edit")}
         </Button>
-        <Button variant="secondary" onClick={onDelete} size="sm">
-          {t("ui.delete")}
-        </Button>
+        <ConfirmationModal
+          renderTriggerButton={(props) => (
+            <Button variant="secondary" size="sm" {...props}>
+              {t("ui.delete")}
+            </Button>
+          )}
+          title={t("ui.delete")}
+          body={t("ui.deleteConfirm", {
+            defaultValue: `Are you sure you want to delete "${classification.name}"? This cannot be undone.`,
+          })}
+          onConfirm={async (close) => {
+            await onDelete()
+            close()
+          }}
+          confirmButtonProps={{ variant: "primary" }}
+        />
       </HStack>
     </Flex>
   )

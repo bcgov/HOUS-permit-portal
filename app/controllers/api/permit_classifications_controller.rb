@@ -1,4 +1,5 @@
 class Api::PermitClassificationsController < Api::ApplicationController
+  before_action :set_permit_classification, only: %i[update destroy]
   def index
     @permit_classifications = policy_scope(PermitClassification)
     render_success @permit_classifications,
@@ -85,14 +86,13 @@ class Api::PermitClassificationsController < Api::ApplicationController
   def update
     authorize :permit_classification, :update?
     begin
-      permit_classification = PermitClassification.find(params[:id])
-      if permit_classification.update(permit_classification_params)
-        render_success permit_classification,
+      if @permit_classification.update(permit_classification_params)
+        render_success @permit_classification,
                        nil,
                        { blueprint: PermitClassificationBlueprint }
       else
         render_error "permit_classification.update_error",
-                     { errors: permit_classification.errors.full_messages }
+                     { errors: @permit_classification.errors.full_messages }
       end
     rescue StandardError => e
       render_error "permit_classification.update_error", {}, e
@@ -102,13 +102,18 @@ class Api::PermitClassificationsController < Api::ApplicationController
   def destroy
     authorize :permit_classification, :destroy?
     begin
-      permit_classification = PermitClassification.find(params[:id])
-      permit_classification.destroy!
-      render_success permit_classification,
+      @permit_classification.destroy!
+      render_success @permit_classification,
                      nil,
                      { blueprint: PermitClassificationBlueprint }
+    rescue ActiveRecord::InvalidForeignKey => e
+      render_error("permit_classification.in_use_error", { status: 400 }, e)
     rescue StandardError => e
-      render_error "permit_classification.destroy_error", {}, e
+      render_error(
+        "permit_classification.destroy_error",
+        { message_opts: { error_message: e.message } },
+        e
+      )
     end
   end
 
@@ -137,5 +142,11 @@ class Api::PermitClassificationsController < Api::ApplicationController
       :type,
       :category
     )
+  end
+
+  def set_permit_classification
+    @permit_classification = PermitClassification.find(params[:id])
+  rescue ActiveRecord::RecordNotFound => e
+    render_error "misc.not_found_error", { status: 404 }, e
   end
 end

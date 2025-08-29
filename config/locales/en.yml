@@ -210,19 +210,22 @@ en:
       jurisdiction_ltsa_error:
         title: Error
         message: Jurisdiction could not be determined. Please check back later.
-      permit_classification:
-        options_error:
-          title: Error
-          message: Error encountered fetching permit classification options
-        create_error:
-          title: Error
-          message: "There was an error creating the permit classification"
-        update_error:
-          title: Error
-          message: "There was an error updating the permit classification"
-        destroy_error:
-          title: Error
-          message: "There was an error deleting the permit classification"
+    permit_classification:
+      options_error:
+        title: Error
+        message: Error encountered fetching permit classification options
+      create_error:
+        title: Error
+        message: "There was an error creating the permit classification"
+      update_error:
+        title: Error
+        message: "There was an error updating the permit classification"
+      destroy_error:
+        title: Error
+        message: "%{error_message}"
+      in_use_error:
+        title: Error
+        message: "This permit classification is in use and cannot be deleted"
     contact:
       options_error:
         title: Error

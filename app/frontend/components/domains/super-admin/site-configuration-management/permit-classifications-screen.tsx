@@ -27,7 +27,7 @@ import {
 } from "@chakra-ui/react"
 import { Plus } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
-import React, { useEffect, useMemo, useState } from "react"
+import React, { useEffect, useState } from "react"
 import { Controller, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import CreatableSelect from "react-select/creatable"
@@ -46,22 +46,26 @@ export const PermitClassificationsScreen = observer(function PermitClassificatio
   const [tabIndex, setTabIndex] = useState(0)
 
   const [editingId, setEditingId] = useState<string | null>(null)
-  const { control, register, handleSubmit, reset, watch } = useForm<{
+  type FormValues = {
     type: EPermitClassificationType
     name: string
     code: string
     description?: string
     enabled: boolean
     category?: string
-  }>({
-    defaultValues: {
-      type: EPermitClassificationType.PermitType,
-      name: "",
-      code: "",
-      description: "",
-      enabled: true,
-      category: "",
-    },
+  }
+
+  const getDefaultValues = (type: EPermitClassificationType = EPermitClassificationType.PermitType): FormValues => ({
+    type,
+    name: "",
+    code: "",
+    description: "",
+    enabled: true,
+    category: "",
+  })
+
+  const { control, register, handleSubmit, reset, watch } = useForm<FormValues>({
+    defaultValues: getDefaultValues(),
   })
   const formType = watch("type")
 
@@ -71,35 +75,9 @@ export const PermitClassificationsScreen = observer(function PermitClassificatio
     }
   }, [permitClassificationStore.isLoaded])
 
-  const permitTypes = useMemo(
-    () => permitClassificationStore.permitTypes as IPermitType[],
-    [permitClassificationStore.permitTypes]
-  )
-  const activities = useMemo(
-    () => permitClassificationStore.activities as IActivity[],
-    [permitClassificationStore.activities]
-  )
-
-  const groupByCategoryLabel = <T extends { categoryLabel?: string | null }>(items: T[]) => {
-    const labeledGroups = new Map<string, T[]>()
-    const uncategorized: T[] = []
-    items.forEach((item) => {
-      const label = (item.categoryLabel as string | null) || ""
-      if (label) {
-        if (!labeledGroups.has(label)) labeledGroups.set(label, [])
-        labeledGroups.get(label)!.push(item)
-      } else {
-        uncategorized.push(item)
-      }
-    })
-    const labeled = Array.from(labeledGroups.entries())
-      .sort(([a], [b]) => a.localeCompare(b))
-      .map(([label, list]) => ({ label, list }))
-    return { labeled, uncategorized }
-  }
-
-  const groupedPermitTypes = useMemo(() => groupByCategoryLabel(permitTypes), [permitTypes])
-  const groupedActivities = useMemo(() => groupByCategoryLabel(activities), [activities])
+  const permitTypes = permitClassificationStore.permitTypes as IPermitType[]
+  const activities = permitClassificationStore.activities as IActivity[]
+  const groupedActivities = permitClassificationStore.groupedActivities
 
   if (!currentUser?.isSuperAdmin) {
     return (
@@ -111,26 +89,12 @@ export const PermitClassificationsScreen = observer(function PermitClassificatio
 
   const resetForm = () => {
     setEditingId(null)
-    reset({
-      type: EPermitClassificationType.PermitType,
-      name: "",
-      code: "",
-      description: "",
-      enabled: true,
-      category: "",
-    })
+    reset(getDefaultValues())
   }
 
   const openCreate = (type: EPermitClassificationType) => {
-    resetForm()
-    reset({
-      type,
-      name: "",
-      code: "",
-      description: "",
-      enabled: true,
-      category: "",
-    })
+    setEditingId(null)
+    reset(getDefaultValues(type))
     onOpen()
   }
 
@@ -147,28 +111,17 @@ export const PermitClassificationsScreen = observer(function PermitClassificatio
       type: item.type,
       name: item.name,
       code: item.code,
-      // @ts-ignore
       description: item.description || "",
-      // @ts-ignore
       enabled: !!item.enabled,
-      // @ts-ignore
       category: item.category || "",
     })
     onOpen()
   }
 
   const onSubmit = handleSubmit(async (values) => {
-    const payload = {
-      name: values.name,
-      code: values.code,
-      description: values.description || undefined,
-      enabled: values.enabled,
-      type: values.type,
-      category: values.type === EPermitClassificationType.Activity ? values.category || null : null,
-    }
     const ok = editingId
-      ? await permitClassificationStore.updatePermitClassification(editingId, payload)
-      : await permitClassificationStore.createPermitClassification(payload)
+      ? await permitClassificationStore.updatePermitClassification(editingId, values)
+      : await permitClassificationStore.createPermitClassification(values)
     if (ok) {
       onClose()
       resetForm()
@@ -207,22 +160,7 @@ export const PermitClassificationsScreen = observer(function PermitClassificatio
           <TabPanels mt={4}>
             <TabPanel px={0}>
               <Stack spacing={6}>
-                {groupedPermitTypes.labeled.map((g) => (
-                  <Stack key={g.label} spacing={3}>
-                    <Text as="h3" fontWeight={700} color="text.secondary">
-                      {g.label}
-                    </Text>
-                    {g.list.map((pt: any) => (
-                      <PermitClassificationItem
-                        key={pt.id}
-                        classification={pt}
-                        onEdit={() => openEdit({ ...pt, type: EPermitClassificationType.PermitType })}
-                        onDelete={() => onDelete(pt.id, EPermitClassificationType.PermitType)}
-                      />
-                    ))}
-                  </Stack>
-                ))}
-                {groupedPermitTypes.uncategorized.map((pt: any) => (
+                {permitTypes.map((pt: any) => (
                   <PermitClassificationItem
                     key={pt.id}
                     classification={pt}
@@ -288,42 +226,44 @@ export const PermitClassificationsScreen = observer(function PermitClassificatio
                   )}
                 />
               </FormControl>
-              <FormControl isRequired>
-                <FormLabel>{t("siteConfiguration.permitClassifications.name")}</FormLabel>
-                <Input {...register("name", { required: true })} />
-              </FormControl>
               <FormControl isRequired={!editingId} isDisabled={!!editingId}>
                 <FormLabel>{t("siteConfiguration.permitClassifications.code")}</FormLabel>
                 <Input {...register("code", { required: !editingId })} />
+              </FormControl>
+              <FormControl isRequired>
+                <FormLabel>{t("siteConfiguration.permitClassifications.name")}</FormLabel>
+                <Input {...register("name", { required: true })} />
               </FormControl>
               <FormControl>
                 <FormLabel>{t("siteConfiguration.permitClassifications.descriptionLabel")}</FormLabel>
                 <Textarea {...register("description")} minH={20} />
               </FormControl>
-              <FormControl>
-                <FormLabel>{t("siteConfiguration.permitClassifications.category")}</FormLabel>
-                <Controller
-                  name="category"
-                  control={control}
-                  render={({ field }) => (
-                    <CreatableSelect
-                      isClearable
-                      value={
-                        field.value
-                          ? {
-                              value: field.value,
-                              label:
-                                permitClassificationStore.categoryOptions.find((o) => o.value === field.value)?.label ||
-                                field.value,
-                            }
-                          : null
-                      }
-                      onChange={(opt) => field.onChange((opt as any)?.value || "")}
-                      options={permitClassificationStore.categoryOptions}
-                    />
-                  )}
-                />
-              </FormControl>
+              {formType === EPermitClassificationType.Activity && (
+                <FormControl>
+                  <FormLabel>{t("siteConfiguration.permitClassifications.category")}</FormLabel>
+                  <Controller
+                    name="category"
+                    control={control}
+                    render={({ field }) => (
+                      <CreatableSelect
+                        isClearable
+                        value={
+                          field.value
+                            ? {
+                                value: field.value,
+                                label:
+                                  permitClassificationStore.categoryOptions.find((o) => o.value === field.value)
+                                    ?.label || field.value,
+                              }
+                            : null
+                        }
+                        onChange={(opt) => field.onChange((opt as any)?.value || "")}
+                        options={permitClassificationStore.categoryOptions}
+                      />
+                    )}
+                  />
+                </FormControl>
+              )}
               <FormControl display="flex" alignItems="center">
                 <FormLabel mb="0">{t("ui.enabled")}</FormLabel>
                 <Controller
