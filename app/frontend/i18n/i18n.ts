@@ -169,7 +169,7 @@ const options = {
           card3Body: "Stay up to date and respond to building officials directly, all in one place",
           underDevelopmentTitle: "Share your feedback on permit applications under development",
           underDevelopmentBody:
-            "We’re co-developing standard permit types with local governments and First Nations across BC. These drafts are available for review and discussion as we continue this work together.",
+            "We’re co-developing standard permit classifications with local governments and First Nations across BC. These drafts are available for review and discussion as we continue this work together.",
           listedDrafts:
             " The listed drafts are open for review. These permit applications are drafts; do not use for permit intake.",
           shareFeedbackBody:
@@ -182,6 +182,10 @@ const options = {
         },
         ui: {
           toggleManualMode: "Toggle manual mode",
+          empty: "No items yet",
+          enabled: "Enabled",
+          disabled: "Disabled",
+          type: "Type",
           noOptionsFound: "No options found",
           change: "Change",
           copyValue: "Copy value",
@@ -426,7 +430,7 @@ const options = {
               title: "Step code requirements",
               description:
                 "Below are the step code requirements for each permit application type. <1>What does each step code level mean?<2></2></1>",
-              permitType: "Permit type",
+              permitType: "BCBC Part",
               workType: "Work type",
               energyStepRequired: "Energy step code required",
               zeroCarbonStepRequired: "Zero carbon step required",
@@ -657,7 +661,7 @@ Thank you,
             },
             permits: {
               heading: "Permits",
-              title: "Permit type",
+              title: "BCBC Part",
               workType: "Work type",
               energyStepRequired: "Energy step code required",
               zeroCarbonStepRequired: "Zero carbon step required",
@@ -771,7 +775,7 @@ Thank you,
             jurisdiction: "Jurisdiction",
             page: "Page {{pageNumber}} / {{totalPages}}",
             fileNotAdded: "Not uploaded",
-            permitType: "Permit type",
+            permitType: "BCBC Part",
             contactInfo: "Contact information",
             applicantInfo: "Applicant contact details",
           },
@@ -817,7 +821,7 @@ Thank you,
           },
           submissionInbox: {
             contactInviteWarning:
-              "Please have a Review Manager setup the Submissions Inbox for all permit types to allow submissions to be received.",
+              "Please have a Review Manager setup the Submissions Inbox for all BCBC parts to allow submissions to be received.",
             title: "Submissions inbox",
             tableHeading: "Permit applications",
             submissionsSentTo:
@@ -879,9 +883,9 @@ Thank you,
             confirmation:
               "You confirm that the information you provided was completed to the best of your knowledge and ability",
             yourReference: "For reference, your BC Building Permit Hub Application # is {{ number }}",
-            noContactsAvailableTitle: "No template has been scheduled for this permit type and work type combination",
+            noContactsAvailableTitle: "No template has been scheduled for this classification",
             noContactsAvailableDescription:
-              "To start an application in Sandbox mode, schedule a template for publishing for this permit type and work type combination.",
+              "To start an application in Sandbox mode, schedule a template for publishing for this classification.",
             whatsNext:
               "Upon receipt by the local jurisdiction, you will be notified via email or phone of any updates to your application's status or if additional documentation is required.",
             emailed:
@@ -918,7 +922,7 @@ Thank you,
               "Submissions for this local jurisdictions are currently disabled. You will be able to make edits to this permit application but will not be able to submit until this jurisdiction's is accepting submissions again and inboxes are enabled globally.",
             inboxDisabledTitleEarlyAccess: "Early Access – Submissions Not Yet Enabled",
             inboxDisabledEarlyAccess:
-              "This permit is available for early access to help your team get familiar with the application process. You can view and edit your application, but submission is currently disabled. Submissions will be enabled once this permit type is officially launched in your jurisdiction.",
+              "This permit is available for early access to help your team get familiar with the application process. You can view and edit your application, but submission is currently disabled. Submissions will be enabled once this permit classification is officially launched in your jurisdiction.",
             downloadApplication: "Download application",
             fetchingMissingPdf: "Fetching {{missingPdf}}...",
             missingPdfLabels: {
@@ -2580,10 +2584,10 @@ Thank you,
               description: "Building Permit Hub is live and ready for use.",
               features: {
                 title: "Current features include:",
-                permitApplications: "Permit applications for small-scale multi-unit housing permit types",
+                permitApplications: "Permit applications for small-scale multi-unit housing classifications",
                 automatedStepCodes: "Automated Step Codes compliance tools for Part 3 & Part 9 buildings",
                 collaborativeWorkflows: "Collaborative workflows for application submission and review",
-                customizablePermits: "Customizable permit types tailored to your bylaws",
+                customizablePermits: "Customizable permits tailored to your bylaws",
                 resubmissionTools: "Resubmission and revision tools",
               },
             },
@@ -2741,14 +2745,14 @@ Thank you,
               title: "Energy Step Code requirements",
               description: "Define step code requirements",
               setMinimum:
-                "Set the minimum acceptable levels of Energy Step Code and Zero Carbon Step Code for each permit type below:",
+                "Set the minimum acceptable levels of Energy Step Code and Zero Carbon Step Code for BCBC part 9 buildings below:",
               part9Building: "Part 9 Building",
               addStep: "Add another requirement combination",
               deleteCustomization: "Delete customization",
               overriddenWarning: "This was overridden by your customized requirements below.",
               notRequired: "Not required",
               stepRequired: {
-                permitTypeHeading: "PERMIT TYPE",
+                permitTypeHeading: "BCBC part",
                 standardToPass: "Standard Step Code compliance to pass",
                 customizedMinimum: "Customized minimum requirement for submission",
                 energy: {
@@ -2972,7 +2976,7 @@ Thank you,
         errors: {
           fetchJurisdiction: "Something went wrong fetching the jurisdiction",
           fetchPermitApplication: "Something went wrong fetching the permit application",
-          fetchPermitTypeOptions: "Something went wrong fetching the permit type options",
+          fetchPermitTypeOptions: "Something went wrong fetching the BCBC part options",
           fetchAutoComplianceModuleConfigurations: "Something went wrong fetching the auto compliance module options",
           fetchActivityOptions: "Something went wrong fetching the activity options",
           workTypeNotFound: "Work type not found",
@@ -3146,7 +3150,7 @@ Thank you,
           },
           fields: {
             nickname: "Nickname",
-            permitType: "Permit type",
+            permitType: "BCBC Part",
             activity: "Work type",
             firstNations: "First nations?",
             sharedWith: "Shared with",
@@ -3229,7 +3233,7 @@ Thank you,
           },
           fields: {
             status: "Status",
-            permitType: "Permit type",
+            permitType: "BCBC Part",
             activity: "Work type",
             firstNations: "First Nations",
             description: "Description",
@@ -3324,12 +3328,13 @@ Thank you,
         digitalBuildingPermits: {
           index: {
             title: "Digital Building Permits",
+            permitType: "BCBC part",
             selectPermit: "Select a digital permit:",
             workType: "Work type",
             manageButton: "Manage",
             lastUpdated: "Last updated",
             requestNewPromptWithLink:
-              "Your administrator has made the above permit types available for digital submissions. If there is another permit type you want please <1>request a new permit type</1>.",
+              "Your administrator has made the above permit classifications available for digital submissions. If there is another classification you want please <1>request a new classification</1>.",
             emptyPermitsText:
               "No available building permits of the selected work type. Please wait for updates from the Ministry of Housing.",
           },
@@ -3368,6 +3373,21 @@ Thank you,
           adminUserIndex: {
             title: "Users",
             description: "View and manage administrative users",
+          },
+          permitClassifications: {
+            title: "Permit classifications",
+            description: "Manage BCBC parts and work types",
+            descriptionLabel: "Description",
+            permitTypes: "BCBC parts",
+            permitType: "BCBC part",
+            activities: "Work types",
+            activity: "Work type",
+            addPermitType: "Add BCBC part",
+            addActivity: "Add work type",
+            code: "Code",
+            name: "Name",
+            enabled: "Enabled",
+            category: "Category",
           },
           landingPageSetup: {
             title: "Landing page setup",
@@ -3654,7 +3674,7 @@ Thank you,
           privacyPolicyWhatInformationWeCollectItem1:
             "Name, contact information, and user credentials (for account creation and secure access)",
           privacyPolicyWhatInformationWeCollectItem2:
-            "Project and permit application details (e.g., property address, permit type, uploaded documents)",
+            "Project and permit application details (e.g., property address, BCBC part, uploaded documents)",
           privacyPolicyWhatInformationWeCollectItem3:
             "Jurisdictional or regulatory information (e.g., zoning, bylaw data, step code compliance)",
           privacyPolicyWhatInformationWeCollectItem4:
@@ -3727,6 +3747,7 @@ Thank you,
           privacyPolicyContactUsEmailAddress: "digital.codes.permits@gov.bc.ca",
           breadcrumb: {
             projects: "Projects",
+            permitClassifications: "Permit classifications",
             documents: "Documents",
             checkStepCodeRequirements: "Check step code requirements",
             latest: "Latest",

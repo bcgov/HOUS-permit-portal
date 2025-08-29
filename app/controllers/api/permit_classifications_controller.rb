@@ -64,6 +64,54 @@ class Api::PermitClassificationsController < Api::ApplicationController
     end
   end
 
+  def create
+    authorize :permit_classification, :create?
+    begin
+      permit_classification =
+        PermitClassification.new(permit_classification_params)
+      if permit_classification.save
+        render_success permit_classification,
+                       nil,
+                       { blueprint: PermitClassificationBlueprint }
+      else
+        render_error "permit_classification.create_error",
+                     { errors: permit_classification.errors.full_messages }
+      end
+    rescue StandardError => e
+      render_error "permit_classification.create_error", {}, e
+    end
+  end
+
+  def update
+    authorize :permit_classification, :update?
+    begin
+      permit_classification = PermitClassification.find(params[:id])
+      if permit_classification.update(permit_classification_params)
+        render_success permit_classification,
+                       nil,
+                       { blueprint: PermitClassificationBlueprint }
+      else
+        render_error "permit_classification.update_error",
+                     { errors: permit_classification.errors.full_messages }
+      end
+    rescue StandardError => e
+      render_error "permit_classification.update_error", {}, e
+    end
+  end
+
+  def destroy
+    authorize :permit_classification, :destroy?
+    begin
+      permit_classification = PermitClassification.find(params[:id])
+      permit_classification.destroy!
+      render_success permit_classification,
+                     nil,
+                     { blueprint: PermitClassificationBlueprint }
+    rescue StandardError => e
+      render_error "permit_classification.destroy_error", {}, e
+    end
+  end
+
   private
 
   def classification_option_params
@@ -77,6 +125,17 @@ class Api::PermitClassificationsController < Api::ApplicationController
         jurisdiction_id
         first_nations
       ]
+    )
+  end
+
+  def permit_classification_params
+    params.require(:permit_classification).permit(
+      :name,
+      :code,
+      :description,
+      :enabled,
+      :type,
+      :category
     )
   end
 end

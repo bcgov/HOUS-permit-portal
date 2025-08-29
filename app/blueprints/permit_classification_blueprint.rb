@@ -7,5 +7,6 @@ class PermitClassificationBlueprint < Blueprinter::Base
          :type,
          :description,
          :image_url,
-         :category
+         :category,
+         :category_label
 end

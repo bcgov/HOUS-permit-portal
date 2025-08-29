@@ -16,41 +16,39 @@ import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
 import { useTranslation } from "react-i18next"
 import { useSearchParams } from "react-router-dom"
-import { useActivityOptions } from "../../../../hooks/resources/use-activity-options"
+import { usePermitTypeOptions } from "../../../../hooks/resources/use-permit-type-options"
 import { ErrorScreen } from "../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../shared/base/loading-screen"
-import { ActivityTabSwitcher } from "../../requirement-template/activity-tab-switcher"
-import { DigitalBuildingPermitsList } from "../../requirement-template/digital-building-permits-list"
+import { PermitTypeTabSwitcher } from "../../requirement-template/permit-type-tab-switcher"
+import { TemplateVersionsList } from "../../requirement-template/template-versions-list"
 
 export const ExportTemplateSummaryScreen = observer(function ExportTemplateSummaryScreen() {
   const { t } = useTranslation()
-  const { activityOptions: allActivityOptions, error: activityOptionsError } = useActivityOptions({
-    customErrorMessage: t("errors.fetchWorkTypeOptions"),
-  })
+  const { permitTypeOptions: allPermitTypeOptions, error: permitTypeOptionsError } = usePermitTypeOptions()
   const [searchParams, setSearchParams] = useSearchParams()
-  const enabledActivityOptions = allActivityOptions?.filter((option) => option.value.enabled) ?? null
-  const activityId = searchParams.get("activityId")
+  const enabledPermitTypeOptions = allPermitTypeOptions?.filter((option) => option.value.enabled) ?? null
+  const permitTypeId = searchParams.get("permitTypeId")
 
-  const navigateToActivityTab = (activityId: string, replace?: boolean) => {
-    setSearchParams({ activityId }, { replace })
+  const navigateToPermitTypeTab = (permitTypeId: string, replace?: boolean) => {
+    setSearchParams({ permitTypeId }, { replace })
   }
 
   useEffect(() => {
-    if (!enabledActivityOptions || activityOptionsError || activityId) {
+    if (!enabledPermitTypeOptions || permitTypeOptionsError || permitTypeId) {
       return
     }
 
-    const firstActivityId = enabledActivityOptions[0]?.value?.id
+    const firstPermitTypeId = enabledPermitTypeOptions[0]?.value?.id
 
-    navigateToActivityTab(firstActivityId, true)
-  }, [activityId, enabledActivityOptions, activityOptionsError])
+    navigateToPermitTypeTab(firstPermitTypeId, true)
+  }, [permitTypeId, enabledPermitTypeOptions, permitTypeOptionsError])
 
-  if (activityOptionsError) return <ErrorScreen error={activityOptionsError} />
-  if (!enabledActivityOptions || (enabledActivityOptions && !activityId)) return <LoadingScreen />
+  if (permitTypeOptionsError) return <ErrorScreen error={permitTypeOptionsError} />
+  if (!enabledPermitTypeOptions || (enabledPermitTypeOptions && !permitTypeId)) return <LoadingScreen />
 
-  const selectedTabIndex = enabledActivityOptions.findIndex((option) => option.value.id === activityId)
+  const selectedTabIndex = enabledPermitTypeOptions.findIndex((option) => option.value.id === permitTypeId)
 
-  if (enabledActivityOptions.length === 0 || selectedTabIndex === -1) {
+  if (enabledPermitTypeOptions.length === 0 || selectedTabIndex === -1) {
     return <ErrorScreen error={new Error(t("errors.workTypeNotFound"))} />
   }
 
@@ -64,15 +62,15 @@ export const ExportTemplateSummaryScreen = observer(function ExportTemplateSumma
           {t("digitalBuildingPermits.index.selectPermit")}
         </Text>
 
-        <ActivityTabSwitcher
+        <PermitTypeTabSwitcher
           selectedTabIndex={selectedTabIndex}
-          navigateToActivityTab={navigateToActivityTab}
-          enabledActivityOptions={enabledActivityOptions}
+          navigateToPermitTypeTab={navigateToPermitTypeTab}
+          enabledPermitTypeOptions={enabledPermitTypeOptions}
         >
-          {enabledActivityOptions.map((activityOption) => (
-            <TabPanel key={activityOption.value.id} w="100%" pt={0}>
-              <DigitalBuildingPermitsList
-                activityId={activityOption.value.id}
+          {enabledPermitTypeOptions.map((permitTypeOption) => (
+            <TabPanel key={permitTypeOption.value.id} w="100%" pt={0}>
+              <TemplateVersionsList
+                permitTypeId={permitTypeOption.value.id}
                 renderButton={(templateVersion) => (
                   <Menu>
                     <MenuButton as={Button} aria-label="Options" variant="secondary" rightIcon={<Export />} px={2}>
@@ -91,7 +89,7 @@ export const ExportTemplateSummaryScreen = observer(function ExportTemplateSumma
               />
             </TabPanel>
           ))}
-        </ActivityTabSwitcher>
+        </PermitTypeTabSwitcher>
       </Box>
     </Container>
   )

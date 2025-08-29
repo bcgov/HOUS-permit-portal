@@ -147,7 +147,7 @@ Rails.application.routes.draw do
       get "contact_options", on: :collection
     end
 
-    resources :permit_classifications, only: %i[index] do
+    resources :permit_classifications, only: %i[index create update destroy] do
       post "permit_classification_options", on: :collection
     end
 

@@ -6,12 +6,14 @@ import { ETemplateVersionStatus } from "../../types/enums"
 
 export const useTemplateVersions = ({
   activityId,
+  permitTypeId,
   customErrorMessage,
   status,
   earlyAccess = false,
   isPublic = false,
 }: {
   activityId?: string
+  permitTypeId?: string
   customErrorMessage?: string
   status?: ETemplateVersionStatus
   earlyAccess?: boolean
@@ -24,18 +26,21 @@ export const useTemplateVersions = ({
     templateVersionStore
   status ??= currentSandbox?.templateVersionStatusScope || ETemplateVersionStatus.published
 
-  const templateVersions = (
-    activityId
-      ? getTemplateVersionsByActivityId(activityId, status, earlyAccess, isPublic)
-      : getTemplateVersionsByStatus(status, earlyAccess, isPublic)
-  ) as ITemplateVersion[]
+  let templateVersions = getTemplateVersionsByStatus(status, earlyAccess, isPublic) as ITemplateVersion[]
+  if (activityId) {
+    templateVersions = getTemplateVersionsByActivityId(activityId, status, earlyAccess, isPublic) as ITemplateVersion[]
+  } else if (permitTypeId) {
+    templateVersions = (templateVersions as ITemplateVersion[]).filter(
+      (tv) => tv.denormalizedTemplateJson?.permitType?.id === permitTypeId
+    )
+  }
   const { t } = useTranslation()
 
   useEffect(() => {
     ;(async () => {
       const errorMessage = customErrorMessage ?? t("errors.fetchTemplateVersions")
       try {
-        const isSuccess = await fetchTemplateVersions(activityId, status, earlyAccess, isPublic)
+        const isSuccess = await fetchTemplateVersions(activityId, status, earlyAccess, isPublic, permitTypeId)
 
         if (isSuccess) {
           setError(null)
@@ -46,7 +51,7 @@ export const useTemplateVersions = ({
         setError(e instanceof Error ? e : new Error(errorMessage))
       }
     })()
-  }, [activityId, currentSandbox?.id])
+  }, [activityId, permitTypeId, currentSandbox?.id])
 
   return { templateVersions, error, isLoading }
 }

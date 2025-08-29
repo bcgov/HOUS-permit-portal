@@ -1,5 +1,5 @@
 import { Instance, types } from "mobx-state-tree"
-import { EPermitClassificationCode } from "../types/enums"
+import { EPermitClassificationCode, EPermitClassificationType } from "../types/enums"
 
 export const PermitClassificationModel = types.model("PermitClassificationModel", {
   id: types.identifier,
@@ -9,17 +9,18 @@ export const PermitClassificationModel = types.model("PermitClassificationModel"
   enabled: types.boolean,
   imageUrl: types.string,
   category: types.maybeNull(types.string),
+  categoryLabel: types.maybeNull(types.string),
 })
 
 // Subclass Model for PermitType
 export const PermitTypeModel = PermitClassificationModel.named("PermitTypeModel").props({
-  type: types.literal("PermitType"),
+  type: types.literal(EPermitClassificationType.PermitType),
   // Additional properties specific to PermitType
 })
 
 // Subclass Model for Activity
 export const ActivityModel = PermitClassificationModel.named("ActivityModel").props({
-  type: types.literal("Activity"),
+  type: types.literal(EPermitClassificationType.Activity),
   // Additional properties specific to Activity
 })
 

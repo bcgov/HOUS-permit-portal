@@ -26,6 +26,9 @@ export const PermitClassificationStoreModel = types
     get permitTypes() {
       return Array.from(self.permitTypeMap.values())
     },
+    get activities() {
+      return Array.from(self.activityMap.values())
+    },
   }))
   .views((self) => ({
     get part9BuildingPermitType() {
@@ -36,8 +39,25 @@ export const PermitClassificationStoreModel = types
       return self.activityMap.get(id)
     },
     // View to get all Activities as an array
-    get activities() {
-      return Array.from(self.activityMap.values())
+
+    // Unique category options across permit types and activities
+    get categoryOptions() {
+      const labelByKey = new Map<string, string>()
+      self.permitTypes.forEach((pt) => {
+        // @ts-ignore
+        const key = pt.category as string | null
+        // @ts-ignore
+        const label = (pt.categoryLabel as string | null) || key
+        if (key) labelByKey.set(key, label)
+      })
+      self.activities.forEach((a) => {
+        // @ts-ignore
+        const key = a.category as string | null
+        // @ts-ignore
+        const label = (a.categoryLabel as string | null) || key
+        if (key) labelByKey.set(key, label)
+      })
+      return Array.from(labelByKey.entries()).map(([value, label]) => ({ label, value }))
     },
   }))
   .actions((self) => ({
@@ -103,6 +123,49 @@ export const PermitClassificationStoreModel = types
       )
       self.isActivityLoading = false
       return (response?.data?.data ?? []) as IOption<IActivity>[]
+    }),
+    createPermitClassification: flow(function* (data: {
+      name: string
+      code: string
+      description?: string
+      enabled?: boolean
+      type: EPermitClassificationType
+      category?: string | null
+    }) {
+      const response: any = yield* toGenerator(self.environment.api.createPermitClassification(data))
+      if (response?.ok) {
+        const created = response?.data?.data
+        if (created?.type === EPermitClassificationType.PermitType) self.mergeUpdate(created, "permitTypeMap")
+        if (created?.type === EPermitClassificationType.Activity) self.mergeUpdate(created, "activityMap")
+      }
+      return response?.ok
+    }),
+    updatePermitClassification: flow(function* (
+      id: string,
+      data: Partial<{
+        name: string
+        code: string
+        description?: string
+        enabled?: boolean
+        type: EPermitClassificationType
+        category?: string | null
+      }>
+    ) {
+      const response: any = yield* toGenerator(self.environment.api.updatePermitClassification(id, data))
+      if (response?.ok) {
+        const updated = response?.data?.data
+        if (updated?.type === EPermitClassificationType.PermitType) self.mergeUpdate(updated, "permitTypeMap")
+        if (updated?.type === EPermitClassificationType.Activity) self.mergeUpdate(updated, "activityMap")
+      }
+      return response?.ok
+    }),
+    destroyPermitClassification: flow(function* (id: string, type: EPermitClassificationType) {
+      const response = yield* toGenerator(self.environment.api.destroyPermitClassification(id))
+      if (response?.ok) {
+        if (type === EPermitClassificationType.PermitType) self.removePermitType(id)
+        if (type === EPermitClassificationType.Activity) self.removeActivity(id)
+      }
+      return response?.ok
     }),
   }))
 
