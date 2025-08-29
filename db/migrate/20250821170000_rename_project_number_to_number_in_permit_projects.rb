@@ -16,6 +16,7 @@ class RenameProjectNumberToNumberInPermitProjects < ActiveRecord::Migration[7.1]
       remove_index :permit_projects, :project_number
     end
     PermitProject.find_each(&:save)
+    RequirementTemplate.find_each(&:save)
     PermitApplication.reindex
     StepCode.reindex
   end
