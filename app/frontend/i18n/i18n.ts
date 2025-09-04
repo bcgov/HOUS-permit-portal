@@ -588,6 +588,7 @@ Thank you,
           pinProject: "Pin project",
           unpinProject: "Unpin project",
           formUpdateWarningTitle: "Form updated",
+          backToProject: "Back to project",
           formUpdateWarningDescription:
             "The permit application form requirements have been updated. Review your draft application to confirm your responses.",
           rollupStatus: {
