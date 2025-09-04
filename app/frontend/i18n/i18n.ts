@@ -632,6 +632,7 @@ Thank you,
           back: "Back to my projects",
           addPermits: {
             title: "Add permits to your project",
+            fn: "These are First Nations specific permits",
             button: "Add permits",
             bcbcPartHeading: "BCBC Part",
             bcbcPart:
@@ -3262,7 +3263,7 @@ Thank you,
               "Provide some context for review managers and administrators on what kinds of buildings this permit is meant for.",
             createButton: "Create template",
             firstNationsLand: "This permit is intended only for <1>First Nation Registered Land</1>",
-            copyExistingByClassifications: "Copy from existing template of this permit and work type if available",
+            copyExistingByClassifications: "Copy from existing template of this BCBC part and work type if available",
           },
           versionSidebar: {
             triggerButton: "Versions",

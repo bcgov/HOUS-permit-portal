@@ -24,6 +24,7 @@ import { useMst } from "../../../setup/root"
 import { EFlashMessageStatus, EPermitClassificationCode } from "../../../types/enums"
 import { IOption } from "../../../types/types"
 import { CustomMessageBox } from "../../shared/base/custom-message-box"
+import { ErrorScreen } from "../../shared/base/error-screen"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import ProjectInfoRow from "../../shared/project/project-info-row"
 import { Can } from "../../shared/user/can"
@@ -33,39 +34,43 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
   const { t } = useTranslation()
   const { currentPermitProject, error } = usePermitProject()
   const navigate = useNavigate()
-  const { permitClassificationStore, permitApplicationStore } = useMst()
+  const { permitClassificationStore } = useMst()
 
-  const [permitType, setPermitType] = useState<IPermitType | null>(null)
-  const [activities, setActivities] = useState<IOption<IActivity>[]>([])
+  const [permitTypeOptions, setPermitTypeOptions] = useState<IPermitType | null>(null)
+  const [activitieOptions, setActivitieOptions] = useState<IOption<IActivity>[]>([])
   const [selectedActivityIds, setSelectedActivityIds] = useState<string[]>([])
   const [query, setQuery] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isFirstNations, setIsFirstNations] = useState(false)
 
   // Load default permit type (low_residential) and then its activities
   useEffect(() => {
     ;(async () => {
       // Default hidden selections
-      const permitTypeOptions = await permitClassificationStore.fetchPermitTypeOptions(true, false, null, null)
-      const lowRes = permitTypeOptions.find((o) => o.value.code === EPermitClassificationCode.lowResidential)?.value
+      const permitTypeOptList = await permitClassificationStore.fetchPermitTypeOptions(true, isFirstNations, null, null)
+      const lowRes = permitTypeOptList.find((o) => o.value.code === EPermitClassificationCode.lowResidential)?.value
       if (lowRes) {
-        setPermitType(lowRes)
-        const activityOptions = await permitClassificationStore.fetchActivityOptions(true, false, lowRes.id)
-        setActivities(activityOptions)
+        setPermitTypeOptions(lowRes)
+        const activityOptions = await permitClassificationStore.fetchActivityOptions(true, isFirstNations, lowRes.id)
+        setActivitieOptions(activityOptions)
+      } else {
+        setPermitTypeOptions(null)
+        setActivitieOptions([])
       }
     })()
-  }, [permitClassificationStore])
+  }, [permitClassificationStore, isFirstNations])
 
   const filteredActivities = useMemo(() => {
     const q = query.trim().toLowerCase()
-    if (!q) return activities
-    return activities.filter((opt) => {
+    if (!q) return activitieOptions
+    return activitieOptions.filter((opt) => {
       const name = opt.value.name?.toLowerCase() || ""
       const desc = opt.value.description?.toLowerCase() || ""
       return name.includes(q) || desc.includes(q)
     })
-  }, [activities, query])
+  }, [activitieOptions, query])
 
-  const groupedActivities = useMemo(() => {
+  const groupedActivityOptions = useMemo(() => {
     const groups = R.groupBy<IOption<IActivity>>((opt) => opt.value.category || "", filteredActivities)
     const order = Object.keys(groups)
     return order.map((k) => {
@@ -82,13 +87,13 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
   }
 
   const onSubmit = async () => {
-    if (!permitType || !currentPermitProject) return
+    if (!permitTypeOptions || !currentPermitProject) return
 
     try {
       setIsSubmitting(true)
       const params = selectedActivityIds.map((activityId) => ({
         activityId,
-        permitTypeId: permitType.id,
+        permitTypeId: permitTypeOptions.id,
         firstNations: false,
       }))
       const response = await (currentPermitProject as any).bulkCreatePermitApplications(params)
@@ -104,6 +109,8 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
   const clearSelection = () => {
     setSelectedActivityIds([])
   }
+
+  if (error) return <ErrorScreen error={error} />
 
   return (
     <Container maxW="container.lg" py={10}>
@@ -205,6 +212,11 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
             mb={6}
           />
 
+          {/* TODO: Revisit this when we have First Nations specific permits */}
+          {/* <Checkbox isChecked={isFirstNations} onChange={(e) => setIsFirstNations(e.target.checked)} mb={6}>
+            {t("permitProject.addPermits.fn")}
+          </Checkbox> */}
+
           {/* Search bar */}
           <InputGroup mb={6} maxW="full">
             <InputLeftElement pointerEvents="none">
@@ -221,12 +233,12 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
             <AddPermitsFAB
               onClick={onSubmit}
               count={selectedActivityIds.length}
-              disabled={isSubmitting || selectedActivityIds.length === 0 || !permitType}
+              disabled={isSubmitting || selectedActivityIds.length === 0 || !permitTypeOptions}
               label={t("permitProject.addPermits.title")}
             />
           </Flex>
 
-          {groupedActivities.map((group) => (
+          {groupedActivityOptions.map((group) => (
             <Box key={group.key} mb={10}>
               <Heading as="h3" fontSize="lg" mb={4}>
                 {group.label}
@@ -289,7 +301,7 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
             <AddPermitsFAB
               onClick={onSubmit}
               count={selectedActivityIds.length}
-              disabled={isSubmitting || selectedActivityIds.length === 0 || !permitType}
+              disabled={isSubmitting || selectedActivityIds.length === 0 || !permitTypeOptions}
               label={t("permitProject.addPermits.title")}
             />
           </Flex>
