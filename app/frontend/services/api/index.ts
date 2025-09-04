@@ -49,6 +49,7 @@ import {
   EJurisdictionSortFields,
   EPermitApplicationSortFields,
   EPermitBlockStatus,
+  EPermitClassificationType,
   EPermitProjectSortFields,
   ERequirementLibrarySortFields,
   ERequirementTemplateSortFields,
@@ -167,6 +168,35 @@ export class Api {
 
   async fetchPermitClassifications() {
     return this.client.get<IOptionResponse<IContact>>(`/permit_classifications`)
+  }
+
+  async createPermitClassification(permitClassification: {
+    name: string
+    code: string
+    description?: string
+    enabled?: boolean
+    type: EPermitClassificationType
+    category?: string | null
+  }) {
+    return this.client.post(`/permit_classifications`, { permitClassification })
+  }
+
+  async updatePermitClassification(
+    id: string,
+    permitClassification: Partial<{
+      name: string
+      code: string
+      description?: string
+      enabled?: boolean
+      type: EPermitClassificationType
+      category?: string | null
+    }>
+  ) {
+    return this.client.put(`/permit_classifications/${id}`, { permitClassification })
+  }
+
+  async destroyPermitClassification(id: string) {
+    return this.client.delete(`/permit_classifications/${id}`)
   }
 
   async fetchPermitClassificationOptions(
@@ -583,13 +613,15 @@ export class Api {
     activityId?: string,
     status?: ETemplateVersionStatus,
     earlyAccess?: boolean,
-    isPublic?: boolean
+    isPublic?: boolean,
+    permitTypeId?: string
   ) {
     return this.client.get<ApiResponse<ITemplateVersion[]>>(`/template_versions`, {
       activityId,
       status,
       earlyAccess,
       public: isPublic,
+      permitTypeId,
     })
   }
 

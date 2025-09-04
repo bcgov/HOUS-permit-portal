@@ -3,7 +3,7 @@ import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
 import { useTranslation } from "react-i18next"
 import { useSearchParams } from "react-router-dom"
-import { useActivityOptions } from "../../../../hooks/resources/use-activity-options"
+import { usePermitTypeOptions } from "../../../../hooks/resources/use-permit-type-options"
 import { useMst } from "../../../../setup/root"
 import { ETemplateVersionStatus } from "../../../../types/enums"
 import { ErrorScreen } from "../../../shared/base/error-screen"
@@ -11,25 +11,23 @@ import { LoadingScreen } from "../../../shared/base/loading-screen"
 import { RedirectScreen } from "../../../shared/base/redirect-screen"
 import { RouterLink } from "../../../shared/navigation/router-link"
 import { SubNavBar } from "../../navigation/sub-nav-bar"
-import { ActivityTabSwitcher } from "../activity-tab-switcher"
-import { DigitalBuildingPermitsList } from "../digital-building-permits-list"
+import { PermitTypeTabSwitcher } from "../permit-type-tab-switcher"
+import { TemplateVersionsList } from "../template-versions-list"
 
 export const JurisdictionApiMappingsSetupIndexScreen = observer(function JurisdictionApiMappingsSetupIndexScreen() {
   const { t } = useTranslation()
   const { userStore } = useMst()
   const { currentUser } = userStore
-  const { activityOptions: allActivityOptions, error: activityOptionsError } = useActivityOptions({
-    customErrorMessage: t("errors.fetchWorkTypeOptions"),
-  })
+  const { permitTypeOptions: allPermitTypeOptions, error: permitTypeOptionsError } = usePermitTypeOptions()
   const [searchParams, setSearchParams] = useSearchParams()
-  const enabledActivityOptions = allActivityOptions?.filter((option) => option.value.enabled) ?? null
-  const activityId = searchParams.get("activityId")
+  const enabledPermitTypeOptions = allPermitTypeOptions?.filter((option) => option.value.enabled) ?? null
+  const permitTypeId = searchParams.get("permitTypeId")
   let templateStatuses = [ETemplateVersionStatus.published, ETemplateVersionStatus.scheduled]
   const status = templateStatuses.find((s) => s === searchParams.get("status"))
   const currentJurisdiction = currentUser?.jurisdiction
 
-  const navigateToActivityTab = (activityId: string, replace?: boolean) => {
-    setSearchParams({ activityId, status }, { replace })
+  const navigateToPermitTypeTab = (permitTypeId: string, replace?: boolean) => {
+    setSearchParams({ permitTypeId, status }, { replace })
   }
 
   const navigateToStatusTab = (status: ETemplateVersionStatus, replace?: boolean) => {
@@ -37,14 +35,14 @@ export const JurisdictionApiMappingsSetupIndexScreen = observer(function Jurisdi
   }
 
   useEffect(() => {
-    if (!enabledActivityOptions || activityOptionsError || activityId) {
+    if (!enabledPermitTypeOptions || permitTypeOptionsError || permitTypeId) {
       return
     }
 
-    const firstActivityId = enabledActivityOptions[0]?.value?.id
+    const firstPermitTypeId = enabledPermitTypeOptions[0]?.value?.id
 
-    navigateToActivityTab(firstActivityId, true)
-  }, [activityId, enabledActivityOptions, activityOptionsError])
+    navigateToPermitTypeTab(firstPermitTypeId, true)
+  }, [permitTypeId, enabledPermitTypeOptions, permitTypeOptionsError])
 
   useEffect(() => {
     if (!status) {
@@ -53,16 +51,17 @@ export const JurisdictionApiMappingsSetupIndexScreen = observer(function Jurisdi
   }, [status])
 
   if (!currentUser?.jurisdiction) return <ErrorScreen error={new Error(t("errors.fetchJurisdiction"))} />
-  if (activityOptionsError) return <ErrorScreen error={activityOptionsError} />
-  if (!enabledActivityOptions || (enabledActivityOptions && !activityId)) return <LoadingScreen />
+  if (permitTypeOptionsError) return <ErrorScreen error={permitTypeOptionsError} />
+  if (!enabledPermitTypeOptions || (enabledPermitTypeOptions && !permitTypeId)) return <LoadingScreen />
   if (currentJurisdiction && !currentJurisdiction.externalApiEnabled) {
     return <RedirectScreen path={`/jurisdictions/${currentJurisdiction.slug}/api-settings`} />
   }
 
-  const selectedActivityTabIndex = enabledActivityOptions.findIndex((option) => option.value.id === activityId) || 0
+  const selectedPermitTypeTabIndex =
+    enabledPermitTypeOptions.findIndex((option) => option.value.id === permitTypeId) || 0
   const selectedStatusTabIndex = templateStatuses.findIndex((s) => s === status) || 0
 
-  if (enabledActivityOptions.length === 0 || selectedActivityTabIndex === -1) {
+  if (enabledPermitTypeOptions.length === 0 || selectedPermitTypeTabIndex === -1) {
     return <ErrorScreen error={new Error(t("errors.workTypeNotFound"))} />
   }
 
@@ -112,15 +111,15 @@ export const JurisdictionApiMappingsSetupIndexScreen = observer(function Jurisdi
           <TabPanels>
             {templateStatuses.map((status) => (
               <TabPanel key={status}>
-                <ActivityTabSwitcher
-                  selectedTabIndex={selectedActivityTabIndex}
-                  navigateToActivityTab={navigateToActivityTab}
-                  enabledActivityOptions={enabledActivityOptions}
+                <PermitTypeTabSwitcher
+                  selectedTabIndex={selectedPermitTypeTabIndex}
+                  navigateToPermitTypeTab={navigateToPermitTypeTab}
+                  enabledPermitTypeOptions={enabledPermitTypeOptions}
                 >
-                  {enabledActivityOptions.map((activityOption) => (
-                    <TabPanel key={activityOption.value.id} w="100%" pt={0}>
-                      <DigitalBuildingPermitsList
-                        activityId={activityOption.value.id}
+                  {enabledPermitTypeOptions.map((permitTypeOption) => (
+                    <TabPanel key={permitTypeOption.value.id} w="100%" pt={0}>
+                      <TemplateVersionsList
+                        permitTypeId={permitTypeOption.value.id}
                         renderButton={(templateVersion) => (
                           <Button
                             as={RouterLink}
@@ -141,7 +140,7 @@ export const JurisdictionApiMappingsSetupIndexScreen = observer(function Jurisdi
                       />
                     </TabPanel>
                   ))}
-                </ActivityTabSwitcher>
+                </PermitTypeTabSwitcher>
               </TabPanel>
             ))}
           </TabPanels>

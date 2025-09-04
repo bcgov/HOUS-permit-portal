@@ -66,9 +66,13 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
   }, [activities, query])
 
   const groupedActivities = useMemo(() => {
-    const groups = R.groupBy<IOption<IActivity>>((opt) => opt.value.category || "other", filteredActivities)
+    const groups = R.groupBy<IOption<IActivity>>((opt) => opt.value.category || "", filteredActivities)
     const order = Object.keys(groups)
-    return order.map((k) => ({ key: k, label: (t as any)(`classification.categories.${k}`) || k, options: groups[k] }))
+    return order.map((k) => {
+      const options = groups[k]
+      const label = options[0]?.value?.categoryLabel || ""
+      return { key: k, label, options }
+    })
   }, [filteredActivities])
 
   const toggleSelection = (activityId: string) => {
