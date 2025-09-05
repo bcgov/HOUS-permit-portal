@@ -9,7 +9,6 @@ import { EFlashMessageStatus } from "../../../types/enums"
 import { FlashMessage } from "../../shared/base/flash-message"
 import { LoadingScreen } from "../../shared/base/loading-screen"
 import { EULAScreen } from "../onboarding/eula"
-import { ComingSoonPlaceholder } from "./coming-soon-placeholder"
 import { NavBar } from "./nav-bar"
 import { ProtectedRoute } from "./protected-route"
 
@@ -787,7 +786,8 @@ const AppRoutes = observer(() => {
         <Route path="/part-3-step-code/:stepCodeId" element={<RedirectScreen path="start" />} />
         <Route path="/part-3-step-code/:stepCodeId/:section" element={<Part3StepCodeForm />} />
         <Route path="/part-3-step-code/:section" element={<Part3StepCodeForm />} />
-        <Route path="/part-9-step-code/:stepCodeId" element={<ComingSoonPlaceholder />} />
+        {/* <Route path="/part-9-step-code/:stepCodeId" element={<ComingSoonPlaceholder />} /> */}
+        <Route path="/part-9-step-code/:stepCodeId" element={<RedirectScreen path="/" />} />
         <Route path="*" element={<NotFoundScreen />} />
       </Routes>
     </>

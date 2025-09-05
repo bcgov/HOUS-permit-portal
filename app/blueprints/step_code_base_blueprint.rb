@@ -9,7 +9,8 @@ class StepCodeBaseBlueprint < Blueprinter::Base
          :full_address,
          :jurisdiction_name,
          :permit_date,
-         :phase
+         :phase,
+         :permit_application_id
 
   association :permit_application,
               blueprint: PermitApplicationBlueprint,

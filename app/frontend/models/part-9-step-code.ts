@@ -17,6 +17,7 @@ export const Part9StepCodeModel = types
       checklistsMap: types.map(Part9StepCodeChecklistModel),
       zeroCarbonSteps: types.array(types.enumeration(Object.values(EZeroCarbonStep))),
       energySteps: types.array(types.enumeration(Object.values(EEnergyStep))),
+      permitApplicationId: types.maybeNull(types.string),
     })
   )
   .extend(withEnvironment())
@@ -46,9 +47,8 @@ export const Part9StepCodeModel = types
       return self.preConstructionChecklist?.isComplete
     },
     get targetPath() {
-      const permitApplicationId = (self as any)?.permitApplication?.id as string | undefined
-      if (permitApplicationId) {
-        return `/permit-applications/${permitApplicationId}/edit/part-9-step-code`
+      if (self.permitApplicationId) {
+        return `/permit-applications/${self.permitApplicationId}/edit/part-9-step-code`
       }
       return `/part-9-step-code/${self.id}`
     },
