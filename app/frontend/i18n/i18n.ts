@@ -2211,6 +2211,7 @@ Thank you,
                 stepRequired: "Step required",
                 stepProposed: "Proposed step achieved",
                 steps: {
+                  null: "None",
                   "2": "2",
                   "3": "3",
                   "4": "4",
@@ -2222,6 +2223,7 @@ Thank you,
                 stepRequired: "Level required",
                 stepProposed: "Proposed step achieved",
                 steps: {
+                  null: "None",
                   "0": "None",
                   "1": "EL 1",
                   "2": "EL 2",
@@ -2758,6 +2760,7 @@ Thank you,
                 energy: {
                   title: "Energy Step Code Level",
                   options: {
+                    null: "Not required",
                     "2": "2",
                     "3": "3",
                     "4": "4",
@@ -2767,6 +2770,7 @@ Thank you,
                 zeroCarbon: {
                   title: "Zero Carbon Step Code Level",
                   options: {
+                    null: "Not required",
                     "0": "Not required",
                     "1": "EL 1 - Measure Only",
                     "2": "EL 2 - Moderate",

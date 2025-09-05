@@ -211,6 +211,34 @@ class NotificationService
     NotificationPushJob.perform_async(notification_user_hash)
   end
 
+  def self.publish_step_code_report_generated_event(report_document)
+    step_code = report_document.step_code
+    return if step_code.blank?
+
+    # Determine recipient users:
+    # If the step code belongs to a permit application, notify the submitter; otherwise notify the creator
+    user_ids = []
+    if step_code.permit_application.present?
+      submitter_id = step_code.permit_application.submitter_id
+      user_ids << submitter_id if submitter_id.present?
+    end
+
+    creator_id = step_code.creator_id
+    user_ids << creator_id if creator_id.present?
+
+    notification_user_hash =
+      user_ids
+        .compact
+        .uniq
+        .each_with_object({}) do |uid, hash|
+          hash[uid] = report_document.report_generated_event_notification_data
+        end
+
+    unless notification_user_hash.empty?
+      NotificationPushJob.perform_async(notification_user_hash)
+    end
+  end
+
   def self.publish_application_submission_event(permit_application)
     notification_user_hash = {}
 

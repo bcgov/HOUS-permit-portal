@@ -378,10 +378,17 @@ export interface INotification {
     | IPermitCollaborationNotificationObjectData
     | ITemplateVersionNotificationObjectData
     | IRequirementTemplateNotificationObjectData
+    | IReportDocumentNotificationObjectData
 }
 
 export interface ITemplateVersionUpdate {
   status: ETemplateVersionStatus
+}
+
+export interface IReportDocumentNotificationObjectData {
+  reportDocumentId: string
+  filename?: string
+  downloadUrl?: string
 }
 
 export type TSocketEventData =
