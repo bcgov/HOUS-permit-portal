@@ -30,10 +30,10 @@ export const StepCodeTabPanelContent = observer(() => {
                 {t("stepCode.index.createReportTitle")}
               </Heading>
               <Text mb={3}>
-                {t("stepCode.index.createReportDescriptionPrefix")}{" "}
-                <Link as={RouterLink} to="/documents" color="text.link" textDecoration="underline">
+                {t("stepCode.index.createReportDescriptionPrefix")} {t("stepCode.index.documentsLabel")}
+                {/* <Link as={RouterLink} to="/documents" color="text.link" textDecoration="underline">
                   {t("stepCode.index.documentsLabel")}
-                </Link>
+                </Link> */}
                 .
               </Text>
               <RouterLinkButton
