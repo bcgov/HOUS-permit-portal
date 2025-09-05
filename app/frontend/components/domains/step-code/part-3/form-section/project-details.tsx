@@ -33,7 +33,6 @@ import { SectionHeading } from "./shared/section-heading"
 
 interface IProjectDetailsForm {
   fullAddress?: string
-  title?: string
   referenceNumber?: string
   permitDate?: string
   phase?: string
@@ -49,14 +48,13 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
   const navigate = useNavigate()
   const location = useLocation()
 
-  const getDefaultValues = () => {
+  const getDefaultValues = (): IProjectDetailsForm => {
     return {
       fullAddress: stepCode?.fullAddress || "",
       referenceNumber: stepCode?.referenceNumber || "",
-      title: stepCode?.title || "",
-      permitDate: stepCode?.permitDate || "",
+      permitDate: stepCode?.permitDate ? String(stepCode.permitDate) : "",
       phase: stepCode?.phase || "",
-      jurisdictionId: stepCode?.jurisdiction?.id || "",
+      jurisdictionId: stepCode?.jurisdiction?.id ? String(stepCode.jurisdiction.id) : "",
     }
   }
 
@@ -98,7 +96,6 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
       const ok = await (stepCode as any).update({
         fullAddress: data.fullAddress,
         referenceNumber: data.referenceNumber,
-        title: data.title,
         permitDate: data.permitDate,
         phase: data.phase,
         jurisdictionId: data.jurisdictionId,
@@ -135,14 +132,7 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
       <FormProvider {...formMethods}>
         <form onSubmit={handleSubmit(onSubmit)} name="part3SectionForm">
           <Flex direction="column" gap={{ base: 6, xl: 6 }} pb={4}>
-            {editable ? (
-              <FormControl>
-                <FormLabel htmlFor="title">{t(`${i18nPrefix}.name`)}</FormLabel>
-                <Input id="title" {...register("title")} />
-              </FormControl>
-            ) : (
-              <Field label={t(`${i18nPrefix}.name`)} value={stepCode.title} />
-            )}
+            <Field label={t(`${i18nPrefix}.name`)} value={stepCode.title} />
 
             <Flex gap={{ base: 6, xl: 6 }} direction="column">
               <Flex gap={2} alignItems="flex-end">
