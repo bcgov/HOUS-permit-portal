@@ -60,6 +60,10 @@ module ProjectItem
       parent&.jurisdiction || super
     end
 
+    def jurisdiction_id
+      parent&.jurisdiction_id || super
+    end
+
     # Prefer parent permit_date when present, otherwise use standalone value
     def permit_date
       parent&.permit_date || self[:permit_date]
