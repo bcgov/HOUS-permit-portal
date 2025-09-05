@@ -52,9 +52,9 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
     return {
       fullAddress: stepCode?.fullAddress || "",
       referenceNumber: stepCode?.referenceNumber || "",
-      permitDate: stepCode?.permitDate ? String(stepCode.permitDate) : "",
+      permitDate: stepCode?.permitDate || "",
       phase: stepCode?.phase || "",
-      jurisdictionId: stepCode?.jurisdiction?.id ? String(stepCode.jurisdiction.id) : "",
+      jurisdictionId: stepCode?.jurisdiction?.id || "",
     }
   }
 
