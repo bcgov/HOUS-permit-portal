@@ -34,7 +34,7 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
   const { t } = useTranslation()
   const { currentPermitProject, error } = usePermitProject()
   const navigate = useNavigate()
-  const { permitClassificationStore, permitApplicationStore } = useMst()
+  const { permitClassificationStore } = useMst()
 
   const [permitType, setPermitType] = useState<IPermitType | null>(null)
   const [activityOptions, setActivityOptions] = useState<IOption<IActivity>[]>([])
@@ -46,6 +46,8 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
   // Load default permit type (low_residential) and then its activities
   useEffect(() => {
     ;(async () => {
+      if (!currentPermitProject) return
+
       // Default hidden selections
       const permitTypeOptions = await permitClassificationStore.fetchPermitTypeOptions(true, isFirstNation, null, null)
       const lowRes = permitTypeOptions.find((o) => o.value.code === EPermitClassificationCode.lowResidential)?.value
@@ -55,7 +57,7 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
         setActivityOptions(activityOptions)
       }
     })()
-  }, [permitClassificationStore])
+  }, [permitClassificationStore, currentPermitProject?.id])
 
   const filteredActivities = useMemo(() => {
     const q = query.trim().toLowerCase()
