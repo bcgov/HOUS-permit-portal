@@ -24,7 +24,8 @@ class JurisdictionBlueprint < Blueprinter::Base
            :regional_district_name,
            :created_at,
            :updated_at,
-           :external_api_state
+           :external_api_state,
+           :first_nation
 
     field :external_api_enabled do |jurisdiction, options|
       jurisdiction.external_api_enabled?

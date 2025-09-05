@@ -21,6 +21,7 @@ export const PermitProjectStoreModel = types
       rollupStatusFilter: types.maybeNull(types.array(types.enumeration(Object.values(EPermitProjectRollupStatus)))),
       isFetchingPinnedProjects: types.optional(types.boolean, false),
       jurisdictionFilter: types.optional(types.array(types.string), []),
+      requirementTemplateIdFilter: types.optional(types.array(types.string), []),
     }),
     createSearchModel<EPermitProjectSortFields>("searchPermitProjects", "setPermitProjectFilters")
   )
@@ -110,6 +111,11 @@ export const PermitProjectStoreModel = types
       if (opts?.reset) {
         self.resetPages() // Method from createSearchModel
       }
+      const requirementTemplateIds =
+        self.requirementTemplateIdFilter && self.requirementTemplateIdFilter.length > 0
+          ? self.requirementTemplateIdFilter
+          : undefined
+
       const searchParams: TSearchParams<EPermitProjectSortFields, IPermitProjectSearchFilters> = {
         query: self.query, // from createSearchModel
         sort: self.sort, // from createSearchModel
@@ -120,6 +126,7 @@ export const PermitProjectStoreModel = types
           query: self.query,
           rollupStatus: self.rollupStatusFilter,
           jurisdictionId: self.jurisdictionFilter,
+          requirementTemplateIds,
         },
       }
 
@@ -202,10 +209,15 @@ export const PermitProjectStoreModel = types
       const rollupStatusStr = queryParams.get("rollupStatus")
       const rollupStatus = rollupStatusStr ? (rollupStatusStr.split(",") as EPermitProjectRollupStatus[]) : null
       const jurisdictionFilter = queryParams.get("jurisdictionFilter")?.split(",")
+      const requirementTemplateIdFilter = queryParams.get("requirementTemplateId")?.split(",")
       self.rollupStatusFilter = rollupStatus ? cast(rollupStatus) : null
 
       if (jurisdictionFilter) {
         self.setJurisdictionFilter(jurisdictionFilter)
+      }
+      if (requirementTemplateIdFilter) {
+        // @ts-ignore
+        self.setRequirementTemplateIdFilter(requirementTemplateIdFilter)
       }
     },
     createPermitProject: flow(function* (projectData: {
@@ -246,6 +258,12 @@ export const PermitProjectStoreModel = types
       }
       return response
     }),
+    setRequirementTemplateIdFilter(requirementTemplateIds: string[] | undefined) {
+      if (!requirementTemplateIds) return
+      setQueryParam("requirementTemplateId", requirementTemplateIds)
+      // @ts-ignore
+      self.requirementTemplateIdFilter = requirementTemplateIds
+    },
   }))
 
 export interface IPermitProjectStore extends Instance<typeof PermitProjectStoreModel> {}
