@@ -182,13 +182,11 @@ export const PermitApplicationStoreModel = types
       )
 
       self.rootStore.collaboratorStore.mergeUpdateAll(
-        // @ts-ignore
         R.pipe(
           R.map(R.prop("permitCollaborations")),
           R.reject(R.isNil),
           R.flatten,
           R.map(R.prop("collaborator")),
-          // @ts-ignore
           R.uniqBy((c: ICollaborator) => c.id)
         )(permitApplicationsData),
         "collaboratorMap"
