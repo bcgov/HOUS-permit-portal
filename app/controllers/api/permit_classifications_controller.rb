@@ -39,7 +39,6 @@ class Api::PermitClassificationsController < Api::ApplicationController
             query.where(
               activity_id: classification_option_params[:activity_id]
             ) if classification_option_params[:activity_id].present?
-
           query =
             query.where(
               first_nations: classification_option_params[:first_nations]

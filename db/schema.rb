@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_08_21_170000) do
+ActiveRecord::Schema[7.1].define(version: 2025_09_04_215554) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -225,6 +225,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_08_21_170000) do
     t.boolean "show_about_page", default: false, null: false
     t.boolean "allow_designated_reviewer", default: false
     t.string "disambiguator"
+    t.boolean "first_nation", default: false
     t.index ["prefix"], name: "index_jurisdictions_on_prefix", unique: true
     t.index ["regional_district_id"], name: "index_jurisdictions_on_regional_district_id"
     t.index ["slug"], name: "index_jurisdictions_on_slug", unique: true

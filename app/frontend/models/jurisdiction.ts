@@ -49,6 +49,7 @@ export const JurisdictionModel = types
     ),
     permitTypeRequiredSteps: types.array(types.frozen<IPermitTypeRequiredStep>()),
     sandboxes: types.array(types.reference(SandboxModel)),
+    firstNation: types.optional(types.boolean, false),
   })
   .extend(withEnvironment())
   .extend(withRootStore())
