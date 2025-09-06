@@ -90,6 +90,8 @@ export const InputSummaryForm = ({ onNext }: IInputSummaryFormProps) => {
           ]}
         />
 
+        <TextFormControl fieldName="calculationBasedOn.stories" label={t(`${prefix}.calculationBasedOn.stories`)} />
+
         <TextFormControl
           fieldName="calculationBasedOn.stories"
           maxLength={60}

@@ -780,7 +780,6 @@ const AppRoutes = observer(() => {
           path="/onboarding-checklist-page-for-lg-adopting"
           element={<OnboardingChecklistPageForLgAdoptingScreen />}
         />
-        <Route path="/single-zone-cooling-heating-tool" element={<SingleZoneCoolingHeatingToolScreen />} />
         <Route path="/confirmed" element={<EmailConfirmedScreen />} />
         <Route path="/welcome" element={<LandingScreen />} />
         <Route
