@@ -1,16 +1,36 @@
 import { Box, Button, Divider, Grid, Heading } from "@chakra-ui/react"
 import React from "react"
+import { useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
+import { uploadFile } from "../../../utils/uploads"
 import { SelectFormControl, TextFormControl } from "../../shared/form/input-form-control"
 import { BuildingLocationFields } from "./building-location-fields"
 
 interface IInputSummaryFormProps {
-  onCalculate: () => void
+  onNext: () => void
 }
 
-export const InputSummaryForm = ({ onCalculate }: IInputSummaryFormProps) => {
-  const { t } = useTranslation()
+export const InputSummaryForm = ({ onNext }: IInputSummaryFormProps) => {
+  const { t } = useTranslation() as any
   const prefix = "singleZoneCoolingHeatingTool.inputSummary"
+  const { setValue } = useFormContext()
+
+  const onUploadFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    try {
+      const res = await uploadFile(file, file.name)
+      const url =
+        (res as any)?.url ||
+        (res as any)?.location ||
+        ((res as any)?.signed_url ? (res as any).signed_url.split("?")[0] : null)
+      if (url) {
+        setValue("f280FormsSet2410xlsx.attachment", url, { shouldDirty: true, shouldTouch: true, shouldValidate: true })
+      }
+    } catch (err) {
+      console.error("File upload failed", err)
+    }
+  }
 
   return (
     <Box as="form" p={4} borderWidth="1px" borderRadius="lg">
@@ -42,30 +62,47 @@ export const InputSummaryForm = ({ onCalculate }: IInputSummaryFormProps) => {
           fieldName="calculationBasedOn.frontFacing"
           label={t(`${prefix}.calculationBasedOn.frontFacing`)}
         />
-        <TextFormControl fieldName="calculationBasedOn.stories" label={t(`${prefix}.calculationBasedOn.stories`)} />
 
         <SelectFormControl
-          fieldName="calculationBasedOn.assumed"
-          label={t(`${prefix}.calculationBasedOn.assumed`)}
+          fieldName="calculationBasedOn.frontFacingAssumed"
+          label={t(`${prefix}.calculationBasedOn.frontFacingAssumed`)}
           options={[
-            { label: "Yes", value: "yes" },
-            { label: "No", value: "no" },
+            {
+              label: t(`${prefix}.calculationBasedOn.frontFacingAssumedYes`),
+              value: t(`${prefix}.calculationBasedOn.frontFacingAssumedYes`).toLowerCase(),
+            },
+            {
+              label: t(`${prefix}.calculationBasedOn.frontFacingAssumedNo`),
+              value: t(`${prefix}.calculationBasedOn.frontFacingAssumedNo`).toLowerCase(),
+            },
           ]}
         />
+
+        <TextFormControl fieldName="calculationBasedOn.stories" label={t(`${prefix}.calculationBasedOn.stories`)} />
 
         <TextFormControl
           fieldName="calculationBasedOn.airTightness"
           label={t(`${prefix}.calculationBasedOn.airTightness`)}
         />
         <SelectFormControl
-          fieldName="calculationBasedOn.assumed"
-          label={t(`${prefix}.calculationBasedOn.assumed`)}
+          fieldName="calculationBasedOn.airTightnessAssumed"
+          label={t(`${prefix}.calculationBasedOn.airTightnessAssumed`)}
           options={[
-            { label: "Yes", value: "yes" },
-            { label: "No", value: "no" },
+            {
+              label: t(`${prefix}.calculationBasedOn.airTightnessYes`),
+              value: t(`${prefix}.calculationBasedOn.airTightnessYes`).toLowerCase(),
+            },
+            {
+              label: t(`${prefix}.calculationBasedOn.airTightnessNo`),
+              value: t(`${prefix}.calculationBasedOn.airTightnessNo`).toLowerCase(),
+            },
           ]}
         />
 
+        <TextFormControl
+          fieldName="calculationBasedOn.weatherLocation"
+          label={t(`${prefix}.calculationBasedOn.weatherLocation`)}
+        />
         <TextFormControl
           fieldName="calculationBasedOn.internalShading"
           label={t(`${prefix}.climateData.internalShading`)}
@@ -74,8 +111,11 @@ export const InputSummaryForm = ({ onCalculate }: IInputSummaryFormProps) => {
           fieldName="calculationBasedOn.assumed"
           label={t(`${prefix}.calculationBasedOn.assumed`)}
           options={[
-            { label: "Yes", value: "yes" },
-            { label: "No", value: "no" },
+            {
+              label: t(`${prefix}.calculationBasedOn.yes`),
+              value: t(`${prefix}.calculationBasedOn.yes`).toLowerCase(),
+            },
+            { label: t(`${prefix}.calculationBasedOn.no`), value: t(`${prefix}.calculationBasedOn.no`).toLowerCase() },
           ]}
         />
 
@@ -84,8 +124,11 @@ export const InputSummaryForm = ({ onCalculate }: IInputSummaryFormProps) => {
           fieldName="calculationBasedOn.assumed"
           label={t(`${prefix}.calculationBasedOn.assumed`)}
           options={[
-            { label: "Yes", value: "yes" },
-            { label: "No", value: "no" },
+            {
+              label: t(`${prefix}.calculationBasedOn.yes`),
+              value: t(`${prefix}.calculationBasedOn.yes`).toLowerCase(),
+            },
+            { label: t(`${prefix}.calculationBasedOn.no`), value: t(`${prefix}.calculationBasedOn.no`).toLowerCase() },
           ]}
         />
       </Grid>
@@ -101,16 +144,16 @@ export const InputSummaryForm = ({ onCalculate }: IInputSummaryFormProps) => {
           fieldName="climateData.ventilated"
           label={t(`${prefix}.climateData.ventilated`)}
           options={[
-            { label: "Yes", value: "yes" },
-            { label: "No", value: "no" },
+            { label: t(`${prefix}.climateData.yes`), value: t(`${prefix}.climateData.yes`).toLowerCase() },
+            { label: t(`${prefix}.climateData.no`), value: t(`${prefix}.climateData.no`).toLowerCase() },
           ]}
         />
         <SelectFormControl
           fieldName="climateData.hrvErv"
           label={t(`${prefix}.climateData.hrvErv`)}
           options={[
-            { label: "Yes", value: "yes" },
-            { label: "No", value: "no" },
+            { label: t(`${prefix}.climateData.yes`), value: t(`${prefix}.climateData.yes`).toLowerCase() },
+            { label: t(`${prefix}.climateData.no`), value: t(`${prefix}.climateData.no`).toLowerCase() },
           ]}
         />
         <TextFormControl fieldName="climateData.ase" label={t(`${prefix}.climateData.ase`)} />
@@ -173,28 +216,28 @@ export const InputSummaryForm = ({ onCalculate }: IInputSummaryFormProps) => {
 
       {/* Sections for Above Grade Walls, Below Grade Walls, Ceilings, etc. */}
       {[
-        "aboveGradeWalls",
-        "belowGradeWalls",
-        "ceilings",
-        "floorsOnSoil",
-        "windows",
-        "exposedFloors",
-        "doors",
-        "skylights",
+        t(`${prefix}.inputSummarySections.aboveGradeWalls`),
+        t(`${prefix}.inputSummarySections.belowGradeWalls`),
+        t(`${prefix}.inputSummarySections.ceilings`),
+        t(`${prefix}.inputSummarySections.floorsOnSoil`),
+        t(`${prefix}.inputSummarySections.windows`),
+        t(`${prefix}.inputSummarySections.exposedFloors`),
+        t(`${prefix}.inputSummarySections.doors`),
+        t(`${prefix}.inputSummarySections.skylights`),
       ].map((section) => (
         <Box key={section} mb={6}>
           <Heading as="h4" size="md" mb={4}>
-            {t(`${prefix}.${section}.title` as any)}
+            {t(`${section}` as any)}
           </Heading>
           <Grid templateColumns="1fr 1fr" gap={6}>
-            <TextFormControl fieldName={`${section}.styleA`} label={t(`${prefix}.${section}.styleA` as any)} />
-            <TextFormControl fieldName={`${section}.styleB`} label={t(`${prefix}.${section}.styleB` as any)} />
-            <TextFormControl fieldName={`${section}.styleC`} label={t(`${prefix}.${section}.styleC` as any)} />
+            <TextFormControl fieldName={`${section}.styleA`} label={t(`${prefix}.belowGradeWalls.styleA` as any)} />
+            <TextFormControl fieldName={`${section}.styleB`} label={t(`${prefix}.belowGradeWalls.styleB` as any)} />
+            <TextFormControl fieldName={`${section}.styleC`} label={t(`${prefix}.belowGradeWalls.styleC` as any)} />
           </Grid>
         </Box>
       ))}
       <Divider my={10} />
-      <Button onClick={onCalculate}>Calculate</Button>
+      <Button onClick={onNext}>{t(`${prefix}.submit`)}</Button>
     </Box>
   )
 }

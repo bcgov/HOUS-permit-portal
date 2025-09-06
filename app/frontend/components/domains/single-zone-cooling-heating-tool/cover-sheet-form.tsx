@@ -1,7 +1,7 @@
 import { Box, Button, Checkbox, Divider, Flex, Grid, Heading, Radio, RadioGroup, Stack, Text } from "@chakra-ui/react"
 import React from "react"
 import { useTranslation } from "react-i18next"
-import { NumberFormControl, TextFormControl } from "../../shared/form/input-form-control"
+import { DatePickerFormControl, NumberFormControl, TextFormControl } from "../../shared/form/input-form-control"
 import { BuildingLocationFields } from "./building-location-fields"
 
 interface ICoverSheetFormProps {
@@ -9,7 +9,7 @@ interface ICoverSheetFormProps {
 }
 
 export const CoverSheetForm = ({ onNext }: ICoverSheetFormProps) => {
-  const { t } = useTranslation()
+  const { t } = useTranslation() as any
   const prefix = "singleZoneCoolingHeatingTool.coverSheet"
 
   return (
@@ -224,15 +224,17 @@ export const CoverSheetForm = ({ onNext }: ICoverSheetFormProps) => {
           fieldName="calculationPerformedBy.reference2"
           label={t(`${prefix}.calculationPerformedBy.reference2`)}
         />
-        <TextFormControl
-          required
-          fieldName="calculationPerformedBy.date"
-          label={t(`${prefix}.calculationPerformedBy.date`)}
+        <DatePickerFormControl
+          label={t(`${prefix}.calculationPerformedBy.issuedForDate`)}
+          fieldName={"calculationPerformedBy.issuedForDate"}
+          showOptional={false}
+          isReadOnly
         />
-        <TextFormControl
-          required
-          fieldName="calculationPerformedBy.reissuedDate"
-          label={t(`${prefix}.calculationPerformedBy.reissuedDate`)}
+        <DatePickerFormControl
+          label={t(`${prefix}.calculationPerformedBy.issuedForDate2`)}
+          fieldName={"calculationPerformedBy.issuedForDate2"}
+          showOptional={false}
+          isReadOnly
         />
       </Grid>
       <Divider my={10} />

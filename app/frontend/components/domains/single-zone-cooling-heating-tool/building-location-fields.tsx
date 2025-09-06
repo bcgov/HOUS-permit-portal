@@ -4,11 +4,8 @@ import { useTranslation } from "react-i18next"
 import { TextFormControl } from "../../shared/form/input-form-control"
 
 export interface BuildingLocationFieldsProps {
-  // Base key for form paths, e.g. "buildingLocation"
   namePrefix?: string
-  // i18n prefix for labels, e.g. "singleZoneCoolingHeatingTool.coverSheet.buildingLocation"
   i18nPrefix: string
-  // Optional grid overrides (columns, gap, etc.)
   gridProps?: Partial<GridProps>
 }
 
@@ -21,7 +18,7 @@ export const BuildingLocationFields: React.FC<BuildingLocationFieldsProps> = ({
   const prefix = "singleZoneCoolingHeatingTool"
 
   const field = (key: string) => `${namePrefix}.${key}`
-  const label = (key: string) => t(`${i18nPrefix}.${key}`)
+  const label = (key: string) => t(`${i18nPrefix}.${key}` as any)
 
   return (
     <Box>
@@ -38,17 +35,17 @@ export const BuildingLocationFields: React.FC<BuildingLocationFieldsProps> = ({
       </Box>
       <Box mb={6} backgroundColor="gray.100" p={4} borderRadius="md">
         <Heading as="h2" size="lg" mb={6} textAlign="center" textTransform="uppercase">
-          {t(`${prefix}.buildingLocation.title`)}
+          {t(`${i18nPrefix}.title` as any)}
         </Heading>
       </Box>
       <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={6} {...gridProps}>
-        <TextFormControl fieldName={field("model")} required label={label("model")} />
-        <TextFormControl fieldName={field("site")} required label={label("site")} />
-        <TextFormControl fieldName={field("lot")} required label={label("lot")} />
+        <TextFormControl fieldName={field("model")} required label={label("model")} maxLength={50} />
+        <TextFormControl fieldName={field("site")} required label={label("site")} maxLength={60} />
+        <TextFormControl fieldName={field("lot")} required label={label("lot")} maxLength={60} />
         <TextFormControl fieldName={field("address")} required label={label("address")} />
-        <TextFormControl fieldName={field("city")} required label={label("city")} />
-        <TextFormControl fieldName={field("province")} required label={label("province")} />
-        <TextFormControl fieldName={field("postalCode")} required label={label("postalCode")} />
+        <TextFormControl fieldName={field("city")} required label={label("city")} maxLength={60} />
+        <TextFormControl fieldName={field("province")} required label={label("province")} maxLength={60} />
+        <TextFormControl fieldName={field("postalCode")} required label={label("postalCode")} maxLength={60} />
       </Grid>
     </Box>
   )

@@ -152,6 +152,11 @@ const SingleZoneCoolingHeatingToolScreen = lazy(() =>
     default: module.SingleZoneCoolingHeatingToolScreen,
   }))
 )
+const SingleZoneCoolingHeatingToolListScreen = lazy(() =>
+  import("../single-zone-cooling-heating-tool/single-zone-cooling-heating-tool-list-screen").then((module) => ({
+    default: module.SingleZoneCoolingHeatingToolListScreen,
+  }))
+)
 const PermitApplicationIndexScreen = lazy(() =>
   import("../permit-application").then((module) => ({ default: module.PermitApplicationIndexScreen }))
 )
@@ -666,6 +671,13 @@ const AppRoutes = observer(() => {
           <Route path="/profile" element={<ProfileScreen />} />
         </Route>
 
+        <Route element={<ProtectedRoute isAllowed={loggedIn && currentUser?.isSubmitter} />}>
+          <Route path="/single-zone-cooling-heating-tool" element={<SingleZoneCoolingHeatingToolScreen />} />
+        </Route>
+        <Route element={<ProtectedRoute isAllowed={loggedIn && currentUser?.isSubmitter} />}>
+          <Route path="/single-zone-cooling-heating-tool/list" element={<SingleZoneCoolingHeatingToolListScreen />} />
+        </Route>
+
         <Route element={<ProtectedRoute isAllowed={loggedIn && !currentUser?.isSuperAdmin && !isUnconfirmed} />}>
           <Route path="/profile/eula" element={<EULAScreen withClose />} />
         </Route>
@@ -750,7 +762,6 @@ const AppRoutes = observer(() => {
           path="/onboarding-checklist-page-for-lg-adopting"
           element={<OnboardingChecklistPageForLgAdoptingScreen />}
         />
-        <Route path="/single-zone-cooling-heating-tool" element={<SingleZoneCoolingHeatingToolScreen />} />
         <Route path="/confirmed" element={<EmailConfirmedScreen />} />
         <Route path="/welcome" element={<LandingScreen />} />
         <Route

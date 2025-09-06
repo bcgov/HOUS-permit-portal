@@ -16,6 +16,7 @@ import {
 import { GeocoderStoreModel, IGeocoderStore } from "./geocoder-store"
 import { IJurisdictionStore, JurisdictionStoreModel } from "./jurisdiction-store"
 import { INotificationStore, NotificationStoreModel } from "./notification-store"
+import { IPdfFormStore, PdfFormStoreModel } from "./pdf-form-store"
 import { IPermitApplicationStore, PermitApplicationStoreModel } from "./permit-application-store"
 import { IPermitClassificationStore, PermitClassificationStoreModel } from "./permit-classification-store"
 import { IPermitProjectStore, PermitProjectStoreModel } from "./permit-project-store"
@@ -52,6 +53,7 @@ export const RootStoreModel = types
     contactStore: types.optional(ContactStoreModel, {}),
     notificationStore: types.optional(NotificationStoreModel, {}),
     sandboxStore: types.optional(SandboxStoreModel, {}),
+    pdfFormStore: types.optional(PdfFormStoreModel, {}),
   })
   .extend(withEnvironment())
   .volatile((self) => ({
@@ -129,6 +131,7 @@ export interface IRootStore extends IStateTreeNode {
   notificationStore: INotificationStore
   collaboratorStore: ICollaboratorStore
   sandboxStore: ISandboxStore
+  pdfFormStore: IPdfFormStore
   subscribeToUserChannel: () => void
   disconnectUserChannel: () => void
   loadLocalPersistedData: () => void
