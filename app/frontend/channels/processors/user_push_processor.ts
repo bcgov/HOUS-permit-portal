@@ -1,6 +1,7 @@
 import { IRootStore } from "../../stores/root-store"
 import { ESocketDomainTypes } from "../../types/enums"
 import { IUserPushPayload } from "../../types/types"
+import { applyNotificationSideEffects } from "./notification_effects"
 
 export class UserPushProcessor {
   constructor(private readonly rootStore: IRootStore) {
@@ -15,6 +16,7 @@ export class UserPushProcessor {
         break
       case ESocketDomainTypes.notification:
         this.rootStore.notificationStore.processWebsocketChange(payload)
+        applyNotificationSideEffects(payload, this.rootStore)
         break
       case ESocketDomainTypes.template_version:
         this.rootStore.templateVersionStore.processWebsocketChange(payload)

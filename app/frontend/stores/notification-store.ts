@@ -221,6 +221,8 @@ export const NotificationStoreModel = types
       self.notifications.unshift(self.convertNotificationToUseDate(payload.data))
       self.unreadNotificationsCount = self.popoverOpen ? 0 : payload.meta.unreadCount
       self.totalPages = payload.meta.totalPages
+
+      // Side-effects are handled by applyNotificationSideEffects (see user_push_processor)
     }),
   }))
 

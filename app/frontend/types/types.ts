@@ -386,6 +386,7 @@ export interface ITemplateVersionUpdate {
 }
 
 export interface IReportDocumentNotificationObjectData {
+  stepCodeId?: string
   reportDocumentId: string
   filename?: string
   downloadUrl?: string

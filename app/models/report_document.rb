@@ -18,6 +18,7 @@ class ReportDocument < FileUploadAttachment
           default: "Your step code report is ready to download"
         ),
       "object_data" => {
+        "step_code_id" => step_code_id,
         "report_document_id" => id,
         "filename" => file&.metadata&.dig("filename"),
         "download_url" => file_url
