@@ -1,10 +1,10 @@
 import { Instance, types } from "mobx-state-tree"
-import { EPermitClassificationCode, EPermitClassificationType } from "../types/enums"
+import { EPermitClassificationType } from "../types/enums"
 
 export const PermitClassificationModel = types.model("PermitClassificationModel", {
   id: types.identifier,
   name: types.string,
-  code: types.enumeration(Object.values(EPermitClassificationCode)),
+  code: types.string,
   description: types.string,
   enabled: types.boolean,
   imageUrl: types.string,

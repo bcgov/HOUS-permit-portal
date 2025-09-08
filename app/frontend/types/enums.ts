@@ -30,27 +30,6 @@ export enum EFileUploadAttachmentType {
   ReportDocument = "ReportDocument",
 }
 
-export enum EPermitClassificationCode {
-  lowResidential = "low_residential",
-  mediumResidential = "medium_residential",
-  highResidential = "high_residential",
-  newConstruction = "new_construction",
-  additionAlterationRenovation = "addition_alteration_renovation",
-  siteAlteration = "site_alteration",
-  demolition = "demolition",
-  manufacturedHome = "manufactured_home",
-  mechanical = "mechanical",
-  plumbing = "plumbing",
-  electrical = "electrical",
-  gas = "gas",
-  solidFuelBurningAppliance = "solid_fuel_burning_appliance",
-  fireAlarm = "fire_alarm",
-  fireSuppression = "fire_suppression",
-  treeCuttingAndTreeRemoval = "tree_cutting_and_tree_removal",
-  retainingWall = "retaining_wall",
-  relocation = "relocation",
-}
-
 export enum EPermitApplicationStatus {
   newDraft = "new_draft",
   newlySubmitted = "newly_submitted",
@@ -683,3 +662,27 @@ export enum EClassificationCategory {
   trades = "trades",
   sitePreparation = "site_preparation",
 }
+
+// Centralized constants for permit classification codes (string-backed)
+export const EPermitClassificationCode = {
+  lowResidential: "low_residential",
+  mediumResidential: "medium_residential",
+  highResidential: "high_residential",
+  newConstruction: "new_construction",
+  additionAlterationRenovation: "addition_alteration_renovation",
+  siteAlteration: "site_alteration",
+  demolition: "demolition",
+  manufacturedHome: "manufactured_home",
+  mechanical: "mechanical",
+  plumbing: "plumbing",
+  electrical: "electrical",
+  gas: "gas",
+  solidFuelBurningAppliance: "solid_fuel_burning_appliance",
+  fireAlarm: "fire_alarm",
+  fireSuppression: "fire_suppression",
+  treeCuttingAndTreeRemoval: "tree_cutting_and_tree_removal",
+  retainingWall: "retaining_wall",
+  relocation: "relocation",
+} as const
+
+export type EPermitClassificationCode = (typeof EPermitClassificationCode)[keyof typeof EPermitClassificationCode]
