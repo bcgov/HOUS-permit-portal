@@ -43,7 +43,7 @@ class PermitApplication < ApplicationRecord
   has_many :collaborators, through: :permit_collaborations
   has_many :permit_block_statuses, dependent: :destroy
 
-  has_one :step_code, dependent: :destroy
+  has_one :step_code, dependent: :nullify
 
   scope :submitted, -> { joins(:submission_versions).distinct }
 

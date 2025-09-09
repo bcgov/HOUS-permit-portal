@@ -17,6 +17,15 @@ export const StepCodeBaseFields = types
     permitProjectTitle: types.maybeNull(types.string),
     reportDocuments: types.maybeNull(types.array(types.frozen<IReportDocument>())),
   })
+  .views((self) => ({
+    get latestReportDocument(): IReportDocument | null {
+      if (!self.reportDocuments || self.reportDocuments.length === 0) return null
+      // documents are not guaranteed to be sorted; sort by createdAt if present, fallback to last
+      const docs = [...self.reportDocuments]
+      docs.sort((a, b) => (new Date(a.createdAt as any).getTime() || 0) - (new Date(b.createdAt as any).getTime() || 0))
+      return docs[docs.length - 1]
+    },
+  }))
   .actions((self) => ({
     setProjectDetails(projectDetails: { title: string; fullAddress: string; referenceNumber?: string }) {
       self.title = projectDetails.title

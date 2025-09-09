@@ -114,6 +114,9 @@ class StepCodeReportGenerationJob
         report_doc = step_code.report_documents.build
         File.open(pdf_path) { |file| report_doc.file = file }
         report_doc.save!
+
+        # Notify relevant users that report is ready for download
+        NotificationService.publish_step_code_report_generated_event(report_doc)
         File.delete(pdf_path) if Rails.env.production?
       else
         Rails.logger.error(
