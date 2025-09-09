@@ -19,9 +19,9 @@ import { StepNotMetWarning } from "./shared/step-not-met-warning"
 import { ZeroCarbonStepCodeCompliance } from "./zero-carbon-step-code-compliance"
 
 export const StepCodeChecklistForm = observer(function StepCodeChecklistForm() {
-  const { stepCode } = usePart9StepCode()
+  const { currentStepCode } = usePart9StepCode()
   const { permitApplicationId } = useParams()
-  const checklist = stepCode.preConstructionChecklist
+  const checklist = currentStepCode.preConstructionChecklist
   const navigate = useNavigate()
   const [index, setIndex] = useState([0, 1, 2, 3, 4])
   const [scrollRef, setScrollRef] = useState<null | HTMLDivElement>()
@@ -41,7 +41,7 @@ export const StepCodeChecklistForm = observer(function StepCodeChecklistForm() {
   const { handleSubmit, reset } = formMethods
 
   const onSubmit = async (values) => {
-    const result = await stepCode.updateChecklist(
+    const result = await currentStepCode.updateChecklist(
       checklist.id,
       R.mergeRight(values, { stepRequirementId: checklist.stepRequirementId })
     )

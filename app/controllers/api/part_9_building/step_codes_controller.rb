@@ -1,21 +1,9 @@
 class Api::Part9Building::StepCodesController < Api::ApplicationController
   include StepCodeParamsConcern
 
-  def index
-    @step_codes = policy_scope(Part9StepCode)
-    render_success @step_codes,
-                   nil,
-                   {
-                     blueprint: Part9StepCodeBlueprint,
-                     meta: {
-                       select_options: Part9StepCode::Checklist.select_options
-                     }
-                   }
-  end
-
   def select_options
     authorize Part9StepCode, :select_options?
-    render_success({ select_options: Part9StepCode::Checklist.select_options })
+    render json: { data: Part9StepCode::Checklist.select_options }, status: :ok
   end
 
   # POST /api/step_codes

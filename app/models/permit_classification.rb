@@ -10,26 +10,7 @@ class PermitClassification < ApplicationRecord
 
   scope :enabled, -> { where(enabled: true) }
 
-  enum code: %i[
-         low_residential
-         medium_residential
-         high_residential
-         new_construction
-         addition_alteration_renovation
-         site_alteration
-         demolition
-         manufactured_home
-         mechanical
-         plumbing
-         electrical
-         gas
-         solid_fuel_burning_appliance
-         fire_alarm
-         fire_suppression
-         tree_cutting_and_tree_removal
-         retaining_wall
-         relocation
-       ]
+  # `code` is a plain string persisted in the database.
 
   def image_url
     ActionController::Base.helpers.asset_path(

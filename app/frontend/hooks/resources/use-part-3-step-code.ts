@@ -35,8 +35,8 @@ export const usePart3StepCode = () => {
     }
   }, [permitApplicationId, stepCodeId, fetchPart3StepCode, getStepCode, setCurrentStepCode, currentPermitApplication])
 
-  const stepCode = stepCodeStore.currentStepCode as IPart3StepCode
-  const checklist = stepCode?.checklist
+  const currentStepCode = stepCodeStore.currentStepCode as IPart3StepCode
+  const checklist = currentStepCode?.checklist
 
-  return { stepCode, checklist, isLoading }
+  return { currentStepCode, checklist, isLoading }
 }

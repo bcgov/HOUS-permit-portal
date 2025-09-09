@@ -1,6 +1,5 @@
 import { t } from "i18next"
 import { Instance, flow, toGenerator, types } from "mobx-state-tree"
-import * as R from "ramda"
 import { createSearchModel } from "../lib/create-search-model"
 import { withEnvironment } from "../lib/with-environment"
 import { withMerge } from "../lib/with-merge"
@@ -40,7 +39,7 @@ export const StepCodeStoreModel = types
     types.model("StepCodeStore", {
       stepCodesMap: types.map(StepCodeModel),
       tableStepCodes: types.optional(types.array(types.reference(StepCodeModel)), []),
-      isLoaded: types.maybeNull(types.boolean),
+      isOptionsLoaded: types.maybeNull(types.boolean),
       selectOptions: types.frozen<Partial<IPart9ChecklistSelectOptions & IPart3ChecklistSelectOptions>>(),
       currentStepCode: types.maybeNull(types.reference(StepCodeModel)),
       typeFilter: types.optional(types.array(types.enumeration(Object.values(EStepCodeType) as any)), []),
@@ -103,23 +102,13 @@ export const StepCodeStoreModel = types
     __beforeMergeUpdate(stepCode: IPart9StepCode | IPart3StepCode) {
       let normalized = stepCode as any
 
-      // Part 9: convert checklists array to map for stable references
-      if (normalized.type === EStepCodeType.part9StepCode) {
-        const checklistsMap = (normalized as IPart9StepCode).checklists?.reduce(
-          (acc, checklist) => {
-            acc[checklist.id] = checklist
-            return acc
-          },
-          {} as Record<string, any>
-        )
-        normalized = R.mergeRight(normalized, { checklistsMap })
-      }
+      // Part 9 checklists are normalized by Part9StepCodeModel preProcessor
 
       // Jurisdiction: merge object into store, replace with reference id (applies to all types)
       const jurisdiction = normalized.jurisdiction
       if (jurisdiction && typeof jurisdiction === "object" && jurisdiction.id) {
         self.rootStore.jurisdictionStore.mergeUpdate(jurisdiction, "jurisdictionMap")
-        normalized = R.mergeRight(normalized, { jurisdiction: jurisdiction.id })
+        normalized.jurisdiction = jurisdiction.id
       }
 
       return normalized
@@ -133,7 +122,7 @@ export const StepCodeStoreModel = types
       } else {
         console.error("Failed to fetch Part 9 Step Codes:", response.problem, response.data)
       }
-      self.isLoaded = true
+      self.isOptionsLoaded = true
     }),
     searchStepCodes: flow(function* (opts?: { reset?: boolean; page?: number; countPerPage?: number }) {
       if (opts?.reset) {
@@ -165,8 +154,10 @@ export const StepCodeStoreModel = types
     },
     fetchPart9SelectOptions: flow(function* () {
       const response = yield self.environment.api.fetchPart9StepCodeSelectOptions()
+
       if (response.ok) {
-        self.selectOptions = { ...self.selectOptions, ...response.data.data.selectOptions }
+        self.selectOptions = { ...self.selectOptions, ...response.data.data }
+        self.isOptionsLoaded = true
       } else {
         console.error("Failed to fetch Part 9 Select Options:", response.problem, response.data)
       }

@@ -5,12 +5,12 @@ import { Part3PDFContent } from "../components/domains/step-code/part-3/checklis
 import { Part9PDFContent } from "../components/domains/step-code/part-9/checklist/pdf-content"
 import { PDFContent as PermitApplicationPDFContent } from "../components/shared/permit-applications/pdf-content"
 import "../i18n/i18n"
-import { EStepCodeType } from "../types/enums"
+import { EPermitClassificationCode, EStepCodeType } from "../types/enums"
 import { combineComplianceHints } from "../utils/formio-component-traversal"
 
 const ChecklistComponentMap = {
-  low_residential: Part9PDFContent,
-  medium_residential: Part3PDFContent,
+  [EPermitClassificationCode.lowResidential]: Part9PDFContent,
+  [EPermitClassificationCode.mediumResidential]: Part3PDFContent,
 }
 
 const main = async () => {
@@ -62,7 +62,9 @@ const main = async () => {
       const permitTypeCode =
         pdfData.permitApplication?.permitType?.code ||
         pdfData?.meta?.permitTypeCode ||
-        (pdfData?.checklist?.stepCodeType === EStepCodeType.part9StepCode ? "low_residential" : "medium_residential")
+        (pdfData?.checklist?.stepCodeType === EStepCodeType.part9StepCode
+          ? EPermitClassificationCode.lowResidential
+          : EPermitClassificationCode.mediumResidential)
       const ChecklistComponent = ChecklistComponentMap[permitTypeCode]
 
       if (!pdfData.checklist) {
