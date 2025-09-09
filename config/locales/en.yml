@@ -817,6 +817,8 @@ en:
       submission_assignee_collaboration_unassignment_notification: "You have been removed as a collaborator on requirement “%{requirement_block_name}” for permit application %{number}"
       review_delegatee_collaboration_unassignment_notification: "You have been removed as a designated reviewer for permit application %{number}."
       review_assignee_collaboration_unassignment_notification: "You have been removed as a review collaborator on requirement “%{requirement_block_name}” for permit application %{number}"
+    step_code:
+      report_generated: "Your step code report is ready to download"
     permit_block_status:
       status_read_by_user: 'Requirement “%{requirement_block_name}” status set to "ready" by %{setter_name} for permit application %{number}'
       status_ready_no_user: 'Requirement “%{requirement_block_name}” status set to "ready" for permit application %{number}'
