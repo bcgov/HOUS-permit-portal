@@ -26,7 +26,10 @@ import React, { useEffect } from "react"
 import { useTranslation } from "react-i18next"
 import { useNotificationPopover } from "../../../../hooks/use-notification-popover"
 import { useMst } from "../../../../setup/root"
+import { EFileUploadAttachmentType, ENotificationActionType } from "../../../../types/enums"
+import { IReportDocumentNotificationObjectData } from "../../../../types/types"
 import { CustomMessageBox } from "../../../shared/base/custom-message-box"
+import { FileDownloadButton } from "../../../shared/base/file-download-button"
 import { RouterLinkButton } from "../../../shared/navigation/router-link-button"
 
 interface INotificationsPopoverProps extends IconButtonProps {}
@@ -48,6 +51,48 @@ export const NotificationsPopover: React.FC<INotificationsPopoverProps> = observ
   const { t } = useTranslation()
 
   const notificationsToShow = showRead ? notifications : notifications.slice(0, numberJustRead)
+
+  // Default renderer: list of navigation links
+  const renderLinks = (n) => (
+    <UnorderedList pl={0} mb={0}>
+      {generateSpecificLinkData(n)?.map((link) => (
+        <ListItem whiteSpace={"normal"} key={link.href}>
+          <RouterLinkButton
+            variant="link"
+            rightIcon={<CaretRight />}
+            to={link.href}
+            color="text.primary"
+            onClick={handleClose}
+            whiteSpace={"normal"}
+            wordBreak={"break-word"}
+          >
+            {link.text}
+          </RouterLinkButton>
+        </ListItem>
+      ))}
+    </UnorderedList>
+  )
+
+  // Map of actionType -> renderer
+  const notificationRenderers: Partial<Record<ENotificationActionType, (n) => React.ReactNode>> = {
+    [ENotificationActionType.stepCodeReportGenerated]: (n) => (
+      <Box onClick={handleClose}>
+        <FileDownloadButton
+          variant="link"
+          modelType={EFileUploadAttachmentType.ReportDocument}
+          document={
+            {
+              id: (n.objectData as IReportDocumentNotificationObjectData)?.reportDocumentId,
+              file: {
+                metadata: { filename: (n.objectData as IReportDocumentNotificationObjectData)?.filename },
+              },
+            } as any
+          }
+          simpleLabel
+        />
+      </Box>
+    ),
+  }
 
   return (
     <Popover isOpen={isOpen} onOpen={handleOpen} onClose={handleClose}>
@@ -99,23 +144,7 @@ export const NotificationsPopover: React.FC<INotificationsPopoverProps> = observ
               ) : (
                 notificationsToShow?.map((n) => (
                   <CustomMessageBox status={getSemanticKey(n)} description={n.actionText} key={n.id}>
-                    <UnorderedList pl={0} mb={0}>
-                      {generateSpecificLinkData(n)?.map((link) => (
-                        <ListItem whiteSpace={"normal"} key={link.href}>
-                          <RouterLinkButton
-                            variant="link"
-                            rightIcon={<CaretRight />}
-                            to={link.href}
-                            color="text.primary"
-                            onClick={handleClose}
-                            whiteSpace={"normal"}
-                            wordBreak={"break-word"}
-                          >
-                            {link.text}
-                          </RouterLinkButton>
-                        </ListItem>
-                      ))}
-                    </UnorderedList>
+                    {(notificationRenderers[n.actionType] || renderLinks)(n)}
                   </CustomMessageBox>
                 ))
               )}

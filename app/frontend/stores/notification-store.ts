@@ -3,7 +3,7 @@ import { flow, Instance, toGenerator, types } from "mobx-state-tree"
 import * as R from "ramda"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
-import { ECollaborationType, ENotificationActionType } from "../types/enums"
+import { ECollaborationType, EFlashMessageStatus, ENotificationActionType } from "../types/enums"
 import {
   ILinkData,
   INotification,
@@ -28,8 +28,10 @@ export const NotificationStoreModel = types
   .extend(withEnvironment())
   .extend(withRootStore())
   .views((self) => ({
-    getSemanticKey(notification: INotification) {
-      return criticalNotificationTypes.includes(notification.actionType) ? "warning" : "info"
+    getSemanticKey(notification: INotification): EFlashMessageStatus {
+      return criticalNotificationTypes.includes(notification.actionType)
+        ? EFlashMessageStatus.warning
+        : EFlashMessageStatus.info
     },
     get anyUnread() {
       return self.unreadNotificationsCount > 0
@@ -147,6 +149,17 @@ export const NotificationStoreModel = types
             href: `/permit-applications/${(notification.objectData as IPermitNotificationObjectData).permitApplicationId}/edit`,
           },
         ]
+      } else if (notification.actionType === ENotificationActionType.stepCodeReportGenerated) {
+        const reportData = notification.objectData as any
+        const filename = reportData?.filename || t("ui.download")
+        // Use direct S3 url if provided, otherwise route to step-codes listing where latest report shows a Download button
+        const href = reportData?.downloadUrl || "/step-codes"
+        return [
+          {
+            text: `${t("ui.download")} ${filename}`,
+            href,
+          },
+        ]
       }
     },
   }))
@@ -208,6 +221,8 @@ export const NotificationStoreModel = types
       self.notifications.unshift(self.convertNotificationToUseDate(payload.data))
       self.unreadNotificationsCount = self.popoverOpen ? 0 : payload.meta.unreadCount
       self.totalPages = payload.meta.totalPages
+
+      // Side-effects are handled by applyNotificationSideEffects (see user_push_processor)
     }),
   }))
 
