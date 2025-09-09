@@ -10,15 +10,15 @@ import { EStepCodeChecklistStatus } from "../../../../types/enums"
 import { RestartConfirmationModal } from "../part-9/restart-confirmation-modal"
 
 export const Part9NavLinks = observer(function Part9StepCodeNavLinks() {
-  const { stepCode } = usePart9StepCode()
-  const checklist = stepCode?.preConstructionChecklist
+  const { currentStepCode } = usePart9StepCode()
+  const checklist = currentStepCode?.preConstructionChecklist
   const navigate = useNavigate()
   const { uiStore } = useMst()
   const { handleSubmit, register, formState } = useForm()
   const { isValid, isSubmitting } = formState
 
   const onComplete = async (values) => {
-    await stepCode.updateChecklist(checklist.id, values)
+    await currentStepCode.updateChecklist(checklist.id, values)
   }
 
   const handleBack = () => {

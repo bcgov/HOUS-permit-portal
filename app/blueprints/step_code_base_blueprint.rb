@@ -12,10 +12,6 @@ class StepCodeBaseBlueprint < Blueprinter::Base
          :phase,
          :permit_application_id
 
-  association :permit_application,
-              blueprint: PermitApplicationBlueprint,
-              view: :base
-
   association :creator, blueprint: UserBlueprint
 
   association :jurisdiction, blueprint: JurisdictionBlueprint, view: :base
