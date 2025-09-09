@@ -17,7 +17,7 @@ import { StepCodePerformance } from "./step-code-performance"
 
 export const StepCodeSummary = observer(function StepCodeSummary() {
   const i18nPrefix = "stepCode.part3.stepCodeSummary"
-  const { checklist, stepCode } = usePart3StepCode()
+  const { checklist, currentStepCode } = usePart3StepCode()
   const { permitApplicationId } = useParams()
   const navigate = useNavigate()
   const location = useLocation()
@@ -102,11 +102,11 @@ export const StepCodeSummary = observer(function StepCodeSummary() {
               {permitApplicationId ? t(`${i18nPrefix}.cta`) : t(`${i18nPrefix}.standaloneCta`)}
             </Button>
             {isSubmitting && <SharedSpinner m={0} />}
-            {!isSubmitting && stepCode?.latestReportDocument && (
+            {!isSubmitting && currentStepCode?.latestReportDocument && (
               <FileDownloadButton
                 variant="link"
                 modelType={EFileUploadAttachmentType.ReportDocument}
-                document={stepCode.latestReportDocument as any}
+                document={currentStepCode.latestReportDocument as any}
                 simpleLabel
               />
             )}
