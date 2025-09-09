@@ -24,6 +24,7 @@ import { useMst } from "../../../setup/root"
 import { EFlashMessageStatus, EPermitClassificationCode } from "../../../types/enums"
 import { IOption } from "../../../types/types"
 import { CustomMessageBox } from "../../shared/base/custom-message-box"
+import { ErrorScreen } from "../../shared/base/error-screen"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import ProjectInfoRow from "../../shared/project/project-info-row"
 import { Can } from "../../shared/user/can"
@@ -33,37 +34,40 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
   const { t } = useTranslation()
   const { currentPermitProject, error } = usePermitProject()
   const navigate = useNavigate()
-  const { permitClassificationStore, permitApplicationStore } = useMst()
+  const { permitClassificationStore } = useMst()
 
   const [permitType, setPermitType] = useState<IPermitType | null>(null)
-  const [activities, setActivities] = useState<IOption<IActivity>[]>([])
+  const [activityOptions, setActivityOptions] = useState<IOption<IActivity>[]>([])
   const [selectedActivityIds, setSelectedActivityIds] = useState<string[]>([])
   const [query, setQuery] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const isFirstNation = currentPermitProject?.jurisdiction?.firstNation
 
   // Load default permit type (low_residential) and then its activities
   useEffect(() => {
     ;(async () => {
+      if (!currentPermitProject) return
+
       // Default hidden selections
-      const permitTypeOptions = await permitClassificationStore.fetchPermitTypeOptions(true, false, null, null)
+      const permitTypeOptions = await permitClassificationStore.fetchPermitTypeOptions(true, isFirstNation, null, null)
       const lowRes = permitTypeOptions.find((o) => o.value.code === EPermitClassificationCode.lowResidential)?.value
       if (lowRes) {
         setPermitType(lowRes)
-        const activityOptions = await permitClassificationStore.fetchActivityOptions(true, false, lowRes.id)
-        setActivities(activityOptions)
+        const activityOptions = await permitClassificationStore.fetchActivityOptions(true, isFirstNation, lowRes.id)
+        setActivityOptions(activityOptions)
       }
     })()
-  }, [permitClassificationStore])
+  }, [permitClassificationStore, currentPermitProject?.id])
 
   const filteredActivities = useMemo(() => {
     const q = query.trim().toLowerCase()
-    if (!q) return activities
-    return activities.filter((opt) => {
+    if (!q) return activityOptions
+    return activityOptions.filter((opt) => {
       const name = opt.value.name?.toLowerCase() || ""
       const desc = opt.value.description?.toLowerCase() || ""
       return name.includes(q) || desc.includes(q)
     })
-  }, [activities, query])
+  }, [activityOptions, query])
 
   const groupedActivities = useMemo(() => {
     const groups = R.groupBy<IOption<IActivity>>((opt) => opt.value.category || "", filteredActivities)
@@ -89,7 +93,7 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
       const params = selectedActivityIds.map((activityId) => ({
         activityId,
         permitTypeId: permitType.id,
-        firstNations: false,
+        firstNations: isFirstNation,
       }))
       const response = await (currentPermitProject as any).bulkCreatePermitApplications(params)
       if (response?.ok) {
@@ -105,11 +109,17 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
     setSelectedActivityIds([])
   }
 
+  if (error) return <ErrorScreen error={error} />
+
   return (
     <Container maxW="container.lg" py={10}>
       <Flex direction="column" gap={2}>
-        <RouterLinkButton variant="link" to="/projects" leftIcon={<CaretLeft size={24} />}>
-          {t("permitProject.back")}
+        <RouterLinkButton
+          variant="link"
+          to={`/projects/${currentPermitProject?.id}`}
+          leftIcon={<CaretLeft size={24} />}
+        >
+          {t("permitProject.backToProject")}
         </RouterLinkButton>
         <Heading>{t("permitProject.addPermits.title")}</Heading>
       </Flex>

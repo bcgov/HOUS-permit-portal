@@ -191,7 +191,7 @@ export const NavBar = observer(function NavBar() {
               {!loggedIn && <HelpDrawer />}
               {currentUser?.isSubmitter && !currentUser.isUnconfirmed && (
                 <RouterLinkButton to="/" variant="tertiary" leftIcon={<Folders size={16} />}>
-                  {t("site.myPermits")}
+                  {t("site.myProjects")}
                 </RouterLinkButton>
               )}
               {(currentUser?.isReviewStaff || currentUser?.isTechnicalSupport) &&

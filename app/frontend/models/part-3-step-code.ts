@@ -33,9 +33,8 @@ export const Part3StepCodeModel = types
       return self.checklist?.isAllComplete
     },
     get targetPath() {
-      const permitApplicationId = (self as any)?.permitApplication?.id as string | undefined
-      if (permitApplicationId) {
-        return `/permit-applications/${permitApplicationId}/edit/part-3-step-code`
+      if (self.permitApplicationId) {
+        return `/permit-applications/${self.permitApplicationId}/edit/part-3-step-code`
       }
       return `/part-3-step-code/${self.id}`
     },

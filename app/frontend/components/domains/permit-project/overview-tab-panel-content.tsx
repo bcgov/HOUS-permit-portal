@@ -47,6 +47,12 @@ export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
               isBold
               isCopyable
             />
+            <ProjectInfoRow
+              label={t("permitProject.overview.jurisdictionName")}
+              value={jurisdiction?.disambiguatedName || t("permitProject.overview.notAvailable")}
+              isCopyable
+            />
+
             <ProjectInfoRow label={t("permitProject.overview.number")} value={number} isCopyable />
             <ProjectInfoRow
               label={t("permitProject.overview.pid")}
