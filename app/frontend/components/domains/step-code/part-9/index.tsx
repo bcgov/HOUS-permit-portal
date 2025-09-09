@@ -1,12 +1,11 @@
-import { Box, Center, Container, VStack } from "@chakra-ui/react"
+import { Box, Container, VStack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
-import React, { Suspense, useEffect } from "react"
+import React, { useEffect } from "react"
 import { useTranslation } from "react-i18next"
 import { RemoveScroll } from "react-remove-scroll"
 import { usePart9StepCode } from "../../../../hooks/resources/use-part-9-step-code"
 import { usePermitApplication } from "../../../../hooks/resources/use-permit-application"
 import { useMst } from "../../../../setup/root"
-import { SharedSpinner } from "../../../shared/base/shared-spinner"
 import { FloatingHelpDrawer } from "../../../shared/floating-help-drawer"
 import { StepCodeNavBar } from "../nav-bar"
 import { Part9NavLinks } from "../nav-bar/part-9-nav-links"
@@ -18,17 +17,17 @@ import { Title } from "./title"
 
 export const Part9StepCodeForm = observer(function Part9StepCodeForm() {
   const {
-    stepCodeStore: { isLoaded, fetchPart9StepCodes },
+    stepCodeStore: { isOptionsLoaded, fetchPart9SelectOptions },
   } = useMst()
-  const { stepCode } = usePart9StepCode()
-  const { currentPermitApplication } = usePermitApplication()
+  const { currentStepCode } = usePart9StepCode()
+  usePermitApplication()
 
   const { t } = useTranslation()
 
   useEffect(() => {
-    const fetch = async () => await fetchPart9StepCodes()
-    !isLoaded && fetch()
-  }, [isLoaded])
+    const fetch = async () => await fetchPart9SelectOptions()
+    !isOptionsLoaded && fetch()
+  }, [isOptionsLoaded])
 
   return (
     <RemoveScroll>
@@ -44,31 +43,23 @@ export const Part9StepCodeForm = observer(function Part9StepCodeForm() {
         bg="white"
       >
         <StepCodeNavBar title={t("stepCode.title")} NavLinks={<Part9NavLinks />} />
-        <Suspense
-          fallback={
-            <Center p={50}>
-              <SharedSpinner />
-            </Center>
-          }
-        >
-          {isLoaded && currentPermitApplication && (
-            <Container maxW="container.lg">
-              <FloatingHelpDrawer top="24" />
-              <Container my={10} maxW="780px" px={0}>
-                {!stepCode ? (
-                  <VStack spacing={8} align="start" w="full" pb={20}>
-                    <Title />
-                    <Info />
-                    <DrawingsWarning />
-                    <H2KImport />
-                  </VStack>
-                ) : (
-                  <StepCodeChecklistForm />
-                )}
-              </Container>
+        {isOptionsLoaded && (
+          <Container maxW="container.lg">
+            <FloatingHelpDrawer top="24" />
+            <Container my={10} maxW="780px" px={0}>
+              {!currentStepCode ? (
+                <VStack spacing={8} align="start" w="full" pb={20}>
+                  <Title />
+                  <Info />
+                  <DrawingsWarning />
+                  <H2KImport />
+                </VStack>
+              ) : (
+                <StepCodeChecklistForm />
+              )}
             </Container>
-          )}
-        </Suspense>
+          </Container>
+        )}
       </Box>
     </RemoveScroll>
   )

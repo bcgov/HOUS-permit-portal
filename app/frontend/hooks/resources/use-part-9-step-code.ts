@@ -1,9 +1,11 @@
-import { IPart9StepCode } from "../../models/part-9-step-code"
 import { useMst } from "../../setup/root"
 
 export const usePart9StepCode = () => {
   const { stepCodeStore } = useMst()
-  const stepCode = stepCodeStore.currentStepCode as IPart9StepCode
+  const { currentStepCode } = stepCodeStore
 
-  return { stepCode }
+  // current step coe should be set by the permit application hook.
+  // When standalone part 9 is supported, we need to set the current step code here.
+
+  return { currentStepCode }
 }
