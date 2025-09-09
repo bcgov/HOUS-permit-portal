@@ -280,7 +280,6 @@ export const PermitApplicationStoreModel = types
       requirementTemplate: IRequirementTemplate,
       overrides: Partial<IPermitApplication> = {}
     ) {
-      if (self.currentPermitApplication?.isEphemeral) return self.currentPermitApplication
       const permitApplication = PermitApplicationModel.create({
         id: `ephemeral-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
         nickname: overrides.nickname || "Ephemeral Application",
