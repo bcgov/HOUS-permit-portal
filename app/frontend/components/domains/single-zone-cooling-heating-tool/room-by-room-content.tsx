@@ -1,7 +1,6 @@
-import { Image, Page, Text, View } from "@react-pdf/renderer"
+import { Image, Page, StyleSheet, Text, View } from "@react-pdf/renderer"
 import React from "react"
 import { useTranslation } from "react-i18next"
-import { pdfStyles as styles } from "./shared-pdf-styles"
 
 interface PDFComponentProps {
   data: any
@@ -24,32 +23,295 @@ export const SingleZoneCoolingHeatingRoomByRoomContent: React.FC<PDFComponentPro
     cooling: "",
   }))
 
+  const styles = StyleSheet.create({
+    page: {
+      fontFamily: "Helvetica",
+      fontSize: 9,
+      padding: 25,
+      paddingTop: 20,
+      paddingBottom: 15,
+      backgroundColor: "white",
+    },
+
+    headerTable: {
+      border: "1pt solid black",
+      borderBottom: "none",
+      marginBottom: 0,
+    },
+    headerRow: {
+      flexDirection: "row",
+      borderBottom: "1pt solid black",
+    },
+    headerLeft: {
+      flex: 4,
+      backgroundColor: "#c0c0c0",
+      borderRight: "1pt solid black",
+      justifyContent: "center",
+    },
+    headerLeftNoBg: {
+      flex: 4,
+      borderRight: "1pt solid black",
+      justifyContent: "center",
+    },
+    headerRight: {
+      flex: 1,
+      textAlign: "center",
+      fontSize: 8,
+      justifyContent: "center",
+    },
+    headerTitle: {
+      fontSize: 14.5,
+      fontFamily: "Times-Roman",
+      fontWeight: "bold",
+      textAlign: "center",
+    },
+    headerSubtitle: {
+      fontSize: 7,
+      textAlign: "center",
+      lineHeight: 1.2,
+    },
+
+    // Section headers
+    sectionHeader: {
+      backgroundColor: "#c0c0c0",
+      border: "1pt solid black",
+      borderTop: "none",
+      fontFamily: "Times-Roman",
+      fontSize: 10,
+      fontWeight: "bold",
+      textAlign: "center",
+      textTransform: "uppercase",
+      marginTop: 0,
+    },
+
+    // Form sections
+    formSection: {
+      border: "1pt solid black",
+      borderTop: "none",
+      borderBottom: "none",
+    },
+    formRow: {
+      flexDirection: "row",
+      borderBottom: "1pt solid black",
+      alignItems: "center",
+    },
+    formRowLast: {
+      flexDirection: "row",
+      alignItems: "center",
+    },
+
+    // Field styles
+    fieldLabel: {
+      paddingBottom: 3,
+      fontSize: 9,
+      justifyContent: "flex-start",
+      alignItems: "flex-start",
+    },
+    fieldValue: {
+      paddingLeft: 2,
+      fontSize: 9,
+      paddingTop: 1,
+      paddingBottom: 3,
+      flex: 1,
+      justifyContent: "flex-start",
+      alignItems: "flex-start",
+      minHeight: 18,
+    },
+    fieldValueBorder: {
+      padding: 4,
+      fontSize: 9,
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      borderRight: "1pt solid black",
+      minHeight: 18,
+    },
+
+    // Checkbox styles
+    checkbox: {
+      width: 10,
+      height: 10,
+      border: "1pt solid black",
+      marginRight: 4,
+      marginLeft: 2,
+      textAlign: "center",
+      fontSize: 7,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    checkboxChecked: {
+      width: 10,
+      height: 10,
+      border: "1pt solid black",
+      marginRight: 4,
+      marginLeft: 2,
+      textAlign: "center",
+      fontSize: 7,
+      backgroundColor: "black",
+      color: "white",
+      justifyContent: "center",
+      alignItems: "center",
+    },
+
+    // Footer styles
+    footerSection: {
+      marginTop: 20,
+      border: "1pt solid black",
+    },
+    footerRow: {
+      flexDirection: "row",
+      borderBottom: "1pt solid black",
+      minHeight: 80,
+    },
+    footerLabel: {
+      width: 60,
+      padding: 3,
+      fontSize: 8,
+      borderRight: "1pt solid black",
+      backgroundColor: "#f5f5f5",
+    },
+    footerValue: {
+      flex: 1,
+      padding: 3,
+      fontSize: 8,
+    },
+
+    // Signature section
+    signatureSection: {
+      flexDirection: "row",
+      marginTop: 5,
+      border: "1pt solid black",
+      minHeight: 80,
+    },
+    signatureLeft: {
+      flex: 1,
+      padding: 8,
+      borderRight: "1pt solid black",
+      position: "relative",
+    },
+    signatureRight: {
+      flex: 1,
+      padding: 8,
+    },
+
+    // Bottom section
+    bottomSection: {
+      flexDirection: "row",
+      alignItems: "stretch",
+    },
+    bottomLeft: {
+      flex: 1,
+      border: "1pt solid black",
+      padding: 8,
+      textAlign: "center",
+      fontSize: 9,
+      fontWeight: "bold",
+      color: "blue",
+      justifyContent: "center",
+      alignItems: "center",
+      minHeight: 40,
+      width: 585,
+      borderTop: "none",
+    },
+    bottomRight: {
+      border: "1pt solid black",
+      width: 181.5,
+      borderTop: "none",
+      borderLeft: "none",
+      textAlign: "center",
+      justifyContent: "center",
+      alignItems: "center",
+    },
+
+    // Input field styles
+    inputField: {
+      borderBottom: "1pt solid black",
+      minHeight: 15,
+      marginRight: 10,
+      paddingLeft: 2,
+      flex: 1,
+    },
+
+    fieldNumber: {
+      fontSize: "4.5pt",
+      letterSpacing: 0,
+      textAlign: "right",
+      marginRight: "1pt",
+    },
+    // Small text
+    smallText: {
+      fontSize: 7,
+    },
+
+    // Bold text
+    boldText: {
+      fontWeight: "bold",
+    },
+  })
+
   return (
     <Page size="LETTER" style={styles.page}>
       <View style={styles.headerTable}>
-        <View style={styles.headerRow}>
+        <View style={[styles.headerRow]}>
           <View style={styles.headerLeft}>
             <Text style={[styles.headerTitle, { fontWeight: "bold" }]}>{t(`${prefix}.title`)}</Text>
           </View>
           <View style={[styles.headerRight, { backgroundColor: "#c0c0c0" }]}>
-            <Text style={{ fontSize: 4, fontWeight: "normal" }}>{t(`${prefix}.CSAF28012`)}</Text>
-            <Text>{t(`${prefix}.FormSetVer2410`)}</Text>
-            <Text style={{ fontWeight: "bold", fontSize: 6 }}>{t(`${prefix}.project`)}</Text>
+            <View style={{ flexDirection: "row" }}>
+              <Text style={{ fontSize: 6 }}>{t(`${prefix}.CSAF28012`)}</Text>
+              <Text style={{ fontSize: 6, marginLeft: "60pt" }}>{t(`${prefix}.Form`)}</Text>
+            </View>
+            <Text style={{ fontSize: 6, paddingTop: "2pt" }}>{t(`${prefix}.SetVer2410`)}</Text>
           </View>
         </View>
-        <View style={styles.headerRow}>
+        <View style={[styles.headerRow, { minHeight: "35pt" }]}>
           <View style={styles.headerLeftNoBg}>
-            <Text style={{ fontSize: 6, paddingLeft: 5 }}>
+            <Text
+              style={{
+                fontSize: "6pt",
+                paddingTop: "4pt",
+                fontWeight: "bold",
+                letterSpacing: 0,
+                fontFamily: "Helvetica",
+              }}
+            >
               {t(`${prefix}.theseDocumentsIssuedForTheUseOf`)}{" "}
-              <Text style={{ textDecoration: "underline" }}>{formJson.issuedFor || ""}</Text>
+              <Text style={{ textDecoration: "underline", paddingTop: "10pt" }}>{formJson.drawingIssueFor || ""}</Text>
             </Text>
-            <Text style={{ fontSize: 6, paddingLeft: 5 }}>
+            <Text
+              style={{
+                fontSize: "6pt",
+                paddingTop: "5pt",
+                marginTop: "5pt",
+                marginLeft: "40pt",
+                fontWeight: "bold",
+                letterSpacing: 0,
+                fontFamily: "Helvetica",
+              }}
+            >
               {t(`${prefix}.andMayNotBeUsedByAnyOtherPersonsWithoutAuthorization`)}
             </Text>
+            <View style={{ flexDirection: "row", alignItems: "flex-end", justifyContent: "flex-end" }}>
+              <Text style={styles.fieldNumber}>1</Text>
+            </View>
           </View>
           <View style={styles.headerRight}>
+            <Text
+              style={{
+                fontWeight: "bold",
+                fontSize: "6pt",
+                textTransform: "uppercase",
+                letterSpacing: 0,
+                fontFamily: "Helvetica",
+              }}
+            >
+              {t(`${prefix}.projectNumber`)}
+            </Text>
             <View style={{ minHeight: 15, paddingLeft: 2 }}>
-              <Text style={{ fontSize: 6 }}>{formJson.projectNumber || ""}</Text>
+              <Text style={{ fontSize: "6pt" }}>{formJson.projectNumber || ""}</Text>
+            </View>
+            <View style={{ flexDirection: "row", justifyContent: "flex-end", marginTop: "7pt" }}>
+              <Text style={styles.fieldNumber}>2</Text>
             </View>
           </View>
         </View>
@@ -186,22 +448,6 @@ export const SingleZoneCoolingHeatingRoomByRoomContent: React.FC<PDFComponentPro
             <Image src={logoPath} style={{ width: 120, height: 40 }} />
           </View>
         </View>
-      </View>
-
-      <View
-        style={{
-          position: "absolute",
-          bottom: 20,
-          left: 20,
-          right: 20,
-          flexDirection: "row",
-          justifyContent: "space-between",
-        }}
-      >
-        <Text style={{ fontSize: 8 }}>{t(`${prefix}.F280FormsSet2410xlsxResults`)}</Text>
-        <Text style={{ fontSize: 8 }}>
-          {new Date().toLocaleTimeString()}, {new Date().toLocaleDateString()}
-        </Text>
       </View>
     </Page>
   )

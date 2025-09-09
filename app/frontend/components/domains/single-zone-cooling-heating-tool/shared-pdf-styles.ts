@@ -1,67 +1,74 @@
 import { StyleSheet } from "@react-pdf/renderer"
 
+const LETTER_PAGE_WIDTH = 618 // 8.5in * 72pt
+const MARGIN_LEFT = 2
+const MARGIN_RIGHT = 65
+const MARGIN_TOP = 20
+
 export const pdfStyles = StyleSheet.create({
   page: {
     fontFamily: "Helvetica",
     fontSize: 7,
-    margin: "15pt",
     backgroundColor: "white",
+    marginTop: MARGIN_TOP,
+    marginLeft: 0,
+    marginRight: 0,
+  },
+  pageInner: {
+    width: LETTER_PAGE_WIDTH - (MARGIN_LEFT + MARGIN_RIGHT),
+    alignSelf: "center",
   },
 
   // Header section
   headerTable: {
-    border: "1pt solid black",
+    border: "1.5pt solid black",
     borderBottom: "none",
     marginBottom: 0,
   },
   headerRow: {
     flexDirection: "row",
-    borderBottom: "1pt solid black",
+    borderBottom: "1.5pt solid black",
     minHeight: 29,
   },
   headerLeft: {
-    flex: 4,
+    width: "630pt",
     backgroundColor: "#c0c0c0",
     borderRight: "1pt solid black",
-    justifyContent: "center",
   },
   headerLeftNoBg: {
-    flex: 4,
+    width: "630pt",
     borderRight: "1pt solid black",
-    justifyContent: "center",
   },
   headerRight: {
-    width: 105,
-    textAlign: "center",
     fontSize: 8,
-    justifyContent: "center",
+    width: "150pt",
   },
   headerTitle: {
-    fontSize: 14,
+    fontSize: 14.5,
     fontFamily: "Times-Roman",
     fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 2,
   },
   headerSubtitle: {
     fontSize: 7,
-    textAlign: "center",
-    lineHeight: 1.2,
   },
-
-  // Section headers
+  fieldNumber: {
+    fontSize: "4.5pt",
+    letterSpacing: 0,
+    textAlign: "right",
+    marginRight: "1pt",
+  },
   sectionHeader: {
     backgroundColor: "#c0c0c0",
     border: "1pt solid black",
     borderTop: "none",
     fontFamily: "Times-Roman",
-    fontSize: 10,
+    fontSize: "9.5pt",
     fontWeight: "bold",
-    textAlign: "center",
+    textTransform: "uppercase",
     marginTop: 0,
+    minHeight: "12pt",
   },
 
-  // Form sections
   formSection: {
     border: "1pt solid black",
     borderTop: "none",
@@ -70,41 +77,29 @@ export const pdfStyles = StyleSheet.create({
   formRow: {
     flexDirection: "row",
     borderBottom: "1pt solid black",
-    alignItems: "center",
   },
-  formRowLast: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-
   // Field styles
   fieldLabel: {
     paddingLeft: 2,
     paddingTop: 1,
-    paddingBottom: 3,
     fontSize: 9,
-    justifyContent: "flex-start",
-    alignItems: "flex-start",
   },
   fieldValue: {
     paddingLeft: 2,
     fontSize: 9,
     paddingTop: 1,
-    paddingBottom: 3,
     flex: 1,
-    justifyContent: "flex-start",
-    alignItems: "flex-start",
     minHeight: 18,
   },
-  fieldValueBorder: {
-    padding: 4,
-    fontSize: 9,
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    borderRight: "1pt solid black",
-    minHeight: 18,
-  },
+  // fieldValueBorder: {
+  //   padding: 4,
+  //   fontSize: 9,
+  //   flex: 1,
+  //   justifyContent: "center",
+  //   alignItems: "center",
+  //   borderRight: "1pt solid black",
+  //   minHeight: 18,
+  // },
 
   // Checkbox styles (used in some pages)
   checkbox: {
@@ -132,54 +127,52 @@ export const pdfStyles = StyleSheet.create({
     alignItems: "center",
   },
 
-  // Footer styles
-  footerSection: {
-    marginTop: 20,
-    border: "1pt solid black",
-  },
-  footerRow: {
-    flexDirection: "row",
-    borderBottom: "1pt solid black",
-    minHeight: 80,
-  },
-  footerLabel: {
-    width: 60,
-    padding: 3,
-    fontSize: 8,
-    borderRight: "1pt solid black",
-    backgroundColor: "#f5f5f5",
-  },
-  footerValue: {
-    flex: 1,
-    padding: 3,
-    fontSize: 8,
-  },
+  // // Footer styles
+  // footerSection: {
+  //   marginTop: 20,
+  //   border: "1pt solid black",
+  // },
+  // footerRow: {
+  //   flexDirection: "row",
+  //   borderBottom: "1pt solid black",
+  //   minHeight: 80,
+  // },
+  // footerLabel: {
+  //   width: 60,
+  //   padding: 3,
+  //   fontSize: 8,
+  //   borderRight: "1pt solid black",
+  //   backgroundColor: "#f5f5f5",
+  // },
+  // footerValue: {
+  //   flex: 1,
+  //   padding: 3,
+  //   fontSize: 8,
+  // },
 
-  // Signature section
-  signatureSection: {
-    flexDirection: "row",
-    marginTop: 5,
-    border: "1pt solid black",
-    minHeight: 80,
-  },
-  signatureLeft: {
-    flex: 1,
-    padding: 8,
-    borderRight: "1pt solid black",
-    position: "relative",
-  },
-  signatureRight: {
-    flex: 1,
-    padding: 8,
-  },
+  // // Signature section
+  // signatureSection: {
+  //   flexDirection: "row",
+  //   marginTop: 5,
+  //   border: "1pt solid black",
+  //   minHeight: 80,
+  // },
+  // signatureLeft: {
+  //   flex: 1,
+  //   padding: 8,
+  //   borderRight: "1pt solid black",
+  //   position: "relative",
+  // },
+  // signatureRight: {
+  //   flex: 1,
+  //   padding: 8,
+  // },
 
-  // Bottom section
+  // // Bottom section
   bottomSection: {
     flexDirection: "row",
-    alignItems: "stretch",
   },
   bottomLeft: {
-    flex: 1,
     border: "1pt solid black",
     padding: 8,
     textAlign: "center",
@@ -189,12 +182,12 @@ export const pdfStyles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     minHeight: 40,
-    //width: 585,
+    width: 370,
     borderTop: "none",
   },
   bottomRight: {
     border: "1pt solid black",
-    //width: 181.5,
+    width: 185,
     borderTop: "none",
     borderLeft: "none",
     textAlign: "center",
@@ -202,21 +195,19 @@ export const pdfStyles = StyleSheet.create({
     alignItems: "center",
   },
 
-  // Input field styles
-  inputField: {
-    borderBottom: "1pt solid black",
-    minHeight: 15,
-    marginRight: 10,
-    paddingLeft: 2,
-    flex: 1,
-  },
+  // // Input field styles
+  // inputField: {
+  //   borderBottom: "1pt solid black",
+  //   minHeight: 15,
+  //   marginRight: 10,
+  //   paddingLeft: 2,
+  //   flex: 1,
+  // },
 
-  // Small text
   smallText: {
     fontSize: 7,
   },
 
-  // Bold text
   boldText: {
     fontWeight: "bold",
   },

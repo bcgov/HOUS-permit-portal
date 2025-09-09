@@ -7,10 +7,10 @@ import { NumberFormControl, TextFormControl } from "../../shared/form/input-form
 import { BuildingLocationFields } from "./building-location-fields"
 
 interface IRoomByRoomFormProps {
-  onNext: () => void
+  onSubmit: () => void
 }
 
-export const RoomByRoomForm = ({ onNext }: IRoomByRoomFormProps) => {
+export const RoomByRoomForm = ({ onSubmit }: IRoomByRoomFormProps) => {
   const { t } = useTranslation() as any
   const prefix = "singleZoneCoolingHeatingTool.roomByRoom"
   const { setValue } = useFormContext()
@@ -132,7 +132,7 @@ export const RoomByRoomForm = ({ onNext }: IRoomByRoomFormProps) => {
         <Box>{t("singleZoneCoolingHeatingTool.pdfContent.roomByRoomCalculationResults.page3Of3")}</Box>
       </Grid>
       <Divider my={10} />
-      <Button onClick={onNext}>{t(`${prefix}.submit`)}</Button>
+      <Button onClick={onSubmit}>{t(`${prefix}.submit`)}</Button>
     </Box>
   )
 }

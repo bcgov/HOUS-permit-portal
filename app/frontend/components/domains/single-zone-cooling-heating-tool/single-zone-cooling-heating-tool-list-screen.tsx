@@ -30,6 +30,7 @@ import { useTranslation } from "react-i18next"
 import { useMst } from "../../../setup/root"
 import { CoverSheetForm } from "./cover-sheet-form"
 import { InputSummaryForm } from "./input-summary-form"
+import { RoomByRoomForm } from "./room-by-room-form"
 
 export const SingleZoneCoolingHeatingToolListScreen = observer(() => {
   const { t } = useTranslation() as any
@@ -184,13 +185,17 @@ export const SingleZoneCoolingHeatingToolListScreen = observer(() => {
                         <TabList>
                           <Tab>{t("singleZoneCoolingHeatingTool.tabs.compliance")}</Tab>
                           <Tab>{t("singleZoneCoolingHeatingTool.tabs.inputSummary")}</Tab>
+                          <Tab>{t("singleZoneCoolingHeatingTool.tabs.roomByRoom")}</Tab>
                         </TabList>
                         <TabPanels>
                           <TabPanel>
                             <CoverSheetForm onNext={() => setEditTabIndex(1)} />
                           </TabPanel>
                           <TabPanel>
-                            <InputSummaryForm onSubmit={saveEdit} />
+                            <InputSummaryForm onNext={() => setEditTabIndex(1)} />
+                          </TabPanel>
+                          <TabPanel>
+                            <RoomByRoomForm onSubmit={saveEdit} />
                           </TabPanel>
                         </TabPanels>
                       </Tabs>
