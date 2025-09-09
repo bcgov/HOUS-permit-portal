@@ -50,8 +50,8 @@ export function EditableGroup<TFieldValues>({
 
   return (
     <Stack spacing={4} {...containerProps}>
-      <EditableLabel {...editableLabelProps} />
       <EditableInstructionsText {...editableInstructionsTextProps} />
+      <EditableLabel {...editableLabelProps} />
       {editableInput}
       {editableInput && <EditableHelperText {...editableHelperTextProps} />}
       {multiOptionEditableInput && (
