@@ -228,7 +228,7 @@ const requirementsComponentMap = {
     return (
       <EditableGroup
         sx={{
-          "& > div:first-of-type": {
+          "& > div:nth-of-type(2)": {
             alignItems: "center",
             "&:before": {
               content: "''",
