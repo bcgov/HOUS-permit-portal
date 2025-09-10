@@ -18,7 +18,7 @@ class Part3StepCode::FuelType < ApplicationRecord
 
   before_create :set_emissions_factor
 
-  belongs_to :checklist, optional: true
+  belongs_to :checklist, optional: true, touch: true
 
   enum key: {
          electricity: 0,

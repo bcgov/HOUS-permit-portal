@@ -1,7 +1,7 @@
 class Part3StepCode::OccupancyClassification < ApplicationRecord
   self.table_name = "occupancy_classifications"
 
-  belongs_to :checklist
+  belongs_to :checklist, touch: true
 
   OCCUPANCIES_LOOKUP = Constants::Part3StepCode::OCCUPANCIES_LOOKUP
 

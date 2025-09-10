@@ -1,7 +1,7 @@
 class Part3StepCode::EnergyOutput < ApplicationRecord
   self.table_name = "energy_outputs"
 
-  belongs_to :checklist
+  belongs_to :checklist, touch: true
   belongs_to :fuel_type
 
   # Validate name presence for 'other' type and ensure it's name is unique within the checklist

@@ -1,7 +1,7 @@
 class Part9StepCode::BuildingCharacteristicsSummary < ApplicationRecord
   self.table_name = "step_code_building_characteristics_summaries"
 
-  belongs_to :checklist, class_name: "Part9StepCode::Checklist"
+  belongs_to :checklist, class_name: "Part9StepCode::Checklist", touch: true
 
   serialize :above_grade_walls_lines,
             coder: StepCode::BuildingCharacteristics::Line::AboveGradeWalls

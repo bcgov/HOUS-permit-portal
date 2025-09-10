@@ -10,7 +10,9 @@ class Part3StepCode::Checklist < ApplicationRecord
              optional: true,
              class_name: "Part3StepCode",
              foreign_key: "step_code_id",
-             inverse_of: :checklist
+             inverse_of: :checklist,
+             touch: true
+
   accepts_nested_attributes_for :step_code, update_only: true
 
   has_many :occupancy_classifications, dependent: :destroy

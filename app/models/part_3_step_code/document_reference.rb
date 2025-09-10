@@ -1,7 +1,7 @@
 class Part3StepCode::DocumentReference < ApplicationRecord
   self.table_name = "document_references"
 
-  belongs_to :checklist
+  belongs_to :checklist, touch: true
 
   enum document_type: %i[
          architectural_drawing
