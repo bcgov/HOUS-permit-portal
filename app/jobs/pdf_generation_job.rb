@@ -114,6 +114,16 @@ class PdfGenerationJob
     #   Rails.logger.error "Failing PDF JSON data (could not be parsed):\n#{pdf_json_data}"
     #   Rails.logger.error "###############################"
     # end
+    # Pre-remove any existing target PDFs to avoid reusing stale files
+
+    if should_permit_application_pdf_be_generated
+      application_path = "#{generation_directory_path}/#{application_filename}"
+      FileUtils.rm_f(application_path)
+    end
+    if should_checklist_pdf_be_generated
+      step_code_path = "#{generation_directory_path}/#{step_code_filename}"
+      FileUtils.rm_f(step_code_path)
+    end
 
     # Run Node.js script as a child process, passing JSON data as an argument
     stdout, stderr, status =
@@ -132,7 +142,7 @@ class PdfGenerationJob
         # Wait for the process to exit and get the exit status
         exit_status = wait_thr.value
 
-        File.delete(json_filename) if Rails.env.production?
+        File.delete(json_filename)
 
         # Check for errors or handle output based on the exit status
         if exit_status.success?
@@ -170,6 +180,18 @@ class PdfGenerationJob
         else
           err = "Pdf generation process failed: #{exit_status}"
           Rails.logger.error err
+
+          # Ensure no failed or partial PDFs remain
+          if should_permit_application_pdf_be_generated
+            application_path =
+              "#{generation_directory_path}/#{application_filename}"
+            FileUtils.rm_f(application_path)
+          end
+          if should_checklist_pdf_be_generated
+            step_code_path =
+              "#{generation_directory_path}/#{step_code_filename}"
+            FileUtils.rm_f(step_code_path)
+          end
 
           # this will raise an error and retry the job
           raise err
