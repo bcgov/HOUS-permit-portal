@@ -43,18 +43,18 @@ interface IProjectDetailsForm {
 export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails() {
   const i18nPrefix = "stepCode.part3.projectDetails"
   const { permitApplicationId } = useParams()
-  const { checklist, stepCode } = usePart3StepCode()
+  const { checklist, currentStepCode } = usePart3StepCode()
 
   const navigate = useNavigate()
   const location = useLocation()
 
   const getDefaultValues = (): IProjectDetailsForm => {
     return {
-      fullAddress: stepCode?.fullAddress || "",
-      referenceNumber: stepCode?.referenceNumber || "",
-      permitDate: stepCode?.permitDate || "",
-      phase: stepCode?.phase || "",
-      jurisdictionId: stepCode?.jurisdiction?.id || "",
+      fullAddress: currentStepCode?.fullAddress || "",
+      referenceNumber: currentStepCode?.referenceNumber || "",
+      permitDate: currentStepCode?.permitDate || "",
+      phase: currentStepCode?.phase || "",
+      jurisdictionId: currentStepCode?.jurisdiction?.id || "",
     }
   }
 
@@ -72,16 +72,16 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
     formState: { errors, isSubmitting },
   } = formMethods
 
-  const [editingAddress, setEditingAddress] = useState<boolean>(!Boolean(stepCode?.fullAddress))
+  const [editingAddress, setEditingAddress] = useState<boolean>(!Boolean(currentStepCode?.fullAddress))
   const [manualMode, setManualMode] = useState<boolean>(false)
   const { jurisdictionStore } = useMst()
 
   useEffect(() => {
-    if (checklist && stepCode) {
+    if (checklist && currentStepCode) {
       reset(getDefaultValues())
-      setEditingAddress(!Boolean(stepCode?.fullAddress))
+      setEditingAddress(!Boolean(currentStepCode?.fullAddress))
     }
-  }, [checklist, stepCode, reset])
+  }, [checklist, currentStepCode, reset])
 
   // Hook now returns the jurisdiction it resolved; disable when in manual mode
   const hookJurisdiction = useJurisdictionFromSite(watch, setValue, { disabled: manualMode })
@@ -90,10 +90,10 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
     manualMode && jurisdictionId ? jurisdictionStore.getJurisdictionById(jurisdictionId) : hookJurisdiction
 
   const onSubmit = async (data: IProjectDetailsForm) => {
-    if (!checklist || !stepCode) return
+    if (!checklist || !currentStepCode) return
 
     if (editable) {
-      const ok = await (stepCode as any).update({
+      const ok = await (currentStepCode as any).update({
         fullAddress: data.fullAddress,
         referenceNumber: data.referenceNumber,
         permitDate: data.permitDate,
@@ -113,7 +113,7 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
     }
   }
 
-  if (!checklist || !stepCode) {
+  if (!checklist || !currentStepCode) {
     return (
       <Center p={10}>
         <SharedSpinner />
@@ -132,14 +132,14 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
       <FormProvider {...formMethods}>
         <form onSubmit={handleSubmit(onSubmit)} name="part3SectionForm">
           <Flex direction="column" gap={{ base: 6, xl: 6 }} pb={4}>
-            <Field label={t(`${i18nPrefix}.name`)} value={stepCode.title} />
+            <Field label={t(`${i18nPrefix}.name`)} value={currentStepCode.title} />
 
             <Flex gap={{ base: 6, xl: 6 }} direction="column">
               <Flex gap={2} alignItems="flex-end">
                 <Flex direction="column" gap={4} w="full">
                   <FormControl isInvalid={editable && !!errors.fullAddress}>
                     {editable ? (
-                      editingAddress || !stepCode.fullAddress ? (
+                      editingAddress || !currentStepCode.fullAddress ? (
                         <Controller
                           name="site"
                           control={control}
@@ -163,7 +163,7 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
                               <InputLeftElement pointerEvents="none">
                                 <MapPin />
                               </InputLeftElement>
-                              <Input isDisabled value={stepCode.fullAddress || ""} />
+                              <Input isDisabled value={currentStepCode.fullAddress || ""} />
                             </InputGroup>
                           </Flex>
                         </Flex>
@@ -175,7 +175,7 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
                           <InputLeftElement pointerEvents="none">
                             <MapPin />
                           </InputLeftElement>
-                          <Input isDisabled value={stepCode.fullAddress || ""} />
+                          <Input isDisabled value={currentStepCode.fullAddress || ""} />
                         </InputGroup>
                       </Flex>
                     )}
@@ -200,8 +200,8 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
                   isDisabled
                   value={
                     selectedJurisdiction?.qualifiedName ||
-                    stepCode.jurisdictionName ||
-                    stepCode.jurisdiction?.qualifiedName ||
+                    currentStepCode.jurisdictionName ||
+                    currentStepCode.jurisdiction?.qualifiedName ||
                     ""
                   }
                 />
@@ -220,11 +220,11 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
                     <Input
                       id="referenceNumber"
                       {...register("referenceNumber")}
-                      defaultValue={stepCode.referenceNumber || ""}
+                      defaultValue={currentStepCode.referenceNumber || ""}
                     />
                   </FormControl>
                 ) : (
-                  <Field label={t(`${i18nPrefix}.identifier`)} value={stepCode.referenceNumber} />
+                  <Field label={t(`${i18nPrefix}.identifier`)} value={currentStepCode.referenceNumber} />
                 )}
                 {editable ? (
                   <FormControl>
@@ -233,7 +233,7 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
                       id="phase"
                       placeholder="Select stage"
                       {...register("phase")}
-                      defaultValue={stepCode.phase || ""}
+                      defaultValue={currentStepCode.phase || ""}
                     >
                       <option value="pre_construction">
                         {t("stepCodeChecklist.edit.projectInfo.stages.pre_construction")}
@@ -245,7 +245,7 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
                     </Select>
                   </FormControl>
                 ) : (
-                  <Field label={t(`${i18nPrefix}.stage`)} value={stepCode.phase} />
+                  <Field label={t(`${i18nPrefix}.stage`)} value={currentStepCode.phase} />
                 )}
               </Flex>
               {editable ? (
