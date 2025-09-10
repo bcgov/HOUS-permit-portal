@@ -3,7 +3,7 @@ import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useForm } from "react-hook-form"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import { usePart9StepCode } from "../../../../hooks/resources/use-part-9-step-code"
 import { useMst } from "../../../../setup/root"
 import { EStepCodeChecklistStatus } from "../../../../types/enums"
@@ -13,6 +13,7 @@ export const Part9NavLinks = observer(function Part9StepCodeNavLinks() {
   const { currentStepCode } = usePart9StepCode()
   const checklist = currentStepCode?.preConstructionChecklist
   const navigate = useNavigate()
+  const { permitApplicationId } = useParams()
   const { uiStore } = useMst()
   const { handleSubmit, register, formState } = useForm()
   const { isValid, isSubmitting } = formState
@@ -23,7 +24,11 @@ export const Part9NavLinks = observer(function Part9StepCodeNavLinks() {
 
   const handleBack = () => {
     uiStore.setScrollToSelector(".formio-component[class*='energy_step_code_method']")
-    navigate(-1)
+    if (permitApplicationId) {
+      navigate(`/permit-applications/${permitApplicationId}/step-codes`)
+    } else {
+      navigate("/step-codes")
+    }
   }
 
   const handleSave = async () => {

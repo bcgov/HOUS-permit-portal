@@ -24,10 +24,7 @@ class Part9StepCode < StepCode
   end
 
   def step_requirements
-    all =
-      permit_application.jurisdiction.permit_type_required_steps.where(
-        permit_type: permit_application.permit_type
-      )
+    all = jurisdiction.permit_type_required_steps
     all.customizations.any? ? all.customizations : all
   end
 

@@ -3,6 +3,7 @@ import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
 import { useTranslation } from "react-i18next"
 import { RemoveScroll } from "react-remove-scroll"
+import { useParams } from "react-router-dom"
 import { usePart9StepCode } from "../../../../hooks/resources/use-part-9-step-code"
 import { usePermitApplication } from "../../../../hooks/resources/use-permit-application"
 import { useMst } from "../../../../setup/root"
@@ -23,6 +24,8 @@ export const Part9StepCodeForm = observer(function Part9StepCodeForm() {
   usePermitApplication()
 
   const { t } = useTranslation()
+
+  const { permitApplicationId } = useParams()
 
   useEffect(() => {
     const fetch = async () => await fetchPart9SelectOptions()
@@ -51,7 +54,7 @@ export const Part9StepCodeForm = observer(function Part9StepCodeForm() {
                 <VStack spacing={8} align="start" w="full" pb={20}>
                   <Title />
                   <Info />
-                  <DrawingsWarning />
+                  {permitApplicationId && <DrawingsWarning />}
                   <H2KImport />
                 </VStack>
               ) : (
