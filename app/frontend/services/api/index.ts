@@ -1,5 +1,4 @@
 import { ApiResponse, ApisauceInstance, create, Monitor } from "apisauce"
-import { TCreatePermitApplicationFormData } from "../../components/domains/permit-application/new-permit-application-screen"
 import { IRevisionRequestForm } from "../../components/domains/permit-application/revision-sidebar"
 import { IJurisdictionTemplateVersionCustomizationForm } from "../../components/domains/requirement-template/screens/jurisdiction-edit-digital-permit-screen"
 import { TContactFormData } from "../../components/shared/contact/create-edit-contact-modal"
@@ -68,6 +67,7 @@ import {
   IPermitProjectSearchFilters,
   ITemplateVersionDiff,
   TAutoComplianceModuleConfigurations,
+  TCreatePermitApplicationFormData,
   TCreateRequirementTemplateFormData,
   TSearchParams,
 } from "../../types/types"
