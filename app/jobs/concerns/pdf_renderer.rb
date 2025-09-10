@@ -30,7 +30,7 @@ module PdfRenderer
       stderr.each_line { |line| Rails.logger.error(line) }
 
       exit_status = wait_thr.value
-      File.delete(json_filename) if Rails.env.production?
+      File.delete(json_filename)
       exit_status
     end
   end

@@ -30,7 +30,6 @@ class StepCode < ApplicationRecord
            :newly_submitted_at,
            :status,
            :jurisdiction_heating_degree_days,
-           :reference_number,
            to: :permit_application,
            allow_nil: true
 

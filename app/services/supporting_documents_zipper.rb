@@ -1,5 +1,6 @@
 require "open-uri"
 require "zip"
+require "fileutils"
 
 class SupportingDocumentsZipper
   attr_reader :permit_application, :temp_files, :file_path
@@ -29,6 +30,9 @@ class SupportingDocumentsZipper
   private
 
   def create_zip_file
+    # Pre-remove any existing zip to avoid reusing stale/partial files
+    FileUtils.rm_f(file_path)
+
     Zip::File.open(file_path, Zip::File::CREATE) do |zipfile|
       permit_application
         .all_submission_version_completed_supporting_documents
@@ -80,8 +84,7 @@ class SupportingDocumentsZipper
   end
 
   def cleanup_temp_files
-    temp_files.each { |file| File.delete(file) if File.exist?(file) }
-    # Only cleanup the zip if all else is cleaned
-    File.delete(file_path) if File.exist?(file_path) && temp_files.empty?
+    temp_files.each { |file| FileUtils.rm_f(file) }
+    FileUtils.rm_f(file_path)
   end
 end
