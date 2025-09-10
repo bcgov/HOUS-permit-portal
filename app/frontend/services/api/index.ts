@@ -683,6 +683,10 @@ export class Api {
     return this.client.get<ApiResponse<IStepCode[]>>("/part_9_building/step_codes")
   }
 
+  async fetchPart9StepCode(id: string) {
+    return this.client.get<ApiResponse<IPart9StepCode>>(`/part_9_building/step_codes/${id}`)
+  }
+
   async searchStepCodes(params?: TSearchParams<EStepCodeSortFields>) {
     return this.client.post<ApiResponse<IStepCode[]>>("/step_codes/search", params)
   }
@@ -859,6 +863,7 @@ export class Api {
 
   async createPart9StepCode(data: {
     permitApplicationId?: string
+    jurisdictionId?: string
     preConstructionChecklistAttributes?: any
     name?: string
   }) {

@@ -1,9 +1,16 @@
 class Api::Part9Building::StepCodesController < Api::ApplicationController
   include StepCodeParamsConcern
+  before_action :set_step_code, only: [:show]
 
   def select_options
     authorize Part9StepCode, :select_options?
     render json: { data: Part9StepCode::Checklist.select_options }, status: :ok
+  end
+
+  # GET /api/part_9_building/step_codes/:id
+  def show
+    authorize @step_code
+    render_success @step_code, nil, { blueprint: Part9StepCodeBlueprint }
   end
 
   # POST /api/step_codes
@@ -35,4 +42,8 @@ class Api::Part9Building::StepCodesController < Api::ApplicationController
   end
 
   private
+
+  def set_step_code
+    @step_code = Part9StepCode.find(params[:id])
+  end
 end
