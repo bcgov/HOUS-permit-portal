@@ -105,6 +105,8 @@ class StepCodeReportGenerationJob
 
     # Invoke the Node SSR script to generate the PDF
     pdf_path = generation_directory_path.join(output_filename).to_s
+    # Remove any existing file to avoid reusing a stale PDF if rendering fails
+    FileUtils.rm_f(pdf_path)
 
     exit_status = run_node_pdf_renderer(json_filename)
 
@@ -124,6 +126,8 @@ class StepCodeReportGenerationJob
         )
       end
     else
+      # Ensure no failed or partial PDF remains in production
+      FileUtils.rm_f(pdf_path) if Rails.env.production?
       err = "StepCode report PDF generation failed: #{exit_status}"
       Rails.logger.error(err)
       raise err
