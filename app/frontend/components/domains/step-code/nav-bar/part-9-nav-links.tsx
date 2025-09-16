@@ -19,7 +19,12 @@ export const Part9NavLinks = observer(function Part9StepCodeNavLinks() {
   const { isValid, isSubmitting } = formState
 
   const onComplete = async (values) => {
-    await currentStepCode.updateChecklist(checklist.id, values)
+    const shouldRequestReportGeneration = !currentStepCode?.permitApplicationId
+    await currentStepCode.updateChecklist(
+      checklist.id,
+      values,
+      shouldRequestReportGeneration ? { reportGenerationRequested: true } : undefined
+    )
   }
 
   const handleBack = () => {
