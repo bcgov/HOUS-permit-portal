@@ -1197,6 +1197,7 @@ Thank you,
             stepCodePackageFile: "Design package file for energy step code",
             pidInfo: "Pid Info",
             energyStepCodePart3: "Energy Step Code Part 3",
+            energyStepCodePart9: "Energy Step Code Part 9",
           },
           contactFieldItemLabels: {
             firstName: "First name",

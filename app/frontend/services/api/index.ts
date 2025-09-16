@@ -713,6 +713,7 @@ export class Api {
       phase: string
       buildingCodeVersion: string
       jurisdictionId: string
+      permitApplicationId: string
     }>
   ) {
     return this.client.patch<ApiResponse<IStepCode>>(`/step_codes/${id}`, { stepCode: data })

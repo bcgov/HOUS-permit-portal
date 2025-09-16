@@ -80,20 +80,21 @@ class Requirement < ApplicationRecord
   ENERGY_STEP_CODE_SELECT_REQUIREMENT_CODE = "energy_step_code_method".freeze
   ENERGY_STEP_CODE_PART_9_REQUIREMENT_CODE =
     "energy_step_code_tool_part_9".freeze
+  ENERGY_STEP_CODE_METHOD_HASH = {
+    "requirement_code" => ENERGY_STEP_CODE_SELECT_REQUIREMENT_CODE,
+    "input_type" => "select",
+    "input_options" => {
+      "value_options" => [
+        {
+          "label" => "Utilizing the digital step code tool",
+          "value" => "tool"
+        },
+        { "label" => "By file upload", "value" => "file" }
+      ]
+    }
+  }
   ENERGY_STEP_CODE_PART_9_DEPENDENCY_REQUIRED_SCHEMA = {
-    energy_step_code_method: {
-      "requirement_code" => ENERGY_STEP_CODE_SELECT_REQUIREMENT_CODE,
-      "input_type" => "select",
-      "input_options" => {
-        "value_options" => [
-          {
-            "label" => "Utilizing the digital step code tool",
-            "value" => "tool"
-          },
-          { "label" => "By file upload", "value" => "file" }
-        ]
-      }
-    },
+    energy_step_code_method: ENERGY_STEP_CODE_METHOD_HASH,
     energy_step_code_tool_part_9: {
       "requirement_code" => "energy_step_code_tool_part_9",
       "input_type" => "energy_step_code",
@@ -133,19 +134,7 @@ class Requirement < ApplicationRecord
   ENERGY_STEP_CODE_PART_3_REQUIREMENT_CODE =
     "energy_step_code_tool_part_3".freeze
   ENERGY_STEP_CODE_PART_3_DEPENDENCY_REQUIRED_SCHEMA = {
-    energy_step_code_method: {
-      "requirement_code" => ENERGY_STEP_CODE_SELECT_REQUIREMENT_CODE,
-      "input_type" => "select",
-      "input_options" => {
-        "value_options" => [
-          {
-            "label" => "Utilizing the digital step code tool",
-            "value" => "tool"
-          },
-          { "label" => "By file upload", "value" => "file" }
-        ]
-      }
-    },
+    energy_step_code_method: ENERGY_STEP_CODE_METHOD_HASH,
     energy_step_code_tool_part_3: {
       "requirement_code" => "energy_step_code_tool_part_3",
       "input_type" => "energy_step_code_part_3",
