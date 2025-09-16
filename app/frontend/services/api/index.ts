@@ -739,9 +739,10 @@ export class Api {
     return this.client.get<ApiResponse<IPart3StepCodeChecklist>>(`/part_3_building/checklists/${id}`)
   }
 
-  async updatePart9Checklist(id: string, data: Partial<IPart9StepCodeChecklist>) {
+  async updatePart9Checklist(id: string, data: Partial<IPart9StepCodeChecklist>, options?: Record<string, any>) {
     return this.client.patch<ApiResponse<IPart9StepCode>>(`/part_9_building/checklists/${id}`, {
       stepCodeChecklist: data,
+      ...(options ?? {}),
     })
   }
 
