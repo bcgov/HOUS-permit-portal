@@ -6,10 +6,14 @@ FactoryBot.define do
       pid { nil }
       pin { nil }
       full_address { nil }
+      # When true, stub a fake plan document to satisfy step_code_plan_* helpers
+      with_fake_plan_document { false }
     end
 
     permit_project do
       attrs = {}
+      # Ensure policy "create?" passes by default: make the submitter the owner of the project
+      attrs[:owner] = submitter
       attrs[:jurisdiction] = jurisdiction if jurisdiction.present?
       attrs[:pid] = pid if pid.present?
       attrs[:pin] = pin if pin.present?
@@ -26,6 +30,19 @@ FactoryBot.define do
     status { :new_draft }
     sequence(:nickname) { |n| "Permit Application Nickname #{n}" }
     association :template_version
+
+    after(:build) do |permit_application, evaluator|
+      if evaluator.with_fake_plan_document
+        fake_doc =
+          Struct.new(:last_signer, :file_data).new(
+            { name: "Signer", date: Time.current },
+            { "metadata" => { "filename" => "plan.pdf" } }
+          )
+        permit_application.define_singleton_method(:step_code_plan_document) do
+          fake_doc
+        end
+      end
+    end
 
     trait :newly_submitted do
       status { :newly_submitted }

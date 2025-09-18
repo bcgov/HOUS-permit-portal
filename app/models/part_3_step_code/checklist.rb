@@ -2,7 +2,7 @@ class Part3StepCode::Checklist < ApplicationRecord
   self.table_name = "part_3_step_code_checklists"
 
   delegate :newly_submitted_at,
-           :building_permit_number,
+           :reference_number,
            to: :step_code,
            allow_nil: true
 
@@ -11,7 +11,7 @@ class Part3StepCode::Checklist < ApplicationRecord
              class_name: "Part3StepCode",
              foreign_key: "step_code_id",
              inverse_of: :checklist
-  accepts_nested_attributes_for :step_code
+  accepts_nested_attributes_for :step_code, update_only: true
 
   has_many :occupancy_classifications, dependent: :destroy
   has_many :baseline_occupancies,

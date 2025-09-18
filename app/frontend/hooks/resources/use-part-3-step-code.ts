@@ -15,8 +15,8 @@ export const usePart3StepCode = () => {
     const loadStepCode = async () => {
       setIsLoading(true)
       if (isUUID(stepCodeId)) {
-        let stepCode = getStepCode(stepCodeId)
-        if (!stepCode) {
+        let stepCode = getStepCode(stepCodeId) as IPart3StepCode
+        if (!stepCode || !stepCode.isFullyLoaded) {
           stepCode = await fetchPart3StepCode(stepCodeId)
         }
         if (stepCode) {
@@ -35,8 +35,8 @@ export const usePart3StepCode = () => {
     }
   }, [permitApplicationId, stepCodeId, fetchPart3StepCode, getStepCode, setCurrentStepCode, currentPermitApplication])
 
-  const stepCode = stepCodeStore.currentStepCode as IPart3StepCode
-  const checklist = stepCode?.checklist
+  const currentStepCode = stepCodeStore.currentStepCode as IPart3StepCode
+  const checklist = currentStepCode?.checklist
 
-  return { stepCode, checklist, isLoading }
+  return { currentStepCode, checklist, isLoading }
 }

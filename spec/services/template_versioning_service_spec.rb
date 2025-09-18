@@ -406,6 +406,10 @@ RSpec.describe TemplateVersioningService, type: :service, search: true do
       end
 
       context "and a published version already exists" do
+        before(:each) { Timecop.freeze(Time.zone.parse("2025-08-27 12:00:06")) }
+
+        after(:each) { Timecop.return }
+
         let!(:existing_published_version) do
           TemplateVersioningService.create_or_update_published_version_for_early_access!(
             early_access_template

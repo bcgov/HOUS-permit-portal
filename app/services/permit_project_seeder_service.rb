@@ -25,6 +25,7 @@ class PermitProjectSeederService
         permit_application.read_attribute_before_type_cast(:nickname)
       pa_full_address =
         permit_application.read_attribute_before_type_cast(:full_address)
+      pa_short_address = pa_full_address.split(",").first
       pa_pid = permit_application.read_attribute_before_type_cast(:pid)
       pa_pin = permit_application.read_attribute_before_type_cast(:pin)
 
@@ -37,12 +38,8 @@ class PermitProjectSeederService
 
       ActiveRecord::Base.transaction do
         project_name_for_title = pa_nickname || "N/A"
-        activity_name = permit_application.activity&.name || "N/A"
-        permit_type_name = permit_application.permit_type&.name || "N/A"
-        address_for_title = pa_full_address || "N/A"
 
-        title_string =
-          "Project for: #{project_name_for_title} - #{activity_name} / #{permit_type_name} at #{address_for_title}"
+        title_string = "Project for: #{pa_short_address}"
         title_string = title_string.squish
 
         new_project_attributes = {
@@ -80,19 +77,6 @@ class PermitProjectSeederService
                 "Failed to save PA with new project association"
         end
         Rails.logger.info "PermitProjectSeederService: PA #{pa_id} - Successfully associated PA with Project #{new_project.id}."
-
-        if permit_application.step_codes.any?
-          permit_application.step_codes.each do |sc|
-            sc.permit_project = new_project
-            unless sc.save
-              Rails.logger.error "PermitProjectSeederService: Failed to associate StepCode #{sc.id} with Project #{new_project.id}: #{sc.errors.full_messages.join(", ")}"
-              raise ActiveRecord::Rollback,
-                    "Failed to save StepCode with new project association"
-            end
-          end
-          Rails.logger.info "PermitProjectSeederService: Updated #{permit_application.step_codes.count} StepCode(s) for PA #{permit_application.id} to link to Project #{new_project.id}."
-        end
-
         Rails.logger.info "PermitProjectSeederService: Successfully created Project #{new_project.id} for PA #{permit_application.id}."
       end
     rescue ActiveRecord::Rollback => e
@@ -100,6 +84,7 @@ class PermitProjectSeederService
     rescue => e
       Rails.logger.error "PermitProjectSeederService: Error processing PA #{pa_id}: #{e.message}\n#{e.backtrace.join("\n")}"
     end
+    PermitProject.reindex
     Rails.logger.info "PermitProjectSeederService: Finished creating permit projects."
   end
 end

@@ -1,4 +1,8 @@
 class StepCodePolicy < ApplicationPolicy
+  def index?
+    record.creator == user
+  end
+
   def download_step_code_summary_csv?
     user.super_admin?
   end
@@ -8,7 +12,13 @@ class StepCodePolicy < ApplicationPolicy
   end
 
   def create?
-    user.present?
+    return false unless user
+
+    # If creating a standalone step code (no permit application), any logged-in user may create
+    return true if record.permit_application.nil?
+
+    # If tied to a permit application, only the submitter of that permit application may create
+    record.permit_application.submitter == user
   end
 
   def destroy?
@@ -36,11 +46,6 @@ class StepCodePolicy < ApplicationPolicy
     return true if user == record.creator
 
     return true if record.permit_application.submitter == user
-
-    # TODO: ALLOW COLLABORATORS TO UPDATE IF THEY ARE ASSIGNED TO THE STEP CODE BLOCK
-    if (record.permit_application.collaborators.include?(user) && false)
-      return true
-    end
 
     false
   end

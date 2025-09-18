@@ -51,8 +51,15 @@ export const ChecklistSideBar = observer(({ permitApplication, completedBlocks }
                       {section.title}
                     </Heading>
                     {section?.components?.map((block) => {
+                      // todo: some better way to signify something is a step code block
+                      const isStepCodeBlock = block.components.some((component) =>
+                        component.key.includes("|energy_step_code")
+                      )
                       const usingStepCodeTool = !!stepCode
-                      const showCompleted = usingStepCodeTool ? stepCode?.isComplete : completedBlocks[block.key]
+                      const showCompleted =
+                        usingStepCodeTool && isStepCodeBlock
+                          ? stepCode?.isComplete
+                          : completedBlocks[block.key] || false
                       return (
                         <Tab
                           key={block.key}

@@ -72,6 +72,7 @@ en:
           duplicate_energy_step_code: 'Multiple "Energy step code" requirements found. Please ensure there is only one "Energy step code" requirement in the template'
           duplicate_step_code_package: 'Multiple "Design package energy step code files" found. Please ensure there is only one "Design package energy step code file" when there is an "Energy step code" requirement'
           nonunique_classification: "There can only be one requirement template per permit type, activity, and First Nations combination"
+          taken: "must be unique"
           attributes:
             public:
               true_on_early_access_only: "can only be true for early access"
@@ -213,6 +214,18 @@ en:
       options_error:
         title: Error
         message: Error encountered fetching permit classification options
+      create_error:
+        title: Error
+        message: "There was an error creating the permit classification"
+      update_error:
+        title: Error
+        message: "There was an error updating the permit classification"
+      destroy_error:
+        title: Error
+        message: "%{error_message}"
+      in_use_error:
+        title: Error
+        message: "This permit classification is in use and cannot be deleted"
     contact:
       options_error:
         title: Error
@@ -482,6 +495,12 @@ en:
       create_success:
         title: ""
         message: "New permit application started!"
+      bulk_create_success:
+        title: ""
+        message: "Permit applications created successfully!"
+      bulk_create_error:
+        title: Error
+        message: "There was an error creating the permit applications"
       update_error:
         title: Error
         message: "%{error_message}"
@@ -531,6 +550,9 @@ en:
         title: Error
         message: "There was an error updating permit block status"
     permit_project:
+      update_error:
+        title: Error
+        message: "%{error_message}"
       create_success:
         title: ""
         message: "Permit project pinned successfully"
@@ -582,6 +604,12 @@ en:
       h2k_imported:
         title: ""
         message: "Your Hot2000 file has been successfully imported. Please review the imported fields."
+      update_success:
+        title: ""
+        message: "Step code updated successfully!"
+      update_error:
+        title: Error
+        message: "Error updating step code"
     step_code_checklist:
       update_success:
         title: ""
@@ -796,6 +824,8 @@ en:
       submission_assignee_collaboration_unassignment_notification: "You have been removed as a collaborator on requirement “%{requirement_block_name}” for permit application %{number}"
       review_delegatee_collaboration_unassignment_notification: "You have been removed as a designated reviewer for permit application %{number}."
       review_assignee_collaboration_unassignment_notification: "You have been removed as a review collaborator on requirement “%{requirement_block_name}” for permit application %{number}"
+    step_code:
+      report_generated: "Your step code report is ready to download"
     permit_block_status:
       status_read_by_user: 'Requirement “%{requirement_block_name}” status set to "ready" by %{setter_name} for permit application %{number}'
       status_ready_no_user: 'Requirement “%{requirement_block_name}” status set to "ready" for permit application %{number}'

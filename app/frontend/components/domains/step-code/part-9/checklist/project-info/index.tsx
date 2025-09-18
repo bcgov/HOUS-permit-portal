@@ -24,13 +24,13 @@ export const ProjectInfo = observer(function ProjectInfo({ checklist }: IProps) 
       </Text>
       <TextFormControl
         label={t(`${i18nPrefix}.permitNum`)}
-        inputProps={{ isDisabled: true, value: checklist.buildingPermitNumber || "" }}
+        inputProps={{ isDisabled: true, value: checklist.permitApplicationNumber || "" }}
       />
       <TextFormControl label={t(`${i18nPrefix}.builder`)} fieldName="builder" />
 
       <TextFormControl
         label={t(`${i18nPrefix}.address`)}
-        inputProps={{ isDisabled: true, value: checklist.address || "" }}
+        inputProps={{ isDisabled: true, value: checklist.fullAddress || "" }}
         leftElement={<MapPin size={20} color="var(--chakra-colors-greys-grey01)" />}
       />
       <TextFormControl

@@ -24,9 +24,9 @@ class PermitProjectPolicy < ApplicationPolicy
 
   # This is for authorizing a specific project instance (e.g., in a show action).
   def show?
-    # User can show a project if they are the owner.
-    # For now, strict ownership:
-    user_is_owner?
+    # updating to allow collaborators to see projects
+    # user_is_owner?
+    user_is_owner_or_collaborator?
   end
 
   def create?
@@ -51,6 +51,11 @@ class PermitProjectPolicy < ApplicationPolicy
 
   def search_permit_applications?
     user_is_owner_or_collaborator?
+  end
+
+  # Allow bulk creation of permit applications under a project
+  def create_permit_applications?
+    user_is_owner?
   end
 
   def submission_collaborator_options?

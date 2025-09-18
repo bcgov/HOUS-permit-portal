@@ -18,6 +18,7 @@ type TSitesSelectProps = {
   selectedOption: IOption
   pidName?: string
   siteName?: string
+  pidRequired?: boolean
 } & Partial<TAsyncSelectProps>
 
 // Please be advised that this is expected to be used within a form context!
@@ -28,6 +29,7 @@ export const SitesSelect = observer(function ({
   stylesToMerge,
   pidName = "pid",
   siteName = "site",
+  pidRequired = false,
   ...rest
 }: TSitesSelectProps) {
   const { t } = useTranslation()
@@ -36,7 +38,7 @@ export const SitesSelect = observer(function ({
   const { fetchSiteOptions: fetchOptions, fetchPids, fetchingPids, fetchSiteDetailsFromPid } = geocoderStore
   const pidSelectRef = useRef(null)
 
-  const { setValue, control, reset, watch } = useFormContext()
+  const { setValue, control, watch } = useFormContext()
 
   const pidWatch = watch(pidName)
   const siteWatch = watch(siteName)
@@ -44,7 +46,8 @@ export const SitesSelect = observer(function ({
   const fetchSiteOptions = (address: string, callback: (options) => void) => {
     if (address.length > 3) {
       fetchOptions(address).then((options: IOption[]) => {
-        reset()
+        setValue(pidName, null)
+        setValue(siteName, null)
         callback(options)
       })
     } else callback([])
@@ -83,7 +86,7 @@ export const SitesSelect = observer(function ({
   const debouncedFetchOptions = useCallback(debounce(fetchSiteOptions, 1000), [])
 
   return (
-    <Flex direction={{ base: "column", md: "row" }} bg="greys.grey03" px={6} py={2} gap={4}>
+    <Flex direction={{ base: "column", md: "row" }} bg="greys.grey03" px={6} py={2} gap={4} w="full">
       <FormControl>
         <FormLabel>{t("permitApplication.addressLabel")}</FormLabel>
         <InputGroup>
@@ -92,10 +95,21 @@ export const SitesSelect = observer(function ({
             onChange={handleChange}
             placeholder="Search Addresses"
             value={selectedOption}
+            menuPosition="fixed"
+            menuShouldScrollIntoView={false}
             components={{
               Control,
               Option,
               Input,
+            }}
+            // Ensure full-width container and menu portal z-index by default
+            styles={{
+              container: (css) => ({
+                ...css,
+                width: "100%",
+              }),
+              menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+              ...(rest.styles as any),
             }}
             stylesToMerge={{
               control: {
@@ -113,6 +127,10 @@ export const SitesSelect = observer(function ({
             loadOptions={debouncedFetchOptions}
             closeMenuOnSelect={true}
             isCreatable={false}
+            // Render menu in a portal by default to avoid clipping in overflow contexts
+            menuPortalTarget={
+              (rest as any).menuPortalTarget ?? (typeof document !== "undefined" ? document.body : undefined)
+            }
             {...rest}
           />
         </InputGroup>
@@ -127,7 +145,9 @@ export const SitesSelect = observer(function ({
               control={control}
               rules={{
                 required:
-                  pidOptions.length > 0 ? t("ui.isRequired", { field: t("permitApplication.pidLabel") }) : false,
+                  pidRequired || pidOptions.length > 0
+                    ? (t("ui.isRequired", { field: t("permitApplication.pidLabel") }) as string)
+                    : false,
               }}
               render={({ field: { onChange, value } }) => {
                 return (
@@ -152,6 +172,13 @@ export const SitesSelect = observer(function ({
                     formatCreateLabel={(inputValue: string) =>
                       t("permitApplication.usePid", { inputValue: formatPidLabel(inputValue) })
                     }
+                    menuPortalTarget={document.body}
+                    menuPosition="fixed"
+                    styles={{
+                      menuPortal: (base) => ({ ...base, zIndex: 10000 }),
+                      menu: (base) => ({ ...base, zIndex: 10000 }),
+                      /* keep existing styles */
+                    }}
                     isClearable
                     isSearchable
                   />

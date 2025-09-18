@@ -49,6 +49,7 @@ export const JurisdictionModel = types
     ),
     permitTypeRequiredSteps: types.array(types.frozen<IPermitTypeRequiredStep>()),
     sandboxes: types.array(types.reference(SandboxModel)),
+    firstNation: types.optional(types.boolean, false),
   })
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -99,7 +100,7 @@ export const JurisdictionModel = types
     },
   }))
   .views((self) => ({
-    get part9RequiredSteps() {
+    get part9RequiredSteps(): IPermitTypeRequiredStep[] {
       // This assumes that the permitTypeRequiredSteps are all part 9
       // Revisit this once adding part 3 required steps
       const nonDefaults = self.permitTypeRequiredSteps.filter((r) => !r.default)

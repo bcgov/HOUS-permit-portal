@@ -60,7 +60,7 @@ export const FieldsSetupDrawer = observer(function FieldsSetupMenu({
 
     // add pseudo type for step code package file
     // This approach is used merely to group the design doc with the step code requirement
-    if (type === ERequirementType.energyStepCode) {
+    if (type === ERequirementType.energyStepCodePart9) {
       acc.push({ requirementType: ERequirementType.file, isStepCodePackageFileRequirement: true })
     }
 

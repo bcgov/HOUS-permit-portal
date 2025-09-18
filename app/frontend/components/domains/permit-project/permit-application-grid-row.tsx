@@ -45,7 +45,7 @@ export const PermitApplicationGridRow = observer(({ permitApplication }: IPermit
       borderColor="border.light"
       _last={{ borderBottom: "none" }}
     >
-      {!usingCurrentTemplateVersion && <OutdatedFormWarning colSpan={5} mx={4} mt={2} />}
+      {!usingCurrentTemplateVersion && <OutdatedFormWarning colSpan={6} mx={4} mt={2} />}
       <GridItem display="flex" alignItems="center" px={4} py={2}>
         <VStack align="start" spacing={0}>
           <Text variant="secondary">{permitApplication.templateNickname}</Text>
@@ -53,6 +53,9 @@ export const PermitApplicationGridRow = observer(({ permitApplication }: IPermit
       </GridItem>
       <GridItem display="flex" alignItems="center" px={4} py={2}>
         <Avatar name={designatedSubmitter?.collaborator?.user?.name} size="sm" />
+      </GridItem>
+      <GridItem display="flex" alignItems="center" px={4} py={2}>
+        <Text>{permitApplication.number}</Text>
       </GridItem>
       <GridItem display="flex" alignItems="center" px={4} py={2}>
         <Text>{format(updatedAt, datefnsTableDateTimeFormat)}</Text>

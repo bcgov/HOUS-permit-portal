@@ -16,6 +16,7 @@ export const Part3StepCodeModel = types
       checklist: types.maybeNull(types.late(() => Part3StepCodeChecklistModel)),
       zeroCarbonSteps: types.array(types.enumeration(Object.values(EZeroCarbonStep))),
       energySteps: types.array(types.enumeration(Object.values(EEnergyStep))),
+      isFullyLoaded: types.optional(types.boolean, false),
     })
   )
   .extend(withEnvironment())
@@ -30,6 +31,12 @@ export const Part3StepCodeModel = types
     },
     get isComplete() {
       return self.checklist?.isAllComplete
+    },
+    get targetPath() {
+      if (self.permitApplicationId) {
+        return `/permit-applications/${self.permitApplicationId}/edit/part-3-step-code`
+      }
+      return `/part-3-step-code/${self.id}`
     },
   }))
   .views((self) => ({}))

@@ -1,20 +1,24 @@
-import { Container, Flex, Heading, TabPanel, TabPanels, Tabs, VStack } from "@chakra-ui/react"
-import { FolderSimple } from "@phosphor-icons/react"
+import { Flex, TabPanel, TabPanels, Tabs } from "@chakra-ui/react"
+import { ClipboardText, FolderSimple } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
-import React, { useEffect } from "react"
+import React, { useEffect, useTransition } from "react"
 import { useTranslation } from "react-i18next"
+import { useLocation, useNavigate } from "react-router-dom"
 import { useSearch } from "../../../hooks/use-search"
 import { useMst } from "../../../setup/root"
-import { RouterLinkButton } from "../../shared/navigation/router-link-button"
-import { PinnedProjectsGrid } from "./pinned-projects-grid"
-import { ProjectsGrid } from "./projects-grid"
-import { ITabItem, ProjectSidebarTabList } from "./sidebar-tab-list"
+import { LoadingScreen } from "../../shared/base/loading-screen"
+import { ITabItem, ProjectSidebarTabList } from "./project-sidebar-tab-list"
+import { ProjectTabPanelContent } from "./project-tab-panel-content"
+import { StepCodeTabPanelContent } from "./step-code-tab-panel-content"
 
-interface IPermitProjectIndexScreenProps {}
+interface IProjectDashboardScreenProps {}
 
-export const PermitProjectIndexScreen = observer(({}: IPermitProjectIndexScreenProps) => {
+export const ProjectDashboardScreen = observer(({}: IProjectDashboardScreenProps) => {
   const { t } = useTranslation()
   const { permitProjectStore } = useMst()
+  const location = useLocation()
+  const navigate = useNavigate()
+  const [isPending, startTransition] = useTransition()
 
   useSearch(permitProjectStore, [])
 
@@ -22,31 +26,32 @@ export const PermitProjectIndexScreen = observer(({}: IPermitProjectIndexScreenP
     permitProjectStore.fetchPinnedProjects()
   }, [])
 
-  const TABS_DATA: ITabItem[] = [{ label: t("permitProject.index.title", "Projects"), icon: FolderSimple, to: "" }]
+  const TABS_DATA: ITabItem[] = [
+    { label: t("permitProject.index.title", "Projects"), icon: FolderSimple, to: "projects", tabIndex: 0 },
+    { label: t("stepCode.index.title", "Step Codes"), icon: ClipboardText, to: "step-codes", tabIndex: 1 },
+    // Disabled: Documents tab
+    // { label: t("document.index.title", "Documents"), icon: File, to: "documents", tabIndex: 2 },
+  ]
+
+  const getTabIndex = () => {
+    const tabIndex = TABS_DATA.find((tab) => location.pathname.endsWith(tab.to))?.tabIndex
+    return tabIndex ?? 0
+  }
+
+  const handleTabChange = (index: number) => {
+    startTransition(() => {
+      navigate(index === 0 ? "/projects" : index === 1 ? "/step-codes" : "/documents", { replace: true })
+    })
+  }
 
   return (
     <Flex as="main" direction="row" w="full" flexGrow={1}>
-      <Tabs w="full" flexGrow={1} index={0} display="flex">
+      <Tabs w="full" flexGrow={1} index={getTabIndex()} onChange={handleTabChange} display="flex" isLazy>
         <ProjectSidebarTabList p={0} tabsData={TABS_DATA} />
         <TabPanels>
-          <TabPanel p={0}>
-            <Flex direction="column" flex={1} bg="greys.white" pb={24} overflowY="auto" h={"full"}>
-              <Container maxW="container.xl" py={8} h={"full"}>
-                <VStack spacing={6} align="stretch">
-                  <Flex justify="space-between" align="center">
-                    <Heading as="h1">{t("permitProject.index.title", "Projects")}</Heading>
-                    <RouterLinkButton to="/permit-projects/new" variant="primary">
-                      {t("permitProject.startNew", "Start New Project")}
-                    </RouterLinkButton>
-                  </Flex>
-
-                  <PinnedProjectsGrid />
-
-                  <ProjectsGrid />
-                </VStack>
-              </Container>
-            </Flex>
-          </TabPanel>
+          <TabPanel p={0}>{isPending ? <LoadingScreen /> : <ProjectTabPanelContent />}</TabPanel>
+          <TabPanel p={0}>{isPending ? <LoadingScreen /> : <StepCodeTabPanelContent />}</TabPanel>
+          {/* <TabPanel p={0}>{isPending ? <LoadingScreen /> : <ComingSoonPlaceholder />}</TabPanel> */}
         </TabPanels>
       </Tabs>
     </Flex>

@@ -290,7 +290,10 @@ export interface IBaseFileAttachment {
 
 export interface IRequirementDocument extends IBaseFileAttachment {
   requirementBlockId: string
-  // _destroy is now in IBaseFileAttachment
+}
+
+export interface IReportDocument extends IBaseFileAttachment {
+  stepCodeId: string
 }
 
 export interface IProjectDocument extends IBaseFileAttachment {
@@ -375,10 +378,18 @@ export interface INotification {
     | IPermitCollaborationNotificationObjectData
     | ITemplateVersionNotificationObjectData
     | IRequirementTemplateNotificationObjectData
+    | IReportDocumentNotificationObjectData
 }
 
 export interface ITemplateVersionUpdate {
   status: ETemplateVersionStatus
+}
+
+export interface IReportDocumentNotificationObjectData {
+  stepCodeId?: string
+  reportDocumentId: string
+  filename?: string
+  downloadUrl?: string
 }
 
 export type TSocketEventData =
@@ -606,6 +617,17 @@ export type TCreateRequirementTemplateFormData = {
   permitTypeId: string
   activityId: string
   type: string
+}
+
+export type TCreatePermitApplicationFormData = {
+  pid?: string
+  pin?: string
+  permitTypeId: string
+  activityId: string
+  jurisdictionId?: string
+  site?: IOption
+  firstNations: boolean
+  sandboxId?: string
 }
 
 export interface ICopyRequirementTemplateFormData extends Partial<TCreateRequirementTemplateFormData> {

@@ -29,7 +29,6 @@ const main = async () => {
     if (!pdfData.meta?.generationPaths) {
       throw new Error("No generationPaths provided in pdfData.meta")
     }
-    console.log("pdfData===============================:", pdfData)
     // Handle both permit applications and pdf forms
     if (pdfData.permitApplication) {
       // Existing permit application logic

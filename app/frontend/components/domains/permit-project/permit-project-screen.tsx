@@ -1,7 +1,7 @@
 import { Box, Container, Flex, IconButton, TabPanel, TabPanels, Tabs, Text } from "@chakra-ui/react"
 import { CaretLeft, ClipboardText, SquaresFour } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
-import React, { useEffect, useRef, useState, useTransition } from "react"
+import React, { useEffect, useTransition } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom"
@@ -13,7 +13,7 @@ import { EditableInputWithControls } from "../../shared/editable-input-with-cont
 import { RollupStatusBox } from "../../shared/permit-projects/rollup-status-box"
 import { OverviewTabPanelContent } from "./overview-tab-panel-content"
 import { PermitsTabPanelContent } from "./permits-tab-panel-content"
-import { ITabItem, ProjectSidebarTabList } from "./sidebar-tab-list"
+import { ITabItem, ProjectSidebarTabList } from "./project-sidebar-tab-list"
 
 export const PermitProjectScreen = observer(() => {
   const { currentPermitProject, error } = usePermitProject()
@@ -23,8 +23,8 @@ export const PermitProjectScreen = observer(() => {
   const navigate = useNavigate()
 
   const TABS_DATA: ITabItem[] = [
-    { label: t("permitProject.details.overview"), icon: SquaresFour, to: "overview" },
-    { label: t("permitProject.details.permits"), icon: ClipboardText, to: "permits" },
+    { label: t("permitProject.details.overview"), icon: SquaresFour, to: "overview", tabIndex: 0 },
+    { label: t("permitProject.details.permits"), icon: ClipboardText, to: "permits", tabIndex: 1 },
   ]
 
   const getDefaultValues = () => {
@@ -39,9 +39,6 @@ export const PermitProjectScreen = observer(() => {
 
   const { updatePermitProject } = permitProjectStore
 
-  const [headerHeight, setHeaderHeight] = useState(0)
-  const headerRef = useRef<HTMLDivElement>(null)
-
   useEffect(() => {
     if (!TABS_DATA.some((tab) => location.pathname.includes(tab.to))) {
       navigate("overview", { replace: true })
@@ -49,9 +46,6 @@ export const PermitProjectScreen = observer(() => {
   }, [location.pathname, navigate])
 
   useEffect(() => {
-    if (headerRef.current) {
-      setHeaderHeight(headerRef.current.offsetHeight)
-    }
     reset(getDefaultValues())
   }, [currentPermitProject, reset]) // Recalculate if title changes, as it might affect height
 
@@ -79,12 +73,12 @@ export const PermitProjectScreen = observer(() => {
 
   return (
     <Box>
-      <Flex ref={headerRef} justify="space-between" align="center" py={6} borderBottom="1px" borderColor="border.light">
+      <Flex justify="space-between" align="center" py={6} borderBottom="1px" borderColor="border.light">
         <Container maxW="container.lg">
           <Flex align="center" h={24}>
             <IconButton
               as={RouterLink}
-              to="/permit-projects"
+              to="/projects"
               aria-label={t("permitProject.details.backToProjects")}
               icon={<CaretLeft size={24} />}
               variant="ghost"
@@ -92,7 +86,7 @@ export const PermitProjectScreen = observer(() => {
             />
             <EditableInputWithControls
               w="full"
-              initialHint={t("permitProject.details.editProjectNameHint")}
+              initialHint={t("permitProject.details.editPermitProjectTitleHint")}
               value={watch("title") || ""}
               editableInputProps={{
                 fontWeight: 700,
@@ -104,14 +98,14 @@ export const PermitProjectScreen = observer(() => {
                     message: t("permitProject.details.invalidInput"),
                   },
                 }),
-                "aria-label": t("permitProject.details.editProjectName"),
+                "aria-label": t("permitProject.details.editPermitProjectTitle"),
                 onSubmit: handleSubmit(onSubmit),
               }}
               editablePreviewProps={{
                 fontWeight: 700,
                 fontSize: "3xl",
               }}
-              aria-label={t("permitProject.details.editProjectName")}
+              aria-label={t("permitProject.details.editPermitProjectTitle")}
               onChange={(val) => setValue("title", val)}
             />
             <RollupStatusBox project={currentPermitProject} w="240px" />
@@ -119,7 +113,7 @@ export const PermitProjectScreen = observer(() => {
         </Container>
       </Flex>
       <Tabs w="full" flexGrow={1} index={getTabIndex()} onChange={handleTabChange} display="flex" isLazy>
-        <ProjectSidebarTabList top={`${headerHeight}px`} p={0} tabsData={TABS_DATA} />
+        <ProjectSidebarTabList p={0} tabsData={TABS_DATA} />
         <TabPanels>
           <TabPanel>
             {isPending ? <LoadingScreen /> : <OverviewTabPanelContent permitProject={currentPermitProject} />}

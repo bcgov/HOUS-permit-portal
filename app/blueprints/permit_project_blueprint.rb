@@ -5,12 +5,13 @@ class PermitProjectBlueprint < Blueprinter::Base
     fields :title,
            :full_address,
            :pid,
-           :project_number,
+           :number,
            :jurisdiction_disambiguated_name,
            :rollup_status,
            :is_pinned,
            :created_at,
-           :updated_at
+           :updated_at,
+           :owner_id
 
     field :total_permits_count, default: 0
     field :new_draft_count, default: 0
@@ -20,7 +21,7 @@ class PermitProjectBlueprint < Blueprinter::Base
     field :approved_count, default: 0
     field :owner_name, default: nil
 
-    field :is_fully_loaded do |permit_project, options|
+    field :is_fully_loaded do |_permit_project, _options|
       false
     end
 
@@ -41,16 +42,19 @@ class PermitProjectBlueprint < Blueprinter::Base
   view :extended do
     include_view :base
 
-    field :is_fully_loaded do |permit_project, options|
+    field :is_fully_loaded do |_permit_project, _options|
       true
     end
 
     association :recent_permit_applications,
                 blueprint: PermitApplicationBlueprint,
-                view: :project_base do |permit_project, _options|
-      permit_project.recent_permit_applications
+                view: :project_base do |permit_project, options|
+      permit_project.recent_permit_applications(options[:current_user])
     end
-    association :project_documents, blueprint: ProjectDocumentBlueprint
+    association :project_documents,
+                blueprint: ProjectDocumentBlueprint do |permit_project, options|
+      permit_project.project_documents(options[:current_user])
+    end
     association :jurisdiction, blueprint: JurisdictionBlueprint, view: :base
   end
 end

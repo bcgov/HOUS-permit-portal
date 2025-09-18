@@ -8,6 +8,7 @@ import {
   Menu,
   MenuButton,
   MenuList,
+  Text,
   useCheckboxGroup,
   VStack,
 } from "@chakra-ui/react"
@@ -34,6 +35,8 @@ export const CheckboxFilter = observer(function CheckboxFilter({ value, onChange
   const [searchTerm, setSearchTerm] = useState("")
   const [isMenuOpen, setIsMenuOpen] = React.useState(false)
 
+  const hasSelection = !!value && value.length > 0
+
   const filteredOptions = options.filter((option) => option.label.toLowerCase().includes(searchTerm.toLowerCase()))
 
   const { getCheckboxProps } = useCheckboxGroup({
@@ -48,7 +51,13 @@ export const CheckboxFilter = observer(function CheckboxFilter({ value, onChange
       onClose={() => setIsMenuOpen(false)}
       closeOnSelect={false}
     >
-      <MenuButton as={Button} variant="outline" rightIcon={<CaretDown />}>
+      <MenuButton
+        as={Button}
+        variant="outline"
+        rightIcon={<CaretDown />}
+        bg={hasSelection ? "background.blueLight" : undefined}
+        _expanded={{ bg: "background.blueLight" }}
+      >
         {title}
       </MenuButton>
       <MenuList p={4} zIndex="dropdown">
@@ -60,14 +69,20 @@ export const CheckboxFilter = observer(function CheckboxFilter({ value, onChange
             <Input placeholder={t("ui.search")} value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
           </InputGroup>
           <Divider />
-          {filteredOptions.map((option) => {
-            const checkboxProps = getCheckboxProps({ value: option.value })
-            return (
-              <Checkbox key={option.value} {...checkboxProps}>
-                {option.label}
-              </Checkbox>
-            )
-          })}
+          {filteredOptions.length === 0 ? (
+            <Text color="greys.grey01" fontSize="sm" px={2} w="full" textAlign="center">
+              {t("ui.noOptionsFound")}
+            </Text>
+          ) : (
+            filteredOptions.map((option) => {
+              const checkboxProps = getCheckboxProps({ value: option.value })
+              return (
+                <Checkbox key={option.value} {...checkboxProps}>
+                  {option.label}
+                </Checkbox>
+              )
+            })
+          )}
           <Divider />
           <Button
             onClick={onReset}

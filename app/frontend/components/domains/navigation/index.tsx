@@ -165,8 +165,8 @@ const SingleZoneCoolingHeatingToolListScreen = lazy(() =>
 const PermitApplicationIndexScreen = lazy(() =>
   import("../permit-application").then((module) => ({ default: module.PermitApplicationIndexScreen }))
 )
-const PermitProjectIndexScreen = lazy(() =>
-  import("../permit-project").then((module) => ({ default: module.PermitProjectIndexScreen }))
+const ProjectDashboardScreen = lazy(() =>
+  import("../permit-project").then((module) => ({ default: module.ProjectDashboardScreen }))
 )
 const NewPermitProjectScreen = lazy(() =>
   import("../permit-project/new-permit-project-screen").then((module) => ({ default: module.NewPermitProjectScreen }))
@@ -174,17 +174,18 @@ const NewPermitProjectScreen = lazy(() =>
 const PermitProjectScreen = lazy(() =>
   import("../permit-project/permit-project-screen").then((module) => ({ default: module.PermitProjectScreen }))
 )
+const AddPermitApplicationToProjectScreen = lazy(() =>
+  import("../permit-project/add-permit-application-screen").then((module) => ({
+    default: module.AddPermitApplicationToProjectScreen,
+  }))
+)
 const EditPermitApplicationScreen = lazy(() =>
   import("../permit-application/edit-permit-application-screen").then((module) => ({
     default: module.EditPermitApplicationScreen,
   }))
 )
 
-const NewPermitApplicationScreen = lazy(() =>
-  import("../permit-application/new-permit-application-screen").then((module) => ({
-    default: module.NewPermitApplicationScreen,
-  }))
-)
+// Disabled: New Permit Application screen removed
 const ReviewPermitApplicationScreen = lazy(() =>
   import("../permit-application/review-permit-application-screen").then((module) => ({
     default: module.ReviewPermitApplicationScreen,
@@ -253,9 +254,7 @@ const Part9StepCodeForm = lazy(() =>
 const Part3StepCodeForm = lazy(() =>
   import("../step-code/part-3").then((module) => ({ default: module.Part3StepCodeForm }))
 )
-const StepCodeIndexScreen = lazy(() =>
-  import("../step-code").then((module) => ({ default: module.StepCodeIndexScreen }))
-)
+
 const StepCodeChecklistPDFViewer = lazy(() =>
   import("../step-code/checklist/pdf-content/viewer").then((module) => ({
     default: module.StepCodeChecklistPDFViewer,
@@ -264,6 +263,11 @@ const StepCodeChecklistPDFViewer = lazy(() =>
 const SiteConfigurationManagementScreen = lazy(() =>
   import("../super-admin/site-configuration-management").then((module) => ({
     default: module.SiteConfigurationManagementScreen,
+  }))
+)
+const PermitClassificationsScreen = lazy(() =>
+  import("../super-admin/site-configuration-management/permit-classifications-screen").then((module) => ({
+    default: module.PermitClassificationsScreen,
   }))
 )
 const SitewideMessageScreen = lazy(() =>
@@ -478,6 +482,7 @@ const AppRoutes = observer(() => {
       <Route path="/requirement-templates/:requirementTemplateId/edit" element={<EditRequirementTemplateScreen />} />
       <Route path="/template-versions/:templateVersionId" element={<TemplateVersionScreen />} />
       <Route path="/configuration-management" element={<SiteConfigurationManagementScreen />} />
+      <Route path="/configuration-management/permit-classifications" element={<PermitClassificationsScreen />} />
       <Route path="/configuration-management/sitewide-message" element={<SitewideMessageScreen />} />
       <Route path="/configuration-management/help-drawer-setup" element={<HelpDrawerSetupScreen />} />
       <Route path="/configuration-management/revision-reason-setup" element={<RevisionReasonSetupScreen />} />
@@ -636,18 +641,24 @@ const AppRoutes = observer(() => {
             />
           }
         >
-          <Route path="/permit-applications" element={<PermitApplicationIndexScreen />} />
-          <Route path="/permit-applications/new" element={<NewPermitApplicationScreen />} />
+          {/* Migrate old permit-projects paths to new structure */}
+          <Route path="/permit-projects" element={<RedirectScreen path="/projects" />} />
+          <Route path="/permit-projects/projects/*" element={<RedirectScreen path="/projects" />} />
+          <Route path="/permit-projects/step-codes/*" element={<RedirectScreen path="/step-codes" />} />
+          {/* Disabled: New Permit Application screen */}
           <Route path="/permit-applications/:permitApplicationId/edit" element={<EditPermitApplicationScreen />} />
           <Route
             element={<ProtectedRoute isAllowed={loggedIn && !mustAcceptEula} redirectPath={mustAcceptEula && "/"} />}
           >
-            <Route path="/step-codes" element={<StepCodeIndexScreen />} />
-            <Route path="/permit-applications" element={<PermitApplicationIndexScreen />} />
-            <Route path="/permit-projects" element={<PermitProjectIndexScreen />} />
-            <Route path="/permit-projects/new" element={<NewPermitProjectScreen />} />
-            <Route path="/permit-projects/:permitProjectId/*" element={<PermitProjectScreen />} />
-            <Route path="/permit-applications/new" element={<NewPermitApplicationScreen />} />
+            <Route path="/step-codes" element={<ProjectDashboardScreen />} />
+            <Route path="/documents" element={<ProjectDashboardScreen />} />
+            {/* Already handled above with path-based tabs */}
+            <Route path="/projects" element={<ProjectDashboardScreen />} />
+            <Route path="/projects/new" element={<NewPermitProjectScreen />} />
+            <Route path="/projects/:permitProjectId/*" element={<PermitProjectScreen />} />
+            <Route path="/projects/:permitProjectId/add-permits" element={<AddPermitApplicationToProjectScreen />} />
+            <Route path="/step-codes/*" element={<ProjectDashboardScreen />} />
+            {/* Disabled: New Permit Application screen */}
             <Route path="/permit-applications/:permitApplicationId/edit" element={<EditPermitApplicationScreen />} />
             <Route
               path="/permit-applications/:permitApplicationId/edit/part-9-step-code"
@@ -795,8 +806,11 @@ const AppRoutes = observer(() => {
           element={loggedIn && isUnconfirmed ? <RedirectScreen path="/" /> : <JurisdictionScreen />}
         />
         <Route path="/part-3-step-code" element={<RedirectScreen path="start" />} />
+        <Route path="/part-3-step-code/:stepCodeId" element={<RedirectScreen path="start" />} />
         <Route path="/part-3-step-code/:stepCodeId/:section" element={<Part3StepCodeForm />} />
         <Route path="/part-3-step-code/:section" element={<Part3StepCodeForm />} />
+        {/* <Route path="/part-9-step-code/:stepCodeId" element={<ComingSoonPlaceholder />} /> */}
+        <Route path="/part-9-step-code/:stepCodeId" element={<RedirectScreen path="/" />} />
         <Route path="*" element={<NotFoundScreen />} />
       </Routes>
     </>

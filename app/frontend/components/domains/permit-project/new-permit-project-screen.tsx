@@ -2,111 +2,129 @@ import {
   Box,
   Button,
   Container,
+  Flex,
   FormControl,
   FormErrorMessage,
   FormLabel,
   Heading,
+  HStack,
   Input,
-  Textarea,
+  Text,
   VStack,
 } from "@chakra-ui/react"
-// import { zodResolver } from "@hookform/resolvers/zod" // Removed
+import { CaretLeft } from "@phosphor-icons/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React from "react"
-import { useForm } from "react-hook-form"
+import { Controller, FormProvider, useForm } from "react-hook-form"
 import { useNavigate } from "react-router-dom"
-// import * as z from "zod" // Removed Zod import
+import { useJurisdictionFromSite } from "../../../hooks/use-jurisdiction-from-site"
 import { useMst } from "../../../setup/root"
+import { IOption } from "../../../types/types"
+import { BackButton } from "../../shared/buttons/back-button"
+import { RouterLinkButton } from "../../shared/navigation/router-link-button"
+import { ManualModeInputs } from "../../shared/select/selectors/manual-mode-inputs"
+import { SitesSelect } from "../../shared/select/selectors/sites-select"
 
-// Define the form data type manually
-interface TPermitProjectFormData {
-  name: string
-  description?: string
-  fullAddress?: string
+type TCreatePermitProjectFormData = {
+  title: string
   pid?: string
-  pin?: string
-  propertyPlanJurisdictionId?: string
+  site?: IOption
+  jurisdictionId?: string
 }
 
 export const NewPermitProjectScreen = observer(() => {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-  } = useForm<TPermitProjectFormData>({
+  const formMethods = useForm<TCreatePermitProjectFormData>({
+    mode: "onChange",
+    reValidateMode: "onChange",
     defaultValues: {
-      name: "", // Initialize name as an empty string
-      description: "",
-      fullAddress: "",
+      title: "",
       pid: "",
-      pin: "",
-      propertyPlanJurisdictionId: "",
+      site: null as IOption,
+      jurisdictionId: "",
     },
   })
+
+  const { handleSubmit, formState, control, watch, setValue, register } = formMethods
+  const { isSubmitting, errors, isValid } = formState
   const navigate = useNavigate()
   const { permitProjectStore } = useMst()
 
-  const onSubmit = async (data: TPermitProjectFormData) => {
-    const result = await permitProjectStore.createPermitProject(data)
+  const [manualMode, setManualMode] = React.useState(false)
+
+  useJurisdictionFromSite(watch, setValue, {
+    siteFieldName: "site",
+    jurisdictionIdFieldName: "jurisdictionId",
+    disabled: manualMode,
+  })
+
+  const onSubmit = async (values: TCreatePermitProjectFormData) => {
+    const params = {
+      title: values.title,
+      fullAddress: values.site?.label,
+      pid: values.pid,
+      jurisdictionId: values.jurisdictionId,
+    }
+    const result = await permitProjectStore.createPermitProject(params)
     if (result.ok && result.data) {
-      navigate(`/permit-projects/${result.data.id}`)
+      navigate(`/projects/${result.data.id}`)
     }
   }
 
   return (
-    <Container maxW="container.md" py={10}>
-      <Heading mb={6}>{t("permitProject.newProjectTitle")}</Heading>
-      <Box as="form" onSubmit={handleSubmit(onSubmit)}>
-        <VStack spacing={4} align="stretch">
-          <FormControl isInvalid={!!errors.name}>
-            <FormLabel htmlFor="name">{t("permitProject.name")}</FormLabel>
-            <Input
-              id="name"
-              {...register("name", {
-                required: t("ui.isRequired", { field: t("permitProject.name") }) as string,
-              })}
-            />
-            <FormErrorMessage>{errors.name?.message}</FormErrorMessage>
-          </FormControl>
+    <Container maxW="container.lg" py={10}>
+      <Flex direction="column" gap={2}>
+        <RouterLinkButton variant="link" to="/projects" leftIcon={<CaretLeft size={24} />}>
+          {t("permitProject.back")}
+        </RouterLinkButton>
+        <Heading mb={6}>{t("permitProject.new.title")}</Heading>
+      </Flex>
+      <FormProvider {...formMethods}>
+        <Box as="form" onSubmit={handleSubmit(onSubmit)}>
+          <VStack spacing={8} align="stretch">
+            <Flex direction="column" gap={2} w={{ base: "full", md: "50%" }}>
+              <Heading as="h2" variant="yellowline">
+                {t("permitProject.new.nameHeading")}
+              </Heading>
+              <Text>{t("permitProject.new.nameDescription")}</Text>
+              <FormControl isInvalid={!!errors.title}>
+                <FormLabel htmlFor="title" mt={4}>
+                  {t("permitProject.new.nameLabel")}
+                </FormLabel>
+                <Input
+                  id="title"
+                  {...register("title", {
+                    required: t("ui.isRequired", { field: t("permitProject.name") }) as string,
+                  })}
+                />
+                <FormErrorMessage>{errors.title?.message}</FormErrorMessage>
+              </FormControl>
+            </Flex>
 
-          <FormControl isInvalid={!!errors.description}>
-            <FormLabel htmlFor="description">{t("permitProject.description")}</FormLabel>
-            <Textarea id="description" {...register("description")} />
-            <FormErrorMessage>{errors.description?.message}</FormErrorMessage>
-          </FormControl>
+            <Flex direction="column" gap={2}>
+              <Heading as="h2" variant="yellowline">
+                {t("permitProject.new.fullAddressHeading")}
+              </Heading>
+              <Controller
+                name="site"
+                control={control}
+                render={({ field: { onChange, value } }) => <SitesSelect onChange={onChange} selectedOption={value} />}
+              />
+              {manualMode && <ManualModeInputs />}
+              <Button variant="link" onClick={() => setManualMode((prev) => !prev)}>
+                {t("ui.toggleManualMode")}
+              </Button>
+            </Flex>
 
-          <FormControl isInvalid={!!errors.fullAddress}>
-            <FormLabel htmlFor="fullAddress">{t("permitProject.fullAddress")}</FormLabel>
-            <Input id="fullAddress" {...register("fullAddress")} />
-            <FormErrorMessage>{errors.fullAddress?.message}</FormErrorMessage>
-          </FormControl>
-
-          <FormControl isInvalid={!!errors.pid}>
-            <FormLabel htmlFor="pid">{t("permitProject.pid")}</FormLabel>
-            <Input id="pid" {...register("pid")} />
-            <FormErrorMessage>{errors.pid?.message}</FormErrorMessage>
-          </FormControl>
-
-          <FormControl isInvalid={!!errors.pin}>
-            <FormLabel htmlFor="pin">{t("permitProject.pin")}</FormLabel>
-            <Input id="pin" {...register("pin")} />
-            <FormErrorMessage>{errors.pin?.message}</FormErrorMessage>
-          </FormControl>
-
-          {/* Add PropertyPlanJurisdiction select if needed
-          <FormControl isInvalid={!!errors.propertyPlanJurisdictionId}>
-            <FormLabel htmlFor="propertyPlanJurisdictionId">{t("permitProject.propertyPlanJurisdictionId")}</FormLabel> // Ensure this translation key exists if uncommented
-            <Input id="propertyPlanJurisdictionId" {...register("propertyPlanJurisdictionId")} />
-            <FormErrorMessage>{errors.propertyPlanJurisdictionId?.message}</FormErrorMessage>
-          </FormControl>
-          */}
-
-          <Button mt={4} colorScheme="blue" isLoading={isSubmitting} type="submit">
-            {t("permitProject.createProjectButton")}
-          </Button>
-        </VStack>
-      </Box>
+            <HStack>
+              <BackButton>{t("ui.back")}</BackButton>
+              <Button variant="primary" isLoading={isSubmitting} isDisabled={!isValid} type="submit">
+                {t("permitProject.new.createButton")}
+              </Button>
+            </HStack>
+          </VStack>
+        </Box>
+      </FormProvider>
     </Container>
   )
 })

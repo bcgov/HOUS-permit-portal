@@ -1,7 +1,6 @@
 import { t } from "i18next"
 import { flow, Instance, toGenerator, types } from "mobx-state-tree"
 import * as R from "ramda"
-import { TCreatePermitApplicationFormData } from "../components/domains/permit-application/new-permit-application-screen"
 import { createSearchModel } from "../lib/create-search-model"
 import { withEnvironment } from "../lib/with-environment"
 import { withMerge } from "../lib/with-merge"
@@ -25,6 +24,7 @@ import {
   IPermitApplicationSearchFilters,
   IPermitApplicationSupportingDocumentsUpdate,
   IUserPushPayload,
+  TCreatePermitApplicationFormData,
   TSearchParams,
 } from "../types/types"
 import { convertResourceArrayToRecord, setQueryParam, startBlobDownload } from "../utils/utility-functions"
@@ -65,7 +65,10 @@ export const PermitApplicationStoreModel = types
       const map = {
         [EProjectPermitApplicationSortFields.permit]: t("permitProject.overview.permit"),
         [EProjectPermitApplicationSortFields.assignedTo]: t("permitProject.overview.assignedTo"),
-        [EProjectPermitApplicationSortFields.lastModified]: t("permitProject.overview.lastModified"),
+        [EProjectPermitApplicationSortFields.permitApplicationNumber]: t(
+          "permitProject.overview.permitApplicationNumber"
+        ),
+        [EProjectPermitApplicationSortFields.updatedAt]: t("permitProject.overview.updatedAt"),
         [EProjectPermitApplicationSortFields.status]: t("permitProject.overview.status"),
       }
       return map[field]
@@ -179,13 +182,11 @@ export const PermitApplicationStoreModel = types
       )
 
       self.rootStore.collaboratorStore.mergeUpdateAll(
-        // @ts-ignore
         R.pipe(
           R.map(R.prop("permitCollaborations")),
           R.reject(R.isNil),
           R.flatten,
           R.map(R.prop("collaborator")),
-          // @ts-ignore
           R.uniqBy((c: ICollaborator) => c.id)
         )(permitApplicationsData),
         "collaboratorMap"
@@ -279,7 +280,6 @@ export const PermitApplicationStoreModel = types
       requirementTemplate: IRequirementTemplate,
       overrides: Partial<IPermitApplication> = {}
     ) {
-      if (self.currentPermitApplication?.isEphemeral) return self.currentPermitApplication
       const permitApplication = PermitApplicationModel.create({
         id: `ephemeral-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
         nickname: overrides.nickname || "Ephemeral Application",

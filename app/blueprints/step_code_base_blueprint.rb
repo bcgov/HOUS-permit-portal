@@ -2,15 +2,19 @@ class StepCodeBaseBlueprint < Blueprinter::Base
   identifier :id
 
   fields :type,
-         :project_name,
-         :project_identifier,
+         :created_at,
+         :updated_at,
+         :title,
+         :reference_number,
          :full_address,
          :jurisdiction_name,
-         :permit_date
-
-  association :permit_application,
-              blueprint: PermitApplicationBlueprint,
-              view: :base
+         :permit_date,
+         :phase,
+         :permit_application_id
 
   association :creator, blueprint: UserBlueprint
+
+  association :jurisdiction, blueprint: JurisdictionBlueprint, view: :base
+
+  association :report_documents, blueprint: ReportDocumentBlueprint
 end

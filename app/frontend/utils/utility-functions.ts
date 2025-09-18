@@ -82,11 +82,14 @@ export function keysToCamelCase(obj) {
 
 export function setQueryParam(key: string, value: string | string[]) {
   const searchParams = new URLSearchParams(window.location.search)
-  if (!value) {
+  const isEmptyArray = Array.isArray(value) && value.length === 0
+  const isEmptyString = typeof value === "string" && value.trim() === ""
+
+  if (!value || isEmptyArray || isEmptyString) {
     searchParams.delete(key)
   } else {
-    // @ts-ignore
-    searchParams.set(key, value)
+    const serialized = Array.isArray(value) ? value.join(",") : value
+    searchParams.set(key, serialized)
   }
   const stringParams = searchParams.toString()
   const newUrl = `${window.location.pathname}${stringParams ? "?" + stringParams : ""}`
@@ -309,18 +312,27 @@ export async function downloadFileFromStorage(options: {
 
     const data = await response.json()
     console.log("[DownloadDebug] Received data from API:", data)
-    if (data.url) {
-      console.log("[DownloadDebug] S3 URL:", data.url)
+    if (!data.url) throw new Error("No URL found in response")
+
+    console.log("[DownloadDebug] S3 URL:", data.url)
+    // Preferred: fetch as Blob and force a download (works regardless of Content-Disposition)
+    try {
+      const fileResp = await fetch(data.url)
+      if (!fileResp.ok) throw new Error(`File GET failed: ${fileResp.status}`)
+      const blob = await fileResp.blob()
+      const mimeType = fileResp.headers.get("content-type") || "application/octet-stream"
+      startBlobDownload(blob, mimeType, filename || "download")
+      return
+    } catch (e) {
+      console.warn("[DownloadDebug] Blob fetch failed, falling back to anchor navigation", e)
+      // Fallback: navigate via anchor – relies on server's Content-Disposition: attachment
       const a = document.createElement("a")
       a.href = data.url
       a.download = filename
-      console.log("[DownloadDebug] Anchor element created:", { href: a.href, download: a.download })
+      a.rel = "noopener"
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)
-      console.log("[DownloadDebug] Anchor clicked and removed.")
-    } else {
-      throw new Error("No URL found in response")
     }
   } catch (error) {
     console.error("Failed to download file:", error)
@@ -365,4 +377,21 @@ export function formattedStringToNumber(value: string): number {
 
   const parsedValue = Number(rawValue)
   return !isNaN(parsedValue) ? parsedValue : 0
+}
+
+// Step Code helpers (shared across PDF and HTML components)
+export function getStepCodeOccupancies(checklist: any) {
+  const stepCodeOccs = Array.isArray(checklist?.stepCodeOccupancies) ? checklist.stepCodeOccupancies : []
+  const baselineOccs = Array.isArray(checklist?.baselineOccupancies) ? checklist.baselineOccupancies : []
+  return { stepCodeOccs, baselineOccs }
+}
+
+export function isMixedUseChecklist(checklist: any): boolean {
+  const { stepCodeOccs, baselineOccs } = getStepCodeOccupancies(checklist)
+  return stepCodeOccs.length + baselineOccs.length > 1
+}
+
+export function isBaselineChecklist(checklist: any): boolean {
+  const { stepCodeOccs } = getStepCodeOccupancies(checklist)
+  return stepCodeOccs.length === 0
 }

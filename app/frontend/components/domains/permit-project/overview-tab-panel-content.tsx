@@ -1,47 +1,29 @@
-import { Box, Button, Flex, Grid, Heading, HStack, Icon, Text, VStack } from "@chakra-ui/react"
+import { Box, Flex, Grid, Heading, HStack, Icon, VStack } from "@chakra-ui/react"
 import { CaretRight, Info, Plus, SquaresFour, Steps } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { IPermitProject } from "../../../models/permit-project"
-import { EProjectPermitApplicationSortFields } from "../../../types/enums"
-import { CopyLinkButton } from "../../shared/base/copy-link-button"
+import {
+  EFlashMessageStatus,
+  EPermitProjectRollupStatus,
+  EProjectPermitApplicationSortFields,
+} from "../../../types/enums"
+import { CustomMessageBox } from "../../shared/base/custom-message-box"
 import { SearchGrid } from "../../shared/grid/search-grid"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
+import ProjectInfoRow from "../../shared/project/project-info-row"
 import { PermitApplicationGridHeaders } from "./permit-application-grid-headers"
 import { PermitApplicationGridRow } from "./permit-application-grid-row"
 
-const ProjectInfoRow = ({ label, value, subLabel = null, isCopyable = false }) => (
-  <Flex
-    justify="space-between"
-    align="center"
-    py={2}
-    borderBottom="1px"
-    borderColor="border.light"
-    _last={{ borderBottom: "none" }}
-    w="full"
-  >
-    <Flex justify="space-between" align="center" w="full" mr={2}>
-      <VStack align="flex-start" spacing={0}>
-        <Text>{label}</Text>
-        {subLabel && (
-          <Text fontSize="sm" color="text.secondary">
-            {subLabel}
-          </Text>
-        )}
-      </VStack>
-      <Text>{value}</Text>
-    </Flex>
-    {isCopyable && <CopyLinkButton value={value} iconOnly />}
-  </Flex>
-)
+// moved to shared/project/project-info-row.tsx
 
 interface IProps {
   permitProject: IPermitProject
 }
 
 export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
-  const { fullAddress, pid, jurisdiction, projectNumber } = permitProject
+  const { fullAddress, pid, jurisdiction, number } = permitProject
   const { t } = useTranslation()
 
   return (
@@ -62,9 +44,16 @@ export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
             <ProjectInfoRow
               label={t("permitProject.overview.address")}
               value={fullAddress || t("permitProject.overview.notAvailable")}
+              isBold
               isCopyable
             />
-            <ProjectInfoRow label={t("permitProject.overview.number")} value={projectNumber} isCopyable />
+            <ProjectInfoRow
+              label={t("permitProject.overview.jurisdictionName")}
+              value={jurisdiction?.disambiguatedName || t("permitProject.overview.notAvailable")}
+              isCopyable
+            />
+
+            <ProjectInfoRow label={t("permitProject.overview.number")} value={number} isCopyable />
             <ProjectInfoRow
               label={t("permitProject.overview.pid")}
               value={pid || t("permitProject.overview.notAvailable")}
@@ -100,28 +89,41 @@ export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
           <Heading as="h3" size="md">
             {t("permitProject.overview.recentPermits")}
           </Heading>
-          <Button variant="primary" leftIcon={<Icon as={Plus} />}>
-            {t("permitProject.overview.addPermit")}
-          </Button>
-        </Flex>
-        <SearchGrid templateColumns="2fr 1.5fr 1.5fr 1.5fr 0.5fr" gridRowClassName="permit-application-grid-row">
-          <PermitApplicationGridHeaders
-            columns={Object.values(EProjectPermitApplicationSortFields)}
-            includeActionColumn
-          />
-          {permitProject.recentPermitApplications.map((permitApplication) => (
-            <PermitApplicationGridRow key={permitApplication.id} permitApplication={permitApplication} />
-          ))}
-        </SearchGrid>
-        <Flex justify="flex-end" mt={4}>
           <RouterLinkButton
-            variant="tertiary"
-            rightIcon={<CaretRight />}
-            to={`/permit-projects/${permitProject.id}/permits`}
+            variant="primary"
+            leftIcon={<Icon as={Plus} />}
+            to={`/projects/${permitProject.id}/add-permits`}
           >
-            {t("permitProject.overview.allPermits")}
+            {t("permitProject.addPermits.title")}
           </RouterLinkButton>
         </Flex>
+        {permitProject.rollupStatus === EPermitProjectRollupStatus.empty ? (
+          <CustomMessageBox status={EFlashMessageStatus.info} description={t("permitProject.index.empty")} mt={2} />
+        ) : (
+          <>
+            <SearchGrid
+              templateColumns="2fr 1.5fr 1.5fr 1.5fr 1.5fr 0.5fr"
+              gridRowClassName="permit-application-grid-row"
+            >
+              <PermitApplicationGridHeaders
+                columns={Object.values(EProjectPermitApplicationSortFields)}
+                includeActionColumn
+              />
+              {permitProject.recentPermitApplications.map((permitApplication) => (
+                <PermitApplicationGridRow key={permitApplication.id} permitApplication={permitApplication} />
+              ))}
+            </SearchGrid>
+            <Flex justify="flex-end" mt={4}>
+              <RouterLinkButton
+                variant="tertiary"
+                rightIcon={<CaretRight />}
+                to={`/projects/${permitProject.id}/permits`}
+              >
+                {t("permitProject.overview.allPermits")}
+              </RouterLinkButton>
+            </Flex>
+          </>
+        )}
       </Box>
     </Flex>
   )

@@ -94,7 +94,11 @@ export const FuelTypes = observer(function Part3StepCodeFormFuelTypes() {
       if (alternatePath) {
         navigate(alternatePath)
       } else {
-        const nextSectionPath = !R.isEmpty(checklist.otherFuelTypes) ? "additional-fuel-types" : "baseline-performance"
+        const nextSectionPath = !R.isEmpty(checklist.otherFuelTypes)
+          ? "additional-fuel-types"
+          : checklist.isRelevant("baselinePerformance")
+            ? "baseline-performance"
+            : "step-code-occupancies"
         navigate(location.pathname.replace("fuel-types", nextSectionPath))
       }
     }

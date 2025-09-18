@@ -1,5 +1,4 @@
 import { ApiResponse, ApisauceInstance, create, Monitor } from "apisauce"
-import { TCreatePermitApplicationFormData } from "../../components/domains/permit-application/new-permit-application-screen"
 import { IRevisionRequestForm } from "../../components/domains/permit-application/revision-sidebar"
 import { IJurisdictionTemplateVersionCustomizationForm } from "../../components/domains/requirement-template/screens/jurisdiction-edit-digital-permit-screen"
 import { TContactFormData } from "../../components/shared/contact/create-edit-contact-modal"
@@ -50,9 +49,11 @@ import {
   EJurisdictionSortFields,
   EPermitApplicationSortFields,
   EPermitBlockStatus,
+  EPermitClassificationType,
   EPermitProjectSortFields,
   ERequirementLibrarySortFields,
   ERequirementTemplateSortFields,
+  EStepCodeSortFields,
   EStepCodeType,
   ETemplateVersionStatus,
   EUserSortFields,
@@ -67,6 +68,7 @@ import {
   IPermitProjectSearchFilters,
   ITemplateVersionDiff,
   TAutoComplianceModuleConfigurations,
+  TCreatePermitApplicationFormData,
   TCreateRequirementTemplateFormData,
   TSearchParams,
 } from "../../types/types"
@@ -169,6 +171,35 @@ export class Api {
     return this.client.get<IOptionResponse<IContact>>(`/permit_classifications`)
   }
 
+  async createPermitClassification(permitClassification: {
+    name: string
+    code: string
+    description?: string
+    enabled?: boolean
+    type: EPermitClassificationType
+    category?: string | null
+  }) {
+    return this.client.post(`/permit_classifications`, { permitClassification })
+  }
+
+  async updatePermitClassification(
+    id: string,
+    permitClassification: Partial<{
+      name: string
+      code: string
+      description?: string
+      enabled?: boolean
+      type: EPermitClassificationType
+      category?: string | null
+    }>
+  ) {
+    return this.client.put(`/permit_classifications/${id}`, { permitClassification })
+  }
+
+  async destroyPermitClassification(id: string) {
+    return this.client.delete(`/permit_classifications/${id}`)
+  }
+
   async fetchPermitClassificationOptions(
     type,
     published = false,
@@ -249,13 +280,12 @@ export class Api {
   }
 
   async createPermitProject(projectData: {
-    name: string
-    description?: string
+    title: string
     fullAddress?: string
     pid?: string
+    jurisdictionId?: string
     pin?: string
     propertyPlanJurisdictionId?: string
-    // Add other fields as necessary
   }) {
     return this.client.post<ApiResponse<IPermitProject>>("/permit_projects", { permitProject: projectData })
   }
@@ -295,6 +325,16 @@ export class Api {
 
   async createPermitApplication(params: TCreatePermitApplicationFormData) {
     return this.client.post<ApiResponse<IPermitApplication>>("/permit_applications", { permitApplication: params })
+  }
+
+  async createProjectPermitApplications(
+    permitProjectId: string,
+    params: Array<{ activityId: string; permitTypeId: string; firstNations: boolean }>
+  ) {
+    return this.client.post<ApiResponse<IPermitApplication[]>>(
+      `/permit_projects/${permitProjectId}/permit_applications`,
+      { permitApplications: params }
+    )
   }
 
   async createRequirementBlock(params: IRequirementBlockParams) {
@@ -574,13 +614,15 @@ export class Api {
     activityId?: string,
     status?: ETemplateVersionStatus,
     earlyAccess?: boolean,
-    isPublic?: boolean
+    isPublic?: boolean,
+    permitTypeId?: string
   ) {
     return this.client.get<ApiResponse<ITemplateVersion[]>>(`/template_versions`, {
       activityId,
       status,
       earlyAccess,
       public: isPublic,
+      permitTypeId,
     })
   }
 
@@ -642,34 +684,35 @@ export class Api {
     return this.client.get<ApiResponse<IStepCode[]>>("/part_9_building/step_codes")
   }
 
+  async searchStepCodes(params?: TSearchParams<EStepCodeSortFields>) {
+    return this.client.post<ApiResponse<IStepCode[]>>("/step_codes/search", params)
+  }
+
   async fetchPart9StepCodeSelectOptions() {
     return this.client.get<ApiResponse<{ selectOptions: IPart9ChecklistSelectOptions }>>(
       "/part_9_building/step_codes/select_options"
     )
   }
 
-  async createOrFindStepCodeForPermitApplication(
-    permitApplicationId: string,
-    stepCodeType: EStepCodeType,
-    attributes: {
-      checklistAttributes?: { sectionCompletionStatus: Record<string, any> }
-      name?: string
-      preConstructionChecklistAttributes?: any
-    }
-  ) {
-    return this.client.post<ApiResponse<IStepCode>>(
-      `/permit_applications/${permitApplicationId}/part_3_building/step_code`,
-      {
-        step_code: {
-          type: stepCodeType,
-          ...attributes,
-        },
-      }
-    )
-  }
+  // Removed legacy method createOrFindStepCodeForPermitApplication; Part 9 mirrors Part 3 creation now
 
   async deleteStepCode(id: string) {
     return this.client.delete<ApiResponse<IStepCode>>(`/step_codes/${id}`)
+  }
+
+  async updateStepCode(
+    id: string,
+    data: Partial<{
+      fullAddress: string
+      referenceNumber: string
+      title: string
+      permitDate: string
+      phase: string
+      buildingCodeVersion: string
+      jurisdictionId: string
+    }>
+  ) {
+    return this.client.patch<ApiResponse<IStepCode>>(`/step_codes/${id}`, { stepCode: data })
   }
 
   async downloadStepCodeSummaryCsv() {
@@ -699,9 +742,10 @@ export class Api {
   }
 
   // importing IPart3StepCodeChecklist causes circular dependency typescript error
-  async updatePart3Checklist(checklistId: string, checklist) {
+  async updatePart3Checklist(checklistId: string, checklist, options?: Record<string, any>) {
     return this.client.patch<ApiResponse<any>>(`/part_3_building/checklists/${checklistId}`, {
       checklist,
+      ...(options ?? {}),
     })
   }
 
@@ -814,8 +858,19 @@ export class Api {
     }
   }
 
-  async createPart9StepCode(data: any) {
-    return this.client.post<ApiResponse<IStepCode>>(`/part_9_building/step_codes`, { stepCode: data })
+  async createPart9StepCode(data: {
+    permitApplicationId?: string
+    preConstructionChecklistAttributes?: any
+    name?: string
+  }) {
+    if (data.permitApplicationId) {
+      return this.client.post<ApiResponse<IStepCode>>(
+        `/permit_applications/${data.permitApplicationId}/part_9_building/step_code`,
+        { stepCode: data }
+      )
+    } else {
+      return this.client.post<ApiResponse<IStepCode>>(`/part_9_building/step_codes`, { stepCode: data })
+    }
   }
 
   async createPdfForm(formData: { formJson: any; formType: string; status?: boolean }) {

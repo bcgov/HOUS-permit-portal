@@ -27,7 +27,8 @@ module Api::Concerns::Search::PermitApplications
             nil
           end
         ),
-      includes: PermitApplication::SEARCH_INCLUDES
+      includes: PermitApplication::SEARCH_INCLUDES,
+      scope_results: ->(relation) { policy_scope(relation) }
     }
     @permit_application_search =
       PermitApplication.search(permit_application_query, **search_conditions)

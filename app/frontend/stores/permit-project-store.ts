@@ -19,9 +19,9 @@ export const PermitProjectStoreModel = types
       tablePermitProjects: types.array(types.reference(PermitProjectModel)), // For table views
       currentPermitProject: types.maybeNull(types.reference(PermitProjectModel)),
       rollupStatusFilter: types.maybeNull(types.array(types.enumeration(Object.values(EPermitProjectRollupStatus)))),
-      requirementTemplateFilter: types.maybeNull(types.array(types.string)),
       isFetchingPinnedProjects: types.optional(types.boolean, false),
       jurisdictionFilter: types.optional(types.array(types.string), []),
+      requirementTemplateIdFilter: types.optional(types.array(types.string), []),
     }),
     createSearchModel<EPermitProjectSortFields>("searchPermitProjects", "setPermitProjectFilters")
   )
@@ -81,11 +81,6 @@ export const PermitProjectStoreModel = types
         jurisdiction: permitProject.jurisdiction?.id,
       })
     },
-    setRequirementTemplateFilter(value: string[]) {
-      self.requirementTemplateFilter = cast(value)
-      const paramValue = value && value.length > 0 ? value.join(",") : null
-      setQueryParam("requirementTemplateFilter", paramValue)
-    },
     setJurisdictionFilter(value: string[]) {
       self.jurisdictionFilter = cast(value)
       const paramValue = value && value.length > 0 ? value.join(",") : null
@@ -116,6 +111,11 @@ export const PermitProjectStoreModel = types
       if (opts?.reset) {
         self.resetPages() // Method from createSearchModel
       }
+      const requirementTemplateIds =
+        self.requirementTemplateIdFilter && self.requirementTemplateIdFilter.length > 0
+          ? self.requirementTemplateIdFilter
+          : undefined
+
       const searchParams: TSearchParams<EPermitProjectSortFields, IPermitProjectSearchFilters> = {
         query: self.query, // from createSearchModel
         sort: self.sort, // from createSearchModel
@@ -125,8 +125,8 @@ export const PermitProjectStoreModel = types
           showArchived: self.showArchived,
           query: self.query,
           rollupStatus: self.rollupStatusFilter,
-          requirementTemplateIds: self.requirementTemplateFilter,
           jurisdictionId: self.jurisdictionFilter,
+          requirementTemplateIds,
         },
       }
 
@@ -209,19 +209,22 @@ export const PermitProjectStoreModel = types
       const rollupStatusStr = queryParams.get("rollupStatus")
       const rollupStatus = rollupStatusStr ? (rollupStatusStr.split(",") as EPermitProjectRollupStatus[]) : null
       const jurisdictionFilter = queryParams.get("jurisdictionFilter")?.split(",")
+      const requirementTemplateIdFilter = queryParams.get("requirementTemplateId")?.split(",")
       self.rollupStatusFilter = rollupStatus ? cast(rollupStatus) : null
-      if (requirementTemplateFilter) {
-        self.setRequirementTemplateFilter(requirementTemplateFilter.split(","))
-      }
+
       if (jurisdictionFilter) {
         self.setJurisdictionFilter(jurisdictionFilter)
       }
+      if (requirementTemplateIdFilter) {
+        // @ts-ignore
+        self.setRequirementTemplateIdFilter(requirementTemplateIdFilter)
+      }
     },
     createPermitProject: flow(function* (projectData: {
-      name: string
-      description?: string
+      title: string
       fullAddress?: string
       pid?: string
+      jurisdictionId?: string
       pin?: string
       propertyPlanJurisdictionId?: string
     }) {
@@ -255,6 +258,12 @@ export const PermitProjectStoreModel = types
       }
       return response
     }),
+    setRequirementTemplateIdFilter(requirementTemplateIds: string[] | undefined) {
+      if (!requirementTemplateIds) return
+      setQueryParam("requirementTemplateId", requirementTemplateIds)
+      // @ts-ignore
+      self.requirementTemplateIdFilter = requirementTemplateIds
+    },
   }))
 
 export interface IPermitProjectStore extends Instance<typeof PermitProjectStoreModel> {}

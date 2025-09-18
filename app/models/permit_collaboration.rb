@@ -189,6 +189,7 @@ class PermitCollaboration < ApplicationRecord
 
   def validate_delegatee
     return unless delegatee?
+
     existing_delegatee =
       permit_application.permit_collaborations.find_by(
         collaborator_id: collaborator_id,

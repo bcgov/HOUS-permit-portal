@@ -3,11 +3,11 @@ source "https://rubygems.org"
 ruby "3.2.5"
 
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
-gem "rails", "~> 7.1.5.1"
+gem "rails", "7.2.2.2"
 
 # Use postgresql as the database for Active Record
 gem "pg", "~> 1.1"
-gem "activerecord-nulldb-adapter", "1.0.1" # for Dockerfile asset build
+gem "activerecord-nulldb-adapter", "~> 1.1.0" # for Dockerfile asset build
 
 # Use the Puma web server [https://github.com/puma/puma]
 gem "puma", ">= 6.4.2"
@@ -51,7 +51,7 @@ gem "acts_as_list", "~> 1.1.0"
 gem "searchkick", "~> 5.3.1"
 gem "elasticsearch", "~> 8.11.0"
 gem "kaminari", "~> 1.2.2"
-gem "acts-as-taggable-on", "~> 10.0.0"
+gem "acts-as-taggable-on", "~> 12.0"
 # Assuming BC Common Object Management Service (COMS) is compatible with S3 formats:
 gem "aws-sdk-s3", "~> 1.141.0"
 gem "pundit", "~> 2.3.1"
@@ -95,7 +95,7 @@ group :development, :test do
   gem "shoulda-matchers", "~> 5.3.0"
   gem "database_cleaner-active_record"
   gem "vcr", "~> 6.2"
-  gem "bullet", "~> 7.1.6"
+  gem "bullet", "~> 8.0"
 end
 
 group :test do

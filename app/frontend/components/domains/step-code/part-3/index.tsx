@@ -21,7 +21,7 @@ export const Part3StepCodeForm = observer(function Part3StepCodeForm() {
   const {
     stepCodeStore: { createPart3StepCode },
   } = useMst()
-  const { stepCode } = usePart3StepCode()
+  const { currentStepCode } = usePart3StepCode()
   const navigate = useNavigate()
   const isEarlyAccess = !permitApplicationId
 
@@ -30,29 +30,37 @@ export const Part3StepCodeForm = observer(function Part3StepCodeForm() {
   // create the step code if needed
   useEffect(() => {
     if (stepCodeId) return // step code was already created in the previous screen
-    if (!!stepCode) return // step code already exists
+    if (!!currentStepCode) return // step code already exists
     if (!isEarlyAccess && !currentPermitApplication?.isFullyLoaded) return // wait for permit application to load
 
-    if (!stepCode) {
+    if (!currentStepCode) {
       createPart3StepCode({
         permitApplicationId, // nil for early access
         checklistAttributes: { sectionCompletionStatus: defaultSectionCompletionStatus },
       })
     }
-  }, [currentPermitApplication?.isFullyLoaded, stepCode])
+  }, [currentPermitApplication?.isFullyLoaded, currentStepCode])
 
   // handle redirect if no section is specified
   useEffect(() => {
-    if (!stepCode) return // wait for step code to load or be created
+    if (!currentStepCode) return // wait for step code to load or be created
     if (section) return // only redirect if no section is specified in params
 
-    if (stepCode.checklist) {
-      const navLink = stepCode.checklist.currentNavLink
+    if (currentStepCode.checklist) {
+      const navLink = currentStepCode.checklist.currentNavLink
       navigate(navLink?.location || "start")
     } else {
       navigate("start")
     }
-  }, [stepCode])
+  }, [currentStepCode])
+
+  // ensure scroll resets on section change at the container level
+  useEffect(() => {
+    const scroller = document.getElementById("stepCodeScroll")
+    if (scroller) {
+      scroller.scrollTo({ top: 0, left: 0, behavior: "auto" })
+    }
+  }, [section])
 
   return (
     <RemoveScroll>
@@ -76,8 +84,8 @@ export const Part3StepCodeForm = observer(function Part3StepCodeForm() {
             </Center>
           }
         >
-          {stepCode && (
-            <Flex flex={1} w="full" id="stepCodeScroll" overflow="auto" position="relative">
+          {currentStepCode && (
+            <Flex flex={1} w="full" overflow="auto" position="relative">
               <Show above="lg">
                 <Flex
                   w={"sidebar.width"}
@@ -98,6 +106,7 @@ export const Part3StepCodeForm = observer(function Part3StepCodeForm() {
                 pl={{ base: 0, xl: 20 }}
                 pt={10}
                 pb={10}
+                id="stepCodeScroll"
               >
                 <Hide above="lg">
                   <SideBarDrawer triggerProps={{ ml: 6, size: "md" }} />

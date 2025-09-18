@@ -36,6 +36,8 @@ module StepCodeFieldExtraction
 
   def step_code_plan_field
     # can be overridden by config settings requirement_energy_step_code["plan_file_field"]
+    return nil if requirements_lookups.blank?
+
     requirements_lookups.keys.find do |k|
       k.ends_with?("|#{Requirement::STEP_CODE_PACKAGE_FILE_REQUIREMENT_CODE}")
     end

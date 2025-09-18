@@ -9,7 +9,7 @@ interface IProps<TSearchModel extends ISearch> {
   searchModel: TSearchModel
 }
 
-export const RequirementTemplateFilter = observer(function RequirementTemplateFilter<TSearchModel extends ISearch>({
+export const RequirementTemplateFilter = observer(function RequirementTemplateIdFilter<TSearchModel extends ISearch>({
   searchModel,
 }: IProps<TSearchModel>) {
   const { t } = useTranslation()

@@ -10,6 +10,7 @@ class Api::PermitProjectsController < Api::ApplicationController
                   unpin
                   search_permit_applications
                   submission_collaborator_options
+                  create_permit_applications
                 ]
   before_action :set_pinned_projects, only: %i[pinned]
 
@@ -55,7 +56,15 @@ class Api::PermitProjectsController < Api::ApplicationController
                        blueprint_opts: blueprint_options(view: :extended)
                      }
     else
-      render_error @permit_project.errors, :unprocessable_entity
+      render_error(
+        "permit_project.update_error",
+        {
+          message_opts: {
+            errors: @permit_project.errors.full_messages
+          },
+          status: :unprocessable_entity
+        }
+      )
     end
   end
 
@@ -127,22 +136,23 @@ class Api::PermitProjectsController < Api::ApplicationController
   def search_permit_applications
     authorize @permit_project
     perform_permit_application_search
-    authorized_results =
-      apply_search_authorization(@permit_application_search.results, "index")
+    # Results are already authorized by the policy_scope in the search concern
+    authorized_results = @permit_application_search.results
     render_success authorized_results,
                    nil,
                    {
                      meta: page_meta(@permit_application_search),
                      blueprint: PermitApplicationBlueprint,
                      blueprint_opts: {
-                       view: :project_base
+                       view: :project_base,
+                       current_user: current_user
                      }
                    }
   end
 
   def submission_collaborator_options
     authorize @permit_project
-    render_success @permit_project.submission_collaborators,
+    render_success @permit_project.submission_collaborators(current_user),
                    nil,
                    {
                      blueprint: CollaboratorOptionBlueprint,
@@ -150,6 +160,62 @@ class Api::PermitProjectsController < Api::ApplicationController
                        view: :base
                      }
                    }
+  end
+
+  # Bulk create permit applications for a project
+  # Expected params:
+  #   permit_applications: [{ activity_id, permit_type_id, first_nations, jurisdiction_id?, sandbox_id? }]
+  def create_permit_applications
+    authorize @permit_project
+
+    applications_params = params.require(:permit_applications)
+
+    created = []
+    errors = []
+
+    applications_params.each do |pa_params|
+      permit_application =
+        PermitApplication.new(
+          submitter: current_user,
+          sandbox: current_sandbox,
+          permit_project: @permit_project,
+          activity_id: pa_params[:activity_id],
+          permit_type_id: pa_params[:permit_type_id],
+          first_nations: pa_params[:first_nations],
+          jurisdiction_id: pa_params[:jurisdiction_id]
+        )
+
+      authorize permit_application, :create?
+
+      if permit_application.save
+        if !Rails.env.development? || ENV["RUN_COMPLIANCE_ON_SAVE"] == "true"
+          AutomatedCompliance::AutopopulateJob.perform_async(
+            permit_application.id
+          )
+        end
+        created << permit_application
+      else
+        errors << permit_application.errors.full_messages
+      end
+    end
+
+    if errors.empty?
+      render_success created,
+                     "permit_application.bulk_create_success",
+                     {
+                       blueprint: PermitApplicationBlueprint,
+                       blueprint_opts: {
+                         view: :project_base
+                       }
+                     }
+    else
+      render_error(
+        "permit_application.bulk_create_error",
+        message_opts: {
+        },
+        status: :unprocessable_entity
+      )
+    end
   end
 
   def jurisdiction_options
@@ -200,11 +266,11 @@ class Api::PermitProjectsController < Api::ApplicationController
 
   def permit_project_params
     params.require(:permit_project).permit(
-      :title, # Changed from name and description
-      :full_address, # Added full_address
-      :pid, # Added pid
-      :pin, # Added pin
-      :property_plan_jurisdiction_id, # Added property_plan_jurisdiction_id
+      :title,
+      :full_address,
+      :pid,
+      :pin,
+      :jurisdiction_id,
       project_documents_attributes: [
         :id,
         :permit_project_id,

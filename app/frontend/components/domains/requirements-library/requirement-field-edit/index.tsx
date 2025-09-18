@@ -228,7 +228,7 @@ const requirementsComponentMap = {
     return (
       <EditableGroup
         sx={{
-          "& > div:first-of-type": {
+          "& > div:nth-of-type(2)": {
             alignItems: "center",
             "&:before": {
               content: "''",
@@ -378,7 +378,7 @@ const requirementsComponentMap = {
     )
   },
 
-  [ERequirementType.energyStepCode]: function <TFieldValues>(props) {
+  [ERequirementType.energyStepCodePart9]: function <TFieldValues>(props) {
     return <EditableGroup editableInput={<i className="fa fa-bolt"></i>} {...props} />
   },
 

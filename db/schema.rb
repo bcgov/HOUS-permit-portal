@@ -10,7 +10,8 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_08_25_221046) do
+ActiveRecord::Schema[7.1].define(version: 2025_09_08_120000) do
+
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -225,6 +226,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_08_25_221046) do
     t.boolean "show_about_page", default: false, null: false
     t.boolean "allow_designated_reviewer", default: false
     t.string "disambiguator"
+    t.boolean "first_nation", default: false
     t.index ["prefix"], name: "index_jurisdictions_on_prefix", unique: true
     t.index ["regional_district_id"], name: "index_jurisdictions_on_regional_district_id"
     t.index ["slug"], name: "index_jurisdictions_on_slug", unique: true
@@ -433,7 +435,9 @@ ActiveRecord::Schema[7.1].define(version: 2025_08_25_221046) do
     t.datetime "updated_at", null: false
     t.string "description"
     t.boolean "enabled"
-    t.integer "code"
+    t.string "category"
+    t.string "code"
+    t.index ["code"], name: "index_permit_classifications_on_code", unique: true
   end
 
   create_table "permit_collaborations", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -465,10 +469,10 @@ ActiveRecord::Schema[7.1].define(version: 2025_08_25_221046) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "reference_identifier"
-    t.string "project_number"
+    t.string "number"
     t.index ["jurisdiction_id"], name: "index_permit_projects_on_jurisdiction_id"
+    t.index ["number"], name: "index_permit_projects_on_number", unique: true
     t.index ["owner_id"], name: "index_permit_projects_on_owner_id"
-    t.index ["project_number"], name: "index_permit_projects_on_project_number", unique: true
   end
 
   create_table "permit_type_required_steps", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -533,6 +537,14 @@ ActiveRecord::Schema[7.1].define(version: 2025_08_25_221046) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["permit_project_id"], name: "index_project_documents_on_permit_project_id"
+  end
+
+  create_table "report_documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "step_code_id", null: false
+    t.jsonb "file_data"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["step_code_id"], name: "index_report_documents_on_step_code_id"
   end
 
   create_table "requirement_blocks", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -741,7 +753,14 @@ ActiveRecord::Schema[7.1].define(version: 2025_08_25_221046) do
     t.string "full_address"
     t.string "pid"
     t.string "pin"
+    t.uuid "jurisdiction_id"
+    t.string "reference_number"
+    t.string "title"
+    t.date "permit_date"
+    t.string "phase"
+    t.string "building_code_version"
     t.index ["creator_id"], name: "index_step_codes_on_creator_id"
+    t.index ["jurisdiction_id"], name: "index_step_codes_on_jurisdiction_id"
     t.index ["permit_application_id"], name: "index_step_codes_on_permit_application_id"
     t.index ["permit_project_id"], name: "index_step_codes_on_permit_project_id"
   end
@@ -956,6 +975,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_08_25_221046) do
   add_foreign_key "sandboxes", "jurisdictions"
   add_foreign_key "step_code_building_characteristics_summaries", "part_9_step_code_checklists", column: "checklist_id"
   add_foreign_key "step_code_data_entries", "part_9_step_code_checklists", column: "checklist_id"
+  add_foreign_key "step_codes", "jurisdictions"
   add_foreign_key "step_codes", "permit_applications"
   add_foreign_key "step_codes", "permit_projects"
   add_foreign_key "step_codes", "users", column: "creator_id"

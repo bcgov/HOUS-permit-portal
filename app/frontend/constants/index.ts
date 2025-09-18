@@ -127,7 +127,7 @@ export function getEnergyStepCodeRequirementRequiredSchema(
     },
     [EEnergyStepCodeDependencyRequirementCode.energyStepCodeToolPart9]: {
       requirementCode: EEnergyStepCodeDependencyRequirementCode.energyStepCodeToolPart9,
-      inputType: ERequirementType.energyStepCode,
+      inputType: ERequirementType.energyStepCodePart9,
       label: t("requirementsLibrary.modals.stepCodeDependencies.energyStepCodeToolPart9.label"),
       inputOptions: {
         conditional: {

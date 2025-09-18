@@ -36,11 +36,7 @@ RSpec.describe PermitApplicationPolicy do
       expect(subject.show?).to be true
     end
 
-    it "permits search on own application" do
-      expect(subject.index?).to be true
-    end
-
-    it "permits create" do
+    it "permits create when under a project owned by the submitter" do
       expect(subject.create?).to be true
     end
 
@@ -61,6 +57,41 @@ RSpec.describe PermitApplicationPolicy do
         )
       expect(resolved_scope).to include(draft_permit_application)
       expect(resolved_scope).not_to include(other_user_application)
+    end
+  end
+
+  context "create? permissions around project ownership" do
+    let(:user) { submitter }
+
+    it "denies create when no permit project is present" do
+      record =
+        build(
+          :permit_application,
+          submitter: submitter,
+          jurisdiction: jurisdiction,
+          sandbox: sandbox,
+          permit_project: nil
+        )
+
+      policy = described_class.new(UserContext.new(user, sandbox), record)
+      expect(policy.create?).to be false
+    end
+
+    it "denies create when project is owned by someone else" do
+      other_owner = create(:user)
+      foreign_project =
+        create(:permit_project, owner: other_owner, jurisdiction: jurisdiction)
+      record =
+        build(
+          :permit_application,
+          submitter: submitter,
+          jurisdiction: jurisdiction,
+          sandbox: sandbox,
+          permit_project: foreign_project
+        )
+
+      policy = described_class.new(UserContext.new(user, sandbox), record)
+      expect(policy.create?).to be false
     end
   end
 

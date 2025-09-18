@@ -157,7 +157,7 @@ export const CreateEditContactModal = ({
               </Flex>
               <TextFormControl label={t("contact.fields.extension")} fieldName="extension" />
               <PhoneFormControl label={t("contact.fields.cell")} fieldName="cell" />
-              <TextFormControl label={t("contact.fields.title")} fieldName="title" />
+              <TextFormControl label={t("contact.fields.title")} fieldName="title" required />
               <TextFormControl label={t("contact.fields.address")} fieldName="address" />
               <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={4}>
                 <TextFormControl label={t("contact.fields.organization")} fieldName="organization" />

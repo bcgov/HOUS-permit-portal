@@ -25,20 +25,30 @@ class PermitClassificationSeeder
         type: "PermitType"
       },
       {
-        name: "New Construction",
+        name: "New construction",
         code: "new_construction",
         description:
           "Includes the addition to an existing building (infill development) but not the renovation of an existing home to include a secondary suite.",
         enabled: true,
-        type: "Activity"
+        type: "Activity",
+        category: "buildings_and_structures"
       },
       {
-        name: "Addition, Alteration, or Renovation",
+        name: "Renovation, alteration, or addition",
         code: "addition_alteration_renovation",
         description:
           "Modification of an existing residential dwelling to include a (secondary) suite (within the existing building footprint).",
         enabled: true,
-        type: "Activity"
+        type: "Activity",
+        category: "buildings_and_structures"
+      },
+      {
+        name: "Manufactured home",
+        code: "manufactured_home",
+        description: "",
+        enabled: true,
+        type: "Activity",
+        category: "buildings_and_structures"
       },
       {
         name: "Site Alteration",
@@ -54,7 +64,95 @@ class PermitClassificationSeeder
         description:
           "Involves the systematic tearing down of buildings and other structures, including clearing debris and preparing the site for future construction or restoration activities.",
         enabled: true,
-        type: "Activity"
+        type: "Activity",
+        category: "site_preparation"
+      },
+      {
+        name: "Tree-cutting and tree removal",
+        code: "tree_cutting_and_tree_removal",
+        description: "",
+        enabled: true,
+        type: "Activity",
+        category: "site_preparation"
+      },
+      {
+        name: "Retaining wall",
+        code: "retaining_wall",
+        description: "",
+        enabled: true,
+        type: "Activity",
+        category: "site_preparation"
+      },
+      {
+        name: "Relocation",
+        code: "relocation",
+        description: "",
+        enabled: true,
+        type: "Activity",
+        category: "site_preparation"
+      },
+      {
+        name: "Mechanical",
+        code: "mechanical",
+        description:
+          "Install, change, or repair heating, ventilation, or air conditioning (HVAC) systems.",
+        enabled: true,
+        type: "Activity",
+        category: "trades"
+      },
+      {
+        name: "Plumbing",
+        code: "plumbing",
+        description:
+          "Install, change, or repair plumbing systems, including water supply, drainage, and services to a building.",
+        enabled: true,
+        type: "Activity",
+        category: "trades"
+      },
+      {
+        name: "Electrical",
+        code: "electrical",
+        description:
+          "Electrical work, including installation, changes, or repairs to wiring, panels, or lighting. Applies to both permanent and temporary services.",
+        enabled: true,
+        type: "Activity",
+        category: "trades"
+      },
+      {
+        name: "Gas",
+        code: "gas",
+        description:
+          "Install, change, or repair gas piping, appliances, venting, or connections.",
+        enabled: true,
+        type: "Activity",
+        category: "trades"
+      },
+      {
+        name: "Solid fuel burning appliance",
+        code: "solid_fuel_burning_appliance",
+        description:
+          "Install, change, or repair a wood stove, pellet stove, or another solid fuel-burning appliance.",
+        enabled: true,
+        type: "Activity",
+        category: "trades"
+      },
+      {
+        name: "Fire alarm",
+        code: "fire_alarm",
+        description:
+          "Install, change, or repair a fire alarm system, including detectors, panels, and wiring.",
+        enabled: true,
+        type: "Activity",
+        category: "trades"
+      },
+      {
+        name: "Fire suppression",
+        code: "fire_suppression",
+        description:
+          "Install, change, or repair a sprinkler or other fire suppression system in a building.",
+        enabled: true,
+        type: "Activity",
+        category: "trades"
       }
     ]
 

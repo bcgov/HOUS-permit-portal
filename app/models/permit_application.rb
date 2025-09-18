@@ -7,13 +7,13 @@ class PermitApplication < ApplicationRecord
   include ProjectItem
   has_parent :permit_project
 
-  SEARCH_INCLUDES = %i[
-    permit_type
-    submission_versions
-    step_code
-    activity
-    submitter
-    permit_collaborations
+  SEARCH_INCLUDES = [
+    :permit_type,
+    :submission_versions,
+    :step_code,
+    :activity,
+    :submitter,
+    { permit_collaborations: :collaborator }
   ]
 
   searchkick word_middle: %i[
@@ -43,7 +43,7 @@ class PermitApplication < ApplicationRecord
   has_many :collaborators, through: :permit_collaborations
   has_many :permit_block_statuses, dependent: :destroy
 
-  has_one :step_code, dependent: :destroy
+  has_one :step_code, dependent: :nullify
 
   scope :submitted, -> { joins(:submission_versions).distinct }
 
@@ -65,8 +65,8 @@ class PermitApplication < ApplicationRecord
   delegate :published_template_version, to: :template_version
 
   before_validation :assign_unique_number, on: :create
-  before_validation :assign_default_nickname, on: :create
   before_validation :set_template_version, on: :create
+  before_validation :assign_default_nickname, on: :create
   before_validation :populate_base_form_data, on: :create
   before_save :take_form_customizations_snapshot_if_submitted
 
@@ -148,6 +148,22 @@ class PermitApplication < ApplicationRecord
       .joins(collaborations: :permit_collaborations)
       .where(base_where_clause)
       .distinct
+  end
+
+  # Returns collaborations visible to the provided user.
+  # - If user is nil or the submitter, returns all collaborations.
+  # - If user is a collaborator, returns only their collaborations.
+  # Uses in-memory filtering when preloaded; falls back to a single SQL join otherwise.
+  def permit_collaborations(user = nil)
+    base = association(:permit_collaborations).reader
+
+    return base if user.nil? || submitter_id == user.id
+
+    if base.loaded?
+      base.select { |pc| pc.collaborator&.user_id == user.id }
+    else
+      base.joins(:collaborator).where(collaborators: { user_id: user.id })
+    end
   end
 
   # Helper method to get the latest SubmissionVersion
@@ -300,6 +316,8 @@ class PermitApplication < ApplicationRecord
   end
 
   def update_viewed_at
+    return unless latest_submission_version.present?
+
     latest_submission_version.update(viewed_at: Time.current)
     reindex
   end
@@ -623,6 +641,10 @@ class PermitApplication < ApplicationRecord
     self.id # Ensures Searchkick uses the PermitApplication's own ID
   end
 
+  def short_address
+    full_address.split(",").first
+  end
+
   private
 
   def update_collaboration_assignments
@@ -631,12 +653,7 @@ class PermitApplication < ApplicationRecord
 
   def assign_default_nickname
     if nickname.blank? # Only attempt to default if nickname is not already provided
-      if permit_project.present?
-        self.nickname =
-          "#{formatted_permit_classifications} Application for #{permit_project.title}"
-      else
-        self.nickname = "#{full_address} - #{formatted_permit_classifications}"
-      end
+      self.nickname = requirement_template.nickname
     end
   end
 
@@ -646,8 +663,11 @@ class PermitApplication < ApplicationRecord
         last_number =
           jurisdiction
             .permit_applications
-            .where("number LIKE ?", "#{number_prefix}-%")
-            .order(Arel.sql("LENGTH(number) DESC"), number: :desc)
+            .where("permit_applications.number LIKE ?", "#{number_prefix}-%")
+            .order(
+              Arel.sql("LENGTH(permit_applications.number) DESC"),
+              Arel.sql("permit_applications.number DESC")
+            )
             .limit(1)
             .pluck(:number)
             .first

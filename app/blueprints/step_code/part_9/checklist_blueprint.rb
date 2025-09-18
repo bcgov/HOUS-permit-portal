@@ -13,11 +13,11 @@ class StepCode::Part9::ChecklistBlueprint < Blueprinter::Base
   end
 
   view :project_info do
-    fields :building_permit_number, :building_type, :builder
+    fields :permit_application_number, :building_type, :builder
 
-    field :project_name
-    field :project_address
-    field :pid, name: :project_identifier
+    field :title
+    field :full_address
+    field :pid
     field :jurisdiction_name
     field :permit_date do |checklist, _options|
       checklist.permit_date&.strftime("%b %e, %Y")

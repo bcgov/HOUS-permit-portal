@@ -51,11 +51,12 @@ export const TemplateVersionStoreModel = types
       activityId?: string,
       status?: ETemplateVersionStatus,
       earlyAccess?: boolean,
-      isPublic?: boolean
+      isPublic?: boolean,
+      permitTypeId?: string
     ) {
       self.isLoading = true
       const response = yield* toGenerator(
-        self.environment.api.fetchTemplateVersions(activityId, status, earlyAccess, isPublic)
+        self.environment.api.fetchTemplateVersions(activityId, status, earlyAccess, isPublic, permitTypeId)
       )
 
       if (response.ok) {
