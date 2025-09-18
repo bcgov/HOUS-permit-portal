@@ -1,11 +1,15 @@
 class Api::PdfFormsController < Api::ApplicationController
+  before_action :set_pdf_form, only: %i[generate_pdf download update]
+
   def create
     @pdf_form = PdfForm.new(pdf_form_params.merge(user_id: current_user.id))
 
     authorize @pdf_form
 
     if @pdf_form.save
-      render json: @pdf_form, status: :created
+      render_success @pdf_form,
+                     "pdf_form.create_success",
+                     { blueprint: PdfFormBlueprint }
     else
       render_error "pdf_form.create_error",
                    {
@@ -18,22 +22,16 @@ class Api::PdfFormsController < Api::ApplicationController
   end
 
   def index
-    @pdf_forms = policy_scope(PdfForm)
+    @pdf_forms = policy_scope(PdfForm).order(created_at: :desc)
     render_success @pdf_forms, nil, { blueprint: PdfFormBlueprint }
   end
 
   def generate_pdf
-    @pdf_form = PdfForm.find(params[:id])
-    authorize @pdf_form
-
     WebformToPdfJob.perform_async(@pdf_form.id)
     render_success @pdf_form, nil, { blueprint: PdfFormBlueprint }
   end
 
   def download
-    @pdf_form = PdfForm.find(params[:id])
-    authorize @pdf_form
-
     file_path = Rails.root.join("tmp", "files", "pdf_form_#{@pdf_form.id}.pdf")
 
     Rails.logger.info "Attempting to download PDF from: #{file_path}"
@@ -44,7 +42,6 @@ class Api::PdfFormsController < Api::ApplicationController
       Rails.logger.info "File size: #{file_size} bytes"
 
       if file_size > 0
-        # Try to read file content to verify it's readable
         begin
           file_content = File.read(file_path)
           Rails.logger.info "Successfully read #{file_content.length} bytes from file"
@@ -86,9 +83,6 @@ class Api::PdfFormsController < Api::ApplicationController
   end
 
   def update
-    @pdf_form = PdfForm.find(params[:id])
-    authorize @pdf_form
-
     if @pdf_form.update(pdf_form_params)
       render_success @pdf_form, nil, { blueprint: PdfFormBlueprint }
     else
@@ -103,6 +97,11 @@ class Api::PdfFormsController < Api::ApplicationController
   end
 
   private
+
+  def set_pdf_form
+    @pdf_form = PdfForm.find(params[:id])
+    authorize @pdf_form
+  end
 
   def pdf_form_params
     params.require(:pdf_form).permit(:form_type, :status, form_json: {})

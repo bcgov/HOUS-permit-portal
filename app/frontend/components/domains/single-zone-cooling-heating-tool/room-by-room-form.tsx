@@ -1,9 +1,9 @@
-import { Box, Button, Divider, Grid, Heading, Table, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/react"
+import { Box, Button, Divider, Flex, Grid, Heading, Table, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/react"
 import React from "react"
-import { useFormContext } from "react-hook-form"
+import { useFormContext, useFormState } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { uploadFile } from "../../../utils/uploads"
-import { NumberFormControl, TextFormControl } from "../../shared/form/input-form-control"
+import { DatePickerFormControl, NumberFormControl, TextFormControl } from "../../shared/form/input-form-control"
 import { BuildingLocationFields } from "./building-location-fields"
 
 interface IRoomByRoomFormProps {
@@ -14,6 +14,7 @@ export const RoomByRoomForm = ({ onSubmit }: IRoomByRoomFormProps) => {
   const { t } = useTranslation() as any
   const prefix = "singleZoneCoolingHeatingTool.roomByRoom"
   const { setValue } = useFormContext()
+  const { isValid, errors } = useFormState()
 
   const onUploadFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -44,16 +45,9 @@ export const RoomByRoomForm = ({ onSubmit }: IRoomByRoomFormProps) => {
       <Divider my={10} />
       <Box mb={6} backgroundColor="gray.100" p={4} borderRadius="md">
         <Heading as="h3" size="md" mb={4} textAlign="center" textTransform="uppercase">
-          CALCULATION RESULTS - ROOM by ROOM
+          {t(`singleZoneCoolingHeatingTool.pdfContent.roomByRoomCalculationResults.calculationResultsRoomByRoom`)}
         </Heading>
       </Box>
-      <Grid templateColumns="repeat(3, 1fr)" gap={6}>
-        <TextFormControl
-          fieldName="calculationBasedOn.attachment"
-          label={t(`${prefix}.calculationBasedOn.attachment`)}
-        />
-      </Grid>
-
       <Box mt={8}>
         <Table variant="simple" size="sm">
           <Thead>
@@ -124,15 +118,22 @@ export const RoomByRoomForm = ({ onSubmit }: IRoomByRoomFormProps) => {
           )}
         </Box>
         <Box>
-          <TextFormControl
+          <DatePickerFormControl
             fieldName={`roomByRoomSummary.issued`}
             label={t("singleZoneCoolingHeatingTool.pdfContent.roomByRoomCalculationResults.issued")}
           />
         </Box>
-        <Box>{t("singleZoneCoolingHeatingTool.pdfContent.roomByRoomCalculationResults.page3Of3")}</Box>
       </Grid>
       <Divider my={10} />
-      <Button onClick={onSubmit}>{t(`${prefix}.submit`)}</Button>
+      <Flex justify="flex-end" mt={10} mb={10}>
+        <Button
+          onClick={onSubmit}
+          isDisabled={!isValid || Object.keys(errors).length > 0}
+          variant={!isValid || Object.keys(errors).length > 0 ? "secondary" : "primary"}
+        >
+          {t(`${prefix}.submit`)}
+        </Button>
+      </Flex>
     </Box>
   )
 }

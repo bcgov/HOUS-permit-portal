@@ -152,6 +152,11 @@ const SingleZoneCoolingHeatingToolScreen = lazy(() =>
     default: module.SingleZoneCoolingHeatingToolScreen,
   }))
 )
+const SingleZoneCoolingHeatingToolStartScreen = lazy(() =>
+  import("../single-zone-cooling-heating-tool/single-zone-cooling-heating-tool-start-screen").then((module) => ({
+    default: module.SingleZoneCoolingHeatingToolStartScreen,
+  }))
+)
 const SingleZoneCoolingHeatingToolListScreen = lazy(() =>
   import("../single-zone-cooling-heating-tool/single-zone-cooling-heating-tool-list-screen").then((module) => ({
     default: module.SingleZoneCoolingHeatingToolListScreen,
@@ -672,7 +677,7 @@ const AppRoutes = observer(() => {
         </Route>
 
         <Route element={<ProtectedRoute isAllowed={loggedIn && currentUser?.isSubmitter} />}>
-          <Route path="/single-zone-cooling-heating-tool" element={<SingleZoneCoolingHeatingToolScreen />} />
+          <Route path="/single-zone-cooling-heating-tool/start" element={<SingleZoneCoolingHeatingToolStartScreen />} />
         </Route>
         <Route element={<ProtectedRoute isAllowed={loggedIn && currentUser?.isSubmitter} />}>
           <Route path="/single-zone-cooling-heating-tool/list" element={<SingleZoneCoolingHeatingToolListScreen />} />
@@ -745,6 +750,7 @@ const AppRoutes = observer(() => {
         <Route path="/accept-invitation" element={<AcceptInvitationScreen />} />
         <Route path="/contact" element={<ContactScreen />} />
         <Route path="/project-readiness-tools" element={<ProjectReadinessToolsIndexScreen />} />
+        <Route path="/single-zone-cooling-heating-tool" element={<SingleZoneCoolingHeatingToolScreen />} />
         <Route path="/privacy-policy" element={<PrivacyPolicyScreen />} />
         <Route
           path="/project-readiness-tools/create-your-letters-of-assurance"

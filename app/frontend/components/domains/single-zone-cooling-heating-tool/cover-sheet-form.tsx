@@ -1,7 +1,31 @@
-import { Box, Button, Checkbox, Divider, Flex, Grid, Heading, Radio, RadioGroup, Stack, Text } from "@chakra-ui/react"
+import {
+  Box,
+  Button,
+  Checkbox,
+  Divider,
+  Flex,
+  Grid,
+  Heading,
+  HStack,
+  Radio,
+  RadioGroup,
+  Stack,
+  Text,
+  useDisclosure,
+} from "@chakra-ui/react"
+import { AddressBook } from "@phosphor-icons/react"
 import React from "react"
+import { useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { DatePickerFormControl, NumberFormControl, TextFormControl } from "../../shared/form/input-form-control"
+import { IContact, IOption } from "../../../types/types"
+import { ContactModal } from "../../shared/contact/contact-modal"
+import { EmailFormControl } from "../../shared/form/email-form-control"
+import {
+  DatePickerFormControl,
+  NumberFormControl,
+  PhoneFormControl,
+  TextFormControl,
+} from "../../shared/form/input-form-control"
 import { BuildingLocationFields } from "./building-location-fields"
 
 interface ICoverSheetFormProps {
@@ -11,6 +35,55 @@ interface ICoverSheetFormProps {
 export const CoverSheetForm = ({ onNext }: ICoverSheetFormProps) => {
   const { t } = useTranslation() as any
   const prefix = "singleZoneCoolingHeatingTool.coverSheet"
+  const { setValue } = useFormContext()
+  const { isOpen: isContactsOpen, onOpen: onContactsOpen, onClose: onContactsClose } = useDisclosure()
+
+  const onContactChange = (option: IOption<IContact>) => {
+    const contact = option.value
+    if (contact.firstName && contact.lastName) {
+      setValue("calculationPerformedBy.name", `${contact.firstName} ${contact.lastName}`, {
+        shouldDirty: true,
+        shouldTouch: true,
+        shouldValidate: true,
+      })
+    }
+    if (contact.businessName) {
+      setValue("calculationPerformedBy.attestation", contact.businessName, {
+        shouldDirty: true,
+        shouldTouch: true,
+        shouldValidate: true,
+      })
+    }
+    if (contact.email) {
+      setValue("calculationPerformedBy.email", contact.email, {
+        shouldDirty: true,
+        shouldTouch: true,
+        shouldValidate: true,
+      })
+    }
+    if (contact.phone) {
+      const phoneNumber = contact.phone.startsWith("+1") ? contact.phone.slice(2) : contact.phone
+      setValue("calculationPerformedBy.phone", phoneNumber, {
+        shouldDirty: true,
+        shouldTouch: true,
+        shouldValidate: true,
+      })
+    }
+    if (contact.address) {
+      setValue("calculationPerformedBy.address", contact.address, {
+        shouldDirty: true,
+        shouldTouch: true,
+        shouldValidate: true,
+      })
+    }
+    if (contact.businessName) {
+      setValue("calculationPerformedBy.company", contact.businessName, {
+        shouldDirty: true,
+        shouldTouch: true,
+        shouldValidate: true,
+      })
+    }
+  }
 
   return (
     <Box as="form" p={4} borderWidth="1px" borderRadius="lg">
@@ -62,8 +135,23 @@ export const CoverSheetForm = ({ onNext }: ICoverSheetFormProps) => {
         fieldName="heating.building"
         required
         label={t(`${prefix}.heating.building`)}
-        inputProps={{ type: "number", step: 1, inputMode: "numeric", pattern: "[0-9]*" }}
-        validate={{ isNumber: (v: any) => (!isNaN(Number(v)) && v !== "") || t("ui.invalidInput") }}
+        inputProps={{
+          type: "number",
+          step: 1,
+          inputMode: "numeric",
+          pattern: "[0-9]*",
+          maxLength: 15,
+          onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+            const value = e.target.value
+            if (value.length > 15) {
+              e.target.value = value.slice(0, 15)
+            }
+          },
+        }}
+        validate={{
+          isNumber: (v: any) => (!isNaN(Number(v)) && v !== "") || t("ui.invalidInput"),
+          maxLength: (v: any) => !v || String(v).length <= 15 || true,
+        }}
         rightElement={
           <Text fontSize="sm" whiteSpace="nowrap" position="absolute" left="50px" top="2">
             {t(`${prefix}.heating.units`)} {t(`${prefix}.heating.unitsHelpText`)}
@@ -90,6 +178,19 @@ export const CoverSheetForm = ({ onNext }: ICoverSheetFormProps) => {
         required
         fieldName="cooling.nominal"
         label={t(`${prefix}.cooling.nominal`)}
+        inputProps={{
+          type: "number",
+          step: 1,
+          inputMode: "numeric",
+          pattern: "[0-9]*",
+          maxLength: 15,
+          onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+            const value = e.target.value
+            if (value.length > 15) {
+              e.target.value = value.slice(0, 15)
+            }
+          },
+        }}
         rightElement={
           <Text fontSize="sm" whiteSpace="nowrap" position="absolute" left="50px" top="2">
             {t(`${prefix}.cooling.units`)} {t(`${prefix}.cooling.unitsHelpText`)}
@@ -101,6 +202,19 @@ export const CoverSheetForm = ({ onNext }: ICoverSheetFormProps) => {
         required
         fieldName="cooling.minimumCoolingCapacity"
         label={t(`${prefix}.cooling.minimumCoolingCapacity`)}
+        inputProps={{
+          type: "number",
+          step: 1,
+          inputMode: "numeric",
+          pattern: "[0-9]*",
+          maxLength: 15,
+          onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+            const value = e.target.value
+            if (value.length > 15) {
+              e.target.value = value.slice(0, 15)
+            }
+          },
+        }}
         rightElement={
           <Text fontSize="sm" whiteSpace="nowrap" position="absolute" left="50px" top="2">
             {t(`${prefix}.cooling.units`)}
@@ -112,6 +226,19 @@ export const CoverSheetForm = ({ onNext }: ICoverSheetFormProps) => {
         required
         fieldName="cooling.maximumCoolingCapacity"
         label={t(`${prefix}.cooling.maximumCoolingCapacity`)}
+        inputProps={{
+          type: "number",
+          step: 1,
+          inputMode: "numeric",
+          pattern: "[0-9]*",
+          maxLength: 15,
+          onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+            const value = e.target.value
+            if (value.length > 15) {
+              e.target.value = value.slice(0, 15)
+            }
+          },
+        }}
         rightElement={
           <Text fontSize="sm" whiteSpace="nowrap" position="absolute" left="50px" top="2">
             {t(`${prefix}.cooling.units`)}
@@ -144,11 +271,11 @@ export const CoverSheetForm = ({ onNext }: ICoverSheetFormProps) => {
 
       <Text as="p" mt={4} mb={2}>
         {t(`${prefix}.other`)}
-        <TextFormControl fieldName="other" />
+        <TextFormControl fieldName="other" maxLength={310} />
       </Text>
       <Text as="p" mt={4} mb={2}>
         {t(`${prefix}.notes`)}
-        <TextFormControl fieldName="notes" />
+        <TextFormControl fieldName="notes" maxLength={190} />
       </Text>
       <Divider my={10} />
       <Box mb={6} backgroundColor="gray.100" p={4} borderRadius="md">
@@ -161,13 +288,29 @@ export const CoverSheetForm = ({ onNext }: ICoverSheetFormProps) => {
           required
           fieldName="calculationPerformedBy.name"
           label={t(`${prefix}.calculationPerformedBy.name`)}
+          maxLength={50}
         />
         <Box>
-          <TextFormControl
-            required
-            fieldName="calculationPerformedBy.attestation"
-            label={t(`${prefix}.calculationPerformedBy.attestation`)}
-          />
+          <HStack spacing={3} align="start">
+            <Box flex={1}>
+              <TextFormControl
+                required
+                fieldName="calculationPerformedBy.attestation"
+                label={t(`${prefix}.calculationPerformedBy.attestation`)}
+                maxLength={50}
+              />
+            </Box>
+            <Button
+              variant="outline"
+              size="md"
+              leftIcon={<AddressBook size={16} />}
+              onClick={onContactsOpen}
+              mt={8}
+              alignSelf="start"
+            >
+              {t("ui.autofill")}
+            </Button>
+          </HStack>
           <Text as="p" mt={1} mb={2}>
             {t(`${prefix}.calculationPerformedBy.helpText`)}
           </Text>
@@ -177,28 +320,32 @@ export const CoverSheetForm = ({ onNext }: ICoverSheetFormProps) => {
           required
           fieldName="calculationPerformedBy.address"
           label={t(`${prefix}.calculationPerformedBy.address`)}
+          maxLength={50}
         />
         <TextFormControl
           required
           fieldName="calculationPerformedBy.company"
           label={t(`${prefix}.calculationPerformedBy.company`)}
+          maxLength={50}
         />
         <TextFormControl
           required
           fieldName="calculationPerformedBy.city"
           label={t(`${prefix}.calculationPerformedBy.city`)}
+          maxLength={50}
         />
         <TextFormControl
           required
           fieldName="calculationPerformedBy.postalCode"
           label={t(`${prefix}.calculationPerformedBy.postalCode`)}
+          maxLength={50}
         />
-        <TextFormControl
+        <PhoneFormControl
           required
           fieldName="calculationPerformedBy.phone"
           label={t(`${prefix}.calculationPerformedBy.phone`)}
         />
-        <TextFormControl
+        <EmailFormControl
           required
           fieldName="calculationPerformedBy.email"
           label={t(`${prefix}.calculationPerformedBy.email`)}
@@ -207,22 +354,19 @@ export const CoverSheetForm = ({ onNext }: ICoverSheetFormProps) => {
           required
           fieldName="calculationPerformedBy.fax"
           label={t(`${prefix}.calculationPerformedBy.fax`)}
+          maxLength={50}
         />
-        <Box width="100%" height="300px" border="1px solid" borderColor="gray.300" p={2} borderRadius="md">
-          <Text as="p" mt={1} mb={2}>
-            {t(`${prefix}.calculationPerformedBy.designersSignature`)}
-          </Text>
-        </Box>
-
         <TextFormControl
           required
           fieldName="calculationPerformedBy.reference1"
           label={t(`${prefix}.calculationPerformedBy.reference1`)}
+          maxLength={50}
         />
         <TextFormControl
           required
           fieldName="calculationPerformedBy.reference2"
           label={t(`${prefix}.calculationPerformedBy.reference2`)}
+          maxLength={50}
         />
         <DatePickerFormControl
           label={t(`${prefix}.calculationPerformedBy.issuedForDate`)}
@@ -237,15 +381,21 @@ export const CoverSheetForm = ({ onNext }: ICoverSheetFormProps) => {
           isReadOnly
         />
       </Grid>
-      <Divider my={10} />
-      <Box width="100%" height="300px" border="1px solid" borderColor="gray.300" p={2} borderRadius="md">
-        <Text as="p" mt={1} mb={2}>
-          {t(`${prefix}.calculationPerformedBy.softwareInfo`)}
-        </Text>
-      </Box>
-      <Button mt={10} mb={10} colorScheme="blue" onClick={onNext}>
-        {t(`${prefix}.calculationPerformedBy.next`)}
-      </Button>
+      <Flex justify="flex-end" mt={10} mb={10}>
+        <Button variant="primary" onClick={onNext}>
+          {t(`${prefix}.calculationPerformedBy.next`)}
+        </Button>
+      </Flex>
+
+      {/* Contact Modal for autofill */}
+      <ContactModal
+        isOpen={isContactsOpen}
+        onOpen={onContactsOpen}
+        onClose={onContactsClose}
+        onContactChange={onContactChange}
+        submissionState={{ data: {} }}
+        setSubmissionState={() => {}}
+      />
     </Box>
   )
 }

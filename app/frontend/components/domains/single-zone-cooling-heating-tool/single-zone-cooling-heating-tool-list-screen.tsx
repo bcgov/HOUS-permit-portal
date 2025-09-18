@@ -1,6 +1,7 @@
 import {
   Button,
   Container,
+  Flex,
   Heading,
   HStack,
   Modal,
@@ -9,27 +10,27 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
-  Spinner,
   Tab,
-  Table,
   TabList,
   TabPanel,
   TabPanels,
   Tabs,
-  Tbody,
-  Td,
-  Th,
-  Thead,
-  Tr,
   useDisclosure,
+  VStack,
 } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
 import { FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../setup/root"
+import { Paginator } from "../../shared/base/inputs/paginator"
+import { PerPageSelect } from "../../shared/base/inputs/per-page-select"
+import { SharedSpinner } from "../../shared/base/shared-spinner"
+import { SearchGrid } from "../../shared/grid/search-grid"
 import { CoverSheetForm } from "./cover-sheet-form"
 import { InputSummaryForm } from "./input-summary-form"
+import { PdfFormGridRow } from "./pdf-form-grid-row"
+import { PdfFormsGridHeader } from "./pdf-forms-grid-header"
 import { RoomByRoomForm } from "./room-by-room-form"
 
 export const SingleZoneCoolingHeatingToolListScreen = observer(() => {
@@ -43,11 +44,31 @@ export const SingleZoneCoolingHeatingToolListScreen = observer(() => {
   const [editTabIndex, setEditTabIndex] = useState(0)
   const { isOpen, onOpen, onClose } = useDisclosure()
 
-  useEffect(() => {
-    pdfFormStore.getPdfForms()
-  }, [])
+  const {
+    currentPage,
+    totalPages,
+    totalCount,
+    countPerPage,
+    setCurrentPage,
+    setCountPerPage,
+    isSearching,
+    tablePdfForms,
+    searchPdfForms,
+  } = pdfFormStore
 
-  const pdfForms = pdfFormStore.pdfForms
+  const handleCountPerPageChange = (newCount: number) => {
+    setCountPerPage(newCount)
+    searchPdfForms({ countPerPage: newCount, page: 1 })
+  }
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page)
+    searchPdfForms({ page })
+  }
+
+  useEffect(() => {
+    searchPdfForms()
+  }, [])
 
   const generatePdf = async (id: string) => {
     setLoadingPdfs((prev) => ({ ...prev, [id]: true }))
@@ -95,8 +116,37 @@ export const SingleZoneCoolingHeatingToolListScreen = observer(() => {
 
   const openEdit = (id: string, currentJson: any) => {
     setEditingId(id)
-    // Prefill form values
-    formMethods.reset(currentJson ?? {})
+
+    const formData = currentJson ?? {}
+    const mappedFormData = {
+      ...formData,
+      AboveGradeWalls_styleA: formData.aboveGradeWallsStyleA || "",
+      AboveGradeWalls_styleB: formData.aboveGradeWallsStyleB || "",
+      AboveGradeWalls_styleC: formData.aboveGradeWallsStyleC || "",
+      BelowGradeWalls_styleA: formData.belowGradeWallsStyleA || "",
+      BelowGradeWalls_styleB: formData.belowGradeWallsStyleB || "",
+      BelowGradeWalls_styleC: formData.belowGradeWallsStyleC || "",
+      Ceilings_styleA: formData.ceilingsStyleA || "",
+      Ceilings_styleB: formData.ceilingsStyleB || "",
+      Ceilings_styleC: formData.ceilingsStyleC || "",
+      FloorsonSoil_styleA: formData.floorsonSoilStyleA || "",
+      FloorsonSoil_styleB: formData.floorsonSoilStyleB || "",
+      FloorsonSoil_styleC: formData.floorsonSoilStyleC || "",
+      Windows_styleA: formData.windowsStyleA || "",
+      Windows_styleB: formData.windowsStyleB || "",
+      Windows_styleC: formData.windowsStyleC || "",
+      ExposedFloors_styleA: formData.exposedFloorsStyleA || "",
+      ExposedFloors_styleB: formData.exposedFloorsStyleB || "",
+      ExposedFloors_styleC: formData.exposedFloorsStyleC || "",
+      Doors_styleA: formData.doorsStyleA || "",
+      Doors_styleB: formData.doorsStyleB || "",
+      Doors_styleC: formData.doorsStyleC || "",
+      Skylights_styleA: formData.skylightsStyleA || "",
+      Skylights_styleB: formData.skylightsStyleB || "",
+      Skylights_styleC: formData.skylightsStyleC || "",
+    }
+    formMethods.reset(mappedFormData)
+
     setEditTabIndex(0)
     onOpen()
   }
@@ -117,7 +167,9 @@ export const SingleZoneCoolingHeatingToolListScreen = observer(() => {
       <Heading as="h1" mt="16" mb="6">
         {t("singleZoneCoolingHeatingTool.title")}
       </Heading>
-      <Button onClick={() => (window.location.href = "/single-zone-cooling-heating-tool")}>Back</Button>
+      <Button onClick={() => (window.location.href = "/single-zone-cooling-heating-tool")}>
+        {t("singleZoneCoolingHeatingTool.addNewForm")}
+      </Button>
       <FormProvider {...formMethods}>
         <Tabs isLazy index={activeTabIndex} onChange={setActiveTabIndex}>
           <TabList>
@@ -125,56 +177,42 @@ export const SingleZoneCoolingHeatingToolListScreen = observer(() => {
           </TabList>
           <TabPanels>
             <TabPanel>
-              <Table>
-                <Thead>
-                  <Tr>
-                    <Th>{t("singleZoneCoolingHeatingTool.formType")}</Th>
-                    <Th>{t("singleZoneCoolingHeatingTool.status")}</Th>
-                    <Th>{t("singleZoneCoolingHeatingTool.createdAt")}</Th>
-                  </Tr>
-                </Thead>
-                <Tbody>
-                  {pdfForms.map((pdfForm) => (
-                    <Tr key={pdfForm.id}>
-                      <Td>
-                        {pdfForm.formType} | {pdfForm.id}
-                      </Td>
-                      <Td>{pdfForm.status ? "Active" : "Inactive"}</Td>
-                      <Td>{pdfForm.createdAt?.toLocaleDateString()}</Td>
-                      <Td>
-                        <HStack spacing={3}>
-                          <Button
-                            onClick={() => generatePdf(pdfForm.id)}
-                            isDisabled={loadingPdfs[pdfForm.id] || !!generatedPdfs[pdfForm.id]}
-                          >
-                            {t("singleZoneCoolingHeatingTool.generatePdf")}
-                          </Button>
-                          {loadingPdfs[pdfForm.id] && <Spinner size="sm" color="blue.500" />}
-                          {generatedPdfs[pdfForm.id] && (
-                            <Button
-                              size="sm"
-                              colorScheme="blue"
-                              variant="outline"
-                              onClick={() => handleDownloadPdf(pdfForm.id)}
-                            >
-                              Download PDF
-                            </Button>
-                          )}
-                        </HStack>
-                      </Td>
-                      <Td>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => openEdit(pdfForm.id, (pdfForm as any).formJson)}
-                        >
-                          {t("ui.update")}
-                        </Button>
-                      </Td>
-                    </Tr>
-                  ))}
-                </Tbody>
-              </Table>
+              <VStack alignItems={"flex-start"} spacing={5} w={"full"} h={"full"}>
+                <SearchGrid templateColumns="1fr 1fr 2fr" gridRowClassName="pdf-form-grid-row">
+                  <PdfFormsGridHeader />
+                  {isSearching ? (
+                    <Flex py="50" gridColumn={"span 3"}>
+                      <SharedSpinner />
+                    </Flex>
+                  ) : (
+                    tablePdfForms.map((pdfForm) => (
+                      <PdfFormGridRow
+                        key={pdfForm.id}
+                        pdfForm={pdfForm}
+                        onGeneratePdf={generatePdf}
+                        onDownloadPdf={handleDownloadPdf}
+                        isGenerating={!!loadingPdfs[pdfForm.id]}
+                        isDownloaded={!!generatedPdfs[pdfForm.id]}
+                      />
+                    ))
+                  )}
+                </SearchGrid>
+                <Flex w={"full"} justifyContent={"space-between"}>
+                  <PerPageSelect
+                    handleCountPerPageChange={handleCountPerPageChange}
+                    countPerPage={countPerPage}
+                    totalCount={totalCount}
+                  />
+                  <Paginator
+                    current={currentPage}
+                    total={totalCount}
+                    totalPages={totalPages}
+                    pageSize={countPerPage}
+                    handlePageChange={handlePageChange}
+                    showLessItems={true}
+                  />
+                </Flex>
+              </VStack>
               <Modal isOpen={isOpen} onClose={onClose} size="6xl">
                 <ModalOverlay />
                 <ModalContent>
@@ -204,7 +242,7 @@ export const SingleZoneCoolingHeatingToolListScreen = observer(() => {
                   <ModalFooter>
                     <HStack spacing={3}>
                       <Button onClick={onClose}>{t("ui.cancel")}</Button>
-                      <Button colorScheme="blue" onClick={saveEdit}>
+                      <Button variant="primary" onClick={saveEdit}>
                         {t("ui.save")}
                       </Button>
                     </HStack>

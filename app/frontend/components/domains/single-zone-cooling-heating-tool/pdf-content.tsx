@@ -469,8 +469,8 @@ export const SingleZoneCoolingHeatingPDFContent: React.FC<PDFComponentProps> = (
                 </View>
                 <View style={{ width: "300pt" }}>
                   <Text style={{ fontSize: 6 }}>{t(`${prefix}.pdfContent.other`)}:</Text>
-                  <View style={{ borderBottom: "1pt solid black", marginLeft: "10pt", width: "300pt" }}>
-                    <Text style={{ fontSize: 6 }}>{formJson.other || ""}</Text>
+                  <View style={{ borderBottom: "1pt solid black", marginLeft: "15pt", width: "300pt" }}>
+                    <Text style={{ fontSize: 6 }}>{(formJson.other || "").slice(0, 120)}</Text>
                   </View>
                   <View style={{ position: "absolute", right: "-30pt", top: "10pt" }}>
                     <Text style={styles.fieldNumber}>i</Text>
@@ -481,10 +481,8 @@ export const SingleZoneCoolingHeatingPDFContent: React.FC<PDFComponentProps> = (
             <View style={[styles.formRow, { minHeight: 15 }]}>
               <View style={{ flexDirection: "row", alignItems: "center" }}>
                 <Text style={{ fontSize: 6, marginLeft: 5 }}>{t(`${prefix}.pdfContent.other`)}:</Text>
-                <View
-                  style={{ borderBottom: "1pt solid black", flex: 1, marginLeft: 10, marginRight: 10, marginTop: 5 }}
-                >
-                  <Text style={{ fontSize: 6, color: "transparent" }}>.</Text>
+                <View style={{ width: "100%", marginLeft: 10, marginRight: 10, marginTop: 5 }}>
+                  <Text style={{ fontSize: 6 }}>{(formJson.other || "").slice(120)}</Text>
                 </View>
               </View>
               <View style={{ position: "absolute", right: "2pt", top: "8pt" }}>
@@ -521,7 +519,7 @@ export const SingleZoneCoolingHeatingPDFContent: React.FC<PDFComponentProps> = (
                 {[
                   [
                     t(`${prefix}.pdfContent.calculationsPerformedByName`),
-                    formJson.calculationPerformedBy?.attestation || "",
+                    formJson.calculationPerformedBy?.name || "",
                     55,
                   ],
                   [
@@ -650,7 +648,10 @@ export const SingleZoneCoolingHeatingPDFContent: React.FC<PDFComponentProps> = (
                 </View>
                 <View style={{ position: "relative" }}>
                   <Text style={{ fontSize: 6, paddingBottom: 2, paddingTop: 5, paddingLeft: 2 }}>
-                    {t(`${prefix}.pdfContent.issuedForDate`)} {formJson.calculationPerformedBy?.issuedForDate || ""}
+                    {t(`${prefix}.pdfContent.issuedForDate`)}{" "}
+                    {formJson.calculationPerformedBy?.issuedForDate
+                      ? new Date(formJson.calculationPerformedBy.issuedForDate).toLocaleDateString()
+                      : ""}
                   </Text>
                   <View style={{ width: "180pt", position: "absolute", right: "1pt", top: "8pt" }}>
                     <Text style={styles.fieldNumber}>66</Text>
@@ -666,7 +667,10 @@ export const SingleZoneCoolingHeatingPDFContent: React.FC<PDFComponentProps> = (
                   }}
                 ></Text>
                 <Text style={{ fontSize: 6, paddingBottom: 2, paddingTop: 5, paddingLeft: 2 }}>
-                  {t(`${prefix}.pdfContent.issuedForDate2`)} {formJson.calculationPerformedBy?.issuedForDate2 || ""}
+                  {t(`${prefix}.pdfContent.issuedForDate2`)}{" "}
+                  {formJson.calculationPerformedBy?.issuedForDate2
+                    ? new Date(formJson.calculationPerformedBy.issuedForDate2).toLocaleDateString()
+                    : ""}
                 </Text>
                 <View style={{ width: "180pt", position: "relative", right: "-2pt", top: "7pt" }}>
                   <Text style={styles.fieldNumber}>67</Text>

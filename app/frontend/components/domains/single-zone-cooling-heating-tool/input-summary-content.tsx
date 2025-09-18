@@ -1,7 +1,6 @@
 import { Image, Page, StyleSheet, Text, View } from "@react-pdf/renderer"
 import React from "react"
 import { useTranslation } from "react-i18next"
-import { getStyleValue } from "../../../utils/object-utils"
 
 const styles = StyleSheet.create({
   page: {
@@ -481,7 +480,8 @@ export const SingleZoneCoolingHeatingInputSummaryContent: React.FC<PDFComponentP
           <View style={{ borderLeft: "1pt solid black", minHeight: 17, width: 1 }}></View>
           <View style={[styles.fieldLabel, { width: 150 }]}>
             <Text style={{ fontSize: 6 }}>
-              {t(`${prefix}.inputSummary.calculationBasedOn.internal`)}: {formJson.calculationBasedOn?.internal || ""}
+              {t(`${prefix}.inputSummary.calculationBasedOn.internal`)}:{" "}
+              {formJson.calculationBasedOn?.internal_shading || ""}
             </Text>
             <View style={{ position: "absolute", right: "0pt", top: "7pt" }}>
               <Text style={styles.fieldNumber}>21</Text>
@@ -532,7 +532,7 @@ export const SingleZoneCoolingHeatingInputSummaryContent: React.FC<PDFComponentP
           <View style={[styles.fieldLabel, { width: 270 }]}>
             <Text style={{ fontSize: 6 }}>
               {t(`${prefix}.inputSummary.calculationBasedOn.windShelteringBuilding`)}:{" "}
-              {formJson.climateData?.climateData?.windShelteringBuilding || ""}
+              {formJson.climateData?.windShelteringBuilding || ""}
             </Text>
             <View style={{ position: "absolute", right: "0pt", top: "7pt" }}>
               <Text style={styles.fieldNumber}>20a</Text>
@@ -586,7 +586,7 @@ export const SingleZoneCoolingHeatingInputSummaryContent: React.FC<PDFComponentP
           <View style={{ borderLeft: "1pt solid black", minHeight: 17, width: 1 }}></View>
           <View style={[styles.fieldLabel, { width: 148 }]}>
             <Text style={{ fontSize: 7 }}>
-              {t(`${prefix}.inputSummary.calculationBasedOn.ASE`)}: {formJson.climateData?.ASE || ""}
+              {t(`${prefix}.inputSummary.calculationBasedOn.ASE`)}: {formJson.climateData?.ase || ""}
             </Text>
             <View style={{ position: "absolute", right: "0pt", top: "7pt" }}>
               <Text style={styles.fieldNumber}>15</Text>
@@ -595,7 +595,7 @@ export const SingleZoneCoolingHeatingInputSummaryContent: React.FC<PDFComponentP
           <View style={{ borderLeft: "1pt solid black", minHeight: 17, width: 1 }}></View>
           <View style={[styles.fieldLabel, { width: 147 }]}>
             <Text style={{ fontSize: 7 }}>
-              {t(`${prefix}.inputSummary.calculationBasedOn.ATRE`)}: {formJson.climateData?.ATRE || ""}
+              {t(`${prefix}.inputSummary.calculationBasedOn.ATRE`)}: {formJson.climateData?.atre || ""}
             </Text>
             <View style={{ position: "absolute", right: "0pt", top: "7pt" }}>
               <Text style={styles.fieldNumber}>15a</Text>
@@ -668,7 +668,7 @@ export const SingleZoneCoolingHeatingInputSummaryContent: React.FC<PDFComponentP
                   {formJson.heatingDesignConditions?.slabFluidTemp || ""}
                 </Text>
                 <View style={{ position: "absolute", right: "0pt", top: "7pt" }}>
-                  <Text style={styles.fieldNumber}>28</Text>
+                  <Text style={styles.fieldNumber}>26c</Text>
                 </View>
               </View>
             </View>
@@ -737,7 +737,7 @@ export const SingleZoneCoolingHeatingInputSummaryContent: React.FC<PDFComponentP
               <View key={label} style={index === 2 ? styles.formRowLast : styles.formRow}>
                 <View style={[styles.fieldLabel, { minHeight: 20 }]}>
                   <Text style={{ fontSize: 6 }}>
-                    {label}: {getStyleValue(formJson, "aboveGradeWalls", styleKey)}
+                    {label}: {formJson[`aboveGradeWallsStyle${styleKey.slice(-1).toUpperCase()}`] || "[EMPTY]"}
                   </Text>
                 </View>
                 <View style={{ position: "absolute", right: "5pt", top: "13pt" }}>
@@ -760,7 +760,7 @@ export const SingleZoneCoolingHeatingInputSummaryContent: React.FC<PDFComponentP
               <View key={label} style={index === 2 ? styles.formRowLast : styles.formRow}>
                 <View style={[styles.fieldLabel, { minHeight: 20 }]}>
                   <Text style={{ fontSize: 6 }}>
-                    {label}: {getStyleValue(formJson, "belowGradeWalls", styleKey)}
+                    {label}: {formJson[`belowGradeWallsStyle${styleKey.slice(-1).toUpperCase()}`] || "[EMPTY]"}
                   </Text>
                 </View>
                 <View style={{ position: "absolute", right: "5pt", top: "13pt" }}>
@@ -786,7 +786,7 @@ export const SingleZoneCoolingHeatingInputSummaryContent: React.FC<PDFComponentP
               <View key={label} style={index === 2 ? styles.formRowLast : styles.formRow}>
                 <View style={[styles.fieldLabel, { minHeight: 20 }]}>
                   <Text style={{ fontSize: 6 }}>
-                    {label}: {getStyleValue(formJson, "ceilings", styleKey)}
+                    {label}: {formJson[`ceilingsStyle${styleKey.slice(-1).toUpperCase()}`] || "[EMPTY]"}
                   </Text>
                 </View>
                 <View style={{ position: "absolute", right: "5pt", top: "13pt" }}>
@@ -809,7 +809,7 @@ export const SingleZoneCoolingHeatingInputSummaryContent: React.FC<PDFComponentP
               <View key={label} style={index === 2 ? styles.formRowLast : styles.formRow}>
                 <View style={[styles.fieldLabel, { minHeight: 20 }]}>
                   <Text style={{ fontSize: 6 }}>
-                    {label}: {getStyleValue(formJson, "floorsOnSoil", styleKey)}
+                    {label}: {formJson[`floorsonSoilStyle${styleKey.slice(-1).toUpperCase()}`] || "[EMPTY]"}
                   </Text>
                 </View>
                 <View style={{ position: "absolute", right: "5pt", top: "13pt" }}>
@@ -835,7 +835,7 @@ export const SingleZoneCoolingHeatingInputSummaryContent: React.FC<PDFComponentP
               <View key={label} style={index === 2 ? styles.formRowLast : styles.formRow}>
                 <View style={[styles.fieldLabel, { minHeight: 20 }]}>
                   <Text style={{ fontSize: 6 }}>
-                    {label}: {getStyleValue(formJson, "windows", styleKey)}
+                    {label}: {formJson[`windowsStyle${styleKey.slice(-1).toUpperCase()}`] || "[EMPTY]"}
                   </Text>
                 </View>
                 <View style={{ position: "absolute", right: "5pt", top: "13pt" }}>
@@ -858,7 +858,7 @@ export const SingleZoneCoolingHeatingInputSummaryContent: React.FC<PDFComponentP
               <View key={label} style={index === 2 ? styles.formRowLast : styles.formRow}>
                 <View style={[styles.fieldLabel, { minHeight: 20 }]}>
                   <Text style={{ fontSize: 6 }}>
-                    {label}: {getStyleValue(formJson, "exposedFloors", styleKey)}
+                    {label}: {formJson[`exposedFloorsStyle${styleKey.slice(-1).toUpperCase()}`] || "[EMPTY]"}
                   </Text>
                 </View>
                 <View style={{ position: "absolute", right: "5pt", top: "13pt" }}>
@@ -884,7 +884,7 @@ export const SingleZoneCoolingHeatingInputSummaryContent: React.FC<PDFComponentP
               <View key={label} style={index === 2 ? styles.formRowLast : styles.formRow}>
                 <View style={[styles.fieldLabel, { minHeight: 20 }]}>
                   <Text style={{ fontSize: 6 }}>
-                    {label}: {getStyleValue(formJson, "skylights", styleKey)}
+                    {label}: {formJson[`skylightsStyle${styleKey.slice(-1).toUpperCase()}`] || "[EMPTY]"}
                   </Text>
                 </View>
                 <View style={{ position: "absolute", right: "5pt", top: "13pt" }}>
@@ -907,7 +907,7 @@ export const SingleZoneCoolingHeatingInputSummaryContent: React.FC<PDFComponentP
               <View key={label} style={index === 2 ? styles.formRowLast : styles.formRow}>
                 <View style={[styles.fieldLabel, { minHeight: 20 }]}>
                   <Text style={{ fontSize: 6 }}>
-                    {label}: {getStyleValue(formJson, "doors", styleKey)}
+                    {label}: {formJson[`doorsStyle${styleKey.slice(-1).toUpperCase()}`] || "[EMPTY]"}
                   </Text>
                 </View>
                 <View style={{ position: "absolute", right: "5pt", top: "13pt" }}>

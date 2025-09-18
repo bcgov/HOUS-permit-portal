@@ -828,8 +828,14 @@ export class Api {
     })
   }
 
-  async getPdfForms() {
-    return this.client.get<ApiResponse<IPdfForm[]>>("/pdf_forms")
+  async getPdfForms(params?: {
+    page?: number
+    per_page?: number
+    query?: string
+    sort_field?: string
+    sort_direction?: string
+  }) {
+    return this.client.get<ApiResponse<IPdfForm[]>>("/pdf_forms", params)
   }
 
   async generatePdf(id: string) {

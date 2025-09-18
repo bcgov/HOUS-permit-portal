@@ -423,10 +423,6 @@ const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
                     label={t("home.joinTheBuildingPermitHub.title")}
                     to={"/onboarding-checklist-page-for-lg-adopting"}
                   />
-                  <NavMenuItem
-                    label={t("singleZoneCoolingHeatingTool.title")}
-                    to={"/single-zone-cooling-heating-tool"}
-                  />
                   <NavMenuItem label={t("home.projectReadinessTools.title")} to={"/project-readiness-tools"} />
                 </MenuGroup>
               </>

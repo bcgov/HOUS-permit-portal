@@ -200,7 +200,6 @@ export const SingleZoneCoolingHeatingRoomByRoomContent: React.FC<PDFComponentPro
       alignItems: "stretch",
     },
     bottomLeft: {
-      flex: 1,
       border: "1pt solid black",
       padding: 8,
       textAlign: "center",
@@ -210,12 +209,12 @@ export const SingleZoneCoolingHeatingRoomByRoomContent: React.FC<PDFComponentPro
       justifyContent: "center",
       alignItems: "center",
       minHeight: 40,
-      width: 585,
+      width: 410,
       borderTop: "none",
     },
     bottomRight: {
       border: "1pt solid black",
-      width: 181.5,
+      width: 165,
       borderTop: "none",
       borderLeft: "none",
       textAlign: "center",
@@ -321,30 +320,40 @@ export const SingleZoneCoolingHeatingRoomByRoomContent: React.FC<PDFComponentPro
       <View style={styles.formSection}>
         <View style={[styles.formRow, { minHeight: 17 }]}>
           <View style={[styles.fieldLabel, { width: 300 }]}>
-            <Text style={{ fontSize: 7 }}>{t(`${prefix}.model`)}:</Text>
-          </View>
-          <View style={{ borderLeft: "1pt solid black", minHeight: 17, width: 1 }}></View>
-          <View style={[styles.fieldLabel, { width: 150 }]}>
-            <Text style={{ fontSize: 7 }}>{t(`${prefix}.site`)}:</Text>
-          </View>
-          <View style={{ borderLeft: "1pt solid black", minHeight: 17, width: 1 }}></View>
-          <View style={[styles.fieldLabel, { width: 150 }]}>
-            <Text style={{ fontSize: 7 }}>{t(`${prefix}.lot`)}:</Text>
-          </View>
-        </View>
-        <View style={[styles.formRowLast, { minHeight: 17 }]}>
-          <View style={[styles.fieldLabel, { width: 300 }]}>
-            <Text style={{ fontSize: 7 }}>{t(`${prefix}.address`)}:</Text>
-          </View>
-          <View style={{ borderLeft: "1pt solid black", minHeight: 17, width: 1 }}></View>
-          <View style={[styles.fieldLabel, { width: 150 }]}>
             <Text style={{ fontSize: 7 }}>
-              {t(`${prefix}.city`)}/{t(`${prefix}.province`)}:
+              {t(`${prefix}.model`)}:{formJson.buildingLocation?.model || ""}
             </Text>
           </View>
           <View style={{ borderLeft: "1pt solid black", minHeight: 17, width: 1 }}></View>
           <View style={[styles.fieldLabel, { width: 150 }]}>
-            <Text style={{ fontSize: 7 }}>{t(`${prefix}.postalCode`)}:</Text>
+            <Text style={{ fontSize: 7 }}>
+              {t(`${prefix}.site`)}:{formJson.buildingLocation?.site || ""}
+            </Text>
+          </View>
+          <View style={{ borderLeft: "1pt solid black", minHeight: 17, width: 1 }}></View>
+          <View style={[styles.fieldLabel, { width: 150 }]}>
+            <Text style={{ fontSize: 7 }}>
+              {t(`${prefix}.lot`)}:{formJson.buildingLocation?.lot || ""}
+            </Text>
+          </View>
+        </View>
+        <View style={[styles.formRowLast, { minHeight: 17 }]}>
+          <View style={[styles.fieldLabel, { width: 300 }]}>
+            <Text style={{ fontSize: 7 }}>
+              {t(`${prefix}.address`)}: {formJson.buildingLocation?.address || ""}
+            </Text>
+          </View>
+          <View style={{ borderLeft: "1pt solid black", minHeight: 17, width: 1 }}></View>
+          <View style={[styles.fieldLabel, { width: 150 }]}>
+            <Text style={{ fontSize: 7 }}>
+              {t(`${prefix}.city`)}/{t(`${prefix}.province`)}: {formJson.buildingLocation?.city || ""}
+            </Text>
+          </View>
+          <View style={{ borderLeft: "1pt solid black", minHeight: 17, width: 1 }}></View>
+          <View style={[styles.fieldLabel, { width: 150 }]}>
+            <Text style={{ fontSize: 7 }}>
+              {t(`${prefix}.postalCode`)}: {formJson.buildingLocation?.postalCode || ""}
+            </Text>
           </View>
         </View>
       </View>
@@ -378,30 +387,36 @@ export const SingleZoneCoolingHeatingRoomByRoomContent: React.FC<PDFComponentPro
             </View>
             <View style={{ borderLeft: "1pt solid black", minHeight: 12, width: 1 }}></View>
             <View style={[styles.fieldLabel, { flex: 1 }]}>
-              <Text style={{ fontSize: 6 }}>{room.name}</Text>
+              <Text style={{ fontSize: 6 }}>{formJson.roomByRoom?.[room.number]?.name || ""}</Text>
             </View>
             <View style={{ borderLeft: "1pt solid black", minHeight: 12, width: 1 }}></View>
             <View style={[styles.fieldLabel, { width: 80, textAlign: "center" }]}>
-              <Text style={{ fontSize: 6 }}>{room.heating}</Text>
+              <Text style={{ fontSize: 6 }}>{formJson.roomByRoom?.[room.number]?.heating || ""}</Text>
             </View>
             <View style={{ borderLeft: "1pt solid black", minHeight: 12, width: 1 }}></View>
             <View style={[styles.fieldLabel, { width: 80, textAlign: "center" }]}>
-              <Text style={{ fontSize: 6 }}>{room.cooling}</Text>
+              <Text style={{ fontSize: 6 }}>{formJson.roomByRoom?.[room.number]?.cooling || ""}</Text>
             </View>
           </View>
         ))}
 
         <View style={[styles.formRow, { minHeight: 14 }]}>
           <View style={[styles.fieldLabel, { flex: 1, alignItems: "flex-end" }]}>
-            <Text style={{ fontSize: 7, fontWeight: "bold", paddingLeft: 5 }}>{t(`${prefix}.ventilationLoss`)}</Text>
+            <Text style={{ fontSize: 7, fontWeight: "bold", paddingLeft: 5 }}>{t(`${prefix}.ventilationLoss`)} </Text>
           </View>
           <View style={{ borderLeft: "1pt solid black", minHeight: 14, width: 1 }}></View>
           <View style={[styles.fieldLabel, { width: 80, textAlign: "center" }]}>
-            <Text style={{ fontSize: 7, fontWeight: "bold" }}>{t(`${prefix}.BtuPerH`)}</Text>
+            <Text style={{ fontSize: 7, fontWeight: "bold" }}>
+              {" "}
+              {formJson.roomByRoomSummary?.ventilationLoss || ""} {t(`${prefix}.BtuPerH`)}
+            </Text>
           </View>
           <View style={{ borderLeft: "1pt solid black", minHeight: 14, width: 1 }}></View>
           <View style={[styles.fieldLabel, { width: 80, textAlign: "center" }]}>
-            <Text style={{ fontSize: 7, fontWeight: "bold" }}>{t(`${prefix}.BtuPerH`)}</Text>
+            <Text style={{ fontSize: 7, fontWeight: "bold" }}>
+              {" "}
+              {formJson.roomByRoomSummary?.latentGain || ""} {t(`${prefix}.BtuPerH`)}
+            </Text>
           </View>
         </View>
 
@@ -413,11 +428,17 @@ export const SingleZoneCoolingHeatingRoomByRoomContent: React.FC<PDFComponentPro
           </View>
           <View style={{ borderLeft: "1pt solid black", minHeight: 14, width: 1 }}></View>
           <View style={[styles.fieldLabel, { width: 80, textAlign: "center" }]}>
-            <Text style={{ fontSize: 7, fontWeight: "bold" }}>{t(`${prefix}.BtuPerH`)}</Text>
+            <Text style={{ fontSize: 7, fontWeight: "bold" }}>
+              {" "}
+              {formJson.roomByRoomSummary?.totalBuildingLoss || ""} {t(`${prefix}.BtuPerH`)}
+            </Text>
           </View>
           <View style={{ borderLeft: "1pt solid black", minHeight: 14, width: 1 }}></View>
           <View style={[styles.fieldLabel, { width: 80, textAlign: "center" }]}>
-            <Text style={{ fontSize: 7, fontWeight: "bold" }}>{t(`${prefix}.BtuPerH`)}</Text>
+            <Text style={{ fontSize: 7, fontWeight: "bold" }}>
+              {" "}
+              {formJson.roomByRoomSummary?.nominalCoolingCapacity || ""} {t(`${prefix}.BtuPerH`)}
+            </Text>
           </View>
         </View>
         <View style={[styles.formRow, { minHeight: 14 }]}>
@@ -428,7 +449,16 @@ export const SingleZoneCoolingHeatingRoomByRoomContent: React.FC<PDFComponentPro
           </View>
           <View style={{ borderLeft: "1pt solid black", minHeight: 14, width: 1 }}></View>
           <View style={[styles.fieldLabel, { width: 80, textAlign: "center" }]}>
-            <Text style={{ fontSize: 7 }}>{t(`${prefix}.issued`)}:</Text>
+            <Text style={{ fontSize: 7 }}>
+              {" "}
+              {t(`${prefix}.issued`)}{" "}
+              {formJson.roomByRoomSummary?.issued
+                ? new Date(formJson.roomByRoomSummary.issued).toLocaleDateString()
+                : ""}
+            </Text>
+            <View style={{ width: "370pt", color: "black", position: "relative", top: "17pt" }}>
+              <Text style={styles.fieldNumber}>76</Text>
+            </View>
           </View>
           <View style={{ borderLeft: "1pt solid black", minHeight: 14, width: 1 }}></View>
           <View style={[styles.fieldLabel, { width: 80, textAlign: "center" }]}>
@@ -442,6 +472,9 @@ export const SingleZoneCoolingHeatingRoomByRoomContent: React.FC<PDFComponentPro
           <Text style={{ color: "blue", fontSize: 8 }}>
             {t(`${prefix}.areaForSoftwareVendorsInformationLogoContactInfoVersionNumber`)}
           </Text>
+          <View style={{ width: "395pt", color: "black", position: "relative", top: "12pt" }}>
+            <Text style={styles.fieldNumber}>63</Text>
+          </View>
         </View>
         <View style={styles.bottomRight}>
           <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center" }}>

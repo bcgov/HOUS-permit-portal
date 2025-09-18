@@ -1,17 +1,18 @@
-import { Button, Container, Flex, Heading, Text, useToast } from "@chakra-ui/react"
+import { Button, Container, Heading, Tab, TabList, TabPanel, TabPanels, Tabs, useToast } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useState } from "react"
-import { useForm } from "react-hook-form"
+import { FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../setup/root"
+import { CoverSheetForm } from "./cover-sheet-form"
+import { InputSummaryForm } from "./input-summary-form"
+import { RoomByRoomForm } from "./room-by-room-form"
 
-export const SingleZoneCoolingHeatingToolScreen = observer(() => {
+export const SingleZoneCoolingHeatingToolStartScreen = observer(() => {
   const { t } = useTranslation() as any
   const { pdfFormStore } = useMst()
   const toast = useToast()
   const formMethods = useForm()
-  const { sessionStore } = useMst()
-  const { loggedIn } = sessionStore
 
   const [activeTabIndex, setActiveTabIndex] = useState(0)
 
@@ -56,21 +57,27 @@ export const SingleZoneCoolingHeatingToolScreen = observer(() => {
       <Heading as="h1" mt="16" mb="6">
         {t("singleZoneCoolingHeatingTool.title")}
       </Heading>
-      <Text fontSize="lg" color="text.primary" mb="4">
-        {t("singleZoneCoolingHeatingTool.description")}
-      </Text>
-      <Flex align="flex-start" bg={"semantic.infoLight"} borderRadius="lg" borderColor={"semantic.info"} p={4}>
-        <Flex direction="column" gap={2}>
-          <Text>{t("singleZoneCoolingHeatingTool.info")}</Text>
-          <Button
-            size="sm"
-            variant="primary"
-            onClick={() => (window.location.href = "/single-zone-cooling-heating-tool/start")}
-          >
-            {loggedIn ? t(`singleZoneCoolingHeatingTool.start`) : t(`singleZoneCoolingHeatingTool.loginToStart`)}
-          </Button>
-        </Flex>
-      </Flex>
+      <Button onClick={() => (window.location.href = "/single-zone-cooling-heating-tool/list")}>View List</Button>
+      <FormProvider {...formMethods}>
+        <Tabs isLazy index={activeTabIndex} onChange={setActiveTabIndex}>
+          <TabList>
+            <Tab>{t("singleZoneCoolingHeatingTool.tabs.compliance")}</Tab>
+            <Tab>{t("singleZoneCoolingHeatingTool.tabs.inputSummary")}</Tab>
+            <Tab>{t("singleZoneCoolingHeatingTool.tabs.roomByRoom")}</Tab>
+          </TabList>
+          <TabPanels>
+            <TabPanel>
+              <CoverSheetForm onNext={handleNextFromCoverSheet} />
+            </TabPanel>
+            <TabPanel>
+              <InputSummaryForm onNext={handleNextRoomByRoom} />
+            </TabPanel>
+            <TabPanel>
+              <RoomByRoomForm onSubmit={handleSubmit} />
+            </TabPanel>
+          </TabPanels>
+        </Tabs>
+      </FormProvider>
     </Container>
   )
 })
