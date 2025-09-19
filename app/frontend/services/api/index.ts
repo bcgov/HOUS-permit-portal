@@ -167,8 +167,8 @@ export class Api {
     })
   }
 
-  async fetchPermitClassifications() {
-    return this.client.get<IOptionResponse<IContact>>(`/permit_classifications`)
+  async fetchPermitClassifications(onlyEnabled: boolean = true) {
+    return this.client.get<IOptionResponse<IContact>>(`/permit_classifications`, { onlyEnabled })
   }
 
   async createPermitClassification(permitClassification: {
