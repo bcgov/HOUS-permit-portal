@@ -1,5 +1,4 @@
 import { VStack } from "@chakra-ui/react"
-import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React, { useEffect } from "react"
@@ -7,7 +6,6 @@ import { FormProvider, useFieldArray, useForm } from "react-hook-form"
 import { IJurisdiction } from "../../../../../../models/jurisdiction"
 import { useMst } from "../../../../../../setup/root"
 import { EditableBlock } from "./editable-block"
-import { i18nPrefix } from "./i18n-prefix"
 
 interface IFormProps {
   jurisdiction: IJurisdiction
@@ -78,8 +76,7 @@ export const Form = observer(function SubmissionInboxSetupForm({ jurisdiction }:
             return (
               <EditableBlock
                 key={permitType.id}
-                heading={t(`${i18nPrefix}.permitTypes.${permitType.code}`)}
-                headingLabel={t(`${i18nPrefix}.permitTypes.label`)}
+                heading={permitType.name}
                 permitTypeId={permitType.id}
                 fields={permitTypeFields}
                 fieldArrayName={fieldArrayName}

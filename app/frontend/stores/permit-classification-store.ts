@@ -94,8 +94,8 @@ export const PermitClassificationStoreModel = types
     removeActivity(id: string) {
       self.activityMap.delete(id)
     },
-    fetchPermitClassifications: flow(function* () {
-      const response: any = yield self.environment.api.fetchPermitClassifications()
+    fetchPermitClassifications: flow(function* (onlyEnabled: boolean = true) {
+      const response: any = yield* toGenerator(self.environment.api.fetchPermitClassifications(onlyEnabled))
       if (response.ok) {
         const permitTypeData = response.data.data.filter((pc) => pc.type == EPermitClassificationType.PermitType)
         const activityData = response.data.data.filter((pc) => pc.type == EPermitClassificationType.Activity)
