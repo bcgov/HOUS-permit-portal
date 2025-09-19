@@ -163,7 +163,7 @@ export const FieldsSetup = observer(function FieldsSetup({
 
   const disabledRequirementTypeOptions = (() => {
     const hasEnergyStepCodeRequirement = watchedRequirements?.some(
-      (r) => (r as IRequirementAttributes).inputType === ERequirementType.energyStepCode
+      (r) => (r as IRequirementAttributes).inputType === ERequirementType.energyStepCodePart9
     )
     const hasEnergyStepCodePart3Requirement = watchedRequirements?.some(
       (r) => (r as IRequirementAttributes).inputType === ERequirementType.energyStepCodePart3
@@ -465,6 +465,7 @@ export const FieldsSetup = observer(function FieldsSetup({
                           requirementType={requirementType}
                           label={watch(`requirementsAttributes.${index}.label`)}
                           helperText={watchedHint}
+                          inputOptions={watch(`requirementsAttributes.${index}.inputOptions`)}
                           unit={
                             requirementType === ERequirementType.number
                               ? (watch(`requirementsAttributes.${index}.inputOptions.numberUnit`) ?? null)
