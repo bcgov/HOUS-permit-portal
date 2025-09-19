@@ -55,8 +55,8 @@ export const Part9StepCodeModel = types.snapshotProcessor(
       },
     }))
     .actions((self) => ({
-      updateChecklist: flow(function* (id, values) {
-        const response = yield self.environment.api.updatePart9Checklist(id, values)
+      updateChecklist: flow(function* (id: string, values: Record<string, any>, options?: Record<string, any>) {
+        const response = yield self.environment.api.updatePart9Checklist(id, values, options)
         if (response.ok) {
           self.mergeUpdate(response.data.data, "checklistsMap")
           return true
