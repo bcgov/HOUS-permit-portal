@@ -9,7 +9,7 @@ class Api::PdfFormsController < Api::ApplicationController
     if @pdf_form.save
       render_success @pdf_form,
                      "pdf_form.create_success",
-                     { blueprint: PdfFormBlueprint }
+                     { blueprint: PdfFormBlueprint, status: :created }
     else
       render_error "pdf_form.create_error",
                    {

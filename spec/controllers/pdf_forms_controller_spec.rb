@@ -24,17 +24,20 @@ RSpec.describe Api::PdfFormsController, type: :controller do
                params: {
                  pdf_form: {
                    form_json: form_data,
-                   form_type: "example_form",
+                   form_type: "single_zone_cooling_heating_tool",
                    status: true
                  }
                },
                as: :json
         }.to change(PdfForm, :count).by(1)
 
-        pdf_form = PdfForm.last
+        expect(response).to have_http_status(:created)
+
+        pdf_form = PdfForm.find(JSON.parse(response.body)["data"]["id"])
         expect(pdf_form.user_id).to eq(submitter.id)
         expect(pdf_form.form_json).to eq(form_data)
-        expect(response).to have_http_status(:created)
+        expect(pdf_form.form_type).to eq("single_zone_cooling_heating_tool")
+        expect(pdf_form.status).to be_truthy
       end
     end
 
