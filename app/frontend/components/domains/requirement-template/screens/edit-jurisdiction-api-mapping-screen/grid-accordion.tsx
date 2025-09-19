@@ -137,6 +137,7 @@ export const GridAccordion = observer(function GridAccordion({
                           requirementType={requirementJson.inputType}
                           label={requirementJson.label}
                           helperText={requirementJson.hint}
+                          inputOptions={requirementJson?.inputOptions}
                           unit={requirementJson?.inputOptions?.numberUnit}
                           options={pluck("label", requirementJson.inputOptions?.valueOptions ?? [])}
                           selectProps={{

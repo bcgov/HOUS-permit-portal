@@ -136,6 +136,7 @@ class Api::RequirementBlocksController < Api::ApplicationController
           :can_add_multiple_contacts,
           :energy_step_code,
           :multiple,
+          { headers: %i[first_column a] },
           value_options: [%i[value label]],
           conditional: %i[eq show when hide],
           computed_compliance: [:value, :module, options_map: {}]

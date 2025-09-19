@@ -13,7 +13,7 @@ import { CalendarBlank, Envelope, MapPin, Phone, X } from "@phosphor-icons/react
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React from "react"
-import { Controller, FieldValues, useFieldArray } from "react-hook-form"
+import { Controller, FieldValues, useController, useFieldArray, useFormContext } from "react-hook-form"
 import { UseFieldArrayProps } from "react-hook-form/dist/types"
 import { useTranslation } from "react-i18next"
 import {
@@ -25,6 +25,7 @@ import {
 import { IOption } from "../../../../types/types"
 import { isContactRequirement, isMultiOptionRequirement } from "../../../../utils/utility-functions"
 import { UnitSelect } from "../../../shared/select/selectors/unit-select"
+import { MultiplySumGridPreview } from "../multiply-sum-grid-preview"
 import { EditableGroup, TEditableGroupProps } from "./editable-group"
 import { GenericContactEdit } from "./generic-contact-edit"
 import { PidInfoEdit } from "./pid-info-edit"
@@ -321,7 +322,7 @@ const requirementsComponentMap = {
     const { fields, append, remove } = useFieldArray<TFieldValues>(useFieldArrayProps)
 
     const isEnergyStepCodeDependency =
-      editableGroupProps.requirementCode === EEnergyStepCodeDependencyRequirementCode.energyStepCodeMethod
+      String(editableGroupProps.requirementCode) === EEnergyStepCodeDependencyRequirementCode.energyStepCodeMethod
 
     return (
       <EditableGroup
@@ -509,6 +510,42 @@ const requirementsComponentMap = {
         isOptionalCheckboxProps={isOptionalCheckboxProps}
         controlProps={controlProps}
         {...rest}
+      />
+    )
+  },
+
+  [ERequirementType.multiplySumGrid]: function <TFieldValues>(props: TRequirementEditProps<TFieldValues>) {
+    const { control } = useFormContext<TFieldValues>()
+    const editableLabelName = (props?.editableLabelProps?.controlProps as any)?.name as string | undefined
+    const basePath = editableLabelName ? editableLabelName.replace(/\.label$/, "") : undefined
+
+    const first = useController({
+      control,
+      name: `${basePath}.inputOptions.headers.firstColumn` as any,
+      defaultValue: "Add column header" as any,
+    })
+    const a = useController({
+      control,
+      name: `${basePath}.inputOptions.headers.a` as any,
+      defaultValue: "Add column header" as any,
+    })
+    // b and load are fixed labels in the preview now
+
+    return (
+      <EditableGroup
+        editableInput={
+          <MultiplySumGridPreview
+            headers={{
+              firstColumn: first.field.value as any,
+              a: a.field.value as any,
+            }}
+            controls={{
+              firstColumn: { value: first.field.value as any, onChange: first.field.onChange },
+              a: { value: a.field.value as any, onChange: a.field.onChange },
+            }}
+          />
+        }
+        {...props}
       />
     )
   },

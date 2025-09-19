@@ -194,6 +194,8 @@ class RequirementFormJsonService
         get_contact_form_json(requirement_block_key)
       elsif requirement.input_type_pid_info?
         get_pid_info_components(requirement_block_key, requirement.required)
+      elsif requirement.input_type_multiply_sum_grid?
+        get_multiply_sum_grid_form_json(requirement_block_key)
       else
         {
           id: requirement.id,
@@ -579,6 +581,138 @@ class RequirementFormJsonService
       ]
     }
     multi_data_grid_form_json(key, component, true, "Add #{requirement.label}")
+  end
+
+  def get_multiply_sum_grid_form_json(
+    requirement_block_key = requirement&.requirement_block&.key
+  )
+    return {} unless requirement.input_type_multiply_sum_grid?
+
+    grid_key = "#{requirement.key(requirement_block_key)}|grid"
+    total_key = "#{requirement.key(requirement_block_key)}|totalLoad"
+    section_key = PermitApplication.section_from_key(requirement_block_key)
+
+    # Allow rows to be provided via input_options["rows"]. Each row should
+    # be a hash with { name: String, fixtureUnits: Number }.
+    configured_rows = requirement.input_options["rows"]
+    default_rows = [
+      { name: "Bathroom Group - three fixtures only", fixtureUnits: 3.6 },
+      { name: "Bathtub", fixtureUnits: 1.4 },
+      { name: "Clothes Washer", fixtureUnits: 1.4 },
+      { name: "Dishwasher", fixtureUnits: 1.4 },
+      { name: "Hose bibb – 1/2\" (Outside Tap)", fixtureUnits: 2.5 },
+      { name: "Sink, bar", fixtureUnits: 1.0 },
+      { name: "Sink, Bathroom (Lavatory or Basin)", fixtureUnits: 0.7 },
+      { name: "Sink, kitchen", fixtureUnits: 1.4 },
+      { name: "Sink, laundry (1 or 2 compartments)", fixtureUnits: 1.4 },
+      { name: "Shower stall (1 shower valve)", fixtureUnits: 1.4 },
+      { name: "Water closet (Toilet)", fixtureUnits: 2.2 }
+    ]
+    rows =
+      (
+        if configured_rows.is_a?(Array) && configured_rows.any?
+          configured_rows
+        else
+          default_rows
+        end
+      )
+
+    datagrid_default_value =
+      rows.map do |r|
+        {
+          "name" => r[:name] || r["name"],
+          "fixtureUnits" => r[:fixtureUnits] || r["fixtureUnits"],
+          "quantity" => 0
+        }
+      end
+
+    datagrid_component = {
+      label: requirement.label,
+      id: requirement.id,
+      reorder: false,
+      addAnother: "",
+      addAnotherPosition: "bottom",
+      layoutFixed: false,
+      enableRowGroups: false,
+      initEmpty: false,
+      hideLabel: true,
+      tableView: false,
+      key: grid_key,
+      type: "datagrid",
+      input: true,
+      validate: {
+        minLength: datagrid_default_value.length,
+        maxLength: datagrid_default_value.length
+      },
+      defaultValue: datagrid_default_value,
+      components: [
+        {
+          label: "Fixture or Device",
+          type: "textfield",
+          key: "name",
+          disabled: true,
+          readOnly: true,
+          input: true
+        },
+        {
+          label: "Fixture Units (A)",
+          type: "number",
+          key: "fixtureUnits",
+          disabled: true,
+          readOnly: true,
+          input: true,
+          decimalLimit: 1
+        },
+        {
+          label: "Qty (B)",
+          type: "number",
+          key: "quantity",
+          input: true,
+          defaultValue: 0,
+          validate: {
+            min: 0
+          },
+          decimalLimit: 1
+        },
+        {
+          label: "Load (A × B)",
+          type: "number",
+          key: "load",
+          disabled: true,
+          readOnly: true,
+          input: true,
+          persistent: "client",
+          decimalLimit: 1,
+          calculateValue:
+            "var a = Number(row.fixtureUnits)||0; var b = Number(row.quantity)||0; var r = a*b; value = Math.round(r*10)/10;"
+        }
+      ]
+    }
+
+    total_component = {
+      label: "TOTAL LOAD",
+      type: "number",
+      key: total_key,
+      disabled: true,
+      readOnly: true,
+      input: true,
+      decimalLimit: 1,
+      calculateValue:
+        "var section = '#{section_key}'; var list = (data && data[section] && data[section]['#{grid_key}']) || []; var sum = 0; for (var i=0;i<list.length;i++){ var a = Number(list[i] && list[i].fixtureUnits || 0); var b = Number(list[i] && list[i].quantity || 0); sum += (a*b); } value = Math.round(sum*10)/10;"
+    }
+
+    {
+      id: requirement.id,
+      key: requirement.key(requirement_block_key),
+      type: "fieldset",
+      legend: requirement.label,
+      custom_class: "multiply-sum-grid",
+      label: requirement.label,
+      hideLabel: true,
+      input: false,
+      tableView: false,
+      components: [datagrid_component, total_component]
+    }
   end
 
   # this is a generic mulitgrid for a single component
