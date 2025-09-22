@@ -619,6 +619,17 @@ export type TCreateRequirementTemplateFormData = {
   type: string
 }
 
+export type TCreatePermitApplicationFormData = {
+  pid?: string
+  pin?: string
+  permitTypeId: string
+  activityId: string
+  jurisdictionId?: string
+  site?: IOption
+  firstNations: boolean
+  sandboxId?: string
+}
+
 export interface ICopyRequirementTemplateFormData extends Partial<TCreateRequirementTemplateFormData> {
   id?: string
 }

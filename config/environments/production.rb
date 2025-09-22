@@ -4,9 +4,10 @@ require_relative "../../lib/multi_logger"
 Rails.application.configure do
   # Specify AnyCable WebSocket server URL to use by JS client
   config.after_initialize do
-    config.action_cable.url =
-      ActionCable.server.config.url =
-        ENV.fetch("ANYCABLE_URL", "/cable") if AnyCable::Rails.enabled?
+    if defined?(AnyCable) && AnyCable::Rails.enabled?
+      config.action_cable.url =
+        ActionCable.server.config.url = ENV.fetch("ANYCABLE_URL", "/cable")
+    end
   end
   # Settings specified here will take precedence over those in config/application.rb.
 
@@ -40,6 +41,9 @@ Rails.application.configure do
   # Mount Action Cable outside main process or domain.
   # config.action_cable.mount_path = nil
   # config.action_cable.url = "wss://example.com/cable"
+  # config.action_cable.allowed_request_origins = [ "http://example.com", /http:\/\/example.*/ ]
+
+  #  # Action Cable origins (configured for AnyCable)
   config.action_cable.allowed_request_origins =
     ENV["ANYCABLE_ALLOWED_REQUEST_ORIGINS"]
 
@@ -48,19 +52,22 @@ Rails.application.configure do
   # config.assume_ssl = true
 
   # Force all access to the app over SSL, use Strict-Transport-Security, and use secure cookies.
-  # Don't force all traffic to SSL here since we want the liveness probes to be able to hit /up properly without redirecting to an SSL scheme
-  # instead this will be redirected on the route level
+  # SSL redirect is handled at the ingress/router level; keep this disabled here.
+  # If you prefer enabling it in Rails, consider excluding /up:
+  # config.ssl_options = { redirect: { exclude: ->(request) { request.path == "/up" } } }
+  # Then set: config.force_ssl = true
+  # For this app, we keep it disabled in Rails:
   # config.force_ssl = true
 
-  # Logger configured in initializer
-  #config.logger = #
+  # Skip http-to-https redirect for the default health check endpoint.
+  # config.ssl_options = { redirect: { exclude: ->(request) { request.path == "/up" } } }
 
-  # Info include generic and useful information about system operation, but avoids logging too much
+  # "info" includes generic and useful information about system operation, but avoids logging too much
   # information to avoid inadvertent exposure of personally identifiable information (PII). If you
   # want to log everything, set the level to "debug".
   config.log_level = ENV.fetch("RAILS_LOG_LEVEL", "info")
 
-  # Use a different cache store in production.
+  # Use a Redis cache store with Sentinel in production (skipped during Docker image builds)
   if ENV["IS_DOCKER_BUILD"].blank?
     config.cache_store =
       :redis_cache_store,
@@ -81,6 +88,16 @@ Rails.application.configure do
       }
   end
 
+  # Use Sidekiq as configured in application.rb
+
+  # Disable caching for Action Mailer templates even if Action Controller
+  # caching is enabled.
+  config.action_mailer.perform_caching = false
+
+  # Ignore bad email addresses and do not raise email delivery errors.
+  # Set this to true and configure the email server for immediate delivery to raise delivery errors.
+  # config.action_mailer.raise_delivery_errors = false
+
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
   # the I18n.default_locale when a translation cannot be found).
   config.i18n.fallbacks = true
@@ -92,6 +109,8 @@ Rails.application.configure do
   config.active_record.dump_schema_after_migration = false
 
   config.action_mailer.delivery_method = :ches
+  # Only use :id for inspections in production.
+  config.active_record.attributes_for_inspect = [:id]
 
   # Enable DNS rebinding protection and other `Host` header attacks.
   # config.hosts = [
@@ -110,8 +129,7 @@ Rails.application.configure do
       Rails.application.config.action_mailer.default_url_options
   end
 
-  # Use Multilogger in production so we can write both to a file (compliance) and to STDOUT for openshift
-  # Rotate the logs daily
+  # Logger: write to STDOUT and (when not building Docker images) to a rotated file
   stdout_logger = Logger.new(STDOUT)
   config.logger =
     (
@@ -129,8 +147,7 @@ Rails.application.configure do
         stdout_logger
       end
     )
-  # Ensure ActiveRecord uses the same logger
-  ActiveRecord::Base.logger = config.logger
 
+  # Prepend all log lines with the following tags.
   config.log_tags = [:request_id]
 end

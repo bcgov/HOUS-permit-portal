@@ -13,19 +13,19 @@ import { i18nPrefix } from "./i18n-prefix"
 
 export const EnergyStepRequirementsScreen = observer(function EnergyStepRequirementsScreen() {
   const {
-    stepCodeStore: { isLoaded, fetchPart9StepCodes },
+    stepCodeStore: { isOptionsLoaded, fetchPart9SelectOptions },
   } = useMst()
 
   const { isLoaded: isClassificationsLoaded } = usePermitClassificationsLoad()
 
   useEffect(() => {
-    const fetch = async () => await fetchPart9StepCodes()
-    !isLoaded && fetch()
-  }, [isLoaded])
+    const fetch = async () => await fetchPart9SelectOptions()
+    !isOptionsLoaded && fetch()
+  }, [isOptionsLoaded])
 
   const { currentJurisdiction, error } = useJurisdiction()
 
-  if (!isLoaded) return <LoadingScreen />
+  if (!isOptionsLoaded) return <LoadingScreen />
   if (error) return <ErrorScreen error={error} />
 
   return (
@@ -47,7 +47,9 @@ export const EnergyStepRequirementsScreen = observer(function EnergyStepRequirem
           </Link>
         </Text>
 
-        {currentJurisdiction && isLoaded && isClassificationsLoaded && <Form jurisdiction={currentJurisdiction} />}
+        {currentJurisdiction && isOptionsLoaded && isClassificationsLoaded && (
+          <Form jurisdiction={currentJurisdiction} />
+        )}
       </VStack>
     </Container>
   )
