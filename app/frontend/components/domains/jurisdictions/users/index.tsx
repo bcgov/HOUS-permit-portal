@@ -1,8 +1,10 @@
-import { Box, Container, Flex, Heading, VStack } from "@chakra-ui/react"
+import { Box, Button, Container, Flex, Heading, VStack } from "@chakra-ui/react"
+import { CaretLeft } from "@phosphor-icons/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
+import { useNavigate } from "react-router-dom"
 import { useJurisdiction } from "../../../../hooks/resources/use-jurisdiction"
 import { useSearch } from "../../../../hooks/use-search"
 import { IUser } from "../../../../models/user"
@@ -23,6 +25,7 @@ import { GridHeaders } from "./grid-header"
 export const JurisdictionUserIndexScreen = observer(function JurisdictionUserIndex() {
   const { t } = useTranslation()
   const { userStore } = useMst()
+  const navigate = useNavigate()
   const { currentJurisdiction, error } = useJurisdiction()
 
   const {
@@ -43,6 +46,9 @@ export const JurisdictionUserIndexScreen = observer(function JurisdictionUserInd
 
   return (
     <Container maxW="container.lg" p={8} as={"main"}>
+      <Button variant="link" onClick={() => navigate(-1)} leftIcon={<CaretLeft size={20} />} textDecoration="none">
+        {t("ui.back")}
+      </Button>
       <VStack alignItems={"flex-start"} spacing={5} w={"full"} h={"full"}>
         <Flex justifyContent={"space-between"} w={"full"} alignItems={"flex-end"}>
           <Box>
