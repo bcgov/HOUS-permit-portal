@@ -45,7 +45,7 @@ interface ISelectFormControlProps extends IInputFormControlProps<Partial<SelectP
 }
 
 const isValidUrl = (url: string) => {
-  const regex = /^(https?:\/\/)?([a-z0-9-]+\.)+[a-z]{2,6}(\/[\w.-]*)?\/?$/i
+  const regex = /^(https?:\/\/)?([a-z0-9-]+\.)+[a-z]{2,}(\/[\w./%-]*)?\/?$/i
   return regex.test(url)
 }
 
