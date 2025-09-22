@@ -1,9 +1,10 @@
-import { Box, ButtonGroup, Container, Flex, Heading, Link, StackProps, VStack } from "@chakra-ui/react"
+import { Box, Button, ButtonGroup, Container, Flex, Heading, Link, StackProps, VStack } from "@chakra-ui/react"
+import { CaretLeft } from "@phosphor-icons/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
 import { Trans, useTranslation } from "react-i18next"
-import { Outlet } from "react-router-dom"
+import { Outlet, useNavigate } from "react-router-dom"
 import { datefnsTableDateFormat } from "../../../constants"
 import { useJurisdiction } from "../../../hooks/resources/use-jurisdiction"
 import { useMst } from "../../../setup/root"
@@ -27,6 +28,7 @@ export const ExternalApiKeysIndexScreen = observer(function ExternalApiKeysIndex
   const { currentJurisdiction, error } = useJurisdiction()
   const [isFetching, setIsFetching] = useState(false)
   const { t } = useTranslation()
+  const navigate = useNavigate()
 
   useEffect(() => {
     if (currentJurisdiction) {
@@ -49,6 +51,9 @@ export const ExternalApiKeysIndexScreen = observer(function ExternalApiKeysIndex
 
   return (
     <Container maxW="container.lg" p={8} as={"main"} h={"full"} w={"full"} {...containerProps}>
+      <Button variant="link" onClick={() => navigate(-1)} leftIcon={<CaretLeft size={20} />} textDecoration="none">
+        {t("ui.back")}
+      </Button>
       {/*This outlet will render the create/edit modal*/}
       <Outlet />
       <VStack alignItems={"flex-start"} spacing={5} w={"full"} h={"full"}>
