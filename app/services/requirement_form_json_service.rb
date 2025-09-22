@@ -593,21 +593,10 @@ class RequirementFormJsonService
     section_key = PermitApplication.section_from_key(requirement_block_key)
 
     # Allow rows to be provided via input_options["rows"]. Each row should
-    # be a hash with { name: String, fixtureUnits: Number }.
+    # be a hash with { name: String, : Number }.
     configured_rows = requirement.input_options["rows"]
-    default_rows = [
-      { name: "Bathroom Group - three fixtures only", fixtureUnits: 3.6 },
-      { name: "Bathtub", fixtureUnits: 1.4 },
-      { name: "Clothes Washer", fixtureUnits: 1.4 },
-      { name: "Dishwasher", fixtureUnits: 1.4 },
-      { name: "Hose bibb – 1/2\" (Outside Tap)", fixtureUnits: 2.5 },
-      { name: "Sink, bar", fixtureUnits: 1.0 },
-      { name: "Sink, Bathroom (Lavatory or Basin)", fixtureUnits: 0.7 },
-      { name: "Sink, kitchen", fixtureUnits: 1.4 },
-      { name: "Sink, laundry (1 or 2 compartments)", fixtureUnits: 1.4 },
-      { name: "Shower stall (1 shower valve)", fixtureUnits: 1.4 },
-      { name: "Water closet (Toilet)", fixtureUnits: 2.2 }
-    ]
+    # Do not force defaults; rows are fully configurable from the editor UI
+    default_rows = []
     rows =
       (
         if configured_rows.is_a?(Array) && configured_rows.any?
@@ -618,20 +607,19 @@ class RequirementFormJsonService
       )
 
     datagrid_default_value =
-      rows.map do |r|
-        {
-          "name" => r[:name] || r["name"],
-          "fixtureUnits" => r[:fixtureUnits] || r["fixtureUnits"],
-          "quantity" => 0
-        }
-      end
+      rows.map { |r| { "name" => r["name"], "a" => r["a"], "quantity" => 0 } }
+
+    headers = requirement.input_options["headers"] || {}
+    first_col_label =
+      headers["first_column"].presence || headers["first_column"] ||
+        "Fixture or Device"
+    a_col_base = headers["a"].presence || headers["a"] || "Fixture Units"
+    a_col_label = "#{a_col_base} (A)"
 
     datagrid_component = {
       label: requirement.label,
       id: requirement.id,
       reorder: false,
-      addAnother: "",
-      addAnotherPosition: "bottom",
       layoutFixed: false,
       enableRowGroups: false,
       initEmpty: false,
@@ -647,24 +635,28 @@ class RequirementFormJsonService
       defaultValue: datagrid_default_value,
       components: [
         {
-          label: "Fixture or Device",
+          label: first_col_label,
           type: "textfield",
           key: "name",
           disabled: true,
           readOnly: true,
-          input: true
+          input: true,
+          calculateValue:
+            "var defs=(instance && instance.parent && instance.parent.component && instance.parent.component.defaultValue)||[]; var i=rowIndex; if(!value && defs[i]){ value = defs[i].name || ''; }"
         },
         {
-          label: "Fixture Units (A)",
+          label: a_col_label,
           type: "number",
-          key: "fixtureUnits",
+          key: "a",
           disabled: true,
           readOnly: true,
           input: true,
-          decimalLimit: 1
+          decimalLimit: 3,
+          calculateValue:
+            "var defs=(instance && instance.parent && instance.parent.component && instance.parent.component.defaultValue)||[]; var i=rowIndex; if(!value && defs[i]){ value = Number(defs[i].a || 0); }"
         },
         {
-          label: "Qty (B)",
+          label: "Quantity (B)",
           type: "number",
           key: "quantity",
           input: true,
@@ -675,30 +667,34 @@ class RequirementFormJsonService
           decimalLimit: 1
         },
         {
-          label: "Load (A × B)",
+          label: "A × B",
           type: "number",
           key: "load",
           disabled: true,
           readOnly: true,
           input: true,
           persistent: "client",
-          decimalLimit: 1,
+          decimalLimit: 3,
           calculateValue:
-            "var a = Number(row.fixtureUnits)||0; var b = Number(row.quantity)||0; var r = a*b; value = Math.round(r*10)/10;"
+            "var a = Number(row.a)||0; var b = Number(row.quantity)||0; var r = a*b; value = Math.round(r*10)/10;"
         }
       ]
     }
 
     total_component = {
-      label: "TOTAL LOAD",
+      label: "TOTAL",
       type: "number",
+      defaultValue: 0,
       key: total_key,
       disabled: true,
       readOnly: true,
       input: true,
+      validate: {
+        required: true
+      },
       decimalLimit: 1,
       calculateValue:
-        "var section = '#{section_key}'; var list = (data && data[section] && data[section]['#{grid_key}']) || []; var sum = 0; for (var i=0;i<list.length;i++){ var a = Number(list[i] && list[i].fixtureUnits || 0); var b = Number(list[i] && list[i].quantity || 0); sum += (a*b); } value = Math.round(sum*10)/10;"
+        "var section = '#{section_key}'; var list = (data && data[section] && data[section]['#{grid_key}']) || []; var sum = 0; for (var i=0;i<list.length;i++){ var a = Number(list[i] && list[i].a || 0); var b = Number(list[i] && list[i].quantity || 0); sum += (a*b); } value = Math.round(sum*10)/10;"
     }
 
     {

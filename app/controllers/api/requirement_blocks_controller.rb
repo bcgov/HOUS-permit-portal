@@ -137,6 +137,7 @@ class Api::RequirementBlocksController < Api::ApplicationController
           :energy_step_code,
           :multiple,
           { headers: %i[first_column a] },
+          { rows: %i[name a] },
           value_options: [%i[value label]],
           conditional: %i[eq show when hide],
           computed_compliance: [:value, :module, options_map: {}]
