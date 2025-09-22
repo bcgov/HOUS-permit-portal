@@ -2,11 +2,14 @@ import {
   Box,
   BoxProps,
   Button,
+  Grid,
+  GridItem,
   HStack,
   IconButton,
   Input,
   InputGroup,
   InputLeftElement,
+  Stack,
   Textarea,
 } from "@chakra-ui/react"
 import { CalendarBlank, Envelope, MapPin, Phone, X } from "@phosphor-icons/react"
@@ -531,19 +534,74 @@ const requirementsComponentMap = {
     })
     // b and load are fixed labels in the preview now
 
+    const { fields, append, remove } = useFieldArray({
+      control,
+      name: `${basePath}.inputOptions.rows` as any,
+    })
+
     return (
       <EditableGroup
         editableInput={
-          <MultiplySumGridPreview
-            headers={{
-              firstColumn: first.field.value as any,
-              a: a.field.value as any,
-            }}
-            controls={{
-              firstColumn: { value: first.field.value as any, onChange: first.field.onChange },
-              a: { value: a.field.value as any, onChange: a.field.onChange },
-            }}
-          />
+          <Stack spacing={3}>
+            <MultiplySumGridPreview
+              headers={{ firstColumn: first.field.value as any, a: a.field.value as any }}
+              controls={{
+                firstColumn: { value: first.field.value as any, onChange: first.field.onChange },
+                a: { value: a.field.value as any, onChange: a.field.onChange },
+              }}
+            />
+            <Stack spacing={2}>
+              <Grid templateColumns="2fr 2fr 1fr 1fr" gap={2}>
+                {fields.map((row, idx) => (
+                  <React.Fragment key={row.id}>
+                    <GridItem>
+                      <Controller
+                        name={`${basePath}.inputOptions.rows.${idx}.name` as any}
+                        control={control}
+                        render={({ field }) => (
+                          <Input
+                            placeholder={`${(first.field.value as any) || "Add column header"}`}
+                            bg="white"
+                            value={`${field.value ?? ""}`}
+                            onChange={field.onChange}
+                            w="100%"
+                          />
+                        )}
+                      />
+                    </GridItem>
+                    <GridItem>
+                      <Controller
+                        name={`${basePath}.inputOptions.rows.${idx}.a` as any}
+                        control={control}
+                        render={({ field }) => (
+                          <Input
+                            placeholder={`${(a.field.value as any) || "Add column header"} (A)`}
+                            type="number"
+                            bg="white"
+                            value={`${field.value ?? ""}`}
+                            onChange={(e) => field.onChange(e.target.value === "" ? "" : Number(e.target.value))}
+                            w="100%"
+                          />
+                        )}
+                      />
+                    </GridItem>
+                    <GridItem display="flex" alignItems="right" justifyContent="flex-start">
+                      <IconButton aria-label="Remove" icon={<X />} variant="ghost" onClick={() => remove(idx)} />
+                    </GridItem>
+                    <GridItem />
+                  </React.Fragment>
+                ))}
+              </Grid>
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={() => append({ name: "", a: "" } as any)}
+                alignSelf="flex-start"
+              >
+                Add row
+              </Button>
+            </Stack>
+          </Stack>
         }
         {...props}
       />
