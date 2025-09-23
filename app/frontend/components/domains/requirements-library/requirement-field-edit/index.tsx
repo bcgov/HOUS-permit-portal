@@ -518,6 +518,7 @@ const requirementsComponentMap = {
   },
 
   [ERequirementType.multiplySumGrid]: function <TFieldValues>(props: TRequirementEditProps<TFieldValues>) {
+    const { t } = useTranslation()
     const { control } = useFormContext<TFieldValues>()
     const editableLabelName = (props?.editableLabelProps?.controlProps as any)?.name as string | undefined
     const basePath = editableLabelName ? editableLabelName.replace(/\.label$/, "") : undefined
@@ -525,12 +526,12 @@ const requirementsComponentMap = {
     const first = useController({
       control,
       name: `${basePath}.inputOptions.headers.firstColumn` as any,
-      defaultValue: "Add column header" as any,
+      defaultValue: t("requirementsLibrary.multiplySumGrid.addHeaderPlaceholder"),
     })
     const a = useController({
       control,
       name: `${basePath}.inputOptions.headers.a` as any,
-      defaultValue: "Add column header" as any,
+      defaultValue: t("requirementsLibrary.multiplySumGrid.addHeaderPlaceholder"),
     })
     // b and load are fixed labels in the preview now
 
@@ -560,7 +561,7 @@ const requirementsComponentMap = {
                         control={control}
                         render={({ field }) => (
                           <Input
-                            placeholder={`${(first.field.value as any) || "Add column header"}`}
+                            placeholder={`${(first.field.value as any) || t("requirementsLibrary.multiplySumGrid.addHeaderPlaceholder")}`}
                             bg="white"
                             value={`${field.value ?? ""}`}
                             onChange={field.onChange}
@@ -575,7 +576,7 @@ const requirementsComponentMap = {
                         control={control}
                         render={({ field }) => (
                           <Input
-                            placeholder={`${(a.field.value as any) || "Add column header"} (A)`}
+                            placeholder={`${(a.field.value as any) || t("requirementsLibrary.multiplySumGrid.addHeaderPlaceholder")} (A)`}
                             type="number"
                             bg="white"
                             value={`${field.value ?? ""}`}
@@ -598,7 +599,7 @@ const requirementsComponentMap = {
                 onClick={() => append({ name: "", a: "" } as any)}
                 alignSelf="flex-start"
               >
-                Add row
+                {t("requirementsLibrary.multiplySumGrid.addRow")}
               </Button>
             </Stack>
           </Stack>

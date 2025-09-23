@@ -1199,6 +1199,13 @@ Thank you,
             energyStepCodePart3: "Energy Step Code Part 3",
             multiplySumGrid: "Grid (A × B with Total)",
           },
+          multiplySumGrid: {
+            title: "Grid (A × B with Total)",
+            addHeaderPlaceholder: "Add header",
+            quantityB: "Quantity (B)",
+            ab: "(A × B)",
+            addRow: "Add row",
+          },
           contactFieldItemLabels: {
             firstName: "First name",
             lastName: "Last name",
