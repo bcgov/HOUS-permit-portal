@@ -702,7 +702,7 @@ class RequirementFormJsonService
     }
 
     total_component = {
-      label: "TOTAL",
+      label: "Total:",
       type: "number",
       defaultValue: 0,
       key: total_key,
