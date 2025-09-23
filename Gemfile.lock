@@ -142,7 +142,7 @@ GEM
     connection_pool (2.5.4)
     content_disposition (1.0.0)
     crass (1.0.6)
-    data_migrate (9.4.0)
+    data_migrate (11.3.0)
       activerecord (>= 6.1)
       railties (>= 6.1)
     database_cleaner-active_record (2.2.1)
@@ -663,7 +663,7 @@ DEPENDENCIES
   blueprinter (~> 1.0.2)
   bootsnap
   bullet (~> 8.0)
-  data_migrate (~> 9.4)
+  data_migrate (~> 11.3)
   database_cleaner-active_record
   debug
   devise (= 4.9.3)
