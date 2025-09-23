@@ -25,7 +25,10 @@ class Api::StorageController < Api::ApplicationController
 
   AUTHORIZED_S3_MODELS = {
     "SupportingDocument" => SupportingDocument,
-    "RequirementDocument" => RequirementDocument
+    "RequirementDocument" => RequirementDocument,
+    "ProjectDocument" => ProjectDocument,
+    "JurisdictionDocument" => JurisdictionDocument,
+    "ReportDocument" => ReportDocument
   }.freeze
 
   def download

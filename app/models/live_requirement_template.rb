@@ -1,5 +1,9 @@
 class LiveRequirementTemplate < RequirementTemplate
+  before_validation :set_nickname_from_label
   validate :unique_classification_for_undiscarded
+  validate :validate_nickname_uniqueness
+
+  scope :with_published_version, -> { joins(:published_template_version) }
 
   def visibility
     "live"
@@ -27,6 +31,23 @@ class LiveRequirementTemplate < RequirementTemplate
           )
         )
       end
+    end
+  end
+
+  private
+
+  def set_nickname_from_label
+    self.nickname = label if nickname.blank? && label.present?
+  end
+
+  def validate_nickname_uniqueness
+    return if nickname.blank? || instance_of?(EarlyAccessRequirementTemplate)
+
+    if LiveRequirementTemplate
+         .where.not(id: id)
+         .where(discarded_at: nil)
+         .exists?(nickname: nickname)
+      errors.add(:nickname, :taken)
     end
   end
 end

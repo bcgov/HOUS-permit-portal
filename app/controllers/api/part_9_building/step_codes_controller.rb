@@ -1,63 +1,38 @@
 class Api::Part9Building::StepCodesController < Api::ApplicationController
-  def index
-    @step_codes = policy_scope(Part9StepCode)
-    render_success @step_codes,
-                   nil,
-                   {
-                     blueprint: Part9StepCodeBlueprint,
-                     meta: {
-                       select_options: Part9StepCode::Checklist.select_options
-                     }
-                   }
+  include StepCodeParamsConcern
+
+  def select_options
+    authorize Part9StepCode, :select_options?
+    render json: { data: Part9StepCode::Checklist.select_options }, status: :ok
   end
 
   # POST /api/step_codes
   def create
-    #save step code like normal
-    authorize Part9StepCode.new
-    # NOTE ABOUT "INSECURE MASS ASSIGNMENT": See step_code_params below
-    # h2k_file is given {} which allows any values
-    # however, this is not a sensitive field and is not used in any
-    # security critical processes. Clearing this code scanning warning only works temporarily.
-    Part9StepCode.transaction do
-      @step_code = Part9StepCode.create(step_code_params)
-      if @step_code.valid?
-        @step_code.pre_construction_checklist.data_entries.each do |de|
-          if de.h2k_file
-            StepCode::Part9::DataEntryFromHot2000.new(
-              xml: Nokogiri.XML(de.h2k_file.read),
-              data_entry: de
-            ).call
+    temp_step_code = Part9StepCode.new(step_code_params_for_create)
+    authorize temp_step_code
+    begin
+      Part9StepCode.transaction do
+        @step_code =
+          if step_code_params[:permit_application_id]
+            Part9StepCode.where(
+              permit_application_id: step_code_params[:permit_application_id]
+            ).first_or_create!(step_code_params_for_create)
+          else
+            Part9StepCode.create!(step_code_params_for_create)
           end
-        end
+
+        # H2K processing occurs in Part9StepCode.after_create callback
         render_success @step_code,
                        "step_code.h2k_imported",
                        { blueprint: Part9StepCodeBlueprint } and return
       end
+    rescue ActiveRecord::RecordInvalid => e
+      render_error "step_code.create_error",
+                   message_opts: {
+                     error_message: e.record.errors.full_messages.join(", ")
+                   }
     end
-    render_error "step_code.create_error",
-                 message_opts: {
-                   error_message: @step_code.errors.full_messages.join(", ")
-                 }
   end
 
   private
-
-  def step_code_params
-    params.require(:step_code).permit(
-      :name,
-      :permit_application_id,
-      pre_construction_checklist_attributes: [
-        :compliance_path,
-        data_entries_attributes: [
-          :district_energy_ef,
-          :district_energy_consumption,
-          :other_ghg_ef,
-          :other_ghg_consumption,
-          h2k_file: {
-          }
-        ]
-      ]
-    )
-  end
 end

@@ -5,11 +5,12 @@ import { Part3PDFContent } from "../components/domains/step-code/part-3/checklis
 import { Part9PDFContent } from "../components/domains/step-code/part-9/checklist/pdf-content"
 import { PDFContent as PermitApplicationPDFContent } from "../components/shared/permit-applications/pdf-content"
 import "../i18n/i18n"
+import { EPermitClassificationCode, EStepCodeType } from "../types/enums"
 import { combineComplianceHints } from "../utils/formio-component-traversal"
 
 const ChecklistComponentMap = {
-  low_residential: Part9PDFContent,
-  medium_residential: Part3PDFContent,
+  [EPermitClassificationCode.lowResidential]: Part9PDFContent,
+  [EPermitClassificationCode.mediumResidential]: Part3PDFContent,
 }
 
 const main = async () => {
@@ -28,15 +29,20 @@ const main = async () => {
     if (!pdfData.meta?.generationPaths) {
       throw new Error("No generationPaths provided in pdfData.meta")
     }
-    if (!pdfData.permitApplication) {
+    // Only require permitApplication if a permit application PDF is being generated
+    const generationPaths = pdfData.meta.generationPaths
+    const requiresPermitApplication = Boolean(generationPaths?.permitApplication)
+    if (requiresPermitApplication && !pdfData.permitApplication) {
       throw new Error("No permit application")
     }
 
-    pdfData.permitApplication.formattedFormJson = combineComplianceHints(
-      pdfData.permitApplication?.formJson ?? {},
-      pdfData.permitApplication?.formCustomizations ?? {},
-      pdfData.permitApplication?.formattedComplianceData ?? {}
-    )
+    if (pdfData.permitApplication) {
+      pdfData.permitApplication.formattedFormJson = combineComplianceHints(
+        pdfData.permitApplication?.formJson ?? {},
+        pdfData.permitApplication?.formCustomizations ?? {},
+        pdfData.permitApplication?.formattedComplianceData ?? {}
+      )
+    }
 
     const { permitApplication: permitApplicationPDFPath, stepCodeChecklist: stepCodeChecklistPDFPath } =
       pdfData.meta.generationPaths
@@ -53,7 +59,12 @@ const main = async () => {
     }
 
     if (stepCodeChecklistPDFPath) {
-      const permitTypeCode = pdfData.permitApplication?.permitType?.code
+      const permitTypeCode =
+        pdfData.permitApplication?.permitType?.code ||
+        pdfData?.meta?.permitTypeCode ||
+        (pdfData?.checklist?.stepCodeType === EStepCodeType.part9StepCode
+          ? EPermitClassificationCode.lowResidential
+          : EPermitClassificationCode.mediumResidential)
       const ChecklistComponent = ChecklistComponentMap[permitTypeCode]
 
       if (!pdfData.checklist) {
@@ -68,6 +79,7 @@ const main = async () => {
       await ReactPDF.renderToFile(
         <ChecklistComponent
           permitApplication={pdfData.permitApplication}
+          stepCode={pdfData.stepCode}
           checklist={pdfData.checklist}
           assetDirectoryPath={assetDirectoryPath}
         />,

@@ -27,7 +27,7 @@ class StepCode::Compliance::CheckRequirements::Energy::Base
   def tedi_reference
     @tedi_reference ||=
       ThermalEnergyDemandIntensityReference.find_by(
-        "hdd @> :hdd AND step = :step",
+        "hdd @> (:hdd)::int AND step = :step",
         hdd: total(:hdd),
         step: step
       )

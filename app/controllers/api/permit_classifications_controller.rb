@@ -1,6 +1,12 @@
 class Api::PermitClassificationsController < Api::ApplicationController
+  before_action :set_permit_classification, only: %i[update destroy]
   def index
-    @permit_classifications = policy_scope(PermitClassification)
+    # By default, only return enabled classifications unless explicitly requested otherwise
+    only_enabled =
+      ActiveModel::Type::Boolean.new.cast(index_params[:only_enabled])
+    scope = policy_scope(PermitClassification)
+    scope = scope.where(enabled: true) if only_enabled != false
+    @permit_classifications = scope
     render_success @permit_classifications,
                    nil,
                    { blueprint: PermitClassificationBlueprint }
@@ -12,7 +18,7 @@ class Api::PermitClassificationsController < Api::ApplicationController
       permit_classifications =
         if classification_option_params[:published].present?
           query =
-            RequirementTemplate
+            LiveRequirementTemplate
               .for_sandbox(current_sandbox)
               .joins(:permit_type)
               .joins(:activity)
@@ -38,7 +44,6 @@ class Api::PermitClassificationsController < Api::ApplicationController
             query.where(
               activity_id: classification_option_params[:activity_id]
             ) if classification_option_params[:activity_id].present?
-
           query =
             query.where(
               first_nations: classification_option_params[:first_nations]
@@ -64,7 +69,63 @@ class Api::PermitClassificationsController < Api::ApplicationController
     end
   end
 
+  def create
+    authorize :permit_classification, :create?
+    begin
+      permit_classification =
+        PermitClassification.new(permit_classification_params)
+      if permit_classification.save
+        render_success permit_classification,
+                       nil,
+                       { blueprint: PermitClassificationBlueprint }
+      else
+        render_error "permit_classification.create_error",
+                     { errors: permit_classification.errors.full_messages }
+      end
+    rescue StandardError => e
+      render_error "permit_classification.create_error", {}, e
+    end
+  end
+
+  def update
+    authorize :permit_classification, :update?
+    begin
+      if @permit_classification.update(permit_classification_params)
+        render_success @permit_classification,
+                       nil,
+                       { blueprint: PermitClassificationBlueprint }
+      else
+        render_error "permit_classification.update_error",
+                     { errors: @permit_classification.errors.full_messages }
+      end
+    rescue StandardError => e
+      render_error "permit_classification.update_error", {}, e
+    end
+  end
+
+  def destroy
+    authorize :permit_classification, :destroy?
+    begin
+      @permit_classification.destroy!
+      render_success @permit_classification,
+                     nil,
+                     { blueprint: PermitClassificationBlueprint }
+    rescue ActiveRecord::InvalidForeignKey => e
+      render_error("permit_classification.in_use_error", { status: 400 }, e)
+    rescue StandardError => e
+      render_error(
+        "permit_classification.destroy_error",
+        { message_opts: { error_message: e.message } },
+        e
+      )
+    end
+  end
+
   private
+
+  def index_params
+    params.permit(:only_enabled)
+  end
 
   def classification_option_params
     params.permit(
@@ -78,5 +139,22 @@ class Api::PermitClassificationsController < Api::ApplicationController
         first_nations
       ]
     )
+  end
+
+  def permit_classification_params
+    params.require(:permit_classification).permit(
+      :name,
+      :code,
+      :description,
+      :enabled,
+      :type,
+      :category
+    )
+  end
+
+  def set_permit_classification
+    @permit_classification = PermitClassification.find(params[:id])
+  rescue ActiveRecord::RecordNotFound => e
+    render_error "misc.not_found_error", { status: 404 }, e
   end
 end

@@ -28,10 +28,11 @@ import { UnitSelect } from "../../../shared/select/selectors/unit-select"
 import { EditableGroup, TEditableGroupProps } from "./editable-group"
 import { GenericContactEdit } from "./generic-contact-edit"
 import { PidInfoEdit } from "./pid-info-edit"
-import { IControlProps, TIsMultipleFilesCheckboxProps } from "./types"
+import { IControlProps, TEditableInstructionsTextProps, TIsMultipleFilesCheckboxProps } from "./types"
 
 export type TRequirementEditProps<TFieldValues extends FieldValues> = TEditableGroupProps<TFieldValues> & {
   unitSelectProps?: IControlProps<TFieldValues>
+  editableInstructionsTextProps?: TEditableInstructionsTextProps<TFieldValues>
   multiOptionProps?: {
     useFieldArrayProps: UseFieldArrayProps<TFieldValues>
     onOptionValueChange: (optionIndex: number, optionValue: string) => void
@@ -227,7 +228,7 @@ const requirementsComponentMap = {
     return (
       <EditableGroup
         sx={{
-          "& > div:first-of-type": {
+          "& > div:nth-of-type(2)": {
             alignItems: "center",
             "&:before": {
               content: "''",
@@ -377,7 +378,7 @@ const requirementsComponentMap = {
     )
   },
 
-  [ERequirementType.energyStepCode]: function <TFieldValues>(props) {
+  [ERequirementType.energyStepCodePart9]: function <TFieldValues>(props) {
     return <EditableGroup editableInput={<i className="fa fa-bolt"></i>} {...props} />
   },
 
@@ -452,6 +453,7 @@ const requirementsComponentMap = {
         },
       },
       { type: ERequirementContactFieldItemType.professionalAssociation },
+      { type: ERequirementContactFieldItemType.contactType },
       {
         type: ERequirementContactFieldItemType.professionalNumber,
         containerProps: {

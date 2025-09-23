@@ -2,11 +2,10 @@ import { PDFViewer } from "@react-pdf/renderer"
 import { observer } from "mobx-react-lite"
 import React, { Suspense, useEffect } from "react"
 import { usePermitApplication } from "../../../../../hooks/resources/use-permit-application"
-import { Part3StepCodeType } from "../../../../../models/part-3-step-code"
 import { IPart3StepCodeChecklist } from "../../../../../models/part-3-step-code-checklist"
-import { Part9StepCodeType } from "../../../../../models/part-9-step-code"
 import { IPart9StepCodeChecklist } from "../../../../../models/part-9-step-code-checklist"
 import { IPermitApplication } from "../../../../../models/permit-application"
+import { EStepCodeType } from "../../../../../types/enums"
 import { LoadingScreen } from "../../../../shared/base/loading-screen"
 import { Part3PDFContent } from "../../part-3/checklist/pdf-content"
 import { Part9PDFContent } from "../../part-9/checklist/pdf-content"
@@ -70,10 +69,10 @@ function Content({ permitApplication, checklist }: IContentProps) {
     <Suspense fallback={<LoadingScreen />}>
       {/* Parent component now ensures checklist exists and is loaded when rendering PDFViewer,
           so isLoaded checks are removed here. Still needed for Suspense in html mode */}
-      {checklist.stepCodeType === Part9StepCodeType && (
+      {checklist.stepCodeType === EStepCodeType.part9StepCode && (
         <Part9PDFContent permitApplication={permitApplication} checklist={checklist as IPart9StepCodeChecklist} />
       )}
-      {checklist.stepCodeType === Part3StepCodeType && (
+      {checklist.stepCodeType === EStepCodeType.part3StepCode && (
         <Part3PDFContent permitApplication={permitApplication} checklist={checklist as IPart3StepCodeChecklist} />
       )}
     </Suspense>

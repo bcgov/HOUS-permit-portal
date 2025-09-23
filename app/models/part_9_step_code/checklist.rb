@@ -17,12 +17,17 @@ class Part9StepCode::Checklist < ApplicationRecord
   accepts_nested_attributes_for :building_characteristics_summary
   after_create :create_building_characteristics_summary
 
-  delegate :building_permit_number,
-           :jurisdiction_name,
-           :full_address,
-           :pid,
-           to: :step_code
+  validates :compliance_path, presence: true, on: :update
+
   delegate :plan_author, :plan_version, :plan_date, to: :step_code
+
+  delegate :jurisdiction_name, to: :step_code
+  delegate :permit_date, to: :step_code
+  delegate :title, to: :step_code
+  delegate :full_address, to: :step_code
+  delegate :pid, to: :step_code
+  delegate :reference_number, to: :step_code
+  delegate :permit_application_number, to: :step_code
 
   enum stage: %i[pre_construction mid_construction as_built]
   enum status: %i[draft complete]

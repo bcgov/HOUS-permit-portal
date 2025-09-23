@@ -1,5 +1,2 @@
-class Part3StepCodePolicy < ApplicationPolicy
-  def create?
-    true
-  end
+class Part3StepCodePolicy < StepCodePolicy
 end

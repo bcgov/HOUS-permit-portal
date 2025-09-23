@@ -16,10 +16,12 @@ export const JurisdictionModel = types
     id: types.identifier,
     slug: types.maybeNull(types.string),
     name: types.maybeNull(types.string),
+    disambiguatedName: types.maybeNull(types.string),
     submissionEmail: types.maybeNull(types.string),
     qualifiedName: types.string,
-    inboxEnabled: types.boolean,
-    showAboutPage: types.boolean,
+    inboxEnabled: types.optional(types.boolean, false),
+    showAboutPage: types.optional(types.boolean, false),
+    allowDesignatedReviewer: types.optional(types.boolean, false),
     reverseQualifiedName: types.maybeNull(types.string),
     regionalDistrictName: types.maybeNull(types.string),
     localityType: types.maybeNull(types.string),
@@ -47,6 +49,7 @@ export const JurisdictionModel = types
     ),
     permitTypeRequiredSteps: types.array(types.frozen<IPermitTypeRequiredStep>()),
     sandboxes: types.array(types.reference(SandboxModel)),
+    firstNation: types.optional(types.boolean, false),
   })
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -97,7 +100,7 @@ export const JurisdictionModel = types
     },
   }))
   .views((self) => ({
-    get part9RequiredSteps() {
+    get part9RequiredSteps(): IPermitTypeRequiredStep[] {
       // This assumes that the permitTypeRequiredSteps are all part 9
       // Revisit this once adding part 3 required steps
       const nonDefaults = self.permitTypeRequiredSteps.filter((r) => !r.default)

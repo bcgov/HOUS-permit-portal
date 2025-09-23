@@ -84,6 +84,26 @@ function isApiMappingPath(path: string): boolean {
   return regex.test(path)
 }
 
+function isLoginPath(path: string): boolean {
+  const regex = /^\/login.*$/
+  return regex.test(path)
+}
+
+function isAdminPath(path: string): boolean {
+  const regex = /^\/admin.*$/
+  return regex.test(path)
+}
+
+function isProjectDetailPath(path: string): boolean {
+  const regex = /^\/projects\/[a-f\d-]+/
+  return regex.test(path)
+}
+
+function isStepCodePath(path: string): boolean {
+  const regex = /^\/part-(3|9)-step-code.*$/
+  return regex.test(path)
+}
+
 function shouldHideSubNavbarForPath(path: string): boolean {
   const matchers: Array<(path: string) => boolean> = [
     (path) => path === "/",
@@ -95,6 +115,10 @@ function shouldHideSubNavbarForPath(path: string): boolean {
     isPermitApplicationPath,
     isDigitalPermitEditPath,
     isApiMappingPath,
+    isLoginPath,
+    isProjectDetailPath,
+    isStepCodePath,
+    isAdminPath,
   ]
 
   return matchers.some((matcher) => matcher(path))
@@ -167,7 +191,7 @@ export const NavBar = observer(function NavBar() {
               {!loggedIn && <HelpDrawer />}
               {currentUser?.isSubmitter && !currentUser.isUnconfirmed && (
                 <RouterLinkButton to="/" variant="tertiary" leftIcon={<Folders size={16} />}>
-                  {t("site.myPermits")}
+                  {t("site.myProjects")}
                 </RouterLinkButton>
               )}
               {(currentUser?.isReviewStaff || currentUser?.isTechnicalSupport) &&
@@ -213,7 +237,7 @@ export const NavBar = observer(function NavBar() {
       </Box>
       {!R.isEmpty(criticalNotifications) && <ActionRequiredBox notification={criticalNotifications[0]} />}
 
-      {!shouldHideSubNavbarForPath(path) && loggedIn && <SubNavBar />}
+      {!shouldHideSubNavbarForPath(path) && <SubNavBar />}
     </PopoverProvider>
   )
 })
@@ -386,12 +410,7 @@ const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
                   {currentUser?.isTechnicalSupport && reviewStaffOnlyItems}
                   {!currentUser?.isSubmitter && (
                     <>
-                      <MenuItem bg="greys.grey03" onClick={(e) => navigate("/permit-applications/new")}>
-                        <Button as={Box} variant="primary">
-                          {t("site.newApplication")}
-                        </Button>
-                      </MenuItem>
-                      <NavMenuItem label={t("site.myPermits")} to="/permit-applications" bg="greys.grey03" />
+                      <NavMenuItem label={t("site.myProjects")} to="/projects" bg="greys.grey03" />
                       <MenuDivider my={0} borderColor="border.light" />
                     </>
                   )}

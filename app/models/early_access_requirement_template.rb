@@ -8,7 +8,6 @@ class EarlyAccessRequirementTemplate < RequirementTemplate
   has_many :early_access_previews, dependent: :destroy
   has_many :previewers, through: :early_access_previews, source: :previewer
 
-  before_validation :set_default_nickname, on: :create
   before_validation :maintain_published_early_access_version,
                     unless: :maintaining_published_version?
 
@@ -39,10 +38,6 @@ class EarlyAccessRequirementTemplate < RequirementTemplate
   end
 
   private
-
-  def set_default_nickname
-    self.nickname ||= label
-  end
 
   # Predicate method for callback condition
   def maintaining_published_version?

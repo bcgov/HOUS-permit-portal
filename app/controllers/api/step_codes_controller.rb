@@ -1,5 +1,43 @@
 class Api::StepCodesController < Api::ApplicationController
+  include StepCodeParamsConcern
+  include Api::Concerns::Search::StepCodes
+
   # DELETE /api/step_codes/:id
+  # PATCH /api/step_codes/:id
+
+  before_action :set_step_code, only: %i[update destroy]
+  skip_after_action :verify_policy_scoped, only: %i[index]
+
+  # GET /api/step_codes (or POST /api/step_codes/search similar to other controllers)
+  def index
+    perform_step_code_search
+    authorized_results = apply_search_authorization(@step_code_search, :index)
+    render_success authorized_results,
+                   nil,
+                   {
+                     meta: page_meta(@step_code_search),
+                     blueprint: StepCodeBlueprint
+                   }
+  end
+
+  def update
+    authorize @step_code
+    # disallow updating step code if it's tied to a permit application and the user is not the submitter (for now)
+    if step_code_params[:permit_application_id].present?
+      target_pa =
+        PermitApplication.find_by(id: step_code_params[:permit_application_id])
+      unless target_pa && target_pa.submitter_id == current_user.id
+        render_error "misc.user_not_authorized_error", { status: 403 } and
+          return
+      end
+    end
+
+    @step_code.update!(step_code_params)
+    render_success @step_code,
+                   "step_code.update_success",
+                   { blueprint: StepCodeBlueprint }
+  end
+
   def destroy
     @step_code = StepCode.find(params[:id])
     authorize @step_code
@@ -14,46 +52,9 @@ class Api::StepCodesController < Api::ApplicationController
     send_data csv_data, type: "text/csv"
   end
 
-  def download_step_code_metrics_csv
-    authorize :step_code, :download_step_code_metrics_csv?
-
-    step_code_type = step_code_metrics_params[:step_code_type]
-    service = StepCodeExportService.new
-
-    csv_data =
-      case step_code_type
-      when "Part3StepCode"
-        service.part_3_metrics_csv
-      when "Part9StepCode"
-        service.part_9_metrics_csv
-      else
-        raise ActionController::BadRequest, "Invalid step code type"
-      end
-
-    send_data csv_data, type: "text/csv"
-  end
-
   private
 
-  def step_code_metrics_params
-    params.permit(:step_code_type)
-  end
-
-  def step_code_params
-    params.require(:step_code).permit(
-      :name,
-      :permit_application_id,
-      pre_construction_checklist_attributes: [
-        :compliance_path,
-        data_entries_attributes: [
-          :district_energy_ef,
-          :district_energy_consumption,
-          :other_ghg_ef,
-          :other_ghg_consumption,
-          h2k_file: {
-          }
-        ]
-      ]
-    )
+  def set_step_code
+    @step_code = StepCode.find(params[:id])
   end
 end

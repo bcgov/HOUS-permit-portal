@@ -1,5 +1,6 @@
 class Api::PermitApplicationsController < Api::ApplicationController
   include Api::Concerns::Search::PermitApplications
+  include StepCodeParamsConcern
 
   before_action :set_permit_application,
                 only: %i[
@@ -18,25 +19,6 @@ class Api::PermitApplicationsController < Api::ApplicationController
                   create_or_update_permit_block_status
                 ]
   skip_after_action :verify_policy_scoped, only: [:index]
-
-  def index
-    perform_permit_application_search
-    authorized_results =
-      apply_search_authorization(@permit_application_search.results)
-    render_success authorized_results,
-                   nil,
-                   {
-                     meta: {
-                       total_pages: @permit_application_search.total_pages,
-                       total_count: @permit_application_search.total_count,
-                       current_page: @permit_application_search.current_page
-                     },
-                     blueprint: PermitApplicationBlueprint,
-                     blueprint_opts: {
-                       view: :base
-                     }
-                   }
-  end
 
   def mark_as_viewed
     authorize @permit_application
@@ -450,6 +432,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
       :pin,
       :pid,
       :first_nations,
+      :permit_project_id,
       submission_data: {
       }
     )

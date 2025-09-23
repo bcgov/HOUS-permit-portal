@@ -1,5 +1,5 @@
 import { Container, Grid, GridItem, Heading, VStack } from "@chakra-ui/react"
-import { FlagBanner, House, NotePencil, Question, SlidersHorizontal, Users } from "@phosphor-icons/react"
+import { FlagBanner, House, NotePencil, Question, SlidersHorizontal, TreeStructure, Users } from "@phosphor-icons/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -63,6 +63,16 @@ export const SiteConfigurationManagementScreen = observer(function SiteConfigura
               linkText={t("ui.edit")}
               icon={<House size="24px" color="var(--chakra-colors-text-link)" />}
               href="landing-setup"
+              h="full"
+            />
+          </GridItem>
+          <GridItem>
+            <HomeScreenBox
+              title={t(`${i18nPrefix}.permitClassifications.title`)}
+              description={t(`${i18nPrefix}.permitClassifications.description`)}
+              linkText={t("ui.edit")}
+              icon={<TreeStructure size="24px" color="var(--chakra-colors-text-link)" />}
+              href="permit-classifications"
               h="full"
             />
           </GridItem>

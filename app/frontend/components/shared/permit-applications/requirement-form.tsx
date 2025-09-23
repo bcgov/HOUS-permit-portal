@@ -332,7 +332,6 @@ export const RequirementForm = observer(
       if (onCompletedBlocksChange) {
         onCompletedBlocksChange(getCompletedBlocksFromForm(formRef.current))
       }
-      setErrorBoxData(mapErrorBoxData(formRef.current.errors))
     }
 
     const formReady = (rootComponent) => {
@@ -430,11 +429,18 @@ export const RequirementForm = observer(
               status={EFlashMessageStatus.warning}
             />
           )}
-          {!inboxEnabled && !sandbox && (
+          {!inboxEnabled && !sandbox && !isEarlyAccess && (
             <CustomMessageBox
               title={t("permitApplication.show.inboxDisabledTitle")}
               description={t("permitApplication.show.inboxDisabled")}
               status={EFlashMessageStatus.error}
+            />
+          )}
+          {!inboxEnabled && !sandbox && isEarlyAccess && (
+            <CustomMessageBox
+              title={t("permitApplication.show.inboxDisabledTitleEarlyAccess")}
+              description={t("permitApplication.show.inboxDisabledEarlyAccess")}
+              status={EFlashMessageStatus.warning}
             />
           )}
           {permitApplication?.isSubmitted ? (

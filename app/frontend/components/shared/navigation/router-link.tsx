@@ -1,11 +1,9 @@
-import { Link } from "@chakra-ui/react"
+import { LinkProps as ChakraLinkProps, Link } from "@chakra-ui/react"
 import React, { forwardRef } from "react"
 import { LinkProps, Link as ReactRouterLink } from "react-router-dom"
 import { handleScrollToTop } from "../../../utils/utility-functions"
 
-export interface IRouterLinkProps extends LinkProps {
-  onClick?: () => void
-}
+export interface IRouterLinkProps extends Omit<LinkProps, "color">, ChakraLinkProps {}
 
 export const RouterLink = forwardRef<HTMLAnchorElement, IRouterLinkProps>(function RouterLink(
   { to, children, onClick, ...rest },

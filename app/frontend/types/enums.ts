@@ -26,16 +26,8 @@ export enum ERequirementTemplateType {
 export enum EFileUploadAttachmentType {
   RequirementDocument = "RequirementDocument",
   SupportingDocument = "SupportingDocument",
-}
-
-export enum EPermitClassificationCode {
-  lowResidential = "low_residential",
-  mediumResidential = "medium_residential",
-  highResidential = "high_residential",
-  newConstruction = "new_construction",
-  additionAlterationRenovation = "addition_alteration_renovation",
-  siteAlteration = "site_alteration",
-  demolition = "demolition",
+  ProjectDocument = "ProjectDocument",
+  ReportDocument = "ReportDocument",
 }
 
 export enum EPermitApplicationStatus {
@@ -139,6 +131,14 @@ export enum EPermitApplicationSortFields {
   status = "status",
 }
 
+export enum EProjectPermitApplicationSortFields {
+  permit = "permit",
+  assignedTo = "assigned_to",
+  permitApplicationNumber = "permit_application_number",
+  updatedAt = "updated_at",
+  status = "status",
+}
+
 export enum EPermitApplicationSubmitterSortFields {
   number = "number",
   permitClassification = "permit_classification",
@@ -182,7 +182,7 @@ export enum ERequirementType {
   bcaddress = "bcaddress",
   signature = "signature",
   textArea = "textarea",
-  energyStepCode = "energy_step_code",
+  energyStepCodePart9 = "energy_step_code",
   energyStepCodePart3 = "energy_step_code_part_3",
   pidInfo = "pid_info",
   phone = "phone",
@@ -310,6 +310,7 @@ export enum EZeroCarbonStep {
 }
 
 export enum ERequirementContactFieldItemType {
+  contactType = "contactType",
   firstName = "firstName",
   lastName = "lastName",
   email = "email",
@@ -425,6 +426,7 @@ export enum ENotificationActionType {
   applicationSubmission = "application_submission",
   applicationRevisionsRequest = "application_revisions_request",
   applicationView = "application_view",
+  stepCodeReportGenerated = "step_code_report_generated",
 }
 
 export enum ECollaboratorableType {
@@ -628,6 +630,60 @@ export enum EDocumentReferenceDocumentType {
 }
 
 export enum EStepCodeType {
-  Part3 = "Part3StepCode",
-  Part9 = "Part9StepCode",
+  part3StepCode = "Part3StepCode",
+  part9StepCode = "Part9StepCode",
 }
+
+export enum EPermitProjectSortFields {
+  title = "title",
+  location = "location",
+  submitter = "submitter",
+  updatedAt = "updated_at",
+  rollupStatus = "rollup_status",
+}
+
+export enum EPermitProjectRollupStatus {
+  empty = "empty",
+  newDraft = "new_draft",
+  newlySubmitted = "newly_submitted",
+  revisionsRequested = "revisions_requested",
+  resubmitted = "resubmitted",
+  approved = "approved",
+}
+
+export enum EStepCodeSortFields {
+  type = "type",
+  permitProjectTitle = "permit_project_title",
+  fullAddress = "full_address",
+  updatedAt = "updated_at",
+}
+
+export enum EClassificationCategory {
+  buildingsAndStructures = "buildings_and_structures",
+  trades = "trades",
+  sitePreparation = "site_preparation",
+}
+
+// Centralized constants for permit classification codes (string-backed)
+export const EPermitClassificationCode = {
+  lowResidential: "low_residential",
+  mediumResidential: "medium_residential",
+  highResidential: "high_residential",
+  newConstruction: "new_construction",
+  additionAlterationRenovation: "addition_alteration_renovation",
+  siteAlteration: "site_alteration",
+  demolition: "demolition",
+  manufacturedHome: "manufactured_home",
+  mechanical: "mechanical",
+  plumbing: "plumbing",
+  electrical: "electrical",
+  gas: "gas",
+  solidFuelBurningAppliance: "solid_fuel_burning_appliance",
+  fireAlarm: "fire_alarm",
+  fireSuppression: "fire_suppression",
+  treeCuttingAndTreeRemoval: "tree_cutting_and_tree_removal",
+  retainingWall: "retaining_wall",
+  relocation: "relocation",
+} as const
+
+export type EPermitClassificationCode = (typeof EPermitClassificationCode)[keyof typeof EPermitClassificationCode]

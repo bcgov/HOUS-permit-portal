@@ -4,6 +4,7 @@ class JurisdictionBlueprint < Blueprinter::Base
   view :base do
     fields :slug,
            :name,
+           :disambiguated_name,
            :locality_type,
            :qualifier,
            :qualified_name,
@@ -18,11 +19,13 @@ class JurisdictionBlueprint < Blueprinter::Base
            :map_position,
            :inbox_enabled,
            :show_about_page,
+           :allow_designated_reviewer,
            :map_zoom,
            :regional_district_name,
            :created_at,
            :updated_at,
-           :external_api_state
+           :external_api_state,
+           :first_nation
 
     field :external_api_enabled do |jurisdiction, options|
       jurisdiction.external_api_enabled?

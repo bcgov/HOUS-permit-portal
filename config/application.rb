@@ -3,7 +3,7 @@ require_relative "boot"
 require "rails"
 # Pick the frameworks you want:
 require "active_model/railtie"
-# require "active_job/railtie"
+require "active_job/railtie"
 require "active_record/railtie"
 # require "active_storage/engine"
 require "action_controller/railtie"
@@ -21,7 +21,7 @@ Bundler.require(*Rails.groups)
 module HousPermitPortal
   class Application < Rails::Application
     # Initialize configuration defaults for originally generated Rails version.
-    config.load_defaults 7.1
+    config.load_defaults 7.2
 
     # Please, add to the `ignore` list any other `lib` subdirectories that do
     # not contain `.rb` files, or that should not be reloaded or eager loaded.
@@ -36,41 +36,31 @@ module HousPermitPortal
     config.time_zone = "Pacific Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
 
-    # we will be using dotenv locally and Hashicorp Vault in production so disable default rails master.key
-    config.read_encrypted_secrets = false
-
-    config.active_job.queue_adapter = :sidekiq
-
     # Don't generate system test files.
     config.generators.system_tests = nil
 
-    # This will force all new tables to use UUIDs for id field
+    # Use Sidekiq for Active Job
+    config.active_job.queue_adapter = :sidekiq
+
+    # Force UUID primary keys for new tables and models
     config.generators { |g| g.orm :active_record, primary_key_type: :uuid }
 
+    # Allow additional hosts from environment variable AUTHORIZED_HOSTS (comma-separated)
     if ENV["AUTHORIZED_HOSTS"]
       config.hosts.concat(ENV["AUTHORIZED_HOSTS"].split(","))
     end
-    # This sets up keys needed for active record attribute encryption
 
-    # Add request-id to the logging tags
-    config.middleware.insert_before 0,
-                                    ActionDispatch::RequestId,
-                                    header: "X-Request-Id"
+    # Set request id header and include request id in logs
+    config.action_dispatch.request_id_header = "X-Request-Id"
     config.log_tags = [:request_id]
 
-    # the minimum lengths for the keys should be 12 bytes for the
-    # primary key (this will be used to derive the AES 32
-    # bytes key) and 20 bytes for the salt.
-
-    # You can auto generate this in the console with: bin/rails db:encryption:init
-
+    # Active Record encryption keys (configured via environment variables)
     config.active_record.encryption.primary_key =
       ENV["ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY"]
     config.active_record.encryption.deterministic_key =
       ENV["ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY"]
     config.active_record.encryption.key_derivation_salt =
       ENV["ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT"]
-    # This will enable unique validations on encrypted fields
     config.active_record.encryption.extend_queries = true
   end
 end

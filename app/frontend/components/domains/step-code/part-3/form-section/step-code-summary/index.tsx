@@ -1,12 +1,15 @@
 import { Button, Flex, FormControl, FormHelperText, Heading, Input, Text } from "@chakra-ui/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
-import * as R from "ramda"
 import React from "react"
 import { useForm } from "react-hook-form"
 import { Trans } from "react-i18next"
 import { useLocation, useNavigate, useParams } from "react-router-dom"
 import { usePart3StepCode } from "../../../../../../hooks/resources/use-part-3-step-code"
+import { EFileUploadAttachmentType } from "../../../../../../types/enums"
+import { isBaselineChecklist, isMixedUseChecklist } from "../../../../../../utils/utility-functions"
+import { FileDownloadButton } from "../../../../../shared/base/file-download-button"
+import { SharedSpinner } from "../../../../../shared/base/shared-spinner"
 import { RouterLink } from "../../../../../shared/navigation/router-link"
 import { SectionHeading } from "../shared/section-heading"
 import { MixedUsePerformance } from "./mixed-use"
@@ -14,12 +17,12 @@ import { StepCodePerformance } from "./step-code-performance"
 
 export const StepCodeSummary = observer(function StepCodeSummary() {
   const i18nPrefix = "stepCode.part3.stepCodeSummary"
-  const { checklist } = usePart3StepCode()
+  const { checklist, currentStepCode } = usePart3StepCode()
   const { permitApplicationId } = useParams()
   const navigate = useNavigate()
   const location = useLocation()
-  const isMixedUse = checklist.stepCodeOccupancies.length + checklist.baselineOccupancies.length > 1
-  const isBaseline = R.isEmpty(checklist.stepCodeOccupancies)
+  const isMixedUse = isMixedUseChecklist(checklist as any)
+  const isBaseline = isBaselineChecklist(checklist as any)
 
   const { handleSubmit, formState } = useForm()
   const { isSubmitting } = formState
@@ -35,7 +38,7 @@ export const StepCodeSummary = observer(function StepCodeSummary() {
     if (updateSucceeded) {
       if (alternatePath) {
         navigate(alternatePath)
-      } else {
+      } else if (permitApplicationId) {
         permitApplicationId && navigate(`/permit-applications/${permitApplicationId}/edit`)
       }
     } else {
@@ -49,6 +52,16 @@ export const StepCodeSummary = observer(function StepCodeSummary() {
   const baselineOccupanciesPath = checklist.isComplete("baselineOccupancies")
     ? "baseline-details"
     : "baseline-occupancies"
+
+  // Auto-submit in standalone mode (no permit application id)
+  const hasAutoSubmittedRef = React.useRef(false)
+  const submitNow = handleSubmit(onSubmit)
+  React.useEffect(() => {
+    if (!permitApplicationId && !isSubmitting && !hasAutoSubmittedRef.current) {
+      hasAutoSubmittedRef.current = true
+      submitNow()
+    }
+  }, [permitApplicationId, isSubmitting, submitNow])
 
   return !checklist.canShowResults ? (
     <Flex direction="column" gap={6}>
@@ -84,9 +97,20 @@ export const StepCodeSummary = observer(function StepCodeSummary() {
       )}
       <form onSubmit={handleSubmit(onSubmit)} name="part3SectionForm">
         <FormControl>
-          <Button type="submit" variant="primary" isLoading={isSubmitting} isDisabled={isSubmitting}>
-            {t(`${i18nPrefix}.cta`)}
-          </Button>
+          <Flex gap={4} align="center">
+            <Button type="submit" variant="primary" isLoading={isSubmitting} isDisabled={isSubmitting}>
+              {permitApplicationId ? t(`${i18nPrefix}.cta`) : t(`${i18nPrefix}.standaloneCta`)}
+            </Button>
+            {isSubmitting && <SharedSpinner m={0} />}
+            {!isSubmitting && currentStepCode?.latestReportDocument && (
+              <FileDownloadButton
+                variant="link"
+                modelType={EFileUploadAttachmentType.ReportDocument}
+                document={currentStepCode.latestReportDocument as any}
+                simpleLabel
+              />
+            )}
+          </Flex>
         </FormControl>
       </form>
     </Flex>

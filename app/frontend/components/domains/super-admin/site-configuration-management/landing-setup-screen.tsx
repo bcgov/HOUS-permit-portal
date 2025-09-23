@@ -4,12 +4,12 @@ import React, { useEffect } from "react"
 import { useFieldArray, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useSearchParams } from "react-router-dom"
-import { useActivityOptions } from "../../../../hooks/resources/use-activity-options"
+import { usePermitTypeOptions } from "../../../../hooks/resources/use-permit-type-options"
 import { useMst } from "../../../../setup/root"
 import { ErrorScreen } from "../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../shared/base/loading-screen"
-import { ActivityTabSwitcher } from "../../requirement-template/activity-tab-switcher"
-import { DigitalBuildingPermitsList } from "../../requirement-template/digital-building-permits-list"
+import { PermitTypeTabSwitcher } from "../../requirement-template/permit-type-tab-switcher"
+import { TemplateVersionsList } from "../../requirement-template/template-versions-list"
 
 interface ILandingPageSetupForm {
   templateIds: { id: string }[]
@@ -19,12 +19,10 @@ export const LandingSetupScreen = observer(() => {
   const { t } = useTranslation()
   const { siteConfigurationStore } = useMst()
   const { updateSiteConfiguration, landingPageEarlyAccessRequirementTemplateIds } = siteConfigurationStore
-  const { activityOptions: allActivityOptions, error: activityOptionsError } = useActivityOptions({
-    customErrorMessage: "Error fetching work type options",
-  })
+  const { permitTypeOptions: allPermitTypeOptions, error: permitTypeOptionsError } = usePermitTypeOptions()
   const [searchParams, setSearchParams] = useSearchParams({ earlyAccess: "true" })
-  const enabledActivityOptions = allActivityOptions?.filter((option) => option.value.enabled) ?? null
-  const activityId = searchParams.get("activityId")
+  const enabledPermitTypeOptions = allPermitTypeOptions?.filter((option) => option.value.enabled) ?? null
+  const permitTypeId = searchParams.get("permitTypeId")
 
   const { control, handleSubmit, reset } = useForm<ILandingPageSetupForm>({
     defaultValues: { templateIds: [] },
@@ -50,26 +48,27 @@ export const LandingSetupScreen = observer(() => {
     })
   }
 
-  const navigateToActivityTab = (activityId: string, replace?: boolean) => {
-    setSearchParams({ activityId }, { replace })
+  const navigateToPermitTypeTab = (permitTypeId: string, replace?: boolean) => {
+    const earlyAccess = searchParams.get("earlyAccess") ?? "true"
+    setSearchParams({ permitTypeId, earlyAccess }, { replace })
   }
 
   useEffect(() => {
-    if (!enabledActivityOptions || activityOptionsError || activityId) {
+    if (!enabledPermitTypeOptions || permitTypeOptionsError || permitTypeId) {
       return
     }
 
-    const firstActivityId = enabledActivityOptions[0]?.value?.id
+    const firstPermitTypeId = enabledPermitTypeOptions[0]?.value?.id
 
-    navigateToActivityTab(firstActivityId, true)
-  }, [activityId, enabledActivityOptions, activityOptionsError, navigateToActivityTab])
+    navigateToPermitTypeTab(firstPermitTypeId, true)
+  }, [permitTypeId, enabledPermitTypeOptions, permitTypeOptionsError, navigateToPermitTypeTab])
 
-  if (activityOptionsError) return <ErrorScreen error={activityOptionsError} />
-  if (!enabledActivityOptions || (enabledActivityOptions && !activityId)) return <LoadingScreen />
+  if (permitTypeOptionsError) return <ErrorScreen error={permitTypeOptionsError} />
+  if (!enabledPermitTypeOptions || (enabledPermitTypeOptions && !permitTypeId)) return <LoadingScreen />
 
-  const selectedTabIndex = enabledActivityOptions.findIndex((option) => option.value.id === activityId)
+  const selectedTabIndex = enabledPermitTypeOptions.findIndex((option) => option.value.id === permitTypeId)
 
-  if (enabledActivityOptions.length === 0 || selectedTabIndex === -1) {
+  if (enabledPermitTypeOptions.length === 0 || selectedTabIndex === -1) {
     return <ErrorScreen error={new Error("Work type not found")} />
   }
 
@@ -84,15 +83,15 @@ export const LandingSetupScreen = observer(() => {
             {t("siteConfiguration.landingPageSetup.description")}
           </Text>
 
-          <ActivityTabSwitcher
+          <PermitTypeTabSwitcher
             selectedTabIndex={selectedTabIndex}
-            navigateToActivityTab={navigateToActivityTab}
-            enabledActivityOptions={enabledActivityOptions}
+            navigateToPermitTypeTab={navigateToPermitTypeTab}
+            enabledPermitTypeOptions={enabledPermitTypeOptions}
           >
-            {enabledActivityOptions.map((activityOption) => (
-              <TabPanel key={activityOption.value.id} w="100%" px={6}>
-                <DigitalBuildingPermitsList
-                  activityId={activityOption.value.id}
+            {enabledPermitTypeOptions.map((permitTypeOption) => (
+              <TabPanel key={permitTypeOption.value.id} w="100%" px={6}>
+                <TemplateVersionsList
+                  permitTypeId={permitTypeOption.value.id}
                   earlyAccess={true}
                   isPublic={true}
                   renderButton={(templateVersion) => {
@@ -115,7 +114,7 @@ export const LandingSetupScreen = observer(() => {
                 />
               </TabPanel>
             ))}
-          </ActivityTabSwitcher>
+          </PermitTypeTabSwitcher>
           <Button type="submit" variant="primary" mt={6} mr={6} alignSelf={"flex-end"} justifySelf={"flex-end"}>
             {t("ui.save")}
           </Button>

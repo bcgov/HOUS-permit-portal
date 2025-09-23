@@ -58,7 +58,8 @@ export const unitGroups: { [key: string]: ENumberUnit[] } = {
 }
 
 export const datefnsAppDateFormat = "yyyy/MM/dd"
-export const datefnsTableDateFormat = "yyyy-MM-dd"
+export const datefnsTableDateFormat = "MMM-dd-yyyy"
+export const datefnsTableDateTimeFormat = "MMM dd, yyyy HH:mm"
 
 export const vancouverTimeZone = "America/Vancouver" // Vancouver time zone
 
@@ -126,7 +127,7 @@ export function getEnergyStepCodeRequirementRequiredSchema(
     },
     [EEnergyStepCodeDependencyRequirementCode.energyStepCodeToolPart9]: {
       requirementCode: EEnergyStepCodeDependencyRequirementCode.energyStepCodeToolPart9,
-      inputType: ERequirementType.energyStepCode,
+      inputType: ERequirementType.energyStepCodePart9,
       label: t("requirementsLibrary.modals.stepCodeDependencies.energyStepCodeToolPart9.label"),
       inputOptions: {
         conditional: {

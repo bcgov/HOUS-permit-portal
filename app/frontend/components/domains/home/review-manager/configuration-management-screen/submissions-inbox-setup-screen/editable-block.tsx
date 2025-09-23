@@ -1,4 +1,4 @@
-import { Alert, Box, Button, FormControl, FormLabel, HStack, Input, VStack } from "@chakra-ui/react"
+import { Alert, Box, Button, FormControl, HStack, Input, VStack } from "@chakra-ui/react"
 import { Pencil, Plus, Warning } from "@phosphor-icons/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
@@ -15,7 +15,6 @@ import { i18nPrefix } from "./i18n-prefix"
 
 interface IProps {
   heading: string
-  headingLabel: string
   permitTypeId: string
   fields: Record<"id", string>[]
   fieldArrayName: string
@@ -28,7 +27,6 @@ interface IProps {
 
 export const EditableBlock = observer(function SubmissionsInboxSetupEditableBlock({
   heading,
-  headingLabel,
   permitTypeId,
   fields,
   fieldArrayName,
@@ -92,7 +90,6 @@ export const EditableBlock = observer(function SubmissionsInboxSetupEditableBloc
   ) : (
     <EditableBlockContainer>
       <FormControl flexBasis={"280px"} alignSelf="start">
-        <FormLabel>{headingLabel}</FormLabel>
         <EditableBlockHeading>{heading}</EditableBlockHeading>
       </FormControl>
       <VStack flex={1} spacing={5} alignSelf="end">

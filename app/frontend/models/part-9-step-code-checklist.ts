@@ -8,9 +8,9 @@ import {
   EStepCodeChecklistStatus,
   EStepCodeCompliancePath,
   EStepCodeEPCTestingTargetType,
+  EStepCodeType,
 } from "../types/enums"
 import { renameKeys } from "../utils/utility-functions"
-import { Part9StepCodeType } from "./part-9-step-code"
 import { StepCodeBuildingCharacteristicsSummaryModel } from "./step-code-building-characteristic-summary"
 import { StepCodeComplianceReportModel } from "./step-code-compliance-report"
 
@@ -29,9 +29,9 @@ export const Part9StepCodeChecklistModel = types.snapshotProcessor(
       stage: types.enumeration<EStepCodeChecklistStage[]>(Object.values(EStepCodeChecklistStage)),
       status: types.enumeration<EStepCodeChecklistStatus[]>(Object.values(EStepCodeChecklistStatus)),
       // permit application info
-      buildingPermitNumber: types.maybeNull(types.string),
+      permitApplicationNumber: types.maybeNull(types.string),
       builder: types.maybeNull(types.string),
-      address: types.maybeNull(types.string),
+      fullAddress: types.maybeNull(types.string),
       jurisdictionName: types.maybeNull(types.string),
       pid: types.maybeNull(types.string),
       // plan, assumed to be based on drawing upload on the permit application
@@ -72,7 +72,7 @@ export const Part9StepCodeChecklistModel = types.snapshotProcessor(
     .extend(withEnvironment())
     .views((self) => ({
       get stepCodeType() {
-        return Part9StepCodeType
+        return EStepCodeType.part9StepCode
       },
       get dwellingUnitsCount() {
         return self.selectedReport?.energy?.dwellingUnitsCount

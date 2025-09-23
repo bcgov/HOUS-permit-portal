@@ -16,6 +16,7 @@ import {
   EPart3BuildingType,
   EPart3StepCodeSoftware,
   EProjectStage,
+  EStepCodeType,
 } from "../types/enums"
 import {
   DeepPartial,
@@ -31,19 +32,12 @@ import {
   IStepCodeOccupancy,
   TPart3NavLinkKey,
 } from "../types/types"
-import { Part3StepCodeType } from "./part-3-step-code"
 
 export const Part3StepCodeChecklistModel = types
   .model("Part3StepCodeChecklistModel", {
     id: types.identifier,
     isLoaded: types.maybeNull(types.boolean),
     sectionCompletionStatus: types.maybeNull(types.frozen<IPart3SectionCompletionStatus>()),
-    // permit application info
-    projectName: types.maybeNull(types.string),
-    projectIdentifier: types.maybeNull(types.string),
-    projectAddress: types.maybeNull(types.string),
-    jurisdictionName: types.maybeNull(types.string),
-    permitDate: types.maybeNull(types.string),
     projectStage: types.maybeNull(types.enumeration<EProjectStage[]>(Object.values(EProjectStage))),
     buildingCodeVersion: types.maybeNull(
       types.enumeration<EBuildingCodeVersion[]>(Object.values(EBuildingCodeVersion))
@@ -116,7 +110,7 @@ export const Part3StepCodeChecklistModel = types
   }))
   .views((self) => ({
     get stepCodeType() {
-      return Part3StepCodeType
+      return EStepCodeType.part3StepCode
     },
     isComplete(key: TPart3NavLinkKey): boolean {
       return self.sectionCompletionStatus[key]?.complete
@@ -227,13 +221,19 @@ export const Part3StepCodeChecklistModel = types
     completeSection: flow(function* (key: TPart3NavLinkKey) {
       let updatedStatus = R.clone(self.sectionCompletionStatus)
       updatedStatus[key] = { complete: true, relevant: true }
-      const response = yield self.environment.api.updatePart3Checklist(self.id, {
-        sectionCompletionStatus: updatedStatus,
-      })
+
+      const requestOptions = key === "stepCodeSummary" ? { reportGenerationRequested: true } : undefined
+
+      const response = yield self.environment.api.updatePart3Checklist(
+        self.id,
+        { sectionCompletionStatus: updatedStatus },
+        requestOptions
+      )
       if (response.ok) {
         self.sectionCompletionStatus = updatedStatus
         return true
       }
+      return false
     }),
     bulkUpdateCompletionStatus: flow(function* (updatedSections: DeepPartial<IPart3SectionCompletionStatus>) {
       let updatedStatus = R.clone(self.sectionCompletionStatus)

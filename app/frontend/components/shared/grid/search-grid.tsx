@@ -16,7 +16,6 @@ export const SearchGrid = ({
 }: ISearchGridProps) => {
   return (
     <Grid
-      mt={3}
       role={"table"}
       templateColumns={templateColumns}
       w="full"
@@ -38,8 +37,6 @@ export const SearchGrid = ({
         },
         ...sx,
       }}
-      border={"1px solid"}
-      borderColor={"border.light"}
       borderRadius={"sm"}
       {...containerProps}
     >

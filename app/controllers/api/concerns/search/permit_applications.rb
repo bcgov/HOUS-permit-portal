@@ -27,7 +27,8 @@ module Api::Concerns::Search::PermitApplications
             nil
           end
         ),
-      includes: PermitApplication::SEARCH_INCLUDES
+      includes: PermitApplication::SEARCH_INCLUDES,
+      scope_results: ->(relation) { policy_scope(relation) }
     }
     @permit_application_search =
       PermitApplication.search(permit_application_query, **search_conditions)
@@ -89,6 +90,6 @@ module Api::Concerns::Search::PermitApplications
       end
     where[:sandbox_id] = current_sandbox&.id if !current_user.super_admin?
 
-    (filters&.to_h || {}).deep_symbolize_keys.compact.merge!(where)
+    (filters&.to_h || {}).deep_symbolize_keys.compact_blank.merge!(where)
   end
 end

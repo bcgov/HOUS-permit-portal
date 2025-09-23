@@ -6,7 +6,7 @@ RSpec.describe User, type: :model do
     it { should have_many(:permit_applications) }
     it do
       should have_many(:applied_jurisdictions).through(
-               :permit_applications
+               :application_projects
              ).source(:jurisdiction)
     end
 
@@ -60,7 +60,7 @@ RSpec.describe User, type: :model do
     it "a review manager can invite reviewers and review managers" do
       inviter = build(:user, :review_manager)
       expect(inviter.invitable_roles).to match_array(
-        %w[reviewer review_manager technical_support]
+        %w[reviewer review_manager technical_support regional_review_manager]
       )
     end
     it "a reviewer cannot invite anyone" do

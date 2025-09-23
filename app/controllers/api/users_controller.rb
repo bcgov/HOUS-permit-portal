@@ -24,11 +24,7 @@ class Api::UsersController < Api::ApplicationController
     render_success authorized_results,
                    nil,
                    {
-                     meta: {
-                       total_pages: @user_search.total_pages,
-                       total_count: @user_search.total_count,
-                       current_page: @user_search.current_page
-                     },
+                     meta: page_meta(@user_search),
                      blueprint: UserBlueprint,
                      blueprint_opts: {
                        view: :base
@@ -165,6 +161,7 @@ class Api::UsersController < Api::ApplicationController
       User.find_by_invitation_token(params[:invitation_token], true)
     if @user.id != invited_user.id
       PromoteUser.new(existing_user: @user, invited_user:).call
+
       if !@user.valid?
         render_error "user.accept_invite_error",
                      {
