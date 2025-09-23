@@ -1,3 +1,6 @@
+require "digest"
+require "json"
+
 class RequirementFormJsonService
   attr_accessor :requirement
 
@@ -616,6 +619,23 @@ class RequirementFormJsonService
     a_col_base = headers["a"].presence || headers["a"] || "Fixture Units"
     a_col_label = "#{a_col_base} (A)"
 
+    # Version the component keys based on configuration so stale submission data from
+    # previous template versions (with different headers/rows) will not be reused.
+    begin
+      raw_rows = configured_rows.is_a?(Array) ? configured_rows : []
+      signature_payload = {
+        "rows" => raw_rows.map { |r| { "name" => r["name"], "a" => r["a"] } }
+      }
+      version_sig =
+        Digest::MD5.hexdigest(JSON.generate(signature_payload))[0, 8]
+      grid_key =
+        "#{requirement.key(requirement_block_key)}|grid|v#{version_sig}"
+      total_key =
+        "#{requirement.key(requirement_block_key)}|totalLoad|v#{version_sig}"
+    rescue => e
+      # If anything goes wrong computing the signature, fall back to non-versioned keys
+    end
+
     datagrid_component = {
       label: requirement.label,
       id: requirement.id,
@@ -651,7 +671,7 @@ class RequirementFormJsonService
           disabled: true,
           readOnly: true,
           input: true,
-          decimalLimit: 3,
+          decimalLimit: 7,
           calculateValue:
             "var defs=(instance && instance.parent && instance.parent.component && instance.parent.component.defaultValue)||[]; var i=rowIndex; if(!value && defs[i]){ value = Number(defs[i].a || 0); }"
         },
@@ -664,7 +684,7 @@ class RequirementFormJsonService
           validate: {
             min: 0
           },
-          decimalLimit: 1
+          decimalLimit: 7
         },
         {
           label: "A × B",
@@ -674,7 +694,7 @@ class RequirementFormJsonService
           readOnly: true,
           input: true,
           persistent: "client",
-          decimalLimit: 3,
+          decimalLimit: 7,
           calculateValue:
             "var a = Number(row.a)||0; var b = Number(row.quantity)||0; var r = a*b; value = Math.round(r*10)/10;"
         }
@@ -692,9 +712,9 @@ class RequirementFormJsonService
       validate: {
         required: true
       },
-      decimalLimit: 1,
+      decimalLimit: 7,
       calculateValue:
-        "var section = '#{section_key}'; var list = (data && data[section] && data[section]['#{grid_key}']) || []; var sum = 0; for (var i=0;i<list.length;i++){ var a = Number(list[i] && list[i].a || 0); var b = Number(list[i] && list[i].quantity || 0); sum += (a*b); } value = Math.round(sum*10)/10;"
+        "var section = '#{section_key}'; var list = (data && data[section] && data[section]['#{grid_key}']) || []; var sum = 0; for (var i=0;i<list.length;i++){ var a = Number(list[i] && list[i].a || 0); var b = Number(list[i] && list[i].quantity || 0); sum += (a*b); } value = sum;"
     }
 
     {
