@@ -148,7 +148,6 @@ export const GridAccordion = observer(function GridAccordion({
                           }}
                           required={requirementJson?.required}
                         />
-                        {/* TODO: DESIGN DRAWING REDESIGN Previously passed matchesStepCodePackageRequirementCode here. */}
                       </Stack>
                     </SearchGridItem>
                   </Box>

@@ -22,7 +22,11 @@ import {
   ERequirementType,
 } from "../../../../types/enums"
 import { IDenormalizedRequirementBlock } from "../../../../types/types"
-import { isContactRequirement, isMultiOptionRequirement } from "../../../../utils/utility-functions"
+import {
+  isArchitecturalDrawingDependencyRequirementCode,
+  isContactRequirement,
+  isMultiOptionRequirement,
+} from "../../../../utils/utility-functions"
 import { CustomMessageBox } from "../../../shared/base/custom-message-box"
 import { EditableInputWithControls } from "../../../shared/editable-input-with-controls"
 import { EditorWithPreview } from "../../../shared/editor/custom-extensions/editor-with-preview"
@@ -176,7 +180,6 @@ export const FieldsSetup = observer(function FieldsSetup({
     const hasArchitecturalRequirement = watchedRequirements?.some(
       (r) => (r as IRequirementAttributes).inputType === ERequirementType.architecturalDrawing
     )
-    // TODO: DESIGN DRAWING REDESIGN Previously disabled step code package file option here.
     const disabledTypes: Array<{
       requirementType: ERequirementType
     }> = []
@@ -322,8 +325,11 @@ export const FieldsSetup = observer(function FieldsSetup({
                   const isStepCodeDependency = Object.values(EEnergyStepCodeDependencyRequirementCode).includes(
                     watchedRequirementCode as EEnergyStepCodeDependencyRequirementCode
                   )
-                  const disabledMenuOptions: ("remove" | "conditional")[] = isStepCodeDependency ? ["conditional"] : []
-                  // TODO: DESIGN DRAWING REDESIGN Previously treated step code package file as dependency.
+                  const isArchitecturalRequirement =
+                    isArchitecturalDrawingDependencyRequirementCode(watchedRequirementCode)
+
+                  const disabledMenuOptions: ("remove" | "conditional")[] =
+                    isStepCodeDependency || isArchitecturalRequirement ? ["conditional"] : []
 
                   // for step code dependency only the step_code requirement is removable and the other
                   // dependencies rely on it for removal
@@ -331,6 +337,10 @@ export const FieldsSetup = observer(function FieldsSetup({
                     isStepCodeDependency &&
                     watchedRequirementCode !== EEnergyStepCodeDependencyRequirementCode.energyStepCodeToolPart9
                   ) {
+                    disabledMenuOptions.push("remove")
+                  }
+
+                  if (isArchitecturalRequirement) {
                     disabledMenuOptions.push("remove")
                   }
 
@@ -368,6 +378,7 @@ export const FieldsSetup = observer(function FieldsSetup({
                       >
                         <RequirementFieldEdit<IRequirementBlockForm>
                           requirementType={requirementType}
+                          label={watch(`requirementsAttributes.${index}.label`)}
                           editableLabelProps={{
                             controlProps: {
                               control,

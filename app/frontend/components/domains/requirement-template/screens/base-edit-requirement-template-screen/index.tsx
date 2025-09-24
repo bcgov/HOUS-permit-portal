@@ -267,7 +267,10 @@ export const BaseEditRequirementTemplateScreen = observer(function BaseEditRequi
   }
 
   function getStepCodePackageFileBlocks() {
-    return [] // TODO: DESIGN DRAWING REDESIGN Previously required step code package file presence here.
+    return allTemplateSectionBlocks.filter(
+      (sectionBlock) =>
+        requirementBlockStore.getRequirementBlockById(sectionBlock.requirementBlockId)?.blocksWithArchitecturalDrawing
+    )
   }
 
   function getStepCodeRelatedWarningBannerErrors() {
@@ -280,6 +283,8 @@ export const BaseEditRequirementTemplateScreen = observer(function BaseEditRequi
     const hasDuplicateEnergyStepCodeBlocks = energyStepCodeBlocks.length > 1
     const hasAnyPart3StepCodeBlocks = part3StepCodeBlocks.length > 0
     const hasAnyPart9StepCodeBlocks = part9StepCodeBlocks.length > 0
+    const hasAnyStepCodePackageFileBlock = stepCodePackageFileBlocks.length > 0
+    const hasDuplicateStepCodePackageFileBlock = stepCodePackageFileBlocks.length > 1
 
     const errors: Array<{ title: string; type: "warning" | "error" }> = []
 
@@ -288,31 +293,30 @@ export const BaseEditRequirementTemplateScreen = observer(function BaseEditRequi
     }
 
     if (hasAnyPart9StepCodeBlocks) {
-      // TODO: DESIGN DRAWING REDESIGN Previously required step code package file presence here.
-      //   if (!hasAnyStepCodePackageFileBlock) {
-      //     errors.push({
-      //       title: t("requirementTemplate.edit.stepCodeErrors.stepCodePackageRequired"),
-      //       type: "error",
-      //     })
-      //   }
-      //   if (hasDuplicateStepCodePackageFileBlock) {
-      //     errors.push({
-      //       title: t("requirementTemplate.edit.stepCodeErrors.duplicateStepCodePackage"),
-      //       type: "error",
-      //     })
-      //   }
-      // } else if (hasAnyStepCodePackageFileBlock) {
-      //   if (hasDuplicateStepCodePackageFileBlock) {
-      //     errors.push({
-      //       title: t("requirementTemplate.edit.stepCodeWarnings.duplicateStepCodePackage"),
-      //       type: "warning",
-      //     })
-      //   } else {
-      //     errors.push({
-      //       title: t("requirementTemplate.edit.stepCodeWarnings.energyStepCodeRecommended"),
-      //       type: "warning",
-      //     })
-      //   }
+      if (!hasAnyStepCodePackageFileBlock) {
+        errors.push({
+          title: t("requirementTemplate.edit.stepCodeErrors.stepCodePackageRequired"),
+          type: "error",
+        })
+      }
+      if (hasDuplicateStepCodePackageFileBlock) {
+        errors.push({
+          title: t("requirementTemplate.edit.stepCodeErrors.duplicateStepCodePackage"),
+          type: "error",
+        })
+      }
+    } else if (hasAnyStepCodePackageFileBlock) {
+      if (hasDuplicateStepCodePackageFileBlock) {
+        errors.push({
+          title: t("requirementTemplate.edit.stepCodeWarnings.duplicateStepCodePackage"),
+          type: "warning",
+        })
+      } else {
+        errors.push({
+          title: t("requirementTemplate.edit.stepCodeWarnings.energyStepCodeRecommended"),
+          type: "warning",
+        })
+      }
     }
 
     if (hasDuplicateEnergyStepCodeBlocks) {

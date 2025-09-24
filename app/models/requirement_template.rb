@@ -297,14 +297,13 @@ class RequirementTemplate < ApplicationRecord
     )
   end
 
-  def step_code_package_file_requirements_from_nest_attributes_copy
+  def architectural_design_file_requirements_from_nest_attributes_copy
     requirement_block_ids = requirement_block_ids_from_nested_attributes_copy
 
     return [] unless requirement_block_ids.length.positive?
 
     Requirement.where(
       requirement_block_id: requirement_block_ids,
-      # TODO: DESIGN DRAWING REDESIGN
       requirement_code: Requirement::ARCHITECTURAL_DRAWING_REQUIREMENT_CODE
     )
   end
@@ -329,26 +328,26 @@ class RequirementTemplate < ApplicationRecord
   def validate_step_code_related_dependencies
     energy_step_code_requirements_count =
       energy_step_code_requirements_from_nest_attributes_copy.count
-    step_code_package_file_requirements_count =
-      step_code_package_file_requirements_from_nest_attributes_copy.count
+    architectural_drawing_file_requirements_count =
+      architectural_design_file_requirements_from_nest_attributes_copy.count
 
     has_any_step_code_requirements = energy_step_code_requirements_count > 0
-    has_any_step_code_package_file_requirements =
-      step_code_package_file_requirements_count > 0
+    has_any_architectural_drawing_file_requirements =
+      architectural_drawing_file_requirements_count > 0
     has_duplicate_step_code_requirements =
       energy_step_code_requirements_count > 1
-    has_duplicate_step_code_package_file_requirements =
-      step_code_package_file_requirements_count > 1
+    has_duplicate_architectural_drawing_file_requirements =
+      architectural_drawing_file_requirements_count > 1
 
     return unless has_any_step_code_requirements
 
-    if !has_any_step_code_package_file_requirements
+    if !has_any_architectural_drawing_file_requirements
       errors.add(:base, :step_code_package_required)
     end
     if has_duplicate_step_code_requirements
       errors.add(:base, :duplicate_energy_step_code)
     end
-    if has_duplicate_step_code_package_file_requirements
+    if has_duplicate_architectural_drawing_file_requirements
       errors.add(:base, :duplicate_step_code_package)
     end
   end

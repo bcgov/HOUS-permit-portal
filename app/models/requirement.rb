@@ -42,7 +42,7 @@ class Requirement < ApplicationRecord
                       Proc.new { |req|
                         TYPES_WITH_VALUE_OPTIONS.include?(req.input_type.to_s)
                       }
-  before_save :set_digital_seal_validator_to_step_code_package_file
+  before_save :set_digital_seal_validator_to_architectural_drawing_file
   validate :validate_value_options,
            if:
              Proc.new { |req|
@@ -275,8 +275,7 @@ class Requirement < ApplicationRecord
     key.split("|").second
   end
 
-  def step_code_package_file?
-    # TODO: DESIGN DRAWING REDESIGN
+  def architectural_drawing_file?
     requirement_code == ARCHITECTURAL_DRAWING_REQUIREMENT_CODE
   end
 
@@ -287,8 +286,8 @@ class Requirement < ApplicationRecord
     configuration_service.merge_default_settings!
   end
 
-  def validate_step_code_package_file
-    return unless step_code_package_file?
+  def validate_architectural_drawing_file
+    return unless architectural_drawing_file?
 
     matches_package_file_required_schema =
       attributes.slice("input_type", "required", "elective") !=
@@ -296,11 +295,14 @@ class Requirement < ApplicationRecord
 
     return unless matches_package_file_required_schema
 
-    errors.add(:requirement_code, :incorrect_step_code_package_file_attributes)
+    errors.add(
+      :requirement_code,
+      :incorrect_architectural_drawing_file_attributes
+    )
   end
 
-  def set_digital_seal_validator_to_step_code_package_file
-    return unless step_code_package_file?
+  def set_digital_seal_validator_to_architectural_drawing_file
+    return unless architectural_drawing_file?
 
     required_computed_compliance = {
       "module" => "DigitalSealValidator",
@@ -353,8 +355,7 @@ class Requirement < ApplicationRecord
     # this happens when the label is "Architectural Drawing File" as the generated requirement code
     # will clash with the step code package file requirement code. This needs to be handled only
     # when the requirement code is generated from the label, because if it was intended to be used
-    # as a step code package file requirement code, it would have been set as such from the front-end.]
-    # TODO: DESIGN DRAWING REDESIGN
+    # as a step code package file requirement code, it would have been set as such from the front-end.
     new_code_clashes_with_step_code_package =
       using_dummy &&
         new_requirement_code == ARCHITECTURAL_DRAWING_REQUIREMENT_CODE

@@ -73,7 +73,6 @@ export function getRequirementTypeLabel(requirementType: ERequirementType): stri
     }
   })
 
-  // TODO: DESIGN DRAWING REDESIGN Previously handled step code package file override.
   // @ts-ignore
   return t(`requirementsLibrary.requirementTypeLabels.${derivedTranslationKey}`)
 }

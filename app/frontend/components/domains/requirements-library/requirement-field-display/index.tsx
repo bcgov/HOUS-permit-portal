@@ -399,8 +399,6 @@ export const RequirementFieldDisplay = observer(function RequirementFieldDisplay
   return requirementsComponentMap[props.requirementType]?.(props) ?? null
 })
 
-// TODO: DESIGN DRAWING REDESIGN Previously forwarded matchesStepCodePackageRequirementCode prop.
-
 export function hasRequirementFieldDisplayComponent(requirementType: ERequirementType): boolean {
   return !!requirementsComponentMap[requirementType]
 }

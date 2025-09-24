@@ -76,5 +76,3 @@ export const GenericFieldDisplay = observer(function GroupedFieldDisplay({
     </FormControl>
   )
 })
-
-// TODO: DESIGN DRAWING REDESIGN Previously forwarded matchesStepCodePackageRequirementCode to derive label.

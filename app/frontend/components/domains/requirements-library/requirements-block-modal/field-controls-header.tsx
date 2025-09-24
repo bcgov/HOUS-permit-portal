@@ -64,7 +64,6 @@ export function FieldControlsHeader({
         {!isRequirementInEditMode && (
           <RequirementTypeTag type={requirementType} className={"requirement-edit-controls"} display={"none"} />
         )}
-        {/* TODO: DESIGN DRAWING REDESIGN Previously matched step code package file requirement code here. */}
         <Button
           variant={"primary"}
           size={"sm"}
