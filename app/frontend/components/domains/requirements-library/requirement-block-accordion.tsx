@@ -241,6 +241,7 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
                         label={requirement.label}
                         helperText={requirement?.hint}
                         instructions={requirement?.instructions}
+                        inputOptions={requirement?.inputOptions}
                         unit={
                           requirementType === ERequirementType.number
                             ? (requirement?.inputOptions?.numberUnit ?? null)

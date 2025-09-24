@@ -12,6 +12,7 @@ module StepCodeParamsConcern
       :permit_application_id,
       # Standalone-editable fields
       :full_address,
+      :pid,
       :reference_number,
       :title,
       :permit_date,

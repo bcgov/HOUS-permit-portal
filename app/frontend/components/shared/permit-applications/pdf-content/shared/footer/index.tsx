@@ -5,7 +5,13 @@ import React from "react"
 import { IPermitApplication } from "../../../../../../models/permit-application"
 import { theme } from "../../../../../../styles/theme"
 
-export const Footer = ({ permitApplication }: { permitApplication?: IPermitApplication }) => {
+export const Footer = ({
+  permitApplication,
+  stepCode,
+}: {
+  permitApplication?: IPermitApplication
+  stepCode?: { jurisdictionName?: string }
+}) => {
   return (
     <View
       style={{
@@ -23,7 +29,7 @@ export const Footer = ({ permitApplication }: { permitApplication?: IPermitAppli
         const totalPages = (props as any).totalPages as number | undefined
         return (
           <>
-            {!!permitApplication && (
+            {!!permitApplication ? (
               <>
                 <Field label={t("permitApplication.pdf.id")} value={permitApplication.number} />
                 <Field
@@ -36,6 +42,8 @@ export const Footer = ({ permitApplication }: { permitApplication?: IPermitAppli
                 />
                 <Field label={t("permitApplication.pdf.jurisdiction")} value={permitApplication.jurisdiction.name} />
               </>
+            ) : (
+              !!stepCode && <Field label={t("permitApplication.pdf.jurisdiction")} value={stepCode.jurisdictionName} />
             )}
             <Field label={t("permitApplication.pdf.page", { pageNumber, totalPages })} value={t("site.titleLong")} />
           </>

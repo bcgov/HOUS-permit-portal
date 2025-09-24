@@ -21,6 +21,7 @@ import { CalendarBlank, Envelope, FileCloud, LightningA, MapPin, Phone } from "@
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { ENumberUnit, ERequirementContactFieldItemType, ERequirementType } from "../../../../types/enums"
+import { MultiplySumGridPreview } from "../multiply-sum-grid-preview"
 import { GenericContactDisplay } from "./generic-contact-display"
 import { GenericFieldDisplay } from "./generic-field-display"
 import { GenericMultiDisplay } from "./generic-multi-display"
@@ -33,6 +34,8 @@ export type TRequirementFieldDisplayProps = {
   helperText?: string
   instructions?: string
   unit?: ENumberUnit | null
+  headers?: { firstColumn?: string; a?: string }
+  inputOptions?: any
   selectProps?: Partial<SelectProps>
   addMultipleContactProps?: {
     shouldRender?: boolean
@@ -375,6 +378,17 @@ const requirementsComponentMap = {
     ]
 
     return <GenericContactDisplay contactFieldItems={contactFieldItemTypes} {...props} />
+  },
+
+  [ERequirementType.multiplySumGrid](props: TRequirementFieldDisplayProps & { inputOptions?: any }) {
+    const firstColumnHeader = props.headers?.firstColumn ?? props.inputOptions?.headers?.firstColumn
+    const aHeader = props.headers?.a ?? props.inputOptions?.headers?.a
+    return (
+      <GenericFieldDisplay
+        inputDisplay={<MultiplySumGridPreview headers={{ firstColumn: firstColumnHeader, a: aHeader }} />}
+        {...props}
+      />
+    )
   },
 }
 

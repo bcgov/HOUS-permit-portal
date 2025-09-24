@@ -15,6 +15,19 @@ class Api::Part9Building::ChecklistsController < Api::ApplicationController
   # PATCH /api/step_code_checklists
   def update
     if @step_code_checklist.update(step_code_checklist_params)
+      # If the client requested report generation and this step code is standalone (no permit application),
+      # enqueue the standalone report generation job.
+      should_generate_report =
+        ActiveModel::Type::Boolean.new.cast(
+          params[:report_generation_requested]
+        )
+      if should_generate_report
+        step_code = @step_code_checklist.step_code
+        if step_code.present? && step_code.permit_application_id.blank?
+          StepCodeReportGenerationJob.perform_async(step_code.id)
+        end
+      end
+
       render_success @step_code_checklist,
                      "step_code_checklist.update_success",
                      {

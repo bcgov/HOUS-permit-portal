@@ -17,7 +17,7 @@ import { StepCodeComplianceReportModel } from "./step-code-compliance-report"
 function preProcessor(snapshot) {
   return {
     ...snapshot,
-    selectedReport: snapshot.selectedReport?.requirementId,
+    selectedReportRequirementId: snapshot.selectedReport?.requirementId,
   }
 }
 
@@ -67,7 +67,7 @@ export const Part9StepCodeChecklistModel = types.snapshotProcessor(
       epcCalculationCompliance: types.maybeNull(types.boolean),
       // calculated / pre-populated fields
       complianceReports: types.array(StepCodeComplianceReportModel),
-      selectedReport: types.maybeNull(types.late(() => types.safeReference(StepCodeComplianceReportModel))),
+      selectedReportRequirementId: types.maybeNull(types.string),
     })
     .extend(withEnvironment())
     .views((self) => ({
@@ -75,7 +75,10 @@ export const Part9StepCodeChecklistModel = types.snapshotProcessor(
         return EStepCodeType.part9StepCode
       },
       get dwellingUnitsCount() {
-        return self.selectedReport?.energy?.dwellingUnitsCount
+        const report =
+          self.complianceReports.find((r) => r.requirementId == self.selectedReportRequirementId) ||
+          self.complianceReports[0]
+        return report?.energy?.dwellingUnitsCount
       },
       get defaultFormValues() {
         const snapshot = getSnapshot(self)
@@ -111,7 +114,17 @@ export const Part9StepCodeChecklistModel = types.snapshotProcessor(
         return self.status == EStepCodeChecklistStatus.complete
       },
       get stepRequirementId() {
-        return self.selectedReport?.requirementId || self.complianceReports[0].requirementId
+        const report =
+          self.complianceReports.find((r) => r.requirementId == self.selectedReportRequirementId) ||
+          self.complianceReports[0]
+        return report?.requirementId
+      },
+    }))
+    .views((self) => ({
+      get selectedReport() {
+        if (!self.complianceReports || self.complianceReports.length === 0) return null as any
+        const found = self.complianceReports.find((r) => r.requirementId == self.selectedReportRequirementId)
+        return found || self.complianceReports[0]
       },
     }))
     .actions((self) => ({
@@ -123,8 +136,7 @@ export const Part9StepCodeChecklistModel = types.snapshotProcessor(
         }
       }),
       setSelectedReport(requirementId: string) {
-        const report = self.complianceReports.find((r) => r.requirementId == requirementId)
-        self.selectedReport = report
+        self.selectedReportRequirementId = requirementId
       },
     })),
   { preProcessor }

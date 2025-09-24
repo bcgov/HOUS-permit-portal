@@ -8,8 +8,8 @@ class Api::RequirementBlocksController < Api::ApplicationController
 
   def index
     perform_search
-    authorized_results = apply_search_authorization(@search.results)
-    render_success authorized_results,
+
+    render_success @search.results,
                    nil,
                    {
                      meta: page_meta(@search),
@@ -136,6 +136,8 @@ class Api::RequirementBlocksController < Api::ApplicationController
           :can_add_multiple_contacts,
           :energy_step_code,
           :multiple,
+          { headers: %i[first_column a] },
+          { rows: %i[name a] },
           value_options: [%i[value label]],
           conditional: %i[eq show when hide],
           computed_compliance: [:value, :module, options_map: {}]

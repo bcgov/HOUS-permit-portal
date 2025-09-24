@@ -189,6 +189,7 @@ export enum ERequirementType {
   email = "email",
   generalContact = "general_contact",
   professionalContact = "professional_contact",
+  multiplySumGrid = "multiply_sum_grid",
 }
 
 export enum ENumberUnit {

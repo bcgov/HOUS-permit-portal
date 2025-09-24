@@ -27,7 +27,8 @@ class Requirement < ApplicationRecord
          general_contact: 17,
          professional_contact: 18,
          pid_info: 19,
-         energy_step_code_part_3: 20
+         energy_step_code_part_3: 20,
+         multiply_sum_grid: 21
        },
        _prefix: true
 

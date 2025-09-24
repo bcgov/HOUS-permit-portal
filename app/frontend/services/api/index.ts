@@ -683,6 +683,10 @@ export class Api {
     return this.client.get<ApiResponse<IStepCode[]>>("/part_9_building/step_codes")
   }
 
+  async fetchPart9StepCode(id: string) {
+    return this.client.get<ApiResponse<IPart9StepCode>>(`/part_9_building/step_codes/${id}`)
+  }
+
   async searchStepCodes(params?: TSearchParams<EStepCodeSortFields>) {
     return this.client.post<ApiResponse<IStepCode[]>>("/step_codes/search", params)
   }
@@ -734,9 +738,10 @@ export class Api {
     return this.client.get<ApiResponse<IPart3StepCodeChecklist>>(`/part_3_building/checklists/${id}`)
   }
 
-  async updatePart9Checklist(id: string, data: Partial<IPart9StepCodeChecklist>) {
+  async updatePart9Checklist(id: string, data: Partial<IPart9StepCodeChecklist>, options?: Record<string, any>) {
     return this.client.patch<ApiResponse<IPart9StepCode>>(`/part_9_building/checklists/${id}`, {
       stepCodeChecklist: data,
+      ...(options ?? {}),
     })
   }
 
@@ -859,6 +864,7 @@ export class Api {
 
   async createPart9StepCode(data: {
     permitApplicationId?: string
+    jurisdictionId?: string
     preConstructionChecklistAttributes?: any
     name?: string
   }) {
