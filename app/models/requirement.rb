@@ -212,7 +212,8 @@ class Requirement < ApplicationRecord
           "eq" => "file",
           "show" => true,
           "when" => ARCHITECTURAL_DRAWING_METHOD_REQUIREMENT_CODE
-        }
+        },
+        "multiple" => true
       }
     }
   }.freeze
@@ -554,7 +555,7 @@ class Requirement < ApplicationRecord
              ] == current_attributes_of_interest
       errors.add(
         :base,
-        :incorrect_energy_requirement_schema,
+        :incorrect_requirement_schema,
         requirement_code: requirement_code
       )
     end
@@ -574,7 +575,7 @@ class Requirement < ApplicationRecord
              attributes.slice("requirement_code", "input_type", "input_options")
       errors.add(
         :base,
-        :incorrect_architectural_requirement_schema,
+        :incorrect_requirement_schema,
         requirement_code: requirement_code
       )
     end
