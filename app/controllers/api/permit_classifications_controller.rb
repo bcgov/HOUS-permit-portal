@@ -1,7 +1,12 @@
 class Api::PermitClassificationsController < Api::ApplicationController
   before_action :set_permit_classification, only: %i[update destroy]
   def index
-    @permit_classifications = policy_scope(PermitClassification)
+    # By default, only return enabled classifications unless explicitly requested otherwise
+    only_enabled =
+      ActiveModel::Type::Boolean.new.cast(index_params[:only_enabled])
+    scope = policy_scope(PermitClassification)
+    scope = scope.where(enabled: true) if only_enabled != false
+    @permit_classifications = scope
     render_success @permit_classifications,
                    nil,
                    { blueprint: PermitClassificationBlueprint }
@@ -117,6 +122,10 @@ class Api::PermitClassificationsController < Api::ApplicationController
   end
 
   private
+
+  def index_params
+    params.permit(:only_enabled)
+  end
 
   def classification_option_params
     params.permit(

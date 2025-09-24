@@ -18,7 +18,7 @@ export const SubmissionsInboxSetupScreen: React.FC = observer(function Submissio
   const { currentJurisdiction, error: jurisdictionError } = useJurisdiction() // from both, aliased error
   const [isEnabled, setIsEnabled] = useState(currentJurisdiction?.inboxEnabled ?? false) // from inbox-feature-access
 
-  const { isLoaded: permitClassificationsLoaded } = usePermitClassificationsLoad() // from original submissions-inbox-setup
+  const { isLoaded: permitClassificationsLoaded } = usePermitClassificationsLoad(true) // load only enabled by default
 
   const handleToggle = (checked) => {
     setIsEnabled(checked)
