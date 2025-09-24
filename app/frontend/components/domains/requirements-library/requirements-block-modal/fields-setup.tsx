@@ -163,12 +163,12 @@ export const FieldsSetup = observer(function FieldsSetup({
 
   const disabledRequirementTypeOptions = (() => {
     const hasEnergyStepCodeRequirement = watchedRequirements?.some(
-      (r) => (r as IRequirementAttributes).inputType === ERequirementType.energyStepCode
+      (r) => (r as IRequirementAttributes).inputType === ERequirementType.energyStepCodePart9
     )
     const hasEnergyStepCodePart3Requirement = watchedRequirements?.some(
       (r) => (r as IRequirementAttributes).inputType === ERequirementType.energyStepCodePart3
     )
-    const hasStepCodePackageFileRequirement = watchedRequirements.some((r) =>
+    const hasStepCodePackageFileRequirement = watchedRequirements?.some((r) =>
       isStepCodePackageFileRequirementCode(r.requirementCode)
     )
 
@@ -374,6 +374,7 @@ export const FieldsSetup = observer(function FieldsSetup({
                               rules: { required: true },
                             },
                             color: "text.link",
+                            // ts-ignore
                             "aria-label": t("requirementsLibrary.modals.fieldLabel"),
                           }}
                           editableHelperTextProps={{
@@ -465,6 +466,7 @@ export const FieldsSetup = observer(function FieldsSetup({
                           requirementType={requirementType}
                           label={watch(`requirementsAttributes.${index}.label`)}
                           helperText={watchedHint}
+                          inputOptions={watch(`requirementsAttributes.${index}.inputOptions`)}
                           unit={
                             requirementType === ERequirementType.number
                               ? (watch(`requirementsAttributes.${index}.inputOptions.numberUnit`) ?? null)
