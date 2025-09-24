@@ -7,12 +7,14 @@ import { Controller, useController, useFieldArray, useFormContext } from "react-
 import { useTranslation } from "react-i18next"
 import { v4 as uuidv4 } from "uuid"
 import {
+  getArchitecturalDrawingRequirementRequiredSchema,
   getEnergyStepCodePart3RequirementRequiredSchema,
   getEnergyStepCodeRequirementRequiredSchema,
 } from "../../../../constants"
 import { IRequirementBlock } from "../../../../models/requirement-block"
 import { IFormConditional, IRequirementAttributes } from "../../../../types/api-request"
 import {
+  EArchitecturalDrawingDependencyRequirementCode,
   EEnergyStepCodeDependencyRequirementCode,
   EEnergyStepCodePart3DependencyRequirementCode,
   EFlashMessageStatus,
@@ -109,44 +111,56 @@ export const FieldsSetup = observer(function FieldsSetup({
       return
     }
 
-    if (requirementType == ERequirementType.energyStepCodePart9) {
-      // handle energy_step_code requirement as it's a special case where we have to add multiple other requirements
-      // with additional defaults
-      const energyStepCodeDependencyDefaults = Object.values(EEnergyStepCodeDependencyRequirementCode)
-        .map((code) => getEnergyStepCodeRequirementRequiredSchema(code))
-        .map((requirement) => {
-          const energyRequirementInOriginalBlock = requirementBlock?.requirements.find(
-            (r) => requirement.requirementCode === r.requirementCode
-          )
-
-          // we reuse the id of the original energy requirement dependency if it exists
-          // this is to prevent duplicate label error from back-end, when removing then adding an energy_step_code requirement
-          if (energyRequirementInOriginalBlock) {
-            requirement.id = energyRequirementInOriginalBlock.id
-          }
-          return requirement
-        })
-
-      append(energyStepCodeDependencyDefaults)
+    const dependencyMap: Record<
+      ERequirementType,
+      {
+        codes:
+          | EEnergyStepCodeDependencyRequirementCode[]
+          | EEnergyStepCodePart3DependencyRequirementCode[]
+          | EArchitecturalDrawingDependencyRequirementCode[]
+        schemaGetter: (
+          code:
+            | EEnergyStepCodeDependencyRequirementCode
+            | EEnergyStepCodePart3DependencyRequirementCode
+            | EArchitecturalDrawingDependencyRequirementCode
+        ) => IRequirementAttributes
+      }
+    > = {
+      [ERequirementType.energyStepCodePart9]: {
+        codes: Object.values(EEnergyStepCodeDependencyRequirementCode),
+        schemaGetter: (code) =>
+          getEnergyStepCodeRequirementRequiredSchema(code as EEnergyStepCodeDependencyRequirementCode),
+      },
+      [ERequirementType.energyStepCodePart3]: {
+        codes: Object.values(EEnergyStepCodePart3DependencyRequirementCode),
+        schemaGetter: (code) =>
+          getEnergyStepCodePart3RequirementRequiredSchema(code as EEnergyStepCodePart3DependencyRequirementCode),
+      },
+      [ERequirementType.architecturalDrawing]: {
+        codes: Object.values(EArchitecturalDrawingDependencyRequirementCode),
+        schemaGetter: (code) =>
+          getArchitecturalDrawingRequirementRequiredSchema(code as EArchitecturalDrawingDependencyRequirementCode),
+      },
     }
 
-    if (requirementType == ERequirementType.energyStepCodePart3) {
-      const energyStepCodePart3DependencyDefaults = Object.values(EEnergyStepCodePart3DependencyRequirementCode)
-        .map((code) => getEnergyStepCodePart3RequirementRequiredSchema(code))
+    const dependencyConfig = dependencyMap[requirementType]
+
+    if (dependencyConfig) {
+      const dependencyDefaults = dependencyConfig.codes
+        .map((code) => dependencyConfig.schemaGetter(code))
         .map((requirement) => {
-          const energyRequirementInOriginalBlock = requirementBlock?.requirements.find(
+          const existingRequirement = requirementBlock?.requirements.find(
             (r) => requirement.requirementCode === r.requirementCode
           )
 
-          // we reuse the id of the original energy requirement dependency if it exists
-          // this is to prevent duplicate label error from back-end, when removing then adding an energy_step_code requirement
-          if (energyRequirementInOriginalBlock) {
-            requirement.id = energyRequirementInOriginalBlock.id
+          if (existingRequirement) {
+            requirement.id = existingRequirement.id
           }
+
           return requirement
         })
 
-      append(energyStepCodePart3DependencyDefaults)
+      append(dependencyDefaults)
     }
   }
 

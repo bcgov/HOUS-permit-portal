@@ -154,7 +154,7 @@ RSpec.describe Requirement, type: :model, search: true do
             expect(requirement).to_not be_valid
             expect(requirement.errors[:base]).to include(
               I18n.t(
-                "activerecord.errors.models.requirement.incorrect_energy_requirement_schema",
+                "activerecord.errors.models.requirement.incorrect_requirement_schema",
                 requirement_code: requirement.requirement_code
               )
             )
@@ -211,7 +211,7 @@ RSpec.describe Requirement, type: :model, search: true do
           expect(requirement).to_not be_valid
           expect(requirement.errors[:base]).to include(
             I18n.t(
-              "activerecord.errors.models.requirement.incorrect_energy_requirement_schema",
+              "activerecord.errors.models.requirement.incorrect_requirement_schema",
               requirement_code: requirement.requirement_code
             )
           )
@@ -247,7 +247,7 @@ RSpec.describe Requirement, type: :model, search: true do
           expect(requirement).to_not be_valid
           expect(requirement.errors[:base]).to include(
             I18n.t(
-              "activerecord.errors.models.requirement.incorrect_energy_requirement_schema",
+              "activerecord.errors.models.requirement.incorrect_requirement_schema",
               requirement_code: requirement.requirement_code
             )
           )
@@ -281,7 +281,7 @@ RSpec.describe Requirement, type: :model, search: true do
           expect(requirement).to_not be_valid
           expect(requirement.errors[:base]).to include(
             I18n.t(
-              "activerecord.errors.models.requirement.incorrect_energy_requirement_schema",
+              "activerecord.errors.models.requirement.incorrect_requirement_schema",
               requirement_code: requirement.requirement_code
             )
           )

@@ -88,7 +88,7 @@ en:
               incorrect_energy_step_code_dependencies: "missing or duplicate energy step code dependencies"
               duplicate_step_code_package_file: "must have only one design package file for energy step code per requirement block"
         requirement:
-          incorrect_energy_requirement_schema: "Incorrect schema for %{requirement_code}"
+          incorrect_requirement_schema: "Incorrect schema for %{requirement_code}"
           attributes:
             requirement_code:
               incorrect_energy_requirement_code: "must be %{correct_requirement_code} for energy step code requirements, but received %{incorrect_requirement_code}"
