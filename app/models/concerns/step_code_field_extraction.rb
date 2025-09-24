@@ -39,7 +39,8 @@ module StepCodeFieldExtraction
     return nil if requirements_lookups.blank?
 
     requirements_lookups.keys.find do |k|
-      k.ends_with?("|#{Requirement::STEP_CODE_PACKAGE_FILE_REQUIREMENT_CODE}")
+      # TODO: DESIGN DRAWING REDESIGN
+      k.ends_with?("|#{Requirement::ARCHITECTURAL_DRAWING_REQUIREMENT_CODE}")
     end
   end
 

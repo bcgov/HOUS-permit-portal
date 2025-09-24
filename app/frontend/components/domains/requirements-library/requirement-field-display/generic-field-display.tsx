@@ -23,7 +23,6 @@ const helperTextStyles = {
 }
 
 export const GenericFieldDisplay = observer(function GroupedFieldDisplay({
-  matchesStepCodePackageRequirementCode,
   inputDisplay,
   label,
   labelProps,
@@ -54,7 +53,7 @@ export const GenericFieldDisplay = observer(function GroupedFieldDisplay({
         {label ??
           (showAddLabelIndicator
             ? `${t("requirementsLibrary.modals.addLabel")} *`
-            : getRequirementTypeLabel(requirementType, matchesStepCodePackageRequirementCode))}
+            : getRequirementTypeLabel(requirementType))}
       </FormLabel>
 
       {!isQuillEmpty(instructions) && (
@@ -77,3 +76,5 @@ export const GenericFieldDisplay = observer(function GroupedFieldDisplay({
     </FormControl>
   )
 })
+
+// TODO: DESIGN DRAWING REDESIGN Previously forwarded matchesStepCodePackageRequirementCode to derive label.

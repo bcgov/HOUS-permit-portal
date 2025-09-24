@@ -3,7 +3,6 @@ import React, { ReactNode } from "react"
 import { FieldValues } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { EEnergyStepCodeDependencyRequirementCode, ERequirementType } from "../../../../types/enums"
-import { isStepCodePackageFileRequirementCode } from "../../../../utils/utility-functions"
 import { EditableHelperText, TEditableHelperTextProps } from "./editable-helper-text"
 import { EditableInstructionsText, TEditableInstructionsTextProps } from "./editable-instructions-text"
 import { EditableLabel, TEditableLabelProps } from "./editable-label"
@@ -42,11 +41,8 @@ export function EditableGroup<TFieldValues>({
 }: TEditableGroupProps<TFieldValues>) {
   const { t } = useTranslation()
   const { isOpen, onOpen, onClose } = useDisclosure()
-  const isEditLimited =
-    isStepCodePackageFileRequirementCode(requirementCode) ||
-    Object.values(EEnergyStepCodeDependencyRequirementCode).includes(
-      requirementCode as EEnergyStepCodeDependencyRequirementCode
-    )
+  const isEditLimited = Object.values(EEnergyStepCodeDependencyRequirementCode).includes(requirementCode)
+  // TODO: DESIGN DRAWING REDESIGN Previously limited editing for step code package file here.
 
   return (
     <Stack spacing={4} {...containerProps}>
