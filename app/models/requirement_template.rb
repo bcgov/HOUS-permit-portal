@@ -304,7 +304,8 @@ class RequirementTemplate < ApplicationRecord
 
     Requirement.where(
       requirement_block_id: requirement_block_ids,
-      requirement_code: Requirement::STEP_CODE_PACKAGE_FILE_REQUIREMENT_CODE
+      # TODO: DESIGN DRAWING REDESIGN
+      requirement_code: Requirement::ARCHITECTURAL_DRAWING_REQUIREMENT_CODE
     )
   end
 

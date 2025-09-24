@@ -2,7 +2,6 @@ import { format } from "date-fns"
 import { utcToZonedTime } from "date-fns-tz"
 import {
   OPTIONS_MAPPER_AUTO_COMPLIANCE_TYPES,
-  STEP_CODE_PACKAGE_FILE_REQUIREMENT_CODE,
   VALUE_EXTRACTION_AUTO_COMPLIANCE_TYPES,
   vancouverTimeZone,
 } from "../constants"
@@ -170,9 +169,7 @@ export function startBlobDownload(blobData: BlobPart, mimeType: string, fileName
   window.URL.revokeObjectURL(url)
 }
 
-export function isStepCodePackageFileRequirementCode(requirementCode: string) {
-  return requirementCode === STEP_CODE_PACKAGE_FILE_REQUIREMENT_CODE
-}
+// TODO: DESIGN DRAWING REDESIGN Previously provided step code package file helper.
 
 export function convertE164PhoneToInputDefault(e164PhoneNumber: string): string {
   if (!e164PhoneNumber) return ""

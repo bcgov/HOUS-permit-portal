@@ -1,5 +1,4 @@
 import { applySnapshot, flow, Instance, toGenerator, types } from "mobx-state-tree"
-import { STEP_CODE_PACKAGE_FILE_REQUIREMENT_CODE } from "../constants"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
 import { IRequirementAttributes, IRequirementBlockParams } from "../types/api-request"
@@ -45,8 +44,9 @@ export const RequirementBlockModel = types
       )
     },
     get blocksWithStepCodePackageFile() {
-      return self.requirements?.some((r) => r.requirementCode === STEP_CODE_PACKAGE_FILE_REQUIREMENT_CODE)
+      return false
     },
+    // TODO: DESIGN DRAWING REDESIGN Previously computed blocksWithStepCodePackageFile.
     hasRequirement(id: string) {
       return self.requirements.findIndex((requirement) => requirement.id === id) !== -1
     },

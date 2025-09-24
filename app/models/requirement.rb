@@ -28,7 +28,8 @@ class Requirement < ApplicationRecord
          professional_contact: 18,
          pid_info: 19,
          energy_step_code_part_3: 20,
-         multiply_sum_grid: 21
+         multiply_sum_grid: 21,
+         architectural_drawing: 22
        },
        _prefix: true
 
@@ -71,13 +72,19 @@ class Requirement < ApplicationRecord
             }
   validate :validate_energy_step_code_requirement_code
   validate :validate_energy_step_code_related_requirements_schema
+  validate :validate_architectural_drawing_requirement_code
+  validate :validate_architectural_drawing_related_requirements_schema
   validate :validate_computed_compliance
 
   NUMBER_UNITS = %w[no_unit mm cm m in ft mi sqm sqft cad]
   TYPES_WITH_VALUE_OPTIONS = %w[multi_option_select select radio]
   CONTACT_TYPES = %w[general_contact professional_contact]
 
-  STEP_CODE_PACKAGE_FILE_REQUIREMENT_CODE = "architectural_drawing_file".freeze
+  ARCHITECTURAL_DRAWING_REQUIREMENT_CODE = "architectural_drawing_file".freeze
+  ARCHITECTURAL_DRAWING_METHOD_REQUIREMENT_CODE =
+    "architectural_drawing_method".freeze
+  ARCHITECTURAL_DRAWING_TOOL_REQUIREMENT_CODE =
+    "architectural_drawing_tool".freeze
   ENERGY_STEP_CODE_SELECT_REQUIREMENT_CODE = "energy_step_code_method".freeze
   ENERGY_STEP_CODE_PART_9_REQUIREMENT_CODE =
     "energy_step_code_tool_part_9".freeze
@@ -172,11 +179,52 @@ class Requirement < ApplicationRecord
     }
   }
 
+  ARCHITECTURAL_DRAWING_DEPENDENCY_REQUIRED_SCHEMA = {
+    architectural_drawing_method: {
+      "requirement_code" => ARCHITECTURAL_DRAWING_METHOD_REQUIREMENT_CODE,
+      "input_type" => "select",
+      "input_options" => {
+        "value_options" => [
+          {
+            "label" => "Use the architectural drawing tool",
+            "value" => "tool"
+          },
+          { "label" => "Upload a file", "value" => "file" }
+        ]
+      }
+    },
+    architectural_drawing_tool: {
+      "requirement_code" => ARCHITECTURAL_DRAWING_TOOL_REQUIREMENT_CODE,
+      "input_type" => "architectural_drawing",
+      "input_options" => {
+        "conditional" => {
+          "eq" => "tool",
+          "show" => true,
+          "when" => ARCHITECTURAL_DRAWING_METHOD_REQUIREMENT_CODE
+        }
+      }
+    },
+    architectural_drawing_file: {
+      "requirement_code" => ARCHITECTURAL_DRAWING_REQUIREMENT_CODE,
+      "input_type" => "file",
+      "input_options" => {
+        "conditional" => {
+          "eq" => "file",
+          "show" => true,
+          "when" => ARCHITECTURAL_DRAWING_METHOD_REQUIREMENT_CODE
+        }
+      }
+    }
+  }.freeze
+
   ENERGY_STEP_CODE_REQUIRED_DEPENDENCY_CODES =
     (
       ENERGY_STEP_CODE_PART_9_DEPENDENCY_REQUIRED_SCHEMA.keys.map(&:to_s) +
         ENERGY_STEP_CODE_PART_3_DEPENDENCY_REQUIRED_SCHEMA.keys.map(&:to_s)
     ).uniq.freeze
+
+  ARCHITECTURAL_DRAWING_REQUIRED_DEPENDENCY_CODES =
+    ARCHITECTURAL_DRAWING_DEPENDENCY_REQUIRED_SCHEMA.keys.map(&:to_s).freeze
 
   def value_options
     return nil if input_options.blank? || input_options["value_options"].blank?
@@ -227,7 +275,8 @@ class Requirement < ApplicationRecord
   end
 
   def step_code_package_file?
-    requirement_code == STEP_CODE_PACKAGE_FILE_REQUIREMENT_CODE
+    # TODO: DESIGN DRAWING REDESIGN
+    requirement_code == ARCHITECTURAL_DRAWING_REQUIREMENT_CODE
   end
 
   private
@@ -286,6 +335,10 @@ class Requirement < ApplicationRecord
             return ENERGY_STEP_CODE_PART_9_REQUIREMENT_CODE
           end
 
+          if input_type_architectural_drawing?
+            return ARCHITECTURAL_DRAWING_TOOL_REQUIREMENT_CODE
+          end
+
           if label.blank?
             ENERGY_STEP_CODE_PART_9_REQUIREMENT_CODE
           else
@@ -299,10 +352,11 @@ class Requirement < ApplicationRecord
     # this happens when the label is "Architectural Drawing File" as the generated requirement code
     # will clash with the step code package file requirement code. This needs to be handled only
     # when the requirement code is generated from the label, because if it was intended to be used
-    # as a step code package file requirement code, it would have been set as such from the front-end.
+    # as a step code package file requirement code, it would have been set as such from the front-end.]
+    # TODO: DESIGN DRAWING REDESIGN
     new_code_clashes_with_step_code_package =
       using_dummy &&
-        new_requirement_code == STEP_CODE_PACKAGE_FILE_REQUIREMENT_CODE
+        new_requirement_code == ARCHITECTURAL_DRAWING_REQUIREMENT_CODE
 
     # new_requirement_code =
     new_requirement_code =
@@ -502,6 +556,41 @@ class Requirement < ApplicationRecord
         :base,
         :incorrect_energy_requirement_schema,
         requirement_code: requirement_code
+      )
+    end
+  end
+
+  def validate_architectural_drawing_related_requirements_schema
+    unless ARCHITECTURAL_DRAWING_REQUIRED_DEPENDENCY_CODES.include?(
+             requirement_code
+           )
+      return
+    end
+
+    expected_schema =
+      ARCHITECTURAL_DRAWING_DEPENDENCY_REQUIRED_SCHEMA[requirement_code.to_sym]
+
+    unless expected_schema ==
+             attributes.slice("requirement_code", "input_type", "input_options")
+      errors.add(
+        :base,
+        :incorrect_architectural_requirement_schema,
+        requirement_code: requirement_code
+      )
+    end
+  end
+
+  def validate_architectural_drawing_requirement_code
+    unless input_type_architectural_drawing? && !using_dummied_requirement_code
+      return
+    end
+
+    unless requirement_code == ARCHITECTURAL_DRAWING_TOOL_REQUIREMENT_CODE
+      errors.add(
+        :requirement_code,
+        :incorrect_architectural_requirement_code,
+        correct_requirement_code: ARCHITECTURAL_DRAWING_TOOL_REQUIREMENT_CODE,
+        incorrect_requirement_code: requirement_code
       )
     end
   end

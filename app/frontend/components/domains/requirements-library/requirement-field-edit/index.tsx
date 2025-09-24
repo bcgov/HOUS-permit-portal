@@ -390,6 +390,10 @@ const requirementsComponentMap = {
     return <EditableGroup editableInput={<i className="fa fa-bolt"></i>} {...props} />
   },
 
+  [ERequirementType.architecturalDrawing]: function <TFieldValues>(props) {
+    return <EditableGroup editableInput={<i className="fa fa-bolt"></i>} {...props} />
+  },
+
   [ERequirementType.generalContact]: function <TFieldValues>({
     editableLabelProps,
     canAddMultipleContactProps,

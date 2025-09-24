@@ -22,14 +22,9 @@ import { RequirementFieldDisplay, hasRequirementFieldDisplayComponent } from "./
 interface IProps {
   defaultButtonProps?: Partial<ButtonProps>
   renderTriggerButton?: (props: ButtonProps & { ref: Ref<HTMLElement> }) => JSX.Element
-  onUse?: (
-    requirementType: ERequirementType,
-    closeDrawer?: () => void,
-    isStepCodePackageFileRequirement?: boolean
-  ) => void
+  onUse?: (requirementType: ERequirementType, closeDrawer?: () => void) => void
   disabledRequirementTypeOptions?: Array<{
     requirementType: ERequirementType
-    isStepCodePackageFileRequirement?: boolean
   }>
 }
 
@@ -44,25 +39,16 @@ export const FieldsSetupDrawer = observer(function FieldsSetupMenu({
   const btnRef = useRef<HTMLButtonElement>()
   const disabledTypeOptions: Array<{
     requirementType: ERequirementType
-    isStepCodePackageFileRequirement?: boolean
   }> = disabledRequirementTypeOptions
 
   const requirementTypeOptions = Object.values(ERequirementType).reduce<
     {
       requirementType: ERequirementType
-      isStepCodePackageFileRequirement?: boolean
     }[]
   >((acc, type) => {
-    let options = {
-      requirementType: type,
-    }
-    acc.push(options)
+    acc.push({ requirementType: type })
 
-    // add pseudo type for step code package file
-    // This approach is used merely to group the design doc with the step code requirement
-    if (type === ERequirementType.energyStepCodePart9) {
-      acc.push({ requirementType: ERequirementType.file, isStepCodePackageFileRequirement: true })
-    }
+    // TODO: DESIGN DRAWING REDESIGN Previously handled step code package file special case here.
 
     return acc
   }, [])
@@ -97,9 +83,10 @@ export const FieldsSetupDrawer = observer(function FieldsSetupMenu({
             <Flex flexDir={"column"} w={"full"}>
               {requirementTypeOptions
                 .filter(({ requirementType }) => hasRequirementFieldDisplayComponent(requirementType))
-                .map(({ requirementType, isStepCodePackageFileRequirement = false }) => (
+                .map(({ requirementType }) => (
+                  // TODO: DESIGN DRAWING REDESIGN Previously passed matchesStepCodePackageRequirementCode flag.
                   <HStack
-                    key={`${requirementType}${isStepCodePackageFileRequirement ? "_stepCodePackage" : ""}`}
+                    key={`${requirementType}`}
                     alignItems={"flex-end"}
                     justifyContent={"space-between"}
                     spacing={6}
@@ -112,23 +99,15 @@ export const FieldsSetupDrawer = observer(function FieldsSetupMenu({
                       "&:last-of-type": { border: "none" },
                     }}
                   >
-                    <RequirementFieldDisplay
-                      requirementType={requirementType}
-                      inputOptions={{}}
-                      matchesStepCodePackageRequirementCode={isStepCodePackageFileRequirement}
-                    />
+                    <RequirementFieldDisplay inputOptions={{}} requirementType={requirementType} />
                     <Button
                       minW="76px"
                       variant={"primary"}
                       rightIcon={<CaretRight />}
                       isDisabled={
-                        !!disabledTypeOptions.find(
-                          (typeOption) =>
-                            typeOption.requirementType === requirementType &&
-                            (typeOption?.isStepCodePackageFileRequirement ?? false) === isStepCodePackageFileRequirement
-                        )
+                        !!disabledTypeOptions.find((typeOption) => typeOption.requirementType === requirementType)
                       }
-                      onClick={() => onUse?.(requirementType, onClose, isStepCodePackageFileRequirement)}
+                      onClick={() => onUse?.(requirementType, onClose)}
                     >
                       {t("requirementsLibrary.fieldsDrawer.useButton")}
                     </Button>

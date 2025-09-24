@@ -63,22 +63,17 @@ export const datefnsTableDateTimeFormat = "MMM dd, yyyy HH:mm"
 
 export const vancouverTimeZone = "America/Vancouver" // Vancouver time zone
 
-export function getRequirementTypeLabel(
-  requirementType: ERequirementType,
-  matchesStepCodePackageRequirementCode?: boolean
-) {
-  let derivedTranslationKey: keyof typeof ERequirementType | "stepCodePackageFile"
+export function getRequirementTypeLabel(requirementType: ERequirementType): string {
+  let derivedTranslationKey: keyof typeof ERequirementType
 
-  if (requirementType === ERequirementType.file && matchesStepCodePackageRequirementCode) {
-    derivedTranslationKey = "stepCodePackageFile"
-  } else {
-    Object.entries(ERequirementType).forEach(([key, value]: [keyof typeof ERequirementType, ERequirementType]) => {
-      if (value === requirementType) {
-        derivedTranslationKey = key
-      }
-    })
-  }
+  Object.entries(ERequirementType).forEach(([key, value]: [keyof typeof ERequirementType, ERequirementType]) => {
+    if (value === requirementType) {
+      derivedTranslationKey = key
+    }
+  })
 
+  // TODO: DESIGN DRAWING REDESIGN Previously handled step code package file override.
+  // @ts-ignore
   return t(`requirementsLibrary.requirementTypeLabels.${derivedTranslationKey}`)
 }
 
@@ -222,8 +217,6 @@ export function getEnergyStepCodePart3RequirementRequiredSchema(
 
   return requirementCodeToSchema[energyRequirementCode]
 }
-
-export const STEP_CODE_PACKAGE_FILE_REQUIREMENT_CODE = "architectural_drawing_file" as const
 
 export const VALUE_EXTRACTION_AUTO_COMPLIANCE_TYPES = [
   EAutoComplianceType.internalValueExtractor,

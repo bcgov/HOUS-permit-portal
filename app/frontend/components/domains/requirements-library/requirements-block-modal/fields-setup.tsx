@@ -9,7 +9,6 @@ import { v4 as uuidv4 } from "uuid"
 import {
   getEnergyStepCodePart3RequirementRequiredSchema,
   getEnergyStepCodeRequirementRequiredSchema,
-  STEP_CODE_PACKAGE_FILE_REQUIREMENT_CODE,
 } from "../../../../constants"
 import { IRequirementBlock } from "../../../../models/requirement-block"
 import { IFormConditional, IRequirementAttributes } from "../../../../types/api-request"
@@ -21,11 +20,7 @@ import {
   ERequirementType,
 } from "../../../../types/enums"
 import { IDenormalizedRequirementBlock } from "../../../../types/types"
-import {
-  isContactRequirement,
-  isMultiOptionRequirement,
-  isStepCodePackageFileRequirementCode,
-} from "../../../../utils/utility-functions"
+import { isContactRequirement, isMultiOptionRequirement } from "../../../../utils/utility-functions"
 import { CustomMessageBox } from "../../../shared/base/custom-message-box"
 import { EditableInputWithControls } from "../../../shared/editable-input-with-controls"
 import { EditorWithPreview } from "../../../shared/editor/custom-extensions/editor-with-preview"
@@ -81,18 +76,14 @@ export const FieldsSetup = observer(function FieldsSetup({
     setRequirementIdsToEdit((pastState) => ({ ...pastState, [requirementId]: !pastState[requirementId] }))
   }
 
-  const onUseRequirement = (
-    requirementType: ERequirementType,
-    _callBack: any,
-    matchesStepCodePackageRequirementCode?: boolean
-  ) => {
+  const onUseRequirement = (requirementType: ERequirementType, _callBack: any) => {
     if (
       requirementType !== ERequirementType.energyStepCodePart9 &&
-      requirementType !== ERequirementType.energyStepCodePart3
+      requirementType !== ERequirementType.energyStepCodePart3 &&
+      requirementType !== ERequirementType.architecturalDrawing
     ) {
-      const isStepCodePackageFile = requirementType === ERequirementType.file && matchesStepCodePackageRequirementCode
       const defaults = {
-        requirementCode: isStepCodePackageFile ? STEP_CODE_PACKAGE_FILE_REQUIREMENT_CODE : `dummy-${uuidv4()}`,
+        requirementCode: `dummy-${uuidv4()}`,
         id: `dummy-${uuidv4()}`,
         inputType: requirementType,
         label: [ERequirementType.generalContact, ERequirementType.professionalContact].includes(requirementType)
@@ -168,13 +159,12 @@ export const FieldsSetup = observer(function FieldsSetup({
     const hasEnergyStepCodePart3Requirement = watchedRequirements?.some(
       (r) => (r as IRequirementAttributes).inputType === ERequirementType.energyStepCodePart3
     )
-    const hasStepCodePackageFileRequirement = watchedRequirements?.some((r) =>
-      isStepCodePackageFileRequirementCode(r.requirementCode)
+    const hasArchitecturalRequirement = watchedRequirements?.some(
+      (r) => (r as IRequirementAttributes).inputType === ERequirementType.architecturalDrawing
     )
-
+    // TODO: DESIGN DRAWING REDESIGN Previously disabled step code package file option here.
     const disabledTypes: Array<{
       requirementType: ERequirementType
-      isStepCodePackageFileRequirement?: boolean
     }> = []
 
     if (hasEnergyStepCodeRequirement) {
@@ -184,9 +174,8 @@ export const FieldsSetup = observer(function FieldsSetup({
     if (hasEnergyStepCodePart3Requirement) {
       disabledTypes.push({ requirementType: ERequirementType.energyStepCodePart3 })
     }
-
-    if (hasStepCodePackageFileRequirement) {
-      disabledTypes.push({ requirementType: ERequirementType.file, isStepCodePackageFileRequirement: true })
+    if (hasArchitecturalRequirement) {
+      disabledTypes.push({ requirementType: ERequirementType.architecturalDrawing })
     }
     return disabledTypes
   })()
@@ -319,10 +308,8 @@ export const FieldsSetup = observer(function FieldsSetup({
                   const isStepCodeDependency = Object.values(EEnergyStepCodeDependencyRequirementCode).includes(
                     watchedRequirementCode as EEnergyStepCodeDependencyRequirementCode
                   )
-                  const disabledMenuOptions: ("remove" | "conditional")[] =
-                    isStepCodeDependency || isStepCodePackageFileRequirementCode(watchedRequirementCode)
-                      ? ["conditional"]
-                      : []
+                  const disabledMenuOptions: ("remove" | "conditional")[] = isStepCodeDependency ? ["conditional"] : []
+                  // TODO: DESIGN DRAWING REDESIGN Previously treated step code package file as dependency.
 
                   // for step code dependency only the step_code requirement is removable and the other
                   // dependencies rely on it for removal
@@ -460,9 +447,6 @@ export const FieldsSetup = observer(function FieldsSetup({
                         {...fieldContainerSharedProps}
                       >
                         <RequirementFieldDisplay
-                          matchesStepCodePackageRequirementCode={isStepCodePackageFileRequirementCode(
-                            watchedRequirementCode
-                          )}
                           requirementType={requirementType}
                           label={watch(`requirementsAttributes.${index}.label`)}
                           helperText={watchedHint}

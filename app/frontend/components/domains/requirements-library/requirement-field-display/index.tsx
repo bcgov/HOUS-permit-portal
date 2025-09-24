@@ -27,7 +27,6 @@ import { GenericFieldDisplay } from "./generic-field-display"
 import { GenericMultiDisplay } from "./generic-multi-display"
 
 export type TRequirementFieldDisplayProps = {
-  matchesStepCodePackageRequirementCode?: boolean
   labelProps?: Partial<FormLabelProps | HeadingProps>
   label?: string
   options?: string[]
@@ -271,6 +270,10 @@ const requirementsComponentMap = {
     return <GenericFieldDisplay inputDisplay={<DummyStepCodeInput />} {...props} />
   },
 
+  [ERequirementType.architecturalDrawing](props: TRequirementFieldDisplayProps) {
+    return <GenericFieldDisplay inputDisplay={<DummyStepCodeInput />} {...props} />
+  },
+
   [ERequirementType.pidInfo](props: TRequirementFieldDisplayProps) {
     const pidInfoFieldItemTypes: Array<{
       type: ERequirementType
@@ -395,6 +398,8 @@ const requirementsComponentMap = {
 export const RequirementFieldDisplay = observer(function RequirementFieldDisplay(props: TRequirementFieldDisplayProps) {
   return requirementsComponentMap[props.requirementType]?.(props) ?? null
 })
+
+// TODO: DESIGN DRAWING REDESIGN Previously forwarded matchesStepCodePackageRequirementCode prop.
 
 export function hasRequirementFieldDisplayComponent(requirementType: ERequirementType): boolean {
   return !!requirementsComponentMap[requirementType]
