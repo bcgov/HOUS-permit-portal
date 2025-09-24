@@ -43,10 +43,9 @@ export const RequirementBlockModel = types
           r.inputType === ERequirementType.energyStepCodePart9 || r.inputType === ERequirementType.energyStepCodePart3
       )
     },
-    get blocksWithStepCodePackageFile() {
-      return false
+    get blocksWithArchitecturalDrawing() {
+      return self.requirements?.some((r) => r.inputType === ERequirementType.architecturalDrawing)
     },
-    // TODO: DESIGN DRAWING REDESIGN Previously computed blocksWithStepCodePackageFile.
     hasRequirement(id: string) {
       return self.requirements.findIndex((requirement) => requirement.id === id) !== -1
     },

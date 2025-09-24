@@ -15,4 +15,3 @@ export function RequirementTypeTag({
     </Tag>
   )
 }
-// TODO: DESIGN DRAWING REDESIGN Previously required matchesStepCodePackageRequirementCode prop.

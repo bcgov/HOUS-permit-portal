@@ -5,7 +5,7 @@ import {
   VALUE_EXTRACTION_AUTO_COMPLIANCE_TYPES,
   vancouverTimeZone,
 } from "../constants"
-import { ERequirementType } from "../types/enums"
+import { EArchitecturalDrawingDependencyRequirementCode, ERequirementType } from "../types/enums"
 import { TAutoComplianceModuleConfiguration, TDebouncedFunction } from "../types/types"
 
 export function isUUID(str) {
@@ -169,7 +169,15 @@ export function startBlobDownload(blobData: BlobPart, mimeType: string, fileName
   window.URL.revokeObjectURL(url)
 }
 
-// TODO: DESIGN DRAWING REDESIGN Previously provided step code package file helper.
+export function isArchitecturalDrawingDependencyRequirementCode(
+  requirementCode?: string | null
+): requirementCode is EArchitecturalDrawingDependencyRequirementCode {
+  if (!requirementCode) return false
+
+  return Object.values(EArchitecturalDrawingDependencyRequirementCode).includes(
+    requirementCode as EArchitecturalDrawingDependencyRequirementCode
+  )
+}
 
 export function convertE164PhoneToInputDefault(e164PhoneNumber: string): string {
   if (!e164PhoneNumber) return ""

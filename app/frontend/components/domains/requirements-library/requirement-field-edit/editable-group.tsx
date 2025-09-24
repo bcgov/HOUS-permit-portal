@@ -1,8 +1,9 @@
-import { Stack, StackProps, useDisclosure } from "@chakra-ui/react"
+import { Stack, StackProps } from "@chakra-ui/react"
 import React, { ReactNode } from "react"
 import { FieldValues } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { EEnergyStepCodeDependencyRequirementCode, ERequirementType } from "../../../../types/enums"
+import { EEnergyStepCodeDependencyRequirementCode } from "../../../../types/enums"
+import { isArchitecturalDrawingDependencyRequirementCode } from "../../../../utils/utility-functions"
 import { EditableHelperText, TEditableHelperTextProps } from "./editable-helper-text"
 import { EditableInstructionsText, TEditableInstructionsTextProps } from "./editable-instructions-text"
 import { EditableLabel, TEditableLabelProps } from "./editable-label"
@@ -12,7 +13,7 @@ import { IsOptionalCheckbox } from "./is-optional-checkbox"
 import { TIsElectiveCheckboxProps, TIsMultipleFilesCheckboxProps, TIsOptionalCheckboxProps } from "./types"
 
 export type TEditableGroupProps<TFieldValues extends FieldValues> = {
-  requirementCode?: ERequirementType
+  requirementCode?: string
   editableLabelProps: TEditableLabelProps<TFieldValues>
   editableHelperTextProps?: TEditableHelperTextProps<TFieldValues>
   isOptionalCheckboxProps: TIsOptionalCheckboxProps<TFieldValues>
@@ -40,9 +41,11 @@ export function EditableGroup<TFieldValues>({
   ...containerProps
 }: TEditableGroupProps<TFieldValues>) {
   const { t } = useTranslation()
-  const { isOpen, onOpen, onClose } = useDisclosure()
-  const isEditLimited = Object.values(EEnergyStepCodeDependencyRequirementCode).includes(requirementCode)
-  // TODO: DESIGN DRAWING REDESIGN Previously limited editing for step code package file here.
+  const isEnergyStepCodeDependency = Object.values(EEnergyStepCodeDependencyRequirementCode).includes(
+    requirementCode as EEnergyStepCodeDependencyRequirementCode
+  )
+  const isArchitecturalDependency = isArchitecturalDrawingDependencyRequirementCode(requirementCode)
+  const isEditLimited = isEnergyStepCodeDependency || isArchitecturalDependency
 
   return (
     <Stack spacing={4} {...containerProps}>

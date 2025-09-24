@@ -41,17 +41,7 @@ export const FieldsSetupDrawer = observer(function FieldsSetupMenu({
     requirementType: ERequirementType
   }> = disabledRequirementTypeOptions
 
-  const requirementTypeOptions = Object.values(ERequirementType).reduce<
-    {
-      requirementType: ERequirementType
-    }[]
-  >((acc, type) => {
-    acc.push({ requirementType: type })
-
-    // TODO: DESIGN DRAWING REDESIGN Previously handled step code package file special case here.
-
-    return acc
-  }, [])
+  const requirementTypeOptions = Object.values(ERequirementType).map((requirementType) => ({ requirementType }))
 
   return (
     <>
@@ -84,7 +74,6 @@ export const FieldsSetupDrawer = observer(function FieldsSetupMenu({
               {requirementTypeOptions
                 .filter(({ requirementType }) => hasRequirementFieldDisplayComponent(requirementType))
                 .map(({ requirementType }) => (
-                  // TODO: DESIGN DRAWING REDESIGN Previously passed matchesStepCodePackageRequirementCode flag.
                   <HStack
                     key={`${requirementType}`}
                     alignItems={"flex-end"}
