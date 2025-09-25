@@ -14,7 +14,7 @@ import {
   InputProps,
   useEditableControls,
 } from "@chakra-ui/react"
-import { Pencil } from "@phosphor-icons/react"
+import { Check, Pencil, X } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React, { MouseEventHandler, useState } from "react"
@@ -27,6 +27,7 @@ interface IControlsProps {
   saveButtonProps?: Partial<ButtonProps> & { textContent?: string }
   cancelButtonProps?: Partial<ButtonProps> & { textContent?: string }
   iconButtonProps?: Partial<IconButtonProps>
+  compact?: boolean
 }
 
 interface ICustomEditablePreviewProps extends Partial<EditablePreviewProps> {
@@ -45,6 +46,7 @@ export interface IEditableInputWithControlsProps extends EditableProps {
   editableInputProps?: Partial<InputProps>
   initialHint?: string
   controlsProps?: IControlsProps
+  compact?: boolean
 }
 
 function EditableControls({
@@ -54,6 +56,7 @@ function EditableControls({
   saveButtonProps = {},
   cancelButtonProps = {},
   iconButtonProps,
+  compact,
 }: IControlsProps) {
   const editableControls = useEditableControls()
   const { isEditing, getSubmitButtonProps, getCancelButtonProps, getEditButtonProps } = editableControls
@@ -66,6 +69,26 @@ function EditableControls({
   }
 
   if (isEditing) {
+    if (compact) {
+      return (
+        <Flex w={"100%"} mt={1} gap={2} alignItems={"center"} justifyContent={"flex-start"}>
+          <IconButton
+            aria-label={"Save"}
+            size={"xs"}
+            variant={"ghost"}
+            icon={<Check size={14} />}
+            {...getSubmitButtonProps()}
+          />
+          <IconButton
+            aria-label={"Cancel"}
+            size={"xs"}
+            variant={"ghost"}
+            icon={<X size={14} />}
+            {...getCancelButtonProps()}
+          />
+        </Flex>
+      )
+    }
     return CustomEditModeControls ? (
       <CustomEditModeControls {...editableControls} />
     ) : (
@@ -120,6 +143,7 @@ export const EditableInputWithControls = observer(function EditableInputWithCont
   onCancel,
   onBlur,
   controlsProps,
+  compact,
   borderEndEndRadius,
   ...editableProps
 }: IEditableInputWithControlsProps) {
@@ -128,7 +152,8 @@ export const EditableInputWithControls = observer(function EditableInputWithCont
   return (
     <Editable
       as={Flex}
-      alignItems={"center"}
+      alignItems={compact ? "stretch" : "center"}
+      flexWrap={compact ? "wrap" : undefined}
       placeholder={isInEditMode ? placeholder : (initialHint ?? placeholder)}
       color={R.isEmpty(editableProps.value) ? "text.link" : undefined}
       onEdit={() => {
@@ -152,7 +177,7 @@ export const EditableInputWithControls = observer(function EditableInputWithCont
     >
       <CustomEditablePreview initialHint={initialHint} {...editablePreviewProps} />
       <Input as={EditableInput} {...editableInputProps} />
-      <EditableControls {...controlsProps} />
+      <EditableControls {...controlsProps} compact={compact} />
     </Editable>
   )
 })

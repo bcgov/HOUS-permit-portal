@@ -1,3 +1,6 @@
+require "digest"
+require "json"
+
 class RequirementFormJsonService
   attr_accessor :requirement
 
@@ -194,6 +197,8 @@ class RequirementFormJsonService
         get_contact_form_json(requirement_block_key)
       elsif requirement.input_type_pid_info?
         get_pid_info_components(requirement_block_key, requirement.required)
+      elsif requirement.input_type_multiply_sum_grid?
+        get_multiply_sum_grid_form_json(requirement_block_key)
       else
         {
           id: requirement.id,
@@ -579,6 +584,151 @@ class RequirementFormJsonService
       ]
     }
     multi_data_grid_form_json(key, component, true, "Add #{requirement.label}")
+  end
+
+  def get_multiply_sum_grid_form_json(
+    requirement_block_key = requirement&.requirement_block&.key
+  )
+    return {} unless requirement.input_type_multiply_sum_grid?
+
+    grid_key = "#{requirement.key(requirement_block_key)}|grid"
+    total_key = "#{requirement.key(requirement_block_key)}|totalLoad"
+    section_key = PermitApplication.section_from_key(requirement_block_key)
+
+    # Allow rows to be provided via input_options["rows"]. Each row should
+    # be a hash with { name: String, : Number }.
+    configured_rows = requirement.input_options["rows"]
+    # Do not force defaults; rows are fully configurable from the editor UI
+    default_rows = []
+    rows =
+      (
+        if configured_rows.is_a?(Array) && configured_rows.any?
+          configured_rows
+        else
+          default_rows
+        end
+      )
+
+    datagrid_default_value =
+      rows.map { |r| { "name" => r["name"], "a" => r["a"], "quantity" => 0 } }
+
+    headers = requirement.input_options["headers"] || {}
+    first_col_label =
+      headers["first_column"].presence || headers["first_column"] ||
+        "Fixture or Device"
+    a_col_base = headers["a"].presence || headers["a"] || "Fixture Units"
+    a_col_label = "#{a_col_base} (A)"
+
+    # Version the component keys based on configuration so stale submission data from
+    # previous template versions (with different headers/rows) will not be reused.
+    begin
+      raw_rows = configured_rows.is_a?(Array) ? configured_rows : []
+      signature_payload = {
+        "rows" => raw_rows.map { |r| { "name" => r["name"], "a" => r["a"] } }
+      }
+      version_sig =
+        Digest::MD5.hexdigest(JSON.generate(signature_payload))[0, 8]
+      grid_key =
+        "#{requirement.key(requirement_block_key)}|grid|v#{version_sig}"
+      total_key =
+        "#{requirement.key(requirement_block_key)}|totalLoad|v#{version_sig}"
+    rescue => e
+      # If anything goes wrong computing the signature, fall back to non-versioned keys
+    end
+
+    datagrid_component = {
+      label: requirement.label,
+      id: requirement.id,
+      reorder: false,
+      layoutFixed: false,
+      enableRowGroups: false,
+      initEmpty: false,
+      hideLabel: true,
+      tableView: false,
+      key: grid_key,
+      type: "datagrid",
+      input: true,
+      validate: {
+        minLength: datagrid_default_value.length,
+        maxLength: datagrid_default_value.length
+      },
+      defaultValue: datagrid_default_value,
+      components: [
+        {
+          label: first_col_label,
+          type: "textfield",
+          key: "name",
+          disabled: true,
+          readOnly: true,
+          input: true,
+          calculateValue:
+            "var defs=(instance && instance.parent && instance.parent.component && instance.parent.component.defaultValue)||[]; var i=rowIndex; if(!value && defs[i]){ value = defs[i].name || ''; }"
+        },
+        {
+          label: a_col_label,
+          type: "number",
+          key: "a",
+          disabled: true,
+          readOnly: true,
+          input: true,
+          decimalLimit: 7,
+          calculateValue:
+            "var defs=(instance && instance.parent && instance.parent.component && instance.parent.component.defaultValue)||[]; var i=rowIndex; if(!value && defs[i]){ value = Number(defs[i].a || 0); }"
+        },
+        {
+          label: "Quantity (B)",
+          type: "number",
+          key: "quantity",
+          input: true,
+          defaultValue: 0,
+          validate: {
+            min: 0
+          },
+          decimalLimit: 7
+        },
+        {
+          label: "A × B",
+          type: "number",
+          key: "load",
+          disabled: true,
+          readOnly: true,
+          input: true,
+          persistent: "client",
+          decimalLimit: 7,
+          calculateValue:
+            "var a = Number(row.a)||0; var b = Number(row.quantity)||0; var r = a*b; value = Math.round(r*10)/10;"
+        }
+      ]
+    }
+
+    total_component = {
+      label: "Total:",
+      type: "number",
+      defaultValue: 0,
+      key: total_key,
+      disabled: true,
+      readOnly: true,
+      input: true,
+      validate: {
+        required: true
+      },
+      decimalLimit: 7,
+      calculateValue:
+        "var section = '#{section_key}'; var list = (data && data[section] && data[section]['#{grid_key}']) || []; var sum = 0; for (var i=0;i<list.length;i++){ var a = Number(list[i] && list[i].a || 0); var b = Number(list[i] && list[i].quantity || 0); sum += (a*b); } value = sum;"
+    }
+
+    {
+      id: requirement.id,
+      key: requirement.key(requirement_block_key),
+      type: "fieldset",
+      legend: requirement.label,
+      custom_class: "multiply-sum-grid",
+      label: requirement.label,
+      hideLabel: true,
+      input: false,
+      tableView: false,
+      components: [datagrid_component, total_component]
+    }
   end
 
   # this is a generic mulitgrid for a single component

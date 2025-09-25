@@ -114,6 +114,7 @@ export const FieldsSetupDrawer = observer(function FieldsSetupMenu({
                   >
                     <RequirementFieldDisplay
                       requirementType={requirementType}
+                      inputOptions={{}}
                       matchesStepCodePackageRequirementCode={isStepCodePackageFileRequirement}
                     />
                     <Button
