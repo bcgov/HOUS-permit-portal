@@ -61,7 +61,7 @@ const resolveComponentDisplay = (component: any, value: any): string => {
         return JSON.stringify(value)
       }
 
-      return typeof value === "number" ? String(value) : String(value)
+      return String(value)
     }
   }
 }
