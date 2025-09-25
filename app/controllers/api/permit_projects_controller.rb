@@ -171,7 +171,7 @@ class Api::PermitProjectsController < Api::ApplicationController
     created = []
     errors = []
 
-    applications_params.each do |pa_params|
+    permit_applications_params.each do |pa_params|
       permit_application =
         PermitApplication.new(
           submitter: current_user,
@@ -211,7 +211,7 @@ class Api::PermitProjectsController < Api::ApplicationController
         project_id: @permit_project.id,
         current_sandbox_id: current_sandbox.id,
         permit_applications:
-          permitted_params.map do |pa_params|
+          permit_applications_params.map do |pa_params|
             pa_params.slice(
               :activity_id,
               :permit_type_id,
@@ -283,7 +283,7 @@ class Api::PermitProjectsController < Api::ApplicationController
     compute_project_ids_with_outdated_drafts([@permit_project])
   end
 
-  def applications_params
+  def permit_applications_params
     params
       .require(:permit_applications)
       .map do |pa_params|
