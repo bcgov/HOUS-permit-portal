@@ -101,7 +101,8 @@ FactoryBot.define do
             "eq" => "file",
             "show" => true,
             "when" => Requirement::ARCHITECTURAL_DRAWING_METHOD_REQUIREMENT_CODE
-          }
+          },
+          "multiple" => true
         }
       end
     end
