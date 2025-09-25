@@ -2,11 +2,10 @@ import { format } from "date-fns"
 import { utcToZonedTime } from "date-fns-tz"
 import {
   OPTIONS_MAPPER_AUTO_COMPLIANCE_TYPES,
-  STEP_CODE_PACKAGE_FILE_REQUIREMENT_CODE,
   VALUE_EXTRACTION_AUTO_COMPLIANCE_TYPES,
   vancouverTimeZone,
 } from "../constants"
-import { ERequirementType } from "../types/enums"
+import { EArchitecturalDrawingDependencyRequirementCode, ERequirementType } from "../types/enums"
 import { TAutoComplianceModuleConfiguration, TDebouncedFunction } from "../types/types"
 
 export function isUUID(str) {
@@ -170,8 +169,14 @@ export function startBlobDownload(blobData: BlobPart, mimeType: string, fileName
   window.URL.revokeObjectURL(url)
 }
 
-export function isStepCodePackageFileRequirementCode(requirementCode: string) {
-  return requirementCode === STEP_CODE_PACKAGE_FILE_REQUIREMENT_CODE
+export function isArchitecturalDrawingDependencyRequirementCode(
+  requirementCode?: string | null
+): requirementCode is EArchitecturalDrawingDependencyRequirementCode {
+  if (!requirementCode) return false
+
+  return Object.values(EArchitecturalDrawingDependencyRequirementCode).includes(
+    requirementCode as EArchitecturalDrawingDependencyRequirementCode
+  )
 }
 
 export function convertE164PhoneToInputDefault(e164PhoneNumber: string): string {

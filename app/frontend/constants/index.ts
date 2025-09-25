@@ -1,6 +1,7 @@
 import { t } from "i18next"
 import { IRequirementAttributes } from "../types/api-request"
 import {
+  EArchitecturalDrawingDependencyRequirementCode,
   EAutoComplianceType,
   EEnabledElectiveFieldReason,
   EEnergyStepCodeDependencyRequirementCode,
@@ -63,22 +64,16 @@ export const datefnsTableDateTimeFormat = "MMM dd, yyyy HH:mm"
 
 export const vancouverTimeZone = "America/Vancouver" // Vancouver time zone
 
-export function getRequirementTypeLabel(
-  requirementType: ERequirementType,
-  matchesStepCodePackageRequirementCode?: boolean
-) {
-  let derivedTranslationKey: keyof typeof ERequirementType | "stepCodePackageFile"
+export function getRequirementTypeLabel(requirementType: ERequirementType): string {
+  let derivedTranslationKey: keyof typeof ERequirementType
 
-  if (requirementType === ERequirementType.file && matchesStepCodePackageRequirementCode) {
-    derivedTranslationKey = "stepCodePackageFile"
-  } else {
-    Object.entries(ERequirementType).forEach(([key, value]: [keyof typeof ERequirementType, ERequirementType]) => {
-      if (value === requirementType) {
-        derivedTranslationKey = key
-      }
-    })
-  }
+  Object.entries(ERequirementType).forEach(([key, value]: [keyof typeof ERequirementType, ERequirementType]) => {
+    if (value === requirementType) {
+      derivedTranslationKey = key
+    }
+  })
 
+  // @ts-ignore
   return t(`requirementsLibrary.requirementTypeLabels.${derivedTranslationKey}`)
 }
 
@@ -223,7 +218,56 @@ export function getEnergyStepCodePart3RequirementRequiredSchema(
   return requirementCodeToSchema[energyRequirementCode]
 }
 
-export const STEP_CODE_PACKAGE_FILE_REQUIREMENT_CODE = "architectural_drawing_file" as const
+export function getArchitecturalDrawingRequirementRequiredSchema(
+  code: EArchitecturalDrawingDependencyRequirementCode
+): IRequirementAttributes {
+  const requirementCodeToSchema: Record<EArchitecturalDrawingDependencyRequirementCode, IRequirementAttributes> = {
+    [EArchitecturalDrawingDependencyRequirementCode.architecturalDrawingMethod]: {
+      requirementCode: EArchitecturalDrawingDependencyRequirementCode.architecturalDrawingMethod,
+      inputType: ERequirementType.select,
+      label: t("requirementsLibrary.modals.architecturalDrawing.dependencies.method.label"),
+      inputOptions: {
+        valueOptions: [
+          {
+            label: t("requirementsLibrary.modals.architecturalDrawing.dependencies.method.tool"),
+            value: "tool",
+          },
+          {
+            label: t("requirementsLibrary.modals.architecturalDrawing.dependencies.method.file"),
+            value: "file",
+          },
+        ],
+      },
+    },
+    [EArchitecturalDrawingDependencyRequirementCode.architecturalDrawingTool]: {
+      requirementCode: EArchitecturalDrawingDependencyRequirementCode.architecturalDrawingTool,
+      inputType: ERequirementType.architecturalDrawing,
+      label: t("requirementsLibrary.modals.architecturalDrawing.dependencies.tool.label"),
+      inputOptions: {
+        conditional: {
+          when: EArchitecturalDrawingDependencyRequirementCode.architecturalDrawingMethod,
+          eq: "tool",
+          show: true,
+        },
+      },
+    },
+    [EArchitecturalDrawingDependencyRequirementCode.architecturalDrawingFile]: {
+      requirementCode: EArchitecturalDrawingDependencyRequirementCode.architecturalDrawingFile,
+      inputType: ERequirementType.file,
+      label: t("requirementsLibrary.modals.architecturalDrawing.dependencies.file.label"),
+      inputOptions: {
+        conditional: {
+          when: EArchitecturalDrawingDependencyRequirementCode.architecturalDrawingMethod,
+          eq: "file",
+          show: true,
+        },
+        multiple: true,
+      },
+    },
+  }
+
+  return requirementCodeToSchema[code]
+}
 
 export const VALUE_EXTRACTION_AUTO_COMPLIANCE_TYPES = [
   EAutoComplianceType.internalValueExtractor,

@@ -27,7 +27,6 @@ import { GenericFieldDisplay } from "./generic-field-display"
 import { GenericMultiDisplay } from "./generic-multi-display"
 
 export type TRequirementFieldDisplayProps = {
-  matchesStepCodePackageRequirementCode?: boolean
   labelProps?: Partial<FormLabelProps | HeadingProps>
   label?: string
   options?: string[]
@@ -268,6 +267,10 @@ const requirementsComponentMap = {
   },
 
   [ERequirementType.energyStepCodePart3](props: TRequirementFieldDisplayProps) {
+    return <GenericFieldDisplay inputDisplay={<DummyStepCodeInput />} {...props} />
+  },
+
+  [ERequirementType.architecturalDrawing](props: TRequirementFieldDisplayProps) {
     return <GenericFieldDisplay inputDisplay={<DummyStepCodeInput />} {...props} />
   },
 

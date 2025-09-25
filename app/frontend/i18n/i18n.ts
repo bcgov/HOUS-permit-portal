@@ -1159,6 +1159,21 @@ Thank you,
                 label: "Pre construction Hot2000 model details, Hot2000 report",
               },
             },
+            architecturalDrawing: {
+              dependencies: {
+                method: {
+                  label: "Which method do you want to use for the architectural drawing?",
+                  tool: "Use the architectural drawing tool",
+                  file: "Upload a file",
+                },
+                tool: {
+                  label: "Open the architectural drawing tool",
+                },
+                file: {
+                  label: "Architectural drawing file",
+                },
+              },
+            },
           },
           fields: {
             name: "Name",
@@ -1197,7 +1212,9 @@ Thank you,
             stepCodePackageFile: "Design package file for energy step code",
             pidInfo: "Pid Info",
             energyStepCodePart3: "Energy Step Code Part 3",
+            energyStepCodePart9: "Energy Step Code Part 9",
             multiplySumGrid: "Grid (A × B with Total)",
+            architecturalDrawing: "Architectural drawing",
           },
           multiplySumGrid: {
             title: "Grid (A × B with Total)",
@@ -1205,6 +1222,7 @@ Thank you,
             quantityB: "Quantity (B)",
             ab: "(A × B)",
             addRow: "Add row",
+            energyStepCodePart9: "Energy Step Code Part 9",
           },
           contactFieldItemLabels: {
             firstName: "First name",

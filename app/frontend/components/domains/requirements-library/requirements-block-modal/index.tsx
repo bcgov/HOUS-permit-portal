@@ -23,6 +23,7 @@ import { IRequirementBlock } from "../../../../models/requirement-block"
 import { useMst } from "../../../../setup/root"
 import { IFormConditional, IRequirementAttributes, IRequirementBlockParams } from "../../../../types/api-request"
 import {
+  EArchitecturalDrawingDependencyRequirementCode,
   EEnergyStepCodeDependencyRequirementCode,
   EEnergyStepCodePart3DependencyRequirementCode,
   EVisibility,
@@ -117,25 +118,25 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
         } as any,
       }
 
-      const isEnergyStepCodeDependency =
+      const hasPreconfiguredConditional =
         Object.values(EEnergyStepCodeDependencyRequirementCode).includes(
           ra.requirementCode as EEnergyStepCodeDependencyRequirementCode
         ) ||
         Object.values(EEnergyStepCodePart3DependencyRequirementCode).includes(
           ra.requirementCode as EEnergyStepCodePart3DependencyRequirementCode
+        ) ||
+        Object.values(EArchitecturalDrawingDependencyRequirementCode).includes(
+          ra.requirementCode as EArchitecturalDrawingDependencyRequirementCode
         )
 
-      const shouldAppendConditional = formConditional?.when && formConditional?.operand && formConditional?.then
-      // energy step code dependency conditionals is not possible to edit from the front-end and has default values
-      // and follows a slightly different structure so we make sure not to remove them or alter them
       const cond = ra.inputOptions.conditional as IFormConditional
-      if (shouldAppendConditional) {
+      if (cond?.when && cond?.operand && cond?.then) {
         processedRequirementAttributes.inputOptions.conditional = {
           when: cond.when,
           eq: cond.operand,
           [cond.then]: true,
         }
-      } else if (isEnergyStepCodeDependency && cond) {
+      } else if (hasPreconfiguredConditional && cond) {
         processedRequirementAttributes.inputOptions.conditional = cond
       }
       return getPrunedOptionsMapperComplianceConfiguration(

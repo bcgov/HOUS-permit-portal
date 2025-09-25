@@ -42,6 +42,7 @@ export interface IRequirementAttributes {
     conditional?: IFormConditional | TConditional
     energyStepCode?: string
     computedCompliance?: TComputedCompliance
+    multiple?: boolean
   }
   position?: number
 }
