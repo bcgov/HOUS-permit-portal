@@ -182,6 +182,14 @@ class RequirementFormJsonService
       title: I18n.t("formio.requirement_template.energy_step_code"),
       label: I18n.t("formio.requirement_template.energy_step_code"),
       custom: "document.dispatchEvent(new Event('openStepCodePart3'));"
+    },
+    architectural_drawing: {
+      type: "button",
+      action: "custom",
+      title: I18n.t("formio.requirement_template.architectural_drawing"),
+      label: I18n.t("formio.requirement_template.architectural_drawing"),
+      custom:
+        "document.dispatchEvent(new CustomEvent('openArchitecturalDrawingTool', { detail: { requirementCode: component.key } }));"
     }
   }
 
@@ -199,6 +207,8 @@ class RequirementFormJsonService
         get_pid_info_components(requirement_block_key, requirement.required)
       elsif requirement.input_type_multiply_sum_grid?
         get_multiply_sum_grid_form_json(requirement_block_key)
+      elsif requirement.input_type_architectural_drawing?
+        get_architectural_drawing_form_json(requirement_block_key)
       else
         {
           id: requirement.id,
@@ -728,6 +738,25 @@ class RequirementFormJsonService
       input: false,
       tableView: false,
       components: [datagrid_component, total_component]
+    }
+  end
+
+  def get_architectural_drawing_form_json(
+    requirement_block_key = requirement&.requirement_block&.key
+  )
+    return {} unless requirement.input_type_architectural_drawing?
+
+    {
+      id: requirement.id,
+      key: requirement.key(requirement_block_key),
+      type: "button",
+      label: requirement.label,
+      action: "custom",
+      disableOnInvalid: true,
+      input: true,
+      theme: "primary",
+      custom:
+        "document.dispatchEvent(new CustomEvent('openArchitecturalDrawingTool', { detail: { requirementCode: '#{requirement.key(requirement_block_key)}' } }));"
     }
   end
 

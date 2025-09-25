@@ -190,6 +190,7 @@ export enum ERequirementType {
   generalContact = "general_contact",
   professionalContact = "professional_contact",
   multiplySumGrid = "multiply_sum_grid",
+  architecturalDrawing = "architectural_drawing",
 }
 
 export enum ENumberUnit {
@@ -383,6 +384,12 @@ export enum EEnergyStepCodePart3DependencyRequirementCode {
   energyStepCodeMethod = "energy_step_code_method",
   energyStepCodeToolPart3 = "energy_step_code_tool_part_3",
   energyStepCodeReportFile = "energy_step_code_report_file",
+}
+
+export enum EArchitecturalDrawingDependencyRequirementCode {
+  architecturalDrawingMethod = "architectural_drawing_method",
+  architecturalDrawingTool = "architectural_drawing_tool",
+  architecturalDrawingFile = "architectural_drawing_file",
 }
 
 export enum EAutoComplianceModule {
