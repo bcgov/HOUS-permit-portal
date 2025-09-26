@@ -10,34 +10,45 @@ import {
   useDisclosure,
 } from "@chakra-ui/react"
 import { CaretDown, MagnifyingGlass } from "@phosphor-icons/react"
-import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React from "react"
+import { useTranslation } from "react-i18next"
 import { ControlProps, components } from "react-select"
 import { IJurisdiction } from "../../../models/jurisdiction"
 import { useMst } from "../../../setup/root"
 import { IOption } from "../../../types/types"
+import { ConditionalTooltip } from "../../shared/conditional-tooltip"
 import { JurisdictionSelect } from "../../shared/select/selectors/jurisdiction-select"
 
 export const RegionalRMJurisdictionSelect = observer(function RegionalRMJurisdictionSelect() {
-  const { userStore, uiStore } = useMst()
+  const { userStore, uiStore, sandboxStore } = useMst()
   const { currentUser } = userStore
+  const { isSandboxActive } = sandboxStore
   const { onOpen, onClose, isOpen } = useDisclosure()
+  const { t } = useTranslation()
 
   return (
     <Popover isOpen={isOpen} onOpen={onOpen} onClose={onClose} placement="bottom-end">
       <PopoverTrigger>
-        <Button
-          rightIcon={<CaretDown />}
-          variant="outline"
-          fontWeight="bold"
-          size="xs"
-          bg={isOpen ? "semantic.warning" : "semantic.warningLight"}
-          borderColor="semantic.warning"
-          _hover={{ bg: "semantic.warning" }}
+        <ConditionalTooltip
+          showTooltip={isSandboxActive}
+          message={t("sandbox.disableJurisdictionSwitchTooltip")}
+          placement="bottom-end"
+          openDelay={200}
         >
-          {currentUser.jurisdiction.qualifiedName}
-        </Button>
+          <Button
+            rightIcon={<CaretDown />}
+            variant="outline"
+            fontWeight="bold"
+            size="xs"
+            bg={isOpen ? "semantic.warning" : "semantic.warningLight"}
+            borderColor="semantic.warning"
+            _hover={{ bg: "semantic.warning" }}
+            isDisabled={isSandboxActive}
+          >
+            {currentUser.jurisdiction.qualifiedName}
+          </Button>
+        </ConditionalTooltip>
       </PopoverTrigger>
       <Portal>
         <PopoverContent shadow="none">
@@ -79,7 +90,7 @@ export const RegionalRMJurisdictionSelect = observer(function RegionalRMJurisdic
                 padding: 0,
               },
             }}
-            components={{ Control }}
+            components={{ Control: Control as any }}
             filters={{ userId: currentUser.id }}
             isClearable={false}
             placeholder={null}
@@ -94,6 +105,7 @@ export const RegionalRMJurisdictionSelect = observer(function RegionalRMJurisdic
 })
 
 const Control = ({ children, ...props }: ControlProps<IOption<IJurisdiction>>) => {
+  const { t } = useTranslation()
   return (
     <>
       <components.Control {...props}>

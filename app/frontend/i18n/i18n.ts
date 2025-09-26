@@ -635,6 +635,7 @@ Thank you,
           addPermits: {
             title: "Add permits to your project",
             fn: "These are First Nations specific permits",
+            sandboxWarning: "Sandbox permits can only be added into your own jurisdiction's sandbox",
             button: "Add permits",
             bcbcPartHeading: "BCBC Part",
             bcbcPart:
@@ -977,6 +978,7 @@ Thank you,
           live: "Live (None)",
           disabledFor: "Disabled for sandbox",
           inMode: "You're in testing mode:",
+          disableJurisdictionSwitchTooltip: "Leave sandbox mode before switching jurisdictions",
           switch: {
             label: "Sandbox mode",
             title: "Enter testing sandbox mode?",
