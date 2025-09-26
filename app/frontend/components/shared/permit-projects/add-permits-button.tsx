@@ -1,9 +1,10 @@
-import { Box, Icon, Tooltip } from "@chakra-ui/react"
+import { Icon } from "@chakra-ui/react"
 import { Plus } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { IPermitProject } from "../../../models/permit-project"
+import { ConditionalTooltip } from "../conditional-tooltip"
 import { RouterLinkButton } from "../navigation/router-link-button"
 
 interface IProps {
@@ -30,11 +31,14 @@ export const AddPermitsButton = observer(({ permitProject }: IProps) => {
     </RouterLinkButton>
   )
 
-  if (!isDisabled) return button
-
   return (
-    <Tooltip label={t("permitProject.addPermits.sandboxWarning")} hasArrow openDelay={200} placement="top">
-      <Box display="inline-block">{button}</Box>
-    </Tooltip>
+    <ConditionalTooltip
+      showTooltip={isDisabled}
+      message={t("permitProject.addPermits.sandboxWarning")}
+      openDelay={200}
+      placement="top"
+    >
+      {button}
+    </ConditionalTooltip>
   )
 })
