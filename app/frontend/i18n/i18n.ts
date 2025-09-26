@@ -978,6 +978,7 @@ Thank you,
           live: "Live (None)",
           disabledFor: "Disabled for sandbox",
           inMode: "You're in testing mode:",
+          disableJurisdictionSwitchTooltip: "Leave sandbox mode before switching jurisdictions",
           switch: {
             label: "Sandbox mode",
             title: "Enter testing sandbox mode?",
