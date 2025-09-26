@@ -1,4 +1,4 @@
-import { getParent, Instance, types } from "mobx-state-tree"
+import { Instance, types } from "mobx-state-tree"
 import { ETemplateVersionStatus } from "../types/enums"
 
 export const SandboxModel = types
@@ -8,12 +8,8 @@ export const SandboxModel = types
     name: types.string,
     description: types.maybeNull(types.string),
     templateVersionStatusScope: types.enumeration(Object.values(ETemplateVersionStatus)),
+    jurisdictionId: types.string,
   })
-  .views((self) => ({
-    get jurisdiction() {
-      return getParent(self, 2)
-    },
-  }))
   .views((self) => ({}))
 
 export interface ISandbox extends Instance<typeof SandboxModel> {}

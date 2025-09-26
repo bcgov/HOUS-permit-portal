@@ -635,6 +635,7 @@ Thank you,
           addPermits: {
             title: "Add permits to your project",
             fn: "These are First Nations specific permits",
+            sandboxWarning: "Sandbox permits can only be added into your own jurisdiction's sandbox",
             button: "Add permits",
             bcbcPartHeading: "BCBC Part",
             bcbcPart:

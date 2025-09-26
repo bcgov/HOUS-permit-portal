@@ -1,5 +1,5 @@
-import { Box, Flex, Grid, Heading, HStack, Icon, VStack } from "@chakra-ui/react"
-import { CaretRight, Info, Plus, SquaresFour, Steps } from "@phosphor-icons/react"
+import { Box, Flex, Grid, Heading, HStack, VStack } from "@chakra-ui/react"
+import { CaretRight, Info, SquaresFour, Steps } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
@@ -12,6 +12,7 @@ import {
 import { CustomMessageBox } from "../../shared/base/custom-message-box"
 import { SearchGrid } from "../../shared/grid/search-grid"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
+import { AddPermitsButton } from "../../shared/permit-projects/add-permits-button"
 import ProjectInfoRow from "../../shared/project/project-info-row"
 import { PermitApplicationGridHeaders } from "./permit-application-grid-headers"
 import { PermitApplicationGridRow } from "./permit-application-grid-row"
@@ -89,13 +90,7 @@ export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
           <Heading as="h3" size="md">
             {t("permitProject.overview.recentPermits")}
           </Heading>
-          <RouterLinkButton
-            variant="primary"
-            leftIcon={<Icon as={Plus} />}
-            to={`/projects/${permitProject.id}/add-permits`}
-          >
-            {t("permitProject.addPermits.title")}
-          </RouterLinkButton>
+          <AddPermitsButton permitProject={permitProject} />
         </Flex>
         {permitProject.rollupStatus === EPermitProjectRollupStatus.empty ? (
           <CustomMessageBox status={EFlashMessageStatus.info} description={t("permitProject.index.empty")} mt={2} />
