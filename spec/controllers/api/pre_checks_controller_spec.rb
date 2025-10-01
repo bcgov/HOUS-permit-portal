@@ -12,7 +12,7 @@ RSpec.describe Api::PreChecksController, type: :controller, search: true do
 
   describe "POST #index" do
     it "returns the current user's pre-checks" do
-      permit_project_mine = create(:permit_project, title: "Mine")
+      permit_project_mine = create(:permit_project, title: "Mine", owner: user)
       permit_application_mine =
         create(
           :permit_application,
@@ -28,8 +28,19 @@ RSpec.describe Api::PreChecksController, type: :controller, search: true do
 
       permit_project_theirs = create(:permit_project, title: "Theirs")
       permit_application_theirs =
-        create(:permit_application, permit_project: permit_project_theirs)
-      create(:pre_check, permit_application: permit_application_theirs)
+        create(
+          :permit_application,
+          permit_project: permit_project_theirs,
+          submitter: create(:user)
+        )
+      create(
+        :pre_check,
+        creator: permit_application_theirs.submitter,
+        permit_application: permit_application_theirs
+      )
+
+      PreCheck.reindex
+      PreCheck.search_index.refresh
 
       post :index, params: { query: "Mine" }, format: :json
 
@@ -42,7 +53,12 @@ RSpec.describe Api::PreChecksController, type: :controller, search: true do
 
   describe "POST #create" do
     it "creates a pre-check" do
-      permit_application = create(:permit_application, submitter: user)
+      permit_application =
+        create(
+          :permit_application,
+          submitter: user,
+          permit_project: create(:permit_project, owner: user)
+        )
 
       expect do
         post :create,

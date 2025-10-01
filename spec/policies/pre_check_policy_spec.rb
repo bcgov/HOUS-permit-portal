@@ -20,7 +20,11 @@ RSpec.describe PreCheckPolicy do
     it "allows the permit application submitter" do
       expect(policy).to permit(
         creator_context,
-        create(:pre_check, permit_application: permit_application)
+        create(
+          :pre_check,
+          creator: creator,
+          permit_application: permit_application
+        )
       )
     end
 
@@ -50,7 +54,16 @@ RSpec.describe PreCheckPolicy do
 
   permissions :index? do
     it "allows authenticated users" do
-      expect(policy).to permit(UserContext.new(create(:user), nil), pre_check)
+      user = create(:user)
+      permit_application = create(:permit_application, submitter: user)
+      pre_check =
+        create(
+          :pre_check,
+          creator: user,
+          permit_application: permit_application
+        )
+
+      expect(policy).to permit(UserContext.new(user, nil), pre_check)
     end
   end
 

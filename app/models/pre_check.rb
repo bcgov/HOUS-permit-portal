@@ -13,6 +13,8 @@ class PreCheck < ApplicationRecord
   attribute :checklist, default: -> { DEFAULT_CHECKLIST.deep_dup }
 
   before_validation :ensure_checklist_structure
+  validate :permit_application_belongs_to_creator,
+           if: -> { permit_application_id.present? }
 
   validates :checklist, presence: true
 
@@ -40,5 +42,14 @@ class PreCheck < ApplicationRecord
   def ensure_checklist_structure
     self.checklist = DEFAULT_CHECKLIST.deep_dup if checklist.blank? ||
       !checklist.is_a?(Hash)
+  end
+
+  def permit_application_belongs_to_creator
+    return if creator_id.blank?
+
+    submitter_id = permit_application&.submitter_id
+    return if submitter_id.nil? || submitter_id == creator_id
+
+    errors.add(:permit_application, :invalid)
   end
 end

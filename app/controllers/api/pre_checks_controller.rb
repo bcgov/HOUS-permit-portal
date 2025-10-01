@@ -21,6 +21,7 @@ class Api::PreChecksController < Api::ApplicationController
 
   def create
     pre_check = PreCheck.new(pre_check_params.merge(creator: current_user))
+
     authorize pre_check
     if pre_check.save
       render_success pre_check,
