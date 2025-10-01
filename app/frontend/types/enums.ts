@@ -104,6 +104,14 @@ export enum ERequirementTemplateSortFields {
   jurisdictionsSize = "jurisdictions_size",
 }
 
+export enum EPreCheckSortFields {
+  title = "title",
+  createdAt = "created_at",
+  updatedAt = "updated_at",
+  certNumber = "cert_number",
+  phase = "phase",
+}
+
 export enum EEarlyAccessRequirementTemplateSortFields {
   nickname = "nickname",
   permitType = "permit_type",
