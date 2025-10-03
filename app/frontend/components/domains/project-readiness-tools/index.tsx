@@ -26,15 +26,15 @@ export const ProjectReadinessToolsIndexScreen = () => {
     {
       sectionTitle: t("projectReadinessTools.prepareYourApplication"),
       items: [
-        // {
-        //   linkText: t("projectReadinessTools.signDocumentsLink"),
-        //   description: t("projectReadinessTools.signDocumentsDescription"),
-        //   href: "#",
-        // },
         {
           linkText: t("projectReadinessTools.letterOfAssuranceLink"),
           description: t("projectReadinessTools.createLoaDescription"),
           href: "/project-readiness-tools/create-your-letters-of-assurance",
+        },
+        {
+          linkText: t("projectReadinessTools.singleZoneCoolingHeatingTool"),
+          description: t("projectReadinessTools.singleZoneCoolingHeatingToolDescription"),
+          href: "/single-zone-cooling-heating-tool",
         },
       ],
     },

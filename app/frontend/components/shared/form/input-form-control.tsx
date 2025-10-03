@@ -50,16 +50,18 @@ const isValidUrl = (url: string) => {
 }
 
 export const TextFormControl = (props: IInputFormControlProps) => {
-  const { inputProps, validate, ...rest } = props
+  const { inputProps, validate, maxLength, ...rest } = props
+  const effectiveMax = typeof maxLength === "number" ? maxLength : 128
   const mergedProps: IInputFormControlProps = {
     ...rest,
     inputProps: {
       type: "text",
+      ...(maxLength ? { maxLength } : {}),
       ...inputProps,
     },
     validate: {
       satisfiesLength: (str) =>
-        (!props.required && !str) || (str?.length >= 1 && str?.length < 128) || t("ui.invalidInput"),
+        (!props.required && !str) || (str?.length >= 1 && str?.length <= effectiveMax) || t("ui.invalidInput"),
       ...validate,
     },
   }
@@ -119,7 +121,7 @@ export const NumberFormControl = (props: IInputFormControlProps) => {
 export const PhoneFormControl = (props: IInputFormControlProps) => {
   return (
     <InputFormControl
-      {...R.mergeDeepRight({ inputProps: { type: "text", maxLength: 10 } }, props)}
+      {...R.mergeDeepRight({ inputProps: { type: "text", maxLength: 14 } }, props)}
       leftElement={<Phone />}
     />
   )
