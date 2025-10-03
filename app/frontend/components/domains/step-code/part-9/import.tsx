@@ -1,14 +1,12 @@
-import { Button, Flex, FormControl, FormLabel, HStack, Heading, IconButton, Input, VStack } from "@chakra-ui/react"
+import { Button, Flex, FormControl, FormLabel, HStack, Heading, IconButton, VStack } from "@chakra-ui/react"
 import { Plus, X } from "@phosphor-icons/react"
 import { t } from "i18next"
 import React, { useState } from "react"
 import { Controller, FormProvider, useFieldArray, useForm } from "react-hook-form"
 import { useNavigate, useParams } from "react-router-dom"
-import { useJurisdictionFromSite } from "../../../../hooks/use-jurisdiction-from-site"
 import { useMst } from "../../../../setup/root"
 import { uploadFile } from "../../../../utils/uploads"
 import { FileFormControl, NumberFormControl } from "../../../shared/form/input-form-control"
-import { ManualModeInputs } from "../../../shared/select/selectors/manual-mode-inputs"
 import { SitesSelect } from "../../../shared/select/selectors/sites-select"
 import { CompliancePathSelect } from "./compliance-path-select"
 
@@ -22,7 +20,6 @@ export const H2KImport = function StepCodeH2kImport() {
 
   const [isUploading, setIsUploading] = useState<Record<number, boolean>>({})
   const areAllUploaded = Object.values(isUploading).every((loading) => loading === false)
-  const [manualMode, setManualMode] = useState<boolean>(false)
 
   const dataEntryAttributes = {
     districtEnergyEf: null,
@@ -46,11 +43,6 @@ export const H2KImport = function StepCodeH2kImport() {
   })
 
   const { control, handleSubmit, setValue, setError, clearErrors, formState, watch } = formMethods
-  // Auto-populate jurisdictionId from selected site when not in manual mode
-  const hookJurisdiction = useJurisdictionFromSite(watch, setValue, { disabled: manualMode })
-  const jurisdictionId = watch("jurisdictionId") as string | undefined
-  const selectedJurisdiction =
-    manualMode && jurisdictionId ? jurisdictionStore.getJurisdictionById(jurisdictionId as string) : hookJurisdiction
   const { isValid, isSubmitting } = formState
   const { fields, append, remove } = useFieldArray({
     control,
@@ -121,30 +113,17 @@ export const H2KImport = function StepCodeH2kImport() {
                 <Controller
                   control={control}
                   name="site"
-                  rules={{ required: !manualMode }}
                   render={({ field: { onChange, value } }) => (
-                    <FormControl isRequired={!manualMode}>
-                      <FormLabel>{t("stepCode.part3.projectDetails.address")}</FormLabel>
-                      <SitesSelect
-                        onChange={(opt) => {
-                          onChange(opt)
-                          setValue("fullAddress", opt?.label || "")
-                        }}
-                        placeholder={undefined}
-                        selectedOption={value}
-                        menuPortalTarget={document.body}
-                      />
-                    </FormControl>
+                    <SitesSelect
+                      onChange={(opt) => {
+                        onChange(opt)
+                        setValue("fullAddress", opt?.label || "")
+                      }}
+                      selectedOption={value}
+                      menuPortalTarget={document.body}
+                    />
                   )}
                 />
-                {manualMode && <ManualModeInputs />}
-                <Button mb={3} size="sm" variant="link" onClick={() => setManualMode((prev) => !prev)}>
-                  {t("ui.toggleManualMode")}
-                </Button>
-                <FormControl>
-                  <FormLabel>{t("stepCode.part3.projectDetails.jurisdiction")}</FormLabel>
-                  <Input isDisabled value={selectedJurisdiction?.qualifiedName || ""} />
-                </FormControl>
               </>
             )}
             <Controller

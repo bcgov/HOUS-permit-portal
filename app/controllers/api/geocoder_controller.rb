@@ -73,6 +73,7 @@ class Api::GeocoderController < Api::ApplicationController
       jurisdiction =
         Jurisdiction.fuzzy_find_by_ltsa_feature_attributes(attributes)
       raise StandardError unless jurisdiction.present?
+
       render_success jurisdiction,
                      nil,
                      {

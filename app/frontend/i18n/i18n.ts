@@ -181,7 +181,8 @@ const options = {
           part9ChecklistsLink: "Part 9 checklists (PDF)",
         },
         ui: {
-          toggleManualMode: "Toggle manual mode",
+          switchToManualMode: "Manually select my jurisdiction",
+          switchToAutomaticMode: "Use my address to automatically select my jurisdiction",
           empty: "No items yet",
           enabled: "Enabled",
           disabled: "Disabled",
