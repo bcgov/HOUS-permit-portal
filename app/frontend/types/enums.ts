@@ -650,6 +650,12 @@ export enum EPermitProjectSortFields {
   rollupStatus = "rollup_status",
 }
 
+export enum EPdfFormSortFields {
+  projectNumber = "Project",
+  buildingLocationAddress = "Address",
+  createdAt = "Last Modified",
+}
+
 export enum EPermitProjectRollupStatus {
   empty = "empty",
   newDraft = "new_draft",

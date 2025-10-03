@@ -1,5 +1,5 @@
 class Api::PdfFormsController < Api::ApplicationController
-  before_action :set_pdf_form, only: %i[generate_pdf download update]
+  before_action :set_pdf_form, only: %i[generate_pdf download update archive]
 
   def create
     @pdf_form = PdfForm.new(pdf_form_params.merge(user_id: current_user.id))
@@ -87,6 +87,20 @@ class Api::PdfFormsController < Api::ApplicationController
       render_success @pdf_form, nil, { blueprint: PdfFormBlueprint }
     else
       render_error "pdf_form.update_error",
+                   {
+                     message_opts: {
+                       error_message: @pdf_form.errors.full_messages.join(", ")
+                     },
+                     status: 422
+                   }
+    end
+  end
+
+  def archive
+    if @pdf_form.update(status: false)
+      render_success @pdf_form, nil, { blueprint: PdfFormBlueprint }
+    else
+      render_error "pdf_form.archive_error",
                    {
                      message_opts: {
                        error_message: @pdf_form.errors.full_messages.join(", ")

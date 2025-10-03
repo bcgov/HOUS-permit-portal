@@ -903,6 +903,10 @@ export class Api {
     return this.client.post<ApiResponse<any>>(`/pdf_forms/${id}/generate_pdf`)
   }
 
+  async archivePdf(id: string) {
+    return this.client.post<ApiResponse<any>>(`/pdf_forms/${id}/archive`)
+  }
+
   async downloadPdf(id: string) {
     const blobClient = create({
       baseURL: "/api",

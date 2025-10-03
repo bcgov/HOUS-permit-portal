@@ -29,6 +29,10 @@ class PdfFormPolicy < ApplicationPolicy
     user.present? && (record.user_id == user.id || user.submitter?)
   end
 
+  def archive?
+    user.present? && record.user_id == user.id
+  end
+
   class Scope < Scope
     def resolve
       user.review_staff? ? scope.all : scope.where(user_id: user.id)

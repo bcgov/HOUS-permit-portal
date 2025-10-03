@@ -1,5 +1,5 @@
 import { Flex, TabPanel, TabPanels, Tabs } from "@chakra-ui/react"
-import { ClipboardText, FolderSimple } from "@phosphor-icons/react"
+import { ClipboardText, FolderSimple, ThermometerHot } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useTransition } from "react"
 import { useTranslation } from "react-i18next"
@@ -7,6 +7,7 @@ import { useLocation, useNavigate } from "react-router-dom"
 import { useSearch } from "../../../hooks/use-search"
 import { useMst } from "../../../setup/root"
 import { LoadingScreen } from "../../shared/base/loading-screen"
+import { OverheatingTabPanelContent } from "../single-zone-cooling-heating-tool/overheating-tab-panel-content"
 import { ITabItem, ProjectSidebarTabList } from "./project-sidebar-tab-list"
 import { ProjectTabPanelContent } from "./project-tab-panel-content"
 import { StepCodeTabPanelContent } from "./step-code-tab-panel-content"
@@ -29,6 +30,12 @@ export const ProjectDashboardScreen = observer(({}: IProjectDashboardScreenProps
   const TABS_DATA: ITabItem[] = [
     { label: t("permitProject.index.title", "Projects"), icon: FolderSimple, to: "projects", tabIndex: 0 },
     { label: t("stepCode.index.title", "Step Codes"), icon: ClipboardText, to: "step-codes", tabIndex: 1 },
+    {
+      label: t("singleZoneCoolingHeatingTool.indexTitle", "Overheating"),
+      icon: ThermometerHot,
+      to: "overheating",
+      tabIndex: 2,
+    },
     // Disabled: Documents tab
     // { label: t("document.index.title", "Documents"), icon: File, to: "documents", tabIndex: 2 },
   ]
@@ -40,7 +47,9 @@ export const ProjectDashboardScreen = observer(({}: IProjectDashboardScreenProps
 
   const handleTabChange = (index: number) => {
     startTransition(() => {
-      navigate(index === 0 ? "/projects" : index === 1 ? "/step-codes" : "/documents", { replace: true })
+      navigate(index === 0 ? "/projects" : index === 1 ? "/step-codes" : index === 2 ? "/overheating" : "/documents", {
+        replace: true,
+      })
     })
   }
 
@@ -51,6 +60,7 @@ export const ProjectDashboardScreen = observer(({}: IProjectDashboardScreenProps
         <TabPanels>
           <TabPanel p={0}>{isPending ? <LoadingScreen /> : <ProjectTabPanelContent />}</TabPanel>
           <TabPanel p={0}>{isPending ? <LoadingScreen /> : <StepCodeTabPanelContent />}</TabPanel>
+          <TabPanel p={0}>{isPending ? <LoadingScreen /> : <OverheatingTabPanelContent />}</TabPanel>
           {/* <TabPanel p={0}>{isPending ? <LoadingScreen /> : <ComingSoonPlaceholder />}</TabPanel> */}
         </TabPanels>
       </Tabs>

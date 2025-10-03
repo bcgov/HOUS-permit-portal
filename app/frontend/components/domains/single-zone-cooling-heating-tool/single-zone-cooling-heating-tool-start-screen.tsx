@@ -3,6 +3,7 @@ import { observer } from "mobx-react-lite"
 import React, { useState } from "react"
 import { FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
+import { useNavigate } from "react-router-dom"
 import { useMst } from "../../../setup/root"
 import { CoverSheetForm } from "./cover-sheet-form"
 import { InputSummaryForm } from "./input-summary-form"
@@ -13,7 +14,7 @@ export const SingleZoneCoolingHeatingToolStartScreen = observer(() => {
   const { pdfFormStore } = useMst()
   const toast = useToast()
   const formMethods = useForm()
-
+  const navigate = useNavigate()
   const [activeTabIndex, setActiveTabIndex] = useState(0)
 
   const handleNextFromCoverSheet = () => {
@@ -40,7 +41,7 @@ export const SingleZoneCoolingHeatingToolStartScreen = observer(() => {
         duration: 3000,
         isClosable: true,
       })
-      window.location.href = "/single-zone-cooling-heating-tool/list"
+      window.location.href = "/overheating"
     } else {
       toast({
         title: "Error",
@@ -57,7 +58,7 @@ export const SingleZoneCoolingHeatingToolStartScreen = observer(() => {
       <Heading as="h1" mt="16" mb="6">
         {t("singleZoneCoolingHeatingTool.title")}
       </Heading>
-      <Button onClick={() => (window.location.href = "/single-zone-cooling-heating-tool/list")}>View List</Button>
+      <Button onClick={() => navigate(-1)}>Back</Button>
       <FormProvider {...formMethods}>
         <Tabs isLazy index={activeTabIndex} onChange={setActiveTabIndex}>
           <TabList>

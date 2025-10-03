@@ -34,7 +34,7 @@ export const ProjectReadinessToolsIndexScreen = () => {
         {
           linkText: t("projectReadinessTools.singleZoneCoolingHeatingTool"),
           description: t("projectReadinessTools.singleZoneCoolingHeatingToolDescription"),
-          href: "/single-zone-cooling-heating-tool",
+          href: "/project-readiness-tools/single-zone-cooling-heating-tool",
         },
       ],
     },

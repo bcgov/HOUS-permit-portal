@@ -1,37 +1,9 @@
-import {
-  Button,
-  Container,
-  Flex,
-  Heading,
-  HStack,
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
-  Tab,
-  TabList,
-  TabPanel,
-  TabPanels,
-  Tabs,
-  useDisclosure,
-  VStack,
-} from "@chakra-ui/react"
+import { Box, Container, Flex, Heading, useDisclosure, VStack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
-import { FormProvider, useForm } from "react-hook-form"
+import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../setup/root"
-import { Paginator } from "../../shared/base/inputs/paginator"
-import { PerPageSelect } from "../../shared/base/inputs/per-page-select"
-import { SharedSpinner } from "../../shared/base/shared-spinner"
-import { SearchGrid } from "../../shared/grid/search-grid"
-import { CoverSheetForm } from "./cover-sheet-form"
-import { InputSummaryForm } from "./input-summary-form"
-import { PdfFormGridRow } from "./pdf-form-grid-row"
-import { PdfFormsGridHeader } from "./pdf-forms-grid-header"
-import { RoomByRoomForm } from "./room-by-room-form"
 
 export const SingleZoneCoolingHeatingToolListScreen = observer(() => {
   const { t } = useTranslation() as any
@@ -163,96 +135,26 @@ export const SingleZoneCoolingHeatingToolListScreen = observer(() => {
   }
 
   return (
-    <Container maxW="container.xl" pb="36" px="8">
-      <Heading as="h1" mt="16" mb="6">
-        {t("singleZoneCoolingHeatingTool.title")}
-      </Heading>
-      <Button onClick={() => (window.location.href = "/single-zone-cooling-heating-tool")}>
-        {t("singleZoneCoolingHeatingTool.addNewForm")}
-      </Button>
-      <FormProvider {...formMethods}>
-        <Tabs isLazy index={activeTabIndex} onChange={setActiveTabIndex}>
-          <TabList>
-            <Tab>{t("singleZoneCoolingHeatingTool.list")}</Tab>
-          </TabList>
-          <TabPanels>
-            <TabPanel>
-              <VStack alignItems={"flex-start"} spacing={5} w={"full"} h={"full"}>
-                <SearchGrid templateColumns="1fr 1fr 2fr" gridRowClassName="pdf-form-grid-row">
-                  <PdfFormsGridHeader />
-                  {isSearching ? (
-                    <Flex py="50" gridColumn={"span 3"}>
-                      <SharedSpinner />
-                    </Flex>
-                  ) : (
-                    tablePdfForms.map((pdfForm) => (
-                      <PdfFormGridRow
-                        key={pdfForm.id}
-                        pdfForm={pdfForm}
-                        onGeneratePdf={generatePdf}
-                        onDownloadPdf={handleDownloadPdf}
-                        isGenerating={!!loadingPdfs[pdfForm.id]}
-                        isDownloaded={!!generatedPdfs[pdfForm.id]}
-                      />
-                    ))
-                  )}
-                </SearchGrid>
-                <Flex w={"full"} justifyContent={"space-between"}>
-                  <PerPageSelect
-                    handleCountPerPageChange={handleCountPerPageChange}
-                    countPerPage={countPerPage}
-                    totalCount={totalCount}
-                  />
-                  <Paginator
-                    current={currentPage}
-                    total={totalCount}
-                    totalPages={totalPages}
-                    pageSize={countPerPage}
-                    handlePageChange={handlePageChange}
-                    showLessItems={true}
-                  />
-                </Flex>
-              </VStack>
-              <Modal isOpen={isOpen} onClose={onClose} size="6xl">
-                <ModalOverlay />
-                <ModalContent>
-                  <ModalHeader>{t("ui.update")}</ModalHeader>
-                  <ModalBody>
-                    <FormProvider {...formMethods}>
-                      <Tabs isLazy index={editTabIndex} onChange={setEditTabIndex}>
-                        <TabList>
-                          <Tab>{t("singleZoneCoolingHeatingTool.tabs.compliance")}</Tab>
-                          <Tab>{t("singleZoneCoolingHeatingTool.tabs.inputSummary")}</Tab>
-                          <Tab>{t("singleZoneCoolingHeatingTool.tabs.roomByRoom")}</Tab>
-                        </TabList>
-                        <TabPanels>
-                          <TabPanel>
-                            <CoverSheetForm onNext={() => setEditTabIndex(1)} />
-                          </TabPanel>
-                          <TabPanel>
-                            <InputSummaryForm onNext={() => setEditTabIndex(1)} />
-                          </TabPanel>
-                          <TabPanel>
-                            <RoomByRoomForm onSubmit={saveEdit} />
-                          </TabPanel>
-                        </TabPanels>
-                      </Tabs>
-                    </FormProvider>
-                  </ModalBody>
-                  <ModalFooter>
-                    <HStack spacing={3}>
-                      <Button onClick={onClose}>{t("ui.cancel")}</Button>
-                      <Button variant="primary" onClick={saveEdit}>
-                        {t("ui.save")}
-                      </Button>
-                    </HStack>
-                  </ModalFooter>
-                </ModalContent>
-              </Modal>
-            </TabPanel>
-          </TabPanels>
-        </Tabs>
-      </FormProvider>
-    </Container>
+    <Flex direction="column" flex={1} bg="greys.white" pb={24} overflowY="auto" h={"full"}>
+      <Container maxW="container.xl" py={8} h={"full"}>
+        <VStack spacing={3} align="stretch">
+          <Flex justify="space-between" align="center">
+            <Heading>{t("stepCode.index.title")}</Heading>
+          </Flex>
+          <Box w="full" bg="theme.blueLight" p={6} borderRadius="md">
+            <Box maxW="xl">
+              <Heading as="h3" mb={6}>
+                {t("stepCode.index.createReportTitle")}
+              </Heading>
+
+              <Heading as="h3" mt={2} mb={1}>
+                {t("stepCode.index.lookupTitle")}
+              </Heading>
+            </Box>
+          </Box>
+          <Flex direction="column" gap={4} w="full"></Flex>
+        </VStack>
+      </Container>
+    </Flex>
   )
 })

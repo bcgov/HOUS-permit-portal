@@ -2873,9 +2873,9 @@ Thank you,
           signDocumentsLink: "Digitally sign and authenticate your permit documents",
           signDocumentsDescription:
             "Add secure digital signatures that meet provincial requirements for authenticity and integrity in building permit submissions",
-          singleZoneCoolingHeatingTool: "Single Zone Cooling and Heating Tool",
+          singleZoneCoolingHeatingTool: "Create an overheating protection compliance report",
           singleZoneCoolingHeatingToolDescription:
-            "The Single Zone Cooling Calculator is a digital tool integrated into the Building Permit Hub platform that helps users determine cooling system capacity requirements to meet BC Building Code (BCBC) 2024 overheating provisions.",
+            "Create a report that shows your project meets BC’s 2024 overheating protection requirement (one room at or below 26 °C) using cooling load data from CSA F280-12 certified software",
           createLoaDescription:
             "Complete Letters of Assurance to confirm who is professionally responsible for design and field review on your project, as required by the BC Building Code for some building types",
           compliantApplicationLink: "complete and compliant permit application",
@@ -3776,6 +3776,7 @@ Thank you,
           breadcrumb: {
             projects: "Projects",
             permitClassifications: "Permit classifications",
+            overheating: "Overheating",
             documents: "Documents",
             checkStepCodeRequirements: "Check step code requirements",
             latest: "Latest",
@@ -3833,7 +3834,7 @@ Thank you,
             stepCodeRequirements: "Step code requirements",
             start: "Start",
             select: "Select",
-            singleZoneCoolingHeatingTool: "Single Zone Cooling and Heating Tool",
+            singleZoneCoolingHeatingTool: "Create an overheating protection compliance report",
           },
           earlyAccessStepCodePreviewNotAvailable: "Early access step code preview not available",
         },
@@ -3843,10 +3844,46 @@ Thank you,
           failedValueMessage: `Auto-Compliance was unable fill this field, please check with your local jurisdiction if this is required.`,
         },
         singleZoneCoolingHeatingTool: {
-          title: "Single Zone Cooling and Heating Tool",
+          title: "Create an overheating protection compliance report",
+          indexTitle: "Overheating",
+          createReportTitle: "Create an overheating protection compliance report for your project",
+          createReportDescriptionPrefix:
+            "Create a report that shows your project meets BC’s 2024 overheating protection requirement (one room at or below 26 °C) using cooling load data from CSA F280-12 certified software. When a report is finished, you’ll find it in",
+          createReportDescriptionLink: "Documents",
+          pickUpWhereYouLeftOff: "Pick up where you left off",
           description:
-            "This voluntary guidance tool imports and validates data from certified CSA F280 Standard software outputs, providing clear reports that demonstrate compliance with minimum cooling requirements. The tool serves as a bridge between complex HVAC calculations and regulatory compliance verification, making technical requirements accessible to both professionals and building officials.",
+            "Use this service to create a report showing your project meets the 2024 BC Building Code requirement to provide at least one living space in each dwelling that does not exceed 26 °C. This is sometimes referred to as a refuge room or single-zone cooling.",
+          serviceDescription:
+            "Enter cooling load data from CSA F280-12 certified software, and the service will generate a report you can submit to local building officials.",
           info: "The tool is used during HVAC design and building permit application stages to verify that proposed cooling systems meet the BC Building Code 2024 overheating requirements. It's applicable in residential projects across BC, supporting both HVAC professionals and building officials in ensuring compliance and streamlining approvals.",
+          beforeYouStart: "Before you start",
+          beforeYouStartDescription:
+            "To use this service, you’ll need results from CSA F280-12 calculation software. Only registered HVAC designers may provide these results. Refer to the",
+          beforeYouStartDescriptionLink: "list of software verified to perform CSA F280-12 calculations",
+          beforeYouStartDescriptionList1: "Enter your project details into a certified software application first",
+          beforeYouStartDescriptionList2: "Keep the results handy: you’ll need them when using this service",
+          whoThisServiceIsFor: "Who this service is for",
+          whoThisServiceIsForDescription: "This overheating protection reporting service is designed for:",
+          whoThisServiceIsForList1: "HVAC professionals and designers",
+          whoThisServiceIsForList2: "Building officials reviewing residential projects",
+          whenToCreateAnOverheatingProtectionComplianceReport:
+            "When to create an overheating protection compliance report",
+          whenToCreateAnOverheatingProtectionComplianceReportDescription:
+            "Use this service during the design of your project’s HVAC system and before submitting building permit applications. The local government or First Nation responsible for approving permits may ask for this report as part of your submission.",
+          whatToExpect: "What to expect",
+          whatToExpectDescription:
+            "You’ll enter results from CSA F280-12 certified software. The service will check for completeness and generate a standardized report you can share with local building officials to demonstrate that your project meets BC’s overheating requirements.",
+          whatsIncludedInAnOverheatingProtectionComplianceReport:
+            "What’s included in an overheating protection compliance report:",
+          whatsIncludedInAnOverheatingProtectionComplianceReportList1:
+            "A report in a standardized format, checked for completeness and ready to submit with your permit applications",
+          whatsIncludedInAnOverheatingProtectionComplianceReportList2:
+            "Compliance will be determined by your local government of First Nation",
+          learnMoreAboutOverheatingProtectionProvisions: "Learn more about overheating protection provisions",
+          learnMoreAboutOverheatingProtectionProvisionsDescription:
+            "BC has added overheating protection to the BC Building Code to reduce health risks from indoor temperatures above 26 °C. At least one living space in each dwelling unit must stay below this limit.",
+          learnMoreAboutOverheatingProtectionProvisionsDescription2:
+            "For more background, refer to <1>Information Bulletin B24-08: Protection from Overheating in Dwelling Units (PDF)</1>",
           list: "List",
           start: "Start now",
           loginToStart: "Login to start",

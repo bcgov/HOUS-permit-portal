@@ -5,7 +5,8 @@ import { IPdfForm, PdfFormModel } from "../models/pdf-form"
 
 export enum EPdfFormSortFields {
   createdAt = "createdAt",
-  formType = "formType",
+  projectNumber = "projectNumber",
+  address = "address",
 }
 
 export const PdfFormStoreModel = types
@@ -20,6 +21,10 @@ export const PdfFormStoreModel = types
     totalCount: types.maybeNull(types.number),
     countPerPage: types.optional(types.number, 10),
     isSearching: types.optional(types.boolean, false),
+    sort: types.optional(types.frozen<{ field: EPdfFormSortFields; direction: "asc" | "desc" }>(), {
+      field: EPdfFormSortFields.createdAt,
+      direction: "desc",
+    }),
   })
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -38,25 +43,55 @@ export const PdfFormStoreModel = types
       if (self.query) {
         const query = self.query.toLowerCase()
         forms = forms.filter((form) => {
+          const project = form.formJson?.projectNumber || ""
+          const address = form.formJson?.buildingLocation?.address || ""
+          const createdAt = form.createdAt ? form.createdAt.toLocaleDateString() : ""
+          const id = form.id || ""
           return (
-            form.formType?.toLowerCase().includes(query) ||
-            form.id?.toLowerCase().includes(query) ||
-            form.createdAt?.toLocaleDateString().toLowerCase().includes(query) ||
-            form.formJson?.projectNumber?.toLowerCase().includes(query)
+            project.toLowerCase().includes(query) ||
+            address.toLowerCase().includes(query) ||
+            createdAt.toLowerCase().includes(query) ||
+            id.toLowerCase().includes(query)
           )
         })
       }
 
-      return forms as IPdfForm[]
+      // Apply sort based on current sort state
+      const direction = self.sort.direction === "asc" ? 1 : -1
+      const field = self.sort.field
+      const sorted = forms.sort((a: any, b: any) => {
+        const aVal =
+          field === EPdfFormSortFields.projectNumber
+            ? a?.formJson?.projectNumber
+            : field === EPdfFormSortFields.address
+              ? a?.formJson?.buildingLocation?.address
+              : a?.createdAt
+        const bVal =
+          field === EPdfFormSortFields.projectNumber
+            ? b?.formJson?.projectNumber
+            : field === EPdfFormSortFields.address
+              ? b?.formJson?.buildingLocation?.address
+              : b?.createdAt
+
+        const aKey = aVal instanceof Date ? aVal.getTime() : String(aVal || "").toLowerCase()
+        const bKey = bVal instanceof Date ? bVal.getTime() : String(bVal || "").toLowerCase()
+        if (aKey < bKey) return -1 * direction
+        if (aKey > bKey) return 1 * direction
+        return 0
+      })
+
+      return sorted as IPdfForm[]
     },
     getSortColumnHeader(field: EPdfFormSortFields): string {
       switch (field) {
+        case EPdfFormSortFields.projectNumber:
+          return "Project"
+        case EPdfFormSortFields.address:
+          return "Address"
         case EPdfFormSortFields.createdAt:
-          return "Created At"
-        case EPdfFormSortFields.formType:
-          return "Project Number"
+          return "Last modified"
         default:
-          return field
+          return String(field)
       }
     },
   }))
@@ -75,7 +110,7 @@ export const PdfFormStoreModel = types
 
         const response = yield self.environment.api.getPdfForms(params)
         if (response.ok) {
-          const pdfForms = response.data.data
+          const pdfForms = (response.data.data || []).filter((f: any) => f?.status !== false)
           const meta = response.data.meta
 
           // Clear existing forms if this is a fresh search
@@ -151,6 +186,12 @@ export const PdfFormStoreModel = types
         self.countPerPage = count
       },
 
+      // Sorting: toggle asc/desc for the given field and refresh view
+      toggleSort(field: EPdfFormSortFields) {
+        const nextDirection = self.sort.field === field && self.sort.direction === "asc" ? "desc" : "asc"
+        ;(self as any).sort = { field, direction: nextDirection }
+      },
+
       // Keep the old method for backward compatibility
       getPdfForms: flow(function* () {
         return yield searchPdfForms()
@@ -187,6 +228,26 @@ export const PdfFormStoreModel = types
           }
         } catch (error) {
           return { success: false, error: error.message }
+        } finally {
+          self.isLoading = false
+        }
+      }),
+
+      archivePdfForm: flow(function* (id: string) {
+        self.isLoading = true
+        try {
+          const response = yield self.environment.api.archivePdf(id)
+          if (response.ok) {
+            const archived = response.data.data
+            if (archived && archived.id) {
+              self.pdfFormsMap.put(archived)
+            }
+            return { success: true, data: archived }
+          } else {
+            return { success: false, error: response.data }
+          }
+        } catch (error) {
+          return { success: false, error: (error as any).message }
         } finally {
           self.isLoading = false
         }

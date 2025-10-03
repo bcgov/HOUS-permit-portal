@@ -651,6 +651,7 @@ const AppRoutes = observer(() => {
             element={<ProtectedRoute isAllowed={loggedIn && !mustAcceptEula} redirectPath={mustAcceptEula && "/"} />}
           >
             <Route path="/step-codes" element={<ProjectDashboardScreen />} />
+            <Route path="/overheating" element={<ProjectDashboardScreen />} />
             <Route path="/documents" element={<ProjectDashboardScreen />} />
             {/* Already handled above with path-based tabs */}
             <Route path="/projects" element={<ProjectDashboardScreen />} />
@@ -762,7 +763,10 @@ const AppRoutes = observer(() => {
         <Route path="/accept-invitation" element={<AcceptInvitationScreen />} />
         <Route path="/contact" element={<ContactScreen />} />
         <Route path="/project-readiness-tools" element={<ProjectReadinessToolsIndexScreen />} />
-        <Route path="/single-zone-cooling-heating-tool" element={<SingleZoneCoolingHeatingToolScreen />} />
+        <Route
+          path="/project-readiness-tools/single-zone-cooling-heating-tool"
+          element={<SingleZoneCoolingHeatingToolScreen />}
+        />
         <Route path="/privacy-policy" element={<PrivacyPolicyScreen />} />
         <Route
           path="/project-readiness-tools/create-your-letters-of-assurance"
