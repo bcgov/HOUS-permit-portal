@@ -13,6 +13,7 @@ import { TextFormControl } from "../../shared/form/input-form-control"
 export type TEditJurisdictionFormData = {
   name: string
   localityType: string
+  ltsaMatcher: string
 }
 
 export const EditJurisdictionScreen = observer(() => {
@@ -29,6 +30,7 @@ export const EditJurisdictionScreen = observer(() => {
   const getDefaults = (): TEditJurisdictionFormData => ({
     name: currentJurisdiction?.name || "",
     localityType: currentJurisdiction?.localityType || "",
+    ltsaMatcher: currentJurisdiction?.ltsaMatcher || "",
   })
 
   const formMethods = useForm<TEditJurisdictionFormData>({
@@ -100,6 +102,17 @@ export const EditJurisdictionScreen = observer(() => {
                 </FormLabel>
                 <Switch id="use-custom" isChecked={useCustom} onChange={handleToggleCustom} />
               </FormControl>
+
+              <Flex gap={8}>
+                <Box w="full">
+                  <TextFormControl
+                    label={t("jurisdiction.fields.ltsaMatcher")}
+                    fieldName={"ltsaMatcher"}
+                    required
+                    inputProps={{ isDisabled: true }}
+                  />
+                </Box>
+              </Flex>
             </Flex>
             <Flex gap={4}>
               <Button

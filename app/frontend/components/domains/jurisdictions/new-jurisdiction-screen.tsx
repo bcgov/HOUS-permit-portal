@@ -30,6 +30,7 @@ export type TCreateJurisdictionFormData = {
   localityType: string
   postalAddress: string
   regionalDistrict: IJurisdiction
+  ltsaMatcher: string
 }
 
 export const NewJurisdictionScreen = observer(() => {
@@ -47,6 +48,7 @@ export const NewJurisdictionScreen = observer(() => {
       localityType: "",
       postalAddress: "",
       regionalDistrict: null,
+      ltsaMatcher: "",
     },
   })
 
@@ -170,6 +172,19 @@ export const NewJurisdictionScreen = observer(() => {
                               </InputGroup>
                             </FormControl>
                           )
+                        }}
+                      />
+                    </Box>
+                  </Flex>
+
+                  <Flex gap={8}>
+                    <Box w="full">
+                      <TextFormControl
+                        label={t("jurisdiction.fields.ltsaMatcher")}
+                        fieldName={"ltsaMatcher"}
+                        isRequired
+                        inputProps={{
+                          isDisabled: true,
                         }}
                       />
                     </Box>

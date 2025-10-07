@@ -25,7 +25,8 @@ class JurisdictionBlueprint < Blueprinter::Base
            :created_at,
            :updated_at,
            :external_api_state,
-           :first_nation
+           :first_nation,
+           :ltsa_matcher
 
     field :external_api_enabled do |jurisdiction, options|
       jurisdiction.external_api_enabled?

@@ -78,6 +78,8 @@ class Jurisdiction < ApplicationRecord
   before_validation :normalize_locality_type
   before_validation :normalize_name
   before_validation :set_type_based_on_locality
+  before_validation :set_first_nation_flag, on: :create
+  before_validation :populate_ltsa_matcher
 
   before_save :sanitize_html_fields
 
@@ -148,19 +150,32 @@ class Jurisdiction < ApplicationRecord
   end
 
   def self.fuzzy_find_by_ltsa_feature_attributes(attributes)
-    name = attributes["MUNICIPALITY"]
-    regional_district_name = attributes["REGIONAL_DISTRICT"]
+    municipality = attributes["MUNICIPALITY"]
+    regional_district = attributes["REGIONAL_DISTRICT"]
+    is_regional_district = municipality == "Rural"
 
-    named_params = {
-      fields: %w[reverse_qualified_name qualified_name],
+    ltsa_matcher = is_regional_district ? regional_district : municipality
+
+    ltsa_matcher_params = {
+      fields: %w[ltsa_matcher],
       misspellings: {
         edit_distance: 1
       }
     }
+
     return(
-      SubDistrict.search(name, **named_params).first ||
-        RegionalDistrict.search(regional_district_name, **named_params).first
+      (
+        if is_regional_district
+          RegionalDistrict.search(ltsa_matcher, **ltsa_matcher_params).first
+        else
+          SubDistrict.search(ltsa_matcher, **ltsa_matcher_params).first
+        end
+      )
     )
+  end
+
+  def populate_ltsa_matcher
+    self.ltsa_matcher = qualified_name if ltsa_matcher.blank?
   end
 
   def search_data
@@ -177,7 +192,8 @@ class Jurisdiction < ApplicationRecord
       user_ids: users.pluck(:id),
       inbox_enabled: inbox_enabled,
       created_at: created_at,
-      manager_emails: manager_emails
+      manager_emails: manager_emails,
+      ltsa_matcher: ltsa_matcher
     }
   end
 
@@ -320,6 +336,10 @@ class Jurisdiction < ApplicationRecord
       else
         "SubDistrict"
       end
+  end
+
+  def set_first_nation_flag
+    self.first_nation = locality_type == "first nation"
   end
 
   def normalize_name

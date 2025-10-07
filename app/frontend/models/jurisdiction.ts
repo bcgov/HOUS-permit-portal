@@ -50,6 +50,7 @@ export const JurisdictionModel = types
     permitTypeRequiredSteps: types.array(types.frozen<IPermitTypeRequiredStep>()),
     sandboxes: types.array(types.reference(SandboxModel)),
     firstNation: types.optional(types.boolean, false),
+    ltsaMatcher: types.string,
   })
   .extend(withEnvironment())
   .extend(withRootStore())
