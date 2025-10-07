@@ -15,7 +15,7 @@ import { formatPidLabel, formatPidValue } from "../../../../utils/utility-functi
 import { AsyncSelect, TAsyncSelectProps } from "../async-select"
 import { JurisdictionSelect } from "./jurisdiction-select"
 
-type TSitesSelectProps = {
+export type TSitesSelectProps = {
   onChange: (option: IOption) => void
   selectedOption: IOption
   pidName?: string
@@ -24,6 +24,8 @@ type TSitesSelectProps = {
   jurisdictionIdFieldName?: string
   showManualModeToggle?: boolean
   defaultManualMode?: boolean
+  onLtsaMatcherFound?: (matcher: string | null) => void
+  showJurisdiction?: boolean
 } & Partial<TAsyncSelectProps>
 
 // Please be advised that this is expected to be used within a form context!
@@ -39,6 +41,8 @@ export const SitesSelect = observer(function ({
   jurisdictionIdFieldName = "jurisdictionId",
   showManualModeToggle = true,
   defaultManualMode = false,
+  onLtsaMatcherFound,
+  showJurisdiction = true,
   ...rest
 }: TSitesSelectProps) {
   const { t } = useTranslation()
@@ -115,7 +119,12 @@ export const SitesSelect = observer(function ({
     let isActive = true
     ;(async () => {
       try {
-        const matchedJurisdiction = await fetchGeocodedJurisdiction(siteValue, undefined)
+        const response = await fetchGeocodedJurisdiction(siteValue, undefined, Boolean(onLtsaMatcherFound))
+        const matchedJurisdiction = response?.jurisdiction
+        const foundLtsaMatcher = response?.ltsaMatcher ?? null
+        if (onLtsaMatcherFound) {
+          onLtsaMatcherFound(foundLtsaMatcher)
+        }
         if (!isActive) return
         if (matchedJurisdiction) {
           addJurisdiction(matchedJurisdiction)
@@ -128,6 +137,9 @@ export const SitesSelect = observer(function ({
       } catch (_e) {
         setValue(jurisdictionIdFieldName, null)
         setJurisdiction(null)
+        if (onLtsaMatcherFound) {
+          onLtsaMatcherFound(null)
+        }
       }
     })()
 
@@ -246,7 +258,7 @@ export const SitesSelect = observer(function ({
       </Flex>
 
       {/* Auto-matched Jurisdiction Display - Only in automatic mode */}
-      {!manualMode && (
+      {!manualMode && showJurisdiction && (
         <Flex bg="greys.grey03" px={6} py={2} gap={2} w="full" direction="column">
           <FormLabel mb={0}>{t("permitProject.new.jurisdictionTitle")}</FormLabel>
           <ChakraInput isDisabled value={jurisdiction?.qualifiedName || ""} />
@@ -254,7 +266,7 @@ export const SitesSelect = observer(function ({
       )}
 
       {/* Manual Jurisdiction Selector - Only in manual mode */}
-      {manualMode && (
+      {manualMode && showJurisdiction && (
         <Flex bg="greys.grey03" px={6} py={2} gap={4} w="full" direction="column">
           <FormControl w="full" zIndex={1}>
             <FormLabel>{t("permitProject.new.jurisdictionTitle")}</FormLabel>
@@ -282,7 +294,7 @@ export const SitesSelect = observer(function ({
       )}
 
       {/* Manual Mode Toggle */}
-      {showManualModeToggle && (
+      {showManualModeToggle && showJurisdiction && (
         <Button variant="link" size="sm" onClick={() => setManualMode((prev) => !prev)}>
           {manualMode ? t("ui.switchToAutomaticMode") : t("ui.switchToManualMode")}
         </Button>

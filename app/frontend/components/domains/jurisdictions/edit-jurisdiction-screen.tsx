@@ -1,4 +1,4 @@
-import { Box, Button, Container, Flex, FormControl, FormLabel, Heading, Switch, Text, VStack } from "@chakra-ui/react"
+import { Button, Container, Flex, Heading, VStack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
 import { FormProvider, useForm } from "react-hook-form"
@@ -7,8 +7,7 @@ import { useNavigate } from "react-router-dom"
 import { useJurisdiction } from "../../../hooks/resources/use-jurisdiction"
 import { useMst } from "../../../setup/root"
 import { ErrorScreen } from "../../shared/base/error-screen"
-import { AsyncRadioGroup } from "../../shared/base/inputs/async-radio-group"
-import { TextFormControl } from "../../shared/form/input-form-control"
+import { JurisdictionFormSection } from "./jurisdiction-form"
 
 export type TEditJurisdictionFormData = {
   name: string
@@ -38,7 +37,7 @@ export const EditJurisdictionScreen = observer(() => {
     defaultValues: getDefaults(),
   })
 
-  const { handleSubmit, formState, control, watch, reset } = formMethods
+  const { handleSubmit, formState, reset, setValue } = formMethods
   const { isSubmitting, isValid } = formState
 
   const onSubmit = async (formData: TEditJurisdictionFormData) => {
@@ -56,6 +55,10 @@ export const EditJurisdictionScreen = observer(() => {
 
   const handleToggleCustom = () => setUseCustom((prev) => !prev)
 
+  const handleLtsaMatcherFound = (matcher: string | null) => {
+    setValue("ltsaMatcher", matcher)
+  }
+
   useEffect(() => {
     reset(getDefaults())
     // Optionally set useCustom based on currentJurisdiction's localityType
@@ -72,48 +75,12 @@ export const EditJurisdictionScreen = observer(() => {
             <Heading as="h1" alignSelf="center">
               {t("jurisdiction.edit.title")}
             </Heading>
-            <Flex direction="column" as="section" gap={6} w="full" p={6} border="solid 1px" borderColor="border.light">
-              <Flex gap={8}>
-                <Flex w="50%" align="center">
-                  <Text mr={4}>The</Text>
-                  {useCustom ? (
-                    <TextFormControl
-                      label={t("jurisdiction.fields.localityType")}
-                      fieldName={"localityType"}
-                      required
-                    />
-                  ) : (
-                    <AsyncRadioGroup
-                      label={t("jurisdiction.fields.localityType")}
-                      fetchOptions={fetchLocalityTypeOptions}
-                      fieldName={"localityType"}
-                    />
-                  )}
-                  <Text ml={8}>of</Text>
-                </Flex>
-                <Box w="50%">
-                  <TextFormControl label={t("jurisdiction.new.nameLabel")} fieldName={"name"} required />
-                </Box>
-              </Flex>
-
-              <FormControl display="flex" alignItems="center">
-                <FormLabel htmlFor="use-custom" mb="0">
-                  {t("jurisdiction.new.useCustom")}
-                </FormLabel>
-                <Switch id="use-custom" isChecked={useCustom} onChange={handleToggleCustom} />
-              </FormControl>
-
-              <Flex gap={8}>
-                <Box w="full">
-                  <TextFormControl
-                    label={t("jurisdiction.fields.ltsaMatcher")}
-                    fieldName={"ltsaMatcher"}
-                    required
-                    inputProps={{ isDisabled: true }}
-                  />
-                </Box>
-              </Flex>
-            </Flex>
+            <JurisdictionFormSection
+              useCustom={useCustom}
+              onToggleCustom={handleToggleCustom}
+              onLtsaMatcherFound={handleLtsaMatcherFound}
+              sitesSelectProps={{ showJurisdiction: false }}
+            />
             <Flex gap={4}>
               <Button
                 variant="primary"

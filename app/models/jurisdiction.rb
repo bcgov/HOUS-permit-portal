@@ -15,18 +15,21 @@ class Jurisdiction < ApplicationRecord
                reverse_qualified_name
                qualified_name
                manager_emails
+               ltsa_matcher
              ],
              word_start: %i[
                name
                reverse_qualified_name
                qualified_name
                manager_emails
+               ltsa_matcher
              ],
              text_start: %i[
                name
                reverse_qualified_name
                qualified_name
                manager_emails
+               ltsa_matcher
              ]
 
   SEARCH_DATA_FIELDS = %i[
@@ -42,6 +45,7 @@ class Jurisdiction < ApplicationRecord
     user_ids
     inbox_enabled
     created_at
+    ltsa_matcher
   ]
   SUPER_ADMIN_ADDITIONAL_DATA_FIELDS = %i[manager_emails]
   # Associations
@@ -79,7 +83,6 @@ class Jurisdiction < ApplicationRecord
   before_validation :normalize_name
   before_validation :set_type_based_on_locality
   before_validation :set_first_nation_flag, on: :create
-  before_validation :populate_ltsa_matcher
 
   before_save :sanitize_html_fields
 
@@ -149,6 +152,13 @@ class Jurisdiction < ApplicationRecord
     )
   end
 
+  def self.ltsa_matcher_from_ltsa_attributes(attributes)
+    municipality = attributes["MUNICIPALITY"]
+    regional_district = attributes["REGIONAL_DISTRICT"]
+    is_regional_district = municipality == "Rural"
+    is_regional_district ? regional_district : municipality
+  end
+
   def self.fuzzy_find_by_ltsa_feature_attributes(attributes)
     municipality = attributes["MUNICIPALITY"]
     regional_district = attributes["REGIONAL_DISTRICT"]
@@ -159,7 +169,7 @@ class Jurisdiction < ApplicationRecord
     ltsa_matcher_params = {
       fields: %w[ltsa_matcher],
       misspellings: {
-        edit_distance: 1
+        edit_distance: 4
       }
     }
 
@@ -172,10 +182,6 @@ class Jurisdiction < ApplicationRecord
         end
       )
     )
-  end
-
-  def populate_ltsa_matcher
-    self.ltsa_matcher = qualified_name if ltsa_matcher.blank?
   end
 
   def search_data
