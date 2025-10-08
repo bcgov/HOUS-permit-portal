@@ -403,7 +403,7 @@ const options = {
         jurisdiction: {
           edit: {
             displayDescriptionLabel: "Jurisdiction description (public)",
-            title: "Rename jurisdiction",
+            title: "Manage jurisdiction name settings",
             addDescription: "Click to add a description",
             displayChecklistLabel: "Permit application checklist (public)",
             addChecklist: "Click to add a permit application checklist",
@@ -443,7 +443,6 @@ const options = {
             title: "Create new jurisdiction",
             createButton: "Create jurisdiction",
             nameLabel: "Name of local jurisdiction",
-            postalAddressLabel: "Postal address",
             nextStep: "The next step is to invite users",
             useCustom: "Use a custom locality type",
           },
@@ -457,7 +456,7 @@ const options = {
             externalApiKeys: "API settings",
             exportTemplates: "Export templates",
             about: "About",
-            rename: "Rename",
+            rename: "Name & settings",
           },
           fields: {
             reverseQualifiedName: "Name",
@@ -471,9 +470,12 @@ const options = {
             inboxEnabled: "Accepting submissions",
             ltsaMatcher: "Matched jurisdiction with LTSA",
           },
-          determineWithSite: "Enter an address or PID in this jurisdiction to determine the LTSA matcher",
+          determineWithSite:
+            "Enter an address or PID within this jurisdiction to determine the matched jurisdiction with LTSA",
           ltsaMatcherExplanation:
-            "The LTSA matcher is the name of the jurisdiction as it appears in the LTSA service. This is needed to determine which PIDs correspond to this jurisdiction. Please edit this using the address selection if you are having problems with addresses not being matched correctly to this jurisdiction.",
+            "Give an examlpe address or PID so our app knows how a site from this jurisdiction would be represented in the LTSA service. This is needed to determine which PIDs correspond to this jurisdiction. Please edit this using this selector if you are having problems with addresses not being matched correctly to this jurisdiction.",
+          ltsaMatcherHelp:
+            "Enter an address or PID above to determine this field. This is the name of the jurisdiction as it appears in the LTSA service which is used to find this jurisdiction in the LTSA service PID lookup.",
           lat: "Latitude",
           lng: "Longitude",
           title: "Local housing permits",
