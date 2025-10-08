@@ -371,6 +371,65 @@
   }
 }
 
+// Multiply & Sum grid visual tweaks
+.multiply-sum-grid {
+  .form-control[disabled],
+  .form-control[readonly] {
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    color: var(--chakra-colors-text-primary);
+    padding-left: 0;
+  }
+
+  input[name$="[load]"],
+  input[id*="totalLoad"],
+  input[name*="totalLoad"] {
+    font-weight: 700;
+    color: var(--chakra-colors-text-primary);
+    text-align: right;
+  }
+
+  .table.datagrid-table {
+    border: none;
+
+    th,
+    td {
+      border: none;
+    }
+  }
+
+  .formio-component-number[class*="totalLoad"] {
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+    gap: var(--chakra-space-1);
+    margin-top: var(--chakra-space-4);
+    margin-left: auto;
+    width: fit-content;
+
+    > label {
+      margin: 0;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      flex: 0 0 auto;
+      display: inline-flex;
+    }
+
+    [ref="element"] {
+      flex: 0 0 auto;
+      min-width: 0;
+    }
+
+    input {
+      text-align: right;
+      width: 125px;
+      padding-inline: var(--chakra-space-2);
+      margin-right: var(--chakra-space-3);
+    }
+  }
+}
+
 .formio-component-panel {
   .card-header {
     padding: var(--chakra-space-2) var(--chakra-space-6);

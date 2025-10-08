@@ -84,6 +84,8 @@ export const JurisdictionStoreModel = types
         self.environment.api.searchJurisdictions({
           query: self.query,
           sort: self.sort,
+          page: opts?.page ?? self.currentPage,
+          perPage: opts?.countPerPage ?? self.countPerPage,
           filters: {
             inboxEnabled,
           },

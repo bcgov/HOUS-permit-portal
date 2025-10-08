@@ -1,5 +1,4 @@
-import { Box, Flex, Heading, Icon } from "@chakra-ui/react"
-import { Plus } from "@phosphor-icons/react"
+import { Box, Flex, Heading } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
@@ -15,7 +14,7 @@ import { CustomMessageBox } from "../../shared/base/custom-message-box"
 import { Paginator } from "../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../shared/base/inputs/per-page-select"
 import { SearchGrid } from "../../shared/grid/search-grid"
-import { RouterLinkButton } from "../../shared/navigation/router-link-button"
+import { AddPermitsButton } from "../../shared/permit-projects/add-permits-button"
 import { PermitApplicationGridHeaders } from "./permit-application-grid-headers"
 import { PermitApplicationGridRow } from "./permit-application-grid-row"
 import { RequirementTemplateFilter } from "./requirement-template-filter"
@@ -30,7 +29,6 @@ export const PermitsTabPanelContent = observer(({ permitProject }: IProps) => {
   const { permitApplicationStore, userStore } = useMst()
   const { currentPage, totalPages, totalCount, countPerPage, handleCountPerPageChange, handlePageChange } =
     permitApplicationStore
-  const { currentUser } = userStore
 
   useSearch(permitApplicationStore, [permitProject.id])
 
@@ -43,13 +41,7 @@ export const PermitsTabPanelContent = observer(({ permitProject }: IProps) => {
           <Heading as="h3" size="md">
             {t("permitProject.permits.title")}
           </Heading>
-          <RouterLinkButton
-            variant="primary"
-            leftIcon={<Icon as={Plus} />}
-            to={`/projects/${permitProject.id}/add-permits`}
-          >
-            {t("permitProject.addPermits.button")}
-          </RouterLinkButton>
+          <AddPermitsButton permitProject={permitProject} />
         </Flex>
         {permitProject.rollupStatus === EPermitProjectRollupStatus.empty ? (
           <CustomMessageBox status={EFlashMessageStatus.info} description={t("permitProject.index.empty")} mt={2} />
