@@ -66,6 +66,10 @@ export const PermitProjectModel = types
     get isOwner() {
       return self.ownerId === self.rootStore.userStore.currentUser?.id
     },
+    get jurisdictionDifferentFromSandbox() {
+      if (!self.rootStore.sandboxStore.currentSandbox) return false
+      return self.jurisdiction?.id !== self.rootStore.sandboxStore.currentSandbox?.jurisdictionId
+    },
   }))
   .actions((self) => ({
     setIsPinned(isPinned: boolean) {

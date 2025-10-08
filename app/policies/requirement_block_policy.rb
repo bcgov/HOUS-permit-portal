@@ -30,7 +30,7 @@ class RequirementBlockPolicy < ApplicationPolicy
 
   class Scope < Scope
     def resolve
-      user.super_admin? ? RequirementBlock.all : []
+      user&.super_admin? ? scope.all : scope.none
     end
   end
 end

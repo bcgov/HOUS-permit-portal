@@ -71,7 +71,8 @@ export const PermitClassificationsScreen = observer(function PermitClassificatio
 
   useEffect(() => {
     if (!permitClassificationStore.isLoaded) {
-      permitClassificationStore.fetchPermitClassifications()
+      // Super-admin needs all classifications, including disabled ones
+      permitClassificationStore.fetchPermitClassifications(false)
     }
   }, [permitClassificationStore.isLoaded])
 

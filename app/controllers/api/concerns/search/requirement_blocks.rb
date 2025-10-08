@@ -20,7 +20,8 @@ module Api::Concerns::Search::RequirementBlocks
               nil
             end
           ),
-        includes: %i[taggings requirements]
+        includes: %i[taggings requirements],
+        scope_results: ->(relation) { policy_scope(relation) }
       )
   end
 

@@ -269,7 +269,7 @@ export const BaseEditRequirementTemplateScreen = observer(function BaseEditRequi
   function getStepCodePackageFileBlocks() {
     return allTemplateSectionBlocks.filter(
       (sectionBlock) =>
-        requirementBlockStore.getRequirementBlockById(sectionBlock.requirementBlockId)?.blocksWithStepCodePackageFile
+        requirementBlockStore.getRequirementBlockById(sectionBlock.requirementBlockId)?.blocksWithArchitecturalDrawing
     )
   }
 
@@ -288,7 +288,7 @@ export const BaseEditRequirementTemplateScreen = observer(function BaseEditRequi
 
     const errors: Array<{ title: string; type: "warning" | "error" }> = []
 
-    if (!hasAnyEnergyStepCodeBlocks && !hasAnyStepCodePackageFileBlock) {
+    if (!hasAnyEnergyStepCodeBlocks) {
       return errors
     }
 
@@ -299,7 +299,6 @@ export const BaseEditRequirementTemplateScreen = observer(function BaseEditRequi
           type: "error",
         })
       }
-
       if (hasDuplicateStepCodePackageFileBlock) {
         errors.push({
           title: t("requirementTemplate.edit.stepCodeErrors.duplicateStepCodePackage"),
