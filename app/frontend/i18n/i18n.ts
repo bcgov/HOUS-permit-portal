@@ -456,7 +456,7 @@ const options = {
             externalApiKeys: "API settings",
             exportTemplates: "Export templates",
             about: "About",
-            rename: "Name & settings",
+            rename: "Edit name & location",
           },
           fields: {
             reverseQualifiedName: "Name",
