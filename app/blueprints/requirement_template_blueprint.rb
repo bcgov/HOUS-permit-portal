@@ -12,6 +12,10 @@ class RequirementTemplateBlueprint < Blueprinter::Base
          :visibility,
          :public
 
+  field :jurisdictions_size, name: :jurisdictionsSize do |rt|
+    rt.published_customizations_count
+  end
+
   association :permit_type, blueprint: PermitClassificationBlueprint
   association :activity, blueprint: PermitClassificationBlueprint
   association :last_three_deprecated_template_versions,
