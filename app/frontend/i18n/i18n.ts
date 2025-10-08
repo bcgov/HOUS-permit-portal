@@ -1299,6 +1299,13 @@ Thank you,
             lookupDescriptionLinkLabel: "look up Step Codes requirements for your project's jurisdiction",
             noReportAvailable: "No report generated yet",
           },
+          shareReport: {
+            action: "Share with jurisdiction",
+            sharing: "Sharing...",
+            success: "Report successfully shared with jurisdiction",
+            error: "Failed to share report",
+            errorDescription: "There was an error sharing the report. Please try again.",
+          },
 
           noneFound: "No Step Codes found",
           columns: {

@@ -25,4 +25,31 @@ class ReportDocument < FileUploadAttachment
       }
     }
   end
+
+  # Share this report with the step_code's associated jurisdiction
+  # Returns true if successful, false otherwise
+  def share_with_jurisdiction(sender_user:)
+    return false unless step_code.jurisdiction
+
+    service =
+      StepCodeReportSharingService.new(
+        report_document: self,
+        sender_user: sender_user
+      )
+
+    service.send_to_jurisdiction(step_code.jurisdiction.id)
+  end
+
+  # Share this report with a specific email for the step_code's jurisdiction
+  def share_with_email(email:, sender_user:)
+    return false unless step_code.jurisdiction
+
+    service =
+      StepCodeReportSharingService.new(
+        report_document: self,
+        sender_user: sender_user
+      )
+
+    service.send_to_email(email, step_code.jurisdiction.id)
+  end
 end

@@ -882,4 +882,11 @@ export class Api {
       return this.client.post<ApiResponse<IStepCode>>(`/part_9_building/step_codes`, { stepCode: data })
     }
   }
+
+  async shareReportDocumentWithJurisdiction(reportDocumentId: string, email?: string) {
+    return this.client.post<ApiResponse<{ message: string }>>(
+      `/report_documents/${reportDocumentId}/share_with_jurisdiction`,
+      { email }
+    )
+  }
 }
