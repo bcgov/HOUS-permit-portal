@@ -1,30 +1,43 @@
 import { Box, BoxProps, Tooltip, TooltipProps } from "@chakra-ui/react"
-import React from "react"
+import React, { Children, ReactElement, cloneElement, forwardRef } from "react"
 
-interface ConditionalTooltipProps extends Omit<TooltipProps, "children" | "label"> {
+interface ConditionalTooltipProps extends React.HTMLAttributes<HTMLElement> {
   showTooltip: boolean
   message: React.ReactNode
   wrapperProps?: BoxProps
-  children: React.ReactNode
+  tooltipProps?: Omit<TooltipProps, "children" | "label">
+  children: ReactElement
 }
 
-export function ConditionalTooltip({
-  showTooltip,
-  message,
-  wrapperProps,
-  children,
-  hasArrow = true,
-  ...tooltipProps
-}: ConditionalTooltipProps) {
+export const ConditionalTooltip = forwardRef<HTMLElement, ConditionalTooltipProps>(function ConditionalTooltip(
+  { showTooltip, message, wrapperProps, tooltipProps, children, ...triggerProps },
+  ref
+) {
+  const child = Children.only(children)
+  const childWithProps = cloneElement(child, {
+    ...triggerProps,
+    ref,
+  })
+
+  const content = wrapperProps ? (
+    <Box display="inline-block" {...wrapperProps}>
+      {childWithProps}
+    </Box>
+  ) : (
+    childWithProps
+  )
+
   if (!showTooltip) {
-    return <>{children}</>
+    return content
   }
 
+  const { hasArrow = true, ...restTooltipProps } = tooltipProps ?? {}
+
   return (
-    <Tooltip label={message} hasArrow={hasArrow} {...tooltipProps}>
+    <Tooltip label={message} hasArrow={hasArrow} {...restTooltipProps}>
       <Box display="inline-block" {...wrapperProps}>
-        {children}
+        {childWithProps}
       </Box>
     </Tooltip>
   )
-}
+})
