@@ -53,7 +53,6 @@ export const SitesSelect = observer(function ({
   const {
     fetchSiteOptions: fetchOptions,
     fetchPids,
-    fetchingPids,
     fetchSiteDetailsFromPid,
     fetchGeocodedJurisdiction,
   } = geocoderStore

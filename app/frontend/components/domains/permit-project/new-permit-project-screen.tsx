@@ -43,7 +43,7 @@ export const NewPermitProjectScreen = observer(() => {
     },
   })
 
-  const { handleSubmit, formState, control, watch, setValue, register } = formMethods
+  const { handleSubmit, formState, control, register } = formMethods
   const { isSubmitting, errors, isValid } = formState
   const navigate = useNavigate()
   const { permitProjectStore } = useMst()

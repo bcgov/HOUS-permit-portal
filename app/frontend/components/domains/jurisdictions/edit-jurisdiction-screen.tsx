@@ -5,7 +5,6 @@ import { FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { useJurisdiction } from "../../../hooks/resources/use-jurisdiction"
-import { useMst } from "../../../setup/root"
 import { ErrorScreen } from "../../shared/base/error-screen"
 import { JurisdictionFormSection } from "./jurisdiction-form"
 
@@ -18,9 +17,6 @@ export type TEditJurisdictionFormData = {
 export const EditJurisdictionScreen = observer(() => {
   const { t } = useTranslation()
   const { currentJurisdiction, error } = useJurisdiction()
-  const {
-    jurisdictionStore: { fetchLocalityTypeOptions },
-  } = useMst()
 
   const navigate = useNavigate()
   const [useCustom, setUseCustom] = useState<boolean>(false)

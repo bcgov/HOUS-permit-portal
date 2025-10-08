@@ -42,7 +42,7 @@ export const H2KImport = function StepCodeH2kImport() {
     },
   })
 
-  const { control, handleSubmit, setValue, setError, clearErrors, formState, watch } = formMethods
+  const { control, handleSubmit, setValue, setError, clearErrors, formState } = formMethods
   const { isValid, isSubmitting } = formState
   const { fields, append, remove } = useFieldArray({
     control,
@@ -109,22 +109,20 @@ export const H2KImport = function StepCodeH2kImport() {
         <form onSubmit={handleSubmit(onSubmit)}>
           <Flex direction="column" gap={4}>
             {!permitApplicationId && (
-              <>
-                <Controller
-                  control={control}
-                  name="site"
-                  render={({ field: { onChange, value } }) => (
-                    <SitesSelect
-                      onChange={(opt) => {
-                        onChange(opt)
-                        setValue("fullAddress", opt?.label || "")
-                      }}
-                      selectedOption={value}
-                      menuPortalTarget={document.body}
-                    />
-                  )}
-                />
-              </>
+              <Controller
+                control={control}
+                name="site"
+                render={({ field: { onChange, value } }) => (
+                  <SitesSelect
+                    onChange={(opt) => {
+                      onChange(opt)
+                      setValue("fullAddress", opt?.label || "")
+                    }}
+                    selectedOption={value}
+                    menuPortalTarget={document.body}
+                  />
+                )}
+              />
             )}
             <Controller
               control={control}

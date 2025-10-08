@@ -174,13 +174,11 @@ class Jurisdiction < ApplicationRecord
     }
 
     return(
-      (
-        if is_regional_district
-          RegionalDistrict.search(ltsa_matcher, **ltsa_matcher_params).first
-        else
-          SubDistrict.search(ltsa_matcher, **ltsa_matcher_params).first
-        end
-      )
+      if is_regional_district
+        RegionalDistrict.search(ltsa_matcher, **ltsa_matcher_params).first
+      else
+        SubDistrict.search(ltsa_matcher, **ltsa_matcher_params).first
+      end
     )
   end
 

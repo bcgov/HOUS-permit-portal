@@ -204,6 +204,5 @@ export const JurisdictionModel = types
     }),
   }))
 
-type JurisdictionInstance = Instance<typeof JurisdictionModel>
-
-export type IJurisdiction = JurisdictionInstance
+//@ts-ignore
+export type IJurisdiction = Instance<typeof JurisdictionModel>
