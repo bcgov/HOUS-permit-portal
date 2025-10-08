@@ -3,10 +3,8 @@ class PermitProject < ApplicationRecord
   searchkick word_middle: %i[title full_address pid pin number] # Search configuration for PermitProject
 
   belongs_to :owner, class_name: "User"
-  belongs_to :jurisdiction # Direct association to Jurisdiction
+  belongs_to :jurisdiction, optional: false # Direct association to Jurisdiction
   belongs_to :property_plan_jurisdiction, optional: true
-  # has_one :permit_project_payment_detail, dependent: :destroy
-  # has_one :payment_detail, through: :permit_project_payment_detail
 
   has_many :permit_applications
   has_many :project_documents, dependent: :destroy

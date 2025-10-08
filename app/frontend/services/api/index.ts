@@ -585,8 +585,12 @@ export class Api {
     return this.client.get<IOptionResponse>(`/geocoder/site_options`, { address })
   }
 
-  async fetchGeocodedJurisdiction(siteId: string, pid: string = null) {
-    return this.client.get<IOptionResponse>(`/geocoder/jurisdiction`, { siteId, pid })
+  async fetchGeocodedJurisdiction(siteId: string, pid: string = null, includeLtsaMatcher = false) {
+    return this.client.get<IOptionResponse>(`/geocoder/jurisdiction`, {
+      siteId,
+      pid,
+      includeLtsaMatcher,
+    })
   }
 
   async fetchPids(siteId: string) {
@@ -713,6 +717,7 @@ export class Api {
       phase: string
       buildingCodeVersion: string
       jurisdictionId: string
+      permitApplicationId: string
     }>
   ) {
     return this.client.patch<ApiResponse<IStepCode>>(`/step_codes/${id}`, { stepCode: data })

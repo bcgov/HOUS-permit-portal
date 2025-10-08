@@ -783,6 +783,19 @@ export const PermitApplicationModel = types.snapshotProcessor(
         self.isLoading = false
         return response
       }),
+      assignExistingStepCode: flow(function* (stepCodeId: string) {
+        // Since StepCode belongs_to PermitApplication, assign by updating the StepCode with permitApplicationId
+        const response = yield self.environment.api.updateStepCode(stepCodeId, {
+          permitApplicationId: self.id,
+        })
+        if (response.ok) {
+          const { data: stepCode } = response.data
+          self.rootStore.stepCodeStore.mergeUpdate(stepCode, "stepCodesMap")
+          // Refresh current permit application from server so associations are consistent
+          yield self.rootStore.permitApplicationStore.fetchPermitApplication(self.id)
+        }
+        return response.ok
+      }),
       submit: flow(function* (params) {
         const response = yield self.environment.api.submitPermitApplication(self.id, params)
         if (response.ok) {
