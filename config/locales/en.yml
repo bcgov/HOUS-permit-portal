@@ -612,7 +612,7 @@ en:
         message: "Step code updated successfully!"
       update_error:
         title: Error
-        message: "Error updating step code"
+        message: "%{error_message}"
     step_code_checklist:
       update_success:
         title: ""
@@ -736,8 +736,11 @@ en:
       signoff_checkbox_title: "Sign Off"
       signoff_checkbox_label: "I acknowledge that by checking this box and providing my digital signature, I am electronically signing."
       signoff_submit_title: "Review and Submit"
-      energy_step_code: "Start"
+      energy_step_code: "Open or resume tool"
+      select_energy_step_code: "Find and attach your report instead"
       autofill_contact: "Autofill"
+      or_use_existing_html: 'Started a report outside this permit application? <a href="#">use existing step code</a>'
+      started_report_outside: "Started a report outside this permit application? "
     requirement_block:
       optional_block_confirmation_requirement_label: "I acknowledge that all fields in this block are either complete, or not applicable."
       documents_title: "Download related documents"
