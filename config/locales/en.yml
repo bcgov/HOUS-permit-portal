@@ -226,6 +226,19 @@ en:
       in_use_error:
         title: Error
         message: "This permit classification is in use and cannot be deleted"
+    pre_check:
+      create_success:
+        title: ""
+        message: "Pre-check created successfully!"
+      create_error:
+        title: Error
+        message: "Error creating pre-check"
+      update_success:
+        title: ""
+        message: "Pre-check updated successfully!"
+      update_error:
+        title: Error
+        message: "Error updating pre-check"
     contact:
       options_error:
         title: Error

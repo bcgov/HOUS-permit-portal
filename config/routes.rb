@@ -256,6 +256,10 @@ Rails.application.routes.draw do
       patch "update", on: :member, to: "step_codes#update"
     end
 
+    resources :pre_checks, only: %i[index show create update] do
+      post "search", on: :collection, to: "pre_checks#index"
+    end
+
     # Controller namespace is Api::Part9Building::*, but we expose path with underscore for continuity
     namespace :part9_building, path: "part_9_building" do
       resources :checklists, only: %i[show update]
