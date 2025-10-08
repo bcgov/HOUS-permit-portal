@@ -18,7 +18,7 @@ class Wrappers::Geocoder < Wrappers::Base
     site_params = { autoComplete: true, brief: true, maxResults: 10 }
     site_params[:addressString] = address_string if address_string.present?
 
-    r = get("/addresses.#{OUTPUT_FORMAT}", site_params)
+    get("/addresses.#{OUTPUT_FORMAT}", site_params)
   end
 
   def site_options(address_string = nil, coordinates = nil)
@@ -42,18 +42,45 @@ class Wrappers::Geocoder < Wrappers::Base
     end
 
     r = get("/addresses.json", site_params)
-    return(
-      r["features"]
-        .filter do |f|
-          %w[CIVIC_NUMBER BLOCK].include?(f["properties"]["matchPrecision"])
+    filtered_features =
+      r["features"].filter do |f|
+        %w[CIVIC_NUMBER BLOCK].include?(f["properties"]["matchPrecision"])
+      end
+
+    options = []
+
+    filtered_features.each do |site|
+      site_id = site["properties"]["siteID"]
+
+      # Add the parent site
+      options << { label: site["properties"]["fullAddress"], value: site_id }
+
+      # Only fetch subsites if we have a valid siteID (CIVIC_NUMBER matches)
+      # BLOCK matches have empty siteIDs and represent street blocks, not buildings
+      next if site_id.blank?
+
+      # Fetch and add subsites (units/strata lots) if they exist
+      begin
+        subsites_response = subsites(site_id)
+        if subsites_response && subsites_response["features"]
+          subsites_response["features"].each do |subsite|
+            options << {
+              label: subsite["properties"]["fullAddress"],
+              value: subsite["properties"]["siteID"]
+            }
+          end
         end
-        .map do |site|
-          {
-            label: site["properties"]["fullAddress"],
-            value: site["properties"]["siteID"]
-          }
-        end
-    )
+      rescue StandardError => e
+        # If subsites call fails, just continue with parent site only
+        # Note: BC Geocoder API returns 500 errors for sites without subsites
+        # instead of empty arrays, so we silently continue here
+        Rails.logger.debug(
+          "No subsites found for #{site_id} (this is normal): #{e.message}"
+        )
+      end
+    end
+
+    options
   end
 
   def nearest_options(coordinates, exclude_units = "true")
@@ -66,8 +93,9 @@ class Wrappers::Geocoder < Wrappers::Base
       excludeUnits: exclude_units
     }
     r = get("/sites/near.json", site_params)
-    #matchPrecision does not exist on near
-    return(
+    # matchPrecision does not exist on near
+
+    (
       r["features"].map do |site|
         {
           label: site["properties"]["fullAddress"],

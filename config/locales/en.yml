@@ -467,6 +467,9 @@ en:
         title: "Error"
         message: "There was an error restoring the template"
     jurisdiction:
+      fields:
+        ltsa_matcher: "LTSA matcher"
+        jurisdiction_pid: "Verify with PID"
       create_error:
         title: Error
         message: "%{error_message}"

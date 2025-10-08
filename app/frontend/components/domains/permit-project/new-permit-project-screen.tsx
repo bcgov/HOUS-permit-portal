@@ -18,12 +18,10 @@ import { observer } from "mobx-react-lite"
 import React from "react"
 import { Controller, FormProvider, useForm } from "react-hook-form"
 import { useNavigate } from "react-router-dom"
-import { useJurisdictionFromSite } from "../../../hooks/use-jurisdiction-from-site"
 import { useMst } from "../../../setup/root"
 import { IOption } from "../../../types/types"
 import { BackButton } from "../../shared/buttons/back-button"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
-import { ManualModeInputs } from "../../shared/select/selectors/manual-mode-inputs"
 import { SitesSelect } from "../../shared/select/selectors/sites-select"
 
 type TCreatePermitProjectFormData = {
@@ -45,18 +43,10 @@ export const NewPermitProjectScreen = observer(() => {
     },
   })
 
-  const { handleSubmit, formState, control, watch, setValue, register } = formMethods
+  const { handleSubmit, formState, control, register } = formMethods
   const { isSubmitting, errors, isValid } = formState
   const navigate = useNavigate()
   const { permitProjectStore } = useMst()
-
-  const [manualMode, setManualMode] = React.useState(false)
-
-  useJurisdictionFromSite(watch, setValue, {
-    siteFieldName: "site",
-    jurisdictionIdFieldName: "jurisdictionId",
-    disabled: manualMode,
-  })
 
   const onSubmit = async (values: TCreatePermitProjectFormData) => {
     const params = {
@@ -110,10 +100,6 @@ export const NewPermitProjectScreen = observer(() => {
                 control={control}
                 render={({ field: { onChange, value } }) => <SitesSelect onChange={onChange} selectedOption={value} />}
               />
-              {manualMode && <ManualModeInputs />}
-              <Button variant="link" onClick={() => setManualMode((prev) => !prev)}>
-                {t("ui.toggleManualMode")}
-              </Button>
             </Flex>
 
             <HStack>

@@ -181,7 +181,9 @@ const options = {
           part9ChecklistsLink: "Part 9 checklists (PDF)",
         },
         ui: {
-          toggleManualMode: "Toggle manual mode",
+          clear: "Clear",
+          switchToManualMode: "Manually select my jurisdiction",
+          switchToAutomaticMode: "Use my address to automatically select my jurisdiction",
           empty: "No items yet",
           enabled: "Enabled",
           disabled: "Disabled",
@@ -467,7 +469,11 @@ const options = {
             mapPosition: "Map position",
             regionalDistrictName: "Regional district",
             inboxEnabled: "Accepting submissions",
+            ltsaMatcher: "Matched jurisdiction with LTSA",
           },
+          determineWithSite: "Enter an address or PID in this jurisdiction to determine the LTSA matcher",
+          ltsaMatcherExplanation:
+            "The LTSA matcher is the name of the jurisdiction as it appears in the LTSA service. This is needed to determine which PIDs correspond to this jurisdiction. Please edit this using the address selection if you are having problems with addresses not being matched correctly to this jurisdiction.",
           lat: "Latitude",
           lng: "Longitude",
           title: "Local housing permits",
