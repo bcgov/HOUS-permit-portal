@@ -12,7 +12,7 @@ class RequirementTemplateBlueprint < Blueprinter::Base
          :visibility,
          :public
 
-  field :jurisdictions_size, name: :jurisdictionsSize do |rt|
+  field :used_by do |rt|
     rt.published_customizations_count
   end
 

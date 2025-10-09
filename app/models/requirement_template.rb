@@ -240,7 +240,8 @@ class RequirementTemplate < ApplicationRecord
       assignee: assignee&.name,
       visibility: visibility,
       public: public?,
-      created_at: created_at
+      created_at: created_at,
+      used_by: published_customizations_count
     }
   end
 
