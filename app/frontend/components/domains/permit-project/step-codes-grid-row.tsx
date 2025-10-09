@@ -38,8 +38,8 @@ export const StepCodesGridRow = observer(({ stepCode }: { stepCode: IStepCode })
       gridColumn="1 / -1"
       templateColumns="subgrid"
       display="grid"
-      onClick={() => targetPath && navigate(targetPath)}
-      _hover={{ bg: "greys.grey03", cursor: targetPath ? "pointer" : "default" }}
+      onClick={() => !isDiscarded && targetPath && navigate(targetPath)}
+      _hover={{ bg: "greys.grey03", cursor: !isDiscarded && targetPath ? "pointer" : "default" }}
       borderBottom="1px"
       borderColor="border.light"
       _last={{ borderBottom: "none" }}
@@ -93,7 +93,7 @@ export const StepCodesGridRow = observer(({ stepCode }: { stepCode: IStepCode })
             <MenuItem
               as={ReactRouterLink}
               to={targetPath || "#"}
-              isDisabled={!targetPath}
+              isDisabled={!targetPath || isDiscarded}
               icon={<ArrowSquareOut size={16} />}
               onClick={(e) => e.stopPropagation()}
             >

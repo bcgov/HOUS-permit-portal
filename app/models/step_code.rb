@@ -27,7 +27,11 @@ class StepCode < ApplicationRecord
   # Delegates for attributes from PermitApplication
   delegate :number, to: :permit_application, prefix: true, allow_nil: true
 
-  validates :permit_application_id, uniqueness: true, allow_nil: true
+  validates :permit_application_id,
+            uniqueness: {
+              conditions: -> { kept }
+            },
+            allow_nil: true
 
   delegate :submitter,
            :newly_submitted_at,

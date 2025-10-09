@@ -22,6 +22,20 @@ class Api::StepCodesController < Api::ApplicationController
 
   def update
     authorize @step_code
+
+    # Prevent updating archived step codes
+    if @step_code.discarded?
+      return(
+        render_error "step_code.update_archived_error",
+                     {
+                       status: 422,
+                       log_args: {
+                         errors: "Cannot update archived step code"
+                       }
+                     }
+      )
+    end
+
     begin
       # disallow updating step code if it's tied to a permit application and the user is not the submitter (for now)
       if step_code_params[:permit_application_id].present?
@@ -49,6 +63,7 @@ class Api::StepCodesController < Api::ApplicationController
         if step_code_params[:permit_application_id].present?
           existing =
             StepCode
+              .kept
               .where(
                 permit_application_id: step_code_params[:permit_application_id]
               )
