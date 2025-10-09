@@ -26,7 +26,6 @@ export const NewJurisdictionScreen = observer(() => {
       site: null,
       pid: "",
       localityType: "",
-      postalAddress: "",
       regionalDistrict: null,
       ltsaMatcher: "",
     },
