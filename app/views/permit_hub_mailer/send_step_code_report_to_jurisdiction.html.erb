@@ -12,7 +12,7 @@
             Hello,
           </p>
           <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
-            An energy advisor has shared a Step Code compliance report with <%= @jurisdiction.qualified_name %> for pre-permit consultation.
+            <strong><%= @sender_user.first_name %></strong> has shared a Step Code compliance report with <%= @jurisdiction.qualified_name %>.
           </p>
 
           <h2 style="color: #292929; font-family: 'Open Sans', sans-serif; font-weight: 700; line-height: 1.4; margin-top: 24px; margin-bottom: 16px; text-align: left; font-size: 22px;">Report details:</h2>
@@ -22,19 +22,14 @@
               <td style="font-family: 'Open Sans', sans-serif; font-size: 16px; vertical-align: top;" valign="top">
                 <dl class="table-like" style="margin: 0;">
 
-                  <% if @step_code.title.present? %>
-                    <dt style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; font-size: 11px; text-transform: uppercase; font-weight: bold; padding-top: 10px; padding-bottom: 8px;">Report Title</dt>
-                    <dd style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; margin: 0; padding-bottom: 10px; border-bottom: 1px solid #d9d9d9;"><%= @step_code.title %></dd>
+                  <% if @step_code.full_address.present? %>
+                    <dt style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; font-size: 11px; text-transform: uppercase; font-weight: bold; padding-top: 10px; padding-bottom: 8px;">Address</dt>
+                    <dd style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; margin: 0; padding-bottom: 10px; border-bottom: 1px solid #d9d9d9;"><%= @step_code.full_address %></dd>
                   <% end %>
 
                   <% if @step_code.reference_number.present? %>
                     <dt style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; font-size: 11px; text-transform: uppercase; font-weight: bold; padding-top: 10px; padding-bottom: 8px;">Reference Number</dt>
                     <dd style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; margin: 0; padding-bottom: 10px; border-bottom: 1px solid #d9d9d9;"><%= @step_code.reference_number %></dd>
-                  <% end %>
-
-                  <% if @step_code.full_address.present? %>
-                    <dt style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; font-size: 11px; text-transform: uppercase; font-weight: bold; padding-top: 10px; padding-bottom: 8px;">Address</dt>
-                    <dd style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; margin: 0; padding-bottom: 10px; border-bottom: 1px solid #d9d9d9;"><%= @step_code.full_address %></dd>
                   <% end %>
 
                   <dt style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; font-size: 11px; text-transform: uppercase; font-weight: bold; padding-top: 10px; padding-bottom: 8px;">Shared By</dt>
@@ -54,18 +49,12 @@
           <h2 style="color: #292929; font-family: 'Open Sans', sans-serif; font-weight: 700; line-height: 1.4; margin-top: 24px; margin-bottom: 16px; text-align: left; font-size: 22px;">About this report:</h2>
 
           <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
-            This Step Code compliance report has been generated through the BC Building Permit Hub and is being shared as part of the pre-permit consultation process. The attached PDF contains detailed energy efficiency analysis and compliance information.
+            This Step Code compliance report has been generated through the Building Permit Hub.
           </p>
 
           <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
             The report maintains its authenticity features and timestamp information. Please review the attached document for complete details.
           </p>
-
-          <% if @step_code.permit_application.present? %>
-            <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
-              <strong>Note:</strong> This report is associated with permit application <strong><%= @step_code.permit_application.number %></strong>.
-            </p>
-          <% end %>
 
           <br>
 
