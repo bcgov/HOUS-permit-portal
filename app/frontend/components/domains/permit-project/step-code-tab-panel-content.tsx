@@ -7,6 +7,7 @@ import { Link as RouterLink } from "react-router-dom"
 import { useSearch } from "../../../hooks/use-search"
 import { useMst } from "../../../setup/root"
 import { ModelSearchInput } from "../../shared/base/model-search-input"
+import { ToggleArchivedButton } from "../../shared/buttons/toggle-archived-button"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { StepCodeTypeFilter } from "./step-code-type-filter"
 import { StepCodesGrid } from "./step-codes-grid"
@@ -72,6 +73,7 @@ export const StepCodeTabPanelContent = observer(() => {
           </Flex>
 
           <StepCodesGrid />
+          <ToggleArchivedButton searchModel={stepCodeStore} />
         </VStack>
       </Container>
     </Flex>

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_10_08_184807) do
+ActiveRecord::Schema[7.2].define(version: 2025_10_09_202916) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -771,7 +771,9 @@ ActiveRecord::Schema[7.2].define(version: 2025_10_08_184807) do
     t.date "permit_date"
     t.string "phase"
     t.string "building_code_version"
+    t.datetime "discarded_at"
     t.index ["creator_id"], name: "index_step_codes_on_creator_id"
+    t.index ["discarded_at"], name: "index_step_codes_on_discarded_at"
     t.index ["jurisdiction_id"], name: "index_step_codes_on_jurisdiction_id"
     t.index ["permit_application_id"], name: "index_step_codes_on_permit_application_id"
     t.index ["permit_project_id"], name: "index_step_codes_on_permit_project_id"

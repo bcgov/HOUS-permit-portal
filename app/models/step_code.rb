@@ -1,5 +1,6 @@
 class StepCode < ApplicationRecord
   include ProjectItem
+  include Discard::Model
   has_parent :permit_application
 
   # Enable search for StepCodes
@@ -15,6 +16,8 @@ class StepCode < ApplicationRecord
              class_name: "User",
              foreign_key: "creator_id",
              optional: true
+
+  after_commit :refresh_search_index, if: :saved_change_to_discarded_at
 
   # Associations
   belongs_to :permit_application, optional: true
@@ -67,7 +70,12 @@ class StepCode < ApplicationRecord
       submitter_id: permit_application&.submitter_id,
       permit_project_id: permit_project&.id,
       jurisdiction_id: jurisdiction&.id,
-      sandbox_id: permit_application&.sandbox_id
+      sandbox_id: permit_application&.sandbox_id,
+      discarded: discarded_at.present?
     }
+  end
+
+  def refresh_search_index
+    StepCode.search_index.refresh
   end
 end

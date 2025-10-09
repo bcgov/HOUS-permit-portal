@@ -1,11 +1,12 @@
 import { Grid, GridItem, IconButton, Menu, MenuButton, MenuItem, MenuList, Text } from "@chakra-ui/react"
-import { ArrowSquareOut, DotsThreeVertical } from "@phosphor-icons/react"
+import { Archive, ArrowSquareOut, ClockClockwise, DotsThreeVertical } from "@phosphor-icons/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { Link as ReactRouterLink, useNavigate } from "react-router-dom"
 import { datefnsTableDateTimeFormat } from "../../../constants"
+import { useMst } from "../../../setup/root"
 import { IStepCode } from "../../../stores/step-code-store"
 import { EFileUploadAttachmentType, EStepCodeType } from "../../../types/enums"
 import { FileDownloadButton } from "../../shared/base/file-download-button"
@@ -13,7 +14,24 @@ import { FileDownloadButton } from "../../shared/base/file-download-button"
 export const StepCodesGridRow = observer(({ stepCode }: { stepCode: IStepCode }) => {
   const navigate = useNavigate()
   const { t } = useTranslation()
-  const { type, permitProjectTitle, fullAddress, updatedAt, targetPath } = stepCode as any
+  const { stepCodeStore } = useMst()
+  const { type, permitProjectTitle, fullAddress, updatedAt, targetPath, isDiscarded } = stepCode as any
+
+  const handleArchive = async (e: React.MouseEvent) => {
+    e.stopPropagation()
+    const success = await stepCode.archive()
+    if (success) {
+      await stepCodeStore.search()
+    }
+  }
+
+  const handleRestore = async (e: React.MouseEvent) => {
+    e.stopPropagation()
+    const success = await stepCode.restore()
+    if (success) {
+      await stepCodeStore.search()
+    }
+  }
 
   return (
     <Grid
@@ -81,6 +99,15 @@ export const StepCodesGridRow = observer(({ stepCode }: { stepCode: IStepCode })
             >
               {t("ui.open")}
             </MenuItem>
+            {isDiscarded ? (
+              <MenuItem icon={<ClockClockwise size={16} />} onClick={handleRestore} color="semantic.success">
+                {t("ui.restore")}
+              </MenuItem>
+            ) : (
+              <MenuItem icon={<Archive size={16} />} onClick={handleArchive} color="semantic.error">
+                {t("ui.archive")}
+              </MenuItem>
+            )}
           </MenuList>
         </Menu>
       </GridItem>

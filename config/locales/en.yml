@@ -613,6 +613,18 @@ en:
       update_error:
         title: Error
         message: "%{error_message}"
+      destroy_success:
+        title: ""
+        message: "Report archived successfully"
+      destroy_error:
+        title: Error
+        message: "There was an error archiving the report"
+      restore_success:
+        title: ""
+        message: "Report restored successfully"
+      restore_error:
+        title: Error
+        message: "There was an error restoring the report"
     step_code_checklist:
       update_success:
         title: ""
