@@ -1,6 +1,12 @@
 class StepCodeReportSharingService
   attr_reader :report_document, :step_code, :sender_user, :errors
 
+  # Map step code types to their corresponding permit type codes
+  STEP_CODE_TYPE_TO_PERMIT_TYPE = {
+    "Part9StepCode" => "low_residential",
+    "Part3StepCode" => "medium_residential"
+  }.freeze
+
   def initialize(report_document:, sender_user:)
     @report_document = report_document
     @step_code = report_document.step_code
@@ -17,70 +23,62 @@ class StepCodeReportSharingService
       return false
     end
 
-    # Get confirmed submission contacts for the jurisdiction
-    submission_contacts = get_confirmed_submission_contacts(jurisdiction)
+    # Get the appropriate permit type based on step code type
+    permit_type_code = get_permit_type_code
 
-    if submission_contacts.empty?
-      @errors << "No confirmed submission contacts found for this jurisdiction"
+    # Find the confirmed submission contact for this permit type
+    submission_contact =
+      get_confirmed_submission_contact(jurisdiction, permit_type_code)
+
+    unless submission_contact
+      @errors << "No confirmed submission contact found for #{permit_type_code} in this jurisdiction"
       return false
     end
 
-    # Send to all confirmed contacts
-    send_emails(jurisdiction, submission_contacts)
+    # Send to the one relevant contact
+    send_email_to_contact(jurisdiction, submission_contact)
   end
 
-  # Send report to a specific email address with jurisdiction context
-  def send_to_email(email, jurisdiction_id)
-    jurisdiction = Jurisdiction.find_by(id: jurisdiction_id)
+  # Get confirmed submission contact email for a jurisdiction and permit type
+  # permit_type_code should be "low_residential" (Part 9) or "medium_residential" (Part 3)
+  def self.confirmed_contact_email_for_jurisdiction(
+    jurisdiction_id,
+    permit_type_code
+  )
+    permit_type = PermitType.find_by(code: permit_type_code)
+    return nil unless permit_type
 
-    unless jurisdiction
-      @errors << "Jurisdiction not found"
-      return false
-    end
-
-    unless valid_email?(email)
-      @errors << "Invalid email address"
-      return false
-    end
-
-    send_email_to_recipient(jurisdiction, email)
-  end
-
-  # Get list of jurisdictions that have confirmed submission contacts
-  # This can be used in the UI to populate the jurisdiction selector
-  def self.jurisdictions_with_confirmed_contacts
-    Jurisdiction
-      .joins(:permit_type_submission_contacts)
-      .where.not(permit_type_submission_contacts: { confirmed_at: nil })
-      .distinct
-      .order(:name)
-  end
-
-  # Get confirmed submission contacts for a jurisdiction
-  def self.confirmed_contacts_for_jurisdiction(jurisdiction_id)
     PermitTypeSubmissionContact
-      .where(jurisdiction_id: jurisdiction_id)
+      .where(jurisdiction_id: jurisdiction_id, permit_type: permit_type)
       .where.not(confirmed_at: nil)
-      .pluck(:email)
+      .first
+      &.email
   end
 
   private
 
-  def get_confirmed_submission_contacts(jurisdiction)
-    jurisdiction.permit_type_submission_contacts.where.not(confirmed_at: nil)
+  def get_permit_type_code
+    STEP_CODE_TYPE_TO_PERMIT_TYPE[@step_code.class.name]
   end
 
-  def send_emails(jurisdiction, submission_contacts)
-    results = []
+  def get_confirmed_submission_contact(jurisdiction, permit_type_code)
+    permit_type = PermitType.find_by(code: permit_type_code)
+    return nil unless permit_type
 
-    submission_contacts.each do |contact|
-      results << send_email_to_recipient(jurisdiction, contact.email)
-    end
+    jurisdiction
+      .permit_type_submission_contacts
+      .where(permit_type: permit_type)
+      .where.not(confirmed_at: nil)
+      .first
+  end
+
+  def send_email_to_contact(jurisdiction, submission_contact)
+    success = send_email_to_recipient(jurisdiction, submission_contact.email)
 
     # Log the sharing activity
-    log_sharing_activity(jurisdiction, submission_contacts.map(&:email))
+    log_sharing_activity(jurisdiction, submission_contact) if success
 
-    results.all?
+    success
   end
 
   def send_email_to_recipient(jurisdiction, email)
@@ -101,19 +99,17 @@ class StepCodeReportSharingService
     false
   end
 
-  def log_sharing_activity(jurisdiction, recipient_emails)
+  def log_sharing_activity(jurisdiction, submission_contact)
     Rails.logger.info(
       "Step Code Report Shared - " \
         "Report ID: #{@report_document.id}, " \
         "Step Code ID: #{@step_code.id}, " \
+        "Step Code Type: #{@step_code.class.name}, " \
         "Jurisdiction: #{jurisdiction.qualified_name} (#{jurisdiction.id}), " \
-        "Recipients: #{recipient_emails.join(", ")}, " \
+        "Permit Type: #{submission_contact.permit_type.code}, " \
+        "Recipient: #{submission_contact.email}, " \
         "Sender: #{@sender_user.name} (#{@sender_user.id}), " \
         "Timestamp: #{Time.current}"
     )
-  end
-
-  def valid_email?(email)
-    email.present? && email.match?(URI::MailTo::EMAIL_REGEXP)
   end
 end

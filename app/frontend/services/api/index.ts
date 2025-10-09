@@ -883,10 +883,9 @@ export class Api {
     }
   }
 
-  async shareReportDocumentWithJurisdiction(reportDocumentId: string, email?: string) {
+  async shareReportDocumentWithJurisdiction(reportDocumentId: string) {
     return this.client.post<ApiResponse<{ message: string }>>(
-      `/report_documents/${reportDocumentId}/share_with_jurisdiction`,
-      { email }
+      `/report_documents/${reportDocumentId}/share_with_jurisdiction`
     )
   }
 }

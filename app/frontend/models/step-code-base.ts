@@ -50,7 +50,7 @@ export const StepCodeBaseFields = types
       }
       return response.ok
     }),
-    shareReportWithJurisdiction: flow(function* (email?: string) {
+    shareReportWithJurisdiction: flow(function* () {
       const latestReport = self.latestReportDocument
       if (!latestReport) {
         return { ok: false, error: "No report document available" }
@@ -59,7 +59,7 @@ export const StepCodeBaseFields = types
       // @ts-ignore environment provided by composed models (Part3/Part9)
       const response = yield* toGenerator(
         // @ts-ignore environment provided by composed models (Part3/Part9)
-        self.environment.api.shareReportDocumentWithJurisdiction(latestReport.id, email)
+        self.environment.api.shareReportDocumentWithJurisdiction(latestReport.id)
       )
 
       return { ok: response.ok, data: response.data }

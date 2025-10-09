@@ -3,8 +3,6 @@ class Api::ReportDocumentsController < Api::ApplicationController
 
   # POST /api/report_documents/:id/share_with_jurisdiction
   # Shares the report with the jurisdiction associated with the step_code
-  # Params:
-  #   - email (optional): specific email address to send to (otherwise sends to all confirmed contacts)
   def share_with_jurisdiction
     authorize @report_document, :share?
 
@@ -33,12 +31,7 @@ class Api::ReportDocumentsController < Api::ApplicationController
         sender_user: current_user
       )
 
-    success =
-      if params[:email].present?
-        service.send_to_email(params[:email], jurisdiction.id)
-      else
-        service.send_to_jurisdiction(jurisdiction.id)
-      end
+    success = service.send_to_jurisdiction(jurisdiction.id)
 
     if success
       render_success(
