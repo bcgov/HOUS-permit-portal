@@ -69,7 +69,7 @@ export const RequirementTemplateModel = types.snapshotProcessor(
       type: types.enumeration(Object.values(ERequirementTemplateType)),
       visibility: types.enumeration(Object.values(EVisibility)),
       description: types.maybeNull(types.string),
-      jurisdictionsSize: types.optional(types.number, 0),
+      usedBy: types.optional(types.number, 0),
       publishedTemplateVersion: types.maybeNull(types.safeReference(TemplateVersionModel)),
       scheduledTemplateVersions: types.array(types.safeReference(TemplateVersionModel)),
       deprecatedTemplateVersions: types.array(types.safeReference(TemplateVersionModel)),
