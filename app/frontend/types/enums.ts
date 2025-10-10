@@ -101,7 +101,7 @@ export enum ERequirementTemplateSortFields {
   firstNations = "first_nations",
   description = "description",
   currentVersion = "current_version",
-  jurisdictionsSize = "jurisdictions_size",
+  usedBy = "used_by",
 }
 
 export enum EEarlyAccessRequirementTemplateSortFields {

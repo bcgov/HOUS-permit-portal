@@ -3272,7 +3272,7 @@ Thank you,
             firstNations: "First Nations",
             description: "Description",
             currentVersion: "Current version",
-            jurisdictionsSize: "Used by",
+            usedBy: "Used by",
           },
           status: {
             published: "Published",
