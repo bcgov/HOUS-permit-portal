@@ -28,6 +28,7 @@ class Part9StepCode::Checklist < ApplicationRecord
   delegate :pid, to: :step_code
   delegate :reference_number, to: :step_code
   delegate :permit_application_number, to: :step_code
+  delegate :discarded?, to: :step_code
 
   enum stage: %i[pre_construction mid_construction as_built]
   enum status: %i[draft complete]

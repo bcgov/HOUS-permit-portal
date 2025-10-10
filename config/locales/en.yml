@@ -613,7 +613,28 @@ en:
       update_error:
         title: Error
         message: "%{error_message}"
+      update_archived_error:
+        title: Error
+        message: "Cannot update archived step code. Please restore it first."
+      destroy_success:
+        title: ""
+        message: "Report archived successfully"
+      destroy_error:
+        title: Error
+        message: "There was an error archiving the report"
+      restore_success:
+        title: ""
+        message: "Report restored successfully"
+      restore_error:
+        title: Error
+        message: "There was an error restoring the report"
     step_code_checklist:
+      show_archived_error:
+        title: Error
+        message: "Cannot view checklist of archived step code. Please restore the step code first."
+      update_archived_error:
+        title: Error
+        message: "Cannot update checklist of archived step code. Please restore the step code first."
       update_success:
         title: ""
         message: "Step code checklist updated!"
