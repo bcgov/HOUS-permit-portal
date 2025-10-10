@@ -98,7 +98,25 @@ export const NewPermitProjectScreen = observer(() => {
               <Controller
                 name="site"
                 control={control}
-                render={({ field: { onChange, value } }) => <SitesSelect onChange={onChange} selectedOption={value} />}
+                rules={{
+                  validate: {
+                    hasJurisdiction: () => {
+                      const jurisdictionId = formMethods.getValues("jurisdictionId")
+                      return jurisdictionId
+                        ? true
+                        : (t("ui.isRequired", { field: t("permitProject.new.fullAddressHeading") }) as string)
+                    },
+                  },
+                }}
+                render={({ field: { onChange, value } }) => (
+                  <SitesSelect
+                    onChange={onChange}
+                    selectedOption={value}
+                    pidName="pid"
+                    siteName="site"
+                    jurisdictionIdFieldName="jurisdictionId"
+                  />
+                )}
               />
             </Flex>
 

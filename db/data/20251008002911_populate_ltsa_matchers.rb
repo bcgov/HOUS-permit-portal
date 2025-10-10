@@ -59,6 +59,9 @@ class PopulateLtsaMatchers < ActiveRecord::Migration[7.2]
       say "Errors (#{errors.count}):"
       errors.each { |msg| say "  - #{msg}" }
     end
+
+    Jurisdiction.reindex
+    Jurisdiction.search_index.refresh
   end
 
   def down
