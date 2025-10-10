@@ -105,18 +105,29 @@ module FormSupportingDocuments
   def fetch_file_ids_from_submission_data_matching_requirements(
     fields_and_requirements_array
   )
-    fields_and_requirements_array
-      .map do |field_id, req|
-        self.submission_data.dig(
-          "data",
-          PermitApplication.section_from_key(field_id),
-          field_id,
-          0,
-          "id"
-        )
+    file_ids = []
+    fields_and_requirements_array.each do |field_id, req|
+      section = PermitApplication.section_from_key(field_id)
+      field_value = self.submission_data.dig("data", section, field_id)
+
+      # Handle both single file and multi-file uploads
+      if field_value.is_a?(Array)
+        # Multi-file upload: extract all file IDs
+        field_value.each do |file_data|
+          if file_data.is_a?(Hash) && file_data["id"].present?
+            file_ids << file_data["id"]
+          end
+        end
+      elsif field_value.is_a?(Hash) && field_value["id"].present?
+        # Single file upload (legacy format)
+        file_ids << field_value["id"]
       end
-      .compact
-      .map { |id| id.start_with?("cache/") ? id.slice(6..-1) : id }
+    end
+
+    # Remove cache/ prefix if present
+    file_ids.compact.map do |id|
+      id.start_with?("cache/") ? id.slice(6..-1) : id
+    end
   end
 
   def supporting_documents_without_compliance_matching(regex_pattern)

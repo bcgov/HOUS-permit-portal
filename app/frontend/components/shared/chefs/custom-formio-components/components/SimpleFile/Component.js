@@ -146,7 +146,7 @@ export default class Component extends ParentComponent {
               })
             }
           })
-          const fileKey = this.component.fileKey || "file"
+          const fileKey = this.component.fileKey || this.component.key || "file"
           const groupResourceId = groupKey ? this.currentForm.submission.data[groupKey]._id : null
           fileService
             .uploadFile(
