@@ -559,6 +559,68 @@
       height: 24px;
       margin-right: 6px;
     }
+
+    .compliance-digital-signatures {
+      margin-top: 8px;
+
+      .compliance-section-title {
+        font-weight: 600;
+        margin-bottom: 12px;
+        font-size: var(--chakra-fontSizes-sm);
+      }
+
+      .compliance-file-item {
+        margin-bottom: 16px;
+        padding-left: 8px;
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+
+        .compliance-file-name {
+          font-weight: 600;
+          margin-bottom: 6px;
+          color: $bcgov-font;
+        }
+
+        .compliance-file-message {
+          margin-left: 16px;
+          font-size: var(--chakra-fontSizes-xs);
+          color: $bcgov-font;
+          font-style: italic;
+        }
+
+        .compliance-file-error-message {
+          margin-left: 16px;
+          font-size: var(--chakra-fontSizes-xs);
+          color: $bcgov-font-error;
+        }
+
+        &.compliance-file-error {
+          .compliance-file-name {
+            color: $bcgov-font-error;
+          }
+        }
+
+        .compliance-signer {
+          margin-left: 16px;
+          margin-bottom: 4px;
+          font-size: var(--chakra-fontSizes-xs);
+
+          .compliance-signer-name {
+            color: $bcgov-font-success;
+            font-weight: 500;
+            margin-bottom: 2px;
+          }
+
+          .compliance-signer-date {
+            color: $bcgov-font;
+            margin-left: 12px;
+            font-size: var(--chakra-fontSizes-xs);
+          }
+        }
+      }
+    }
   }
 
   .energy-step-code-warning {

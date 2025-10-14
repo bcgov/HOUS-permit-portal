@@ -22,7 +22,11 @@ class StepCodePolicy < ApplicationPolicy
   end
 
   def destroy?
-    record.submitter == user
+    record.creator == user || record.submitter == user
+  end
+
+  def restore?
+    record.creator == user || record.submitter == user
   end
 
   def show?

@@ -7,6 +7,7 @@ import { useNavigate, useParams } from "react-router-dom"
 import { usePart3StepCode } from "../../../../hooks/resources/use-part-3-step-code"
 import { usePermitApplication } from "../../../../hooks/resources/use-permit-application"
 import { useMst } from "../../../../setup/root"
+import { NotFoundScreen } from "../../../shared/base/not-found-screen"
 import { SharedSpinner } from "../../../shared/base/shared-spinner"
 import { FloatingHelpDrawer } from "../../../shared/floating-help-drawer"
 import { StepCodeNavBar } from "../nav-bar"
@@ -61,6 +62,9 @@ export const Part3StepCodeForm = observer(function Part3StepCodeForm() {
       scroller.scrollTo({ top: 0, left: 0, behavior: "auto" })
     }
   }, [section])
+
+  // Prevent viewing/editing archived step codes
+  if (currentStepCode?.isDiscarded) return <NotFoundScreen />
 
   return (
     <RemoveScroll>

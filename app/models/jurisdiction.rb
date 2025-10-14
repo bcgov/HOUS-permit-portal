@@ -168,11 +168,7 @@ class Jurisdiction < ApplicationRecord
   end
 
   def self.fuzzy_find_by_ltsa_feature_attributes(attributes)
-    municipality = attributes["MUNICIPALITY"]
-    regional_district = attributes["REGIONAL_DISTRICT"]
-    is_regional_district = municipality == "Rural"
-
-    ltsa_matcher = is_regional_district ? regional_district : municipality
+    ltsa_matcher = ltsa_matcher_from_ltsa_attributes(attributes)
 
     ltsa_matcher_params = {
       fields: %w[ltsa_matcher],
@@ -180,6 +176,7 @@ class Jurisdiction < ApplicationRecord
         edit_distance: 4
       }
     }
+    is_regional_district = attributes["MUNICIPALITY"] == "Rural"
 
     return(
       if is_regional_district

@@ -7,6 +7,7 @@ export const StepCodeBaseFields = types
   .model("StepCodeBaseFields", {
     createdAt: types.maybeNull(types.Date),
     updatedAt: types.maybeNull(types.Date),
+    discardedAt: types.maybeNull(types.Date),
     title: types.maybeNull(types.string),
     referenceNumber: types.maybeNull(types.string),
     fullAddress: types.maybeNull(types.string),
@@ -24,6 +25,9 @@ export const StepCodeBaseFields = types
       const docs = [...self.reportDocuments]
       docs.sort((a, b) => (new Date(a.createdAt as any).getTime() || 0) - (new Date(b.createdAt as any).getTime() || 0))
       return docs[docs.length - 1]
+    },
+    get isDiscarded(): boolean {
+      return self.discardedAt !== null
     },
   }))
   .actions((self) => ({
@@ -63,5 +67,23 @@ export const StepCodeBaseFields = types
       )
 
       return { ok: response.ok, data: response.data }
+    }),
+    archive: flow(function* () {
+      // @ts-ignore environment provided by composed models (Part3/Part9)
+      const response = yield* toGenerator(self.environment.api.archiveStepCode(self.id as any))
+      if (response.ok) {
+        // @ts-ignore rootStore provided by withRootStore on composed models
+        self.rootStore.stepCodeStore.mergeUpdate(response.data.data, "stepCodesMap")
+      }
+      return response.ok
+    }),
+    restore: flow(function* () {
+      // @ts-ignore environment provided by composed models (Part3/Part9)
+      const response = yield* toGenerator(self.environment.api.restoreStepCode(self.id as any))
+      if (response.ok) {
+        // @ts-ignore rootStore provided by withRootStore on composed models
+        self.rootStore.stepCodeStore.mergeUpdate(response.data.data, "stepCodesMap")
+      }
+      return response.ok
     }),
   }))

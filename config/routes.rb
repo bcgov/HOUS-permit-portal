@@ -254,6 +254,7 @@ Rails.application.routes.draw do
           to: "step_codes#download_step_code_metrics_csv"
       post "search", on: :collection, to: "step_codes#index"
       patch "update", on: :member, to: "step_codes#update"
+      patch "restore", on: :member, to: "step_codes#restore"
     end
 
     resources :report_documents, only: [] do

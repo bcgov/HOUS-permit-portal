@@ -707,6 +707,14 @@ export class Api {
     return this.client.delete<ApiResponse<IStepCode>>(`/step_codes/${id}`)
   }
 
+  async archiveStepCode(id: string) {
+    return this.client.delete<ApiResponse<IStepCode>>(`/step_codes/${id}`)
+  }
+
+  async restoreStepCode(id: string) {
+    return this.client.patch<ApiResponse<IStepCode>>(`/step_codes/${id}/restore`)
+  }
+
   async updateStepCode(
     id: string,
     data: Partial<{

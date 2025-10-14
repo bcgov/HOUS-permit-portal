@@ -26,7 +26,6 @@ import { SitesSelect, TSitesSelectProps } from "../../shared/select/selectors/si
 export type TJurisdictionFormValues = {
   name: string
   localityType: string
-  postalAddress: string
   regionalDistrict: IJurisdiction
   ltsaMatcher: string
   site: IOption
@@ -87,11 +86,7 @@ export const JurisdictionFormSection: React.FC<TJurisdictionFormProps> = ({
       </FormControl>
 
       <Flex gap={8}>
-        <Box w="50%">
-          <TextFormControl label={t("jurisdiction.new.postalAddressLabel")} fieldName={"postalAddress"} required />
-        </Box>
-
-        <Box w="50%">
+        <Box w="full">
           <Controller
             name="regionalDistrict"
             control={control}
@@ -124,7 +119,7 @@ export const JurisdictionFormSection: React.FC<TJurisdictionFormProps> = ({
               <Tooltip label={t("jurisdiction.ltsaMatcherExplanation")} hasArrow>
                 <IconButton
                   aria-label={t("jurisdiction.ltsaMatcherExplanation")}
-                  icon={<Info />}
+                  icon={<Info size={16} />}
                   size="xs"
                   variant="ghost"
                   type="button"
@@ -159,6 +154,19 @@ export const JurisdictionFormSection: React.FC<TJurisdictionFormProps> = ({
             inputProps={{
               isDisabled: true,
             }}
+            LabelInfo={() => (
+              <Tooltip label={t("jurisdiction.ltsaMatcherHelp")} hasArrow>
+                <IconButton
+                  mb={2}
+                  ml={2}
+                  aria-label={t("jurisdiction.ltsaMatcherHelp")}
+                  icon={<Info size={16} />}
+                  size="xs"
+                  variant="ghost"
+                  type="button"
+                />
+              </Tooltip>
+            )}
           />
         </Box>
         <Button
