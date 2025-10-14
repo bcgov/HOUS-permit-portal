@@ -14,10 +14,14 @@ export const FormFooter = observer(function FormFooter({ onContinue, isLoading }
   const { navigateToNext, navigateToPrevious, hasNext, hasPrevious } = usePreCheckNavigation()
 
   const handleContinue = async () => {
-    if (onContinue) {
-      await onContinue()
+    try {
+      if (onContinue) {
+        await onContinue()
+      }
+      navigateToNext()
+    } catch (error) {
+      console.error("Form submission failed:", error)
     }
-    navigateToNext()
   }
 
   return (

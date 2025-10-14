@@ -1,6 +1,6 @@
 import { Box, FormControl, FormLabel, Heading, Radio, RadioGroup, Stack, Text, VStack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
-import React, { useState } from "react"
+import React from "react"
 import { Controller, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { usePreCheck } from "../../../../hooks/resources/use-pre-check"
@@ -17,9 +17,12 @@ export const ServicePartner = observer(function ServicePartner() {
   const {
     preCheckStore: { updatePreCheck },
   } = useMst()
-  const [isLoading, setIsLoading] = useState(false)
 
-  const { control, handleSubmit } = useForm<IServicePartnerFormData>({
+  const {
+    control,
+    handleSubmit,
+    formState: { isSubmitting },
+  } = useForm<IServicePartnerFormData>({
     defaultValues: {
       servicePartner: currentPreCheck?.servicePartner || "archistar",
     },
@@ -27,15 +30,9 @@ export const ServicePartner = observer(function ServicePartner() {
 
   const onSubmit = async (data: IServicePartnerFormData) => {
     if (!currentPreCheck) return
-
-    setIsLoading(true)
-    try {
-      await updatePreCheck(currentPreCheck.id, {
-        servicePartner: data.servicePartner,
-      })
-    } finally {
-      setIsLoading(false)
-    }
+    await updatePreCheck(currentPreCheck.id, {
+      servicePartner: data.servicePartner,
+    })
   }
 
   return (
@@ -66,7 +63,7 @@ export const ServicePartner = observer(function ServicePartner() {
         </FormControl>
       </VStack>
 
-      <FormFooter onContinue={handleSubmit(onSubmit)} isLoading={isLoading} />
+      <FormFooter onContinue={handleSubmit(onSubmit)} isLoading={isSubmitting} />
     </Box>
   )
 })

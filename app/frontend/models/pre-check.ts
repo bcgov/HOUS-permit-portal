@@ -1,5 +1,6 @@
 import { Instance, types } from "mobx-state-tree"
 import { JurisdictionModel } from "./jurisdiction"
+import { PermitTypeModel } from "./permit-classification"
 
 export const PreCheckModel = types
   .model("PreCheck", {
@@ -9,7 +10,7 @@ export const PreCheckModel = types
     fullAddress: types.maybeNull(types.string),
     permitApplicationId: types.maybeNull(types.string),
     jurisdiction: types.maybeNull(types.reference(types.late(() => JurisdictionModel))),
-    jurisdictionId: types.maybeNull(types.string),
+    permitType: types.maybeNull(types.reference(types.late(() => PermitTypeModel))),
     servicePartner: types.maybeNull(types.string),
     eulaAccepted: types.optional(types.boolean, false),
     consentToSendDrawings: types.optional(types.boolean, false),
@@ -24,15 +25,14 @@ export const PreCheckModel = types
       return !!self.servicePartner
     },
     get isProjectAddressComplete() {
-      return !!self.fullAddress
+      return !!self.fullAddress && !!self.jurisdiction
     },
     get isAgreementsAndConsentComplete() {
       // Both required consents must be accepted
       return self.eulaAccepted && self.consentToSendDrawings
     },
     get isBuildingTypeComplete() {
-      // TODO: implement when building type field is added
-      return false
+      return !!self.permitType
     },
     get isUploadDrawingsComplete() {
       // TODO: implement when drawings upload is added

@@ -5,7 +5,6 @@ class PreCheckBlueprint < Blueprinter::Base
          :phase,
          :full_address,
          :permit_application_id,
-         :jurisdiction_id,
          :service_partner,
          :eula_accepted,
          :consent_to_send_drawings,
@@ -16,4 +15,5 @@ class PreCheckBlueprint < Blueprinter::Base
 
   association :creator, blueprint: UserBlueprint
   association :jurisdiction, blueprint: JurisdictionBlueprint, view: :base
+  association :permit_type, blueprint: PermitClassificationBlueprint
 end

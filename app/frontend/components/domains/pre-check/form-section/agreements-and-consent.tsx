@@ -1,6 +1,6 @@
 import { Box, Checkbox, Heading, Link, Stack, Text, VStack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
-import React, { useState } from "react"
+import React from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { usePreCheck } from "../../../../hooks/resources/use-pre-check"
@@ -20,9 +20,13 @@ export const AgreementsAndConsent = observer(function AgreementsAndConsent() {
   const {
     preCheckStore: { updatePreCheck },
   } = useMst()
-  const [isLoading, setIsLoading] = useState(false)
 
-  const { register, handleSubmit, watch } = useForm<IAgreementsFormData>({
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { isSubmitting },
+  } = useForm<IAgreementsFormData>({
     defaultValues: {
       eulaAccepted: currentPreCheck?.eulaAccepted || false,
       consentToSendDrawings: currentPreCheck?.consentToSendDrawings || false,
@@ -36,18 +40,12 @@ export const AgreementsAndConsent = observer(function AgreementsAndConsent() {
 
   const onSubmit = async (data: IAgreementsFormData) => {
     if (!currentPreCheck) return
-
-    setIsLoading(true)
-    try {
-      await updatePreCheck(currentPreCheck.id, {
-        eulaAccepted: data.eulaAccepted,
-        consentToSendDrawings: data.consentToSendDrawings,
-        consentToShareWithJurisdiction: data.consentToShareWithJurisdiction,
-        consentToResearchContact: data.consentToResearchContact,
-      })
-    } finally {
-      setIsLoading(false)
-    }
+    await updatePreCheck(currentPreCheck.id, {
+      eulaAccepted: data.eulaAccepted,
+      consentToSendDrawings: data.consentToSendDrawings,
+      consentToShareWithJurisdiction: data.consentToShareWithJurisdiction,
+      consentToResearchContact: data.consentToResearchContact,
+    })
   }
 
   return (
@@ -136,7 +134,7 @@ export const AgreementsAndConsent = observer(function AgreementsAndConsent() {
         </Box>
       </VStack>
 
-      <FormFooter onContinue={handleSubmit(onSubmit)} isLoading={isLoading} />
+      <FormFooter onContinue={handleSubmit(onSubmit)} isLoading={isSubmitting} />
     </Box>
   )
 })

@@ -28,7 +28,6 @@ class Api::PreChecksController < Api::ApplicationController
                      "pre_check.create_success",
                      { blueprint: PreCheckBlueprint }
     else
-      binding.pry
       render_error "pre_check.create_error",
                    message_opts: {
                      error_message: pre_check.errors.full_messages.to_sentence,
@@ -66,6 +65,7 @@ class Api::PreChecksController < Api::ApplicationController
       :full_address,
       :permit_application_id,
       :jurisdiction_id,
+      :permit_type_id,
       :service_partner,
       :eula_accepted,
       :consent_to_send_drawings,

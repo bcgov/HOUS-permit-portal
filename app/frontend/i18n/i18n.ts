@@ -404,7 +404,7 @@ const options = {
             },
             buildingType: {
               title: "Building Type",
-              description: "Select your building type.",
+              description: "Choose the building type that best describes your project",
             },
             uploadDrawings: {
               title: "Upload Drawings",

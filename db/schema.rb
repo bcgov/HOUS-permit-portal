@@ -76,6 +76,9 @@ ActiveRecord::Schema[7.2].define(version: 2025_10_09_202916) do
     t.index ["contactable_type", "contactable_id"], name: "index_contacts_on_contactable"
   end
 
+  create_table "data_migrations", primary_key: "version", id: :string, force: :cascade do |t|
+  end
+
   create_table "document_references", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "checklist_id"
     t.string "document_name"
@@ -502,6 +505,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_10_09_202916) do
 
   create_table "pre_checks", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "permit_application_id"
+    t.uuid "permit_type_id"
     t.uuid "creator_id", null: false
     t.uuid "jurisdiction_id"
     t.string "cert_number"
@@ -517,6 +521,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_10_09_202916) do
     t.index ["creator_id"], name: "index_pre_checks_on_creator_id"
     t.index ["jurisdiction_id"], name: "index_pre_checks_on_jurisdiction_id"
     t.index ["permit_application_id"], name: "index_pre_checks_on_permit_application_id", unique: true
+    t.index ["permit_type_id"], name: "index_pre_checks_on_permit_type_id"
     t.index ["service_partner"], name: "index_pre_checks_on_service_partner"
   end
 
@@ -975,6 +980,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_10_09_202916) do
   add_foreign_key "pinned_projects", "users"
   add_foreign_key "pre_checks", "jurisdictions"
   add_foreign_key "pre_checks", "permit_applications"
+  add_foreign_key "pre_checks", "permit_classifications", column: "permit_type_id"
   add_foreign_key "pre_checks", "users", column: "creator_id"
   add_foreign_key "preferences", "users"
   add_foreign_key "project_documents", "permit_projects"

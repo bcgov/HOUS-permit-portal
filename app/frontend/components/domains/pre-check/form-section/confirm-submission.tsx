@@ -1,6 +1,6 @@
 import { Box, Heading, Text, VStack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
-import React, { useState } from "react"
+import React from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { usePreCheck } from "../../../../hooks/resources/use-pre-check"
@@ -18,9 +18,12 @@ export const ConfirmSubmission = observer(function ConfirmSubmission() {
   const {
     preCheckStore: { updatePreCheck },
   } = useMst()
-  const [isLoading, setIsLoading] = useState(false)
 
-  const { register, handleSubmit } = useForm<IConfirmSubmissionFormData>({
+  const {
+    register,
+    handleSubmit,
+    formState: { isSubmitting },
+  } = useForm<IConfirmSubmissionFormData>({
     defaultValues: {
       finalConfirmation: false,
     },
@@ -28,15 +31,9 @@ export const ConfirmSubmission = observer(function ConfirmSubmission() {
 
   const onSubmit = async (data: IConfirmSubmissionFormData) => {
     if (!currentPreCheck) return
-
-    setIsLoading(true)
-    try {
-      await updatePreCheck(currentPreCheck.id, {
-        // Final submission logic will go here
-      })
-    } finally {
-      setIsLoading(false)
-    }
+    await updatePreCheck(currentPreCheck.id, {
+      // Final submission logic will go here
+    })
   }
 
   return (
@@ -53,7 +50,7 @@ export const ConfirmSubmission = observer(function ConfirmSubmission() {
         <Text color="text.secondary">Form fields coming soon...</Text>
       </VStack>
 
-      <FormFooter onContinue={handleSubmit(onSubmit)} isLoading={isLoading} />
+      <FormFooter onContinue={handleSubmit(onSubmit)} isLoading={isSubmitting} />
     </Box>
   )
 })
