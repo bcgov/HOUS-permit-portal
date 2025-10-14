@@ -7,11 +7,28 @@ module ProjectItem
       # alias_attribute only supports real DB attributes (not associations).
       # Using define_method also avoids ordering issues with when the
       # association is declared on the including class.
-      define_method(:parent) { public_send(parent_association) }
+      define_method(:parent) do
+        reflection = self.class.reflect_on_association(parent_association)
+        foreign_key = reflection&.foreign_key || "#{parent_association}_id"
+
+        parent_association_instance = association(parent_association)
+
+        if parent_association_instance.loaded?
+          parent_association_instance.reader
+        elsif !has_attribute?(foreign_key)
+          nil
+        else
+          public_send(parent_association)
+        end
+      end
     end
   end
 
   included do
+    unless self < ActiveRecord::Base
+      raise TypeError, "ProjectItem can only be included in ActiveRecord models"
+    end
+
     belongs_to :jurisdiction, optional: true # Added for direct association
     has_one :owner, through: :permit_project
 

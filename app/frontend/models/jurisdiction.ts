@@ -1,5 +1,5 @@
 import { t } from "i18next"
-import { Instance, flow, toGenerator, types } from "mobx-state-tree"
+import { flow, Instance, toGenerator, types } from "mobx-state-tree"
 import * as R from "ramda"
 import { withEnvironment } from "../lib/with-environment"
 import { withMerge } from "../lib/with-merge"
@@ -50,6 +50,7 @@ export const JurisdictionModel = types
     permitTypeRequiredSteps: types.array(types.frozen<IPermitTypeRequiredStep>()),
     sandboxes: types.array(types.reference(SandboxModel)),
     firstNation: types.optional(types.boolean, false),
+    ltsaMatcher: types.maybeNull(types.string),
   })
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -203,4 +204,5 @@ export const JurisdictionModel = types
     }),
   }))
 
-export interface IJurisdiction extends Instance<typeof JurisdictionModel> {}
+//@ts-ignore
+export type IJurisdiction = Instance<typeof JurisdictionModel>

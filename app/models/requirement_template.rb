@@ -115,6 +115,12 @@ class RequirementTemplate < ApplicationRecord
     jurisdiction_template_version_customizations
   end
 
+  def published_customizations_count
+    # Returns the count of customizations for the published template version
+    published_template_version&.jurisdiction_template_version_customizations_count ||
+      0
+  end
+
   def label
     return "New template" if permit_type.nil? || activity.nil?
 
@@ -234,7 +240,8 @@ class RequirementTemplate < ApplicationRecord
       assignee: assignee&.name,
       visibility: visibility,
       public: public?,
-      created_at: created_at
+      created_at: created_at,
+      used_by: published_customizations_count
     }
   end
 

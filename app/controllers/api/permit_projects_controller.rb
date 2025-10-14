@@ -209,7 +209,7 @@ class Api::PermitProjectsController < Api::ApplicationController
     else
       loggable_params = {
         project_id: @permit_project.id,
-        current_sandbox_id: current_sandbox.id,
+        current_sandbox_id: current_sandbox?.id,
         permit_applications:
           permit_applications_params.map do |pa_params|
             pa_params.slice(

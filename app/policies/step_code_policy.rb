@@ -22,7 +22,11 @@ class StepCodePolicy < ApplicationPolicy
   end
 
   def destroy?
-    record.submitter == user
+    record.creator == user || record.submitter == user
+  end
+
+  def restore?
+    record.creator == user || record.submitter == user
   end
 
   def show?
@@ -43,11 +47,16 @@ class StepCodePolicy < ApplicationPolicy
   def update?
     return false unless user
 
-    return true if user == record.creator
+    # Allow general updates by creator or current submitter of the associated permit application
+    (user == record.creator) || (record.permit_application&.submitter == user)
+  end
 
-    return true if record.permit_application.submitter == user
+  # Specific guard used when (re)assigning a StepCode to a PermitApplication.
+  # Only the submitter of the target PermitApplication is allowed to perform this action.
+  def reassign_to?(target_permit_application)
+    return false unless user
 
-    false
+    target_permit_application&.submitter == user
   end
 
   class Scope < Scope

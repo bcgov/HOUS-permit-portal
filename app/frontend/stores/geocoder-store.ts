@@ -32,15 +32,23 @@ export const GeocoderStoreModel = types
       self.fetchingPids = false
       return response.ok
     }),
-    fetchGeocodedJurisdiction: flow(function* (siteId: string, pid: string = null) {
+    fetchGeocodedJurisdiction: flow(function* (
+      siteId: string,
+      pid: string = null,
+      includeLtsaMatcher: boolean = false
+    ) {
       self.fetchingJurisdiction = true
-      const response: any = yield self.environment.api.fetchGeocodedJurisdiction(siteId, pid)
+      const response: any = yield self.environment.api.fetchGeocodedJurisdiction(siteId, pid, includeLtsaMatcher)
       let responseData = response?.data?.data
+      const ltsaMatcher = response?.data?.meta?.ltsaMatcher ?? null
       self.fetchingJurisdiction = false
       if (response.ok) {
-        self.rootStore.jurisdictionStore.mergeUpdate(responseData, "jurisdictionMap")
-        return responseData
+        if (responseData) {
+          self.rootStore.jurisdictionStore.mergeUpdate(responseData, "jurisdictionMap")
+        }
+        return { jurisdiction: responseData, ltsaMatcher }
       }
+      return { jurisdiction: null, ltsaMatcher: null }
     }),
     fetchSiteDetailsFromPid: flow(function* (pid: string) {
       self.fetchingJurisdiction = true

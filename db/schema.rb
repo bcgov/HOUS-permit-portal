@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_09_26_120000) do
+ActiveRecord::Schema[7.2].define(version: 2025_10_09_202916) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -229,6 +229,8 @@ ActiveRecord::Schema[7.2].define(version: 2025_09_26_120000) do
     t.boolean "allow_designated_reviewer", default: false
     t.string "disambiguator"
     t.boolean "first_nation", default: false
+    t.string "ltsa_matcher"
+    t.index ["ltsa_matcher"], name: "index_jurisdictions_on_ltsa_matcher"
     t.index ["prefix"], name: "index_jurisdictions_on_prefix", unique: true
     t.index ["regional_district_id"], name: "index_jurisdictions_on_regional_district_id"
     t.index ["slug"], name: "index_jurisdictions_on_slug", unique: true
@@ -769,7 +771,9 @@ ActiveRecord::Schema[7.2].define(version: 2025_09_26_120000) do
     t.date "permit_date"
     t.string "phase"
     t.string "building_code_version"
+    t.datetime "discarded_at"
     t.index ["creator_id"], name: "index_step_codes_on_creator_id"
+    t.index ["discarded_at"], name: "index_step_codes_on_discarded_at"
     t.index ["jurisdiction_id"], name: "index_step_codes_on_jurisdiction_id"
     t.index ["permit_application_id"], name: "index_step_codes_on_permit_application_id"
     t.index ["permit_project_id"], name: "index_step_codes_on_permit_project_id"
@@ -851,6 +855,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_09_26_120000) do
     t.datetime "updated_at", null: false
     t.integer "deprecation_reason"
     t.uuid "deprecated_by_id"
+    t.integer "jurisdiction_template_version_customizations_count", default: 0, null: false
     t.index ["deprecated_by_id"], name: "index_template_versions_on_deprecated_by_id"
     t.index ["requirement_template_id"], name: "index_template_versions_on_requirement_template_id"
   end

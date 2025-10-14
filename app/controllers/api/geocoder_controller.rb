@@ -70,22 +70,42 @@ class Api::GeocoderController < Api::ApplicationController
 
       attributes =
         Wrappers::LtsaParcelMapBc.new.get_feature_attributes_by_pid(pid: pid)
+      ltsa_matcher = Jurisdiction.ltsa_matcher_from_ltsa_attributes(attributes)
       jurisdiction =
         Jurisdiction.fuzzy_find_by_ltsa_feature_attributes(attributes)
       raise StandardError unless jurisdiction.present?
+
       render_success jurisdiction,
                      nil,
                      {
                        blueprint: JurisdictionBlueprint,
                        blueprint_opts: {
                          view: :base
-                       }
+                       },
+                       meta:
+                         (
+                           if include_ltsa_matcher?
+                             { ltsa_matcher: ltsa_matcher }
+                           else
+                             {}
+                           end
+                         )
                      }
     rescue Errors::FeatureAttributesRetrievalError => e
       render_error "geocoder.ltsa_retrieval_error", {}, e and return
     rescue Errors::LtsaUnavailableError => e
       render_error "geocoder.ltsa_unavailable_error", {}, e and return
     rescue StandardError => e
+      if include_ltsa_matcher? && ltsa_matcher.present?
+        render json: {
+                 data: nil,
+                 meta: {
+                   ltsa_matcher: ltsa_matcher
+                 }
+               },
+               status: :ok and return
+      end
+
       render_error "geocoder.jurisdiction_error", {}, e and return
     end
   end
@@ -121,7 +141,11 @@ class Api::GeocoderController < Api::ApplicationController
   private
 
   def geocoder_params
-    params.permit(:address, :site_id, :pid, :coordinates)
+    params.permit(:address, :site_id, :pid, :coordinates, :include_ltsa_matcher)
+  end
+
+  def include_ltsa_matcher?
+    ActiveModel::Type::Boolean.new.cast(geocoder_params[:include_ltsa_matcher])
   end
 
   def pin_params

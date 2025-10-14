@@ -133,6 +133,7 @@ export const StepCodeStoreModel = types
         sort: self.sort,
         page: opts?.page ?? self.currentPage,
         perPage: opts?.countPerPage ?? self.countPerPage,
+        showArchived: self.showArchived,
         filters: {
           type: self.typeFilter,
         } as any,
