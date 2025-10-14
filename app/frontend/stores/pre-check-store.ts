@@ -1,3 +1,4 @@
+import { t } from "i18next"
 import { Instance, flow, types } from "mobx-state-tree"
 import { createSearchModel } from "../lib/create-search-model"
 import { withEnvironment } from "../lib/with-environment"
@@ -18,6 +19,12 @@ export const PreCheckStoreModel = types
   .extend(withEnvironment())
   .extend(withRootStore())
   .extend(withMerge())
+  .views((self) => ({
+    getSortColumnHeader(field: EPreCheckSortFields) {
+      // @ts-ignore
+      return t(`preCheck.columns.${field}`)
+    },
+  }))
   .actions((self) => ({
     setTablePreChecks(preChecks: IPreCheck[]) {
       // @ts-ignore

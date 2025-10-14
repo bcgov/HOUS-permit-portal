@@ -2,32 +2,31 @@ class PreCheck < ApplicationRecord
   include ProjectItem
   has_parent :permit_application
 
-  DEFAULT_CHECKLIST = { "sections" => [] }.freeze
+  searchkick word_middle: %i[full_address cert_number]
 
-  searchkick word_middle: %i[title full_address cert_number]
+  attribute :service_partner, :integer
+  enum service_partner: { archistar: 0 }
 
   belongs_to :creator, class_name: "User", foreign_key: "creator_id"
   belongs_to :permit_application, optional: true
   has_one :permit_project, through: :permit_application
 
-  attribute :checklist, default: -> { DEFAULT_CHECKLIST.deep_dup }
-
-  before_validation :ensure_checklist_structure
   validate :permit_application_belongs_to_creator,
            if: -> { permit_application_id.present? }
 
-  validates :checklist, presence: true
+  validates :service_partner, presence: true
+  # Note: eula_accepted and consent_to_send_drawings are validated on the frontend
+  # Backend validations are not enforced to allow progressive form completion
 
   delegate :permit_project_title, to: :permit_application, allow_nil: true
 
   def search_data
     {
       id: id,
-      title: title,
       cert_number: cert_number,
       full_address: full_address,
-      permit_date: permit_date,
       phase: phase,
+      service_partner: service_partner,
       creator_id: creator_id,
       created_at: created_at,
       updated_at: updated_at,
@@ -38,11 +37,6 @@ class PreCheck < ApplicationRecord
   end
 
   private
-
-  def ensure_checklist_structure
-    self.checklist = DEFAULT_CHECKLIST.deep_dup if checklist.blank? ||
-      !checklist.is_a?(Hash)
-  end
 
   def permit_application_belongs_to_creator
     return if creator_id.blank?

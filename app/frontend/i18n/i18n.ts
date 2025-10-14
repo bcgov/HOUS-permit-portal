@@ -338,6 +338,88 @@ const options = {
             acceptedOn: "Accepted on {{ timestamp }}",
           },
         },
+        preCheck: {
+          index: {
+            title: "Pre-Checks",
+          },
+          backToList: "Back to Pre-Checks",
+          form: {
+            title: "Pre-check your drawings for compliance with BC Building Code",
+            backToPreChecks: "Back to pre-checks",
+          },
+          columns: {
+            created_at: "Created",
+            updated_at: "Last Updated",
+            cert_number: "Certificate Number",
+            phase: "Phase",
+            service_partner: "Service Partner",
+          },
+          sidebar: {
+            sections: {
+              start: "START",
+              drawings: "DRAWINGS",
+              reviewAndSubmit: "REVIEW AND SUBMIT",
+              results: "RESULTS",
+            },
+            servicePartner: "Service partner",
+            projectAddress: "Project address",
+            agreementsAndConsent: "Agreements and consent",
+            buildingType: "Building type",
+            uploadDrawings: "Upload drawings",
+            confirmSubmission: "Confirm your submission",
+            resultsSummary: "Results summary",
+          },
+          sections: {
+            servicePartner: {
+              title: "Service Partner",
+              description: "Select your service partner.",
+              label: "Available Service Partners:",
+              archistarDescription: "Automated building code compliance checking",
+            },
+            projectAddress: {
+              title: "Project Address",
+              description: "Enter an address to confirm the service is available for your building project",
+            },
+            agreementsAndConsent: {
+              title: "Agreements and Consent",
+              description: "To use this service, you need to agree to the End User Licence Agreement (EULA).",
+              readEula: "Read the full EULA",
+              eulaCheckbox: "I have read and agree to the End User Licence Agreement (EULA)",
+              sendDrawingsCheckbox: "I consent to my drawings being sent to Archistar for pre-checking",
+              shareSubmissionTitle: "Share your submission details (optional)",
+              shareSubmissionDescription:
+                "You can choose to share limited details from your submission with (Jurisdiction name) to help improve the accuracy of this service. This includes:",
+              shareItem1: "project address",
+              shareItem2: "date of submission",
+              shareItem3: "results summary",
+              shareSubmissionNote:
+                "(Jurisdiction name) may use this information to review and compare the results of your pre-check.",
+              shareWithJurisdictionCheckbox:
+                "I agree to share details of this submission with (Jurisdiction name) (optional)",
+              researchTitle: "Take part in research (optional)",
+              researchDescription:
+                "You can let the Ministry of Housing and Municipal Affairs contact you about taking part in research to help improve this service.",
+              researchCheckbox:
+                "I agree to be contacted by the Ministry of Housing and Municipal Affairs about taking part in research (optional)",
+            },
+            buildingType: {
+              title: "Building Type",
+              description: "Select your building type.",
+            },
+            uploadDrawings: {
+              title: "Upload Drawings",
+              description: "Upload your building drawings.",
+            },
+            confirmSubmission: {
+              title: "Confirm Your Submission",
+              description: "Review your information before submitting.",
+            },
+            resultsSummary: {
+              title: "Results Summary",
+              description: "View your pre-check results.",
+            },
+          },
+        },
         contact: {
           create: "New contact",
           edit: "Edit contact",
@@ -3839,6 +3921,7 @@ Thank you,
             stepCodeRequirements: "Step code requirements",
             start: "Start",
             select: "Select",
+            preChecks: "Pre-Checks",
           },
           earlyAccessStepCodePreviewNotAvailable: "Early access step code preview not available",
         },

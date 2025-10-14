@@ -6,12 +6,16 @@ class CreatePreChecks < ActiveRecord::Migration[7.1]
       t.uuid :permit_application_id
       t.uuid :creator_id, null: false
       t.uuid :jurisdiction_id
-      t.string :title
       t.string :cert_number
-      t.date :permit_date
       t.string :phase
       t.string :full_address
-      t.jsonb :checklist, null: false, default: {}
+      t.integer :service_partner, null: false, default: 0
+
+      # Agreements and consent
+      t.boolean :eula_accepted, default: false, null: false
+      t.boolean :consent_to_send_drawings, default: false, null: false
+      t.boolean :consent_to_share_with_jurisdiction, default: false
+      t.boolean :consent_to_research_contact, default: false
 
       t.timestamps
     end
@@ -19,6 +23,7 @@ class CreatePreChecks < ActiveRecord::Migration[7.1]
     add_index :pre_checks, :permit_application_id, unique: true
     add_index :pre_checks, :creator_id
     add_index :pre_checks, :jurisdiction_id
+    add_index :pre_checks, :service_partner
 
     add_foreign_key :pre_checks,
                     :permit_applications,
