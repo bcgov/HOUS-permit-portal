@@ -3,6 +3,7 @@ class Part3StepCode::Checklist < ApplicationRecord
 
   delegate :newly_submitted_at,
            :reference_number,
+           :discarded?,
            to: :step_code,
            allow_nil: true
 

@@ -29,6 +29,7 @@ module Api::Concerns::Search::StepCodes
       :query,
       :page,
       :per_page,
+      :show_archived,
       { sort: %i[field direction] },
       { filters: { type: [] } }
     )
@@ -50,11 +51,18 @@ module Api::Concerns::Search::StepCodes
 
   def step_code_where_clause
     search_filters = (step_code_search_params[:filters] || {}).deep_dup
+    show_archived =
+      ActiveModel::Type::Boolean.new.cast(
+        step_code_search_params[:show_archived] || false
+      )
 
     # Base visibility: only records created by current user
     base_conditions = [{ creator_id: current_user.id }]
 
     final_where = { _and: [{ _or: base_conditions }] }
+
+    # Add discarded filter
+    final_where[:_and] << { discarded: show_archived }
 
     # OR within a filter (arrays), AND across different filters
     if search_filters[:type].present?

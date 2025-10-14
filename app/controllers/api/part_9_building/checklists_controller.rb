@@ -2,6 +2,19 @@ class Api::Part9Building::ChecklistsController < Api::ApplicationController
   before_action :set_and_authorize_checklist, only: %i[show update]
 
   def show
+    # Prevent viewing checklists of archived step codes
+    if @step_code_checklist.step_code&.discarded?
+      return(
+        render_error "step_code_checklist.show_archived_error",
+                     {
+                       status: 404,
+                       log_args: {
+                         errors: "Cannot view checklist of archived step code"
+                       }
+                     }
+      )
+    end
+
     render_success @step_code_checklist,
                    nil,
                    {
@@ -14,6 +27,19 @@ class Api::Part9Building::ChecklistsController < Api::ApplicationController
 
   # PATCH /api/step_code_checklists
   def update
+    # Prevent updating checklists of archived step codes
+    if @step_code_checklist.step_code&.discarded?
+      return(
+        render_error "step_code_checklist.update_archived_error",
+                     {
+                       status: 422,
+                       log_args: {
+                         errors: "Cannot update checklist of archived step code"
+                       }
+                     }
+      )
+    end
+
     if @step_code_checklist.update(step_code_checklist_params)
       # If the client requested report generation and this step code is standalone (no permit application),
       # enqueue the standalone report generation job.
