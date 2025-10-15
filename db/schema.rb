@@ -505,19 +505,24 @@ ActiveRecord::Schema[7.2].define(version: 2025_10_09_202916) do
 
   create_table "pre_checks", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "permit_application_id"
+    t.uuid "permit_type_id"
     t.uuid "creator_id", null: false
     t.uuid "jurisdiction_id"
-    t.string "title"
     t.string "cert_number"
-    t.date "permit_date"
     t.string "phase"
     t.string "full_address"
-    t.jsonb "checklist", default: {}, null: false
+    t.integer "service_partner", default: 0, null: false
+    t.boolean "eula_accepted", default: false, null: false
+    t.boolean "consent_to_send_drawings", default: false, null: false
+    t.boolean "consent_to_share_with_jurisdiction", default: false
+    t.boolean "consent_to_research_contact", default: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["creator_id"], name: "index_pre_checks_on_creator_id"
     t.index ["jurisdiction_id"], name: "index_pre_checks_on_jurisdiction_id"
     t.index ["permit_application_id"], name: "index_pre_checks_on_permit_application_id", unique: true
+    t.index ["permit_type_id"], name: "index_pre_checks_on_permit_type_id"
+    t.index ["service_partner"], name: "index_pre_checks_on_service_partner"
   end
 
   create_table "preferences", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -975,6 +980,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_10_09_202916) do
   add_foreign_key "pinned_projects", "users"
   add_foreign_key "pre_checks", "jurisdictions"
   add_foreign_key "pre_checks", "permit_applications"
+  add_foreign_key "pre_checks", "permit_classifications", column: "permit_type_id"
   add_foreign_key "pre_checks", "users", column: "creator_id"
   add_foreign_key "preferences", "users"
   add_foreign_key "project_documents", "permit_projects"

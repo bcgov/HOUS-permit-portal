@@ -239,6 +239,7 @@ const Part9StepCodeForm = lazy(() =>
 const Part3StepCodeForm = lazy(() =>
   import("../step-code/part-3").then((module) => ({ default: module.Part3StepCodeForm }))
 )
+const PreCheckForm = lazy(() => import("../pre-check").then((module) => ({ default: module.PreCheckForm })))
 
 const StepCodeChecklistPDFViewer = lazy(() =>
   import("../step-code/checklist/pdf-content/viewer").then((module) => ({
@@ -640,6 +641,10 @@ const AppRoutes = observer(() => {
             element={<ProtectedRoute isAllowed={loggedIn && !mustAcceptEula} redirectPath={mustAcceptEula && "/"} />}
           >
             <Route path="/step-codes" element={<ProjectDashboardScreen />} />
+            <Route path="/pre-checks" element={<ProjectDashboardScreen />} />
+            <Route path="/pre-checks/new" element={<PreCheckForm />} />
+            <Route path="/pre-checks/new/:section" element={<PreCheckForm />} />
+            <Route path="/pre-checks/:preCheckId/edit/:section" element={<PreCheckForm />} />
             <Route path="/documents" element={<ProjectDashboardScreen />} />
             {/* Already handled above with path-based tabs */}
             <Route path="/projects" element={<ProjectDashboardScreen />} />

@@ -1,4 +1,6 @@
+import { t } from "i18next"
 import { Instance, flow, types } from "mobx-state-tree"
+import * as R from "ramda"
 import { createSearchModel } from "../lib/create-search-model"
 import { withEnvironment } from "../lib/with-environment"
 import { withMerge } from "../lib/with-merge"
@@ -18,7 +20,28 @@ export const PreCheckStoreModel = types
   .extend(withEnvironment())
   .extend(withRootStore())
   .extend(withMerge())
+  .views((self) => ({
+    getSortColumnHeader(field: EPreCheckSortFields) {
+      // @ts-ignore
+      return t(`preCheck.columns.${field}`)
+    },
+  }))
   .actions((self) => ({
+    __beforeMergeUpdate(preCheck: any) {
+      // Normalize jurisdiction data into jurisdictionStore
+      if (preCheck.jurisdiction) {
+        self.rootStore.jurisdictionStore.mergeUpdate(preCheck.jurisdiction, "jurisdictionMap")
+      }
+      // Normalize permit_type data into permitTypeStore
+      if (preCheck.permitType) {
+        self.rootStore.permitClassificationStore.mergeUpdate(preCheck.permitType, "permitTypeMap")
+      }
+      return R.mergeRight(preCheck, {
+        jurisdiction: preCheck.jurisdiction?.id,
+        permitType: preCheck.permitType?.id,
+      })
+    },
+
     setTablePreChecks(preChecks: IPreCheck[]) {
       // @ts-ignore
       self.tablePreChecks.replace(preChecks.map((s) => s.id))
@@ -72,7 +95,7 @@ export const PreCheckStoreModel = types
       return { ok: false, error: response.data?.errors || response.problem }
     }),
 
-    updatePreCheck: flow(function* (id: string, data: Partial<IPreCheck>) {
+    updatePreCheck: flow(function* (id: string, data: Record<string, any>) {
       const response = yield self.environment.api.updatePreCheck(id, data)
       if (response.ok) {
         self.mergeUpdate(response.data.data, "preChecksMap")

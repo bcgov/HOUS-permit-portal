@@ -30,7 +30,10 @@ class Api::PreChecksController < Api::ApplicationController
     else
       render_error "pre_check.create_error",
                    message_opts: {
-                     error_message: pre_check.errors.full_messages.to_sentence
+                     error_message: pre_check.errors.full_messages.to_sentence,
+                     log_args: {
+                       errors: pre_check.errors.full_messages
+                     }
                    }
     end
   end
@@ -57,15 +60,17 @@ class Api::PreChecksController < Api::ApplicationController
 
   def pre_check_params
     params.require(:pre_check).permit(
-      :title,
       :cert_number,
-      :permit_date,
       :phase,
       :full_address,
       :permit_application_id,
       :jurisdiction_id,
-      checklist: {
-      }
+      :permit_type_id,
+      :service_partner,
+      :eula_accepted,
+      :consent_to_send_drawings,
+      :consent_to_share_with_jurisdiction,
+      :consent_to_research_contact
     )
   end
 end

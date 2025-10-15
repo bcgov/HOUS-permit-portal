@@ -26,6 +26,7 @@ export type TSitesSelectProps = {
   defaultManualMode?: boolean
   onLtsaMatcherFound?: (matcher: string | null) => void
   showJurisdiction?: boolean
+  initialJurisdiction?: IJurisdiction | null
 } & Partial<TAsyncSelectProps>
 
 // Please be advised that this is expected to be used within a form context!
@@ -43,12 +44,13 @@ export const SitesSelect = observer(function ({
   defaultManualMode = false,
   onLtsaMatcherFound,
   showJurisdiction = true,
+  initialJurisdiction = null,
   ...rest
 }: TSitesSelectProps) {
   const { t } = useTranslation()
   const { geocoderStore, jurisdictionStore } = useMst()
   const [pidOptions, setPidOptions] = useState<IOption<string>[]>([])
-  const [jurisdiction, setJurisdiction] = useState<IJurisdiction | null>(null)
+  const [jurisdiction, setJurisdiction] = useState<IJurisdiction | null>(initialJurisdiction)
   const [manualMode, setManualMode] = useState(defaultManualMode)
   const {
     fetchSiteOptions: fetchOptions,
@@ -111,7 +113,10 @@ export const SitesSelect = observer(function ({
     }
     const siteValue: string | undefined = siteWatch?.value
     if (R.isNil(siteValue) || siteValue === "") {
-      setJurisdiction(null)
+      // Don't clear jurisdiction if we have an initialJurisdiction and haven't selected a site yet
+      if (!initialJurisdiction || jurisdiction !== initialJurisdiction) {
+        setJurisdiction(null)
+      }
       return
     }
 
