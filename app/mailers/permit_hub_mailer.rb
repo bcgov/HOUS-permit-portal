@@ -211,8 +211,77 @@ class PermitHubMailer < ApplicationMailer
     )
   end
 
+  def send_step_code_report_to_jurisdiction(
+    report_document:,
+    step_code:,
+    recipient_email:,
+    jurisdiction:,
+    sender_user:
+  )
+    @report_document = report_document
+    @step_code = step_code
+    @jurisdiction = jurisdiction
+    @sender_user = sender_user
+
+    # Download and attach the report file
+    temp_file = download_report_file(report_document)
+
+    if temp_file
+      begin
+        attachments[report_document.file_name] = File.read(temp_file)
+
+        send_mail(
+          email: recipient_email,
+          template_key: "send_step_code_report_to_jurisdiction",
+          subject_i18n_params: {
+            step_code_title: step_code.title || "Step Code Report",
+            jurisdiction_name: jurisdiction.qualified_name
+          }
+        )
+      ensure
+        # Clean up the temporary file
+        FileUtils.rm_f(temp_file)
+      end
+    else
+      Rails.logger.error(
+        "Failed to download report document #{report_document.id} for emailing"
+      )
+      raise "Unable to download report file for emailing"
+    end
+  end
+
   def send_user_mail(*args, **kwargs)
     return if @user.discarded? || !@user.confirmed?
     send_mail(*args, **kwargs)
+  end
+
+  private
+
+  def download_report_file(report_document)
+    temp_file =
+      Tempfile.new(["report", File.extname(report_document.file_name)])
+    temp_file.binmode
+    url = URI.parse(report_document.file_url)
+
+    Net::HTTP.start(
+      url.host,
+      url.port,
+      use_ssl: url.scheme == "https"
+    ) do |http|
+      request = Net::HTTP::Get.new(url)
+      http.request(request) do |response|
+        response.read_body { |chunk| temp_file.write(chunk) }
+      end
+    end
+
+    temp_file.close
+    temp_file.path
+  rescue => e
+    Rails.logger.error(
+      "Failed to download report file: #{report_document.file_url} with error: #{e.message}"
+    )
+    temp_file&.close
+    temp_file&.unlink
+    nil
   end
 end

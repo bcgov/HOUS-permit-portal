@@ -15,27 +15,59 @@ class RequirementFormJsonService
         tableView: false,
         components: [
           {
-            type: "button",
-            action: "custom",
-            title: I18n.t("formio.requirement_template.energy_step_code"),
-            label: I18n.t("formio.requirement_template.energy_step_code"),
-            custom: "document.dispatchEvent(new Event('#{start_event}'));"
-          },
-          {
-            type: "content",
-            html:
-              "<span class=\"step-code-actions\">#{I18n.t("formio.requirement_template.started_report_outside")}</span>"
-          },
-          {
-            type: "button",
-            action: "custom",
-            custom_class: "step-code-link-button",
-            title:
-              I18n.t("formio.requirement_template.select_energy_step_code"),
-            label:
-              I18n.t("formio.requirement_template.select_energy_step_code"),
-            custom:
-              "document.dispatchEvent(new CustomEvent('openExistingStepCode', { detail: { stepCodeType: '#{step_code_type}' } }));"
+            type: "columns",
+            input: false,
+            tableView: false,
+            columns: [
+              {
+                components: [
+                  {
+                    type: "button",
+                    action: "custom",
+                    title:
+                      I18n.t("formio.requirement_template.energy_step_code"),
+                    label:
+                      I18n.t("formio.requirement_template.energy_step_code"),
+                    custom:
+                      "document.dispatchEvent(new Event('#{start_event}'));"
+                  }
+                ],
+                width: 3,
+                offset: 0,
+                push: 0,
+                pull: 0,
+                size: "md"
+              },
+              {
+                components: [
+                  {
+                    type: "content",
+                    html:
+                      "<span class=\"step-code-actions-inline\">#{I18n.t("formio.requirement_template.started_report_outside")} </span>"
+                  },
+                  {
+                    type: "button",
+                    action: "custom",
+                    custom_class: "step-code-link-button",
+                    title:
+                      I18n.t(
+                        "formio.requirement_template.select_energy_step_code"
+                      ),
+                    label:
+                      I18n.t(
+                        "formio.requirement_template.select_energy_step_code"
+                      ),
+                    custom:
+                      "document.dispatchEvent(new CustomEvent('openExistingStepCode', { detail: { stepCodeType: '#{step_code_type}' } }));"
+                  }
+                ],
+                width: 9,
+                offset: 0,
+                push: 0,
+                pull: 0,
+                size: "md"
+              }
+            ]
           }
         ]
       }

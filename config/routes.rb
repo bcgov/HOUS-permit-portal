@@ -257,6 +257,12 @@ Rails.application.routes.draw do
       patch "restore", on: :member, to: "step_codes#restore"
     end
 
+    resources :report_documents, only: [] do
+      post "share_with_jurisdiction",
+           on: :member,
+           to: "report_documents#share_with_jurisdiction"
+    end
+
     # Controller namespace is Api::Part9Building::*, but we expose path with underscore for continuity
     namespace :part9_building, path: "part_9_building" do
       resources :checklists, only: %i[show update]

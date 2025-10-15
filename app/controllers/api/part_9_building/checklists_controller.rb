@@ -27,6 +27,14 @@ class Api::Part9Building::ChecklistsController < Api::ApplicationController
 
   # PATCH /api/step_code_checklists
   def update
+    # Update step_code reference_number if provided
+    if params[:step_code_checklist][:reference_number].present? &&
+         @step_code_checklist.step_code.present?
+      @step_code_checklist.step_code.update(
+        reference_number: params[:step_code_checklist][:reference_number]
+      )
+    end
+
     # Prevent updating checklists of archived step codes
     if @step_code_checklist.step_code&.discarded?
       return(
@@ -49,7 +57,7 @@ class Api::Part9Building::ChecklistsController < Api::ApplicationController
         )
       if should_generate_report
         step_code = @step_code_checklist.step_code
-        if step_code.present? && step_code.permit_application_id.blank?
+        if step_code.present?
           StepCodeReportGenerationJob.perform_async(step_code.id)
         end
       end
