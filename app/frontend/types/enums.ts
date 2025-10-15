@@ -703,3 +703,7 @@ export const EPermitClassificationCode = {
 } as const
 
 export type EPermitClassificationCode = (typeof EPermitClassificationCode)[keyof typeof EPermitClassificationCode]
+
+export enum EPreCheckServicePartner {
+  archistar = "archistar",
+}

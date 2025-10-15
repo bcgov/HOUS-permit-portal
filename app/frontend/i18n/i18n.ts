@@ -181,6 +181,7 @@ const options = {
           part9ChecklistsLink: "Part 9 checklists (PDF)",
         },
         ui: {
+          optional: "(optional)",
           clear: "Clear",
           switchToManualMode: "Manually select my jurisdiction",
           switchToAutomaticMode: "Use my address to automatically select my jurisdiction",
@@ -342,10 +343,9 @@ const options = {
           index: {
             title: "Pre-Checks",
           },
-          backToList: "Back to Pre-Checks",
           form: {
             title: "Pre-check your drawings for compliance with BC Building Code",
-            backToPreChecks: "Back to pre-checks",
+            backToPreChecks: "Go to pre-checks",
           },
           columns: {
             created_at: "Created",
@@ -371,10 +371,24 @@ const options = {
           },
           sections: {
             servicePartner: {
-              title: "Service Partner",
-              description: "Select your service partner.",
-              label: "Available Service Partners:",
-              archistarDescription: "Automated building code compliance checking",
+              title: "Service partner",
+              intro:
+                "To receive a compliance report, your drawings will be analyzed by a third-party service provider. Select the one that best fits your project needs. The Ministry of Housing and Municipal Affairs does not endorse one provider over another.",
+              availableProviders: "Available providers",
+              archistarTitle: "Archistar eCheck",
+              archistarDescription:
+                "Archistar is an Australian technology company that creates tools for property development, generative design, and automated compliance checking.",
+              visitWebsite: "Visit Archistar's website",
+              freeToUse: "Free to use",
+              automatedReview: "Automated code analysis and human review",
+              resultsTime: "Results in 48 hours or less",
+              smallResidential: "For small residential buildings only",
+              preChecksFor: "Pre-checks drawings for the following code requirements:",
+              buildingHeight: "Building height",
+              footings: "House footings and foundation size",
+              egress: "Shared egress facilities",
+              stairs: "Stairs in dwelling units",
+              selectArchistar: "Pre-check with Archistar eCheck",
             },
             projectAddress: {
               title: "Project Address",
@@ -386,21 +400,22 @@ const options = {
               readEula: "Read the full EULA",
               eulaCheckbox: "I have read and agree to the End User Licence Agreement (EULA)",
               sendDrawingsCheckbox: "I consent to my drawings being sent to Archistar for pre-checking",
+              sendDrawingsRequired: "You must consent to send drawings",
+              eulaRequired: "You must accept the EULA",
               shareSubmissionTitle: "Share your submission details (optional)",
               shareSubmissionDescription:
-                "You can choose to share limited details from your submission with (Jurisdiction name) to help improve the accuracy of this service. This includes:",
+                "You can choose to share limited details from your submission with {{jurisdictionName}} to help improve the accuracy of this service. This includes:",
               shareItem1: "project address",
               shareItem2: "date of submission",
               shareItem3: "results summary",
               shareSubmissionNote:
-                "(Jurisdiction name) may use this information to review and compare the results of your pre-check.",
-              shareWithJurisdictionCheckbox:
-                "I agree to share details of this submission with (Jurisdiction name) (optional)",
+                "{{jurisdictionName}} may use this information to review and compare the results of your pre-check.",
+              shareWithJurisdictionCheckbox: "I agree to share details of this submission with {{jurisdictionName}}",
               researchTitle: "Take part in research (optional)",
               researchDescription:
                 "You can let the Ministry of Housing and Municipal Affairs contact you about taking part in research to help improve this service.",
               researchCheckbox:
-                "I agree to be contacted by the Ministry of Housing and Municipal Affairs about taking part in research (optional)",
+                "I agree to be contacted by the Ministry of Housing and Municipal Affairs about taking part in research",
             },
             buildingType: {
               title: "Building Type",
@@ -483,6 +498,7 @@ const options = {
           },
         },
         jurisdiction: {
+          yourJurisdiction: "your jurisdiction",
           edit: {
             displayDescriptionLabel: "Jurisdiction description (public)",
             title: "Manage jurisdiction name settings",

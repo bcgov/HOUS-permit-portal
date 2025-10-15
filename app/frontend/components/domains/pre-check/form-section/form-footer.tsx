@@ -4,23 +4,34 @@ import React from "react"
 import { useTranslation } from "react-i18next"
 import { usePreCheckNavigation } from "../use-pre-check-navigation"
 
-interface IFormFooterProps {
-  onContinue?: () => Promise<void> | void
+interface IFormFooterProps<T> {
+  handleSubmit: (onValid: (data: T) => void | Promise<void>, onInvalid?: () => void) => (e?: any) => void
+  onSubmit: (data: T) => Promise<void> | void
   isLoading?: boolean
 }
 
-export const FormFooter = observer(function FormFooter({ onContinue, isLoading }: IFormFooterProps) {
+export const FormFooter = observer(function FormFooter<T>({ handleSubmit, onSubmit, isLoading }: IFormFooterProps<T>) {
   const { t } = useTranslation()
   const { navigateToNext, navigateToPrevious, hasNext, hasPrevious } = usePreCheckNavigation()
 
   const handleContinue = async () => {
     try {
-      if (onContinue) {
-        await onContinue()
-      }
+      await new Promise<void>((resolve, reject) => {
+        handleSubmit(
+          async (data) => {
+            await onSubmit(data)
+            resolve()
+          },
+          () => {
+            reject(new Error("Validation failed"))
+          }
+        )()
+      })
+
+      // Only navigate if valid
       navigateToNext()
     } catch (error) {
-      console.error("Form submission failed:", error)
+      console.warn("Form validation failed or submission error:", error)
     }
   }
 

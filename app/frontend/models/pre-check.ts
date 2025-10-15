@@ -20,6 +20,10 @@ export const PreCheckModel = types
     updatedAt: types.maybeNull(types.Date),
   })
   .views((self) => ({
+    // Helper to check if all required agreements have been accepted
+    get requiredAgreementsAccepted() {
+      return self.eulaAccepted && self.consentToSendDrawings
+    },
     // Section completion status
     get isServicePartnerComplete() {
       return !!self.servicePartner

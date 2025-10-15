@@ -1,0 +1,11 @@
+class PreCheckDesignDocument < FileUploadAttachment
+  belongs_to :pre_check, inverse_of: :pre_check_design_documents
+
+  include FileUploader.Attachment(:file)
+
+  validates :pre_check, presence: true
+
+  def attached_to
+    pre_check
+  end
+end

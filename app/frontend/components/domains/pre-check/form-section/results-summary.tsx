@@ -23,7 +23,7 @@ export const ResultsSummary = observer(function ResultsSummary() {
       </VStack>
 
       <Button variant="primary" mt={8} onClick={() => navigate("/pre-checks")}>
-        {t("preCheck.backToList", "Back to Pre-Checks")}
+        {t("preCheck.form.backToPreChecks", "Back to Pre-Checks")}
       </Button>
     </Box>
   )

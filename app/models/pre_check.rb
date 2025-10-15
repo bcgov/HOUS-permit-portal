@@ -10,15 +10,23 @@ class PreCheck < ApplicationRecord
   belongs_to :creator, class_name: "User", foreign_key: "creator_id"
   belongs_to :permit_application, optional: true
   has_one :permit_project, through: :permit_application
+  has_many :pre_check_design_documents,
+           dependent: :destroy,
+           inverse_of: :pre_check
 
   validate :permit_application_belongs_to_creator,
            if: -> { permit_application_id.present? }
+  validate :agreements_accepted_before_permit_type
+  validate :agreements_accepted_before_design_documents
 
   validates :service_partner, presence: true
-  # Note: eula_accepted and consent_to_send_drawings are validated on the frontend
-  # Backend validations are not enforced to allow progressive form completion
 
   delegate :permit_project_title, to: :permit_application, allow_nil: true
+
+  # Helper to check if all required agreements have been accepted
+  def required_agreements_accepted?
+    eula_accepted && consent_to_send_drawings
+  end
 
   def search_data
     {
@@ -45,5 +53,25 @@ class PreCheck < ApplicationRecord
     return if submitter_id.nil? || submitter_id == creator_id
 
     errors.add(:permit_application, :invalid)
+  end
+
+  def agreements_accepted_before_permit_type
+    return unless permit_type_id.present?
+    return if required_agreements_accepted?
+
+    errors.add(
+      :permit_type_id,
+      "cannot be set until EULA and consent to send drawings are accepted"
+    )
+  end
+
+  def agreements_accepted_before_design_documents
+    return unless pre_check_design_documents.any?
+    return if required_agreements_accepted?
+
+    errors.add(
+      :base,
+      "Design documents cannot be added until EULA and consent to send drawings are accepted"
+    )
   end
 end

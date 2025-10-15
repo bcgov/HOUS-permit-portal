@@ -36,6 +36,7 @@ export const ProjectAddress = observer(function ProjectAddress() {
     setValue,
     formState: { isSubmitting },
   } = methods
+
   const selectedSite = watch("site")
 
   const onSubmit = async (data: IProjectAddressFormData) => {
@@ -73,7 +74,7 @@ export const ProjectAddress = observer(function ProjectAddress() {
           />
         </VStack>
 
-        <FormFooter onContinue={handleSubmit(onSubmit)} isLoading={isSubmitting} />
+        <FormFooter<IProjectAddressFormData> handleSubmit={handleSubmit} onSubmit={onSubmit} isLoading={isSubmitting} />
       </Box>
     </FormProvider>
   )

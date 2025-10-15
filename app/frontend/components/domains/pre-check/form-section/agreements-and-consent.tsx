@@ -1,7 +1,7 @@
 import { Box, Checkbox, Heading, Link, Stack, Text, VStack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
-import { useForm } from "react-hook-form"
+import { Controller, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { usePreCheck } from "../../../../hooks/resources/use-pre-check"
 import { useMst } from "../../../../setup/root"
@@ -26,6 +26,7 @@ export const AgreementsAndConsent = observer(function AgreementsAndConsent() {
     handleSubmit,
     watch,
     formState: { isSubmitting },
+    control,
   } = useForm<IAgreementsFormData>({
     defaultValues: {
       eulaAccepted: currentPreCheck?.eulaAccepted || false,
@@ -35,7 +36,6 @@ export const AgreementsAndConsent = observer(function AgreementsAndConsent() {
     },
   })
 
-  // Watch form values for controlled checkboxes
   const formValues = watch()
 
   const onSubmit = async (data: IAgreementsFormData) => {
@@ -51,90 +51,111 @@ export const AgreementsAndConsent = observer(function AgreementsAndConsent() {
   return (
     <Box>
       <Heading as="h2" size="lg" mb={4}>
-        {t("preCheck.sections.agreementsAndConsent.title", "Agreements and Consent")}
+        {t("preCheck.sections.agreementsAndConsent.title")}
       </Heading>
       <Text mb={6}>
-        {t(
-          "preCheck.sections.agreementsAndConsent.description",
-          "To use this service, you need to agree to the End User Licence Agreement (EULA)."
-        )}{" "}
-        <Link href="/eulas/open.html" color="text.link" textDecoration="underline" isExternal>
-          {t("preCheck.sections.agreementsAndConsent.readEula", "Read the full EULA")}
+        {t("preCheck.sections.agreementsAndConsent.description")}{" "}
+        <Link href="/profile/eula" isExternal>
+          {t("preCheck.sections.agreementsAndConsent.readEula")}
         </Link>
       </Text>
 
       <VStack spacing={6} align="stretch">
         <Stack spacing={4}>
-          <Checkbox {...register("eulaAccepted")} isChecked={formValues.eulaAccepted}>
-            {t(
-              "preCheck.sections.agreementsAndConsent.eulaCheckbox",
-              "I have read and agree to the End User Licence Agreement (EULA)"
+          <Controller
+            name="eulaAccepted"
+            control={control}
+            rules={{ required: t("preCheck.sections.agreementsAndConsent.eulaRequired") }}
+            render={({ field, fieldState }) => (
+              <>
+                <Checkbox
+                  isChecked={field.value}
+                  onChange={(e) => field.onChange(e.target.checked)}
+                  onBlur={field.onBlur}
+                  name={field.name}
+                  ref={field.ref}
+                  isDisabled={currentPreCheck?.eulaAccepted === true}
+                >
+                  {t("preCheck.sections.agreementsAndConsent.eulaCheckbox")}
+                </Checkbox>
+                {fieldState.error && (
+                  <Text color="red.500" fontSize="sm" mt={1}>
+                    {fieldState.error.message}
+                  </Text>
+                )}
+              </>
             )}
-          </Checkbox>
-
-          <Checkbox {...register("consentToSendDrawings")} isChecked={formValues.consentToSendDrawings}>
-            {t(
-              "preCheck.sections.agreementsAndConsent.sendDrawingsCheckbox",
-              "I consent to my drawings being sent to Archistar for pre-checking"
+          />
+          <Controller
+            name="consentToSendDrawings"
+            control={control}
+            rules={{ required: t("preCheck.sections.agreementsAndConsent.sendDrawingsRequired") }}
+            render={({ field, fieldState }) => (
+              <>
+                <Checkbox
+                  isChecked={field.value}
+                  onChange={(e) => field.onChange(e.target.checked)}
+                  onBlur={field.onBlur}
+                  name={field.name}
+                  ref={field.ref}
+                  isDisabled={currentPreCheck?.consentToSendDrawings === true}
+                >
+                  {t("preCheck.sections.agreementsAndConsent.sendDrawingsCheckbox")}
+                </Checkbox>
+                {fieldState.error && (
+                  <Text color="red.500" fontSize="sm" mt={1}>
+                    {fieldState.error.message}
+                  </Text>
+                )}
+              </>
             )}
-          </Checkbox>
+          />
         </Stack>
 
         <Box>
           <Heading as="h3" size="md" mb={3}>
-            {t(
-              "preCheck.sections.agreementsAndConsent.shareSubmissionTitle",
-              "Share your submission details (optional)"
-            )}
+            {t("preCheck.sections.agreementsAndConsent.shareSubmissionTitle")}
           </Heading>
           <Text mb={4} fontSize="sm" color="text.secondary">
-            {t(
-              "preCheck.sections.agreementsAndConsent.shareSubmissionDescription",
-              "You can choose to share limited details from your submission with (Jurisdiction name) to help improve the accuracy of this service. This includes:"
-            )}
+            {t("preCheck.sections.agreementsAndConsent.shareSubmissionDescription", {
+              jurisdictionName: currentPreCheck?.jurisdiction?.name || t("jurisdiction.yourJurisdiction"),
+            })}
           </Text>
           <Box as="ul" pl={6} mb={4} fontSize="sm">
-            <li>{t("preCheck.sections.agreementsAndConsent.shareItem1", "project address")}</li>
-            <li>{t("preCheck.sections.agreementsAndConsent.shareItem2", "date of submission")}</li>
-            <li>{t("preCheck.sections.agreementsAndConsent.shareItem3", "results summary")}</li>
+            <li>{t("preCheck.sections.agreementsAndConsent.shareItem1")}</li>
+            <li>{t("preCheck.sections.agreementsAndConsent.shareItem2")}</li>
+            <li>{t("preCheck.sections.agreementsAndConsent.shareItem3")}</li>
           </Box>
           <Text mb={4} fontSize="sm" color="text.secondary">
-            {t(
-              "preCheck.sections.agreementsAndConsent.shareSubmissionNote",
-              "(Jurisdiction name) may use this information to review and compare the results of your pre-check."
-            )}
+            {t("preCheck.sections.agreementsAndConsent.shareSubmissionNote", {
+              jurisdictionName: currentPreCheck?.jurisdiction?.name || t("jurisdiction.yourJurisdiction"),
+            })}
           </Text>
           <Checkbox
             {...register("consentToShareWithJurisdiction")}
             isChecked={formValues.consentToShareWithJurisdiction}
           >
-            {t(
-              "preCheck.sections.agreementsAndConsent.shareWithJurisdictionCheckbox",
-              "I agree to share details of this submission with (Jurisdiction name) (optional)"
-            )}
+            {t("preCheck.sections.agreementsAndConsent.shareWithJurisdictionCheckbox", {
+              jurisdictionName: currentPreCheck?.jurisdiction?.name || t("jurisdiction.yourJurisdiction"),
+            })}{" "}
+            <strong>{t("ui.optional")}</strong>
           </Checkbox>
         </Box>
 
         <Box>
           <Heading as="h3" size="md" mb={3}>
-            {t("preCheck.sections.agreementsAndConsent.researchTitle", "Take part in research (optional)")}
+            {t("preCheck.sections.agreementsAndConsent.researchTitle")}
           </Heading>
           <Text mb={4} fontSize="sm" color="text.secondary">
-            {t(
-              "preCheck.sections.agreementsAndConsent.researchDescription",
-              "You can let the Ministry of Housing and Municipal Affairs contact you about taking part in research to help improve this service."
-            )}
+            {t("preCheck.sections.agreementsAndConsent.researchDescription")}
           </Text>
           <Checkbox {...register("consentToResearchContact")} isChecked={formValues.consentToResearchContact}>
-            {t(
-              "preCheck.sections.agreementsAndConsent.researchCheckbox",
-              "I agree to be contacted by the Ministry of Housing and Municipal Affairs about taking part in research (optional)"
-            )}
+            {t("preCheck.sections.agreementsAndConsent.researchCheckbox")} <strong>{t("ui.optional")}</strong>
           </Checkbox>
         </Box>
       </VStack>
 
-      <FormFooter onContinue={handleSubmit(onSubmit)} isLoading={isSubmitting} />
+      <FormFooter<IAgreementsFormData> handleSubmit={handleSubmit} onSubmit={onSubmit} isLoading={isSubmitting} />
     </Box>
   )
 })

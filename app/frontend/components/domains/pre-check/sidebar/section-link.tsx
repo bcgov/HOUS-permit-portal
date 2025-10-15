@@ -11,9 +11,15 @@ import { INavLink } from "./nav-sections"
 interface ISectionLinkProps {
   navLink: INavLink
   isComplete?: boolean
+  isDisabled?: boolean
 }
 
-export const SectionLink = observer(function SectionLink({ navLink, isComplete, ...rest }: ISectionLinkProps) {
+export const SectionLink = observer(function SectionLink({
+  navLink,
+  isComplete,
+  isDisabled,
+  ...rest
+}: ISectionLinkProps) {
   const { section } = useParams()
   const { pathname } = useLocation()
   let baseUrl = R.pipe(R.split("/"), R.dropLast(1), R.join("/"))(pathname)
@@ -28,29 +34,47 @@ export const SectionLink = observer(function SectionLink({ navLink, isComplete, 
       }
     : {}
 
+  const disabledProps = isDisabled
+    ? {
+        opacity: 0.5,
+        cursor: "not-allowed",
+        pointerEvents: "none" as const,
+      }
+    : {}
+
+  const content = (
+    <Flex
+      align="center"
+      pl={6}
+      py={2}
+      gap={2}
+      borderLeftWidth={6}
+      borderColor="transparent"
+      textAlign="left"
+      color="text.primary"
+      {...activeProps}
+      {...disabledProps}
+      {...rest}
+    >
+      <Flex flex="none">
+        {isComplete ? (
+          <CheckCircle color="var(--chakra-colors-semantic-success)" size={18} />
+        ) : (
+          <CircleDashed color="var(--chakra-colors-greys-grey01)" size={18} />
+        )}
+      </Flex>
+      <Text>{t(`preCheck.sidebar.${navLink.key}` as const as any)}</Text>
+    </Flex>
+  )
+
+  // If disabled, render without RouterLink to prevent navigation
+  if (isDisabled) {
+    return content
+  }
+
   return (
     <RouterLink to={`${baseUrl}/${navLink.location}`} textDecoration="none" _hover={{ textDecoration: "none" }}>
-      <Flex
-        align="center"
-        pl={6}
-        py={2}
-        gap={2}
-        borderLeftWidth={6}
-        borderColor="transparent"
-        textAlign="left"
-        color="text.primary"
-        {...activeProps}
-        {...rest}
-      >
-        <Flex flex="none">
-          {isComplete ? (
-            <CheckCircle color="var(--chakra-colors-semantic-success)" size={18} />
-          ) : (
-            <CircleDashed color="var(--chakra-colors-greys-grey01)" size={18} />
-          )}
-        </Flex>
-        <Text>{t(`preCheck.sidebar.${navLink.key}` as const as any)}</Text>
-      </Flex>
+      {content}
     </RouterLink>
   )
 })

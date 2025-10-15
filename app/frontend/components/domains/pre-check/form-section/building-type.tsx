@@ -64,57 +64,65 @@ export const BuildingType = observer(function BuildingType() {
         <Controller
           name="permitTypeId"
           control={control}
-          render={({ field }) => (
-            <Flex gap={4} wrap="wrap">
-              {permitTypeOptions.map((option) => {
-                const isSelected = selectedPermitTypeId === option.value.id
-                return (
-                  <Box
-                    key={option.value.id}
-                    onClick={() => field.onChange(option.value.id)}
-                    borderRadius="lg"
-                    p={6}
-                    border="1px solid"
-                    borderColor={isSelected ? "theme.blueAlt" : "border.light"}
-                    bg="white"
-                    w={{ base: "100%", md: "48%" }}
-                    transition="all 0.2s ease-in-out"
-                    _hover={{ bg: "hover.blue" }}
-                    cursor="pointer"
-                  >
-                    <Flex direction="column" justify="space-between" align="start" gap={4}>
-                      <Box flex={1}>
-                        <Heading as="h3" fontSize="lg" mb={2}>
-                          {option.value.name}
-                        </Heading>
-                        <Text color="text.secondary">{option.value.description}</Text>
-                      </Box>
-                      <Flex
-                        align="center"
-                        gap={2}
-                        border="1px solid"
-                        borderColor={isSelected ? "theme.blueAlt" : "border.light"}
-                        bg="white"
-                        px={4}
-                        py={2}
-                        borderRadius="md"
-                        alignSelf="flex-end"
-                      >
-                        <Radio isChecked={isSelected} value={option.value.id} pointerEvents="none" />
-                        <Text fontWeight="medium">
-                          {isSelected ? t("ui.selected", "Selected") : t("ui.select", "Select")}
-                        </Text>
+          rules={{ required: t("preCheck.sections.buildingType.required", "You must select a building type") }}
+          render={({ field, fieldState }) => (
+            <>
+              <Flex gap={4} wrap="wrap">
+                {permitTypeOptions.map((option) => {
+                  const isSelected = selectedPermitTypeId === option.value.id
+                  return (
+                    <Box
+                      key={option.value.id}
+                      onClick={() => field.onChange(option.value.id)}
+                      borderRadius="lg"
+                      p={6}
+                      border="1px solid"
+                      borderColor={isSelected ? "theme.blueAlt" : "border.light"}
+                      bg="white"
+                      w={{ base: "100%", md: "48%" }}
+                      transition="all 0.2s ease-in-out"
+                      _hover={{ bg: "hover.blue" }}
+                      cursor="pointer"
+                    >
+                      <Flex direction="column" justify="space-between" align="start" gap={4}>
+                        <Box flex={1}>
+                          <Heading as="h3" fontSize="lg" mb={2}>
+                            {option.value.name}
+                          </Heading>
+                          <Text color="text.secondary">{option.value.description}</Text>
+                        </Box>
+                        <Flex
+                          align="center"
+                          gap={2}
+                          border="1px solid"
+                          borderColor={isSelected ? "theme.blueAlt" : "border.light"}
+                          bg="white"
+                          px={4}
+                          py={2}
+                          borderRadius="md"
+                          alignSelf="flex-end"
+                        >
+                          <Radio isChecked={isSelected} value={option.value.id} pointerEvents="none" />
+                          <Text fontWeight="medium">
+                            {isSelected ? t("ui.selected", "Selected") : t("ui.select", "Select")}
+                          </Text>
+                        </Flex>
                       </Flex>
-                    </Flex>
-                  </Box>
-                )
-              })}
-            </Flex>
+                    </Box>
+                  )
+                })}
+              </Flex>
+              {fieldState.error && (
+                <Text color="red.500" fontSize="sm" mt={1}>
+                  {fieldState.error.message}
+                </Text>
+              )}
+            </>
           )}
         />
       </VStack>
 
-      <FormFooter onContinue={handleSubmit(onSubmit)} isLoading={isSubmitting} />
+      <FormFooter<IBuildingTypeFormData> handleSubmit={handleSubmit} onSubmit={onSubmit} isLoading={isSubmitting} />
     </Box>
   )
 })

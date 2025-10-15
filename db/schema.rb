@@ -503,6 +503,14 @@ ActiveRecord::Schema[7.2].define(version: 2025_10_09_202916) do
     t.index ["user_id"], name: "index_pinned_projects_on_user_id"
   end
 
+  create_table "pre_check_design_documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "pre_check_id", null: false
+    t.text "file_data"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["pre_check_id"], name: "index_pre_check_design_documents_on_pre_check_id"
+  end
+
   create_table "pre_checks", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "permit_application_id"
     t.uuid "permit_type_id"
@@ -978,6 +986,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_10_09_202916) do
   add_foreign_key "permit_type_submission_contacts", "permit_classifications", column: "permit_type_id"
   add_foreign_key "pinned_projects", "permit_projects"
   add_foreign_key "pinned_projects", "users"
+  add_foreign_key "pre_check_design_documents", "pre_checks"
   add_foreign_key "pre_checks", "jurisdictions"
   add_foreign_key "pre_checks", "permit_applications"
   add_foreign_key "pre_checks", "permit_classifications", column: "permit_type_id"
