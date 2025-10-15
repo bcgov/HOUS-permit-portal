@@ -61,7 +61,7 @@ class Api::PreChecksController < Api::ApplicationController
   def pre_check_params
     params.require(:pre_check).permit(
       :cert_number,
-      :phase,
+      :status,
       :full_address,
       :permit_application_id,
       :jurisdiction_id,
@@ -71,6 +71,7 @@ class Api::PreChecksController < Api::ApplicationController
       :consent_to_send_drawings,
       :consent_to_share_with_jurisdiction,
       :consent_to_research_contact,
+      :is_submitted,
       design_documents_attributes: [
         :id,
         :_destroy,

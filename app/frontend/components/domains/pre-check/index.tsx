@@ -83,7 +83,7 @@ export const PreCheckForm = observer(function PreCheckForm() {
             {t("preCheck.form.title", "Pre-check your drawings for compliance with BC Building Code")}
           </FormLabel>
           <Spacer />
-          <RouterLinkButton to="/pre-checks" variant="link">
+          <RouterLinkButton to="/pre-checks" variant="tertiary">
             {t("preCheck.form.backToPreChecks", "Back to pre-checks")}
           </RouterLinkButton>
         </Flex>

@@ -35,7 +35,7 @@ export const PreCheckGridRow = observer(({ preCheck }: IPreCheckGridRowProps) =>
           <Text>{preCheck.certNumber || "-"}</Text>
         </GridItem>
         <GridItem display="flex" alignItems="center" px={4} py={2}>
-          <Text>{preCheck.phase || "-"}</Text>
+          <Text>{preCheck.status || "-"}</Text>
         </GridItem>
         <GridItem display="flex" alignItems="center" px={4} py={2}>
           <Text>{preCheck.servicePartner || "-"}</Text>

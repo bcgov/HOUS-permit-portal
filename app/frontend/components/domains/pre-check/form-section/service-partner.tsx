@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next"
 import { usePreCheck } from "../../../../hooks/resources/use-pre-check"
 import { useMst } from "../../../../setup/root"
 import { EPreCheckServicePartner } from "../../../../types/enums"
+import { PreCheckBackLink } from "../pre-check-back-link"
 import { FormFooter } from "./form-footer"
 
 interface IServicePartnerFormData {
@@ -41,6 +42,7 @@ export const ServicePartner = observer(function ServicePartner() {
 
   return (
     <Box>
+      <PreCheckBackLink />
       <Heading as="h2" size="lg" mb={4}>
         {t("preCheck.sections.servicePartner.title", "Service partner")}
       </Heading>
@@ -62,7 +64,7 @@ export const ServicePartner = observer(function ServicePartner() {
           rules={{ required: "You must select a service provider" }}
           render={({ field }) => (
             <Box
-              onClick={() => field.onChange(EPreCheckServicePartner.archistar)}
+              onClick={() => !currentPreCheck?.isSubmitted && field.onChange(EPreCheckServicePartner.archistar)}
               borderRadius="lg"
               p={6}
               border="1px solid"
@@ -71,8 +73,9 @@ export const ServicePartner = observer(function ServicePartner() {
               }
               bg={"white"}
               transition="all 0.2s ease-in-out"
-              _hover={{ bg: "semantic.infoLight" }}
-              cursor="pointer"
+              _hover={!currentPreCheck?.isSubmitted ? { bg: "semantic.infoLight" } : undefined}
+              cursor={currentPreCheck?.isSubmitted ? "not-allowed" : "pointer"}
+              opacity={currentPreCheck?.isSubmitted ? 0.6 : 1}
             >
               <Flex direction="column" gap={4}>
                 <Flex align="center" gap={2}>

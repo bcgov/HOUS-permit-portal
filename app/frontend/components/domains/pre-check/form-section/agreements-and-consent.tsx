@@ -5,6 +5,7 @@ import { Controller, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { usePreCheck } from "../../../../hooks/resources/use-pre-check"
 import { useMst } from "../../../../setup/root"
+import { PreCheckBackLink } from "../pre-check-back-link"
 import { FormFooter } from "./form-footer"
 
 interface IAgreementsFormData {
@@ -50,6 +51,7 @@ export const AgreementsAndConsent = observer(function AgreementsAndConsent() {
 
   return (
     <Box>
+      <PreCheckBackLink />
       <Heading as="h2" size="lg" mb={4}>
         {t("preCheck.sections.agreementsAndConsent.title")}
       </Heading>
@@ -74,7 +76,7 @@ export const AgreementsAndConsent = observer(function AgreementsAndConsent() {
                   onBlur={field.onBlur}
                   name={field.name}
                   ref={field.ref}
-                  isDisabled={currentPreCheck?.eulaAccepted === true}
+                  isDisabled={currentPreCheck?.eulaAccepted === true || currentPreCheck?.isSubmitted}
                 >
                   {t("preCheck.sections.agreementsAndConsent.eulaCheckbox")}
                 </Checkbox>
@@ -98,7 +100,7 @@ export const AgreementsAndConsent = observer(function AgreementsAndConsent() {
                   onBlur={field.onBlur}
                   name={field.name}
                   ref={field.ref}
-                  isDisabled={currentPreCheck?.consentToSendDrawings === true}
+                  isDisabled={currentPreCheck?.consentToSendDrawings === true || currentPreCheck?.isSubmitted}
                 >
                   {t("preCheck.sections.agreementsAndConsent.sendDrawingsCheckbox")}
                 </Checkbox>
@@ -134,6 +136,7 @@ export const AgreementsAndConsent = observer(function AgreementsAndConsent() {
           <Checkbox
             {...register("consentToShareWithJurisdiction")}
             isChecked={formValues.consentToShareWithJurisdiction}
+            isDisabled={currentPreCheck?.isSubmitted}
           >
             {t("preCheck.sections.agreementsAndConsent.shareWithJurisdictionCheckbox", {
               jurisdictionName: currentPreCheck?.jurisdiction?.name || t("jurisdiction.yourJurisdiction"),
@@ -149,7 +152,11 @@ export const AgreementsAndConsent = observer(function AgreementsAndConsent() {
           <Text mb={4} fontSize="sm" color="text.secondary">
             {t("preCheck.sections.agreementsAndConsent.researchDescription")}
           </Text>
-          <Checkbox {...register("consentToResearchContact")} isChecked={formValues.consentToResearchContact}>
+          <Checkbox
+            {...register("consentToResearchContact")}
+            isChecked={formValues.consentToResearchContact}
+            isDisabled={currentPreCheck?.isSubmitted}
+          >
             {t("preCheck.sections.agreementsAndConsent.researchCheckbox")} <strong>{t("ui.optional")}</strong>
           </Checkbox>
         </Box>

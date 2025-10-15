@@ -8,15 +8,16 @@ class CreatePreChecks < ActiveRecord::Migration[7.1]
       t.uuid :creator_id, null: false
       t.uuid :jurisdiction_id
       t.string :cert_number
-      t.string :phase
       t.string :full_address
       t.integer :service_partner, null: false, default: 0
+      t.integer :status, null: false, default: 0
 
       # Agreements and consent
       t.boolean :eula_accepted, default: false, null: false
       t.boolean :consent_to_send_drawings, default: false, null: false
       t.boolean :consent_to_share_with_jurisdiction, default: false
       t.boolean :consent_to_research_contact, default: false
+      t.boolean :is_submitted, default: false, null: false
 
       t.timestamps
     end

@@ -14,6 +14,7 @@ import { useMst } from "../../../../setup/root"
 import { EFileUploadAttachmentType, EPreCheckServicePartner } from "../../../../types/enums"
 import { IDesignDocument } from "../../../../types/types"
 import { FileDownloadButton } from "../../../shared/base/file-download-button"
+import { PreCheckBackLink } from "../pre-check-back-link"
 import { FormFooter } from "./form-footer"
 
 interface IUploadDrawingsFormData {
@@ -97,6 +98,7 @@ export const UploadDrawings = observer(function UploadDrawings() {
 
   return (
     <Box>
+      <PreCheckBackLink />
       <Heading as="h2" size="lg" mb={4}>
         {t("preCheck.sections.uploadDrawings.title", "Upload drawings")}
       </Heading>
@@ -129,54 +131,60 @@ export const UploadDrawings = observer(function UploadDrawings() {
           ) : (
             <Text textDecoration={doc._destroy ? "line-through" : "none"}>{doc.file?.metadata?.filename}</Text>
           )}
-          {doc._destroy ? (
-            <Button
-              variant="link"
-              size="sm"
-              color="semantic.info"
-              leftIcon={<Icon as={ArrowCounterClockwise} />}
-              onClick={() => handleUndoRemove(doc.id || doc.file?.id)}
-            >
-              {t("ui.undo")}
-            </Button>
-          ) : (
-            <IconButton
-              aria-label={t("ui.remove")}
-              color="semantic.error"
-              icon={<Icon as={Trash} />}
-              variant="tertiary"
-              size="sm"
-              onClick={() => handleRemoveFile(doc.id || doc.file?.id)}
-            />
+          {!currentPreCheck?.isSubmitted && (
+            <>
+              {doc._destroy ? (
+                <Button
+                  variant="link"
+                  size="sm"
+                  color="semantic.info"
+                  leftIcon={<Icon as={ArrowCounterClockwise} />}
+                  onClick={() => handleUndoRemove(doc.id || doc.file?.id)}
+                >
+                  {t("ui.undo")}
+                </Button>
+              ) : (
+                <IconButton
+                  aria-label={t("ui.remove")}
+                  color="semantic.error"
+                  icon={<Icon as={Trash} />}
+                  variant="tertiary"
+                  size="sm"
+                  onClick={() => handleRemoveFile(doc.id || doc.file?.id)}
+                />
+              )}
+            </>
           )}
         </Flex>
       ))}
 
-      <Box
-        position="relative"
-        mb={6}
-        sx={{
-          ".uppy-Dashboard": {
-            border: "2px dashed var(--chakra-colors-border-light)",
-            borderRadius: "var(--chakra-radii-lg)",
-          },
-          ".uppy-Dashboard-inner": {
-            border: "none",
-            borderRadius: "var(--chakra-radii-lg)",
-          },
-          ".uppy-Dashboard-dropFilesHereHint": {
-            display: "none",
-          },
-          ".uppy-DashboardContent-title": {
-            display: "none",
-          },
-          ".uppy-DashboardContent-back": {
-            display: "none",
-          },
-        }}
-      >
-        <Dashboard uppy={uppy} height={200} proudlyDisplayPoweredByUppy={false} />
-      </Box>
+      {!currentPreCheck?.isSubmitted && (
+        <Box
+          position="relative"
+          mb={6}
+          sx={{
+            ".uppy-Dashboard": {
+              border: "2px dashed var(--chakra-colors-border-light)",
+              borderRadius: "var(--chakra-radii-lg)",
+            },
+            ".uppy-Dashboard-inner": {
+              border: "none",
+              borderRadius: "var(--chakra-radii-lg)",
+            },
+            ".uppy-Dashboard-dropFilesHereHint": {
+              display: "none",
+            },
+            ".uppy-DashboardContent-title": {
+              display: "none",
+            },
+            ".uppy-DashboardContent-back": {
+              display: "none",
+            },
+          }}
+        >
+          <Dashboard uppy={uppy} height={200} proudlyDisplayPoweredByUppy={false} />
+        </Box>
+      )}
 
       {currentPreCheck?.servicePartner === EPreCheckServicePartner.archistar && (
         <Box mb={6}>

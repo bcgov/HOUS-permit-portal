@@ -76,6 +76,9 @@ ActiveRecord::Schema[7.2].define(version: 2025_10_09_202916) do
     t.index ["contactable_type", "contactable_id"], name: "index_contacts_on_contactable"
   end
 
+  create_table "data_migrations", primary_key: "version", id: :string, force: :cascade do |t|
+  end
+
   create_table "design_documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "pre_check_id", null: false
     t.text "file_data"
@@ -514,13 +517,14 @@ ActiveRecord::Schema[7.2].define(version: 2025_10_09_202916) do
     t.uuid "creator_id", null: false
     t.uuid "jurisdiction_id"
     t.string "cert_number"
-    t.string "phase"
     t.string "full_address"
     t.integer "service_partner", default: 0, null: false
+    t.integer "status", default: 0, null: false
     t.boolean "eula_accepted", default: false, null: false
     t.boolean "consent_to_send_drawings", default: false, null: false
     t.boolean "consent_to_share_with_jurisdiction", default: false
     t.boolean "consent_to_research_contact", default: false
+    t.boolean "is_submitted", default: false, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["creator_id"], name: "index_pre_checks_on_creator_id"

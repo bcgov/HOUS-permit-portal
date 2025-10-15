@@ -26,6 +26,7 @@ export const Sidebar = observer(function PreCheckSidebar() {
 
   // Check if agreements and consent section is complete
   const agreementsComplete = currentPreCheck?.isAgreementsAndConsentComplete || false
+  const isSubmitted = currentPreCheck?.isSubmitted || false
 
   return (
     <VStack w="full" align="stretch" pt={4}>
@@ -36,8 +37,18 @@ export const Sidebar = observer(function PreCheckSidebar() {
             const completionKey = completionMap[navLink.key]
             const isComplete = currentPreCheck && completionKey ? currentPreCheck[completionKey] : false
 
+            // Disable logic
+            let isDisabled = false
+
             // Disable links that require consent if agreements are not complete
-            const isDisabled = linksRequiringConsent.includes(navLink.key) && !agreementsComplete
+            if (linksRequiringConsent.includes(navLink.key) && !agreementsComplete) {
+              isDisabled = true
+            }
+
+            // Disable results summary until pre-check is submitted
+            if (navLink.key === "resultsSummary" && !isSubmitted) {
+              isDisabled = true
+            }
 
             return <SectionLink key={navLink.key} navLink={navLink} isComplete={isComplete} isDisabled={isDisabled} />
           })}

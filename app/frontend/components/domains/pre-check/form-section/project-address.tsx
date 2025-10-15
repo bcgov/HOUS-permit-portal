@@ -7,6 +7,7 @@ import { usePreCheck } from "../../../../hooks/resources/use-pre-check"
 import { useMst } from "../../../../setup/root"
 import { IOption } from "../../../../types/types"
 import { SitesSelect } from "../../../shared/select/selectors/sites-select"
+import { PreCheckBackLink } from "../pre-check-back-link"
 import { FormFooter } from "./form-footer"
 
 interface IProjectAddressFormData {
@@ -50,6 +51,7 @@ export const ProjectAddress = observer(function ProjectAddress() {
   return (
     <FormProvider {...methods}>
       <Box>
+        <PreCheckBackLink />
         <Heading as="h2" size="lg" mb={4}>
           {t("preCheck.sections.projectAddress.title", "Project Address")}
         </Heading>
@@ -62,7 +64,7 @@ export const ProjectAddress = observer(function ProjectAddress() {
 
         <VStack spacing={4} align="stretch">
           <SitesSelect
-            onChange={(option) => setValue("site", option)}
+            onChange={(option) => !currentPreCheck?.isSubmitted && setValue("site", option)}
             selectedOption={selectedSite}
             pidName="pid"
             siteName="site"
@@ -71,6 +73,7 @@ export const ProjectAddress = observer(function ProjectAddress() {
             showManualModeToggle={true}
             showJurisdiction={true}
             initialJurisdiction={currentPreCheck?.jurisdiction || null}
+            isDisabled={currentPreCheck?.isSubmitted}
           />
         </VStack>
 

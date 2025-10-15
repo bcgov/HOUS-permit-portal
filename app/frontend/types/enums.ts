@@ -109,7 +109,7 @@ export enum EPreCheckSortFields {
   createdAt = "created_at",
   updatedAt = "updated_at",
   certNumber = "cert_number",
-  phase = "phase",
+  status = "status",
   servicePartner = "service_partner",
 }
 
@@ -707,4 +707,10 @@ export type EPermitClassificationCode = (typeof EPermitClassificationCode)[keyof
 
 export enum EPreCheckServicePartner {
   archistar = "archistar",
+}
+
+export enum EPreCheckStatus {
+  draft = "draft",
+  submitted = "submitted",
+  reviewed = "reviewed",
 }

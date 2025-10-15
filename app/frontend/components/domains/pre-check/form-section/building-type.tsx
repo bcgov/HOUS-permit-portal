@@ -7,6 +7,7 @@ import { usePreCheck } from "../../../../hooks/resources/use-pre-check"
 import { IPermitType } from "../../../../models/permit-classification"
 import { useMst } from "../../../../setup/root"
 import { IOption } from "../../../../types/types"
+import { PreCheckBackLink } from "../pre-check-back-link"
 import { FormFooter } from "./form-footer"
 
 interface IBuildingTypeFormData {
@@ -53,6 +54,7 @@ export const BuildingType = observer(function BuildingType() {
 
   return (
     <Box>
+      <PreCheckBackLink />
       <Heading as="h2" size="lg" mb={4}>
         {t("preCheck.sections.buildingType.title", "Building Type")}
       </Heading>
@@ -73,7 +75,7 @@ export const BuildingType = observer(function BuildingType() {
                   return (
                     <Box
                       key={option.value.id}
-                      onClick={() => field.onChange(option.value.id)}
+                      onClick={() => !currentPreCheck?.isSubmitted && field.onChange(option.value.id)}
                       borderRadius="lg"
                       p={6}
                       border="1px solid"
@@ -81,8 +83,9 @@ export const BuildingType = observer(function BuildingType() {
                       bg="white"
                       w={{ base: "100%", md: "48%" }}
                       transition="all 0.2s ease-in-out"
-                      _hover={{ bg: "hover.blue" }}
-                      cursor="pointer"
+                      _hover={!currentPreCheck?.isSubmitted ? { bg: "hover.blue" } : undefined}
+                      cursor={currentPreCheck?.isSubmitted ? "not-allowed" : "pointer"}
+                      opacity={currentPreCheck?.isSubmitted ? 0.6 : 1}
                     >
                       <Flex direction="column" justify="space-between" align="start" gap={4}>
                         <Box flex={1}>
