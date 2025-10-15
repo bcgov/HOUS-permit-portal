@@ -19,6 +19,7 @@ class ReportDocument < FileUploadAttachment
         ),
       "object_data" => {
         "step_code_id" => step_code_id,
+        "step_code_type" => step_code.type,
         "report_document_id" => id,
         "filename" => file&.metadata&.dig("filename"),
         "download_url" => file_url
