@@ -70,7 +70,12 @@ class Api::PreChecksController < Api::ApplicationController
       :eula_accepted,
       :consent_to_send_drawings,
       :consent_to_share_with_jurisdiction,
-      :consent_to_research_contact
+      :consent_to_research_contact,
+      design_documents_attributes: [
+        :id,
+        :_destroy,
+        file: [:id, :storage, metadata: %i[size filename mime_type]]
+      ]
     )
   end
 end

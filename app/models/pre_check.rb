@@ -10,14 +10,15 @@ class PreCheck < ApplicationRecord
   belongs_to :creator, class_name: "User", foreign_key: "creator_id"
   belongs_to :permit_application, optional: true
   has_one :permit_project, through: :permit_application
-  has_many :pre_check_design_documents,
-           dependent: :destroy,
-           inverse_of: :pre_check
+  has_many :design_documents, dependent: :destroy, inverse_of: :pre_check
+
+  accepts_nested_attributes_for :design_documents, allow_destroy: true
 
   validate :permit_application_belongs_to_creator,
            if: -> { permit_application_id.present? }
   validate :agreements_accepted_before_permit_type
   validate :agreements_accepted_before_design_documents
+  validate :agreements_cannot_be_unaccepted
 
   validates :service_partner, presence: true
 
@@ -66,12 +67,22 @@ class PreCheck < ApplicationRecord
   end
 
   def agreements_accepted_before_design_documents
-    return unless pre_check_design_documents.any?
+    return unless design_documents.any?
     return if required_agreements_accepted?
 
     errors.add(
       :base,
       "Design documents cannot be added until EULA and consent to send drawings are accepted"
     )
+  end
+
+  def agreements_cannot_be_unaccepted
+    if eula_accepted_changed?(from: true, to: false)
+      errors.add(:eula_accepted, "cannot be revoked once accepted")
+    end
+
+    if consent_to_send_drawings_changed?(from: true, to: false)
+      errors.add(:consent_to_send_drawings, "cannot be revoked once accepted")
+    end
   end
 end

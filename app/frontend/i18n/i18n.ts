@@ -246,7 +246,6 @@ const options = {
           doLater: "Do this later",
           add: "Add",
           edit: "Edit",
-          optional: "(optional)",
           archive: "Remove and archive",
           restore: "Restore",
           archived: "Archived",
@@ -422,8 +421,19 @@ const options = {
               description: "Choose the building type that best describes your project",
             },
             uploadDrawings: {
-              title: "Upload Drawings",
-              description: "Upload your building drawings.",
+              title: "Upload drawings",
+              description:
+                "Upload a single PDF that includes the drawings you would normally submit with a building permit application.",
+              fileRequirementsTitle: "File requirements",
+              requirement1: "PDF format only",
+              requirement2: "One file, not multiple PDFs",
+              requirement3: "Architectural drawings must be legible and properly scaled",
+              requirement4: "Maximum file size: 100 MB",
+              dragAndDrop: "Drag and drop files here, or",
+              browseDevice: "browse your device",
+              protectionTitle: "How Archistar protects and stores your drawings",
+              protectionDescription1:
+                "Our service partners use industry-standard security to protect your drawings. Archistar will keep your drawings for up to 150 days, then delete them. All drawings will be deleted on December 31, 2025, when the beta testing period ends.",
             },
             confirmSubmission: {
               title: "Confirm Your Submission",

@@ -76,7 +76,12 @@ ActiveRecord::Schema[7.2].define(version: 2025_10_09_202916) do
     t.index ["contactable_type", "contactable_id"], name: "index_contacts_on_contactable"
   end
 
-  create_table "data_migrations", primary_key: "version", id: :string, force: :cascade do |t|
+  create_table "design_documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "pre_check_id", null: false
+    t.text "file_data"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["pre_check_id"], name: "index_design_documents_on_pre_check_id"
   end
 
   create_table "document_references", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -501,14 +506,6 @@ ActiveRecord::Schema[7.2].define(version: 2025_10_09_202916) do
     t.index ["permit_project_id"], name: "index_pinned_projects_on_permit_project_id"
     t.index ["user_id", "permit_project_id"], name: "index_pinned_projects_on_user_id_and_permit_project_id", unique: true
     t.index ["user_id"], name: "index_pinned_projects_on_user_id"
-  end
-
-  create_table "pre_check_design_documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.uuid "pre_check_id", null: false
-    t.text "file_data"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["pre_check_id"], name: "index_pre_check_design_documents_on_pre_check_id"
   end
 
   create_table "pre_checks", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -947,6 +944,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_10_09_202916) do
   add_foreign_key "allowlisted_jwts", "users", on_delete: :cascade
   add_foreign_key "api_key_expiration_notifications", "external_api_keys"
   add_foreign_key "collaborators", "users"
+  add_foreign_key "design_documents", "pre_checks"
   add_foreign_key "document_references", "part_3_step_code_checklists", column: "checklist_id"
   add_foreign_key "early_access_previews", "users", column: "previewer_id"
   add_foreign_key "energy_outputs", "part_3_step_code_checklists", column: "checklist_id"
@@ -986,7 +984,6 @@ ActiveRecord::Schema[7.2].define(version: 2025_10_09_202916) do
   add_foreign_key "permit_type_submission_contacts", "permit_classifications", column: "permit_type_id"
   add_foreign_key "pinned_projects", "permit_projects"
   add_foreign_key "pinned_projects", "users"
-  add_foreign_key "pre_check_design_documents", "pre_checks"
   add_foreign_key "pre_checks", "jurisdictions"
   add_foreign_key "pre_checks", "permit_applications"
   add_foreign_key "pre_checks", "permit_classifications", column: "permit_type_id"

@@ -1,5 +1,5 @@
-class PreCheckDesignDocument < FileUploadAttachment
-  belongs_to :pre_check, inverse_of: :pre_check_design_documents
+class DesignDocument < FileUploadAttachment
+  belongs_to :pre_check, inverse_of: :design_documents
 
   include FileUploader.Attachment(:file)
 

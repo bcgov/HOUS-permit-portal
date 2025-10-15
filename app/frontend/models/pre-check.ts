@@ -1,4 +1,5 @@
 import { Instance, types } from "mobx-state-tree"
+import { IDesignDocument } from "../types/types"
 import { JurisdictionModel } from "./jurisdiction"
 import { PermitTypeModel } from "./permit-classification"
 
@@ -16,6 +17,7 @@ export const PreCheckModel = types
     consentToSendDrawings: types.optional(types.boolean, false),
     consentToShareWithJurisdiction: types.optional(types.boolean, false),
     consentToResearchContact: types.optional(types.boolean, false),
+    designDocuments: types.array(types.frozen<IDesignDocument>()),
     createdAt: types.maybeNull(types.Date),
     updatedAt: types.maybeNull(types.Date),
   })
@@ -40,7 +42,7 @@ export const PreCheckModel = types
     },
     get isUploadDrawingsComplete() {
       // TODO: implement when drawings upload is added
-      return false
+      return self.designDocuments.length > 0
     },
     get isConfirmSubmissionComplete() {
       // TODO: implement when submission confirmation is added

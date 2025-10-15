@@ -1,5 +1,5 @@
 FactoryBot.define do
-  factory :pre_check_design_document do
+  factory :design_document do
     association :pre_check, factory: :pre_check
 
     after(:build) do |document|
