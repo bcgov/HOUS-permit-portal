@@ -1,4 +1,6 @@
 import { Instance, types } from "mobx-state-tree"
+import { EPreCheckStatus } from "../types/enums"
+import { IDesignDocument } from "../types/types"
 import { JurisdictionModel } from "./jurisdiction"
 import { PermitTypeModel } from "./permit-classification"
 
@@ -6,7 +8,7 @@ export const PreCheckModel = types
   .model("PreCheck", {
     id: types.identifier,
     certNumber: types.maybeNull(types.string),
-    phase: types.maybeNull(types.string),
+    status: types.enumeration(Object.values(EPreCheckStatus)),
     fullAddress: types.maybeNull(types.string),
     permitApplicationId: types.maybeNull(types.string),
     jurisdiction: types.maybeNull(types.reference(types.late(() => JurisdictionModel))),
@@ -16,10 +18,16 @@ export const PreCheckModel = types
     consentToSendDrawings: types.optional(types.boolean, false),
     consentToShareWithJurisdiction: types.optional(types.boolean, false),
     consentToResearchContact: types.optional(types.boolean, false),
+    isSubmitted: types.optional(types.boolean, false),
+    designDocuments: types.array(types.frozen<IDesignDocument>()),
     createdAt: types.maybeNull(types.Date),
     updatedAt: types.maybeNull(types.Date),
   })
   .views((self) => ({
+    // Helper to check if all required agreements have been accepted
+    get requiredAgreementsAccepted() {
+      return self.eulaAccepted && self.consentToSendDrawings
+    },
     // Section completion status
     get isServicePartnerComplete() {
       return !!self.servicePartner
@@ -35,16 +43,23 @@ export const PreCheckModel = types
       return !!self.permitType
     },
     get isUploadDrawingsComplete() {
-      // TODO: implement when drawings upload is added
-      return false
+      return self.designDocuments.length > 0
     },
     get isConfirmSubmissionComplete() {
-      // TODO: implement when submission confirmation is added
-      return false
+      return self.isSubmitted
     },
     get isResultsSummaryComplete() {
-      // TODO: implement when results are added
-      return false
+      return self.status === EPreCheckStatus.reviewed
+    },
+    // Check if all required fields are complete and ready for submission
+    get isReadyForSubmission() {
+      return (
+        this.isServicePartnerComplete &&
+        this.isProjectAddressComplete &&
+        this.isAgreementsAndConsentComplete &&
+        this.isBuildingTypeComplete &&
+        this.isUploadDrawingsComplete
+      )
     },
   }))
 

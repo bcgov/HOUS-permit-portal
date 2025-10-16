@@ -104,6 +104,11 @@ function isStepCodePath(path: string): boolean {
   return regex.test(path)
 }
 
+function isPreCheckPath(path: string): boolean {
+  const regex = /^\/pre-checks\/[a-f\d-]+/
+  return regex.test(path)
+}
+
 function shouldHideSubNavbarForPath(path: string): boolean {
   const matchers: Array<(path: string) => boolean> = [
     (path) => path === "/",
@@ -119,6 +124,7 @@ function shouldHideSubNavbarForPath(path: string): boolean {
     isProjectDetailPath,
     isStepCodePath,
     isAdminPath,
+    isPreCheckPath,
   ]
 
   return matchers.some((matcher) => matcher(path))

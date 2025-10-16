@@ -6,8 +6,8 @@ import { RemoveScroll } from "react-remove-scroll"
 import { useNavigate, useParams } from "react-router-dom"
 import { usePreCheck } from "../../../hooks/resources/use-pre-check"
 import { useMst } from "../../../setup/root"
+import { EPreCheckServicePartner } from "../../../types/enums"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
-import { FloatingHelpDrawer } from "../../shared/floating-help-drawer"
 import { RouterLink } from "../../shared/navigation/router-link"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { FormSection } from "./form-section"
@@ -28,7 +28,7 @@ export const PreCheckForm = observer(function PreCheckForm() {
 
     // Create new pre-check with default service partner
     createPreCheck({
-      servicePartner: "archistar",
+      servicePartner: EPreCheckServicePartner.archistar,
     }).then((response) => {
       if (response.ok && response.data) {
         // Redirect to edit route with the new ID
@@ -40,7 +40,7 @@ export const PreCheckForm = observer(function PreCheckForm() {
   // handle redirect if no section is specified
   useEffect(() => {
     if (!section && currentPreCheck) {
-      navigate("service-partner")
+      navigate(`/pre-checks/${currentPreCheck.id}/edit/service-partner`, { replace: true })
     }
   }, [section, currentPreCheck])
 
@@ -83,7 +83,7 @@ export const PreCheckForm = observer(function PreCheckForm() {
             {t("preCheck.form.title", "Pre-check your drawings for compliance with BC Building Code")}
           </FormLabel>
           <Spacer />
-          <RouterLinkButton to="/pre-checks" variant="link">
+          <RouterLinkButton to="/pre-checks" variant="tertiary">
             {t("preCheck.form.backToPreChecks", "Back to pre-checks")}
           </RouterLinkButton>
         </Flex>
@@ -112,7 +112,6 @@ export const PreCheckForm = observer(function PreCheckForm() {
               pb={10}
               id="preCheckScroll"
             >
-              <FloatingHelpDrawer top="24" zIndex={1} />
               <Flex direction="column" flex={1} maxW="780px" px={6} py={3}>
                 {currentPreCheck ? (
                   <FormSection />

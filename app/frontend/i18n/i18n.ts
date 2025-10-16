@@ -181,6 +181,9 @@ const options = {
           part9ChecklistsLink: "Part 9 checklists (PDF)",
         },
         ui: {
+          optional: "(optional)",
+          next: "Next",
+          saveAndcontinue: "Save and continue",
           clear: "Clear",
           switchToManualMode: "Manually select my jurisdiction",
           switchToAutomaticMode: "Use my address to automatically select my jurisdiction",
@@ -245,7 +248,6 @@ const options = {
           doLater: "Do this later",
           add: "Add",
           edit: "Edit",
-          optional: "(optional)",
           archive: "Remove and archive",
           restore: "Restore",
           archived: "Archived",
@@ -342,16 +344,15 @@ const options = {
           index: {
             title: "Pre-Checks",
           },
-          backToList: "Back to Pre-Checks",
           form: {
             title: "Pre-check your drawings for compliance with BC Building Code",
-            backToPreChecks: "Back to pre-checks",
+            backToPreChecks: "Go to pre-checks",
           },
           columns: {
             created_at: "Created",
             updated_at: "Last Updated",
             cert_number: "Certificate Number",
-            phase: "Phase",
+            status: "Status",
             service_partner: "Service Partner",
           },
           sidebar: {
@@ -371,10 +372,24 @@ const options = {
           },
           sections: {
             servicePartner: {
-              title: "Service Partner",
-              description: "Select your service partner.",
-              label: "Available Service Partners:",
-              archistarDescription: "Automated building code compliance checking",
+              title: "Service partner",
+              intro:
+                "To receive a compliance report, your drawings will be analyzed by a third-party service provider. Select the one that best fits your project needs. The Ministry of Housing and Municipal Affairs does not endorse one provider over another.",
+              availableProviders: "Available providers",
+              archistarTitle: "Archistar eCheck",
+              archistarDescription:
+                "Archistar is an Australian technology company that creates tools for property development, generative design, and automated compliance checking.",
+              visitWebsite: "Visit Archistar's website",
+              freeToUse: "Free to use",
+              automatedReview: "Automated code analysis and human review",
+              resultsTime: "Results in 48 hours or less",
+              smallResidential: "For small residential buildings only",
+              preChecksFor: "Pre-checks drawings for the following code requirements:",
+              buildingHeight: "Building height",
+              footings: "House footings and foundation size",
+              egress: "Shared egress facilities",
+              stairs: "Stairs in dwelling units",
+              selectArchistar: "Pre-check with Archistar eCheck",
             },
             projectAddress: {
               title: "Project Address",
@@ -386,37 +401,80 @@ const options = {
               readEula: "Read the full EULA",
               eulaCheckbox: "I have read and agree to the End User Licence Agreement (EULA)",
               sendDrawingsCheckbox: "I consent to my drawings being sent to Archistar for pre-checking",
+              sendDrawingsRequired: "You must consent to send drawings",
+              eulaRequired: "You must accept the EULA",
               shareSubmissionTitle: "Share your submission details (optional)",
               shareSubmissionDescription:
-                "You can choose to share limited details from your submission with (Jurisdiction name) to help improve the accuracy of this service. This includes:",
+                "You can choose to share limited details from your submission with {{jurisdictionName}} to help improve the accuracy of this service. This includes:",
               shareItem1: "project address",
               shareItem2: "date of submission",
               shareItem3: "results summary",
               shareSubmissionNote:
-                "(Jurisdiction name) may use this information to review and compare the results of your pre-check.",
-              shareWithJurisdictionCheckbox:
-                "I agree to share details of this submission with (Jurisdiction name) (optional)",
+                "{{jurisdictionName}} may use this information to review and compare the results of your pre-check.",
+              shareWithJurisdictionCheckbox: "I agree to share details of this submission with {{jurisdictionName}}",
               researchTitle: "Take part in research (optional)",
               researchDescription:
                 "You can let the Ministry of Housing and Municipal Affairs contact you about taking part in research to help improve this service.",
               researchCheckbox:
-                "I agree to be contacted by the Ministry of Housing and Municipal Affairs about taking part in research (optional)",
+                "I agree to be contacted by the Ministry of Housing and Municipal Affairs about taking part in research",
             },
             buildingType: {
               title: "Building Type",
               description: "Choose the building type that best describes your project",
             },
             uploadDrawings: {
-              title: "Upload Drawings",
-              description: "Upload your building drawings.",
+              title: "Upload drawings",
+              description:
+                "Upload a single PDF that includes the drawings you would normally submit with a building permit application.",
+              fileRequirementsTitle: "File requirements",
+              requirement1: "PDF format only",
+              requirement2: "One file, not multiple PDFs",
+              requirement3: "Architectural drawings must be legible and properly scaled",
+              requirement4: "Maximum file size: 100 MB",
+              dragAndDrop: "Drag and drop files here, or",
+              browseDevice: "browse your device",
+              protectionTitle: "How Archistar protects and stores your drawings",
+              protectionDescription1:
+                "Our service partners use industry-standard security to protect your drawings. Archistar will keep your drawings for up to 150 days, then delete them. All drawings will be deleted on December 31, 2025, when the beta testing period ends.",
             },
             confirmSubmission: {
-              title: "Confirm Your Submission",
+              title: "Review and submit",
               description: "Review your information before submitting.",
+              projectNumber: "Project number",
+              applicationNumber: "Application number",
+              address: "Address",
+              jurisdiction: "Jurisdiction",
+              uploadedFiles: "Uploaded files ({{count}})",
+              noFiles: "No files uploaded",
+              submit: "Submit",
+              confirmTitle: "Confirm Submission",
+              confirmBody:
+                "Are you sure you want to submit this pre-check? Once submitted, you will not be able to make any changes.",
+              completeAllFields: "Please complete all required sections before submitting.",
             },
             resultsSummary: {
               title: "Results Summary",
               description: "View your pre-check results.",
+              notSubmitted: "Pre-check not submitted",
+              notSubmittedDescription:
+                "This pre-check has not been submitted yet. Please complete all sections and submit your pre-check to receive results.",
+              goToSubmission: "Go to submission",
+              preparing: "We're preparing your results",
+              timeframe: "Most reports are ready within a few hours, but it can take up to 48 hours.",
+              whatHappensNext: "What happens next",
+              step1: "Your drawings are analyzed",
+              step2: "A PDF report and interactive results are generated",
+              step3: "The downloadable report and a link to interactive results are available in your Projects",
+              notification:
+                "You don't need to stay on this page. We'll notify you as soon as your results are ready. You'll find completed reports in the Projects section.",
+              refreshStatus: "Refresh status",
+              ready: "Your results are ready",
+              readyDescription: "Your pre-check has been reviewed and the results are now available.",
+              nextSteps: "Next steps",
+              downloadReport: "Download your PDF report",
+              viewInteractive: "View interactive results",
+              proceedToPermit: "Proceed with your building permit application",
+              unknownStatus: "Unknown status",
             },
           },
         },
@@ -483,6 +541,7 @@ const options = {
           },
         },
         jurisdiction: {
+          yourJurisdiction: "your jurisdiction",
           edit: {
             displayDescriptionLabel: "Jurisdiction description (public)",
             title: "Manage jurisdiction name settings",

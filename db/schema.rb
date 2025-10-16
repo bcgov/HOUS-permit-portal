@@ -79,6 +79,14 @@ ActiveRecord::Schema[7.2].define(version: 2025_10_09_202916) do
   create_table "data_migrations", primary_key: "version", id: :string, force: :cascade do |t|
   end
 
+  create_table "design_documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "pre_check_id", null: false
+    t.text "file_data"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["pre_check_id"], name: "index_design_documents_on_pre_check_id"
+  end
+
   create_table "document_references", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "checklist_id"
     t.string "document_name"
@@ -509,13 +517,14 @@ ActiveRecord::Schema[7.2].define(version: 2025_10_09_202916) do
     t.uuid "creator_id", null: false
     t.uuid "jurisdiction_id"
     t.string "cert_number"
-    t.string "phase"
     t.string "full_address"
     t.integer "service_partner", default: 0, null: false
+    t.integer "status", default: 0, null: false
     t.boolean "eula_accepted", default: false, null: false
     t.boolean "consent_to_send_drawings", default: false, null: false
     t.boolean "consent_to_share_with_jurisdiction", default: false
     t.boolean "consent_to_research_contact", default: false
+    t.boolean "is_submitted", default: false, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["creator_id"], name: "index_pre_checks_on_creator_id"
@@ -939,6 +948,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_10_09_202916) do
   add_foreign_key "allowlisted_jwts", "users", on_delete: :cascade
   add_foreign_key "api_key_expiration_notifications", "external_api_keys"
   add_foreign_key "collaborators", "users"
+  add_foreign_key "design_documents", "pre_checks"
   add_foreign_key "document_references", "part_3_step_code_checklists", column: "checklist_id"
   add_foreign_key "early_access_previews", "users", column: "previewer_id"
   add_foreign_key "energy_outputs", "part_3_step_code_checklists", column: "checklist_id"

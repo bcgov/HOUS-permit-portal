@@ -2,35 +2,47 @@ import { Button, Flex } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
+import { usePreCheck } from "../../../../hooks/resources/use-pre-check"
 import { usePreCheckNavigation } from "../use-pre-check-navigation"
 
-interface IFormFooterProps {
-  onContinue?: () => Promise<void> | void
+interface IFormFooterProps<T> {
+  handleSubmit?: (onValid: (data: T) => void | Promise<void>, onInvalid?: () => void) => (e?: any) => void
+  onSubmit?: (data: T) => Promise<void> | void
   isLoading?: boolean
 }
 
-export const FormFooter = observer(function FormFooter({ onContinue, isLoading }: IFormFooterProps) {
+export const FormFooter = observer(function FormFooter<T>({ handleSubmit, onSubmit, isLoading }: IFormFooterProps<T>) {
   const { t } = useTranslation()
-  const { navigateToNext, navigateToPrevious, hasNext, hasPrevious } = usePreCheckNavigation()
+  const { currentPreCheck } = usePreCheck()
+  const { navigateToNext, hasNext } = usePreCheckNavigation()
 
   const handleContinue = async () => {
+    if (currentPreCheck?.isSubmitted) return navigateToNext()
+
     try {
-      if (onContinue) {
-        await onContinue()
-      }
+      await new Promise<void>((resolve, reject) => {
+        handleSubmit(
+          async (data) => {
+            await onSubmit(data)
+            resolve()
+          },
+          () => {
+            reject(new Error("Validation failed"))
+          }
+        )()
+      })
+
+      // Only navigate if valid
       navigateToNext()
     } catch (error) {
-      console.error("Form submission failed:", error)
+      console.warn("Form validation failed or submission error:", error)
     }
   }
 
   return (
     <Flex gap={3} mt={8} justifyContent="flex-start">
       <Button variant="primary" onClick={handleContinue} isDisabled={!hasNext} isLoading={isLoading}>
-        {t("ui.continue", "Continue")}
-      </Button>
-      <Button variant="secondary" onClick={navigateToPrevious} isDisabled={!hasPrevious || isLoading}>
-        {t("ui.back", "Back")}
+        {currentPreCheck?.isSubmitted ? t("ui.next", "Next") : t("ui.saveAndcontinue", "Save and Continue")}
       </Button>
     </Flex>
   )

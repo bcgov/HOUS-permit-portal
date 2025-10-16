@@ -28,6 +28,7 @@ export enum EFileUploadAttachmentType {
   SupportingDocument = "SupportingDocument",
   ProjectDocument = "ProjectDocument",
   ReportDocument = "ReportDocument",
+  DesignDocument = "DesignDocument",
 }
 
 export enum EPermitApplicationStatus {
@@ -108,7 +109,7 @@ export enum EPreCheckSortFields {
   createdAt = "created_at",
   updatedAt = "updated_at",
   certNumber = "cert_number",
-  phase = "phase",
+  status = "status",
   servicePartner = "service_partner",
 }
 
@@ -703,3 +704,13 @@ export const EPermitClassificationCode = {
 } as const
 
 export type EPermitClassificationCode = (typeof EPermitClassificationCode)[keyof typeof EPermitClassificationCode]
+
+export enum EPreCheckServicePartner {
+  archistar = "archistar",
+}
+
+export enum EPreCheckStatus {
+  draft = "draft",
+  submitted = "submitted",
+  reviewed = "reviewed",
+}

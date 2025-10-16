@@ -292,6 +292,10 @@ export interface IRequirementDocument extends IBaseFileAttachment {
   requirementBlockId: string
 }
 
+export interface IDesignDocument extends IBaseFileAttachment {
+  preCheckId: string
+}
+
 export interface IReportDocument extends IBaseFileAttachment {
   stepCodeId: string
 }

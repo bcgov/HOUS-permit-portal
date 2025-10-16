@@ -644,6 +644,7 @@ const AppRoutes = observer(() => {
             <Route path="/pre-checks" element={<ProjectDashboardScreen />} />
             <Route path="/pre-checks/new" element={<PreCheckForm />} />
             <Route path="/pre-checks/new/:section" element={<PreCheckForm />} />
+            <Route path="/pre-checks/:preCheckId/edit/" element={<PreCheckForm />} />
             <Route path="/pre-checks/:preCheckId/edit/:section" element={<PreCheckForm />} />
             <Route path="/documents" element={<ProjectDashboardScreen />} />
             {/* Already handled above with path-based tabs */}

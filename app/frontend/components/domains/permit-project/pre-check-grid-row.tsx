@@ -22,7 +22,7 @@ export const PreCheckGridRow = observer(({ preCheck }: IPreCheckGridRowProps) =>
         gridColumn="1 / -1"
         templateColumns="subgrid"
         display="grid"
-        onClick={() => navigate(`/pre-checks/${preCheck.id}`)}
+        onClick={() => navigate(`/pre-checks/${preCheck.id}/edit`)}
         _hover={{
           bg: "greys.grey03",
           cursor: "pointer",
@@ -35,7 +35,7 @@ export const PreCheckGridRow = observer(({ preCheck }: IPreCheckGridRowProps) =>
           <Text>{preCheck.certNumber || "-"}</Text>
         </GridItem>
         <GridItem display="flex" alignItems="center" px={4} py={2}>
-          <Text>{preCheck.phase || "-"}</Text>
+          <Text>{preCheck.status || "-"}</Text>
         </GridItem>
         <GridItem display="flex" alignItems="center" px={4} py={2}>
           <Text>{preCheck.servicePartner || "-"}</Text>
@@ -59,7 +59,7 @@ export const PreCheckGridRow = observer(({ preCheck }: IPreCheckGridRowProps) =>
               <MenuItem
                 onClick={(e) => {
                   e.stopPropagation()
-                  navigate(`/pre-checks/${preCheck.id}`)
+                  navigate(`/pre-checks/${preCheck.id}/edit`)
                 }}
               >
                 {t("ui.view", "View")}
