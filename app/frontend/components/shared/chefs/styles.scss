@@ -593,12 +593,12 @@
         .compliance-file-error-message {
           margin-left: 16px;
           font-size: var(--chakra-fontSizes-xs);
-          color: $bcgov-font-error;
+          color: $bcgov-font;
         }
 
         &.compliance-file-error {
           .compliance-file-name {
-            color: $bcgov-font-error;
+            color: $bcgov-font;
           }
         }
 
