@@ -173,7 +173,7 @@ class Jurisdiction < ApplicationRecord
     ltsa_matcher_params = {
       fields: %w[ltsa_matcher],
       misspellings: {
-        edit_distance: 4
+        edit_distance: 2
       }
     }
     is_regional_district = attributes["MUNICIPALITY"] == "Rural"
