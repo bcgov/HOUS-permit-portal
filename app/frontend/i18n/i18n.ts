@@ -184,6 +184,12 @@ const options = {
           optional: "(optional)",
           next: "Next",
           saveAndcontinue: "Save and continue",
+          selectParticipatingJurisdiction: "Please select a participating jurisdiction to continue",
+          participatingCommunityTitle: "Your project is in a participating community",
+          participatingCommunityDescription:
+            "You can use this service to pre-check your drawings against selected parts of the BC Building Code.",
+          serviceNotAvailableTitle: "This service is not available in your community",
+          serviceNotAvailableDescription: "For questions about code compliance, contact your local building officials.",
           clear: "Clear",
           switchToManualMode: "Manually select my jurisdiction",
           switchToAutomaticMode: "Use my address to automatically select my jurisdiction",
@@ -3590,6 +3596,26 @@ Thank you,
               item2:
                 "When <strong>on</strong>, jurisdictions can choose to limit who can request revisions from applicants",
             },
+            codeCompliance: "Code compliance",
+            codeComplianceSetup: {
+              title: "Code compliance",
+              description:
+                "Enable review managers to turn on or off code compliance services globally. These services let applicants run automated checks through a third-party system. If turned off, applicants cannot run compliance checks in their permit applications.",
+              toggleTitle: "Code compliance",
+              individualServices: "Individual services",
+              individualServicesDescription:
+                "Configure specific compliance services and their availability by jurisdiction.",
+              archistarEcheck: "Archistar eCheck",
+              enableForAll: "Enable for all jurisdictions",
+              enrolledJurisdictions: "Select jurisdictions",
+              allJurisdictionsEnabled: "All jurisdictions enabled",
+              allJurisdictionsEnabledDescription:
+                "All jurisdictions are currently enabled for Archistar eCheck. Turn off the switch above to select specific jurisdictions.",
+              jurisdictionsCount: "{{count}} jurisdictions enabled",
+              jurisdictionsCount_one: "{{count}} jurisdiction enabled",
+              jurisdictionsCount_other: "{{count}} jurisdictions enabled",
+              searchJurisdictions: "Search and select jurisdictions...",
+            },
           },
           sitewideMessage: {
             title: "Site-wide message",
@@ -3922,6 +3948,7 @@ Thank you,
           privacyPolicyContactUsEmailAddress: "digital.codes.permits@gov.bc.ca",
           breadcrumb: {
             projects: "Projects",
+            codeCompliance: "Code compliance",
             permitClassifications: "Permit classifications",
             documents: "Documents",
             checkStepCodeRequirements: "Check step code requirements",

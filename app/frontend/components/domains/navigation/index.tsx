@@ -303,6 +303,12 @@ const AdminDesignatedReviewerScreen = lazy(() =>
   }))
 )
 
+const CodeComplianceSetupScreen = lazy(() =>
+  import("../super-admin/site-configuration-management/code-compliance-setup-screen").then((module) => ({
+    default: module.CodeComplianceSetupScreen,
+  }))
+)
+
 const ReportingScreen = lazy(() =>
   import("../super-admin/reporting/reporting-screen").then((module) => ({ default: module.ReportingScreen }))
 )
@@ -482,6 +488,10 @@ const AppRoutes = observer(() => {
       <Route
         path="/configuration-management/global-feature-access/access-control-for-revision-requests-to-submitters"
         element={<AdminDesignatedReviewerScreen />}
+      />
+      <Route
+        path="/configuration-management/global-feature-access/code-compliance"
+        element={<CodeComplianceSetupScreen />}
       />
       <Route path="/configuration-management/users/invite" element={<AdminInviteScreen />} />
       <Route path="/reporting" element={<ReportingScreen />} />

@@ -813,6 +813,19 @@ export class Api {
     return this.client.put<ApiResponse<ISiteConfigurationStore>>(`/site_configuration`, { siteConfiguration })
   }
 
+  async updateJurisdictionEnrollments(servicePartner: string, jurisdictionIds: string[]) {
+    return this.client.post<ApiResponse<any>>(`/site_configuration/update_jurisdiction_enrollments`, {
+      servicePartner,
+      jurisdictionIds,
+    })
+  }
+
+  async fetchJurisdictionEnrollments(servicePartner: string) {
+    return this.client.get<ApiResponse<any>>(`/site_configuration/jurisdiction_enrollments`, {
+      servicePartner,
+    })
+  }
+
   async updateUser(id: string, user: IUser) {
     return this.client.patch<ApiResponse<IUser>>(`/users/${id}`, { user })
   }

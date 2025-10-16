@@ -19,6 +19,8 @@ export const SiteConfigurationStoreModel = types.snapshotProcessor(
       displaySitewideMessage: types.maybeNull(types.boolean),
       inboxEnabled: types.maybeNull(types.boolean),
       allowDesignatedReviewer: types.maybeNull(types.boolean),
+      codeComplianceEnabled: types.maybeNull(types.boolean),
+      archistarEnabledForAllJurisdictions: types.maybeNull(types.boolean),
       sitewideMessage: types.maybeNull(types.string),
       helpLinkItems: types.frozen<IHelpLinkItems>(),
       revisionReasonsMap: types.map(RevisionReasonModel),
@@ -48,6 +50,17 @@ export const SiteConfigurationStoreModel = types.snapshotProcessor(
         }
         self.configurationLoaded = true
         return response.ok
+      }),
+      updateJurisdictionEnrollments: flow(function* updateJurisdictionEnrollments(
+        servicePartner: string,
+        jurisdictionIds: string[]
+      ) {
+        const response: any = yield self.environment.api.updateJurisdictionEnrollments(servicePartner, jurisdictionIds)
+        return response
+      }),
+      fetchJurisdictionEnrollments: flow(function* fetchJurisdictionEnrollments(servicePartner: string) {
+        const response: any = yield self.environment.api.fetchJurisdictionEnrollments(servicePartner)
+        return response
       }),
     }))
     .actions((self) => ({

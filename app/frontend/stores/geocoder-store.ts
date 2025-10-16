@@ -45,8 +45,11 @@ export const GeocoderStoreModel = types
       if (response.ok) {
         if (responseData) {
           self.rootStore.jurisdictionStore.mergeUpdate(responseData, "jurisdictionMap")
+          // Return the MST model instance instead of raw data
+          const jurisdictionModel = self.rootStore.jurisdictionStore.getJurisdictionById(responseData.id)
+          return { jurisdiction: jurisdictionModel, ltsaMatcher }
         }
-        return { jurisdiction: responseData, ltsaMatcher }
+        return { jurisdiction: null, ltsaMatcher: null }
       }
       return { jurisdiction: null, ltsaMatcher: null }
     }),

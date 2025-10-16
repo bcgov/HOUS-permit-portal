@@ -1,5 +1,5 @@
 import { Instance, types } from "mobx-state-tree"
-import { EPreCheckStatus } from "../types/enums"
+import { EPreCheckServicePartner, EPreCheckStatus } from "../types/enums"
 import { IDesignDocument } from "../types/types"
 import { JurisdictionModel } from "./jurisdiction"
 import { PermitTypeModel } from "./permit-classification"
@@ -13,7 +13,7 @@ export const PreCheckModel = types
     permitApplicationId: types.maybeNull(types.string),
     jurisdiction: types.maybeNull(types.reference(types.late(() => JurisdictionModel))),
     permitType: types.maybeNull(types.reference(types.late(() => PermitTypeModel))),
-    servicePartner: types.maybeNull(types.string),
+    servicePartner: types.enumeration(Object.values(EPreCheckServicePartner)),
     eulaAccepted: types.optional(types.boolean, false),
     consentToSendDrawings: types.optional(types.boolean, false),
     consentToShareWithJurisdiction: types.optional(types.boolean, false),

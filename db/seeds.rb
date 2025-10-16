@@ -25,6 +25,13 @@ north_van =
 
 van = Jurisdiction.find_by(name: "Vancouver")
 
+# Seed Archistar enrollment for North Vancouver
+JurisdictionServicePartnerEnrollment.find_or_create_by(
+  jurisdiction: north_van,
+  service_partner: :archistar
+) { |enrollment| enrollment.enabled = true }
+puts "  ✓ Created Archistar enrollment for North Vancouver"
+
 puts "Seeding users..."
 User.find_or_create_by(omniauth_username: "super_admin") do |user|
   user.role = :super_admin

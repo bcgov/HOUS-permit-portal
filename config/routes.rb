@@ -291,6 +291,8 @@ Rails.application.routes.draw do
     resources :site_configuration, only: [] do
       get :show, on: :collection
       put :update, on: :collection
+      post :update_jurisdiction_enrollments, on: :collection
+      get :jurisdiction_enrollments, on: :collection
     end
 
     resources :external_api_keys do

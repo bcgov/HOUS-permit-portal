@@ -598,6 +598,9 @@ en:
         title: ""
         message: "%{error_message}"
     site_configuration:
+      enrollments_updated:
+        title: ""
+        message: "Jurisdiction code compliance enrollments updated successfully"
       update_success:
         title: ""
         message: "Successfully updated site configuration"
