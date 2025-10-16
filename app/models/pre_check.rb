@@ -5,10 +5,10 @@ class PreCheck < ApplicationRecord
   searchkick word_middle: %i[full_address cert_number]
 
   attribute :service_partner, :integer
-  enum service_partner: { archistar: 0 }
+  enum :service_partner, { archistar: 0 }
 
   attribute :status, :integer
-  enum status: { draft: 0, submitted: 1, reviewed: 2 }
+  enum :status, { draft: 0, submitted: 1, reviewed: 2 }
 
   belongs_to :creator, class_name: "User", foreign_key: "creator_id"
   belongs_to :permit_application, optional: true
