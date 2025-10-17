@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_10_16_115335) do
+ActiveRecord::Schema[7.2].define(version: 2025_10_17_215837) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -447,7 +447,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_10_16_115335) do
     t.string "type", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "description"
+    t.text "description_html"
     t.boolean "enabled"
     t.string "category"
     t.string "code"
