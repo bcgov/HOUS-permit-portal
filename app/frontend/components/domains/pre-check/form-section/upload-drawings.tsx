@@ -180,9 +180,12 @@ export const UploadDrawings = observer(function UploadDrawings() {
             ".uppy-DashboardContent-back": {
               display: "none",
             },
+            ".uppy-DashboardContent-bar": {
+              display: "none",
+            },
           }}
         >
-          <Dashboard uppy={uppy} height={200} proudlyDisplayPoweredByUppy={false} />
+          <Dashboard uppy={uppy} height={276} proudlyDisplayPoweredByUppy={false} />
         </Box>
       )}
 

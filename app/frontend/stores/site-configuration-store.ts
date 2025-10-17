@@ -3,6 +3,7 @@ import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
 import { RevisionReasonModel } from "../models/revision-reason"
 import { ISiteConfigurationUpdateParams } from "../types/api-request"
+import { EPreCheckServicePartner } from "../types/enums"
 import { IHelpLinkItems } from "../types/types.js"
 
 interface ILandingPageTemplate {
@@ -83,6 +84,17 @@ export const SiteConfigurationStoreModel = types.snapshotProcessor(
         if (!self?.helpLinkItems) return []
 
         return Object.values(self.helpLinkItems).filter((item) => item.show)
+      },
+      isServicePartnerGloballyEnabled(servicePartner: string) {
+        if (!self.codeComplianceEnabled) return false
+
+        // Map service partner to the corresponding "enabled for all" flag
+        switch (servicePartner) {
+          case EPreCheckServicePartner.archistar:
+            return !!self.archistarEnabledForAllJurisdictions
+          default:
+            return false
+        }
       },
     })),
   {

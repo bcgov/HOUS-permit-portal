@@ -526,7 +526,8 @@ ActiveRecord::Schema[7.2].define(version: 2025_10_16_115335) do
     t.uuid "permit_type_id"
     t.uuid "creator_id", null: false
     t.uuid "jurisdiction_id"
-    t.string "cert_number"
+    t.integer "comply_certificate_id"
+    t.string "certificate_no"
     t.string "full_address"
     t.integer "service_partner", default: 0, null: false
     t.integer "status", default: 0, null: false
@@ -534,7 +535,6 @@ ActiveRecord::Schema[7.2].define(version: 2025_10_16_115335) do
     t.boolean "consent_to_send_drawings", default: false, null: false
     t.boolean "consent_to_share_with_jurisdiction", default: false
     t.boolean "consent_to_research_contact", default: false
-    t.boolean "is_submitted", default: false, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["creator_id"], name: "index_pre_checks_on_creator_id"

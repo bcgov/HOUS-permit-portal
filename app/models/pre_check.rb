@@ -1,14 +1,31 @@
 class PreCheck < ApplicationRecord
   include ProjectItem
+  include AASM
   has_parent :permit_application
 
-  searchkick word_middle: %i[full_address cert_number]
+  searchkick word_middle: %i[full_address certificate_no]
 
   attribute :service_partner, :integer
   enum :service_partner, { archistar: 0 }
 
   attribute :status, :integer
   enum :status, { draft: 0, submitted: 1, reviewed: 2 }
+
+  aasm column: :status, enum: true do
+    state :draft, initial: true
+    state :submitted
+    state :reviewed
+
+    event :submit do
+      transitions from: :draft, to: :submitted
+
+      after { submit_to_archistar }
+    end
+
+    event :mark_reviewed do
+      transitions from: :submitted, to: :reviewed
+    end
+  end
 
   belongs_to :creator, class_name: "User", foreign_key: "creator_id"
   belongs_to :permit_application, optional: true
@@ -27,6 +44,7 @@ class PreCheck < ApplicationRecord
   validate :all_required_fields_complete_before_submission
 
   validates :service_partner, presence: true
+  validates :certificate_no, uniqueness: true, allow_nil: true
 
   delegate :permit_project_title, to: :permit_application, allow_nil: true
 
@@ -35,10 +53,37 @@ class PreCheck < ApplicationRecord
     eula_accepted && consent_to_send_drawings
   end
 
+  def city_key
+    # TODO: Implement city key
+    "todo"
+  end
+
+  def primary_design_document
+    design_documents.order(created_at: :desc).first
+  end
+
+  def latitude
+    # TODO: Extract from geocoder data or site
+    nil
+  end
+
+  def longitude
+    # TODO: Extract from geocoder data or site
+    nil
+  end
+
+  def submit_to_archistar
+    archistar = Wrappers::Archistar.new
+    archistar.create_submission(self)
+  rescue => e
+    Rails.logger.error("Archistar submission failed: #{e.message}")
+    raise # This will rollback the AASM transition
+  end
+
   def search_data
     {
       id: id,
-      cert_number: cert_number,
+      certificate_no: certificate_no,
       full_address: full_address,
       status: status,
       service_partner: service_partner,
@@ -93,7 +138,7 @@ class PreCheck < ApplicationRecord
   end
 
   def cannot_change_after_submission
-    return unless persisted? && is_submitted_was == true
+    return unless persisted? && (submitted? || reviewed?)
 
     # Fields that cannot be changed after submission
     locked_fields = %w[
@@ -122,16 +167,16 @@ class PreCheck < ApplicationRecord
   end
 
   def cannot_unsubmit
-    if is_submitted_changed?(from: true, to: false)
-      errors.add(:is_submitted, "cannot be revoked once submitted")
+    if status_changed? && status_was.in?(%w[submitted reviewed]) &&
+         status == "draft"
+      errors.add(:status, "cannot be reverted to draft after submission")
     end
   end
 
   def all_required_fields_complete_before_submission
-    unless is_submitted == true && !persisted? ||
-             is_submitted_changed?(to: true)
-      return
-    end
+    # This validation runs during AASM transition via before_validation
+    # Only check if we're trying to transition to submitted status
+    return unless status == "submitted" && status_changed?
 
     missing_fields = []
 

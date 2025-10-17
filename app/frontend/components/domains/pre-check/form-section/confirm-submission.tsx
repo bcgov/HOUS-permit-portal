@@ -14,7 +14,7 @@ export const ConfirmSubmission = observer(function ConfirmSubmission() {
   const { navigateToNext } = usePreCheckNavigation()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const {
-    preCheckStore: { updatePreCheck },
+    preCheckStore: { submitPreCheck },
   } = useMst()
 
   const handleSubmit = async (closeModal: () => void) => {
@@ -22,10 +22,7 @@ export const ConfirmSubmission = observer(function ConfirmSubmission() {
 
     setIsSubmitting(true)
     try {
-      const result = await updatePreCheck(currentPreCheck.id, {
-        isSubmitted: true,
-        status: "submitted",
-      })
+      const result = await submitPreCheck(currentPreCheck.id)
 
       if (result.ok) {
         closeModal()

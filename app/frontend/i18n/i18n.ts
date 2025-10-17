@@ -357,7 +357,7 @@ const options = {
           columns: {
             created_at: "Created",
             updated_at: "Last Updated",
-            cert_number: "Certificate Number",
+            certificate_no: "Certificate Number",
             status: "Status",
             service_partner: "Service Partner",
           },
