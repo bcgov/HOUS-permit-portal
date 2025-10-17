@@ -51,7 +51,7 @@ export const ResultsSummary = observer(function ResultsSummary() {
               <li>
                 {t(
                   "preCheck.sections.resultsSummary.step3",
-                  "The downloadable report and a link to interactive results are available in your Projects"
+                  "The downloadable report and a link to interactive results are available in your Pre-checks"
                 )}
               </li>
             </Box>
@@ -59,7 +59,7 @@ export const ResultsSummary = observer(function ResultsSummary() {
             <Text mb={4} fontSize="sm" color="theme.blueAlt">
               {t(
                 "preCheck.sections.resultsSummary.notification",
-                "You don't need to stay on this page. We'll notify you as soon as your results are ready. You'll find completed reports in the Projects section."
+                "You don't need to stay on this page. We'll notify you as soon as your results are ready. You'll find completed reports in the Pre-checks section."
               )}
             </Text>
 

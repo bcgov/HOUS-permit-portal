@@ -1,4 +1,4 @@
-import { Flex, FormControl, GridItem, Heading, VStack } from "@chakra-ui/react"
+import { Flex, FormControl, GridItem, VStack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React from "react"
@@ -31,10 +31,6 @@ export const PreChecksGrid = observer(() => {
 
   return (
     <VStack align="stretch" spacing={4} w="full">
-      <Heading as="h2" size="lg">
-        {t("preCheck.index.allPreChecks", "All Pre-Checks")}
-      </Heading>
-
       <Flex direction="column" gap={4} w="full">
         <FormControl w="full">
           <ModelSearchInput

@@ -7,6 +7,7 @@ import { useNavigate, useParams } from "react-router-dom"
 import { usePreCheck } from "../../../hooks/resources/use-pre-check"
 import { useMst } from "../../../setup/root"
 import { EPreCheckServicePartner } from "../../../types/enums"
+import { LoadingScreen } from "../../shared/base/loading-screen"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
 import { RouterLink } from "../../shared/navigation/router-link"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
@@ -83,7 +84,7 @@ export const PreCheckForm = observer(function PreCheckForm() {
             {t("preCheck.form.title", "Pre-check your drawings for compliance with BC Building Code")}
           </FormLabel>
           <Spacer />
-          <RouterLinkButton to="/pre-checks" variant="tertiary">
+          <RouterLinkButton to="/pre-checks" variant="link">
             {t("preCheck.form.backToPreChecks", "Back to pre-checks")}
           </RouterLinkButton>
         </Flex>
@@ -107,19 +108,12 @@ export const PreCheckForm = observer(function PreCheckForm() {
               pos="sticky"
               overflow="auto"
               top={0}
-              pl={{ base: 0, xl: 20 }}
-              pt={10}
-              pb={10}
+              px={{ base: 0, xl: 20 }}
+              py={10}
               id="preCheckScroll"
             >
-              <Flex direction="column" flex={1} maxW="780px" px={6} py={3}>
-                {currentPreCheck ? (
-                  <FormSection />
-                ) : (
-                  <Center minH="400px">
-                    <SharedSpinner />
-                  </Center>
-                )}
+              <Flex direction="column" flex={1} px={6} py={3}>
+                {currentPreCheck ? <FormSection /> : <LoadingScreen />}
               </Flex>
             </Flex>
           </Flex>

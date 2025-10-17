@@ -189,7 +189,7 @@ export const UploadDrawings = observer(function UploadDrawings() {
             },
           }}
         >
-          <Dashboard uppy={uppy} height={276} proudlyDisplayPoweredByUppy={false} />
+          <Dashboard uppy={uppy} width="100%" height={276} proudlyDisplayPoweredByUppy={false} />
         </Box>
       )}
 

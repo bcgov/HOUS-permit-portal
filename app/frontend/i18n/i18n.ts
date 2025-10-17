@@ -359,6 +359,7 @@ const options = {
             updated_at: "Last Updated",
             certificate_no: "Certificate Number",
             status: "Status",
+            full_address: "Full Address",
             service_partner: "Service Partner",
           },
           sidebar: {
@@ -470,9 +471,9 @@ const options = {
               whatHappensNext: "What happens next",
               step1: "Your drawings are analyzed",
               step2: "A PDF report and interactive results are generated",
-              step3: "The downloadable report and a link to interactive results are available in your Projects",
+              step3: "The downloadable report and a link to interactive results are available in your Pre-checks",
               notification:
-                "You don't need to stay on this page. We'll notify you as soon as your results are ready. You'll find completed reports in the Projects section.",
+                "You don't need to stay on this page. We'll notify you as soon as your results are ready. You'll find completed reports in the Pre-checks section.",
               refreshStatus: "Refresh status",
               ready: "Your results are ready",
               readyDescription: "Your pre-check has been reviewed and the results are now available.",
