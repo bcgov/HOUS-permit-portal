@@ -106,11 +106,10 @@ export enum ERequirementTemplateSortFields {
 }
 
 export enum EPreCheckSortFields {
-  certificateNo = "certificate_no",
-  status = "status",
-  servicePartner = "service_partner",
   fullAddress = "full_address",
+  title = "title",
   updatedAt = "updated_at",
+  status = "status",
 }
 
 export enum EEarlyAccessRequirementTemplateSortFields {
@@ -711,6 +710,6 @@ export enum EPreCheckServicePartner {
 
 export enum EPreCheckStatus {
   draft = "draft",
-  submitted = "submitted",
-  reviewed = "reviewed",
+  processing = "processing",
+  complete = "complete",
 }

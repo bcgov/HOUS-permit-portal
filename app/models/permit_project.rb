@@ -72,6 +72,11 @@ class PermitProject < ApplicationRecord
     nil
   end
 
+  def permit_type_id
+    # To be overridden by PermitApplication using ProjectItem
+    nil
+  end
+
   def phase
     # To be implemented later
     nil

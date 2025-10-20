@@ -357,9 +357,10 @@ const options = {
           columns: {
             created_at: "Created",
             updated_at: "Last Updated",
+            title: "Project",
             certificate_no: "Certificate Number",
             status: "Status",
-            full_address: "Full Address",
+            full_address: "Address",
             service_partner: "Service Partner",
           },
           sidebar: {

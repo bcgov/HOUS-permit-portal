@@ -10,6 +10,7 @@ export const PreCheckModel = types
     complyCertificateId: types.maybeNull(types.number),
     certificateNo: types.maybeNull(types.string),
     status: types.enumeration(Object.values(EPreCheckStatus)),
+    title: types.maybeNull(types.string),
     fullAddress: types.maybeNull(types.string),
     permitApplicationId: types.maybeNull(types.string),
     jurisdiction: types.maybeNull(types.reference(types.late(() => JurisdictionModel))),
