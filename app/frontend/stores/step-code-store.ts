@@ -133,6 +133,7 @@ export const StepCodeStoreModel = types
         sort: self.sort,
         page: opts?.page ?? self.currentPage,
         perPage: opts?.countPerPage ?? self.countPerPage,
+        showArchived: self.showArchived,
         filters: {
           type: self.typeFilter,
         } as any,
@@ -236,6 +237,7 @@ export const StepCodeStoreModel = types
     }),
     createPart9StepCode: flow(function* (values: {
       permitApplicationId?: string
+      jurisdictionId?: string
       preConstructionChecklistAttributes?: any
       name?: string
     }) {
@@ -257,6 +259,16 @@ export const StepCodeStoreModel = types
         return response.data.data
       } else {
         console.error("Failed to fetch Part 3 Step Code:", response.problem, response.data)
+        return null
+      }
+    }),
+    fetchPart9StepCode: flow(function* (id: string) {
+      const response = yield self.environment.api.fetchPart9StepCode(id)
+      if (response.ok) {
+        self.mergeUpdate(response.data.data, "stepCodesMap")
+        return response.data.data
+      } else {
+        console.error("Failed to fetch Part 9 Step Code:", response.problem, response.data)
         return null
       }
     }),

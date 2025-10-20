@@ -37,4 +37,66 @@ namespace :jurisdiction do
 
     puts "Jurisdiction data cleanup finished."
   end
+
+  desc "Populate LTSA matcher using existing jurisdiction names"
+  task populate_ltsa_matcher: :environment do
+    updates = []
+    warnings = []
+    errors = []
+
+    Jurisdiction.find_each do |jurisdiction|
+      begin
+        matcher =
+          case jurisdiction.type
+          when SubDistrict.name
+            jurisdiction.reverse_qualified_name
+          when RegionalDistrict.name
+            jurisdiction.qualified_name
+          else
+            nil
+          end
+
+        if matcher.present?
+          if jurisdiction.ltsa_matcher != matcher
+            jurisdiction.update!(ltsa_matcher: matcher)
+            updates << "Updated #{jurisdiction.name} with matcher '#{matcher}'"
+          end
+        else
+          warnings << warn_message(
+            jurisdiction,
+            "Skipped: no matching rule for type #{jurisdiction.type || "unknown"}"
+          )
+        end
+      rescue StandardError => e
+        errors << warn_message(
+          jurisdiction,
+          "Error while assigning matcher: #{e.message}"
+        )
+      end
+    end
+
+    puts "Populate LTSA matcher summary"
+    puts "---"
+    if updates.any?
+      puts "Updated jurisdictions (#{updates.count}):"
+      updates.each { |msg| puts "  - #{msg}" }
+    else
+      puts "No jurisdictions updated."
+    end
+
+    if warnings.any?
+      puts "Warnings (#{warnings.count}):"
+      warnings.each { |msg| puts "  - #{msg}" }
+    end
+
+    if errors.any?
+      puts "Errors (#{errors.count}):"
+      errors.each { |msg| puts "  - #{msg}" }
+    end
+  end
+
+  def warn_message(jurisdiction, message)
+    prefix = jurisdiction.inbox_enabled? ? "⚠️ [INBOX ENABLED] ->" : "->"
+    "#{prefix} #{jurisdiction.name}: #{message}"
+  end
 end

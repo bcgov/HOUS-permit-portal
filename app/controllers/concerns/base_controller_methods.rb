@@ -64,6 +64,15 @@ module BaseControllerMethods
   def render_error(error_key = nil, opts = {}, exception = nil)
     if exception.present?
       Rails.logger.error "#{exception.message}\n#{exception.backtrace}"
+    elsif opts[:log_args].present?
+      Rails.logger.warn(
+        {
+          message: "render_error invoked",
+          error_key: error_key,
+          errors: opts[:log_args][:errors],
+          params: opts[:log_args][:params]
+        }.compact
+      )
     end
     opts.reverse_merge!({ status: 400, meta: {} })
     message =

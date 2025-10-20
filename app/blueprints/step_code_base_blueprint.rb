@@ -4,6 +4,7 @@ class StepCodeBaseBlueprint < Blueprinter::Base
   fields :type,
          :created_at,
          :updated_at,
+         :discarded_at,
          :title,
          :reference_number,
          :full_address,

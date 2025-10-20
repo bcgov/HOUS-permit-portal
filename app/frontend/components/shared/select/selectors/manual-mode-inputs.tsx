@@ -17,7 +17,7 @@ export const ManualModeInputs = observer(({ disabled }: IManualModeInputsProps) 
   const { t } = useTranslation()
 
   return (
-    <Flex direction="column" bg="greys.grey03" px={6} py={2} gap={4}>
+    <Flex direction="column" bg="greys.grey03" px={6} py={2} gap={4} w="full">
       <Flex gap={4}>
         <Controller
           name="jurisdictionId"

@@ -141,8 +141,7 @@ class PdfGenerationJob
 
         # Wait for the process to exit and get the exit status
         exit_status = wait_thr.value
-
-        File.delete(json_filename)
+        File.delete(json_filename) if Rails.env.production?
 
         # Check for errors or handle output based on the exit status
         if exit_status.success?

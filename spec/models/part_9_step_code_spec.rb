@@ -9,7 +9,7 @@ RSpec.describe Part9StepCode, type: :model do
   end
 
   before :each do
-    allow(permit_application).to receive(:step_code_plan_field) {
+    allow(permit_application).to receive(:architectural_drawing_plan_field) {
       "formSubmissionDataRSTsection422ad829-55d0-4677-b93b-ada73a3d2e0b|RB60d1b79c-02e9-430b-97e0-aaac8a0277e4|test_file"
     }
   end

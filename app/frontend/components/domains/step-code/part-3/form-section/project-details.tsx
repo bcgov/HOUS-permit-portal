@@ -22,12 +22,9 @@ import { Controller, FormProvider, useForm } from "react-hook-form"
 import { Trans } from "react-i18next"
 import { useLocation, useNavigate, useParams } from "react-router-dom"
 import { usePart3StepCode } from "../../../../../hooks/resources/use-part-3-step-code"
-import { useJurisdictionFromSite } from "../../../../../hooks/use-jurisdiction-from-site"
-import { useMst } from "../../../../../setup/root"
 import { IOption } from "../../../../../types/types"
 import { SharedSpinner } from "../../../../shared/base/shared-spinner"
 import { DatePickerFormControl } from "../../../../shared/form/input-form-control"
-import { ManualModeInputs } from "../../../../shared/select/selectors/manual-mode-inputs"
 import { SitesSelect } from "../../../../shared/select/selectors/sites-select"
 import { SectionHeading } from "./shared/section-heading"
 
@@ -67,14 +64,11 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
     register,
     reset,
     control,
-    watch,
     setValue,
     formState: { errors, isSubmitting },
   } = formMethods
 
   const [editingAddress, setEditingAddress] = useState<boolean>(!Boolean(currentStepCode?.fullAddress))
-  const [manualMode, setManualMode] = useState<boolean>(false)
-  const { jurisdictionStore } = useMst()
 
   useEffect(() => {
     if (checklist && currentStepCode) {
@@ -82,12 +76,6 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
       setEditingAddress(!Boolean(currentStepCode?.fullAddress))
     }
   }, [checklist, currentStepCode, reset])
-
-  // Hook now returns the jurisdiction it resolved; disable when in manual mode
-  const hookJurisdiction = useJurisdictionFromSite(watch, setValue, { disabled: manualMode })
-  const jurisdictionId = watch("jurisdictionId") as string | undefined
-  const selectedJurisdiction =
-    manualMode && jurisdictionId ? jurisdictionStore.getJurisdictionById(jurisdictionId) : hookJurisdiction
 
   const onSubmit = async (data: IProjectDetailsForm) => {
     if (!checklist || !currentStepCode) return
@@ -132,7 +120,7 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
       <FormProvider {...formMethods}>
         <form onSubmit={handleSubmit(onSubmit)} name="part3SectionForm">
           <Flex direction="column" gap={{ base: 6, xl: 6 }} pb={4}>
-            <Field label={t(`${i18nPrefix}.name`)} value={currentStepCode.title} />
+            {!editable && <Field label={t(`${i18nPrefix}.name`)} value={currentStepCode.title} />}
 
             <Flex gap={{ base: 6, xl: 6 }} direction="column">
               <Flex gap={2} alignItems="flex-end">
@@ -149,7 +137,6 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
                                 onChange(opt)
                                 setValue("fullAddress", opt?.label || "")
                               }}
-                              placeholder={undefined}
                               selectedOption={value}
                               menuPortalTarget={document.body}
                             />
@@ -179,14 +166,8 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
                         </InputGroup>
                       </Flex>
                     )}
-                    {manualMode && <ManualModeInputs />}
                     {editable && <FormErrorMessage>{errors.fullAddress?.message}</FormErrorMessage>}
                   </FormControl>
-                  {editable && (
-                    <Button mb={3} size="sm" variant="link" onClick={() => setManualMode((prev) => !prev)}>
-                      {t("ui.toggleManualMode")}
-                    </Button>
-                  )}
                 </Flex>
               </Flex>
               {editable && (
@@ -194,18 +175,15 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
                 <input type="hidden" {...register("fullAddress")} />
               )}
 
-              <FormControl flex={1}>
-                <FormLabel>{t(`${i18nPrefix}.jurisdiction`)}</FormLabel>
-                <Input
-                  isDisabled
-                  value={
-                    selectedJurisdiction?.qualifiedName ||
-                    currentStepCode.jurisdictionName ||
-                    currentStepCode.jurisdiction?.qualifiedName ||
-                    ""
-                  }
-                />
-              </FormControl>
+              {!editable && (
+                <FormControl flex={1}>
+                  <FormLabel>{t(`${i18nPrefix}.jurisdiction`)}</FormLabel>
+                  <Input
+                    isDisabled
+                    value={currentStepCode.jurisdictionName || currentStepCode.jurisdiction?.qualifiedName || ""}
+                  />
+                </FormControl>
+              )}
             </Flex>
 
             <Flex gap={{ base: 6, xl: 6 }} direction={{ base: "column", xl: "row" }}>
