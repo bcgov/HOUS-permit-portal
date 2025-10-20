@@ -614,6 +614,18 @@ en:
       update_error:
         title: Error
         message: "%{error_message}"
+      restore_success:
+        title: ""
+        message: "Step code restored successfully!"
+      restore_error:
+        title: Error
+        message: "There was an error restoring the step code"
+      destroy_success:
+        title: ""
+        message: "Step code archived successfully!"
+      destroy_error:
+        title: Error
+        message: "There was an error archiving the step code"
     report_document:
       share_success:
         title: ""
