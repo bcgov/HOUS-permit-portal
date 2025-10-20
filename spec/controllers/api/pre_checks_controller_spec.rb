@@ -53,21 +53,11 @@ RSpec.describe Api::PreChecksController, type: :controller, search: true do
 
   describe "POST #create" do
     it "creates a pre-check" do
-      permit_application =
-        create(
-          :permit_application,
-          submitter: user,
-          permit_project: create(:permit_project, owner: user)
-        )
-
       expect do
         post :create,
              params: {
                pre_check: {
-                 title: "New PreCheck",
-                 permit_application_id: permit_application.id,
-                 checklist: {
-                 }
+                 full_address: "123 Test St"
                }
              },
              as: :json

@@ -10,7 +10,7 @@ interface IGridHeadersProps {
   columns: string[]
   includeActionColumn?: boolean
 }
-export const PRE_CHECKS_GRID_TEMPLATE_COLUMNS = "2fr 1.5fr 1.5fr 1.5fr 1.5fr 0.5fr"
+export const PRE_CHECKS_GRID_TEMPLATE_COLUMNS = "2fr 1.5fr 1.5fr 1.5fr 0.5fr"
 
 export const PreCheckGridHeaders = observer(function PreCheckGridHeaders({
   columns,

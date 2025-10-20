@@ -9,21 +9,21 @@ class PreCheck < ApplicationRecord
   enum :service_partner, { archistar: 0 }
 
   attribute :status, :integer
-  enum :status, { draft: 0, submitted: 1, reviewed: 2 }
+  enum :status, { draft: 0, processing: 1, complete: 2 }
 
   aasm column: :status, enum: true do
     state :draft, initial: true
-    state :submitted
-    state :reviewed
+    state :processing
+    state :complete
 
     event :submit do
-      transitions from: :draft, to: :submitted
+      transitions from: :draft, to: :processing
 
       after { submit_to_archistar }
     end
 
-    event :mark_reviewed do
-      transitions from: :submitted, to: :reviewed
+    event :mark_complete do
+      transitions from: :processing, to: :complete
     end
   end
 
@@ -86,6 +86,7 @@ class PreCheck < ApplicationRecord
       certificate_no: certificate_no,
       full_address: full_address,
       status: status,
+      title: title,
       service_partner: service_partner,
       creator_id: creator_id,
       created_at: created_at,
@@ -138,7 +139,7 @@ class PreCheck < ApplicationRecord
   end
 
   def cannot_change_after_submission
-    return unless persisted? && (submitted? || reviewed?)
+    return unless persisted? && (processing? || complete?)
 
     # Fields that cannot be changed after submission
     locked_fields = %w[
@@ -167,7 +168,7 @@ class PreCheck < ApplicationRecord
   end
 
   def cannot_unsubmit
-    if status_changed? && status_was.in?(%w[submitted reviewed]) &&
+    if status_changed? && status_was.in?(%w[processing complete]) &&
          status == "draft"
       errors.add(:status, "cannot be reverted to draft after submission")
     end
@@ -175,8 +176,8 @@ class PreCheck < ApplicationRecord
 
   def all_required_fields_complete_before_submission
     # This validation runs during AASM transition via before_validation
-    # Only check if we're trying to transition to submitted status
-    return unless status == "submitted" && status_changed?
+    # Only check if we're trying to transition to processing status
+    return unless status == "processing" && status_changed?
 
     missing_fields = []
 

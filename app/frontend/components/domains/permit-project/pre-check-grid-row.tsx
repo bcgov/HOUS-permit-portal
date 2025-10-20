@@ -32,19 +32,16 @@ export const PreCheckGridRow = observer(({ preCheck }: IPreCheckGridRowProps) =>
         _last={{ borderBottom: "none" }}
       >
         <GridItem display="flex" alignItems="center" px={4} py={2}>
-          <Text>{preCheck.certificateNo || "-"}</Text>
-        </GridItem>
-        <GridItem display="flex" alignItems="center" px={4} py={2}>
-          <Text>{preCheck.status || "-"}</Text>
-        </GridItem>
-        <GridItem display="flex" alignItems="center" px={4} py={2}>
-          <Text>{preCheck.servicePartner || "-"}</Text>
-        </GridItem>
-        <GridItem display="flex" alignItems="center" px={4} py={2}>
           <Text>{preCheck.fullAddress || "-"}</Text>
         </GridItem>
         <GridItem display="flex" alignItems="center" px={4} py={2}>
+          <Text>{preCheck.title || "-"}</Text>
+        </GridItem>
+        <GridItem display="flex" alignItems="center" px={4} py={2}>
           {preCheck.updatedAt && format(preCheck.updatedAt, datefnsTableDateTimeFormat)}
+        </GridItem>
+        <GridItem display="flex" alignItems="center" px={4} py={2}>
+          <Text>{preCheck.status || "-"}</Text>
         </GridItem>
         <GridItem display="flex" alignItems="center" justifyContent="flex-end" px={4} py={2}>
           <Menu>

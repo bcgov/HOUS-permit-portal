@@ -45,11 +45,11 @@ export const PreChecksGrid = observer(() => {
         <PreCheckGridHeaders columns={Object.values(EPreCheckSortFields)} includeActionColumn />
 
         {isSearching ? (
-          <Flex gridColumn="span 6" justify="center" align="center" minH="200px">
+          <Flex gridColumn="span 5" justify="center" align="center" minH="200px">
             <SharedSpinner />
           </Flex>
         ) : R.isEmpty(tablePreChecks) ? (
-          <GridItem gridColumn="span 6">
+          <GridItem gridColumn="span 5">
             <CustomMessageBox
               m={4}
               status={EFlashMessageStatus.info}

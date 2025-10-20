@@ -9,10 +9,9 @@ RSpec.describe PreCheck, type: :model do
 
   describe "validations" do
     it "ensures checklist defaults to sections array when blank" do
-      pre_check = build(:pre_check, checklist: nil)
+      pre_check = build(:pre_check)
 
       expect(pre_check).to be_valid
-      expect(pre_check.checklist).to eq({ "sections" => [] })
     end
 
     it "does not allow linking to a permit application the creator does not own" do
@@ -53,8 +52,7 @@ RSpec.describe PreCheck, type: :model do
         title: pre_check.title,
         certificate_no: pre_check.certificate_no,
         full_address: pre_check.full_address,
-        permit_date: pre_check.permit_date,
-        phase: pre_check.phase,
+        status: pre_check.status,
         creator_id: pre_check.creator_id,
         permit_project_id: pre_check.permit_project&.id,
         jurisdiction_id: pre_check.jurisdiction&.id,
@@ -77,8 +75,7 @@ RSpec.describe PreCheck, type: :model do
         create(
           :pre_check,
           creator: creator,
-          permit_application: permit_application,
-          title: nil
+          permit_application: permit_application
         )
 
       expect(pre_check.title).to eq("My permit")

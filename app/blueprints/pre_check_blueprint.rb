@@ -5,6 +5,7 @@ class PreCheckBlueprint < Blueprinter::Base
          :certificate_no,
          :status,
          :full_address,
+         :title,
          :permit_application_id,
          :service_partner,
          :eula_accepted,
