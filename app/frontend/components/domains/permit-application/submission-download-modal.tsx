@@ -24,6 +24,7 @@ import { useTranslation } from "react-i18next"
 import { datefnsAppDateFormat } from "../../../constants"
 import { IPermitApplication } from "../../../models/permit-application"
 import { useMst } from "../../../setup/root"
+import { exportPermitApplicationCsv } from "../../../utils/export-permit-application-csv"
 import { formatBytes } from "../../../utils/utility-functions"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
 import { LoadingIcon } from "../../shared/loading-icon"
@@ -97,6 +98,14 @@ export const SubmissionDownloadModal = observer(
                     <Text fontSize="md" fontWeight="normal">
                       {t("permitApplication.show.downloadPrompt")}
                     </Text>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      leftIcon={<FileArrowDown />}
+                      onClick={() => exportPermitApplicationCsv(permitApplication)}
+                    >
+                      {t("permitApplication.show.downloadAsCsv")}
+                    </Button>
                   </VStack>
                   <ModalCloseButton fontSize="11px" />
                 </ModalHeader>
