@@ -464,7 +464,7 @@ end
 if Rails.env.development?
   puts "Ensuring site configuration inbox is enabled for development..."
   site_config = SiteConfiguration.instance
-  site_config.update(inbox_enabled: true)
+  site_config.update(inbox_enabled: true, code_compliance_enabled: true)
 end
 
 puts "Seeding Permit Projects from Permit Applications..."

@@ -104,6 +104,16 @@ export const PreCheckStoreModel = types
       console.error("Failed to update PreCheck:", response.problem, response.data)
       return { ok: false, error: response.data?.errors || response.problem }
     }),
+
+    submitPreCheck: flow(function* (id: string) {
+      const response = yield self.environment.api.submitPreCheck(id)
+      if (response.ok) {
+        self.mergeUpdate(response.data.data, "preChecksMap")
+        return { ok: true, data: response.data.data }
+      }
+      console.error("Failed to submit PreCheck:", response.problem, response.data)
+      return { ok: false, error: response.data?.errors || response.problem }
+    }),
   }))
 
 export interface IPreCheckStore extends Instance<typeof PreCheckStoreModel> {}

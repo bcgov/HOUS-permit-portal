@@ -1,9 +1,11 @@
-import { Box, Button, Flex, Grid, Heading, Text, VStack } from "@chakra-ui/react"
+import { Box, Button, Flex, Heading, Text, VStack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { usePreCheck } from "../../../../hooks/resources/use-pre-check"
 import { useMst } from "../../../../setup/root"
+import { EFileUploadAttachmentType } from "../../../../types/enums"
+import { FileDownloadButton } from "../../../shared/base/file-download-button"
 import { ConfirmationModal } from "../../../shared/confirmation-modal"
 import { PreCheckBackLink } from "../pre-check-back-link"
 import { usePreCheckNavigation } from "../use-pre-check-navigation"
@@ -14,7 +16,7 @@ export const ConfirmSubmission = observer(function ConfirmSubmission() {
   const { navigateToNext } = usePreCheckNavigation()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const {
-    preCheckStore: { updatePreCheck },
+    preCheckStore: { submitPreCheck },
   } = useMst()
 
   const handleSubmit = async (closeModal: () => void) => {
@@ -22,10 +24,7 @@ export const ConfirmSubmission = observer(function ConfirmSubmission() {
 
     setIsSubmitting(true)
     try {
-      const result = await updatePreCheck(currentPreCheck.id, {
-        isSubmitted: true,
-        status: "submitted",
-      })
+      const result = await submitPreCheck(currentPreCheck.id)
 
       if (result.ok) {
         closeModal()
@@ -52,7 +51,7 @@ export const ConfirmSubmission = observer(function ConfirmSubmission() {
 
       <VStack spacing={6} align="stretch" mb={8}>
         {/* Project and Application Numbers */}
-        <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={8}>
+        {/* <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={8}>
           <Box>
             <Heading as="h3" size="sm" mb={2} fontWeight="bold">
               {t("preCheck.sections.confirmSubmission.projectNumber", "Project number")}
@@ -65,7 +64,7 @@ export const ConfirmSubmission = observer(function ConfirmSubmission() {
             </Heading>
             <Text color="text.secondary">—</Text>
           </Box>
-        </Grid>
+        </Grid> */}
 
         {/* Address */}
         <Box>
@@ -85,7 +84,7 @@ export const ConfirmSubmission = observer(function ConfirmSubmission() {
             {t("preCheck.sections.confirmSubmission.jurisdiction", "Jurisdiction")}
           </Heading>
           {currentPreCheck?.jurisdiction?.name ? (
-            <Text>{currentPreCheck.jurisdiction.name}</Text>
+            <Text>{currentPreCheck.jurisdiction.qualifiedName}</Text>
           ) : (
             <Text color="text.secondary">—</Text>
           )}
@@ -103,7 +102,13 @@ export const ConfirmSubmission = observer(function ConfirmSubmission() {
               {designDocuments
                 .filter((doc) => !doc._destroy)
                 .map((doc) => (
-                  <Text key={doc.id || doc.file?.id}>{doc.file?.metadata?.filename || "Unknown file"}</Text>
+                  <FileDownloadButton
+                    key={doc.id || doc.file?.id}
+                    document={doc}
+                    modelType={EFileUploadAttachmentType.DesignDocument}
+                    variant="link"
+                    size="sm"
+                  />
                 ))}
             </VStack>
           ) : (

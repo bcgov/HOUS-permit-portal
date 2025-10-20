@@ -15,6 +15,10 @@ class PreCheckPolicy < ApplicationPolicy
     record.creator_id == user.id
   end
 
+  def submit?
+    update?
+  end
+
   class Scope < Scope
     def resolve
       scope.where(creator_id: user.id)

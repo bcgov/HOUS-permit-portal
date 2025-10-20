@@ -1,7 +1,7 @@
 class Api::PreChecksController < Api::ApplicationController
   include Api::Concerns::Search::PreChecks
 
-  before_action :set_pre_check, only: %i[show update]
+  before_action :set_pre_check, only: %i[show update submit]
   skip_after_action :verify_policy_scoped, only: %i[index]
 
   def index
@@ -52,6 +52,21 @@ class Api::PreChecksController < Api::ApplicationController
     end
   end
 
+  def submit
+    authorize @pre_check
+
+    if @pre_check.submit
+      render_success @pre_check,
+                     "pre_check.submit_success",
+                     { blueprint: PreCheckBlueprint }
+    else
+      render_error "pre_check.submit_error",
+                   message_opts: {
+                     error_message: @pre_check.errors.full_messages.to_sentence
+                   }
+    end
+  end
+
   private
 
   def set_pre_check
@@ -60,7 +75,6 @@ class Api::PreChecksController < Api::ApplicationController
 
   def pre_check_params
     params.require(:pre_check).permit(
-      :cert_number,
       :status,
       :full_address,
       :permit_application_id,
@@ -71,7 +85,6 @@ class Api::PreChecksController < Api::ApplicationController
       :consent_to_send_drawings,
       :consent_to_share_with_jurisdiction,
       :consent_to_research_contact,
-      :is_submitted,
       design_documents_attributes: [
         :id,
         :_destroy,

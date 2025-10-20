@@ -29,11 +29,11 @@ export const CodeComplianceSetupScreen: React.FC = observer(function CodeComplia
     })
   }
 
-  const loadEnrolledJurisdictions = async () => {
+  const loadEnrolledJurisdictions = async (servicePartner: EPreCheckServicePartner) => {
     if (!codeComplianceEnabled) return
 
     setIsLoadingEnrollments(true)
-    const response = await fetchJurisdictionEnrollments("archistar")
+    const response = await fetchJurisdictionEnrollments(servicePartner)
     if (response.ok && response.data?.data) {
       const jurisdictions = response.data.data.map((enrollment: any) => ({
         label: enrollment.jurisdictionQualifiedName,
@@ -65,7 +65,7 @@ export const CodeComplianceSetupScreen: React.FC = observer(function CodeComplia
 
   useEffect(() => {
     if (codeComplianceEnabled && configurationLoaded) {
-      loadEnrolledJurisdictions()
+      loadEnrolledJurisdictions(EPreCheckServicePartner.archistar)
     }
   }, [codeComplianceEnabled, configurationLoaded])
 

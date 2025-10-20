@@ -7,7 +7,8 @@ import { PermitTypeModel } from "./permit-classification"
 export const PreCheckModel = types
   .model("PreCheck", {
     id: types.identifier,
-    certNumber: types.maybeNull(types.string),
+    complyCertificateId: types.maybeNull(types.number),
+    certificateNo: types.maybeNull(types.string),
     status: types.enumeration(Object.values(EPreCheckStatus)),
     fullAddress: types.maybeNull(types.string),
     permitApplicationId: types.maybeNull(types.string),
@@ -18,12 +19,15 @@ export const PreCheckModel = types
     consentToSendDrawings: types.optional(types.boolean, false),
     consentToShareWithJurisdiction: types.optional(types.boolean, false),
     consentToResearchContact: types.optional(types.boolean, false),
-    isSubmitted: types.optional(types.boolean, false),
     designDocuments: types.array(types.frozen<IDesignDocument>()),
     createdAt: types.maybeNull(types.Date),
     updatedAt: types.maybeNull(types.Date),
   })
   .views((self) => ({
+    // Computed view to replace isSubmitted boolean
+    get isSubmitted() {
+      return self.status === EPreCheckStatus.submitted || self.status === EPreCheckStatus.reviewed
+    },
     // Helper to check if all required agreements have been accepted
     get requiredAgreementsAccepted() {
       return self.eulaAccepted && self.consentToSendDrawings
@@ -46,7 +50,7 @@ export const PreCheckModel = types
       return self.designDocuments.length > 0
     },
     get isConfirmSubmissionComplete() {
-      return self.isSubmitted
+      return self.status === EPreCheckStatus.submitted || self.status === EPreCheckStatus.reviewed
     },
     get isResultsSummaryComplete() {
       return self.status === EPreCheckStatus.reviewed

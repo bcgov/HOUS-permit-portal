@@ -49,7 +49,7 @@ export const GeocoderStoreModel = types
           const jurisdictionModel = self.rootStore.jurisdictionStore.getJurisdictionById(responseData.id)
           return { jurisdiction: jurisdictionModel, ltsaMatcher }
         }
-        return { jurisdiction: null, ltsaMatcher: null }
+        return { jurisdiction: null, ltsaMatcher }
       }
       return { jurisdiction: null, ltsaMatcher: null }
     }),

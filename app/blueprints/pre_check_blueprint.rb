@@ -1,7 +1,8 @@
 class PreCheckBlueprint < Blueprinter::Base
   identifier :id
 
-  fields :cert_number,
+  fields :comply_certificate_id,
+         :certificate_no,
          :status,
          :full_address,
          :permit_application_id,
@@ -10,7 +11,6 @@ class PreCheckBlueprint < Blueprinter::Base
          :consent_to_send_drawings,
          :consent_to_share_with_jurisdiction,
          :consent_to_research_contact,
-         :is_submitted,
          :created_at,
          :updated_at
 

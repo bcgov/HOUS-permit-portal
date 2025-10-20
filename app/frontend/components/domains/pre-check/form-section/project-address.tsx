@@ -24,6 +24,7 @@ export const ProjectAddress = observer(function ProjectAddress() {
   const {
     preCheckStore: { updatePreCheck },
     jurisdictionStore,
+    siteConfigurationStore,
   } = useMst()
 
   const methods = useForm<IProjectAddressFormData>({
@@ -60,6 +61,12 @@ export const ProjectAddress = observer(function ProjectAddress() {
   const getIsJurisdictionEnrolled = () => {
     if (!selectedJurisdiction || !currentPreCheck?.servicePartner) return false
 
+    // Check global enablement first - if the service partner is globally enabled for all jurisdictions, return true
+    if (siteConfigurationStore.isServicePartnerGloballyEnabled(currentPreCheck.servicePartner)) {
+      return true
+    }
+
+    // Otherwise, check specific jurisdiction enrollment
     const hasEnrollmentData = selectedJurisdiction.servicePartnerEnrollments?.length > 0
     if (hasEnrollmentData) {
       return selectedJurisdiction.isEnrolledInServicePartner(currentPreCheck.servicePartner as EPreCheckServicePartner)

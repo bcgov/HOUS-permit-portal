@@ -1,5 +1,5 @@
 class CreatePreChecks < ActiveRecord::Migration[7.1]
-  def change
+  def up
     create_table :pre_checks,
                  id: :uuid,
                  default: -> { "gen_random_uuid()" } do |t|
@@ -7,7 +7,8 @@ class CreatePreChecks < ActiveRecord::Migration[7.1]
       t.uuid :permit_type_id
       t.uuid :creator_id, null: false
       t.uuid :jurisdiction_id
-      t.string :cert_number
+      t.integer :comply_certificate_id
+      t.string :certificate_no
       t.string :full_address
       t.integer :service_partner, null: false, default: 0
       t.integer :status, null: false, default: 0
@@ -17,7 +18,6 @@ class CreatePreChecks < ActiveRecord::Migration[7.1]
       t.boolean :consent_to_send_drawings, default: false, null: false
       t.boolean :consent_to_share_with_jurisdiction, default: false
       t.boolean :consent_to_research_contact, default: false
-      t.boolean :is_submitted, default: false, null: false
 
       t.timestamps
     end
@@ -36,5 +36,9 @@ class CreatePreChecks < ActiveRecord::Migration[7.1]
                     column: :permit_type_id
     add_foreign_key :pre_checks, :users, column: :creator_id
     add_foreign_key :pre_checks, :jurisdictions, column: :jurisdiction_id
+  end
+
+  def down
+    drop_table :pre_checks
   end
 end

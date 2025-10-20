@@ -5,7 +5,7 @@ export const PermitClassificationModel = types.model("PermitClassificationModel"
   id: types.identifier,
   name: types.string,
   code: types.string,
-  description: types.string,
+  descriptionHtml: types.maybeNull(types.string),
   enabled: types.boolean,
   imageUrl: types.string,
   category: types.maybeNull(types.string),
