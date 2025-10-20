@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_10_09_202916) do
+ActiveRecord::Schema[7.2].define(version: 2025_10_17_215837) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -198,6 +198,16 @@ ActiveRecord::Schema[7.2].define(version: 2025_10_09_202916) do
     t.datetime "updated_at", null: false
     t.index ["jurisdiction_id"], name: "index_jurisdiction_memberships_on_jurisdiction_id"
     t.index ["user_id"], name: "index_jurisdiction_memberships_on_user_id"
+  end
+
+  create_table "jurisdiction_service_partner_enrollments", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "jurisdiction_id", null: false
+    t.integer "service_partner", null: false
+    t.boolean "enabled", default: true, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["jurisdiction_id", "service_partner"], name: "index_jurisdiction_service_partner_unique", unique: true
+    t.index ["jurisdiction_id"], name: "idx_on_jurisdiction_id_6fa7cce558"
   end
 
   create_table "jurisdiction_template_version_customizations", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -437,7 +447,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_10_09_202916) do
     t.string "type", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "description"
+    t.text "description_html"
     t.boolean "enabled"
     t.string "category"
     t.string "code"
@@ -516,7 +526,8 @@ ActiveRecord::Schema[7.2].define(version: 2025_10_09_202916) do
     t.uuid "permit_type_id"
     t.uuid "creator_id", null: false
     t.uuid "jurisdiction_id"
-    t.string "cert_number"
+    t.integer "comply_certificate_id"
+    t.string "certificate_no"
     t.string "full_address"
     t.integer "service_partner", default: 0, null: false
     t.integer "status", default: 0, null: false
@@ -524,7 +535,6 @@ ActiveRecord::Schema[7.2].define(version: 2025_10_09_202916) do
     t.boolean "consent_to_send_drawings", default: false, null: false
     t.boolean "consent_to_share_with_jurisdiction", default: false
     t.boolean "consent_to_research_contact", default: false
-    t.boolean "is_submitted", default: false, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["creator_id"], name: "index_pre_checks_on_creator_id"
@@ -698,6 +708,8 @@ ActiveRecord::Schema[7.2].define(version: 2025_10_09_202916) do
     t.jsonb "revision_reason_options"
     t.boolean "inbox_enabled", default: false, null: false
     t.boolean "allow_designated_reviewer", default: false, null: false
+    t.boolean "code_compliance_enabled", default: false, null: false
+    t.boolean "archistar_enabled_for_all_jurisdictions", default: false, null: false
   end
 
   create_table "step_code_building_characteristics_summaries", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -961,6 +973,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_10_09_202916) do
   add_foreign_key "jurisdiction_documents", "jurisdictions"
   add_foreign_key "jurisdiction_memberships", "jurisdictions"
   add_foreign_key "jurisdiction_memberships", "users"
+  add_foreign_key "jurisdiction_service_partner_enrollments", "jurisdictions"
   add_foreign_key "jurisdiction_template_version_customizations", "jurisdictions"
   add_foreign_key "jurisdiction_template_version_customizations", "sandboxes"
   add_foreign_key "jurisdiction_template_version_customizations", "template_versions"

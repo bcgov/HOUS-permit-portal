@@ -5,7 +5,9 @@ import { FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { usePreCheck } from "../../../../hooks/resources/use-pre-check"
 import { useMst } from "../../../../setup/root"
+import { EFlashMessageStatus, EPreCheckServicePartner } from "../../../../types/enums"
 import { IOption } from "../../../../types/types"
+import { CustomMessageBox } from "../../../shared/base/custom-message-box"
 import { SitesSelect } from "../../../shared/select/selectors/sites-select"
 import { PreCheckBackLink } from "../pre-check-back-link"
 import { FormFooter } from "./form-footer"
@@ -21,6 +23,8 @@ export const ProjectAddress = observer(function ProjectAddress() {
   const { currentPreCheck } = usePreCheck()
   const {
     preCheckStore: { updatePreCheck },
+    jurisdictionStore,
+    siteConfigurationStore,
   } = useMst()
 
   const methods = useForm<IProjectAddressFormData>({
@@ -39,6 +43,7 @@ export const ProjectAddress = observer(function ProjectAddress() {
   } = methods
 
   const selectedSite = watch("site")
+  const jurisdictionIdWatch = watch("jurisdictionId")
 
   const onSubmit = async (data: IProjectAddressFormData) => {
     if (!currentPreCheck) return
@@ -46,6 +51,52 @@ export const ProjectAddress = observer(function ProjectAddress() {
       fullAddress: data.site?.label || "",
       jurisdictionId: data.jurisdictionId,
     })
+  }
+
+  // Get jurisdiction from store based on form's jurisdictionId
+  const selectedJurisdiction = jurisdictionIdWatch ? jurisdictionStore.getJurisdictionById(jurisdictionIdWatch) : null
+
+  // Check if the selected jurisdiction is enrolled in the service partner
+  // This is a simple computed value that MobX will track automatically
+  const getIsJurisdictionEnrolled = () => {
+    if (!selectedJurisdiction || !currentPreCheck?.servicePartner) return false
+
+    // Check global enablement first - if the service partner is globally enabled for all jurisdictions, return true
+    if (siteConfigurationStore.isServicePartnerGloballyEnabled(currentPreCheck.servicePartner)) {
+      return true
+    }
+
+    // Otherwise, check specific jurisdiction enrollment
+    const hasEnrollmentData = selectedJurisdiction.servicePartnerEnrollments?.length > 0
+    if (hasEnrollmentData) {
+      return selectedJurisdiction.isEnrolledInServicePartner(currentPreCheck.servicePartner as EPreCheckServicePartner)
+    }
+
+    return false
+  }
+
+  const renderEnrollmentStatus = () => {
+    if (!selectedJurisdiction || !currentPreCheck?.servicePartner) return null
+
+    const isEnrolled = getIsJurisdictionEnrolled()
+
+    if (isEnrolled) {
+      return (
+        <CustomMessageBox
+          status={EFlashMessageStatus.success}
+          title={t("ui.participatingCommunityTitle")}
+          description={t("ui.participatingCommunityDescription")}
+        />
+      )
+    } else {
+      return (
+        <CustomMessageBox
+          status={EFlashMessageStatus.error}
+          title={t("ui.serviceNotAvailableTitle")}
+          description={t("ui.serviceNotAvailableDescription")}
+        />
+      )
+    }
   }
 
   return (
@@ -75,9 +126,18 @@ export const ProjectAddress = observer(function ProjectAddress() {
             initialJurisdiction={currentPreCheck?.jurisdiction || null}
             isDisabled={currentPreCheck?.isSubmitted}
           />
+
+          {/* Show enrollment status message */}
+          {renderEnrollmentStatus()}
         </VStack>
 
-        <FormFooter<IProjectAddressFormData> handleSubmit={handleSubmit} onSubmit={onSubmit} isLoading={isSubmitting} />
+        <FormFooter<IProjectAddressFormData>
+          handleSubmit={handleSubmit}
+          onSubmit={onSubmit}
+          isLoading={isSubmitting}
+          isDisabled={!getIsJurisdictionEnrolled()}
+          disabledMessage={!getIsJurisdictionEnrolled() ? t("ui.selectParticipatingJurisdiction") : undefined}
+        />
       </Box>
     </FormProvider>
   )

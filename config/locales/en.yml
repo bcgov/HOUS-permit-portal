@@ -239,6 +239,12 @@ en:
       update_error:
         title: Error
         message: "Error updating pre-check"
+      submit_success:
+        title: ""
+        message: "Pre-check submitted successfully!"
+      submit_error:
+        title: Error
+        message: "Error submitting pre-check"
     contact:
       options_error:
         title: Error
@@ -598,6 +604,9 @@ en:
         title: ""
         message: "%{error_message}"
     site_configuration:
+      enrollments_updated:
+        title: ""
+        message: "Jurisdiction code compliance enrollments updated successfully"
       update_success:
         title: ""
         message: "Successfully updated site configuration"

@@ -32,7 +32,7 @@ export const PreCheckGridRow = observer(({ preCheck }: IPreCheckGridRowProps) =>
         _last={{ borderBottom: "none" }}
       >
         <GridItem display="flex" alignItems="center" px={4} py={2}>
-          <Text>{preCheck.certNumber || "-"}</Text>
+          <Text>{preCheck.certificateNo || "-"}</Text>
         </GridItem>
         <GridItem display="flex" alignItems="center" px={4} py={2}>
           <Text>{preCheck.status || "-"}</Text>

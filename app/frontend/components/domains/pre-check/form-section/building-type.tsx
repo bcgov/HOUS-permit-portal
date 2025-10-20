@@ -1,4 +1,4 @@
-import { Box, Flex, Heading, Radio, Text, VStack } from "@chakra-ui/react"
+import { Box, Flex, Heading, Radio, Spacer, Text, VStack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
 import { Controller, useForm } from "react-hook-form"
@@ -7,6 +7,7 @@ import { usePreCheck } from "../../../../hooks/resources/use-pre-check"
 import { IPermitType } from "../../../../models/permit-classification"
 import { useMst } from "../../../../setup/root"
 import { IOption } from "../../../../types/types"
+import { Editor } from "../../../shared/editor/editor"
 import { PreCheckBackLink } from "../pre-check-back-link"
 import { FormFooter } from "./form-footer"
 
@@ -87,13 +88,14 @@ export const BuildingType = observer(function BuildingType() {
                       cursor={currentPreCheck?.isSubmitted ? "not-allowed" : "pointer"}
                       opacity={currentPreCheck?.isSubmitted ? 0.6 : 1}
                     >
-                      <Flex direction="column" justify="space-between" align="start" gap={4}>
+                      <Flex direction="column" justify="space-between" align="start" gap={4} h="full">
                         <Box flex={1}>
                           <Heading as="h3" fontSize="lg" mb={2}>
                             {option.value.name}
                           </Heading>
-                          <Text color="text.secondary">{option.value.description}</Text>
+                          <Editor htmlValue={option.value.descriptionHtml} readonly />
                         </Box>
+                        <Spacer />
                         <Flex
                           align="center"
                           gap={2}

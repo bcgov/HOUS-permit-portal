@@ -758,6 +758,10 @@ export class Api {
     return this.client.patch<IApiResponse<IPreCheck, {}>>(`/pre_checks/${id}`, { preCheck: params })
   }
 
+  async submitPreCheck(id: string) {
+    return this.client.post<IApiResponse<IPreCheck, {}>>(`/pre_checks/${id}/submit`)
+  }
+
   async downloadApplicationMetricsCsv() {
     return this.client.get<BlobPart>(`/permit_applications/download_application_metrics_csv`)
   }
@@ -811,6 +815,19 @@ export class Api {
 
   async updateSiteConfiguration(siteConfiguration) {
     return this.client.put<ApiResponse<ISiteConfigurationStore>>(`/site_configuration`, { siteConfiguration })
+  }
+
+  async updateJurisdictionEnrollments(servicePartner: string, jurisdictionIds: string[]) {
+    return this.client.post<ApiResponse<any>>(`/site_configuration/update_jurisdiction_enrollments`, {
+      servicePartner,
+      jurisdictionIds,
+    })
+  }
+
+  async fetchJurisdictionEnrollments(servicePartner: string) {
+    return this.client.get<ApiResponse<any>>(`/site_configuration/jurisdiction_enrollments`, {
+      servicePartner,
+    })
   }
 
   async updateUser(id: string, user: IUser) {

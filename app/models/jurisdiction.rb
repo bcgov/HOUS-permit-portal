@@ -68,6 +68,9 @@ class Jurisdiction < ApplicationRecord
   has_many :sandboxes, dependent: :destroy
   has_many :property_plan_local_jurisdictions, dependent: :destroy
   has_many :jurisdiction_documents, dependent: :destroy
+  has_many :service_partner_enrollments,
+           class_name: "JurisdictionServicePartnerEnrollment",
+           dependent: :destroy
 
   validates :name, uniqueness: { scope: :locality_type, case_sensitive: false }
   validates :locality_type, presence: true
@@ -416,5 +419,13 @@ class Jurisdiction < ApplicationRecord
         )
       )
     end
+  end
+
+  def enrolled_in_service_partner?(partner)
+    service_partner_enrollments.exists?(service_partner: partner, enabled: true)
+  end
+
+  def archistar_enabled?
+    enrolled_in_service_partner?(:archistar)
   end
 end

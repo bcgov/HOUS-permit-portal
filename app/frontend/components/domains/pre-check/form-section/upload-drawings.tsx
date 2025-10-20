@@ -158,7 +158,7 @@ export const UploadDrawings = observer(function UploadDrawings() {
         </Flex>
       ))}
 
-      {!currentPreCheck?.isSubmitted && (
+      {!currentPreCheck?.isSubmitted && !currentPreCheck?.isUploadDrawingsComplete && (
         <Box
           position="relative"
           mb={6}
@@ -180,9 +180,16 @@ export const UploadDrawings = observer(function UploadDrawings() {
             ".uppy-DashboardContent-back": {
               display: "none",
             },
+            ".uppy-DashboardContent-bar": {
+              display: "none",
+            },
+            // Todo: remove when supporting multiple files
+            ".uppy-StatusBar-actionBtn--done": {
+              display: "none",
+            },
           }}
         >
-          <Dashboard uppy={uppy} height={200} proudlyDisplayPoweredByUppy={false} />
+          <Dashboard uppy={uppy} width="100%" height={276} proudlyDisplayPoweredByUppy={false} />
         </Box>
       )}
 

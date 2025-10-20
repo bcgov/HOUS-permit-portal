@@ -1,6 +1,7 @@
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
 import { useParams } from "react-router-dom"
+import { LoadingScreen } from "../../../shared/base/loading-screen"
 import { AgreementsAndConsent } from "./agreements-and-consent"
 import { BuildingType } from "./building-type"
 import { ConfirmSubmission } from "./confirm-submission"
@@ -37,6 +38,6 @@ export const FormSection = observer(function PreCheckFormSection() {
     case "results-summary":
       return <ResultsSummary />
     default:
-      return <div>Section not found</div>
+      return <LoadingScreen />
   }
 })

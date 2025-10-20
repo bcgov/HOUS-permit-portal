@@ -1,5 +1,5 @@
 import { Box, Button, Heading, Icon, Text } from "@chakra-ui/react"
-import { ArrowsClockwise, CheckCircle, EnvelopeSimple } from "@phosphor-icons/react"
+import { ArrowsClockwise, CheckCircle, Hourglass } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -26,34 +26,14 @@ export const ResultsSummary = observer(function ResultsSummary() {
   const renderContent = () => {
     switch (currentPreCheck?.status) {
       case EPreCheckStatus.draft:
-        return (
-          <Box bg="greys.grey03" p={8} borderRadius="lg" mb={6}>
-            <Heading as="h2" size="lg" mb={4}>
-              {t("preCheck.sections.resultsSummary.notSubmitted", "Pre-check not submitted")}
-            </Heading>
-            <Text mb={4} color="text.secondary">
-              {t(
-                "preCheck.sections.resultsSummary.notSubmittedDescription",
-                "This pre-check has not been submitted yet. Please complete all sections and submit your pre-check to receive results."
-              )}
-            </Text>
-            <Button
-              variant="primary"
-              onClick={() => navigate(`/pre-checks/${currentPreCheck.id}/edit/confirm-submission`)}
-            >
-              {t("preCheck.sections.resultsSummary.goToSubmission", "Go to submission")}
-            </Button>
-          </Box>
-        )
-
       case EPreCheckStatus.submitted:
         return (
-          <Box bg="semantic.infoLight" p={8} borderRadius="lg" mb={6}>
+          <Box bg="semantic.infoLight" p={8} borderRadius="lg" mb={6} color="theme.blueAlt">
             <Heading as="h2" size="lg" mb={4} display="flex" alignItems="center" gap={2}>
-              <Icon as={EnvelopeSimple} boxSize={6} />
+              <Icon as={Hourglass} boxSize={6} />
               {t("preCheck.sections.resultsSummary.preparing", "We're preparing your results")}
             </Heading>
-            <Text mb={6} color="text.secondary">
+            <Text mb={6} color="theme.blueAlt">
               {t(
                 "preCheck.sections.resultsSummary.timeframe",
                 "Most reports are ready within a few hours, but it can take up to 48 hours."
@@ -71,15 +51,15 @@ export const ResultsSummary = observer(function ResultsSummary() {
               <li>
                 {t(
                   "preCheck.sections.resultsSummary.step3",
-                  "The downloadable report and a link to interactive results are available in your Projects"
+                  "The downloadable report and a link to interactive results are available in your Pre-checks"
                 )}
               </li>
             </Box>
 
-            <Text mb={4} fontSize="sm" color="text.secondary">
+            <Text mb={4} fontSize="sm" color="theme.blueAlt">
               {t(
                 "preCheck.sections.resultsSummary.notification",
-                "You don't need to stay on this page. We'll notify you as soon as your results are ready. You'll find completed reports in the Projects section."
+                "You don't need to stay on this page. We'll notify you as soon as your results are ready. You'll find completed reports in the Pre-checks section."
               )}
             </Text>
 
@@ -101,7 +81,7 @@ export const ResultsSummary = observer(function ResultsSummary() {
               <Icon as={CheckCircle} boxSize={6} />
               {t("preCheck.sections.resultsSummary.ready", "Your results are ready")}
             </Heading>
-            <Text mb={6} color="text.secondary">
+            <Text mb={6} color="theme.blueAlt">
               {t(
                 "preCheck.sections.resultsSummary.readyDescription",
                 "Your pre-check has been reviewed and the results are now available."
@@ -128,7 +108,7 @@ export const ResultsSummary = observer(function ResultsSummary() {
       default:
         return (
           <Box bg="greys.grey03" p={8} borderRadius="lg" mb={6}>
-            <Text color="text.secondary">{t("preCheck.sections.resultsSummary.unknownStatus", "Unknown status")}</Text>
+            <Text color="theme.blueAlt">{t("preCheck.sections.resultsSummary.unknownStatus", "Unknown status")}</Text>
           </Box>
         )
     }
