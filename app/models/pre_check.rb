@@ -53,7 +53,13 @@ class PreCheck < ApplicationRecord
   validates :service_partner, presence: true
   validates :certificate_no, uniqueness: true, allow_nil: true
 
+  scope :completed_and_unviewed, -> { where(status: :complete, viewed_at: nil) }
+
   delegate :permit_project_title, to: :permit_application, allow_nil: true
+
+  def self.unviewed_count_for_user(user_id)
+    completed_and_unviewed.where(creator_id: user_id).count
+  end
 
   # Helper to check if all required agreements have been accepted
   def required_agreements_accepted?
@@ -148,7 +154,8 @@ class PreCheck < ApplicationRecord
         "pre_check_id" => id,
         "certificate_no" => certificate_no,
         "assessment_result" => assessment_result,
-        "full_address" => full_address
+        "full_address" => full_address,
+        "unviewed_count" => PreCheck.unviewed_count_for_user(creator_id)
       }
     }
   end

@@ -19,12 +19,19 @@ export function applyNotificationSideEffects(payload: IUserPushPayload, rootStor
     }
     case ENotificationActionType.preCheckCompleted: {
       const preCheckId = data?.objectData?.preCheckId
+      const unviewedCount = data?.objectData?.unviewedCount
+
       if (preCheckId) {
         try {
           rootStore.preCheckStore.fetchPreCheck(preCheckId)
         } catch (e) {
           import.meta.env.DEV && console.warn("Notification effect refresh failed", e)
         }
+      }
+
+      // Update unviewed count from notification
+      if (typeof unviewedCount === "number") {
+        rootStore.preCheckStore.setUnviewedCount(unviewedCount)
       }
       break
     }

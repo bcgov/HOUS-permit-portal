@@ -1,7 +1,7 @@
 class Api::PreChecksController < Api::ApplicationController
   include Api::Concerns::Search::PreChecks
 
-  before_action :set_pre_check, only: %i[show update submit]
+  before_action :set_pre_check, only: %i[show update submit mark_viewed]
   skip_after_action :verify_policy_scoped, only: %i[index]
 
   def index
@@ -9,7 +9,11 @@ class Api::PreChecksController < Api::ApplicationController
     render_success @pre_check_search.results,
                    nil,
                    {
-                     meta: page_meta(@pre_check_search),
+                     meta:
+                       page_meta(@pre_check_search).merge(
+                         unviewed_count:
+                           PreCheck.unviewed_count_for_user(current_user.id)
+                       ),
                      blueprint: PreCheckBlueprint
                    }
   end
@@ -61,6 +65,19 @@ class Api::PreChecksController < Api::ApplicationController
                      { blueprint: PreCheckBlueprint }
     else
       render_error "pre_check.submit_error",
+                   message_opts: {
+                     error_message: @pre_check.errors.full_messages.to_sentence
+                   }
+    end
+  end
+
+  def mark_viewed
+    authorize @pre_check
+
+    if @pre_check.update(viewed_at: Time.current)
+      render_success @pre_check, nil, { blueprint: PreCheckBlueprint }
+    else
+      render_error "pre_check.update_error",
                    message_opts: {
                      error_message: @pre_check.errors.full_messages.to_sentence
                    }

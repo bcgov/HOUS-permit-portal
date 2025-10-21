@@ -11,6 +11,8 @@ class PreCheckBlueprint < Blueprinter::Base
          :consent_to_send_drawings,
          :consent_to_share_with_jurisdiction,
          :consent_to_research_contact,
+         :assessment_result,
+         :viewed_at,
          :created_at,
          :updated_at
 

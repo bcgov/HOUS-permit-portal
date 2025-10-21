@@ -533,6 +533,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_10_17_215837) do
     t.integer "assessment_result"
     t.datetime "submitted_at"
     t.datetime "completed_at"
+    t.datetime "viewed_at"
     t.text "result_message"
     t.boolean "eula_accepted", default: false, null: false
     t.boolean "consent_to_send_drawings", default: false, null: false
@@ -548,6 +549,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_10_17_215837) do
     t.index ["permit_application_id"], name: "index_pre_checks_on_permit_application_id", unique: true
     t.index ["permit_type_id"], name: "index_pre_checks_on_permit_type_id"
     t.index ["service_partner"], name: "index_pre_checks_on_service_partner"
+    t.index ["viewed_at"], name: "index_pre_checks_on_viewed_at"
   end
 
   create_table "preferences", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|

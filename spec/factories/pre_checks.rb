@@ -32,11 +32,14 @@ FactoryBot.define do
     trait :complete do
       processing
       completed_at { Time.current }
-      assessment_result { :passed }
       result_message { "All sections have passed." }
 
       after(:create) do |pre_check|
-        pre_check.update_column(:status, PreCheck.statuses[:complete])
+        # Bypass validations to set status and assessment_result together
+        pre_check.update_columns(
+          status: PreCheck.statuses[:complete],
+          assessment_result: PreCheck.assessment_results[:passed]
+        )
       end
     end
   end

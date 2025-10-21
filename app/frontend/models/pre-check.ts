@@ -21,6 +21,7 @@ export const PreCheckModel = types
     consentToResearchContact: types.optional(types.boolean, false),
     designDocuments: types.array(types.frozen<IDesignDocument>()),
     assessmentResult: types.maybeNull(types.enumeration(Object.values(EPreCheckAssessmentResult))),
+    viewedAt: types.maybeNull(types.Date),
     createdAt: types.maybeNull(types.Date),
     updatedAt: types.maybeNull(types.Date),
   })
@@ -55,6 +56,10 @@ export const PreCheckModel = types
     },
     get isResultsSummaryComplete() {
       return self.status === EPreCheckStatus.complete
+    },
+    // Check if completed but not yet viewed
+    get isUnviewed() {
+      return self.status === EPreCheckStatus.complete && !self.viewedAt
     },
     // Check if all required fields are complete and ready for submission
     get isReadyForSubmission() {

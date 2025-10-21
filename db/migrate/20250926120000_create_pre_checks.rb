@@ -16,6 +16,7 @@ class CreatePreChecks < ActiveRecord::Migration[7.1]
       # Archistar response data
       t.datetime :submitted_at # When submitted to Archistar
       t.datetime :completed_at # When Archistar completed processing
+      t.datetime :viewed_at # When user viewed the completed results
       t.text :result_message # Message from Archistar (e.g., "All sections have passed.")
 
       # Agreements and consent
@@ -35,6 +36,7 @@ class CreatePreChecks < ActiveRecord::Migration[7.1]
     add_index :pre_checks, :certificate_no, unique: true
     add_index :pre_checks, :assessment_result
     add_index :pre_checks, :completed_at
+    add_index :pre_checks, :viewed_at
 
     add_foreign_key :pre_checks,
                     :permit_applications,

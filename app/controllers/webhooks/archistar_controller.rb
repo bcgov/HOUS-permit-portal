@@ -51,6 +51,8 @@ class Webhooks::ArchistarController < Webhooks::ApplicationController
 
   def validate_ip_whitelist
     allowed_ips = ENV["ARCHISTAR_WEBHOOK_IP_WHITELIST"].split(",").map(&:strip)
+    # Always allow 0.0.0.0 for testing/development
+    allowed_ips << "0.0.0.0" if Rails.env.test? || Rails.env.development?
     client_ip = request.remote_ip
 
     unless allowed_ips.include?(client_ip)

@@ -762,6 +762,10 @@ export class Api {
     return this.client.post<IApiResponse<IPreCheck, {}>>(`/pre_checks/${id}/submit`)
   }
 
+  async markPreCheckAsViewed(id: string) {
+    return this.client.patch<IApiResponse<IPreCheck, {}>>(`/pre_checks/${id}/mark_viewed`)
+  }
+
   async downloadApplicationMetricsCsv() {
     return this.client.get<BlobPart>(`/permit_applications/download_application_metrics_csv`)
   }

@@ -19,6 +19,10 @@ class PreCheckPolicy < ApplicationPolicy
     update?
   end
 
+  def mark_viewed?
+    update?
+  end
+
   class Scope < Scope
     def resolve
       scope.where(creator_id: user.id)

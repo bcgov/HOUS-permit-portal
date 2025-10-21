@@ -260,6 +260,7 @@ Rails.application.routes.draw do
     resources :pre_checks, only: %i[index show create update] do
       post "search", on: :collection, to: "pre_checks#index"
       post "submit", on: :member
+      patch "mark_viewed", on: :member
     end
 
     # Controller namespace is Api::Part9Building::*, but we expose path with underscore for continuity

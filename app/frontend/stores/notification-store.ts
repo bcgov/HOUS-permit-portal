@@ -165,7 +165,7 @@ export const NotificationStoreModel = types
         return [
           {
             text: t("ui.show"),
-            href: `/pre-checks/${preCheckData?.preCheckId}/edit/results-summary`,
+            href: `/pre-checks/${preCheckData?.preCheckId}/edit`,
           },
         ]
       }

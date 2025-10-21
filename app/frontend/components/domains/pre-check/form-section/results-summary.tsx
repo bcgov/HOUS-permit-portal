@@ -1,7 +1,7 @@
 import { Box, Button, Heading, Icon, Text } from "@chakra-ui/react"
 import { ArrowsClockwise, CheckCircle, Hourglass } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { usePreCheck } from "../../../../hooks/resources/use-pre-check"
@@ -15,6 +15,13 @@ export const ResultsSummary = observer(function ResultsSummary() {
   const { preCheckStore } = useMst()
   const navigate = useNavigate()
   const [isRefreshing, setIsRefreshing] = useState(false)
+
+  // Mark as viewed when user views completed results
+  useEffect(() => {
+    if (currentPreCheck && currentPreCheck.status === EPreCheckStatus.complete && !currentPreCheck.viewedAt) {
+      preCheckStore.markPreCheckAsViewed(currentPreCheck.id)
+    }
+  }, [currentPreCheck, preCheckStore])
 
   const handleRefresh = async () => {
     if (!currentPreCheck?.id) return

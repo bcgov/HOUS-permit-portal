@@ -6,7 +6,7 @@ import { RemoveScroll } from "react-remove-scroll"
 import { useNavigate, useParams } from "react-router-dom"
 import { usePreCheck } from "../../../hooks/resources/use-pre-check"
 import { useMst } from "../../../setup/root"
-import { EPreCheckServicePartner } from "../../../types/enums"
+import { EPreCheckServicePartner, EPreCheckStatus } from "../../../types/enums"
 import { LoadingScreen } from "../../shared/base/loading-screen"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
 import { RouterLink } from "../../shared/navigation/router-link"
@@ -41,7 +41,10 @@ export const PreCheckForm = observer(function PreCheckForm() {
   // handle redirect if no section is specified
   useEffect(() => {
     if (!section && currentPreCheck) {
-      navigate(`/pre-checks/${currentPreCheck.id}/edit/service-partner`, { replace: true })
+      navigate(
+        `/pre-checks/${currentPreCheck.id}/edit/${currentPreCheck.status === EPreCheckStatus.complete ? "results-summary" : "service-partner"}`,
+        { replace: true }
+      )
     }
   }, [section, currentPreCheck])
 
