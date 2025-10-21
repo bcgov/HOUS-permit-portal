@@ -429,6 +429,8 @@ const options = {
             buildingType: {
               title: "Building Type",
               description: "Choose the building type that best describes your project",
+              description2:
+                "Only low density residential buildings are supported at this time. For questions about code compliance, contact your local building officials.",
             },
             uploadDrawings: {
               title: "Upload drawings",

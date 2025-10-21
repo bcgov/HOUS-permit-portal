@@ -26,7 +26,7 @@ export const ResultsSummary = observer(function ResultsSummary() {
   const renderContent = () => {
     switch (currentPreCheck?.status) {
       case EPreCheckStatus.draft:
-      case EPreCheckStatus.submitted:
+      case EPreCheckStatus.processing:
         return (
           <Box bg="semantic.infoLight" p={8} borderRadius="lg" mb={6} color="theme.blueAlt">
             <Heading as="h2" size="lg" mb={4} display="flex" alignItems="center" gap={2}>
@@ -74,7 +74,7 @@ export const ResultsSummary = observer(function ResultsSummary() {
           </Box>
         )
 
-      case EPreCheckStatus.reviewed:
+      case EPreCheckStatus.complete:
         return (
           <Box bg="semantic.successLight" p={8} borderRadius="lg" mb={6}>
             <Heading as="h2" size="lg" mb={4} display="flex" alignItems="center" gap={2}>

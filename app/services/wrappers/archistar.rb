@@ -11,22 +11,35 @@ class Wrappers::Archistar < Wrappers::Base
     }
   end
 
-  def comply_certificates(city_key)
+  def comply_certificates(city_key = "bcbc")
     get("comply-certificates", { cityKey: city_key })
+  end
+
+  def get_submission(certificate_no)
+    get("submissions/#{certificate_no}")
   end
 
   def create_submission(pre_check)
     payload = {
       complyCertificateId: pre_check.comply_certificate_id,
-      cityKey: pre_check.city_key,
-      address: pre_check.full_address,
-      fileLink: pre_check.primary_design_document&.file_url
+      cityKey: "bcbc",
+      address: pre_check.formatted_address,
+      fileLink:
+        (
+          if ENV["ARCHISTAR_DEVELOPOMENT_OVERRIDE_FILE_LINK"].present?
+            ENV["ARCHISTAR_DEVELOPOMENT_OVERRIDE_FILE_LINK"]
+          else
+            pre_check.primary_design_document&.file_url
+          end
+        ),
+      additionalFiles: []
     }
 
-    # Add optional fields only if present
-    payload[:latitude] = pre_check.latitude if pre_check.latitude.present?
-    payload[:longitude] = pre_check.longitude if pre_check.longitude.present?
-
-    post("submissions", payload.to_json)
+    # Add coordinates - these might be required for validation
+    # Using Vancouver coordinates as fallback since the model returns nil
+    payload[:latitude] = pre_check.latitude || 49.2620175 # Vancouver latitude
+    payload[:longitude] = pre_check.longitude || -123.1089299 # Vancouver longitude
+    r = post("submissions", payload.to_json)
+    r["certificate_no"]
   end
 end

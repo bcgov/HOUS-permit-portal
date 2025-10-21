@@ -10,6 +10,7 @@ class PreCheck < ApplicationRecord
 
   attribute :status, :integer
   enum :status, { draft: 0, processing: 1, complete: 2 }
+  enum :assessment_result, { passed: 0, failed: 1 }
 
   aasm column: :status, enum: true do
     state :draft, initial: true
@@ -24,6 +25,11 @@ class PreCheck < ApplicationRecord
 
     event :mark_complete do
       transitions from: :processing, to: :complete
+
+      before do |assessment_result_value|
+        self.assessment_result =
+          assessment_result_value if assessment_result_value.present?
+      end
     end
   end
 
@@ -42,6 +48,7 @@ class PreCheck < ApplicationRecord
   validate :cannot_change_after_submission
   validate :cannot_unsubmit
   validate :all_required_fields_complete_before_submission
+  validate :assessment_result_only_when_complete
 
   validates :service_partner, presence: true
   validates :certificate_no, uniqueness: true, allow_nil: true
@@ -54,8 +61,7 @@ class PreCheck < ApplicationRecord
   end
 
   def city_key
-    # TODO: Implement city key
-    "todo"
+    "bcbc"
   end
 
   def primary_design_document
@@ -74,10 +80,39 @@ class PreCheck < ApplicationRecord
 
   def submit_to_archistar
     archistar = Wrappers::Archistar.new
-    archistar.create_submission(self)
+    cert_no = archistar.create_submission(self)
+    self.update(certificate_no: cert_no, submitted_at: Time.current)
   rescue => e
     Rails.logger.error("Archistar submission failed: #{e.message}")
     raise # This will rollback the AASM transition
+  end
+
+  def formatted_address
+    return nil if full_address.blank?
+
+    # Split the address into parts
+    # Expected format: "Street Address, City, Province"
+    parts = full_address.split(",").map(&:strip)
+
+    if parts.length >= 2
+      street_address = parts[0]
+      city = parts[1]
+
+      # If we have a third part (province), we might need to handle it
+      # For now, just use street address and city
+      "#{street_address}, #{city}"
+    else
+      # Fallback to the original address if it doesn't match expected format
+      full_address
+    end
+  end
+
+  def comply_certificate_id
+    if permit_type&.code == "low_residential"
+      152
+    else
+      nil
+    end
   end
 
   def search_data
@@ -195,5 +230,12 @@ class PreCheck < ApplicationRecord
         "Cannot submit pre-check. Missing required fields: #{missing_fields.join(", ")}"
       )
     end
+  end
+
+  def assessment_result_only_when_complete
+    return if assessment_result.nil?
+    return if complete?
+
+    errors.add(:assessment_result, "can only be set when status is complete")
   end
 end

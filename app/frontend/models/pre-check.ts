@@ -1,5 +1,5 @@
 import { Instance, types } from "mobx-state-tree"
-import { EPreCheckServicePartner, EPreCheckStatus } from "../types/enums"
+import { EPreCheckAssessmentResult, EPreCheckServicePartner, EPreCheckStatus } from "../types/enums"
 import { IDesignDocument } from "../types/types"
 import { JurisdictionModel } from "./jurisdiction"
 import { PermitTypeModel } from "./permit-classification"
@@ -7,7 +7,6 @@ import { PermitTypeModel } from "./permit-classification"
 export const PreCheckModel = types
   .model("PreCheck", {
     id: types.identifier,
-    complyCertificateId: types.maybeNull(types.number),
     certificateNo: types.maybeNull(types.string),
     status: types.enumeration(Object.values(EPreCheckStatus)),
     title: types.maybeNull(types.string),
@@ -21,13 +20,14 @@ export const PreCheckModel = types
     consentToShareWithJurisdiction: types.optional(types.boolean, false),
     consentToResearchContact: types.optional(types.boolean, false),
     designDocuments: types.array(types.frozen<IDesignDocument>()),
+    assessmentResult: types.maybeNull(types.enumeration(Object.values(EPreCheckAssessmentResult))),
     createdAt: types.maybeNull(types.Date),
     updatedAt: types.maybeNull(types.Date),
   })
   .views((self) => ({
     // Computed view to replace isSubmitted boolean
     get isSubmitted() {
-      return self.status === EPreCheckStatus.submitted || self.status === EPreCheckStatus.reviewed
+      return self.status === EPreCheckStatus.processing || self.status === EPreCheckStatus.complete
     },
     // Helper to check if all required agreements have been accepted
     get requiredAgreementsAccepted() {
@@ -51,10 +51,10 @@ export const PreCheckModel = types
       return self.designDocuments.length > 0
     },
     get isConfirmSubmissionComplete() {
-      return self.status === EPreCheckStatus.submitted || self.status === EPreCheckStatus.reviewed
+      return self.status === EPreCheckStatus.processing || self.status === EPreCheckStatus.complete
     },
     get isResultsSummaryComplete() {
-      return self.status === EPreCheckStatus.reviewed
+      return self.status === EPreCheckStatus.complete
     },
     // Check if all required fields are complete and ready for submission
     get isReadyForSubmission() {

@@ -713,3 +713,8 @@ export enum EPreCheckStatus {
   processing = "processing",
   complete = "complete",
 }
+
+export enum EPreCheckAssessmentResult {
+  passed = "passed",
+  failed = "failed",
+}

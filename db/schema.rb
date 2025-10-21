@@ -526,17 +526,23 @@ ActiveRecord::Schema[7.2].define(version: 2025_10_17_215837) do
     t.uuid "permit_type_id"
     t.uuid "creator_id", null: false
     t.uuid "jurisdiction_id"
-    t.integer "comply_certificate_id"
     t.string "certificate_no"
     t.string "full_address"
     t.integer "service_partner", default: 0, null: false
     t.integer "status", default: 0, null: false
+    t.integer "assessment_result"
+    t.datetime "submitted_at"
+    t.datetime "completed_at"
+    t.text "result_message"
     t.boolean "eula_accepted", default: false, null: false
     t.boolean "consent_to_send_drawings", default: false, null: false
     t.boolean "consent_to_share_with_jurisdiction", default: false
     t.boolean "consent_to_research_contact", default: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["assessment_result"], name: "index_pre_checks_on_assessment_result"
+    t.index ["certificate_no"], name: "index_pre_checks_on_certificate_no", unique: true
+    t.index ["completed_at"], name: "index_pre_checks_on_completed_at"
     t.index ["creator_id"], name: "index_pre_checks_on_creator_id"
     t.index ["jurisdiction_id"], name: "index_pre_checks_on_jurisdiction_id"
     t.index ["permit_application_id"], name: "index_pre_checks_on_permit_application_id", unique: true

@@ -323,6 +323,11 @@ Rails.application.routes.draw do
     end
   end
 
+  # Webhook routes (outside API scope for external webhook access)
+  namespace :webhooks do
+    post "archistar", to: "archistar#receive"
+  end
+
   root to: "home#index"
 
   get "/reset-password" => "home#index", :as => :reset_password

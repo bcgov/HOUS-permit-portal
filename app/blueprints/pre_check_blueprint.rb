@@ -1,8 +1,7 @@
 class PreCheckBlueprint < Blueprinter::Base
   identifier :id
 
-  fields :comply_certificate_id,
-         :certificate_no,
+  fields :certificate_no,
          :status,
          :full_address,
          :title,
