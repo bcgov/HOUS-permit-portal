@@ -13,16 +13,21 @@ class Webhooks::ArchistarController < Webhooks::ApplicationController
     request.body.rewind
 
     # Parse and process the webhook
-    payload = JSON.parse(raw_body)
-    Rails.logger.info("Archistar webhook parsed payload: #{payload}")
+    begin
+      payload = JSON.parse(raw_body)
+      Rails.logger.info("Archistar webhook parsed payload: #{payload}")
 
-    process_webhook(payload)
+      process_webhook(payload)
 
-    render json: {
-             status: "success",
-             message: "Webhook processed successfully"
-           },
-           status: :ok
+      render json: {
+               status: "success",
+               message: "Webhook processed successfully"
+             },
+             status: :ok
+    rescue JSON::ParserError => e
+      Rails.logger.error("Webhook JSON parse error: #{e.message}")
+      render json: { error: "Invalid JSON payload" }, status: :bad_request
+    end
   end
 
   private
@@ -30,7 +35,7 @@ class Webhooks::ArchistarController < Webhooks::ApplicationController
   def authenticate_webhook
     # API Key authentication
     api_key = request.headers["X-Archistar-API-Key"]
-    expected_api_key = ENV["ARCHISTAR_WEBHOOK_API_KEY"]
+    expected_api_key = ENV["ARCHISTAR_WEBHOOK_SECRET"]
 
     if expected_api_key.present? && api_key != expected_api_key
       Rails.logger.warn(

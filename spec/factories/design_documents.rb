@@ -3,16 +3,15 @@ FactoryBot.define do
     association :pre_check, factory: :pre_check
 
     after(:build) do |document|
-      # Attach a sample file for testing
-      document.file = {
-        id: SecureRandom.hex(10),
-        storage: "cache",
-        metadata: {
-          size: 1024,
-          filename: "sample_drawing.pdf",
-          mime_type: "application/pdf"
-        }
-      }
+      # Create a test file for Shrine upload
+      file =
+        Rack::Test::UploadedFile.new(
+          StringIO.new("test pdf content"),
+          "application/pdf",
+          original_filename: "sample_drawing.pdf"
+        )
+
+      document.file = file
     end
   end
 end
