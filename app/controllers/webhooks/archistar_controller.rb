@@ -129,11 +129,13 @@ class Webhooks::ArchistarController < Webhooks::ApplicationController
           Rails.logger.info(
             "Marked pre-check #{pre_check.id} as complete (assessment: passed)"
           )
+          NotificationService.publish_pre_check_completed_event(pre_check)
         elsif assessment_result == "failed"
           pre_check.mark_complete!(:failed)
           Rails.logger.warn(
             "Marked pre-check #{pre_check.id} as complete (assessment: failed)"
           )
+          NotificationService.publish_pre_check_completed_event(pre_check)
         else
           Rails.logger.warn(
             "Unknown assessment result: #{payload["assessment_result"]}"

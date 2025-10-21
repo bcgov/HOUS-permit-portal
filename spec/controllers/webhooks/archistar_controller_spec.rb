@@ -96,6 +96,16 @@ RSpec.describe Webhooks::ArchistarController, type: :controller do
 
         post :receive, body: webhook_payload.to_json
       end
+
+      it "sends notification to pre-check creator" do
+        expect(NotificationService).to receive(
+          :publish_pre_check_completed_event
+        ).with(pre_check)
+
+        post :receive, body: webhook_payload.to_json
+
+        expect(response).to have_http_status(:ok)
+      end
     end
 
     context "with failed assessment result" do
@@ -114,6 +124,16 @@ RSpec.describe Webhooks::ArchistarController, type: :controller do
         expect(pre_check.status).to eq("complete")
         expect(pre_check.assessment_result).to eq("failed")
         expect(pre_check.result_message).to eq("Assessment failed.")
+      end
+
+      it "sends notification to pre-check creator" do
+        expect(NotificationService).to receive(
+          :publish_pre_check_completed_event
+        ).with(pre_check)
+
+        post :receive, body: webhook_payload.to_json
+
+        expect(response).to have_http_status(:ok)
       end
     end
 

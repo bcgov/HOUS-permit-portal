@@ -132,6 +132,27 @@ class PreCheck < ApplicationRecord
     }
   end
 
+  def completed_event_notification_data
+    action_text_key =
+      if assessment_result == "passed"
+        "notification.pre_check.completed_passed"
+      else
+        "notification.pre_check.completed_failed"
+      end
+
+    {
+      "id" => SecureRandom.uuid,
+      "action_type" => Constants::NotificationActionTypes::PRE_CHECK_COMPLETED,
+      "action_text" => I18n.t(action_text_key, address: full_address),
+      "object_data" => {
+        "pre_check_id" => id,
+        "certificate_no" => certificate_no,
+        "assessment_result" => assessment_result,
+        "full_address" => full_address
+      }
+    }
+  end
+
   private
 
   def permit_application_belongs_to_creator

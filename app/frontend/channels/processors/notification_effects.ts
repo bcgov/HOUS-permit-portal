@@ -17,6 +17,17 @@ export function applyNotificationSideEffects(payload: IUserPushPayload, rootStor
       }
       break
     }
+    case ENotificationActionType.preCheckCompleted: {
+      const preCheckId = data?.objectData?.preCheckId
+      if (preCheckId) {
+        try {
+          rootStore.preCheckStore.fetchPreCheck(preCheckId)
+        } catch (e) {
+          import.meta.env.DEV && console.warn("Notification effect refresh failed", e)
+        }
+      }
+      break
+    }
     default:
       break
   }

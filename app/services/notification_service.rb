@@ -239,6 +239,16 @@ class NotificationService
     end
   end
 
+  def self.publish_pre_check_completed_event(pre_check)
+    return if pre_check.blank? || pre_check.creator_id.blank?
+
+    notification_user_hash = {
+      pre_check.creator_id => pre_check.completed_event_notification_data
+    }
+
+    NotificationPushJob.perform_async(notification_user_hash)
+  end
+
   def self.publish_application_submission_event(permit_application)
     notification_user_hash = {}
 
@@ -358,8 +368,6 @@ class NotificationService
     end
   end
 
-  private
-
   # this is just a wrapper around the activity's metadata methods
   # since in the case of a single instance it returns a specific return type (eg. Integer)
   # but in the case of multiple user_ids the activity is a hash object
@@ -367,4 +375,6 @@ class NotificationService
     metadata = activity_obj.send(method)
     metadata.is_a?(Hash) ? metadata[user_id] : metadata
   end
+
+  private_class_method :activity_metadata
 end
