@@ -75,13 +75,29 @@ class PreCheck < ApplicationRecord
   end
 
   def latitude
-    # TODO: Extract from geocoder data or site
-    nil
+    coordinates&.last
   end
 
   def longitude
-    # TODO: Extract from geocoder data or site
-    nil
+    coordinates&.first
+  end
+
+  def coordinates
+    return @coordinates if defined?(@coordinates)
+
+    @coordinates =
+      if pid.present?
+        begin
+          Wrappers::LtsaParcelMapBc.new.get_coordinates_by_pid(pid)
+        rescue => e
+          Rails.logger.warn(
+            "Failed to fetch coordinates for PID #{pid}: #{e.message}"
+          )
+          nil
+        end
+      else
+        nil
+      end
   end
 
   def submit_to_archistar
@@ -126,6 +142,7 @@ class PreCheck < ApplicationRecord
       id: id,
       certificate_no: certificate_no,
       full_address: full_address,
+      pid: pid,
       status: status,
       title: title,
       service_partner: service_partner,

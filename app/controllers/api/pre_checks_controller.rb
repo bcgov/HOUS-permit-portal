@@ -94,6 +94,7 @@ class Api::PreChecksController < Api::ApplicationController
     params.require(:pre_check).permit(
       :status,
       :full_address,
+      :pid,
       :permit_application_id,
       :jurisdiction_id,
       :permit_type_id,

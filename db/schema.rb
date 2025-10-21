@@ -528,6 +528,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_10_17_215837) do
     t.uuid "jurisdiction_id"
     t.string "certificate_no"
     t.string "full_address"
+    t.string "pid"
     t.integer "service_partner", default: 0, null: false
     t.integer "status", default: 0, null: false
     t.integer "assessment_result"

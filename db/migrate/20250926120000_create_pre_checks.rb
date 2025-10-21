@@ -9,6 +9,7 @@ class CreatePreChecks < ActiveRecord::Migration[7.1]
       t.uuid :jurisdiction_id
       t.string :certificate_no
       t.string :full_address
+      t.string :pid, null: true
       t.integer :service_partner, null: false, default: 0
       t.integer :status, null: false, default: 0
       t.integer :assessment_result, null: true, default: nil

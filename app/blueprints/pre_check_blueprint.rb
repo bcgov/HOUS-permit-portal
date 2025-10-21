@@ -4,6 +4,7 @@ class PreCheckBlueprint < Blueprinter::Base
   fields :certificate_no,
          :status,
          :full_address,
+         :pid,
          :title,
          :permit_application_id,
          :service_partner,

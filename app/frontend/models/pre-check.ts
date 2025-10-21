@@ -11,6 +11,7 @@ export const PreCheckModel = types
     status: types.enumeration(Object.values(EPreCheckStatus)),
     title: types.maybeNull(types.string),
     fullAddress: types.maybeNull(types.string),
+    pid: types.maybeNull(types.string),
     permitApplicationId: types.maybeNull(types.string),
     jurisdiction: types.maybeNull(types.reference(types.late(() => JurisdictionModel))),
     permitType: types.maybeNull(types.reference(types.late(() => PermitTypeModel))),

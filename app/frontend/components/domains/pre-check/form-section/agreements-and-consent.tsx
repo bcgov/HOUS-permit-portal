@@ -81,7 +81,7 @@ export const AgreementsAndConsent = observer(function AgreementsAndConsent() {
                   {t("preCheck.sections.agreementsAndConsent.eulaCheckbox")}
                 </Checkbox>
                 {fieldState.error && (
-                  <Text color="red.500" fontSize="sm" mt={1}>
+                  <Text color="semantic.error" fontSize="sm" mt={1}>
                     {fieldState.error.message}
                   </Text>
                 )}
@@ -105,7 +105,7 @@ export const AgreementsAndConsent = observer(function AgreementsAndConsent() {
                   {t("preCheck.sections.agreementsAndConsent.sendDrawingsCheckbox")}
                 </Checkbox>
                 {fieldState.error && (
-                  <Text color="red.500" fontSize="sm" mt={1}>
+                  <Text color="semantic.error" fontSize="sm" mt={1}>
                     {fieldState.error.message}
                   </Text>
                 )}

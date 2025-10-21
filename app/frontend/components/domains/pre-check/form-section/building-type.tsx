@@ -131,7 +131,7 @@ export const BuildingType = observer(function BuildingType() {
                 })}
               </Flex>
               {fieldState.error && (
-                <Text color="red.500" fontSize="sm" mt={1}>
+                <Text color="semantic.error" fontSize="sm" mt={1}>
                   {fieldState.error.message}
                 </Text>
               )}

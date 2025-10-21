@@ -30,8 +30,8 @@ export const ProjectAddress = observer(function ProjectAddress() {
   const methods = useForm<IProjectAddressFormData>({
     defaultValues: {
       site: currentPreCheck?.fullAddress ? { label: currentPreCheck.fullAddress, value: null } : null,
-      pid: null,
-      jurisdictionId: currentPreCheck?.jurisdiction?.id || null,
+      pid: currentPreCheck?.pid,
+      jurisdictionId: currentPreCheck?.jurisdiction?.id,
     },
   })
 
@@ -39,7 +39,7 @@ export const ProjectAddress = observer(function ProjectAddress() {
     handleSubmit,
     watch,
     setValue,
-    formState: { isSubmitting },
+    formState: { isSubmitting, errors },
   } = methods
 
   const selectedSite = watch("site")
@@ -50,6 +50,7 @@ export const ProjectAddress = observer(function ProjectAddress() {
     await updatePreCheck(currentPreCheck.id, {
       fullAddress: data.site?.label || "",
       jurisdictionId: data.jurisdictionId,
+      pid: data.pid,
     })
   }
 
@@ -120,12 +121,29 @@ export const ProjectAddress = observer(function ProjectAddress() {
             pidName="pid"
             siteName="site"
             jurisdictionIdFieldName="jurisdictionId"
-            pidRequired={false}
+            pidRequired={true}
             showManualModeToggle={true}
             showJurisdiction={true}
             initialJurisdiction={currentPreCheck?.jurisdiction || null}
             isDisabled={currentPreCheck?.isSubmitted}
           />
+
+          {/* Show form validation errors */}
+          {errors.site && (
+            <Text color="semantic.error" fontSize="sm" mt={1}>
+              {errors.site.message as string}
+            </Text>
+          )}
+          {errors.pid && (
+            <Text color="semantic.error" fontSize="sm" mt={1}>
+              {errors.pid.message as string}
+            </Text>
+          )}
+          {errors.jurisdictionId && (
+            <Text color="semantic.error" fontSize="sm" mt={1}>
+              {errors.jurisdictionId.message as string}
+            </Text>
+          )}
 
           {/* Show enrollment status message */}
           {renderEnrollmentStatus()}

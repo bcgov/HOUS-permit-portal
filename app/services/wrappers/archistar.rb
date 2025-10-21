@@ -35,10 +35,10 @@ class Wrappers::Archistar < Wrappers::Base
       additionalFiles: []
     }
 
-    # Add coordinates - these might be required for validation
-    # Using Vancouver coordinates as fallback since the model returns nil
-    payload[:latitude] = pre_check.latitude || 49.2620175 # Vancouver latitude
-    payload[:longitude] = pre_check.longitude || -123.1089299 # Vancouver longitude
+    # Add coordinates - fetched from LTSA using PID when available
+    # Using Vancouver coordinates as fallback if PID lookup fails or is unavailable
+    payload[:latitude] = pre_check.latitude
+    payload[:longitude] = pre_check.longitude
     r = post("submissions", payload.to_json)
     r["certificate_no"]
   end
