@@ -766,6 +766,10 @@ export class Api {
     return this.client.patch<IApiResponse<IPreCheck, {}>>(`/pre_checks/${id}/mark_viewed`)
   }
 
+  async getPreCheckPdfReportUrl(id: string) {
+    return this.client.get<IApiResponse<{ pdfReportUrl: string }, {}>>(`/pre_checks/${id}/pdf_report_url`)
+  }
+
   async downloadApplicationMetricsCsv() {
     return this.client.get<BlobPart>(`/permit_applications/download_application_metrics_csv`)
   }

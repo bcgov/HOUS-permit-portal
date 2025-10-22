@@ -347,8 +347,21 @@ const options = {
           },
         },
         preCheck: {
+          startNew: "New pre-check",
           index: {
             title: "Pre-Checks",
+            resultTitle: "Pre-check results",
+            intro:
+              "Your results from the BC Building Code pre-checking service are stored here. You can use this service to pre-check your drawings for compliance with select areas of the BC Building Code before you submit a permit application.",
+            betaNotice:
+              "During beta, the service is free and available only in participating communities. You may also be invited to share feedback about your experience. <1>Learn more about the BC Building Code pre-checking service</1>.",
+            openInteractiveReport: "Open interactive report",
+            downloadReport: "Download report",
+            expiry: "Pre-checks reports are available for 150 days after they are created.",
+          },
+          infoPage: {
+            title: "BC Building Code Pre-Checking Service",
+            description: "Information about the BC Building Code pre-checking service.",
           },
           form: {
             title: "Pre-check your drawings for compliance with BC Building Code",
@@ -428,9 +441,8 @@ const options = {
             },
             buildingType: {
               title: "Building Type",
-              description: "Choose the building type that best describes your project",
-              description2:
-                "Only low density residential buildings are supported at this time. For questions about code compliance, contact your local building officials.",
+              description:
+                "Choose the building type that best describes your project. Only small-scale/multi-unit housing is supported at this time.",
             },
             uploadDrawings: {
               title: "Upload drawings",
@@ -439,13 +451,15 @@ const options = {
               fileRequirementsTitle: "File requirements",
               requirement1: "PDF format only",
               requirement2: "One file, not multiple PDFs",
-              requirement3: "Architectural drawings must be legible and properly scaled",
-              requirement4: "Maximum file size: 100 MB",
+              requirement3: "Design drawings must be legible and properly scaled",
+              requirement4: "Maximum file size: 200 MB",
+              fileName: "File Name",
+              size: "Size",
               dragAndDrop: "Drag and drop files here, or",
               browseDevice: "browse your device",
-              protectionTitle: "How Archistar protects and stores your drawings",
+              protectionTitle: "How {{provider}} protects and stores your drawings",
               protectionDescription1:
-                "Our service partners use industry-standard security to protect your drawings. Archistar will keep your drawings for up to 150 days, then delete them. All drawings will be deleted on December 31, 2025, when the beta testing period ends.",
+                "Our service partners use industry-standard security to protect your drawings. {{provider}} will keep your drawings for up to 150 days, then delete them. All drawings will be deleted on December 31, 2025, when the beta testing period ends.",
             },
             confirmSubmission: {
               title: "Review and submit",
@@ -478,14 +492,32 @@ const options = {
               notification:
                 "You don't need to stay on this page. We'll notify you as soon as your results are ready. You'll find completed reports in the Pre-checks section.",
               refreshStatus: "Refresh status",
-              ready: "Your results are ready",
+              ready: "Your BC Building Code compliance report is ready",
+              projectDetails: "Project details",
               readyDescription: "Your pre-check has been reviewed and the results are now available.",
               nextSteps: "Next steps",
-              downloadReport: "Download your PDF report",
-              viewInteractive: "View interactive results",
-              proceedToPermit: "Proceed with your building permit application",
+              whatYouCanDoNow: "What you can do now",
               unknownStatus: "Unknown status",
+              exploreResults: "Explore interactive results",
+              downloadOrExplore:
+                "Download a PDF report listing all pre-check results, or explore them interactively in alongside your drawings.",
+              addressCompliance:
+                "You can use these results to address any compliance issues and prepare your drawings for a permit application.",
+              notShared:
+                "These results are not shared with your local building officials and are not part of your official permit submission.",
+              noGuarantee:
+                "A passing result does not guarantee approval: a building official will still carry out a full review as part of the permit application process.",
+              jurisdictionApproval: "Only your local jurisdiction can approve or reject a permit application.",
+              betaNotice:
+                "This service is in beta. If you experience issues or have questions about your results, contact us at",
+              preferResults: "Prefer results you can save and print?",
+              downloadReport: "Download your PDF report",
+              pdfUnavailable: "PDF report unavailable",
             },
+          },
+          viewer: {
+            title: "Interactive Results Viewer",
+            noUrl: "The interactive viewer is not yet available for this pre-check.",
           },
         },
         contact: {

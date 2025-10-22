@@ -19,6 +19,8 @@ class CreatePreChecks < ActiveRecord::Migration[7.1]
       t.datetime :completed_at # When Archistar completed processing
       t.datetime :viewed_at # When user viewed the completed results
       t.text :result_message # Message from Archistar (e.g., "All sections have passed.")
+      t.string :pdf_report_url # URL to the PDF report from Archistar
+      t.string :viewer_url # URL to the web viewer for the report
 
       # Agreements and consent
       t.boolean :eula_accepted, default: false, null: false

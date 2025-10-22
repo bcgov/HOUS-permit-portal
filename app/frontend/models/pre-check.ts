@@ -1,4 +1,4 @@
-import { Instance, types } from "mobx-state-tree"
+import { flow, getRoot, Instance, types } from "mobx-state-tree"
 import { EPreCheckAssessmentResult, EPreCheckServicePartner, EPreCheckStatus } from "../types/enums"
 import { IDesignDocument } from "../types/types"
 import { JurisdictionModel } from "./jurisdiction"
@@ -23,13 +23,22 @@ export const PreCheckModel = types
     designDocuments: types.array(types.frozen<IDesignDocument>()),
     assessmentResult: types.maybeNull(types.enumeration(Object.values(EPreCheckAssessmentResult))),
     viewedAt: types.maybeNull(types.Date),
+    viewerUrl: types.maybeNull(types.string),
+    expired: types.optional(types.boolean, false),
     createdAt: types.maybeNull(types.Date),
     updatedAt: types.maybeNull(types.Date),
   })
+  .volatile(() => ({
+    cachedPdfReportUrl: null as string | null,
+    pdfUrlFetchedAt: null as Date | null,
+  }))
   .views((self) => ({
     // Computed view to replace isSubmitted boolean
     get isSubmitted() {
       return self.status === EPreCheckStatus.processing || self.status === EPreCheckStatus.complete
+    },
+    get isCompleted() {
+      return self.status === EPreCheckStatus.complete
     },
     // Helper to check if all required agreements have been accepted
     get requiredAgreementsAccepted() {
@@ -72,6 +81,42 @@ export const PreCheckModel = types
         this.isUploadDrawingsComplete
       )
     },
+    // Get the display name for the service partner
+    get providerName() {
+      switch (self.servicePartner) {
+        case EPreCheckServicePartner.archistar:
+          return "Archistar"
+        default:
+          return "our service partner"
+      }
+    },
+  }))
+  .actions((self) => ({
+    fetchPdfReportUrl: flow(function* () {
+      // Check if we have a cached URL that's less than 1 hour old
+      if (self.cachedPdfReportUrl && self.pdfUrlFetchedAt) {
+        const hourInMs = 60 * 60 * 1000
+        const timeSinceFetch = Date.now() - self.pdfUrlFetchedAt.getTime()
+
+        if (timeSinceFetch < hourInMs) {
+          // Cache is still valid, return cached URL
+          return self.cachedPdfReportUrl
+        }
+      }
+
+      // Cache is stale or doesn't exist, fetch new URL
+      const rootStore: any = getRoot(self)
+      const response = yield rootStore.environment.api.getPreCheckPdfReportUrl(self.id)
+      if (response.ok && response.data?.pdfReportUrl) {
+        // Cache the new URL and timestamp
+        self.cachedPdfReportUrl = response.data.pdfReportUrl
+        self.pdfUrlFetchedAt = new Date()
+        return self.cachedPdfReportUrl
+      }
+
+      console.error("Failed to fetch PDF report URL:", response.problem, response.data)
+      return null
+    }),
   }))
 
 export interface IPreCheck extends Instance<typeof PreCheckModel> {}

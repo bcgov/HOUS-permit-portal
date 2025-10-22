@@ -177,6 +177,12 @@ class PreCheck < ApplicationRecord
     }
   end
 
+  def expired?
+    return false unless created_at.present?
+
+    created_at <= 150.days.ago
+  end
+
   private
 
   def permit_application_belongs_to_creator

@@ -7,7 +7,7 @@ export const colors = {
   theme: {
     blue: "#003366",
     blueAlt: "#38598A",
-    blueLight: "#F6F9FC",
+    blueLight: "#F1F8FE",
 
     blueGradient:
       "var(--Gradient-Blue-Background, linear-gradient(125deg, #142B43 -52.7%, #142B43 -52.68%, #054277 47.38%, #142B43 137.55%))",
@@ -40,6 +40,7 @@ export const colors = {
     dark: "#323130",
     light: "#D9D9D9",
     input: "#CCCCCC",
+    blue: "#38598A",
   },
   error: "#D9292F",
   success: "#2E8540",

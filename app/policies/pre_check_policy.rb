@@ -23,6 +23,10 @@ class PreCheckPolicy < ApplicationPolicy
     update?
   end
 
+  def pdf_report_url?
+    show?
+  end
+
   class Scope < Scope
     def resolve
       scope.where(creator_id: user.id)

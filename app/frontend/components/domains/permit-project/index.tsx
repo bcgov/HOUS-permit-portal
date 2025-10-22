@@ -1,5 +1,5 @@
 import { Flex, TabPanel, TabPanels, Tabs } from "@chakra-ui/react"
-import { CheckSquare, ClipboardText, FolderSimple } from "@phosphor-icons/react"
+import { ClipboardText, FolderSimple, ListMagnifyingGlass } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useTransition } from "react"
 import { useTranslation } from "react-i18next"
@@ -15,7 +15,7 @@ interface IProjectDashboardScreenProps {}
 
 export const ProjectDashboardScreen = observer(({}: IProjectDashboardScreenProps) => {
   const { t } = useTranslation()
-  const { preCheckStore, permitProjectStore } = useMst()
+  const { preCheckStore } = useMst()
   const location = useLocation()
   const navigate = useNavigate()
   const [isPending, startTransition] = useTransition()
@@ -25,7 +25,7 @@ export const ProjectDashboardScreen = observer(({}: IProjectDashboardScreenProps
     { label: t("stepCode.index.title", "Step Codes"), icon: ClipboardText, to: "step-codes", tabIndex: 1 },
     {
       label: t("preCheck.index.title", "Pre-Checks"),
-      icon: CheckSquare,
+      icon: ListMagnifyingGlass,
       to: "pre-checks",
       tabIndex: 2,
       badgeCount: preCheckStore.unviewedCount,

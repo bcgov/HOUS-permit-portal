@@ -14,8 +14,13 @@ class PreCheckBlueprint < Blueprinter::Base
          :consent_to_research_contact,
          :assessment_result,
          :viewed_at,
+         :viewer_url,
          :created_at,
          :updated_at
+
+  field :expired do |pre_check|
+    pre_check.expired?
+  end
 
   association :creator, blueprint: UserBlueprint
   association :jurisdiction, blueprint: JurisdictionBlueprint, view: :base

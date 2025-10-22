@@ -71,8 +71,6 @@ export const BuildingType = observer(function BuildingType() {
       </Heading>
       <Text mb={6}>
         {t("preCheck.sections.buildingType.description", "Choose the building type that best describes your project")}
-        {". "}
-        {t("preCheck.sections.buildingType.description2")}
       </Text>
       <Text mb={6}></Text>
 

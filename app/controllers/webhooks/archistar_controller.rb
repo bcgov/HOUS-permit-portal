@@ -98,9 +98,15 @@ class Webhooks::ArchistarController < Webhooks::ApplicationController
 
   def update_pre_check_from_webhook(pre_check, payload)
     # Update pre_check with Archistar response data (except assessment_result)
+    # Obtain the viewer url from Archistar
+    viewer_url =
+      Wrappers::Archistar.new.get_submission_viewer_url(
+        pre_check.certificate_no
+      )
     update_params = {
       completed_at: payload["completed_at"],
-      result_message: payload["message"]
+      result_message: payload["message"],
+      viewer_url: viewer_url
     }
 
     # NOTE: Additional metadata available in payload but not currently stored:

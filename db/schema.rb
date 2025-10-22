@@ -536,6 +536,8 @@ ActiveRecord::Schema[7.2].define(version: 2025_10_17_215837) do
     t.datetime "completed_at"
     t.datetime "viewed_at"
     t.text "result_message"
+    t.string "pdf_report_url"
+    t.string "viewer_url"
     t.boolean "eula_accepted", default: false, null: false
     t.boolean "consent_to_send_drawings", default: false, null: false
     t.boolean "consent_to_share_with_jurisdiction", default: false

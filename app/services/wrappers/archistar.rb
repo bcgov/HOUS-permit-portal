@@ -19,6 +19,27 @@ class Wrappers::Archistar < Wrappers::Base
     get("submissions/#{certificate_no}")
   end
 
+  def get_submission_analytics(certificate_no)
+    get("submissions/#{certificate_no}/analytics")
+  end
+
+  def get_submission_detailed(certificate_no)
+    get("submissions/#{certificate_no}/detailed")
+  end
+
+  def get_submission_pdf_report(certificate_no)
+    r = get("submissions/#{certificate_no}/document?type=report")
+    r["link"]
+  end
+
+  def get_submission_viewer_url(certificate_no)
+    r =
+      get(
+        "submissions/#{certificate_no}/viewer-link?signed=1&generatoredFor=echeck_user@archistar.pdu"
+      )
+    r["link"]
+  end
+
   def create_submission(pre_check)
     payload = {
       complyCertificateId: pre_check.comply_certificate_id,

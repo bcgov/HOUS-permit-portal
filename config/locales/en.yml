@@ -245,6 +245,12 @@ en:
       submit_error:
         title: Error
         message: "Error submitting pre-check"
+      no_certificate:
+        title: Error
+        message: "No certificate number found for pre-check"
+      pdf_report_unavailable:
+        title: Error
+        message: "PDF report unavailable"
     contact:
       options_error:
         title: Error
