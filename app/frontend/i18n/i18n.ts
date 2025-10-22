@@ -360,8 +360,52 @@ const options = {
             expiry: "Pre-checks reports are available for 150 days after they are created.",
           },
           infoPage: {
-            title: "BC Building Code Pre-Checking Service",
-            description: "Information about the BC Building Code pre-checking service.",
+            title: "Pre-check your drawings for compliance with BC Building Code",
+            description:
+              "You can use this service to pre-check your drawings for compliance with select areas of the BC Building Code before you submit a permit application. During beta, the service is available only in participating communities. You may also be invited to share feedback about your experience.",
+            whereYouCanUse: "Where you can use this service",
+            whereDescription:
+              "This service is in beta, so availability is limited. You can only use the service if your project is in one of these communities:",
+            projectsYouCanUse: "Projects you can use this service for",
+            projectsDescription:
+              "This service is only for small residential projects Part 9 of the BC Building Code, including:",
+            conclusion:
+              "If your project is in one of these communities and meets these criteria, you can use this service to pre-check your drawings.",
+            startNow: "Start now",
+            projectType1: "single detached houses",
+            projectType2: "townhouses",
+            projectType3: "duplexes, triplexes, or fourplexes",
+            projectType4: "laneway houses, carriage houses, or garden suites",
+            howItWorks: "How it works",
+            step1: "Upload your drawings",
+            step2: "Receive a detailed report showing where your drawings do or don't follow the BC Building Code",
+            step3: "Update your drawings to fix issues",
+            step4: "Apply for your permit(s) with your updated drawings",
+            aboutResults: "About your results and permit approval",
+            aboutResultsDescription:
+              "This service gives you information only. Results depend on the accuracy of the drawings you upload.",
+            disclaimer1:
+              "Results are for your reference only; results will not be included as part of a permit application for your project",
+            disclaimer2: "Results do not replace a plan check by a building official",
+            disclaimer3: "A passing result does not mean your drawings are approved or that a permit will be issued",
+            disclaimer4: "Permits are approved or rejected by the authority having jurisdiction for your project",
+            disclaimer5: "While this service is in beta, you may encounter occasional issues",
+            betaBenefits: "Benefits of taking part in this service during beta",
+            betaBenefitsIntro: "By using this service during beta, you may:",
+            benefit1: "Pre-check your drawings for common compliance issues before you apply",
+            benefit2: "Get feedback within two days or less",
+            benefit3: "Spot issues early, before they cause delays",
+            benefit4: "Better understand building code requirements for your project",
+            thirdPartyPartnership: "This service is provided in partnership with third-party companies",
+            thirdPartyDescription:
+              "The Ministry of Housing and Municipal Affairs works with technology companies to deliver this service. Service partners build tools for property development, design, and automated compliance checking.",
+            feedback: "Your feedback helps us improve this service",
+            feedbackDescription1:
+              "While using this service, you can choose to be contacted by the Ministry of Housing and Municipal Affairs to take part in research like surveys or interviews.",
+            feedbackDescription2:
+              "You can also ask questions, share feedback, or enquire about research opportunities anytime by emailing us at",
+            allJurisdictions: "All jurisdictions",
+            noJurisdictions: "No jurisdictions enrolled",
           },
           form: {
             title: "Pre-check your drawings for compliance with BC Building Code",
@@ -513,6 +557,9 @@ const options = {
               preferResults: "Prefer results you can save and print?",
               downloadReport: "Download your PDF report",
               pdfUnavailable: "PDF report unavailable",
+              expiredTitle: "This pre-check is expired",
+              expiredDescription:
+                "This pre-check is expired because it was created more than 150 days ago. You will not be able to download the PDF report or explore the interactive results.",
             },
           },
           viewer: {
@@ -3059,6 +3106,9 @@ Thank you,
           meetStepCodeLink: "Create a Step Codes compliance report for your project",
           meetStepCodeDescription:
             "Generate a report that details a project's compliance with BC's Energy Step Code and Zero Carbon Step Code requirements",
+          preCheckDrawingsLink: "Pre-check your drawings for compliance with BC Building Code",
+          preCheckDrawingsDescription:
+            "Upload your drawings to receive a report showing where your drawings comply or don't comply with select areas of the BC Building Code",
           checkDrawingsLink: "Check if your drawings follow the BC Building Code",
           checkDrawingsDescription:
             "Upload your drawings to get a report about where your drawings follow or don't follow certain sections of the BC Building Code",
@@ -3983,6 +4033,7 @@ Thank you,
           privacyPolicyContactUsEmail: "Email:",
           privacyPolicyContactUsEmailAddress: "digital.codes.permits@gov.bc.ca",
           breadcrumb: {
+            preCheck: "Pre-check",
             projects: "Projects",
             codeCompliance: "Code compliance",
             permitClassifications: "Permit classifications",

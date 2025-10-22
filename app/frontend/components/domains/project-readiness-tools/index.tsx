@@ -21,6 +21,11 @@ export const ProjectReadinessToolsIndexScreen = () => {
           description: t("projectReadinessTools.meetStepCodeDescription"),
           href: "/project-readiness-tools/check-step-code-requirements",
         },
+        {
+          linkText: t("projectReadinessTools.preCheckDrawingsLink"),
+          description: t("projectReadinessTools.preCheckDrawingsDescription"),
+          href: "/project-readiness-tools/pre-check",
+        },
       ],
     },
     {

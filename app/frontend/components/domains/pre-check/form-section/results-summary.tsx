@@ -1,4 +1,4 @@
-import { Box, Button, Flex, Heading, Icon, Link, List, ListItem, Text } from "@chakra-ui/react"
+import { Box, Button, Flex, Heading, Icon, Link, List, ListItem, Text, UnorderedList } from "@chakra-ui/react"
 import { ArrowsClockwise, Download, Hourglass, Layout } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
@@ -110,7 +110,7 @@ export const ResultsSummary = observer(function ResultsSummary() {
             <Heading as="h3" size="md" mb={4}>
               {t("preCheck.sections.resultsSummary.whatYouCanDoNow", "What you can do now")}
             </Heading>
-            <List spacing={2} pl={6} mb={6} styleType="disc">
+            <UnorderedList spacing={2} pl={6} mb={6}>
               <ListItem>
                 {t(
                   "preCheck.sections.resultsSummary.downloadOrExplore",
@@ -153,53 +153,58 @@ export const ResultsSummary = observer(function ResultsSummary() {
                   digital.codes.permits@gov.bc.ca
                 </Link>
               </ListItem>
-            </List>
-            <RouterLinkButton
-              leftIcon={<Layout />}
-              to={`/pre-checks/${currentPreCheck?.id}/viewer`}
-              variant="primary"
-              mb={4}
-              isDisabled={currentPreCheck?.expired}
-            >
-              {t("preCheck.sections.resultsSummary.exploreResults", "Explore interactive results")}
-            </RouterLinkButton>
-            <Flex>
-              <Text mb={2}>
-                {t("preCheck.sections.resultsSummary.preferResults", "Prefer results you can save and print?")}
-              </Text>
-
-              {isFetchingPdfUrl ? (
-                <Button
-                  size="sm"
-                  variant="link"
-                  leftIcon={<Icon as={Download} />}
-                  isLoading
-                  isDisabled={currentPreCheck?.expired}
-                >
-                  {t("preCheck.sections.resultsSummary.downloadReport", "Download your PDF report")}
-                </Button>
-              ) : pdfReportUrl ? (
-                <Button
-                  as="a"
-                  mb={2}
-                  ml={2}
-                  href={pdfReportUrl}
-                  download
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  size="sm"
-                  variant="link"
-                  leftIcon={<Icon as={Download} />}
-                  isDisabled={currentPreCheck?.expired}
-                >
-                  {t("preCheck.sections.resultsSummary.downloadReport", "Download your PDF report")}
-                </Button>
-              ) : (
-                <Text fontSize="sm" color="text.secondary">
-                  {t("preCheck.sections.resultsSummary.pdfUnavailable", "PDF report unavailable")}
+            </UnorderedList>
+            {!currentPreCheck?.expired && (
+              <RouterLinkButton
+                leftIcon={<Layout />}
+                to={`/pre-checks/${currentPreCheck?.id}/viewer`}
+                variant="primary"
+                mb={4}
+                isDisabled={currentPreCheck?.expired}
+              >
+                {t("preCheck.sections.resultsSummary.exploreResults", "Explore interactive results")}
+              </RouterLinkButton>
+            )}
+            {!currentPreCheck?.expired && (
+              <Flex>
+                <Text mb={2}>
+                  {t("preCheck.sections.resultsSummary.preferResults", "Prefer results you can save and print?")}
                 </Text>
-              )}
-            </Flex>
+
+                {isFetchingPdfUrl ? (
+                  <Button
+                    size="sm"
+                    variant="link"
+                    leftIcon={<Icon as={Download} />}
+                    isLoading
+                    isDisabled={currentPreCheck?.expired}
+                  >
+                    {t("preCheck.sections.resultsSummary.downloadReport", "Download your PDF report")}
+                  </Button>
+                ) : pdfReportUrl ? (
+                  <Button
+                    as="a"
+                    mb={2}
+                    ml={2}
+                    href={pdfReportUrl}
+                    download
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    size="sm"
+                    variant="link"
+                    leftIcon={<Icon as={Download} />}
+                    isDisabled={currentPreCheck?.expired}
+                    disabled={currentPreCheck?.expired}
+                  >
+                    {t("preCheck.sections.resultsSummary.downloadReport", "Download your PDF report")}
+                  </Button>
+                ) : (
+                  <Text fontSize="sm" color="text.secondary">
+                    {t("preCheck.sections.resultsSummary.pdfUnavailable", "PDF report unavailable")}
+                  </Text>
+                )}
+              </Flex>
+            )}
             {currentPreCheck?.expired && (
               <CustomMessageBox
                 title={t("preCheck.sections.resultsSummary.expiredTitle", "This pre-check is expired")}

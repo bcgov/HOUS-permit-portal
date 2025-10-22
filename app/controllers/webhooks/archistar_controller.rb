@@ -34,7 +34,7 @@ class Webhooks::ArchistarController < Webhooks::ApplicationController
 
   def authenticate_webhook
     # API Key authentication
-    api_key = request.headers["X-Archistar-API-Key"]
+    api_key = request.headers["X-Archistar-Webhook-Secret"]
     expected_api_key = ENV["ARCHISTAR_WEBHOOK_SECRET"]
 
     if expected_api_key.present? && api_key != expected_api_key

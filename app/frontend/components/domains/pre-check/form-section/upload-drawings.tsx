@@ -3,7 +3,6 @@ import {
   Heading,
   Icon,
   IconButton,
-  List,
   ListItem,
   Table,
   TableContainer,
@@ -13,6 +12,7 @@ import {
   Th,
   Thead,
   Tr,
+  UnorderedList,
 } from "@chakra-ui/react"
 import { Trash } from "@phosphor-icons/react"
 import { UppyFile } from "@uppy/core"
@@ -134,7 +134,7 @@ export const UploadDrawings = observer(function UploadDrawings() {
       <Heading as="h3" size="md" mb={4}>
         {t("preCheck.sections.uploadDrawings.fileRequirementsTitle", "File requirements")}
       </Heading>
-      <List pl={6} mb={6} styleType="disc">
+      <UnorderedList pl={6} mb={6}>
         <ListItem>{t("preCheck.sections.uploadDrawings.requirement1", "PDF format only")}</ListItem>
         <ListItem>{t("preCheck.sections.uploadDrawings.requirement2", "One file, not multiple PDFs")}</ListItem>
         <ListItem>
@@ -144,7 +144,7 @@ export const UploadDrawings = observer(function UploadDrawings() {
           )}
         </ListItem>
         <ListItem>{t("preCheck.sections.uploadDrawings.requirement4", "Maximum file size: 200 MB")}</ListItem>
-      </List>
+      </UnorderedList>
 
       {designDocumentsAttributes && designDocumentsAttributes.length > 0 && (
         <TableContainer mb={6}>

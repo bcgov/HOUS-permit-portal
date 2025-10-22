@@ -23,7 +23,7 @@ RSpec.describe Webhooks::ArchistarController, type: :controller do
         "metadata" => {
           "certificate" =>
             "British Columbia BC 2024 - Housing and Small Buildings - Essentials",
-          "address" => "322 E Keith Rd, North Vancouver",
+          "address" => "99999 E Keith Rd, North Vancouver",
           "lot_id" => nil,
           "council" => nil,
           "zone" => [],
@@ -54,7 +54,7 @@ RSpec.describe Webhooks::ArchistarController, type: :controller do
 
     before do
       # Set up authentication headers for valid requests
-      request.headers["X-Archistar-API-Key"] = "test-api-key"
+      request.headers["X-Archistar-Webhook-Secret"] = "test-api-key"
       request.headers["Content-Type"] = "application/json"
       allow(ENV).to receive(:[]).and_call_original
       allow(ENV).to receive(:[]).with("ARCHISTAR_WEBHOOK_SECRET").and_return(
@@ -206,7 +206,7 @@ RSpec.describe Webhooks::ArchistarController, type: :controller do
 
     context "authentication" do
       context "with invalid API key" do
-        before { request.headers["X-Archistar-API-Key"] = "wrong-key" }
+        before { request.headers["X-Archistar-Webhook-Secret"] = "wrong-key" }
 
         it "returns unauthorized" do
           post :receive, body: webhook_payload.to_json
@@ -219,7 +219,7 @@ RSpec.describe Webhooks::ArchistarController, type: :controller do
       context "with missing API key" do
         it "returns unauthorized" do
           # Override the before block and don't set API key
-          request.headers["X-Archistar-API-Key"] = ""
+          request.headers["X-Archistar-Webhook-Secret"] = ""
 
           post :receive, body: webhook_payload.to_json
 

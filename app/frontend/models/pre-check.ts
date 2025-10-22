@@ -1,4 +1,5 @@
-import { flow, getRoot, Instance, types } from "mobx-state-tree"
+import { flow, Instance, types } from "mobx-state-tree"
+import { withEnvironment } from "../lib/with-environment"
 import { EPreCheckAssessmentResult, EPreCheckServicePartner, EPreCheckStatus } from "../types/enums"
 import { IDesignDocument } from "../types/types"
 import { JurisdictionModel } from "./jurisdiction"
@@ -28,6 +29,7 @@ export const PreCheckModel = types
     createdAt: types.maybeNull(types.Date),
     updatedAt: types.maybeNull(types.Date),
   })
+  .extend(withEnvironment())
   .volatile(() => ({
     cachedPdfReportUrl: null as string | null,
     pdfUrlFetchedAt: null as Date | null,
@@ -105,8 +107,7 @@ export const PreCheckModel = types
       }
 
       // Cache is stale or doesn't exist, fetch new URL
-      const rootStore: any = getRoot(self)
-      const response = yield rootStore.environment.api.getPreCheckPdfReportUrl(self.id)
+      const response = yield self.environment.api.getPreCheckPdfReportUrl(self.id)
       if (response.ok && response.data?.pdfReportUrl) {
         // Cache the new URL and timestamp
         self.cachedPdfReportUrl = response.data.pdfReportUrl
