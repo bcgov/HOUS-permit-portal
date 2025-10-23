@@ -443,6 +443,7 @@ export enum ENotificationActionType {
   applicationRevisionsRequest = "application_revisions_request",
   applicationView = "application_view",
   stepCodeReportGenerated = "step_code_report_generated",
+  preCheckSubmitted = "pre_check_submitted",
   preCheckCompleted = "pre_check_completed",
 }
 

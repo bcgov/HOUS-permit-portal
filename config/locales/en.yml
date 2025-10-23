@@ -877,6 +877,7 @@ en:
     pre_check:
       completed_passed: "Your BC Code compliance pre-check for %{address} is now available."
       completed_failed: "Your BC Code compliance pre-check for %{address} is now available."
+      submitted: "We've submitted your drawings for %{address}. Your results are being prepared."
     permit_block_status:
       status_read_by_user: 'Requirement “%{requirement_block_name}” status set to "ready" by %{setter_name} for permit application %{number}'
       status_ready_no_user: 'Requirement “%{requirement_block_name}” status set to "ready" for permit application %{number}'

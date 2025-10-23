@@ -160,12 +160,20 @@ export const NotificationStoreModel = types
             href,
           },
         ]
+      } else if (notification.actionType === ENotificationActionType.preCheckSubmitted) {
+        const preCheckData = notification.objectData as any
+        return [
+          {
+            text: t("ui.show"),
+            href: `/pre-checks/${preCheckData?.preCheckId}/edit/results-summary`,
+          },
+        ]
       } else if (notification.actionType === ENotificationActionType.preCheckCompleted) {
         const preCheckData = notification.objectData as any
         return [
           {
             text: t("ui.show"),
-            href: `/pre-checks/${preCheckData?.preCheckId}/edit`,
+            href: `/pre-checks/${preCheckData?.preCheckId}/edit/results-summary`,
           },
         ]
       }

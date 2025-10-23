@@ -20,7 +20,10 @@ class PreCheck < ApplicationRecord
     event :submit do
       transitions from: :draft, to: :processing
 
-      after { submit_to_archistar }
+      after do
+        submit_to_archistar
+        NotificationService.publish_pre_check_submitted_event(self)
+      end
     end
 
     event :mark_complete do
@@ -152,6 +155,20 @@ class PreCheck < ApplicationRecord
       permit_project_id: permit_project&.id,
       jurisdiction_id: jurisdiction&.id,
       permit_application_id: permit_application_id
+    }
+  end
+
+  def submission_event_notification_data
+    {
+      "id" => SecureRandom.uuid,
+      "action_type" => Constants::NotificationActionTypes::PRE_CHECK_SUBMITTED,
+      "action_text" =>
+        I18n.t("notification.pre_check.submitted", address: full_address),
+      "object_data" => {
+        "pre_check_id" => id,
+        "certificate_no" => certificate_no,
+        "full_address" => full_address
+      }
     }
   end
 

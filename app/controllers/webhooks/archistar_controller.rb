@@ -158,8 +158,7 @@ class Webhooks::ArchistarController < Webhooks::ApplicationController
       Rails.logger.error(
         "Archistar submission failed for pre-check #{pre_check.id}: #{payload["message"]}"
       )
-      # TODO: Add failed status handling if needed
-    when "processing", "in_progress"
+    when "processing"
       Rails.logger.info("Pre-check #{pre_check.id} is still processing")
     else
       Rails.logger.warn("Unknown Archistar webhook status: #{status}")

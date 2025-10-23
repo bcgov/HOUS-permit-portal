@@ -60,6 +60,11 @@ RSpec.describe Webhooks::ArchistarController, type: :controller do
       allow(ENV).to receive(:[]).with("ARCHISTAR_WEBHOOK_SECRET").and_return(
         "test-api-key"
       )
+
+      # Stub the Archistar API call to avoid external HTTP requests
+      allow_any_instance_of(Wrappers::Archistar).to receive(
+        :get_submission_viewer_url
+      ).and_return("https://example.com/viewer/BCBC_2024_ESS_uat-TEST123")
     end
 
     context "with valid webhook payload for passed assessment" do

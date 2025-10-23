@@ -239,6 +239,19 @@ class NotificationService
     end
   end
 
+  def self.publish_pre_check_submitted_event(pre_check)
+    return if pre_check.blank? || pre_check.creator_id.blank?
+
+    notification_user_hash = {
+      pre_check.creator_id => pre_check.submission_event_notification_data
+    }
+
+    NotificationPushJob.perform_async(notification_user_hash)
+
+    # Send email notification
+    PermitHubMailer.notify_pre_check_submitted(pre_check).deliver_later
+  end
+
   def self.publish_pre_check_completed_event(pre_check)
     return if pre_check.blank? || pre_check.creator_id.blank?
 
@@ -247,6 +260,9 @@ class NotificationService
     }
 
     NotificationPushJob.perform_async(notification_user_hash)
+
+    # Send email notification
+    PermitHubMailer.notify_pre_check_completed(pre_check).deliver_later
   end
 
   def self.publish_application_submission_event(permit_application)

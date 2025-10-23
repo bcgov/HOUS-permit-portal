@@ -16,6 +16,7 @@ module Constants
     SCHEDULED_TEMPLATE_MISSING_REQUIREMENTS_MAPPING =
       "scheduled_template_missing_requirements_mapping"
     STEP_CODE_REPORT_GENERATED = "step_code_report_generated"
+    PRE_CHECK_SUBMITTED = "pre_check_submitted"
     PRE_CHECK_COMPLETED = "pre_check_completed"
   end
 end
