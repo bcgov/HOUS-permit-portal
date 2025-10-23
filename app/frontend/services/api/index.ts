@@ -770,6 +770,10 @@ export class Api {
     return this.client.get<IApiResponse<{ pdfReportUrl: string }, {}>>(`/pre_checks/${id}/pdf_report_url`)
   }
 
+  async downloadPreCheckUserConsentCsv() {
+    return this.client.get<BlobPart>(`/pre_checks/download_pre_check_user_consent_csv`)
+  }
+
   async downloadApplicationMetricsCsv() {
     return this.client.get<BlobPart>(`/permit_applications/download_application_metrics_csv`)
   }

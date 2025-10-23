@@ -3782,6 +3782,13 @@ Thank you,
             title: "Basic Application metrics for all jurisdictions",
             filename: "Basic Application metrics for all jurisdictions",
           },
+          preCheckUserConsent: {
+            name: "Archistar Tool User Consent Report",
+            description:
+              "Export user contact information and submission details for users who consented to be contacted for research on the Archistar tool. Respects research participation opt-out preferences.",
+            title: "Archistar Tool User Consent Report",
+            filename: "Archistar Tool User Consent Report",
+          },
           columnHeaders: {
             name: "Name",
             description: "Description",

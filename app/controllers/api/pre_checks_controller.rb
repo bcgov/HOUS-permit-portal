@@ -120,6 +120,13 @@ class Api::PreChecksController < Api::ApplicationController
     end
   end
 
+  def download_pre_check_user_consent_csv
+    authorize :pre_check, :download_pre_check_user_consent_csv?
+
+    csv_data = PreCheckExportService.new.user_consent_csv
+    send_data csv_data, type: "text/csv"
+  end
+
   private
 
   def set_pre_check
