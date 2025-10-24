@@ -13,6 +13,8 @@ export function applyNotificationSideEffects(payload: IUserPushPayload, rootStor
           // Fire-and-forget refresh; underlying MST flow returns a promise
           if (stepCodeType === EStepCodeType.part3StepCode) {
             rootStore.stepCodeStore.fetchPart3StepCode(stepCodeId)
+          } else if (stepCodeType === EStepCodeType.part9StepCode) {
+            rootStore.stepCodeStore.fetchPart9StepCode(stepCodeId)
           } else {
             console.error("Unknown step code type", stepCodeType)
           }

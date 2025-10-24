@@ -35,7 +35,7 @@ class Api::ReportDocumentsController < Api::ApplicationController
 
     if success
       render_success(
-        { message: "Report successfully shared with jurisdiction" },
+        nil,
         "report_document.share_success",
         { message_opts: { jurisdiction_name: jurisdiction.qualified_name } }
       )
