@@ -224,7 +224,7 @@ class PermitHubMailer < ApplicationMailer
     @sender_user = sender_user
 
     # Download and attach the report file
-    temp_file = download_report_file(report_document)
+    temp_file = report_document.download_to_tempfile
 
     if temp_file
       begin
@@ -253,35 +253,5 @@ class PermitHubMailer < ApplicationMailer
   def send_user_mail(*args, **kwargs)
     return if @user.discarded? || !@user.confirmed?
     send_mail(*args, **kwargs)
-  end
-
-  private
-
-  def download_report_file(report_document)
-    temp_file =
-      Tempfile.new(["report", File.extname(report_document.file_name)])
-    temp_file.binmode
-    url = URI.parse(report_document.file_url)
-
-    Net::HTTP.start(
-      url.host,
-      url.port,
-      use_ssl: url.scheme == "https"
-    ) do |http|
-      request = Net::HTTP::Get.new(url)
-      http.request(request) do |response|
-        response.read_body { |chunk| temp_file.write(chunk) }
-      end
-    end
-
-    temp_file.close
-    temp_file.path
-  rescue => e
-    Rails.logger.error(
-      "Failed to download report file: #{report_document.file_url} with error: #{e.message}"
-    )
-    temp_file&.close
-    temp_file&.unlink
-    nil
   end
 end

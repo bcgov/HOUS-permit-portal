@@ -23,7 +23,7 @@ class ChesEmailDelivery
       encoding: "utf-8",
       priority: "normal",
       subject: mail.subject,
-      attachments: [],
+      attachments: format_attachments(mail),
       body: mail.body.to_s,
       bodyType: body_type(mail)
     }
@@ -55,6 +55,19 @@ class ChesEmailDelivery
   end
 
   private
+
+  def format_attachments(mail)
+    return [] if mail.attachments.empty?
+
+    mail.attachments.map do |attachment|
+      {
+        content: Base64.strict_encode64(attachment.body.decoded),
+        contentType: attachment.content_type,
+        filename: attachment.filename,
+        encoding: "base64"
+      }
+    end
+  end
 
   def ensure_ches_token_is_valid_and_health_check_passes
     response = client.get("health")
