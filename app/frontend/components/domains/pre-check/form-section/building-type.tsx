@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next"
 import { usePreCheck } from "../../../../hooks/resources/use-pre-check"
 import { IPermitType } from "../../../../models/permit-classification"
 import { useMst } from "../../../../setup/root"
+import { EPermitClassificationCode } from "../../../../types/enums"
 import { IOption } from "../../../../types/types"
 import { Editor } from "../../../shared/editor/editor"
 import { PreCheckBackLink } from "../pre-check-back-link"
@@ -29,6 +30,7 @@ export const BuildingType = observer(function BuildingType() {
     control,
     handleSubmit,
     watch,
+    setValue,
     formState: { isSubmitting },
   } = useForm<IBuildingTypeFormData>({
     defaultValues: {
@@ -42,9 +44,17 @@ export const BuildingType = observer(function BuildingType() {
     ;(async () => {
       // Fetch permit type options - show all, not hidden
       const options = await permitClassificationStore.fetchPermitTypeOptions(false, isFirstNation, null, null)
-      setPermitTypeOptions(options)
+      // Filter to only show low residential options
+      const filteredOptions = options.filter((option) => option.value.code === EPermitClassificationCode.lowResidential)
+      setPermitTypeOptions(filteredOptions)
+
+      // Pre-select the option if there's only one available and no current selection
+      if (filteredOptions.length === 1 && !currentPreCheck?.permitType?.id) {
+        const singleOption = filteredOptions[0]
+        setValue("permitTypeId", singleOption.value.id)
+      }
     })()
-  }, [permitClassificationStore, isFirstNation])
+  }, [permitClassificationStore, isFirstNation, currentPreCheck?.permitType?.id, setValue])
 
   const onSubmit = async (data: IBuildingTypeFormData) => {
     if (!currentPreCheck) return
@@ -62,6 +72,7 @@ export const BuildingType = observer(function BuildingType() {
       <Text mb={6}>
         {t("preCheck.sections.buildingType.description", "Choose the building type that best describes your project")}
       </Text>
+      <Text mb={6}></Text>
 
       <VStack spacing={4} align="stretch" mb={8}>
         <Controller
@@ -118,7 +129,7 @@ export const BuildingType = observer(function BuildingType() {
                 })}
               </Flex>
               {fieldState.error && (
-                <Text color="red.500" fontSize="sm" mt={1}>
+                <Text color="semantic.error" fontSize="sm" mt={1}>
                   {fieldState.error.message}
                 </Text>
               )}

@@ -81,4 +81,73 @@ RSpec.describe PreCheck, type: :model do
       expect(pre_check.title).to eq("My permit")
     end
   end
+
+  describe ".completed_and_unviewed" do
+    let(:user) { create(:user) }
+
+    it "includes completed pre-checks without viewed_at" do
+      complete_unviewed =
+        create(:pre_check, :complete, creator: user, viewed_at: nil)
+
+      expect(PreCheck.completed_and_unviewed).to include(complete_unviewed)
+    end
+
+    it "excludes completed pre-checks that have been viewed" do
+      complete_viewed =
+        create(:pre_check, :complete, creator: user, viewed_at: 1.hour.ago)
+
+      expect(PreCheck.completed_and_unviewed).not_to include(complete_viewed)
+    end
+
+    it "excludes pre-checks in processing status" do
+      processing =
+        create(:pre_check, :processing, creator: user, viewed_at: nil)
+
+      expect(PreCheck.completed_and_unviewed).not_to include(processing)
+    end
+
+    it "excludes pre-checks in draft status" do
+      draft = create(:pre_check, creator: user, viewed_at: nil)
+
+      expect(PreCheck.completed_and_unviewed).not_to include(draft)
+    end
+  end
+
+  describe ".unviewed_count_for_user" do
+    let(:user) { create(:user) }
+    let(:other_user) { create(:user) }
+
+    it "returns count of completed unviewed pre-checks for specific user" do
+      create(:pre_check, :complete, creator: user, viewed_at: nil)
+      create(:pre_check, :complete, creator: user, viewed_at: nil)
+
+      expect(PreCheck.unviewed_count_for_user(user.id)).to eq(2)
+    end
+
+    it "excludes viewed pre-checks" do
+      create(:pre_check, :complete, creator: user, viewed_at: nil)
+      create(:pre_check, :complete, creator: user, viewed_at: 1.hour.ago)
+
+      expect(PreCheck.unviewed_count_for_user(user.id)).to eq(1)
+    end
+
+    it "excludes other users' pre-checks" do
+      create(:pre_check, :complete, creator: user, viewed_at: nil)
+      create(:pre_check, :complete, creator: other_user, viewed_at: nil)
+
+      expect(PreCheck.unviewed_count_for_user(user.id)).to eq(1)
+    end
+
+    it "excludes non-complete pre-checks" do
+      create(:pre_check, :complete, creator: user, viewed_at: nil)
+      create(:pre_check, :processing, creator: user, viewed_at: nil)
+      create(:pre_check, creator: user, viewed_at: nil)
+
+      expect(PreCheck.unviewed_count_for_user(user.id)).to eq(1)
+    end
+
+    it "returns 0 when user has no unviewed completed pre-checks" do
+      expect(PreCheck.unviewed_count_for_user(user.id)).to eq(0)
+    end
+  end
 end

@@ -19,6 +19,18 @@ class PreCheckPolicy < ApplicationPolicy
     update?
   end
 
+  def mark_viewed?
+    update?
+  end
+
+  def pdf_report_url?
+    show?
+  end
+
+  def download_pre_check_user_consent_csv?
+    user.super_admin?
+  end
+
   class Scope < Scope
     def resolve
       scope.where(creator_id: user.id)

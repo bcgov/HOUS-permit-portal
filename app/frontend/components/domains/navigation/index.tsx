@@ -129,6 +129,11 @@ const LookUpStepCodesRequirementsForYourProjectScreen = lazy(() =>
     default: module.LookUpStepCodesRequirementsForYourProjectScreen,
   }))
 )
+const PreCheckInfoScreen = lazy(() =>
+  import("../project-readiness-tools/pre-check-info-screen").then((module) => ({
+    default: module.PreCheckInfoScreen,
+  }))
+)
 
 const CheckStepCodeRequirementsScreen = lazy(() =>
   import("../project-readiness-tools/check-step-code-requirements").then((module) => ({
@@ -240,6 +245,9 @@ const Part3StepCodeForm = lazy(() =>
   import("../step-code/part-3").then((module) => ({ default: module.Part3StepCodeForm }))
 )
 const PreCheckForm = lazy(() => import("../pre-check").then((module) => ({ default: module.PreCheckForm })))
+const PreCheckViewer = lazy(() =>
+  import("../pre-check/pre-check-viewer").then((module) => ({ default: module.PreCheckViewer }))
+)
 
 const StepCodeChecklistPDFViewer = lazy(() =>
   import("../step-code/checklist/pdf-content/viewer").then((module) => ({
@@ -656,6 +664,7 @@ const AppRoutes = observer(() => {
             <Route path="/pre-checks/new/:section" element={<PreCheckForm />} />
             <Route path="/pre-checks/:preCheckId/edit/" element={<PreCheckForm />} />
             <Route path="/pre-checks/:preCheckId/edit/:section" element={<PreCheckForm />} />
+            <Route path="/pre-checks/:preCheckId/viewer" element={<PreCheckViewer />} />
             <Route path="/documents" element={<ProjectDashboardScreen />} />
             {/* Already handled above with path-based tabs */}
             <Route path="/projects" element={<ProjectDashboardScreen />} />
@@ -773,6 +782,7 @@ const AppRoutes = observer(() => {
           path="/project-readiness-tools/look-up-step-codes-requirements-for-your-project"
           element={<LookUpStepCodesRequirementsForYourProjectScreen />}
         />
+        <Route path="/project-readiness-tools/pre-check" element={<PreCheckInfoScreen />} />
         <Route
           path="/onboarding-checklist-page-for-lg-adopting"
           element={<OnboardingChecklistPageForLgAdoptingScreen />}

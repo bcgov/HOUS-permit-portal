@@ -1,5 +1,5 @@
 import { Grid, GridItem, IconButton, Menu, MenuButton, MenuItem, MenuList, Text } from "@chakra-ui/react"
-import { DotsThreeVertical } from "@phosphor-icons/react"
+import { ArrowSquareOut, CloudArrowDown, DotsThreeVertical, Warning } from "@phosphor-icons/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { datefnsTableDateTimeFormat } from "../../../constants"
 import { IPreCheck } from "../../../models/pre-check"
+import { downloadFileFromUrl } from "../../../utils/utility-functions"
 
 interface IPreCheckGridRowProps {
   preCheck: IPreCheck
@@ -15,6 +16,25 @@ interface IPreCheckGridRowProps {
 export const PreCheckGridRow = observer(({ preCheck }: IPreCheckGridRowProps) => {
   const { t } = useTranslation()
   const navigate = useNavigate()
+
+  const handleOpenInteractiveReport = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    navigate(`/pre-checks/${preCheck.id}/viewer`)
+  }
+
+  const handleDownloadReport = async (e: React.MouseEvent) => {
+    e.stopPropagation()
+    try {
+      const pdfUrl = await preCheck.fetchPdfReportUrl()
+      if (pdfUrl) {
+        downloadFileFromUrl(pdfUrl, `pre-check-report-${preCheck.id}.pdf`)
+      } else {
+        console.error("Failed to get PDF report URL")
+      }
+    } catch (error) {
+      console.error("Error downloading PDF report:", error)
+    }
+  }
 
   return (
     <>
@@ -32,16 +52,16 @@ export const PreCheckGridRow = observer(({ preCheck }: IPreCheckGridRowProps) =>
         _last={{ borderBottom: "none" }}
       >
         <GridItem display="flex" alignItems="center" px={4} py={2}>
-          <Text>{preCheck.fullAddress || "-"}</Text>
+          <Text>{preCheck.fullAddress || "—"}</Text>
         </GridItem>
         <GridItem display="flex" alignItems="center" px={4} py={2}>
-          <Text>{preCheck.title || "-"}</Text>
+          <Text>{preCheck.title || "—"}</Text>
         </GridItem>
         <GridItem display="flex" alignItems="center" px={4} py={2}>
           {preCheck.updatedAt && format(preCheck.updatedAt, datefnsTableDateTimeFormat)}
         </GridItem>
-        <GridItem display="flex" alignItems="center" px={4} py={2}>
-          <Text>{preCheck.status || "-"}</Text>
+        <GridItem display="flex" alignItems="center" px={4} py={2} textTransform="capitalize">
+          <Text>{preCheck.status || "—"}</Text>
         </GridItem>
         <GridItem display="flex" alignItems="center" justifyContent="flex-end" px={4} py={2}>
           <Menu>
@@ -54,13 +74,29 @@ export const PreCheckGridRow = observer(({ preCheck }: IPreCheckGridRowProps) =>
             />
             <MenuList>
               <MenuItem
-                onClick={(e) => {
-                  e.stopPropagation()
-                  navigate(`/pre-checks/${preCheck.id}/edit`)
-                }}
+                icon={<ArrowSquareOut size={16} />}
+                onClick={handleOpenInteractiveReport}
+                isDisabled={!preCheck.isCompleted || preCheck.expired}
               >
-                {t("ui.view", "View")}
+                {t("preCheck.index.openInteractiveReport", "Open interactive report")}
               </MenuItem>
+              <MenuItem
+                icon={<CloudArrowDown size={16} />}
+                onClick={handleDownloadReport}
+                isDisabled={!preCheck.isCompleted || preCheck.expired}
+              >
+                {t("preCheck.index.downloadReport", "Download report")}
+              </MenuItem>
+              {preCheck.expired && (
+                <MenuItem
+                  icon={<Warning size={16} />}
+                  _hover={{ cursor: "not-allowed" }}
+                  color="semantic.error"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {t("preCheck.index.expired", "This pre-check is expired")}
+                </MenuItem>
+              )}
             </MenuList>
           </Menu>
         </GridItem>

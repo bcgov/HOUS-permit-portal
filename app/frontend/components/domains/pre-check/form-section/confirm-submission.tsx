@@ -1,13 +1,12 @@
-import { Box, Button, Flex, Heading, Text, VStack } from "@chakra-ui/react"
+import { Box, Button, Flex, Heading, Text } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { usePreCheck } from "../../../../hooks/resources/use-pre-check"
 import { useMst } from "../../../../setup/root"
-import { EFileUploadAttachmentType } from "../../../../types/enums"
-import { FileDownloadButton } from "../../../shared/base/file-download-button"
 import { ConfirmationModal } from "../../../shared/confirmation-modal"
 import { PreCheckBackLink } from "../pre-check-back-link"
+import { PreCheckReviewDetails } from "../pre-check-review-details"
 import { usePreCheckNavigation } from "../use-pre-check-navigation"
 
 export const ConfirmSubmission = observer(function ConfirmSubmission() {
@@ -39,8 +38,7 @@ export const ConfirmSubmission = observer(function ConfirmSubmission() {
     }
   }
 
-  const designDocuments = currentPreCheck?.designDocuments || []
-  const uploadedFilesCount = designDocuments.filter((doc) => !doc._destroy).length
+  if (!currentPreCheck) return null
 
   return (
     <Box>
@@ -49,73 +47,7 @@ export const ConfirmSubmission = observer(function ConfirmSubmission() {
         {t("preCheck.sections.confirmSubmission.title", "Review and submit")}
       </Heading>
 
-      <VStack spacing={6} align="stretch" mb={8}>
-        {/* Project and Application Numbers */}
-        {/* <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={8}>
-          <Box>
-            <Heading as="h3" size="sm" mb={2} fontWeight="bold">
-              {t("preCheck.sections.confirmSubmission.projectNumber", "Project number")}
-            </Heading>
-            <Text color="text.secondary">—</Text>
-          </Box>
-          <Box>
-            <Heading as="h3" size="sm" mb={2} fontWeight="bold">
-              {t("preCheck.sections.confirmSubmission.applicationNumber", "Application number")}
-            </Heading>
-            <Text color="text.secondary">—</Text>
-          </Box>
-        </Grid> */}
-
-        {/* Address */}
-        <Box>
-          <Heading as="h3" size="sm" mb={2} fontWeight="bold">
-            {t("preCheck.sections.confirmSubmission.address", "Address")}
-          </Heading>
-          {currentPreCheck?.fullAddress ? (
-            <Text>{currentPreCheck.fullAddress}</Text>
-          ) : (
-            <Text color="text.secondary">—</Text>
-          )}
-        </Box>
-
-        {/* Jurisdiction */}
-        <Box>
-          <Heading as="h3" size="sm" mb={2} fontWeight="bold">
-            {t("preCheck.sections.confirmSubmission.jurisdiction", "Jurisdiction")}
-          </Heading>
-          {currentPreCheck?.jurisdiction?.name ? (
-            <Text>{currentPreCheck.jurisdiction.qualifiedName}</Text>
-          ) : (
-            <Text color="text.secondary">—</Text>
-          )}
-        </Box>
-
-        {/* Uploaded Files */}
-        <Box>
-          <Heading as="h3" size="sm" mb={2} fontWeight="bold">
-            {t("preCheck.sections.confirmSubmission.uploadedFiles", "Uploaded files ({{count}})", {
-              count: uploadedFilesCount,
-            })}
-          </Heading>
-          {designDocuments.length > 0 ? (
-            <VStack align="stretch" spacing={1}>
-              {designDocuments
-                .filter((doc) => !doc._destroy)
-                .map((doc) => (
-                  <FileDownloadButton
-                    key={doc.id || doc.file?.id}
-                    document={doc}
-                    modelType={EFileUploadAttachmentType.DesignDocument}
-                    variant="link"
-                    size="sm"
-                  />
-                ))}
-            </VStack>
-          ) : (
-            <Text color="text.secondary">{t("preCheck.sections.confirmSubmission.noFiles", "No files uploaded")}</Text>
-          )}
-        </Box>
-      </VStack>
+      <PreCheckReviewDetails preCheck={currentPreCheck} />
 
       <Flex gap={3} mt={8}>
         {!currentPreCheck?.isSubmitted ? (

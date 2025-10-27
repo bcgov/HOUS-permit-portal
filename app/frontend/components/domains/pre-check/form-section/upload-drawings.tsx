@@ -1,5 +1,20 @@
-import { Box, Button, Flex, Heading, Icon, IconButton, Text } from "@chakra-ui/react"
-import { ArrowCounterClockwise, Trash } from "@phosphor-icons/react"
+import {
+  Box,
+  Heading,
+  Icon,
+  IconButton,
+  ListItem,
+  Table,
+  TableContainer,
+  Tbody,
+  Td,
+  Text,
+  Th,
+  Thead,
+  Tr,
+  UnorderedList,
+} from "@chakra-ui/react"
+import { Trash } from "@phosphor-icons/react"
 import { UppyFile } from "@uppy/core"
 import "@uppy/core/dist/style.min.css"
 import "@uppy/dashboard/dist/style.css"
@@ -11,7 +26,7 @@ import { useTranslation } from "react-i18next"
 import { usePreCheck } from "../../../../hooks/resources/use-pre-check"
 import useUppyS3 from "../../../../hooks/use-uppy-s3"
 import { useMst } from "../../../../setup/root"
-import { EFileUploadAttachmentType, EPreCheckServicePartner } from "../../../../types/enums"
+import { EFileUploadAttachmentType } from "../../../../types/enums"
 import { IDesignDocument } from "../../../../types/types"
 import { FileDownloadButton } from "../../../shared/base/file-download-button"
 import { PreCheckBackLink } from "../pre-check-back-link"
@@ -27,6 +42,13 @@ export const UploadDrawings = observer(function UploadDrawings() {
   const {
     preCheckStore: { updatePreCheck },
   } = useMst()
+
+  const formatFileSize = (bytes: number | undefined) => {
+    if (!bytes) return "0 B"
+    const sizes = ["B", "KB", "MB", "GB"]
+    const i = Math.floor(Math.log(bytes) / Math.log(1024))
+    return `${(bytes / Math.pow(1024, i)).toFixed(2)} ${sizes[i]}`
+  }
 
   const {
     control,
@@ -92,7 +114,7 @@ export const UploadDrawings = observer(function UploadDrawings() {
     onUploadSuccess: handleUploadSuccess,
     maxNumberOfFiles: 1,
     autoProceed: true,
-    maxFileSizeMB: 100,
+    maxFileSizeMB: 200,
     allowedFileTypes: ["application/pdf", ".pdf"],
   })
 
@@ -112,51 +134,69 @@ export const UploadDrawings = observer(function UploadDrawings() {
       <Heading as="h3" size="md" mb={4}>
         {t("preCheck.sections.uploadDrawings.fileRequirementsTitle", "File requirements")}
       </Heading>
-      <Box as="ul" pl={6} mb={6}>
-        <li>{t("preCheck.sections.uploadDrawings.requirement1", "PDF format only")}</li>
-        <li>{t("preCheck.sections.uploadDrawings.requirement2", "One file, not multiple PDFs")}</li>
-        <li>
+      <UnorderedList pl={6} mb={6}>
+        <ListItem>{t("preCheck.sections.uploadDrawings.requirement1", "PDF format only")}</ListItem>
+        <ListItem>{t("preCheck.sections.uploadDrawings.requirement2", "One file, not multiple PDFs")}</ListItem>
+        <ListItem>
           {t(
             "preCheck.sections.uploadDrawings.requirement3",
             "Architectural drawings must be legible and properly scaled"
           )}
-        </li>
-        <li>{t("preCheck.sections.uploadDrawings.requirement4", "Maximum file size: 100 MB")}</li>
-      </Box>
+        </ListItem>
+        <ListItem>{t("preCheck.sections.uploadDrawings.requirement4", "Maximum file size: 200 MB")}</ListItem>
+      </UnorderedList>
 
-      {designDocumentsAttributes?.map((doc) => (
-        <Flex key={doc.id || doc.file?.id} justifyContent="space-between" alignItems="center" gap={2} mb={2}>
-          {doc.id ? (
-            <FileDownloadButton document={doc} modelType={EFileUploadAttachmentType.DesignDocument} />
-          ) : (
-            <Text textDecoration={doc._destroy ? "line-through" : "none"}>{doc.file?.metadata?.filename}</Text>
-          )}
-          {!currentPreCheck?.isSubmitted && (
-            <>
-              {doc._destroy ? (
-                <Button
-                  variant="link"
-                  size="sm"
-                  color="semantic.info"
-                  leftIcon={<Icon as={ArrowCounterClockwise} />}
-                  onClick={() => handleUndoRemove(doc.id || doc.file?.id)}
-                >
-                  {t("ui.undo")}
-                </Button>
-              ) : (
-                <IconButton
-                  aria-label={t("ui.remove")}
-                  color="semantic.error"
-                  icon={<Icon as={Trash} />}
-                  variant="tertiary"
-                  size="sm"
-                  onClick={() => handleRemoveFile(doc.id || doc.file?.id)}
-                />
-              )}
-            </>
-          )}
-        </Flex>
-      ))}
+      {designDocumentsAttributes && designDocumentsAttributes.length > 0 && (
+        <TableContainer mb={6}>
+          <Table variant="simple" size="sm">
+            <Thead bg="gray.50">
+              <Tr>
+                <Th width="40px" fontWeight="bold"></Th>
+                <Th fontWeight="bold" textTransform="capitalize">
+                  {t("preCheck.sections.uploadDrawings.fileName", "File Name")}
+                </Th>
+                <Th isNumeric fontWeight="bold" textTransform="capitalize">
+                  {t("preCheck.sections.uploadDrawings.size", "Size")}
+                </Th>
+              </Tr>
+            </Thead>
+            <Tbody>
+              {designDocumentsAttributes.map((doc) => (
+                <Tr key={doc.id || doc.file?.id}>
+                  <Td>
+                    {!currentPreCheck?.isSubmitted && !doc._destroy && (
+                      <IconButton
+                        aria-label={t("ui.remove")}
+                        color="semantic.error"
+                        icon={<Icon as={Trash} />}
+                        variant="ghost"
+                        size="xs"
+                        onClick={() => handleRemoveFile(doc.id || doc.file?.id)}
+                      />
+                    )}
+                  </Td>
+                  <Td>
+                    {doc.id ? (
+                      <FileDownloadButton document={doc} modelType={EFileUploadAttachmentType.DesignDocument} />
+                    ) : (
+                      <Text
+                        textDecoration={doc._destroy ? "line-through" : "none"}
+                        color={doc._destroy ? "gray.500" : "blue.500"}
+                        textDecorationLine={doc._destroy ? "line-through" : "underline"}
+                      >
+                        {doc.file?.metadata?.filename}
+                      </Text>
+                    )}
+                  </Td>
+                  <Td isNumeric>
+                    <Text color="gray.600">{formatFileSize(doc.file?.metadata?.size)}</Text>
+                  </Td>
+                </Tr>
+              ))}
+            </Tbody>
+          </Table>
+        </TableContainer>
+      )}
 
       {!currentPreCheck?.isSubmitted && !currentPreCheck?.isUploadDrawingsComplete && (
         <Box
@@ -166,10 +206,12 @@ export const UploadDrawings = observer(function UploadDrawings() {
             ".uppy-Dashboard": {
               border: "2px dashed var(--chakra-colors-border-light)",
               borderRadius: "var(--chakra-radii-lg)",
+              borderColor: "var(--chakra-colors-theme-blue)",
             },
             ".uppy-Dashboard-inner": {
               border: "none",
               borderRadius: "var(--chakra-radii-lg)",
+              backgroundColor: "var(--chakra-colors-theme-blueLight)",
             },
             ".uppy-Dashboard-dropFilesHereHint": {
               display: "none",
@@ -193,19 +235,22 @@ export const UploadDrawings = observer(function UploadDrawings() {
         </Box>
       )}
 
-      {currentPreCheck?.servicePartner === EPreCheckServicePartner.archistar && (
-        <Box mb={6}>
-          <Heading as="h3" size="md" mb={3}>
-            {t("preCheck.sections.uploadDrawings.protectionTitle", "How Archistar protects and stores your drawings")}
-          </Heading>
-          <Text mb={3}>
-            {t(
-              "preCheck.sections.uploadDrawings.protectionDescription1",
-              "Our service partners use industry-standard security to protect your drawings. Archistar will keep your drawings for up to 150 days, then delete them. All drawings will be deleted on December 31, 2025, when the beta testing period ends."
-            )}
-          </Text>
-        </Box>
-      )}
+      <Box mb={6}>
+        <Heading as="h3" size="md" mb={3}>
+          {t("preCheck.sections.uploadDrawings.protectionTitle", "How {{provider}} protects and stores your drawings", {
+            provider: currentPreCheck?.providerName,
+          })}
+        </Heading>
+        <Text mb={3}>
+          {t(
+            "preCheck.sections.uploadDrawings.protectionDescription1",
+            "Our service partners use industry-standard security to protect your drawings. {{provider}} will keep your drawings for up to 150 days, then delete them. All drawings will be deleted on December 31, 2025, when the beta testing period ends.",
+            {
+              provider: currentPreCheck?.providerName,
+            }
+          )}
+        </Text>
+      </Box>
 
       <FormFooter<IUploadDrawingsFormData> handleSubmit={handleSubmit} onSubmit={onSubmit} isLoading={isSubmitting} />
     </Box>

@@ -1,7 +1,8 @@
-import { Container, Flex, Heading, VStack } from "@chakra-ui/react"
+import { Container, Flex, Heading, Link, Text, VStack } from "@chakra-ui/react"
+import { Plus } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
-import { useTranslation } from "react-i18next"
+import { Trans, useTranslation } from "react-i18next"
 import { useSearch } from "../../../hooks/use-search"
 import { useMst } from "../../../setup/root"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
@@ -18,11 +19,29 @@ export const PreCheckTabPanelContent = observer(() => {
         <VStack spacing={3} align="stretch">
           <Flex justify="space-between" align="center">
             <Heading as="h1">{t("preCheck.index.title", "Pre-Construction Checklists")}</Heading>
-            <RouterLinkButton to="/pre-checks/new" variant="primary">
+            <RouterLinkButton to="/pre-checks/new" variant="primary" leftIcon={<Plus />}>
               {t("preCheck.startNew", "Start New Pre-Check")}
             </RouterLinkButton>
           </Flex>
-          <PreChecksGrid />
+          <Text fontSize="md" color="text.secondary" mb={4}>
+            {t(
+              "preCheck.index.intro",
+              "Your results from the BC Building Code pre-checking service are stored here. You can use this service to pre-check your drawings for compliance with select areas of the BC Building Code before you submit a permit application."
+            )}
+          </Text>
+          <Text fontSize="md" color="text.secondary" mb={4}>
+            <Trans
+              t={t}
+              i18nKey="preCheck.index.betaNotice"
+              components={{
+                1: <Link href="project-readiness-tools/pre-check" color="link" textDecoration="underline" />,
+              }}
+            />
+          </Text>
+          <Text>
+            {t("preCheck.index.expiry", "Pre-checks reports are available for 150 days after they are created.")}
+          </Text>
+          <PreChecksGrid mt={8} />
         </VStack>
       </Container>
     </Flex>

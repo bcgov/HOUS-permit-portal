@@ -1,10 +1,9 @@
 import { Flex, TabPanel, TabPanels, Tabs } from "@chakra-ui/react"
-import { CheckSquare, ClipboardText, FolderSimple } from "@phosphor-icons/react"
+import { ClipboardText, FolderSimple, ListMagnifyingGlass } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
-import React, { useEffect, useTransition } from "react"
+import React, { useTransition } from "react"
 import { useTranslation } from "react-i18next"
 import { useLocation, useNavigate } from "react-router-dom"
-import { useSearch } from "../../../hooks/use-search"
 import { useMst } from "../../../setup/root"
 import { LoadingScreen } from "../../shared/base/loading-screen"
 import { PreCheckTabPanelContent } from "./pre-check-tab-panel-content"
@@ -16,25 +15,20 @@ interface IProjectDashboardScreenProps {}
 
 export const ProjectDashboardScreen = observer(({}: IProjectDashboardScreenProps) => {
   const { t } = useTranslation()
-  const { permitProjectStore } = useMst()
+  const { preCheckStore } = useMst()
   const location = useLocation()
   const navigate = useNavigate()
   const [isPending, startTransition] = useTransition()
-
-  useSearch(permitProjectStore, [])
-
-  useEffect(() => {
-    permitProjectStore.fetchPinnedProjects()
-  }, [])
 
   const TABS_DATA: ITabItem[] = [
     { label: t("permitProject.index.title", "Projects"), icon: FolderSimple, to: "projects", tabIndex: 0 },
     { label: t("stepCode.index.title", "Step Codes"), icon: ClipboardText, to: "step-codes", tabIndex: 1 },
     {
       label: t("preCheck.index.title", "Pre-Checks"),
-      icon: CheckSquare,
+      icon: ListMagnifyingGlass,
       to: "pre-checks",
       tabIndex: 2,
+      badgeCount: preCheckStore.unviewedCount,
     },
     // Disabled: Documents tab
     // { label: t("document.index.title", "Documents"), icon: File, to: "documents", tabIndex: 3 },

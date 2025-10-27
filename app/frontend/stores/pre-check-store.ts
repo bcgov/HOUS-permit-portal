@@ -1,5 +1,5 @@
 import { t } from "i18next"
-import { Instance, flow, types } from "mobx-state-tree"
+import { Instance, flow, toGenerator, types } from "mobx-state-tree"
 import * as R from "ramda"
 import { createSearchModel } from "../lib/create-search-model"
 import { withEnvironment } from "../lib/with-environment"
@@ -8,12 +8,14 @@ import { withRootStore } from "../lib/with-root-store"
 import { IPreCheck, PreCheckModel } from "../models/pre-check"
 import { EPreCheckSortFields } from "../types/enums"
 import { TSearchParams } from "../types/types"
+import { startBlobDownload } from "../utils/utility-functions"
 
 export const PreCheckStoreModel = types
   .compose(
     types.model("PreCheckStore", {
       preChecksMap: types.map(PreCheckModel),
       tablePreChecks: types.optional(types.array(types.reference(PreCheckModel)), []),
+      unviewedCount: types.optional(types.number, 0),
     }),
     createSearchModel<EPreCheckSortFields>("searchPreChecks", "setPreCheckFilters")
   )
@@ -46,6 +48,10 @@ export const PreCheckStoreModel = types
       // @ts-ignore
       self.tablePreChecks.replace(preChecks.map((s) => s.id))
     },
+
+    setUnviewedCount(count: number) {
+      self.unviewedCount = count
+    },
   }))
   .actions((self) => ({
     searchPreChecks: flow(function* (opts?: { reset?: boolean; page?: number; countPerPage?: number }) {
@@ -65,6 +71,7 @@ export const PreCheckStoreModel = types
         self.mergeUpdateAll(response.data.data, "preChecksMap")
         self.setTablePreChecks(response.data.data as any)
         self.setPageFields(response.data.meta, opts)
+        self.setUnviewedCount(response.data.meta?.unviewedCount || 0)
       } else {
         console.error("Failed to search PreChecks:", response.problem, response.data)
       }
@@ -113,6 +120,42 @@ export const PreCheckStoreModel = types
       }
       console.error("Failed to submit PreCheck:", response.problem, response.data)
       return { ok: false, error: response.data?.errors || response.problem }
+    }),
+
+    markPreCheckAsViewed: flow(function* (id: string) {
+      const response = yield self.environment.api.markPreCheckAsViewed(id)
+      if (response.ok) {
+        self.mergeUpdate(response.data.data, "preChecksMap")
+        // Decrement unviewed count
+        if (self.unviewedCount > 0) {
+          self.setUnviewedCount(self.unviewedCount - 1)
+        }
+        return { ok: true }
+      }
+      console.error("Failed to mark PreCheck as viewed:", response.problem, response.data)
+      return { ok: false, error: response.data?.errors || response.problem }
+    }),
+
+    downloadPreCheckUserConsent: flow(function* () {
+      try {
+        const response = yield* toGenerator(self.environment.api.downloadPreCheckUserConsentCsv())
+        if (!response.ok) {
+          return response.ok
+        }
+
+        const blobData = response.data
+        const fileName = `${t("reporting.preCheckUserConsent.filename")}.csv`
+        const mimeType = "text/csv"
+        console.log("fileName", fileName)
+        startBlobDownload(blobData, mimeType, fileName)
+
+        return response
+      } catch (error) {
+        if (import.meta.env.DEV) {
+          console.error(`Failed to download pre-check user consent:`, error)
+        }
+        throw error
+      }
     }),
   }))
 

@@ -1,10 +1,10 @@
 class PreCheckBlueprint < Blueprinter::Base
   identifier :id
 
-  fields :comply_certificate_id,
-         :certificate_no,
+  fields :certificate_no,
          :status,
          :full_address,
+         :pid,
          :title,
          :permit_application_id,
          :service_partner,
@@ -12,8 +12,15 @@ class PreCheckBlueprint < Blueprinter::Base
          :consent_to_send_drawings,
          :consent_to_share_with_jurisdiction,
          :consent_to_research_contact,
+         :assessment_result,
+         :viewed_at,
+         :viewer_url,
          :created_at,
          :updated_at
+
+  field :expired do |pre_check|
+    pre_check.expired?
+  end
 
   association :creator, blueprint: UserBlueprint
   association :jurisdiction, blueprint: JurisdictionBlueprint, view: :base

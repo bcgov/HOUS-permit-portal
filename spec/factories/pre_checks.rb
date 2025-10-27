@@ -12,5 +12,35 @@ FactoryBot.define do
     consent_to_send_drawings { true }
     consent_to_share_with_jurisdiction { false }
     consent_to_research_contact { false }
+
+    trait :with_design_documents do
+      after(:create) do |pre_check|
+        create(:design_document, pre_check: pre_check)
+      end
+    end
+
+    trait :processing do
+      with_design_documents
+      submitted_at { Time.current }
+
+      after(:create) do |pre_check|
+        # Bypass validations to set status directly for test setup
+        pre_check.update_column(:status, PreCheck.statuses[:processing])
+      end
+    end
+
+    trait :complete do
+      processing
+      completed_at { Time.current }
+      result_message { "All sections have passed." }
+
+      after(:create) do |pre_check|
+        # Bypass validations to set status and assessment_result together
+        pre_check.update_columns(
+          status: PreCheck.statuses[:complete],
+          assessment_result: PreCheck.assessment_results[:passed]
+        )
+      end
+    end
   end
 end

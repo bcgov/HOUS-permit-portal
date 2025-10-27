@@ -134,7 +134,7 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
 
           <Text>{t("permitProject.addPermits.beforeYouBegin.intro")}</Text>
 
-          <UnorderedList ml="0" spacing={2} styleType="disc">
+          <UnorderedList ml="0" spacing={2}>
             <ListItem>{t("permitProject.addPermits.beforeYouBegin.bcBuildingCode")}</ListItem>
             <ListItem>{t("permitProject.addPermits.beforeYouBegin.localZoningBylaws")}</ListItem>
             <ListItem>{t("permitProject.addPermits.beforeYouBegin.ocp")}</ListItem>

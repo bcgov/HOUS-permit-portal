@@ -259,7 +259,12 @@ Rails.application.routes.draw do
 
     resources :pre_checks, only: %i[index show create update] do
       post "search", on: :collection, to: "pre_checks#index"
+      get "download_pre_check_user_consent_csv",
+          on: :collection,
+          to: "pre_checks#download_pre_check_user_consent_csv"
       post "submit", on: :member
+      patch "mark_viewed", on: :member
+      get "pdf_report_url", on: :member
     end
 
     # Controller namespace is Api::Part9Building::*, but we expose path with underscore for continuity
@@ -321,6 +326,11 @@ Rails.application.routes.draw do
         end
       end
     end
+  end
+
+  # Webhook routes (outside API scope for external webhook access)
+  namespace :webhooks do
+    post "archistar", to: "archistar#receive"
   end
 
   root to: "home#index"

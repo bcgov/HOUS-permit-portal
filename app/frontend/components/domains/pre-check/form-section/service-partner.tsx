@@ -82,7 +82,7 @@ export const ServicePartner = observer(function ServicePartner() {
                   <Heading as="h4" fontSize="lg">
                     {t("preCheck.sections.servicePartner.archistarTitle", "Archistar eCheck")}
                   </Heading>
-                  <Badge colorScheme="blue" fontSize="xs" textTransform="none">
+                  <Badge colorScheme="blue" fontSize="xs" textTransform="none" mb={2}>
                     {t("ui.beta", "Beta")}
                   </Badge>
                 </Flex>

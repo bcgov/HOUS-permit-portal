@@ -71,6 +71,10 @@ export const SiteConfigurationStoreModel = types.snapshotProcessor(
       },
     }))
     .views((self) => ({
+      get anyProviderEnabledForAllJurisdictions() {
+        // TODO: Add other providers here when we add more providers
+        return self.archistarEnabledForAllJurisdictions
+      },
       get activeRevisionReasons() {
         return Array.from(self.revisionReasonsMap.values()).filter((reason) => !reason.discardedAt)
       },
