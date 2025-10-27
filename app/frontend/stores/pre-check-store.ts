@@ -1,5 +1,5 @@
 import { t } from "i18next"
-import { Instance, flow, types } from "mobx-state-tree"
+import { Instance, flow, toGenerator, types } from "mobx-state-tree"
 import * as R from "ramda"
 import { createSearchModel } from "../lib/create-search-model"
 import { withEnvironment } from "../lib/with-environment"
@@ -8,6 +8,7 @@ import { withRootStore } from "../lib/with-root-store"
 import { IPreCheck, PreCheckModel } from "../models/pre-check"
 import { EPreCheckSortFields } from "../types/enums"
 import { TSearchParams } from "../types/types"
+import { startBlobDownload } from "../utils/utility-functions"
 
 export const PreCheckStoreModel = types
   .compose(
@@ -133,6 +134,28 @@ export const PreCheckStoreModel = types
       }
       console.error("Failed to mark PreCheck as viewed:", response.problem, response.data)
       return { ok: false, error: response.data?.errors || response.problem }
+    }),
+
+    downloadPreCheckUserConsent: flow(function* () {
+      try {
+        const response = yield* toGenerator(self.environment.api.downloadPreCheckUserConsentCsv())
+        if (!response.ok) {
+          return response.ok
+        }
+
+        const blobData = response.data
+        const fileName = `${t("reporting.preCheckUserConsent.filename")}.csv`
+        const mimeType = "text/csv"
+        console.log("fileName", fileName)
+        startBlobDownload(blobData, mimeType, fileName)
+
+        return response
+      } catch (error) {
+        if (import.meta.env.DEV) {
+          console.error(`Failed to download pre-check user consent:`, error)
+        }
+        throw error
+      }
     }),
   }))
 
