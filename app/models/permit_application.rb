@@ -793,6 +793,7 @@ class PermitApplication < ApplicationRecord
   end
 
   def jurisdiction_has_matching_submission_contact
+    return if sandbox.present?
     return unless jurisdiction
     matching_contacts =
       PermitTypeSubmissionContact.where(
