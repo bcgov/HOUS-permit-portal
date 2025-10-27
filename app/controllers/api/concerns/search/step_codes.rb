@@ -16,7 +16,16 @@ module Api::Concerns::Search::StepCodes
           else
             nil
           end
-        )
+        ),
+      load: {
+        includes: %i[
+          creator
+          permit_application
+          jurisdiction
+          permit_project
+          report_documents
+        ]
+      }
     }
 
     @step_code_search = StepCode.search(step_code_query, **search_conditions)
