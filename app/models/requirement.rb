@@ -1,6 +1,6 @@
 class Requirement < ApplicationRecord
   include HtmlSanitizeAttributes
-  sanitizable :hint
+  sanitizable :hint, :instructions
 
   scope :electives, -> { where(elective: true) }
 
