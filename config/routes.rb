@@ -178,6 +178,7 @@ Rails.application.routes.draw do
            to: "permit_applications#invite_new_collaborator"
       post "submit", on: :member
       post "mark_as_viewed", on: :member
+      post "retrigger_submission_webhook", on: :member
       patch "upload_supporting_document", on: :member
       patch "update_version", on: :member
       patch "revision_requests",

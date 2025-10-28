@@ -858,6 +858,11 @@ export const PermitApplicationModel = types.snapshotProcessor(
         }
         return response
       }),
+
+      retriggerSubmissionWebhook: flow(function* () {
+        const response = yield self.environment.api.retriggerPermitApplicationWebhook(self.id)
+        return response
+      }),
     })),
   {
     preProcessor: (snapshot: any) => {
