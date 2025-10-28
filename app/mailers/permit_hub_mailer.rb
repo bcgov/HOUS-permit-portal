@@ -288,14 +288,13 @@ class PermitHubMailer < ApplicationMailer
     end
 
     filename = attachment.metadata["filename"]
-    Rails.logger.info("[MAILER] Downloading attachment: #{filename}")
+    Rails.logger.debug("[MAILER] Downloading attachment: #{filename}")
 
     content = attachment.download.read
     Rails.logger.info(
-      "[MAILER] Downloaded #{content.bytesize} bytes for #{filename}"
+      "[MAILER] Attached #{filename} (#{content.bytesize} bytes)"
     )
 
     attachments[filename] = content
-    Rails.logger.info("[MAILER] Attachment added to mail object")
   end
 end

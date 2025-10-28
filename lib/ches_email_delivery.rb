@@ -29,6 +29,12 @@ class ChesEmailDelivery
       "[CHES] Formatted #{formatted_attachments.size} attachments for CHES"
     )
 
+    # Extract the HTML body part for multipart emails
+    body_content = extract_body_content(mail)
+    Rails.logger.debug(
+      "[CHES] Body content size: #{body_content.bytesize} bytes, multipart: #{mail.multipart?}"
+    )
+
     params = {
       to: mail.to,
       from: mail[:from].to_s,
@@ -38,7 +44,7 @@ class ChesEmailDelivery
       priority: "normal",
       subject: mail.subject,
       attachments: formatted_attachments,
-      body: mail.body.to_s,
+      body: body_content,
       bodyType: body_type(mail)
     }
 
@@ -107,6 +113,17 @@ class ChesEmailDelivery
 
   private
 
+  def extract_body_content(mail)
+    # For multipart emails (with attachments), extract just the HTML part
+    # For simple emails, use the whole body
+    if mail.multipart?
+      html_part = mail.html_part || mail.text_part
+      html_part&.decoded || mail.body.decoded
+    else
+      mail.body.to_s
+    end
+  end
+
   def format_attachments(mail)
     return [] if mail.attachments.empty?
 
@@ -118,7 +135,7 @@ class ChesEmailDelivery
       decoded_size = attachment.body.decoded.bytesize
       encoded_size = Base64.strict_encode64(attachment.body.decoded).bytesize
 
-      Rails.logger.info(
+      Rails.logger.debug(
         "[CHES] Attachment - " \
           "Name: #{attachment.filename}, " \
           "Type: #{attachment.content_type}, " \
