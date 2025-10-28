@@ -218,13 +218,6 @@ class PermitHubMailer < ApplicationMailer
     jurisdiction:,
     sender_user:
   )
-    Rails.logger.info(
-      "[MAILER] Starting send_step_code_report_to_jurisdiction - " \
-        "ReportDocument ID: #{report_document.id}, " \
-        "Recipient: #{recipient_email}, " \
-        "Jurisdiction: #{jurisdiction.qualified_name}"
-    )
-
     @report_document = report_document
     @step_code = step_code
     @jurisdiction = jurisdiction
@@ -290,10 +283,25 @@ class PermitHubMailer < ApplicationMailer
     filename = attachment.metadata["filename"]
     Rails.logger.debug("[MAILER] Downloading attachment: #{filename}")
 
-    content = attachment.download.read
+    # Download and read the file
+    downloaded = attachment.download
+    content = downloaded.read
+
+    # Log encoding information
     Rails.logger.info(
-      "[MAILER] Attached #{filename} (#{content.bytesize} bytes)"
+      "[MAILER] Attached #{filename} - " \
+        "Size: #{content.bytesize} bytes, " \
+        "Encoding: #{content.encoding.name}, " \
+        "Valid: #{content.valid_encoding?}"
     )
+
+    # Force binary encoding for PDFs and other binary files
+    if content.encoding != Encoding::BINARY
+      Rails.logger.warn(
+        "[MAILER] Non-binary encoding detected (#{content.encoding.name}), forcing to BINARY"
+      )
+      content = content.force_encoding(Encoding::BINARY)
+    end
 
     attachments[filename] = content
   end
