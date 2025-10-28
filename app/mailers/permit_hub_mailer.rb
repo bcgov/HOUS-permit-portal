@@ -223,35 +223,40 @@ class PermitHubMailer < ApplicationMailer
     @jurisdiction = jurisdiction
     @sender_user = sender_user
 
-    # Download and attach the report file
-    temp_file = report_document.download_to_tempfile
-
-    if temp_file
-      begin
-        attachments[report_document.file_name] = File.read(temp_file)
-
-        send_mail(
-          email: recipient_email,
-          template_key: "send_step_code_report_to_jurisdiction",
-          subject_i18n_params: {
-            step_code_title: step_code.title || "Step Code Report",
-            jurisdiction_name: jurisdiction.qualified_name
-          }
-        )
-      ensure
-        # Clean up the temporary file
-        FileUtils.rm_f(temp_file)
-      end
-    else
+    unless report_document.file.present?
       Rails.logger.error(
-        "Failed to download report document #{report_document.id} for emailing"
+        "Failed to attach report document #{report_document.id} for emailing"
       )
-      raise "Unable to download report file for emailing"
+      raise "Unable to attach report file for emailing"
     end
+
+    # Attach the file using helper method
+    add_attachment(report_document)
+
+    send_mail(
+      email: recipient_email,
+      template_key: "send_step_code_report_to_jurisdiction",
+      subject_i18n_params: {
+        step_code_title: step_code.title || "Step Code Report",
+        jurisdiction_name: jurisdiction.qualified_name
+      }
+    )
   end
 
   def send_user_mail(*args, **kwargs)
     return if @user.discarded? || !@user.confirmed?
     send_mail(*args, **kwargs)
+  end
+
+  private
+
+  # Helper method to attach a file from a FileUploadAttachment subclass instance
+  # @param file_upload_attachment [FileUploadAttachment] A FileUploadAttachment subclass instance (e.g., ReportDocument)
+  def add_attachment(file_upload_attachment)
+    attachment = file_upload_attachment.file
+    return unless attachment
+
+    filename = attachment.metadata["filename"]
+    attachments[filename] = attachment.download.read
   end
 end
