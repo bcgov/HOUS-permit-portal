@@ -240,6 +240,17 @@ class PermitHubMailer < ApplicationMailer
     # Attach the file using helper method
     add_attachment(report_document)
 
+    # Add a small test attachment for debugging
+    test_content =
+      "This is a test attachment to verify CHES can handle basic attachments.\n" \
+        "If you can read this, basic attachments work!\n" \
+        "Timestamp: #{Time.current}\n" \
+        "Report ID: #{report_document.id}"
+    attachments["test-attachment.txt"] = test_content
+    Rails.logger.info(
+      "[MAILER] Added test attachment (#{test_content.bytesize} bytes)"
+    )
+
     Rails.logger.info("[MAILER] Calling send_mail...")
 
     result =

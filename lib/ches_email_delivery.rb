@@ -145,8 +145,28 @@ class ChesEmailDelivery
         body_content = body_content.force_encoding(Encoding::BINARY)
       end
 
-      encoded_content = Base64.strict_encode64(body_content)
+      # Try with RFC-compliant base64 (with line breaks every 60 chars)
+      # vs strict (no line breaks)
+      use_rfc_encoding = true
+
+      encoded_content =
+        if use_rfc_encoding
+          Base64.encode64(body_content) # Adds \n every 60 chars
+        else
+          Base64.strict_encode64(body_content) # No line breaks
+        end
+
       encoded_size = encoded_content.bytesize
+
+      if use_rfc_encoding
+        Rails.logger.info(
+          "[CHES] Using RFC-compliant Base64 encoding (with line breaks)"
+        )
+      end
+
+      # Calculate checksum for verification
+      content_sha256 = Digest::SHA256.hexdigest(body_content)
+      base64_sha256 = Digest::SHA256.hexdigest(encoded_content)
 
       # Clean content type - remove any parameters like "; filename=..."
       raw_content_type = attachment.content_type.to_s
@@ -157,6 +177,13 @@ class ChesEmailDelivery
           "[CHES] Cleaned content type: '#{raw_content_type}' → '#{clean_content_type}'"
         )
       end
+
+      Rails.logger.info(
+        "[CHES] Attachment checksums - " \
+          "File: #{attachment.filename}, " \
+          "Original SHA256: #{content_sha256[0..15]}..., " \
+          "Base64 SHA256: #{base64_sha256[0..15]}..."
+      )
 
       Rails.logger.debug(
         "[CHES] Attachment - " \
