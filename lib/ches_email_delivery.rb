@@ -14,26 +14,10 @@ class ChesEmailDelivery
   end
 
   def deliver!(mail)
-    masked_recipients = mail.to&.map { |email| "#{email[0..3]}..." }&.join(", ")
-    Rails.logger.info(
-      "[CHES] Starting email delivery - " \
-        "To: #{masked_recipients}, " \
-        "Subject: #{mail.subject}, " \
-        "Attachments: #{mail.attachments.size}"
-    )
-
     ensure_ches_token_is_valid_and_health_check_passes
 
     formatted_attachments = format_attachments(mail)
-    Rails.logger.info(
-      "[CHES] Formatted #{formatted_attachments.size} attachments for CHES"
-    )
-
-    # Extract the HTML body part for multipart emails
     body_content = extract_body_content(mail)
-    Rails.logger.debug(
-      "[CHES] Body content size: #{body_content.bytesize} bytes, multipart: #{mail.multipart?}"
-    )
 
     params = {
       to: mail.to,
@@ -48,42 +32,17 @@ class ChesEmailDelivery
       bodyType: body_type(mail)
     }
 
-    Rails.logger.info("[CHES] Posting to CHES API...")
-    Rails.logger.debug(
-      "[CHES] Payload: #{params.except(:body, :attachments).inspect}"
-    )
-
-    if formatted_attachments.any?
-      Rails.logger.info(
-        "[CHES] Sending #{formatted_attachments.size} attachment(s): #{formatted_attachments.map { |a| a[:filename] }.join(", ")}"
-      )
-    end
-
     response = client.post("email", params.to_json)
-
-    Rails.logger.info(
-      "[CHES] CHES Response - Status: #{response.status}, Success: #{response.success?}"
-    )
 
     if response.success?
       body = JSON.parse(response.body)
       msg_id = body.dig("messages", 0, "msgId")
-      tx_id = body.dig("txId")
-      Rails.logger.info(
-        "[CHES] Email sent successfully! Message ID: #{msg_id}, Transaction ID: #{tx_id}"
-      )
+      Rails.logger.info("[CHES] Email sent successfully! Message ID: #{msg_id}")
       return msg_id
     else
       Rails.logger.error(
         "[CHES] CHES API Error - Status: #{response.status}, Body: #{response.body}"
       )
-      # Try to parse error details
-      begin
-        error_body = JSON.parse(response.body)
-        Rails.logger.error("[CHES] Parsed error: #{error_body.inspect}")
-      rescue StandardError
-        # Body might not be JSON
-      end
       nil
     end
   rescue => e
@@ -134,40 +93,7 @@ class ChesEmailDelivery
     mail.attachments.map do |attachment|
       # Get the raw body content
       body_content = attachment.body.decoded
-      decoded_size = body_content.bytesize
-
-      # Check encoding and force to binary if needed
-      encoding_info = "Encoding: #{body_content.encoding.name}"
-      if body_content.encoding != Encoding::BINARY
-        Rails.logger.warn(
-          "[CHES] Attachment has non-binary encoding: #{body_content.encoding.name}, forcing to BINARY"
-        )
-        body_content = body_content.force_encoding(Encoding::BINARY)
-      end
-
-      # Try with RFC-compliant base64 (with line breaks every 60 chars)
-      # vs strict (no line breaks)
-      use_rfc_encoding = true
-
-      encoded_content =
-        if use_rfc_encoding
-          Base64.encode64(body_content) # Adds \n every 60 chars
-        else
-          Base64.strict_encode64(body_content) # No line breaks
-        end
-
-      encoded_size = encoded_content.bytesize
-
-      if use_rfc_encoding
-        Rails.logger.info(
-          "[CHES] Using RFC-compliant Base64 encoding (with line breaks)"
-        )
-      end
-
-      # Calculate checksum for verification
-      content_sha256 = Digest::SHA256.hexdigest(body_content)
-      base64_sha256 = Digest::SHA256.hexdigest(encoded_content)
-
+      encoded_content = Base64.strict_encode64(body_content)
       # Clean content type - remove any parameters like "; filename=..."
       raw_content_type = attachment.content_type.to_s
       clean_content_type = raw_content_type.split(";").first.strip
@@ -177,22 +103,6 @@ class ChesEmailDelivery
           "[CHES] Cleaned content type: '#{raw_content_type}' → '#{clean_content_type}'"
         )
       end
-
-      Rails.logger.info(
-        "[CHES] Attachment checksums - " \
-          "File: #{attachment.filename}, " \
-          "Original SHA256: #{content_sha256[0..15]}..., " \
-          "Base64 SHA256: #{base64_sha256[0..15]}..."
-      )
-
-      Rails.logger.debug(
-        "[CHES] Attachment - " \
-          "Name: #{attachment.filename}, " \
-          "Type: #{clean_content_type}, " \
-          "Decoded: #{decoded_size} bytes, " \
-          "Encoded: #{encoded_size} bytes, " \
-          "#{encoding_info}"
-      )
 
       {
         content: encoded_content,
@@ -205,21 +115,14 @@ class ChesEmailDelivery
 
   def ensure_ches_token_is_valid_and_health_check_passes
     response = client.get("health")
-
-    if response.success?
-      Rails.logger.debug("[CHES] Health check passed")
-      return
-    end
-
-    Rails.logger.warn("[CHES] Health check failed - Status: #{response.status}")
+    return if response.success?
 
     if response.status == 401
-      Rails.logger.info("[CHES] Refreshing bearer token...")
       obtain_bearer_token
       ensure_ches_token_is_valid_and_health_check_passes
     else
       Rails.logger.error(
-        "[CHES] CHES Healthcheck failed - Status: #{response.status}, Body: #{response.body}"
+        "[CHES] Healthcheck failed - Status: #{response.status}"
       )
       raise "ERROR: CHES Healthcheck failed - check with bcgov service status"
     end
