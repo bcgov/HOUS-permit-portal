@@ -44,33 +44,4 @@ class FileUploadAttachment < ApplicationRecord
         "attachment; filename=\"#{file.original_filename}\""
     )
   end
-
-  # Downloads the report file to a temporary file
-  # Returns the path to the temp file, or nil if download fails
-  def download_to_tempfile
-    temp_file = Tempfile.new(["report", File.extname(file_name)])
-    temp_file.binmode
-    url = URI.parse(file_url)
-
-    Net::HTTP.start(
-      url.host,
-      url.port,
-      use_ssl: url.scheme == "https"
-    ) do |http|
-      request = Net::HTTP::Get.new(url)
-      http.request(request) do |response|
-        response.read_body { |chunk| temp_file.write(chunk) }
-      end
-    end
-
-    temp_file.close
-    temp_file.path
-  rescue => e
-    Rails.logger.error(
-      "Failed to download report file (ID: #{id}): #{file_url} - #{e.message}"
-    )
-    temp_file&.close
-    temp_file&.unlink
-    nil
-  end
 end
