@@ -14,7 +14,21 @@ class ChesEmailDelivery
   end
 
   def deliver!(mail)
+    masked_recipients = mail.to&.map { |email| "#{email[0..3]}..." }&.join(", ")
+    Rails.logger.info(
+      "[CHES] Starting email delivery - " \
+        "To: #{masked_recipients}, " \
+        "Subject: #{mail.subject}, " \
+        "Attachments: #{mail.attachments.size}"
+    )
+
     ensure_ches_token_is_valid_and_health_check_passes
+
+    formatted_attachments = format_attachments(mail)
+    Rails.logger.info(
+      "[CHES] Formatted #{formatted_attachments.size} attachments for CHES"
+    )
+
     params = {
       to: mail.to,
       from: mail[:from].to_s,
@@ -23,17 +37,38 @@ class ChesEmailDelivery
       encoding: "utf-8",
       priority: "normal",
       subject: mail.subject,
-      attachments: format_attachments(mail),
+      attachments: formatted_attachments,
       body: mail.body.to_s,
       bodyType: body_type(mail)
     }
 
+    Rails.logger.info("[CHES] Posting to CHES API...")
+    Rails.logger.debug(
+      "[CHES] Payload: #{params.except(:body, :attachments).inspect}"
+    )
+
     response = client.post("email", params.to_json)
+
+    Rails.logger.info(
+      "[CHES] CHES Response - Status: #{response.status}, Success: #{response.success?}"
+    )
 
     if response.success?
       body = JSON.parse(response.body)
-      return body.dig("messages", 0, "msgId")
+      msg_id = body.dig("messages", 0, "msgId")
+      Rails.logger.info("[CHES] Email sent successfully! Message ID: #{msg_id}")
+      return msg_id
+    else
+      Rails.logger.error(
+        "[CHES] CHES API Error - Status: #{response.status}, Body: #{response.body}"
+      )
+      nil
     end
+  rescue => e
+    Rails.logger.error(
+      "[CHES] Exception during email delivery: #{e.class.name} - #{e.message}\n#{e.backtrace.first(5).join("\n")}"
+    )
+    raise
   end
 
   def body_type(mail)
@@ -59,7 +94,22 @@ class ChesEmailDelivery
   def format_attachments(mail)
     return [] if mail.attachments.empty?
 
+    Rails.logger.info(
+      "[CHES] Formatting #{mail.attachments.size} attachment(s)"
+    )
+
     mail.attachments.map do |attachment|
+      decoded_size = attachment.body.decoded.bytesize
+      encoded_size = Base64.strict_encode64(attachment.body.decoded).bytesize
+
+      Rails.logger.info(
+        "[CHES] Attachment - " \
+          "Name: #{attachment.filename}, " \
+          "Type: #{attachment.content_type}, " \
+          "Decoded: #{decoded_size} bytes, " \
+          "Encoded: #{encoded_size} bytes"
+      )
+
       {
         content: Base64.strict_encode64(attachment.body.decoded),
         contentType: attachment.content_type,
@@ -71,12 +121,22 @@ class ChesEmailDelivery
 
   def ensure_ches_token_is_valid_and_health_check_passes
     response = client.get("health")
-    return if response.success?
+
+    if response.success?
+      Rails.logger.debug("[CHES] Health check passed")
+      return
+    end
+
+    Rails.logger.warn("[CHES] Health check failed - Status: #{response.status}")
 
     if response.status == 401
+      Rails.logger.info("[CHES] Refreshing bearer token...")
       obtain_bearer_token
       ensure_ches_token_is_valid_and_health_check_passes
     else
+      Rails.logger.error(
+        "[CHES] CHES Healthcheck failed - Status: #{response.status}, Body: #{response.body}"
+      )
       raise "ERROR: CHES Healthcheck failed - check with bcgov service status"
     end
   end
