@@ -135,7 +135,7 @@ class ChesEmailDelivery
       decoded_size = attachment.body.decoded.bytesize
       encoded_size = Base64.strict_encode64(attachment.body.decoded).bytesize
 
-      Rails.logger.info(
+      Rails.logger.debug(
         "[CHES] Attachment - " \
           "Name: #{attachment.filename}, " \
           "Type: #{attachment.content_type}, " \
