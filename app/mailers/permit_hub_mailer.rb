@@ -218,36 +218,52 @@ class PermitHubMailer < ApplicationMailer
     jurisdiction:,
     sender_user:
   )
+    Rails.logger.info(
+      "[MAILER] Starting send_step_code_report_to_jurisdiction - " \
+        "ReportDocument ID: #{report_document.id}, " \
+        "Recipient: #{recipient_email}, " \
+        "Jurisdiction: #{jurisdiction.qualified_name}"
+    )
+
     @report_document = report_document
     @step_code = step_code
     @jurisdiction = jurisdiction
     @sender_user = sender_user
 
-    # Download and attach the report file
-    temp_file = download_report_file(report_document)
-
-    if temp_file
-      begin
-        attachments[report_document.file_name] = File.read(temp_file)
-
-        send_mail(
-          email: recipient_email,
-          template_key: "send_step_code_report_to_jurisdiction",
-          subject_i18n_params: {
-            step_code_title: step_code.title || "Step Code Report",
-            jurisdiction_name: jurisdiction.qualified_name
-          }
-        )
-      ensure
-        # Clean up the temporary file
-        FileUtils.rm_f(temp_file)
-      end
-    else
+    unless report_document.file.present?
       Rails.logger.error(
-        "Failed to download report document #{report_document.id} for emailing"
+        "[MAILER] Report document #{report_document.id} has no file attached!"
       )
-      raise "Unable to download report file for emailing"
+      raise "Unable to attach report file for emailing"
     end
+
+    Rails.logger.info(
+      "[MAILER] File present - " \
+        "Filename: #{report_document.file_name}, " \
+        "Content Type: #{report_document.file&.content_type}, " \
+        "Size: #{report_document.file&.size} bytes"
+    )
+
+    # Attach the file using helper method
+    # add_attachment(report_document)
+
+    Rails.logger.info("[MAILER] Calling send_mail...")
+
+    result =
+      send_mail(
+        email: recipient_email,
+        template_key: "send_step_code_report_to_jurisdiction",
+        subject_i18n_params: {
+          step_code_title: step_code.title || "Step Code Report",
+          jurisdiction_name: jurisdiction.qualified_name
+        }
+      )
+
+    Rails.logger.info(
+      "[MAILER] send_mail returned: #{result.class.name}, Message ID: #{result.message_id}"
+    )
+
+    result
   end
 
   def send_user_mail(*args, **kwargs)
@@ -257,31 +273,29 @@ class PermitHubMailer < ApplicationMailer
 
   private
 
-  def download_report_file(report_document)
-    temp_file =
-      Tempfile.new(["report", File.extname(report_document.file_name)])
-    temp_file.binmode
-    url = URI.parse(report_document.file_url)
+  # Helper method to attach a file from a FileUploadAttachment subclass instance
+  # @param file_upload_attachment [FileUploadAttachment] A FileUploadAttachment subclass instance (e.g., ReportDocument)
+  def add_attachment(file_upload_attachment)
+    Rails.logger.info(
+      "[MAILER] add_attachment called for #{file_upload_attachment.class.name} ID: #{file_upload_attachment.id}"
+    )
 
-    Net::HTTP.start(
-      url.host,
-      url.port,
-      use_ssl: url.scheme == "https"
-    ) do |http|
-      request = Net::HTTP::Get.new(url)
-      http.request(request) do |response|
-        response.read_body { |chunk| temp_file.write(chunk) }
-      end
+    attachment = file_upload_attachment.file
+
+    unless attachment
+      Rails.logger.warn("[MAILER] No attachment file found!")
+      return
     end
 
-    temp_file.close
-    temp_file.path
-  rescue => e
-    Rails.logger.error(
-      "Failed to download report file: #{report_document.file_url} with error: #{e.message}"
+    filename = attachment.metadata["filename"]
+    Rails.logger.info("[MAILER] Downloading attachment: #{filename}")
+
+    content = attachment.download.read
+    Rails.logger.info(
+      "[MAILER] Downloaded #{content.bytesize} bytes for #{filename}"
     )
-    temp_file&.close
-    temp_file&.unlink
-    nil
+
+    attachments[filename] = content
+    Rails.logger.info("[MAILER] Attachment added to mail object")
   end
 end
