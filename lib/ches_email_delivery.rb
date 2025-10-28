@@ -47,6 +47,12 @@ class ChesEmailDelivery
       "[CHES] Payload: #{params.except(:body, :attachments).inspect}"
     )
 
+    if formatted_attachments.any?
+      Rails.logger.info(
+        "[CHES] Sending #{formatted_attachments.size} attachment(s): #{formatted_attachments.map { |a| a[:filename] }.join(", ")}"
+      )
+    end
+
     response = client.post("email", params.to_json)
 
     Rails.logger.info(
@@ -56,12 +62,22 @@ class ChesEmailDelivery
     if response.success?
       body = JSON.parse(response.body)
       msg_id = body.dig("messages", 0, "msgId")
-      Rails.logger.info("[CHES] Email sent successfully! Message ID: #{msg_id}")
+      tx_id = body.dig("txId")
+      Rails.logger.info(
+        "[CHES] Email sent successfully! Message ID: #{msg_id}, Transaction ID: #{tx_id}"
+      )
       return msg_id
     else
       Rails.logger.error(
         "[CHES] CHES API Error - Status: #{response.status}, Body: #{response.body}"
       )
+      # Try to parse error details
+      begin
+        error_body = JSON.parse(response.body)
+        Rails.logger.error("[CHES] Parsed error: #{error_body.inspect}")
+      rescue StandardError
+        # Body might not be JSON
+      end
       nil
     end
   rescue => e
@@ -113,8 +129,7 @@ class ChesEmailDelivery
       {
         content: Base64.strict_encode64(attachment.body.decoded),
         contentType: attachment.content_type,
-        filename: attachment.filename,
-        encoding: "base64"
+        filename: attachment.filename
       }
     end
   end
