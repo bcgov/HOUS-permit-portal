@@ -6,11 +6,7 @@ Rails.application.config.logger =
       .tap do |logger|
         logger.formatter =
           proc do |severity, datetime, progname, msg|
-            tags =
-              (Thread.current[:activesupport_tagged_logging_tags] || []).join(
-                " "
-              )
-            "#{severity} [#{datetime}] #{tags}: #{msg}\n"
+            "#{severity} [#{datetime}]: #{msg}\n"
           end
       end
   )

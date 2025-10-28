@@ -2,6 +2,7 @@ require "logger"
 
 class MultiLogger < Logger
   def initialize(*loggers)
+    super(nil)
     @loggers = loggers
   end
 
