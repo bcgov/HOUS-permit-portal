@@ -30,7 +30,7 @@ export const Part9NavLinks = observer(function Part9StepCodeNavLinks() {
   const handleBack = () => {
     uiStore.setScrollToSelector(".formio-component[class*='energy_step_code_method']")
     if (permitApplicationId) {
-      navigate(`/permit-applications/${permitApplicationId}/step-codes`)
+      navigate(`/permit-applications/${permitApplicationId}/edit`)
     } else {
       navigate("/step-codes")
     }
