@@ -197,7 +197,8 @@ class ChesEmailDelivery
       {
         content: encoded_content,
         contentType: clean_content_type,
-        filename: attachment.filename
+        filename: attachment.filename,
+        encoding: "base64" # Tell CHES content is base64 encoded
       }
     end
   end
