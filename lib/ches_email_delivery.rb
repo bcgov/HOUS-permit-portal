@@ -132,20 +132,44 @@ class ChesEmailDelivery
     )
 
     mail.attachments.map do |attachment|
-      decoded_size = attachment.body.decoded.bytesize
-      encoded_size = Base64.strict_encode64(attachment.body.decoded).bytesize
+      # Get the raw body content
+      body_content = attachment.body.decoded
+      decoded_size = body_content.bytesize
+
+      # Check encoding and force to binary if needed
+      encoding_info = "Encoding: #{body_content.encoding.name}"
+      if body_content.encoding != Encoding::BINARY
+        Rails.logger.warn(
+          "[CHES] Attachment has non-binary encoding: #{body_content.encoding.name}, forcing to BINARY"
+        )
+        body_content = body_content.force_encoding(Encoding::BINARY)
+      end
+
+      encoded_content = Base64.strict_encode64(body_content)
+      encoded_size = encoded_content.bytesize
+
+      # Clean content type - remove any parameters like "; filename=..."
+      raw_content_type = attachment.content_type.to_s
+      clean_content_type = raw_content_type.split(";").first.strip
+
+      if raw_content_type != clean_content_type
+        Rails.logger.info(
+          "[CHES] Cleaned content type: '#{raw_content_type}' → '#{clean_content_type}'"
+        )
+      end
 
       Rails.logger.debug(
         "[CHES] Attachment - " \
           "Name: #{attachment.filename}, " \
-          "Type: #{attachment.content_type}, " \
+          "Type: #{clean_content_type}, " \
           "Decoded: #{decoded_size} bytes, " \
-          "Encoded: #{encoded_size} bytes"
+          "Encoded: #{encoded_size} bytes, " \
+          "#{encoding_info}"
       )
 
       {
-        content: Base64.strict_encode64(attachment.body.decoded),
-        contentType: attachment.content_type,
+        content: encoded_content,
+        contentType: clean_content_type,
         filename: attachment.filename
       }
     end

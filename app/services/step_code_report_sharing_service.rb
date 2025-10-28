@@ -107,8 +107,6 @@ class StepCodeReportSharingService
         "Step Code Type: #{@step_code.class.name}, " \
         "Jurisdiction: #{jurisdiction.qualified_name} (#{jurisdiction.id}), " \
         "Permit Type: #{submission_contact.permit_type.code}, " \
-        "Recipient: #{submission_contact.email}, " \
-        "Sender: #{@sender_user.name} (#{@sender_user.id}), " \
         "Timestamp: #{Time.current}"
     )
   end
