@@ -231,7 +231,7 @@ class PermitHubMailer < ApplicationMailer
     end
 
     # Attach the file using helper method
-    add_attachment(report_document)
+    # add_attachment(report_document)
 
     send_mail(
       email: recipient_email,
