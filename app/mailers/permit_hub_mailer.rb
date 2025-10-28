@@ -245,7 +245,7 @@ class PermitHubMailer < ApplicationMailer
     )
 
     # Attach the file using helper method
-    # add_attachment(report_document)
+    add_attachment(report_document)
 
     Rails.logger.info("[MAILER] Calling send_mail...")
 
