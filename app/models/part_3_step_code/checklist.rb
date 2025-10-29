@@ -175,7 +175,7 @@ class Part3StepCode::Checklist < ApplicationRecord
   end
 
   def complete?
-    section_completion_status["step_code_summary"]["complete"]
+    section_completion_status.dig("step_code_summary", "complete")
   end
 
   private

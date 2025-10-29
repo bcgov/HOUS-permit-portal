@@ -31,7 +31,7 @@ export const Part3PDFContent = function StepCodePart3ChecklistPDFContent({
   // Use views from MST model (hardened helpers)
   const isMixedUse = isMixedUseChecklist(checklist as any)
   const isBaseline = isBaselineChecklist(checklist as any)
-
+  stepCode.updatedAt = checklist.updatedAt
   return (
     <PDFDocument assetDirectoryPath={assetDirectoryPath}>
       <CoverPage
