@@ -218,13 +218,6 @@ class PermitHubMailer < ApplicationMailer
     jurisdiction:,
     sender_user:
   )
-    Rails.logger.info(
-      "[MAILER] Starting send_step_code_report_to_jurisdiction - " \
-        "ReportDocument ID: #{report_document.id}, " \
-        "Recipient: #{recipient_email}, " \
-        "Jurisdiction: #{jurisdiction.qualified_name}"
-    )
-
     @report_document = report_document
     @step_code = step_code
     @jurisdiction = jurisdiction
@@ -238,32 +231,20 @@ class PermitHubMailer < ApplicationMailer
     end
 
     Rails.logger.info(
-      "[MAILER] File present - " \
-        "Filename: #{report_document.file_name}, " \
-        "Content Type: #{report_document.file&.content_type}, " \
-        "Size: #{report_document.file&.size} bytes"
+      "[MAILER] Sending report: #{report_document.file_name} (#{report_document.file&.size} bytes)"
     )
 
-    # Attach the file using helper method
-    # add_attachment(report_document)
+    # Attach the file
+    add_attachment(report_document)
 
-    Rails.logger.info("[MAILER] Calling send_mail...")
-
-    result =
-      send_mail(
-        email: recipient_email,
-        template_key: "send_step_code_report_to_jurisdiction",
-        subject_i18n_params: {
-          step_code_title: step_code.title || "Step Code Report",
-          jurisdiction_name: jurisdiction.qualified_name
-        }
-      )
-
-    Rails.logger.info(
-      "[MAILER] send_mail returned: #{result.class.name}, Message ID: #{result.message_id}"
+    send_mail(
+      email: recipient_email,
+      template_key: "send_step_code_report_to_jurisdiction",
+      subject_i18n_params: {
+        step_code_title: step_code.title || "Step Code Report",
+        jurisdiction_name: jurisdiction.qualified_name
+      }
     )
-
-    result
   end
 
   def send_user_mail(*args, **kwargs)
@@ -276,26 +257,14 @@ class PermitHubMailer < ApplicationMailer
   # Helper method to attach a file from a FileUploadAttachment subclass instance
   # @param file_upload_attachment [FileUploadAttachment] A FileUploadAttachment subclass instance (e.g., ReportDocument)
   def add_attachment(file_upload_attachment)
-    Rails.logger.info(
-      "[MAILER] add_attachment called for #{file_upload_attachment.class.name} ID: #{file_upload_attachment.id}"
-    )
-
     attachment = file_upload_attachment.file
-
-    unless attachment
-      Rails.logger.warn("[MAILER] No attachment file found!")
-      return
-    end
-
-    filename = attachment.metadata["filename"]
-    Rails.logger.info("[MAILER] Downloading attachment: #{filename}")
+    return unless attachment
 
     content = attachment.download.read
-    Rails.logger.info(
-      "[MAILER] Downloaded #{content.bytesize} bytes for #{filename}"
-    )
+    # Force binary encoding for binary files
+    content = content.force_encoding(Encoding::BINARY) if content.encoding !=
+      Encoding::BINARY
 
-    attachments[filename] = content
-    Rails.logger.info("[MAILER] Attachment added to mail object")
+    attachments[attachment.metadata["filename"]] = content
   end
 end
