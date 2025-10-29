@@ -69,6 +69,7 @@ export const Part9StepCodeChecklistModel = types.snapshotProcessor(
       // calculated / pre-populated fields
       complianceReports: types.array(StepCodeComplianceReportModel),
       selectedReportRequirementId: types.maybeNull(types.string),
+      updatedAt: types.maybeNull(types.Date),
     })
     .extend(withEnvironment())
     .views((self) => ({

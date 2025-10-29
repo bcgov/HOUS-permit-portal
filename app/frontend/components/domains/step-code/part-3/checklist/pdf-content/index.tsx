@@ -18,7 +18,7 @@ import { StepCodePerformanceSummary } from "./step-code-performance-summary/inde
 interface IProps {
   checklist: IPart3StepCodeChecklist
   permitApplication?: IPermitApplication
-  stepCode?: { fullAddress?: string; jurisdictionName?: string }
+  stepCode?: { fullAddress?: string; jurisdictionName?: string; updatedAt?: Date }
   assetDirectoryPath?: string
 }
 

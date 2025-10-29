@@ -6,6 +6,7 @@ import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
 import { IPart3StepCode, Part3StepCodeModel } from "../models/part-3-step-code"
 import { IPart9StepCode, Part9StepCodeModel } from "../models/part-9-step-code"
+import { IPart3StepCodeChecklist, IPart9StepCodeChecklist } from "../models/part-9-step-code-checklist"
 import { EEnergyStep, EStepCodeSortFields, EStepCodeType, EZeroCarbonStep } from "../types/enums"
 import { IPart3ChecklistSelectOptions, IPart9ChecklistSelectOptions, TSearchParams } from "../types/types"
 import { setQueryParam, startBlobDownload } from "../utils/utility-functions"
@@ -274,4 +275,6 @@ export const StepCodeStoreModel = types
     }),
   }))
 
-export interface IStepCodeStore extends Instance<typeof StepCodeStoreModel> {}
+export interface IStepCodeStore extends Instance<typeof StepCodeStoreModel> {
+  getChecklist(stepCodeId: any): IPart9StepCodeChecklist | IPart3StepCodeChecklist
+}

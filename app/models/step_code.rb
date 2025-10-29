@@ -18,6 +18,8 @@ class StepCode < ApplicationRecord
              optional: true
 
   after_commit :refresh_search_index, if: :saved_change_to_discarded_at
+  after_touch :generate_report,
+              if: -> { complete? && !permit_application_id.present? }
 
   # Associations
   belongs_to :permit_application, optional: true
@@ -42,6 +44,10 @@ class StepCode < ApplicationRecord
 
   def builder
     "" #replace with a config on permit application
+  end
+
+  def complete?
+    raise NotImplementedError, "Subclasses must implement the complete? method"
   end
 
   def primary_checklist
@@ -81,5 +87,9 @@ class StepCode < ApplicationRecord
 
   def refresh_search_index
     StepCode.search_index.refresh
+  end
+
+  def generate_report
+    StepCodeReportGenerationJob.perform_async(id)
   end
 end

@@ -1,7 +1,12 @@
 class Part9StepCode::Checklist < ApplicationRecord
   self.table_name = "part_9_step_code_checklists"
 
-  belongs_to :step_code, optional: true
+  belongs_to :step_code,
+             optional: true,
+             class_name: "Part9StepCode",
+             foreign_key: :step_code_id,
+             touch: true
+
   belongs_to :step_requirement,
              class_name: "PermitTypeRequiredStep",
              optional: true
