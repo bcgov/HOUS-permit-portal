@@ -15,6 +15,8 @@ interface UseUppyS3Props {
   onUploadSuccess?: (file: UppyFile<{}, {}>, response: any) => void
   maxNumberOfFiles?: number
   autoProceed?: boolean
+  maxFileSizeMB?: number
+  allowedFileTypes?: string[]
 }
 
 interface UppyError {
@@ -24,12 +26,20 @@ interface UppyError {
   source?: XMLHttpRequest
 }
 
-const useUppyS3 = ({ onUploadSuccess, maxNumberOfFiles = 1, autoProceed = false }: UseUppyS3Props = {}) => {
+const useUppyS3 = ({
+  onUploadSuccess,
+  maxNumberOfFiles = 1,
+  autoProceed = false,
+  maxFileSizeMB,
+  allowedFileTypes,
+}: UseUppyS3Props = {}) => {
+  const maxFileSize = maxFileSizeMB ? maxFileSizeMB * 1024 * 1024 : MAX_FILE_SIZE_BYTES
   const [uppy] = useState(() =>
     new Uppy({
       restrictions: {
         maxNumberOfFiles,
-        maxFileSize: MAX_FILE_SIZE_BYTES, // Add max file size restriction here
+        maxFileSize,
+        ...(allowedFileTypes && { allowedFileTypes }),
       },
       autoProceed,
       allowMultipleUploadBatches: true,

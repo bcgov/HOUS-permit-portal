@@ -181,6 +181,15 @@ const options = {
           part9ChecklistsLink: "Part 9 checklists (PDF)",
         },
         ui: {
+          optional: "(optional)",
+          next: "Next",
+          saveAndcontinue: "Save and continue",
+          selectParticipatingJurisdiction: "Please select a participating jurisdiction to continue",
+          participatingCommunityTitle: "Your project is in a participating community",
+          participatingCommunityDescription:
+            "You can use this service to pre-check your drawings against selected parts of the BC Building Code.",
+          serviceNotAvailableTitle: "This service is not available in your community",
+          serviceNotAvailableDescription: "For questions about code compliance, contact your local building officials.",
           clear: "Clear",
           switchToManualMode: "Manually select my jurisdiction",
           switchToAutomaticMode: "Use my address to automatically select my jurisdiction",
@@ -245,7 +254,6 @@ const options = {
           doLater: "Do this later",
           add: "Add",
           edit: "Edit",
-          optional: "(optional)",
           archive: "Remove and archive",
           restore: "Restore",
           archived: "Archived",
@@ -338,6 +346,227 @@ const options = {
             acceptedOn: "Accepted on {{ timestamp }}",
           },
         },
+        preCheck: {
+          startNew: "New pre-check",
+          index: {
+            title: "Pre-Checks",
+            resultTitle: "Pre-check results",
+            intro:
+              "Your results from the BC Building Code pre-checking service are stored here. You can use this service to pre-check your drawings for compliance with select areas of the BC Building Code before you submit a permit application.",
+            betaNotice:
+              "During beta, the service is free and available only in participating communities. You may also be invited to share feedback about your experience. <1>Learn more about the BC Building Code pre-checking service</1>.",
+            openInteractiveReport: "Open interactive report",
+            downloadReport: "Download report",
+            expiry: "Pre-checks reports are available for 150 days after they are created.",
+          },
+          infoPage: {
+            title: "Pre-check your drawings for compliance with BC Building Code",
+            description:
+              "You can use this service to pre-check your drawings for compliance with select areas of the BC Building Code before you submit a permit application. During beta, the service is available only in participating communities. You may also be invited to share feedback about your experience.",
+            whereYouCanUse: "Where you can use this service",
+            whereDescription:
+              "This service is in beta, so availability is limited. You can only use the service if your project is in one of these communities:",
+            projectsYouCanUse: "Projects you can use this service for",
+            projectsDescription:
+              "This service is only for small residential projects Part 9 of the BC Building Code, including:",
+            conclusion:
+              "If your project is in one of these communities and meets these criteria, you can use this service to pre-check your drawings.",
+            startNow: "Start now",
+            projectType1: "single detached houses",
+            projectType2: "townhouses",
+            projectType3: "duplexes, triplexes, or fourplexes",
+            projectType4: "laneway houses, carriage houses, or garden suites",
+            howItWorks: "How it works",
+            step1: "Upload your drawings",
+            step2: "Receive a detailed report showing where your drawings do or don't follow the BC Building Code",
+            step3: "Update your drawings to fix issues",
+            step4: "Apply for your permit(s) with your updated drawings",
+            aboutResults: "About your results and permit approval",
+            aboutResultsDescription:
+              "This service gives you information only. Results depend on the accuracy of the drawings you upload.",
+            disclaimer1:
+              "Results are for your reference only; results will not be included as part of a permit application for your project",
+            disclaimer2: "Results do not replace a plan check by a building official",
+            disclaimer3: "A passing result does not mean your drawings are approved or that a permit will be issued",
+            disclaimer4: "Permits are approved or rejected by the authority having jurisdiction for your project",
+            disclaimer5: "While this service is in beta, you may encounter occasional issues",
+            betaBenefits: "Benefits of taking part in this service during beta",
+            betaBenefitsIntro: "By using this service during beta, you may:",
+            benefit1: "Pre-check your drawings for common compliance issues before you apply",
+            benefit2: "Get feedback within two days or less",
+            benefit3: "Spot issues early, before they cause delays",
+            benefit4: "Better understand building code requirements for your project",
+            thirdPartyPartnership: "This service is provided in partnership with third-party companies",
+            thirdPartyDescription:
+              "The Ministry of Housing and Municipal Affairs works with technology companies to deliver this service. Service partners build tools for property development, design, and automated compliance checking.",
+            feedback: "Your feedback helps us improve this service",
+            feedbackDescription1:
+              "While using this service, you can choose to be contacted by the Ministry of Housing and Municipal Affairs to take part in research like surveys or interviews.",
+            feedbackDescription2:
+              "You can also ask questions, share feedback, or enquire about research opportunities anytime by emailing us at",
+            allJurisdictions: "All jurisdictions",
+            noJurisdictions: "No jurisdictions enrolled",
+          },
+          form: {
+            title: "Pre-check your drawings for compliance with BC Building Code",
+            backToPreChecks: "Go to pre-checks",
+          },
+          columns: {
+            created_at: "Created",
+            updated_at: "Last Updated",
+            title: "Project",
+            certificate_no: "Certificate Number",
+            status: "Status",
+            full_address: "Address",
+            service_partner: "Service Partner",
+          },
+          sidebar: {
+            sections: {
+              start: "START",
+              drawings: "DRAWINGS",
+              reviewAndSubmit: "REVIEW AND SUBMIT",
+              results: "RESULTS",
+            },
+            servicePartner: "Service partner",
+            projectAddress: "Project address",
+            agreementsAndConsent: "Agreements and consent",
+            buildingType: "Building type",
+            uploadDrawings: "Upload drawings",
+            confirmSubmission: "Confirm your submission",
+            resultsSummary: "Results summary",
+          },
+          sections: {
+            servicePartner: {
+              title: "Service partner",
+              intro:
+                "To receive a compliance report, your drawings will be analyzed by a third-party service provider. Select the one that best fits your project needs. The Ministry of Housing and Municipal Affairs does not endorse one provider over another.",
+              availableProviders: "Available providers",
+              archistarTitle: "Archistar eCheck",
+              archistarDescription:
+                "Archistar is an Australian technology company that creates tools for property development, generative design, and automated compliance checking.",
+              visitWebsite: "Visit Archistar's website",
+              freeToUse: "Free to use",
+              automatedReview: "Automated code analysis and human review",
+              resultsTime: "Results in 48 hours or less",
+              smallResidential: "For small residential buildings only",
+              preChecksFor: "Pre-checks drawings for the following code requirements:",
+              buildingHeight: "Building height",
+              footings: "House footings and foundation size",
+              egress: "Shared egress facilities",
+              stairs: "Stairs in dwelling units",
+              selectArchistar: "Pre-check with Archistar eCheck",
+            },
+            projectAddress: {
+              title: "Project Address",
+              description: "Enter an address to confirm the service is available for your building project",
+            },
+            agreementsAndConsent: {
+              title: "Agreements and Consent",
+              description: "To use this service, you need to agree to the End User Licence Agreement (EULA).",
+              readEula: "Read the full EULA",
+              eulaCheckbox: "I have read and agree to the End User Licence Agreement (EULA)",
+              sendDrawingsCheckbox: "I consent to my drawings being sent to Archistar for pre-checking",
+              sendDrawingsRequired: "You must consent to send drawings",
+              eulaRequired: "You must accept the EULA",
+              shareSubmissionTitle: "Share your submission details (optional)",
+              shareSubmissionDescription:
+                "You can choose to share limited details from your submission with {{jurisdictionName}} to help improve the accuracy of this service. This includes:",
+              shareItem1: "project address",
+              shareItem2: "date of submission",
+              shareItem3: "results summary",
+              shareSubmissionNote:
+                "{{jurisdictionName}} may use this information to review and compare the results of your pre-check.",
+              shareWithJurisdictionCheckbox: "I agree to share details of this submission with {{jurisdictionName}}",
+              researchTitle: "Take part in research (optional)",
+              researchDescription:
+                "You can let the Ministry of Housing and Municipal Affairs contact you about taking part in research to help improve this service.",
+              researchCheckbox:
+                "I agree to be contacted by the Ministry of Housing and Municipal Affairs about taking part in research",
+            },
+            buildingType: {
+              title: "Building Type",
+              description:
+                "Choose the building type that best describes your project. Only small-scale/multi-unit housing is supported at this time.",
+            },
+            uploadDrawings: {
+              title: "Upload drawings",
+              description:
+                "Upload a single PDF that includes the drawings you would normally submit with a building permit application.",
+              fileRequirementsTitle: "File requirements",
+              requirement1: "PDF format only",
+              requirement2: "One file, not multiple PDFs",
+              requirement3: "Design drawings must be legible and properly scaled",
+              requirement4: "Maximum file size: 200 MB",
+              fileName: "File Name",
+              size: "Size",
+              dragAndDrop: "Drag and drop files here, or",
+              browseDevice: "browse your device",
+              protectionTitle: "How {{provider}} protects and stores your drawings",
+              protectionDescription1:
+                "Our service partners use industry-standard security to protect your drawings. {{provider}} will keep your drawings for up to 150 days, then delete them. All drawings will be deleted on December 31, 2025, when the beta testing period ends.",
+            },
+            confirmSubmission: {
+              title: "Review and submit",
+              description: "Review your information before submitting.",
+              projectNumber: "Project number",
+              applicationNumber: "Application number",
+              address: "Address",
+              jurisdiction: "Jurisdiction",
+              uploadedFiles: "Uploaded files ({{count}})",
+              noFiles: "No files uploaded",
+              submit: "Submit",
+              confirmTitle: "Confirm Submission",
+              confirmBody:
+                "Are you sure you want to submit this pre-check? Once submitted, you will not be able to make any changes.",
+              completeAllFields: "Please complete all required sections before submitting.",
+            },
+            resultsSummary: {
+              title: "Results Summary",
+              description: "View your pre-check results.",
+              notSubmitted: "Pre-check not submitted",
+              notSubmittedDescription:
+                "This pre-check has not been submitted yet. Please complete all sections and submit your pre-check to receive results.",
+              goToSubmission: "Go to submission",
+              preparing: "We're preparing your results",
+              timeframe: "Most reports are ready within a few hours, but it can take up to 48 hours.",
+              whatHappensNext: "What happens next",
+              step1: "Your drawings are analyzed",
+              step2: "A PDF report and interactive results are generated",
+              step3: "The downloadable report and a link to interactive results are available in your Pre-checks",
+              notification:
+                "You don't need to stay on this page. We'll notify you as soon as your results are ready. You'll find completed reports in the Pre-checks section.",
+              refreshStatus: "Refresh status",
+              ready: "Your BC Building Code compliance report is ready",
+              projectDetails: "Project details",
+              readyDescription: "Your pre-check has been reviewed and the results are now available.",
+              nextSteps: "Next steps",
+              whatYouCanDoNow: "What you can do now",
+              unknownStatus: "Unknown status",
+              exploreResults: "Explore interactive results",
+              downloadOrExplore:
+                "Download a PDF report listing all pre-check results, or explore them interactively in alongside your drawings.",
+              addressCompliance:
+                "You can use these results to address any compliance issues and prepare your drawings for a permit application.",
+              notShared:
+                "These results are not shared with your local building officials and are not part of your official permit submission.",
+              noGuarantee:
+                "A passing result does not guarantee approval: a building official will still carry out a full review as part of the permit application process.",
+              jurisdictionApproval: "Only your local jurisdiction can approve or reject a permit application.",
+              betaNotice:
+                "This service is in beta. If you experience issues or have questions about your results, contact us at",
+              preferResults: "Prefer results you can save and print?",
+              downloadReport: "Download your PDF report",
+              pdfUnavailable: "PDF report unavailable",
+              expiredTitle: "This pre-check is expired",
+              expiredDescription:
+                "This pre-check is expired because it was created more than 150 days ago. You will not be able to download the PDF report or explore the interactive results.",
+            },
+          },
+          viewer: {
+            title: "Interactive Results Viewer",
+            noUrl: "The interactive viewer is not yet available for this pre-check.",
+          },
+        },
         contact: {
           create: "New contact",
           edit: "Edit contact",
@@ -401,6 +630,7 @@ const options = {
           },
         },
         jurisdiction: {
+          yourJurisdiction: "your jurisdiction",
           edit: {
             displayDescriptionLabel: "Jurisdiction description (public)",
             title: "Manage jurisdiction name settings",
@@ -2888,6 +3118,9 @@ Thank you,
           meetStepCodeLink: "Create a Step Codes compliance report for your project",
           meetStepCodeDescription:
             "Generate a report that details a project's compliance with BC's Energy Step Code and Zero Carbon Step Code requirements",
+          preCheckDrawingsLink: "Pre-check your drawings for compliance with BC Building Code",
+          preCheckDrawingsDescription:
+            "Upload your drawings to receive a report showing where your drawings comply or don't comply with select areas of the BC Building Code",
           checkDrawingsLink: "Check if your drawings follow the BC Building Code",
           checkDrawingsDescription:
             "Upload your drawings to get a report about where your drawings follow or don't follow certain sections of the BC Building Code",
@@ -3461,6 +3694,26 @@ Thank you,
               item2:
                 "When <strong>on</strong>, jurisdictions can choose to limit who can request revisions from applicants",
             },
+            codeCompliance: "Code compliance",
+            codeComplianceSetup: {
+              title: "Code compliance",
+              description:
+                "Enable review managers to turn on or off code compliance services globally. These services let applicants run automated checks through a third-party system. If turned off, applicants cannot run compliance checks in their permit applications.",
+              toggleTitle: "Code compliance",
+              individualServices: "Individual services",
+              individualServicesDescription:
+                "Configure specific compliance services and their availability by jurisdiction.",
+              archistarEcheck: "Archistar eCheck",
+              enableForAll: "Enable for all jurisdictions",
+              enrolledJurisdictions: "Select jurisdictions",
+              allJurisdictionsEnabled: "All jurisdictions enabled",
+              allJurisdictionsEnabledDescription:
+                "All jurisdictions are currently enabled for Archistar eCheck. Turn off the switch above to select specific jurisdictions.",
+              jurisdictionsCount: "{{count}} jurisdictions enabled",
+              jurisdictionsCount_one: "{{count}} jurisdiction enabled",
+              jurisdictionsCount_other: "{{count}} jurisdictions enabled",
+              searchJurisdictions: "Search and select jurisdictions...",
+            },
           },
           sitewideMessage: {
             title: "Site-wide message",
@@ -3540,6 +3793,13 @@ Thank you,
               "Submitted and draft application metrics by jurisdiction and type, excluding submissions created by employee accounts",
             title: "Basic Application metrics for all jurisdictions",
             filename: "Basic Application metrics for all jurisdictions",
+          },
+          preCheckUserConsent: {
+            name: "Archistar Tool User Consent Report",
+            description:
+              "Export user contact information and submission details for users who consented to be contacted for research on the Archistar tool. Respects research participation opt-out preferences.",
+            title: "Archistar Tool User Consent Report",
+            filename: "Archistar Tool User Consent Report",
           },
           columnHeaders: {
             name: "Name",
@@ -3792,7 +4052,9 @@ Thank you,
           privacyPolicyContactUsEmail: "Email:",
           privacyPolicyContactUsEmailAddress: "digital.codes.permits@gov.bc.ca",
           breadcrumb: {
+            preCheck: "Pre-check",
             projects: "Projects",
+            codeCompliance: "Code compliance",
             permitClassifications: "Permit classifications",
             documents: "Documents",
             checkStepCodeRequirements: "Check step code requirements",
@@ -3851,6 +4113,7 @@ Thank you,
             stepCodeRequirements: "Step code requirements",
             start: "Start",
             select: "Select",
+            preChecks: "Pre-Checks",
           },
           earlyAccessStepCodePreviewNotAvailable: "Early access step code preview not available",
         },

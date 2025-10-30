@@ -2,8 +2,8 @@ class PermitCollaboration < ApplicationRecord
   belongs_to :collaborator
   belongs_to :permit_application, touch: true
 
-  enum collaboration_type: { submission: 0, review: 1 }
-  enum collaborator_type: { delegatee: 0, assignee: 1 }, _default: 0
+  enum :collaboration_type, { submission: 0, review: 1 }
+  enum :collaborator_type, { delegatee: 0, assignee: 1 }, default: 0
 
   before_validation :set_default_collaboration_type, on: :create
 

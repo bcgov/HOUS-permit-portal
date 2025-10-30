@@ -20,7 +20,8 @@ class Part3StepCode::FuelType < ApplicationRecord
 
   belongs_to :checklist, optional: true
 
-  enum key: {
+  enum :key,
+       {
          electricity: 0,
          natural_gas: 1,
          district_energy: 2,
@@ -31,7 +32,7 @@ class Part3StepCode::FuelType < ApplicationRecord
          wood_fuel: 7,
          other: 8
        },
-       _suffix: :fuel_type
+       suffix: :fuel_type
 
   validates :key,
             presence: true,

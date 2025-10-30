@@ -32,6 +32,22 @@ class SiteConfiguration < ApplicationRecord
     instance.allow_designated_reviewer
   end
 
+  def self.code_compliance_enabled?
+    instance.code_compliance_enabled
+  end
+
+  def self.archistar_enabled_for_jurisdiction?(jurisdiction)
+    return false unless instance.code_compliance_enabled # Global switch
+    return true if instance.archistar_enabled_for_all_jurisdictions # Override
+
+    # Check specific enrollment
+    JurisdictionServicePartnerEnrollment.exists?(
+      jurisdiction: jurisdiction,
+      service_partner: :archistar,
+      enabled: true
+    )
+  end
+
   # This override allows discarding of reasons and updating them by reason_code
   # if a discarded reason of a particular code is found and updated, it will be undiscarded.
   def revision_reasons_attributes=(attributes)

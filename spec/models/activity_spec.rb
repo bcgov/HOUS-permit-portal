@@ -18,8 +18,8 @@ RSpec.describe Activity, type: :model do
     end
 
     it "is not valid with a duplicate code" do
-      create(:activity)
-      activity = build(:activity)
+      existing_activity = create(:activity)
+      activity = build(:activity, code: existing_activity.code)
       expect(activity).not_to be_valid
     end
   end

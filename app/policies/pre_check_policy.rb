@@ -1,0 +1,45 @@
+class PreCheckPolicy < ApplicationPolicy
+  def index?
+    user.present?
+  end
+
+  def show?
+    record.creator_id == user.id || permit_application_submitter?
+  end
+
+  def create?
+    user.present?
+  end
+
+  def update?
+    record.creator_id == user.id
+  end
+
+  def submit?
+    update?
+  end
+
+  def mark_viewed?
+    update?
+  end
+
+  def pdf_report_url?
+    show?
+  end
+
+  def download_pre_check_user_consent_csv?
+    user.super_admin?
+  end
+
+  class Scope < Scope
+    def resolve
+      scope.where(creator_id: user.id)
+    end
+  end
+
+  private
+
+  def permit_application_submitter?
+    record.permit_application&.submitter_id == user.id
+  end
+end

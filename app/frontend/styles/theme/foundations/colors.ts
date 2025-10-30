@@ -22,7 +22,7 @@ export const colors = {
   background: {
     sandboxBase: "#FFC6CB",
     sandboxStripe: "rgba(0, 0, 0, 0.1)",
-    blueLight: "#D8EAFD",
+    blueLight: "#F1F8FE",
   },
   greys: {
     overlay: "rgba(150, 150, 150, 0.35)",
@@ -40,6 +40,7 @@ export const colors = {
     dark: "#323130",
     light: "#D9D9D9",
     input: "#CCCCCC",
+    blue: "#38598A",
   },
   error: "#D9292F",
   success: "#2E8540",

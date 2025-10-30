@@ -3,12 +3,8 @@ class Part3StepCode::DocumentReference < ApplicationRecord
 
   belongs_to :checklist
 
-  enum document_type: %i[
-         architectural_drawing
-         mechanical_drawing
-         electrical_drawing
-         other
-       ]
+  enum :document_type,
+       %i[architectural_drawing mechanical_drawing electrical_drawing other]
 
   validates :document_type_description, presence: true, if: :other?
   validates :issued_for, presence: true, if: :other?

@@ -21,8 +21,9 @@ class Part3StepCode::EnergyOutput < ApplicationRecord
 
   before_validation :nil_use_type_for_reference
 
-  enum source: %i[modelled reference]
-  enum use_type: {
+  enum :source, %i[modelled reference]
+  enum :use_type,
+       {
          interior_lighting: 0,
          exterior_lighting: 1,
          heating_general: 2,

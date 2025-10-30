@@ -50,18 +50,14 @@ class Part3StepCode::Checklist < ActiveRecord::Base
            dependent: :destroy
   accepts_nested_attributes_for :modelled_energy_outputs, allow_destroy: true
 
-  enum building_code_version: %i[
-         revision_1
-         revision_2
-         revision_3
-         revision_4
-         revision_5
-       ],
-       _default: "BCBC 2018 Revision 5"
+  enum :building_code_version,
+       %i[revision_1 revision_2 revision_3 revision_4 revision_5],
+       default: "BCBC 2018 Revision 5"
 
-  enum is_suite_sub_metered: %i[yes no not_applicable]
+  enum :is_suite_sub_metered, %i[yes no not_applicable]
 
-  enum software: %i[
+  enum :software,
+       %i[
          ies_ve
          energy_plus
          design_builder
@@ -71,9 +67,10 @@ class Part3StepCode::Checklist < ActiveRecord::Base
          phpp
          other
        ],
-       _prefix: :software
+       prefix: :software
 
-  enum heating_system_plant: %i[
+  enum :heating_system_plant,
+       %i[
          none
          air_source_heat_pump
          ground_source_heat_pump
@@ -83,9 +80,10 @@ class Part3StepCode::Checklist < ActiveRecord::Base
          district_system
          other
        ],
-       _prefix: :heating_plant
+       prefix: :heating_plant
 
-  enum heating_system_type: %i[
+  enum :heating_system_type,
+       %i[
          electric_baseboard
          hydronic_basebaord
          hydronic_fan_coils
@@ -98,9 +96,10 @@ class Part3StepCode::Checklist < ActiveRecord::Base
          heat_pump_rooftop
          other
        ],
-       _prefix: :heating_type
+       prefix: :heating_type
 
-  enum cooling_system_plant: %i[
+  enum :cooling_system_plant,
+       %i[
          none
          air_cooled_chiller
          water_cooled_chiller
@@ -110,9 +109,10 @@ class Part3StepCode::Checklist < ActiveRecord::Base
          ground_source_vrf
          other
        ],
-       _prefix: :cooling_plant
+       prefix: :cooling_plant
 
-  enum cooling_system_type: %i[
+  enum :cooling_system_type,
+       %i[
          ptac
          hydronic_fan_coils
          hydronic_baseboards
@@ -121,9 +121,10 @@ class Part3StepCode::Checklist < ActiveRecord::Base
          none
          other
        ],
-       _prefix: :cooling_type
+       prefix: :cooling_type
 
-  enum dhw_system_type: %i[
+  enum :dhw_system_type,
+       %i[
          heat_pump_space_heating
          air_source_heat_pump
          ground_source_heat_pump
@@ -133,9 +134,9 @@ class Part3StepCode::Checklist < ActiveRecord::Base
          suite_gas
          other
        ],
-       _prefix: :dhw
+       prefix: :dhw
 
-  enum climate_zone: %i[zone_4 zone_5 zone_6 zone_7a zone_7b zone_8]
+  enum :climate_zone, %i[zone_4 zone_5 zone_6 zone_7a zone_7b zone_8]
 
   validates :heating_system_plant_description,
             presence: true,

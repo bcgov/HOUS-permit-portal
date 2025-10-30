@@ -129,6 +129,11 @@ const LookUpStepCodesRequirementsForYourProjectScreen = lazy(() =>
     default: module.LookUpStepCodesRequirementsForYourProjectScreen,
   }))
 )
+const PreCheckInfoScreen = lazy(() =>
+  import("../project-readiness-tools/pre-check-info-screen").then((module) => ({
+    default: module.PreCheckInfoScreen,
+  }))
+)
 
 const CheckStepCodeRequirementsScreen = lazy(() =>
   import("../project-readiness-tools/check-step-code-requirements").then((module) => ({
@@ -239,6 +244,10 @@ const Part9StepCodeForm = lazy(() =>
 const Part3StepCodeForm = lazy(() =>
   import("../step-code/part-3").then((module) => ({ default: module.Part3StepCodeForm }))
 )
+const PreCheckForm = lazy(() => import("../pre-check").then((module) => ({ default: module.PreCheckForm })))
+const PreCheckViewer = lazy(() =>
+  import("../pre-check/pre-check-viewer").then((module) => ({ default: module.PreCheckViewer }))
+)
 
 const StepCodeChecklistPDFViewer = lazy(() =>
   import("../step-code/checklist/pdf-content/viewer").then((module) => ({
@@ -299,6 +308,12 @@ const AdminSubmissionInboxScreen = lazy(() =>
 const AdminDesignatedReviewerScreen = lazy(() =>
   import("../super-admin/site-configuration-management/designated-reviewer-screen").then((module) => ({
     default: module.AdminDesignatedReviewerScreen,
+  }))
+)
+
+const CodeComplianceSetupScreen = lazy(() =>
+  import("../super-admin/site-configuration-management/code-compliance-setup-screen").then((module) => ({
+    default: module.CodeComplianceSetupScreen,
   }))
 )
 
@@ -482,6 +497,10 @@ const AppRoutes = observer(() => {
         path="/configuration-management/global-feature-access/access-control-for-revision-requests-to-submitters"
         element={<AdminDesignatedReviewerScreen />}
       />
+      <Route
+        path="/configuration-management/global-feature-access/code-compliance"
+        element={<CodeComplianceSetupScreen />}
+      />
       <Route path="/configuration-management/users/invite" element={<AdminInviteScreen />} />
       <Route path="/reporting" element={<ReportingScreen />} />
       <Route path="/reporting/export-template-summary" element={<ExportTemplateSummaryScreen />} />
@@ -640,6 +659,12 @@ const AppRoutes = observer(() => {
             element={<ProtectedRoute isAllowed={loggedIn && !mustAcceptEula} redirectPath={mustAcceptEula && "/"} />}
           >
             <Route path="/step-codes" element={<ProjectDashboardScreen />} />
+            <Route path="/pre-checks" element={<ProjectDashboardScreen />} />
+            <Route path="/pre-checks/new" element={<PreCheckForm />} />
+            <Route path="/pre-checks/new/:section" element={<PreCheckForm />} />
+            <Route path="/pre-checks/:preCheckId/edit/" element={<PreCheckForm />} />
+            <Route path="/pre-checks/:preCheckId/edit/:section" element={<PreCheckForm />} />
+            <Route path="/pre-checks/:preCheckId/viewer" element={<PreCheckViewer />} />
             <Route path="/documents" element={<ProjectDashboardScreen />} />
             {/* Already handled above with path-based tabs */}
             <Route path="/projects" element={<ProjectDashboardScreen />} />
@@ -757,6 +782,7 @@ const AppRoutes = observer(() => {
           path="/project-readiness-tools/look-up-step-codes-requirements-for-your-project"
           element={<LookUpStepCodesRequirementsForYourProjectScreen />}
         />
+        <Route path="/project-readiness-tools/pre-check" element={<PreCheckInfoScreen />} />
         <Route
           path="/onboarding-checklist-page-for-lg-adopting"
           element={<OnboardingChecklistPageForLgAdoptingScreen />}

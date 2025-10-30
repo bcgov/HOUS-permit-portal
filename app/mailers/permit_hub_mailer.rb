@@ -170,6 +170,26 @@ class PermitHubMailer < ApplicationMailer
     )
   end
 
+  def notify_pre_check_submitted(pre_check)
+    @pre_check = pre_check
+    @user = pre_check.creator
+
+    send_user_mail(
+      email: @user.email,
+      template_key: "notify_pre_check_submitted"
+    )
+  end
+
+  def notify_pre_check_completed(pre_check)
+    @pre_check = pre_check
+    @user = pre_check.creator
+
+    send_user_mail(
+      email: @user.email,
+      template_key: "notify_pre_check_completed"
+    )
+  end
+
   def remind_reviewer(permit_type_submission_contact, permit_applications)
     @permit_applications = permit_applications
     send_mail(

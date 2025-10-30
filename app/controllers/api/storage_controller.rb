@@ -1,12 +1,4 @@
 class Api::StorageController < Api::ApplicationController
-  skip_after_action :verify_authorized,
-                    only: %i[
-                      upload
-                      create_multipart_upload
-                      batch_presign_multipart_parts
-                      complete_multipart_upload
-                      abort_multipart_upload
-                    ]
   skip_after_action :verify_policy_scoped
   before_action :set_record,
                 except: %i[
@@ -18,8 +10,7 @@ class Api::StorageController < Api::ApplicationController
                 ]
 
   def upload
-    # Authorization is handled by individual model controller policies
-    #https://shrinerb.com/docs/plugins/presign_endpoint#calling-from-a-controller
+    authorize :storage, :upload?
     set_rack_response FileUploader.presign_response(:cache, request.env)
   end
 
@@ -28,7 +19,8 @@ class Api::StorageController < Api::ApplicationController
     "RequirementDocument" => RequirementDocument,
     "ProjectDocument" => ProjectDocument,
     "JurisdictionDocument" => JurisdictionDocument,
-    "ReportDocument" => ReportDocument
+    "ReportDocument" => ReportDocument,
+    "DesignDocument" => DesignDocument
   }.freeze
 
   def download
@@ -40,6 +32,7 @@ class Api::StorageController < Api::ApplicationController
   # POST /api/s3/params/multipart
   # Expected params: { filename: "example.jpg", type: "image/jpeg", metadata: { ... } } (metadata optional)
   def create_multipart_upload
+    authorize :storage, :create_multipart_upload?
     s3_client = Shrine.storages[:cache].client
     bucket_name = Shrine.storages[:cache].bucket.name
     # Generate a unique key, possibly incorporating the original filename for readability/debugging
@@ -63,7 +56,7 @@ class Api::StorageController < Api::ApplicationController
                key: response.key
              },
              status: :ok
-    rescue Aws::S3::Errors::ServiceError => e
+    rescue Aws::S3::Errors::ServiceError => _e
       render_error "s3.multipart_init_failed"
     end
   end
@@ -71,6 +64,7 @@ class Api::StorageController < Api::ApplicationController
   # GET /api/s3/params/multipart/:upload_id/batch
   # Expected params: { key: "s3_object_key", partNumbers: "1,2,3" }
   def batch_presign_multipart_parts
+    authorize :storage, :batch_presign_multipart_parts?
     s3_client = Shrine.storages[:cache].client
     bucket_name = Shrine.storages[:cache].bucket.name
     upload_id = params[:upload_id]
@@ -100,7 +94,7 @@ class Api::StorageController < Api::ApplicationController
         presigned_urls[part_number.to_s] = url
       end
       render json: { presignedUrls: presigned_urls }, status: :ok
-    rescue Aws::S3::Errors::ServiceError => e
+    rescue Aws::S3::Errors::ServiceError => _e
       render_error "s3.batch_presign_failed"
     end
   end
@@ -108,6 +102,7 @@ class Api::StorageController < Api::ApplicationController
   # POST /api/s3/params/multipart/:upload_id/complete
   # Expected params: { key: "s3_object_key", parts: [{ PartNumber: 1, ETag: "etag1" }, ...] }
   def complete_multipart_upload
+    authorize :storage, :complete_multipart_upload?
     s3_client = Shrine.storages[:cache].client
     bucket_name = Shrine.storages[:cache].bucket.name
     upload_id = params[:upload_id]
@@ -124,27 +119,25 @@ class Api::StorageController < Api::ApplicationController
     end
 
     begin
-      response =
-        s3_client.complete_multipart_upload(
-          {
-            bucket: bucket_name,
-            key: object_key,
-            upload_id: upload_id,
-            multipart_upload: {
-              parts: sdk_parts
-            }
+      s3_client.complete_multipart_upload(
+        {
+          bucket: bucket_name,
+          key: object_key,
+          upload_id: upload_id,
+          multipart_upload: {
+            parts: sdk_parts
           }
-        )
+        }
+      )
       # The location might not be in response.location for all S3 providers for complete_multipart_upload.
       # It's safer to construct it or get it via a head_object if needed.
       # For now, we'll assume the frontend uses the key and standard S3 URL construction.
-      # If your S3 provider returns a location, you can use: location: response.location
       render json: {
                location: "s3://#{bucket_name}/#{object_key}",
                key: object_key
              },
              status: :ok # Simplified location
-    rescue Aws::S3::Errors::ServiceError => e
+    rescue Aws::S3::Errors::ServiceError => _e
       render_error "s3.multipart_complete_failed"
     end
   end
@@ -152,6 +145,7 @@ class Api::StorageController < Api::ApplicationController
   # DELETE /api/s3/params/multipart/:upload_id
   # Expected params: { key: "s3_object_key" }
   def abort_multipart_upload
+    authorize :storage, :abort_multipart_upload?
     s3_client = Shrine.storages[:cache].client
     bucket_name = Shrine.storages[:cache].bucket.name
     upload_id = params[:upload_id]
@@ -169,7 +163,7 @@ class Api::StorageController < Api::ApplicationController
                message: "Multipart upload aborted successfully."
              },
              status: :ok
-    rescue Aws::S3::Errors::ServiceError => e
+    rescue Aws::S3::Errors::ServiceError => _e
       render_error "s3.multipart_abort_failed"
     end
   end

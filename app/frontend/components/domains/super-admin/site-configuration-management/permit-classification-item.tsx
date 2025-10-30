@@ -3,6 +3,7 @@ import React from "react"
 import { useTranslation } from "react-i18next"
 import { IPermitClassification } from "../../../../models/permit-classification"
 import { ConfirmationModal } from "../../../shared/confirmation-modal"
+import { Editor } from "../../../shared/editor/editor"
 
 interface IProps {
   classification: IPermitClassification
@@ -36,11 +37,7 @@ export const PermitClassificationItem: React.FC<IProps> = ({ classification, onE
             {classification.enabled ? t("ui.enabled") : t("ui.disabled")}
           </Tag>
         </HStack>
-        {!!classification.description && (
-          <Text color="text.secondary" fontSize="sm">
-            {classification.description}
-          </Text>
-        )}
+        {!!classification.descriptionHtml && <Editor htmlValue={classification.descriptionHtml} readonly />}
       </Stack>
       <HStack spacing={2}>
         <Button onClick={onEdit} size="sm" variant="primary">

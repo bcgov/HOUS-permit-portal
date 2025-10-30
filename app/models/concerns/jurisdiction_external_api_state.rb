@@ -1,7 +1,7 @@
 module JurisdictionExternalApiState
   extend ActiveSupport::Concern
   included do
-    enum external_api_state: { g_off: "g_off", j_on: "j_on", j_off: "j_off" }
+    enum :external_api_state, { g_off: "g_off", j_on: "j_on", j_off: "j_off" }
 
     # Update the after_save callback
     after_save :create_integration_mappings_async,

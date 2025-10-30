@@ -22,7 +22,6 @@ import {
   TabPanels,
   Tabs,
   Text,
-  Textarea,
   useDisclosure,
 } from "@chakra-ui/react"
 import { Plus } from "@phosphor-icons/react"
@@ -34,6 +33,7 @@ import CreatableSelect from "react-select/creatable"
 import { IActivity, IPermitType } from "../../../../models/permit-classification"
 import { useMst } from "../../../../setup/root"
 import { EPermitClassificationType } from "../../../../types/enums"
+import { Editor } from "../../../shared/editor/editor"
 import { PermitClassificationItem } from "./permit-classification-item"
 
 export const PermitClassificationsScreen = observer(function PermitClassificationsScreen() {
@@ -50,7 +50,7 @@ export const PermitClassificationsScreen = observer(function PermitClassificatio
     type: EPermitClassificationType
     name: string
     code: string
-    description?: string
+    descriptionHtml?: string
     enabled: boolean
     category?: string
   }
@@ -59,7 +59,7 @@ export const PermitClassificationsScreen = observer(function PermitClassificatio
     type,
     name: "",
     code: "",
-    description: "",
+    descriptionHtml: "",
     enabled: true,
     category: "",
   })
@@ -112,7 +112,7 @@ export const PermitClassificationsScreen = observer(function PermitClassificatio
       type: item.type,
       name: item.name,
       code: item.code,
-      description: item.description || "",
+      descriptionHtml: item.descriptionHtml || "",
       enabled: !!item.enabled,
       category: item.category || "",
     })
@@ -237,7 +237,11 @@ export const PermitClassificationsScreen = observer(function PermitClassificatio
               </FormControl>
               <FormControl>
                 <FormLabel>{t("siteConfiguration.permitClassifications.descriptionLabel")}</FormLabel>
-                <Textarea {...register("description")} minH={20} />
+                <Controller
+                  name="descriptionHtml"
+                  control={control}
+                  render={({ field }) => <Editor htmlValue={field.value || ""} onChange={field.onChange} />}
+                />
               </FormControl>
               {formType === EPermitClassificationType.Activity && (
                 <FormControl>
