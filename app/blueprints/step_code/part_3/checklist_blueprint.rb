@@ -52,7 +52,8 @@ class StepCode::Part3::ChecklistBlueprint < Blueprinter::Base
          :completed_by_title,
          :completed_by_email,
          :completed_by_phone_number,
-         :completed_by_organization_name
+         :completed_by_organization_name,
+         :updated_at
 
   field :building_code_version do |checklist, _options|
     if checklist.newly_submitted_at.present?

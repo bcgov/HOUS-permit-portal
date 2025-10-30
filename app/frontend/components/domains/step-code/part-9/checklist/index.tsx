@@ -7,7 +7,7 @@ import React, { useEffect, useRef, useState } from "react"
 import { FormProvider, useForm } from "react-hook-form"
 import { useNavigate, useParams } from "react-router-dom"
 import { usePart9StepCode } from "../../../../../hooks/resources/use-part-9-step-code"
-import { EFileUploadAttachmentType, EFlashMessageStatus } from "../../../../../types/enums"
+import { EFileUploadAttachmentType, EFlashMessageStatus, EStepCodeChecklistStatus } from "../../../../../types/enums"
 import { FileDownloadButton } from "../../../../shared/base/file-download-button"
 import { SharedSpinner } from "../../../../shared/base/shared-spinner"
 import { BuildingCharacteristicsSummary } from "./building-characteristics-summary"
@@ -36,7 +36,7 @@ export const StepCodeChecklistForm = observer(function StepCodeChecklistForm() {
         await checklist.load()
       })()
     }
-  }, [checklist])
+  }, [checklist, currentStepCode?.reportDocuments?.length])
 
   useEffect(() => {
     checklist?.isLoaded && reset(checklist.defaultFormValues)
@@ -46,15 +46,16 @@ export const StepCodeChecklistForm = observer(function StepCodeChecklistForm() {
   const { handleSubmit, reset, formState } = formMethods
   const { isSubmitting } = formState
 
-  const onSubmit = async (values) => {
-    const shouldRequestReportGeneration = !currentStepCode?.permitApplicationId
+  const onSubmit = async (values, event: React.BaseSyntheticEvent) => {
+    const markingComplete = (event.nativeEvent as CustomEvent)?.detail?.markComplete
+    if (markingComplete) {
+      values.status = EStepCodeChecklistStatus.complete
+    }
     const result = await currentStepCode.updateChecklist(
       checklist.id,
-      R.mergeRight(values, { stepRequirementId: checklist.stepRequirementId }),
-      shouldRequestReportGeneration ? { reportGenerationRequested: true } : undefined
+      R.mergeRight(values, { stepRequirementId: checklist.stepRequirementId })
     )
-
-    if (result) {
+    if (result && !markingComplete) {
       if (permitApplicationId) {
         navigate(`/permit-applications/${permitApplicationId}/edit`)
       } else {

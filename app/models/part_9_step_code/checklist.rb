@@ -3,6 +3,8 @@ class Part9StepCode::Checklist < ActiveRecord::Base
 
   include ChecklistReportDocumentConcern
 
+  delegate :permit_application_id, to: :step_code, allow_nil: true
+
   belongs_to :step_code,
              optional: true,
              class_name: "Part9StepCode",

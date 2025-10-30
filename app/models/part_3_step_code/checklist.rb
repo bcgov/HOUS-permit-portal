@@ -9,6 +9,8 @@ class Part3StepCode::Checklist < ActiveRecord::Base
            to: :step_code,
            allow_nil: true
 
+  delegate :permit_application_id, to: :step_code
+
   belongs_to :step_code,
              optional: true,
              class_name: "Part3StepCode",

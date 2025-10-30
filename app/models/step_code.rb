@@ -1,6 +1,8 @@
 class StepCode < ApplicationRecord
   include ProjectItem
   include Discard::Model
+  include ChecklistReportDocumentConcern
+
   has_parent :permit_application
 
   # Enable search for StepCodes
@@ -87,7 +89,7 @@ class StepCode < ApplicationRecord
     StepCode.search_index.refresh
   end
 
-  def generate_report
+  def generate_report_document
     StepCodeReportGenerationJob.perform_async(id)
   end
 end
