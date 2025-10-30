@@ -17,6 +17,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
                   invite_new_collaborator
                   remove_collaborator_collaborations
                   create_or_update_permit_block_status
+                  retrigger_submission_webhook
                 ]
   skip_after_action :verify_policy_scoped, only: [:index]
 
@@ -401,6 +402,16 @@ class Api::PermitApplicationsController < Api::ApplicationController
 
     csv_data = PermitApplicationExportService.new.application_metrics_csv
     send_data csv_data, type: "text/csv"
+  end
+
+  def retrigger_submission_webhook
+    authorize @permit_application, :retrigger_submission_webhook?
+
+    @permit_application.send_submitted_webhook
+
+    render_success nil, "permit_application.retrigger_webhook_success", {}
+  rescue StandardError => e
+    render_error "permit_application.retrigger_webhook_error", {}, e
   end
 
   private

@@ -1,5 +1,20 @@
-import { Box, Button, Divider, Flex, HStack, Heading, Spacer, Stack, Text, useDisclosure } from "@chakra-ui/react"
-import { CaretDown, CaretRight, CaretUp, Info, NotePencil } from "@phosphor-icons/react"
+import {
+  Box,
+  Button,
+  Divider,
+  Flex,
+  HStack,
+  Heading,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
+  Spacer,
+  Stack,
+  Text,
+  useDisclosure,
+} from "@chakra-ui/react"
+import { ArrowsClockwise, CaretDown, CaretRight, CaretUp, Info, NotePencil } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useRef, useState } from "react"
 import { useController, useForm } from "react-hook-form"
@@ -52,6 +67,7 @@ export const ReviewPermitApplicationScreen = observer(() => {
   const { isOpen: isContactsOpen, onOpen: onContactsOpen, onClose: onContactsClose } = useDisclosure()
 
   const [hideRevisionList, setHideRevisionList] = useState(false)
+  const [isRetriggeringWebhook, setIsRetriggeringWebhook] = useState(false)
 
   const sendRevisionContainerRef = useRef<HTMLDivElement | null>(null)
 
@@ -99,6 +115,24 @@ export const ReviewPermitApplicationScreen = observer(() => {
       onReferenceNumberChange(referenceNumberSnapshot)
     }
   })
+
+  const handleRetriggerWebhook = async () => {
+    if (!currentPermitApplication) return
+
+    setIsRetriggeringWebhook(true)
+    try {
+      const response = await currentPermitApplication.retriggerSubmissionWebhook()
+      if (response.ok) {
+        console.log("Submission webhook retriggered successfully")
+      } else {
+        console.error("Error retriggering submission webhook")
+      }
+    } catch (error) {
+      console.error("Error retriggering submission webhook:", error)
+    } finally {
+      setIsRetriggeringWebhook(false)
+    }
+  }
 
   // @ts-ignore
   const permitHeaderHeight = permitHeaderRef?.current?.offsetHeight ?? 0
@@ -150,19 +184,40 @@ export const ReviewPermitApplicationScreen = observer(() => {
               </HStack>
             </Flex>
           </HStack>
-          <Stack direction={{ base: "column", lg: "row" }} align={{ base: "flex-end", lg: "center" }}>
-            <BrowserSearchPrompt />
-            <Button variant="ghost" leftIcon={<Info size={20} />} color="white" onClick={onContactsOpen}>
-              {t("permitApplication.show.contactsSummary")}
-            </Button>
-            <SubmissionDownloadModal permitApplication={currentPermitApplication} review />
-            <Button
-              rightIcon={<CaretRight />}
-              onClick={() => navigate(`/jurisdictions/${currentPermitApplication.jurisdiction.slug}/submission-inbox`)}
-            >
-              {t("ui.back")}
-            </Button>
-          </Stack>
+          <Flex direction="column" align="flex-end" justify="space-between">
+            <Stack direction={{ base: "column", lg: "row" }} align={{ base: "flex-end", lg: "center" }}>
+              <BrowserSearchPrompt />
+              <Button variant="ghost" leftIcon={<Info size={20} />} color="white" onClick={onContactsOpen}>
+                {t("permitApplication.show.contactsSummary")}
+              </Button>
+              <SubmissionDownloadModal permitApplication={currentPermitApplication} review />
+              <Button
+                rightIcon={<CaretRight />}
+                onClick={() =>
+                  navigate(`/jurisdictions/${currentPermitApplication.jurisdiction.slug}/submission-inbox`)
+                }
+              >
+                {t("ui.back")}
+              </Button>
+            </Stack>
+            <Menu>
+              <MenuButton as={Button} variant="tertiaryInverse" rightIcon={<CaretDown />}>
+                {t("ui.options")}
+              </MenuButton>
+              <MenuList>
+                <MenuItem
+                  icon={<ArrowsClockwise size={16} />}
+                  onClick={handleRetriggerWebhook}
+                  isDisabled={isRetriggeringWebhook}
+                  color="text.primary"
+                >
+                  {isRetriggeringWebhook
+                    ? t("permitApplication.show.retriggeringWebhook")
+                    : t("permitApplication.show.retriggerWebhook")}
+                </MenuItem>
+              </MenuList>
+            </Menu>
+          </Flex>
         </Flex>
         {revisionMode && (
           <Flex
