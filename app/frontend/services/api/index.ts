@@ -499,6 +499,10 @@ export class Api {
     })
   }
 
+  async retriggerPermitApplicationWebhook(id: string) {
+    return this.client.post<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/retrigger_submission_webhook`)
+  }
+
   async finalizeRevisionRequests(id) {
     return this.client.post<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/revision_requests/finalize`)
   }

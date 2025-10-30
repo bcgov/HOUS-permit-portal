@@ -225,12 +225,16 @@ class PermitHubMailer < ApplicationMailer
 
     unless report_document.file.present?
       Rails.logger.error(
-        "Failed to attach report document #{report_document.id} for emailing"
+        "[MAILER] Report document #{report_document.id} has no file attached!"
       )
       raise "Unable to attach report file for emailing"
     end
 
-    # Attach the file using helper method
+    Rails.logger.info(
+      "[MAILER] Sending report: #{report_document.file_name} (#{report_document.file&.size} bytes)"
+    )
+
+    # Attach the file
     add_attachment(report_document)
 
     send_mail(
@@ -256,7 +260,11 @@ class PermitHubMailer < ApplicationMailer
     attachment = file_upload_attachment.file
     return unless attachment
 
-    filename = attachment.metadata["filename"]
-    attachments[filename] = attachment.download.read
+    content = attachment.download.read
+    # Force binary encoding for binary files
+    content = content.force_encoding(Encoding::BINARY) if content.encoding !=
+      Encoding::BINARY
+
+    attachments[attachment.metadata["filename"]] = content
   end
 end

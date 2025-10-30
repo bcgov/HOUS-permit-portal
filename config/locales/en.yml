@@ -493,6 +493,12 @@ en:
         title: ""
         message: "Jurisdiction external api successfully disabled!"
     permit_application:
+      retrigger_webhook_success:
+        title: ""
+        message: "Permit application submitted webhook re-triggered successfully!"
+      retrigger_webhook_error:
+        title: Error
+        message: "There was an error re-triggering the submitted webhook"
       create_error:
         title: Error
         message: "%{error_message}"
