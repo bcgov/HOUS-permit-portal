@@ -31,6 +31,7 @@ export const Part9PDFContent = function StepCodeChecklistPDFContent({
   const stepCodeForPdf = {
     fullAddress: checklist.fullAddress,
     jurisdictionName: checklist.jurisdictionName,
+    updatedAt: checklist.updatedAt,
   }
   return (
     <PDFDocument assetDirectoryPath={assetDirectoryPath}>

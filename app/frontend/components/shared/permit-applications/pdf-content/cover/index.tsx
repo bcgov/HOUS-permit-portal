@@ -9,7 +9,7 @@ import { page } from "../shared/styles/page"
 
 interface IProps {
   permitApplication?: IPermitApplication
-  stepCode?: { fullAddress?: string; jurisdictionName?: string }
+  stepCode?: { fullAddress?: string; jurisdictionName?: string; updatedAt?: Date }
   subTitle: string
   assetDirectoryPath?: string
 }
@@ -60,10 +60,9 @@ export const CoverPage = function PermitApplicationPDFCoverPage({
             borderColor: theme.colors.greys.grey01,
             fontSize: 8.25,
             paddingTop: 7.5,
-            paddingBottom: 7.5,
           }}
         >
-          {!!permitApplication && (
+          {!!permitApplication ? (
             <>
               <Row label={t("permitApplication.pdf.id")} value={permitApplication.number} />
               <Row
@@ -80,6 +79,8 @@ export const CoverPage = function PermitApplicationPDFCoverPage({
                 isLast
               />
             </>
+          ) : (
+            <Row label={t("permitApplication.pdf.preparedBy")} value={format(stepCode?.updatedAt, "yyyy-MM-dd")} />
           )}
         </View>
       </View>

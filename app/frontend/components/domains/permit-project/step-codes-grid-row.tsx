@@ -82,46 +82,51 @@ export const StepCodesGridRow = observer(({ stepCode }: { stepCode: IStepCode })
             variant="ghost"
           />
           <MenuList>
-            {(stepCode as any)?.reportDocuments?.length > 0 ? (
-              <FileDownloadButton
-                as={MenuItem}
-                modelType={EFileUploadAttachmentType.ReportDocument}
-                document={(stepCode as any).reportDocuments[stepCode.reportDocuments.length - 1]}
-                variant="ghost"
-                size="sm"
-                simpleLabel
-                w="full"
-                display="flex"
-                justifyContent="flex-start"
-                textAlign="left"
-              />
-            ) : (
-              <MenuItem _hover={{ cursor: "not-allowed" }}>
-                <Text>{t("stepCode.index.noReportAvailable")}</Text>
-              </MenuItem>
-            )}
-            {(stepCode as any)?.reportDocuments?.length > 0 && (stepCode as any)?.jurisdiction && (
-              <MenuItem icon={<ShareNetwork size={16} />} onClick={handleShareReport} isDisabled={isSharing}>
-                {isSharing ? t("stepCode.shareReport.sharing") : t("stepCode.shareReport.action")}
-              </MenuItem>
-            )}
-            <MenuItem
-              as={ReactRouterLink}
-              to={targetPath || "#"}
-              isDisabled={!targetPath || isDiscarded}
-              icon={<ArrowSquareOut size={16} />}
-              onClick={(e) => e.stopPropagation()}
-            >
-              {t("ui.open")}
-            </MenuItem>
             {isDiscarded ? (
               <MenuItem icon={<ClockClockwise size={16} />} onClick={handleRestore} color="semantic.success">
                 {t("ui.restore")}
               </MenuItem>
             ) : (
-              <MenuItem icon={<Archive size={16} />} onClick={handleArchive} color="semantic.error">
-                {t("ui.archive")}
-              </MenuItem>
+              <>
+                {(stepCode as any)?.reportDocuments?.length > 0 ? (
+                  <FileDownloadButton
+                    as={MenuItem}
+                    modelType={EFileUploadAttachmentType.ReportDocument}
+                    document={(stepCode as any).reportDocuments[stepCode.reportDocuments.length - 1]}
+                    variant="ghost"
+                    size="sm"
+                    simpleLabel
+                    w="full"
+                    display="flex"
+                    justifyContent="flex-start"
+                    textAlign="left"
+                  />
+                ) : (
+                  <MenuItem _hover={{ cursor: "not-allowed" }}>
+                    <Text>{t("stepCode.index.noReportAvailable")}</Text>
+                  </MenuItem>
+                )}
+
+                {(stepCode as any)?.reportDocuments?.length > 0 && (stepCode as any)?.jurisdiction && (
+                  <MenuItem icon={<ShareNetwork size={16} />} onClick={handleShareReport} isDisabled={isSharing}>
+                    {isSharing ? t("stepCode.shareReport.sharing") : t("stepCode.shareReport.action")}
+                  </MenuItem>
+                )}
+
+                <MenuItem
+                  as={ReactRouterLink}
+                  to={targetPath || "#"}
+                  isDisabled={!targetPath}
+                  icon={<ArrowSquareOut size={16} />}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {t("ui.open")}
+                </MenuItem>
+
+                <MenuItem icon={<Archive size={16} />} onClick={handleArchive} color="semantic.error">
+                  {t("ui.archive")}
+                </MenuItem>
+              </>
             )}
           </MenuList>
         </Menu>

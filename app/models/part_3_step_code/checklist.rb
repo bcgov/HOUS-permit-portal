@@ -1,5 +1,7 @@
-class Part3StepCode::Checklist < ApplicationRecord
+class Part3StepCode::Checklist < ActiveRecord::Base
   self.table_name = "part_3_step_code_checklists"
+
+  include ChecklistReportDocumentConcern
 
   delegate :newly_submitted_at,
            :reference_number,
@@ -7,11 +9,15 @@ class Part3StepCode::Checklist < ApplicationRecord
            to: :step_code,
            allow_nil: true
 
+  delegate :permit_application_id, to: :step_code
+
   belongs_to :step_code,
              optional: true,
              class_name: "Part3StepCode",
              foreign_key: "step_code_id",
-             inverse_of: :checklist
+             inverse_of: :checklist,
+             touch: true
+
   accepts_nested_attributes_for :step_code, update_only: true
 
   has_many :occupancy_classifications, dependent: :destroy
@@ -170,6 +176,10 @@ class Part3StepCode::Checklist < ApplicationRecord
 
   def compliance_report
     StepCode::Part3::V1::GenerateReport.new(checklist: self).call
+  end
+
+  def complete?
+    section_completion_status.dig("step_code_summary", "complete")
   end
 
   private

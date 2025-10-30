@@ -1,6 +1,8 @@
 class StepCode < ApplicationRecord
   include ProjectItem
   include Discard::Model
+  include ChecklistReportDocumentConcern
+
   has_parent :permit_application
 
   # Enable search for StepCodes
@@ -44,6 +46,10 @@ class StepCode < ApplicationRecord
     "" #replace with a config on permit application
   end
 
+  def complete?
+    raise NotImplementedError, "Subclasses must implement the complete? method"
+  end
+
   def primary_checklist
     raise NotImplementedError,
           "Subclasses must implement the primary_checklist method"
@@ -81,5 +87,9 @@ class StepCode < ApplicationRecord
 
   def refresh_search_index
     StepCode.search_index.refresh
+  end
+
+  def generate_report_document
+    StepCodeReportGenerationJob.perform_async(id)
   end
 end

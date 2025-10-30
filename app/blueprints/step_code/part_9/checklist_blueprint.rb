@@ -1,7 +1,7 @@
 class StepCode::Part9::ChecklistBlueprint < Blueprinter::Base
   identifier :id
 
-  fields :stage, :status
+  fields :stage, :status, :updated_at
 
   view :extended do
     include_view :project_info
