@@ -502,6 +502,10 @@ export class Api {
     })
   }
 
+  async retriggerPermitApplicationWebhook(id: string) {
+    return this.client.post<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/retrigger_submission_webhook`)
+  }
+
   async finalizeRevisionRequests(id) {
     return this.client.post<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/revision_requests/finalize`)
   }
@@ -937,5 +941,11 @@ export class Api {
     } else {
       return this.client.post<ApiResponse<IStepCode>>(`/part_9_building/step_codes`, { stepCode: data })
     }
+  }
+
+  async shareReportDocumentWithJurisdiction(reportDocumentId: string) {
+    return this.client.post<ApiResponse<{ message: string }>>(
+      `/report_documents/${reportDocumentId}/share_with_jurisdiction`
+    )
   }
 }

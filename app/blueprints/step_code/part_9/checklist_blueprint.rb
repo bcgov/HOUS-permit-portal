@@ -1,7 +1,7 @@
 class StepCode::Part9::ChecklistBlueprint < Blueprinter::Base
   identifier :id
 
-  fields :stage, :status
+  fields :stage, :status, :updated_at
 
   view :extended do
     include_view :project_info
@@ -13,7 +13,10 @@ class StepCode::Part9::ChecklistBlueprint < Blueprinter::Base
   end
 
   view :project_info do
-    fields :permit_application_number, :building_type, :builder
+    fields :permit_application_number,
+           :reference_number,
+           :building_type,
+           :builder
 
     field :title
     field :full_address

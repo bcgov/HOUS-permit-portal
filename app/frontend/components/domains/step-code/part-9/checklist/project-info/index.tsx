@@ -22,10 +22,7 @@ export const ProjectInfo = observer(function ProjectInfo({ checklist }: IProps) 
       <Text fontSize="lg" fontWeight="bold">
         {t(`${i18nPrefix}.stages.${checklist.stage}`)}
       </Text>
-      <TextFormControl
-        label={t(`${i18nPrefix}.permitNum`)}
-        inputProps={{ isDisabled: true, value: checklist.permitApplicationNumber || "" }}
-      />
+      <TextFormControl label={t(`${i18nPrefix}.permitNum`)} fieldName="referenceNumber" />
       <TextFormControl label={t(`${i18nPrefix}.builder`)} fieldName="builder" />
 
       <TextFormControl

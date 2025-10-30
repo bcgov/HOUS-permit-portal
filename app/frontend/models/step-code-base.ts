@@ -54,6 +54,20 @@ export const StepCodeBaseFields = types
       }
       return response.ok
     }),
+    shareReportWithJurisdiction: flow(function* () {
+      const latestReport = self.latestReportDocument
+      if (!latestReport) {
+        return { ok: false, error: "No report document available" }
+      }
+
+      // @ts-ignore environment provided by composed models (Part3/Part9)
+      const response = yield* toGenerator(
+        // @ts-ignore environment provided by composed models (Part3/Part9)
+        self.environment.api.shareReportDocumentWithJurisdiction(latestReport.id)
+      )
+
+      return { ok: response.ok, data: response.data }
+    }),
     archive: flow(function* () {
       // @ts-ignore environment provided by composed models (Part3/Part9)
       const response = yield* toGenerator(self.environment.api.archiveStepCode(self.id as any))

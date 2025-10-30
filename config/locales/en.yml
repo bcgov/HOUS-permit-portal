@@ -151,9 +151,10 @@ en:
       notify_permit_collaboration: "Welcome you have been invited to Collaborate in the Building Permit Hub"
       notify_new_or_unconfirmed_permit_collaboration: "You’re Invited to Collaborate on a Building Permit Application"
       notify_new_or_unconfirmed_preview: "You’re Invited to Preview a Building Permit Template"
-      notify_preview: "You’re Invited to Preview a Building Permit Template"
+      notify_preview: "You're Invited to Preview a Building Permit Template"
       notify_batched_integration_mapping: "New API mappings"
       notify_api_key_status_change: "API Key for %{jurisdiction_name} is expiring %{interval}"
+      send_step_code_report_to_jurisdiction: "Step Code Report Shared: %{step_code_title} for %{jurisdiction_name}"
   arbitrary_message_construct:
     devise:
       failure:
@@ -517,6 +518,12 @@ en:
         title: ""
         message: "Jurisdiction external api successfully disabled!"
     permit_application:
+      retrigger_webhook_success:
+        title: ""
+        message: "Permit application submitted webhook re-triggered successfully!"
+      retrigger_webhook_error:
+        title: Error
+        message: "There was an error re-triggering the submitted webhook"
       create_error:
         title: Error
         message: "%{error_message}"
@@ -641,6 +648,31 @@ en:
       update_error:
         title: Error
         message: "%{error_message}"
+      restore_success:
+        title: ""
+        message: "Step code restored successfully!"
+      restore_error:
+        title: Error
+        message: "There was an error restoring the step code"
+      destroy_success:
+        title: ""
+        message: "Step code archived successfully!"
+      destroy_error:
+        title: Error
+        message: "There was an error archiving the step code"
+    report_document:
+      share_success:
+        title: ""
+        message: "Report successfully shared with %{jurisdiction_name}"
+      share_error:
+        title: Error
+        message: "Failed to share report: %{errors}"
+      no_jurisdiction:
+        title: Error
+        message: "This step code has no associated jurisdiction"
+      not_found:
+        title: Error
+        message: "Report document not found"
       update_archived_error:
         title: Error
         message: "Cannot update archived step code. Please restore it first."

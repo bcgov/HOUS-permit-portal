@@ -120,4 +120,16 @@
       display: none;
     }
   }
+
+  .step-code-link-button {
+    margin-top: 0;
+    display: inline-block;
+  }
+
+  .step-code-actions-inline {
+    display: inline-block;
+    margin-right: 8px;
+    vertical-align: middle;
+    line-height: 38px; // Match button height
+  }
 }

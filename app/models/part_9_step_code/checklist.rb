@@ -1,7 +1,16 @@
-class Part9StepCode::Checklist < ApplicationRecord
+class Part9StepCode::Checklist < ActiveRecord::Base
   self.table_name = "part_9_step_code_checklists"
 
-  belongs_to :step_code, optional: true
+  include ChecklistReportDocumentConcern
+
+  delegate :permit_application_id, to: :step_code, allow_nil: true
+
+  belongs_to :step_code,
+             optional: true,
+             class_name: "Part9StepCode",
+             foreign_key: :step_code_id,
+             touch: true
+
   belongs_to :step_requirement,
              class_name: "PermitTypeRequiredStep",
              optional: true

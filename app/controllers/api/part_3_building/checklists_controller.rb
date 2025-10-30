@@ -49,7 +49,7 @@ class Api::Part3Building::ChecklistsController < Api::ApplicationController
         )
       if should_generate_report
         step_code = @checklist.step_code
-        if step_code.present? && step_code.permit_application_id.blank?
+        if step_code.present?
           StepCodeReportGenerationJob.perform_async(step_code.id)
         end
       end

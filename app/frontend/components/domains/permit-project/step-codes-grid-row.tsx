@@ -1,8 +1,8 @@
 import { Grid, GridItem, IconButton, Menu, MenuButton, MenuItem, MenuList, Text } from "@chakra-ui/react"
-import { Archive, ArrowSquareOut, ClockClockwise, DotsThreeVertical } from "@phosphor-icons/react"
+import { Archive, ArrowSquareOut, ClockClockwise, DotsThreeVertical, ShareNetwork } from "@phosphor-icons/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
-import React from "react"
+import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Link as ReactRouterLink, useNavigate } from "react-router-dom"
 import { datefnsTableDateTimeFormat } from "../../../constants"
@@ -14,6 +14,7 @@ import { FileDownloadButton } from "../../shared/base/file-download-button"
 export const StepCodesGridRow = observer(({ stepCode }: { stepCode: IStepCode }) => {
   const navigate = useNavigate()
   const { t } = useTranslation()
+  const [isSharing, setIsSharing] = useState(false)
   const { stepCodeStore } = useMst()
   const { type, permitProjectTitle, fullAddress, updatedAt, targetPath, isDiscarded } = stepCode as any
 
@@ -30,6 +31,15 @@ export const StepCodesGridRow = observer(({ stepCode }: { stepCode: IStepCode })
     const success = await stepCode.restore()
     if (success) {
       await stepCodeStore.search()
+    }
+  }
+
+  const handleShareReport = async () => {
+    setIsSharing(true)
+    try {
+      await (stepCode as any).shareReportWithJurisdiction()
+    } finally {
+      setIsSharing(false)
     }
   }
 
@@ -72,41 +82,51 @@ export const StepCodesGridRow = observer(({ stepCode }: { stepCode: IStepCode })
             variant="ghost"
           />
           <MenuList>
-            {(stepCode as any)?.reportDocuments?.length > 0 ? (
-              <FileDownloadButton
-                as={MenuItem}
-                modelType={EFileUploadAttachmentType.ReportDocument}
-                document={(stepCode as any).reportDocuments[stepCode.reportDocuments.length - 1]}
-                variant="ghost"
-                size="sm"
-                simpleLabel
-                w="full"
-                display="flex"
-                justifyContent="flex-start"
-                textAlign="left"
-              />
-            ) : (
-              <MenuItem _hover={{ cursor: "not-allowed" }}>
-                <Text>{t("stepCode.index.noReportAvailable")}</Text>
-              </MenuItem>
-            )}
-            <MenuItem
-              as={ReactRouterLink}
-              to={targetPath || "#"}
-              isDisabled={!targetPath || isDiscarded}
-              icon={<ArrowSquareOut size={16} />}
-              onClick={(e) => e.stopPropagation()}
-            >
-              {t("ui.open")}
-            </MenuItem>
             {isDiscarded ? (
               <MenuItem icon={<ClockClockwise size={16} />} onClick={handleRestore} color="semantic.success">
                 {t("ui.restore")}
               </MenuItem>
             ) : (
-              <MenuItem icon={<Archive size={16} />} onClick={handleArchive} color="semantic.error">
-                {t("ui.archive")}
-              </MenuItem>
+              <>
+                {(stepCode as any)?.reportDocuments?.length > 0 ? (
+                  <FileDownloadButton
+                    as={MenuItem}
+                    modelType={EFileUploadAttachmentType.ReportDocument}
+                    document={(stepCode as any).reportDocuments[stepCode.reportDocuments.length - 1]}
+                    variant="ghost"
+                    size="sm"
+                    simpleLabel
+                    w="full"
+                    display="flex"
+                    justifyContent="flex-start"
+                    textAlign="left"
+                  />
+                ) : (
+                  <MenuItem _hover={{ cursor: "not-allowed" }}>
+                    <Text>{t("stepCode.index.noReportAvailable")}</Text>
+                  </MenuItem>
+                )}
+
+                {(stepCode as any)?.reportDocuments?.length > 0 && (stepCode as any)?.jurisdiction && (
+                  <MenuItem icon={<ShareNetwork size={16} />} onClick={handleShareReport} isDisabled={isSharing}>
+                    {isSharing ? t("stepCode.shareReport.sharing") : t("stepCode.shareReport.action")}
+                  </MenuItem>
+                )}
+
+                <MenuItem
+                  as={ReactRouterLink}
+                  to={targetPath || "#"}
+                  isDisabled={!targetPath}
+                  icon={<ArrowSquareOut size={16} />}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {t("ui.open")}
+                </MenuItem>
+
+                <MenuItem icon={<Archive size={16} />} onClick={handleArchive} color="semantic.error">
+                  {t("ui.archive")}
+                </MenuItem>
+              </>
             )}
           </MenuList>
         </Menu>

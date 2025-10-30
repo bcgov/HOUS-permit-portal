@@ -30,6 +30,7 @@ export const Part9StepCodeChecklistModel = types.snapshotProcessor(
       status: types.enumeration<EStepCodeChecklistStatus[]>(Object.values(EStepCodeChecklistStatus)),
       // permit application info
       permitApplicationNumber: types.maybeNull(types.string),
+      referenceNumber: types.maybeNull(types.string),
       builder: types.maybeNull(types.string),
       fullAddress: types.maybeNull(types.string),
       jurisdictionName: types.maybeNull(types.string),
@@ -68,6 +69,7 @@ export const Part9StepCodeChecklistModel = types.snapshotProcessor(
       // calculated / pre-populated fields
       complianceReports: types.array(StepCodeComplianceReportModel),
       selectedReportRequirementId: types.maybeNull(types.string),
+      updatedAt: types.maybeNull(types.Date),
     })
     .extend(withEnvironment())
     .views((self) => ({
@@ -86,6 +88,7 @@ export const Part9StepCodeChecklistModel = types.snapshotProcessor(
           { buildingCharacteristicsSummary: "buildingCharacteristicsSummaryAttributes" },
           R.pick(
             [
+              "referenceNumber",
               "builder",
               "buildingType",
               "compliancePath",

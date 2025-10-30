@@ -29,6 +29,10 @@ class PermitApplicationPolicy < ApplicationPolicy
     end
   end
 
+  def retrigger_submission_webhook?
+    record.submitted? && update?
+  end
+
   def update_version?
     permit_application = record
     designated_submitter =

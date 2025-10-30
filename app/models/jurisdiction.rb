@@ -72,6 +72,14 @@ class Jurisdiction < ApplicationRecord
            class_name: "JurisdictionServicePartnerEnrollment",
            dependent: :destroy
 
+  # Scopes
+  scope :with_confirmed_submission_contacts,
+        lambda {
+          joins(:permit_type_submission_contacts)
+            .where.not(permit_type_submission_contacts: { confirmed_at: nil })
+            .distinct
+        }
+
   validates :name, uniqueness: { scope: :locality_type, case_sensitive: false }
   validates :locality_type, presence: true
   validate :inbox_enabled_requires_inbox_setup
@@ -168,7 +176,7 @@ class Jurisdiction < ApplicationRecord
     ltsa_matcher_params = {
       fields: %w[ltsa_matcher],
       misspellings: {
-        edit_distance: 4
+        edit_distance: 2
       }
     }
     is_regional_district = attributes["MUNICIPALITY"] == "Rural"
@@ -254,6 +262,19 @@ class Jurisdiction < ApplicationRecord
     permit_types.all? do |permit_type|
       contacts.any? { |contact| contact.permit_type_id == permit_type.id }
     end
+  end
+
+  # Get confirmed submission contact emails for step code report sharing
+  def confirmed_submission_emails
+    permit_type_submission_contacts
+      .where.not(confirmed_at: nil)
+      .pluck(:email)
+      .uniq
+  end
+
+  # Check if jurisdiction has any confirmed submission contacts
+  def has_confirmed_submission_contacts?
+    permit_type_submission_contacts.where.not(confirmed_at: nil).exists?
   end
 
   def self.class_for_locality_type(locality_type)

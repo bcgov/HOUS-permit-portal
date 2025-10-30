@@ -15,6 +15,10 @@ class Part9StepCode < StepCode
 
   after_create :process_h2k_files
 
+  def complete?
+    pre_construction_checklist&.complete?
+  end
+
   def primary_checklist
     pre_construction_checklist
   end
