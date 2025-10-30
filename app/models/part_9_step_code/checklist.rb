@@ -1,5 +1,7 @@
-class Part9StepCode::Checklist < ApplicationRecord
+class Part9StepCode::Checklist < ActiveRecord::Base
   self.table_name = "part_9_step_code_checklists"
+
+  include ChecklistReportDocumentConcern
 
   belongs_to :step_code,
              optional: true,

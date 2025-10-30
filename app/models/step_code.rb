@@ -18,8 +18,6 @@ class StepCode < ApplicationRecord
              optional: true
 
   after_commit :refresh_search_index, if: :saved_change_to_discarded_at
-  after_touch :generate_report,
-              if: -> { complete? && !permit_application_id.present? }
 
   # Associations
   belongs_to :permit_application, optional: true

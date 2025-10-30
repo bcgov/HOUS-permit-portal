@@ -1,5 +1,7 @@
-class Part3StepCode::Checklist < ApplicationRecord
+class Part3StepCode::Checklist < ActiveRecord::Base
   self.table_name = "part_3_step_code_checklists"
+
+  include ChecklistReportDocumentConcern
 
   delegate :newly_submitted_at,
            :reference_number,
