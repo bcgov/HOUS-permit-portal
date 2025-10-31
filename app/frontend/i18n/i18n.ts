@@ -3874,6 +3874,11 @@ Thank you,
   lng: "en", // default language
   fallbackLng: "en",
   interpolation: { escapeValue: false },
+  parseMissingKeyHandler: (key) => {
+    // You can log the missing key, send it to a backend, etc.
+    console.warn(`Missing translation key: ${key}`)
+    return process.env.NODE_ENV === "development" ? `[Missing: ${key}]` : "—" // Custom fallback string
+  },
 }
 
 i18n.use(initReactI18next).init(options)

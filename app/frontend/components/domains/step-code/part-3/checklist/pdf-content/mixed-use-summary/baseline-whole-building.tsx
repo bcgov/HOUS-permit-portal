@@ -1,7 +1,8 @@
-import { Text, View } from "@react-pdf/renderer"
+import { View } from "@react-pdf/renderer"
 import { t } from "i18next"
 import React from "react"
 import { IPart3ComplianceReport } from "../../../../../../../types/types"
+import { Text } from "../../../../../../shared/pdf/text"
 import { Input } from "../../../../part-9/checklist/pdf-content/shared/field"
 import { styles } from "./styles"
 
