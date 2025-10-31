@@ -1,6 +1,7 @@
-import { Text, View } from "@react-pdf/renderer"
+import { View } from "@react-pdf/renderer"
 import React from "react"
 import { theme } from "../../../../../../../styles/theme"
+import { Text } from "../../../../../../shared/pdf/text"
 
 export function Panel({ heading, children, ...rest }) {
   return (

@@ -1,10 +1,11 @@
-import { Image, Page, Text, View } from "@react-pdf/renderer"
+import { Image, Page, View } from "@react-pdf/renderer"
 import { format } from "date-fns"
 import { t } from "i18next"
 import React from "react"
 import { IPermitApplication } from "../../../../../models/permit-application"
 import { theme } from "../../../../../styles/theme"
 import { Divider } from "../../../../domains/step-code/part-9/checklist/pdf-content/shared/divider"
+import { Text } from "../../../../shared/pdf/text"
 import { page } from "../shared/styles/page"
 
 interface IProps {
@@ -60,6 +61,7 @@ export const CoverPage = function PermitApplicationPDFCoverPage({
             borderColor: theme.colors.greys.grey01,
             fontSize: 8.25,
             paddingTop: 7.5,
+            paddingBottom: 7.5,
           }}
         >
           {!!permitApplication ? (
@@ -80,7 +82,11 @@ export const CoverPage = function PermitApplicationPDFCoverPage({
               />
             </>
           ) : (
-            <Row label={t("permitApplication.pdf.preparedBy")} value={format(stepCode?.updatedAt, "yyyy-MM-dd")} />
+            <Row
+              label={t("permitApplication.pdf.preparedBy")}
+              value={format(stepCode?.updatedAt, "yyyy-MM-dd")}
+              isLast
+            />
           )}
         </View>
       </View>
