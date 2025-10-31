@@ -1,6 +1,7 @@
-import { Text, View } from "@react-pdf/renderer"
+import { View } from "@react-pdf/renderer"
 import { t } from "i18next"
 import React from "react"
+import { Text } from "../../../../../../shared/pdf/text"
 import { zeroCarbonI18nPrefix } from "./i18n-prefix"
 import { styles } from "./styles"
 

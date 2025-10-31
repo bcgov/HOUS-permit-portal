@@ -1,7 +1,8 @@
-import { Text, View } from "@react-pdf/renderer"
+import { View } from "@react-pdf/renderer"
 import { t } from "i18next"
 import React from "react"
 import { theme } from "../../../../../../../styles/theme"
+import { Text } from "../../../../../../shared/pdf/text"
 
 export function RequirementsMetTag({ success }) {
   const i18nPrefix = "stepCodeChecklist.edit.complianceGrid.requirementsMetTag"

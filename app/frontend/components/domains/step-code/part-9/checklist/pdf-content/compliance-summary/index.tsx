@@ -1,8 +1,9 @@
-import { Text, View } from "@react-pdf/renderer"
+import { View } from "@react-pdf/renderer"
 import { t } from "i18next"
 import React from "react"
 import { IPart9StepCodeChecklist } from "../../../../../../../models/part-9-step-code-checklist"
 import { theme } from "../../../../../../../styles/theme"
+import { Text } from "../../../../../../shared/pdf/text"
 import { i18nPrefix } from "../../compliance-summary/i18n-prefix"
 import { Divider } from "../shared/divider"
 import { Field, Input } from "../shared/field"
@@ -39,14 +40,16 @@ export const ComplianceSummary = function StepCodeChecklistPDFComplianceSummary(
 
       <Divider />
 
-      <View style={{ display: "flex", flexDirection: "column", gap: 6, width: "100%" }}>
-        <Text style={{ fontWeight: "bold", fontSize: 12 }}>{t(`${i18nPrefix}.planInfo.title`)}</Text>
-        <View style={{ display: "flex", flexDirection: "row", gap: 6, width: "100%" }}>
-          <Field label={t(`${i18nPrefix}.planInfo.author`)} value={checklist.planAuthor} style={{ flex: 1 }} />
-          <Field label={t(`${i18nPrefix}.planInfo.version`)} value={checklist.planVersion} style={{ flex: 1 }} />
-          <Field label={t(`${i18nPrefix}.planInfo.date`)} value={checklist.planDate} style={{ flex: 1 }} />
+      {(checklist.planAuthor || checklist.planVersion || checklist.planDate) && (
+        <View style={{ display: "flex", flexDirection: "column", gap: 6, width: "100%" }}>
+          <Text style={{ fontWeight: "bold", fontSize: 12 }}>{t(`${i18nPrefix}.planInfo.title`)}</Text>
+          <View style={{ display: "flex", flexDirection: "row", gap: 6, width: "100%" }}>
+            <Field label={t(`${i18nPrefix}.planInfo.author`)} value={checklist.planAuthor} style={{ flex: 1 }} />
+            <Field label={t(`${i18nPrefix}.planInfo.version`)} value={checklist.planVersion} style={{ flex: 1 }} />
+            <Field label={t(`${i18nPrefix}.planInfo.date`)} value={checklist.planDate} style={{ flex: 1 }} />
+          </View>
         </View>
-      </View>
+      )}
     </Panel>
   )
 }

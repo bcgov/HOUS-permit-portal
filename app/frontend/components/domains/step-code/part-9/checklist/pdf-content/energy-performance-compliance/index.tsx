@@ -1,9 +1,9 @@
-import { Text } from "@react-pdf/renderer"
 import { t } from "i18next"
 import * as R from "ramda"
 import React from "react"
 import { IPart9StepCodeChecklist } from "../../../../../../../models/part-9-step-code-checklist"
 import { theme } from "../../../../../../../styles/theme"
+import { Text } from "../../../../../../shared/pdf/text"
 import { i18nPrefix } from "../../energy-performance-compliance/i18n-prefix"
 import { CheckBox } from "../shared/check-box"
 import { Divider } from "../shared/divider"
@@ -40,10 +40,12 @@ export const EnergyPerformanceCompliance = function StepCodeChecklistPDFEnergyPe
 
       <Divider />
 
-      <Field
-        label={t(`${i18nPrefix}.calculationAirtightness`)}
-        value={t(`${i18nPrefix}.airtightnessValue.options.${checklist.epcCalculationAirtightness}`)}
-      />
+      <HStack style={{ width: "100%", gap: 3.5 }}>
+        <Field
+          label={t(`${i18nPrefix}.calculationAirtightness`)}
+          value={t(`${i18nPrefix}.airtightnessValue.options.${checklist.epcCalculationAirtightness}`)}
+        />
+      </HStack>
       <HStack style={{ width: "100%", alignItems: "flex-end" }}>
         <Field label={t(`${i18nPrefix}.calculationTestingTarget`)} value={report.ach} />
         <Field value={t(`${i18nPrefix}.epcTestingTargetType.options.${checklist.epcCalculationTestingTargetType}`)} />

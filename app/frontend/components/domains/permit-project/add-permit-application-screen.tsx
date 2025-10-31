@@ -113,7 +113,7 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
 
   return (
     <Container maxW="container.lg" py={10}>
-      <Flex direction="column" gap={2}>
+      <Flex direction="column" gap={6}>
         <RouterLinkButton
           variant="link"
           to={`/projects/${currentPermitProject?.id}`}
