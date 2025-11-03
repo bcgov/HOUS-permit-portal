@@ -23,7 +23,7 @@ import DOMPurify from "dompurify"
  *
  * Allowed elements: p, br, strong, em, u, ol, ul, li, a, h1-h6, blockquote
  * Allowed attributes: href (on <a>), target (on <a>), rel (on <a>), class
- * Blocked: All event handlers, javascript: protocol, data: URIs
+ * Blocked: All event handlers, dangerous protocols (javascript:, data:, vbscript:, file:, about:)
  */
 export function sanitizeQuillHtml(htmlContent: string | null | undefined): string {
   // Handle null/undefined cases
@@ -82,8 +82,10 @@ export function sanitizeQuillHtml(htmlContent: string | null | undefined): strin
     if (node.tagName === "A") {
       const href = node.getAttribute("href")
 
-      // Block javascript: and data: protocols explicitly
-      if (href && (href.toLowerCase().startsWith("javascript:") || href.toLowerCase().startsWith("data:"))) {
+      // Block dangerous protocols explicitly (defense-in-depth)
+      // DOMPurify should catch these, but we add explicit checks as backup
+      const dangerousProtocols = ["javascript:", "data:", "vbscript:", "file:", "about:"]
+      if (href && dangerousProtocols.some((protocol) => href.toLowerCase().startsWith(protocol))) {
         node.removeAttribute("href")
       }
 
@@ -122,7 +124,10 @@ export function isQuillContentEmpty(htmlContent: string | null | undefined): boo
     return true
   }
 
-  // Remove HTML tags and check if any actual content remains
-  const textContent = htmlContent.replace(/<[^>]*>/g, "").trim()
+  // Safely extract text content using DOMPurify to handle incomplete tags
+  // This prevents XSS by ensuring all HTML (including incomplete tags like <script) is removed
+  // Use DOMPurify with no allowed tags to strip all HTML and get plain text
+  const textOnly = DOMPurify.sanitize(htmlContent, { ALLOWED_TAGS: [] })
+  const textContent = textOnly.trim()
   return textContent.length === 0
 }
