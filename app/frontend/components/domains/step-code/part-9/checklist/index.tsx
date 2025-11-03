@@ -30,13 +30,14 @@ export const StepCodeChecklistForm = observer(function StepCodeChecklistForm() {
   const zeroCarbonComplianceRef = useRef<null | HTMLDivElement>()
 
   useEffect(() => {
+    if (!currentStepCode) return
     if (!checklist) return
     if (!checklist.isLoaded) {
       ;(async () => {
         await checklist.load()
       })()
     }
-  }, [checklist, currentStepCode?.reportDocuments?.length])
+  }, [checklist?.id, currentStepCode?.id, currentStepCode?.reportDocuments?.length])
 
   useEffect(() => {
     checklist?.isLoaded && reset(checklist.defaultFormValues)
