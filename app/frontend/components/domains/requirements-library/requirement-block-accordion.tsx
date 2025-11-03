@@ -26,7 +26,7 @@ import {
 } from "../../../types/types"
 import { isQuillEmpty } from "../../../utils/utility-functions"
 import { FileDownloadButton } from "../../shared/base/file-download-button"
-import { Editor } from "../../shared/editor/editor"
+import { SafeQuillDisplay } from "../../shared/editor/safe-quill-display"
 import { ElectiveTag } from "../../shared/elective-tag"
 import { FirstNationsTag } from "../../shared/first-nations-tag"
 import { RichTextTip } from "../../shared/rich-text-tip"
@@ -161,7 +161,8 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
               borderBottom="1px solid"
               borderBottomColor="border.light"
             >
-              <Editor htmlValue={requirementBlock.displayDescription} readonly />
+              {/* Use SafeQuillDisplay instead of readonly Editor to prevent XSS (CVE-2021-3163) */}
+              <SafeQuillDisplay htmlContent={requirementBlock.displayDescription} />
             </Box>
           )}
           {!R.isEmpty(requirementBlock.requirementDocuments) && (
