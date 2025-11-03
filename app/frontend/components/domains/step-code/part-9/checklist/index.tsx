@@ -37,7 +37,7 @@ export const StepCodeChecklistForm = observer(function StepCodeChecklistForm() {
         await checklist.load()
       })()
     }
-  }, [checklist?.id, currentStepCode?.id, currentStepCode?.reportDocuments?.length])
+  }, [checklist?.id, checklist?.isLoaded, currentStepCode?.id, currentStepCode?.reportDocuments?.length])
 
   useEffect(() => {
     checklist?.isLoaded && reset(checklist.defaultFormValues)

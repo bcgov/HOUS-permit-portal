@@ -134,8 +134,12 @@ export const Part9StepCodeChecklistModel = types.snapshotProcessor(
       load: flow(function* () {
         const response = yield self.environment.api.fetchPart9Checklist(self.id)
         if (response.ok) {
-          applySnapshot(self, preProcessor(response.data.data))
-          self.isLoaded = true
+          // Explicitly include isLoaded in the snapshot to ensure it's preserved
+          // This is critical: applySnapshot completely replaces state, so if isLoaded isn't in
+          // the snapshot, it gets reset to null. Setting it here ensures it's set during
+          // the snapshot application, not after, avoiding timing issues with MobX reactions.
+          const snapshotData = { ...preProcessor(response.data.data), isLoaded: true }
+          applySnapshot(self, snapshotData)
         }
       }),
       setSelectedReport(requirementId: string) {
