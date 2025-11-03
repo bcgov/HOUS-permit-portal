@@ -1,9 +1,10 @@
-import { Text, View } from "@react-pdf/renderer"
+import { View } from "@react-pdf/renderer"
 import { format } from "date-fns"
 import { t } from "i18next"
 import React from "react"
 import { IPermitApplication } from "../../../../../../models/permit-application"
 import { theme } from "../../../../../../styles/theme"
+import { Text } from "../../../../../shared/pdf/text"
 
 export const Footer = ({
   permitApplication,
