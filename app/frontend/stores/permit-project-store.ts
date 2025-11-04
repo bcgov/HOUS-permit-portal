@@ -226,7 +226,6 @@ export const PermitProjectStoreModel = types
       pid?: string
       jurisdictionId?: string
       pin?: string
-      propertyPlanJurisdictionId?: string
     }) {
       const response = yield self.environment.api.createPermitProject(projectData)
       if (response.ok && response.data?.data) {

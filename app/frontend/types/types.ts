@@ -296,6 +296,23 @@ export interface IReportDocument extends IBaseFileAttachment {
   stepCodeId: string
 }
 
+export interface IResourceDocument extends IBaseFileAttachment {
+  resourceId: string
+}
+
+export interface IResource {
+  id: string
+  jurisdictionId: string
+  category: string
+  title: string
+  description?: string
+  resourceType: string
+  linkUrl?: string
+  updatedAt: string
+  createdAt: string
+  resourceDocument?: IResourceDocument
+}
+
 export interface IProjectDocument extends IBaseFileAttachment {
   permitProjectId: string // Foreign key to link to PermitProject
 }
