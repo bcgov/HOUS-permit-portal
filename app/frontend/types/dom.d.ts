@@ -17,5 +17,15 @@ declare global {
 
     dispatchEvent<K extends keyof ICustomEventMap>(ev: ICustomEventMap[K]): void
   }
+
+  interface Window {
+    ATL_JQ_PAGE_PROPS?: {
+      triggerFunction: (showCollectorDialog: () => void) => void
+      fieldValues?: {
+        description?: string
+        [key: string]: unknown
+      }
+    }
+  }
 }
 export {} //needed for TS compiler.

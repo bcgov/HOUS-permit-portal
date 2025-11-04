@@ -27,6 +27,7 @@ import * as R from "ramda"
 import React, { useState } from "react"
 import { Trans, useTranslation } from "react-i18next"
 import { useLocation, useNavigate } from "react-router-dom"
+import { useJiraCollector } from "../../../hooks/use-jira-collector"
 import { PopoverProvider, useNotificationPopover } from "../../../hooks/use-notification-popover"
 import { useMst } from "../../../setup/root"
 import { EUserRoles } from "../../../types/enums"
@@ -298,6 +299,7 @@ const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
   const { currentUser } = userStore
   const { logout, loggedIn } = sessionStore
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const { openFeedbackCollector } = useJiraCollector()
 
   const handleClickLogout = async () => {
     await logout()
@@ -458,7 +460,15 @@ const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
 
             <MenuDivider my={0} borderColor="border.light" />
             <MenuItem>
-              <Link textDecoration="none" w="full" href={"mailto:" + t("site.contactEmail")} isExternal>
+              <Link
+                textDecoration="none"
+                w="full"
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault()
+                  openFeedbackCollector(e)
+                }}
+              >
                 {t("site.giveFeedback")} <Envelope size={16} style={{ display: "inline", color: "inherit" }} />
               </Link>
             </MenuItem>
