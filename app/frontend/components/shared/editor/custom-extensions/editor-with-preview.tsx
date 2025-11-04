@@ -4,6 +4,7 @@ import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { isQuillEmpty } from "../../../../utils/utility-functions"
 import { Editor } from "../editor"
+import { SafeQuillDisplay } from "../safe-quill-display"
 
 export type TEditorWithPreviewProps = {
   label?: string
@@ -125,7 +126,16 @@ export const EditorWithPreview = observer(function EditorWithPreview({
               {editText}
             </Button>
           )}
-          <Editor key={"read-only"} htmlValue={htmlValue} readonly />
+          {/* Use SafeQuillDisplay instead of readonly Editor to prevent XSS (CVE-2021-3163) */}
+          <SafeQuillDisplay
+            htmlContent={htmlValue}
+            fontSize="sm"
+            sx={{
+              "& p": {
+                marginBottom: "0.5em",
+              },
+            }}
+          />
         </>
       )}
     </Box>
