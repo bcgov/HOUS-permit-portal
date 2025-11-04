@@ -18,7 +18,7 @@ import {
   useDisclosure,
 } from "@chakra-ui/react"
 import { Bug, CaretRight, Envelope, Info } from "@phosphor-icons/react"
-import React, { ReactNode, Ref, useEffect, useRef } from "react"
+import React, { ReactNode, Ref, useRef } from "react"
 import { useTranslation } from "react-i18next"
 import { useJiraCollector } from "../../hooks/use-jira-collector"
 import { useMst } from "../../setup/root"
@@ -31,19 +31,12 @@ interface IProps {
 
 export function HelpDrawer({ defaultButtonProps, renderTriggerButton }: IProps) {
   const { t } = useTranslation()
-  const { siteConfigurationStore, sessionStore } = useMst()
+  const { siteConfigurationStore } = useMst()
   const { isOpen, onOpen, onClose } = useDisclosure()
   const btnRef = useRef<HTMLButtonElement>()
-  const { openFeedbackCollector, loadJiraCollector } = useJiraCollector()
+  const { openFeedbackCollector } = useJiraCollector() // Always load the collector script
 
   const { shownHelpLinkItems } = siteConfigurationStore
-
-  // Load Jira collector script when drawer opens
-  useEffect(() => {
-    if (isOpen) {
-      loadJiraCollector()
-    }
-  }, [isOpen, loadJiraCollector])
 
   return (
     <>
@@ -102,9 +95,8 @@ export function HelpDrawer({ defaultButtonProps, renderTriggerButton }: IProps) 
                   </HStack>
                   <Button
                     leftIcon={<Bug size={20} />}
-                    colorScheme="blue"
-                    variant="solid"
-                    onClick={(e) => openFeedbackCollector(e)}
+                    variant="primary"
+                    onClick={openFeedbackCollector}
                     mt={4}
                     aria-label={t("site.reportAnIssue")}
                   >

@@ -299,7 +299,7 @@ const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
   const { currentUser } = userStore
   const { logout, loggedIn } = sessionStore
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const { openFeedbackCollector } = useJiraCollector()
+  const { openFeedbackCollector } = useJiraCollector() // Always load the collector script
 
   const handleClickLogout = async () => {
     await logout()
@@ -459,18 +459,10 @@ const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
             )}
 
             <MenuDivider my={0} borderColor="border.light" />
-            <MenuItem>
-              <Link
-                textDecoration="none"
-                w="full"
-                href="#"
-                onClick={(e) => {
-                  e.preventDefault()
-                  openFeedbackCollector(e)
-                }}
-              >
+            <MenuItem onClick={openFeedbackCollector}>
+              <Flex align="center" gap={2}>
                 {t("site.giveFeedback")} <Envelope size={16} style={{ display: "inline", color: "inherit" }} />
-              </Link>
+              </Flex>
             </MenuItem>
             {import.meta.env.VITE_RELEASE_VERSION && (
               <MenuItem maxW={"250px"} bg="greys.grey03" _hover={{ cursor: "auto" }}>
