@@ -3,9 +3,11 @@ import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
 import { useTranslation } from "react-i18next"
 import { RemoveScroll } from "react-remove-scroll"
+import { useParams } from "react-router-dom"
 import { usePart9StepCode } from "../../../../hooks/resources/use-part-9-step-code"
 import { usePermitApplication } from "../../../../hooks/resources/use-permit-application"
 import { useMst } from "../../../../setup/root"
+import { NotFoundScreen } from "../../../shared/base/not-found-screen"
 import { FloatingHelpDrawer } from "../../../shared/floating-help-drawer"
 import { StepCodeNavBar } from "../nav-bar"
 import { Part9NavLinks } from "../nav-bar/part-9-nav-links"
@@ -24,10 +26,15 @@ export const Part9StepCodeForm = observer(function Part9StepCodeForm() {
 
   const { t } = useTranslation()
 
+  const { permitApplicationId } = useParams()
+
   useEffect(() => {
     const fetch = async () => await fetchPart9SelectOptions()
     !isOptionsLoaded && fetch()
   }, [isOptionsLoaded])
+
+  // Prevent viewing/editing archived step codes
+  if (currentStepCode?.isDiscarded) return <NotFoundScreen />
 
   return (
     <RemoveScroll>
@@ -51,7 +58,7 @@ export const Part9StepCodeForm = observer(function Part9StepCodeForm() {
                 <VStack spacing={8} align="start" w="full" pb={20}>
                   <Title />
                   <Info />
-                  <DrawingsWarning />
+                  {permitApplicationId && <DrawingsWarning />}
                   <H2KImport />
                 </VStack>
               ) : (

@@ -28,9 +28,6 @@ class StepCodeReportGenerationJob
     step_code = StepCode.find_by(id: step_code_id)
     return if step_code.blank?
 
-    # Guard: Only generate standalone reports when there is no associated permit application
-    return if step_code.permit_application_id.present?
-
     generation_directory_path = Rails.root.join("tmp/files")
     asset_directory_path = Rails.root.join("public")
 

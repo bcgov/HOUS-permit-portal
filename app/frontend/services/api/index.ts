@@ -499,6 +499,10 @@ export class Api {
     })
   }
 
+  async retriggerPermitApplicationWebhook(id: string) {
+    return this.client.post<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/retrigger_submission_webhook`)
+  }
+
   async finalizeRevisionRequests(id) {
     return this.client.post<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/revision_requests/finalize`)
   }
@@ -585,8 +589,12 @@ export class Api {
     return this.client.get<IOptionResponse>(`/geocoder/site_options`, { address })
   }
 
-  async fetchGeocodedJurisdiction(siteId: string, pid: string = null) {
-    return this.client.get<IOptionResponse>(`/geocoder/jurisdiction`, { siteId, pid })
+  async fetchGeocodedJurisdiction(siteId: string, pid: string = null, includeLtsaMatcher = false) {
+    return this.client.get<IOptionResponse>(`/geocoder/jurisdiction`, {
+      siteId,
+      pid,
+      includeLtsaMatcher,
+    })
   }
 
   async fetchPids(siteId: string) {
@@ -683,6 +691,10 @@ export class Api {
     return this.client.get<ApiResponse<IStepCode[]>>("/part_9_building/step_codes")
   }
 
+  async fetchPart9StepCode(id: string) {
+    return this.client.get<ApiResponse<IPart9StepCode>>(`/part_9_building/step_codes/${id}`)
+  }
+
   async searchStepCodes(params?: TSearchParams<EStepCodeSortFields>) {
     return this.client.post<ApiResponse<IStepCode[]>>("/step_codes/search", params)
   }
@@ -699,6 +711,14 @@ export class Api {
     return this.client.delete<ApiResponse<IStepCode>>(`/step_codes/${id}`)
   }
 
+  async archiveStepCode(id: string) {
+    return this.client.delete<ApiResponse<IStepCode>>(`/step_codes/${id}`)
+  }
+
+  async restoreStepCode(id: string) {
+    return this.client.patch<ApiResponse<IStepCode>>(`/step_codes/${id}/restore`)
+  }
+
   async updateStepCode(
     id: string,
     data: Partial<{
@@ -709,6 +729,7 @@ export class Api {
       phase: string
       buildingCodeVersion: string
       jurisdictionId: string
+      permitApplicationId: string
     }>
   ) {
     return this.client.patch<ApiResponse<IStepCode>>(`/step_codes/${id}`, { stepCode: data })
@@ -734,9 +755,10 @@ export class Api {
     return this.client.get<ApiResponse<IPart3StepCodeChecklist>>(`/part_3_building/checklists/${id}`)
   }
 
-  async updatePart9Checklist(id: string, data: Partial<IPart9StepCodeChecklist>) {
+  async updatePart9Checklist(id: string, data: Partial<IPart9StepCodeChecklist>, options?: Record<string, any>) {
     return this.client.patch<ApiResponse<IPart9StepCode>>(`/part_9_building/checklists/${id}`, {
       stepCodeChecklist: data,
+      ...(options ?? {}),
     })
   }
 
@@ -859,6 +881,7 @@ export class Api {
 
   async createPart9StepCode(data: {
     permitApplicationId?: string
+    jurisdictionId?: string
     preConstructionChecklistAttributes?: any
     name?: string
   }) {
@@ -870,5 +893,11 @@ export class Api {
     } else {
       return this.client.post<ApiResponse<IStepCode>>(`/part_9_building/step_codes`, { stepCode: data })
     }
+  }
+
+  async shareReportDocumentWithJurisdiction(reportDocumentId: string) {
+    return this.client.post<ApiResponse<{ message: string }>>(
+      `/report_documents/${reportDocumentId}/share_with_jurisdiction`
+    )
   }
 }

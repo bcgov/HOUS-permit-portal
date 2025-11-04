@@ -33,7 +33,8 @@ export const JurisdictionSearch = observer(({}: IJurisdictionSearchProps) => {
     // empty string does not count as isNil but undefined does
     if (R.isNil(siteWatch?.value)) return
     ;(async () => {
-      const jurisdiction = await fetchGeocodedJurisdiction(siteWatch.value)
+      const result = await fetchGeocodedJurisdiction(siteWatch.value)
+      const jurisdiction = result?.jurisdiction
       if (jurisdiction) {
         setJurisdiction(jurisdiction)
       } else {

@@ -49,6 +49,45 @@ RSpec.describe Api::RequirementBlocksController,
     sign_in super_admin
   end
 
+  describe "GET #index" do
+    let!(:visible_requirement_block) { create(:requirement_block) }
+    let!(:discarded_requirement_block) do
+      create(:requirement_block, discarded_at: Time.current)
+    end
+
+    before do
+      RequirementBlock.reindex
+      RequirementBlock.search_index.refresh
+    end
+
+    context "when the user is unauthorized" do
+      before { sign_in submitter }
+
+      it "returns an empty result set scoped by policy" do
+        get :index, params: { query: "", page: 1, per_page: 20 }, format: :json
+
+        expect(response).to have_http_status(:success)
+        expect(json_response["data"]).to eq([])
+      end
+
+      it "does not load RequirementBlock records when show_archived is true" do
+        expect(RequirementBlock).not_to receive(:find)
+
+        get :index,
+            params: {
+              query: "",
+              show_archived: true,
+              page: 1,
+              per_page: 20
+            },
+            format: :json
+
+        expect(response).to have_http_status(:success)
+        expect(json_response["data"]).to eq([])
+      end
+    end
+  end
+
   describe "GET #show" do
     context "when the requirement block exists and user is authorized" do
       it "returns the requirement block" do

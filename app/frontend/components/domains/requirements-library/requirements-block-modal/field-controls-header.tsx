@@ -4,7 +4,6 @@ import { useTranslation } from "react-i18next"
 import { IFormConditional } from "../../../../types/api-request"
 import { EAutoComplianceModule, ERequirementType } from "../../../../types/enums"
 import { TComputedCompliance } from "../../../../types/types"
-import { isStepCodePackageFileRequirementCode } from "../../../../utils/utility-functions"
 import { ElectiveTag } from "../../../shared/elective-tag"
 import { HasAutomatedComplianceTag } from "../../../shared/has-automated-compliance-tag"
 import { HasConditionalTag } from "../../../shared/has-conditional-tag"
@@ -63,12 +62,7 @@ export function FieldControlsHeader({
             <HasAutomatedComplianceTag display={isRequirementInEditMode ? "none" : "flex"} />
           )}
         {!isRequirementInEditMode && (
-          <RequirementTypeTag
-            type={requirementType}
-            matchesStepCodePackageRequirementCode={isStepCodePackageFileRequirementCode(requirementCode)}
-            className={"requirement-edit-controls"}
-            display={"none"}
-          />
+          <RequirementTypeTag type={requirementType} className={"requirement-edit-controls"} display={"none"} />
         )}
         <Button
           variant={"primary"}

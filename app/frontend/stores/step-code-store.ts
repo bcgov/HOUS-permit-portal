@@ -6,6 +6,7 @@ import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
 import { IPart3StepCode, Part3StepCodeModel } from "../models/part-3-step-code"
 import { IPart9StepCode, Part9StepCodeModel } from "../models/part-9-step-code"
+import { IPart3StepCodeChecklist, IPart9StepCodeChecklist } from "../models/part-9-step-code-checklist"
 import { EEnergyStep, EStepCodeSortFields, EStepCodeType, EZeroCarbonStep } from "../types/enums"
 import { IPart3ChecklistSelectOptions, IPart9ChecklistSelectOptions, TSearchParams } from "../types/types"
 import { setQueryParam, startBlobDownload } from "../utils/utility-functions"
@@ -133,6 +134,7 @@ export const StepCodeStoreModel = types
         sort: self.sort,
         page: opts?.page ?? self.currentPage,
         perPage: opts?.countPerPage ?? self.countPerPage,
+        showArchived: self.showArchived,
         filters: {
           type: self.typeFilter,
         } as any,
@@ -236,6 +238,7 @@ export const StepCodeStoreModel = types
     }),
     createPart9StepCode: flow(function* (values: {
       permitApplicationId?: string
+      jurisdictionId?: string
       preConstructionChecklistAttributes?: any
       name?: string
     }) {
@@ -260,6 +263,18 @@ export const StepCodeStoreModel = types
         return null
       }
     }),
+    fetchPart9StepCode: flow(function* (id: string) {
+      const response = yield self.environment.api.fetchPart9StepCode(id)
+      if (response.ok) {
+        self.mergeUpdate(response.data.data, "stepCodesMap")
+        return response.data.data
+      } else {
+        console.error("Failed to fetch Part 9 Step Code:", response.problem, response.data)
+        return null
+      }
+    }),
   }))
 
-export interface IStepCodeStore extends Instance<typeof StepCodeStoreModel> {}
+export interface IStepCodeStore extends Instance<typeof StepCodeStoreModel> {
+  getChecklist(stepCodeId: any): IPart9StepCodeChecklist | IPart3StepCodeChecklist
+}

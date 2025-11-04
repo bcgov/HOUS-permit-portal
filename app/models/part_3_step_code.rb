@@ -6,6 +6,10 @@ class Part3StepCode < StepCode
           inverse_of: :step_code
   accepts_nested_attributes_for :checklist
 
+  def complete?
+    checklist&.complete?
+  end
+
   def primary_checklist
     checklist
   end

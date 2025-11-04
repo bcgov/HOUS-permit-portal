@@ -22,6 +22,7 @@ import { defaultSectionCompletionStatus } from "../../step-code/part-3/sidebar/n
 export const SelectStepCodeRequirementsScreen = () => {
   const { t } = useTranslation()
   const { stepCodeStore } = useMst()
+  const { createPart9StepCode, createPart3StepCode } = stepCodeStore
   const navigate = useNavigate()
   const [stepCodeTypeValue, setStepCodeTypeValue] = useState<EStepCodeType | null>(null)
   const [isCreating, setIsCreating] = useState(false)
@@ -33,15 +34,16 @@ export const SelectStepCodeRequirementsScreen = () => {
     let result
 
     if (stepCodeTypeValue === EStepCodeType.part3StepCode) {
-      result = await stepCodeStore.createPart3StepCode({
+      result = await createPart3StepCode({
         checklistAttributes: { sectionCompletionStatus: defaultSectionCompletionStatus },
       })
-    }
-
-    if (result?.ok) {
-      navigate(`/part-3-step-code/${result.data.id}/start`)
-    } else {
-      setIsCreating(false)
+      if (result?.ok) {
+        navigate(`/part-3-step-code/${result.data.id}/start`)
+      } else {
+        setIsCreating(false)
+      }
+    } else if (stepCodeTypeValue === EStepCodeType.part9StepCode) {
+      navigate(`/part-9-step-code/new`)
     }
   }
 
@@ -91,9 +93,9 @@ export const SelectStepCodeRequirementsScreen = () => {
               <Radio value={EStepCodeType.part3StepCode}>
                 {t("projectReadinessTools.startCheckStepCodeRequirementsScreen.part3")}
               </Radio>
-              {/* <Radio value={EStepCodeType.part9StepCode}>
+              <Radio value={EStepCodeType.part9StepCode}>
                 {t("projectReadinessTools.startCheckStepCodeRequirementsScreen.part9")}
-              </Radio> */}
+              </Radio>
             </Stack>
           </RadioGroup>
           <Box pt={4}>

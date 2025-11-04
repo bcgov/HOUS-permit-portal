@@ -150,26 +150,28 @@ export const ComplianceSummary = observer(function ComplianceSummary({
       <Divider />
 
       {/* Plan Info */}
-      <VStack align="start" w="full">
-        <Text fontWeight="bold" fontSize="md">
-          {t(`${i18nPrefix}.planInfo.title`)}
-        </Text>
-        <HStack w="full">
-          <TextFormControl
-            label={t(`${i18nPrefix}.planInfo.author`)}
-            inputProps={{ isDisabled: true, value: checklist.planAuthor || "" }}
-          />
-          <TextFormControl
-            label={t(`${i18nPrefix}.planInfo.version`)}
-            inputProps={{ isDisabled: true, value: checklist.planVersion || "" }}
-          />
-          <TextFormControl
-            label={t(`${i18nPrefix}.planInfo.date`)}
-            inputProps={{ isDisabled: true, value: checklist.planDate || "" }}
-            leftElement={<CalendarBlank />}
-          />
-        </HStack>
-      </VStack>
+      {(checklist.planAuthor || checklist.planVersion || checklist.planDate) && (
+        <VStack align="start" w="full">
+          <Text fontWeight="bold" fontSize="md">
+            {t(`${i18nPrefix}.planInfo.title`)}
+          </Text>
+          <HStack w="full">
+            <TextFormControl
+              label={t(`${i18nPrefix}.planInfo.author`)}
+              inputProps={{ isDisabled: true, value: checklist.planAuthor || "" }}
+            />
+            <TextFormControl
+              label={t(`${i18nPrefix}.planInfo.version`)}
+              inputProps={{ isDisabled: true, value: checklist.planVersion || "" }}
+            />
+            <TextFormControl
+              label={t(`${i18nPrefix}.planInfo.date`)}
+              inputProps={{ isDisabled: true, value: checklist.planDate || "" }}
+              leftElement={<CalendarBlank />}
+            />
+          </HStack>
+        </VStack>
+      )}
     </ChecklistSection>
   )
 })

@@ -5,7 +5,7 @@ class Api::StepCodesController < Api::ApplicationController
   # DELETE /api/step_codes/:id
   # PATCH /api/step_codes/:id
 
-  before_action :set_step_code, only: %i[update destroy]
+  before_action :set_step_code, only: %i[update destroy restore]
   skip_after_action :verify_policy_scoped, only: %i[index]
 
   # GET /api/step_codes (or POST /api/step_codes/search similar to other controllers)
@@ -22,27 +22,102 @@ class Api::StepCodesController < Api::ApplicationController
 
   def update
     authorize @step_code
-    # disallow updating step code if it's tied to a permit application and the user is not the submitter (for now)
-    if step_code_params[:permit_application_id].present?
-      target_pa =
-        PermitApplication.find_by(id: step_code_params[:permit_application_id])
-      unless target_pa && target_pa.submitter_id == current_user.id
-        render_error "misc.user_not_authorized_error", { status: 403 } and
-          return
-      end
+
+    # Prevent updating archived step codes
+    if @step_code.discarded?
+      return(
+        render_error "step_code.update_archived_error",
+                     {
+                       status: 422,
+                       log_args: {
+                         errors: "Cannot update archived step code"
+                       }
+                     }
+      )
     end
 
-    @step_code.update!(step_code_params)
-    render_success @step_code,
-                   "step_code.update_success",
-                   { blueprint: StepCodeBlueprint }
+    begin
+      # disallow updating step code if it's tied to a permit application and the user is not the submitter (for now)
+      if step_code_params[:permit_application_id].present?
+        target_pa =
+          PermitApplication.find_by(
+            id: step_code_params[:permit_application_id]
+          )
+        unless StepCodePolicy.new(pundit_user, @step_code).reassign_to?(
+                 target_pa
+               )
+          render_error "misc.user_not_authorized_error",
+                       {
+                         status: 403,
+                         log_args: {
+                           errors:
+                             "User not authorized to reassign step code to permit application"
+                         }
+                       } and return
+        end
+      end
+
+      StepCode.transaction do
+        # If assigning to a permit application that already has a different step code,
+        # detach the previous one so this update can succeed (overtake behavior).
+        if step_code_params[:permit_application_id].present?
+          existing =
+            StepCode
+              .kept
+              .where(
+                permit_application_id: step_code_params[:permit_application_id]
+              )
+              .where.not(id: @step_code.id)
+              .first
+          existing&.update!(permit_application_id: nil)
+        end
+
+        @step_code.update!(step_code_params)
+      end
+      render_success @step_code,
+                     "step_code.update_success",
+                     { blueprint: StepCodeBlueprint }
+    rescue ActiveRecord::RecordInvalid => e
+      render_error "step_code.update_error",
+                   message_opts: {
+                     error_message: e.record.errors.full_messages.join(", ")
+                   },
+                   log_args: {
+                     errors: e.record.errors.full_messages
+                   }
+    end
   end
 
   def destroy
-    @step_code = StepCode.find(params[:id])
     authorize @step_code
-    @step_code.destroy!
-    render json: {}, status: :ok
+    if @step_code.discard
+      render_success(
+        @step_code,
+        "step_code.destroy_success",
+        { blueprint: StepCodeBlueprint }
+      )
+    else
+      render_error "step_code.destroy_error",
+                   log_args: {
+                     errors: @step_code.errors.full_messages
+                   }
+    end
+  end
+
+  def restore
+    authorize @step_code
+    if @step_code.update(discarded_at: nil)
+      render_success(
+        @step_code,
+        "step_code.restore_success",
+        { blueprint: StepCodeBlueprint }
+      )
+    else
+      render_error "step_code.restore_error",
+                   log_args: {
+                     errors: @step_code.errors.full_messages
+                   }
+    end
   end
 
   def download_step_code_summary_csv

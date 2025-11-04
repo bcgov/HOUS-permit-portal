@@ -371,6 +371,65 @@
   }
 }
 
+// Multiply & Sum grid visual tweaks
+.multiply-sum-grid {
+  .form-control[disabled],
+  .form-control[readonly] {
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    color: var(--chakra-colors-text-primary);
+    padding-left: 0;
+  }
+
+  input[name$="[load]"],
+  input[id*="totalLoad"],
+  input[name*="totalLoad"] {
+    font-weight: 700;
+    color: var(--chakra-colors-text-primary);
+    text-align: right;
+  }
+
+  .table.datagrid-table {
+    border: none;
+
+    th,
+    td {
+      border: none;
+    }
+  }
+
+  .formio-component-number[class*="totalLoad"] {
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+    gap: var(--chakra-space-1);
+    margin-top: var(--chakra-space-4);
+    margin-left: auto;
+    width: fit-content;
+
+    > label {
+      margin: 0;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      flex: 0 0 auto;
+      display: inline-flex;
+    }
+
+    [ref="element"] {
+      flex: 0 0 auto;
+      min-width: 0;
+    }
+
+    input {
+      text-align: right;
+      width: 125px;
+      padding-inline: var(--chakra-space-2);
+      margin-right: var(--chakra-space-3);
+    }
+  }
+}
+
 .formio-component-panel {
   .card-header {
     padding: var(--chakra-space-2) var(--chakra-space-6);
@@ -499,6 +558,68 @@
       width: 24px;
       height: 24px;
       margin-right: 6px;
+    }
+
+    .compliance-digital-signatures {
+      margin-top: 8px;
+
+      .compliance-section-title {
+        font-weight: 600;
+        margin-bottom: 12px;
+        font-size: var(--chakra-fontSizes-sm);
+      }
+
+      .compliance-file-item {
+        margin-bottom: 16px;
+        padding-left: 8px;
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+
+        .compliance-file-name {
+          font-weight: 600;
+          margin-bottom: 6px;
+          color: $bcgov-font;
+        }
+
+        .compliance-file-message {
+          margin-left: 16px;
+          font-size: var(--chakra-fontSizes-xs);
+          color: $bcgov-font;
+          font-style: italic;
+        }
+
+        .compliance-file-error-message {
+          margin-left: 16px;
+          font-size: var(--chakra-fontSizes-xs);
+          color: $bcgov-font;
+        }
+
+        &.compliance-file-error {
+          .compliance-file-name {
+            color: $bcgov-font;
+          }
+        }
+
+        .compliance-signer {
+          margin-left: 16px;
+          margin-bottom: 4px;
+          font-size: var(--chakra-fontSizes-xs);
+
+          .compliance-signer-name {
+            color: $bcgov-font-success;
+            font-weight: 500;
+            margin-bottom: 2px;
+          }
+
+          .compliance-signer-date {
+            color: $bcgov-font;
+            margin-left: 12px;
+            font-size: var(--chakra-fontSizes-xs);
+          }
+        }
+      }
     }
   }
 
@@ -888,6 +1009,46 @@
   [ref="buttonMessageContainer"] .help-block:empty {
     padding: 0;
     border: 0;
+  }
+
+  // Step Code actions helper styles
+  .step-code-actions {
+    display: inline-block;
+    margin-top: var(--chakra-space-4);
+    color: var(--chakra-colors-text-secondary);
+
+    .step-code-select-link {
+      text-decoration: underline;
+      color: $bcgov-link;
+
+      &:hover {
+        color: $bcgov-link-hover;
+      }
+    }
+  }
+  .step-code-link-button {
+    margin-top: var(--chakra-space-1);
+  }
+
+  // Make the secondary step code button look like a link
+  .step-code-link-button.btn {
+    background: transparent;
+    border: none;
+    padding: 0;
+    color: $bcgov-link;
+    text-decoration: underline;
+    font-weight: normal;
+    text-transform: none;
+    display: inline;
+    font-size: var(--chakra-fontSizes-md);
+    margin-top: 0;
+    letter-spacing: normal;
+
+    &:hover {
+      background: transparent;
+      color: $bcgov-link-hover;
+      text-decoration: underline;
+    }
   }
 }
 
