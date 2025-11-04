@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next"
 import { sanitizeQuillHtml } from "../../../../utils/sanitize-quill-content"
 import { isQuillEmpty } from "../../../../utils/utility-functions"
 import { Editor } from "../editor"
+import { SafeQuillDisplay } from "../safe-quill-display"
 
 export type TEditorWithPreviewProps = {
   label?: string
