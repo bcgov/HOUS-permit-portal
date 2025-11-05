@@ -8,13 +8,14 @@ import { usePermitClassificationsLoad } from "../../../../../../hooks/resources/
 import { useMst } from "../../../../../../setup/root"
 import { ErrorScreen } from "../../../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../../../shared/base/loading-screen"
-import { Form } from "./form"
+import { Part9EnergyStepEditableBlock } from "./energy-step-editable-block/part-9-energy-step-editable-block"
 import { i18nPrefix } from "./i18n-prefix"
 import { Part3HeatingDegreeDaysForm } from "./part-3-heating-degree-days-form"
 
 export const EnergyStepRequirementsScreen = observer(function EnergyStepRequirementsScreen() {
   const {
     stepCodeStore: { isOptionsLoaded, fetchPart9SelectOptions },
+    permitClassificationStore: { part9BuildingPermitType },
   } = useMst()
 
   const { isLoaded: isClassificationsLoaded } = usePermitClassificationsLoad()
@@ -26,7 +27,7 @@ export const EnergyStepRequirementsScreen = observer(function EnergyStepRequirem
 
   const { currentJurisdiction, error } = useJurisdiction()
 
-  if (!isOptionsLoaded) return <LoadingScreen />
+  if (!isOptionsLoaded || !part9BuildingPermitType) return <LoadingScreen />
   if (error) return <ErrorScreen error={error} />
 
   return (
@@ -54,7 +55,12 @@ export const EnergyStepRequirementsScreen = observer(function EnergyStepRequirem
                       <ArrowSquareOut />
                     </Link>
                   </Text>
-                  <Form jurisdiction={currentJurisdiction} />
+                  <Part9EnergyStepEditableBlock
+                    key={part9BuildingPermitType.id}
+                    heading={part9BuildingPermitType.name}
+                    permitTypeId={part9BuildingPermitType.id}
+                    jurisdiction={currentJurisdiction}
+                  />
                 </VStack>
               </TabPanel>
               <TabPanel px={0}>

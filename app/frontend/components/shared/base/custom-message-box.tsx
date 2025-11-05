@@ -30,6 +30,9 @@ export const CustomMessageBox = ({
   headingProps,
   ...rest
 }: ICustomMessageBoxProps) => {
+  // Filter out Toast-specific props that shouldn't be passed to DOM elements
+  const { isClosable, render, ...flexProps } = rest
+
   return (
     <Flex
       direction="column"
@@ -39,7 +42,7 @@ export const CustomMessageBox = ({
       borderRadius="lg"
       borderColor={`semantic.${status}`}
       p={4}
-      {...rest}
+      {...flexProps}
     >
       <Flex align="flex-start" gap={2} whiteSpace={"normal"}>
         <Box color={`semantic.${status}`}>{iconMap[status]}</Box>
