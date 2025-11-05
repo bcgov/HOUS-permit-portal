@@ -45,7 +45,7 @@ export const EULAScreen = observer(function EULAScreen({ withClose }: { withClos
           {eula && (
             <>
               <Box maxW="4xl" overflow="hidden">
-                {/* Use SafeQuillDisplay instead of readonly Editor to prevent XSS (CVE-2021-3163) */}
+                {/* Use SafeQuillDisplay for safe HTML rendering */}
                 <SafeQuillDisplay htmlContent={eula.content} />
               </Box>
               {!userStore.currentUser.eulaAccepted && (

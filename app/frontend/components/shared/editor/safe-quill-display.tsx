@@ -4,7 +4,7 @@ import { sanitizeQuillHtml } from "../../../utils/sanitize-quill-content"
 
 export interface SafeQuillDisplayProps extends Omit<BoxProps, "dangerouslySetInnerHTML"> {
   /**
-   * The HTML content from Quill editor to display.
+   * The HTML content from TipTap editor to display.
    * Will be sanitized before rendering to prevent XSS attacks.
    */
   htmlContent: string | null | undefined
@@ -16,14 +16,13 @@ export interface SafeQuillDisplayProps extends Omit<BoxProps, "dangerouslySetInn
 }
 
 /**
- * SafeQuillDisplay - A secure wrapper component for displaying Quill editor content
+ * SafeQuillDisplay - A secure wrapper component for displaying TipTap editor content
  *
- * This component sanitizes HTML content from Quill editors before rendering to mitigate
- * the XSS vulnerability (CVE-2021-3163 / GHSA-4943-9vgg-gr5r) in Quill ≤ 1.3.7.
+ * This component sanitizes HTML content from TipTap editors before rendering to prevent XSS attacks.
+ * The component name is kept for backward compatibility but now works with TipTap HTML.
  *
  * @security
- * This is a TEMPORARY mitigation until migration to TipTap (planned Q1-Q2 2026).
- * Always use this component instead of directly rendering Quill HTML with dangerouslySetInnerHTML.
+ * Always use this component instead of directly rendering editor HTML with dangerouslySetInnerHTML.
  *
  * @example
  * ```tsx
@@ -67,9 +66,9 @@ export const SafeQuillDisplay: React.FC<SafeQuillDisplayProps> = ({
       {...boxProps}
       data-testid={dataTestId || "safe-quill-display"}
       dangerouslySetInnerHTML={{ __html: sanitizedHtml }}
-      // Add default styling that matches Quill's output
+      // Add default styling that matches editor output
       sx={{
-        // Preserve Quill's default text formatting
+        // Preserve default text formatting
         "& p": {
           marginBottom: "1em",
           "&:last-child": {
@@ -141,7 +140,7 @@ export const SafeQuillDisplay: React.FC<SafeQuillDisplayProps> = ({
 /**
  * SafeQuillDisplayInline - A variant for inline display without block-level spacing
  *
- * Useful when you need to display Quill content inline with other content,
+ * Useful when you need to display editor content inline with other content,
  * without the default block-level spacing.
  *
  * @example
@@ -192,3 +191,7 @@ export const SafeQuillDisplayInline: React.FC<SafeQuillDisplayProps> = ({
     />
   )
 }
+
+// Export aliases for TipTap naming
+export const SafeTipTapDisplay = SafeQuillDisplay
+export const SafeTipTapDisplayInline = SafeQuillDisplayInline

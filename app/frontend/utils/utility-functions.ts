@@ -109,6 +109,10 @@ export function isContactRequirement(requirementType: ERequirementType): boolean
   return contactRequirementFields.includes(requirementType)
 }
 
+/**
+ * Checks if editor HTML content is empty (only whitespace/empty tags).
+ * Function name kept for backward compatibility.
+ */
 export function isQuillEmpty(value: string) {
   if (!value || (value.replace(/<(.|\n)*?>/g, "").trim().length === 0 && !value.includes("<img"))) {
     return true

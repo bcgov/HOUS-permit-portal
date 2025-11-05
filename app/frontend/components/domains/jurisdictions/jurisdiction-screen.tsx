@@ -298,10 +298,7 @@ const JurisdictionQuillFormController = observer(
     return (
       <Box
         sx={{
-          ".ql-container.ql-snow": {
-            border: "none",
-          },
-          ".ql-editor": {
+          ".tiptap-editor-readonly": {
             padding: 0,
           },
         }}
@@ -310,7 +307,7 @@ const JurisdictionQuillFormController = observer(
           action={"jurisdiction:manage"}
           data={{ jurisdiction: currentJurisdiction }}
           onPermissionDeniedRender={
-            /* Use SafeQuillDisplay instead of readonly Editor to prevent XSS (CVE-2021-3163) */
+            // Use SafeQuillDisplay for safe HTML rendering
             <SafeQuillDisplay htmlContent={currentJurisdiction[name]} />
           }
         >

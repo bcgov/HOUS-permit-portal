@@ -168,7 +168,7 @@ export const PastEulasModal = observer(function PastEulasModal({
                   </Box>
                   <AccordionPanel bg={"white"} borderBottomRadius={"sm"}>
                     <Box maxW="4xl" overflow="hidden">
-                      {/* Use SafeQuillDisplay instead of readonly Editor to prevent XSS (CVE-2021-3163) */}
+                      {/* Use SafeQuillDisplay for safe HTML rendering */}
                       <SafeQuillDisplay htmlContent={la.agreement?.content} />
                     </Box>
                   </AccordionPanel>

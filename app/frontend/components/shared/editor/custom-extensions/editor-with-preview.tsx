@@ -55,13 +55,13 @@ export const EditorWithPreview = observer(function EditorWithPreview({
     py: 3,
     borderRadius: "sm",
     sx: {
-      ".quill": {
+      ".tiptap-wrapper": {
         bg: isEditable ? "white" : undefined,
       },
-      ".quill .ql-editor": {
+      ".tiptap-editor": {
         px: isEditable ? undefined : 0,
       },
-      ".quill .ql-container": {
+      ".tiptap-editor-readonly": {
         fontSize: isEditable ? undefined : "sm",
       },
     },

@@ -150,7 +150,7 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
           {!isQuillEmpty(requirementBlock.displayDescription) && (
             <Box
               sx={{
-                ".ql-editor": {
+                ".tiptap-editor-readonly": {
                   p: 0,
                 },
               }}
@@ -161,7 +161,7 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
               borderBottom="1px solid"
               borderBottomColor="border.light"
             >
-              {/* Use SafeQuillDisplay instead of readonly Editor to prevent XSS (CVE-2021-3163) */}
+              {/* Use SafeQuillDisplay for safe HTML rendering */}
               <SafeQuillDisplay htmlContent={requirementBlock.displayDescription} />
             </Box>
           )}
