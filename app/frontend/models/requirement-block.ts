@@ -68,40 +68,14 @@ export const RequirementBlockModel = types
 
     get requirementFormDefaults(): IRequirementAttributes[] {
       return self.requirements.map((requirement) => {
-        const {
-          id,
-          requirementCode,
-          label,
-          inputType,
-          hint,
-          instructions,
-          required,
-          relatedContent,
-          requiredForInPersonHint,
-          requiredForMultipleOwners,
-          elective,
-          position,
-          inputOptions,
-          conditional,
-        } = requirement
+        const { inputOptions, conditional, ...baseAttributes } = requirement
 
-        const baseAttributes = {
-          id,
-          requirementCode,
-          label,
-          inputType,
-          hint,
-          instructions,
-          required,
-          relatedContent,
-          requiredForInPersonHint,
-          requiredForMultipleOwners,
-          elective,
-          position,
-          inputOptions,
+        if (!conditional) {
+          return {
+            ...baseAttributes,
+            inputOptions,
+          } as IRequirementAttributes
         }
-
-        if (!conditional) return baseAttributes as IRequirementAttributes
 
         const possibleThens = ["show", "hide", "require"]
         const when = conditional.when

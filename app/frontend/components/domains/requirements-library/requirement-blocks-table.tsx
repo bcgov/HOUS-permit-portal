@@ -77,18 +77,20 @@ export const RequirementBlocksTable = observer(function RequirementBlocksTable({
           tableRequirementBlocks.map((requirementBlock) => {
             return (
               <Box key={requirementBlock.id} className={ROW_CLASS_NAME} role={"row"} display={"contents"}>
-                <SearchGridItem minW="250px">
-                  <Flex direction="column">
-                    <Text as={"span"} fontWeight={700}>
+                <SearchGridItem minW="250px" maxW="280px">
+                  <Flex direction="column" overflow="hidden">
+                    <Text as={"span"} fontWeight={700} noOfLines={2} title={requirementBlock.name}>
                       {requirementBlock.name}
                     </Text>
-                    <Text as={"span"}>{requirementBlock.description}</Text>
+                    <Text as={"span"} noOfLines={2} title={requirementBlock.description || undefined}>
+                      {requirementBlock.description}
+                    </Text>
                   </Flex>
                 </SearchGridItem>
-                <SearchGridItem fontWeight={700} minW="35px">
+                <SearchGridItem fontWeight={700} minW="50px" maxW="70px">
                   <YesNoTag boolean={requirementBlock.firstNations} />
                 </SearchGridItem>
-                <SearchGridItem maxW="190px">
+                <SearchGridItem maxW="150px" minW="120px">
                   <HStack as={"ul"} wrap={"wrap"} spacing={1}>
                     {requirementBlock.associations.map((association) => (
                       <Tag key={association} as={"li"} bg={"greys.grey03"} color={"text.secondary"} fontSize={"xs"}>
@@ -97,28 +99,35 @@ export const RequirementBlocksTable = observer(function RequirementBlocksTable({
                     ))}
                   </HStack>
                 </SearchGridItem>
-                <SearchGridItem pr={0} minW="273px">
+                <SearchGridItem pr={0} minW="180px" maxW="220px">
                   <UnorderedList ml={0} pl={0} w={"full"}>
                     {requirementBlock.requirements.map((requirement) => {
                       return (
-                        <ListItem key={requirement.id} color={"text.secondary"} fontSize={"xs"} mb="1">
+                        <ListItem
+                          key={requirement.id}
+                          color={"text.secondary"}
+                          fontSize={"xs"}
+                          mb="1"
+                          noOfLines={1}
+                          title={requirement.label}
+                        >
                           {requirement.label}
                         </ListItem>
                       )
                     })}
                   </UnorderedList>
                 </SearchGridItem>
-                <SearchGridItem maxW="150px" fontSize={"sm"}>
+                <SearchGridItem maxW="120px" minW="100px" fontSize={"sm"}>
                   {format(requirementBlock.updatedAt, datefnsTableDateFormat)}
                 </SearchGridItem>
-                <SearchGridItem maxW="230px">
+                <SearchGridItem maxW="180px" minW="150px">
                   <HStack flexWrap={"wrap"} maxW={"full"} alignSelf={"middle"}>
                     {requirementBlock.hasAnyElective && <ElectiveTag hasElective />}
                     {requirementBlock.hasAnyConditional && <HasConditionalTag />}
                     {requirementBlock.hasAutomatedCompliance && <HasAutomatedComplianceTag />}
                   </HStack>
                 </SearchGridItem>
-                <SearchGridItem justifyContent={"center"}>
+                <SearchGridItem justifyContent={"center"} minW="100px" flexShrink={0}>
                   {renderActionButton ? (
                     renderActionButton({ requirementBlock })
                   ) : (
