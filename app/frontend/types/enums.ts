@@ -651,7 +651,7 @@ export enum EPermitProjectSortFields {
 }
 
 export enum EPdfFormSortFields {
-  projectNumber = "Project",
+  projectNumber = "Project reference number",
   buildingLocationAddress = "Address",
   createdAt = "Last Modified",
 }

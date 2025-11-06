@@ -25,6 +25,7 @@ export const PdfFormStoreModel = types
       field: EPdfFormSortFields.createdAt,
       direction: "desc",
     }),
+    statusFilter: types.optional(types.enumeration(["all", "archived", "unarchived"]), "unarchived"),
   })
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -38,6 +39,13 @@ export const PdfFormStoreModel = types
     },
     get tablePdfForms(): IPdfForm[] {
       let forms = Array.from(self.pdfFormsMap.values())
+
+      // Apply archived/unarchived filter
+      if (self.statusFilter === "archived") {
+        forms = forms.filter((f: any) => f?.status === false)
+      } else if (self.statusFilter === "unarchived") {
+        forms = forms.filter((f: any) => f?.status !== false)
+      }
 
       // Apply search filter
       if (self.query) {
@@ -110,7 +118,7 @@ export const PdfFormStoreModel = types
 
         const response = yield self.environment.api.getPdfForms(params)
         if (response.ok) {
-          const pdfForms = (response.data.data || []).filter((f: any) => f?.status !== false)
+          const pdfForms = response.data.data || []
           const meta = response.data.meta
 
           // Clear existing forms if this is a fresh search
@@ -150,6 +158,9 @@ export const PdfFormStoreModel = types
       setPdfForm(pdfForm: IPdfForm) {
         self.pdfFormsMap.put(pdfForm)
       },
+      setStatusFilter(filter: "all" | "archived" | "unarchived") {
+        ;(self as any).statusFilter = filter
+      },
       setPdfForms(pdfForms: IPdfForm[]) {
         pdfForms.forEach((pdfForm) => self.pdfFormsMap.put(pdfForm))
       },
@@ -182,9 +193,17 @@ export const PdfFormStoreModel = types
       setCurrentPage(page: number) {
         self.currentPage = page
       },
+      handlePageChange: flow(function* (page: number) {
+        self.currentPage = page
+        return yield searchPdfForms({ page })
+      }),
       setCountPerPage(count: number) {
         self.countPerPage = count
       },
+      handleCountPerPageChange: flow(function* (countPerPage: number) {
+        self.countPerPage = countPerPage
+        return yield searchPdfForms({ page: 1, countPerPage })
+      }),
 
       // Sorting: toggle asc/desc for the given field and refresh view
       toggleSort(field: EPdfFormSortFields) {

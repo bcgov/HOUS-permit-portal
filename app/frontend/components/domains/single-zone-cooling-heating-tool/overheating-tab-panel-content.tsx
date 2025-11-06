@@ -1,4 +1,4 @@
-import { Box, Container, Divider, Flex, FormControl, GridItem, Heading, Text, VStack } from "@chakra-ui/react"
+import { Box, Container, Divider, Flex, FormControl, GridItem, Heading, Select, Text, VStack } from "@chakra-ui/react"
 import { CaretRight } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
@@ -18,21 +18,11 @@ import { PdfFormGridRow } from "../single-zone-cooling-heating-tool/pdf-form-gri
 import { GridHeaders, OVERHEATING_GRID_TEMPLATE_COLUMNS } from "./grid-header"
 
 export const OverheatingTabPanelContent = observer(() => {
-  const { t } = useTranslation()
+  const { t } = useTranslation() as any
   const { pdfFormStore } = useMst()
   const [loadingPdfs, setLoadingPdfs] = useState<Record<string, boolean>>({})
   const [generatedPdfs, setGeneratedPdfs] = useState<Record<string, string>>({})
-  const {
-    isSearching,
-    tablePdfForms,
-    searchPdfForms,
-    handleCountPerPageChange,
-    countPerPage,
-    totalCount,
-    handlePageChange,
-    currentPage,
-    totalPages,
-  } = pdfFormStore
+  const { isSearching, tablePdfForms, searchPdfForms, countPerPage, totalCount, currentPage, totalPages } = pdfFormStore
 
   useEffect(() => {
     // Initial load: page 1, 10 per page
@@ -113,13 +103,25 @@ export const OverheatingTabPanelContent = observer(() => {
             <Heading as="h3" mb={5} mt={4}>
               {t("singleZoneCoolingHeatingTool.pickUpWhereYouLeftOff")}
             </Heading>
-            <FormControl w="full">
-              <ModelSearchInput
-                searchModel={pdfFormStore}
-                inputProps={{ placeholder: t("ui.search"), width: "full" }}
-                inputGroupProps={{ width: "full" }}
-              />
-            </FormControl>
+            <Flex gap={4} w="full" align="center">
+              <FormControl w="full">
+                <ModelSearchInput
+                  searchModel={pdfFormStore as any}
+                  inputProps={{ placeholder: t("ui.search"), width: "full" }}
+                  inputGroupProps={{ width: "full" }}
+                />
+              </FormControl>
+              <FormControl maxW="240px">
+                <Select
+                  value={pdfFormStore.statusFilter}
+                  onChange={(e) => pdfFormStore.setStatusFilter(e.target.value as any)}
+                >
+                  <option value="unarchived">{(t as any)("ui.unarchived") || "Unarchived"}</option>
+                  <option value="archived">{(t as any)("ui.archived") || "Archived"}</option>
+                  <option value="all">{(t as any)("ui.all") || "All"}</option>
+                </Select>
+              </FormControl>
+            </Flex>
           </Flex>
           <SearchGrid templateColumns={OVERHEATING_GRID_TEMPLATE_COLUMNS} gridRowClassName="project-grid-row">
             <GridHeaders columns={Object.values(EPdfFormSortFields)} includeActionColumn />
@@ -137,25 +139,22 @@ export const OverheatingTabPanelContent = observer(() => {
                 />
               </GridItem>
             ) : (
-              tablePdfForms.map(
-                (pdfForm) =>
-                  pdfForm.status !== false && (
-                    <PdfFormGridRow
-                      onGeneratePdf={generatePdf}
-                      onArchivePdf={archivePdf}
-                      onDownloadPdf={handleDownloadPdf}
-                      isGenerating={false}
-                      isDownloaded={false}
-                      key={pdfForm.id}
-                      pdfForm={pdfForm}
-                    />
-                  )
-              )
+              tablePdfForms.map((pdfForm) => (
+                <PdfFormGridRow
+                  onGeneratePdf={generatePdf}
+                  onArchivePdf={archivePdf}
+                  onDownloadPdf={handleDownloadPdf}
+                  isGenerating={false}
+                  isDownloaded={false}
+                  key={pdfForm.id}
+                  pdfForm={pdfForm}
+                />
+              ))
             )}
           </SearchGrid>
           <Flex w={"full"} justifyContent={"space-between"}>
             <PerPageSelect
-              handleCountPerPageChange={handleCountPerPageChange}
+              handleCountPerPageChange={(pdfFormStore as any).handleCountPerPageChange}
               countPerPage={countPerPage}
               totalCount={totalCount}
             />
@@ -164,7 +163,7 @@ export const OverheatingTabPanelContent = observer(() => {
               total={totalCount}
               totalPages={totalPages}
               pageSize={countPerPage}
-              handlePageChange={handlePageChange}
+              handlePageChange={(pdfFormStore as any).handlePageChange}
               showLessItems={true}
             />
           </Flex>

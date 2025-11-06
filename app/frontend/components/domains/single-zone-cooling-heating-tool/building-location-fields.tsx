@@ -1,6 +1,7 @@
-import { Box, FormLabel, Grid, GridProps, Heading, Text } from "@chakra-ui/react"
+import { Box, Divider, FormLabel, Grid, GridProps, Heading, Text } from "@chakra-ui/react"
+import debounce from "lodash/debounce"
 import { observer } from "mobx-react-lite"
-import React from "react"
+import React, { useCallback } from "react"
 import { useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../setup/root"
@@ -22,8 +23,7 @@ interface AddressSearchSelectProps {
 const AddressSearchSelect = observer(function ({ onAddressSelect, stylesToMerge, ...rest }: AddressSearchSelectProps) {
   const { geocoderStore } = useMst()
   const { fetchSiteOptions: fetchOptions } = geocoderStore
-  const { setValue } = useFormContext()
-  const { t } = useTranslation()
+  const { t } = useTranslation() as any
 
   const fetchAddressOptions = (inputValue: string, callback: (options: IOption[]) => void) => {
     if (inputValue.length > 3) {
@@ -39,6 +39,8 @@ const AddressSearchSelect = observer(function ({ onAddressSelect, stylesToMerge,
     }
   }
 
+  const debouncedFetchAddressOptions: any = useCallback(debounce(fetchAddressOptions, 600), [])
+
   const handleAddressSelect = (option: IOption | null) => {
     if (!option) return
 
@@ -49,26 +51,16 @@ const AddressSearchSelect = observer(function ({ onAddressSelect, stylesToMerge,
   }
 
   const props = {
-    loadOptions: fetchAddressOptions,
+    loadOptions: debouncedFetchAddressOptions,
     onChange: handleAddressSelect,
     placeholder: t("ui.enterAddress"),
     noOptionsMessage: () => "Type at least 4 characters to search",
     isClearable: true,
     isCreatable: false,
+    defaultOptions: true,
+    cacheOptions: true,
     menuPortalTarget: document.body,
     stylesToMerge: {
-      menu: (provided: any) => ({
-        ...provided,
-        position: "absolute",
-        zIndex: 9999,
-        top: "100%",
-        left: 0,
-        right: 0,
-        backgroundColor: "white",
-        border: "1px solid #ccc",
-        borderRadius: "4px",
-        boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-      }),
       menuPortal: (provided: any) => ({
         ...provided,
         zIndex: 9999,
@@ -127,7 +119,11 @@ export const BuildingLocationFields: React.FC<BuildingLocationFieldsProps> = ({
   const { setValue } = useFormContext()
 
   const field = (key: string) => `${namePrefix}.${key}`
-  const label = (key: string) => t(`${i18nPrefix}.${key}` as any)
+  const label = (key: string): string => (t as any)(`${i18nPrefix}.${key}`) as string
+  const titleLabel: string = String((t as any)(`${i18nPrefix}.title`))
+  const drawingIssueForLabel: string = String((t as any)(`${prefix}.drawingIssueFor`))
+  const drawingIssueForHelpText: string = String((t as any)(`${prefix}.drawingIssueForHelpText`))
+  const projectNumberLabel: string = String((t as any)(`${prefix}.projectNumber`))
 
   const handleAddressSelect = (addressData: {
     address: string
@@ -144,23 +140,19 @@ export const BuildingLocationFields: React.FC<BuildingLocationFieldsProps> = ({
     <Box>
       <Box display="flex" gap={10} mb={6}>
         <Box width="80%">
-          <TextFormControl
-            fieldName="drawingIssueFor"
-            maxLength={105}
-            required
-            label={t(`${prefix}.drawingIssueFor`)}
-          />
+          <TextFormControl fieldName="drawingIssueFor" maxLength={105} required label={drawingIssueForLabel} />
           <Text as="p" mb={2}>
-            {t(`${prefix}.drawingIssueForHelpText`)}
+            {drawingIssueForHelpText}
           </Text>
         </Box>
         <Box width="20%">
-          <TextFormControl fieldName="projectNumber" maxLength={15} required label={t(`${prefix}.projectNumber`)} />
+          <TextFormControl fieldName="projectNumber" maxLength={15} required label={projectNumberLabel} />
         </Box>
       </Box>
-      <Box mb={6} backgroundColor="gray.100" p={4} borderRadius="md">
-        <Heading as="h2" size="lg" mb={6} textAlign="center" textTransform="uppercase">
-          {t(`${i18nPrefix}.title` as any)}
+      <Divider my={10} />
+      <Box mb={6}>
+        <Heading as="h2" size="lg" mb={6} variant="yellowline">
+          {titleLabel}
         </Heading>
       </Box>
       <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={6} {...gridProps}>

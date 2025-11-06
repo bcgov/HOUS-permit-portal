@@ -86,9 +86,9 @@ export const CoverSheetForm = ({ onNext }: ICoverSheetFormProps) => {
   }
 
   return (
-    <Box as="form" p={4} borderWidth="1px" borderRadius="lg">
-      <Box mb={6} backgroundColor="gray.100" p={4} borderRadius="md">
-        <Heading as="h2" size="lg" mb={6} textAlign="center" textTransform="uppercase">
+    <Box as="form" p={4}>
+      <Box mb={6}>
+        <Heading as="h2" size="lg" mb={6} variant="yellowline">
           {t(`${prefix}.title`)}
         </Heading>
         <Text as="p" mb={2}>
@@ -98,8 +98,8 @@ export const CoverSheetForm = ({ onNext }: ICoverSheetFormProps) => {
       <Divider my={10} />
       <BuildingLocationFields i18nPrefix="singleZoneCoolingHeatingTool.coverSheet.buildingLocation" />
       <Divider my={10} />
-      <Box mb={6} backgroundColor="gray.100" p={4} borderRadius="md">
-        <Heading as="h3" size="md" mb={4} textAlign="center" textTransform="uppercase">
+      <Box mb={6}>
+        <Heading as="h3" size="md" mb={4} variant="yellowline">
           {t(`${prefix}.compliance.title`)}
         </Heading>
       </Box>
@@ -125,8 +125,8 @@ export const CoverSheetForm = ({ onNext }: ICoverSheetFormProps) => {
         </RadioGroup>
       </Flex>
       <Divider my={10} />
-      <Box mb={6} backgroundColor="gray.100" p={4} borderRadius="md">
-        <Heading as="h3" size="md" mb={4} textAlign="center" textTransform="uppercase">
+      <Box mb={6}>
+        <Heading as="h3" size="md" mb={4} variant="yellowline">
           {t(`${prefix}.heating.title`)}
         </Heading>
       </Box>
@@ -168,8 +168,8 @@ export const CoverSheetForm = ({ onNext }: ICoverSheetFormProps) => {
         </Text>
       </Text>
       <Divider my={10} />
-      <Box mb={6} backgroundColor="gray.100" p={4} borderRadius="md">
-        <Heading as="h3" size="md" mb={4} textAlign="center" textTransform="uppercase">
+      <Box mb={6}>
+        <Heading as="h3" size="md" mb={4} variant="yellowline">
           {t(`${prefix}.cooling.title`)}
         </Heading>
       </Box>
@@ -258,8 +258,8 @@ export const CoverSheetForm = ({ onNext }: ICoverSheetFormProps) => {
         {t(`${prefix}.cooling.helpText4`)}
       </Text>
       <Divider my={10} />
-      <Box mb={6} backgroundColor="gray.100" p={4} borderRadius="md">
-        <Heading as="h3" size="md" mb={4} textAlign="center" textTransform="uppercase">
+      <Box mb={6}>
+        <Heading as="h3" size="md" mb={4} variant="yellowline">
           {t(`${prefix}.attachedDocuments.title`)}
         </Heading>
       </Box>
@@ -278,8 +278,8 @@ export const CoverSheetForm = ({ onNext }: ICoverSheetFormProps) => {
         <TextFormControl fieldName="notes" maxLength={190} />
       </Text>
       <Divider my={10} />
-      <Box mb={6} backgroundColor="gray.100" p={4} borderRadius="md">
-        <Heading as="h3" size="md" mb={4} textAlign="center" textTransform="uppercase">
+      <Box mb={6}>
+        <Heading as="h3" size="md" mb={4} variant="yellowline">
           {t(`${prefix}.calculationPerformedBy.title`)}
         </Heading>
       </Box>
@@ -381,7 +381,7 @@ export const CoverSheetForm = ({ onNext }: ICoverSheetFormProps) => {
           isReadOnly
         />
       </Grid>
-      <Flex justify="flex-end" mt={10} mb={10}>
+      <Flex justify="flex-start" mt={10} mb={10}>
         <Button variant="primary" onClick={onNext}>
           {t(`${prefix}.calculationPerformedBy.next`)}
         </Button>

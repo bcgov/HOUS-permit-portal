@@ -1,10 +1,22 @@
-import { Box, Button, Divider, Flex, Grid, Heading } from "@chakra-ui/react"
+import {
+  Box,
+  Button,
+  Divider,
+  Flex,
+  FormControl,
+  FormLabel,
+  Grid,
+  Heading,
+  Radio,
+  RadioGroup,
+  Stack,
+  useToast,
+} from "@chakra-ui/react"
 import React from "react"
 import { useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { uploadFile } from "../../../utils/uploads"
 import { NumberFormControl, SelectFormControl, TextFormControl } from "../../shared/form/input-form-control"
-import { BuildingLocationFields } from "./building-location-fields"
 
 interface IInputSummaryFormProps {
   onNext: () => void
@@ -13,7 +25,27 @@ interface IInputSummaryFormProps {
 export const InputSummaryForm = ({ onNext }: IInputSummaryFormProps) => {
   const { t } = useTranslation() as any
   const prefix = "singleZoneCoolingHeatingTool.inputSummary"
-  const { setValue } = useFormContext()
+  const { setValue, watch, trigger, clearErrors } = useFormContext()
+  const toast = useToast()
+  const [canContinue, setCanContinue] = React.useState(false)
+  const ventilated = watch("climateData.ventilated")
+  const hrvErv = watch("climateData.hrvErv")
+  const all = watch()
+
+  React.useEffect(() => {
+    // Lightweight check: allow continue when at least one meaningful field has a value
+    const values = (watch() as any) || {}
+    const hasVal = (v: any) => v !== undefined && v !== null && String(v).toString().trim() !== ""
+    const ok = [
+      values?.calculationBasedOn?.dimensionalInfo,
+      values?.calculationBasedOn?.attachment,
+      values?.calculationBasedOn?.frontFacing,
+      values?.calculationBasedOn?.assumed,
+    ].some(hasVal)
+    setCanContinue(ok)
+    clearErrors()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [all])
 
   const onUploadFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -33,17 +65,15 @@ export const InputSummaryForm = ({ onNext }: IInputSummaryFormProps) => {
   }
 
   return (
-    <Box as="form" p={4} borderWidth="1px" borderRadius="lg">
-      <Box mb={6} backgroundColor="gray.100" p={4} borderRadius="md">
-        <Heading as="h2" size="lg" mb={6} textAlign="center" textTransform="uppercase">
+    <Box as="form">
+      <Box mb={6}>
+        <Heading as="h2" size="lg" mb={6} variant="yellowline">
           {t(`${prefix}.title`)}
         </Heading>
       </Box>
 
-      <BuildingLocationFields i18nPrefix="singleZoneCoolingHeatingTool.inputSummary.buildingLocation" />
-      <Divider my={10} />
-      <Box mb={6} backgroundColor="gray.100" p={4} borderRadius="md">
-        <Heading as="h3" size="md" mb={4} textAlign="center" textTransform="uppercase">
+      <Box mb={6}>
+        <Heading as="h3" size="md" mb={4}>
           {t(`${prefix}.calculationBasedOn.title`)}
         </Heading>
       </Box>
@@ -164,7 +194,7 @@ export const InputSummaryForm = ({ onNext }: IInputSummaryFormProps) => {
       </Grid>
       <Divider my={10} />
 
-      <Heading as="h3" size="md" mb={4}>
+      <Heading as="h2" size="md" mb={4} variant="yellowline">
         {t(`${prefix}.climateData.title`)}
       </Heading>
       <Grid templateColumns="repeat(2, 1fr)" gap={6}>
@@ -178,29 +208,53 @@ export const InputSummaryForm = ({ onNext }: IInputSummaryFormProps) => {
           maxLength={60}
           label={t(`${prefix}.climateData.windSheilding`)}
         />
-        <SelectFormControl
-          fieldName="climateData.ventilated"
-          label={t(`${prefix}.climateData.ventilated`)}
-          options={[
-            { label: t(`${prefix}.climateData.yes`), value: t(`${prefix}.climateData.yes`).toLowerCase() },
-            { label: t(`${prefix}.climateData.no`), value: t(`${prefix}.climateData.no`).toLowerCase() },
-          ]}
-        />
-        <SelectFormControl
-          fieldName="climateData.hrvErv"
-          label={t(`${prefix}.climateData.hrvErv`)}
-          options={[
-            { label: t(`${prefix}.climateData.yes`), value: t(`${prefix}.climateData.yes`).toLowerCase() },
-            { label: t(`${prefix}.climateData.no`), value: t(`${prefix}.climateData.no`).toLowerCase() },
-          ]}
-        />
+        <FormControl>
+          <FormLabel>{t(`${prefix}.climateData.ventilated`)}</FormLabel>
+          <RadioGroup
+            onChange={(value) =>
+              setValue("climateData.ventilated", value, { shouldDirty: true, shouldTouch: true, shouldValidate: true })
+            }
+            value={ventilated}
+          >
+            <Stack spacing={5} direction="row">
+              <Radio variant="binary" value={"yes"}>
+                {" "}
+                {t("ui.yes")}{" "}
+              </Radio>
+              <Radio variant="binary" value={"no"}>
+                {" "}
+                {t("ui.no")}{" "}
+              </Radio>
+            </Stack>
+          </RadioGroup>
+        </FormControl>
+        <FormControl>
+          <FormLabel>{t(`${prefix}.climateData.hrvErv`)}</FormLabel>
+          <RadioGroup
+            onChange={(value) =>
+              setValue("climateData.hrvErv", value, { shouldDirty: true, shouldTouch: true, shouldValidate: true })
+            }
+            value={hrvErv}
+          >
+            <Stack spacing={5} direction="row">
+              <Radio variant="binary" value={"yes"}>
+                {" "}
+                {t("ui.yes")}{" "}
+              </Radio>
+              <Radio variant="binary" value={"no"}>
+                {" "}
+                {t("ui.no")}{" "}
+              </Radio>
+            </Stack>
+          </RadioGroup>
+        </FormControl>
         <TextFormControl fieldName="climateData.ase" maxLength={60} label={t(`${prefix}.climateData.ase`)} />
         <TextFormControl fieldName="climateData.atre" maxLength={60} label={t(`${prefix}.climateData.atre`)} />
       </Grid>
 
       <Grid templateColumns="1fr 1fr" gap={6} my={10}>
         <Box>
-          <Heading as="h3" size="md" mb={4}>
+          <Heading as="h2" size="md" mb={4} variant="yellowline">
             {t(`${prefix}.heatingDesignConditions.title`)}
           </Heading>
           <TextFormControl
@@ -235,7 +289,7 @@ export const InputSummaryForm = ({ onNext }: IInputSummaryFormProps) => {
           />
         </Box>
         <Box>
-          <Heading as="h3" size="md" mb={4}>
+          <Heading as="h2" size="md" mb={4} variant="yellowline">
             {t(`${prefix}.coolingDesignConditions.title`)}
           </Heading>
           <TextFormControl
@@ -274,7 +328,7 @@ export const InputSummaryForm = ({ onNext }: IInputSummaryFormProps) => {
         t(`${prefix}.inputSummarySections.skylights`),
       ].map((section) => (
         <Box key={section} mb={6}>
-          <Heading as="h4" size="md" mb={4}>
+          <Heading as="h2" size="md" mb={4} variant="yellowline">
             {t(`${section}` as any)}
           </Heading>
           <Grid templateColumns="1fr 1fr" gap={6}>
@@ -282,6 +336,7 @@ export const InputSummaryForm = ({ onNext }: IInputSummaryFormProps) => {
               fieldName={`${section.replace(/\s+/g, "")}_styleA`}
               maxLength={50}
               label={t(`${prefix}.belowGradeWalls.styleA` as any)}
+              required={true}
             />
             <TextFormControl
               fieldName={`${section.replace(/\s+/g, "")}_styleB`}
@@ -294,13 +349,31 @@ export const InputSummaryForm = ({ onNext }: IInputSummaryFormProps) => {
               label={t(`${prefix}.belowGradeWalls.styleC` as any)}
             />
           </Grid>
+          <Divider my={10} />
         </Box>
       ))}
-      <Divider my={10} />
-      <Flex justify="flex-end" mt={10} mb={10}>
-        <Button variant="primary" onClick={onNext}>
-          {t(`${prefix}.next`)}
-        </Button>
+      <Flex justify="flex-start" mt={10} mb={10}>
+        {canContinue && (
+          <Button
+            variant="primary"
+            onClick={async () => {
+              const valid = await trigger(undefined, { shouldFocus: true })
+              if (!valid) {
+                toast({
+                  title: "Error",
+                  description: t("ui.pleaseFillRequiredFields") || "Please fill all required fields to continue.",
+                  status: "error",
+                  duration: 5000,
+                  isClosable: true,
+                })
+                return
+              }
+              onNext()
+            }}
+          >
+            {t(`${prefix}.next`)}
+          </Button>
+        )}
       </Flex>
     </Box>
   )

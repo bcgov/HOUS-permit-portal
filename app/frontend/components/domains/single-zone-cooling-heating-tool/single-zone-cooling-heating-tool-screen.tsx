@@ -85,7 +85,7 @@ export const SingleZoneCoolingHeatingToolScreen = observer(() => {
         variant="primary"
         mb={10}
         fontWeight="bold"
-        onClick={() => (window.location.href = "/overheating")}
+        onClick={() => (window.location.href = "/single-zone-cooling-heating-tool/start")}
       >
         {loggedIn ? t(`singleZoneCoolingHeatingTool.start`) : t(`singleZoneCoolingHeatingTool.loginToStart`)}
       </Button>

@@ -1,84 +1,63 @@
-import { Button, Container, Heading, Tab, TabList, TabPanel, TabPanels, Tabs, useToast } from "@chakra-ui/react"
+import { Flex, Hide, Show } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
-import React, { useState } from "react"
-import { FormProvider, useForm } from "react-hook-form"
+import React from "react"
 import { useTranslation } from "react-i18next"
-import { useNavigate } from "react-router-dom"
-import { useMst } from "../../../setup/root"
-import { CoverSheetForm } from "./cover-sheet-form"
-import { InputSummaryForm } from "./input-summary-form"
-import { RoomByRoomForm } from "./room-by-room-form"
+import { RemoveScroll } from "react-remove-scroll"
+import { FloatingHelpDrawer } from "../../shared/floating-help-drawer"
+import { FormSection } from "./form-section"
+import { SingleZoneCoolingHeatingToolNavBar } from "./nav-bar"
+import { OverheatingNavLinks } from "./nav-bar/overheating-nav-links"
+import { SingleZoneCoolingHeatingToolSidebar } from "./sidebar"
+import { SideBarDrawer } from "./sidebar/side-bar-drawer"
 
 export const SingleZoneCoolingHeatingToolStartScreen = observer(() => {
   const { t } = useTranslation() as any
-  const { pdfFormStore } = useMst()
-  const toast = useToast()
-  const formMethods = useForm()
-  const navigate = useNavigate()
-  const [activeTabIndex, setActiveTabIndex] = useState(0)
-
-  const handleNextFromCoverSheet = () => {
-    setActiveTabIndex(1)
-  }
-
-  const handleNextRoomByRoom = () => {
-    setActiveTabIndex(2)
-  }
-
-  const handleSubmit = async () => {
-    const formData = formMethods.getValues()
-
-    const result = await pdfFormStore.createPdfForm({
-      formJson: formData,
-      formType: "single_zone_cooling_heating_tool",
-      status: true,
-    })
-    if (result.success) {
-      toast({
-        title: "Success",
-        description: "Form data saved successfully!",
-        status: "success",
-        duration: 3000,
-        isClosable: true,
-      })
-      window.location.href = "/overheating"
-    } else {
-      toast({
-        title: "Error",
-        description: "Failed to save form data. Please try again.",
-        status: "error",
-        duration: 5000,
-        isClosable: true,
-      })
-    }
-  }
-
   return (
-    <Container maxW="container.lg" pb="36" px="8">
-      <Heading as="h1" mt="16" mb="6">
-        {t("singleZoneCoolingHeatingTool.title")}
-      </Heading>
-      <Button onClick={() => navigate(-1)}>Back</Button>
-      <FormProvider {...formMethods}>
-        <Tabs isLazy index={activeTabIndex} onChange={setActiveTabIndex}>
-          <TabList>
-            <Tab>{t("singleZoneCoolingHeatingTool.tabs.compliance")}</Tab>
-            <Tab>{t("singleZoneCoolingHeatingTool.tabs.inputSummary")}</Tab>
-            <Tab>{t("singleZoneCoolingHeatingTool.tabs.roomByRoom")}</Tab>
-          </TabList>
-          <TabPanels>
-            <TabPanel>
-              <CoverSheetForm onNext={handleNextFromCoverSheet} />
-            </TabPanel>
-            <TabPanel>
-              <InputSummaryForm onNext={handleNextRoomByRoom} />
-            </TabPanel>
-            <TabPanel>
-              <RoomByRoomForm onSubmit={handleSubmit} />
-            </TabPanel>
-          </TabPanels>
-        </Tabs>
-      </FormProvider>
-    </Container>
+    <RemoveScroll>
+      <Flex
+        direction="column"
+        h="100vh"
+        w="100vw"
+        pos="fixed"
+        top="0"
+        left="0"
+        right="0"
+        bottom="0"
+        zIndex="modal"
+        bg="white"
+      >
+        <SingleZoneCoolingHeatingToolNavBar
+          title={t("singleZoneCoolingHeatingTool.title")}
+          NavLinks={<OverheatingNavLinks />}
+        />
+        <Flex flex={1} w="full" overflow="auto" position="relative">
+          <Show above="lg">
+            <Flex w={"sidebar.width"} boxShadow="md" borderRightWidth={1} borderColor="greys.grey02" overflow="auto">
+              <SingleZoneCoolingHeatingToolSidebar />
+            </Flex>
+          </Show>
+          <Flex
+            direction="column"
+            flex={1}
+            pos="sticky"
+            overflow="auto"
+            top={0}
+            pl={{ base: 0, xl: 20 }}
+            pt={10}
+            pb={10}
+            id="stepCodeScroll"
+          >
+            <Hide above="lg">
+              <SideBarDrawer triggerProps={{ ml: 6, size: "md" }} />
+            </Hide>
+
+            <FloatingHelpDrawer top="24" zIndex={1} />
+            <Flex direction="column" flex={1} w="full" px={6} py={3}>
+              <FormSection />
+            </Flex>
+          </Flex>
+        </Flex>
+      </Flex>
+    </RemoveScroll>
   )
 })
