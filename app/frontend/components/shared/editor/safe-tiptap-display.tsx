@@ -1,8 +1,8 @@
 import { Box, BoxProps } from "@chakra-ui/react"
 import React from "react"
-import { sanitizeQuillHtml } from "../../../utils/sanitize-quill-content"
+import { sanitizeTipTapHtml } from "../../../utils/sanitize-tiptap-content"
 
-export interface SafeQuillDisplayProps extends Omit<BoxProps, "dangerouslySetInnerHTML"> {
+export interface SafeTipTapDisplayProps extends Omit<BoxProps, "dangerouslySetInnerHTML"> {
   /**
    * The HTML content from TipTap editor to display.
    * Will be sanitized before rendering to prevent XSS attacks.
@@ -16,10 +16,9 @@ export interface SafeQuillDisplayProps extends Omit<BoxProps, "dangerouslySetInn
 }
 
 /**
- * SafeQuillDisplay - A secure wrapper component for displaying TipTap editor content
+ * SafeTipTapDisplay - A secure wrapper component for displaying TipTap editor content
  *
  * This component sanitizes HTML content from TipTap editors before rendering to prevent XSS attacks.
- * The component name is kept for backward compatibility but now works with TipTap HTML.
  *
  * @security
  * Always use this component instead of directly rendering editor HTML with dangerouslySetInnerHTML.
@@ -27,10 +26,10 @@ export interface SafeQuillDisplayProps extends Omit<BoxProps, "dangerouslySetInn
  * @example
  * ```tsx
  * // Basic usage
- * <SafeQuillDisplay htmlContent={requirement.instructions} />
+ * <SafeTipTapDisplay htmlContent={requirement.instructions} />
  *
  * // With styling
- * <SafeQuillDisplay
+ * <SafeTipTapDisplay
  *   htmlContent={requirement.helperText}
  *   className="helper-text"
  *   fontSize="sm"
@@ -38,7 +37,7 @@ export interface SafeQuillDisplayProps extends Omit<BoxProps, "dangerouslySetInn
  * />
  *
  * // With custom container props (uses Chakra Box props)
- * <SafeQuillDisplay
+ * <SafeTipTapDisplay
  *   htmlContent={content}
  *   p={4}
  *   bg="gray.50"
@@ -48,13 +47,13 @@ export interface SafeQuillDisplayProps extends Omit<BoxProps, "dangerouslySetInn
  *
  * @component
  */
-export const SafeQuillDisplay: React.FC<SafeQuillDisplayProps> = ({
+export const SafeTipTapDisplay: React.FC<SafeTipTapDisplayProps> = ({
   htmlContent,
   "data-testid": dataTestId,
   ...boxProps
 }) => {
   // Sanitize the content
-  const sanitizedHtml = sanitizeQuillHtml(htmlContent)
+  const sanitizedHtml = sanitizeTipTapHtml(htmlContent)
 
   // Don't render anything if content is empty
   if (!sanitizedHtml) {
@@ -64,7 +63,7 @@ export const SafeQuillDisplay: React.FC<SafeQuillDisplayProps> = ({
   return (
     <Box
       {...boxProps}
-      data-testid={dataTestId || "safe-quill-display"}
+      data-testid={dataTestId || "safe-tiptap-display"}
       dangerouslySetInnerHTML={{ __html: sanitizedHtml }}
       // Add default styling that matches editor output
       sx={{
@@ -138,7 +137,7 @@ export const SafeQuillDisplay: React.FC<SafeQuillDisplayProps> = ({
 }
 
 /**
- * SafeQuillDisplayInline - A variant for inline display without block-level spacing
+ * SafeTipTapDisplayInline - A variant for inline display without block-level spacing
  *
  * Useful when you need to display editor content inline with other content,
  * without the default block-level spacing.
@@ -146,16 +145,16 @@ export const SafeQuillDisplay: React.FC<SafeQuillDisplayProps> = ({
  * @example
  * ```tsx
  * <Text>
- *   Requirement: <SafeQuillDisplayInline htmlContent={req.shortDescription} />
+ *   Requirement: <SafeTipTapDisplayInline htmlContent={req.shortDescription} />
  * </Text>
  * ```
  */
-export const SafeQuillDisplayInline: React.FC<SafeQuillDisplayProps> = ({
+export const SafeTipTapDisplayInline: React.FC<SafeTipTapDisplayProps> = ({
   htmlContent,
   "data-testid": dataTestId,
   ...boxProps
 }) => {
-  const sanitizedHtml = sanitizeQuillHtml(htmlContent)
+  const sanitizedHtml = sanitizeTipTapHtml(htmlContent)
 
   if (!sanitizedHtml) {
     return null
@@ -165,7 +164,7 @@ export const SafeQuillDisplayInline: React.FC<SafeQuillDisplayProps> = ({
     <Box
       as="span"
       {...boxProps}
-      data-testid={dataTestId || "safe-quill-display-inline"}
+      data-testid={dataTestId || "safe-tiptap-display-inline"}
       dangerouslySetInnerHTML={{ __html: sanitizedHtml }}
       sx={{
         display: "inline",
@@ -191,7 +190,3 @@ export const SafeQuillDisplayInline: React.FC<SafeQuillDisplayProps> = ({
     />
   )
 }
-
-// Export aliases for TipTap naming
-export const SafeTipTapDisplay = SafeQuillDisplay
-export const SafeTipTapDisplayInline = SafeQuillDisplayInline

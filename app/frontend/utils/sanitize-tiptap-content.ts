@@ -11,7 +11,7 @@ import DOMPurify from "dompurify"
  *
  * @example
  * ```tsx
- * const safeHtml = sanitizeQuillHtml(userProvidedContent)
+ * const safeHtml = sanitizeTipTapHtml(userProvidedContent)
  * <div dangerouslySetInnerHTML={{ __html: safeHtml }} />
  * ```
  *
@@ -22,15 +22,15 @@ import DOMPurify from "dompurify"
  * Allowed attributes: href (on <a>), target (on <a>), rel (on <a>), class
  * Blocked: All event handlers, dangerous protocols (javascript:, data:, vbscript:, file:, about:)
  */
-export function sanitizeQuillHtml(htmlContent: string | null | undefined): string {
+export function sanitizeTipTapHtml(htmlContent: string | null | undefined): string {
   // Handle null/undefined cases
   if (!htmlContent) {
     return ""
   }
 
-  // Configure DOMPurify with safe defaults for Quill content
+  // Configure DOMPurify with safe defaults for TipTap content
   const config = {
-    // Only allow HTML tags that Quill uses
+    // Only allow HTML tags that TipTap uses
     ALLOWED_TAGS: [
       // Text formatting
       "p",
@@ -46,7 +46,7 @@ export function sanitizeQuillHtml(htmlContent: string | null | undefined): strin
       "li",
       // Links
       "a",
-      // Headers (in case your Quill config allows them)
+      // Headers (in case your TipTap config allows them)
       "h1",
       "h2",
       "h3",
@@ -64,7 +64,7 @@ export function sanitizeQuillHtml(htmlContent: string | null | undefined): strin
       "href", // For links
       "target", // For links (will be validated)
       "rel", // For links (noopener noreferrer)
-      "class", // For Quill styling classes
+      "class", // For TipTap styling classes
     ],
 
     // Additional security options
@@ -111,12 +111,12 @@ export function sanitizeQuillHtml(htmlContent: string | null | undefined): strin
  *
  * @example
  * ```tsx
- * if (!isQuillContentEmpty(content)) {
- *   return <SafeQuillDisplay htmlContent={content} />
+ * if (!isTipTapContentEmpty(content)) {
+ *   return <SafeTipTapDisplay htmlContent={content} />
  * }
  * ```
  */
-export function isQuillContentEmpty(htmlContent: string | null | undefined): boolean {
+export function isTipTapContentEmpty(htmlContent: string | null | undefined): boolean {
   if (!htmlContent) {
     return true
   }

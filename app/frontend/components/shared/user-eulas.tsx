@@ -32,7 +32,7 @@ import { useMst } from "../../setup/root"
 import { colors } from "../../styles/theme/foundations/colors"
 import { ILicenseAgreement } from "../../types/types"
 import { SharedSpinner } from "./base/shared-spinner"
-import { SafeQuillDisplay } from "./editor/safe-quill-display"
+import { SafeTipTapDisplay } from "./editor/safe-tiptap-display"
 import { RouterLinkButton } from "./navigation/router-link-button"
 
 export const UserEulas = observer(function UserEulas() {
@@ -168,8 +168,8 @@ export const PastEulasModal = observer(function PastEulasModal({
                   </Box>
                   <AccordionPanel bg={"white"} borderBottomRadius={"sm"}>
                     <Box maxW="4xl" overflow="hidden">
-                      {/* Use SafeQuillDisplay for safe HTML rendering */}
-                      <SafeQuillDisplay htmlContent={la.agreement?.content} />
+                      {/* Use SafeTipTapDisplay for safe HTML rendering */}
+                      <SafeTipTapDisplay htmlContent={la.agreement?.content} />
                     </Box>
                   </AccordionPanel>
                 </AccordionItem>

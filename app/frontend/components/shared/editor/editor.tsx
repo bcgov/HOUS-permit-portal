@@ -6,7 +6,7 @@ import StarterKit from "@tiptap/starter-kit"
 import debounce from "lodash/debounce"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useMemo } from "react"
-import { isQuillEmpty } from "../../../utils/utility-functions"
+import { isTipTapEmpty } from "../../../utils/utility-functions"
 import { CustomImage } from "./extensions/custom-image"
 import { CustomLink } from "./extensions/custom-link"
 
@@ -62,7 +62,7 @@ export const Editor = observer(
     const debouncedHandleChange = useMemo(
       () =>
         debounce((html: string) => {
-          onChange?.(isQuillEmpty(html) ? "" : html)
+          onChange?.(isTipTapEmpty(html) ? "" : html)
         }, 500),
       [onChange]
     )
