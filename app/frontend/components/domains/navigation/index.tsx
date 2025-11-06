@@ -499,6 +499,10 @@ const AppRoutes = observer(() => {
         <Route path="create" element={<ExternalApiKeyModalSubRoute />} />
         <Route path=":externalApiKeyId/manage" element={<ExternalApiKeyModalSubRoute />} />
       </Route>
+      <Route
+        path="/jurisdictions/:jurisdictionId/configuration-management/energy-step"
+        element={<EnergyStepRequirementsScreen />}
+      />
     </>
   )
 

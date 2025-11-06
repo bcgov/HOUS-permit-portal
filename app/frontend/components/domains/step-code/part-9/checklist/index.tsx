@@ -7,7 +7,8 @@ import React, { useEffect, useRef, useState } from "react"
 import { FormProvider, useForm } from "react-hook-form"
 import { useNavigate, useParams } from "react-router-dom"
 import { usePart9StepCode } from "../../../../../hooks/resources/use-part-9-step-code"
-import { EFlashMessageStatus } from "../../../../../types/enums"
+import { EFileUploadAttachmentType, EFlashMessageStatus, EStepCodeChecklistStatus } from "../../../../../types/enums"
+import { FileDownloadButton } from "../../../../shared/base/file-download-button"
 import { SharedSpinner } from "../../../../shared/base/shared-spinner"
 import { BuildingCharacteristicsSummary } from "./building-characteristics-summary"
 import { CompletedBy } from "./completed-by"
@@ -29,27 +30,33 @@ export const StepCodeChecklistForm = observer(function StepCodeChecklistForm() {
   const zeroCarbonComplianceRef = useRef<null | HTMLDivElement>()
 
   useEffect(() => {
+    if (!currentStepCode) return
     if (!checklist) return
     if (!checklist.isLoaded) {
       ;(async () => {
         await checklist.load()
       })()
     }
-  }, [checklist])
+  }, [checklist?.id, checklist?.isLoaded, currentStepCode?.id, currentStepCode?.reportDocuments?.length])
 
   useEffect(() => {
     checklist?.isLoaded && reset(checklist.defaultFormValues)
   }, [checklist?.isLoaded])
 
   const formMethods = useForm({ mode: "onChange" })
-  const { handleSubmit, reset } = formMethods
+  const { handleSubmit, reset, formState } = formMethods
+  const { isSubmitting } = formState
 
-  const onSubmit = async (values) => {
+  const onSubmit = async (values, event: React.BaseSyntheticEvent) => {
+    const markingComplete = (event.nativeEvent as CustomEvent)?.detail?.markComplete
+    if (markingComplete) {
+      values.status = EStepCodeChecklistStatus.complete
+    }
     const result = await currentStepCode.updateChecklist(
       checklist.id,
       R.mergeRight(values, { stepRequirementId: checklist.stepRequirementId })
     )
-    if (result) {
+    if (result && !markingComplete) {
       if (permitApplicationId) {
         navigate(`/permit-applications/${permitApplicationId}/edit`)
       } else {
@@ -162,6 +169,14 @@ export const StepCodeChecklistForm = observer(function StepCodeChecklistForm() {
             </Accordion>
           </form>
         </FormProvider>
+        {checklist.isComplete && !isSubmitting && currentStepCode?.latestReportDocument && (
+          <FileDownloadButton
+            variant="link"
+            modelType={EFileUploadAttachmentType.ReportDocument}
+            document={currentStepCode.latestReportDocument as any}
+            simpleLabel
+          />
+        )}
       </VStack>
     </Container>
   )

@@ -1,7 +1,8 @@
-import { Text, View } from "@react-pdf/renderer"
+import { View } from "@react-pdf/renderer"
 import { t } from "i18next"
 import React from "react"
 import { IPart9StepCodeChecklist } from "../../../../../../../models/part-9-step-code-checklist"
+import { Text } from "../../../../../../shared/pdf/text"
 import { i18nPrefix } from "../../project-info/i18n-prefix"
 import { Field } from "../shared/field"
 import { Panel } from "../shared/panel"
@@ -13,9 +14,9 @@ export const ProjectInfo = function StepCodeChecklistPDFProjectInfo({ checklist 
   return (
     <Panel heading={t(`${i18nPrefix}.heading`)}>
       <Text style={{ fontSize: 13.5, fontWeight: 700 }}>{t(`${i18nPrefix}.stages.${checklist.stage}`)}</Text>
-      <Field label={t(`${i18nPrefix}.permitNum`)} value={checklist.buildingPermitNumber} />
+      <Field label={t(`${i18nPrefix}.permitNum`)} value={checklist.referenceNumber} />
       <Field label={t(`${i18nPrefix}.builder`)} value={checklist.builder} />
-      <Field label={t(`${i18nPrefix}.address`)} value={checklist.address} />
+      <Field label={t(`${i18nPrefix}.address`)} value={checklist.fullAddress} />
       <Field label={t(`${i18nPrefix}.jurisdiction`)} value={checklist.jurisdictionName} />
       <Field label={t(`${i18nPrefix}.pid`)} value={checklist.pid} />
       <View style={{ display: "flex" }}>

@@ -226,6 +226,7 @@ class Api::JurisdictionsController < Api::ApplicationController
       :contact_summary_html,
       :map_zoom,
       :inbox_enabled,
+      :ltsa_matcher,
       map_position: [],
       users_attributes: %i[first_name last_name role email],
       contacts_attributes: %i[

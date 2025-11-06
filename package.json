@@ -29,7 +29,7 @@
     "sass": "^1.70.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.4.3",
-    "vite": "^6.3.6",
+    "vite": "^6.4.1",
     "vite-plugin-ruby": "^5.1.1"
   },
   "dependencies": {
@@ -58,6 +58,7 @@
     "apisauce": "^3.0.1",
     "date-fns": "^2.30.0",
     "date-fns-tz": "^2.0.1",
+    "dompurify": "^3.3.0",
     "follow-redirects": ">=1.15.6",
     "formiojs": "^4.17.4",
     "framer-motion": "^10.16.5",

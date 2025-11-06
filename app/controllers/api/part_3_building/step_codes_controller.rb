@@ -15,9 +15,12 @@ class Api::Part3Building::StepCodesController < Api::ApplicationController
       Part3StepCode.transaction do
         @step_code =
           if step_code_params[:permit_application_id]
-            Part3StepCode.where(
-              permit_application_id: step_code_params[:permit_application_id]
-            ).first_or_create!(step_code_params_for_create)
+            Part3StepCode
+              .kept
+              .where(
+                permit_application_id: step_code_params[:permit_application_id]
+              )
+              .first_or_create!(step_code_params_for_create)
           else
             Part3StepCode.create!(step_code_params_for_create)
           end

@@ -68,7 +68,7 @@ export const JurisdictionStoreModel = types
       const { ok, data: response } = yield* toGenerator(self.environment.api.createJurisdiction(formData))
 
       if (ok) {
-        self.jurisdictionMap.put(response.data)
+        self.mergeUpdate(response.data, "jurisdictionMap")
         return response.data
       }
     }),

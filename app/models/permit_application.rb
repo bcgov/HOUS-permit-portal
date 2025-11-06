@@ -304,6 +304,17 @@ class PermitApplication < ApplicationRecord
     )
   end
 
+  def latest_possibly_unpublished_template_version
+    LiveRequirementTemplate
+      .find_by(
+        activity: activity,
+        permit_type: permit_type,
+        first_nations: first_nations
+      )
+      &.template_versions
+      &.last
+  end
+
   def form_customizations
     if submitted?
       form_customizations_snapshot
@@ -360,7 +371,12 @@ class PermitApplication < ApplicationRecord
   def set_template_version
     return unless template_version.blank?
 
-    self.template_version = current_published_template_version
+    self.template_version =
+      if sandbox.present? && sandbox.scheduled?
+        latest_possibly_unpublished_template_version
+      else
+        current_published_template_version
+      end
   end
 
   def populate_base_form_data
@@ -777,6 +793,7 @@ class PermitApplication < ApplicationRecord
   end
 
   def jurisdiction_has_matching_submission_contact
+    return if sandbox.present?
     return unless jurisdiction
     matching_contacts =
       PermitTypeSubmissionContact.where(

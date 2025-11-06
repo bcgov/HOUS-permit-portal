@@ -103,6 +103,7 @@ export const Part3StepCodeChecklistModel = types
     completedByEmail: types.maybeNull(types.string),
     completedByOrganizationName: types.maybeNull(types.string),
     complianceReport: types.maybeNull(types.frozen<IPart3ComplianceReport>()),
+    updatedAt: types.maybeNull(types.Date),
   })
   .extend(withEnvironment())
   .volatile((self) => ({

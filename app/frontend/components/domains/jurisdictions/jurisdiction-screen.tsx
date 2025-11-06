@@ -33,7 +33,7 @@ import { CustomMessageBox } from "../../shared/base/custom-message-box"
 import { ErrorScreen } from "../../shared/base/error-screen"
 import { LoadingScreen } from "../../shared/base/loading-screen"
 import { EditorWithPreview } from "../../shared/editor/custom-extensions/editor-with-preview"
-import { Editor } from "../../shared/editor/editor"
+import { SafeQuillDisplay } from "../../shared/editor/safe-quill-display"
 import { JurisdictionMap } from "../../shared/module-wrappers/jurisdiction-map"
 import { StepCodeRequirementsTable } from "../../shared/step-code-requirements-table"
 import { Can } from "../../shared/user/can"
@@ -310,7 +310,8 @@ const JurisdictionQuillFormController = observer(
           action={"jurisdiction:manage"}
           data={{ jurisdiction: currentJurisdiction }}
           onPermissionDeniedRender={
-            <Editor value={currentJurisdiction[name]} readOnly={true} modules={{ toolbar: false }} />
+            /* Use SafeQuillDisplay instead of readonly Editor to prevent XSS (CVE-2021-3163) */
+            <SafeQuillDisplay htmlContent={currentJurisdiction[name]} />
           }
         >
           <Controller

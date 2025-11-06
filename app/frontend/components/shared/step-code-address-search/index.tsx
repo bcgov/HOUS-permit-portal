@@ -48,7 +48,8 @@ const StepCodeAddressSearch = observer(
         return
       }
 
-      const jurisdiction = await geocoderStore.fetchGeocodedJurisdiction(String(selectedSite))
+      const result = await geocoderStore.fetchGeocodedJurisdiction(String(selectedSite))
+      const jurisdiction = result?.jurisdiction
 
       if (!jurisdiction) {
         onJurisdictionFound?.(null)

@@ -1,10 +1,11 @@
-import { Page, Text, View } from "@react-pdf/renderer"
+import { Page, View } from "@react-pdf/renderer"
 import { t } from "i18next"
 import * as R from "ramda"
 import React from "react"
 import { IPermitApplication } from "../../../../../models/permit-application"
 import { theme } from "../../../../../styles/theme"
 import { generateUUID } from "../../../../../utils/utility-functions"
+import { Text } from "../../../../shared/pdf/text"
 import { Footer } from "../shared/footer"
 import { page } from "../shared/styles/page"
 
