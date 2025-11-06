@@ -51,6 +51,7 @@ export const JurisdictionModel = types
     sandboxes: types.array(types.reference(SandboxModel)),
     firstNation: types.optional(types.boolean, false),
     ltsaMatcher: types.maybeNull(types.string),
+    heatingDegreeDays: types.maybeNull(types.number),
   })
   .extend(withEnvironment())
   .extend(withRootStore())

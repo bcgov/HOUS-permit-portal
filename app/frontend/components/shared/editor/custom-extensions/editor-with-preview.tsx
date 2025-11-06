@@ -1,7 +1,8 @@
 import { Box, BoxProps, Button, ButtonProps, Text } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
-import React, { useState } from "react"
+import React, { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
+import { sanitizeQuillHtml } from "../../../../utils/sanitize-quill-content"
 import { isQuillEmpty } from "../../../../utils/utility-functions"
 import { Editor } from "../editor"
 import { SafeQuillDisplay } from "../safe-quill-display"
@@ -36,7 +37,10 @@ export const EditorWithPreview = observer(function EditorWithPreview({
   onRemove,
   isReadOnly,
 }: TEditorWithPreviewProps) {
-  const isEditorEmpty = isQuillEmpty(htmlValue)
+  // Sanitize htmlValue before using it to prevent XSS attacks (CVE-2021-3163)
+  // This protects against malicious content in edit mode (ReactQuill) and preview mode (SafeQuillDisplay)
+  const sanitizedHtmlValue = useMemo(() => sanitizeQuillHtml(htmlValue), [htmlValue])
+  const isEditorEmpty = isQuillEmpty(sanitizedHtmlValue)
   const [isEditMode, setIsEditMode] = useState(false)
   const { t } = useTranslation()
 
@@ -114,7 +118,8 @@ export const EditorWithPreview = observer(function EditorWithPreview({
       )}
       {isEditMode ? (
         <>
-          <Editor key={"edit"} htmlValue={htmlValue} onChange={onChange} />
+          {/* Sanitize htmlValue before passing to Editor to prevent XSS (CVE-2021-3163) */}
+          <Editor key={"edit"} htmlValue={sanitizedHtmlValue} onChange={onChange} />
           <Button variant="primary" mt={4} onClick={handleClickDone}>
             {t("ui.done")}
           </Button>
@@ -126,9 +131,9 @@ export const EditorWithPreview = observer(function EditorWithPreview({
               {editText}
             </Button>
           )}
-          {/* Use SafeQuillDisplay instead of readonly Editor to prevent XSS (CVE-2021-3163) */}
+          {/* SafeQuillDisplay also sanitizes internally, but sanitizing here adds defense-in-depth */}
           <SafeQuillDisplay
-            htmlContent={htmlValue}
+            htmlContent={sanitizedHtmlValue}
             fontSize="sm"
             sx={{
               "& p": {

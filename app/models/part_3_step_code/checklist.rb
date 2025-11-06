@@ -185,7 +185,7 @@ class Part3StepCode::Checklist < ActiveRecord::Base
   private
 
   def set_climate_info
-    return unless step_code&.permit_application
+    return unless step_code&.jurisdiction
 
     self.heating_degree_days ||= step_code.jurisdiction_heating_degree_days
     self.climate_zone ||=
