@@ -117,7 +117,7 @@ export const Part9EnergyStepEditableBlock = observer(function Part9EnergyStepEdi
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} style={{ width: "100%" }}>
-      <EditableBlockContainer>
+      <EditableBlockContainer w="full">
         <Flex direction="column" w="20%" alignSelf="flex-start">
           <Text textTransform="uppercase" color="text.secondary" fontSize="sm" mb={4}>
             {t(`${i18nPrefix}.stepRequired.permitTypeHeading`)}

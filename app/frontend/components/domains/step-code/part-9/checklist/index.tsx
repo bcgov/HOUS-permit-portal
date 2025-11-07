@@ -37,7 +37,7 @@ export const StepCodeChecklistForm = observer(function StepCodeChecklistForm() {
         await checklist.load()
       })()
     }
-  }, [checklist?.id, currentStepCode?.id, currentStepCode?.reportDocuments?.length])
+  }, [checklist?.id, checklist?.isLoaded, currentStepCode?.id, currentStepCode?.reportDocuments?.length])
 
   useEffect(() => {
     checklist?.isLoaded && reset(checklist.defaultFormValues)
@@ -57,11 +57,7 @@ export const StepCodeChecklistForm = observer(function StepCodeChecklistForm() {
       R.mergeRight(values, { stepRequirementId: checklist.stepRequirementId })
     )
     if (result && !markingComplete) {
-      if (permitApplicationId) {
-        navigate(`/permit-applications/${permitApplicationId}/edit`)
-      } else {
-        navigate(`/step-codes`)
-      }
+      navigate(-1)
     }
   }
 

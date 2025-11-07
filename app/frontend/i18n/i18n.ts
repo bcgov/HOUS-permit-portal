@@ -3016,10 +3016,17 @@ Thank you,
               confirmationRequired: "Action required: please click link in verification email",
             },
             stepCodeRequirements: {
-              title: "Energy Step Code requirements",
-              description: "Define step code requirements",
+              title: "Energy Step Code configuration",
+              description: "Define step code configuration values for your jurisdiction",
               setMinimum:
                 "Set the minimum acceptable levels of Energy Step Code and Zero Carbon Step Code for BCBC part 9 buildings below:",
+              part9Tab: "Part 9",
+              part3Tab: "Part 3",
+              part3SetMinimum:
+                "Set the heating degree days below 18°C for BCBC part 3 buildings. This value is used to determine climate zone requirements:",
+              heatingDegreeDays: {
+                label: "Heating degree days below 18°C",
+              },
               part9Building: "Part 9 Building",
               addStep: "Add another requirement combination",
               deleteCustomization: "Delete customization",

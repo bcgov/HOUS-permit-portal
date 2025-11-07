@@ -59,6 +59,7 @@ export const JurisdictionModel = types
     firstNation: types.optional(types.boolean, false),
     ltsaMatcher: types.maybeNull(types.string),
     servicePartnerEnrollments: types.array(types.frozen<IJurisdictionServicePartnerEnrollment>()),
+    heatingDegreeDays: types.maybeNull(types.number),
   })
   .extend(withEnvironment())
   .extend(withRootStore())

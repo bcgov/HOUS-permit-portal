@@ -33,10 +33,10 @@ export const SiteConfigurationStoreModel = types.snapshotProcessor(
       fetchSiteConfiguration: flow(function* fetchSiteConfiguration() {
         self.configurationLoaded = false
         const response: any = yield self.environment.api.fetchSiteConfiguration()
+        const rawData = { ...preProcessor(response.data.data), configurationLoaded: true }
         if (response.ok) {
-          applySnapshot(self, preProcessor(response.data.data))
+          applySnapshot(self, rawData)
         }
-        self.configurationLoaded = true
         return response.ok
       }),
       updateSiteConfiguration: flow(function* updateSiteConfiguration(
@@ -45,11 +45,10 @@ export const SiteConfigurationStoreModel = types.snapshotProcessor(
         self.configurationLoaded = false
         const response: any = yield self.environment.api.updateSiteConfiguration(siteConfiguration)
 
+        const rawData = { ...preProcessor(response.data.data), configurationLoaded: true }
         if (response.ok) {
-          applySnapshot(self, preProcessor(response.data.data))
-          self.configurationLoaded = true
+          applySnapshot(self, rawData)
         }
-        self.configurationLoaded = true
         return response.ok
       }),
       updateJurisdictionEnrollments: flow(function* updateJurisdictionEnrollments(

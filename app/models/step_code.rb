@@ -38,7 +38,6 @@ class StepCode < ApplicationRecord
   delegate :submitter,
            :newly_submitted_at,
            :status,
-           :jurisdiction_heating_degree_days,
            to: :permit_application,
            allow_nil: true
 

@@ -620,7 +620,7 @@ export interface IPermitTypeRequiredStep {
   workType?: string
   energyStepRequired: EEnergyStep
   zeroCarbonStepRequired: EZeroCarbonStep
-  activityName: string
+  activityName?: string
 }
 
 export type TCreateRequirementTemplateFormData = {

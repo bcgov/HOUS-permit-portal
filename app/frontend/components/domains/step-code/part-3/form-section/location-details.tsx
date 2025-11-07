@@ -24,7 +24,7 @@ import { SectionHeading } from "./shared/section-heading"
 
 export const LocationDetails = observer(function Part3StepCodeFormLocationDetails() {
   const i18nPrefix = "stepCode.part3.locationDetails"
-  const { checklist } = usePart3StepCode()
+  const { checklist, currentStepCode } = usePart3StepCode()
 
   const navigate = useNavigate()
   const location = useLocation()
@@ -32,7 +32,7 @@ export const LocationDetails = observer(function Part3StepCodeFormLocationDetail
   const { handleSubmit, formState, register, control, reset } = useForm({
     defaultValues: {
       buildingHeight: checklist.buildingHeight && parseFloat(checklist.buildingHeight),
-      heatingDegreeDays: checklist.heatingDegreeDays,
+      heatingDegreeDays: checklist.heatingDegreeDays ?? currentStepCode?.jurisdiction?.heatingDegreeDays ?? null,
       climateZone: checklist.climateZone,
     },
   })
