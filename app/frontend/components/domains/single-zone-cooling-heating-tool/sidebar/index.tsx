@@ -7,6 +7,11 @@ import { SectionLink } from "./section-link"
 import { SubLink } from "./sub-link"
 
 export const SingleZoneCoolingHeatingToolSidebar = observer(function SingleZoneCoolingHeatingToolSidebar() {
+  React.useEffect(() => {
+    if (!window.location.hash) {
+      window.location.hash = "#compliance"
+    }
+  }, [])
   return (
     <VStack w="full" align="stretch" pt={4}>
       {navSections.map((section) => (
@@ -22,7 +27,6 @@ export const SingleZoneCoolingHeatingToolSidebar = observer(function SingleZoneC
           ))}
         </React.Fragment>
       ))}
-      {/* add some padding below the final element */}
       <Box py={2} w="full" />
     </VStack>
   )

@@ -10,7 +10,6 @@ type KeyPath = string
 const useLabels = () => {
   const { t } = useTranslation() as any
   const labelFor = (path: KeyPath): string => {
-    // Cover sheet labels
     if (path.startsWith("buildingLocation."))
       return (t as any)(`singleZoneCoolingHeatingTool.coverSheet.buildingLocation.${path.split(".")[1]}`)
     if (path.startsWith("heating."))
@@ -22,7 +21,6 @@ const useLabels = () => {
     if (path.startsWith("compliance."))
       return (t as any)(`singleZoneCoolingHeatingTool.coverSheet.compliance.${path.split(".")[1]}`)
 
-    // Input summary labels
     if (path.startsWith("calculationBasedOn."))
       return (t as any)(`singleZoneCoolingHeatingTool.inputSummary.calculationBasedOn.${path.split(".")[1]}`)
     if (path.startsWith("climateData."))
@@ -135,13 +133,21 @@ export const ReviewForm = observer(function ReviewForm() {
 
       <Divider my={6} />
       <Heading as="h3" size="md" mb={3}>
-        Room by room
+        {(useTranslation() as any).t("singleZoneCoolingHeatingTool.review.roomByRoom")}
       </Heading>
       <Grid templateColumns={{ base: "1fr", md: "40px 1fr 1fr 1fr" }} gap={2}>
-        <GridItem fontWeight="bold">#</GridItem>
-        <GridItem fontWeight="bold">Name</GridItem>
-        <GridItem fontWeight="bold">Heating</GridItem>
-        <GridItem fontWeight="bold">Cooling</GridItem>
+        <GridItem fontWeight="bold">
+          {(useTranslation() as any).t("singleZoneCoolingHeatingTool.review.roomByRoomIndex")}
+        </GridItem>
+        <GridItem fontWeight="bold">
+          {(useTranslation() as any).t("singleZoneCoolingHeatingTool.review.roomByRoomName")}
+        </GridItem>
+        <GridItem fontWeight="bold">
+          {(useTranslation() as any).t("singleZoneCoolingHeatingTool.review.roomByRoomHeating")}
+        </GridItem>
+        <GridItem fontWeight="bold">
+          {(useTranslation() as any).t("singleZoneCoolingHeatingTool.review.roomByRoomCooling")}
+        </GridItem>
         {nonEmptyRooms.map((r) => (
           <React.Fragment key={r.index}>
             <GridItem>{r.index}</GridItem>
@@ -151,12 +157,24 @@ export const ReviewForm = observer(function ReviewForm() {
           </React.Fragment>
         ))}
       </Grid>
-
-      <Flex justify="flex-start" mt={10}>
-        <Button variant="primary" onClick={generate}>
-          {(useTranslation() as any).t("singleZoneCoolingHeatingTool.uploads.generate") || "Continue"}
-        </Button>
-      </Flex>
+      <Divider my={6} />
+      {section("Room by room summary", asList(values?.roomByRoomSummary || {}, "roomByRoomSummary"))}
+      <Divider my={6} />
+      {(() => {
+        const bl = values?.buildingLocation || {}
+        const hasVal = (v: any) => v !== undefined && v !== null && String(v).toString().trim() !== ""
+        const requiredKeys = ["model", "site", "lot", "city", "province", "postalCode"]
+        const canGenerate = requiredKeys.every((k) => hasVal((bl as any)[k]))
+        return (
+          canGenerate && (
+            <Flex justify="flex-start" mt={10}>
+              <Button variant="primary" onClick={generate}>
+                {(useTranslation() as any).t("singleZoneCoolingHeatingTool.uploads.generate")}
+              </Button>
+            </Flex>
+          )
+        )
+      })()}
     </Box>
   )
 })

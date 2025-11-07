@@ -16,14 +16,13 @@ export const RoomByRoomForm = ({ onSubmit }: IRoomByRoomFormProps) => {
   const [canContinue, setCanContinue] = React.useState(false)
   const all = watch()
   React.useEffect(() => {
-    // For performance, avoid running full validation on every keystroke
-    // Enable submit when at least one row has either heating or cooling filled
     const values = (watch() as any) || {}
     const rows = values?.roomByRoom || {}
     const hasVal = (v: any) => v !== undefined && v !== null && String(v).toString().trim() !== ""
     const ok = Object.values(rows).some((r: any) => hasVal(r?.heating) || hasVal(r?.cooling))
     setCanContinue(ok)
     clearErrors()
+    window.dispatchEvent(new CustomEvent("szch:section", { detail: { key: "calculations", complete: ok } }))
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [all])
 
@@ -67,7 +66,6 @@ export const RoomByRoomForm = ({ onSubmit }: IRoomByRoomFormProps) => {
         </Table>
       </Box>
 
-      {/* Summary fields below the table */}
       <Grid templateColumns="1fr 150px 150px" gap={4} mt={6} alignItems="center">
         <Box gridColumn="1 / span 1">
           <Heading as="h4" size="sm">

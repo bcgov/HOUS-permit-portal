@@ -1,27 +1,46 @@
-import { Box, Container, Divider, Flex, FormControl, GridItem, Heading, Select, Text, VStack } from "@chakra-ui/react"
+import {
+  Box,
+  Button,
+  Container,
+  Divider,
+  Flex,
+  FormControl,
+  GridItem,
+  Heading,
+  Popover,
+  PopoverArrow,
+  PopoverBody,
+  PopoverContent,
+  PopoverTrigger,
+  Radio,
+  RadioGroup,
+  Stack,
+  Text,
+  useDisclosure,
+  VStack,
+} from "@chakra-ui/react"
 import { CaretRight } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React, { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../setup/root"
-import { ModelSearchInput } from "../../shared/base/model-search-input"
-import { RouterLinkButton } from "../../shared/navigation/router-link-button"
-//import { StepCodeTypeFilter } from "./step-code-type-filter"
 import { EFlashMessageStatus, EPdfFormSortFields } from "../../../types/enums"
 import { CustomMessageBox } from "../../shared/base/custom-message-box"
 import { Paginator } from "../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../shared/base/inputs/per-page-select"
+import { ModelSearchInput } from "../../shared/base/model-search-input"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
 import { SearchGrid } from "../../shared/grid/search-grid"
+import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { PdfFormGridRow } from "../single-zone-cooling-heating-tool/pdf-form-grid-row"
 import { GridHeaders, OVERHEATING_GRID_TEMPLATE_COLUMNS } from "./grid-header"
 
 export const OverheatingTabPanelContent = observer(() => {
   const { t } = useTranslation() as any
   const { pdfFormStore } = useMst()
-  const [loadingPdfs, setLoadingPdfs] = useState<Record<string, boolean>>({})
-  const [generatedPdfs, setGeneratedPdfs] = useState<Record<string, string>>({})
+  const [statusChoice, setStatusChoice] = useState<string>(pdfFormStore.statusFilter)
+  const { isOpen, onOpen, onClose } = useDisclosure()
   const { isSearching, tablePdfForms, searchPdfForms, countPerPage, totalCount, currentPage, totalPages } = pdfFormStore
 
   useEffect(() => {
@@ -29,52 +48,8 @@ export const OverheatingTabPanelContent = observer(() => {
     searchPdfForms({ page: 1, countPerPage: 10 })
   }, [])
 
-  const generatePdf = async (id: string) => {
-    setLoadingPdfs((prev) => ({ ...prev, [id]: true }))
-
-    try {
-      const result = await pdfFormStore.generatePdf(id)
-
-      setTimeout(() => {
-        setLoadingPdfs((prev) => ({ ...prev, [id]: false }))
-
-        setGeneratedPdfs((prev) => ({ ...prev, [id]: "ready" }))
-      }, 4000)
-    } catch (error) {
-      console.error("Error generating PDF:", error)
-      setLoadingPdfs((prev) => ({ ...prev, [id]: false }))
-    }
-  }
-
   const archivePdf = async (id: string) => {
     await pdfFormStore.archivePdfForm(id)
-  }
-
-  const handleDownloadPdf = async (id: string) => {
-    try {
-      const response = await pdfFormStore.environment.api.downloadPdf(id)
-
-      if (!response.data || (response.data as Blob).size === 0) {
-        alert("PDF file is empty or not ready yet. Please wait a moment and try again.")
-        return
-      }
-
-      const blob = new Blob([response.data as Blob], { type: "application/pdf" })
-
-      const url = window.URL.createObjectURL(blob)
-      const link = document.createElement("a")
-      link.href = url
-      link.download = `pdf_form_${id}.pdf`
-
-      document.body.appendChild(link)
-      link.click()
-
-      document.body.removeChild(link)
-      window.URL.revokeObjectURL(url)
-    } catch (error) {
-      console.error("Error downloading PDF:", error)
-      alert("Error downloading PDF. The file may not be ready yet. Please try again in a moment.")
-    }
   }
 
   return (
@@ -104,22 +79,51 @@ export const OverheatingTabPanelContent = observer(() => {
               {t("singleZoneCoolingHeatingTool.pickUpWhereYouLeftOff")}
             </Heading>
             <Flex gap={4} w="full" align="center">
+              <FormControl maxW="240px">
+                <Popover isOpen={isOpen} onClose={onClose} placement="bottom-start">
+                  <PopoverTrigger>
+                    <Button variant="outline" onClick={onOpen} w="full">
+                      {statusChoice === "archived"
+                        ? (t as any)("singleZoneCoolingHeatingTool.archived") || "Archived"
+                        : (t as any)("singleZoneCoolingHeatingTool.active") || "Active"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent w="240px">
+                    <PopoverArrow />
+                    <PopoverBody p={0}>
+                      <Box p={4}>
+                        <RadioGroup value={statusChoice} onChange={(v) => setStatusChoice(v as string)}>
+                          <Stack direction="column" spacing={6}>
+                            <Radio value="unarchived">
+                              {(t as any)("singleZoneCoolingHeatingTool.active") || "Active"}
+                            </Radio>
+                            <Radio value="archived">
+                              {(t as any)("singleZoneCoolingHeatingTool.archived") || "Archived"}
+                            </Radio>
+                          </Stack>
+                        </RadioGroup>
+                        <Button
+                          mt={6}
+                          w="full"
+                          variant="primary"
+                          onClick={() => {
+                            ;(pdfFormStore as any).setStatusFilter(statusChoice as any)
+                            onClose()
+                          }}
+                        >
+                          {(t as any)("ui.apply") || "Apply"}
+                        </Button>
+                      </Box>
+                    </PopoverBody>
+                  </PopoverContent>
+                </Popover>
+              </FormControl>
               <FormControl w="full">
                 <ModelSearchInput
                   searchModel={pdfFormStore as any}
                   inputProps={{ placeholder: t("ui.search"), width: "full" }}
                   inputGroupProps={{ width: "full" }}
                 />
-              </FormControl>
-              <FormControl maxW="240px">
-                <Select
-                  value={pdfFormStore.statusFilter}
-                  onChange={(e) => pdfFormStore.setStatusFilter(e.target.value as any)}
-                >
-                  <option value="unarchived">{(t as any)("ui.unarchived") || "Unarchived"}</option>
-                  <option value="archived">{(t as any)("ui.archived") || "Archived"}</option>
-                  <option value="all">{(t as any)("ui.all") || "All"}</option>
-                </Select>
               </FormControl>
             </Flex>
           </Flex>
@@ -139,17 +143,14 @@ export const OverheatingTabPanelContent = observer(() => {
                 />
               </GridItem>
             ) : (
-              tablePdfForms.map((pdfForm) => (
-                <PdfFormGridRow
-                  onGeneratePdf={generatePdf}
-                  onArchivePdf={archivePdf}
-                  onDownloadPdf={handleDownloadPdf}
-                  isGenerating={false}
-                  isDownloaded={false}
-                  key={pdfForm.id}
-                  pdfForm={pdfForm}
-                />
-              ))
+              tablePdfForms
+                .filter((pdfForm) => {
+                  const pn = (pdfForm as any)?.formJson?.projectNumber
+                  return pn !== undefined && pn !== null && String(pn).toString().trim() !== ""
+                })
+                .map((pdfForm) => (
+                  <PdfFormGridRow onArchivePdf={archivePdf} isGenerating={false} key={pdfForm.id} pdfForm={pdfForm} />
+                ))
             )}
           </SearchGrid>
           <Flex w={"full"} justifyContent={"space-between"}>

@@ -35,8 +35,49 @@ interface ICoverSheetFormProps {
 export const CoverSheetForm = ({ onNext }: ICoverSheetFormProps) => {
   const { t } = useTranslation() as any
   const prefix = "singleZoneCoolingHeatingTool.coverSheet"
-  const { setValue } = useFormContext()
+  const { setValue, watch, getValues } = useFormContext()
   const { isOpen: isContactsOpen, onOpen: onContactsOpen, onClose: onContactsClose } = useDisclosure()
+  const [canContinue, setCanContinue] = React.useState(false)
+
+  const requiredFields = React.useMemo(
+    () => [
+      "drawingIssueFor",
+      "projectNumber",
+      "buildingLocation.model",
+      "buildingLocation.site",
+      "buildingLocation.lot",
+      "buildingLocation.city",
+      "buildingLocation.province",
+      "buildingLocation.postalCode",
+      "heating.building",
+      "cooling.nominal",
+      "cooling.minimumCoolingCapacity",
+      "cooling.maximumCoolingCapacity",
+      "calculationPerformedBy.name",
+      "calculationPerformedBy.attestation",
+      "calculationPerformedBy.address",
+      "calculationPerformedBy.company",
+      "calculationPerformedBy.city",
+      "calculationPerformedBy.postalCode",
+      "calculationPerformedBy.phone",
+      "calculationPerformedBy.email",
+      "calculationPerformedBy.fax",
+      "calculationPerformedBy.reference1",
+      "calculationPerformedBy.reference2",
+    ],
+    []
+  )
+
+  const allValues = watch()
+  React.useEffect(() => {
+    const values = getValues()
+    const getNested = (obj: any, path: string) => path.split(".").reduce((o, k) => (o ? o[k] : undefined), obj)
+    const hasVal = (v: any) => v !== undefined && v !== null && String(v).toString().trim() !== ""
+    const valid = requiredFields.every((p) => hasVal(getNested(values, p)))
+    setCanContinue(valid)
+    window.dispatchEvent(new CustomEvent("szch:section", { detail: { key: "coverSheet", complete: valid } }))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allValues])
 
   const onContactChange = (option: IOption<IContact>) => {
     const contact = option.value
@@ -110,8 +151,12 @@ export const CoverSheetForm = ({ onNext }: ICoverSheetFormProps) => {
             {t(`${prefix}.compliance.submittalIsFor`)}
           </Text>
           <Stack direction="row" spacing={5}>
-            <Radio value="aw">{t(`${prefix}.compliance.wholeHouse`)}</Radio>
-            <Radio value="ar">{t(`${prefix}.compliance.roomByRoom`)}</Radio>
+            <Radio variant="binary" value="aw">
+              {t(`${prefix}.compliance.wholeHouse`)}
+            </Radio>
+            <Radio variant="binary" value="ar">
+              {t(`${prefix}.compliance.roomByRoom`)}
+            </Radio>
           </Stack>
         </RadioGroup>
         <RadioGroup name="compliance.units">
@@ -119,11 +164,139 @@ export const CoverSheetForm = ({ onNext }: ICoverSheetFormProps) => {
             {t(`${prefix}.compliance.units`)}
           </Text>
           <Stack direction="row" spacing={5}>
-            <Radio value="bi">{t(`${prefix}.compliance.imperial`)}</Radio>
-            <Radio value="bm">{t(`${prefix}.compliance.metric`)}</Radio>
+            <Radio variant="binary" value="bi">
+              {t(`${prefix}.compliance.imperial`)}
+            </Radio>
+            <Radio variant="binary" value="bm">
+              {t(`${prefix}.compliance.metric`)}
+            </Radio>
           </Stack>
         </RadioGroup>
       </Flex>
+      <Divider my={10} />
+      <Box mb={6}>
+        <Heading as="h3" size="md" mb={4} variant="yellowline">
+          {t(`${prefix}.attachedDocuments.title`)}
+        </Heading>
+      </Box>
+
+      <Flex gap={6} mt={8} mb={2}>
+        <Checkbox defaultChecked>{t(`${prefix}.attachedDocuments.designSummary`)}</Checkbox>
+        <Checkbox defaultChecked>{t(`${prefix}.attachedDocuments.roomByRoomResults`)}</Checkbox>
+      </Flex>
+
+      <Text as="p" mt={4} mb={2}>
+        {t(`${prefix}.other`)}
+        <TextFormControl fieldName="other" maxLength={310} />
+      </Text>
+      <Text as="p" mt={4} mb={2}>
+        {t(`${prefix}.notes`)}
+        <TextFormControl fieldName="notes" maxLength={190} />
+      </Text>
+      <Divider my={10} />
+      <Box mb={6}>
+        <Heading as="h3" size="md" mb={4} variant="yellowline">
+          {t(`${prefix}.calculationPerformedBy.title`)}
+        </Heading>
+      </Box>
+      <Grid templateColumns="repeat(2, 1fr)" gap={6}>
+        <TextFormControl
+          required
+          fieldName="calculationPerformedBy.name"
+          label={t(`${prefix}.calculationPerformedBy.name`)}
+          maxLength={50}
+        />
+        <Box>
+          <HStack spacing={3} align="start">
+            <Box flex={1}>
+              <TextFormControl
+                required
+                fieldName="calculationPerformedBy.attestation"
+                label={t(`${prefix}.calculationPerformedBy.attestation`)}
+                maxLength={50}
+              />
+            </Box>
+            <Button
+              variant="outline"
+              size="md"
+              leftIcon={<AddressBook size={16} />}
+              onClick={onContactsOpen}
+              mt={8}
+              alignSelf="start"
+            >
+              {t("ui.autofill")}
+            </Button>
+          </HStack>
+          <Text as="p" mt={1} mb={2}>
+            {t(`${prefix}.calculationPerformedBy.helpText`)}
+          </Text>
+        </Box>
+
+        <TextFormControl
+          required
+          fieldName="calculationPerformedBy.address"
+          label={t(`${prefix}.calculationPerformedBy.address`)}
+          maxLength={50}
+        />
+        <TextFormControl
+          required
+          fieldName="calculationPerformedBy.company"
+          label={t(`${prefix}.calculationPerformedBy.company`)}
+          maxLength={50}
+        />
+        <TextFormControl
+          required
+          fieldName="calculationPerformedBy.city"
+          label={t(`${prefix}.calculationPerformedBy.city`)}
+          maxLength={50}
+        />
+        <TextFormControl
+          required
+          fieldName="calculationPerformedBy.postalCode"
+          label={t(`${prefix}.calculationPerformedBy.postalCode`)}
+          maxLength={50}
+        />
+        <PhoneFormControl
+          required
+          fieldName="calculationPerformedBy.phone"
+          label={t(`${prefix}.calculationPerformedBy.phone`)}
+        />
+        <EmailFormControl
+          required
+          fieldName="calculationPerformedBy.email"
+          label={t(`${prefix}.calculationPerformedBy.email`)}
+        />
+        <TextFormControl
+          required
+          fieldName="calculationPerformedBy.fax"
+          label={t(`${prefix}.calculationPerformedBy.fax`)}
+          maxLength={50}
+        />
+        <TextFormControl
+          required
+          fieldName="calculationPerformedBy.reference1"
+          label={t(`${prefix}.calculationPerformedBy.reference1`)}
+          maxLength={50}
+        />
+        <TextFormControl
+          required
+          fieldName="calculationPerformedBy.reference2"
+          label={t(`${prefix}.calculationPerformedBy.reference2`)}
+          maxLength={50}
+        />
+        <DatePickerFormControl
+          label={t(`${prefix}.calculationPerformedBy.issuedForDate`)}
+          fieldName={"calculationPerformedBy.issuedForDate"}
+          showOptional={false}
+          isReadOnly
+        />
+        <DatePickerFormControl
+          label={t(`${prefix}.calculationPerformedBy.issuedForDate2`)}
+          fieldName={"calculationPerformedBy.issuedForDate2"}
+          showOptional={false}
+          isReadOnly
+        />
+      </Grid>
       <Divider my={10} />
       <Box mb={6}>
         <Heading as="h3" size="md" mb={4} variant="yellowline">
@@ -257,134 +430,12 @@ export const CoverSheetForm = ({ onNext }: ICoverSheetFormProps) => {
       <Text as="p" mt={3} mb={2} fontWeight="bold">
         {t(`${prefix}.cooling.helpText4`)}
       </Text>
-      <Divider my={10} />
-      <Box mb={6}>
-        <Heading as="h3" size="md" mb={4} variant="yellowline">
-          {t(`${prefix}.attachedDocuments.title`)}
-        </Heading>
-      </Box>
-
-      <Flex gap={6} mt={8} mb={2}>
-        <Checkbox defaultChecked>{t(`${prefix}.attachedDocuments.designSummary`)}</Checkbox>
-        <Checkbox defaultChecked>{t(`${prefix}.attachedDocuments.roomByRoomResults`)}</Checkbox>
-      </Flex>
-
-      <Text as="p" mt={4} mb={2}>
-        {t(`${prefix}.other`)}
-        <TextFormControl fieldName="other" maxLength={310} />
-      </Text>
-      <Text as="p" mt={4} mb={2}>
-        {t(`${prefix}.notes`)}
-        <TextFormControl fieldName="notes" maxLength={190} />
-      </Text>
-      <Divider my={10} />
-      <Box mb={6}>
-        <Heading as="h3" size="md" mb={4} variant="yellowline">
-          {t(`${prefix}.calculationPerformedBy.title`)}
-        </Heading>
-      </Box>
-      <Grid templateColumns="repeat(2, 1fr)" gap={6}>
-        <TextFormControl
-          required
-          fieldName="calculationPerformedBy.name"
-          label={t(`${prefix}.calculationPerformedBy.name`)}
-          maxLength={50}
-        />
-        <Box>
-          <HStack spacing={3} align="start">
-            <Box flex={1}>
-              <TextFormControl
-                required
-                fieldName="calculationPerformedBy.attestation"
-                label={t(`${prefix}.calculationPerformedBy.attestation`)}
-                maxLength={50}
-              />
-            </Box>
-            <Button
-              variant="outline"
-              size="md"
-              leftIcon={<AddressBook size={16} />}
-              onClick={onContactsOpen}
-              mt={8}
-              alignSelf="start"
-            >
-              {t("ui.autofill")}
-            </Button>
-          </HStack>
-          <Text as="p" mt={1} mb={2}>
-            {t(`${prefix}.calculationPerformedBy.helpText`)}
-          </Text>
-        </Box>
-
-        <TextFormControl
-          required
-          fieldName="calculationPerformedBy.address"
-          label={t(`${prefix}.calculationPerformedBy.address`)}
-          maxLength={50}
-        />
-        <TextFormControl
-          required
-          fieldName="calculationPerformedBy.company"
-          label={t(`${prefix}.calculationPerformedBy.company`)}
-          maxLength={50}
-        />
-        <TextFormControl
-          required
-          fieldName="calculationPerformedBy.city"
-          label={t(`${prefix}.calculationPerformedBy.city`)}
-          maxLength={50}
-        />
-        <TextFormControl
-          required
-          fieldName="calculationPerformedBy.postalCode"
-          label={t(`${prefix}.calculationPerformedBy.postalCode`)}
-          maxLength={50}
-        />
-        <PhoneFormControl
-          required
-          fieldName="calculationPerformedBy.phone"
-          label={t(`${prefix}.calculationPerformedBy.phone`)}
-        />
-        <EmailFormControl
-          required
-          fieldName="calculationPerformedBy.email"
-          label={t(`${prefix}.calculationPerformedBy.email`)}
-        />
-        <TextFormControl
-          required
-          fieldName="calculationPerformedBy.fax"
-          label={t(`${prefix}.calculationPerformedBy.fax`)}
-          maxLength={50}
-        />
-        <TextFormControl
-          required
-          fieldName="calculationPerformedBy.reference1"
-          label={t(`${prefix}.calculationPerformedBy.reference1`)}
-          maxLength={50}
-        />
-        <TextFormControl
-          required
-          fieldName="calculationPerformedBy.reference2"
-          label={t(`${prefix}.calculationPerformedBy.reference2`)}
-          maxLength={50}
-        />
-        <DatePickerFormControl
-          label={t(`${prefix}.calculationPerformedBy.issuedForDate`)}
-          fieldName={"calculationPerformedBy.issuedForDate"}
-          showOptional={false}
-          isReadOnly
-        />
-        <DatePickerFormControl
-          label={t(`${prefix}.calculationPerformedBy.issuedForDate2`)}
-          fieldName={"calculationPerformedBy.issuedForDate2"}
-          showOptional={false}
-          isReadOnly
-        />
-      </Grid>
       <Flex justify="flex-start" mt={10} mb={10}>
-        <Button variant="primary" onClick={onNext}>
-          {t(`${prefix}.calculationPerformedBy.next`)}
-        </Button>
+        {canContinue && (
+          <Button variant="primary" onClick={onNext}>
+            {t(`${prefix}.calculationPerformedBy.next`)}
+          </Button>
+        )}
       </Flex>
 
       {/* Contact Modal for autofill */}

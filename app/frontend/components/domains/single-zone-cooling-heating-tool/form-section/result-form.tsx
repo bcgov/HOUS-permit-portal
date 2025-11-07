@@ -47,13 +47,7 @@ const ReportReadyPanel: React.FC<{ onDownload: () => void; onExplore: () => void
           <Text fontWeight="bold" mb={1}>
             {t("singleZoneCoolingHeatingTool.ready.projectNumber")}
           </Text>
-          <Text>—</Text>
-        </Box>
-        <Box>
-          <Text fontWeight="bold" mb={1}>
-            {t("singleZoneCoolingHeatingTool.ready.applicationNumber")}
-          </Text>
-          <Text>—</Text>
+          <Text>{values?.projectNumber || "—"}</Text>
         </Box>
         <GridItem colSpan={2}>
           <Text fontWeight="bold" mb={1}>
@@ -72,7 +66,20 @@ const ReportReadyPanel: React.FC<{ onDownload: () => void; onExplore: () => void
           <Text fontWeight="bold" mb={1}>
             {t("singleZoneCoolingHeatingTool.ready.uploadedFiles")}
           </Text>
-          <Text>{uploadedName}</Text>
+          {values?.uploads?.drawingsPdfUrl ? (
+            <Link
+              href={(values.uploads.drawingsPdfUrl as string).split("?")[0]}
+              isExternal
+              color="blue.600"
+              textDecoration="underline"
+              target="_blank"
+              rel="noopener"
+            >
+              {uploadedName}
+            </Link>
+          ) : (
+            <Text>{uploadedName}</Text>
+          )}
         </GridItem>
       </Grid>
 
@@ -102,14 +109,11 @@ export const ResultForm: React.FC = () => {
   const { t } = useTranslation() as any
   const { pdfFormStore } = useMst()
   const [ready, setReady] = useState(false)
-
   const handleRefresh = async () => {
     try {
       await pdfFormStore.searchPdfForms({ page: 1, countPerPage: pdfFormStore.countPerPage })
       setReady(true)
-    } catch (e) {
-      // swallow
-    }
+    } catch (e) {}
   }
   const handleExplore = () => {
     window.location.href = "/overheating"
@@ -119,6 +123,25 @@ export const ResultForm: React.FC = () => {
     const id = (pdfFormStore.lastCreatedForm as any)?.id || pdfFormStore.pdfForms?.[0]?.id
     if (!id) return
     try {
+      await pdfFormStore.generatePdf(id)
+
+      const pollUntilReady = async (maxAttempts = 15, delayMs = 2000) => {
+        for (let i = 0; i < maxAttempts; i++) {
+          try {
+            const res = await fetch(`/api/pdf_forms/${id}/download`, { method: "HEAD" })
+            if (res.ok) return true
+          } catch (_) {}
+          await new Promise((r) => setTimeout(r, delayMs))
+        }
+        return false
+      }
+
+      const isReady = await pollUntilReady()
+      if (!isReady) {
+        console.log("Your report is still being prepared. Please try again shortly.")
+        return
+      }
+
       const response = await pdfFormStore.environment.api.downloadPdf(id)
       if (!response.data || (response.data as Blob).size === 0) return
       const blob = new Blob([response.data as Blob], { type: "application/pdf" })

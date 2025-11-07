@@ -1,5 +1,5 @@
 import { Button, Flex, Grid, GridItem, Menu, MenuButton, MenuList, Spinner, Text } from "@chakra-ui/react"
-import { Archive, ArrowSquareOut, DotsThree, Download } from "@phosphor-icons/react"
+import { Archive, ArrowSquareOut, DotsThree } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -8,20 +8,14 @@ import { ManageMenuItemButton } from "../../shared/base/manage-menu-item"
 
 interface IPdfFormGridRowProps {
   pdfForm: IPdfForm
-  onGeneratePdf: (id: string) => void
-  onDownloadPdf: (id: string) => void
   onArchivePdf: (id: string) => void
   isGenerating: boolean
-  isDownloaded: boolean
 }
 
 export const PdfFormGridRow = observer(function PdfFormGridRow({
   pdfForm,
-  onGeneratePdf,
-  onDownloadPdf,
   onArchivePdf,
   isGenerating,
-  isDownloaded,
 }: IPdfFormGridRowProps) {
   const { t } = useTranslation() as any
   const [hasPdf, setHasPdf] = useState(false)
@@ -66,7 +60,13 @@ export const PdfFormGridRow = observer(function PdfFormGridRow({
       </GridItem>
       <GridItem display="flex" alignItems="center" px={4} py={2}>
         <Text w="400px" fontWeight="bold">
-          {pdfForm.formJson?.buildingLocation?.address}
+          {[
+            pdfForm.formJson?.buildingLocation?.city,
+            pdfForm.formJson?.buildingLocation?.province,
+            pdfForm.formJson?.buildingLocation?.postalCode,
+          ]
+            .filter((p) => !!p && String(p).trim() !== "")
+            .join(", ")}
         </Text>
       </GridItem>
 
@@ -82,29 +82,6 @@ export const PdfFormGridRow = observer(function PdfFormGridRow({
               <DotsThree size={16} />
             </MenuButton>
             <MenuList minW="160px">
-              {!isDownloaded && (
-                <ManageMenuItemButton
-                  leftIcon={<Download size={16} />}
-                  onClick={() => onGeneratePdf(pdfForm.id)}
-                  isDisabled={isGenerating}
-                >
-                  {isGenerating ? "Generating PDF..." : "Download"}
-                </ManageMenuItemButton>
-              )}
-              {isDownloaded && (
-                <>
-                  <ManageMenuItemButton
-                    leftIcon={<Download size={16} />}
-                    onClick={() => onGeneratePdf(pdfForm.id)}
-                    isDisabled={isGenerating}
-                  >
-                    {isGenerating ? "Regenerating PDF..." : "Regenerate PDF"}
-                  </ManageMenuItemButton>
-                  <ManageMenuItemButton leftIcon={<Download size={16} />} onClick={() => onDownloadPdf(pdfForm.id)}>
-                    Download PDF
-                  </ManageMenuItemButton>
-                </>
-              )}
               {hasPdf && !isArchived && (
                 <>
                   <ManageMenuItemButton

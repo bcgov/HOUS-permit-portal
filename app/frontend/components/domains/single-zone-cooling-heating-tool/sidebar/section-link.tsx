@@ -10,7 +10,6 @@ interface IProps {
 
 export const SectionLink = function SingleZoneSidebarSectionLink({ navLink, ...rest }) {
   const { pathname, hash } = useLocation()
-  // Simple checklist derived from nav-sections: all items are relevant; mark complete if hash matches
   const allKeys = React.useMemo(() => {
     const keys = new Set<string>()
     const addKeys = (links: INavLink[]) => {
@@ -23,14 +22,19 @@ export const SectionLink = function SingleZoneSidebarSectionLink({ navLink, ...r
     return keys
   }, [])
 
-  const checklist = React.useMemo(
-    () => ({
-      isRelevant: (key: string) => allKeys.has(key),
-      isComplete: (key: string) => hash === `#${navLink.location}` && key === navLink.key,
-    }),
-    [allKeys, hash, navLink.location, navLink.key]
-  )
-  const isActive = hash === `#${navLink.location}`
+  const [isComplete, setIsComplete] = React.useState(false)
+  React.useEffect(() => {
+    const handler = (e: any) => {
+      if (e?.detail?.key === navLink.key) {
+        setIsComplete(!!e.detail.complete)
+      }
+    }
+    window.addEventListener("szch:section", handler as any)
+    return () => window.removeEventListener("szch:section", handler as any)
+  }, [navLink.key])
+
+  const effectiveHash = hash || "#compliance"
+  const isActive = effectiveHash === `#${navLink.location}`
   const activeProps = isActive
     ? {
         color: "theme.blue",
@@ -55,7 +59,7 @@ export const SectionLink = function SingleZoneSidebarSectionLink({ navLink, ...r
         {...rest}
       >
         <Flex flex="none">
-          {checklist.isComplete(navLink.key) ? (
+          {isComplete ? (
             <CheckCircle color="var(--chakra-colors-semantic-success)" size={18} />
           ) : (
             <CircleDashed color="var(--chakra-colors-greys-grey01)" size={18} />

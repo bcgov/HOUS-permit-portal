@@ -199,7 +199,7 @@ export const TextAreaFormControl = (props: IInputFormControlProps) => {
     <InputFormControl
       {...(R.mergeDeepRight(
         {
-          inputProps: { as: Textarea }, // Use Chakra's Textarea instead of Input
+          inputProps: { as: Textarea },
           validate: {
             satisfiesLength: (str) =>
               (!props.required && !str) || (str?.length >= 1 && str?.length < 512) || "Input is invalid", // Use a default error message or use translation as needed
@@ -231,6 +231,14 @@ export const InputFormControl = ({
   const registerProps = fieldName
     ? { ...register(fieldName, { required: required && t("ui.isRequired", { field: label }), validate }) }
     : {}
+  const chainedOnChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if ((registerProps as any)?.onChange) {
+      ;(registerProps as any).onChange(event)
+    }
+    if ((inputProps as any)?.onChange) {
+      ;(inputProps as any).onChange(event)
+    }
+  }
   const chainedOnBlur = (event: React.FocusEvent<HTMLInputElement>) => {
     if ((registerProps as any)?.onBlur) {
       ;(registerProps as any).onBlur(event)
@@ -261,7 +269,7 @@ export const InputFormControl = ({
       )}
 
       <InputGroup w="full" display="flex" flexDirection="column">
-        <Input bg="greys.white" {...registerProps} {...inputProps} onBlur={chainedOnBlur} />
+        <Input bg="greys.white" {...registerProps} {...inputProps} onChange={chainedOnChange} onBlur={chainedOnBlur} />
         {errorMessage && <FormErrorMessage>{errorMessage}</FormErrorMessage>}
         {hint && (
           <FormHelperText mt={1} color="border.base">

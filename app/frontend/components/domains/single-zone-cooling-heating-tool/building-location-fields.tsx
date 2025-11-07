@@ -31,7 +31,7 @@ const AddressSearchSelect = observer(function ({ onAddressSelect, stylesToMerge,
         .then((response) => {
           callback(response || [])
         })
-        .catch((error) => {
+        .catch(() => {
           callback([])
         })
     } else {
@@ -60,12 +60,10 @@ const AddressSearchSelect = observer(function ({ onAddressSelect, stylesToMerge,
     defaultOptions: true,
     cacheOptions: true,
     menuPortalTarget: document.body,
-    stylesToMerge: {
-      menuPortal: (provided: any) => ({
-        ...provided,
-        zIndex: 9999,
-      }),
-    },
+    styles: {
+      menuPortal: (base: any) => ({ ...base, zIndex: 9999 }),
+      menu: (base: any) => ({ ...base, zIndex: 9999 }),
+    } as any,
   }
 
   return (<AsyncSelect {...(props as any)} />) as any
@@ -116,7 +114,7 @@ export const BuildingLocationFields: React.FC<BuildingLocationFieldsProps> = ({
 }) => {
   const { t } = useTranslation()
   const prefix = "singleZoneCoolingHeatingTool"
-  const { setValue } = useFormContext()
+  const { setValue, clearErrors } = useFormContext()
 
   const field = (key: string) => `${namePrefix}.${key}`
   const label = (key: string): string => (t as any)(`${i18nPrefix}.${key}`) as string
@@ -134,6 +132,11 @@ export const BuildingLocationFields: React.FC<BuildingLocationFieldsProps> = ({
     setValue(field("address"), addressData.address, { shouldDirty: true, shouldTouch: true, shouldValidate: true })
     setValue(field("city"), addressData.city, { shouldDirty: true, shouldTouch: true, shouldValidate: true })
     setValue(field("province"), addressData.province, { shouldDirty: true, shouldTouch: true, shouldValidate: true })
+    setValue(field("postalCode"), addressData.postalCode, {
+      shouldDirty: true,
+      shouldTouch: true,
+      shouldValidate: true,
+    })
   }
 
   return (
@@ -168,7 +171,15 @@ export const BuildingLocationFields: React.FC<BuildingLocationFieldsProps> = ({
 
         <TextFormControl fieldName={field("city")} required label={label("city")} maxLength={60} />
         <TextFormControl fieldName={field("province")} required label={label("province")} maxLength={60} />
-        <TextFormControl fieldName={field("postalCode")} required label={label("postalCode")} maxLength={60} />
+        <TextFormControl
+          fieldName={field("postalCode")}
+          required
+          label={label("postalCode")}
+          maxLength={60}
+          inputProps={{
+            onChange: () => clearErrors(field("postalCode")),
+          }}
+        />
       </Grid>
     </Box>
   )

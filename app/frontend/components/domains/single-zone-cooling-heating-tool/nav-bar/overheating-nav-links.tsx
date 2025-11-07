@@ -1,24 +1,19 @@
 import { Button, HStack } from "@chakra-ui/react"
-import { t } from "i18next"
 import React from "react"
+import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 
 export const OverheatingNavLinks = function OverheatingNavLinks() {
   const navigate = useNavigate()
-
-  const handleSave = async () => {
-    navigate("/single-zone-cooling-heating-tool/overheating")
+  const { t } = useTranslation() as any
+  const handleBack = async () => {
+    navigate(-1)
   }
 
   return (
     <HStack>
-      {/* TODO: digitize step code checklist guide */}
-      {/* <Button variant="tertiary" rightIcon={<ArrowSquareOut />}>
-        {t("stepCode.checklistGuide")}
-      </Button> */}
-
-      <Button variant="secondary" onClick={handleSave}>
-        {t("singleZoneCoolingHeatingTool.createReportButton")}
+      <Button variant="secondary" onClick={handleBack}>
+        {t("ui.back")}
       </Button>
     </HStack>
   )

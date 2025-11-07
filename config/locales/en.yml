@@ -637,6 +637,15 @@ en:
       create_error:
         title: "Oops"
         message: "%{error_message}"
+      file_not_found:
+        title: "Error"
+        message: "%{error_message}"
+      empty_file:
+        title: "Error"
+        message: "%{error_message}"
+      read_error:
+        title: "Error"
+        message: "%{error_message}"
     s3:
       multipart_init_failed:
         title: "File Upload Error"

@@ -15,7 +15,6 @@ import {
 import React from "react"
 import { useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { uploadFile } from "../../../utils/uploads"
 import { NumberFormControl, SelectFormControl, TextFormControl } from "../../shared/form/input-form-control"
 
 interface IInputSummaryFormProps {
@@ -33,36 +32,45 @@ export const InputSummaryForm = ({ onNext }: IInputSummaryFormProps) => {
   const all = watch()
 
   React.useEffect(() => {
-    // Lightweight check: allow continue when at least one meaningful field has a value
     const values = (watch() as any) || {}
+    const getNested = (obj: any, path: string) => path.split(".").reduce((o, k) => (o ? o[k] : undefined), obj)
     const hasVal = (v: any) => v !== undefined && v !== null && String(v).toString().trim() !== ""
-    const ok = [
-      values?.calculationBasedOn?.dimensionalInfo,
-      values?.calculationBasedOn?.attachment,
-      values?.calculationBasedOn?.frontFacing,
-      values?.calculationBasedOn?.assumed,
-    ].some(hasVal)
+
+    const requiredFields = [
+      "calculationBasedOn.dimensionalInfo",
+      "calculationBasedOn.attachment",
+      "calculationBasedOn.frontFacing",
+      "calculationBasedOn.frontFacingAssumed",
+      "calculationBasedOn.stories",
+      "calculationBasedOn.airTightness",
+      "calculationBasedOn.airTightnessAssumed",
+      "calculationBasedOn.weatherLocation",
+      "calculationBasedOn.internalShading",
+      "calculationBasedOn.assumed",
+      "climateData.windExposure",
+      "climateData.windSheilding",
+      "climateData.ventilated",
+      "climateData.hrvErv",
+      "climateData.ase",
+      "climateData.atre",
+      "heatingDesignConditions.outdoorTemp",
+      "heatingDesignConditions.indoorTemp",
+      "heatingDesignConditions.soilConductivity",
+      "heatingDesignConditions.meanSoilTemp",
+      "heatingDesignConditions.waterTableDepth",
+      "heatingDesignConditions.slabFluidTemp",
+      "coolingDesignConditions.outdoorTemp",
+      "coolingDesignConditions.range",
+      "coolingDesignConditions.indoorTemp",
+      "coolingDesignConditions.latitude",
+    ]
+
+    const ok = requiredFields.every((path) => hasVal(getNested(values, path)))
     setCanContinue(ok)
     clearErrors()
+    window.dispatchEvent(new CustomEvent("szch:section", { detail: { key: "inputSummary", complete: ok } }))
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [all])
-
-  const onUploadFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    try {
-      const res = await uploadFile(file, file.name)
-      const url =
-        (res as any)?.url ||
-        (res as any)?.location ||
-        ((res as any)?.signed_url ? (res as any).signed_url.split("?")[0] : null)
-      if (url) {
-        setValue("f280FormsSet2410xlsx.attachment", url, { shouldDirty: true, shouldTouch: true, shouldValidate: true })
-      }
-    } catch (err) {
-      console.error("File upload failed", err)
-    }
-  }
 
   return (
     <Box as="form">
@@ -119,8 +127,6 @@ export const InputSummaryForm = ({ onNext }: IInputSummaryFormProps) => {
             },
           ]}
         />
-
-        <TextFormControl fieldName="calculationBasedOn.stories" label={t(`${prefix}.calculationBasedOn.stories`)} />
 
         <TextFormControl
           fieldName="calculationBasedOn.stories"
