@@ -3,7 +3,7 @@ import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useForm } from "react-hook-form"
-import { useNavigate, useParams } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { usePart9StepCode } from "../../../../hooks/resources/use-part-9-step-code"
 import { useMst } from "../../../../setup/root"
 import { RestartConfirmationModal } from "../part-9/restart-confirmation-modal"
@@ -12,9 +12,8 @@ export const Part9NavLinks = observer(function Part9StepCodeNavLinks() {
   const { currentStepCode } = usePart9StepCode()
   const checklist = currentStepCode?.preConstructionChecklist
   const navigate = useNavigate()
-  const { permitApplicationId } = useParams()
   const { uiStore } = useMst()
-  const { handleSubmit, register, formState } = useForm()
+  const { formState } = useForm()
   const { isValid, isSubmitting } = formState
 
   const onComplete = async () => {
@@ -26,11 +25,7 @@ export const Part9NavLinks = observer(function Part9StepCodeNavLinks() {
 
   const handleBack = () => {
     uiStore.setScrollToSelector(".formio-component[class*='energy_step_code_method']")
-    if (permitApplicationId) {
-      navigate(`/permit-applications/${permitApplicationId}/edit`)
-    } else {
-      navigate("/step-codes")
-    }
+    navigate(-1)
   }
 
   const handleSave = async () => {
