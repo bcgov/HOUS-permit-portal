@@ -18,8 +18,6 @@ const SandboxHeader: React.FC<ISandboxHeaderProps> = observer(({ expanded, sandb
   const { sandboxStore } = useMst()
   const { isSandboxActive, currentSandbox } = sandboxStore
 
-  const sandboxToUse = override ? sandbox : currentSandbox
-
   if (!isSandboxActive && !override) return null
 
   return (
@@ -50,7 +48,7 @@ const SandboxHeader: React.FC<ISandboxHeaderProps> = observer(({ expanded, sandb
       {...rest}
     >
       <CubeFocus size={24} />
-      {expanded && t("sandbox.inMode")} {sandboxToUse?.name}
+      {expanded && t("sandbox.inMode")}
     </Flex>
   )
 })

@@ -1,0 +1,209 @@
+import {
+  Box,
+  Button,
+  Drawer,
+  DrawerBody,
+  DrawerCloseButton,
+  DrawerContent,
+  DrawerHeader,
+  DrawerOverlay,
+  Grid,
+  IconButton,
+  Show,
+  Text,
+  useDisclosure,
+  VStack,
+} from "@chakra-ui/react"
+import { List } from "@phosphor-icons/react"
+import { observer } from "mobx-react-lite"
+import React, { useEffect } from "react"
+import { useTranslation } from "react-i18next"
+import { LinkProps, useLocation } from "react-router-dom"
+import { useMst } from "../../../setup/root"
+import { EUserRoles } from "../../../types/enums"
+import { RouterLink } from "../../shared/navigation/router-link"
+import { LoggedOutMenuContent } from "./menu-content/logged-out-menu-content"
+import { ReviewManagerMenuContent } from "./menu-content/review-manager-menu-content"
+import { ReviewerMenuContent } from "./menu-content/reviewer-menu-content"
+import { SubmitterMenuContent } from "./menu-content/submitter-menu-content"
+import { SuperAdminMenuContent } from "./menu-content/super-admin-menu-content"
+import { TechnicalSupportMenuContent } from "./menu-content/technical-support-menu-content"
+
+interface INavBarMenuProps {}
+
+interface IStaticLinkItemProps extends LinkProps {
+  label: string
+  to: string
+  description?: string
+}
+
+const StaticLinkItem = ({ label, to, description, ...props }: IStaticLinkItemProps) => {
+  return (
+    <VStack align="flex-start" spacing={1} w="full">
+      <RouterLink to={to} color="text.link" textDecoration="underline" fontWeight="medium" {...props}>
+        <Text color="text.link" textDecoration="underline" fontWeight="bold">
+          {label}
+        </Text>
+      </RouterLink>
+      {description && <Text>{description}</Text>}
+    </VStack>
+  )
+}
+
+interface IMenuSectionProps {
+  title: string
+  children: React.ReactNode
+}
+
+const MenuSection = ({ title, children }: IMenuSectionProps) => {
+  return (
+    <VStack align="flex-start" spacing={4} w="full">
+      <Text as="h3" fontSize="lg" fontWeight="bold" color="text.primary" mb={2}>
+        {title}
+      </Text>
+      {children}
+    </VStack>
+  )
+}
+
+export const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
+  const { t } = useTranslation()
+  const location = useLocation()
+  const { sessionStore, userStore } = useMst()
+  const { currentUser } = userStore
+  const { loggedIn } = sessionStore
+  const { isOpen, onOpen, onClose, onToggle } = useDisclosure()
+
+  // Close drawer when route changes
+  useEffect(() => {
+    onClose()
+  }, [location.pathname])
+
+  // Column 1 - Project readiness tools
+  const projectReadinessColumn = (
+    <VStack align="flex-start" spacing={4} w="full">
+      <MenuSection title={t("home.projectReadinessTools.title")}>
+        <StaticLinkItem
+          label={t("site.navMenu.projectReadiness.all.label")}
+          to="/project-readiness-tools"
+          description={t("home.projectReadinessTools.pageDescription")}
+        />
+        <StaticLinkItem
+          label={t("site.navMenu.projectReadiness.stepCodes.label")}
+          to="/project-readiness-tools/look-up-step-codes-requirements-for-your-project"
+          description={t("site.navMenu.projectReadiness.stepCodes.description")}
+        />
+        <StaticLinkItem
+          label={t("site.navMenu.projectReadiness.bcBuildingCode.label")}
+          to="/pre-checks"
+          description={t("site.navMenu.projectReadiness.bcBuildingCode.description")}
+        />
+      </MenuSection>
+    </VStack>
+  )
+
+  // Column 2 - About
+  const aboutColumn = (
+    <VStack align="flex-start" spacing={4} w="full">
+      <MenuSection title={t("site.navMenu.sections.about")}>
+        <StaticLinkItem
+          label={t("site.navMenu.about.aboutHub.label")}
+          to="https://www2.gov.bc.ca/gov/content/about-gov-bc-ca"
+          target="_blank"
+          rel="noopener noreferrer"
+        />
+        <StaticLinkItem
+          label={t("site.navMenu.about.participatingCommunities.label")}
+          to="/jurisdictions"
+          description={t("site.navMenu.about.participatingCommunities.description")}
+        />
+        <StaticLinkItem
+          label={t("site.navMenu.about.forLocalGovernments.label")}
+          to="/onboarding-checklist-page-for-lg-adopting"
+          description={t("site.navMenu.about.forLocalGovernments.description")}
+        />
+      </MenuSection>
+    </VStack>
+  )
+
+  // Right column - Role-dependent content
+  const renderRightColumnContent = () => {
+    if (!loggedIn || currentUser?.isUnconfirmed) {
+      return <LoggedOutMenuContent />
+    }
+
+    switch (currentUser.role) {
+      case EUserRoles.superAdmin:
+        return <SuperAdminMenuContent />
+
+      case EUserRoles.reviewManager:
+      case EUserRoles.regionalReviewManager:
+        return <ReviewManagerMenuContent />
+
+      case EUserRoles.reviewer:
+        return <ReviewerMenuContent />
+
+      case EUserRoles.submitter:
+        return <SubmitterMenuContent />
+
+      case EUserRoles.technicalSupport:
+        return <TechnicalSupportMenuContent />
+
+      default:
+        return <LoggedOutMenuContent />
+    }
+  }
+
+  return (
+    <>
+      <Show below="md">
+        <IconButton
+          borderRadius="lg"
+          border={currentUser?.isSubmitter || !loggedIn ? "solid black" : "solid white"}
+          borderWidth="1px"
+          p={3}
+          variant={currentUser?.isSubmitter || !loggedIn ? "primaryInverse" : "primary"}
+          aria-label="menu dropdown button"
+          icon={<List size={16} weight="bold" />}
+          onClick={onToggle}
+        />
+      </Show>
+
+      <Show above="md">
+        <Button
+          borderRadius="lg"
+          border={currentUser?.isSubmitter || !loggedIn ? "solid black" : "solid white"}
+          borderWidth="1px"
+          p={3}
+          variant={currentUser?.isSubmitter || !loggedIn ? "primaryInverse" : "primary"}
+          aria-label="menu dropdown button"
+          leftIcon={<List size={16} weight="bold" />}
+          onClick={onToggle}
+        >
+          {t("site.menu")}
+        </Button>
+      </Show>
+
+      <Drawer isOpen={isOpen} placement="top" onClose={onClose} size="full">
+        <DrawerOverlay mt="var(--app-navbar-height)" zIndex={1400} />
+        <DrawerContent
+          mt="var(--app-navbar-height)"
+          h="fit-content"
+          maxH="calc(100vh - var(--app-navbar-height))"
+          zIndex={1400}
+        >
+          <DrawerHeader>
+            <DrawerCloseButton />
+          </DrawerHeader>
+          <DrawerBody>
+            <Grid templateColumns={{ base: "1fr", md: "repeat(3, 1fr)" }} gap={8} maxW="container.xl" mx="auto" pb={8}>
+              <Box order={{ base: 2, md: 1 }}>{projectReadinessColumn}</Box>
+              <Box order={{ base: 3, md: 2 }}>{aboutColumn}</Box>
+              <Box order={{ base: 1, md: 3 }}>{renderRightColumnContent()}</Box>
+            </Grid>
+          </DrawerBody>
+        </DrawerContent>
+      </Drawer>
+    </>
+  )
+})
