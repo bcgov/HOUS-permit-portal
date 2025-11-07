@@ -23,7 +23,7 @@ export function RichTextTip({ tip, helpLink, headerProps, ...containerProps }: I
         borderColor={"theme.blueAlt"}
         bg={"theme.blueLight"}
         sx={{
-          ".ql-editor": {
+          ".tiptap-editor-readonly": {
             p: 0,
           },
         }}

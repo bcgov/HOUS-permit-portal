@@ -1,39 +1,36 @@
 import DOMPurify from "dompurify"
 
 /**
- * Sanitizes HTML content from Quill editor to prevent XSS attacks.
+ * Sanitizes HTML content from TipTap editor to prevent XSS attacks.
  *
- * This function addresses CVE-2021-3163 (GHSA-4943-9vgg-gr5r), an XSS vulnerability
- * in Quill ≤ 1.3.7 where malicious JavaScript can be injected through crafted HTML
+ * This function sanitizes HTML content to prevent XSS attacks through malicious HTML
  * attributes like `onloadstart`, `onerror`, etc.
  *
- * @param htmlContent - The raw HTML string from Quill editor
+ * @param htmlContent - The raw HTML string from TipTap editor
  * @returns Sanitized HTML safe for rendering
  *
  * @example
  * ```tsx
- * const safeHtml = sanitizeQuillHtml(userProvidedContent)
+ * const safeHtml = sanitizeTipTapHtml(userProvidedContent)
  * <div dangerouslySetInnerHTML={{ __html: safeHtml }} />
  * ```
  *
  * @security
- * This is a TEMPORARY mitigation until migration to TipTap (planned Q1-Q2 2026).
- * The vulnerability exists in the underlying Quill library which is no longer
- * actively maintained for version 1.x.
+ * Always sanitize HTML content before rendering to prevent XSS attacks.
  *
  * Allowed elements: p, br, strong, em, u, ol, ul, li, a, h1-h6, blockquote
  * Allowed attributes: href (on <a>), target (on <a>), rel (on <a>), class
  * Blocked: All event handlers, dangerous protocols (javascript:, data:, vbscript:, file:, about:)
  */
-export function sanitizeQuillHtml(htmlContent: string | null | undefined): string {
+export function sanitizeTipTapHtml(htmlContent: string | null | undefined): string {
   // Handle null/undefined cases
   if (!htmlContent) {
     return ""
   }
 
-  // Configure DOMPurify with safe defaults for Quill content
+  // Configure DOMPurify with safe defaults for TipTap content
   const config = {
-    // Only allow HTML tags that Quill uses
+    // Only allow HTML tags that TipTap uses
     ALLOWED_TAGS: [
       // Text formatting
       "p",
@@ -49,7 +46,7 @@ export function sanitizeQuillHtml(htmlContent: string | null | undefined): strin
       "li",
       // Links
       "a",
-      // Headers (in case your Quill config allows them)
+      // Headers (in case your TipTap config allows them)
       "h1",
       "h2",
       "h3",
@@ -67,7 +64,7 @@ export function sanitizeQuillHtml(htmlContent: string | null | undefined): strin
       "href", // For links
       "target", // For links (will be validated)
       "rel", // For links (noopener noreferrer)
-      "class", // For Quill styling classes
+      "class", // For TipTap styling classes
     ],
 
     // Additional security options
@@ -106,7 +103,7 @@ export function sanitizeQuillHtml(htmlContent: string | null | undefined): strin
 }
 
 /**
- * Checks if Quill HTML content is effectively empty (only whitespace/empty tags).
+ * Checks if editor HTML content is effectively empty (only whitespace/empty tags).
  * This is useful for validation and conditional rendering.
  *
  * @param htmlContent - The HTML string to check
@@ -114,12 +111,12 @@ export function sanitizeQuillHtml(htmlContent: string | null | undefined): strin
  *
  * @example
  * ```tsx
- * if (!isQuillContentEmpty(content)) {
- *   return <SafeQuillDisplay htmlContent={content} />
+ * if (!isTipTapContentEmpty(content)) {
+ *   return <SafeTipTapDisplay htmlContent={content} />
  * }
  * ```
  */
-export function isQuillContentEmpty(htmlContent: string | null | undefined): boolean {
+export function isTipTapContentEmpty(htmlContent: string | null | undefined): boolean {
   if (!htmlContent) {
     return true
   }

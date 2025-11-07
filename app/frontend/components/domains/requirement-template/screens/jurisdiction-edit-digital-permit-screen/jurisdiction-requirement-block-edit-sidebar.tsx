@@ -187,7 +187,7 @@ const MainView = ({
       <Text color={"text.secondary"} fontSize={"sm"}>
         {t("digitalBuildingPermits.edit.requirementBlockSidebar.description")}
       </Text>
-      <Box sx={{ ".ql-container": { h: "112px" } }}>
+      <Box>
         <Text mb={1}>{t("digitalBuildingPermits.edit.requirementBlockSidebar.tipLabel")}</Text>
         <Editor htmlValue={tipValue} onChange={onTipChange} />
         <FormLabel mt={3}>

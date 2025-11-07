@@ -3,7 +3,7 @@ import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { getRequirementTypeLabel } from "../../../../constants"
-import { isQuillEmpty } from "../../../../utils/utility-functions"
+import { isTipTapEmpty } from "../../../../utils/utility-functions"
 import { EditorWithPreview } from "../../../shared/editor/custom-extensions/editor-with-preview"
 import { TRequirementFieldDisplayProps } from "./index"
 
@@ -56,7 +56,7 @@ export const GenericFieldDisplay = observer(function GroupedFieldDisplay({
             : getRequirementTypeLabel(requirementType))}
       </FormLabel>
 
-      {!isQuillEmpty(instructions) && (
+      {!isTipTapEmpty(instructions) && (
         <EditorWithPreview
           label={t("requirementsLibrary.modals.addInstructionsLabel")}
           htmlValue={instructions}
@@ -65,7 +65,7 @@ export const GenericFieldDisplay = observer(function GroupedFieldDisplay({
         />
       )}
       {inputDisplay}
-      {!isQuillEmpty(helperText) && (
+      {!isTipTapEmpty(helperText) && (
         <EditorWithPreview
           label={t("requirementsLibrary.modals.addHelpTextLabel")}
           htmlValue={helperText}
