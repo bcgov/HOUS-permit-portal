@@ -3,7 +3,6 @@ import {
   Button,
   Drawer,
   DrawerBody,
-  DrawerCloseButton,
   DrawerContent,
   DrawerHeader,
   DrawerOverlay,
@@ -14,7 +13,7 @@ import {
   useDisclosure,
   VStack,
 } from "@chakra-ui/react"
-import { List } from "@phosphor-icons/react"
+import { List, X } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
 import { useTranslation } from "react-i18next"
@@ -177,10 +176,10 @@ export const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
           p={3}
           variant={currentUser?.isSubmitter || !loggedIn ? "primaryInverse" : "primary"}
           aria-label="menu dropdown button"
-          leftIcon={<List size={16} weight="bold" />}
+          leftIcon={isOpen ? <X size={16} weight="bold" /> : <List size={16} weight="bold" />}
           onClick={onToggle}
         >
-          {t("site.menu")}
+          {isOpen ? t("site.closeMenu") : t("site.menu")}
         </Button>
       </Show>
 
@@ -192,9 +191,7 @@ export const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
           maxH="calc(100vh - var(--app-navbar-height))"
           zIndex={1400}
         >
-          <DrawerHeader>
-            <DrawerCloseButton />
-          </DrawerHeader>
+          <DrawerHeader minH={8}></DrawerHeader>
           <DrawerBody>
             <Grid templateColumns={{ base: "1fr", md: "repeat(3, 1fr)" }} gap={8} maxW="container.xl" mx="auto" pb={8}>
               <Box order={{ base: 2, md: 1 }}>{projectReadinessColumn}</Box>

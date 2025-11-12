@@ -3869,6 +3869,7 @@ Thank you,
           },
         },
         site: {
+          closeMenu: "Close menu",
           redirecting: "Redirecting...",
           validating: "Validating...",
           loggingOut: "Logging out...",
