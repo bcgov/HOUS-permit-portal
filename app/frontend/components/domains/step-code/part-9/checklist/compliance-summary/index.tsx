@@ -133,7 +133,7 @@ export const ComplianceSummary = observer(function ComplianceSummary({
           </VStack>
 
           <VStack flex={1} justify="end" w="full">
-            <ZeroCarbonSteps requiredStep={report.zeroCarbon.requiredStep.slice(-1)} />
+            <ZeroCarbonSteps requiredStep={report.zeroCarbon.requiredStep?.slice(-1)} />
 
             <VStack>
               <Text fontSize="md">{t(`${i18nPrefix}.zeroCarbonStepCode.stepProposed`) + ": "}</Text>
