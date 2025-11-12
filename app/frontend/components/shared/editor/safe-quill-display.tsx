@@ -67,6 +67,8 @@ export const SafeQuillDisplay: React.FC<SafeQuillDisplayProps> = ({
       {...boxProps}
       data-testid={dataTestId || "safe-quill-display"}
       dangerouslySetInnerHTML={{ __html: sanitizedHtml }}
+      overflowY="auto"
+      overflowX="hidden"
       // Add default styling that matches Quill's output
       sx={{
         // Preserve Quill's default text formatting
@@ -170,6 +172,8 @@ export const SafeQuillDisplayInline: React.FC<SafeQuillDisplayProps> = ({
       dangerouslySetInnerHTML={{ __html: sanitizedHtml }}
       sx={{
         display: "inline",
+        overflowY: "auto",
+        overflowX: "hidden",
         "& p": {
           display: "inline",
           margin: 0,
