@@ -44,9 +44,9 @@ export const EULAScreen = observer(function EULAScreen({ withClose }: { withClos
         <Suspense fallback={<LoadingScreen />}>
           {eula && (
             <>
-              <Box maxW="4xl" overflow="hidden">
+              <Box maxW="4xl" flex={1} minH={0} w="full">
                 {/* Use SafeQuillDisplay instead of readonly Editor to prevent XSS (CVE-2021-3163) */}
-                <SafeQuillDisplay htmlContent={eula.content} />
+                <SafeQuillDisplay htmlContent={eula.content} h="100%" />
               </Box>
               {!userStore.currentUser.eulaAccepted && (
                 <form onSubmit={handleSubmit(onSubmit)} style={{ flex: 0, flexBasis: "auto" }}>
