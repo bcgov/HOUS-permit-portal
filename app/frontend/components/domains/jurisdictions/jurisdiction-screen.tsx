@@ -17,7 +17,7 @@ import {
   Text,
 } from "@chakra-ui/react"
 
-import { ArrowSquareOut } from "@phosphor-icons/react"
+import { ArrowSquareOut, Download, Link as LinkIcon } from "@phosphor-icons/react"
 import i18next from "i18next"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
@@ -26,11 +26,12 @@ import { Trans, useTranslation } from "react-i18next"
 import { useJurisdiction } from "../../../hooks/resources/use-jurisdiction"
 import { IJurisdiction } from "../../../models/jurisdiction"
 import { useMst } from "../../../setup/root"
-import { EFlashMessageStatus } from "../../../types/enums"
+import { EFileUploadAttachmentType, EFlashMessageStatus, EResourceCategory, EResourceType } from "../../../types/enums"
 import { IContact, TLatLngTuple } from "../../../types/types"
 import { BlueTitleBar } from "../../shared/base/blue-title-bar"
 import { CustomMessageBox } from "../../shared/base/custom-message-box"
 import { ErrorScreen } from "../../shared/base/error-screen"
+import { FileDownloadButton } from "../../shared/base/file-download-button"
 import { LoadingScreen } from "../../shared/base/loading-screen"
 import { EditorWithPreview } from "../../shared/editor/custom-extensions/editor-with-preview"
 import { SafeQuillDisplay } from "../../shared/editor/safe-quill-display"
@@ -190,6 +191,92 @@ export const JurisdictionScreen = observer(() => {
 
                     <StepCodeRequirementsTable currentJurisdiction={currentJurisdiction} />
                   </Flex>
+                  {currentJurisdiction.resources && currentJurisdiction.resources.length > 0 && (
+                    <Flex as="section" direction="column" gap={4}>
+                      <Heading as="h2" fontSize="xl" my={0}>
+                        {t("jurisdiction.resources.title")}
+                      </Heading>
+                      {Object.values(EResourceCategory).map((category) => {
+                        const categoryResources = currentJurisdiction.resources.filter((r) => r.category === category)
+                        if (categoryResources.length === 0) return null
+
+                        const categoryLabels = {
+                          [EResourceCategory.planningZoning]: t("jurisdiction.resources.categories.planningZoning"),
+                          [EResourceCategory.bylawsRequirements]: t(
+                            "jurisdiction.resources.categories.bylawsRequirements"
+                          ),
+                          [EResourceCategory.additionalResources]: t(
+                            "jurisdiction.resources.categories.additionalResources"
+                          ),
+                        }
+
+                        return (
+                          <Box key={category} mb={4}>
+                            <Heading as="h3" fontSize="lg" mb={2}>
+                              {categoryLabels[category]}
+                            </Heading>
+                            <Flex direction="column" gap={2}>
+                              {categoryResources.map((resource) => (
+                                <Flex
+                                  key={resource.id}
+                                  p={3}
+                                  bg="greys.grey10"
+                                  borderRadius="md"
+                                  justifyContent="space-between"
+                                  alignItems="center"
+                                >
+                                  <Flex direction="column" gap={1} flex={1}>
+                                    <HStack spacing={2}>
+                                      <Text fontWeight="bold">{resource.title}</Text>
+                                      <Box
+                                        as="span"
+                                        px={2}
+                                        py={1}
+                                        borderRadius="sm"
+                                        bg={resource.resourceType === EResourceType.file ? "blue.100" : "green.100"}
+                                        color={resource.resourceType === EResourceType.file ? "blue.700" : "green.700"}
+                                        fontSize="xs"
+                                        fontWeight="bold"
+                                      >
+                                        {resource.resourceType === EResourceType.file ? (
+                                          <HStack spacing={1}>
+                                            <Download size={12} />
+                                            <Text>PDF</Text>
+                                          </HStack>
+                                        ) : (
+                                          <HStack spacing={1}>
+                                            <LinkIcon size={12} />
+                                            <Text>LINK</Text>
+                                          </HStack>
+                                        )}
+                                      </Box>
+                                    </HStack>
+                                    {resource.description && (
+                                      <Text color="text.secondary" fontSize="sm">
+                                        {resource.description}
+                                      </Text>
+                                    )}
+                                  </Flex>
+                                  {resource.resourceType === EResourceType.file && resource.resourceDocument ? (
+                                    <FileDownloadButton
+                                      document={resource.resourceDocument}
+                                      modelType={EFileUploadAttachmentType.ResourceDocument}
+                                    />
+                                  ) : resource.resourceType === EResourceType.link && resource.linkUrl ? (
+                                    <Link href={resource.linkUrl} isExternal>
+                                      <Button variant="link" rightIcon={<ArrowSquareOut />}>
+                                        {t("ui.open")}
+                                      </Button>
+                                    </Link>
+                                  ) : null}
+                                </Flex>
+                              ))}
+                            </Flex>
+                          </Box>
+                        )
+                      })}
+                    </Flex>
+                  )}
                   <Flex as="section" direction="column" borderRadius="lg" boxShadow="md">
                     <Box py={3} px={6} bg="theme.blueAlt" borderTopRadius="lg">
                       <Heading as="h3" color="greys.white" fontSize="xl">

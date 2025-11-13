@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_10_09_202916) do
+ActiveRecord::Schema[7.2].define(version: 2025_11_06_180012) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -173,14 +173,6 @@ ActiveRecord::Schema[7.2].define(version: 2025_10_09_202916) do
     t.datetime "updated_at", null: false
     t.index ["jurisdiction_id"], name: "index_integration_mappings_on_jurisdiction_id"
     t.index ["template_version_id"], name: "index_integration_mappings_on_template_version_id"
-  end
-
-  create_table "jurisdiction_documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.uuid "jurisdiction_id", null: false
-    t.text "file_data"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["jurisdiction_id"], name: "index_jurisdiction_documents_on_jurisdiction_id"
   end
 
   create_table "jurisdiction_memberships", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -640,6 +632,27 @@ ActiveRecord::Schema[7.2].define(version: 2025_10_09_202916) do
     t.index ["requirement_block_id"], name: "index_requirements_on_requirement_block_id"
   end
 
+  create_table "resource_documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.text "file_data"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.uuid "resource_id", null: false
+    t.index ["resource_id"], name: "index_resource_documents_on_resource_id"
+  end
+
+  create_table "resources", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "jurisdiction_id", null: false
+    t.string "category", null: false
+    t.string "title", null: false
+    t.text "description"
+    t.string "resource_type", null: false
+    t.string "link_url"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["jurisdiction_id", "category"], name: "index_resources_on_jurisdiction_id_and_category"
+    t.index ["jurisdiction_id"], name: "index_resources_on_jurisdiction_id"
+  end
+
   create_table "revision_reasons", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "reason_code", limit: 64
     t.string "description"
@@ -943,7 +956,6 @@ ActiveRecord::Schema[7.2].define(version: 2025_10_09_202916) do
   add_foreign_key "integration_mapping_notifications", "template_versions"
   add_foreign_key "integration_mappings", "jurisdictions"
   add_foreign_key "integration_mappings", "template_versions"
-  add_foreign_key "jurisdiction_documents", "jurisdictions"
   add_foreign_key "jurisdiction_memberships", "jurisdictions"
   add_foreign_key "jurisdiction_memberships", "users"
   add_foreign_key "jurisdiction_template_version_customizations", "jurisdictions"
@@ -987,6 +999,8 @@ ActiveRecord::Schema[7.2].define(version: 2025_10_09_202916) do
   add_foreign_key "requirement_templates", "site_configurations"
   add_foreign_key "requirement_templates", "users", column: "assignee_id"
   add_foreign_key "requirements", "requirement_blocks"
+  add_foreign_key "resource_documents", "resources"
+  add_foreign_key "resources", "jurisdictions"
   add_foreign_key "revision_reasons", "site_configurations"
   add_foreign_key "revision_requests", "submission_versions"
   add_foreign_key "revision_requests", "users"

@@ -4,7 +4,6 @@ class PermitProject < ApplicationRecord
 
   belongs_to :owner, class_name: "User"
   belongs_to :jurisdiction, optional: false # Direct association to Jurisdiction
-  belongs_to :property_plan_jurisdiction, optional: true
 
   has_many :permit_applications
   has_many :project_documents, dependent: :destroy

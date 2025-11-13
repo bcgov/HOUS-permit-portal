@@ -28,6 +28,18 @@ export enum EFileUploadAttachmentType {
   SupportingDocument = "SupportingDocument",
   ProjectDocument = "ProjectDocument",
   ReportDocument = "ReportDocument",
+  ResourceDocument = "ResourceDocument",
+}
+
+export enum EResourceCategory {
+  planningZoning = "planning_zoning",
+  bylawsRequirements = "bylaws_requirements",
+  additionalResources = "additional_resources",
+}
+
+export enum EResourceType {
+  file = "file",
+  link = "link",
 }
 
 export enum EPermitApplicationStatus {
