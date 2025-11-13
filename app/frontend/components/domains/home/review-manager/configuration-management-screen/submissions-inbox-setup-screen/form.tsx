@@ -11,19 +11,23 @@ interface IFormProps {
   jurisdiction: IJurisdiction
 }
 
+interface IFormValues {
+  permitTypeSubmissionContactsAttributes: Array<{
+    permitTypeId: string
+    email: string | null
+    id: string | null
+  }>
+  inboxEnabled: boolean
+}
+
 export const Form = observer(function SubmissionInboxSetupForm({ jurisdiction }: IFormProps) {
   const {
     permitClassificationStore: { permitTypes },
   } = useMst()
   const { permitTypeSubmissionContacts: submissionContacts, inboxEnabled } = jurisdiction
 
-  const getDefaultValues = () => ({
-    permitTypeSubmissionContactsAttributes: [...submissionContacts, ...defaults()],
-    inboxEnabled: inboxEnabled, // Default value for the toggle
-  })
-
-  const defaults = () => {
-    return permitTypes.reduce((result, permitType) => {
+  const defaults = (): IFormValues["permitTypeSubmissionContactsAttributes"] => {
+    return permitTypes.reduce<IFormValues["permitTypeSubmissionContactsAttributes"]>((result, permitType) => {
       const permitTypeContacts = submissionContacts.filter((c) => c.permitTypeId == permitType.id)
       if (R.isEmpty(permitTypeContacts)) {
         result.push({ permitTypeId: permitType.id, email: null, id: null })
@@ -32,13 +36,25 @@ export const Form = observer(function SubmissionInboxSetupForm({ jurisdiction }:
     }, [])
   }
 
-  const fieldArrayName = "permitTypeSubmissionContactsAttributes"
-  const formMethods = useForm({
+  const getDefaultValues = (): IFormValues => ({
+    permitTypeSubmissionContactsAttributes: [
+      ...submissionContacts.map((contact) => ({
+        permitTypeId: contact.permitTypeId,
+        email: contact.email,
+        id: contact.id,
+      })),
+      ...defaults(),
+    ],
+    inboxEnabled: inboxEnabled, // Default value for the toggle
+  })
+
+  const fieldArrayName = "permitTypeSubmissionContactsAttributes" as const
+  const formMethods = useForm<IFormValues>({
     mode: "onChange",
     defaultValues: getDefaultValues(),
   })
   const { handleSubmit, reset, control, setValue, watch } = formMethods
-  const { fields, append, remove, update } = useFieldArray({
+  const { fields, append, remove, update } = useFieldArray<IFormValues, typeof fieldArrayName>({
     control,
     name: fieldArrayName,
   })
@@ -47,7 +63,7 @@ export const Form = observer(function SubmissionInboxSetupForm({ jurisdiction }:
 
   const getIndex = (field) => R.findIndex((f) => f.id == field.id, fields)
 
-  const onSubmit = async (values) => {
+  const onSubmit = async (values: IFormValues) => {
     return await jurisdiction.update(values)
   }
 
@@ -56,9 +72,18 @@ export const Form = observer(function SubmissionInboxSetupForm({ jurisdiction }:
   }
 
   useEffect(() => {
-    jurisdiction &&
-      setValue("permitTypeSubmissionContactsAttributes", [...jurisdiction.permitTypeSubmissionContacts, ...defaults()])
-    setValue("inboxEnabled", inboxEnabled) // Update inboxEnabled value
+    if (jurisdiction) {
+      const mappedContacts: IFormValues["permitTypeSubmissionContactsAttributes"] = [
+        ...jurisdiction.permitTypeSubmissionContacts.map((contact) => ({
+          permitTypeId: contact.permitTypeId,
+          email: contact.email,
+          id: contact.id,
+        })),
+        ...defaults(),
+      ]
+      setValue("permitTypeSubmissionContactsAttributes", mappedContacts)
+      setValue("inboxEnabled", inboxEnabled) // Update inboxEnabled value
+    }
   }, [jurisdiction?.id])
 
   useEffect(() => {
