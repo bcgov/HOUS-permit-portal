@@ -5,6 +5,7 @@ import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { useMst } from "../../../setup/root"
+import { ETemplateVersionStatus } from "../../../types/enums"
 import { SandboxSwitchModal } from "../../shared/modals/sandbox-switch-modal"
 
 export const SandboxMenuItem: React.FC = observer(() => {
@@ -15,7 +16,12 @@ export const SandboxMenuItem: React.FC = observer(() => {
   const { currentSandboxId, setCurrentSandboxId, clearSandboxId, isSandboxActive } = sandboxStore
 
   const { isOpen, onOpen, onClose } = useDisclosure()
-  const [selectedOption, setSelectedOption] = useState(sandboxOptions[0]?.value)
+
+  // Find published sandbox and default to it
+  const publishedSandbox = currentUser.jurisdiction?.sandboxes.find(
+    (s) => s.templateVersionStatusScope === ETemplateVersionStatus.published
+  )
+  const [selectedOption, setSelectedOption] = useState(publishedSandbox?.id || sandboxOptions[0]?.value)
 
   const navigate = useNavigate()
 

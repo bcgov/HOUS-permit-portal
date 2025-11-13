@@ -162,11 +162,7 @@ export const NavBar = observer(function NavBar() {
             </Show>
             <HStack gap={3} w="full" justify="flex-end">
               {!loggedIn && <HelpDrawer />}
-              {currentUser?.isSubmitter && !currentUser.isUnconfirmed && (
-                <RouterLinkButton to="/" variant="tertiary" leftIcon={<Folders size={16} />}>
-                  {t("site.myProjects")}
-                </RouterLinkButton>
-              )}
+
               {(currentUser?.isReviewStaff || currentUser?.isTechnicalSupport) &&
                 !currentUser.isRegionalReviewManager && (
                   <Flex direction="column">
@@ -211,6 +207,11 @@ export const NavBar = observer(function NavBar() {
                   to={`/jurisdictions/${currentUser?.jurisdiction?.slug}/submission-inbox`}
                 >
                   <Show above="xl">{t("home.submissionsInboxTitle")}</Show>
+                </RouterLinkButton>
+              )}
+              {currentUser?.isSubmitter && !currentUser.isUnconfirmed && (
+                <RouterLinkButton variant="tertiary" px={2} leftIcon={<Folders size={16} />} to={`/projects`}>
+                  <Show above="xl">{t("site.myProjects")}</Show>
                 </RouterLinkButton>
               )}
               <NavBarMenu />
