@@ -89,6 +89,7 @@ class Api::PermitClassificationsController < Api::ApplicationController
 
   def update
     authorize :permit_classification, :update?
+
     begin
       if @permit_classification.update(permit_classification_params)
         render_success @permit_classification,
@@ -145,7 +146,7 @@ class Api::PermitClassificationsController < Api::ApplicationController
     params.require(:permit_classification).permit(
       :name,
       :code,
-      :description,
+      :description_html,
       :enabled,
       :type,
       :category

@@ -2,14 +2,15 @@ module PermitApplicationStatus
   extend ActiveSupport::Concern
   included do
     include AASM
-    enum status: {
+    enum :status,
+         {
            new_draft: 0,
            newly_submitted: 1,
            revisions_requested: 3,
            resubmitted: 4
            #  approved: 5
          },
-         _default: 0
+         default: 0
 
     def self.draft_statuses
       %w[new_draft revisions_requested]

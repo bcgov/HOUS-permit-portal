@@ -22,10 +22,18 @@ FactoryBot.define do
     end
 
     permit_type do
-      PermitType.first || association(:permit_type, code: :low_residential)
+      PermitType.first ||
+        association(
+          :permit_type,
+          code: "low_residential_#{SecureRandom.alphanumeric(8)}".to_sym
+        )
     end
     activity do
-      Activity.first || association(:activity, code: :new_construction)
+      Activity.first ||
+        association(
+          :activity,
+          code: "new_construction_#{SecureRandom.alphanumeric(8)}".to_sym
+        )
     end
     status { :new_draft }
     sequence(:nickname) { |n| "Permit Application Nickname #{n}" }

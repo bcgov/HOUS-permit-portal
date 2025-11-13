@@ -28,10 +28,62 @@ class Api::SiteConfigurationController < Api::ApplicationController
     end
   end
 
+  def update_jurisdiction_enrollments
+    authorize :site_configuration, :update_jurisdiction_enrollments?
+
+    service_partner = params[:service_partner]
+    jurisdiction_ids = params[:jurisdiction_ids] || []
+
+    # Remove enrollments not in the list
+    JurisdictionServicePartnerEnrollment
+      .where(service_partner: service_partner)
+      .where.not(jurisdiction_id: jurisdiction_ids)
+      .destroy_all
+
+    # Add new enrollments
+    jurisdiction_ids.each do |jurisdiction_id|
+      JurisdictionServicePartnerEnrollment.find_or_create_by!(
+        jurisdiction_id: jurisdiction_id,
+        service_partner: service_partner
+      )
+    end
+
+    # Return enrolled jurisdictions with their data
+    enrollments =
+      JurisdictionServicePartnerEnrollment.where(
+        service_partner: service_partner
+      ).includes(:jurisdiction)
+
+    render_success(
+      enrollments,
+      "site_configuration.enrollments_updated",
+      { blueprint: JurisdictionServicePartnerEnrollmentBlueprint }
+    )
+  end
+
+  def jurisdiction_enrollments
+    authorize :site_configuration, :jurisdiction_enrollments?
+    service_partner = jurisdiction_enrollments_params[:service_partner]
+    enrollments =
+      JurisdictionServicePartnerEnrollment.where(
+        service_partner: service_partner
+      ).includes(:jurisdiction)
+
+    render_success(
+      enrollments,
+      nil,
+      { blueprint: JurisdictionServicePartnerEnrollmentBlueprint }
+    )
+  end
+
   private
 
   def set_site_configuration
     @site_configuration = SiteConfiguration.instance
+  end
+
+  def jurisdiction_enrollments_params
+    params.permit(:service_partner)
   end
 
   def site_configuration_params
@@ -40,6 +92,8 @@ class Api::SiteConfigurationController < Api::ApplicationController
       :sitewide_message,
       :inbox_enabled,
       :allow_designated_reviewer,
+      :code_compliance_enabled,
+      :archistar_enabled_for_all_jurisdictions,
       landing_page_early_access_requirement_template_ids: [],
       help_link_items: [
         get_started_link_item: %i[href title description show],

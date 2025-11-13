@@ -25,6 +25,13 @@ north_van =
 
 van = Jurisdiction.find_by(name: "Vancouver")
 
+# Seed Archistar enrollment for North Vancouver
+JurisdictionServicePartnerEnrollment.find_or_create_by(
+  jurisdiction: north_van,
+  service_partner: :archistar
+) { |enrollment| enrollment.enabled = true }
+puts "  ✓ Created Archistar enrollment for North Vancouver"
+
 puts "Seeding users..."
 User.find_or_create_by(omniauth_username: "super_admin") do |user|
   user.role = :super_admin
@@ -457,7 +464,7 @@ end
 if Rails.env.development?
   puts "Ensuring site configuration inbox is enabled for development..."
   site_config = SiteConfiguration.instance
-  site_config.update(inbox_enabled: true)
+  site_config.update(inbox_enabled: true, code_compliance_enabled: true)
 end
 
 puts "Seeding Permit Projects from Permit Applications..."

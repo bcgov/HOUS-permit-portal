@@ -22,9 +22,9 @@ class RequirementBlock < ApplicationRecord
   accepts_nested_attributes_for :requirements, allow_destroy: true
   accepts_nested_attributes_for :requirement_documents, allow_destroy: true
 
-  enum sign_off_role: { any: 0 }, _prefix: true
-  enum reviewer_role: { any: 0 }, _prefix: true
-  enum visibility: { any: 0, early_access: 1, live: 2 }, _default: 0
+  enum :sign_off_role, { any: 0 }, prefix: true
+  enum :reviewer_role, { any: 0 }, prefix: true
+  enum :visibility, { any: 0, early_access: 1, live: 2 }, default: 0
 
   validates :sku, uniqueness: true, presence: true
   validates :name, presence: true

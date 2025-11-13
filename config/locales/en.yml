@@ -227,6 +227,31 @@ en:
       in_use_error:
         title: Error
         message: "This permit classification is in use and cannot be deleted"
+    pre_check:
+      create_success:
+        title: ""
+        message: "Pre-check created successfully!"
+      create_error:
+        title: Error
+        message: "Error creating pre-check"
+      update_success:
+        title: ""
+        message: "Pre-check updated successfully!"
+      update_error:
+        title: Error
+        message: "Error updating pre-check"
+      submit_success:
+        title: ""
+        message: "Pre-check submitted successfully!"
+      submit_error:
+        title: Error
+        message: "Error submitting pre-check"
+      no_certificate:
+        title: Error
+        message: "No certificate number found for pre-check"
+      pdf_report_unavailable:
+        title: Error
+        message: "PDF report unavailable"
     contact:
       options_error:
         title: Error
@@ -592,6 +617,9 @@ en:
         title: ""
         message: "%{error_message}"
     site_configuration:
+      enrollments_updated:
+        title: ""
+        message: "Jurisdiction code compliance enrollments updated successfully"
       update_success:
         title: ""
         message: "Successfully updated site configuration"
@@ -878,6 +906,10 @@ en:
       review_assignee_collaboration_unassignment_notification: "You have been removed as a review collaborator on requirement “%{requirement_block_name}” for permit application %{number}"
     step_code:
       report_generated: "Your step code report is ready to download"
+    pre_check:
+      completed_passed: "Your BC Code compliance pre-check for %{address} is now available."
+      completed_failed: "Your BC Code compliance pre-check for %{address} is now available."
+      submitted: "We've submitted your drawings for %{address}. Your results are being prepared."
     permit_block_status:
       status_read_by_user: 'Requirement “%{requirement_block_name}” status set to "ready" by %{setter_name} for permit application %{number}'
       status_ready_no_user: 'Requirement “%{requirement_block_name}” status set to "ready" for permit application %{number}'

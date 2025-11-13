@@ -1,6 +1,7 @@
 import { ICollaborator } from "../models/collaborator"
 import { IJurisdiction } from "../models/jurisdiction"
 import { IPermitApplication } from "../models/permit-application"
+import { IPreCheck } from "../models/pre-check"
 import { IRequirementBlock } from "../models/requirement-block"
 import { IRequirementTemplate } from "../models/requirement-template"
 import { IUser } from "../models/user"
@@ -49,3 +50,5 @@ export interface INotificationResponse {
 export interface ITemplateVersionDiffResponse {
   data: ITemplateVersionDiff
 }
+
+export interface IPreCheckResponse extends IApiResponse<IPreCheck, {}> {}

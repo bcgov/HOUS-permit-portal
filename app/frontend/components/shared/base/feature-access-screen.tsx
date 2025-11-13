@@ -81,9 +81,9 @@ const FeatureRow = ({
         >
           {(() => {
             const toggleKey = `${i18nPrefix}.toggle${enabled ? "On" : "Off"}`
-            // @ts-ignore
             return (
               <Text as="span" fontWeight="bold">
+                {/* // @ts-ignore */}
                 {t(toggleKey)}
               </Text>
             )

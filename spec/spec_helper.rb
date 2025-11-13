@@ -111,6 +111,7 @@ RSpec.configure do |config|
     EarlyAccessRequirementTemplate.reindex
     User.reindex
     Contact.reindex
+    PreCheck.reindex
 
     # and disable callbacks
     Searchkick.disable_callbacks

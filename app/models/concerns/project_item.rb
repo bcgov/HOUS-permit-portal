@@ -30,6 +30,7 @@ module ProjectItem
     end
 
     belongs_to :jurisdiction, optional: true # Added for direct association
+    belongs_to :permit_type, optional: true # Added for direct association
     has_one :owner, through: :permit_project
 
     after_commit :reindex_permit_project
@@ -65,6 +66,14 @@ module ProjectItem
 
     def reference_number
       parent&.reference_number || self[:reference_number]
+    end
+
+    def permit_type
+      parent&.permit_type || super
+    end
+
+    def permit_type_id
+      parent&.permit_type_id || super
     end
 
     def phase
