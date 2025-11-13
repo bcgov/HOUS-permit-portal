@@ -110,7 +110,7 @@ export const EditableBlock = observer(function SubmissionsInboxSetupEditableBloc
                   required={isEditing}
                   validate={isEditing}
                   handleRemove={() => onRemove(trueIndex, contact)}
-                  isRemovable={isEditing && fields.length > 1}
+                  isRemovable={isEditing}
                   hideLabel={index !== 0}
                   showIcon
                 />
