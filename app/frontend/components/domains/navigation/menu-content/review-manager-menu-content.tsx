@@ -31,6 +31,7 @@ export const ReviewManagerMenuContent = observer(() => {
         <SubmissionInboxMenuItem />
         {isSandboxActive && <MyProjectsMenuItem />}
         <MyProfileMenuItem />
+        <SandboxMenuItem />
       </MenuSection>
 
       {/* Settings section */}
@@ -50,7 +51,6 @@ export const ReviewManagerMenuContent = observer(() => {
       </MenuSection>
 
       <MenuSection>
-        <SandboxMenuItem />
         <LogoutButton />
       </MenuSection>
     </MenuContentWrapper>

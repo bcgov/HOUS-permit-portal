@@ -1,12 +1,14 @@
 import {
   Box,
   Button,
+  Container,
   Drawer,
   DrawerBody,
   DrawerContent,
   DrawerHeader,
   DrawerOverlay,
   Grid,
+  Heading,
   IconButton,
   Show,
   Text,
@@ -22,6 +24,7 @@ import { useMst } from "../../../setup/root"
 import { EUserRoles } from "../../../types/enums"
 import { RouterLink } from "../../shared/navigation/router-link"
 import { LoggedOutMenuContent } from "./menu-content/logged-out-menu-content"
+import { MenuCloseProvider } from "./menu-content/menu-link-item"
 import { ReviewManagerMenuContent } from "./menu-content/review-manager-menu-content"
 import { ReviewerMenuContent } from "./menu-content/reviewer-menu-content"
 import { SubmitterMenuContent } from "./menu-content/submitter-menu-content"
@@ -39,10 +42,8 @@ interface IStaticLinkItemProps extends LinkProps {
 const StaticLinkItem = ({ label, to, description, ...props }: IStaticLinkItemProps) => {
   return (
     <VStack align="flex-start" spacing={1} w="full">
-      <RouterLink to={to} color="text.link" textDecoration="underline" fontWeight="medium" {...props}>
-        <Text color="text.link" textDecoration="underline" fontWeight="bold">
-          {label}
-        </Text>
+      <RouterLink to={to} fontWeight="bold" {...props}>
+        {label}
       </RouterLink>
       {description && <Text>{description}</Text>}
     </VStack>
@@ -57,9 +58,9 @@ interface IMenuSectionProps {
 const MenuSection = ({ title, children }: IMenuSectionProps) => {
   return (
     <VStack align="flex-start" spacing={4} w="full">
-      <Text as="h3" fontSize="lg" fontWeight="bold" color="text.primary" mb={2}>
+      <Heading as="h2" color="text.primary" mb={2}>
         {title}
-      </Text>
+      </Heading>
       {children}
     </VStack>
   )
@@ -161,7 +162,7 @@ export const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
           border={currentUser?.isSubmitter || !loggedIn ? "solid black" : "solid white"}
           borderWidth="1px"
           p={3}
-          variant={currentUser?.isSubmitter || !loggedIn ? "primaryInverse" : "primary"}
+          variant={currentUser?.isSubmitter || !loggedIn ? "secondary" : "primary"}
           aria-label="menu dropdown button"
           icon={<List size={16} weight="bold" />}
           onClick={onToggle}
@@ -174,12 +175,12 @@ export const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
           border={currentUser?.isSubmitter || !loggedIn ? "solid black" : "solid white"}
           borderWidth="1px"
           p={3}
-          variant={currentUser?.isSubmitter || !loggedIn ? "primaryInverse" : "primary"}
+          variant={currentUser?.isSubmitter || !loggedIn ? "secondary" : "primary"}
           aria-label="menu dropdown button"
           leftIcon={isOpen ? <X size={16} weight="bold" /> : <List size={16} weight="bold" />}
           onClick={onToggle}
         >
-          {isOpen ? t("site.closeMenu") : t("site.menu")}
+          {t("site.menu")}
         </Button>
       </Show>
 
@@ -193,11 +194,15 @@ export const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
         >
           <DrawerHeader minH={8}></DrawerHeader>
           <DrawerBody>
-            <Grid templateColumns={{ base: "1fr", md: "repeat(3, 1fr)" }} gap={8} maxW="container.xl" mx="auto" pb={8}>
-              <Box order={{ base: 2, md: 1 }}>{projectReadinessColumn}</Box>
-              <Box order={{ base: 3, md: 2 }}>{aboutColumn}</Box>
-              <Box order={{ base: 1, md: 3 }}>{renderRightColumnContent()}</Box>
-            </Grid>
+            <MenuCloseProvider value={onClose}>
+              <Container maxW="container.lg" px={8}>
+                <Grid templateColumns={{ base: "1fr", md: "3fr 3fr 2fr" }} gap={8} pb={8}>
+                  <Box order={{ base: 2, md: 1 }}>{projectReadinessColumn}</Box>
+                  <Box order={{ base: 3, md: 2 }}>{aboutColumn}</Box>
+                  <Box order={{ base: 1, md: 3 }}>{renderRightColumnContent()}</Box>
+                </Grid>
+              </Container>
+            </MenuCloseProvider>
           </DrawerBody>
         </DrawerContent>
       </Drawer>

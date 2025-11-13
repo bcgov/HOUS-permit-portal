@@ -28,6 +28,7 @@ export const TechnicalSupportMenuContent = observer(() => {
         <HomeMenuItem />
         {isSandboxActive && <MyProjectsMenuItem />}
         <MyProfileMenuItem />
+        <SandboxMenuItem />
       </MenuSection>
 
       {/* Settings section */}
@@ -42,7 +43,6 @@ export const TechnicalSupportMenuContent = observer(() => {
       </MenuSection>
 
       <MenuSection>
-        <SandboxMenuItem />
         <LogoutButton />
       </MenuSection>
     </MenuContentWrapper>

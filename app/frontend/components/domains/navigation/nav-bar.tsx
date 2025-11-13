@@ -1,5 +1,5 @@
 import { Box, Container, Flex, HStack, Heading, Image, Link, Show, Spacer, Text, VStack } from "@chakra-ui/react"
-import { Folders, Warning } from "@phosphor-icons/react"
+import { Folders, Tray, Warning } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React from "react"
@@ -146,7 +146,7 @@ export const NavBar = observer(function NavBar() {
                 />
               </Box>
             </RouterLink>
-            <Show above="md">
+            <Show above="lg">
               <Flex direction="column" w="full">
                 <HStack>
                   <Text fontSize="2xl" fontWeight="normal" mb="0" whiteSpace="nowrap">
@@ -202,6 +202,16 @@ export const NavBar = observer(function NavBar() {
                   aria-label="notifications popover"
                   color={currentUser?.isSubmitter || !loggedIn ? "theme.blue" : "greys.white"}
                 />
+              )}
+              {currentUser?.isReviewStaff && (
+                <RouterLinkButton
+                  variant="tertiarty"
+                  px={2}
+                  leftIcon={<Tray size={16} />}
+                  to={`/jurisdictions/${currentUser?.jurisdiction?.slug}/submission-inbox`}
+                >
+                  <Show above="xl">{t("home.submissionsInboxTitle")}</Show>
+                </RouterLinkButton>
               )}
               <NavBarMenu />
             </HStack>

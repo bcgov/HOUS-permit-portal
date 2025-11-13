@@ -1,5 +1,5 @@
 import { Box, Flex, Text, VStack } from "@chakra-ui/react"
-import React from "react"
+import React, { useContext } from "react"
 import { useNavigate } from "react-router-dom"
 
 export interface IMenuLinkItemProps {
@@ -10,12 +10,23 @@ export interface IMenuLinkItemProps {
   description?: string
 }
 
+// Context for closing the menu drawer
+const MenuCloseContext = React.createContext<(() => void) | undefined>(undefined)
+
+export const MenuCloseProvider = MenuCloseContext.Provider
+
+export const useMenuClose = () => useContext(MenuCloseContext)
+
 export const MenuLinkItem = ({ icon, label, to, onClick, description }: IMenuLinkItemProps) => {
   const navigate = useNavigate()
+  const onClose = useMenuClose()
 
   const handleClick = () => {
     if (to) {
       navigate(to)
+      if (onClose) {
+        onClose()
+      }
     }
     if (onClick) {
       onClick()
@@ -28,7 +39,7 @@ export const MenuLinkItem = ({ icon, label, to, onClick, description }: IMenuLin
       onClick={to || onClick ? handleClick : undefined}
       align="flex-start"
       gap={3}
-      p={2}
+      p={1.5}
       borderRadius="md"
       _hover={to || onClick ? { bg: "hover.blue", cursor: "pointer" } : {}}
       w="full"

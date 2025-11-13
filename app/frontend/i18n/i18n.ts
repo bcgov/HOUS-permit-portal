@@ -10,7 +10,7 @@ const options = {
     en: {
       translation: {
         auth: {
-          login: "Login",
+          login: "Log in",
           loginTitle: "Log in to Building Permit Hub",
           firstTime: "First time here? You need a BCeID or BC Services Card Account to log in",
           publicLogin: "I am applying for a permit",
@@ -66,7 +66,7 @@ const options = {
               register: "Register for Business BCeID",
             },
           },
-          logout: "Logout",
+          logout: "Log out",
           submit: "Submit",
           or: "or",
           bceidLogin: "Log in with BCeID",
@@ -86,7 +86,7 @@ const options = {
           completeAccountActiviation: "Please confirm your account",
           checkYourEmail:
             "Check your email inbox for a confirmation email to finish activating your new Building Permit Hub account.",
-          tokenExpired: "Your session is no longer valid, please login again",
+          tokenExpired: "Your session is no longer valid, please log in again",
         },
         landing: {
           title: "Building Permit Hub",
@@ -2716,7 +2716,7 @@ Thank you,
         home: {
           jurisdictionsTitle: "Jurisdictions",
           projectReadinessTools: {
-            title: "Project readiness tools",
+            title: "Tools",
             stepCodeLookupTool: {
               title: "Where are you building?",
               description: "Enter an address to check service availability and local requirements including Step Codes",
@@ -3082,7 +3082,7 @@ Thank you,
               submissionInboxDescription: "Specify where submitted permit applications should be sent",
               myJurisdictionAboutPage: "My Jurisdiction's About page",
               myJurisdictionAboutPageDescription:
-                "Show a custom About page on Building Permit Hub with information specific to your jurisdiction's requirements, contact information, or common issues to watch for.<br><br> Only turn this page on after you've added your content. If it's turned on without custom content, the page will appear blank. <1> Edit your jurisdiction's About page content",
+                "Show a custom About page on Building Permit Hub with information specific to your jurisdiction's requirements, contact information, or common issues to watch for.<br> Only turn this page on after you've added your content. If it's turned on without custom content, the page will appear blank.<br> <1> Edit your jurisdiction's About page content",
               myJurisdictionAboutPageEdit: "Edit",
               designatedReviewer: "Limit who can request revisions from submitters",
               editJurisdictionAboutPage: "Edit my jurisdiction About page",
@@ -3106,7 +3106,7 @@ Thank you,
             },
           },
           superAdminTitle: "Admin home",
-          submissionsInboxTitle: "Submissions inbox",
+          submissionsInboxTitle: "Submissions",
           submissionsInboxDescription: "View all submitted building permit applications.",
           permitsTitle: "Digital building permits",
           permitsDescription:
@@ -3955,7 +3955,7 @@ Thank you,
             quickHelp: {
               title: "Try These First",
               loginIssues:
-                "<strong>Login Issues?</strong> Clear your browser cache or try an incognito window (Link to BCeID or BC Servcices Card Account)",
+                "<strong>Log in Issues?</strong> Clear your browser cache or try an incognito window (Link to BCeID or BC Servcices Card Account)",
               uploadProblems: "<strong>Upload Problems?</strong> Ensure files are under 10MB",
               applicationStatus: "<strong>Application Status?</strong> Log into your account to view real-time updates",
             },

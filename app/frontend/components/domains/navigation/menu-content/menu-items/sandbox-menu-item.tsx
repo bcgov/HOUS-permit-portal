@@ -59,7 +59,7 @@ export const SandboxMenuItem = observer(() => {
         align="center"
         justify="flex-start"
         gap={3}
-        p={3}
+        p={1.5}
         borderRadius="md"
         _hover={{ bg: "hover.blue", cursor: "pointer" }}
         w="full"

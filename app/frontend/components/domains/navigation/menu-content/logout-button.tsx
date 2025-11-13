@@ -14,7 +14,7 @@ export const LogoutButton = observer(() => {
   }
 
   return (
-    <Button variant="tertiary" onClick={handleLogout} ml={-1}>
+    <Button variant="tertiary" onClick={handleLogout} ml={-1} p={1.5}>
       {t("auth.logout")}
     </Button>
   )
