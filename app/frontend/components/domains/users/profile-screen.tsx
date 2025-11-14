@@ -68,7 +68,7 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
   }
 
   const events = [
-    { event: t("user.notifications.essential"), inAppChecked: false, emailChecked: true, emailDisabled: true },
+    { event: t("user.notifications.essential"), inAppChecked: false, emailChecked: false },
     {
       event: t("user.notifications.templateChanged"),
       inAppControl: "preferenceAttributes.enableInAppNewTemplateVersionPublishNotification",
