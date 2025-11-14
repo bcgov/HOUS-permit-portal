@@ -6,7 +6,7 @@ import { Trans, useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { useJurisdiction } from "../../../../../../hooks/resources/use-jurisdiction"
 import { SwitchButton } from "../../../../../shared/buttons/switch-button"
-import { RouterLinkButton } from "../../../../../shared/navigation/router-link-button"
+import { RouterLink } from "../../../../../shared/navigation/router-link"
 
 export const myJurisdictionAboutPageScreen = observer(() => {
   const i18nPrefix = "home.configurationManagement.featureAccess"
@@ -35,14 +35,7 @@ export const myJurisdictionAboutPageScreen = observer(() => {
             <Trans
               i18nKey={`${i18nPrefix}.myJurisdictionAboutPageDescription`}
               components={{
-                1: (
-                  <RouterLinkButton
-                    variant={"link"}
-                    to={"/jurisdictions/" + currentJurisdiction?.slug}
-                    fontSize="lg"
-                    textDecoration="none"
-                  ></RouterLinkButton>
-                ),
+                1: <RouterLink to={"/jurisdictions/" + currentJurisdiction?.slug} fontSize="lg"></RouterLink>,
               }}
             ></Trans>
           </Text>

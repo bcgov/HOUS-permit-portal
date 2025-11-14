@@ -2,6 +2,7 @@ export const Link = {
   baseStyle: {
     color: "text.link",
     textDecoration: "underline",
+    textDecorationThickness: "1px",
 
     ["svg"]: {
       display: "inline",
@@ -10,7 +11,8 @@ export const Link = {
     },
 
     _hover: {
-      color: "focus",
+      color: "text.primary",
+      textDecorationThickness: "3px",
     },
   },
 }

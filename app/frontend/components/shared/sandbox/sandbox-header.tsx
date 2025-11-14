@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next"
 import { ISandbox } from "../../../models/sandbox"
 import { useMst } from "../../../setup/root"
 import { colors } from "../../../styles/theme/foundations/colors"
+import { ETemplateVersionStatus } from "../../../types/enums"
 
 interface ISandboxHeaderProps extends FlexProps {
   expanded?: boolean
@@ -17,8 +18,6 @@ const SandboxHeader: React.FC<ISandboxHeaderProps> = observer(({ expanded, sandb
   const { t } = useTranslation()
   const { sandboxStore } = useMst()
   const { isSandboxActive, currentSandbox } = sandboxStore
-
-  const sandboxToUse = override ? sandbox : currentSandbox
 
   if (!isSandboxActive && !override) return null
 
@@ -50,7 +49,13 @@ const SandboxHeader: React.FC<ISandboxHeaderProps> = observer(({ expanded, sandb
       {...rest}
     >
       <CubeFocus size={24} />
-      {expanded && t("sandbox.inMode")} {sandboxToUse?.name}
+      {expanded && (
+        <>
+          {t("sandbox.inMode")}
+          {currentSandbox?.templateVersionStatusScope === ETemplateVersionStatus.scheduled &&
+            ` (${t("sandbox.scheduledModeDescription")})`}
+        </>
+      )}
     </Flex>
   )
 })
