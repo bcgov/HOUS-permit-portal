@@ -69,7 +69,7 @@ export const RoomByRoomForm = ({ onSubmit }: IRoomByRoomFormProps) => {
       <Grid templateColumns="1fr 150px 150px" gap={4} mt={6} alignItems="center">
         <Box gridColumn="1 / span 1">
           <Heading as="h4" size="sm">
-            Ventilation Loss s (if separate)74 & Latent Gain (if separate, value or multiplier)75
+            Ventilation loss (if separate)74 & Latent gain (if separate, value or multiplier)75
           </Heading>
         </Box>
         <Box>
@@ -83,7 +83,7 @@ export const RoomByRoomForm = ({ onSubmit }: IRoomByRoomFormProps) => {
       <Grid templateColumns="1fr 150px 150px" gap={4} mt={4} alignItems="center">
         <Box gridColumn="1 / span 1">
           <Heading as="h4" size="sm">
-            Total Building Loss (5.2.7) & Nominal Cooling Capacity (6.3.1)
+            Total building loss (5.2.7) & Nominal cooling capacity (6.3.1)
           </Heading>
         </Box>
         <Box>

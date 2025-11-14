@@ -13,20 +13,17 @@ export interface INavSection {
 }
 
 export const navLinks: INavLink[] = [
-  { key: "coverSheet", label: "Heating & Cooling", location: "compliance", section: "overview" },
+  { key: "coverSheet", label: "Heating and cooling", location: "compliance", section: "overview" },
   { key: "inputSummary", label: "Input summary", location: "input-summary", section: "overview" },
   {
     key: "calculations",
     label: "Calculations",
     location: "calculations",
     section: "overview",
-    // subLinks: [
-    //   { key: "totals", label: "Totals", location: "room-by-room-totals", section: "overview" },
-    // ],
   },
   { key: "uploads", label: "Signed report", location: "uploads", section: "attachments" },
   { key: "review", label: "Confirm your submission", location: "review", section: "review" },
-  { key: "result", label: "Result Summary", location: "result", section: "result" },
+  { key: "result", label: "Result summary", location: "result", section: "result" },
 ]
 
 export const navSections: INavSection[] = [
