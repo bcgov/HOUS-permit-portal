@@ -325,6 +325,7 @@ const options = {
           public: "Public",
           undo: "Undo",
           chooseSandboxMode: "Choose a training mode",
+          new: "new",
         },
         notification: {
           title: "Notifications",
@@ -1227,7 +1228,8 @@ Thank you,
           live: "Live (None)",
           disabledFor: "Disabled for training sandbox",
           inMode: "You're in training mode",
-          scheduledModeDescription: "upcoming templates only",
+          scheduledModeDescription: "upcoming template sandbox",
+          publishedModeDescription: "published template sandbox",
           disableJurisdictionSwitchTooltip: "Leave training mode before switching jurisdictions",
           switch: {
             label: "Training mode",
