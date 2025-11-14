@@ -45,7 +45,10 @@ class UserBlueprint < Blueprinter::Base
   view :extended do
     include_view :base
     include_view :current_user
-    association :jurisdictions, blueprint: JurisdictionBlueprint, view: :base
+    association :jurisdictions,
+                blueprint: JurisdictionBlueprint,
+                view: :extended,
+                options: ->(_user, options) { options }
   end
 
   view :invited_user do

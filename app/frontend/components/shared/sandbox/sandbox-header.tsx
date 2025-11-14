@@ -49,13 +49,11 @@ const SandboxHeader: React.FC<ISandboxHeaderProps> = observer(({ expanded, sandb
       {...rest}
     >
       <CubeFocus size={24} />
-      {expanded && (
-        <>
-          {t("sandbox.inMode")}
-          {currentSandbox?.templateVersionStatusScope === ETemplateVersionStatus.scheduled &&
-            ` (${t("sandbox.scheduledModeDescription")})`}
-        </>
-      )}
+      {expanded && <>{t("sandbox.inMode")}</>}
+      {(currentSandbox || sandbox)?.templateVersionStatusScope === ETemplateVersionStatus.scheduled &&
+        ` (${t("sandbox.scheduledModeDescription")})`}
+      {(currentSandbox || sandbox)?.templateVersionStatusScope === ETemplateVersionStatus.published &&
+        ` (${t("sandbox.publishedModeDescription")})`}
     </Flex>
   )
 })

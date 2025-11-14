@@ -58,7 +58,7 @@ export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationC
       gap={4}
       position="relative"
     >
-      {permitApplication.sandbox && <SandboxHeader override sandbox={permitApplication.sandbox} />}
+      {permitApplication.sandbox && <SandboxHeader override sandbox={permitApplication.sandbox} expanded />}
       <Flex flexDirection={{ base: "column", md: "row" }} gap={6} w="full">
         <Show above="md">
           <Flex direction="column" flex={{ base: 0, md: 1 }} maxW={{ base: "100%", md: "20%" }}>

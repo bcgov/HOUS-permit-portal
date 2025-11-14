@@ -246,6 +246,16 @@ class Jurisdiction < ApplicationRecord
     permit_applications&.size || 0
   end
 
+  def unviewed_submissions_count(sandbox: nil)
+    permit_applications
+      .for_sandbox(sandbox)
+      .where(status: %i[newly_submitted resubmitted])
+      .joins(:submission_versions)
+      .where(submission_versions: { viewed_at: nil })
+      .distinct
+      .count
+  end
+
   def unviewed_permit_applications
     permit_applications.unviewed
   end

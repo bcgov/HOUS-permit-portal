@@ -23,6 +23,14 @@ module Constants
         DOMAIN = :template_version
         TYPES = { update: :update }.freeze
       end
+
+      module Jurisdiction
+        DOMAIN = :jurisdiction
+        TYPES = {
+          unviewed_submissions_count_updated:
+            :unviewed_submissions_count_updated
+        }.freeze
+      end
     end
   end
 end
