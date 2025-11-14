@@ -16,6 +16,7 @@ import React, { useEffect } from "react"
 import { FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../setup/root"
+import { EGeneralContactType, EProfessionalContactType } from "../../../types/enums"
 import { IContact } from "../../../types/types"
 import { convertE164PhoneToInputDefault } from "../../../utils/utility-functions"
 import { EmailFormControl } from "../form/email-form-control"
@@ -59,24 +60,19 @@ export const CreateEditContactModal = ({
   const { contactStore } = useMst()
   const { createContact, updateContact, destroyContact } = contactStore
 
-  const generalContactTypes = t("contact.contactTypes.general", { returnObjects: true }) as Record<string, string>
-  const professionalContactTypes = t("contact.contactTypes.professional", { returnObjects: true }) as Record<
-    string,
-    string
-  >
   const contactTypeOptionGroups = [
     {
       label: "General",
-      options: Object.entries(generalContactTypes).map(([value, label]) => ({
+      options: (Object.values(EGeneralContactType) as string[]).map((value) => ({
         value: value,
-        label: label,
+        label: t(`contact.contactTypes.general.${value}` as any) as string,
       })),
     },
     {
       label: "Professional",
-      options: Object.entries(professionalContactTypes).map(([value, label]) => ({
+      options: (Object.values(EProfessionalContactType) as string[]).map((value) => ({
         value: value,
-        label: label,
+        label: t(`contact.contactTypes.professional.${value}` as any) as string,
       })),
     },
   ]
