@@ -24,7 +24,7 @@ import { useController, useForm, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useAutoComplianceModuleConfigurations } from "../../../../../hooks/resources/use-auto-compliance-module-configurations"
 import { useMst } from "../../../../../setup/root"
-import { EAutoComplianceModule } from "../../../../../types/enums"
+import { EAutoComplianceModule, ERequirementType } from "../../../../../types/enums"
 import {
   IOption,
   TAutoComplianceModuleConfiguration,
@@ -217,7 +217,8 @@ export const ComputedComplianceSetupModal = observer(function ComputedCompliance
     )
   }, [watchedRequirementValueOptions, watchedOptionsMap])
 
-  const isSetupDisabled = availableAutoComplianceModuleConfigurations.length === 0
+  const isSetupDisabled =
+    availableAutoComplianceModuleConfigurations.length === 0 && watchedRequirementType !== ERequirementType.pidInfo
 
   // prunes the optionsMap if the value options changed
   useEffect(() => {
