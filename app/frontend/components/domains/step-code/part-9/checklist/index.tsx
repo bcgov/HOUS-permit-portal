@@ -57,11 +57,7 @@ export const StepCodeChecklistForm = observer(function StepCodeChecklistForm() {
       R.mergeRight(values, { stepRequirementId: checklist.stepRequirementId })
     )
     if (result && !markingComplete) {
-      if (permitApplicationId) {
-        navigate(`/permit-applications/${permitApplicationId}/edit`)
-      } else {
-        navigate(`/step-codes`)
-      }
+      navigate(-1)
     }
   }
 

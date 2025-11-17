@@ -44,7 +44,7 @@ export const EULAScreen = observer(function EULAScreen({ withClose }: { withClos
         <Suspense fallback={<LoadingScreen />}>
           {eula && (
             <>
-              <Box maxW="4xl" overflow="hidden">
+              <Box maxW="4xl" overflow="auto">
                 {/* Use SafeTipTapDisplay for safe HTML rendering */}
                 <SafeTipTapDisplay htmlContent={eula.content} />
               </Box>

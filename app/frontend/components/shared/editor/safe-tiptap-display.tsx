@@ -65,7 +65,9 @@ export const SafeTipTapDisplay: React.FC<SafeTipTapDisplayProps> = ({
       {...boxProps}
       data-testid={dataTestId || "safe-tiptap-display"}
       dangerouslySetInnerHTML={{ __html: sanitizedHtml }}
-      // Add default styling that matches editor output
+      overflowY="auto"
+      overflowX="hidden"
+      // Add default styling that matches Quill's output
       sx={{
         // Preserve default text formatting
         "& p": {
@@ -168,6 +170,8 @@ export const SafeTipTapDisplayInline: React.FC<SafeTipTapDisplayProps> = ({
       dangerouslySetInnerHTML={{ __html: sanitizedHtml }}
       sx={{
         display: "inline",
+        overflowY: "auto",
+        overflowX: "hidden",
         "& p": {
           display: "inline",
           margin: 0,
