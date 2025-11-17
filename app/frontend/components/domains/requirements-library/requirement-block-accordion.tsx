@@ -186,7 +186,7 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
               ))}
             </Flex>
           )}
-          {!isQuillEmpty(requirementBlockCustomization?.tip) && (
+          {(!isQuillEmpty(requirementBlockCustomization?.tip) || !!requirementBlockCustomization?.helpLink) && (
             <Box px={2} my={4}>
               <RichTextTip tip={requirementBlockCustomization.tip} helpLink={requirementBlockCustomization.helpLink} />
             </Box>

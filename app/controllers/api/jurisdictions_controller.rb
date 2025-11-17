@@ -227,6 +227,7 @@ class Api::JurisdictionsController < Api::ApplicationController
       :map_zoom,
       :inbox_enabled,
       :ltsa_matcher,
+      :heating_degree_days,
       map_position: [],
       users_attributes: %i[first_name last_name role email],
       contacts_attributes: %i[
