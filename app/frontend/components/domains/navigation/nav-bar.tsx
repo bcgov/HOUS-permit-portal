@@ -27,11 +27,11 @@ import * as R from "ramda"
 import React, { useState } from "react"
 import { Trans, useTranslation } from "react-i18next"
 import { useLocation, useNavigate } from "react-router-dom"
-import { useJiraCollector } from "../../../hooks/use-jira-collector"
 import { PopoverProvider, useNotificationPopover } from "../../../hooks/use-notification-popover"
 import { useMst } from "../../../setup/root"
 import { EUserRoles } from "../../../types/enums"
 import { INotification, IPermitNotificationObjectData } from "../../../types/types"
+import { openFeedbackDialog } from "../../../utils/feedback"
 import { HelpDrawer } from "../../shared/help-drawer"
 import { RouterLink } from "../../shared/navigation/router-link"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
@@ -299,7 +299,6 @@ const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
   const { currentUser } = userStore
   const { logout, loggedIn } = sessionStore
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const { openFeedbackCollector } = useJiraCollector() // Always load the collector script
 
   const handleClickLogout = async () => {
     await logout()
@@ -459,7 +458,7 @@ const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
             )}
 
             <MenuDivider my={0} borderColor="border.light" />
-            <MenuItem onClick={openFeedbackCollector}>
+            <MenuItem onClick={openFeedbackDialog}>
               <Flex align="center" gap={2}>
                 {t("site.giveFeedback")} <Envelope size={16} style={{ display: "inline", color: "inherit" }} />
               </Flex>

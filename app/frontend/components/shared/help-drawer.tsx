@@ -20,8 +20,8 @@ import {
 import { Bug, CaretRight, Envelope, Info } from "@phosphor-icons/react"
 import React, { ReactNode, Ref, useRef } from "react"
 import { useTranslation } from "react-i18next"
-import { useJiraCollector } from "../../hooks/use-jira-collector"
 import { useMst } from "../../setup/root"
+import { openFeedbackDialog } from "../../utils/feedback"
 import { SectionBox } from "../domains/home/section-box"
 
 interface IProps {
@@ -34,7 +34,6 @@ export function HelpDrawer({ defaultButtonProps, renderTriggerButton }: IProps) 
   const { siteConfigurationStore } = useMst()
   const { isOpen, onOpen, onClose } = useDisclosure()
   const btnRef = useRef<HTMLButtonElement>()
-  const { openFeedbackCollector } = useJiraCollector() // Always load the collector script
 
   const { shownHelpLinkItems } = siteConfigurationStore
 
@@ -96,7 +95,7 @@ export function HelpDrawer({ defaultButtonProps, renderTriggerButton }: IProps) 
                   <Button
                     leftIcon={<Bug size={20} />}
                     variant="primary"
-                    onClick={openFeedbackCollector}
+                    onClick={openFeedbackDialog}
                     mt={4}
                     aria-label={t("site.reportAnIssue")}
                   >

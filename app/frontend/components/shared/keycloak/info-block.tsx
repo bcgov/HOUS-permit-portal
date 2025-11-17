@@ -10,8 +10,8 @@ export function KeycloakInfoBlock({ title, description, bulletPoints, ctaText, c
       </Heading>
       <Text fontSize="sm">{description}</Text>
       <UnorderedList fontSize="sm" pl={2}>
-        {bulletPoints.map((p) => (
-          <ListItem>{p}</ListItem>
+        {bulletPoints.map((p, index) => (
+          <ListItem key={index}>{p}</ListItem>
         ))}
       </UnorderedList>
       {infoLink && (

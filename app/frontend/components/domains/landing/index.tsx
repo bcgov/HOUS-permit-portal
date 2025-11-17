@@ -18,6 +18,7 @@ import { observer } from "mobx-react-lite"
 import React, { ReactNode, useEffect, useRef } from "react"
 import { Trans, useTranslation } from "react-i18next"
 import { useMst } from "../../../setup/root"
+import { openFeedbackDialog } from "../../../utils/feedback"
 import { RouterLink } from "../../shared/navigation/router-link"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { StepCodeLookupTool } from "../project-readiness-tools/step-code-lookup-tool"
@@ -26,7 +27,6 @@ interface ILandingScreenProps {}
 
 export const LandingScreen = observer(({}: ILandingScreenProps) => {
   const { t } = useTranslation()
-  const mailto = "mailto:" + t("site.contactEmail")
   const iNeedRef = useRef<HTMLDivElement>(null)
   const { sessionStore, userStore, siteConfigurationStore } = useMst()
   const { landingPageEarlyAccessRequirementTemplates } = siteConfigurationStore
@@ -265,9 +265,9 @@ export const LandingScreen = observer(({}: ILandingScreenProps) => {
             {t("landing.createdQ")}
           </Heading>
           <Text>{t("landing.createdA")}</Text>
-          <Link href={mailto} isExternal mt="4">
+          <Button variant="link" mt="4" onClick={openFeedbackDialog}>
             {t("landing.tellUsYourExperience")}
-          </Link>
+          </Button>
         </Container>
       </Box>
     </Flex>

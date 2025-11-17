@@ -19,13 +19,17 @@ declare global {
   }
 
   interface Window {
+    // Jira Issue Collector configuration (set in application_helper.rb)
     ATL_JQ_PAGE_PROPS?: {
-      triggerFunction: (showCollectorDialog: () => void) => void
+      collectorId?: string
+      triggerFunction?: (showCollectorDialog: () => void) => void
       fieldValues?: {
         description?: string
         [key: string]: unknown
       }
     }
+    // Jira dialog function (provided by Jira collector script)
+    showCollectorDialog?: () => void
   }
 }
 export {} //needed for TS compiler.
