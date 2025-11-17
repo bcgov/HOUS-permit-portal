@@ -79,14 +79,6 @@ ActiveRecord::Schema[7.2].define(version: 2025_11_06_180012) do
   create_table "data_migrations", primary_key: "version", id: :string, force: :cascade do |t|
   end
 
-  create_table "design_documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.uuid "pre_check_id", null: false
-    t.text "file_data"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["pre_check_id"], name: "index_design_documents_on_pre_check_id"
-  end
-
   create_table "document_references", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "checklist_id"
     t.string "document_name"
@@ -190,16 +182,6 @@ ActiveRecord::Schema[7.2].define(version: 2025_11_06_180012) do
     t.datetime "updated_at", null: false
     t.index ["jurisdiction_id"], name: "index_jurisdiction_memberships_on_jurisdiction_id"
     t.index ["user_id"], name: "index_jurisdiction_memberships_on_user_id"
-  end
-
-  create_table "jurisdiction_service_partner_enrollments", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.uuid "jurisdiction_id", null: false
-    t.integer "service_partner", null: false
-    t.boolean "enabled", default: true, null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["jurisdiction_id", "service_partner"], name: "index_jurisdiction_service_partner_unique", unique: true
-    t.index ["jurisdiction_id"], name: "idx_on_jurisdiction_id_6fa7cce558"
   end
 
   create_table "jurisdiction_template_version_customizations", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -439,7 +421,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_11_06_180012) do
     t.string "type", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.text "description_html"
+    t.string "description"
     t.boolean "enabled"
     t.string "category"
     t.string "code"
@@ -515,36 +497,19 @@ ActiveRecord::Schema[7.2].define(version: 2025_11_06_180012) do
 
   create_table "pre_checks", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "permit_application_id"
-    t.uuid "permit_type_id"
     t.uuid "creator_id", null: false
     t.uuid "jurisdiction_id"
-    t.string "certificate_no"
+    t.string "title"
+    t.string "cert_number"
+    t.date "permit_date"
+    t.string "phase"
     t.string "full_address"
-    t.string "pid"
-    t.integer "service_partner", default: 0, null: false
-    t.integer "status", default: 0, null: false
-    t.integer "assessment_result"
-    t.datetime "submitted_at"
-    t.datetime "completed_at"
-    t.datetime "viewed_at"
-    t.text "result_message"
-    t.string "pdf_report_url"
-    t.string "viewer_url"
-    t.boolean "eula_accepted", default: false, null: false
-    t.boolean "consent_to_send_drawings", default: false, null: false
-    t.boolean "consent_to_share_with_jurisdiction", default: false
-    t.boolean "consent_to_research_contact", default: false
+    t.jsonb "checklist", default: {}, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["assessment_result"], name: "index_pre_checks_on_assessment_result"
-    t.index ["certificate_no"], name: "index_pre_checks_on_certificate_no", unique: true
-    t.index ["completed_at"], name: "index_pre_checks_on_completed_at"
     t.index ["creator_id"], name: "index_pre_checks_on_creator_id"
     t.index ["jurisdiction_id"], name: "index_pre_checks_on_jurisdiction_id"
     t.index ["permit_application_id"], name: "index_pre_checks_on_permit_application_id", unique: true
-    t.index ["permit_type_id"], name: "index_pre_checks_on_permit_type_id"
-    t.index ["service_partner"], name: "index_pre_checks_on_service_partner"
-    t.index ["viewed_at"], name: "index_pre_checks_on_viewed_at"
   end
 
   create_table "preferences", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -732,8 +697,6 @@ ActiveRecord::Schema[7.2].define(version: 2025_11_06_180012) do
     t.jsonb "revision_reason_options"
     t.boolean "inbox_enabled", default: false, null: false
     t.boolean "allow_designated_reviewer", default: false, null: false
-    t.boolean "code_compliance_enabled", default: false, null: false
-    t.boolean "archistar_enabled_for_all_jurisdictions", default: false, null: false
   end
 
   create_table "step_code_building_characteristics_summaries", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -984,7 +947,6 @@ ActiveRecord::Schema[7.2].define(version: 2025_11_06_180012) do
   add_foreign_key "allowlisted_jwts", "users", on_delete: :cascade
   add_foreign_key "api_key_expiration_notifications", "external_api_keys"
   add_foreign_key "collaborators", "users"
-  add_foreign_key "design_documents", "pre_checks"
   add_foreign_key "document_references", "part_3_step_code_checklists", column: "checklist_id"
   add_foreign_key "early_access_previews", "users", column: "previewer_id"
   add_foreign_key "energy_outputs", "part_3_step_code_checklists", column: "checklist_id"
@@ -996,7 +958,6 @@ ActiveRecord::Schema[7.2].define(version: 2025_11_06_180012) do
   add_foreign_key "integration_mappings", "template_versions"
   add_foreign_key "jurisdiction_memberships", "jurisdictions"
   add_foreign_key "jurisdiction_memberships", "users"
-  add_foreign_key "jurisdiction_service_partner_enrollments", "jurisdictions"
   add_foreign_key "jurisdiction_template_version_customizations", "jurisdictions"
   add_foreign_key "jurisdiction_template_version_customizations", "sandboxes"
   add_foreign_key "jurisdiction_template_version_customizations", "template_versions"
@@ -1026,7 +987,6 @@ ActiveRecord::Schema[7.2].define(version: 2025_11_06_180012) do
   add_foreign_key "pinned_projects", "users"
   add_foreign_key "pre_checks", "jurisdictions"
   add_foreign_key "pre_checks", "permit_applications"
-  add_foreign_key "pre_checks", "permit_classifications", column: "permit_type_id"
   add_foreign_key "pre_checks", "users", column: "creator_id"
   add_foreign_key "preferences", "users"
   add_foreign_key "project_documents", "permit_projects"

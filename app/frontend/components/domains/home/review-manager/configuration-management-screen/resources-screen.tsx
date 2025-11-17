@@ -6,9 +6,7 @@ import {
   FormControl,
   FormLabel,
   Heading,
-  HStack,
   Icon,
-  IconButton,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -19,12 +17,11 @@ import {
   Radio,
   RadioGroup,
   Stack,
-  Tag,
   Text,
   useDisclosure,
   VStack,
 } from "@chakra-ui/react"
-import { CaretLeft, Download, Link as LinkIcon, Pencil, Plus, Trash } from "@phosphor-icons/react"
+import { CaretLeft, FilePdf, Globe, Pencil, Plus, Trash } from "@phosphor-icons/react"
 import { UppyFile } from "@uppy/core"
 import "@uppy/core/dist/style.min.css"
 import "@uppy/dashboard/dist/style.css"
@@ -69,6 +66,69 @@ interface IResourceModalForm {
     }
     _destroy?: boolean
   }
+}
+
+interface IResourceCardProps {
+  resource: IResource
+  onEdit: (resource: IResource) => void
+  onDelete: (resource: IResource) => void
+}
+
+const ResourceCard: React.FC<IResourceCardProps> = ({ resource, onEdit, onDelete }) => {
+  const { t } = useTranslation()
+
+  const dateToFormat = resource.updatedAt || resource.createdAt || new Date().toISOString()
+  const formattedDate = format(new Date(dateToFormat), "yyyy-MM-dd HH:mm")
+
+  return (
+    <Box p={4} bg="greys.grey03" borderRadius="lg" position="relative">
+      <Flex gap={4} alignItems="flex-start">
+        {/* Icon */}
+        <Box flexShrink={0}>
+          <Icon
+            as={resource.resourceType === EResourceType.file ? FilePdf : Globe}
+            boxSize={8}
+            color={resource.resourceType === EResourceType.file ? "semantic.error" : "semantic.info"}
+          />
+        </Box>
+
+        {/* Content */}
+        <VStack align="start" spacing={1} flex={1}>
+          <Text fontWeight="bold" fontSize="md">
+            {resource.title}
+          </Text>
+          {resource.description && (
+            <Text color="text.secondary" fontSize="sm">
+              {resource.description}
+            </Text>
+          )}
+          <Text color="text.secondary" fontSize="xs">
+            {t("ui.uploaded")} {formattedDate}
+          </Text>
+        </VStack>
+
+        {/* Actions */}
+        <Flex direction="column" align="flex-start" gap={2} flexShrink={0}>
+          <Button variant="secondary" onClick={() => onEdit(resource)} leftIcon={<Pencil />}>
+            {t("ui.edit")}
+          </Button>
+          <ConfirmationModal
+            title={t("home.configurationManagement.resources.confirmDelete")}
+            body={t("home.configurationManagement.resources.confirmDeleteBody")}
+            onConfirm={async (closeModal) => {
+              await onDelete(resource)
+              closeModal()
+            }}
+            renderTriggerButton={(props) => (
+              <Button {...props} variant="tertiary" px={0} leftIcon={<Trash />}>
+                {t("ui.delete")}
+              </Button>
+            )}
+          />
+        </Flex>
+      </Flex>
+    </Box>
+  )
 }
 
 export const ResourcesScreen = observer(function ResourcesScreen() {
@@ -258,26 +318,22 @@ export const ResourcesScreen = observer(function ResourcesScreen() {
     <Flex as="main" direction="column" w="full" bg="greys.white" pb="24">
       <BlueTitleBar title={currentJurisdiction.qualifiedName} />
       <Container maxW="container.lg" py={{ base: 6, md: 16 }} px={8}>
-        <VStack spacing={8} align="start" w="full">
+        <VStack spacing={4} align="start" w="full">
           <Button variant="link" onClick={() => navigate(-1)} leftIcon={<CaretLeft size={20} />} textDecoration="none">
             {t("ui.back")}
           </Button>
-          <Flex align="center" w="100%" direction="column" alignItems="flex-start">
+          <Flex justify="space-between" w="full">
             <Text as="h1" fontSize="3xl" fontWeight="bold" mb={0}>
               {t("home.configurationManagement.resources.title")}
             </Text>
-            <Text color="text.secondary" fontSize="lg" mt={2}>
-              {t("home.configurationManagement.resources.description")}
-            </Text>
+            <Button variant="primary" leftIcon={<Plus size={20} />} onClick={() => handleOpenModal()}>
+              {t("home.configurationManagement.resources.addResource")}
+            </Button>
           </Flex>
-
+          <Text color="text.secondary" fontSize="lg" mt={2}>
+            {t("home.configurationManagement.resources.description")}
+          </Text>
           <VStack spacing={6} align="stretch" w="full">
-            <Flex justify="flex-end" w="full">
-              <Button variant="primary" leftIcon={<Plus size={20} />} onClick={() => handleOpenModal()}>
-                {t("home.configurationManagement.resources.addResource")}
-              </Button>
-            </Flex>
-
             {Object.values(EResourceCategory).map((category) => {
               const categoryResources = getResourcesByCategory(category)
               if (categoryResources.length === 0) return null
@@ -291,82 +347,12 @@ export const ResourcesScreen = observer(function ResourcesScreen() {
                   </Box>
                   <VStack spacing={4} w="full" alignItems="stretch" px={6} pb={6} pt={4}>
                     {categoryResources.map((resource) => (
-                      <Box
+                      <ResourceCard
                         key={resource.id}
-                        p={4}
-                        bg="greys.white"
-                        borderRadius="lg"
-                        border="1px solid"
-                        borderColor="border.base"
-                        position="relative"
-                      >
-                        <Flex justifyContent="space-between" alignItems="flex-start" mb={2}>
-                          <VStack align="start" spacing={1} flex={1}>
-                            <HStack spacing={2}>
-                              <Text fontWeight="bold" fontSize="lg">
-                                {resource.title}
-                              </Text>
-                              <Tag
-                                size="sm"
-                                colorScheme={resource.resourceType === EResourceType.file ? "blue" : "green"}
-                                variant="subtle"
-                              >
-                                {resource.resourceType === EResourceType.file ? (
-                                  <HStack spacing={1}>
-                                    <Download size={14} />
-                                    <Text>{t("home.configurationManagement.resources.types.pdf")}</Text>
-                                  </HStack>
-                                ) : (
-                                  <HStack spacing={1}>
-                                    <LinkIcon size={14} />
-                                    <Text>{t("home.configurationManagement.resources.types.linkTag")}</Text>
-                                  </HStack>
-                                )}
-                              </Tag>
-                            </HStack>
-                            {resource.description && (
-                              <Text color="text.secondary" fontSize="sm">
-                                {resource.description}
-                              </Text>
-                            )}
-                            <Text color="text.secondary" fontSize="xs">
-                              {t("ui.updatedAt")}{" "}
-                              {(() => {
-                                const dateToFormat =
-                                  resource.updatedAt || resource.createdAt || new Date().toISOString()
-                                return format(new Date(dateToFormat), "MMM d, yyyy")
-                              })()}
-                            </Text>
-                          </VStack>
-                          <HStack spacing={2}>
-                            <IconButton
-                              aria-label={t("ui.edit")}
-                              icon={<Icon as={Pencil} />}
-                              variant="tertiary"
-                              size="sm"
-                              onClick={() => handleOpenModal(resource)}
-                            />
-                            <ConfirmationModal
-                              title={t("home.configurationManagement.resources.confirmDelete")}
-                              body={t("home.configurationManagement.resources.confirmDeleteBody")}
-                              onConfirm={async (closeModal) => {
-                                await handleRemoveResource(resource)
-                                closeModal()
-                              }}
-                              renderTriggerButton={(props) => (
-                                <IconButton
-                                  {...props}
-                                  aria-label={t("ui.remove")}
-                                  color="semantic.error"
-                                  icon={<Icon as={Trash} />}
-                                  variant="tertiary"
-                                  size="sm"
-                                />
-                              )}
-                            />
-                          </HStack>
-                        </Flex>
-                      </Box>
+                        resource={resource}
+                        onEdit={handleOpenModal}
+                        onDelete={handleRemoveResource}
+                      />
                     ))}
                   </VStack>
                 </Box>
