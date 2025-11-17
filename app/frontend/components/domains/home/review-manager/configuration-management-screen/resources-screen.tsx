@@ -31,8 +31,8 @@ import "@uppy/dashboard/dist/style.css"
 import Dashboard from "@uppy/react/lib/Dashboard.js"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
-import React, { useEffect, useRef, useState } from "react"
-import { FormProvider, useFieldArray, useForm } from "react-hook-form"
+import React, { useRef, useState } from "react"
+import { FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { useJurisdiction } from "../../../../../hooks/resources/use-jurisdiction"
@@ -42,37 +42,13 @@ import { IResource } from "../../../../../types/types"
 import { BlueTitleBar } from "../../../../shared/base/blue-title-bar"
 import { ErrorScreen } from "../../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../../shared/base/loading-screen"
+import { ConfirmationModal } from "../../../../shared/confirmation-modal"
 import {
   SelectFormControl,
   TextAreaFormControl,
   TextFormControl,
   UrlFormControl,
 } from "../../../../shared/form/input-form-control"
-
-interface IResourcesForm {
-  resourcesAttributes: Array<{
-    id?: string
-    category: string
-    title: string
-    description?: string
-    resourceType: string
-    linkUrl?: string
-    resourceDocumentAttributes?: {
-      id?: string
-      file?: {
-        id: string
-        storage: string
-        metadata: {
-          size: number
-          filename: string
-          mimeType: string
-        }
-      }
-      _destroy?: boolean
-    }
-    _destroy?: boolean
-  }>
-}
 
 interface IResourceModalForm {
   category: string
@@ -101,33 +77,8 @@ export const ResourcesScreen = observer(function ResourcesScreen() {
   const { currentJurisdiction, error } = useJurisdiction()
   const { isOpen, onOpen, onClose } = useDisclosure()
   const [editingResource, setEditingResource] = useState<IResource | null>(null)
-  const containerRef = useRef<HTMLDivElement>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const modalContainerRef = useRef<HTMLDivElement>(null)
-
-  const getDefaultValues = (): IResourcesForm => {
-    return {
-      resourcesAttributes:
-        currentJurisdiction?.resources?.map((resource) => ({
-          id: resource.id,
-          category: resource.category,
-          title: resource.title,
-          description: resource.description,
-          resourceType: resource.resourceType,
-          linkUrl: resource.linkUrl,
-          resourceDocumentAttributes: resource.resourceDocument
-            ? {
-                id: resource.resourceDocument.id,
-                file: resource.resourceDocument.file,
-              }
-            : undefined,
-        })) || [],
-    }
-  }
-
-  const formMethods = useForm<IResourcesForm>({
-    mode: "onChange",
-    defaultValues: getDefaultValues(),
-  })
 
   const modalFormMethods = useForm<IResourceModalForm>({
     mode: "onChange",
@@ -140,28 +91,14 @@ export const ResourcesScreen = observer(function ResourcesScreen() {
     },
   })
 
-  const { control, watch, reset, handleSubmit } = formMethods
   const {
-    control: modalControl,
     watch: modalWatch,
     reset: modalReset,
     handleSubmit: modalHandleSubmit,
     setValue: modalSetValue,
   } = modalFormMethods
 
-  const resourcesAttributes = watch("resourcesAttributes")
   const resourceType = modalWatch("resourceType")
-
-  const { append, update, remove } = useFieldArray({
-    control,
-    name: "resourcesAttributes",
-  })
-
-  useEffect(() => {
-    if (currentJurisdiction) {
-      reset(getDefaultValues())
-    }
-  }, [currentJurisdiction?.id])
 
   const handleOpenModal = (resource?: IResource) => {
     // Reset Uppy whenever opening the modal to ensure a clean state
@@ -253,58 +190,59 @@ export const ResourcesScreen = observer(function ResourcesScreen() {
   const onModalSubmit = async (formData: IResourceModalForm) => {
     if (!currentJurisdiction) return
 
-    if (editingResource) {
-      const index = resourcesAttributes.findIndex((r) => r.id === editingResource.id)
-      if (index !== -1) {
-        update(index, {
-          id: editingResource.id,
-          category: formData.category,
-          title: formData.title,
-          description: formData.description,
-          resourceType: formData.resourceType,
-          linkUrl: formData.linkUrl,
-          resourceDocumentAttributes: formData.resourceDocumentAttributes,
+    setIsSubmitting(true)
+    try {
+      if (editingResource) {
+        // Update existing resource
+        await currentJurisdiction.update({
+          resourcesAttributes: [
+            {
+              id: editingResource.id,
+              category: formData.category,
+              title: formData.title,
+              description: formData.description,
+              resourceType: formData.resourceType,
+              linkUrl: formData.linkUrl,
+              resourceDocumentAttributes: formData.resourceDocumentAttributes,
+            },
+          ],
+        })
+      } else {
+        // Create new resource
+        await currentJurisdiction.update({
+          resourcesAttributes: [
+            {
+              category: formData.category,
+              title: formData.title,
+              description: formData.description,
+              resourceType: formData.resourceType,
+              linkUrl: formData.linkUrl,
+              resourceDocumentAttributes: formData.resourceDocumentAttributes,
+            },
+          ],
         })
       }
-    } else {
-      append({
-        category: formData.category,
-        title: formData.title,
-        description: formData.description,
-        resourceType: formData.resourceType,
-        linkUrl: formData.linkUrl,
-        resourceDocumentAttributes: formData.resourceDocumentAttributes,
-      })
-    }
-    handleCloseModal()
-  }
-
-  const handleRemoveResource = (resourceId: string) => {
-    const index = resourcesAttributes.findIndex((r) => r.id === resourceId)
-    if (index !== -1) {
-      const resource = resourcesAttributes[index]
-      update(index, { ...resource, _destroy: true })
+      handleCloseModal()
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
-  const handleUndoRemove = (resourceId: string) => {
-    const index = resourcesAttributes.findIndex((r) => r.id === resourceId)
-    if (index !== -1) {
-      const resource = resourcesAttributes[index]
-      update(index, { ...resource, _destroy: false })
-    }
-  }
+  const handleRemoveResource = async (resource: IResource) => {
+    if (!currentJurisdiction) return
 
-  const onSubmit = async (formData: IResourcesForm) => {
-    if (currentJurisdiction) {
-      await currentJurisdiction.update({
-        resourcesAttributes: formData.resourcesAttributes,
-      })
-    }
+    await currentJurisdiction.update({
+      resourcesAttributes: [
+        {
+          id: resource.id,
+          _destroy: true,
+        },
+      ],
+    })
   }
 
   const getResourcesByCategory = (category: string) => {
-    return resourcesAttributes.filter((r) => r.category === category && !r._destroy)
+    return currentJurisdiction?.resources?.filter((r) => r.category === category) || []
   }
 
   const categoryLabels = {
@@ -333,117 +271,108 @@ export const ResourcesScreen = observer(function ResourcesScreen() {
             </Text>
           </Flex>
 
-          <FormProvider {...formMethods}>
-            <form onSubmit={handleSubmit(onSubmit)} style={{ width: "100%" }}>
-              <VStack spacing={6} align="stretch" w="full">
-                <Flex justify="flex-end" w="full">
-                  <Button variant="primary" leftIcon={<Plus size={20} />} onClick={() => handleOpenModal()}>
-                    {t("home.configurationManagement.resources.addResource")}
-                  </Button>
-                </Flex>
+          <VStack spacing={6} align="stretch" w="full">
+            <Flex justify="flex-end" w="full">
+              <Button variant="primary" leftIcon={<Plus size={20} />} onClick={() => handleOpenModal()}>
+                {t("home.configurationManagement.resources.addResource")}
+              </Button>
+            </Flex>
 
-                {Object.values(EResourceCategory).map((category) => {
-                  const categoryResources = getResourcesByCategory(category)
-                  if (categoryResources.length === 0) return null
+            {Object.values(EResourceCategory).map((category) => {
+              const categoryResources = getResourcesByCategory(category)
+              if (categoryResources.length === 0) return null
 
-                  return (
-                    <Box key={category} as="section" w="full" boxShadow="md" borderRadius="xl" bg="greys.grey10">
-                      <Box as="header" w="full" px={6} py={3} bg="theme.blueAlt" borderTopRadius="xl">
-                        <Heading as="h3" fontSize="xl" color="greys.white" fontWeight={700}>
-                          {categoryLabels[category]}
-                        </Heading>
-                      </Box>
-                      <VStack spacing={4} w="full" alignItems="stretch" px={6} pb={6} pt={4}>
-                        {categoryResources.map((resource) => (
-                          <Box
-                            key={resource.id}
-                            p={4}
-                            bg="greys.white"
-                            borderRadius="lg"
-                            border="1px solid"
-                            borderColor="border.base"
-                            position="relative"
-                          >
-                            <Flex justifyContent="space-between" alignItems="flex-start" mb={2}>
-                              <VStack align="start" spacing={1} flex={1}>
-                                <HStack spacing={2}>
-                                  <Text fontWeight="bold" fontSize="lg">
-                                    {resource.title}
-                                  </Text>
-                                  <Tag
-                                    size="sm"
-                                    colorScheme={resource.resourceType === EResourceType.file ? "blue" : "green"}
-                                    variant="subtle"
-                                  >
-                                    {resource.resourceType === EResourceType.file ? (
-                                      <HStack spacing={1}>
-                                        <Download size={14} />
-                                        <Text>{t("home.configurationManagement.resources.types.pdf")}</Text>
-                                      </HStack>
-                                    ) : (
-                                      <HStack spacing={1}>
-                                        <LinkIcon size={14} />
-                                        <Text>{t("home.configurationManagement.resources.types.linkTag")}</Text>
-                                      </HStack>
-                                    )}
-                                  </Tag>
-                                </HStack>
-                                {resource.description && (
-                                  <Text color="text.secondary" fontSize="sm">
-                                    {resource.description}
-                                  </Text>
+              return (
+                <Box key={category} as="section" w="full" boxShadow="md" borderRadius="xl" bg="greys.grey10">
+                  <Box as="header" w="full" px={6} py={3} bg="theme.blueAlt" borderTopRadius="xl">
+                    <Heading as="h3" fontSize="xl" color="greys.white" fontWeight={700}>
+                      {categoryLabels[category]}
+                    </Heading>
+                  </Box>
+                  <VStack spacing={4} w="full" alignItems="stretch" px={6} pb={6} pt={4}>
+                    {categoryResources.map((resource) => (
+                      <Box
+                        key={resource.id}
+                        p={4}
+                        bg="greys.white"
+                        borderRadius="lg"
+                        border="1px solid"
+                        borderColor="border.base"
+                        position="relative"
+                      >
+                        <Flex justifyContent="space-between" alignItems="flex-start" mb={2}>
+                          <VStack align="start" spacing={1} flex={1}>
+                            <HStack spacing={2}>
+                              <Text fontWeight="bold" fontSize="lg">
+                                {resource.title}
+                              </Text>
+                              <Tag
+                                size="sm"
+                                colorScheme={resource.resourceType === EResourceType.file ? "blue" : "green"}
+                                variant="subtle"
+                              >
+                                {resource.resourceType === EResourceType.file ? (
+                                  <HStack spacing={1}>
+                                    <Download size={14} />
+                                    <Text>{t("home.configurationManagement.resources.types.pdf")}</Text>
+                                  </HStack>
+                                ) : (
+                                  <HStack spacing={1}>
+                                    <LinkIcon size={14} />
+                                    <Text>{t("home.configurationManagement.resources.types.linkTag")}</Text>
+                                  </HStack>
                                 )}
-                                <Text color="text.secondary" fontSize="xs">
-                                  {t("ui.updatedAt")}{" "}
-                                  {(() => {
-                                    const originalResource = currentJurisdiction.resources.find(
-                                      (r) => r.id === resource.id
-                                    )
-                                    if (!originalResource) return ""
-                                    const dateToFormat =
-                                      originalResource.updatedAt ||
-                                      originalResource.createdAt ||
-                                      new Date().toISOString()
-                                    return format(new Date(dateToFormat), "MMM d, yyyy")
-                                  })()}
-                                </Text>
-                              </VStack>
-                              <HStack spacing={2}>
+                              </Tag>
+                            </HStack>
+                            {resource.description && (
+                              <Text color="text.secondary" fontSize="sm">
+                                {resource.description}
+                              </Text>
+                            )}
+                            <Text color="text.secondary" fontSize="xs">
+                              {t("ui.updatedAt")}{" "}
+                              {(() => {
+                                const dateToFormat =
+                                  resource.updatedAt || resource.createdAt || new Date().toISOString()
+                                return format(new Date(dateToFormat), "MMM d, yyyy")
+                              })()}
+                            </Text>
+                          </VStack>
+                          <HStack spacing={2}>
+                            <IconButton
+                              aria-label={t("ui.edit")}
+                              icon={<Icon as={Pencil} />}
+                              variant="tertiary"
+                              size="sm"
+                              onClick={() => handleOpenModal(resource)}
+                            />
+                            <ConfirmationModal
+                              title={t("home.configurationManagement.resources.confirmDelete")}
+                              body={t("home.configurationManagement.resources.confirmDeleteBody")}
+                              onConfirm={async (closeModal) => {
+                                await handleRemoveResource(resource)
+                                closeModal()
+                              }}
+                              renderTriggerButton={(props) => (
                                 <IconButton
-                                  aria-label={t("ui.edit")}
-                                  icon={<Icon as={Pencil} />}
-                                  variant="tertiary"
-                                  size="sm"
-                                  onClick={() => {
-                                    const fullResource = currentJurisdiction.resources.find((r) => r.id === resource.id)
-                                    if (fullResource) handleOpenModal(fullResource)
-                                  }}
-                                />
-                                <IconButton
+                                  {...props}
                                   aria-label={t("ui.remove")}
                                   color="semantic.error"
                                   icon={<Icon as={Trash} />}
                                   variant="tertiary"
                                   size="sm"
-                                  onClick={() => handleRemoveResource(resource.id!)}
                                 />
-                              </HStack>
-                            </Flex>
-                          </Box>
-                        ))}
-                      </VStack>
-                    </Box>
-                  )
-                })}
-
-                <Flex justify="flex-end" w="full">
-                  <Button type="submit" variant="primary" size="lg">
-                    {t("ui.save")}
-                  </Button>
-                </Flex>
-              </VStack>
-            </form>
-          </FormProvider>
+                              )}
+                            />
+                          </HStack>
+                        </Flex>
+                      </Box>
+                    ))}
+                  </VStack>
+                </Box>
+              )
+            })}
+          </VStack>
         </VStack>
       </Container>
 
@@ -517,11 +446,11 @@ export const ResourcesScreen = observer(function ResourcesScreen() {
               </VStack>
             </ModalBody>
             <ModalFooter>
-              <Button variant="ghost" mr={3} onClick={handleCloseModal}>
+              <Button variant="ghost" mr={3} onClick={handleCloseModal} isDisabled={isSubmitting}>
                 {t("ui.cancel")}
               </Button>
-              <Button type="submit" variant="primary">
-                {t("ui.add")}
+              <Button type="submit" variant="primary" isLoading={isSubmitting}>
+                {t("ui.save")}
               </Button>
             </ModalFooter>
           </ModalContent>

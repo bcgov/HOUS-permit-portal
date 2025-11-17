@@ -2896,6 +2896,8 @@ Thank you,
               resourceType: "Resource type",
               file: "File",
               linkUrl: "Link URL",
+              confirmDelete: "Delete resource?",
+              confirmDeleteBody: "Are you sure you want to delete this resource? This action cannot be undone.",
               types: {
                 file: "File",
                 link: "Link",
