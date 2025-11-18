@@ -63,6 +63,7 @@ class JurisdictionBlueprint < Blueprinter::Base
   end
 
   view :extended do
+    # Only need these extra quereies when jurisdiciton is on user blueprint
     include_view :base
 
     field :unviewed_submissions_count do |jurisdiction, options|
