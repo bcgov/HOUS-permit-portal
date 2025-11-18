@@ -2,10 +2,9 @@ class PermitClassificationBlueprint < Blueprinter::Base
   identifier :id
   fields :name,
          :code,
-         :description,
+         :description_html,
          :enabled,
          :type,
-         :description,
          :image_url,
          :category,
          :category_label

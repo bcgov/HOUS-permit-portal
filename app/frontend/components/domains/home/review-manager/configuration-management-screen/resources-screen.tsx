@@ -6,7 +6,6 @@ import {
   FormControl,
   FormLabel,
   Heading,
-  Icon,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -17,11 +16,12 @@ import {
   Radio,
   RadioGroup,
   Stack,
+  Tag,
   Text,
   useDisclosure,
   VStack,
 } from "@chakra-ui/react"
-import { CaretLeft, FilePdf, Globe, Pencil, Plus, Trash } from "@phosphor-icons/react"
+import { CaretLeft, Link, Pencil, Plus, Trash } from "@phosphor-icons/react"
 import { UppyFile } from "@uppy/core"
 import "@uppy/core/dist/style.min.css"
 import "@uppy/dashboard/dist/style.css"
@@ -36,6 +36,7 @@ import { useJurisdiction } from "../../../../../hooks/resources/use-jurisdiction
 import useUppyS3 from "../../../../../hooks/use-uppy-s3"
 import { EResourceCategory, EResourceType } from "../../../../../types/enums"
 import { IResource } from "../../../../../types/types"
+import { getFileTypeInfo } from "../../../../../utils/file-utils"
 import { BlueTitleBar } from "../../../../shared/base/blue-title-bar"
 import { ErrorScreen } from "../../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../../shared/base/loading-screen"
@@ -66,69 +67,6 @@ interface IResourceModalForm {
     }
     _destroy?: boolean
   }
-}
-
-interface IResourceCardProps {
-  resource: IResource
-  onEdit: (resource: IResource) => void
-  onDelete: (resource: IResource) => void
-}
-
-const ResourceCard: React.FC<IResourceCardProps> = ({ resource, onEdit, onDelete }) => {
-  const { t } = useTranslation()
-
-  const dateToFormat = resource.updatedAt || resource.createdAt || new Date().toISOString()
-  const formattedDate = format(new Date(dateToFormat), "yyyy-MM-dd HH:mm")
-
-  return (
-    <Box p={4} bg="greys.grey03" borderRadius="lg" position="relative">
-      <Flex gap={4} alignItems="flex-start">
-        {/* Icon */}
-        <Box flexShrink={0}>
-          <Icon
-            as={resource.resourceType === EResourceType.file ? FilePdf : Globe}
-            boxSize={8}
-            color={resource.resourceType === EResourceType.file ? "semantic.error" : "semantic.info"}
-          />
-        </Box>
-
-        {/* Content */}
-        <VStack align="start" spacing={1} flex={1}>
-          <Text fontWeight="bold" fontSize="md">
-            {resource.title}
-          </Text>
-          {resource.description && (
-            <Text color="text.secondary" fontSize="sm">
-              {resource.description}
-            </Text>
-          )}
-          <Text color="text.secondary" fontSize="xs">
-            {t("ui.uploaded")} {formattedDate}
-          </Text>
-        </VStack>
-
-        {/* Actions */}
-        <Flex direction="column" align="flex-start" gap={2} flexShrink={0}>
-          <Button variant="secondary" onClick={() => onEdit(resource)} leftIcon={<Pencil />}>
-            {t("ui.edit")}
-          </Button>
-          <ConfirmationModal
-            title={t("home.configurationManagement.resources.confirmDelete")}
-            body={t("home.configurationManagement.resources.confirmDeleteBody")}
-            onConfirm={async (closeModal) => {
-              await onDelete(resource)
-              closeModal()
-            }}
-            renderTriggerButton={(props) => (
-              <Button {...props} variant="tertiary" px={0} leftIcon={<Trash />}>
-                {t("ui.delete")}
-              </Button>
-            )}
-          />
-        </Flex>
-      </Flex>
-    </Box>
-  )
 }
 
 export const ResourcesScreen = observer(function ResourcesScreen() {
@@ -339,13 +277,11 @@ export const ResourcesScreen = observer(function ResourcesScreen() {
               if (categoryResources.length === 0) return null
 
               return (
-                <Box key={category} as="section" w="full" boxShadow="md" borderRadius="xl" bg="greys.grey10">
-                  <Box as="header" w="full" px={6} py={3} bg="theme.blueAlt" borderTopRadius="xl">
-                    <Heading as="h3" fontSize="xl" color="greys.white" fontWeight={700}>
-                      {categoryLabels[category]}
-                    </Heading>
-                  </Box>
-                  <VStack spacing={4} w="full" alignItems="stretch" px={6} pb={6} pt={4}>
+                <Box key={category} as="section" w="full">
+                  <Heading as="h3" fontSize="lg" fontWeight={700} mb={3}>
+                    {categoryLabels[category]}
+                  </Heading>
+                  <VStack spacing={4} w="full" alignItems="stretch">
                     {categoryResources.map((resource) => (
                       <ResourceCard
                         key={resource.id}
@@ -445,3 +381,71 @@ export const ResourcesScreen = observer(function ResourcesScreen() {
     </Flex>
   )
 })
+
+interface IResourceCardProps {
+  resource: IResource
+  onEdit: (resource: IResource) => void
+  onDelete: (resource: IResource) => void
+}
+
+const ResourceCard: React.FC<IResourceCardProps> = ({ resource, onEdit, onDelete }) => {
+  const { t } = useTranslation()
+
+  const dateToFormat = resource.updatedAt || resource.createdAt || new Date().toISOString()
+  const formattedDate = format(new Date(dateToFormat), "yyyy-MM-dd HH:mm")
+
+  // Determine the file type info based on mime type or resource type
+  const fileTypeInfo =
+    resource.resourceType === EResourceType.link
+      ? { icon: <Link />, label: "LINK" }
+      : getFileTypeInfo(resource.resourceDocument?.file?.metadata?.mimeType)
+
+  return (
+    <Box p={4} bg="greys.grey03" borderRadius="lg" position="relative">
+      <Flex gap={4} alignItems="flex-start">
+        {/* Tag */}
+        <Tag backgroundColor="semantic.infoLight" size="sm" fontWeight="medium" color="text.secondary">
+          <Flex align="center" gap={1}>
+            {fileTypeInfo.icon}
+            <Text as="span">{fileTypeInfo.label}</Text>
+          </Flex>
+        </Tag>
+
+        {/* Content */}
+        <VStack align="start" spacing={1} flex={1}>
+          <Text fontWeight="bold" fontSize="md">
+            {resource.title}
+          </Text>
+          {resource.description && (
+            <Text color="text.secondary" fontSize="sm">
+              {resource.description}
+            </Text>
+          )}
+          <Text color="text.secondary" fontSize="xs">
+            {t("ui.uploaded")} {formattedDate}
+          </Text>
+        </VStack>
+
+        {/* Actions */}
+        <Flex direction="column" align="flex-start" gap={2} flexShrink={0}>
+          <Button variant="secondary" onClick={() => onEdit(resource)} leftIcon={<Pencil />}>
+            {t("ui.edit")}
+          </Button>
+          <ConfirmationModal
+            title={t("home.configurationManagement.resources.confirmDelete")}
+            body={t("home.configurationManagement.resources.confirmDeleteBody")}
+            onConfirm={async (closeModal) => {
+              await onDelete(resource)
+              closeModal()
+            }}
+            renderTriggerButton={(props) => (
+              <Button {...props} variant="tertiary" px={0} leftIcon={<Trash />}>
+                {t("ui.delete")}
+              </Button>
+            )}
+          />
+        </Flex>
+      </Flex>
+    </Box>
+  )
+}
