@@ -5,7 +5,7 @@ FactoryBot.define do
     association :permit_type, factory: :permit_type
     permit_application { association :permit_application, submitter: creator }
     full_address { "123 Test St" }
-    certificate_no { "CERT-#{SecureRandom.hex(4)}" }
+    external_id { "EXT-#{SecureRandom.hex(4)}" }
     status { "draft" }
     service_partner { :archistar }
     eula_accepted { true }

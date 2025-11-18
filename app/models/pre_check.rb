@@ -3,7 +3,7 @@ class PreCheck < ApplicationRecord
   include AASM
   has_parent :permit_application
 
-  searchkick word_middle: %i[full_address certificate_no]
+  searchkick word_middle: %i[full_address external_id]
 
   attribute :service_partner, :integer
   enum :service_partner, { archistar: 0 }
@@ -54,7 +54,7 @@ class PreCheck < ApplicationRecord
   validate :assessment_result_only_when_complete
 
   validates :service_partner, presence: true
-  validates :certificate_no, uniqueness: true, allow_nil: true
+  validates :external_id, uniqueness: true, allow_nil: true
 
   scope :completed_and_unviewed, -> { where(status: :complete, viewed_at: nil) }
 
@@ -105,8 +105,8 @@ class PreCheck < ApplicationRecord
 
   def submit_to_archistar
     archistar = Wrappers::Archistar.new
-    cert_no = archistar.create_submission(self)
-    self.update(certificate_no: cert_no, submitted_at: Time.current)
+    ext_id = archistar.create_submission(self)
+    self.update(external_id: ext_id, submitted_at: Time.current)
   rescue => e
     Rails.logger.error("Archistar submission failed: #{e.message}")
     raise # This will rollback the AASM transition
@@ -143,7 +143,7 @@ class PreCheck < ApplicationRecord
   def search_data
     {
       id: id,
-      certificate_no: certificate_no,
+      external_id: external_id,
       full_address: full_address,
       pid: pid,
       status: status,
@@ -166,7 +166,7 @@ class PreCheck < ApplicationRecord
         I18n.t("notification.pre_check.submitted", address: full_address),
       "object_data" => {
         "pre_check_id" => id,
-        "certificate_no" => certificate_no,
+        "external_id" => external_id,
         "full_address" => full_address
       }
     }
@@ -186,7 +186,7 @@ class PreCheck < ApplicationRecord
       "action_text" => I18n.t(action_text_key, address: full_address),
       "object_data" => {
         "pre_check_id" => id,
-        "certificate_no" => certificate_no,
+        "external_id" => external_id,
         "assessment_result" => assessment_result,
         "full_address" => full_address,
         "unviewed_count" => PreCheck.unviewed_count_for_user(creator_id)

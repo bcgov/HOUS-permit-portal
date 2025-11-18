@@ -417,7 +417,7 @@ const options = {
             created_at: "Created",
             updated_at: "Last Updated",
             title: "Project",
-            certificate_no: "Certificate Number",
+            external_id: "External ID",
             status: "Status",
             full_address: "Address",
             service_partner: "Service Partner",

@@ -8,7 +8,7 @@ import { PermitTypeModel } from "./permit-classification"
 export const PreCheckModel = types
   .model("PreCheck", {
     id: types.identifier,
-    certificateNo: types.maybeNull(types.string),
+    externalId: types.maybeNull(types.string),
     status: types.enumeration(Object.values(EPreCheckStatus)),
     title: types.maybeNull(types.string),
     fullAddress: types.maybeNull(types.string),

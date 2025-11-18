@@ -76,23 +76,21 @@ class Webhooks::ArchistarController < Webhooks::ApplicationController
   # end
 
   def process_webhook(payload)
-    certificate_no = payload["certificate_no"]
+    external_id = payload["certificate_no"]
 
-    unless certificate_no.present?
+    unless external_id.present?
       Rails.logger.warn(
         "No certificate number found in Archistar webhook payload"
       )
       return
     end
 
-    pre_check = PreCheck.find_by(certificate_no: certificate_no)
+    pre_check = PreCheck.find_by(external_id: external_id)
 
     if pre_check
       update_pre_check_from_webhook(pre_check, payload)
     else
-      Rails.logger.warn(
-        "No pre-check found for certificate number: #{certificate_no}"
-      )
+      Rails.logger.warn("No pre-check found for external ID: #{external_id}")
     end
   end
 
@@ -100,9 +98,7 @@ class Webhooks::ArchistarController < Webhooks::ApplicationController
     # Update pre_check with Archistar response data (except assessment_result)
     # Obtain the viewer url from Archistar
     viewer_url =
-      Wrappers::Archistar.new.get_submission_viewer_url(
-        pre_check.certificate_no
-      )
+      Wrappers::Archistar.new.get_submission_viewer_url(pre_check.external_id)
     update_params = {
       completed_at: payload["completed_at"],
       result_message: payload["message"],
