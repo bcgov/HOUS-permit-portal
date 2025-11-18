@@ -1,7 +1,6 @@
 import { Box, Button } from "@chakra-ui/react"
 import React, { useState } from "react"
-import ReactQuill from "react-quill"
-import "react-quill/dist/quill.snow.css" // Include the quill.snow.css stylesheet
+import { Editor } from "./editor"
 
 // Define your component's props and state as needed
 interface IProps {
@@ -26,7 +25,7 @@ const SavableEditor: React.FC<IProps> = ({ initialValue, onSave }) => {
 
   return (
     <Box>
-      <ReactQuill theme="snow" value={value} onChange={handleOnChange} />
+      <Editor htmlValue={value} onChange={handleOnChange} />
       {isDirty && (
         <Button onClick={handleSave} mt={3}>
           Save
