@@ -28,7 +28,7 @@ export const ResultsSummary = observer(function ResultsSummary() {
 
   // Fetch PDF report URL when component mounts for completed pre-checks
   useEffect(() => {
-    if (currentPreCheck && currentPreCheck.status === EPreCheckStatus.complete && currentPreCheck.certificateNo) {
+    if (currentPreCheck && currentPreCheck.status === EPreCheckStatus.complete && currentPreCheck.externalId) {
       setIsFetchingPdfUrl(true)
       currentPreCheck.fetchPdfReportUrl().then((url) => {
         if (url) {
@@ -148,7 +148,7 @@ export const ResultsSummary = observer(function ResultsSummary() {
                 )}
                 {"  "}
                 <Link
-                  href={`mailto:digital.codes.permits@gov.bc.ca?cc=compliance.support@archistar.ai&subject=Pre-check Support - Certificate ${currentPreCheck?.certificateNo} (ID: ${currentPreCheck?.id})`}
+                  href={`mailto:digital.codes.permits@gov.bc.ca?cc=compliance.support@archistar.ai&subject=Pre-check Support - External ID ${currentPreCheck?.externalId} (ID: ${currentPreCheck?.id})`}
                 >
                   digital.codes.permits@gov.bc.ca
                 </Link>

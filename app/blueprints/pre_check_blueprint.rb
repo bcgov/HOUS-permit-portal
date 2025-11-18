@@ -1,7 +1,7 @@
 class PreCheckBlueprint < Blueprinter::Base
   identifier :id
 
-  fields :certificate_no,
+  fields :external_id,
          :status,
          :full_address,
          :pid,

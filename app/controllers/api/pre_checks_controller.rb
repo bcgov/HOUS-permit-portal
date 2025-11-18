@@ -101,14 +101,14 @@ class Api::PreChecksController < Api::ApplicationController
   def pdf_report_url
     authorize @pre_check
 
-    unless @pre_check.certificate_no.present?
+    unless @pre_check.external_id.present?
       render_error "pre_check.no_certificate", status: :not_found
       return
     end
 
     begin
       archistar = Wrappers::Archistar.new
-      url = archistar.get_submission_pdf_report(@pre_check.certificate_no)
+      url = archistar.get_submission_pdf_report(@pre_check.external_id)
 
       render json: { pdf_report_url: url }
     rescue => e
