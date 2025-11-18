@@ -19,6 +19,7 @@ import { INotificationStore, NotificationStoreModel } from "./notification-store
 import { IPermitApplicationStore, PermitApplicationStoreModel } from "./permit-application-store"
 import { IPermitClassificationStore, PermitClassificationStoreModel } from "./permit-classification-store"
 import { IPermitProjectStore, PermitProjectStoreModel } from "./permit-project-store"
+import { IPreCheckStore, PreCheckStoreModel } from "./pre-check-store"
 import { IRequirementBlockStoreModel, RequirementBlockStoreModel } from "./requirement-block-store"
 import { IRequirementTemplateStoreModel, RequirementTemplateStoreModel } from "./requirement-template-store"
 import { ISandboxStore, SandboxStoreModel } from "./sandbox-store"
@@ -38,6 +39,7 @@ export const RootStoreModel = types
     permitApplicationStore: types.optional(PermitApplicationStoreModel, {}),
     permitProjectStore: types.optional(PermitProjectStoreModel, {}),
     permitClassificationStore: types.optional(PermitClassificationStoreModel, {}),
+    preCheckStore: types.optional(PreCheckStoreModel, {}),
     jurisdictionStore: types.optional(JurisdictionStoreModel, {}),
     requirementBlockStore: types.optional(RequirementBlockStoreModel, {}),
     earlyAccessRequirementBlockStore: types.optional(EarlyAccessRequirementBlockStoreModel, {}),
@@ -114,6 +116,7 @@ export interface IRootStore extends IStateTreeNode {
   permitApplicationStore: IPermitApplicationStore
   permitProjectStore: IPermitProjectStore
   permitClassificationStore: IPermitClassificationStore
+  preCheckStore: IPreCheckStore
   jurisdictionStore: IJurisdictionStore
   userStore: IUserStore
   earlyAccessRequirementBlockStore: IEarlyAccessRequirementBlockStoreModel

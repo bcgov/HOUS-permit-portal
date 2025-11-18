@@ -104,7 +104,7 @@ export const LandingScreen = observer(({}: ILandingScreenProps) => {
             as="section"
             direction="column"
             borderRadius="lg"
-            bg="var(--chakra-colors-theme-blueLight)"
+            bg="var(--chakra-colors-background-blueLight)"
             p={8}
             gap={6}
             color="theme.secondary"

@@ -348,6 +348,21 @@ export async function downloadFileFromStorage(options: {
   }
 }
 
+/**
+ * Downloads a file from a URL by creating a temporary anchor element
+ * @param url - The URL to download from
+ * @param filename - The filename for the downloaded file
+ */
+export function downloadFileFromUrl(url: string, filename: string): void {
+  const link = document.createElement("a")
+  link.href = url
+  link.download = filename
+  link.rel = "noopener"
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+}
+
 export function isSafari() {
   // Check if the browser is Safari
   return /^((?!chrome|android).)*safari/i.test(navigator.userAgent)

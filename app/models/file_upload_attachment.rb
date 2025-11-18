@@ -17,6 +17,27 @@ class FileUploadAttachment < ApplicationRecord
     attached_to.id
   end
 
+  def file_data
+    value =
+      begin
+        super
+      rescue StandardError
+        read_attribute(:file_data)
+      end
+    return value if value.is_a?(Hash)
+
+    # If value is a String, try to parse as JSON
+    if value.is_a?(String)
+      begin
+        JSON.parse(value)
+      rescue JSON::ParserError
+        {}
+      end
+    else
+      {}
+    end
+  end
+
   def file_id
     file_data.dig("id")
   end
