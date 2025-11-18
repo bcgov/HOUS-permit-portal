@@ -5,6 +5,7 @@ import React, { useTransition } from "react"
 import { useTranslation } from "react-i18next"
 import { useLocation, useNavigate } from "react-router-dom"
 import { useMst } from "../../../setup/root"
+import { ErrorScreen } from "../../shared/base/error-screen"
 import { LoadingScreen } from "../../shared/base/loading-screen"
 import { PreCheckTabPanelContent } from "./pre-check-tab-panel-content"
 import { ITabItem, ProjectSidebarTabList } from "./project-sidebar-tab-list"
@@ -15,7 +16,9 @@ interface IProjectDashboardScreenProps {}
 
 export const ProjectDashboardScreen = observer(({}: IProjectDashboardScreenProps) => {
   const { t } = useTranslation()
-  const { preCheckStore } = useMst()
+  const { preCheckStore, userStore, sandboxStore } = useMst()
+  const { currentUser } = userStore
+  const { isSandboxActive } = sandboxStore
   const location = useLocation()
   const navigate = useNavigate()
   const [isPending, startTransition] = useTransition()
@@ -44,6 +47,11 @@ export const ProjectDashboardScreen = observer(({}: IProjectDashboardScreenProps
       const routes = ["/projects", "/step-codes", "/pre-checks", "/documents"]
       navigate(routes[index] || "/projects", { replace: true })
     })
+  }
+
+  // if the current.isJurisdictionStaff, return ErrorScreen saying to enable sandbox mode
+  if (currentUser.isJurisdictionStaff && !isSandboxActive) {
+    return <ErrorScreen error={new Error(t("permitProject.index.staffError"))} />
   }
 
   return (

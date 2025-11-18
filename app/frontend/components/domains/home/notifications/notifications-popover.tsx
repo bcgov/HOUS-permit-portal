@@ -103,7 +103,6 @@ export const NotificationsPopover: React.FC<INotificationsPopoverProps> = observ
             icon={anyUnread ? <BellRinging size={24} /> : <Bell size={24} />}
             aria-label="open notifications"
             zIndex={1}
-            isDisabled={!!currentSandbox}
             {...rest}
           />
           {anyUnread && !currentSandbox && (

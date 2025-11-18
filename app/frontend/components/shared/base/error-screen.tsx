@@ -16,8 +16,7 @@ export const ErrorScreen = ({ error, ...rest }: IErrorScreenProps) => {
       <Center w="full" flex={1} color="greys.grey01">
         <VStack>
           <Warning size={100} />
-          <Text>{error?.message ?? t("site.somethingWrong")}</Text>
-          <Text>{t("site.seeConsoleForDetails")}</Text>
+          {error?.message ? <Text>{error?.message}</Text> : <Text>{t("site.seeConsoleForDetails")}</Text>}
         </VStack>
       </Center>
     </Container>
