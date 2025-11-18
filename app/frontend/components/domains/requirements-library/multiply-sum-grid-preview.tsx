@@ -29,7 +29,7 @@ export function MultiplySumGridPreview({
       <Box fontWeight={600} mb={1.5}>
         {t("requirementsLibrary.multiplySumGrid.title")}
       </Box>
-      <Grid templateColumns={"2fr 2fr 1fr 1fr"} gap={2}>
+      <Grid templateColumns={"2fr 2fr 2fr 1fr"} gap={2}>
         <Box>
           {controls?.firstColumn ? (
             <EditableInputWithControls
@@ -58,6 +58,10 @@ export function MultiplySumGridPreview({
         </Box>
         <Box>{t("requirementsLibrary.multiplySumGrid.quantityB")}</Box>
         <Box>{t("requirementsLibrary.multiplySumGrid.ab")}</Box>
+        <Box>...</Box>
+        <Box>...</Box>
+        <Box>...</Box>
+        <Box>...</Box>
       </Grid>
     </Box>
   )
