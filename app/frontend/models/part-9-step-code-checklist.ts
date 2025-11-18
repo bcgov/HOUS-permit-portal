@@ -17,7 +17,7 @@ import { StepCodeComplianceReportModel } from "./step-code-compliance-report"
 function preProcessor(snapshot) {
   return {
     ...snapshot,
-    selectedReport: snapshot.selectedReport?.requirementId,
+    selectedReportRequirementId: snapshot.selectedReport?.requirementId,
   }
 }
 
@@ -30,6 +30,7 @@ export const Part9StepCodeChecklistModel = types.snapshotProcessor(
       status: types.enumeration<EStepCodeChecklistStatus[]>(Object.values(EStepCodeChecklistStatus)),
       // permit application info
       permitApplicationNumber: types.maybeNull(types.string),
+      referenceNumber: types.maybeNull(types.string),
       builder: types.maybeNull(types.string),
       fullAddress: types.maybeNull(types.string),
       jurisdictionName: types.maybeNull(types.string),
@@ -67,7 +68,8 @@ export const Part9StepCodeChecklistModel = types.snapshotProcessor(
       epcCalculationCompliance: types.maybeNull(types.boolean),
       // calculated / pre-populated fields
       complianceReports: types.array(StepCodeComplianceReportModel),
-      selectedReport: types.maybeNull(types.late(() => types.safeReference(StepCodeComplianceReportModel))),
+      selectedReportRequirementId: types.maybeNull(types.string),
+      updatedAt: types.maybeNull(types.Date),
     })
     .extend(withEnvironment())
     .views((self) => ({
@@ -75,7 +77,10 @@ export const Part9StepCodeChecklistModel = types.snapshotProcessor(
         return EStepCodeType.part9StepCode
       },
       get dwellingUnitsCount() {
-        return self.selectedReport?.energy?.dwellingUnitsCount
+        const report =
+          self.complianceReports.find((r) => r.requirementId == self.selectedReportRequirementId) ||
+          self.complianceReports[0]
+        return report?.energy?.dwellingUnitsCount
       },
       get defaultFormValues() {
         const snapshot = getSnapshot(self)
@@ -83,6 +88,7 @@ export const Part9StepCodeChecklistModel = types.snapshotProcessor(
           { buildingCharacteristicsSummary: "buildingCharacteristicsSummaryAttributes" },
           R.pick(
             [
+              "referenceNumber",
               "builder",
               "buildingType",
               "compliancePath",
@@ -111,20 +117,33 @@ export const Part9StepCodeChecklistModel = types.snapshotProcessor(
         return self.status == EStepCodeChecklistStatus.complete
       },
       get stepRequirementId() {
-        return self.selectedReport?.requirementId || self.complianceReports[0].requirementId
+        const report =
+          self.complianceReports.find((r) => r.requirementId == self.selectedReportRequirementId) ||
+          self.complianceReports[0]
+        return report?.requirementId
+      },
+    }))
+    .views((self) => ({
+      get selectedReport() {
+        if (!self.complianceReports || self.complianceReports.length === 0) return null as any
+        const found = self.complianceReports.find((r) => r.requirementId == self.selectedReportRequirementId)
+        return found || self.complianceReports[0]
       },
     }))
     .actions((self) => ({
       load: flow(function* () {
         const response = yield self.environment.api.fetchPart9Checklist(self.id)
         if (response.ok) {
-          applySnapshot(self, preProcessor(response.data.data))
-          self.isLoaded = true
+          // Explicitly include isLoaded in the snapshot to ensure it's preserved
+          // This is critical: applySnapshot completely replaces state, so if isLoaded isn't in
+          // the snapshot, it gets reset to null. Setting it here ensures it's set during
+          // the snapshot application, not after, avoiding timing issues with MobX reactions.
+          const snapshotData = { ...preProcessor(response.data.data), isLoaded: true }
+          applySnapshot(self, snapshotData)
         }
       }),
       setSelectedReport(requirementId: string) {
-        const report = self.complianceReports.find((r) => r.requirementId == requirementId)
-        self.selectedReport = report
+        self.selectedReportRequirementId = requirementId
       },
     })),
   { preProcessor }

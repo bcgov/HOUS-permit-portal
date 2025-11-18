@@ -11,7 +11,8 @@ class JurisdictionTemplateVersionCustomization < ApplicationRecord
   # enabled
   belongs_to :sandbox, optional: true
   belongs_to :jurisdiction
-  belongs_to :template_version
+  belongs_to :template_version,
+             counter_cache: :jurisdiction_template_version_customizations_count
 
   before_save :sanitize_tip
   # Ensure that there is no two customizations with the same sandbox, jurisdiction, and template_version

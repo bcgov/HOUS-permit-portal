@@ -166,8 +166,17 @@ class Wrappers::LtsaParcelMapBc < Wrappers::Base
         # Create a polygon from the points
         polygon = factory.polygon(factory.linear_ring(points))
 
-        # Calculate the centroid
-        centroid = polygon.centroid
+        # Calculate the centroid manually (fallback when GEOS is not available)
+        begin
+          centroid = polygon.centroid
+        rescue RGeo::Error::UnsupportedOperation
+          # Manual centroid calculation: average of all coordinates
+          sum_x = geometry_coords.sum { |xy| xy[0] }
+          sum_y = geometry_coords.sum { |xy| xy[1] }
+          avg_x = sum_x / geometry_coords.length.to_f
+          avg_y = sum_y / geometry_coords.length.to_f
+          centroid = factory.point(avg_x, avg_y)
+        end
 
         target_factory = wkid_factory_lookup(4326) #default bc geo utilizes 4326
 

@@ -1,7 +1,7 @@
 import { Button, Container, Flex, Heading, Text, VStack } from "@chakra-ui/react"
 import { CaretLeft } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
-import React, { Suspense, useState } from "react"
+import React, { Suspense } from "react"
 import { Trans, useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { useJurisdiction } from "../../../../../../hooks/resources/use-jurisdiction"
@@ -16,13 +16,11 @@ export const SubmissionsInboxSetupScreen: React.FC = observer(function Submissio
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { currentJurisdiction, error: jurisdictionError } = useJurisdiction() // from both, aliased error
-  const [isEnabled, setIsEnabled] = useState(currentJurisdiction?.inboxEnabled ?? false) // from inbox-feature-access
 
   const { isLoaded: permitClassificationsLoaded } = usePermitClassificationsLoad(true) // load only enabled by default
 
   const handleToggle = (checked) => {
-    setIsEnabled(checked)
-    currentJurisdiction.update({ inboxEnabled: checked })
+    currentJurisdiction?.update({ inboxEnabled: checked })
   }
 
   if (jurisdictionError) {
@@ -58,7 +56,11 @@ export const SubmissionsInboxSetupScreen: React.FC = observer(function Submissio
         <Text color="text.secondary" fontSize="lg" mb={2} mt={2}>
           {t(`${i18nPrefix}.switchButtonInstructions`)}
         </Text>
-        <SwitchButton isChecked={isEnabled} onChange={(e) => handleToggle(e.target.checked)} size={"lg"} />
+        <SwitchButton
+          isChecked={currentJurisdiction?.inboxEnabled ?? false}
+          onChange={(e) => handleToggle(e.target.checked)}
+          size={"lg"}
+        />
       </Flex>
     </Container>
   )

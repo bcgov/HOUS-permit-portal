@@ -1,4 +1,4 @@
-import { Button, HStack, Input } from "@chakra-ui/react"
+import { Button, HStack } from "@chakra-ui/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -6,7 +6,6 @@ import { useForm } from "react-hook-form"
 import { useNavigate } from "react-router-dom"
 import { usePart9StepCode } from "../../../../hooks/resources/use-part-9-step-code"
 import { useMst } from "../../../../setup/root"
-import { EStepCodeChecklistStatus } from "../../../../types/enums"
 import { RestartConfirmationModal } from "../part-9/restart-confirmation-modal"
 
 export const Part9NavLinks = observer(function Part9StepCodeNavLinks() {
@@ -14,11 +13,14 @@ export const Part9NavLinks = observer(function Part9StepCodeNavLinks() {
   const checklist = currentStepCode?.preConstructionChecklist
   const navigate = useNavigate()
   const { uiStore } = useMst()
-  const { handleSubmit, register, formState } = useForm()
+  const { formState } = useForm()
   const { isValid, isSubmitting } = formState
 
-  const onComplete = async (values) => {
-    await currentStepCode.updateChecklist(checklist.id, values)
+  const onComplete = async () => {
+    //@ts-ignore
+    document.stepCodeChecklistForm.dispatchEvent(
+      new CustomEvent("submit", { cancelable: true, bubbles: true, detail: { markComplete: true } })
+    )
   }
 
   const handleBack = () => {
@@ -44,17 +46,15 @@ export const Part9NavLinks = observer(function Part9StepCodeNavLinks() {
           <Button variant="secondary" onClick={handleSave}>
             {t("stepCode.saveAndGoBack")}
           </Button>
-          <form onSubmit={handleSubmit(onComplete)}>
-            <Input type="hidden" value={EStepCodeChecklistStatus.complete} {...register("status")} />
-            <Button
-              variant="primary"
-              isLoading={isSubmitting}
-              isDisabled={checklist.isComplete || isSubmitting || !isValid}
-              type="submit"
-            >
-              {t("stepCode.markAsComplete")}
-            </Button>
-          </form>
+          <Button
+            variant="primary"
+            onClick={onComplete}
+            isLoading={isSubmitting}
+            isDisabled={isSubmitting || !isValid}
+            type="submit"
+          >
+            {checklist.isComplete ? t("ui.save") : t("stepCode.markAsComplete")}
+          </Button>
         </>
       ) : (
         <Button variant="primary" onClick={handleBack}>

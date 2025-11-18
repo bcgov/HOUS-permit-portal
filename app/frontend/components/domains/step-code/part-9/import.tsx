@@ -3,17 +3,20 @@ import { Plus, X } from "@phosphor-icons/react"
 import { t } from "i18next"
 import React, { useState } from "react"
 import { Controller, FormProvider, useFieldArray, useForm } from "react-hook-form"
-import { useParams } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import { useMst } from "../../../../setup/root"
 import { uploadFile } from "../../../../utils/uploads"
 import { FileFormControl, NumberFormControl } from "../../../shared/form/input-form-control"
+import { SitesSelect } from "../../../shared/select/selectors/sites-select"
 import { CompliancePathSelect } from "./compliance-path-select"
 
 export const H2KImport = function StepCodeH2kImport() {
   const {
     stepCodeStore: { createPart9StepCode },
+    jurisdictionStore,
   } = useMst()
   const { permitApplicationId } = useParams()
+  const navigate = useNavigate()
 
   const [isUploading, setIsUploading] = useState<Record<number, boolean>>({})
   const areAllUploaded = Object.values(isUploading).every((loading) => loading === false)
@@ -31,6 +34,10 @@ export const H2KImport = function StepCodeH2kImport() {
     mode: "onChange",
     defaultValues: {
       permitApplicationId,
+      site: null,
+      fullAddress: null,
+      pid: null,
+      jurisdictionId: null,
       preConstructionChecklistAttributes: { compliancePath: null, dataEntriesAttributes: [dataEntryAttributes] },
     },
   })
@@ -51,9 +58,14 @@ export const H2KImport = function StepCodeH2kImport() {
   }
 
   const onSubmit = async (values) => {
-    await createPart9StepCode(values)
-    // setStep(2)
-    // navigate(`${stepCode.id}/checklists/${stepCode.preConstructionChecklist.id}`)
+    const result = await createPart9StepCode(values)
+    if (result?.ok && result.data?.id) {
+      const created = jurisdictionStore.rootStore.stepCodeStore.getStepCode(result.data.id) as any
+      const targetPath = created?.targetPath
+      if (created) {
+        navigate(targetPath)
+      }
+    }
   }
 
   const onUploadFile = async (event, index) => {
@@ -95,7 +107,23 @@ export const H2KImport = function StepCodeH2kImport() {
       </Heading>
       <FormProvider {...formMethods}>
         <form onSubmit={handleSubmit(onSubmit)}>
-          <VStack spacing={4}>
+          <Flex direction="column" gap={4}>
+            {!permitApplicationId && (
+              <Controller
+                control={control}
+                name="site"
+                render={({ field: { onChange, value } }) => (
+                  <SitesSelect
+                    onChange={(opt) => {
+                      onChange(opt)
+                      setValue("fullAddress", opt?.label || "")
+                    }}
+                    selectedOption={value}
+                    menuPortalTarget={document.body}
+                  />
+                )}
+              />
+            )}
             <Controller
               control={control}
               name="preConstructionChecklistAttributes.compliancePath"
@@ -133,6 +161,7 @@ export const H2KImport = function StepCodeH2kImport() {
                 </HStack>
 
                 {/* Optional Fields */}
+                {/* we need the site select somehwere around here */}
 
                 <VStack align="start" w="full">
                   <HStack w="full">
@@ -176,7 +205,7 @@ export const H2KImport = function StepCodeH2kImport() {
             >
               {t("stepCode.import.create")}
             </Button>
-          </VStack>
+          </Flex>
         </form>
       </FormProvider>
     </Flex>

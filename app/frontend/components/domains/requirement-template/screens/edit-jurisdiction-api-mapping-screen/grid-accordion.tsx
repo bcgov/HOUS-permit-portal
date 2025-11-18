@@ -21,7 +21,6 @@ import { Trans, useTranslation } from "react-i18next"
 import { IRequirementBlockMapping } from "../../../../../models/requirement-block-mapping"
 import { ITemplateVersion } from "../../../../../models/template-version"
 import { IRequirementMap, ISimplifiedRequirementsMap } from "../../../../../types/types"
-import { isStepCodePackageFileRequirementCode } from "../../../../../utils/utility-functions"
 import { EditableInputWithControls } from "../../../../shared/editable-input-with-controls"
 import { SearchGridItem } from "../../../../shared/grid/search-grid-item"
 import { HighlightedText } from "../../../../shared/highlighted-text"
@@ -131,12 +130,10 @@ export const GridAccordion = observer(function GridAccordion({
                     <SearchGridItem {...searchGridItemProps} justifyContent={"flex-start"} alignItems={"flex-start"}>
                       <Stack color={"text.secondary"}>
                         <RequirementFieldDisplay
-                          matchesStepCodePackageRequirementCode={isStepCodePackageFileRequirementCode(
-                            requirementJson.requirementCode
-                          )}
                           requirementType={requirementJson.inputType}
                           label={requirementJson.label}
                           helperText={requirementJson.hint}
+                          inputOptions={requirementJson?.inputOptions}
                           unit={requirementJson?.inputOptions?.numberUnit}
                           options={pluck("label", requirementJson.inputOptions?.valueOptions ?? [])}
                           selectProps={{

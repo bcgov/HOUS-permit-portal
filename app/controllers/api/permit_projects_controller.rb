@@ -129,7 +129,7 @@ class Api::PermitProjectsController < Api::ApplicationController
                        blueprint_opts: blueprint_options(view: :base)
                      }
     else
-      render_error "permit_project.unpin_error", :not_found
+      render_error("permit_project.unpin_error", { status: :not_found })
     end
   end
 
@@ -168,12 +168,10 @@ class Api::PermitProjectsController < Api::ApplicationController
   def create_permit_applications
     authorize @permit_project
 
-    applications_params = params.require(:permit_applications)
-
     created = []
     errors = []
 
-    applications_params.each do |pa_params|
+    permit_applications_params.each do |pa_params|
       permit_application =
         PermitApplication.new(
           submitter: current_user,
@@ -209,11 +207,33 @@ class Api::PermitProjectsController < Api::ApplicationController
                        }
                      }
     else
+      loggable_params = {
+        project_id: @permit_project.id,
+        current_sandbox_id: current_sandbox&.id,
+        permit_applications:
+          permit_applications_params.map do |pa_params|
+            pa_params.slice(
+              :activity_id,
+              :permit_type_id,
+              :first_nations,
+              :jurisdiction_id,
+              :permit_project_id,
+              :sandbox_id
+            ).to_h
+          end
+      }
       render_error(
         "permit_application.bulk_create_error",
-        message_opts: {
+        {
+          message_opts: {
+            error_message: errors.flatten.join(", ")
+          },
+          log_args: {
+            errors: errors.flatten,
+            params: loggable_params
+          }
         },
-        status: :unprocessable_entity
+        nil
       )
     end
   end
@@ -262,6 +282,27 @@ class Api::PermitProjectsController < Api::ApplicationController
   def set_permit_project
     @permit_project = PermitProject.includes(:jurisdiction).find(params[:id])
     compute_project_ids_with_outdated_drafts([@permit_project])
+  end
+
+  def permit_applications_params
+    params
+      .require(:permit_applications)
+      .map do |pa_params|
+        pa_params.permit(
+          :activity_id,
+          :permit_type_id,
+          :jurisdiction_id,
+          :full_address,
+          :nickname,
+          :pin,
+          :pid,
+          :first_nations,
+          :permit_project_id,
+          :sandbox_id,
+          submission_data: {
+          }
+        )
+      end
   end
 
   def permit_project_params

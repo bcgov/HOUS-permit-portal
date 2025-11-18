@@ -133,7 +133,7 @@ export const ComplianceSummary = observer(function ComplianceSummary({
           </VStack>
 
           <VStack flex={1} justify="end" w="full">
-            <ZeroCarbonSteps requiredStep={report.zeroCarbon.requiredStep.slice(-1)} />
+            <ZeroCarbonSteps requiredStep={report.zeroCarbon.requiredStep?.slice(-1)} />
 
             <VStack>
               <Text fontSize="md">{t(`${i18nPrefix}.zeroCarbonStepCode.stepProposed`) + ": "}</Text>
@@ -150,26 +150,28 @@ export const ComplianceSummary = observer(function ComplianceSummary({
       <Divider />
 
       {/* Plan Info */}
-      <VStack align="start" w="full">
-        <Text fontWeight="bold" fontSize="md">
-          {t(`${i18nPrefix}.planInfo.title`)}
-        </Text>
-        <HStack w="full">
-          <TextFormControl
-            label={t(`${i18nPrefix}.planInfo.author`)}
-            inputProps={{ isDisabled: true, value: checklist.planAuthor || "" }}
-          />
-          <TextFormControl
-            label={t(`${i18nPrefix}.planInfo.version`)}
-            inputProps={{ isDisabled: true, value: checklist.planVersion || "" }}
-          />
-          <TextFormControl
-            label={t(`${i18nPrefix}.planInfo.date`)}
-            inputProps={{ isDisabled: true, value: checklist.planDate || "" }}
-            leftElement={<CalendarBlank />}
-          />
-        </HStack>
-      </VStack>
+      {(checklist.planAuthor || checklist.planVersion || checklist.planDate) && (
+        <VStack align="start" w="full">
+          <Text fontWeight="bold" fontSize="md">
+            {t(`${i18nPrefix}.planInfo.title`)}
+          </Text>
+          <HStack w="full">
+            <TextFormControl
+              label={t(`${i18nPrefix}.planInfo.author`)}
+              inputProps={{ isDisabled: true, value: checklist.planAuthor || "" }}
+            />
+            <TextFormControl
+              label={t(`${i18nPrefix}.planInfo.version`)}
+              inputProps={{ isDisabled: true, value: checklist.planVersion || "" }}
+            />
+            <TextFormControl
+              label={t(`${i18nPrefix}.planInfo.date`)}
+              inputProps={{ isDisabled: true, value: checklist.planDate || "" }}
+              leftElement={<CalendarBlank />}
+            />
+          </HStack>
+        </VStack>
+      )}
     </ChecklistSection>
   )
 })

@@ -1,29 +1,15 @@
-import {
-  Box,
-  Button,
-  Container,
-  Flex,
-  FormControl,
-  FormErrorMessage,
-  FormLabel,
-  Heading,
-  HStack,
-  Input,
-  Text,
-  VStack,
-} from "@chakra-ui/react"
+import { Box, Button, Container, Flex, Heading, HStack, Text, VStack } from "@chakra-ui/react"
 import { CaretLeft } from "@phosphor-icons/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { Controller, FormProvider, useForm } from "react-hook-form"
 import { useNavigate } from "react-router-dom"
-import { useJurisdictionFromSite } from "../../../hooks/use-jurisdiction-from-site"
 import { useMst } from "../../../setup/root"
 import { IOption } from "../../../types/types"
 import { BackButton } from "../../shared/buttons/back-button"
+import { TextFormControl } from "../../shared/form/input-form-control"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
-import { ManualModeInputs } from "../../shared/select/selectors/manual-mode-inputs"
 import { SitesSelect } from "../../shared/select/selectors/sites-select"
 
 type TCreatePermitProjectFormData = {
@@ -45,18 +31,10 @@ export const NewPermitProjectScreen = observer(() => {
     },
   })
 
-  const { handleSubmit, formState, control, watch, setValue, register } = formMethods
+  const { handleSubmit, formState, control, register } = formMethods
   const { isSubmitting, errors, isValid } = formState
   const navigate = useNavigate()
   const { permitProjectStore } = useMst()
-
-  const [manualMode, setManualMode] = React.useState(false)
-
-  useJurisdictionFromSite(watch, setValue, {
-    siteFieldName: "site",
-    jurisdictionIdFieldName: "jurisdictionId",
-    disabled: manualMode,
-  })
 
   const onSubmit = async (values: TCreatePermitProjectFormData) => {
     const params = {
@@ -73,7 +51,7 @@ export const NewPermitProjectScreen = observer(() => {
 
   return (
     <Container maxW="container.lg" py={10}>
-      <Flex direction="column" gap={2}>
+      <Flex direction="column" gap={6}>
         <RouterLinkButton variant="link" to="/projects" leftIcon={<CaretLeft size={24} />}>
           {t("permitProject.back")}
         </RouterLinkButton>
@@ -87,18 +65,7 @@ export const NewPermitProjectScreen = observer(() => {
                 {t("permitProject.new.nameHeading")}
               </Heading>
               <Text>{t("permitProject.new.nameDescription")}</Text>
-              <FormControl isInvalid={!!errors.title}>
-                <FormLabel htmlFor="title" mt={4}>
-                  {t("permitProject.new.nameLabel")}
-                </FormLabel>
-                <Input
-                  id="title"
-                  {...register("title", {
-                    required: t("ui.isRequired", { field: t("permitProject.name") }) as string,
-                  })}
-                />
-                <FormErrorMessage>{errors.title?.message}</FormErrorMessage>
-              </FormControl>
+              <TextFormControl fieldName="title" label={t("permitProject.new.nameLabel")} required />
             </Flex>
 
             <Flex direction="column" gap={2}>
@@ -108,17 +75,31 @@ export const NewPermitProjectScreen = observer(() => {
               <Controller
                 name="site"
                 control={control}
-                render={({ field: { onChange, value } }) => <SitesSelect onChange={onChange} selectedOption={value} />}
+                rules={{
+                  validate: {
+                    hasJurisdiction: () => {
+                      const jurisdictionId = formMethods.getValues("jurisdictionId")
+                      return jurisdictionId
+                        ? true
+                        : (t("ui.isRequired", { field: t("permitProject.new.fullAddressHeading") }) as string)
+                    },
+                  },
+                }}
+                render={({ field: { onChange, value } }) => (
+                  <SitesSelect
+                    onChange={onChange}
+                    selectedOption={value}
+                    pidName="pid"
+                    siteName="site"
+                    jurisdictionIdFieldName="jurisdictionId"
+                  />
+                )}
               />
-              {manualMode && <ManualModeInputs />}
-              <Button variant="link" onClick={() => setManualMode((prev) => !prev)}>
-                {t("ui.toggleManualMode")}
-              </Button>
             </Flex>
 
             <HStack>
               <BackButton>{t("ui.back")}</BackButton>
-              <Button variant="primary" isLoading={isSubmitting} isDisabled={!isValid} type="submit">
+              <Button variant="primary" isLoading={isSubmitting} type="submit">
                 {t("permitProject.new.createButton")}
               </Button>
             </HStack>

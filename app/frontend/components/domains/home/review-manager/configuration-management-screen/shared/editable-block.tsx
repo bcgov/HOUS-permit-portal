@@ -9,6 +9,7 @@ EditableBlockContainer.defaultProps = {
   rounded: "sm",
   w: "full",
   gap: 6,
+  minH: "136px",
 }
 
 export const EditableBlockHeading = styled(Text)

@@ -46,17 +46,25 @@ class SupportingDocument < FileUploadAttachment
           end
           .sort_by { |signer| signer[:date] }
           .reverse
-          .map { |signer| summarizeString(signer) }
 
       {
         "id" => file_id,
         "data_key" => data_key,
-        "message" => "Signers validated: #{signers.join(",")}"
+        "filename" => file_data.dig("metadata", "filename"),
+        "signers" =>
+          signers.map do |signer|
+            {
+              "name" => signer[:name],
+              "organization" => signer[:subject],
+              "date" => signer[:date]
+            }
+          end
       }
     else
       {
         "id" => file_id,
         "data_key" => data_key,
+        "filename" => file_data.dig("metadata", "filename"),
         "message" => compliance_data["error"],
         "error" => true
       }

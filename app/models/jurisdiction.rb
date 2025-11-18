@@ -15,18 +15,21 @@ class Jurisdiction < ApplicationRecord
                reverse_qualified_name
                qualified_name
                manager_emails
+               ltsa_matcher
              ],
              word_start: %i[
                name
                reverse_qualified_name
                qualified_name
                manager_emails
+               ltsa_matcher
              ],
              text_start: %i[
                name
                reverse_qualified_name
                qualified_name
                manager_emails
+               ltsa_matcher
              ]
 
   SEARCH_DATA_FIELDS = %i[
@@ -42,6 +45,7 @@ class Jurisdiction < ApplicationRecord
     user_ids
     inbox_enabled
     created_at
+    ltsa_matcher
   ]
   SUPER_ADMIN_ADDITIONAL_DATA_FIELDS = %i[manager_emails]
   # Associations
@@ -65,6 +69,14 @@ class Jurisdiction < ApplicationRecord
   has_many :property_plan_local_jurisdictions, dependent: :destroy
   has_many :jurisdiction_documents, dependent: :destroy
 
+  # Scopes
+  scope :with_confirmed_submission_contacts,
+        lambda {
+          joins(:permit_type_submission_contacts)
+            .where.not(permit_type_submission_contacts: { confirmed_at: nil })
+            .distinct
+        }
+
   validates :name, uniqueness: { scope: :locality_type, case_sensitive: false }
   validates :locality_type, presence: true
   validate :inbox_enabled_requires_inbox_setup
@@ -78,6 +90,7 @@ class Jurisdiction < ApplicationRecord
   before_validation :normalize_locality_type
   before_validation :normalize_name
   before_validation :set_type_based_on_locality
+  before_validation :set_first_nation_flag, on: :create
 
   before_save :sanitize_html_fields
 
@@ -147,19 +160,30 @@ class Jurisdiction < ApplicationRecord
     )
   end
 
-  def self.fuzzy_find_by_ltsa_feature_attributes(attributes)
-    name = attributes["MUNICIPALITY"]
-    regional_district_name = attributes["REGIONAL_DISTRICT"]
+  def self.ltsa_matcher_from_ltsa_attributes(attributes)
+    municipality = attributes["MUNICIPALITY"]
+    regional_district = attributes["REGIONAL_DISTRICT"]
+    is_regional_district = municipality == "Rural"
+    is_regional_district ? regional_district : municipality
+  end
 
-    named_params = {
-      fields: %w[reverse_qualified_name qualified_name],
+  def self.fuzzy_find_by_ltsa_feature_attributes(attributes)
+    ltsa_matcher = ltsa_matcher_from_ltsa_attributes(attributes)
+
+    ltsa_matcher_params = {
+      fields: %w[ltsa_matcher],
       misspellings: {
-        edit_distance: 1
+        edit_distance: 2
       }
     }
+    is_regional_district = attributes["MUNICIPALITY"] == "Rural"
+
     return(
-      SubDistrict.search(name, **named_params).first ||
-        RegionalDistrict.search(regional_district_name, **named_params).first
+      if is_regional_district
+        RegionalDistrict.search(ltsa_matcher, **ltsa_matcher_params).first
+      else
+        SubDistrict.search(ltsa_matcher, **ltsa_matcher_params).first
+      end
     )
   end
 
@@ -177,7 +201,8 @@ class Jurisdiction < ApplicationRecord
       user_ids: users.pluck(:id),
       inbox_enabled: inbox_enabled,
       created_at: created_at,
-      manager_emails: manager_emails
+      manager_emails: manager_emails,
+      ltsa_matcher: ltsa_matcher
     }
   end
 
@@ -234,6 +259,19 @@ class Jurisdiction < ApplicationRecord
     permit_types.all? do |permit_type|
       contacts.any? { |contact| contact.permit_type_id == permit_type.id }
     end
+  end
+
+  # Get confirmed submission contact emails for step code report sharing
+  def confirmed_submission_emails
+    permit_type_submission_contacts
+      .where.not(confirmed_at: nil)
+      .pluck(:email)
+      .uniq
+  end
+
+  # Check if jurisdiction has any confirmed submission contacts
+  def has_confirmed_submission_contacts?
+    permit_type_submission_contacts.where.not(confirmed_at: nil).exists?
   end
 
   def self.class_for_locality_type(locality_type)
@@ -320,6 +358,10 @@ class Jurisdiction < ApplicationRecord
       else
         "SubDistrict"
       end
+  end
+
+  def set_first_nation_flag
+    self.first_nation = locality_type == "first nation"
   end
 
   def normalize_name

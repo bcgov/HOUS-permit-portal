@@ -43,39 +43,89 @@ Templates.current = {
       template = template.concat(defaultLabelTemplate(ctx))
       if (ctx?.component?.computedCompliance) {
         let result = ctx?.component?.computedComplianceResult
-
-        let computedComplianceText
+        let computedComplianceHtml = ""
         let showWarning = false
+
         if (result) {
           if (ctx?.component?.computedCompliance?.module == "DigitalSealValidator") {
-            //assume an array of one response or an array of responses for multiple files
-            //utilize id in the compliance messge to check if the front end id matches the file
-
+            // For multi-file uploads, show validation for each file
             const currentFileMessages = result.filter((fileMessage) =>
-              ctx.value.find((v) => {
+              ctx.value?.find((v) => {
                 const idSegments = fileMessage.id.split("/")
                 const fileMessageId = idSegments[idSegments.length - 1]
                 return fileMessageId == v.id
               })
             )
 
-            const parsedMessage = currentFileMessages.map((fileMessage) => fileMessage.message).join(",")
-            showWarning = currentFileMessages.some((fileMessage) => fileMessage.error)
-            computedComplianceText = parsedMessage || t(`automatedCompliance.baseMessage`)
+            if (currentFileMessages.length > 0) {
+              showWarning = currentFileMessages.some((fileMessage) => fileMessage.error)
+
+              // Build enhanced list format
+              const fileItems = currentFileMessages
+                .map((fileMessage) => {
+                  const hasError = fileMessage.error
+                  const fileName = fileMessage.filename || "File"
+
+                  if (hasError) {
+                    return `
+                      <div class="compliance-file-item compliance-file-error">
+                        <div class="compliance-file-name">• ${fileName}</div>
+                        <div class="compliance-file-error-message">${fileMessage.message}</div>
+                      </div>
+                    `
+                  } else if (fileMessage.signers && fileMessage.signers.length > 0) {
+                    const signersHtml = fileMessage.signers
+                      .map(
+                        (signer) => `
+                        <div class="compliance-signer">
+                          <div class="compliance-signer-name">✓ ${signer.name}${signer.organization ? ` (${signer.organization})` : ""}</div>
+                          <div class="compliance-signer-date">Signed: ${signer.date}</div>
+                        </div>
+                      `
+                      )
+                      .join("")
+
+                    return `
+                      <div class="compliance-file-item">
+                        <div class="compliance-file-name">• ${fileName}</div>
+                        ${signersHtml}
+                      </div>
+                    `
+                  } else {
+                    return `
+                      <div class="compliance-file-item">
+                        <div class="compliance-file-name">• ${fileName}</div>
+                        <div class="compliance-file-message">No signature detected</div>
+                      </div>
+                    `
+                  }
+                })
+                .join("")
+
+              computedComplianceHtml = `
+                <div class="compliance-digital-signatures">
+                  <div class="compliance-section-title"><i class="ph-fill ph-lightning-a"></i> Digital Signatures Detected:</div>
+                  ${fileItems}
+                </div>
+              `
+            } else {
+              computedComplianceHtml = t(`automatedCompliance.baseMessage`)
+            }
           } else {
-            //assume all complianes are default values except for seal validators
-            computedComplianceText = t("automatedCompliance.defaultValueMessage", { defaultValue: result })
+            // Other compliance modules - default value display
+            computedComplianceHtml = t("automatedCompliance.defaultValueMessage", { defaultValue: result })
           }
         } else if ("computedComplianceResult" in ctx.component) {
           showWarning = true
-          computedComplianceText = t("automatedCompliance.failedValueMessage")
+          computedComplianceHtml = t("automatedCompliance.failedValueMessage")
         } else {
-          computedComplianceText = t(`automatedCompliance.baseMessage`)
+          computedComplianceHtml = t(`automatedCompliance.baseMessage`)
         }
 
         template = template.concat(
-          `<div key={'${ctx?.id}-compliance'} class="compliance ${showWarning ? "compliance-warning" : ""}" data-compliance='${ctx?.component?.computedCompliance?.module}'><span><i class="ph-fill ph-lightning-a"></i>
-          ${computedComplianceText}</span></div>`
+          `<div key={'${ctx?.id}-compliance'} class="compliance ${showWarning ? "compliance-warning" : ""}" data-compliance='${ctx?.component?.computedCompliance?.module}'>
+            <span>${computedComplianceHtml}</span>
+          </div>`
         )
       }
       return template

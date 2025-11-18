@@ -34,17 +34,20 @@ module StepCodeFieldExtraction
 
   # protected
 
-  def step_code_plan_field
+  def architectural_drawing_plan_field
     # can be overridden by config settings requirement_energy_step_code["plan_file_field"]
     return nil if requirements_lookups.blank?
 
     requirements_lookups.keys.find do |k|
-      k.ends_with?("|#{Requirement::STEP_CODE_PACKAGE_FILE_REQUIREMENT_CODE}")
+      k.ends_with?("|#{Requirement::ARCHITECTURAL_DRAWING_REQUIREMENT_CODE}")
     end
   end
 
   def step_code_plan_document # looks for the first instance that matches the plan field
-    @doc ||= active_supporting_documents.find_by(data_key: step_code_plan_field)
+    @doc ||=
+      active_supporting_documents.find_by(
+        data_key: architectural_drawing_plan_field
+      )
   end
 
   def requirement_energy_step_code_key_value
