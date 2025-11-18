@@ -363,17 +363,9 @@ interface IEventRowProps {
   emailControl?: string
   inAppChecked?: boolean
   emailChecked?: boolean
-  emailDisabled?: boolean
 }
 
-const EventRow: React.FC<IEventRowProps> = ({
-  event,
-  inAppControl,
-  emailControl,
-  inAppChecked,
-  emailChecked,
-  emailDisabled,
-}) => {
+const EventRow: React.FC<IEventRowProps> = ({ event, inAppControl, emailControl, inAppChecked, emailChecked }) => {
   const { control } = useFormContext()
   const { t } = useTranslation()
 
@@ -393,7 +385,9 @@ const EventRow: React.FC<IEventRowProps> = ({
               )}
             />
           ) : (
-            <Switch isChecked={inAppChecked}>{t("user.inApp")}</Switch>
+            <Switch isChecked={inAppChecked} disabled={true}>
+              {t("user.inApp")}
+            </Switch>
           )}
 
           {emailControl ? (
@@ -407,7 +401,7 @@ const EventRow: React.FC<IEventRowProps> = ({
               )}
             />
           ) : (
-            <Switch isChecked={emailChecked} disabled={emailDisabled}>
+            <Switch isChecked={emailChecked} disabled={true}>
               {t("user.email")}
             </Switch>
           )}
