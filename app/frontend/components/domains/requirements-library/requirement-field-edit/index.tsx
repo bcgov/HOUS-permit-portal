@@ -565,7 +565,7 @@ const requirementsComponentMap = {
                         control={control}
                         render={({ field }) => (
                           <Input
-                            placeholder={`${(first.field.value as any) || t("requirementsLibrary.multiplySumGrid.addHeaderPlaceholder")}`}
+                            placeholder={`${t("requirementsLibrary.multiplySumGrid.itemPlaceholder")}`}
                             bg="white"
                             value={`${field.value ?? ""}`}
                             onChange={field.onChange}
@@ -580,7 +580,7 @@ const requirementsComponentMap = {
                         control={control}
                         render={({ field }) => (
                           <Input
-                            placeholder={`${(a.field.value as any) || t("requirementsLibrary.multiplySumGrid.addHeaderPlaceholder")} (A)`}
+                            placeholder={`${t("requirementsLibrary.multiplySumGrid.aPlaceholder")} (A)`}
                             type="number"
                             bg="white"
                             value={`${field.value ?? ""}`}

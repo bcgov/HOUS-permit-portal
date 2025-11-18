@@ -15,27 +15,27 @@ class Wrappers::Archistar < Wrappers::Base
     get("comply-certificates", { cityKey: city_key })
   end
 
-  def get_submission(certificate_no)
-    get("submissions/#{certificate_no}")
+  def get_submission(external_id)
+    get("submissions/#{external_id}")
   end
 
-  def get_submission_analytics(certificate_no)
-    get("submissions/#{certificate_no}/analytics")
+  def get_submission_analytics(external_id)
+    get("submissions/#{external_id}/analytics")
   end
 
-  def get_submission_detailed(certificate_no)
-    get("submissions/#{certificate_no}/detailed")
+  def get_submission_detailed(external_id)
+    get("submissions/#{external_id}/detailed")
   end
 
-  def get_submission_pdf_report(certificate_no)
-    r = get("submissions/#{certificate_no}/document?type=report")
+  def get_submission_pdf_report(external_id)
+    r = get("submissions/#{external_id}/document?type=report")
     r["link"]
   end
 
-  def get_submission_viewer_url(certificate_no)
+  def get_submission_viewer_url(external_id)
     r =
       get(
-        "submissions/#{certificate_no}/viewer-link?signed=1&generatoredFor=echeck_user@archistar.pdu"
+        "submissions/#{external_id}/viewer-link?signed=1&generatoredFor=echeck_user@archistar.pdu"
       )
     r["link"]
   end

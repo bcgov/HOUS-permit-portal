@@ -58,7 +58,7 @@ export const FieldsSetupDrawer = observer(function FieldsSetupMenu({
       )}
       <Drawer isOpen={isOpen} placement="left" onClose={onClose} finalFocusRef={btnRef}>
         <DrawerOverlay />
-        <DrawerContent maxW={"685px"}>
+        <DrawerContent maxW={"700px"}>
           <DrawerCloseButton fontSize={"xs"} />
           <DrawerHeader color={"greys.white"} backgroundColor={"theme.blueAlt"} p={6} pt={10} fontSize={"2xl"}>
             {t("ui.add")}...

@@ -50,7 +50,7 @@ RSpec.describe PreCheck, type: :model do
       expect(pre_check.search_data).to include(
         id: pre_check.id,
         title: pre_check.title,
-        certificate_no: pre_check.certificate_no,
+        external_id: pre_check.external_id,
         full_address: pre_check.full_address,
         status: pre_check.status,
         creator_id: pre_check.creator_id,

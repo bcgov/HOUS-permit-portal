@@ -226,6 +226,7 @@ class Api::PermitProjectsController < Api::ApplicationController
         "permit_application.bulk_create_error",
         {
           message_opts: {
+            error_message: errors.flatten.join(", ")
           },
           log_args: {
             errors: errors.flatten,

@@ -9,7 +9,7 @@ RSpec.describe Webhooks::ArchistarController, type: :controller do
       create(
         :pre_check,
         :processing,
-        certificate_no: "BCBC_2024_ESS_uat-TEST123",
+        external_id: "BCBC_2024_ESS_uat-TEST123",
         creator: creator,
         jurisdiction: jurisdiction,
         permit_type: permit_type
@@ -185,7 +185,7 @@ RSpec.describe Webhooks::ArchistarController, type: :controller do
       it "logs warning and returns success" do
         allow(Rails.logger).to receive(:info).and_call_original
         expect(Rails.logger).to receive(:warn).with(
-          "No pre-check found for certificate number: NONEXISTENT"
+          "No pre-check found for external ID: NONEXISTENT"
         ).and_call_original
 
         post :receive, body: webhook_payload.to_json
