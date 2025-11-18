@@ -17,20 +17,28 @@ import {
   Select,
   Spacer,
   Stack,
+  Tag,
   Text,
   useDisclosure,
+  VStack,
 } from "@chakra-ui/react"
+import { Link } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useMemo, useState } from "react"
 import { FormProvider, useController, useForm, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
+import { Link as RouterLink } from "react-router-dom"
 import { getEnabledElectiveReasonOptions } from "../../../../../constants"
-import { EEnabledElectiveFieldReason } from "../../../../../types/enums"
+import { useMst } from "../../../../../setup/root"
+import { EEnabledElectiveFieldReason, EFlashMessageStatus, EResourceCategory } from "../../../../../types/enums"
 import {
   IDenormalizedRequirement,
   IDenormalizedRequirementBlock,
   IRequirementBlockCustomization,
+  IResource,
 } from "../../../../../types/types"
+import { getFileTypeInfo } from "../../../../../utils/file-utils"
+import { CustomMessageBox } from "../../../../shared/base/custom-message-box"
 import { Editor } from "../../../../shared/editor/editor"
 
 interface ICustomizationForm extends IRequirementBlockCustomization {}
@@ -49,7 +57,7 @@ function formFormDefaults(
 ): ICustomizationForm {
   return {
     tip: customization?.tip,
-    helpLink: customization?.helpLink,
+    resourceIds: customization?.resourceIds || [],
     enabledElectiveFieldIds: customization?.enabledElectiveFieldIds?.filter(
       (id) => !!availableElectiveFields.find((f) => f.id === id)
     ),
@@ -172,11 +180,45 @@ const MainView = ({
   onResetDefault?: () => void
 }) => {
   const { t } = useTranslation()
-  const { control, watch } = useFormContext<ICustomizationForm>()
+  const { userStore } = useMst()
+  const { currentUser } = userStore
+  const currentJurisdiction = currentUser?.jurisdiction
+
+  const { control, watch, setValue } = useFormContext<ICustomizationForm>()
   const {
     field: { value: tipValue, onChange: onTipChange },
   } = useController({ control, name: "tip" })
+
   const watchedEnabledElectiveFieldIds = watch("enabledElectiveFieldIds") ?? []
+  const watchedResourceIds = watch("resourceIds") ?? []
+
+  // Group resources by category for display
+  const resourcesByCategory = useMemo(() => {
+    if (!currentJurisdiction?.resources) return {}
+
+    return currentJurisdiction.resources.reduce(
+      (acc, resource) => {
+        if (!acc[resource.category]) acc[resource.category] = []
+        acc[resource.category].push(resource)
+        return acc
+      },
+      {} as Record<string, IResource[]>
+    )
+  }, [currentJurisdiction?.resources])
+
+  const hasResources = currentJurisdiction?.resources?.length > 0
+
+  const handleResourceToggle = (resourceId: string, isChecked: boolean) => {
+    const currentIds = watchedResourceIds
+    const newIds = isChecked ? [...currentIds, resourceId] : currentIds.filter((id) => id !== resourceId)
+    setValue("resourceIds", newIds)
+  }
+
+  const categoryLabels = {
+    [EResourceCategory.planningZoning]: t("home.configurationManagement.resources.categories.planningZoning"),
+    [EResourceCategory.bylawsRequirements]: t("home.configurationManagement.resources.categories.bylawsRequirements"),
+    [EResourceCategory.additionalResources]: t("home.configurationManagement.resources.categories.additionalResources"),
+  }
 
   return (
     <Stack as={"section"} w={"full"} spacing={6} h="full">
@@ -188,10 +230,77 @@ const MainView = ({
         <Editor htmlValue={tipValue} onChange={onTipChange} />
       </Box>
 
-      <Box w={"full"}>
-        <Text color={"text.secondary"} fontWeight={700}>
-          {t("digitalBuildingPermits.edit.requirementBlockSidebar.electiveFormFields")}
+      <Box w="full">
+        <Text color="text.secondary" fontWeight={700} mb={2}>
+          {t("digitalBuildingPermits.edit.requirementBlockSidebar.resourcesLabel")}
         </Text>
+
+        {!hasResources ? (
+          <CustomMessageBox
+            status={EFlashMessageStatus.info}
+            description={
+              <>
+                {t("digitalBuildingPermits.edit.requirementBlockSidebar.noResourcesYet")}{" "}
+                <RouterLink
+                  to={`/jurisdictions/${currentJurisdiction.slug}/configuration-management/resources`}
+                  target="_blank"
+                  style={{ textDecoration: "underline" }}
+                >
+                  {t("digitalBuildingPermits.edit.requirementBlockSidebar.addResourcesLink")}
+                </RouterLink>
+              </>
+            }
+          />
+        ) : (
+          <VStack align="stretch" spacing={4}>
+            {(Object.entries(resourcesByCategory) as [string, IResource[]][]).map(([category, resources]) => (
+              <Box key={category}>
+                <Text fontSize="sm" fontWeight={600} mb={2}>
+                  {categoryLabels[category]}
+                </Text>
+                <VStack align="stretch" spacing={2}>
+                  {resources.map((resource) => {
+                    const fileTypeInfo =
+                      resource.resourceType === "link"
+                        ? { icon: <Link />, label: "LINK" }
+                        : getFileTypeInfo(resource.resourceDocument?.file?.metadata?.mimeType)
+
+                    return (
+                      <Checkbox
+                        key={resource.id}
+                        isChecked={watchedResourceIds.includes(resource.id)}
+                        onChange={(e) => handleResourceToggle(resource.id, e.target.checked)}
+                      >
+                        <Flex align="center" gap={2}>
+                          <Tag
+                            backgroundColor="semantic.infoLight"
+                            size="sm"
+                            fontWeight="medium"
+                            color="text.secondary"
+                          >
+                            <Flex align="center" gap={1}>
+                              {fileTypeInfo.icon}
+                              <Text as="span">{fileTypeInfo.label}</Text>
+                            </Flex>
+                          </Tag>
+                          <Text fontSize="sm">{resource.title}</Text>
+                        </Flex>
+                      </Checkbox>
+                    )
+                  })}
+                </VStack>
+              </Box>
+            ))}
+          </VStack>
+        )}
+      </Box>
+
+      <Box w={"full"}>
+        {watchedEnabledElectiveFieldIds.length > 0 && (
+          <Text color={"text.secondary"} fontWeight={700}>
+            {t("digitalBuildingPermits.edit.requirementBlockSidebar.electiveFormFields")}
+          </Text>
+        )}
         <Stack w={"full"} spacing={2} mt={3}>
           {watchedEnabledElectiveFieldIds.map((requirementFieldId) => {
             const requirementField = electiveFields.find((req) => req.id === requirementFieldId)

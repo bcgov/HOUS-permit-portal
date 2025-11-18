@@ -263,7 +263,7 @@ export const JurisdictionScreen = observer(() => {
                                       modelType={EFileUploadAttachmentType.ResourceDocument}
                                     />
                                   ) : resource.resourceType === EResourceType.link && resource.linkUrl ? (
-                                    <Link href={resource.linkUrl} isExternal>
+                                    <Link href={resource.linkUrl} size="lg" isExternal>
                                       <Button variant="link" rightIcon={<ArrowSquareOut />}>
                                         {t("ui.open")}
                                       </Button>

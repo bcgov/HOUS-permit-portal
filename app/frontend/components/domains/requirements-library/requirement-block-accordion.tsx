@@ -9,6 +9,7 @@ import {
   Flex,
   HStack,
   IconButton,
+  Link,
   Text,
   useDisclosure,
   VStack,
@@ -16,14 +17,17 @@ import {
 import { X } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
-import React, { useEffect } from "react"
+import React, { useEffect, useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import { EFileUploadAttachmentType, ERequirementType, EVisibility } from "../../../types/enums"
+import { useMst } from "../../../setup/root"
+import { EFileUploadAttachmentType, ERequirementType, EResourceCategory, EVisibility } from "../../../types/enums"
 import {
   IDenormalizedRequirement,
   IDenormalizedRequirementBlock,
   IRequirementBlockCustomization,
+  IResource,
 } from "../../../types/types"
+import { formatFileSize, getFileExtension } from "../../../utils/file-utils"
 import { isQuillEmpty } from "../../../utils/utility-functions"
 import { FileDownloadButton } from "../../shared/base/file-download-button"
 import { SafeQuillDisplay } from "../../shared/editor/safe-quill-display"
@@ -62,7 +66,35 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
   ...accordionProps
 }: TProps) {
   const { t } = useTranslation()
+  const { userStore } = useMst()
+  const { currentUser } = userStore
   const { isOpen, onToggle, onClose, onOpen } = useDisclosure({ defaultIsOpen: true })
+
+  // Get resources based on resourceIds in customization
+  const selectedResources = useMemo(() => {
+    const resourceIds = requirementBlockCustomization?.resourceIds
+    if (!resourceIds || resourceIds.length === 0 || !currentUser?.jurisdiction?.resources) {
+      return []
+    }
+
+    return currentUser.jurisdiction.resources.filter((resource) => resourceIds.includes(resource.id))
+  }, [requirementBlockCustomization?.resourceIds, currentUser?.jurisdiction?.resources])
+
+  // Group resources by category
+  const resourcesByCategory = useMemo(() => {
+    const grouped: Record<string, IResource[]> = {}
+    selectedResources.forEach((resource) => {
+      if (!grouped[resource.category]) grouped[resource.category] = []
+      grouped[resource.category].push(resource)
+    })
+    return grouped
+  }, [selectedResources])
+
+  const categoryLabels = {
+    [EResourceCategory.planningZoning]: t("home.configurationManagement.resources.categories.planningZoning"),
+    [EResourceCategory.bylawsRequirements]: t("home.configurationManagement.resources.categories.bylawsRequirements"),
+    [EResourceCategory.additionalResources]: t("home.configurationManagement.resources.categories.additionalResources"),
+  }
 
   useEffect(() => {
     if (isCollapsedAll) {
@@ -186,9 +218,78 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
               ))}
             </Flex>
           )}
-          {(!isQuillEmpty(requirementBlockCustomization?.tip) || !!requirementBlockCustomization?.helpLink) && (
+          {(!isQuillEmpty(requirementBlockCustomization?.tip) || selectedResources.length > 0) && (
             <Box px={2} my={4}>
-              <RichTextTip tip={requirementBlockCustomization.tip} helpLink={requirementBlockCustomization.helpLink} />
+              <RichTextTip tip={requirementBlockCustomization.tip} />
+              {selectedResources.length > 0 && (
+                <VStack
+                  align="start"
+                  spacing={4}
+                  mt={!isQuillEmpty(requirementBlockCustomization?.tip) ? 3 : 0}
+                  w="full"
+                >
+                  {(Object.entries(resourcesByCategory) as [string, IResource[]][]).map(([category, resources]) => (
+                    <Box key={category} w="full">
+                      <Text fontWeight={600} fontSize="xs" color="text.secondary" mb={2}>
+                        {categoryLabels[category]}{" "}
+                        {(t("home.configurationManagement.resources.title") as string).toLowerCase()}
+                      </Text>
+                      <VStack align="start" spacing={3} w="full">
+                        {resources.map((resource) => {
+                          let linkContent: React.ReactNode
+                          let titleWithMetadata = resource.title
+
+                          if (resource.resourceType === "link") {
+                            linkContent = (
+                              <Link
+                                href={resource.linkUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                color="semantic.info"
+                                textDecoration="underline"
+                                fontSize="sm"
+                              >
+                                {titleWithMetadata}
+                              </Link>
+                            )
+                          } else if (resource.resourceDocument) {
+                            const fileExt = getFileExtension(
+                              resource.resourceDocument.file.metadata.filename,
+                              resource.resourceDocument.file.metadata.mimeType
+                            )
+                            const fileSize = formatFileSize(resource.resourceDocument.file.metadata.size)
+                            titleWithMetadata = `${resource.title} (${fileExt}, ${fileSize})`
+
+                            linkContent = (
+                              <FileDownloadButton
+                                document={resource.resourceDocument}
+                                modelType={EFileUploadAttachmentType.ResourceDocument}
+                                variant="link"
+                                color="semantic.info"
+                                size="sm"
+                                px={0}
+                              >
+                                {titleWithMetadata}
+                              </FileDownloadButton>
+                            )
+                          }
+
+                          return (
+                            <Box key={resource.id} w="full">
+                              {linkContent}
+                              {resource.description && (
+                                <Text fontSize="xs" color="text.secondary" mt={1}>
+                                  {resource.description}
+                                </Text>
+                              )}
+                            </Box>
+                          )
+                        })}
+                      </VStack>
+                    </Box>
+                  ))}
+                </VStack>
+              )}
             </Box>
           )}
           <VStack

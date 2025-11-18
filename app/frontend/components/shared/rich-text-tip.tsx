@@ -6,7 +6,7 @@ import { Editor } from "./editor/editor"
 
 interface IProps extends BoxProps {
   tip: string
-  helpLink: string
+  helpLink?: string
   headerProps?: Partial<HeadingProps>
 }
 
@@ -35,14 +35,16 @@ export function RichTextTip({ tip, helpLink, headerProps, ...containerProps }: I
         </Heading>
         <Editor htmlValue={tip} readonly />
       </Box>
-      <Link
-        href={helpLink}
-        target="_blank"
-        rel="noopener noreferrer"
-        style={{ display: "block", marginTop: "1rem", color: "theme.blueAlt", textDecoration: "underline" }}
-      >
-        {helpLink}
-      </Link>
+      {helpLink && (
+        <Link
+          href={helpLink}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ display: "block", marginTop: "1rem", color: "theme.blueAlt", textDecoration: "underline" }}
+        >
+          {helpLink}
+        </Link>
+      )}
     </>
   )
 }
