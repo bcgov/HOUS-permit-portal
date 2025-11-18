@@ -12,9 +12,10 @@ import { GridHeaders } from "./grid-header"
 
 export const ReportingScreen = observer(() => {
   const { t } = useTranslation()
-  const { stepCodeStore, permitApplicationStore } = useMst()
+  const { stepCodeStore, permitApplicationStore, preCheckStore } = useMst()
   const { downloadStepCodeSummary, downloadStepCodeMetrics } = stepCodeStore
   const { downloadApplicationMetrics } = permitApplicationStore
+  const { downloadPreCheckUserConsent } = preCheckStore
 
   const [filter, setFilter] = useState("")
 
@@ -71,6 +72,16 @@ export const ReportingScreen = observer(() => {
         {
           text: t("reporting.stepCodeMetrics.downloadPart9"),
           onClick: () => downloadStepCodeMetrics(EStepCodeType.part9StepCode),
+        },
+      ],
+    },
+    {
+      name: t("reporting.preCheckUserConsent.name"),
+      description: t("reporting.preCheckUserConsent.description"),
+      dropdown: [
+        {
+          text: t("ui.download"),
+          onClick: downloadPreCheckUserConsent,
         },
       ],
     },

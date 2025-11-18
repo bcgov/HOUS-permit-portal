@@ -12,7 +12,12 @@ import * as R from "ramda"
 import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { IPermitApplication } from "../../../models/permit-application"
-import { INPUT_CONTACT_KEYS } from "../../../stores/contact-store"
+import {
+  EGeneralContactType,
+  EProfessionalContactType,
+  ERequirementContactFieldItemType,
+  ERequirementType,
+} from "../../../types/enums"
 import { IContact, IOption } from "../../../types/types"
 import { convertPhoneNumberToFormioFormat, isSafari } from "../../../utils/utility-functions"
 import { ContactSelect } from "../select/selectors/contact-select"
@@ -23,6 +28,21 @@ export interface IContactModalProps extends Partial<ReturnType<typeof useDisclos
   onContactChange?: (option: IOption<IContact>) => void
   submissionState: any
   setSubmissionState: (any) => void
+}
+
+const isValidContactType = (requirementKey: string, contactTypeValue: string): boolean => {
+  const isGeneralContact = requirementKey.includes(ERequirementType.generalContact)
+  const isProfessionalContact = requirementKey.includes(ERequirementType.professionalContact)
+
+  if (isGeneralContact) {
+    const allowedTypes = Object.values(EGeneralContactType)
+    return allowedTypes.includes(contactTypeValue as EGeneralContactType)
+  } else if (isProfessionalContact) {
+    const allowedTypes = Object.values(EProfessionalContactType)
+    return allowedTypes.includes(contactTypeValue as EProfessionalContactType)
+  }
+
+  return true // If neither general nor professional, allow the contact type
 }
 
 export const ContactModal: React.FC<IContactModalProps> = ({
@@ -74,7 +94,15 @@ export const ContactModal: React.FC<IContactModalProps> = ({
   const updateContactInSubmissionSection = (requirementKey: string, contact: IContact) => {
     const sectionKey = requirementKey.split("|")[0].slice(21, 64)
     const newSectionFields = {}
-    INPUT_CONTACT_KEYS.forEach((contactField) => {
+    Object.values(ERequirementContactFieldItemType).forEach((contactField) => {
+      // Guard clause: skip contactType if it doesn't exist in the allowed options
+      if (
+        contactField === ERequirementContactFieldItemType.contactType &&
+        !isValidContactType(requirementKey, contact[contactField])
+      ) {
+        return
+      }
+
       // Declare newValue as any to allow mixed types
       let newValue: any = ["cell", "phone"].includes(contactField)
         ? convertPhoneNumberToFormioFormat(contact[contactField] as string)
@@ -82,7 +110,6 @@ export const ContactModal: React.FC<IContactModalProps> = ({
       newValue = contactField === "address" ? { display_name: newValue } : newValue
       newSectionFields[`${requirementKey}|${contactField}`] = newValue
     })
-
     const newData = {
       data: {
         ...submissionState.data,
@@ -102,7 +129,15 @@ export const ContactModal: React.FC<IContactModalProps> = ({
     const sectionKey = requirementKey.split("|")[0].slice(21, 64)
 
     const newContactElement = {}
-    INPUT_CONTACT_KEYS.forEach((contactField) => {
+    Object.values(ERequirementContactFieldItemType).forEach((contactField) => {
+      // Guard clause: skip contactType if it doesn't exist in the allowed options
+      if (
+        contactField === ERequirementContactFieldItemType.contactType &&
+        !isValidContactType(requirementKey, contact[contactField])
+      ) {
+        return
+      }
+
       // Declare newValue as any to allow mixed types
       let newValue: any = ["cell", "phone"].includes(contactField)
         ? convertPhoneNumberToFormioFormat(contact[contactField] as string)
