@@ -11,6 +11,15 @@ interface IFormProps {
   jurisdiction: IJurisdiction
 }
 
+interface IFormValues {
+  permitTypeSubmissionContactsAttributes: Array<{
+    permitTypeId: string
+    email: string | null
+    id: string | null
+  }>
+  inboxEnabled: boolean
+}
+
 export const Form = observer(function SubmissionInboxSetupForm({ jurisdiction }: IFormProps) {
   const {
     permitClassificationStore: { permitTypes },
@@ -33,7 +42,7 @@ export const Form = observer(function SubmissionInboxSetupForm({ jurisdiction }:
   }
 
   const fieldArrayName = "permitTypeSubmissionContactsAttributes"
-  const formMethods = useForm({
+  const formMethods = useForm<IFormValues>({
     mode: "onChange",
     defaultValues: getDefaultValues(),
   })

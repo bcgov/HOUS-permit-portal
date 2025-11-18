@@ -66,6 +66,7 @@ export const StepCodeLookupAddressSelect = observer(function ({
       paddingInline: "0.75rem",
       height: "75px",
       width: "57%",
+      minWidth: "423px",
     }),
     valueContainer: (provided) => ({
       ...provided,

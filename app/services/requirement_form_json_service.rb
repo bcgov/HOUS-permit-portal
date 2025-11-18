@@ -683,7 +683,7 @@ class RequirementFormJsonService
       )
 
     datagrid_default_value =
-      rows.map { |r| { "name" => r["name"], "a" => r["a"], "quantity" => 0 } }
+      rows.map { |r| { "name" => r["name"], "a" => r["a"] } }
 
     headers = requirement.input_options["headers"] || {}
     first_col_label =
@@ -753,7 +753,6 @@ class RequirementFormJsonService
           type: "number",
           key: "quantity",
           input: true,
-          defaultValue: 0,
           validate: {
             min: 0
           },

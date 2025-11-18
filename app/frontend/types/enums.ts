@@ -725,3 +725,40 @@ export enum EPreCheckAssessmentResult {
   passed = "passed",
   failed = "failed",
 }
+
+export enum EGeneralContactType {
+  adjacentOwner = "adjacentOwner",
+  applicant = "applicant",
+  builder = "builder",
+  business = "business",
+  contractor = "contractor",
+  designer = "designer",
+  developer = "developer",
+  lawyer = "lawyer",
+  propertyManager = "propertyManager",
+  purchaser = "purchaser",
+  owner = "owner",
+  tenant = "tenant",
+  siteContact = "siteContact",
+}
+
+export enum EProfessionalContactType {
+  architect = "architect",
+  coordinatingRegisteredProfessional = "coordinatingRegisteredProfessional",
+  engineer = "engineer",
+  civilEngineer = "civilEngineer",
+  electricalEngineer = "electricalEngineer",
+  energyAdvisor = "energyAdvisor",
+  fireSuppressionEngineer = "fireSuppressionEngineer",
+  fireContact = "fireContact",
+  geotechnicalEngineer = "geotechnicalEngineer",
+  lawyer = "lawyer",
+  mechanical = "mechanical",
+  mechanicalEngineer = "mechanicalEngineer",
+  plumbingEngineer = "plumbingEngineer",
+  plumber = "plumber",
+  qualifiedEnvironmentalProfessional = "qualifiedEnvironmentalProfessional",
+  registeredOnsiteWastewaterPractitioner = "registeredOnsiteWastewaterPractitioner",
+  structuralEngineer = "structuralEngineer",
+  surveyor = "surveyor",
+}

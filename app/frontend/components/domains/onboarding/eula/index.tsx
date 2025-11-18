@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form"
 import { useNavigate } from "react-router-dom"
 import { useMst } from "../../../../setup/root"
 import { LoadingScreen } from "../../../shared/base/loading-screen"
-import { SafeQuillDisplay } from "../../../shared/editor/safe-quill-display"
+import { SafeTipTapDisplay } from "../../../shared/editor/safe-tiptap-display"
 
 const Editor = React.lazy(() => import("../../../shared/editor/editor").then((module) => ({ default: module.Editor })))
 
@@ -44,9 +44,9 @@ export const EULAScreen = observer(function EULAScreen({ withClose }: { withClos
         <Suspense fallback={<LoadingScreen />}>
           {eula && (
             <>
-              <Box maxW="4xl" overflow="hidden">
-                {/* Use SafeQuillDisplay instead of readonly Editor to prevent XSS (CVE-2021-3163) */}
-                <SafeQuillDisplay htmlContent={eula.content} />
+              <Box maxW="4xl" overflow="auto">
+                {/* Use SafeTipTapDisplay for safe HTML rendering */}
+                <SafeTipTapDisplay htmlContent={eula.content} />
               </Box>
               {!userStore.currentUser.eulaAccepted && (
                 <form onSubmit={handleSubmit(onSubmit)} style={{ flex: 0, flexBasis: "auto" }}>

@@ -535,7 +535,7 @@ en:
         message: "Permit applications created successfully!"
       bulk_create_error:
         title: Error
-        message: "There was an error creating the permit applications"
+        message: "%{error_message}"
       update_error:
         title: Error
         message: "%{error_message}"
