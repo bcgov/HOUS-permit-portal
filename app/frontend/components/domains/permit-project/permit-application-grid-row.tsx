@@ -33,13 +33,15 @@ export const PermitApplicationGridRow = observer(({ permitApplication }: IPermit
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { id, updatedAt, designatedSubmitter, usingCurrentTemplateVersion } = permitApplication
-  const { sandboxStore } = useMst()
+  const { sandboxStore, userStore } = useMst()
   const { currentSandbox } = sandboxStore
-  const isDisabled = currentSandbox?.id !== permitApplication.sandbox?.id
+  const { currentUser } = userStore
+  const isDisabledRow = currentSandbox?.id !== permitApplication.sandbox?.id && !currentUser?.isSuperAdmin
+  const shouldMarkRow = currentSandbox?.id !== permitApplication.sandbox?.id
 
   return (
     <Tooltip
-      isDisabled={!isDisabled}
+      isDisabled={!isDisabledRow}
       label={t("sandbox.disabledRow", "Disabled due to sandbox mismatch")}
       hasArrow
       placement="top"
@@ -49,20 +51,20 @@ export const PermitApplicationGridRow = observer(({ permitApplication }: IPermit
         gridColumn="1 / -1"
         templateColumns="subgrid"
         display="grid"
-        aria-disabled={isDisabled}
+        aria-disabled={isDisabledRow}
         // bg={isDisabled ? "background.grey03" : undefined}
         bgImage={
-          isDisabled
+          shouldMarkRow
             ? `repeating-linear-gradient(45deg,${colors.background.sandboxStripe} 5px,${colors.background.sandboxStripe} 10px,rgba(0, 0, 0, 0) 10px,rgba(0, 0, 0, 0) 20px)`
             : undefined
         }
-        bgSize={isDisabled ? "100% 100%" : undefined}
+        bgSize={isDisabledRow ? "100% 100%" : undefined}
         onClick={() => {
-          if (isDisabled) return
+          if (isDisabledRow) return
           navigate(`/permit-applications/${id}/edit`)
         }}
         _hover={
-          isDisabled
+          isDisabledRow
             ? { cursor: "not-allowed" }
             : {
                 bg: "greys.grey03",
@@ -97,7 +99,7 @@ export const PermitApplicationGridRow = observer(({ permitApplication }: IPermit
               as={IconButton}
               icon={<Icon as={DotsThreeVertical} />}
               variant="ghost"
-              isDisabled={isDisabled}
+              isDisabled={isDisabledRow}
               onClick={(e) => e.stopPropagation()}
               aria-label={t("ui.options")}
             />
@@ -105,7 +107,7 @@ export const PermitApplicationGridRow = observer(({ permitApplication }: IPermit
               <MenuItem
                 onClick={(e) => {
                   e.stopPropagation()
-                  if (isDisabled) return
+                  if (isDisabledRow) return
                   navigate(`/permit-applications/${id}/edit`)
                 }}
               >

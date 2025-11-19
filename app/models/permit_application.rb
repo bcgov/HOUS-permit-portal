@@ -75,6 +75,8 @@ class PermitApplication < ApplicationRecord
   after_commit :notify_user_reference_number_updated,
                if: :saved_change_to_reference_number?
   after_commit :reindex_permit_project, if: :saved_change_to_status?
+  after_commit :broadcast_jurisdiction_count_update,
+               if: :status_changed_to_submitted?
 
   scope :with_submitter_role,
         -> { joins(:submitter).where(users: { role: "submitter" }) }
@@ -661,6 +663,28 @@ class PermitApplication < ApplicationRecord
     full_address.split(",").first
   end
 
+  def broadcast_jurisdiction_count_update
+    return unless jurisdiction.present?
+
+    review_staff_user_ids =
+      jurisdiction.users.kept.select(&:review_staff?).map(&:id)
+    return if review_staff_user_ids.empty?
+
+    WebsocketBroadcaster.push_update_to_relevant_users(
+      review_staff_user_ids,
+      Constants::Websockets::Events::Jurisdiction::DOMAIN,
+      Constants::Websockets::Events::Jurisdiction::TYPES[
+        :unviewed_submissions_count_updated
+      ],
+      {
+        jurisdiction_id: jurisdiction.id,
+        sandbox_id: sandbox_id,
+        unviewed_count:
+          jurisdiction.unviewed_submissions_count(sandbox: sandbox)
+      }
+    )
+  end
+
   private
 
   def update_collaboration_assignments
@@ -755,6 +779,10 @@ class PermitApplication < ApplicationRecord
     return if new_record?
 
     NotificationService.publish_application_view_event(self)
+  end
+
+  def status_changed_to_submitted?
+    saved_change_to_status? && (newly_submitted? || resubmitted?)
   end
 
   def reindex_jurisdiction_permit_application_size
