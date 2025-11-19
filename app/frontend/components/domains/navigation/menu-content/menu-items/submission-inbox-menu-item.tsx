@@ -9,12 +9,14 @@ export const SubmissionInboxMenuItem = observer(() => {
   const { t } = useTranslation()
   const { userStore } = useMst()
   const { currentUser } = userStore
+  const count = currentUser?.jurisdiction?.unviewedSubmissionsCount || 0
 
   return (
     <MenuLinkItem
       icon={<Tray size={20} />}
       label={t("site.breadcrumb.submissionInbox")}
       to={`/jurisdictions/${currentUser?.jurisdiction?.slug}/submission-inbox`}
+      badge={count}
     />
   )
 })

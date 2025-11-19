@@ -1,5 +1,6 @@
-import { Box, Flex, Text, VStack } from "@chakra-ui/react"
+import { Badge, Box, Flex, Text, VStack } from "@chakra-ui/react"
 import React, { useContext } from "react"
+import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 
 export interface IMenuLinkItemProps {
@@ -8,6 +9,7 @@ export interface IMenuLinkItemProps {
   to?: string
   onClick?: () => void
   description?: string
+  badge?: number
 }
 
 // Context for closing the menu drawer
@@ -17,9 +19,10 @@ export const MenuCloseProvider = MenuCloseContext.Provider
 
 export const useMenuClose = () => useContext(MenuCloseContext)
 
-export const MenuLinkItem = ({ icon, label, to, onClick, description }: IMenuLinkItemProps) => {
+export const MenuLinkItem = ({ icon, label, to, onClick, description, badge }: IMenuLinkItemProps) => {
   const navigate = useNavigate()
   const onClose = useMenuClose()
+  const { t } = useTranslation()
 
   const handleClick = () => {
     if (to) {
@@ -49,9 +52,16 @@ export const MenuLinkItem = ({ icon, label, to, onClick, description }: IMenuLin
         {icon}
       </Box>
       <VStack align="flex-start" spacing={0} flex={1}>
-        <Text fontWeight="medium" color="text.primary">
-          {label}
-        </Text>
+        <Flex align="center" gap={2}>
+          <Text fontWeight="medium" color="text.primary">
+            {label}
+          </Text>
+          {!!badge && badge > 0 && (
+            <Badge colorScheme="green" borderRadius="full" px={2}>
+              {badge} {t("ui.new")}
+            </Badge>
+          )}
+        </Flex>
         {description && (
           <Text fontSize="sm" color="greys.grey01" mt={1}>
             {description}
