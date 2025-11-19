@@ -3905,7 +3905,7 @@ Thank you,
             },
             projectReadiness: {
               all: {
-                label: "All project readiness tools",
+                label: "All project tools",
                 description: "A short description about this link",
               },
               stepCodes: {

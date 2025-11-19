@@ -84,7 +84,7 @@ export const ConfirmSubmission = observer(function ConfirmSubmission() {
           </>
         ) : (
           <Button variant="primary" onClick={navigateToNext}>
-            {t("ui.continue", "Continue")}
+            {t("ui.next", "Next")}
           </Button>
         )}
       </Flex>
