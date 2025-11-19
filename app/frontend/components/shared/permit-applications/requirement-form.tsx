@@ -248,6 +248,18 @@ export const RequirementForm = observer(
       })
     }
 
+    const handleOpenResourceLink = (event) => {
+      window.open(event.detail.url, "_blank", "noopener,noreferrer")
+    }
+
+    const handleDownloadResourceDocument = async (event) => {
+      downloadFileFromStorage({
+        model: EFileUploadAttachmentType.ResourceDocument,
+        modelId: event.detail.id,
+        filename: event.detail.filename,
+      })
+    }
+
     useEffect(() => {
       document.addEventListener("openStepCode", handleOpenStepCodePart9)
       document.addEventListener("openStepCodePart3", handleOpenStepCodePart3)
@@ -255,6 +267,8 @@ export const RequirementForm = observer(
       document.addEventListener("openPreviousSubmission", handleOpenPreviousSubmission)
       document.addEventListener("openExistingStepCode", handleOpenExistingStepCode)
       document.addEventListener("downloadRequirementDocument", handleDownloadRequirementDocument)
+      document.addEventListener("openResourceLink", handleOpenResourceLink)
+      document.addEventListener("downloadResourceDocument", handleDownloadResourceDocument)
       return () => {
         document.removeEventListener("openStepCode", handleOpenStepCodePart9)
         document.removeEventListener("openStepCodePart3", handleOpenStepCodePart3)
@@ -262,6 +276,8 @@ export const RequirementForm = observer(
         document.removeEventListener("openPreviousSubmission", handleOpenPreviousSubmission)
         document.removeEventListener("openExistingStepCode", handleOpenExistingStepCode)
         document.removeEventListener("downloadRequirementDocument", handleDownloadRequirementDocument)
+        document.removeEventListener("openResourceLink", handleOpenResourceLink)
+        document.removeEventListener("downloadResourceDocument", handleDownloadResourceDocument)
       }
     }, [])
 

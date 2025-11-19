@@ -30,7 +30,7 @@ import { useTranslation } from "react-i18next"
 import { Link as RouterLink } from "react-router-dom"
 import { getEnabledElectiveReasonOptions } from "../../../../../constants"
 import { useMst } from "../../../../../setup/root"
-import { EEnabledElectiveFieldReason, EFlashMessageStatus, EResourceCategory } from "../../../../../types/enums"
+import { EEnabledElectiveFieldReason, EFlashMessageStatus } from "../../../../../types/enums"
 import {
   IDenormalizedRequirement,
   IDenormalizedRequirementBlock,
@@ -214,12 +214,6 @@ const MainView = ({
     setValue("resourceIds", newIds)
   }
 
-  const categoryLabels = {
-    [EResourceCategory.planningZoning]: t("home.configurationManagement.resources.categories.planningZoning"),
-    [EResourceCategory.bylawsRequirements]: t("home.configurationManagement.resources.categories.bylawsRequirements"),
-    [EResourceCategory.additionalResources]: t("home.configurationManagement.resources.categories.additionalResources"),
-  }
-
   return (
     <Stack as={"section"} w={"full"} spacing={6} h="full">
       <Text color={"text.secondary"} fontSize={"sm"}>
@@ -256,7 +250,7 @@ const MainView = ({
             {(Object.entries(resourcesByCategory) as [string, IResource[]][]).map(([category, resources]) => (
               <Box key={category}>
                 <Text fontSize="sm" fontWeight={600} mb={2}>
-                  {categoryLabels[category]}
+                  {t(`home.configurationManagement.resources.categories.${category}`)}
                 </Text>
                 <VStack align="stretch" spacing={2}>
                   {resources.map((resource) => {

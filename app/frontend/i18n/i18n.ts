@@ -720,9 +720,9 @@ const options = {
           resources: {
             title: "Resources",
             categories: {
-              planningZoning: "Planning & Zoning",
-              bylawsRequirements: "Bylaws & Requirements",
-              additionalResources: "Additional Resources",
+              planning_zoning: "Planning & Zoning",
+              bylaws_requirements: "Bylaws & Requirements",
+              additional_resources: "Additional Resources",
             },
           },
           documents: {
@@ -3145,9 +3145,9 @@ Thank you,
                 linkTag: "LINK",
               },
               categories: {
-                planningZoning: "Planning & Zoning",
-                bylawsRequirements: "Bylaws & Requirements",
-                additionalResources: "Additional Resources",
+                planning_zoning: "Planning & Zoning",
+                bylaws_requirements: "Bylaws & Requirements",
+                additional_resources: "Additional Resources",
               },
             },
             myJurisdictionAboutPage: {

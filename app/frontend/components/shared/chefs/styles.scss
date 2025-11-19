@@ -909,6 +909,27 @@
     }
   }
 
+  // Resource buttons styling
+  .btn.resource-link-button,
+  .btn.resource-document-download-button {
+    text-transform: none;
+    background: none;
+    border: none;
+    color: $bcgov-link;
+    text-decoration: none;
+    font-weight: normal;
+    padding: 0;
+    margin-top: 0;
+    letter-spacing: normal;
+    line-height: 1.5;
+    text-align: left;
+
+    &:hover {
+      background: none;
+      text-decoration: underline;
+    }
+  }
+
   .btn.revision-button {
     background: var(--chakra-colors-theme-yellow);
     color: var(--chakra-colors-border-dark);

@@ -119,6 +119,14 @@ export const JurisdictionModel = types
     getServicePartnerEnrollment(servicePartner: EPreCheckServicePartner): IJurisdictionServicePartnerEnrollment | null {
       return self.servicePartnerEnrollments.find((enrollment) => enrollment.servicePartner === servicePartner) || null
     },
+    get resourcesByCategory(): Record<string, IResource[]> {
+      const grouped: Record<string, IResource[]> = {}
+      self.resources.forEach((resource) => {
+        if (!grouped[resource.category]) grouped[resource.category] = []
+        grouped[resource.category].push(resource)
+      })
+      return grouped
+    },
   }))
   .views((self) => ({
     get part9RequiredSteps(): IPermitTypeRequiredStep[] {

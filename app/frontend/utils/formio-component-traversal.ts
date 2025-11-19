@@ -5,9 +5,11 @@ import {
   IFormIORequirement,
   IFormIOSection,
   IFormJson,
+  IResource,
   IRevisionRequest,
   ITemplateVersionDiff,
 } from "../types/types"
+import { formatFileSize, getFileExtension } from "./file-utils"
 import { isNonRequirementKey } from "./formio-helpers"
 
 const findComponentsByType = (components, type) => {
@@ -75,10 +77,87 @@ export const getCompletedBlocksFromForm = (rootComponent) => {
   return completedBlocks
 }
 
-export const combineComplianceHints = (
+/**
+ * Generate FormIO components for jurisdiction resources
+ * Similar to documents_component in requirement_block.rb
+ */
+const generateResourceComponents = (resourcesByCategory: Record<string, IResource[]>, blockId: string): any[] => {
+  const components: any[] = []
+
+  // Add heading
+  const headingText: string = (t as any)("digitalBuildingPermits.edit.requirementBlockSidebar.resourcesLabel")
+  components.push({
+    type: "content",
+    key: `${blockId}-resources-heading`,
+    html: `<p style="font-weight: 600; font-size: 14px; margin-bottom: 8px;">${headingText}</p>`,
+  })
+
+  // Add components for each category
+  Object.entries(resourcesByCategory).forEach(([category, resources]) => {
+    // Category label - category is in snake_case, matching the i18n keys
+    const categoryLabel: string = (t as any)(`home.configurationManagement.resources.categories.${category}`)
+    const resourcesText: string = ((t as any)("home.configurationManagement.resources.title") as string).toLowerCase()
+    components.push({
+      type: "content",
+      key: `${blockId}-resource-category-${category}`,
+      html: `<p style="font-weight: 600; font-size: 12px; color: var(--chakra-colors-text-secondary); margin: 8px 0 4px 0;">${categoryLabel} ${resourcesText}</p>`,
+    })
+
+    // Individual resources
+    resources.forEach((resource) => {
+      if (resource.resourceType === "link") {
+        components.push({
+          type: "button",
+          key: `${blockId}-resource-${resource.id}`,
+          action: "custom",
+          custom_class: "resource-link-button",
+          label: resource.title,
+          custom: `document.dispatchEvent(new CustomEvent('openResourceLink', {
+            detail: { url: '${resource.linkUrl.replace(/'/g, "\\'")}', title: '${resource.title.replace(/'/g, "\\'")}' }
+          }));`,
+        })
+      } else if (resource.resourceDocument) {
+        const fileExt = getFileExtension(
+          resource.resourceDocument.file.metadata.filename,
+          resource.resourceDocument.file.metadata.mimeType
+        )
+        const fileSize = formatFileSize(resource.resourceDocument.file.metadata.size)
+        const label = `${resource.title} (${fileExt}, ${fileSize})`
+
+        components.push({
+          type: "button",
+          key: `${blockId}-resource-${resource.id}`,
+          action: "custom",
+          custom_class: "resource-document-download-button",
+          label: label,
+          custom: `document.dispatchEvent(new CustomEvent('downloadResourceDocument', {
+            detail: {
+              id: '${resource.resourceDocument.id}',
+              filename: '${resource.resourceDocument.file.metadata.filename.replace(/'/g, "\\'")}'
+            }
+          }));`,
+        })
+      }
+
+      // Description if present
+      if (resource.description) {
+        components.push({
+          type: "content",
+          key: `${blockId}-resource-${resource.id}-desc`,
+          html: `<p style="font-size: 12px; color: var(--chakra-colors-text-secondary); margin: 4px 0 8px 0;">${resource.description}</p>`,
+        })
+      }
+    })
+  })
+
+  return components
+}
+
+export const combineCustomizations = (
   formJson,
   templateVersionCustomizationsByJurisdiction,
-  formattedComplianceData
+  formattedComplianceData,
+  jurisdictionResources?: IResource[]
 ) => {
   let updatedJson = formJson
   //special step - utilize the fileKey variable in simplefile to pass the file through, this is done this way to not modify the underlying chefs simplefile implementation
@@ -115,6 +194,27 @@ export const combineComplianceHints = (
         })
       }
 
+      // Inject resource components if resourceIds are present
+      const resourceIds = blocksLookups[panelComponent.id]?.["resourceIds"]
+      if (resourceIds && resourceIds.length > 0 && jurisdictionResources) {
+        const resources = jurisdictionResources.filter((r) => resourceIds.includes(r.id))
+
+        if (resources.length > 0) {
+          // Group filtered resources by category
+          const grouped: Record<string, IResource[]> = {}
+          resources.forEach((resource) => {
+            if (!grouped[resource.category]) grouped[resource.category] = []
+            grouped[resource.category].push(resource)
+          })
+
+          // Generate FormIO components for each category
+          const resourceComponents = generateResourceComponents(grouped, panelComponent.id)
+
+          // Inject components at the beginning of panelComponent.components
+          panelComponent.components.unshift(...resourceComponents)
+        }
+      }
+
       for (const [key, value] of Object.entries(blocksLookups[panelComponent.id])) {
         panelComponent[key] = value
       }
@@ -143,10 +243,11 @@ export const combineComplianceHints = (
       }
     }
     if (item && item.energyStepCode) {
-      item.label = t("formComponents.energyStepCode.edit")
-      item.title = t("formComponents.energyStepCode.edit")
+      const energyStepCodeLabel: string = (t as any)("formComponents.energyStepCode.edit")
+      item.label = energyStepCodeLabel
+      item.title = energyStepCodeLabel
       if (value == "warningFileOutOfDate") {
-        item.energyStepCodeWarning = t("formComponents.energyStepCode.warningFileOutOfDate")
+        item.energyStepCodeWarning = (t as any)("formComponents.energyStepCode.warningFileOutOfDate")
       }
     }
   }

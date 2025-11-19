@@ -243,12 +243,6 @@ export const ResourcesScreen = observer(function ResourcesScreen() {
     return currentJurisdiction?.resources?.filter((r) => r.category === category) || []
   }
 
-  const categoryLabels = {
-    [EResourceCategory.planningZoning]: t("home.configurationManagement.resources.categories.planningZoning"),
-    [EResourceCategory.bylawsRequirements]: t("home.configurationManagement.resources.categories.bylawsRequirements"),
-    [EResourceCategory.additionalResources]: t("home.configurationManagement.resources.categories.additionalResources"),
-  }
-
   if (error) return <ErrorScreen error={error} />
   if (!currentJurisdiction) return <LoadingScreen />
 
@@ -279,7 +273,7 @@ export const ResourcesScreen = observer(function ResourcesScreen() {
               return (
                 <Box key={category} as="section" w="full">
                   <Heading as="h3" fontSize="lg" fontWeight={700} mb={3}>
-                    {categoryLabels[category]}
+                    {t(`home.configurationManagement.resources.categories.${category as EResourceCategory}`)}
                   </Heading>
                   <VStack spacing={4} w="full" alignItems="stretch">
                     {categoryResources.map((resource) => (
@@ -315,7 +309,7 @@ export const ResourcesScreen = observer(function ResourcesScreen() {
                   fieldName="category"
                   required
                   options={Object.values(EResourceCategory).map((cat) => ({
-                    label: categoryLabels[cat],
+                    label: t(`home.configurationManagement.resources.categories.${cat}`),
                     value: cat,
                   }))}
                 />

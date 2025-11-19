@@ -200,20 +200,10 @@ export const JurisdictionScreen = observer(() => {
                         const categoryResources = currentJurisdiction.resources.filter((r) => r.category === category)
                         if (categoryResources.length === 0) return null
 
-                        const categoryLabels = {
-                          [EResourceCategory.planningZoning]: t("jurisdiction.resources.categories.planningZoning"),
-                          [EResourceCategory.bylawsRequirements]: t(
-                            "jurisdiction.resources.categories.bylawsRequirements"
-                          ),
-                          [EResourceCategory.additionalResources]: t(
-                            "jurisdiction.resources.categories.additionalResources"
-                          ),
-                        }
-
                         return (
                           <Box key={category} mb={4}>
                             <Heading as="h3" fontSize="lg" mb={2}>
-                              {categoryLabels[category]}
+                              {t(`home.configurationManagement.resources.categories.${category as EResourceCategory}`)}
                             </Heading>
                             <Flex direction="column" gap={2}>
                               {categoryResources.map((resource) => (

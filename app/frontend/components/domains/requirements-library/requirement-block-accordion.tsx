@@ -90,12 +90,6 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
     return grouped
   }, [selectedResources])
 
-  const categoryLabels = {
-    [EResourceCategory.planningZoning]: t("home.configurationManagement.resources.categories.planningZoning"),
-    [EResourceCategory.bylawsRequirements]: t("home.configurationManagement.resources.categories.bylawsRequirements"),
-    [EResourceCategory.additionalResources]: t("home.configurationManagement.resources.categories.additionalResources"),
-  }
-
   useEffect(() => {
     if (isCollapsedAll) {
       onClose()
@@ -231,7 +225,7 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
                   {(Object.entries(resourcesByCategory) as [string, IResource[]][]).map(([category, resources]) => (
                     <Box key={category} w="full">
                       <Text fontWeight={600} fontSize="xs" color="text.secondary" mb={2}>
-                        {categoryLabels[category]}{" "}
+                        {t(`home.configurationManagement.resources.categories.${category as EResourceCategory}`)}{" "}
                         {(t("home.configurationManagement.resources.title") as string).toLowerCase()}
                       </Text>
                       <VStack align="start" spacing={3} w="full">
