@@ -188,12 +188,13 @@ export const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
         <DrawerOverlay mt="var(--app-navbar-height)" zIndex={1400} />
         <DrawerContent
           mt="var(--app-navbar-height)"
-          h="fit-content"
           maxH="calc(100vh - var(--app-navbar-height))"
           zIndex={1400}
+          display="flex"
+          flexDirection="column"
         >
-          <DrawerHeader minH={8}></DrawerHeader>
-          <DrawerBody>
+          <DrawerHeader minH={8} flexShrink={0}></DrawerHeader>
+          <DrawerBody flex="1" minH={0} overflow="auto">
             <MenuCloseProvider value={onClose}>
               <Container maxW="container.lg" px={8}>
                 <Grid templateColumns={{ base: "1fr", md: "3fr 3fr 2fr" }} gap={8} pb={8}>
