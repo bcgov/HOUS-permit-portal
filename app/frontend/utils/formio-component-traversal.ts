@@ -11,6 +11,7 @@ import {
 } from "../types/types"
 import { formatFileSize, getFileExtension } from "./file-utils"
 import { isNonRequirementKey } from "./formio-helpers"
+import { escapeForSingleQuotedJsString } from "./utility-functions"
 
 const findComponentsByType = (components, type) => {
   let foundComponents = []
@@ -113,7 +114,7 @@ const generateResourceComponents = (resourcesByCategory: Record<string, IResourc
           customClass: "resource-link-button",
           label: resource.title,
           custom: `document.dispatchEvent(new CustomEvent('openResourceLink', {
-            detail: { url: '${resource.linkUrl.replace(/'/g, "\\'")}', title: '${resource.title.replace(/'/g, "\\'")}' }
+            detail: { url: '${escapeForSingleQuotedJsString(resource.linkUrl)}', title: '${escapeForSingleQuotedJsString(resource.title)}' }
           }));`,
         })
       } else if (resource.resourceDocument) {
@@ -133,7 +134,7 @@ const generateResourceComponents = (resourcesByCategory: Record<string, IResourc
           custom: `document.dispatchEvent(new CustomEvent('downloadResourceDocument', {
             detail: {
               id: '${resource.resourceDocument.id}',
-              filename: '${resource.resourceDocument.file.metadata.filename.replace(/'/g, "\\'")}'
+              filename: '${escapeForSingleQuotedJsString(resource.resourceDocument.file.metadata.filename)}'
             }
           }));`,
         })
@@ -302,7 +303,7 @@ const convertToRevisionButton = (requirement: IFormIORequirement) => {
     title: "Revision Button",
     input: true,
     action: "custom",
-    custom: `document.dispatchEvent(new CustomEvent('openRequestRevision', { detail: { key: '${requirement.key}' } } ));`,
+    custom: `document.dispatchEvent(new CustomEvent('openRequestRevision', { detail: { key: '${escapeForSingleQuotedJsString(requirement.key || "")}' } } ));`,
     customClass: "revision-button",
     hideLabel: true,
     persistent: "client-only",
@@ -320,7 +321,7 @@ const convertToChangeMarker = (requirement: IFormIORequirement) => {
     title: "ANSWER CHANGED",
     input: true,
     action: "custom",
-    custom: `document.dispatchEvent(new CustomEvent('openPreviousSubmission', { detail: { key: '${requirement.key}' } } ));`,
+    custom: `document.dispatchEvent(new CustomEvent('openPreviousSubmission', { detail: { key: '${escapeForSingleQuotedJsString(requirement.key || "")}' } } ));`,
     customClass: "submission-change-marker",
     hideLabel: true,
     persistent: "client-only",
