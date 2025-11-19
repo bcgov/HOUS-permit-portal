@@ -6,6 +6,9 @@ class AddCustomizationsCountToTemplateVersions < ActiveRecord::Migration[7.2]
                default: 0,
                null: false
 
+    # Reset column information so ActiveRecord knows about the new column
+    TemplateVersion.reset_column_information
+
     # Backfill the counter cache for existing records
     TemplateVersion.find_each do |tv|
       TemplateVersion.reset_counters(

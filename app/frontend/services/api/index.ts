@@ -15,6 +15,7 @@ import { IPermitApplication } from "../../models/permit-application"
 import { IActivity, IPermitType } from "../../models/permit-classification"
 import { IPermitCollaboration } from "../../models/permit-collaboration"
 import { IPermitProject } from "../../models/permit-project"
+import { IPreCheck } from "../../models/pre-check"
 import { IRequirementTemplate } from "../../models/requirement-template"
 import { ITemplateVersion } from "../../models/template-version"
 import { IUser } from "../../models/user"
@@ -37,6 +38,7 @@ import {
   IJurisdictionResponse,
   INotificationResponse,
   IOptionResponse,
+  IPageMeta,
   IRequirementBlockResponse,
   IRequirementTemplateResponse,
   IUsersResponse,
@@ -50,6 +52,7 @@ import {
   EPermitBlockStatus,
   EPermitClassificationType,
   EPermitProjectSortFields,
+  EPreCheckSortFields,
   ERequirementLibrarySortFields,
   ERequirementTemplateSortFields,
   EStepCodeSortFields,
@@ -742,6 +745,38 @@ export class Api {
     return this.client.get<BlobPart>(`/step_codes/download_step_code_metrics_csv`, { stepCodeType })
   }
 
+  async fetchPreChecks(params?: TSearchParams<EPreCheckSortFields>) {
+    return this.client.post<IApiResponse<IPreCheck[], IPageMeta>>(`/pre_checks/search`, params)
+  }
+
+  async fetchPreCheck(id: string) {
+    return this.client.get<IApiResponse<IPreCheck, {}>>(`/pre_checks/${id}`)
+  }
+
+  async createPreCheck(params: Partial<IPreCheck>) {
+    return this.client.post<IApiResponse<IPreCheck, {}>>(`/pre_checks`, { preCheck: params })
+  }
+
+  async updatePreCheck(id: string, params: Partial<IPreCheck>) {
+    return this.client.patch<IApiResponse<IPreCheck, {}>>(`/pre_checks/${id}`, { preCheck: params })
+  }
+
+  async submitPreCheck(id: string) {
+    return this.client.post<IApiResponse<IPreCheck, {}>>(`/pre_checks/${id}/submit`)
+  }
+
+  async markPreCheckAsViewed(id: string) {
+    return this.client.patch<IApiResponse<IPreCheck, {}>>(`/pre_checks/${id}/mark_viewed`)
+  }
+
+  async getPreCheckPdfReportUrl(id: string) {
+    return this.client.get<IApiResponse<{ pdfReportUrl: string }, {}>>(`/pre_checks/${id}/pdf_report_url`)
+  }
+
+  async downloadPreCheckUserConsentCsv() {
+    return this.client.get<BlobPart>(`/pre_checks/download_pre_check_user_consent_csv`)
+  }
+
   async downloadApplicationMetricsCsv() {
     return this.client.get<BlobPart>(`/permit_applications/download_application_metrics_csv`)
   }
@@ -795,6 +830,19 @@ export class Api {
 
   async updateSiteConfiguration(siteConfiguration) {
     return this.client.put<ApiResponse<ISiteConfigurationStore>>(`/site_configuration`, { siteConfiguration })
+  }
+
+  async updateJurisdictionEnrollments(servicePartner: string, jurisdictionIds: string[]) {
+    return this.client.post<ApiResponse<any>>(`/site_configuration/update_jurisdiction_enrollments`, {
+      servicePartner,
+      jurisdictionIds,
+    })
+  }
+
+  async fetchJurisdictionEnrollments(servicePartner: string) {
+    return this.client.get<ApiResponse<any>>(`/site_configuration/jurisdiction_enrollments`, {
+      servicePartner,
+    })
   }
 
   async updateUser(id: string, user: IUser) {

@@ -5,9 +5,10 @@ import { withEnvironment } from "../lib/with-environment"
 import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
 import { IExternalApiKeyParams } from "../types/api-request"
-import { EEnergyStep, EJurisdictionExternalApiState, EZeroCarbonStep } from "../types/enums"
+import { EEnergyStep, EJurisdictionExternalApiState, EPreCheckServicePartner, EZeroCarbonStep } from "../types/enums"
 import {
   IContact,
+  IJurisdictionServicePartnerEnrollment,
   IOption,
   IPermitTypeRequiredStep,
   IPermitTypeSubmissionContact,
@@ -59,6 +60,7 @@ export const JurisdictionModel = types
     resources: types.array(types.frozen<IResource>()),
     firstNation: types.optional(types.boolean, false),
     ltsaMatcher: types.maybeNull(types.string),
+    servicePartnerEnrollments: types.array(types.frozen<IJurisdictionServicePartnerEnrollment>()),
     heatingDegreeDays: types.maybeNull(types.number),
   })
   .extend(withEnvironment())
@@ -107,6 +109,15 @@ export const JurisdictionModel = types
         value: s.id,
         description: s.description,
       }))
+    },
+    isEnrolledInServicePartner(servicePartner: EPreCheckServicePartner): boolean {
+      const enrollment = self.servicePartnerEnrollments.find(
+        (enrollment) => enrollment.servicePartner === servicePartner
+      )
+      return enrollment?.enabled || false
+    },
+    getServicePartnerEnrollment(servicePartner: EPreCheckServicePartner): IJurisdictionServicePartnerEnrollment | null {
+      return self.servicePartnerEnrollments.find((enrollment) => enrollment.servicePartner === servicePartner) || null
     },
   }))
   .views((self) => ({

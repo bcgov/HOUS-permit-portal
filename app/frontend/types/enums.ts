@@ -29,6 +29,7 @@ export enum EFileUploadAttachmentType {
   ProjectDocument = "ProjectDocument",
   ReportDocument = "ReportDocument",
   ResourceDocument = "ResourceDocument",
+  DesignDocument = "DesignDocument",
 }
 
 export enum EResourceCategory {
@@ -114,6 +115,13 @@ export enum ERequirementTemplateSortFields {
   description = "description",
   currentVersion = "current_version",
   usedBy = "used_by",
+}
+
+export enum EPreCheckSortFields {
+  fullAddress = "full_address",
+  title = "title",
+  updatedAt = "updated_at",
+  status = "status",
 }
 
 export enum EEarlyAccessRequirementTemplateSortFields {
@@ -447,6 +455,8 @@ export enum ENotificationActionType {
   applicationRevisionsRequest = "application_revisions_request",
   applicationView = "application_view",
   stepCodeReportGenerated = "step_code_report_generated",
+  preCheckSubmitted = "pre_check_submitted",
+  preCheckCompleted = "pre_check_completed",
 }
 
 export enum ECollaboratorableType {
@@ -707,3 +717,55 @@ export const EPermitClassificationCode = {
 } as const
 
 export type EPermitClassificationCode = (typeof EPermitClassificationCode)[keyof typeof EPermitClassificationCode]
+
+export enum EPreCheckServicePartner {
+  archistar = "archistar",
+}
+
+export enum EPreCheckStatus {
+  draft = "draft",
+  processing = "processing",
+  complete = "complete",
+}
+
+export enum EPreCheckAssessmentResult {
+  passed = "passed",
+  failed = "failed",
+}
+
+export enum EGeneralContactType {
+  adjacentOwner = "adjacentOwner",
+  applicant = "applicant",
+  builder = "builder",
+  business = "business",
+  contractor = "contractor",
+  designer = "designer",
+  developer = "developer",
+  lawyer = "lawyer",
+  propertyManager = "propertyManager",
+  purchaser = "purchaser",
+  owner = "owner",
+  tenant = "tenant",
+  siteContact = "siteContact",
+}
+
+export enum EProfessionalContactType {
+  architect = "architect",
+  coordinatingRegisteredProfessional = "coordinatingRegisteredProfessional",
+  engineer = "engineer",
+  civilEngineer = "civilEngineer",
+  electricalEngineer = "electricalEngineer",
+  energyAdvisor = "energyAdvisor",
+  fireSuppressionEngineer = "fireSuppressionEngineer",
+  fireContact = "fireContact",
+  geotechnicalEngineer = "geotechnicalEngineer",
+  lawyer = "lawyer",
+  mechanical = "mechanical",
+  mechanicalEngineer = "mechanicalEngineer",
+  plumbingEngineer = "plumbingEngineer",
+  plumber = "plumber",
+  qualifiedEnvironmentalProfessional = "qualifiedEnvironmentalProfessional",
+  registeredOnsiteWastewaterPractitioner = "registeredOnsiteWastewaterPractitioner",
+  structuralEngineer = "structuralEngineer",
+  surveyor = "surveyor",
+}

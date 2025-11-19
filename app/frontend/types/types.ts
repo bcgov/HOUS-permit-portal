@@ -292,6 +292,18 @@ export interface IRequirementDocument extends IBaseFileAttachment {
   requirementBlockId: string
 }
 
+export interface IDesignDocument extends IBaseFileAttachment {
+  preCheckId: string
+}
+
+export interface IJurisdictionServicePartnerEnrollment {
+  id: string
+  servicePartner: string
+  enabled: boolean
+  createdAt: Date
+  updatedAt: Date
+}
+
 export interface IReportDocument extends IBaseFileAttachment {
   stepCodeId: string
 }

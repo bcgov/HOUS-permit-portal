@@ -48,6 +48,8 @@ class JurisdictionBlueprint < Blueprinter::Base
                   PermitTypeRequiredStepBlueprint do |jurisdiction, _options|
       jurisdiction.enabled_permit_type_required_steps
     end
+    association :service_partner_enrollments,
+                blueprint: JurisdictionServicePartnerEnrollmentBlueprint
   end
 
   view :minimal do
@@ -56,5 +58,8 @@ class JurisdictionBlueprint < Blueprinter::Base
     field :external_api_enabled do |jurisdiction, options|
       jurisdiction.external_api_enabled?
     end
+
+    association :service_partner_enrollments,
+                blueprint: JurisdictionServicePartnerEnrollmentBlueprint
   end
 end

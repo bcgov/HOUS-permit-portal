@@ -14,7 +14,7 @@ import {
   useDisclosure,
   VStack,
 } from "@chakra-ui/react"
-import { X } from "@phosphor-icons/react"
+import { Link as LinkIcon, X } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React, { useEffect, useMemo } from "react"
@@ -28,9 +28,9 @@ import {
   IResource,
 } from "../../../types/types"
 import { formatFileSize, getFileExtension } from "../../../utils/file-utils"
-import { isQuillEmpty } from "../../../utils/utility-functions"
+import { isTipTapEmpty } from "../../../utils/utility-functions"
 import { FileDownloadButton } from "../../shared/base/file-download-button"
-import { SafeQuillDisplay } from "../../shared/editor/safe-quill-display"
+import { SafeTipTapDisplay } from "../../shared/editor/safe-tiptap-display"
 import { ElectiveTag } from "../../shared/elective-tag"
 import { FirstNationsTag } from "../../shared/first-nations-tag"
 import { RichTextTip } from "../../shared/rich-text-tip"
@@ -179,10 +179,10 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
           bg="greys.white"
           borderBottomRadius="8px"
         >
-          {!isQuillEmpty(requirementBlock.displayDescription) && (
+          {!isTipTapEmpty(requirementBlock.displayDescription) && (
             <Box
               sx={{
-                ".ql-editor": {
+                ".tiptap-editor-readonly": {
                   p: 0,
                 },
               }}
@@ -193,8 +193,8 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
               borderBottom="1px solid"
               borderBottomColor="border.light"
             >
-              {/* Use SafeQuillDisplay instead of readonly Editor to prevent XSS (CVE-2021-3163) */}
-              <SafeQuillDisplay htmlContent={requirementBlock.displayDescription} />
+              {/* Use SafeTipTapDisplay for safe HTML rendering */}
+              <SafeTipTapDisplay htmlContent={requirementBlock.displayDescription} />
             </Box>
           )}
           {!R.isEmpty(requirementBlock.requirementDocuments) && (
@@ -218,14 +218,14 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
               ))}
             </Flex>
           )}
-          {(!isQuillEmpty(requirementBlockCustomization?.tip) || selectedResources.length > 0) && (
+          {(!isTipTapEmpty(requirementBlockCustomization?.tip) || selectedResources.length > 0) && (
             <Box px={2} my={4}>
               <RichTextTip tip={requirementBlockCustomization.tip} />
               {selectedResources.length > 0 && (
                 <VStack
                   align="start"
                   spacing={4}
-                  mt={!isQuillEmpty(requirementBlockCustomization?.tip) ? 3 : 0}
+                  mt={!isTipTapEmpty(requirementBlockCustomization?.tip) ? 3 : 0}
                   w="full"
                 >
                   {(Object.entries(resourcesByCategory) as [string, IResource[]][]).map(([category, resources]) => (
@@ -246,9 +246,12 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 color="semantic.info"
-                                textDecoration="underline"
-                                fontSize="sm"
+                                fontSize="md"
+                                display="inline-flex"
+                                alignItems="center"
+                                gap={1}
                               >
+                                <LinkIcon size={16} />
                                 {titleWithMetadata}
                               </Link>
                             )
@@ -298,7 +301,7 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
             spacing={2}
             px={2}
             mt={
-              isQuillEmpty(requirementBlock.displayDescription) && isQuillEmpty(requirementBlockCustomization?.tip)
+              isTipTapEmpty(requirementBlock.displayDescription) && isTipTapEmpty(requirementBlockCustomization?.tip)
                 ? 4
                 : 0
             }

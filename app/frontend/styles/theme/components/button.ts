@@ -43,7 +43,7 @@ export const Button = {
       _focus: { ...focusStyles },
     },
     primaryInverse: {
-      color: "theme.blue",
+      color: "text.primary",
       borderWidth: 1,
       borderColor: "theme.blue",
       bg: "greys.white",
@@ -117,8 +117,9 @@ export const Button = {
       color: "text.link",
       fontWeight: "normal",
       textDecoration: "underline",
-      fontSize: "inherit",
-      _hover: { color: "focus" },
+      textDecorationThickness: "1px",
+      fontSize: "md",
+      _hover: { color: "text.primary", textDecorationThickness: "3px" },
       _disabled: { ...disabledStyles, bg: "inherit" },
     },
     callout: {
