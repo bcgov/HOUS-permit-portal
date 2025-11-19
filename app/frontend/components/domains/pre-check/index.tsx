@@ -65,7 +65,7 @@ export const PreCheckForm = observer(function PreCheckForm() {
         left="0"
         right="0"
         bottom="0"
-        zIndex="modal"
+        zIndex={2000}
         bg="white"
       >
         <PreCheckNavBar />

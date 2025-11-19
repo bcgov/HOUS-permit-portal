@@ -568,6 +568,8 @@ const options = {
           viewer: {
             title: "Interactive Results Viewer",
             noUrl: "The interactive viewer is not yet available for this pre-check.",
+            disclaimer:
+              "{{serviceProvider}} prepared these results to give early guidance. They may not be complete or accurate.",
           },
         },
         contact: {
