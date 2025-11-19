@@ -3907,7 +3907,7 @@ Thank you,
             },
             projectReadiness: {
               all: {
-                label: "All project readiness tools",
+                label: "All project tools",
                 description: "A short description about this link",
               },
               stepCodes: {
@@ -4136,7 +4136,7 @@ Thank you,
             configuration: "Configure jurisdiction",
             sucessfulSubmission: "Application submitted",
             stepCodes: "Step Codes",
-            digitalBuildingPermits: "Digital building permits",
+            digitalBuildingPermits: "Configure permits",
             contact: "Contact us",
             configurationManagement: "Configuration",
             featureAccess: "Feature access",
