@@ -345,6 +345,7 @@ export enum ESocketDomainTypes {
   notification = "notification",
   permitApplication = "permit_application",
   template_version = "template_version",
+  jurisdiction = "jurisdiction",
 }
 
 export enum ESocketEventTypes {
@@ -356,6 +357,10 @@ export enum EPermitApplicationSocketEventTypes {
   updateCompliance = "update_compliance",
   updateSupportingDocuments = "update_supporting_documents",
   updatePermitBlockStatus = "update_permit_block_status",
+}
+
+export enum EJurisdictionSocketEventTypes {
+  unviewedSubmissionsCountUpdated = "unviewed_submissions_count_updated",
 }
 
 export enum EEnabledElectiveFieldReason {
