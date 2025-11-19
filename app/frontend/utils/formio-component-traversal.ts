@@ -110,7 +110,7 @@ const generateResourceComponents = (resourcesByCategory: Record<string, IResourc
           type: "button",
           key: `${blockId}-resource-${resource.id}`,
           action: "custom",
-          custom_class: "resource-link-button",
+          customClass: "resource-link-button",
           label: resource.title,
           custom: `document.dispatchEvent(new CustomEvent('openResourceLink', {
             detail: { url: '${resource.linkUrl.replace(/'/g, "\\'")}', title: '${resource.title.replace(/'/g, "\\'")}' }
@@ -128,7 +128,7 @@ const generateResourceComponents = (resourcesByCategory: Record<string, IResourc
           type: "button",
           key: `${blockId}-resource-${resource.id}`,
           action: "custom",
-          custom_class: "resource-document-download-button",
+          customClass: "resource-document-download-button",
           label: label,
           custom: `document.dispatchEvent(new CustomEvent('downloadResourceDocument', {
             detail: {

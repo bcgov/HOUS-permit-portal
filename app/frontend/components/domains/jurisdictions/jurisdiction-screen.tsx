@@ -17,7 +17,7 @@ import {
   Text,
 } from "@chakra-ui/react"
 
-import { ArrowSquareOut, Download, Link as LinkIcon } from "@phosphor-icons/react"
+import { ArrowSquareOut } from "@phosphor-icons/react"
 import i18next from "i18next"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
@@ -194,72 +194,39 @@ export const JurisdictionScreen = observer(() => {
                   {currentJurisdiction.resources && currentJurisdiction.resources.length > 0 && (
                     <Flex as="section" direction="column" gap={4}>
                       <Heading as="h2" fontSize="xl" my={0}>
-                        {t("jurisdiction.resources.title")}
+                        {t("jurisdiction.resources.sectionTitle")}
                       </Heading>
+                      <Text color="text.secondary" fontSize="sm" mt={1}>
+                        {t("jurisdiction.resources.description")}
+                      </Text>
                       {Object.values(EResourceCategory).map((category) => {
                         const categoryResources = currentJurisdiction.resources.filter((r) => r.category === category)
                         if (categoryResources.length === 0) return null
 
                         return (
                           <Box key={category} mb={4}>
-                            <Heading as="h3" fontSize="lg" mb={2}>
+                            <Heading as="h3" mb={2}>
                               {t(`home.configurationManagement.resources.categories.${category as EResourceCategory}`)}
                             </Heading>
-                            <Flex direction="column" gap={2}>
+                            <Flex direction="column" gap={6}>
                               {categoryResources.map((resource) => (
-                                <Flex
-                                  key={resource.id}
-                                  p={3}
-                                  bg="greys.grey10"
-                                  borderRadius="md"
-                                  justifyContent="space-between"
-                                  alignItems="center"
-                                >
-                                  <Flex direction="column" gap={1} flex={1}>
-                                    <HStack spacing={2}>
-                                      <Text fontWeight="bold">{resource.title}</Text>
-                                      <Box
-                                        as="span"
-                                        px={2}
-                                        py={1}
-                                        borderRadius="sm"
-                                        bg={resource.resourceType === EResourceType.file ? "blue.100" : "green.100"}
-                                        color={resource.resourceType === EResourceType.file ? "blue.700" : "green.700"}
-                                        fontSize="xs"
-                                        fontWeight="bold"
-                                      >
-                                        {resource.resourceType === EResourceType.file ? (
-                                          <HStack spacing={1}>
-                                            <Download size={12} />
-                                            <Text>PDF</Text>
-                                          </HStack>
-                                        ) : (
-                                          <HStack spacing={1}>
-                                            <LinkIcon size={12} />
-                                            <Text>LINK</Text>
-                                          </HStack>
-                                        )}
-                                      </Box>
-                                    </HStack>
-                                    {resource.description && (
-                                      <Text color="text.secondary" fontSize="sm">
-                                        {resource.description}
-                                      </Text>
-                                    )}
-                                  </Flex>
+                                <Box key={resource.id}>
                                   {resource.resourceType === EResourceType.file && resource.resourceDocument ? (
                                     <FileDownloadButton
                                       document={resource.resourceDocument}
                                       modelType={EFileUploadAttachmentType.ResourceDocument}
                                     />
                                   ) : resource.resourceType === EResourceType.link && resource.linkUrl ? (
-                                    <Link href={resource.linkUrl} size="lg" isExternal>
-                                      <Button variant="link" rightIcon={<ArrowSquareOut />}>
-                                        {t("ui.open")}
-                                      </Button>
+                                    <Link href={resource.linkUrl} isExternal color="text.link" size="sm" px={0}>
+                                      <ArrowSquareOut style={{ display: "inline" }} /> {resource.title}
                                     </Link>
                                   ) : null}
-                                </Flex>
+                                  {resource.description && (
+                                    <Text color="text.secondary" fontSize="sm" mt={1}>
+                                      {resource.description}
+                                    </Text>
+                                  )}
+                                </Box>
                               ))}
                             </Flex>
                           </Box>

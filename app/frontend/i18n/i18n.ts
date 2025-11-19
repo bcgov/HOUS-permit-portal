@@ -719,6 +719,8 @@ const options = {
           lookOut: "Things to look out for",
           resources: {
             title: "Resources",
+            sectionTitle: "Resources for applicants",
+            description: "Additional resources and reference materials to help you with your application:",
             categories: {
               planning_zoning: "Planning & Zoning",
               bylaws_requirements: "Bylaws & Requirements",

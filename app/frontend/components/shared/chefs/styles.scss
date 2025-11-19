@@ -910,23 +910,60 @@
   }
 
   // Resource buttons styling
-  .btn.resource-link-button,
-  .btn.resource-document-download-button {
-    text-transform: none;
-    background: none;
-    border: none;
-    color: $bcgov-link;
-    text-decoration: none;
-    font-weight: normal;
-    padding: 0;
-    margin-top: 0;
-    letter-spacing: normal;
-    line-height: 1.5;
-    text-align: left;
+  .resource-link-button,
+  .resource-document-download-button {
+    &.formio-component-button {
+      margin-top: 0;
+      margin-bottom: var(--chakra-space-1) !important;
+    }
 
-    &:hover {
+    .btn {
+      text-transform: none;
       background: none;
+      border: none;
+      color: $bcgov-link;
       text-decoration: underline;
+      text-decoration-thickness: 1px;
+      font-weight: normal;
+      padding: 0;
+      padding-right: 24px;
+      margin-top: 0;
+      letter-spacing: normal;
+      line-height: 1.5;
+      text-align: left;
+      white-space: normal;
+      position: relative;
+
+      &:hover {
+        background: none;
+        color: $bcgov-font;
+        text-decoration: underline;
+        text-decoration-thickness: 3px;
+      }
+
+      &::after {
+        font-family: "FontAwesome";
+        position: absolute;
+        right: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        color: inherit;
+        font-weight: normal;
+      }
+    }
+  }
+
+  .resource-link-button {
+    .btn::after {
+      content: "\f08e"; // FontAwesome external link icon
+      font-size: 12px;
+    }
+  }
+
+  .resource-document-download-button {
+    .btn::after {
+      content: "\f019"; // FontAwesome download icon
+      font-size: 12px;
     }
   }
 
