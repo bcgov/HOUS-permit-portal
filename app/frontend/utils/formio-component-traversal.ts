@@ -85,14 +85,6 @@ export const getCompletedBlocksFromForm = (rootComponent) => {
 const generateResourceComponents = (resourcesByCategory: Record<string, IResource[]>, blockId: string): any[] => {
   const components: any[] = []
 
-  // Add heading
-  const headingText: string = (t as any)("digitalBuildingPermits.edit.requirementBlockSidebar.resourcesLabel")
-  components.push({
-    type: "content",
-    key: `${blockId}-resources-heading`,
-    html: `<p style="font-weight: 600; font-size: 14px; margin-bottom: 8px;">${headingText}</p>`,
-  })
-
   // Add components for each category
   Object.entries(resourcesByCategory).forEach(([category, resources]) => {
     // Category label - category is in snake_case, matching the i18n keys
@@ -101,7 +93,7 @@ const generateResourceComponents = (resourcesByCategory: Record<string, IResourc
     components.push({
       type: "content",
       key: `${blockId}-resource-category-${category}`,
-      html: `<p style="font-weight: 600; font-size: 12px; color: var(--chakra-colors-text-secondary); margin: 8px 0 4px 0;">${categoryLabel} ${resourcesText}</p>`,
+      html: `<p style="font-weight: 600; font-size: 16px; color: var(--chakra-colors-text-secondary); margin: 8px 0 4px 0;">${categoryLabel} ${resourcesText}</p>`,
     })
 
     // Individual resources
@@ -145,7 +137,7 @@ const generateResourceComponents = (resourcesByCategory: Record<string, IResourc
         components.push({
           type: "content",
           key: `${blockId}-resource-${resource.id}-desc`,
-          html: `<p style="font-size: 12px; color: var(--chakra-colors-text-secondary); margin: 4px 0 8px 0;">${resource.description}</p>`,
+          html: `<p style="font-size: 14px; color: var(--chakra-colors-text-secondary); margin: 4px 0 8px 0;">${resource.description}</p>`,
         })
       }
     })

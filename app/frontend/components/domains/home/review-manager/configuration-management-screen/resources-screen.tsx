@@ -260,7 +260,7 @@ export const ResourcesScreen = observer(function ResourcesScreen() {
                   </Heading>
                   <VStack spacing={4} w="full" alignItems="stretch">
                     {categoryResources.map((resource) => (
-                      <ResourceCard
+                      <ResourceInputCard
                         key={resource.id}
                         resource={resource}
                         onEdit={handleOpenModal}
@@ -332,7 +332,7 @@ export const ResourcesScreen = observer(function ResourcesScreen() {
                   <Box ref={modalContainerRef}>
                     <FormLabel>{t("home.configurationManagement.resources.file")}</FormLabel>
                     <Box position="relative" mt={2}>
-                      <Dashboard uppy={modalUppy} height={300} width="100%" />
+                      <Dashboard uppy={modalUppy} height={300} width="100%" proudlyDisplayPoweredByUppy={false} />
                     </Box>
                   </Box>
                 ) : (
@@ -359,13 +359,13 @@ export const ResourcesScreen = observer(function ResourcesScreen() {
   )
 })
 
-interface IResourceCardProps {
+interface IResourceInputCardProps {
   resource: IResource
   onEdit: (resource: IResource) => void
   onDelete: (resource: IResource) => void
 }
 
-const ResourceCard: React.FC<IResourceCardProps> = ({ resource, onEdit, onDelete }) => {
+const ResourceInputCard: React.FC<IResourceInputCardProps> = ({ resource, onEdit, onDelete }) => {
   const { t } = useTranslation()
 
   const dateToFormat = resource.updatedAt || resource.createdAt || new Date().toISOString()
@@ -379,20 +379,32 @@ const ResourceCard: React.FC<IResourceCardProps> = ({ resource, onEdit, onDelete
 
   return (
     <Box p={4} bg="greys.grey03" borderRadius="lg" position="relative">
-      <Flex gap={4} alignItems="flex-start">
-        {/* Tag */}
-        <Tag backgroundColor="semantic.infoLight" size="sm" fontWeight="medium" color="text.secondary">
-          <Flex align="center" gap={1}>
-            {fileTypeInfo.icon}
-            <Text as="span">{fileTypeInfo.label}</Text>
-          </Flex>
-        </Tag>
-
+      <Flex gap={4} justify="space-between" alignItems="flex-start">
         {/* Content */}
-        <VStack align="start" spacing={1} flex={1}>
+        <VStack align="start" spacing={2} flex={1}>
           <Text fontWeight="bold" fontSize="md">
             {resource.title}
           </Text>
+
+          <Flex align="center" gap={2}>
+            <Tag backgroundColor="semantic.infoLight" size="sm" fontWeight="medium" color="text.secondary">
+              <Flex align="center" gap={1}>
+                {fileTypeInfo.icon}
+                <Text as="span">{fileTypeInfo.label}</Text>
+              </Flex>
+            </Tag>
+            {resource.resourceType === EResourceType.file && resource.resourceDocument?.file?.metadata?.filename && (
+              <Text fontSize="sm" color="text.primary" noOfLines={1}>
+                {resource.resourceDocument.file.metadata.filename}
+              </Text>
+            )}
+            {resource.resourceType === EResourceType.link && resource.linkUrl && (
+              <Text fontSize="sm" color="text.primary" noOfLines={1}>
+                {resource.linkUrl}
+              </Text>
+            )}
+          </Flex>
+
           {resource.description && (
             <Text color="text.secondary" fontSize="sm">
               {resource.description}
@@ -404,7 +416,7 @@ const ResourceCard: React.FC<IResourceCardProps> = ({ resource, onEdit, onDelete
         </VStack>
 
         {/* Actions */}
-        <Flex direction="column" align="flex-start" gap={2} flexShrink={0}>
+        <Flex direction="column" align="flex-end" gap={2} flexShrink={0}>
           <Button variant="secondary" onClick={() => onEdit(resource)} leftIcon={<Pencil />}>
             {t("ui.edit")}
           </Button>

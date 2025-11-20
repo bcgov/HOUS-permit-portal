@@ -2,7 +2,7 @@ import { Box, BoxProps, Heading, HeadingProps, Link } from "@chakra-ui/react"
 import { SealCheck } from "@phosphor-icons/react"
 import React from "react"
 import { useTranslation } from "react-i18next"
-import { Editor } from "./editor/editor"
+import { SafeTipTapDisplay } from "./editor/safe-tiptap-display"
 
 interface IProps extends BoxProps {
   tip: string
@@ -10,7 +10,7 @@ interface IProps extends BoxProps {
   headerProps?: Partial<HeadingProps>
 }
 
-export function RichTextTip({ tip, helpLink, headerProps, ...containerProps }: IProps) {
+export function RichTextTip({ tip, helpLink, headerProps, ...containerProps }: IProps): JSX.Element {
   const { t } = useTranslation()
   return (
     <>
@@ -27,13 +27,14 @@ export function RichTextTip({ tip, helpLink, headerProps, ...containerProps }: I
             p: 0,
           },
         }}
+        mb={6}
         {...containerProps}
       >
         <Heading display={"flex"} fontSize={"lg"} color={"theme.blueAlt"} {...headerProps}>
           <SealCheck weight={"fill"} size={"24px"} style={{ marginRight: "6px" }} />
           {t("ui.tip")}
         </Heading>
-        <Editor htmlValue={tip} readonly />
+        <SafeTipTapDisplay htmlContent={tip} />
       </Box>
       {helpLink && (
         <Link

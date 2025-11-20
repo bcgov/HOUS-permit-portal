@@ -924,7 +924,6 @@
       color: $bcgov-link;
       text-decoration: underline;
       text-decoration-thickness: 1px;
-      font-weight: normal;
       padding: 0;
       padding-right: 24px;
       margin-top: 0;
@@ -933,6 +932,8 @@
       text-align: left;
       white-space: normal;
       position: relative;
+      font-size: var(--chakra-fontSizes-md);
+      font-weight: bold;
 
       &:hover {
         background: none;
@@ -956,14 +957,14 @@
   .resource-link-button {
     .btn::after {
       content: "\f08e"; // FontAwesome external link icon
-      font-size: 12px;
+      font-size: var(--chakra-fontSizes-md);
     }
   }
 
   .resource-document-download-button {
     .btn::after {
       content: "\f019"; // FontAwesome download icon
-      font-size: 12px;
+      font-size: var(--chakra-fontSizes-md);
     }
   }
 

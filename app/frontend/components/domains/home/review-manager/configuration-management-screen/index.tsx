@@ -110,7 +110,7 @@ export const ConfigurationManagementScreen = observer(function ConfigurationMana
                 <GridItem key="resources">
                   <HomeScreenBox
                     title={t(`${i18nPrefix}.resources.title`)}
-                    description={t(`${i18nPrefix}.resources.description`)}
+                    description={t(`${i18nPrefix}.resources.shortDescription`)}
                     linkText={t("ui.edit")}
                     icon={<Paperclip size={24} />}
                     href="resources"

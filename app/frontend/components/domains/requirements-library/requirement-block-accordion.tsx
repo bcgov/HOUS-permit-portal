@@ -9,12 +9,11 @@ import {
   Flex,
   HStack,
   IconButton,
-  Link,
   Text,
   useDisclosure,
   VStack,
 } from "@chakra-ui/react"
-import { Link as LinkIcon, X } from "@phosphor-icons/react"
+import { X } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React, { useEffect, useMemo } from "react"
@@ -27,9 +26,8 @@ import {
   IRequirementBlockCustomization,
   IResource,
 } from "../../../types/types"
-import { formatFileSize, getFileExtension } from "../../../utils/file-utils"
 import { isTipTapEmpty } from "../../../utils/utility-functions"
-import { FileDownloadButton } from "../../shared/base/file-download-button"
+import { DownloadLinkButton, ResourceItem } from "../../shared/base/resource-item"
 import { SafeTipTapDisplay } from "../../shared/editor/safe-tiptap-display"
 import { ElectiveTag } from "../../shared/elective-tag"
 import { FirstNationsTag } from "../../shared/first-nations-tag"
@@ -37,6 +35,7 @@ import { RichTextTip } from "../../shared/rich-text-tip"
 import { VisibilityTag } from "../../shared/visibility-tag.tsx"
 import { RequirementFieldDisplay } from "./requirement-field-display"
 import { RequirementsBlockModal } from "./requirements-block-modal"
+
 type TProps = {
   requirementBlock: IDenormalizedRequirementBlock
   onRemove?: () => void
@@ -204,7 +203,7 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
             >
               <Text fontWeight={700}>{t("requirementsLibrary.fields.requirementDocuments")}</Text>
               {requirementBlock.requirementDocuments?.map((document) => (
-                <FileDownloadButton
+                <DownloadLinkButton
                   key={document.id}
                   document={document}
                   modelType={EFileUploadAttachmentType.RequirementDocument}
@@ -212,81 +211,28 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
               ))}
             </Flex>
           )}
-          {(!isTipTapEmpty(requirementBlockCustomization?.tip) || selectedResources.length > 0) && (
+          {!isTipTapEmpty(requirementBlockCustomization?.tip) && (
             <Box px={2} my={4}>
               <RichTextTip tip={requirementBlockCustomization.tip} />
-              {selectedResources.length > 0 && (
-                <VStack
-                  align="start"
-                  spacing={4}
-                  mt={!isTipTapEmpty(requirementBlockCustomization?.tip) ? 3 : 0}
-                  w="full"
-                >
-                  {(Object.entries(resourcesByCategory) as [string, IResource[]][]).map(([category, resources]) => (
-                    <Box key={category} w="full">
-                      <Text fontWeight={600} fontSize="xs" color="text.secondary" mb={2}>
-                        {t(`home.configurationManagement.resources.categories.${category as EResourceCategory}`)}{" "}
-                        {(t("home.configurationManagement.resources.title") as string).toLowerCase()}
-                      </Text>
-                      <VStack align="start" spacing={3} w="full">
-                        {resources.map((resource) => {
-                          let linkContent: React.ReactNode
-                          let titleWithMetadata = resource.title
-
-                          if (resource.resourceType === "link") {
-                            linkContent = (
-                              <Link
-                                href={resource.linkUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                color="semantic.info"
-                                fontSize="md"
-                                display="inline-flex"
-                                alignItems="center"
-                                gap={1}
-                              >
-                                <LinkIcon size={16} />
-                                {titleWithMetadata}
-                              </Link>
-                            )
-                          } else if (resource.resourceDocument) {
-                            const fileExt = getFileExtension(
-                              resource.resourceDocument.file.metadata.filename,
-                              resource.resourceDocument.file.metadata.mimeType
-                            )
-                            const fileSize = formatFileSize(resource.resourceDocument.file.metadata.size)
-                            titleWithMetadata = `${resource.title} (${fileExt}, ${fileSize})`
-
-                            linkContent = (
-                              <FileDownloadButton
-                                document={resource.resourceDocument}
-                                modelType={EFileUploadAttachmentType.ResourceDocument}
-                                variant="link"
-                                color="semantic.info"
-                                size="sm"
-                                px={0}
-                              >
-                                {titleWithMetadata}
-                              </FileDownloadButton>
-                            )
-                          }
-
-                          return (
-                            <Box key={resource.id} w="full">
-                              {linkContent}
-                              {resource.description && (
-                                <Text fontSize="xs" color="text.secondary" mt={1}>
-                                  {resource.description}
-                                </Text>
-                              )}
-                            </Box>
-                          )
-                        })}
-                      </VStack>
-                    </Box>
-                  ))}
-                </VStack>
-              )}
+            </Box>
+          )}
+          {selectedResources.length > 0 && (
+            <Box px={2} my={4}>
+              <VStack align="start" spacing={4} w="full">
+                {(Object.entries(resourcesByCategory) as [string, IResource[]][]).map(([category, resources]) => (
+                  <Box key={category} w="full">
+                    <Text fontWeight={600} fontSize="xs" color="text.secondary" mb={2}>
+                      {t(`home.configurationManagement.resources.categories.${category as EResourceCategory}`)}{" "}
+                      {(t("home.configurationManagement.resources.title") as string).toLowerCase()}
+                    </Text>
+                    <VStack align="start" spacing={3} w="full">
+                      {resources.map((resource) => {
+                        return <ResourceItem key={resource.id} resource={resource} />
+                      })}
+                    </VStack>
+                  </Box>
+                ))}
+              </VStack>
             </Box>
           )}
           <VStack

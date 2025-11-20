@@ -26,13 +26,13 @@ import { Trans, useTranslation } from "react-i18next"
 import { useJurisdiction } from "../../../hooks/resources/use-jurisdiction"
 import { IJurisdiction } from "../../../models/jurisdiction"
 import { useMst } from "../../../setup/root"
-import { EFileUploadAttachmentType, EFlashMessageStatus, EResourceCategory, EResourceType } from "../../../types/enums"
+import { EFlashMessageStatus, EResourceCategory } from "../../../types/enums"
 import { IContact, TLatLngTuple } from "../../../types/types"
 import { BlueTitleBar } from "../../shared/base/blue-title-bar"
 import { CustomMessageBox } from "../../shared/base/custom-message-box"
 import { ErrorScreen } from "../../shared/base/error-screen"
-import { FileDownloadButton } from "../../shared/base/file-download-button"
 import { LoadingScreen } from "../../shared/base/loading-screen"
+import { ResourceItem } from "../../shared/base/resource-item"
 import { EditorWithPreview } from "../../shared/editor/custom-extensions/editor-with-preview"
 import { SafeTipTapDisplay } from "../../shared/editor/safe-tiptap-display"
 import { JurisdictionMap } from "../../shared/module-wrappers/jurisdiction-map"
@@ -210,23 +210,7 @@ export const JurisdictionScreen = observer(() => {
                             </Heading>
                             <Flex direction="column" gap={6}>
                               {categoryResources.map((resource) => (
-                                <Box key={resource.id}>
-                                  {resource.resourceType === EResourceType.file && resource.resourceDocument ? (
-                                    <FileDownloadButton
-                                      document={resource.resourceDocument}
-                                      modelType={EFileUploadAttachmentType.ResourceDocument}
-                                    />
-                                  ) : resource.resourceType === EResourceType.link && resource.linkUrl ? (
-                                    <Link href={resource.linkUrl} isExternal color="text.link" size="sm" px={0}>
-                                      <ArrowSquareOut style={{ display: "inline" }} /> {resource.title}
-                                    </Link>
-                                  ) : null}
-                                  {resource.description && (
-                                    <Text color="text.secondary" fontSize="sm" mt={1}>
-                                      {resource.description}
-                                    </Text>
-                                  )}
-                                </Box>
+                                <ResourceItem key={resource.id} resource={resource} />
                               ))}
                             </Flex>
                           </Box>
