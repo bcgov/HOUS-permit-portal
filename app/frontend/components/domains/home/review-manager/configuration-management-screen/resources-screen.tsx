@@ -190,36 +190,19 @@ export const ResourcesScreen = observer(function ResourcesScreen() {
 
     setIsSubmitting(true)
     try {
-      if (editingResource) {
-        // Update existing resource
-        await currentJurisdiction.update({
-          resourcesAttributes: [
-            {
-              id: editingResource.id,
-              category: formData.category,
-              title: formData.title,
-              description: formData.description,
-              resourceType: formData.resourceType,
-              linkUrl: formData.linkUrl,
-              resourceDocumentAttributes: formData.resourceDocumentAttributes,
-            },
-          ],
-        })
-      } else {
-        // Create new resource
-        await currentJurisdiction.update({
-          resourcesAttributes: [
-            {
-              category: formData.category,
-              title: formData.title,
-              description: formData.description,
-              resourceType: formData.resourceType,
-              linkUrl: formData.linkUrl,
-              resourceDocumentAttributes: formData.resourceDocumentAttributes,
-            },
-          ],
-        })
-      }
+      await currentJurisdiction.update({
+        resourcesAttributes: [
+          {
+            id: editingResource?.id,
+            category: formData.category,
+            title: formData.title,
+            description: formData.description,
+            resourceType: formData.resourceType,
+            linkUrl: formData.linkUrl,
+            resourceDocumentAttributes: formData.resourceDocumentAttributes,
+          },
+        ],
+      })
       handleCloseModal()
     } finally {
       setIsSubmitting(false)

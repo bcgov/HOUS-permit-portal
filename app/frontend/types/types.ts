@@ -19,6 +19,7 @@ import {
   EFossilFuelsPresence,
   EFuelType,
   EHotWaterPerformanceType,
+  EJurisdictionSocketEventTypes,
   EJurisdictionTypes,
   ENotificationActionType,
   ENumberUnit,
@@ -441,7 +442,7 @@ export interface IPermitApplicationSupportingDocumentsUpdate {
 export interface IUserPushPayload {
   data: TSocketEventData
   domain: ESocketDomainTypes
-  eventType: ESocketEventTypes | EPermitApplicationSocketEventTypes
+  eventType: ESocketEventTypes | EPermitApplicationSocketEventTypes | EJurisdictionSocketEventTypes
   meta: {
     lastReadAt: number
     totalPages: number

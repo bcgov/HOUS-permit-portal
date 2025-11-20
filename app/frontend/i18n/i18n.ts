@@ -328,6 +328,7 @@ const options = {
           public: "Public",
           undo: "Undo",
           chooseSandboxMode: "Choose a training mode",
+          new: "new",
         },
         notification: {
           title: "Notifications",
@@ -570,6 +571,8 @@ const options = {
           viewer: {
             title: "Interactive Results Viewer",
             noUrl: "The interactive viewer is not yet available for this pre-check.",
+            disclaimer:
+              "{{serviceProvider}} prepared these results to give early guidance. They may not be complete or accurate.",
           },
         },
         contact: {
@@ -1243,7 +1246,8 @@ Thank you,
           live: "Live (None)",
           disabledFor: "Disabled for training sandbox",
           inMode: "You're in training mode",
-          scheduledModeDescription: "upcoming templates only",
+          scheduledModeDescription: "upcoming template sandbox",
+          publishedModeDescription: "published template sandbox",
           disableJurisdictionSwitchTooltip: "Leave training mode before switching jurisdictions",
           switch: {
             label: "Training mode",
@@ -3952,7 +3956,7 @@ Thank you,
             },
             projectReadiness: {
               all: {
-                label: "All project readiness tools",
+                label: "All project tools",
                 description: "A short description about this link",
               },
               stepCodes: {
@@ -4181,7 +4185,7 @@ Thank you,
             configuration: "Configure jurisdiction",
             sucessfulSubmission: "Application submitted",
             stepCodes: "Step Codes",
-            digitalBuildingPermits: "Digital building permits",
+            digitalBuildingPermits: "Configure permits",
             contact: "Contact us",
             configurationManagement: "Configuration",
             featureAccess: "Feature access",
