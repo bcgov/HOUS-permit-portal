@@ -25,6 +25,18 @@ class Api::PreChecksController < Api::ApplicationController
   end
 
   def create
+    if pre_check_params[:permit_application_id].present?
+      existing_pre_check =
+        PreCheck.find_by(
+          permit_application_id: pre_check_params[:permit_application_id]
+        )
+      if existing_pre_check
+        authorize existing_pre_check, :show?
+        render_success existing_pre_check, nil, { blueprint: PreCheckBlueprint }
+        return
+      end
+    end
+
     pre_check = PreCheck.new(pre_check_params.merge(creator: current_user))
 
     authorize pre_check
