@@ -885,7 +885,7 @@ Thank you,
             button: "Add permits",
             bcbcPartHeading: "BCBC Part",
             bcbcPart:
-              "Right now, you can apply for small-scale residential building permits. This includes single-family homes, duplexes, laneway houses, triplexes and townhouses. These are covered by Part 9 of the BC Building Code (three storeys or less, up to 600 m²).",
+              "Right now, you can apply for permits for small-scale projects. This includes residential buildings, small structures, trades permits, and site work.",
             beforeYouBegin: {
               heading: "Before you begin",
               intro:
