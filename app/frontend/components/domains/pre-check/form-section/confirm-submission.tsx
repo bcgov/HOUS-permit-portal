@@ -71,6 +71,10 @@ export const ConfirmSubmission = observer(function ConfirmSubmission() {
                   {t("preCheck.sections.confirmSubmission.submit", "Submit")}
                 </Button>
               )}
+              modalProps={{
+                isCentered: true,
+                zIndex: 2001,
+              }}
               confirmButtonProps={{
                 isLoading: isSubmitting,
               }}

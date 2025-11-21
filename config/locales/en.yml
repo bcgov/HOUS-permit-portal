@@ -245,7 +245,7 @@ en:
         message: "Pre-check submitted successfully!"
       submit_error:
         title: Error
-        message: "Error submitting pre-check"
+        message: "Error submitting pre-check - please verify your PID and try again"
       no_certificate:
         title: Error
         message: "No certificate number found for pre-check"

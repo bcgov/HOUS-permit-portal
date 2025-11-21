@@ -46,8 +46,12 @@ export const ConfirmationModal = observer(function ConfirmationModal({
 }: IConfirmationModalProps) {
   const disclosureProps = useDisclosure()
 
+  const disclosureOpen = () => {
+    disclosureProps.onOpen()
+  }
+
   const isOpen = modalControlProps?.isOpen ?? disclosureProps.isOpen
-  const onOpen = modalControlProps?.onOpen ?? disclosureProps.onOpen
+  const onOpen = modalControlProps?.onOpen ?? disclosureOpen
   const onClose = modalControlProps?.onClose ?? disclosureProps.onClose
 
   const { t } = useTranslation()
@@ -55,7 +59,7 @@ export const ConfirmationModal = observer(function ConfirmationModal({
   return (
     <>
       {renderTriggerButton ? (
-        renderTriggerButton({ onClick: onOpen })
+        renderTriggerButton({ onClick: onOpen, ...triggerButtonProps })
       ) : (
         <Button variant={"ghost"} color={"text.link"} onClick={onOpen} {...triggerButtonProps}>
           {triggerText ?? t("ui.confirm")}
