@@ -590,7 +590,7 @@ en:
         message: "%{error_message}"
       create_success:
         title: ""
-        message: "Permit project pinned successfully"
+        message: "Permit project created successfully"
       create_error:
         title: Error
         message: "%{error_message}"
