@@ -1,5 +1,5 @@
 import { Container, Flex, FormControl, FormLabel, Grid, GridItem, Heading, Input, Text, VStack } from "@chakra-ui/react"
-import { FileText, Key, SlidersHorizontal, Users } from "@phosphor-icons/react"
+import { FileText, Info, Key, Paperclip, SlidersHorizontal, Users } from "@phosphor-icons/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React, { Suspense } from "react"
@@ -106,9 +106,40 @@ export const ConfigurationManagementScreen = observer(function ConfigurationMana
                   />
                 </GridItem>
               )
+              const resourcesGridItem = (
+                <GridItem key="resources">
+                  <HomeScreenBox
+                    title={t(`${i18nPrefix}.resources.title`)}
+                    description={t(`${i18nPrefix}.resources.shortDescription`)}
+                    linkText={t("ui.edit")}
+                    icon={<Paperclip size={24} />}
+                    href="resources"
+                    h="full"
+                  />
+                </GridItem>
+              )
+              const myJurisdictionAboutPageGridItem = (
+                <GridItem key="myJurisdictionAboutPage">
+                  <HomeScreenBox
+                    title={t(`${i18nPrefix}.myJurisdictionAboutPage.title`)}
+                    description={t(`${i18nPrefix}.myJurisdictionAboutPage.description`)}
+                    linkText={t("ui.edit")}
+                    icon={<Info size={24} />}
+                    href={`/jurisdictions/${currentJurisdiction.slug}`}
+                    h="full"
+                  />
+                </GridItem>
+              )
               const items = isTechnicalSupport
                 ? [apiKeysGridItem, usersGridItem]
-                : [stepCodeGridItem, apiKeysGridItem, usersGridItem, featureAccessGridItem]
+                : [
+                    myJurisdictionAboutPageGridItem,
+                    stepCodeGridItem,
+                    apiKeysGridItem,
+                    usersGridItem,
+                    featureAccessGridItem,
+                    resourcesGridItem,
+                  ]
               return (
                 <Grid templateColumns="repeat(2, 1fr)" gap={6}>
                   {items}

@@ -1,4 +1,9 @@
 import {
+  Accordion,
+  AccordionButton,
+  AccordionIcon,
+  AccordionItem,
+  AccordionPanel,
   Box,
   Button,
   ButtonGroup,
@@ -17,22 +22,29 @@ import {
   Select,
   Spacer,
   Stack,
+  Tag,
   Text,
   useDisclosure,
+  VStack,
 } from "@chakra-ui/react"
+import { Link } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useMemo, useState } from "react"
 import { FormProvider, useController, useForm, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
+import { Link as RouterLink } from "react-router-dom"
 import { getEnabledElectiveReasonOptions } from "../../../../../constants"
-import { EEnabledElectiveFieldReason } from "../../../../../types/enums"
+import { useMst } from "../../../../../setup/root"
+import { EEnabledElectiveFieldReason, EFlashMessageStatus } from "../../../../../types/enums"
 import {
   IDenormalizedRequirement,
   IDenormalizedRequirementBlock,
   IRequirementBlockCustomization,
+  IResource,
 } from "../../../../../types/types"
+import { getFileTypeInfo } from "../../../../../utils/file-utils"
+import { CustomMessageBox } from "../../../../shared/base/custom-message-box"
 import { Editor } from "../../../../shared/editor/editor"
-import { UrlFormControl } from "../../../../shared/form/input-form-control"
 
 interface ICustomizationForm extends IRequirementBlockCustomization {}
 
@@ -50,7 +62,7 @@ function formFormDefaults(
 ): ICustomizationForm {
   return {
     tip: customization?.tip,
-    helpLink: customization?.helpLink,
+    resourceIds: customization?.resourceIds || [],
     enabledElectiveFieldIds: customization?.enabledElectiveFieldIds?.filter(
       (id) => !!availableElectiveFields.find((f) => f.id === id)
     ),
@@ -173,14 +185,40 @@ const MainView = ({
   onResetDefault?: () => void
 }) => {
   const { t } = useTranslation()
-  const { control, watch } = useFormContext<ICustomizationForm>()
+  const { userStore } = useMst()
+  const { currentUser } = userStore
+  const currentJurisdiction = currentUser?.jurisdiction
+
+  const { control, watch, setValue } = useFormContext<ICustomizationForm>()
   const {
     field: { value: tipValue, onChange: onTipChange },
   } = useController({ control, name: "tip" })
-  const {
-    field: { value: helpLinkValue, onChange: onhelpLinkChange },
-  } = useController({ control, name: "helpLink" })
+
   const watchedEnabledElectiveFieldIds = watch("enabledElectiveFieldIds") ?? []
+  const watchedEnabledElectiveFieldReasons = watch("enabledElectiveFieldReasons") ?? {}
+  const watchedResourceIds = watch("resourceIds") ?? []
+
+  // Group resources by category for display
+  const resourcesByCategory = useMemo(() => {
+    if (!currentJurisdiction?.resources) return {}
+
+    return currentJurisdiction.resources.reduce(
+      (acc, resource) => {
+        if (!acc[resource.category]) acc[resource.category] = []
+        acc[resource.category].push(resource)
+        return acc
+      },
+      {} as Record<string, IResource[]>
+    )
+  }, [currentJurisdiction?.resources])
+
+  const hasResources = currentJurisdiction?.resources?.length > 0
+
+  const handleResourceToggle = (resourceId: string, isChecked: boolean) => {
+    const currentIds = watchedResourceIds
+    const newIds = isChecked ? [...currentIds, resourceId] : currentIds.filter((id) => id !== resourceId)
+    setValue("resourceIds", newIds)
+  }
 
   return (
     <Stack as={"section"} w={"full"} spacing={6} h="full">
@@ -190,32 +228,146 @@ const MainView = ({
       <Box>
         <Text mb={1}>{t("digitalBuildingPermits.edit.requirementBlockSidebar.tipLabel")}</Text>
         <Editor htmlValue={tipValue} onChange={onTipChange} />
-        <FormLabel mt={3}>
-          {t("digitalBuildingPermits.edit.requirementBlockSidebar.helpSectionLink")}
-          <UrlFormControl fieldName="helpLink" />
-        </FormLabel>
       </Box>
 
-      <Box w={"full"}>
-        <Text color={"text.secondary"} fontWeight={700}>
-          {t("digitalBuildingPermits.edit.requirementBlockSidebar.electiveFormFields")}
-        </Text>
-        <Stack w={"full"} spacing={2} mt={3}>
-          {watchedEnabledElectiveFieldIds.map((requirementFieldId) => {
-            const requirementField = electiveFields.find((req) => req.id === requirementFieldId)
-            return (
-              <Box key={requirementField.id} borderRadius={"md"} bg={"theme.blueLight"} px={4} py={1}>
-                {requirementField.label}
-              </Box>
-            )
-          })}
-        </Stack>
-      </Box>
-      {electiveFields?.length > 0 && (
-        <Button variant={"link"} textDecoration={"underline"} onClick={onManageElectiveFields}>
-          {t("digitalBuildingPermits.edit.requirementBlockSidebar.manageFieldsButton")}
-        </Button>
+      {electiveFields.length > 0 && (
+        <Box w={"full"}>
+          {watchedEnabledElectiveFieldIds.length === 0 ? (
+            <>
+              <Text color={"text.secondary"} fontWeight={700} mb={2}>
+                {t("digitalBuildingPermits.edit.requirementBlockSidebar.electiveFormFields")}
+              </Text>
+              <CustomMessageBox
+                status={EFlashMessageStatus.info}
+                description={t("digitalBuildingPermits.edit.requirementBlockSidebar.noElectiveFields")}
+              />
+            </>
+          ) : (
+            <Accordion allowMultiple w={"full"}>
+              <AccordionItem border="none">
+                <AccordionButton px={0}>
+                  <Box as="span" flex="1" textAlign="left" fontWeight="bold" fontSize="md">
+                    {t("digitalBuildingPermits.edit.requirementBlockSidebar.electiveFormFields")}
+                  </Box>
+                  <AccordionIcon />
+                </AccordionButton>
+                <AccordionPanel pb={4} px={0}>
+                  <Stack w={"full"} spacing={2}>
+                    {watchedEnabledElectiveFieldIds.map((requirementFieldId) => {
+                      const requirementField = electiveFields.find((req) => req.id === requirementFieldId)
+                      const reasonLabel =
+                        getEnabledElectiveReasonOptions().find(
+                          (o) => o.value === watchedEnabledElectiveFieldReasons[requirementFieldId]
+                        )?.label || ""
+
+                      return (
+                        <Box key={requirementField.id} borderRadius={"md"} bg={"theme.blueLight"} px={4} py={3}>
+                          <Text fontWeight="bold" fontSize="sm">
+                            {requirementField.label}
+                          </Text>
+                          <Text fontSize="sm" fontWeight="bold" mt={1}>
+                            {t("digitalBuildingPermits.edit.requirementBlockSidebar.reason")} {reasonLabel}
+                          </Text>
+                          {requirementField.hint && (
+                            <Text fontSize="sm" mt={1}>
+                              {requirementField.hint}
+                            </Text>
+                          )}
+                        </Box>
+                      )
+                    })}
+                  </Stack>
+                </AccordionPanel>
+              </AccordionItem>
+            </Accordion>
+          )}
+
+          {electiveFields?.length > 0 && (
+            <Button variant={"link"} textDecoration={"underline"} onClick={onManageElectiveFields} mt={2}>
+              {t("digitalBuildingPermits.edit.requirementBlockSidebar.manageFieldsButton")}
+            </Button>
+          )}
+        </Box>
       )}
+
+      <Box w="full">
+        {!hasResources ? (
+          <>
+            <Text color="text.secondary" fontWeight={700} mb={2}>
+              {t("digitalBuildingPermits.edit.requirementBlockSidebar.resourcesLabel")}
+            </Text>
+            <CustomMessageBox
+              status={EFlashMessageStatus.info}
+              description={
+                <>
+                  {t("digitalBuildingPermits.edit.requirementBlockSidebar.noResourcesYet")}{" "}
+                  <RouterLink
+                    to={`/jurisdictions/${currentJurisdiction.slug}/configuration-management/resources`}
+                    target="_blank"
+                    style={{ textDecoration: "underline" }}
+                  >
+                    {t("digitalBuildingPermits.edit.requirementBlockSidebar.addResourcesLink")}
+                  </RouterLink>
+                </>
+              }
+            />
+          </>
+        ) : (
+          <Accordion allowMultiple w="full">
+            <AccordionItem border="none">
+              <AccordionButton px={0}>
+                <Box as="span" flex="1" textAlign="left" fontWeight="bold" fontSize="md">
+                  {t("digitalBuildingPermits.edit.requirementBlockSidebar.resourcesLabel")}
+                </Box>
+                <AccordionIcon />
+              </AccordionButton>
+              <AccordionPanel pb={4} px={0}>
+                <VStack align="stretch" spacing={4}>
+                  {(Object.entries(resourcesByCategory) as [string, IResource[]][]).map(([category, resources]) => (
+                    <Box key={category}>
+                      <Text fontSize="sm" fontWeight={600} mb={2}>
+                        {t(`home.configurationManagement.resources.categories.${category}`)}
+                      </Text>
+                      <VStack align="stretch" spacing={2}>
+                        {resources.map((resource) => {
+                          const fileTypeInfo =
+                            resource.resourceType === "link"
+                              ? { icon: <Link />, label: "LINK" }
+                              : getFileTypeInfo(resource.resourceDocument?.file?.metadata?.mimeType)
+
+                          return (
+                            <Checkbox
+                              key={resource.id}
+                              isChecked={watchedResourceIds.includes(resource.id)}
+                              onChange={(e) => handleResourceToggle(resource.id, e.target.checked)}
+                            >
+                              <Flex align="center" gap={2}>
+                                <Tag
+                                  backgroundColor="semantic.infoLight"
+                                  size="sm"
+                                  fontWeight="medium"
+                                  color="text.secondary"
+                                >
+                                  <Flex align="center" gap={1}>
+                                    {fileTypeInfo.icon}
+                                    <Text as="span">{fileTypeInfo.label}</Text>
+                                  </Flex>
+                                </Tag>
+                                <Text fontSize="sm">{resource.title}</Text>
+                              </Flex>
+                            </Checkbox>
+                          )
+                        })}
+                      </VStack>
+                    </Box>
+                  ))}
+                </VStack>
+              </AccordionPanel>
+            </AccordionItem>
+          </Accordion>
+        )}
+      </Box>
+
       <ButtonGroup size={"md"}>
         <Button
           variant={"primary"}
