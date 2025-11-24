@@ -484,21 +484,14 @@
   }
 
   .card-panel-addition {
-    padding-top: var(--chakra-space-6);
-    padding-right: var(--chakra-space-6);
-    padding-left: var(--chakra-space-6);
+    padding: var(--chakra-space-6);
   }
 
   .tips {
     border-left: 4px solid;
     border-color: $bcgov-blue-secondary;
     background-color: $blue-light;
-    padding-left: var(--chakra-space-6);
-    padding-top: var(--chakra-space-3);
-    padding-bottom: var(--chakra-space-3);
-    padding-right: var(--chakra-space-6);
-    margin-top: 4px;
-    margin-bottom: 4px;
+    padding: var(--chakra-space-6);
 
     .tips-header {
       color: $bcgov-blue-secondary;
