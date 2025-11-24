@@ -5,6 +5,7 @@ class JurisdictionTemplateVersionCustomization < ApplicationRecord
   #     tip?: string
   #     resource_ids?: Array<UUID>
   #     enabled_elective_field_ids?: Array<UUID>
+  #     optional_elective_field_ids?: Array<UUID>
   #     enabled_elective_field_reasons?: Record<UUID, string>
   #   }>
   # }

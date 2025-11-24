@@ -334,6 +334,7 @@ export interface IRequirementBlockCustomization {
   tip?: string
   resourceIds?: string[]
   enabledElectiveFieldIds?: Array<string>
+  optionalElectiveFieldIds?: Array<string>
   enabledElectiveFieldReasons?: Record<string, EEnabledElectiveFieldReason>
 }
 

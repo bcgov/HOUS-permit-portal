@@ -173,6 +173,7 @@ export const combineCustomizations = (
         panelComponent["tip"] = blocksLookups[panelComponent.id].tip
       }
       const enabledElectiveIds = blocksLookups[panelComponent.id]?.["enabledElectiveFieldIds"]
+      const optionalElectiveIds = blocksLookups[panelComponent.id]?.["optionalElectiveFieldIds"]
 
       if (enabledElectiveIds) {
         panelComponent.components.forEach((subComp) => {
@@ -183,6 +184,11 @@ export const combineCustomizations = (
           ) {
             //remove the ;show = false at the end of the conditional
             subComp.customConditional = subComp.customConditional.slice(0, -13)
+
+            // Handle optional/required status
+            if (subComp.validate) {
+              subComp.validate.required = !optionalElectiveIds?.includes(subComp.id)
+            }
           }
         })
       }
