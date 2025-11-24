@@ -349,6 +349,7 @@ const options = {
           },
         },
         preCheck: {
+          disabled: "Code compliance pre-check is currently not available. ",
           startNew: "New pre-check",
           noneFoundExplanation: "No pre-checks found",
           index: {
