@@ -30,9 +30,7 @@ export const PreCheckInfoScreen = () => {
     if (siteConfigurationStore.anyProviderEnabledForAllJurisdictions) {
       return (
         <UnorderedList spacing={2} pl={6}>
-          <ListItem color="theme.blueAlt" fontWeight="bold">
-            {t("preCheck.infoPage.allJurisdictions", "All jurisdictions")}
-          </ListItem>
+          <ListItem color="theme.blueAlt">{t("preCheck.infoPage.allJurisdictions", "All jurisdictions")}</ListItem>
         </UnorderedList>
       )
     }
