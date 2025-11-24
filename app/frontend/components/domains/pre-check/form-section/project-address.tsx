@@ -26,6 +26,7 @@ export const ProjectAddress = observer(function ProjectAddress() {
     jurisdictionStore,
     siteConfigurationStore,
   } = useMst()
+  const { codeComplianceEnabled } = siteConfigurationStore
 
   const methods = useForm<IProjectAddressFormData>({
     defaultValues: {
@@ -60,6 +61,7 @@ export const ProjectAddress = observer(function ProjectAddress() {
   // Check if the selected jurisdiction is enrolled in the service partner
   // This is a simple computed value that MobX will track automatically
   const getIsJurisdictionEnrolled = () => {
+    if (!codeComplianceEnabled) return false
     if (!selectedJurisdiction || !currentPreCheck?.servicePartner) return false
 
     // Check global enablement first - if the service partner is globally enabled for all jurisdictions, return true

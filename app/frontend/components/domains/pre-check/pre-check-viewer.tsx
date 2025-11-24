@@ -6,7 +6,6 @@ import { RemoveScroll } from "react-remove-scroll"
 import { usePreCheck } from "../../../hooks/resources/use-pre-check"
 import { LoadingScreen } from "../../shared/base/loading-screen"
 import { FloatingHelpDrawer } from "../../shared/floating-help-drawer"
-import { PreCheckNavBar } from "./pre-check-nav-bar"
 
 interface IPreCheckDisclaimerBarProps extends FlexProps {
   serviceProvider: string
@@ -37,17 +36,16 @@ export const PreCheckViewer = observer(function PreCheckViewer() {
       <RemoveScroll>
         <Flex
           direction="column"
-          h="100vh"
+          h="calc(100vh - var(--app-navbar-height))"
           w="100vw"
           pos="fixed"
-          top="0"
+          top="var(--app-navbar-height)"
           left="0"
           right="0"
           bottom="0"
-          zIndex={2000}
+          zIndex={0}
           bg="white"
         >
-          <PreCheckNavBar />
           <PreCheckDisclaimerBar serviceProvider={currentPreCheck.providerName} mt={-1} />
           <Center flex={1}>
             <Text color="text.secondary">
@@ -63,17 +61,16 @@ export const PreCheckViewer = observer(function PreCheckViewer() {
     <RemoveScroll>
       <Flex
         direction="column"
-        h="100vh"
+        h="calc(100vh - var(--app-navbar-height))"
         w="100vw"
         pos="fixed"
-        top="0"
+        top="var(--app-navbar-height)"
         left="0"
         right="0"
         bottom="0"
-        zIndex={2000}
+        zIndex={0}
         bg="white"
       >
-        <PreCheckNavBar />
         <PreCheckDisclaimerBar serviceProvider={currentPreCheck.providerName} />
         <Box flex={1} w="full" h="full" position="relative">
           <iframe

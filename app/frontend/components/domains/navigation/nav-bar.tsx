@@ -18,6 +18,8 @@ import { NavBarMenu } from "./nav-bar-menu"
 import { RegionalRMJurisdictionSelect } from "./regional-rm-jurisdiction-select"
 import { SubNavBar } from "./sub-nav-bar"
 
+import { PreCheckNavBar } from "../pre-check/pre-check-nav-bar"
+
 function isTemplateEditPath(path: string): boolean {
   const regex = /^\/requirement-templates\/([a-f\d-]+)\/edit$/
 
@@ -119,6 +121,10 @@ export const NavBar = observer(function NavBar() {
 
   const location = useLocation()
   const path = location.pathname
+
+  if (isPreCheckPath(path)) {
+    return <PreCheckNavBar />
+  }
 
   return (
     <PopoverProvider>

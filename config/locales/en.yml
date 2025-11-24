@@ -153,6 +153,8 @@ en:
       notify_new_or_unconfirmed_preview: "You’re Invited to Preview a Building Permit Template"
       notify_preview: "You're Invited to Preview a Building Permit Template"
       notify_batched_integration_mapping: "New API mappings"
+      notify_pre_check_submitted: "Your pre-check has been submitted"
+      notify_pre_check_completed: "Your pre-check has been completed"
       notify_api_key_status_change: "API Key for %{jurisdiction_name} is expiring %{interval}"
       send_step_code_report_to_jurisdiction: "Step Code Report Shared: %{step_code_title} for %{jurisdiction_name}"
   arbitrary_message_construct:
@@ -245,7 +247,7 @@ en:
         message: "Pre-check submitted successfully!"
       submit_error:
         title: Error
-        message: "Error submitting pre-check"
+        message: "Error submitting pre-check - please verify your PID and try again"
       no_certificate:
         title: Error
         message: "No certificate number found for pre-check"
@@ -590,7 +592,7 @@ en:
         message: "%{error_message}"
       create_success:
         title: ""
-        message: "Permit project pinned successfully"
+        message: "Permit project created successfully"
       create_error:
         title: Error
         message: "%{error_message}"

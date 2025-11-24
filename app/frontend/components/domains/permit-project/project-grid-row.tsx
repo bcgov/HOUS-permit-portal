@@ -1,5 +1,17 @@
-import { Avatar, Flex, Grid, GridItem, IconButton, Menu, MenuButton, MenuItem, MenuList, Text } from "@chakra-ui/react"
-import { DotsThreeVertical } from "@phosphor-icons/react"
+import {
+  Avatar,
+  Flex,
+  Grid,
+  GridItem,
+  HStack,
+  IconButton,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
+  Text,
+} from "@chakra-ui/react"
+import { DotsThreeVertical, PushPinSimple } from "@phosphor-icons/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -70,9 +82,14 @@ export const ProjectGridRow = observer(({ project }: IProjectGridRowProps) => {
                   project.togglePin()
                 }}
               >
-                {project.isPinned
-                  ? t("permitProject.unpinProject", "Unpin project")
-                  : t("permitProject.pinProject", "Pin project")}
+                <HStack spacing={2} fontSize={"sm"}>
+                  <PushPinSimple size={16} />
+                  <Text>
+                    {project.isPinned
+                      ? t("permitProject.unpinProject", "Unpin project")
+                      : t("permitProject.pinProject", "Pin project")}
+                  </Text>
+                </HStack>
               </MenuItem>
             </MenuList>
           </Menu>

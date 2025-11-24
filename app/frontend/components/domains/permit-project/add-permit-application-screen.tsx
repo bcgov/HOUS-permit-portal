@@ -64,7 +64,7 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
     if (!q) return activityOptions
     return activityOptions.filter((opt) => {
       const name = opt.value.name?.toLowerCase() || ""
-      const desc = opt.value.description?.toLowerCase() || ""
+      const desc = opt.value.descriptionHtml?.toLowerCase() || ""
       return name.includes(q) || desc.includes(q)
     })
   }, [activityOptions, query])
@@ -263,7 +263,7 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
                           <Heading as="h3" fontSize="lg" mb={2}>
                             {opt.value.name}
                           </Heading>
-                          <Text color="text.secondary">{opt.value.description}</Text>
+                          <Text color="text.secondary">{opt.value.descriptionHtml}</Text>
                         </Box>
                         <Flex
                           align="center"

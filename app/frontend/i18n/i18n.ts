@@ -355,7 +355,7 @@ const options = {
           startNew: "New pre-check",
           noneFoundExplanation: "No pre-checks found",
           index: {
-            title: "Pre-Checks",
+            title: "Pre-checks",
             resultTitle: "Pre-check results",
             intro:
               "Your results from the BC Building Code pre-checking service are stored here. You can use this service to pre-check your drawings for compliance with select areas of the BC Building Code before you submit a permit application.",
@@ -901,7 +901,7 @@ Thank you,
             button: "Add permits",
             bcbcPartHeading: "BCBC Part",
             bcbcPart:
-              "Right now, you can apply for small-scale residential building permits. This includes single-family homes, duplexes, laneway houses, triplexes and townhouses. These are covered by Part 9 of the BC Building Code (three storeys or less, up to 600 m²).",
+              "Right now, you can apply for permits for small-scale projects. This includes residential buildings, small structures, trades permits, and site work.",
             beforeYouBegin: {
               heading: "Before you begin",
               intro:
@@ -978,7 +978,7 @@ Thank you,
           createSuccessTitle: "Project Created Successfully",
           createSuccessDescription: 'The project "{{name}}" has been created.',
           createErrorTitle: "Failed to Create Project",
-          startNew: "Start New Project",
+          startNew: "Start new project",
           rollupStatusFilter: "Status",
           jurisdictionFilter: "Location",
           new: {
@@ -4226,7 +4226,7 @@ Thank you,
             start: "Start",
             select: "Select",
             resources: "Resources",
-            preChecks: "Pre-Checks",
+            preChecks: "Pre-checks",
           },
           earlyAccessStepCodePreviewNotAvailable: "Early access step code preview not available",
         },

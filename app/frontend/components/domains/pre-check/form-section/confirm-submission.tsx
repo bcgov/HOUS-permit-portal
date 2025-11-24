@@ -16,7 +16,9 @@ export const ConfirmSubmission = observer(function ConfirmSubmission() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const {
     preCheckStore: { submitPreCheck },
+    siteConfigurationStore,
   } = useMst()
+  const { codeComplianceEnabled } = siteConfigurationStore
 
   const handleSubmit = async (closeModal: () => void) => {
     if (!currentPreCheck) return
@@ -63,12 +65,16 @@ export const ConfirmSubmission = observer(function ConfirmSubmission() {
                 <Button
                   variant="primary"
                   isLoading={isSubmitting}
-                  isDisabled={!currentPreCheck?.isReadyForSubmission}
+                  isDisabled={!currentPreCheck?.isReadyForSubmission || !codeComplianceEnabled}
                   {...props}
                 >
                   {t("preCheck.sections.confirmSubmission.submit", "Submit")}
                 </Button>
               )}
+              modalProps={{
+                isCentered: true,
+                zIndex: 2001,
+              }}
               confirmButtonProps={{
                 isLoading: isSubmitting,
               }}
