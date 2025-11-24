@@ -181,7 +181,7 @@ export const NavBar = observer(function NavBar() {
 
               {currentUser?.isRegionalReviewManager && (
                 <VStack align="flex-end" gap={1}>
-                  <Text color="whiteAlpha.700" textAlign="right" variant="tiny_uppercase">
+                  <Text color="whiteAlpha.700" textAlign="right" variant="tiny_uppercase" whiteSpace="nowrap">
                     {t(`user.roles.${currentUser.role as EUserRoles}`)}
                   </Text>
                   <RegionalRMJurisdictionSelect key={rmJurisdictionSelectKey} />
@@ -212,11 +212,9 @@ export const NavBar = observer(function NavBar() {
                   variant="ghost"
                   color="greys.white"
                 >
-                  <Tray size={16} />
+                  <Tray size={24} />
                   <Show above="xl">
-                    <Box as="span" ml={2}>
-                      {t("home.submissionsInboxTitle")}
-                    </Box>
+                    <Text ml={2}>{t("home.submissionsInboxTitle")}</Text>
                   </Show>
                 </RouterLinkButton>
               )}
