@@ -11,14 +11,14 @@ export const PreCheckNavBar = observer(function PreCheckNavBar() {
   return (
     <Flex
       w="full"
-      h="60px"
+      h="var(--app-navbar-height)"
       bg="white"
       borderBottom="1px"
       borderColor="border.light"
       align="center"
       px={6}
       gap={6}
-      zIndex={99999}
+      zIndex={1500}
     >
       <RouterLink to="/welcome">
         <Box w={120} mr={2}>

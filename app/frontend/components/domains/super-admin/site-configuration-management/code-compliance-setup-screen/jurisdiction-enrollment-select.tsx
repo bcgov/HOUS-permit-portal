@@ -25,6 +25,7 @@ interface JurisdictionEnrollmentSelectProps {
   onChange: (selectedOptions: IOption[]) => void
   onSave: (selectedOptions: IOption[]) => Promise<void>
   onToggleEnabledForAll: (enabled: boolean) => Promise<void>
+  isLoading?: boolean
 }
 
 export const JurisdictionEnrollmentSelect = observer(function JurisdictionEnrollmentSelect({
@@ -34,6 +35,7 @@ export const JurisdictionEnrollmentSelect = observer(function JurisdictionEnroll
   onChange,
   onSave,
   onToggleEnabledForAll,
+  isLoading = false,
 }: JurisdictionEnrollmentSelectProps) {
   const { t } = useTranslation()
   const { jurisdictionStore } = useMst()
@@ -104,7 +106,12 @@ export const JurisdictionEnrollmentSelect = observer(function JurisdictionEnroll
             borderColor="border.light"
           >
             <Text fontWeight="bold">{t(`${i18nPrefix}.enableForAll`)}</Text>
-            <SwitchButton isChecked={enabledForAll} onChange={handleToggleAll} size="lg" />
+            <SwitchButton
+              isChecked={enabledForAll}
+              onChange={handleToggleAll}
+              size="lg"
+              isDisabled={isLoading || isSaving}
+            />
           </Flex>
 
           {!enabledForAll && (
@@ -121,8 +128,8 @@ export const JurisdictionEnrollmentSelect = observer(function JurisdictionEnroll
                 isClearable={false}
                 onChange={handleJurisdictionsChange}
                 placeholder={t(`${i18nPrefix}.searchJurisdictions`)}
-                isLoading={isSaving}
-                isDisabled={isSaving}
+                isLoading={isSaving || isLoading}
+                isDisabled={isSaving || isLoading}
                 menuPortalTarget={typeof document !== "undefined" ? document.body : undefined}
                 styles={{
                   menuPortal: (base) => ({ ...base, zIndex: 9999 }),

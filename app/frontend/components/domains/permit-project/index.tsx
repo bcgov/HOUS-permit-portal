@@ -56,7 +56,15 @@ export const ProjectDashboardScreen = observer(({}: IProjectDashboardScreenProps
 
   return (
     <Flex as="main" direction="row" w="full" flexGrow={1}>
-      <Tabs w="full" flexGrow={1} index={getTabIndex()} onChange={handleTabChange} display="flex" isLazy>
+      <Tabs
+        w="full"
+        flexGrow={1}
+        index={getTabIndex()}
+        onChange={handleTabChange}
+        display="flex"
+        isLazy
+        variant="sidebar"
+      >
         <ProjectSidebarTabList p={0} tabsData={TABS_DATA} />
         <TabPanels>
           <TabPanel p={0}>{isPending ? <LoadingScreen /> : <ProjectTabPanelContent />}</TabPanel>

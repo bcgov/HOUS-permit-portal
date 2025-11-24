@@ -247,7 +247,7 @@ en:
         message: "Pre-check submitted successfully!"
       submit_error:
         title: Error
-        message: "Error submitting pre-check"
+        message: "Error submitting pre-check - please verify your PID and try again"
       no_certificate:
         title: Error
         message: "No certificate number found for pre-check"
@@ -592,7 +592,7 @@ en:
         message: "%{error_message}"
       create_success:
         title: ""
-        message: "Permit project pinned successfully"
+        message: "Permit project created successfully"
       create_error:
         title: Error
         message: "%{error_message}"

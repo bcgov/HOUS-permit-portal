@@ -8,11 +8,26 @@ export interface IRouterLinkButtonProps extends ButtonProps {
 }
 
 export const RouterLinkButton = forwardRef<HTMLAnchorElement, IRouterLinkButtonProps>(function RouterLinkButton(
-  { to, icon, children, ...rest },
+  { to, icon, children, disabled, onClick, ...rest },
   ref
 ) {
   return (
-    <Button as={ReactRouterLink} to={to} variant="primary" ref={ref} leftIcon={icon} {...rest}>
+    <Button
+      as={ReactRouterLink}
+      to={to}
+      variant="primary"
+      ref={ref}
+      leftIcon={icon}
+      isDisabled={disabled}
+      onClick={(e) => {
+        if (disabled) {
+          e.preventDefault()
+          return
+        }
+        onClick?.(e)
+      }}
+      {...rest}
+    >
       {children}
     </Button>
   )

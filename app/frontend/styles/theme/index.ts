@@ -7,6 +7,7 @@ import { Link } from "./components/link"
 import { Radio } from "./components/radio"
 import { Select } from "./components/select"
 import { Table } from "./components/table"
+import { Tabs } from "./components/tabs"
 import { Tag } from "./components/tag"
 import { Text } from "./components/text"
 import { radii } from "./foundations/border-radii"
@@ -86,7 +87,7 @@ const styles = {
     },
   },
 }
-const components = { Button, FormLabel, Heading, Input, Link, Select, Text, Table, Radio, Tag }
+const components = { Button, FormLabel, Heading, Input, Link, Select, Text, Table, Radio, Tag, Tabs }
 const overrides = { styles, colors, fonts, fontSizes, sizes, radii, space, shadows, components }
 
 export const theme = extendTheme(overrides)
