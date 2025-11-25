@@ -207,13 +207,16 @@ export const NavBar = observer(function NavBar() {
               )}
               {currentUser?.isReviewStaff && (
                 <RouterLinkButton
-                  variant="tertiarty"
                   px={2}
                   to={`/jurisdictions/${currentUser?.jurisdiction?.slug}/submission-inbox`}
+                  variant="ghost"
+                  color="greys.white"
                 >
                   <Tray size={24} />
                   <Show above="xl">
-                    <Text ml={2}>{t("home.submissionsInboxTitle")}</Text>
+                    <Box as="span" ml={2}>
+                      {t("home.submissionsInboxTitle")}
+                    </Box>
                   </Show>
                 </RouterLinkButton>
               )}
