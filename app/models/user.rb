@@ -177,6 +177,10 @@ class User < ApplicationRecord
     reviewer? || review_manager? || regional_review_manager?
   end
 
+  def jurisdiction_staff?
+    review_staff? || technical_support?
+  end
+
   def role_name
     role.gsub("_", " ")
   end

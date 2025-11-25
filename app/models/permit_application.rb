@@ -59,6 +59,7 @@ class PermitApplication < ApplicationRecord
   validates :reference_number, length: { maximum: 300 }, allow_nil: true
   validate :sandbox_belongs_to_jurisdiction
   validate :template_version_of_live_template
+  validate :submitter_cannot_be_jurisdiction_staff_without_sandbox
 
   delegate :code, :name, to: :permit_type, prefix: true
   delegate :code, :name, to: :activity, prefix: true
@@ -835,5 +836,17 @@ class PermitApplication < ApplicationRecord
         )
       )
     end
+  end
+
+  def submitter_cannot_be_jurisdiction_staff_without_sandbox
+    return unless submitter&.jurisdiction_staff?
+    return if sandbox_id.present?
+
+    errors.add(
+      :submitter,
+      I18n.t(
+        "activerecord.errors.models.permit_application.attributes.submitter.review_staff_requires_sandbox"
+      )
+    )
   end
 end
