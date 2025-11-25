@@ -452,12 +452,12 @@ const ManageElectiveFieldsView = ({
     }
   }
 
-  const onRequiredChange = (fieldId: string, isRequired: boolean) => {
-    if (isRequired) {
-      setOptionalFieldIds((prev) => prev.filter((id) => id !== fieldId))
-    } else {
-      setOptionalFieldIds((prev) => [...prev, fieldId])
-    }
+  const markAsRequired = (fieldId: string) => {
+    setOptionalFieldIds((prev) => prev.filter((id) => id !== fieldId))
+  }
+
+  const markAsOptional = (fieldId: string) => {
+    setOptionalFieldIds((prev) => [...prev, fieldId])
   }
 
   const onReasonChange = (fieldId: string, reason: EEnabledElectiveFieldReason) => {
@@ -594,7 +594,11 @@ const ManageElectiveFieldsView = ({
                           <Checkbox
                             mt={2}
                             isChecked={isRequired}
-                            onChange={(e) => onRequiredChange(requirementField.id, e.target.checked)}
+                            onChange={(e) =>
+                              e.target.checked
+                                ? markAsRequired(requirementField.id)
+                                : markAsOptional(requirementField.id)
+                            }
                           >
                             <Text fontSize="sm">
                               {t("digitalBuildingPermits.edit.requirementBlockSidebar.requiredForSubmitter")}
