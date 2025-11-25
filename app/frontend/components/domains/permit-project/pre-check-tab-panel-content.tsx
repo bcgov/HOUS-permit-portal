@@ -1,4 +1,4 @@
-import { Container, Flex, Heading, Link, Text, VStack } from "@chakra-ui/react"
+import { Container, Flex, Heading, Link, Text, Tooltip, VStack } from "@chakra-ui/react"
 import { Plus } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -10,18 +10,34 @@ import { PreChecksGrid } from "./pre-checks-grid"
 
 export const PreCheckTabPanelContent = observer(() => {
   const { t } = useTranslation()
-  const { preCheckStore } = useMst()
+  const { preCheckStore, siteConfigurationStore } = useMst()
+  const { codeComplianceEnabled } = siteConfigurationStore
 
   useSearch(preCheckStore, [])
+
+  const startNewButton = (
+    <RouterLinkButton to="/pre-checks/new" variant="primary" leftIcon={<Plus />} disabled={!codeComplianceEnabled}>
+      {t("preCheck.startNew", "Start New Pre-Check")}
+    </RouterLinkButton>
+  )
+
   return (
     <Flex direction="column" flex={1} bg="greys.white" pb={24} overflowY="auto" h={"full"}>
       <Container maxW="container.xl" py={8} h={"full"}>
         <VStack spacing={3} align="stretch">
           <Flex justify="space-between" align="center">
             <Heading as="h1">{t("preCheck.index.title", "Pre-Construction Checklists")}</Heading>
-            <RouterLinkButton to="/pre-checks/new" variant="primary" leftIcon={<Plus />}>
-              {t("preCheck.startNew", "Start New Pre-Check")}
-            </RouterLinkButton>
+            {!codeComplianceEnabled ? (
+              <Tooltip
+                label={t("preCheck.disabled", "Code compliance pre-check is currently not available. ")}
+                placement="top"
+                hasArrow
+              >
+                {startNewButton}
+              </Tooltip>
+            ) : (
+              startNewButton
+            )}
           </Flex>
           <Text fontSize="md" color="text.secondary" mb={4}>
             {t(

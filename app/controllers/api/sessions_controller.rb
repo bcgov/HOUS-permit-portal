@@ -1,5 +1,6 @@
 class Api::SessionsController < Devise::SessionsController
   include BaseControllerMethods
+  include CurrentSandbox
   respond_to :json
 
   skip_before_action :verify_signed_out_user
@@ -37,7 +38,14 @@ class Api::SessionsController < Devise::SessionsController
     authenticate_user!
     if current_user
       warden.authenticate({ scope: :user })
-      render_success current_user, nil, { blueprint_opts: { view: :extended } }
+      render_success current_user,
+                     nil,
+                     {
+                       blueprint_opts: {
+                         view: :extended,
+                         current_sandbox: current_sandbox
+                       }
+                     }
     else
       # clear the cookie so user can try and login again
       name, cookie = Devise::JWT::Cookie::CookieHelper.new.build(nil)

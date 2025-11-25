@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_10_17_215837) do
+ActiveRecord::Schema[7.2].define(version: 2025_11_18_000000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -526,7 +526,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_10_17_215837) do
     t.uuid "permit_type_id"
     t.uuid "creator_id", null: false
     t.uuid "jurisdiction_id"
-    t.string "certificate_no"
+    t.string "external_id"
     t.string "full_address"
     t.string "pid"
     t.integer "service_partner", default: 0, null: false
@@ -545,9 +545,9 @@ ActiveRecord::Schema[7.2].define(version: 2025_10_17_215837) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["assessment_result"], name: "index_pre_checks_on_assessment_result"
-    t.index ["certificate_no"], name: "index_pre_checks_on_certificate_no", unique: true
     t.index ["completed_at"], name: "index_pre_checks_on_completed_at"
     t.index ["creator_id"], name: "index_pre_checks_on_creator_id"
+    t.index ["external_id"], name: "index_pre_checks_on_external_id", unique: true
     t.index ["jurisdiction_id"], name: "index_pre_checks_on_jurisdiction_id"
     t.index ["permit_application_id"], name: "index_pre_checks_on_permit_application_id", unique: true
     t.index ["permit_type_id"], name: "index_pre_checks_on_permit_type_id"

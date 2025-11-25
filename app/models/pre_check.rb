@@ -18,7 +18,7 @@ class PreCheck < ApplicationRecord
     state :complete
 
     event :submit do
-      transitions from: :draft, to: :processing
+      transitions from: :draft, to: :processing, guard: :can_submit?
 
       after do
         submit_to_archistar
@@ -198,6 +198,16 @@ class PreCheck < ApplicationRecord
     return false unless created_at.present?
 
     created_at <= 150.days.ago
+  end
+
+  def can_submit?
+    return false if service_partner.blank?
+
+    if archistar?
+      SiteConfiguration.archistar_enabled_for_jurisdiction?(jurisdiction)
+    else
+      false
+    end
   end
 
   private

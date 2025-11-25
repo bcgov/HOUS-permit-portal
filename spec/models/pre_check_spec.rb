@@ -150,4 +150,71 @@ RSpec.describe PreCheck, type: :model do
       expect(PreCheck.unviewed_count_for_user(user.id)).to eq(0)
     end
   end
+
+  describe "#can_submit?" do
+    let(:pre_check) { create(:pre_check, service_partner: :archistar) }
+    let(:jurisdiction) { pre_check.jurisdiction }
+
+    before do
+      allow(SiteConfiguration).to receive(
+        :archistar_enabled_for_jurisdiction?
+      ).with(jurisdiction).and_return(archistar_enabled)
+    end
+
+    context "when archistar is enabled for jurisdiction" do
+      let(:archistar_enabled) { true }
+
+      it "returns true" do
+        expect(pre_check.can_submit?).to be true
+      end
+    end
+
+    context "when archistar is disabled for jurisdiction" do
+      let(:archistar_enabled) { false }
+
+      it "returns false" do
+        expect(pre_check.can_submit?).to be false
+      end
+    end
+
+    context "when service_partner is blank" do
+      let(:archistar_enabled) { true }
+
+      it "returns false" do
+        pre_check.service_partner = nil
+        expect(pre_check.can_submit?).to be false
+      end
+    end
+  end
+
+  describe "transitions" do
+    describe "submit" do
+      let(:pre_check) { create(:pre_check, :with_design_documents) }
+
+      before { allow(pre_check).to receive(:submit_to_archistar) }
+
+      context "when can_submit? is true" do
+        before { allow(pre_check).to receive(:can_submit?).and_return(true) }
+
+        it "transitions to processing" do
+          expect { pre_check.submit! }.to change(pre_check, :status).from(
+            "draft"
+          ).to("processing")
+        end
+
+        it "calls submit_to_archistar" do
+          pre_check.submit!
+          expect(pre_check).to have_received(:submit_to_archistar)
+        end
+      end
+
+      context "when can_submit? is false" do
+        before { allow(pre_check).to receive(:can_submit?).and_return(false) }
+
+        it "does not transition" do
+          expect { pre_check.submit! }.to raise_error(AASM::InvalidTransition)
+        end
+      end
+    end
+  end
 end

@@ -18,6 +18,8 @@ import { NavBarMenu } from "./nav-bar-menu"
 import { RegionalRMJurisdictionSelect } from "./regional-rm-jurisdiction-select"
 import { SubNavBar } from "./sub-nav-bar"
 
+import { PreCheckNavBar } from "../pre-check/pre-check-nav-bar"
+
 function isTemplateEditPath(path: string): boolean {
   const regex = /^\/requirement-templates\/([a-f\d-]+)\/edit$/
 
@@ -120,6 +122,10 @@ export const NavBar = observer(function NavBar() {
   const location = useLocation()
   const path = location.pathname
 
+  if (isPreCheckPath(path)) {
+    return <PreCheckNavBar />
+  }
+
   return (
     <PopoverProvider>
       <Box
@@ -175,7 +181,7 @@ export const NavBar = observer(function NavBar() {
 
               {currentUser?.isRegionalReviewManager && (
                 <VStack align="flex-end" gap={1}>
-                  <Text color="whiteAlpha.700" textAlign="right" variant="tiny_uppercase">
+                  <Text color="whiteAlpha.700" textAlign="right" variant="tiny_uppercase" whiteSpace="nowrap">
                     {t(`user.roles.${currentUser.role as EUserRoles}`)}
                   </Text>
                   <RegionalRMJurisdictionSelect key={rmJurisdictionSelectKey} />
@@ -201,12 +207,17 @@ export const NavBar = observer(function NavBar() {
               )}
               {currentUser?.isReviewStaff && (
                 <RouterLinkButton
-                  variant="tertiarty"
                   px={2}
-                  leftIcon={<Tray size={16} />}
                   to={`/jurisdictions/${currentUser?.jurisdiction?.slug}/submission-inbox`}
+                  variant="ghost"
+                  color="greys.white"
                 >
-                  <Show above="xl">{t("home.submissionsInboxTitle")}</Show>
+                  <Tray size={24} />
+                  <Show above="xl">
+                    <Box as="span" ml={2}>
+                      {t("home.submissionsInboxTitle")}
+                    </Box>
+                  </Show>
                 </RouterLinkButton>
               )}
               {currentUser?.isSubmitter && !currentUser.isUnconfirmed && (

@@ -325,6 +325,7 @@ const options = {
           public: "Public",
           undo: "Undo",
           chooseSandboxMode: "Choose a training mode",
+          new: "new",
         },
         notification: {
           title: "Notifications",
@@ -348,10 +349,11 @@ const options = {
           },
         },
         preCheck: {
+          disabled: "Code compliance pre-check is currently not available. ",
           startNew: "New pre-check",
           noneFoundExplanation: "No pre-checks found",
           index: {
-            title: "Pre-Checks",
+            title: "Pre-checks",
             resultTitle: "Pre-check results",
             intro:
               "Your results from the BC Building Code pre-checking service are stored here. You can use this service to pre-check your drawings for compliance with select areas of the BC Building Code before you submit a permit application.",
@@ -567,6 +569,8 @@ const options = {
           viewer: {
             title: "Interactive Results Viewer",
             noUrl: "The interactive viewer is not yet available for this pre-check.",
+            disclaimer:
+              "{{serviceProvider}} prepared these results to give early guidance. They may not be complete or accurate.",
           },
         },
         contact: {
@@ -882,7 +886,7 @@ Thank you,
             button: "Add permits",
             bcbcPartHeading: "BCBC Part",
             bcbcPart:
-              "Right now, you can apply for small-scale residential building permits. This includes single-family homes, duplexes, laneway houses, triplexes and townhouses. These are covered by Part 9 of the BC Building Code (three storeys or less, up to 600 m²).",
+              "Right now, you can apply for permits for small-scale projects. This includes residential buildings, small structures, trades permits, and site work.",
             beforeYouBegin: {
               heading: "Before you begin",
               intro:
@@ -959,7 +963,7 @@ Thank you,
           createSuccessTitle: "Project Created Successfully",
           createSuccessDescription: 'The project "{{name}}" has been created.',
           createErrorTitle: "Failed to Create Project",
-          startNew: "Start New Project",
+          startNew: "Start new project",
           rollupStatusFilter: "Status",
           jurisdictionFilter: "Location",
           new: {
@@ -1227,7 +1231,8 @@ Thank you,
           live: "Live (None)",
           disabledFor: "Disabled for training sandbox",
           inMode: "You're in training mode",
-          scheduledModeDescription: "upcoming templates only",
+          scheduledModeDescription: "upcoming template sandbox",
+          publishedModeDescription: "published template sandbox",
           disableJurisdictionSwitchTooltip: "Leave training mode before switching jurisdictions",
           switch: {
             label: "Training mode",
@@ -3903,7 +3908,7 @@ Thank you,
             },
             projectReadiness: {
               all: {
-                label: "All project readiness tools",
+                label: "All project tools",
                 description: "A short description about this link",
               },
               stepCodes: {
@@ -4132,7 +4137,7 @@ Thank you,
             configuration: "Configure jurisdiction",
             sucessfulSubmission: "Application submitted",
             stepCodes: "Step Codes",
-            digitalBuildingPermits: "Digital building permits",
+            digitalBuildingPermits: "Configure permits",
             contact: "Contact us",
             configurationManagement: "Configuration",
             featureAccess: "Feature access",
@@ -4169,7 +4174,7 @@ Thank you,
             stepCodeRequirements: "Step code requirements",
             start: "Start",
             select: "Select",
-            preChecks: "Pre-Checks",
+            preChecks: "Pre-checks",
           },
           earlyAccessStepCodePreviewNotAvailable: "Early access step code preview not available",
         },
