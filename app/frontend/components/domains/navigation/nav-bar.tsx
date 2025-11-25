@@ -214,7 +214,9 @@ export const NavBar = observer(function NavBar() {
                 >
                   <Tray size={24} />
                   <Show above="xl">
-                    <Text ml={2}>{t("home.submissionsInboxTitle")}</Text>
+                    <Box as="span" ml={2}>
+                      {t("home.submissionsInboxTitle")}
+                    </Box>
                   </Show>
                 </RouterLinkButton>
               )}
