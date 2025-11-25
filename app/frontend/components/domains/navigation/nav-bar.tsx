@@ -110,6 +110,12 @@ function shouldHideSubNavbarForPath(path: string): boolean {
   return matchers.some((matcher) => matcher(path))
 }
 
+function shouldHideFullNavBarForPath(path: string): boolean {
+  const matchers: Array<(path: string) => boolean> = [isStepCodePath]
+
+  return matchers.some((matcher) => matcher(path))
+}
+
 export const NavBar = observer(function NavBar() {
   const { t } = useTranslation()
   const { sessionStore, userStore, notificationStore, uiStore, sandboxStore } = useMst()
@@ -124,6 +130,10 @@ export const NavBar = observer(function NavBar() {
 
   if (isPreCheckPath(path)) {
     return <PreCheckNavBar />
+  }
+
+  if (shouldHideFullNavBarForPath(path)) {
+    return null
   }
 
   return (
