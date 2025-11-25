@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_11_18_000000) do
+ActiveRecord::Schema[7.2].define(version: 2025_11_25_000000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -684,8 +684,10 @@ ActiveRecord::Schema[7.2].define(version: 2025_11_18_000000) do
     t.string "link_url"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.datetime "last_reminder_sent_at"
     t.index ["jurisdiction_id", "category"], name: "index_resources_on_jurisdiction_id_and_category"
     t.index ["jurisdiction_id"], name: "index_resources_on_jurisdiction_id"
+    t.index ["last_reminder_sent_at"], name: "index_resources_on_last_reminder_sent_at"
   end
 
   create_table "revision_reasons", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
