@@ -1,6 +1,13 @@
 class FileUploadAttachment < ApplicationRecord
   self.abstract_class = true
 
+  # Virus scan status enum
+  # Provides scopes: .pending, .clean, .infected
+  # Provides methods: .pending?, .clean?, .infected?, .pending!, .clean!, .infected!
+  enum :scan_status,
+       { pending: "pending", clean: "clean", infected: "infected" },
+       default: :pending
+
   # This method must be implemented by all subclasses
   # It should return the parent model that the file is attached to
   def attached_to
@@ -64,5 +71,10 @@ class FileUploadAttachment < ApplicationRecord
       response_content_disposition:
         "attachment; filename=\"#{file.original_filename}\""
     )
+  end
+
+  # Additional scan status helper
+  def scan_complete?
+    clean? || infected?
   end
 end
