@@ -5,7 +5,6 @@ import {
   Drawer,
   DrawerBody,
   DrawerContent,
-  DrawerHeader,
   DrawerOverlay,
   Grid,
   Heading,
@@ -192,12 +191,12 @@ export const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
           zIndex={1400}
           display="flex"
           flexDirection="column"
+          h="auto"
         >
-          <DrawerHeader minH={8} flexShrink={0}></DrawerHeader>
           <DrawerBody flex="1" minH={0} overflow="auto">
             <MenuCloseProvider value={onClose}>
               <Container maxW="container.lg" px={8}>
-                <Grid templateColumns={{ base: "1fr", md: "3fr 3fr 2fr" }} gap={8} pb={8}>
+                <Grid templateColumns={{ base: "1fr", md: "3fr 3fr 2fr" }} gap={8} py={5}>
                   <Box order={{ base: 2, md: 1 }}>{projectReadinessColumn}</Box>
                   <Box order={{ base: 3, md: 2 }}>{aboutColumn}</Box>
                   <Box order={{ base: 1, md: 3 }}>{renderRightColumnContent()}</Box>
