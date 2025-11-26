@@ -66,6 +66,7 @@ function formFormDefaults(
     enabledElectiveFieldIds: customization?.enabledElectiveFieldIds?.filter(
       (id) => !!availableElectiveFields.find((f) => f.id === id)
     ),
+    optionalElectiveFieldIds: customization?.optionalElectiveFieldIds || [],
     enabledElectiveFieldReasons: customization?.enabledElectiveFieldReasons,
   }
 }
@@ -88,6 +89,7 @@ export const JurisdictionRequirementBlockEditSidebar = observer(function Jurisdi
   const [showManageFieldsView, setShowManageFieldsView] = useState(false)
 
   const watchedEnabledElectiveFieldIds = watch("enabledElectiveFieldIds") ?? []
+  const watchedOptionalElectiveFieldIds = watch("optionalElectiveFieldIds") ?? []
   const watchedEnabledElectiveFieldReasons = watch("enabledElectiveFieldReasons") ?? {}
 
   useEffect(() => {
@@ -142,10 +144,12 @@ export const JurisdictionRequirementBlockEditSidebar = observer(function Jurisdi
               {showManageFieldsView ? (
                 <ManageElectiveFieldsView
                   existingEnabledElectiveFieldIds={watchedEnabledElectiveFieldIds}
+                  existingOptionalElectiveFieldIds={watchedOptionalElectiveFieldIds}
                   electiveFields={electiveFields}
                   onCancel={() => setShowManageFieldsView(false)}
-                  onAddFields={(fieldIds, fieldReasons) => {
+                  onAddFields={(fieldIds, optionalFieldIds, fieldReasons) => {
                     setValue("enabledElectiveFieldIds", fieldIds)
+                    setValue("optionalElectiveFieldIds", optionalFieldIds)
                     setValue("enabledElectiveFieldReasons", fieldReasons)
                     setShowManageFieldsView(false)
                   }}
@@ -195,6 +199,7 @@ const MainView = ({
   } = useController({ control, name: "tip" })
 
   const watchedEnabledElectiveFieldIds = watch("enabledElectiveFieldIds") ?? []
+  const watchedOptionalElectiveFieldIds = watch("optionalElectiveFieldIds") ?? []
   const watchedEnabledElectiveFieldReasons = watch("enabledElectiveFieldReasons") ?? {}
   const watchedResourceIds = watch("resourceIds") ?? []
 
@@ -259,12 +264,18 @@ const MainView = ({
                         getEnabledElectiveReasonOptions().find(
                           (o) => o.value === watchedEnabledElectiveFieldReasons[requirementFieldId]
                         )?.label || ""
+                      const isOptional = watchedOptionalElectiveFieldIds.includes(requirementFieldId)
 
                       return (
                         <Box key={requirementField.id} borderRadius={"md"} bg={"theme.blueLight"} px={4} py={3}>
-                          <Text fontWeight="bold" fontSize="sm">
-                            {requirementField.label}
-                          </Text>
+                          <Flex align="center" justify="space-between" mb={1}>
+                            <Text fontWeight="bold" fontSize="sm">
+                              {requirementField.label}
+                            </Text>
+                            <Tag size="sm" variant="solid" colorScheme={isOptional ? "gray" : "blue"}>
+                              {isOptional ? t("ui.optional") : t("ui.required")}
+                            </Tag>
+                          </Flex>
                           <Text fontSize="sm" fontWeight="bold" mt={1}>
                             {t("digitalBuildingPermits.edit.requirementBlockSidebar.reason")} {reasonLabel}
                           </Text>
@@ -393,19 +404,26 @@ const MainView = ({
 
 const ManageElectiveFieldsView = ({
   existingEnabledElectiveFieldIds,
+  existingOptionalElectiveFieldIds = [],
   existingEnabledElectiveFieldReasons = {},
   onCancel,
   electiveFields,
   onAddFields,
 }: {
   existingEnabledElectiveFieldIds: string[]
+  existingOptionalElectiveFieldIds: string[]
   existingEnabledElectiveFieldReasons: Record<string, EEnabledElectiveFieldReason>
   electiveFields: IDenormalizedRequirement[]
-  onAddFields: (fieldIds: string[], enabledElectiveFieldReasons: Record<string, EEnabledElectiveFieldReason>) => void
+  onAddFields: (
+    fieldIds: string[],
+    optionalFieldIds: string[],
+    enabledElectiveFieldReasons: Record<string, EEnabledElectiveFieldReason>
+  ) => void
   onCancel: () => void
 }) => {
   const { t } = useTranslation()
   const [enabledFieldIds, setEnabledFieldIds] = useState<string[]>([...existingEnabledElectiveFieldIds])
+  const [optionalFieldIds, setOptionalFieldIds] = useState<string[]>([...existingOptionalElectiveFieldIds])
   const [enabledFieldReasons, setEnabledFieldReasons] = useState<Record<string, EEnabledElectiveFieldReason>>(
     existingEnabledElectiveFieldReasons ?? {}
   )
@@ -425,10 +443,21 @@ const ManageElectiveFieldsView = ({
   const onFieldEnableChange = (fieldId: string, isEnabled: boolean) => {
     if (isEnabled) {
       setEnabledFieldIds((prev) => [...prev, fieldId])
+      // Default to required (not in optional list)
+      setOptionalFieldIds((prev) => prev.filter((id) => id !== fieldId))
     } else {
       setEnabledFieldIds((prev) => prev.filter((id) => id !== fieldId))
+      setOptionalFieldIds((prev) => prev.filter((id) => id !== fieldId))
       removeReason(fieldId)
     }
+  }
+
+  const markAsRequired = (fieldId: string) => {
+    setOptionalFieldIds((prev) => prev.filter((id) => id !== fieldId))
+  }
+
+  const markAsOptional = (fieldId: string) => {
+    setOptionalFieldIds((prev) => [...prev, fieldId])
   }
 
   const onReasonChange = (fieldId: string, reason: EEnabledElectiveFieldReason) => {
@@ -519,6 +548,8 @@ const ManageElectiveFieldsView = ({
         <Stack w={"full"} spacing={4}>
           {filteredAndSortedFields.map((requirementField) => {
             const enabled = enabledFieldIds.includes(requirementField.id)
+            const isRequired = !optionalFieldIds.includes(requirementField.id)
+
             return (
               <Stack key={requirementField.id} mb="8">
                 <Box
@@ -540,25 +571,40 @@ const ManageElectiveFieldsView = ({
                     <Box>
                       <Text fontWeight={700}>{requirementField.label}</Text>
                       {enabled && (
-                        <FormControl maxW={"200px"} isRequired={enabled} mt={2}>
-                          <FormLabel>{t("digitalBuildingPermits.edit.requirementBlockSidebar.reason")}</FormLabel>
-                          <Select
-                            bg="greys.white"
-                            value={enabledFieldReasons[requirementField.id] || ""}
-                            placeholder={t(
-                              "digitalBuildingPermits.edit.requirementBlockSidebar.reasonLabels.placeholder"
-                            )}
+                        <>
+                          <FormControl maxW={"200px"} isRequired={enabled} mt={2}>
+                            <FormLabel>{t("digitalBuildingPermits.edit.requirementBlockSidebar.reason")}</FormLabel>
+                            <Select
+                              bg="greys.white"
+                              value={enabledFieldReasons[requirementField.id] || ""}
+                              placeholder={t(
+                                "digitalBuildingPermits.edit.requirementBlockSidebar.reasonLabels.placeholder"
+                              )}
+                              onChange={(e) =>
+                                onReasonChange(requirementField.id, e.target.value as EEnabledElectiveFieldReason)
+                              }
+                            >
+                              {getEnabledElectiveReasonOptions().map((option) => (
+                                <option key={option.value} value={option.value}>
+                                  {option.label}
+                                </option>
+                              ))}
+                            </Select>
+                          </FormControl>
+                          <Checkbox
+                            mt={2}
+                            isChecked={isRequired}
                             onChange={(e) =>
-                              onReasonChange(requirementField.id, e.target.value as EEnabledElectiveFieldReason)
+                              e.target.checked
+                                ? markAsRequired(requirementField.id)
+                                : markAsOptional(requirementField.id)
                             }
                           >
-                            {getEnabledElectiveReasonOptions().map((option) => (
-                              <option key={option.value} value={option.value}>
-                                {option.label}
-                              </option>
-                            ))}
-                          </Select>
-                        </FormControl>
+                            <Text fontSize="sm">
+                              {t("digitalBuildingPermits.edit.requirementBlockSidebar.requiredForSubmitter")}
+                            </Text>
+                          </Checkbox>
+                        </>
                       )}
                     </Box>
                   </Flex>
@@ -581,7 +627,9 @@ const ManageElectiveFieldsView = ({
         >
           <Button
             variant={"primary"}
-            onClick={() => onAddFields([...new Set(enabledFieldIds)], enabledFieldReasons)}
+            onClick={() =>
+              onAddFields([...new Set(enabledFieldIds)], [...new Set(optionalFieldIds)], enabledFieldReasons)
+            }
             isDisabled={!isAddValid}
           >
             {t("digitalBuildingPermits.edit.requirementBlockSidebar.addSelectedButton")}
