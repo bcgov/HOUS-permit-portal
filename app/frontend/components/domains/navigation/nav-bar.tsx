@@ -80,11 +80,12 @@ function isProjectDetailPath(path: string): boolean {
 }
 
 function isStepCodePath(path: string): boolean {
-  const regex = /^\/part-(3|9)-step-code.*$/
+  const regex = /^(\/part-(3|9)-step-code|\/permit-applications\/[a-f\d-]+\/edit\/part-(3|9)-step-code).*$/
   return regex.test(path)
 }
 
 function isPreCheckPath(path: string): boolean {
+  // TODO: Update for pre checks that are attached to a permit application
   const regex = /^\/pre-checks\/[a-f\d-]+/
   return regex.test(path)
 }
