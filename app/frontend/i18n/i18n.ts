@@ -292,6 +292,7 @@ const options = {
           returnHome: "Return to home",
           copied: "Copied!",
           failedToCopy: "Something went wrong while trying to copy",
+          fileUnavailable: "File unavailable",
           reset: "Reset",
           autofill: "Autofill",
           help: "Help",

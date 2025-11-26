@@ -182,7 +182,7 @@ export const PermitProjectStoreModel = types
           const attribute: IProjectDocumentAttribute = {
             id: doc.id,
             permitProjectId: doc.permitProjectId,
-            file: doc.file
+            file: doc.file?.metadata
               ? {
                   ...doc.file,
                   metadata: {

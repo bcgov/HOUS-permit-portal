@@ -17,7 +17,7 @@ export const RequirementDocumentDownloadButton: React.FC<RequirementDocumentDown
     downloadFileFromStorage({
       model: EFileUploadAttachmentType.RequirementDocument,
       modelId: document.id,
-      filename: document.file.metadata.filename,
+      filename: document.file?.metadata?.filename,
     })
   }
 
@@ -30,7 +30,7 @@ export const RequirementDocumentDownloadButton: React.FC<RequirementDocumentDown
       textDecoration={document._destroy ? "line-through" : "none"}
       {...buttonProps}
     >
-      {document.file.metadata.filename}
+      {document.file?.metadata?.filename}
     </Button>
   )
 }
