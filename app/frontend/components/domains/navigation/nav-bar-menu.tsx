@@ -106,12 +106,6 @@ export const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
     <VStack align="flex-start" spacing={4} w="full">
       <MenuSection title={t("site.navMenu.sections.about")}>
         <StaticLinkItem
-          label={t("site.navMenu.about.aboutHub.label")}
-          to="https://www2.gov.bc.ca/gov/content/about-gov-bc-ca"
-          target="_blank"
-          rel="noopener noreferrer"
-        />
-        <StaticLinkItem
           label={t("site.navMenu.about.participatingCommunities.label")}
           to="/jurisdictions"
           description={t("site.navMenu.about.participatingCommunities.description")}
