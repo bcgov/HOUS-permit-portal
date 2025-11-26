@@ -1,15 +1,18 @@
-import { Box, Flex, Grid, Heading, HStack, VStack } from "@chakra-ui/react"
+import { Box, Flex, Grid, Heading, HStack, Text, VStack } from "@chakra-ui/react"
 import { CaretRight, Info, SquaresFour, Steps } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
-import React from "react"
+import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { IPermitProject } from "../../../models/permit-project"
+import { useMst } from "../../../setup/root"
 import {
   EFlashMessageStatus,
   EPermitProjectRollupStatus,
   EProjectPermitApplicationSortFields,
 } from "../../../types/enums"
+import { CopyLinkButton } from "../../shared/base/copy-link-button"
 import { CustomMessageBox } from "../../shared/base/custom-message-box"
+import { EditableInputWithControls } from "../../shared/editable-input-with-controls"
 import { SearchGrid } from "../../shared/grid/search-grid"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { AddPermitsButton } from "../../shared/permit-projects/add-permits-button"
@@ -26,6 +29,14 @@ interface IProps {
 export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
   const { fullAddress, pid, jurisdiction, number } = permitProject
   const { t } = useTranslation()
+  const { permitProjectStore } = useMst()
+  const [editableAddress, setEditableAddress] = useState(fullAddress || "")
+
+  const handleAddressUpdate = async (newAddress: string) => {
+    if (newAddress !== fullAddress) {
+      await permitProjectStore.updatePermitProject(permitProject.id, { fullAddress: newAddress })
+    }
+  }
 
   return (
     <Flex direction="column" flex={1} bg="greys.white" p={10}>
@@ -42,12 +53,29 @@ export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
               {t("permitProject.overview.projectInformation")}
             </Heading>
 
-            <ProjectInfoRow
-              label={t("permitProject.overview.address")}
-              value={fullAddress || t("permitProject.overview.notAvailable")}
-              isBold
-              isCopyable
-            />
+            <Flex justify="space-between" align="center" py={2} borderBottom="1px" borderColor="border.light" w="full">
+              <Flex justify="space-between" align="center" w="full">
+                <Text mr={2}>{t("permitProject.overview.address")}</Text>
+                <EditableInputWithControls
+                  initialHint={t("permitProject.overview.clickToEditAddress")}
+                  value={editableAddress}
+                  editableInputProps={{
+                    minWidth: "400px",
+                    fontWeight: "bold",
+                    textAlign: "right",
+                    "aria-label": t("permitProject.overview.address"),
+                  }}
+                  editablePreviewProps={{
+                    fontWeight: "bold",
+                  }}
+                  aria-label={t("permitProject.overview.address")}
+                  onChange={setEditableAddress}
+                  onSubmit={handleAddressUpdate}
+                  onCancel={() => setEditableAddress(fullAddress || "")}
+                />
+              </Flex>
+              {editableAddress && <CopyLinkButton value={editableAddress} iconOnly />}
+            </Flex>
             <ProjectInfoRow
               label={t("permitProject.overview.jurisdictionName")}
               value={jurisdiction?.disambiguatedName || t("permitProject.overview.notAvailable")}

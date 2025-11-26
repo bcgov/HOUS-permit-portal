@@ -148,6 +148,7 @@ export interface IProjectDocumentAttribute {
 export interface IPermitProjectUpdateParams {
   description?: string
   title?: string
+  fullAddress?: string
   // other PermitProject fields that can be updated
   projectDocumentsAttributes?: IProjectDocumentAttribute[]
 }
