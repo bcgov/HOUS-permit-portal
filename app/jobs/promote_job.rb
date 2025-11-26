@@ -93,7 +93,28 @@ class PromoteJob
     mark_scan_status(record, :infected)
     record.update_columns(file_data: nil) if record.respond_to?(:file_data)
 
+    # Notify the user that their file upload failed
+    notify_upload_failed(record)
+
     # Don't re-raise - we've handled this case
+  end
+
+  def handle_promotion_error(record)
+    # Clear file data since promotion failed
+    record.update_columns(file_data: nil) if record.respond_to?(:file_data)
+
+    # Notify the user that their file upload failed
+    notify_upload_failed(record)
+  end
+
+  def notify_upload_failed(record)
+    return unless record.is_a?(FileUploadAttachment)
+
+    NotificationService.publish_file_upload_failed_event(record)
+  rescue => e
+    Rails.logger.warn(
+      "PromoteJob: Failed to send upload failed notification: #{e.message}"
+    )
   end
 
   def mark_scan_status(record, status)

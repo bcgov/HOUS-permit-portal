@@ -8,6 +8,14 @@ class FileUploadAttachment < ApplicationRecord
        { pending: "pending", clean: "clean", infected: "infected" },
        default: :pending
 
+  # Scopes for filtering by file availability
+  # Use .with_file to get only records that have valid, accessible files
+  # Use .without_file to find orphaned records (failed uploads, virus removals, etc.)
+  scope :with_file,
+        -> { where.not(file_data: nil).where.not(scan_status: :infected) }
+  scope :without_file,
+        -> { where(file_data: nil).or(where(scan_status: :infected)) }
+
   # This method must be implemented by all subclasses
   # It should return the parent model that the file is attached to
   def attached_to
@@ -76,5 +84,39 @@ class FileUploadAttachment < ApplicationRecord
   # Additional scan status helper
   def scan_complete?
     clean? || infected?
+  end
+
+  # Check if the file is available for use
+  # Returns false if file_data is missing or file was infected
+  def file_available?
+    file_data.present? && file_data["id"].present? && !infected?
+  end
+
+  # Inverse of file_available? for clarity
+  def file_unavailable?
+    !file_available?
+  end
+
+  # Safe file_url that returns nil instead of erroring when file is unavailable
+  def file_url_safe
+    return nil unless file_available?
+
+    file_url
+  rescue StandardError
+    nil
+  end
+
+  # Notification data for failed file upload
+  def upload_failed_notification_data
+    {
+      id: SecureRandom.uuid,
+      action_type: Constants::NotificationActionTypes::FILE_UPLOAD_FAILED,
+      action_text: "notification.file_upload_failed",
+      object_data: {
+        file_name: file_name || "Unknown file",
+        record_type: self.class.name,
+        record_id: id
+      }
+    }
   end
 end

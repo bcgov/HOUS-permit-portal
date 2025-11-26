@@ -384,6 +384,40 @@ class NotificationService
     end
   end
 
+  def self.publish_file_upload_failed_event(file_attachment)
+    return if file_attachment.blank?
+
+    # Determine the user to notify based on the attached_to relationship
+    user_to_notify = determine_file_owner(file_attachment)
+    return if user_to_notify.blank?
+
+    notification_user_hash = {
+      user_to_notify.id => file_attachment.upload_failed_notification_data
+    }
+
+    NotificationPushJob.perform_async(notification_user_hash)
+  end
+
+  # Determines the owner/uploader of a file attachment for notification purposes
+  def self.determine_file_owner(file_attachment)
+    attached_to = file_attachment.attached_to
+    return nil if attached_to.blank?
+
+    case attached_to
+    when PermitApplication
+      attached_to.submitter
+    when RequirementBlock
+      # For requirement blocks, notify the last editor or creator
+      nil # Requirement block files are admin-uploaded, skip notification
+    else
+      # Try common patterns
+      attached_to.try(:submitter) || attached_to.try(:creator) ||
+        attached_to.try(:user)
+    end
+  end
+
+  private_class_method :determine_file_owner
+
   # this is just a wrapper around the activity's metadata methods
   # since in the case of a single instance it returns a specific return type (eg. Integer)
   # but in the case of multiple user_ids the activity is a hash object

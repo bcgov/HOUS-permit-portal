@@ -334,6 +334,8 @@ const options = {
           title: "Notifications",
           nUnread: "{{ n }} new",
           noUnread: "No unread notifications",
+          file_upload_failed:
+            "A file you uploaded could not be processed and has been removed. Please try uploading the file again.",
         },
         eula: {
           title: "End-User License Agreement",

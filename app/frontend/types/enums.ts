@@ -463,6 +463,7 @@ export enum ENotificationActionType {
   stepCodeReportGenerated = "step_code_report_generated",
   preCheckSubmitted = "pre_check_submitted",
   preCheckCompleted = "pre_check_completed",
+  fileUploadFailed = "file_upload_failed",
 }
 
 export enum ECollaboratorableType {
