@@ -587,6 +587,9 @@ en:
         title: Error
         message: "There was an error updating permit block status"
     permit_project:
+      update_success:
+        title: ""
+        message: "Project updated successfully"
       update_error:
         title: Error
         message: "%{error_message}"
