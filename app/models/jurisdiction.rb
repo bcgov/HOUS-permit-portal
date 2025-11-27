@@ -261,17 +261,10 @@ class Jurisdiction < ApplicationRecord
   end
 
   def submission_inbox_set_up
-    # preload all of the permit_types and contacts for efficiency
-    permit_types = PermitType.enabled.to_a
-    contacts =
-      permit_type_submission_contacts
-        .where.not(email: nil)
-        .where.not(confirmed_at: nil)
-        .to_a
-
-    permit_types.all? do |permit_type|
-      contacts.any? { |contact| contact.permit_type_id == permit_type.id }
-    end
+    permit_type_submission_contacts
+      .where.not(email: nil)
+      .where.not(confirmed_at: nil)
+      .exists?
   end
 
   # Get confirmed submission contact emails for step code report sharing
