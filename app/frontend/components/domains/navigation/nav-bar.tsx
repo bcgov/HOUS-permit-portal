@@ -118,14 +118,6 @@ function shouldHideFullNavBarForPath(path: string): boolean {
 }
 
 export const NavBar = observer(function NavBar() {
-  const { t } = useTranslation()
-  const { sessionStore, userStore, notificationStore, uiStore, sandboxStore } = useMst()
-
-  const { currentUser } = userStore
-  const { loggedIn } = sessionStore
-  const { criticalNotifications } = notificationStore
-  const { rmJurisdictionSelectKey } = uiStore
-
   const location = useLocation()
   const path = location.pathname
 
@@ -139,6 +131,38 @@ export const NavBar = observer(function NavBar() {
 
   return (
     <PopoverProvider>
+      <NavBarContent />
+    </PopoverProvider>
+  )
+})
+
+const NavBarContent = observer(function NavBarContent() {
+  const { t } = useTranslation()
+  const { sessionStore, userStore, notificationStore, uiStore } = useMst()
+
+  const { currentUser } = userStore
+  const { loggedIn } = sessionStore
+  const { criticalNotifications } = notificationStore
+  const { rmJurisdictionSelectKey } = uiStore
+  const { isMenuOpen, closeMenu } = useNotificationPopover()
+
+  const location = useLocation()
+  const path = location.pathname
+
+  // Close menu when clicking on the navbar (but not on the menu button itself)
+  const handleNavBarClick = (e: React.MouseEvent) => {
+    // Only close if the menu is open and we're not clicking on the menu button
+    if (isMenuOpen) {
+      const target = e.target as HTMLElement
+      // Don't close if clicking on the menu button or inside the drawer
+      if (!target.closest('[aria-label="menu dropdown button"]') && !target.closest(".chakra-modal__content")) {
+        closeMenu()
+      }
+    }
+  }
+
+  return (
+    <>
       <Box
         as="nav"
         id="mainNav"
@@ -149,6 +173,7 @@ export const NavBar = observer(function NavBar() {
         zIndex={1500}
         shadow="elevations.elevation01"
         position="relative"
+        onClick={handleNavBarClick}
       >
         <Container maxW="container.lg" p={2} px={{ base: 4, md: 8 }}>
           <Flex align="center" gap={2} w="full">
@@ -253,7 +278,7 @@ export const NavBar = observer(function NavBar() {
         />
       )}
       {!shouldHideSubNavbarForPath(path) && <SubNavBar />}
-    </PopoverProvider>
+    </>
   )
 })
 
