@@ -67,6 +67,14 @@ export const UserModel = types
         self.role == EUserRoles.regionalReviewManager
       )
     },
+    get isJurisdictionStaff() {
+      return (
+        self.role == EUserRoles.regionalReviewManager ||
+        self.role == EUserRoles.reviewManager ||
+        self.role == EUserRoles.reviewer ||
+        self.role == EUserRoles.technicalSupport
+      )
+    },
     get isSubmitter() {
       return self.role == EUserRoles.submitter
     },
@@ -81,6 +89,9 @@ export const UserModel = types
     },
     get name() {
       return self.firstName && self.lastName && `${self.firstName} ${self.lastName}`
+    },
+    get initials() {
+      return self.firstName && self.lastName && `${self.firstName[0]}${self.lastName[0]}`.toUpperCase()
     },
     get jurisdiction() {
       return (

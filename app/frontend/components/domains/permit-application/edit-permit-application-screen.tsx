@@ -167,7 +167,22 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
 
   const updateFormIoValues = (formio, frontEndFormUpdate) => {
     for (const [key, value] of Object.entries(frontEndFormUpdate)) {
-      const componentToSet = formio.getComponent(key)
+      let componentToSet = formio.getComponent(key)
+
+      if (key.endsWith("additional_pid_info")) {
+        if (componentToSet) {
+          const pidKey = findPidComponentKey(componentToSet.component)
+          if (pidKey) {
+            const dataValue = componentToSet.getValue()
+
+            if (!dataValue || dataValue.length === 0) {
+              componentToSet.addRow()
+            }
+            componentToSet = formio.getComponent(pidKey)
+          }
+        }
+      }
+
       if (!R.isNil(value)) {
         if (!R.isNil(componentToSet)) {
           componentSetValue(componentToSet, value)
@@ -180,6 +195,28 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
 
       updateComputedComplianceResult(componentToSet, value)
     }
+  }
+
+  const findPidComponentKey = (component) => {
+    if (component.key && component.key.endsWith("|pid")) {
+      return component.key
+    }
+
+    if (component.components) {
+      for (const child of component.components) {
+        const key = findPidComponentKey(child)
+        if (key) return key
+      }
+    }
+
+    if (component.columns) {
+      for (const column of component.columns) {
+        const key = findPidComponentKey(column)
+        if (key) return key
+      }
+    }
+
+    return null
   }
 
   const updateComputedComplianceResult = (componentToSet, newValue) => {

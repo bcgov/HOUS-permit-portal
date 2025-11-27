@@ -3,6 +3,7 @@ import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
 import { RevisionReasonModel } from "../models/revision-reason"
 import { ISiteConfigurationUpdateParams } from "../types/api-request"
+import { EPreCheckServicePartner } from "../types/enums"
 import { IHelpLinkItems } from "../types/types.js"
 
 interface ILandingPageTemplate {
@@ -19,6 +20,8 @@ export const SiteConfigurationStoreModel = types.snapshotProcessor(
       displaySitewideMessage: types.maybeNull(types.boolean),
       inboxEnabled: types.maybeNull(types.boolean),
       allowDesignatedReviewer: types.maybeNull(types.boolean),
+      codeComplianceEnabled: types.maybeNull(types.boolean),
+      archistarEnabledForAllJurisdictions: types.maybeNull(types.boolean),
       sitewideMessage: types.maybeNull(types.string),
       helpLinkItems: types.frozen<IHelpLinkItems>(),
       revisionReasonsMap: types.map(RevisionReasonModel),
@@ -48,6 +51,17 @@ export const SiteConfigurationStoreModel = types.snapshotProcessor(
         }
         return response.ok
       }),
+      updateJurisdictionEnrollments: flow(function* updateJurisdictionEnrollments(
+        servicePartner: string,
+        jurisdictionIds: string[]
+      ) {
+        const response: any = yield self.environment.api.updateJurisdictionEnrollments(servicePartner, jurisdictionIds)
+        return response
+      }),
+      fetchJurisdictionEnrollments: flow(function* fetchJurisdictionEnrollments(servicePartner: string) {
+        const response: any = yield self.environment.api.fetchJurisdictionEnrollments(servicePartner)
+        return response
+      }),
     }))
     .actions((self) => ({
       afterCreate() {
@@ -56,6 +70,10 @@ export const SiteConfigurationStoreModel = types.snapshotProcessor(
       },
     }))
     .views((self) => ({
+      get anyProviderEnabledForAllJurisdictions() {
+        // TODO: Add other providers here when we add more providers
+        return self.archistarEnabledForAllJurisdictions
+      },
       get activeRevisionReasons() {
         return Array.from(self.revisionReasonsMap.values()).filter((reason) => !reason.discardedAt)
       },
@@ -69,6 +87,17 @@ export const SiteConfigurationStoreModel = types.snapshotProcessor(
         if (!self?.helpLinkItems) return []
 
         return Object.values(self.helpLinkItems).filter((item) => item.show)
+      },
+      isServicePartnerGloballyEnabled(servicePartner: string) {
+        if (!self.codeComplianceEnabled) return false
+
+        // Map service partner to the corresponding "enabled for all" flag
+        switch (servicePartner) {
+          case EPreCheckServicePartner.archistar:
+            return !!self.archistarEnabledForAllJurisdictions
+          default:
+            return false
+        }
       },
     })),
   {
