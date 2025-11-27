@@ -58,7 +58,9 @@ export function FieldControlsHeader({
         )}
         {computedCompliance &&
           !isRequirementInEditMode &&
-          Object.values(EAutoComplianceModule).includes(computedCompliance?.module) && (
+          computedCompliance?.module &&
+          (Object.values(EAutoComplianceModule).includes(computedCompliance?.module as EAutoComplianceModule) ||
+            requirementType === ERequirementType.pidInfo) && (
             <HasAutomatedComplianceTag display={isRequirementInEditMode ? "none" : "flex"} />
           )}
         {!isRequirementInEditMode && (
