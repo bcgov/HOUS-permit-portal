@@ -727,6 +727,7 @@ const options = {
             categories: {
               planning_zoning: "Planning & Zoning",
               bylaws_requirements: "Bylaws & Requirements",
+              gis_mapping: "GIS Mapping",
               additional_resources: "Additional Resources",
             },
           },
@@ -937,11 +938,19 @@ Thank you,
           details: {
             overview: "Overview",
             permits: "Permits",
+            localResources: "Local Resources",
             notFound: "Permit project not found.",
             backToProjects: "Back to projects",
             editPermitProjectTitleHint: "Click to edit project name",
             invalidInput: "invalid input",
             editPermitProjectTitle: "Edit Project Name",
+          },
+          localResources: {
+            title: "Local Resources",
+            description:
+              "Access planning documents, bylaws, and reference materials from {{jurisdictionName}} to help you prepare your permit application.",
+            empty:
+              "{{jurisdictionName}} has not yet added any local resources. Contact your local government for additional guidance.",
           },
           rollupStatusDescription: {
             empty: "No permits yet",
@@ -3155,6 +3164,7 @@ Thank you,
               categories: {
                 planning_zoning: "Planning & Zoning",
                 bylaws_requirements: "Bylaws & Requirements",
+                gis_mapping: "GIS Mapping",
                 additional_resources: "Additional Resources",
               },
             },

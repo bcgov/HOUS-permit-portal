@@ -35,6 +35,7 @@ export enum EFileUploadAttachmentType {
 export enum EResourceCategory {
   planningZoning = "planning_zoning",
   bylawsRequirements = "bylaws_requirements",
+  gisMapping = "gis_mapping",
   additionalResources = "additional_resources",
 }
 
