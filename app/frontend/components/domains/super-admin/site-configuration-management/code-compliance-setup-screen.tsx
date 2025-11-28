@@ -100,16 +100,15 @@ export const CodeComplianceSetupScreen: React.FC = observer(function CodeComplia
               {t(`${i18nPrefix}.individualServicesDescription`)}
             </Text>
 
-            {!isLoadingEnrollments && (
-              <JurisdictionEnrollmentSelect
-                servicePartner={EPreCheckServicePartner.archistar}
-                value={enrolledJurisdictions}
-                enabledForAll={archistarEnabledForAll}
-                onChange={setEnrolledJurisdictions}
-                onSave={handleSaveEnrollments}
-                onToggleEnabledForAll={handleToggleEnabledForAll}
-              />
-            )}
+            <JurisdictionEnrollmentSelect
+              servicePartner={EPreCheckServicePartner.archistar}
+              value={enrolledJurisdictions}
+              enabledForAll={archistarEnabledForAll}
+              onChange={setEnrolledJurisdictions}
+              onSave={handleSaveEnrollments}
+              onToggleEnabledForAll={handleToggleEnabledForAll}
+              isLoading={isLoadingEnrollments}
+            />
           </Box>
         )}
       </VStack>

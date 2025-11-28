@@ -9,7 +9,6 @@ import { EPreCheckServicePartner, EPreCheckStatus } from "../../../types/enums"
 import { LoadingScreen } from "../../shared/base/loading-screen"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
 import { FormSection } from "./form-section"
-import { PreCheckNavBar } from "./pre-check-nav-bar"
 import { Sidebar } from "./sidebar"
 
 export const PreCheckForm = observer(function PreCheckForm() {
@@ -58,18 +57,16 @@ export const PreCheckForm = observer(function PreCheckForm() {
     <RemoveScroll>
       <Flex
         direction="column"
-        h="100vh"
+        h="calc(100vh - var(--app-navbar-height))"
         w="100vw"
         pos="fixed"
-        top="0"
+        top="var(--app-navbar-height)"
         left="0"
         right="0"
         bottom="0"
-        zIndex="modal"
+        zIndex={0}
         bg="white"
       >
-        <PreCheckNavBar />
-
         <Suspense
           fallback={
             <Center p={50}>

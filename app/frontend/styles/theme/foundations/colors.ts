@@ -22,7 +22,7 @@ export const colors = {
   background: {
     sandboxBase: "#FFC6CB",
     sandboxStripe: "rgba(0, 0, 0, 0.1)",
-    blueLight: "#F1F8FE",
+    blueLight: "#D8EAFD",
   },
   greys: {
     overlay: "rgba(150, 150, 150, 0.35)",
@@ -54,7 +54,7 @@ export const colors = {
     100: "rgba(0, 0, 0, 0.1)",
   },
   hover: {
-    blue: "#DFECF9",
+    blue: "#C1DDFC",
   },
   semantic: {
     success: "#2E8540",

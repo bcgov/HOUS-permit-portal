@@ -5,7 +5,6 @@ import {
   Drawer,
   DrawerBody,
   DrawerContent,
-  DrawerHeader,
   DrawerOverlay,
   Grid,
   Heading,
@@ -107,12 +106,6 @@ export const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
     <VStack align="flex-start" spacing={4} w="full">
       <MenuSection title={t("site.navMenu.sections.about")}>
         <StaticLinkItem
-          label={t("site.navMenu.about.aboutHub.label")}
-          to="https://www2.gov.bc.ca/gov/content/about-gov-bc-ca"
-          target="_blank"
-          rel="noopener noreferrer"
-        />
-        <StaticLinkItem
           label={t("site.navMenu.about.participatingCommunities.label")}
           to="/jurisdictions"
           description={t("site.navMenu.about.participatingCommunities.description")}
@@ -188,15 +181,16 @@ export const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
         <DrawerOverlay mt="var(--app-navbar-height)" zIndex={1400} />
         <DrawerContent
           mt="var(--app-navbar-height)"
-          h="fit-content"
           maxH="calc(100vh - var(--app-navbar-height))"
           zIndex={1400}
+          display="flex"
+          flexDirection="column"
+          h="auto"
         >
-          <DrawerHeader minH={8}></DrawerHeader>
-          <DrawerBody>
+          <DrawerBody flex="1" minH={0} overflow="auto">
             <MenuCloseProvider value={onClose}>
               <Container maxW="container.lg" px={8}>
-                <Grid templateColumns={{ base: "1fr", md: "3fr 3fr 2fr" }} gap={8} pb={8}>
+                <Grid templateColumns={{ base: "1fr", md: "3fr 3fr 2fr" }} gap={8} py={5}>
                   <Box order={{ base: 2, md: 1 }}>{projectReadinessColumn}</Box>
                   <Box order={{ base: 3, md: 2 }}>{aboutColumn}</Box>
                   <Box order={{ base: 1, md: 3 }}>{renderRightColumnContent()}</Box>

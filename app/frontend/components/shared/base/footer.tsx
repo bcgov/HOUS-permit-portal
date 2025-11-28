@@ -83,14 +83,6 @@ export const Footer = observer(() => {
 
                       <VStack align="flex-start" gap={4} w={{ base: "100%", md: "33%" }}>
                         <Link
-                          href="https://www2.gov.bc.ca/gov/content/about-gov-bc-ca"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          color="text.primary"
-                        >
-                          {t("site.aboutTitle")}
-                        </Link>
-                        <Link
                           href="https://www2.gov.bc.ca/gov/content/home/disclaimer"
                           target="_blank"
                           rel="noopener noreferrer"

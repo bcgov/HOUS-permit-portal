@@ -17,21 +17,13 @@ interface IProjectSidebarTabListProps extends BoxProps {
   tabsData?: ITabItem[]
 }
 
-const tabProps = {
-  justifyContent: "flex-start",
-  _selected: {
-    fontWeight: "bold",
-    bg: "background.blueLight",
-  },
-}
-
 export const ProjectSidebarTabList = ({ top = 0, tabsData, children, ...rest }: IProjectSidebarTabListProps) => {
   const navHeight = document.getElementById("mainNav")?.offsetHeight
 
   return (
     <Box
       minW="240px"
-      bg="greys.grey03"
+      bg="greys.grey04"
       borderRight="1px"
       borderColor="border.light"
       position="sticky"
@@ -45,7 +37,7 @@ export const ProjectSidebarTabList = ({ top = 0, tabsData, children, ...rest }: 
       {tabsData ? (
         <VStack align="stretch" spacing={1} w="full" pt={8}>
           {tabsData.map((tabData) => (
-            <Tab key={tabData.label} {...tabProps}>
+            <Tab key={tabData.label}>
               <Flex align="center" justify="flex-start" w="full" gap={3}>
                 <Flex align="center">
                   <Icon as={tabData.icon} mr={2} />

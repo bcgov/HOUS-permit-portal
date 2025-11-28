@@ -33,6 +33,10 @@ class User < ApplicationRecord
   self.skip_session_storage = %i[http_auth params_auth]
 
   # Associations
+  has_many :pre_checks,
+           foreign_key: "creator_id",
+           dependent: :destroy,
+           inverse_of: :creator
   has_many :jurisdiction_memberships, dependent: :destroy
   has_many :jurisdictions, through: :jurisdiction_memberships
   has_many :integration_mapping_notifications,
@@ -175,6 +179,10 @@ class User < ApplicationRecord
 
   def review_staff?
     reviewer? || review_manager? || regional_review_manager?
+  end
+
+  def jurisdiction_staff?
+    review_staff? || technical_support?
   end
 
   def role_name

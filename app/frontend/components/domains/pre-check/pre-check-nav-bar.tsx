@@ -9,7 +9,17 @@ export const PreCheckNavBar = observer(function PreCheckNavBar() {
   const { t } = useTranslation()
 
   return (
-    <Flex w="full" h="60px" bg="white" borderBottom="1px" borderColor="border.light" align="center" px={6} gap={6}>
+    <Flex
+      w="full"
+      h="var(--app-navbar-height)"
+      bg="white"
+      borderBottom="1px"
+      borderColor="border.light"
+      align="center"
+      px={6}
+      gap={6}
+      zIndex={1500}
+    >
       <RouterLink to="/welcome">
         <Box w={120} mr={2}>
           <Image fit="contain" htmlHeight="64px" htmlWidth="166px" alt={t("site.linkHome")} src={"/images/logo.svg"} />

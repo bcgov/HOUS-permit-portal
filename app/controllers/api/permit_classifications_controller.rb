@@ -80,7 +80,12 @@ class Api::PermitClassificationsController < Api::ApplicationController
                        { blueprint: PermitClassificationBlueprint }
       else
         render_error "permit_classification.create_error",
-                     { errors: permit_classification.errors.full_messages }
+                     {
+                       message_opts: {
+                         error_message:
+                           permit_classification.errors.full_messages.join(", ")
+                       }
+                     }
       end
     rescue StandardError => e
       render_error "permit_classification.create_error", {}, e

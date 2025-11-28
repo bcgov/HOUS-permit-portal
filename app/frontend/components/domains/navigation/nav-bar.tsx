@@ -18,6 +18,8 @@ import { NavBarMenu } from "./nav-bar-menu"
 import { RegionalRMJurisdictionSelect } from "./regional-rm-jurisdiction-select"
 import { SubNavBar } from "./sub-nav-bar"
 
+import { PreCheckNavBar } from "../pre-check/pre-check-nav-bar"
+
 function isTemplateEditPath(path: string): boolean {
   const regex = /^\/requirement-templates\/([a-f\d-]+)\/edit$/
 
@@ -78,11 +80,12 @@ function isProjectDetailPath(path: string): boolean {
 }
 
 function isStepCodePath(path: string): boolean {
-  const regex = /^\/part-(3|9)-step-code.*$/
+  const regex = /^(\/part-(3|9)-step-code|\/permit-applications\/[a-f\d-]+\/edit\/part-(3|9)-step-code).*$/
   return regex.test(path)
 }
 
 function isPreCheckPath(path: string): boolean {
+  // TODO: Update for pre checks that are attached to a permit application
   const regex = /^\/pre-checks\/[a-f\d-]+/
   return regex.test(path)
 }
@@ -108,6 +111,12 @@ function shouldHideSubNavbarForPath(path: string): boolean {
   return matchers.some((matcher) => matcher(path))
 }
 
+function shouldHideFullNavBarForPath(path: string): boolean {
+  const matchers: Array<(path: string) => boolean> = [isStepCodePath]
+
+  return matchers.some((matcher) => matcher(path))
+}
+
 export const NavBar = observer(function NavBar() {
   const { t } = useTranslation()
   const { sessionStore, userStore, notificationStore, uiStore, sandboxStore } = useMst()
@@ -119,6 +128,14 @@ export const NavBar = observer(function NavBar() {
 
   const location = useLocation()
   const path = location.pathname
+
+  if (isPreCheckPath(path)) {
+    return <PreCheckNavBar />
+  }
+
+  if (shouldHideFullNavBarForPath(path)) {
+    return null
+  }
 
   return (
     <PopoverProvider>
@@ -175,7 +192,7 @@ export const NavBar = observer(function NavBar() {
 
               {currentUser?.isRegionalReviewManager && (
                 <VStack align="flex-end" gap={1}>
-                  <Text color="whiteAlpha.700" textAlign="right" variant="tiny_uppercase">
+                  <Text color="whiteAlpha.700" textAlign="right" variant="tiny_uppercase" whiteSpace="nowrap">
                     {t(`user.roles.${currentUser.role as EUserRoles}`)}
                   </Text>
                   <RegionalRMJurisdictionSelect key={rmJurisdictionSelectKey} />
@@ -201,12 +218,17 @@ export const NavBar = observer(function NavBar() {
               )}
               {currentUser?.isReviewStaff && (
                 <RouterLinkButton
-                  variant="tertiarty"
                   px={2}
-                  leftIcon={<Tray size={16} />}
                   to={`/jurisdictions/${currentUser?.jurisdiction?.slug}/submission-inbox`}
+                  variant="ghost"
+                  color="greys.white"
                 >
-                  <Show above="xl">{t("home.submissionsInboxTitle")}</Show>
+                  <Tray size={24} />
+                  <Show above="xl">
+                    <Box as="span" ml={2}>
+                      {t("home.submissionsInboxTitle")}
+                    </Box>
+                  </Show>
                 </RouterLinkButton>
               )}
               {currentUser?.isSubmitter && !currentUser.isUnconfirmed && (
