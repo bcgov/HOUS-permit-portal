@@ -261,6 +261,9 @@ class Jurisdiction < ApplicationRecord
   end
 
   def submission_inbox_set_up
+    # Preserve legacy behavior: if no permit types are enabled, setup is considered complete
+    return true if PermitType.enabled.empty?
+
     permit_type_submission_contacts
       .where.not(email: nil)
       .where.not(confirmed_at: nil)
