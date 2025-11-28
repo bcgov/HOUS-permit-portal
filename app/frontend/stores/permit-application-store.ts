@@ -408,6 +408,8 @@ export const PermitApplicationStoreModel = types
       let payloadData
       switch (payload.eventType as EPermitApplicationSocketEventTypes) {
         case EPermitApplicationSocketEventTypes.updateCompliance:
+          console.log("processWebsocketChange=====   updateCompliance   =======")
+          console.log("payload=========", payload)
           payloadData = payload.data as IPermitApplicationComplianceUpdate
           const event = new CustomEvent(ECustomEvents.handlePermitApplicationUpdate, { detail: payloadData })
 
