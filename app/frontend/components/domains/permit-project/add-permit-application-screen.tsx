@@ -64,7 +64,7 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
     if (!q) return activityOptions
     return activityOptions.filter((opt) => {
       const name = opt.value.name?.toLowerCase() || ""
-      const desc = opt.value.description?.toLowerCase() || ""
+      const desc = opt.value.descriptionHtml?.toLowerCase() || ""
       return name.includes(q) || desc.includes(q)
     })
   }, [activityOptions, query])
@@ -134,7 +134,7 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
 
           <Text>{t("permitProject.addPermits.beforeYouBegin.intro")}</Text>
 
-          <UnorderedList ml="0" spacing={2} styleType="disc">
+          <UnorderedList ml="0" spacing={2}>
             <ListItem>{t("permitProject.addPermits.beforeYouBegin.bcBuildingCode")}</ListItem>
             <ListItem>{t("permitProject.addPermits.beforeYouBegin.localZoningBylaws")}</ListItem>
             <ListItem>{t("permitProject.addPermits.beforeYouBegin.ocp")}</ListItem>
@@ -263,7 +263,7 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
                           <Heading as="h3" fontSize="lg" mb={2}>
                             {opt.value.name}
                           </Heading>
-                          <Text color="text.secondary">{opt.value.description}</Text>
+                          <Text color="text.secondary">{opt.value.descriptionHtml}</Text>
                         </Box>
                         <Flex
                           align="center"

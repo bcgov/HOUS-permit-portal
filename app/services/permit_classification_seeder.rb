@@ -5,30 +5,30 @@ class PermitClassificationSeeder
       {
         name: "Small-scale/Multi-unit housing (Part 9 BCBC)",
         code: "low_residential",
-        description:
-          "Single detached, duplex, triplex / fourplex / townhouse, secondary suite, accessory dwelling unit (ADU) e.g. garden suite",
+        description_html:
+          "<p>Single detached, duplex, triplex / fourplex / townhouse, secondary suite, accessory dwelling unit (ADU) e.g. garden suite</p>",
         enabled: true,
         type: "PermitType"
       },
       {
         name: "4+ Unit housing",
         code: "medium_residential",
-        description: "Part 9 townhouses, small apartment buildings",
+        description_html: "<p>Part 9 townhouses, small apartment buildings</p>",
         enabled: true,
         type: "PermitType"
       },
       {
         name: "High density apartment buildings",
         code: "high_residential",
-        description: "Highest density residential structures",
+        description_html: "<p>Highest density residential structures</p>",
         enabled: true,
         type: "PermitType"
       },
       {
         name: "New construction",
         code: "new_construction",
-        description:
-          "Includes the addition to an existing building (infill development) but not the renovation of an existing home to include a secondary suite.",
+        description_html:
+          "<p>Includes the addition to an existing building (infill development) but not the renovation of an existing home to include a secondary suite.</p>",
         enabled: true,
         type: "Activity",
         category: "buildings_and_structures"
@@ -36,8 +36,8 @@ class PermitClassificationSeeder
       {
         name: "Renovation, alteration, or addition",
         code: "addition_alteration_renovation",
-        description:
-          "Modification of an existing residential dwelling to include a (secondary) suite (within the existing building footprint).",
+        description_html:
+          "<p>Modification of an existing residential dwelling to include a (secondary) suite (within the existing building footprint).</p>",
         enabled: true,
         type: "Activity",
         category: "buildings_and_structures"
@@ -45,7 +45,7 @@ class PermitClassificationSeeder
       {
         name: "Manufactured home",
         code: "manufactured_home",
-        description: "",
+        description_html: "<p></p>",
         enabled: true,
         type: "Activity",
         category: "buildings_and_structures"
@@ -53,16 +53,16 @@ class PermitClassificationSeeder
       {
         name: "Site Alteration",
         code: "site_alteration",
-        description:
-          "Modifies land contours through grading, excavation, or preparation for construction projects. This process involves adjusting the earth to support new structures or landscaping.",
+        description_html:
+          "<p>Modifies land contours through grading, excavation, or preparation for construction projects. This process involves adjusting the earth to support new structures or landscaping.</p>",
         enabled: true,
         type: "Activity"
       },
       {
         name: "Demolition",
         code: "demolition",
-        description:
-          "Involves the systematic tearing down of buildings and other structures, including clearing debris and preparing the site for future construction or restoration activities.",
+        description_html:
+          "<p>Involves the systematic tearing down of buildings and other structures, including clearing debris and preparing the site for future construction or restoration activities.</p>",
         enabled: true,
         type: "Activity",
         category: "site_preparation"
@@ -70,7 +70,7 @@ class PermitClassificationSeeder
       {
         name: "Tree-cutting and tree removal",
         code: "tree_cutting_and_tree_removal",
-        description: "",
+        description_html: "<p></p>",
         enabled: true,
         type: "Activity",
         category: "site_preparation"
@@ -78,7 +78,7 @@ class PermitClassificationSeeder
       {
         name: "Retaining wall",
         code: "retaining_wall",
-        description: "",
+        description_html: "<p></p>",
         enabled: true,
         type: "Activity",
         category: "site_preparation"
@@ -86,7 +86,7 @@ class PermitClassificationSeeder
       {
         name: "Relocation",
         code: "relocation",
-        description: "",
+        description_html: "<p></p>",
         enabled: true,
         type: "Activity",
         category: "site_preparation"
@@ -94,8 +94,8 @@ class PermitClassificationSeeder
       {
         name: "Mechanical",
         code: "mechanical",
-        description:
-          "Install, change, or repair heating, ventilation, or air conditioning (HVAC) systems.",
+        description_html:
+          "<p>Install, change, or repair heating, ventilation, or air conditioning (HVAC) systems.</p>",
         enabled: true,
         type: "Activity",
         category: "trades"
@@ -103,8 +103,8 @@ class PermitClassificationSeeder
       {
         name: "Plumbing",
         code: "plumbing",
-        description:
-          "Install, change, or repair plumbing systems, including water supply, drainage, and services to a building.",
+        description_html:
+          "<p>Install, change, or repair plumbing systems, including water supply, drainage, and services to a building.</p>",
         enabled: true,
         type: "Activity",
         category: "trades"
@@ -112,8 +112,8 @@ class PermitClassificationSeeder
       {
         name: "Electrical",
         code: "electrical",
-        description:
-          "Electrical work, including installation, changes, or repairs to wiring, panels, or lighting. Applies to both permanent and temporary services.",
+        description_html:
+          "<p>Electrical work, including installation, changes, or repairs to wiring, panels, or lighting. Applies to both permanent and temporary services.</p>",
         enabled: true,
         type: "Activity",
         category: "trades"
@@ -121,8 +121,8 @@ class PermitClassificationSeeder
       {
         name: "Gas",
         code: "gas",
-        description:
-          "Install, change, or repair gas piping, appliances, venting, or connections.",
+        description_html:
+          "<p>Install, change, or repair gas piping, appliances, venting, or connections.</p>",
         enabled: true,
         type: "Activity",
         category: "trades"
@@ -130,8 +130,8 @@ class PermitClassificationSeeder
       {
         name: "Solid fuel burning appliance",
         code: "solid_fuel_burning_appliance",
-        description:
-          "Install, change, or repair a wood stove, pellet stove, or another solid fuel-burning appliance.",
+        description_html:
+          "<p>Install, change, or repair a wood stove, pellet stove, or another solid fuel-burning appliance.</p>",
         enabled: true,
         type: "Activity",
         category: "trades"
@@ -139,8 +139,8 @@ class PermitClassificationSeeder
       {
         name: "Fire alarm",
         code: "fire_alarm",
-        description:
-          "Install, change, or repair a fire alarm system, including detectors, panels, and wiring.",
+        description_html:
+          "<p>Install, change, or repair a fire alarm system, including detectors, panels, and wiring.</p>",
         enabled: true,
         type: "Activity",
         category: "trades"
@@ -148,8 +148,8 @@ class PermitClassificationSeeder
       {
         name: "Fire suppression",
         code: "fire_suppression",
-        description:
-          "Install, change, or repair a sprinkler or other fire suppression system in a building.",
+        description_html:
+          "<p>Install, change, or repair a sprinkler or other fire suppression system in a building.</p>",
         enabled: true,
         type: "Activity",
         category: "trades"

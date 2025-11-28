@@ -18,7 +18,8 @@ class User < ApplicationRecord
          omniauth_providers: %i[keycloak],
          jwt_revocation_strategy: self
 
-  enum role: {
+  enum :role,
+       {
          submitter: 0,
          review_manager: 1,
          reviewer: 2,
@@ -26,12 +27,16 @@ class User < ApplicationRecord
          regional_review_manager: 4,
          technical_support: 5
        },
-       _default: 0
+       default: 0
 
   # https://github.com/waiting-for-dev/devise-jwt
   self.skip_session_storage = %i[http_auth params_auth]
 
   # Associations
+  has_many :pre_checks,
+           foreign_key: "creator_id",
+           dependent: :destroy,
+           inverse_of: :creator
   has_many :jurisdiction_memberships, dependent: :destroy
   has_many :jurisdictions, through: :jurisdiction_memberships
   has_many :integration_mapping_notifications,
@@ -174,6 +179,10 @@ class User < ApplicationRecord
 
   def review_staff?
     reviewer? || review_manager? || regional_review_manager?
+  end
+
+  def jurisdiction_staff?
+    review_staff? || technical_support?
   end
 
   def role_name

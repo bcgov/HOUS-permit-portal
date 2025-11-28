@@ -80,7 +80,12 @@ class Api::PermitClassificationsController < Api::ApplicationController
                        { blueprint: PermitClassificationBlueprint }
       else
         render_error "permit_classification.create_error",
-                     { errors: permit_classification.errors.full_messages }
+                     {
+                       message_opts: {
+                         error_message:
+                           permit_classification.errors.full_messages.join(", ")
+                       }
+                     }
       end
     rescue StandardError => e
       render_error "permit_classification.create_error", {}, e
@@ -89,6 +94,7 @@ class Api::PermitClassificationsController < Api::ApplicationController
 
   def update
     authorize :permit_classification, :update?
+
     begin
       if @permit_classification.update(permit_classification_params)
         render_success @permit_classification,
@@ -145,7 +151,7 @@ class Api::PermitClassificationsController < Api::ApplicationController
     params.require(:permit_classification).permit(
       :name,
       :code,
-      :description,
+      :description_html,
       :enabled,
       :type,
       :category

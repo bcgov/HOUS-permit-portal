@@ -2,10 +2,10 @@ import { Box, BoxProps, Button, ButtonProps, Text } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { sanitizeQuillHtml } from "../../../../utils/sanitize-quill-content"
-import { isQuillEmpty } from "../../../../utils/utility-functions"
+import { sanitizeTipTapHtml } from "../../../../utils/sanitize-tiptap-content"
+import { isTipTapEmpty } from "../../../../utils/utility-functions"
 import { Editor } from "../editor"
-import { SafeQuillDisplay } from "../safe-quill-display"
+import { SafeTipTapDisplay } from "../safe-tiptap-display"
 
 export type TEditorWithPreviewProps = {
   label?: string
@@ -38,9 +38,9 @@ export const EditorWithPreview = observer(function EditorWithPreview({
   isReadOnly,
 }: TEditorWithPreviewProps) {
   // Sanitize htmlValue before using it to prevent XSS attacks (CVE-2021-3163)
-  // This protects against malicious content in edit mode (ReactQuill) and preview mode (SafeQuillDisplay)
-  const sanitizedHtmlValue = useMemo(() => sanitizeQuillHtml(htmlValue), [htmlValue])
-  const isEditorEmpty = isQuillEmpty(sanitizedHtmlValue)
+  // This protects against malicious content in edit mode (TipTap) and preview mode (SafeTipTapDisplay)
+  const sanitizedHtmlValue = useMemo(() => sanitizeTipTapHtml(htmlValue), [htmlValue])
+  const isEditorEmpty = isTipTapEmpty(sanitizedHtmlValue)
   const [isEditMode, setIsEditMode] = useState(false)
   const { t } = useTranslation()
 
@@ -55,13 +55,13 @@ export const EditorWithPreview = observer(function EditorWithPreview({
     py: 3,
     borderRadius: "sm",
     sx: {
-      ".quill": {
+      ".tiptap-wrapper": {
         bg: isEditable ? "white" : undefined,
       },
-      ".quill .ql-editor": {
+      ".tiptap-editor": {
         px: isEditable ? undefined : 0,
       },
-      ".quill .ql-container": {
+      ".tiptap-editor-readonly": {
         fontSize: isEditable ? undefined : "sm",
       },
     },
@@ -131,8 +131,8 @@ export const EditorWithPreview = observer(function EditorWithPreview({
               {editText}
             </Button>
           )}
-          {/* SafeQuillDisplay also sanitizes internally, but sanitizing here adds defense-in-depth */}
-          <SafeQuillDisplay
+          {/* SafeTipTapDisplay also sanitizes internally, but sanitizing here adds defense-in-depth */}
+          <SafeTipTapDisplay
             htmlContent={sanitizedHtmlValue}
             fontSize="sm"
             sx={{

@@ -26,6 +26,8 @@ export type TSitesSelectProps = {
   defaultManualMode?: boolean
   onLtsaMatcherFound?: (matcher: string | null) => void
   showJurisdiction?: boolean
+  initialJurisdiction?: IJurisdiction | null
+  isDisabled?: boolean
 } & Partial<TAsyncSelectProps>
 
 // Please be advised that this is expected to be used within a form context!
@@ -43,12 +45,14 @@ export const SitesSelect = observer(function ({
   defaultManualMode = false,
   onLtsaMatcherFound,
   showJurisdiction = true,
+  initialJurisdiction = null,
+  isDisabled = false,
   ...rest
 }: TSitesSelectProps) {
   const { t } = useTranslation()
   const { geocoderStore, jurisdictionStore } = useMst()
   const [pidOptions, setPidOptions] = useState<IOption<string>[]>([])
-  const [jurisdiction, setJurisdiction] = useState<IJurisdiction | null>(null)
+  const [jurisdiction, setJurisdiction] = useState<IJurisdiction | null>(initialJurisdiction)
   const [manualMode, setManualMode] = useState(defaultManualMode)
   const {
     fetchSiteOptions: fetchOptions,
@@ -111,7 +115,10 @@ export const SitesSelect = observer(function ({
     }
     const siteValue: string | undefined = siteWatch?.value
     if (R.isNil(siteValue) || siteValue === "") {
-      setJurisdiction(null)
+      // Don't clear jurisdiction if we have an initialJurisdiction and haven't selected a site yet
+      if (!initialJurisdiction || jurisdiction !== initialJurisdiction) {
+        setJurisdiction(null)
+      }
       return
     }
 
@@ -163,6 +170,7 @@ export const SitesSelect = observer(function ({
               value={selectedOption}
               menuPosition="fixed"
               menuShouldScrollIntoView={false}
+              isDisabled={isDisabled}
               components={{
                 Control,
                 Option,
@@ -212,7 +220,7 @@ export const SitesSelect = observer(function ({
                 rules={{
                   required:
                     pidRequired || pidOptions.length > 0
-                      ? (t("ui.isRequired", { field: t("permitApplication.pidLabel") }) as string)
+                      ? String(t("ui.isRequired", { field: t("permitApplication.pidLabel") }))
                       : false,
                 }}
                 render={({ field: { onChange, value } }) => {
@@ -247,6 +255,7 @@ export const SitesSelect = observer(function ({
                       }}
                       isClearable
                       isSearchable
+                      isDisabled={isDisabled}
                     />
                   )
                 }}
@@ -283,6 +292,7 @@ export const SitesSelect = observer(function ({
                       onFetch={() => setValue(jurisdictionIdFieldName, null)}
                       selectedOption={value ? { label: getJurisdictionById(value)?.reverseQualifiedName, value } : null}
                       menuPortalTarget={document.body}
+                      isDisabled={isDisabled}
                     />
                   )
                 }}
@@ -294,7 +304,7 @@ export const SitesSelect = observer(function ({
 
       {/* Manual Mode Toggle */}
       {showManualModeToggle && showJurisdiction && (
-        <Button variant="link" size="sm" onClick={() => setManualMode((prev) => !prev)}>
+        <Button isDisabled={isDisabled} variant="link" size="sm" onClick={() => setManualMode((prev) => !prev)}>
           {manualMode ? t("ui.switchToAutomaticMode") : t("ui.switchToManualMode")}
         </Button>
       )}

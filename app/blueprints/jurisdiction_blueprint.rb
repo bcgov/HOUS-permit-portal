@@ -29,7 +29,7 @@ class JurisdictionBlueprint < Blueprinter::Base
            :ltsa_matcher,
            :heating_degree_days
 
-    field :external_api_enabled do |jurisdiction, options|
+    field :external_api_enabled do |jurisdiction, _options|
       jurisdiction.external_api_enabled?
     end
     association :contacts, blueprint: ContactBlueprint
@@ -47,13 +47,29 @@ class JurisdictionBlueprint < Blueprinter::Base
                   PermitTypeRequiredStepBlueprint do |jurisdiction, _options|
       jurisdiction.enabled_permit_type_required_steps
     end
+    association :service_partner_enrollments,
+                blueprint: JurisdictionServicePartnerEnrollmentBlueprint
   end
 
   view :minimal do
     fields :qualified_name, :external_api_state, :inbox_enabled
 
-    field :external_api_enabled do |jurisdiction, options|
+    field :external_api_enabled do |jurisdiction, _options|
       jurisdiction.external_api_enabled?
+    end
+
+    association :service_partner_enrollments,
+                blueprint: JurisdictionServicePartnerEnrollmentBlueprint
+  end
+
+  view :extended do
+    # Only need these extra quereies when jurisdiciton is on user blueprint
+    include_view :base
+
+    field :unviewed_submissions_count do |jurisdiction, options|
+      jurisdiction.unviewed_submissions_count(
+        sandbox: options[:current_sandbox]
+      )
     end
   end
 end

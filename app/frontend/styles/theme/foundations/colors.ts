@@ -40,6 +40,7 @@ export const colors = {
     dark: "#323130",
     light: "#D9D9D9",
     input: "#CCCCCC",
+    blue: "#38598A",
   },
   error: "#D9292F",
   success: "#2E8540",
@@ -53,7 +54,7 @@ export const colors = {
     100: "rgba(0, 0, 0, 0.1)",
   },
   hover: {
-    blue: "#DFECF9",
+    blue: "#C1DDFC",
   },
   semantic: {
     success: "#2E8540",
