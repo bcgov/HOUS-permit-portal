@@ -684,7 +684,7 @@ const options = {
           },
           index: {
             title: "Jurisdictions",
-            description: "Below is a list of all jurisdictions in the system",
+            description: "Search or sort to check if a community is accepting permit application submissions",
             createButton: "Create new jurisdiction",
             tableHeading: "Local governments",
             users: "Users",
