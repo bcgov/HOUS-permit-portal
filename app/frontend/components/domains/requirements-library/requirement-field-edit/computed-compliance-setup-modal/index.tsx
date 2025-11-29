@@ -23,7 +23,7 @@ import { useController, useForm, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useAutoComplianceModuleConfigurations } from "../../../../../hooks/resources/use-auto-compliance-module-configurations"
 import { useMst } from "../../../../../setup/root"
-import { EAutoComplianceModule, ERequirementType } from "../../../../../types/enums"
+import { EAutoComplianceModule } from "../../../../../types/enums"
 import {
   IOption,
   TAutoComplianceModuleConfiguration,
@@ -148,20 +148,11 @@ export const ComputedComplianceSetupModal = observer(function ComputedCompliance
   })
 
   const moduleSelectOptions = useMemo(() => {
-    // Fall back to full list for pidInfo so the menu isn't empty
-    const source =
-      availableAutoComplianceModuleConfigurations.length > 0 || watchedRequirementType !== ERequirementType.pidInfo
-        ? availableAutoComplianceModuleConfigurations
-        : requirementBlockStore.autoComplianceModuleConfigurationsList
-    return source.map((option) => ({
+    return availableAutoComplianceModuleConfigurations.map((option) => ({
       value: option.module,
       label: option.label,
     }))
-  }, [
-    availableAutoComplianceModuleConfigurations,
-    watchedRequirementType,
-    requirementBlockStore.autoComplianceModuleConfigurationsList,
-  ])
+  }, [availableAutoComplianceModuleConfigurations])
 
   const selectedModuleOption = useMemo(() => {
     return moduleSelectOptions.find((option) => option.value === watchedModule) ?? null
@@ -227,8 +218,7 @@ export const ComputedComplianceSetupModal = observer(function ComputedCompliance
     )
   }, [watchedRequirementValueOptions, watchedOptionsMap])
 
-  const isSetupDisabled =
-    availableAutoComplianceModuleConfigurations.length === 0 && watchedRequirementType !== ERequirementType.pidInfo
+  const isSetupDisabled = availableAutoComplianceModuleConfigurations.length === 0
 
   // prunes the optionsMap if the value options changed
   useEffect(() => {
@@ -347,21 +337,17 @@ export const ComputedComplianceSetupModal = observer(function ComputedCompliance
 
     if (
       !isValueExtractorModuleConfiguration(moduleConfiguration) ||
-      // For pidInfo we accept the module even if not advertised for this type
-      (watchedRequirementType !== ERequirementType.pidInfo &&
-        !moduleConfiguration.availableOnInputTypes.includes(watchedRequirementType))
+      !requirementBlockStore.getAutoComplianceModuleConfigurationForRequirementType(
+        watchedModule,
+        watchedRequirementType
+      )
     ) {
       return false
     }
 
     const isSelectedFieldValid = !!(
       moduleConfiguration as TValueExtractorAutoComplianceModuleConfiguration
-    ).availableFields.find(
-      (field) =>
-        field.value === value &&
-        (watchedRequirementType === ERequirementType.pidInfo ||
-          field.availableOnInputTypes.includes(watchedRequirementType))
-    )
+    ).availableFields.find((field) => field.value === value)
 
     return isSelectedFieldValid
   }
@@ -380,8 +366,10 @@ export const ComputedComplianceSetupModal = observer(function ComputedCompliance
 
     if (
       !isOptionsMapperModuleConfiguration(moduleConfiguration) ||
-      (watchedRequirementType !== ERequirementType.pidInfo &&
-        !moduleConfiguration.availableOnInputTypes.includes(watchedRequirementType))
+      !requirementBlockStore.getAutoComplianceModuleConfigurationForRequirementType(
+        watchedModule,
+        watchedRequirementType
+      )
     ) {
       return false
     }

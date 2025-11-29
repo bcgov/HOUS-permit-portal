@@ -25,6 +25,7 @@ import { useInterval } from "../../../hooks/use-interval"
 import { useMst } from "../../../setup/root"
 import { ICustomEventMap } from "../../../types/dom"
 import { ECollaborationType, ECustomEvents, ERequirementType } from "../../../types/enums"
+import { findPidComponentKey } from "../../../utils/formio-component-traversal"
 import { handleScrollToBottom } from "../../../utils/utility-functions"
 import { CopyableValue } from "../../shared/base/copyable-value"
 import { ErrorScreen } from "../../shared/base/error-screen"
@@ -195,28 +196,6 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
 
       updateComputedComplianceResult(componentToSet, value)
     }
-  }
-
-  const findPidComponentKey = (component) => {
-    if (component.key && component.key.endsWith("|pid")) {
-      return component.key
-    }
-
-    if (component.components) {
-      for (const child of component.components) {
-        const key = findPidComponentKey(child)
-        if (key) return key
-      }
-    }
-
-    if (component.columns) {
-      for (const column of component.columns) {
-        const key = findPidComponentKey(column)
-        if (key) return key
-      }
-    }
-
-    return null
   }
 
   const updateComputedComplianceResult = (componentToSet, newValue) => {
