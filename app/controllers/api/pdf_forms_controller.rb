@@ -118,6 +118,11 @@ class Api::PdfFormsController < Api::ApplicationController
   end
 
   def pdf_form_params
-    params.require(:pdf_form).permit(:form_type, :status, form_json: {})
+    p = params.require(:pdf_form)
+    permitted = p.permit(:form_type, :status)
+    permitted[:form_json] = p[:form_json].permit! if p[:form_json].respond_to?(
+      :permit!
+    )
+    permitted
   end
 end

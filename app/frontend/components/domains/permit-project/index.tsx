@@ -1,6 +1,5 @@
 import { Flex, TabPanel, TabPanels, Tabs } from "@chakra-ui/react"
-import { ClipboardText, FolderSimple, ThermometerHot } from "@phosphor-icons/react"
-import { ClipboardText, FolderSimple, ListMagnifyingGlass } from "@phosphor-icons/react"
+import { ClipboardText, FolderSimple, ListMagnifyingGlass, ThermometerHot } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useTransition } from "react"
 import { useTranslation } from "react-i18next"
@@ -33,11 +32,12 @@ export const ProjectDashboardScreen = observer(({}: IProjectDashboardScreenProps
       icon: ThermometerHot,
       to: "overheating",
       tabIndex: 2,
+    },
+    {
       label: t("preCheck.index.title", "Pre-checks"),
       icon: ListMagnifyingGlass,
       to: "pre-checks",
-      tabIndex: 2,
-      badgeCount: preCheckStore.unviewedCount,
+      tabIndex: 3,
     },
     // Disabled: Documents tab
     // { label: t("document.index.title", "Documents"), icon: File, to: "documents", tabIndex: 3 },
@@ -53,7 +53,7 @@ export const ProjectDashboardScreen = observer(({}: IProjectDashboardScreenProps
       navigate(index === 0 ? "/projects" : index === 1 ? "/step-codes" : index === 2 ? "/overheating" : "/documents", {
         replace: true,
       })
-      const routes = ["/projects", "/step-codes", "/pre-checks", "/documents"]
+      const routes = ["/projects", "/step-codes", "/overheating", "/pre-checks", "/documents"]
       navigate(routes[index] || "/projects", { replace: true })
     })
   }
