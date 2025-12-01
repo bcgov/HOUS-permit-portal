@@ -183,6 +183,7 @@ Rails.application.routes.draw do
            to: "permit_applications#invite_new_collaborator"
       post "submit", on: :member
       post "mark_as_viewed", on: :member
+      post "retrigger_submission_webhook", on: :member
       patch "upload_supporting_document", on: :member
       patch "update_version", on: :member
       patch "revision_requests",
@@ -259,6 +260,23 @@ Rails.application.routes.draw do
           to: "step_codes#download_step_code_metrics_csv"
       post "search", on: :collection, to: "step_codes#index"
       patch "update", on: :member, to: "step_codes#update"
+      patch "restore", on: :member, to: "step_codes#restore"
+    end
+
+    resources :pre_checks, only: %i[index show create update] do
+      post "search", on: :collection, to: "pre_checks#index"
+      get "download_pre_check_user_consent_csv",
+          on: :collection,
+          to: "pre_checks#download_pre_check_user_consent_csv"
+      post "submit", on: :member
+      patch "mark_viewed", on: :member
+      get "pdf_report_url", on: :member
+    end
+
+    resources :report_documents, only: [] do
+      post "share_with_jurisdiction",
+           on: :member,
+           to: "report_documents#share_with_jurisdiction"
     end
 
     # Controller namespace is Api::Part9Building::*, but we expose path with underscore for continuity
@@ -291,6 +309,8 @@ Rails.application.routes.draw do
     resources :site_configuration, only: [] do
       get :show, on: :collection
       put :update, on: :collection
+      post :update_jurisdiction_enrollments, on: :collection
+      get :jurisdiction_enrollments, on: :collection
     end
 
     resources :external_api_keys do
@@ -318,6 +338,11 @@ Rails.application.routes.draw do
         end
       end
     end
+  end
+
+  # Webhook routes (outside API scope for external webhook access)
+  namespace :webhooks do
+    post "archistar", to: "archistar#receive"
   end
 
   root to: "home#index"

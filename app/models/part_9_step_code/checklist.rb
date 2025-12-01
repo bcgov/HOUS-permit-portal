@@ -1,7 +1,16 @@
-class Part9StepCode::Checklist < ApplicationRecord
+class Part9StepCode::Checklist < ActiveRecord::Base
   self.table_name = "part_9_step_code_checklists"
 
-  belongs_to :step_code, optional: true
+  include ChecklistReportDocumentConcern
+
+  delegate :permit_application_id, to: :step_code, allow_nil: true
+
+  belongs_to :step_code,
+             optional: true,
+             class_name: "Part9StepCode",
+             foreign_key: :step_code_id,
+             touch: true
+
   belongs_to :step_requirement,
              class_name: "PermitTypeRequiredStep",
              optional: true
@@ -28,13 +37,16 @@ class Part9StepCode::Checklist < ApplicationRecord
   delegate :pid, to: :step_code
   delegate :reference_number, to: :step_code
   delegate :permit_application_number, to: :step_code
+  delegate :discarded?, to: :step_code
 
-  enum stage: %i[pre_construction mid_construction as_built]
-  enum status: %i[draft complete]
-  enum compliance_path: %i[step_code_ers step_code_necb passive_house step_code]
-  enum epc_calculation_airtightness: %i[two_point_five three_point_two]
-  enum epc_calculation_testing_target_type: %i[ach nlr nla]
-  enum building_type: %i[
+  enum :stage, %i[pre_construction mid_construction as_built]
+  enum :status, %i[draft complete]
+  enum :compliance_path,
+       %i[step_code_ers step_code_necb passive_house step_code]
+  enum :epc_calculation_airtightness, %i[two_point_five three_point_two]
+  enum :epc_calculation_testing_target_type, %i[ach nlr nla]
+  enum :building_type,
+       %i[
          laneway
          single_detached
          double_detached

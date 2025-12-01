@@ -1,0 +1,99 @@
+<!-- START MAIN CONTENT AREA -->
+<tr>
+  <td class="wrapper" style="font-family: 'Open Sans', sans-serif; font-size: 16px; vertical-align: top; box-sizing: border-box; padding: 56px 32px;" valign="top">
+    <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; min-width: 100%; width: 100%;" width="100%">
+      <tr>
+        <!-- START CONTENT ROW -->
+        <td style="font-family: 'Open Sans', sans-serif; font-size: 16px; vertical-align: top;" valign="top">
+          <h1 style="color: #292929; font-family: 'Open Sans', sans-serif; font-weight: 700; line-height: 1.4; text-align: left; font-size: 28px; margin-top: 0; margin-bottom: 48px;">
+            Your BC Building Code compliance pre-check results are ready
+          </h1>
+          <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">Hello <%= @user.first_name %>,</p>
+          <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
+            Your compliance report is now available for <%= @pre_check.full_address %>.
+          </p>
+
+          <h2 style="color: #292929; font-family: 'Open Sans', sans-serif; font-weight: 700; line-height: 1.4; margin-top: 24px; margin-bottom: 16px; text-align: left; font-size: 22px;">Project details</h2>
+
+          <table class="basic-table" role="presentation" border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; min-width: 100%; width: 100%; background: #f2f2f2; border: 1px solid #d9d9d9; margin-bottom: 32px;" width="100%">
+            <tr>
+              <td style="font-family: 'Open Sans', sans-serif; font-size: 16px; vertical-align: top;" valign="top">
+                <dl class="table-like" style="margin: 0;">
+
+                  <dt style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; font-size: 11px; text-transform: uppercase; font-weight: bold; padding-top: 10px; padding-bottom: 8px;">Service partner ID</dt>
+                  <dd style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; margin: 0; padding-bottom: 10px; border-bottom: 1px solid #d9d9d9;">
+                    <%= @pre_check.external_id %>
+                  </dd>
+
+                  <dt style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; font-size: 11px; text-transform: uppercase; font-weight: bold; padding-top: 10px; padding-bottom: 8px;">Address</dt>
+                  <dd style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; margin: 0; padding-bottom: 10px; border-bottom: 1px solid #d9d9d9;">
+                    <%= @pre_check.full_address %>
+                  </dd>
+
+                  <dt style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; font-size: 11px; text-transform: uppercase; font-weight: bold; padding-top: 10px; padding-bottom: 8px;">Jurisdiction</dt>
+                  <dd style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; margin: 0; padding-bottom: 10px; border-bottom: 1px solid #d9d9d9;">
+                    <%= @pre_check.jurisdiction_qualified_name %>
+                  </dd>
+
+                  <dt style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; font-size: 11px; text-transform: uppercase; font-weight: bold; padding-top: 10px; padding-bottom: 8px;">Uploaded files</dt>
+                  <dd style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; margin: 0; padding-bottom: 10px; border-bottom: 0;">
+                    <% @pre_check.design_documents.each do |document| %>
+                      <%= document.file_name %><br>
+                    <% end %>
+                  </dd>
+
+                </dl>
+              </td>
+            </tr>
+          </table>
+
+          <h2 style="color: #292929; font-family: 'Open Sans', sans-serif; font-weight: 700; line-height: 1.4; margin-top: 24px; margin-bottom: 16px; text-align: left; font-size: 22px;">What you can do now</h2>
+          <ul style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px; padding-left: 24px;">
+            <li style="list-style-position: initial; margin-left: 5px;">Download the PDF report, or explore the results interactively alongside your drawings</li>
+            <li style="list-style-position: initial; margin-left: 5px;">Use these results to address compliance issues and prepare your drawings for a permit application</li>
+          </ul>
+
+          <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="btn btn-primary" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; min-width: 100%; box-sizing: border-box; width: 100%; margin: 12px auto;" width="100%">
+            <tbody>
+            <tr>
+              <td align="left" style="font-family: 'Open Sans', sans-serif; font-size: 16px; vertical-align: top; padding-bottom: 15px;" valign="top">
+                <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; min-width: auto; width: auto;">
+                  <tbody>
+                  <tr>
+                    <td style="font-family: 'Open Sans', sans-serif; font-size: 16px; vertical-align: top; border-radius: 5px; text-align: center; background-color: transparent;" valign="top" align="center" bgcolor="transparent">
+                      <a href="<%= FrontendUrlHelper.frontend_url("/pre-checks/#{@pre_check.id}/edit/results-summary") %>" target="_blank" style="border: solid 1px #003366; border-radius: 4px; box-sizing: border-box; cursor: pointer; display: inline-block; font-size: 16px; font-weight: normal; line-height: 26px; margin: 0; padding: 6px 12px; text-decoration: none; background-color: #003366; border-color: #003366; color: #ffffff;">View on Building Permit Hub</a>
+                    </td>
+                  </tr>
+                  </tbody>
+                </table>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+
+          <h2 style="color: #292929; font-family: 'Open Sans', sans-serif; font-weight: 700; line-height: 1.4; margin-top: 24px; margin-bottom: 16px; text-align: left; font-size: 22px;">Important to know</h2>
+          <ul style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px; padding-left: 24px;">
+            <li style="list-style-position: initial; margin-left: 5px;">Results are not shared with local building officials and are not part of an official permit submission</li>
+            <li style="list-style-position: initial; margin-left: 5px;">A passing result does not guarantee approval; your local building official will still complete a full review as part of the permit process</li>
+            <li style="list-style-position: initial; margin-left: 5px;">Only your local jurisdiction can approve or reject a permit application</li>
+          </ul>
+
+          <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
+            If you have any questions or need assistance, reach out to us at
+            <a href="mailto:digital.codes.permits@gov.bc.ca" style="color: #1a5a96; text-decoration: underline;">digital.codes.permits@gov.bc.ca</a>.
+          </p>
+
+          <br>
+
+          <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
+            The Building Permit Hub Team
+          </p>
+        </td>
+        <!-- END OF CONTENT ROW -->
+      </tr>
+    </table>
+  </td>
+</tr>
+
+<!-- END MAIN CONTENT AREA -->
+

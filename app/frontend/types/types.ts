@@ -19,6 +19,7 @@ import {
   EFossilFuelsPresence,
   EFuelType,
   EHotWaterPerformanceType,
+  EJurisdictionSocketEventTypes,
   EJurisdictionTypes,
   ENotificationActionType,
   ENumberUnit,
@@ -292,6 +293,18 @@ export interface IRequirementDocument extends IBaseFileAttachment {
   requirementBlockId: string
 }
 
+export interface IDesignDocument extends IBaseFileAttachment {
+  preCheckId: string
+}
+
+export interface IJurisdictionServicePartnerEnrollment {
+  id: string
+  servicePartner: string
+  enabled: boolean
+  createdAt: Date
+  updatedAt: Date
+}
+
 export interface IReportDocument extends IBaseFileAttachment {
   stepCodeId: string
 }
@@ -412,7 +425,7 @@ export interface IPermitApplicationSupportingDocumentsUpdate {
 export interface IUserPushPayload {
   data: TSocketEventData
   domain: ESocketDomainTypes
-  eventType: ESocketEventTypes | EPermitApplicationSocketEventTypes
+  eventType: ESocketEventTypes | EPermitApplicationSocketEventTypes | EJurisdictionSocketEventTypes
   meta: {
     lastReadAt: number
     totalPages: number
@@ -608,7 +621,7 @@ export interface IPermitTypeRequiredStep {
   workType?: string
   energyStepRequired: EEnergyStep
   zeroCarbonStepRequired: EZeroCarbonStep
-  activityName: string
+  activityName?: string
 }
 
 export type TCreateRequirementTemplateFormData = {

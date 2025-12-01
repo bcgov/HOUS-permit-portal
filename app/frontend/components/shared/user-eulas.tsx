@@ -32,7 +32,7 @@ import { useMst } from "../../setup/root"
 import { colors } from "../../styles/theme/foundations/colors"
 import { ILicenseAgreement } from "../../types/types"
 import { SharedSpinner } from "./base/shared-spinner"
-import { Editor } from "./editor/editor"
+import { SafeTipTapDisplay } from "./editor/safe-tiptap-display"
 import { RouterLinkButton } from "./navigation/router-link-button"
 
 export const UserEulas = observer(function UserEulas() {
@@ -167,23 +167,9 @@ export const PastEulasModal = observer(function PastEulasModal({
                     </AccordionButton>
                   </Box>
                   <AccordionPanel bg={"white"} borderBottomRadius={"sm"}>
-                    <Box
-                      maxW="4xl"
-                      overflow="hidden"
-                      sx={{
-                        ".quill": {
-                          height: "100%",
-                          overflow: "auto",
-                          ".ql-editor": {
-                            p: 0,
-                          },
-                          ".ql-container": {
-                            border: "none",
-                          },
-                        },
-                      }}
-                    >
-                      <Editor value={la.agreement?.content} readOnly={true} modules={{ toolbar: false }} />
+                    <Box maxW="4xl" overflow="hidden">
+                      {/* Use SafeTipTapDisplay for safe HTML rendering */}
+                      <SafeTipTapDisplay htmlContent={la.agreement?.content} />
                     </Box>
                   </AccordionPanel>
                 </AccordionItem>

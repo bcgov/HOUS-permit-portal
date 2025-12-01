@@ -18,8 +18,8 @@ RSpec.describe PermitType, type: :model do
     end
 
     it "is not valid with a duplicate code" do
-      create(:permit_type)
-      permit_type = build(:permit_type)
+      existing_permit_type = create(:permit_type)
+      permit_type = build(:permit_type, code: existing_permit_type.code)
       expect(permit_type).not_to be_valid
     end
   end

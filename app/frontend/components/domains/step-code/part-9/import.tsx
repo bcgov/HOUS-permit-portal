@@ -4,11 +4,9 @@ import { t } from "i18next"
 import React, { useState } from "react"
 import { Controller, FormProvider, useFieldArray, useForm } from "react-hook-form"
 import { useNavigate, useParams } from "react-router-dom"
-import { useJurisdictionFromSite } from "../../../../hooks/use-jurisdiction-from-site"
 import { useMst } from "../../../../setup/root"
 import { uploadFile } from "../../../../utils/uploads"
 import { FileFormControl, NumberFormControl } from "../../../shared/form/input-form-control"
-import { ManualModeInputs } from "../../../shared/select/selectors/manual-mode-inputs"
 import { SitesSelect } from "../../../shared/select/selectors/sites-select"
 import { CompliancePathSelect } from "./compliance-path-select"
 
@@ -117,35 +115,20 @@ export const H2KImport = function StepCodeH2kImport() {
         <form onSubmit={handleSubmit(onSubmit)}>
           <Flex direction="column" gap={4}>
             {!permitApplicationId && (
-              <>
-                <Controller
-                  control={control}
-                  name="site"
-                  rules={{ required: !manualMode }}
-                  render={({ field: { onChange, value } }) => (
-                    <FormControl isRequired={!manualMode}>
-                      <FormLabel>{t("stepCode.part3.projectDetails.address")}</FormLabel>
-                      <SitesSelect
-                        onChange={(opt) => {
-                          onChange(opt)
-                          setValue("fullAddress", opt?.label || "")
-                        }}
-                        placeholder={undefined}
-                        selectedOption={value}
-                        menuPortalTarget={document.body}
-                      />
-                    </FormControl>
-                  )}
-                />
-                {manualMode && <ManualModeInputs />}
-                <Button mb={3} size="sm" variant="link" onClick={() => setManualMode((prev) => !prev)}>
-                  {t("ui.toggleManualMode")}
-                </Button>
-                <FormControl>
-                  <FormLabel>{t("stepCode.part3.projectDetails.jurisdiction")}</FormLabel>
-                  <Input isDisabled value={selectedJurisdiction?.qualifiedName || ""} />
-                </FormControl>
-              </>
+              <Controller
+                control={control}
+                name="site"
+                render={({ field: { onChange, value } }) => (
+                  <SitesSelect
+                    onChange={(opt) => {
+                      onChange(opt)
+                      setValue("fullAddress", opt?.label || "")
+                    }}
+                    selectedOption={value}
+                    menuPortalTarget={document.body}
+                  />
+                )}
+              />
             )}
             <Controller
               control={control}

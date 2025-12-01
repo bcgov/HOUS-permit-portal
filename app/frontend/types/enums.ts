@@ -28,6 +28,7 @@ export enum EFileUploadAttachmentType {
   SupportingDocument = "SupportingDocument",
   ProjectDocument = "ProjectDocument",
   ReportDocument = "ReportDocument",
+  DesignDocument = "DesignDocument",
 }
 
 export enum EPermitApplicationStatus {
@@ -101,7 +102,14 @@ export enum ERequirementTemplateSortFields {
   firstNations = "first_nations",
   description = "description",
   currentVersion = "current_version",
-  jurisdictionsSize = "jurisdictions_size",
+  usedBy = "used_by",
+}
+
+export enum EPreCheckSortFields {
+  fullAddress = "full_address",
+  title = "title",
+  updatedAt = "updated_at",
+  status = "status",
 }
 
 export enum EEarlyAccessRequirementTemplateSortFields {
@@ -337,6 +345,7 @@ export enum ESocketDomainTypes {
   notification = "notification",
   permitApplication = "permit_application",
   template_version = "template_version",
+  jurisdiction = "jurisdiction",
 }
 
 export enum ESocketEventTypes {
@@ -348,6 +357,10 @@ export enum EPermitApplicationSocketEventTypes {
   updateCompliance = "update_compliance",
   updateSupportingDocuments = "update_supporting_documents",
   updatePermitBlockStatus = "update_permit_block_status",
+}
+
+export enum EJurisdictionSocketEventTypes {
+  unviewedSubmissionsCountUpdated = "unviewed_submissions_count_updated",
 }
 
 export enum EEnabledElectiveFieldReason {
@@ -435,6 +448,8 @@ export enum ENotificationActionType {
   applicationRevisionsRequest = "application_revisions_request",
   applicationView = "application_view",
   stepCodeReportGenerated = "step_code_report_generated",
+  preCheckSubmitted = "pre_check_submitted",
+  preCheckCompleted = "pre_check_completed",
 }
 
 export enum ECollaboratorableType {
@@ -701,3 +716,55 @@ export const EPermitClassificationCode = {
 } as const
 
 export type EPermitClassificationCode = (typeof EPermitClassificationCode)[keyof typeof EPermitClassificationCode]
+
+export enum EPreCheckServicePartner {
+  archistar = "archistar",
+}
+
+export enum EPreCheckStatus {
+  draft = "draft",
+  processing = "processing",
+  complete = "complete",
+}
+
+export enum EPreCheckAssessmentResult {
+  passed = "passed",
+  failed = "failed",
+}
+
+export enum EGeneralContactType {
+  adjacentOwner = "adjacentOwner",
+  applicant = "applicant",
+  builder = "builder",
+  business = "business",
+  contractor = "contractor",
+  designer = "designer",
+  developer = "developer",
+  lawyer = "lawyer",
+  propertyManager = "propertyManager",
+  purchaser = "purchaser",
+  owner = "owner",
+  tenant = "tenant",
+  siteContact = "siteContact",
+}
+
+export enum EProfessionalContactType {
+  architect = "architect",
+  coordinatingRegisteredProfessional = "coordinatingRegisteredProfessional",
+  engineer = "engineer",
+  civilEngineer = "civilEngineer",
+  electricalEngineer = "electricalEngineer",
+  energyAdvisor = "energyAdvisor",
+  fireSuppressionEngineer = "fireSuppressionEngineer",
+  fireContact = "fireContact",
+  geotechnicalEngineer = "geotechnicalEngineer",
+  lawyer = "lawyer",
+  mechanical = "mechanical",
+  mechanicalEngineer = "mechanicalEngineer",
+  plumbingEngineer = "plumbingEngineer",
+  plumber = "plumber",
+  qualifiedEnvironmentalProfessional = "qualifiedEnvironmentalProfessional",
+  registeredOnsiteWastewaterPractitioner = "registeredOnsiteWastewaterPractitioner",
+  structuralEngineer = "structuralEngineer",
+  surveyor = "surveyor",
+}

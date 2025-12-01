@@ -1,4 +1,4 @@
-import { Flex, FormControl, FormLabel, HStack, InputGroup, Text } from "@chakra-ui/react"
+import { Button, Input as ChakraInput, Flex, FormControl, FormLabel, HStack, InputGroup, Text } from "@chakra-ui/react"
 import { MapPin } from "@phosphor-icons/react"
 import debounce from "lodash/debounce"
 import { observer } from "mobx-react-lite"
@@ -8,20 +8,30 @@ import { Controller, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { ControlProps, InputProps, OptionProps, components } from "react-select"
 import CreatableSelect from "react-select/creatable"
+import { IJurisdiction } from "../../../../models/jurisdiction"
 import { useMst } from "../../../../setup/root"
 import { IOption } from "../../../../types/types"
 import { formatPidLabel, formatPidValue } from "../../../../utils/utility-functions"
 import { AsyncSelect, TAsyncSelectProps } from "../async-select"
+import { JurisdictionSelect } from "./jurisdiction-select"
 
-type TSitesSelectProps = {
+export type TSitesSelectProps = {
   onChange: (option: IOption) => void
   selectedOption: IOption
   pidName?: string
   siteName?: string
   pidRequired?: boolean
+  jurisdictionIdFieldName?: string
+  showManualModeToggle?: boolean
+  defaultManualMode?: boolean
+  onLtsaMatcherFound?: (matcher: string | null) => void
+  showJurisdiction?: boolean
+  initialJurisdiction?: IJurisdiction | null
+  isDisabled?: boolean
 } & Partial<TAsyncSelectProps>
 
 // Please be advised that this is expected to be used within a form context!
+// This component now includes integrated jurisdiction matching and manual mode functionality
 
 export const SitesSelect = observer(function ({
   onChange,
@@ -30,12 +40,27 @@ export const SitesSelect = observer(function ({
   pidName = "pid",
   siteName = "site",
   pidRequired = false,
+  jurisdictionIdFieldName = "jurisdictionId",
+  showManualModeToggle = true,
+  defaultManualMode = false,
+  onLtsaMatcherFound,
+  showJurisdiction = true,
+  initialJurisdiction = null,
+  isDisabled = false,
   ...rest
 }: TSitesSelectProps) {
   const { t } = useTranslation()
-  const { geocoderStore } = useMst()
+  const { geocoderStore, jurisdictionStore } = useMst()
   const [pidOptions, setPidOptions] = useState<IOption<string>[]>([])
-  const { fetchSiteOptions: fetchOptions, fetchPids, fetchingPids, fetchSiteDetailsFromPid } = geocoderStore
+  const [jurisdiction, setJurisdiction] = useState<IJurisdiction | null>(initialJurisdiction)
+  const [manualMode, setManualMode] = useState(defaultManualMode)
+  const {
+    fetchSiteOptions: fetchOptions,
+    fetchPids,
+    fetchSiteDetailsFromPid,
+    fetchGeocodedJurisdiction,
+  } = geocoderStore
+  const { addJurisdiction, getJurisdictionById } = jurisdictionStore
   const pidSelectRef = useRef(null)
 
   const { setValue, control, watch } = useFormContext()
@@ -83,111 +108,206 @@ export const SitesSelect = observer(function ({
     })()
   }, [siteWatch?.value, pidWatch])
 
+  // Jurisdiction matching logic - integrated from useJurisdictionFromSite hook
+  useEffect(() => {
+    if (manualMode) {
+      return
+    }
+    const siteValue: string | undefined = siteWatch?.value
+    if (R.isNil(siteValue) || siteValue === "") {
+      // Don't clear jurisdiction if we have an initialJurisdiction and haven't selected a site yet
+      if (!initialJurisdiction || jurisdiction !== initialJurisdiction) {
+        setJurisdiction(null)
+      }
+      return
+    }
+
+    let isActive = true
+    ;(async () => {
+      try {
+        const response = await fetchGeocodedJurisdiction(siteValue, undefined, Boolean(onLtsaMatcherFound))
+        const matchedJurisdiction = response?.jurisdiction
+        const foundLtsaMatcher = response?.ltsaMatcher ?? null
+        if (onLtsaMatcherFound) {
+          onLtsaMatcherFound(foundLtsaMatcher)
+        }
+        if (!isActive) return
+        if (matchedJurisdiction) {
+          addJurisdiction(matchedJurisdiction)
+          setValue(jurisdictionIdFieldName, matchedJurisdiction.id)
+          setJurisdiction(matchedJurisdiction)
+        } else {
+          setValue(jurisdictionIdFieldName, null)
+          setJurisdiction(null)
+        }
+      } catch (_e) {
+        setValue(jurisdictionIdFieldName, null)
+        setJurisdiction(null)
+        if (onLtsaMatcherFound) {
+          onLtsaMatcherFound(null)
+        }
+      }
+    })()
+
+    return () => {
+      isActive = false
+    }
+  }, [siteWatch?.value, manualMode])
+
   const debouncedFetchOptions = useCallback(debounce(fetchSiteOptions, 1000), [])
 
   return (
-    <Flex direction={{ base: "column", md: "row" }} bg="greys.grey03" px={6} py={2} gap={4} w="full">
-      <FormControl>
-        <FormLabel>{t("permitApplication.addressLabel")}</FormLabel>
-        <InputGroup>
-          <AsyncSelect<IOption, boolean>
-            isClearable={true}
-            onChange={handleChange}
-            placeholder="Search Addresses"
-            value={selectedOption}
-            menuPosition="fixed"
-            menuShouldScrollIntoView={false}
-            components={{
-              Control,
-              Option,
-              Input,
-            }}
-            // Ensure full-width container and menu portal z-index by default
-            styles={{
-              container: (css) => ({
-                ...css,
-                width: "100%",
-              }),
-              menuPortal: (base) => ({ ...base, zIndex: 9999 }),
-              ...(rest.styles as any),
-            }}
-            stylesToMerge={{
-              control: {
-                borderRadius: "4px",
-                paddingInline: "0.75rem",
-                height: "40px",
-              },
-              menu: {
-                width: "100%",
-                background: "var(--chakra-colors-greys-grey10)",
-              },
-              ...stylesToMerge,
-            }}
-            defaultOptions
-            loadOptions={debouncedFetchOptions}
-            closeMenuOnSelect={true}
-            isCreatable={false}
-            // Render menu in a portal by default to avoid clipping in overflow contexts
-            menuPortalTarget={
-              (rest as any).menuPortalTarget ?? (typeof document !== "undefined" ? document.body : undefined)
-            }
-            {...rest}
-          />
-        </InputGroup>
-      </FormControl>
-
-      <FormControl>
-        <FormLabel>{t("permitApplication.pidLabel")}</FormLabel>
-        <InputGroup>
-          <Flex w="full" direction="column">
-            <Controller
-              name={pidName}
-              control={control}
-              rules={{
-                required:
-                  pidRequired || pidOptions.length > 0
-                    ? (t("ui.isRequired", { field: t("permitApplication.pidLabel") }) as string)
-                    : false,
+    <Flex direction="column" gap={4} w="full">
+      {/* Address and PID - Always visible */}
+      <Flex direction={{ base: "column", md: "row" }} bg="greys.grey03" px={6} py={2} gap={4} w="full">
+        <FormControl>
+          <FormLabel>{t("permitApplication.addressLabel")}</FormLabel>
+          <InputGroup>
+            <AsyncSelect<IOption, boolean>
+              isClearable={true}
+              onChange={handleChange}
+              placeholder="Search Addresses"
+              value={selectedOption}
+              menuPosition="fixed"
+              menuShouldScrollIntoView={false}
+              isDisabled={isDisabled}
+              components={{
+                Control,
+                Option,
+                Input,
               }}
-              render={({ field: { onChange, value } }) => {
-                return (
-                  <CreatableSelect
-                    // @ts-ignore
-                    options={pidOptions}
-                    ref={pidSelectRef}
-                    value={{
-                      label: formatPidLabel(value),
-                      value: formatPidValue(value),
-                    }}
-                    onChange={(option) => {
-                      if (!option) {
-                        setValue(siteName, null)
-                      }
-                      onChange(formatPidValue(option?.value))
-                    }}
-                    onCreateOption={(inputValue: string) => {
-                      const newValue = { label: formatPidLabel(inputValue), value: formatPidValue(inputValue) }
-                      onChange(newValue.value)
-                    }}
-                    formatCreateLabel={(inputValue: string) =>
-                      t("permitApplication.usePid", { inputValue: formatPidLabel(inputValue) })
-                    }
-                    menuPortalTarget={document.body}
-                    menuPosition="fixed"
-                    styles={{
-                      menuPortal: (base) => ({ ...base, zIndex: 10000 }),
-                      menu: (base) => ({ ...base, zIndex: 10000 }),
-                      /* keep existing styles */
-                    }}
-                    isClearable
-                    isSearchable
-                  />
-                )
+              // Ensure full-width container and menu portal z-index by default
+              styles={{
+                container: (css) => ({
+                  ...css,
+                  width: "100%",
+                }),
+                menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                ...(rest.styles as any),
               }}
+              stylesToMerge={{
+                control: {
+                  borderRadius: "4px",
+                  paddingInline: "0.75rem",
+                  height: "40px",
+                },
+                menu: {
+                  width: "100%",
+                  background: "var(--chakra-colors-greys-grey10)",
+                },
+                ...stylesToMerge,
+              }}
+              defaultOptions
+              loadOptions={debouncedFetchOptions}
+              closeMenuOnSelect={true}
+              isCreatable={false}
+              // Render menu in a portal by default to avoid clipping in overflow contexts
+              menuPortalTarget={
+                (rest as any).menuPortalTarget ?? (typeof document !== "undefined" ? document.body : undefined)
+              }
+              {...rest}
             />
-          </Flex>
-        </InputGroup>
-      </FormControl>
+          </InputGroup>
+        </FormControl>
+
+        <FormControl>
+          <FormLabel>{t("permitApplication.pidLabel")}</FormLabel>
+          <InputGroup>
+            <Flex w="full" direction="column">
+              <Controller
+                name={pidName}
+                control={control}
+                rules={{
+                  required:
+                    pidRequired || pidOptions.length > 0
+                      ? String(t("ui.isRequired", { field: t("permitApplication.pidLabel") }))
+                      : false,
+                }}
+                render={({ field: { onChange, value } }) => {
+                  return (
+                    <CreatableSelect
+                      // @ts-ignore
+                      options={pidOptions}
+                      ref={pidSelectRef}
+                      value={{
+                        label: formatPidLabel(value),
+                        value: formatPidValue(value),
+                      }}
+                      onChange={(option) => {
+                        if (!option) {
+                          setValue(siteName, null)
+                        }
+                        onChange(formatPidValue(option?.value))
+                      }}
+                      onCreateOption={(inputValue: string) => {
+                        const newValue = { label: formatPidLabel(inputValue), value: formatPidValue(inputValue) }
+                        onChange(newValue.value)
+                      }}
+                      formatCreateLabel={(inputValue: string) =>
+                        t("permitApplication.usePid", { inputValue: formatPidLabel(inputValue) })
+                      }
+                      menuPortalTarget={document.body}
+                      menuPosition="fixed"
+                      styles={{
+                        menuPortal: (base) => ({ ...base, zIndex: 10000 }),
+                        menu: (base) => ({ ...base, zIndex: 10000 }),
+                        /* keep existing styles */
+                      }}
+                      isClearable
+                      isSearchable
+                      isDisabled={isDisabled}
+                    />
+                  )
+                }}
+              />
+            </Flex>
+          </InputGroup>
+        </FormControl>
+      </Flex>
+
+      {/* Auto-matched Jurisdiction Display - Only in automatic mode */}
+      {!manualMode && showJurisdiction && (
+        <Flex bg="greys.grey03" px={6} py={2} gap={2} w="full" direction="column">
+          <FormLabel mb={0}>{t("permitProject.new.jurisdictionTitle")}</FormLabel>
+          <ChakraInput isDisabled value={jurisdiction?.qualifiedName || ""} />
+        </Flex>
+      )}
+
+      {/* Manual Jurisdiction Selector - Only in manual mode */}
+      {manualMode && showJurisdiction && (
+        <Flex bg="greys.grey03" px={6} py={2} gap={4} w="full" direction="column">
+          <FormControl w="full" zIndex={1}>
+            <FormLabel>{t("permitProject.new.jurisdictionTitle")}</FormLabel>
+            <InputGroup w="full">
+              <Controller
+                name={jurisdictionIdFieldName}
+                control={control}
+                render={({ field: { onChange, value } }) => {
+                  return (
+                    <JurisdictionSelect
+                      onChange={(selectValue) => {
+                        if (selectValue) addJurisdiction(selectValue)
+                        onChange(selectValue?.id)
+                      }}
+                      onFetch={() => setValue(jurisdictionIdFieldName, null)}
+                      selectedOption={value ? { label: getJurisdictionById(value)?.reverseQualifiedName, value } : null}
+                      menuPortalTarget={document.body}
+                      isDisabled={isDisabled}
+                    />
+                  )
+                }}
+              />
+            </InputGroup>
+          </FormControl>
+        </Flex>
+      )}
+
+      {/* Manual Mode Toggle */}
+      {showManualModeToggle && showJurisdiction && (
+        <Button isDisabled={isDisabled} variant="link" size="sm" onClick={() => setManualMode((prev) => !prev)}>
+          {manualMode ? t("ui.switchToAutomaticMode") : t("ui.switchToManualMode")}
+        </Button>
+      )}
     </Flex>
   )
 })

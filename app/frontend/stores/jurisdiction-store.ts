@@ -7,8 +7,8 @@ import { withEnvironment } from "../lib/with-environment"
 import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
 import { IJurisdiction, JurisdictionModel } from "../models/jurisdiction"
-import { EJurisdictionSortFields } from "../types/enums"
-import { IJurisdictionFilters } from "../types/types"
+import { EJurisdictionSocketEventTypes, EJurisdictionSortFields } from "../types/enums"
+import { IJurisdictionFilters, IUserPushPayload } from "../types/types"
 import { isUUID, setQueryParam, toCamelCase } from "../utils/utility-functions"
 
 export const JurisdictionStoreModel = types
@@ -68,7 +68,7 @@ export const JurisdictionStoreModel = types
       const { ok, data: response } = yield* toGenerator(self.environment.api.createJurisdiction(formData))
 
       if (ok) {
-        self.jurisdictionMap.put(response.data)
+        self.mergeUpdate(response.data, "jurisdictionMap")
         return response.data
       }
     }),
@@ -145,6 +145,23 @@ export const JurisdictionStoreModel = types
       setQueryParam("currentPage", null)
       return result
     }),
+    processWebsocketChange(payload: IUserPushPayload) {
+      if (payload?.eventType === EJurisdictionSocketEventTypes.unviewedSubmissionsCountUpdated) {
+        const { jurisdictionId, sandboxId, unviewedCount } = payload.data as any
+        const currentUser = self.rootStore.userStore.currentUser
+        const currentJurisdiction = currentUser?.jurisdiction
+        const currentSandboxId = self.rootStore.sandboxStore.currentSandboxId
+
+        // Only update if it's for the current jurisdiction and sandbox matches
+        if (
+          currentJurisdiction?.id === jurisdictionId &&
+          sandboxId === currentSandboxId &&
+          typeof unviewedCount === "number"
+        ) {
+          currentJurisdiction.setUnviewedSubmissionsCount(unviewedCount)
+        }
+      }
+    },
   }))
 
 export interface IJurisdictionStore extends Instance<typeof JurisdictionStoreModel> {}

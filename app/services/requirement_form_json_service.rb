@@ -7,6 +7,72 @@ class RequirementFormJsonService
   ENERGY_STEP_CODE_TOOLTIP_URL =
     "https://www2.gov.bc.ca/gov/content/housing-tenancy/building-or-renovating/permits/building-permit-hub/29065#Reports"
 
+  STEP_CODE_ACTIONS_CONTAINER =
+    lambda do |start_event, step_code_type|
+      {
+        type: "container",
+        input: false,
+        tableView: false,
+        components: [
+          {
+            type: "columns",
+            input: false,
+            tableView: false,
+            columns: [
+              {
+                components: [
+                  {
+                    type: "button",
+                    action: "custom",
+                    title:
+                      I18n.t("formio.requirement_template.energy_step_code"),
+                    label:
+                      I18n.t("formio.requirement_template.energy_step_code"),
+                    custom:
+                      "document.dispatchEvent(new Event('#{start_event}'));"
+                  }
+                ],
+                width: 3,
+                offset: 0,
+                push: 0,
+                pull: 0,
+                size: "md"
+              },
+              {
+                components: [
+                  {
+                    type: "content",
+                    html:
+                      "<span class=\"step-code-actions-inline\">#{I18n.t("formio.requirement_template.started_report_outside")} </span>"
+                  },
+                  {
+                    type: "button",
+                    action: "custom",
+                    custom_class: "step-code-link-button",
+                    title:
+                      I18n.t(
+                        "formio.requirement_template.select_energy_step_code"
+                      ),
+                    label:
+                      I18n.t(
+                        "formio.requirement_template.select_energy_step_code"
+                      ),
+                    custom:
+                      "document.dispatchEvent(new CustomEvent('openExistingStepCode', { detail: { stepCodeType: '#{step_code_type}' } }));"
+                  }
+                ],
+                width: 9,
+                offset: 0,
+                push: 0,
+                pull: 0,
+                size: "md"
+              }
+            ]
+          }
+        ]
+      }
+    end
+
   DEFAULT_FORMIO_TYPE_TO_OPTIONS = {
     text: {
       type: "simpletextfield"
@@ -169,20 +235,10 @@ class RequirementFormJsonService
       #   type: "choicesjs",
       # },
     },
-    energy_step_code: {
-      type: "button",
-      action: "custom",
-      title: I18n.t("formio.requirement_template.energy_step_code"),
-      label: I18n.t("formio.requirement_template.energy_step_code"),
-      custom: "document.dispatchEvent(new Event('openStepCode'));"
-    },
-    energy_step_code_part_3: {
-      type: "button",
-      action: "custom",
-      title: I18n.t("formio.requirement_template.energy_step_code"),
-      label: I18n.t("formio.requirement_template.energy_step_code"),
-      custom: "document.dispatchEvent(new Event('openStepCodePart3'));"
-    },
+    energy_step_code:
+      STEP_CODE_ACTIONS_CONTAINER.call("openStepCode", "Part9StepCode"),
+    energy_step_code_part_3:
+      STEP_CODE_ACTIONS_CONTAINER.call("openStepCodePart3", "Part3StepCode"),
     architectural_drawing: {
       type: "button",
       action: "custom",
@@ -254,6 +310,13 @@ class RequirementFormJsonService
       json.merge!(
         { energyStepCode: requirement.input_options["energy_step_code"] }
       )
+      # Inject the requirement key into the link below the primary button
+      inject_step_code_existing_link!(json, "Part9StepCode", json[:key])
+    end
+
+    if requirement.input_type.to_sym == :energy_step_code_part_3
+      # Inject the requirement key into the link below the primary button
+      inject_step_code_existing_link!(json, "Part3StepCode", json[:key])
     end
 
     if requirement.input_options["conditional"].present?
@@ -620,7 +683,7 @@ class RequirementFormJsonService
       )
 
     datagrid_default_value =
-      rows.map { |r| { "name" => r["name"], "a" => r["a"], "quantity" => 0 } }
+      rows.map { |r| { "name" => r["name"], "a" => r["a"] } }
 
     headers = requirement.input_options["headers"] || {}
     first_col_label =
@@ -690,7 +753,6 @@ class RequirementFormJsonService
           type: "number",
           key: "quantity",
           input: true,
-          defaultValue: 0,
           validate: {
             min: 0
           },
@@ -839,6 +901,25 @@ class RequirementFormJsonService
   end
 
   private
+
+  def inject_step_code_existing_link!(json, step_code_type, key)
+    begin
+      # Find the link-styled button and inject the requirement key into its event
+      components = json[:components].is_a?(Array) ? json[:components] : []
+      link_button =
+        components.find do |c|
+          c.is_a?(Hash) && c[:type] == "button" &&
+            c[:custom_class] == "step-code-link-button"
+        end
+      return unless link_button
+
+      link_button[
+        :custom
+      ] = "document.dispatchEvent(new CustomEvent('openExistingStepCode', { detail: { key: '#{key}', stepCodeType: '#{step_code_type}' } }));"
+    rescue StandardError
+      # no-op
+    end
+  end
 
   def get_general_contact_type_options
     I18n

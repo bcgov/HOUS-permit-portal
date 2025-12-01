@@ -1,6 +1,6 @@
 class Requirement < ApplicationRecord
   include HtmlSanitizeAttributes
-  sanitizable :hint
+  sanitizable :hint, :instructions
 
   scope :electives, -> { where(elective: true) }
 
@@ -8,7 +8,8 @@ class Requirement < ApplicationRecord
 
   acts_as_list scope: :requirement_block, top_of_list: 0
 
-  enum input_type: {
+  enum :input_type,
+       {
          text: 0,
          number: 1,
          checkbox: 2,
@@ -31,7 +32,7 @@ class Requirement < ApplicationRecord
          multiply_sum_grid: 21,
          architectural_drawing: 22
        },
-       _prefix: true
+       prefix: true
 
   # This needs to run before validation because we have validations related to the requirement_code
   before_validation :set_requirement_code
@@ -88,20 +89,21 @@ class Requirement < ApplicationRecord
   ENERGY_STEP_CODE_SELECT_REQUIREMENT_CODE = "energy_step_code_method".freeze
   ENERGY_STEP_CODE_PART_9_REQUIREMENT_CODE =
     "energy_step_code_tool_part_9".freeze
+  ENERGY_STEP_CODE_METHOD_HASH = {
+    "requirement_code" => ENERGY_STEP_CODE_SELECT_REQUIREMENT_CODE,
+    "input_type" => "select",
+    "input_options" => {
+      "value_options" => [
+        {
+          "label" => "Utilizing the digital step code tool",
+          "value" => "tool"
+        },
+        { "label" => "By file upload", "value" => "file" }
+      ]
+    }
+  }
   ENERGY_STEP_CODE_PART_9_DEPENDENCY_REQUIRED_SCHEMA = {
-    energy_step_code_method: {
-      "requirement_code" => ENERGY_STEP_CODE_SELECT_REQUIREMENT_CODE,
-      "input_type" => "select",
-      "input_options" => {
-        "value_options" => [
-          {
-            "label" => "Utilizing the digital step code tool",
-            "value" => "tool"
-          },
-          { "label" => "By file upload", "value" => "file" }
-        ]
-      }
-    },
+    energy_step_code_method: ENERGY_STEP_CODE_METHOD_HASH,
     energy_step_code_tool_part_9: {
       "requirement_code" => "energy_step_code_tool_part_9",
       "input_type" => "energy_step_code",
@@ -141,19 +143,7 @@ class Requirement < ApplicationRecord
   ENERGY_STEP_CODE_PART_3_REQUIREMENT_CODE =
     "energy_step_code_tool_part_3".freeze
   ENERGY_STEP_CODE_PART_3_DEPENDENCY_REQUIRED_SCHEMA = {
-    energy_step_code_method: {
-      "requirement_code" => ENERGY_STEP_CODE_SELECT_REQUIREMENT_CODE,
-      "input_type" => "select",
-      "input_options" => {
-        "value_options" => [
-          {
-            "label" => "Utilizing the digital step code tool",
-            "value" => "tool"
-          },
-          { "label" => "By file upload", "value" => "file" }
-        ]
-      }
-    },
+    energy_step_code_method: ENERGY_STEP_CODE_METHOD_HASH,
     energy_step_code_tool_part_3: {
       "requirement_code" => "energy_step_code_tool_part_3",
       "input_type" => "energy_step_code_part_3",

@@ -1,5 +1,8 @@
 class StepCode < ApplicationRecord
   include ProjectItem
+  include Discard::Model
+  include ChecklistReportDocumentConcern
+
   has_parent :permit_application
 
   # Enable search for StepCodes
@@ -16,6 +19,8 @@ class StepCode < ApplicationRecord
              foreign_key: "creator_id",
              optional: true
 
+  after_commit :refresh_search_index, if: :saved_change_to_discarded_at
+
   # Associations
   belongs_to :permit_application, optional: true
   has_one :permit_project, through: :permit_application
@@ -24,17 +29,24 @@ class StepCode < ApplicationRecord
   # Delegates for attributes from PermitApplication
   delegate :number, to: :permit_application, prefix: true, allow_nil: true
 
-  validates :permit_application_id, uniqueness: true, allow_nil: true
+  validates :permit_application_id,
+            uniqueness: {
+              conditions: -> { kept }
+            },
+            allow_nil: true
 
   delegate :submitter,
            :newly_submitted_at,
            :status,
-           :jurisdiction_heating_degree_days,
            to: :permit_application,
            allow_nil: true
 
   def builder
     "" #replace with a config on permit application
+  end
+
+  def complete?
+    raise NotImplementedError, "Subclasses must implement the complete? method"
   end
 
   def primary_checklist
@@ -67,7 +79,16 @@ class StepCode < ApplicationRecord
       submitter_id: permit_application&.submitter_id,
       permit_project_id: permit_project&.id,
       jurisdiction_id: jurisdiction&.id,
-      sandbox_id: permit_application&.sandbox_id
+      sandbox_id: permit_application&.sandbox_id,
+      discarded: discarded_at.present?
     }
+  end
+
+  def refresh_search_index
+    StepCode.search_index.refresh
+  end
+
+  def generate_report_document
+    StepCodeReportGenerationJob.perform_async(id)
   end
 end

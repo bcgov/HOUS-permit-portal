@@ -39,7 +39,16 @@ export const PopoverProvider: React.FC<IPopoverProvider> = ({ children }) => {
   }
 
   return (
-    <PopoverContext.Provider value={{ isOpen, handleOpen, handleClose, numberJustRead, showRead, setShowRead }}>
+    <PopoverContext.Provider
+      value={{
+        isOpen,
+        handleOpen,
+        handleClose,
+        numberJustRead,
+        showRead,
+        setShowRead,
+      }}
+    >
       {children}
     </PopoverContext.Provider>
   )

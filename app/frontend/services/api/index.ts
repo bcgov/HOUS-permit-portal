@@ -16,6 +16,7 @@ import { IPermitApplication } from "../../models/permit-application"
 import { IActivity, IPermitType } from "../../models/permit-classification"
 import { IPermitCollaboration } from "../../models/permit-collaboration"
 import { IPermitProject } from "../../models/permit-project"
+import { IPreCheck } from "../../models/pre-check"
 import { IRequirementTemplate } from "../../models/requirement-template"
 import { ITemplateVersion } from "../../models/template-version"
 import { IUser } from "../../models/user"
@@ -38,6 +39,7 @@ import {
   IJurisdictionResponse,
   INotificationResponse,
   IOptionResponse,
+  IPageMeta,
   IRequirementBlockResponse,
   IRequirementTemplateResponse,
   IUsersResponse,
@@ -51,6 +53,7 @@ import {
   EPermitBlockStatus,
   EPermitClassificationType,
   EPermitProjectSortFields,
+  EPreCheckSortFields,
   ERequirementLibrarySortFields,
   ERequirementTemplateSortFields,
   EStepCodeSortFields,
@@ -500,6 +503,10 @@ export class Api {
     })
   }
 
+  async retriggerPermitApplicationWebhook(id: string) {
+    return this.client.post<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/retrigger_submission_webhook`)
+  }
+
   async finalizeRevisionRequests(id) {
     return this.client.post<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/revision_requests/finalize`)
   }
@@ -586,8 +593,12 @@ export class Api {
     return this.client.get<IOptionResponse>(`/geocoder/site_options`, { address })
   }
 
-  async fetchGeocodedJurisdiction(siteId: string, pid: string = null) {
-    return this.client.get<IOptionResponse>(`/geocoder/jurisdiction`, { siteId, pid })
+  async fetchGeocodedJurisdiction(siteId: string, pid: string = null, includeLtsaMatcher = false) {
+    return this.client.get<IOptionResponse>(`/geocoder/jurisdiction`, {
+      siteId,
+      pid,
+      includeLtsaMatcher,
+    })
   }
 
   async fetchPids(siteId: string) {
@@ -704,6 +715,14 @@ export class Api {
     return this.client.delete<ApiResponse<IStepCode>>(`/step_codes/${id}`)
   }
 
+  async archiveStepCode(id: string) {
+    return this.client.delete<ApiResponse<IStepCode>>(`/step_codes/${id}`)
+  }
+
+  async restoreStepCode(id: string) {
+    return this.client.patch<ApiResponse<IStepCode>>(`/step_codes/${id}/restore`)
+  }
+
   async updateStepCode(
     id: string,
     data: Partial<{
@@ -714,6 +733,7 @@ export class Api {
       phase: string
       buildingCodeVersion: string
       jurisdictionId: string
+      permitApplicationId: string
     }>
   ) {
     return this.client.patch<ApiResponse<IStepCode>>(`/step_codes/${id}`, { stepCode: data })
@@ -725,6 +745,38 @@ export class Api {
 
   async downloadStepCodeMetricsCsv(stepCodeType: EStepCodeType) {
     return this.client.get<BlobPart>(`/step_codes/download_step_code_metrics_csv`, { stepCodeType })
+  }
+
+  async fetchPreChecks(params?: TSearchParams<EPreCheckSortFields>) {
+    return this.client.post<IApiResponse<IPreCheck[], IPageMeta>>(`/pre_checks/search`, params)
+  }
+
+  async fetchPreCheck(id: string) {
+    return this.client.get<IApiResponse<IPreCheck, {}>>(`/pre_checks/${id}`)
+  }
+
+  async createPreCheck(params: Partial<IPreCheck>) {
+    return this.client.post<IApiResponse<IPreCheck, {}>>(`/pre_checks`, { preCheck: params })
+  }
+
+  async updatePreCheck(id: string, params: Partial<IPreCheck>) {
+    return this.client.patch<IApiResponse<IPreCheck, {}>>(`/pre_checks/${id}`, { preCheck: params })
+  }
+
+  async submitPreCheck(id: string) {
+    return this.client.post<IApiResponse<IPreCheck, {}>>(`/pre_checks/${id}/submit`)
+  }
+
+  async markPreCheckAsViewed(id: string) {
+    return this.client.patch<IApiResponse<IPreCheck, {}>>(`/pre_checks/${id}/mark_viewed`)
+  }
+
+  async getPreCheckPdfReportUrl(id: string) {
+    return this.client.get<IApiResponse<{ pdfReportUrl: string }, {}>>(`/pre_checks/${id}/pdf_report_url`)
+  }
+
+  async downloadPreCheckUserConsentCsv() {
+    return this.client.get<BlobPart>(`/pre_checks/download_pre_check_user_consent_csv`)
   }
 
   async downloadApplicationMetricsCsv() {
@@ -780,6 +832,19 @@ export class Api {
 
   async updateSiteConfiguration(siteConfiguration) {
     return this.client.put<ApiResponse<ISiteConfigurationStore>>(`/site_configuration`, { siteConfiguration })
+  }
+
+  async updateJurisdictionEnrollments(servicePartner: string, jurisdictionIds: string[]) {
+    return this.client.post<ApiResponse<any>>(`/site_configuration/update_jurisdiction_enrollments`, {
+      servicePartner,
+      jurisdictionIds,
+    })
+  }
+
+  async fetchJurisdictionEnrollments(servicePartner: string) {
+    return this.client.get<ApiResponse<any>>(`/site_configuration/jurisdiction_enrollments`, {
+      servicePartner,
+    })
   }
 
   async updateUser(id: string, user: IUser) {
@@ -934,5 +999,10 @@ export class Api {
         status: data.status,
       },
     })
+  }
+  async shareReportDocumentWithJurisdiction(reportDocumentId: string) {
+    return this.client.post<ApiResponse<{ message: string }>>(
+      `/report_documents/${reportDocumentId}/share_with_jurisdiction`
+    )
   }
 }

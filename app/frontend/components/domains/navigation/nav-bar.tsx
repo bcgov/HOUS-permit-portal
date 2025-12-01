@@ -1,32 +1,10 @@
-import {
-  Box,
-  Button,
-  Container,
-  Flex,
-  HStack,
-  Heading,
-  IconButton,
-  Image,
-  Link,
-  Menu,
-  MenuButton,
-  MenuDivider,
-  MenuGroup,
-  MenuItem,
-  MenuItemProps,
-  MenuList,
-  Portal,
-  Show,
-  Spacer,
-  Text,
-  VStack,
-} from "@chakra-ui/react"
-import { Envelope, Folders, List, Warning } from "@phosphor-icons/react"
+import { Box, Container, Flex, HStack, Heading, Image, Link, Show, Spacer, Text, VStack } from "@chakra-ui/react"
+import { Folders, Tray, Warning } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
-import React, { useState } from "react"
+import React from "react"
 import { Trans, useTranslation } from "react-i18next"
-import { useLocation, useNavigate } from "react-router-dom"
+import { useLocation } from "react-router-dom"
 import { PopoverProvider, useNotificationPopover } from "../../../hooks/use-notification-popover"
 import { useMst } from "../../../setup/root"
 import { EUserRoles } from "../../../types/enums"
@@ -36,9 +14,11 @@ import { RouterLink } from "../../shared/navigation/router-link"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import SandboxHeader from "../../shared/sandbox/sandbox-header"
 import { NotificationsPopover } from "../home/notifications/notifications-popover"
+import { NavBarMenu } from "./nav-bar-menu"
 import { RegionalRMJurisdictionSelect } from "./regional-rm-jurisdiction-select"
-import { SandboxMenuItem } from "./sandbox-menu-item"
 import { SubNavBar } from "./sub-nav-bar"
+
+import { PreCheckNavBar } from "../pre-check/pre-check-nav-bar"
 
 function isTemplateEditPath(path: string): boolean {
   const regex = /^\/requirement-templates\/([a-f\d-]+)\/edit$/
@@ -100,7 +80,13 @@ function isProjectDetailPath(path: string): boolean {
 }
 
 function isStepCodePath(path: string): boolean {
-  const regex = /^\/part-(3|9)-step-code.*$/
+  const regex = /^(\/part-(3|9)-step-code|\/permit-applications\/[a-f\d-]+\/edit\/part-(3|9)-step-code).*$/
+  return regex.test(path)
+}
+
+function isPreCheckPath(path: string): boolean {
+  // TODO: Update for pre checks that are attached to a permit application
+  const regex = /^\/pre-checks\/[a-f\d-]+/
   return regex.test(path)
 }
 
@@ -119,14 +105,40 @@ function shouldHideSubNavbarForPath(path: string): boolean {
     isProjectDetailPath,
     isStepCodePath,
     isAdminPath,
+    isPreCheckPath,
   ]
 
   return matchers.some((matcher) => matcher(path))
 }
 
+function shouldHideFullNavBarForPath(path: string): boolean {
+  const matchers: Array<(path: string) => boolean> = [isStepCodePath]
+
+  return matchers.some((matcher) => matcher(path))
+}
+
 export const NavBar = observer(function NavBar() {
+  const location = useLocation()
+  const path = location.pathname
+
+  if (isPreCheckPath(path)) {
+    return <PreCheckNavBar />
+  }
+
+  if (shouldHideFullNavBarForPath(path)) {
+    return null
+  }
+
+  return (
+    <PopoverProvider>
+      <NavBarContent />
+    </PopoverProvider>
+  )
+})
+
+const NavBarContent = observer(function NavBarContent() {
   const { t } = useTranslation()
-  const { sessionStore, userStore, notificationStore, uiStore, sandboxStore } = useMst()
+  const { sessionStore, userStore, notificationStore, uiStore } = useMst()
 
   const { currentUser } = userStore
   const { loggedIn } = sessionStore
@@ -137,17 +149,17 @@ export const NavBar = observer(function NavBar() {
   const path = location.pathname
 
   return (
-    <PopoverProvider>
+    <>
       <Box
         as="nav"
         id="mainNav"
         w="full"
+        maxH="var(--app-navbar-height)"
         bg={currentUser?.isSubmitter || !loggedIn ? "greys.white" : "theme.blue"}
         color={currentUser?.isSubmitter || !loggedIn ? "theme.blue" : "greys.white"}
-        zIndex={10}
-        borderBottomWidth={2}
-        borderColor="border.light"
+        zIndex={1500}
         shadow="elevations.elevation01"
+        position="relative"
       >
         <Container maxW="container.lg" p={2} px={{ base: 4, md: 8 }}>
           <Flex align="center" gap={2} w="full">
@@ -162,38 +174,23 @@ export const NavBar = observer(function NavBar() {
                 />
               </Box>
             </RouterLink>
-            <Show above="md">
+            <Show above="lg">
               <Flex direction="column" w="full">
                 <HStack>
                   <Text fontSize="2xl" fontWeight="normal" mb="0" whiteSpace="nowrap">
-                    {currentUser?.isSuperAdmin ? t("site.adminNavBarTitle") : t("site.title")}
+                    {t("site.title")}
                   </Text>
 
                   <Text fontSize="sm" textTransform="uppercase" color="theme.yellow" fontWeight="bold" mb={2} ml={1}>
                     {t("site.beta")}
                   </Text>
                 </HStack>
-                {currentUser?.isReviewStaff && (
-                  <SandboxHeader
-                    justify="center"
-                    align="center"
-                    position="static"
-                    borderTopRadius={0}
-                    mb={-2}
-                    color="text.primary"
-                    expanded
-                  />
-                )}
               </Flex>
               <Spacer />
             </Show>
             <HStack gap={3} w="full" justify="flex-end">
               {!loggedIn && <HelpDrawer />}
-              {currentUser?.isSubmitter && !currentUser.isUnconfirmed && (
-                <RouterLinkButton to="/" variant="tertiary" leftIcon={<Folders size={16} />}>
-                  {t("site.myProjects")}
-                </RouterLinkButton>
-              )}
+
               {(currentUser?.isReviewStaff || currentUser?.isTechnicalSupport) &&
                 !currentUser.isRegionalReviewManager && (
                   <Flex direction="column">
@@ -206,7 +203,7 @@ export const NavBar = observer(function NavBar() {
 
               {currentUser?.isRegionalReviewManager && (
                 <VStack align="flex-end" gap={1}>
-                  <Text color="whiteAlpha.700" textAlign="right" variant="tiny_uppercase">
+                  <Text color="whiteAlpha.700" textAlign="right" variant="tiny_uppercase" whiteSpace="nowrap">
                     {t(`user.roles.${currentUser.role as EUserRoles}`)}
                   </Text>
                   <RegionalRMJurisdictionSelect key={rmJurisdictionSelectKey} />
@@ -230,15 +227,44 @@ export const NavBar = observer(function NavBar() {
                   color={currentUser?.isSubmitter || !loggedIn ? "theme.blue" : "greys.white"}
                 />
               )}
+              {currentUser?.isReviewStaff && (
+                <RouterLinkButton
+                  px={2}
+                  to={`/jurisdictions/${currentUser?.jurisdiction?.slug}/submission-inbox`}
+                  variant="ghost"
+                  color="greys.white"
+                >
+                  <Tray size={24} />
+                  <Show above="xl">
+                    <Box as="span" ml={2}>
+                      {t("home.submissionsInboxTitle")}
+                    </Box>
+                  </Show>
+                </RouterLinkButton>
+              )}
+              {currentUser?.isSubmitter && !currentUser.isUnconfirmed && (
+                <RouterLinkButton variant="tertiary" px={2} leftIcon={<Folders size={16} />} to={`/projects`}>
+                  <Show above="xl">{t("site.myProjects")}</Show>
+                </RouterLinkButton>
+              )}
               <NavBarMenu />
             </HStack>
           </Flex>
         </Container>
       </Box>
       {!R.isEmpty(criticalNotifications) && <ActionRequiredBox notification={criticalNotifications[0]} />}
-
+      {currentUser?.isReviewStaff && (
+        <SandboxHeader
+          justify="center"
+          align="center"
+          position="static"
+          borderTopRadius={0}
+          color="text.primary"
+          expanded
+        />
+      )}
       {!shouldHideSubNavbarForPath(path) && <SubNavBar />}
-    </PopoverProvider>
+    </>
   )
 })
 
@@ -288,259 +314,3 @@ const ActionRequiredBox: React.FC<IActionRequiredBoxProps> = observer(({ notific
     </Flex>
   )
 })
-
-interface INavBarMenuProps {}
-
-const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
-  const { t } = useTranslation()
-  const navigate = useNavigate()
-  const { sessionStore, userStore } = useMst()
-  const { currentUser } = userStore
-  const { logout, loggedIn } = sessionStore
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-
-  const handleClickLogout = async () => {
-    await logout()
-  }
-
-  const superAdminOnlyItems = (
-    <MenuGroup>
-      <NavMenuItem label={t("home.permitTemplateCatalogueTitle")} to={"/requirement-templates"} />
-      <NavMenuItem label={t("home.requirementsLibraryTitle")} to={"/requirements-library"} />
-      <NavMenuItem label={t("home.configurationManagement.title")} to={"/configuration-management"} />
-      <NavMenuItem label={t("home.earlyAccess.title")} to={"/early-access"} />
-      <MenuDivider my={0} borderColor="border.light" />
-    </MenuGroup>
-  )
-
-  const reviewStaffOnlyItems = (
-    <MenuGroup>
-      <SandboxMenuItem />
-      <MenuDivider my={0} borderColor="border.light" />
-    </MenuGroup>
-  )
-
-  const reviewManagerOnlyItems = (
-    <MenuGroup>
-      <NavMenuItem
-        label={t("site.breadcrumb.submissionInbox")}
-        to={`/jurisdictions/${currentUser?.jurisdiction?.slug}/submission-inbox`}
-      />
-      <NavMenuItem label={t("site.breadcrumb.digitalBuildingPermits")} to={"/digital-building-permits"} />
-      <NavMenuItem
-        label={t("site.breadcrumb.configurationManagement")}
-        to={`/jurisdictions/${currentUser?.jurisdiction?.slug}/configuration-management`}
-      />
-      <NavMenuItem
-        label={t("site.breadcrumb.apiSettings")}
-        to={`/jurisdictions/${currentUser?.jurisdiction?.slug}/api-settings`}
-      />
-      <MenuDivider my={0} borderColor="border.light" />
-    </MenuGroup>
-  )
-
-  const adminOrManagerItems = <></>
-
-  const reviwerOnlyItems = (
-    <MenuGroup>
-      <NavMenuItem
-        label={t("site.breadcrumb.submissionInbox")}
-        to={`/jurisdictions/${currentUser?.jurisdiction?.slug}/submission-inbox`}
-      />
-      <MenuDivider my={0} borderColor="border.light" />
-    </MenuGroup>
-  )
-
-  const submitterOnlyItems = <></>
-
-  return (
-    <Menu onClose={() => setIsMenuOpen(false)} onOpen={() => setIsMenuOpen(true)} computePositionOnMount>
-      <Show below="md">
-        <MenuButton
-          as={IconButton}
-          borderRadius="lg"
-          border={currentUser?.isSubmitter || !loggedIn ? "solid black" : "solid white"}
-          borderWidth="1px"
-          p={3}
-          variant={currentUser?.isSubmitter || !loggedIn ? "primaryInverse" : "primary"}
-          aria-label="menu dropdown button"
-          icon={<List size={16} weight="bold" />}
-        />
-      </Show>
-
-      <Show above="md">
-        <MenuButton
-          as={Button}
-          borderRadius="lg"
-          border={currentUser?.isSubmitter || !loggedIn ? "solid black" : "solid white"}
-          borderWidth="1px"
-          p={3}
-          variant={currentUser?.isSubmitter || !loggedIn ? "primaryInverse" : "primary"}
-          aria-label="menu dropdown button"
-          leftIcon={<List size={16} weight="bold" />}
-        >
-          {t("site.menu")}
-        </MenuButton>
-      </Show>
-
-      <Portal>
-        <Box color="text.primary" className={isMenuOpen && "show-menu-overlay-background"}>
-          <MenuList zIndex={99} boxShadow="2xl" pb={0}>
-            {loggedIn && !currentUser.isUnconfirmed ? (
-              <>
-                <Text fontSize="xs" fontStyle="italic" px={3} mb={-1} color="greys.grey01">
-                  {t("site.loggedInWelcome")}
-                </Text>
-                <MenuGroup title={currentUser.name} noOfLines={1}>
-                  <MenuDivider my={0} borderColor="border.light" />
-                  <NavMenuItem label={t("site.home")} to={"/"} />
-                  <MenuDivider my={0} borderColor="border.light" />
-                  {!currentUser.isReviewStaff && (
-                    <NavMenuItem label={t("home.jurisdictionsTitle")} to={"/jurisdictions"} />
-                  )}
-                  {currentUser?.isSuperAdmin && superAdminOnlyItems}
-                  {(currentUser?.isReviewManager || currentUser?.isRegionalReviewManager) && reviewManagerOnlyItems}
-                  {(currentUser?.isSuperAdmin ||
-                    currentUser?.isReviewManager ||
-                    currentUser?.isRegionalReviewManager) &&
-                    adminOrManagerItems}
-                  {currentUser?.isReviewer && reviwerOnlyItems}
-                  {currentUser?.isSubmitter && submitterOnlyItems}
-                  {currentUser?.isReviewStaff && reviewStaffOnlyItems}
-                  {currentUser?.isTechnicalSupport && reviewStaffOnlyItems}
-                  {!currentUser?.isSubmitter && (
-                    <>
-                      <NavMenuItem label={t("site.myProjects")} to="/projects" bg="greys.grey03" />
-                      <MenuDivider my={0} borderColor="border.light" />
-                    </>
-                  )}
-                  <HelpDrawer
-                    renderTriggerButton={({ onClick }) => <NavMenuItem label={t("ui.help")} onClick={onClick} />}
-                  />
-                  <NavMenuItem label={t("user.myProfile")} to={"/profile"} />
-                  <NavMenuItem label={t("auth.logout")} onClick={handleClickLogout} />
-                  <NavMenuItem
-                    label={t("home.joinTheBuildingPermitHub.title")}
-                    to={"/onboarding-checklist-page-for-lg-adopting"}
-                  />
-                  <NavMenuItem label={t("home.projectReadinessTools.title")} to={"/project-readiness-tools"} />
-                </MenuGroup>
-              </>
-            ) : (
-              <>
-                {!loggedIn && (
-                  <>
-                    <MenuList
-                      display="flex"
-                      flexWrap="wrap"
-                      px={2}
-                      py={3}
-                      gap={2}
-                      border="0"
-                      boxShadow="none"
-                      maxW="300px"
-                    >
-                      <NavMenuItemCTA label={t("auth.login")} to="/login" />
-                    </MenuList>
-                    <MenuDivider my={0} borderColor="border.light" />
-                  </>
-                )}
-                <NavMenuItem label={t("site.home")} to="/" />
-                <NavMenuItem label={t("home.jurisdictionsTitle")} to={"/jurisdictions"} />
-                <NavMenuItem label={t("home.projectReadinessTools.title")} to={"/project-readiness-tools"} />
-                <NavMenuItem
-                  label={t("home.joinTheBuildingPermitHub.title")}
-                  to={"/onboarding-checklist-page-for-lg-adopting"}
-                />
-                {loggedIn && <NavMenuItem label={t("auth.logout")} onClick={handleClickLogout} />}
-              </>
-            )}
-
-            <MenuDivider my={0} borderColor="border.light" />
-            <MenuItem>
-              <Link textDecoration="none" w="full" href={"mailto:" + t("site.contactEmail")} isExternal>
-                {t("site.giveFeedback")} <Envelope size={16} style={{ display: "inline", color: "inherit" }} />
-              </Link>
-            </MenuItem>
-            {import.meta.env.VITE_RELEASE_VERSION && (
-              <MenuItem maxW={"250px"} bg="greys.grey03" _hover={{ cursor: "auto" }}>
-                <Text
-                  textAlign="center"
-                  w="full"
-                  color="greys.grey90"
-                  fontWeight={"thin"}
-                  fontStyle="italic"
-                  fontSize="sm"
-                >
-                  {import.meta.env.VITE_RELEASE_VERSION}
-                </Text>
-              </MenuItem>
-            )}
-          </MenuList>
-        </Box>
-      </Portal>
-    </Menu>
-  )
-})
-
-// Looks complicated but this is jsut how you make it so that either to or onClick must be given, but not necessarily both
-interface INavMenuItemProps extends MenuItemProps {
-  label: string
-  to?: string
-  onClick?: (any) => void
-}
-
-const NavMenuItem = ({ label, to, onClick, ...rest }: INavMenuItemProps) => {
-  const navigate = useNavigate()
-
-  const handleClick = (e) => {
-    navigate(to)
-    onClick && onClick(e)
-  }
-
-  return (
-    <MenuItem as={"a"} py={2} px={3} onClick={handleClick} _hover={{ cursor: "pointer", bg: "hover.blue" }} {...rest}>
-      <Text textAlign="left" w="full">
-        {label}
-      </Text>
-    </MenuItem>
-  )
-}
-
-// THIS IS CTA BUTTON VERSION FOR THE NAV MENU
-interface INavMenuItemCTAProps {
-  label: string
-  to?: string
-  onClick?: (any) => void
-}
-
-const NavMenuItemCTA = ({ label, to, onClick }: INavMenuItemCTAProps) => {
-  const navigate = useNavigate()
-
-  const handleClick = (e) => {
-    navigate(to)
-    onClick && onClick(e)
-  }
-
-  return (
-    <MenuItem
-      as={"a"}
-      flex={1}
-      onClick={handleClick}
-      style={{
-        color: "var(--chakra-colors-greys-white)",
-        background: "var(--chakra-colors-theme-blue)",
-        borderRadius: "var(--chakra-radii-sm)",
-        width: "auto",
-      }}
-      display={"flex"}
-      justifyContent={"center"}
-      _hover={{
-        bg: "var(--chakra-colors-theme-blueAlt) !important",
-        boxShadow: "none",
-      }}
-    >
-      {label}
-    </MenuItem>
-  )
-}

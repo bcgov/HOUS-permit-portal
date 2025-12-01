@@ -9,7 +9,7 @@ import { Trans, useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { useMountStatus } from "../../../hooks/use-mount-status"
 import { IPermitApplication } from "../../../models/permit-application"
-import { EFileUploadAttachmentType, EFlashMessageStatus } from "../../../types/enums"
+import { EFileUploadAttachmentType, EFlashMessageStatus, EStepCodeType } from "../../../types/enums"
 import { IErrorsBoxData } from "../../../types/types"
 import { getCompletedBlocksFromForm, getRequirementByKey } from "../../../utils/formio-component-traversal"
 import { singleRequirementFormJson, singleRequirementSubmissionData } from "../../../utils/formio-helpers"
@@ -23,12 +23,13 @@ import { Form, defaultOptions } from "../chefs"
 import { ContactModal } from "../contact/contact-modal"
 import { PreviousSubmissionModal } from "../revisions/previous-submission-modal"
 import { PermitApplicationSubmitModal } from "./permit-application-submit-modal"
+import { StepCodeSelectModal } from "./step-code-select-modal"
 
 interface IRequirementFormProps {
   permitApplication?: IPermitApplication
   onCompletedBlocksChange?: (sections: any) => void
   formRef: any
-  triggerSave?: (params?: { autosave?: boolean; skipPristineCheck?: boolean }) => void
+  triggerSave?: (params?: { autosave?: boolean; skipPristineCheck?: boolean }) => Promise<boolean | void> | void
   showHelpButton?: boolean
   renderSaveButton?: () => JSX.Element
   isEditing?: boolean
@@ -222,6 +223,24 @@ export const RequirementForm = observer(
       onPreviousSubmissionOpen()
     }
 
+    const [isStepCodeSelectOpen, setIsStepCodeSelectOpen] = useState(false)
+    const [stepCodeSelectType, setStepCodeSelectType] = useState<EStepCodeType>(EStepCodeType.part9StepCode)
+    const handleOpenExistingStepCode = async (event) => {
+      const incoming = event?.detail?.stepCodeType as EStepCodeType
+      setStepCodeSelectType(
+        incoming === EStepCodeType.part3StepCode ? EStepCodeType.part3StepCode : EStepCodeType.part9StepCode
+      )
+      setIsStepCodeSelectOpen(true)
+    }
+
+    const handleSelectExistingStepCode = async (stepCodeId: string) => {
+      await triggerSave?.()
+      // Assign by updating the StepCode's permitApplicationId (belongs_to association)
+      // @ts-ignore method added on model
+      const ok = await permitApplication.assignExistingStepCode(stepCodeId)
+      if (ok) setIsStepCodeSelectOpen(false)
+    }
+
     const handleDownloadRequirementDocument = async (event) => {
       downloadFileFromStorage({
         model: EFileUploadAttachmentType.RequirementDocument,
@@ -235,12 +254,14 @@ export const RequirementForm = observer(
       document.addEventListener("openStepCodePart3", handleOpenStepCodePart3)
       document.addEventListener("openAutofillContact", handleOpenContactAutofill)
       document.addEventListener("openPreviousSubmission", handleOpenPreviousSubmission)
+      document.addEventListener("openExistingStepCode", handleOpenExistingStepCode)
       document.addEventListener("downloadRequirementDocument", handleDownloadRequirementDocument)
       return () => {
         document.removeEventListener("openStepCode", handleOpenStepCodePart9)
         document.removeEventListener("openStepCodePart3", handleOpenStepCodePart3)
         document.removeEventListener("openAutofillContact", handleOpenContactAutofill)
         document.removeEventListener("openPreviousSubmission", handleOpenPreviousSubmission)
+        document.removeEventListener("openExistingStepCode", handleOpenExistingStepCode)
         document.removeEventListener("downloadRequirementDocument", handleDownloadRequirementDocument)
       }
     }, [])
@@ -532,6 +553,13 @@ export const RequirementForm = observer(
             setSubmissionState={handleSetUnsavedSubmissionData}
           />
         )}
+
+        <StepCodeSelectModal
+          isOpen={isStepCodeSelectOpen}
+          onClose={() => setIsStepCodeSelectOpen(false)}
+          stepCodeType={stepCodeSelectType}
+          onSelect={handleSelectExistingStepCode}
+        />
 
         {isPreviousSubmissionOpen && (
           <PreviousSubmissionModal

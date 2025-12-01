@@ -1,16 +1,23 @@
-class Part3StepCode::Checklist < ApplicationRecord
+class Part3StepCode::Checklist < ActiveRecord::Base
   self.table_name = "part_3_step_code_checklists"
+
+  include ChecklistReportDocumentConcern
 
   delegate :newly_submitted_at,
            :reference_number,
+           :discarded?,
            to: :step_code,
            allow_nil: true
+
+  delegate :permit_application_id, to: :step_code
 
   belongs_to :step_code,
              optional: true,
              class_name: "Part3StepCode",
              foreign_key: "step_code_id",
-             inverse_of: :checklist
+             inverse_of: :checklist,
+             touch: true
+
   accepts_nested_attributes_for :step_code, update_only: true
 
   has_many :occupancy_classifications, dependent: :destroy
@@ -43,18 +50,14 @@ class Part3StepCode::Checklist < ApplicationRecord
            dependent: :destroy
   accepts_nested_attributes_for :modelled_energy_outputs, allow_destroy: true
 
-  enum building_code_version: %i[
-         revision_1
-         revision_2
-         revision_3
-         revision_4
-         revision_5
-       ],
-       _default: "BCBC 2018 Revision 5"
+  enum :building_code_version,
+       %i[revision_1 revision_2 revision_3 revision_4 revision_5],
+       default: "BCBC 2018 Revision 5"
 
-  enum is_suite_sub_metered: %i[yes no not_applicable]
+  enum :is_suite_sub_metered, %i[yes no not_applicable]
 
-  enum software: %i[
+  enum :software,
+       %i[
          ies_ve
          energy_plus
          design_builder
@@ -64,9 +67,10 @@ class Part3StepCode::Checklist < ApplicationRecord
          phpp
          other
        ],
-       _prefix: :software
+       prefix: :software
 
-  enum heating_system_plant: %i[
+  enum :heating_system_plant,
+       %i[
          none
          air_source_heat_pump
          ground_source_heat_pump
@@ -76,9 +80,10 @@ class Part3StepCode::Checklist < ApplicationRecord
          district_system
          other
        ],
-       _prefix: :heating_plant
+       prefix: :heating_plant
 
-  enum heating_system_type: %i[
+  enum :heating_system_type,
+       %i[
          electric_baseboard
          hydronic_basebaord
          hydronic_fan_coils
@@ -91,9 +96,10 @@ class Part3StepCode::Checklist < ApplicationRecord
          heat_pump_rooftop
          other
        ],
-       _prefix: :heating_type
+       prefix: :heating_type
 
-  enum cooling_system_plant: %i[
+  enum :cooling_system_plant,
+       %i[
          none
          air_cooled_chiller
          water_cooled_chiller
@@ -103,9 +109,10 @@ class Part3StepCode::Checklist < ApplicationRecord
          ground_source_vrf
          other
        ],
-       _prefix: :cooling_plant
+       prefix: :cooling_plant
 
-  enum cooling_system_type: %i[
+  enum :cooling_system_type,
+       %i[
          ptac
          hydronic_fan_coils
          hydronic_baseboards
@@ -114,9 +121,10 @@ class Part3StepCode::Checklist < ApplicationRecord
          none
          other
        ],
-       _prefix: :cooling_type
+       prefix: :cooling_type
 
-  enum dhw_system_type: %i[
+  enum :dhw_system_type,
+       %i[
          heat_pump_space_heating
          air_source_heat_pump
          ground_source_heat_pump
@@ -126,9 +134,9 @@ class Part3StepCode::Checklist < ApplicationRecord
          suite_gas
          other
        ],
-       _prefix: :dhw
+       prefix: :dhw
 
-  enum climate_zone: %i[zone_4 zone_5 zone_6 zone_7a zone_7b zone_8]
+  enum :climate_zone, %i[zone_4 zone_5 zone_6 zone_7a zone_7b zone_8]
 
   validates :heating_system_plant_description,
             presence: true,
@@ -171,10 +179,14 @@ class Part3StepCode::Checklist < ApplicationRecord
     StepCode::Part3::V1::GenerateReport.new(checklist: self).call
   end
 
+  def complete?
+    section_completion_status.dig("step_code_summary", "complete")
+  end
+
   private
 
   def set_climate_info
-    return unless step_code&.permit_application
+    return unless step_code&.jurisdiction
 
     self.heating_degree_days ||= step_code.jurisdiction_heating_degree_days
     self.climate_zone ||=

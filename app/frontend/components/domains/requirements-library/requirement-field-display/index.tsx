@@ -124,7 +124,7 @@ const requirementsComponentMap = {
     return (
       <GenericFieldDisplay
         inputDisplay={
-          <InputGroup w={"166px"}>
+          <InputGroup>
             <InputLeftElement>
               <CalendarBlank />
             </InputLeftElement>
@@ -140,7 +140,7 @@ const requirementsComponentMap = {
     return (
       <GenericFieldDisplay
         inputDisplay={
-          <InputGroup w={"130px"}>
+          <InputGroup>
             <InputRightElement mr={2}>{unit === undefined ? "unit" : unit}</InputRightElement>
             <Input bg={"white"} />
           </InputGroup>

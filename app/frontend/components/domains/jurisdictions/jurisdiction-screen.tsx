@@ -33,7 +33,7 @@ import { CustomMessageBox } from "../../shared/base/custom-message-box"
 import { ErrorScreen } from "../../shared/base/error-screen"
 import { LoadingScreen } from "../../shared/base/loading-screen"
 import { EditorWithPreview } from "../../shared/editor/custom-extensions/editor-with-preview"
-import { Editor } from "../../shared/editor/editor"
+import { SafeTipTapDisplay } from "../../shared/editor/safe-tiptap-display"
 import { JurisdictionMap } from "../../shared/module-wrappers/jurisdiction-map"
 import { StepCodeRequirementsTable } from "../../shared/step-code-requirements-table"
 import { Can } from "../../shared/user/can"
@@ -127,7 +127,7 @@ export const JurisdictionScreen = observer(() => {
                     </Show>
                     <Flex as="section" flex={1} direction="column" gap={4}>
                       <Heading>{t("jurisdiction.title")}</Heading>
-                      <JurisdictionQuillFormController
+                      <JurisdictionTipTapFormController
                         control={control}
                         label={t("jurisdiction.edit.displayDescriptionLabel")}
                         initialTriggerText={t("jurisdiction.edit.addDescription")}
@@ -149,7 +149,7 @@ export const JurisdictionScreen = observer(() => {
                     >
                       <Heading mb={0}>{t("jurisdiction.checklist")}</Heading>
                       <Divider my={0} />
-                      <JurisdictionQuillFormController
+                      <JurisdictionTipTapFormController
                         control={control}
                         label={t("jurisdiction.edit.displayChecklistLabel")}
                         initialTriggerText={t("jurisdiction.edit.addChecklist")}
@@ -166,7 +166,7 @@ export const JurisdictionScreen = observer(() => {
                       background="theme.blueLight"
                     >
                       <Heading as="h3">{t("jurisdiction.lookOut")}</Heading>
-                      <JurisdictionQuillFormController
+                      <JurisdictionTipTapFormController
                         control={control}
                         label={t("jurisdiction.edit.displayLookOutLabel")}
                         initialTriggerText={t("jurisdiction.edit.addLookOut")}
@@ -197,7 +197,7 @@ export const JurisdictionScreen = observer(() => {
                       </Heading>
                     </Box>
                     <Flex direction="column" p={6} gap={9}>
-                      <JurisdictionQuillFormController
+                      <JurisdictionTipTapFormController
                         control={control}
                         label={t("jurisdiction.edit.displayContactSummaryLabel")}
                         initialTriggerText={t("jurisdiction.edit.addContactSummary")}
@@ -282,15 +282,15 @@ export const JurisdictionScreen = observer(() => {
   )
 })
 
-interface IJurisdictionQuillFormControllerProps {
+interface IJurisdictionTipTapFormControllerProps {
   control: Control<TJurisdictionFieldValues>
   label: string
   initialTriggerText: string
   name: keyof TJurisdictionFieldValues
 }
 
-const JurisdictionQuillFormController = observer(
-  ({ control, label, initialTriggerText, name }: IJurisdictionQuillFormControllerProps) => {
+const JurisdictionTipTapFormController = observer(
+  ({ control, label, initialTriggerText, name }: IJurisdictionTipTapFormControllerProps) => {
     const { jurisdictionStore } = useMst()
     const { currentJurisdiction } = jurisdictionStore
     const { t } = useTranslation()
@@ -298,10 +298,7 @@ const JurisdictionQuillFormController = observer(
     return (
       <Box
         sx={{
-          ".ql-container.ql-snow": {
-            border: "none",
-          },
-          ".ql-editor": {
+          ".tiptap-editor-readonly": {
             padding: 0,
           },
         }}
@@ -310,7 +307,8 @@ const JurisdictionQuillFormController = observer(
           action={"jurisdiction:manage"}
           data={{ jurisdiction: currentJurisdiction }}
           onPermissionDeniedRender={
-            <Editor value={currentJurisdiction[name]} readOnly={true} modules={{ toolbar: false }} />
+            // Use SafeTipTapDisplay for safe HTML rendering
+            <SafeTipTapDisplay htmlContent={currentJurisdiction[name]} />
           }
         >
           <Controller

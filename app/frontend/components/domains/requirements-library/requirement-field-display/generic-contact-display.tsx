@@ -33,7 +33,7 @@ export function GenericContactDisplay<TFieldValues>({
   return (
     <Box>
       <Box
-        w={"full"}
+        w={"536px"}
         as={"section"}
         borderRadius={"sm"}
         border={"1px solid"}

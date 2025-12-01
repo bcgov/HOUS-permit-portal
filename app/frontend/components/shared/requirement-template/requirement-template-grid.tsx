@@ -37,7 +37,7 @@ export const RequirementTemplateGrid: React.FC<RequirementTemplateGridProps> = o
 
   return (
     <VStack alignItems={"flex-start"} spacing={5} w={"full"} h={"full"}>
-      <SearchGrid templateColumns="repeat(3, 1fr) 2fr repeat(3, 1fr)">
+      <SearchGrid templateColumns="1.5fr 1fr 0.8fr 2fr 1fr 1fr 1fr">
         <GridHeaders />
 
         {isSearching ? (
@@ -47,7 +47,11 @@ export const RequirementTemplateGrid: React.FC<RequirementTemplateGridProps> = o
         ) : (
           tableRequirementTemplates.map((rt) => (
             <Box key={rt.id} className={"requirements-template-grid-row"} role={"row"} display={"contents"}>
-              <SearchGridItem fontWeight="bold">{rt.permitType.name}</SearchGridItem>
+              <SearchGridItem fontWeight="bold">
+                <Text noOfLines={2} title={rt.permitType.name}>
+                  {rt.permitType.name}
+                </Text>
+              </SearchGridItem>
               <SearchGridItem fontWeight="bold">{rt.activity.name}</SearchGridItem>
               <SearchGridItem>
                 <YesNoTag boolean={rt.firstNations} />
@@ -58,7 +62,7 @@ export const RequirementTemplateGrid: React.FC<RequirementTemplateGridProps> = o
                   <VersionTag versionDate={rt.publishedTemplateVersion.versionDate} />
                 ) : null}
               </SearchGridItem>
-              <SearchGridItem>{rt.jurisdictionsSize}</SearchGridItem>
+              <SearchGridItem>{rt.usedBy}</SearchGridItem>
               <SearchGridItem>{renderActions(rt)}</SearchGridItem>
             </Box>
           ))

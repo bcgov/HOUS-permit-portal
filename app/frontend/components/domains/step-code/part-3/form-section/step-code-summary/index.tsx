@@ -1,4 +1,4 @@
-import { Button, Flex, FormControl, FormHelperText, Heading, Input, Text } from "@chakra-ui/react"
+import { Flex, FormControl, FormHelperText, Heading, Input, Text } from "@chakra-ui/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -98,9 +98,6 @@ export const StepCodeSummary = observer(function StepCodeSummary() {
       <form onSubmit={handleSubmit(onSubmit)} name="part3SectionForm">
         <FormControl>
           <Flex gap={4} align="center">
-            <Button type="submit" variant="primary" isLoading={isSubmitting} isDisabled={isSubmitting}>
-              {permitApplicationId ? t(`${i18nPrefix}.cta`) : t(`${i18nPrefix}.standaloneCta`)}
-            </Button>
             {isSubmitting && <SharedSpinner m={0} />}
             {!isSubmitting && currentStepCode?.latestReportDocument && (
               <FileDownloadButton

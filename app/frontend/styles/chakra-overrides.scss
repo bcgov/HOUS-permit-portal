@@ -120,4 +120,190 @@
       display: none;
     }
   }
+
+  .step-code-link-button {
+    margin-top: 0;
+    display: inline-block;
+  }
+
+  .step-code-actions-inline {
+    display: inline-block;
+    margin-right: 8px;
+    vertical-align: middle;
+    line-height: 38px; // Match button height
+  }
+}
+
+/* ======================================
+
+			TipTap Editor Styles
+
+====================================== */
+
+.tiptap-wrapper {
+  width: 100%;
+}
+
+.tiptap-toolbar {
+  display: flex;
+  gap: 4px;
+  padding: 8px;
+  border: 1px solid #e2e8f0;
+  border-bottom: none;
+  background: #f7fafc;
+  border-radius: 4px 4px 0 0;
+  flex-wrap: wrap;
+}
+
+.tiptap-toolbar-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  border-radius: 3px;
+  cursor: pointer;
+  color: #4a5568;
+  transition: all 0.2s;
+  min-width: 32px;
+  height: 32px;
+
+  &:hover {
+    background: #edf2f7;
+    border-color: #cbd5e0;
+  }
+
+  &.is-active {
+    background: #e2e8f0;
+    border-color: #cbd5e0;
+    color: #2d3748;
+  }
+}
+
+.tiptap-editor {
+  min-height: 150px;
+  padding: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 0 0 4px 4px;
+  background: white;
+  outline: none;
+
+  // ProseMirror/TipTap content styles
+  p {
+    margin: 0 0 0.5em 0;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    &.is-editor-empty:first-child::before {
+      content: attr(data-placeholder);
+      float: left;
+      color: #a0aec0;
+      pointer-events: none;
+      height: 0;
+    }
+  }
+
+  ul,
+  ol {
+    padding-left: 1.5em;
+    margin: 0.5em 0;
+  }
+
+  li {
+    margin: 0.25em 0;
+  }
+
+  a {
+    color: #3182ce;
+    text-decoration: underline;
+
+    &:hover {
+      color: #2c5282;
+    }
+  }
+
+  strong {
+    font-weight: bold;
+  }
+
+  em {
+    font-style: italic;
+  }
+
+  u {
+    text-decoration: underline;
+  }
+
+  s {
+    text-decoration: line-through;
+  }
+}
+
+.tiptap-editor-readonly {
+  min-height: auto;
+  padding: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  background: #f7fafc;
+  outline: none;
+
+  // ProseMirror/TipTap content styles
+  p {
+    margin: 0 0 0.5em 0;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    &.is-editor-empty:first-child::before {
+      content: attr(data-placeholder);
+      float: left;
+      color: #a0aec0;
+      pointer-events: none;
+      height: 0;
+    }
+  }
+
+  ul,
+  ol {
+    padding-left: 1.5em;
+    margin: 0.5em 0;
+  }
+
+  li {
+    margin: 0.25em 0;
+  }
+
+  a {
+    color: #3182ce;
+    text-decoration: underline;
+
+    &:hover {
+      color: #2c5282;
+    }
+  }
+
+  strong {
+    font-weight: bold;
+  }
+
+  em {
+    font-style: italic;
+  }
+
+  u {
+    text-decoration: underline;
+  }
+
+  s {
+    text-decoration: line-through;
+  }
+
+  // Override for readonly mode - match TipTap bubble theme style
+  border: none;
+  background: transparent;
+  padding: 0;
 }
