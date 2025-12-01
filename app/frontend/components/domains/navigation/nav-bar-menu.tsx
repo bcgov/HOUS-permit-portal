@@ -78,6 +78,29 @@ export const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
     onClose()
   }, [location.pathname])
 
+  // Close menu when clicking outside (including the navbar above the drawer)
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (isOpen) {
+        const target = event.target as HTMLElement
+        const isButton = target.closest('[aria-label="menu dropdown button"]')
+        const isDrawer = target.closest(".chakra-modal__content")
+
+        if (!isButton && !isDrawer) {
+          onClose()
+        }
+      }
+    }
+
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside)
+    }
+  }, [isOpen, onClose])
+
   // Column 1 - Project readiness tools
   const projectReadinessColumn = (
     <VStack align="flex-start" spacing={4} w="full">

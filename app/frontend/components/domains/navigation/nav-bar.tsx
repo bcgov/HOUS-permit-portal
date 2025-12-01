@@ -118,14 +118,6 @@ function shouldHideFullNavBarForPath(path: string): boolean {
 }
 
 export const NavBar = observer(function NavBar() {
-  const { t } = useTranslation()
-  const { sessionStore, userStore, notificationStore, uiStore, sandboxStore } = useMst()
-
-  const { currentUser } = userStore
-  const { loggedIn } = sessionStore
-  const { criticalNotifications } = notificationStore
-  const { rmJurisdictionSelectKey } = uiStore
-
   const location = useLocation()
   const path = location.pathname
 
@@ -139,6 +131,25 @@ export const NavBar = observer(function NavBar() {
 
   return (
     <PopoverProvider>
+      <NavBarContent />
+    </PopoverProvider>
+  )
+})
+
+const NavBarContent = observer(function NavBarContent() {
+  const { t } = useTranslation()
+  const { sessionStore, userStore, notificationStore, uiStore } = useMst()
+
+  const { currentUser } = userStore
+  const { loggedIn } = sessionStore
+  const { criticalNotifications } = notificationStore
+  const { rmJurisdictionSelectKey } = uiStore
+
+  const location = useLocation()
+  const path = location.pathname
+
+  return (
+    <>
       <Box
         as="nav"
         id="mainNav"
@@ -253,7 +264,7 @@ export const NavBar = observer(function NavBar() {
         />
       )}
       {!shouldHideSubNavbarForPath(path) && <SubNavBar />}
-    </PopoverProvider>
+    </>
   )
 })
 
