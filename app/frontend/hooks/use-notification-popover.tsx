@@ -8,11 +8,6 @@ interface PopoverContextProps {
   numberJustRead: number
   showRead: boolean
   setShowRead: (boolean) => void
-  // Menu state management
-  isMenuOpen: boolean
-  openMenu: () => void
-  closeMenu: () => void
-  toggleMenu: () => void
 }
 
 const PopoverContext = createContext<PopoverContextProps | undefined>(undefined)
@@ -25,7 +20,6 @@ export const PopoverProvider: React.FC<IPopoverProvider> = ({ children }) => {
   const [isOpen, setIsOpen] = useState(false)
   const [showRead, setShowRead] = useState<boolean>(false)
   const [numberJustRead, setNumberJustRead] = useState<number>()
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   const onOpen = () => setIsOpen(true)
   const onClose = () => setIsOpen(false)
@@ -34,8 +28,6 @@ export const PopoverProvider: React.FC<IPopoverProvider> = ({ children }) => {
   const { unreadNotificationsCount, markAllAsRead } = notificationStore
 
   const handleOpen = () => {
-    // Close the menu when opening the notification popover
-    setIsMenuOpen(false)
     onOpen()
     setNumberJustRead(unreadNotificationsCount)
     markAllAsRead()
@@ -46,11 +38,6 @@ export const PopoverProvider: React.FC<IPopoverProvider> = ({ children }) => {
     onClose()
   }
 
-  // Menu state management
-  const openMenu = () => setIsMenuOpen(true)
-  const closeMenu = () => setIsMenuOpen(false)
-  const toggleMenu = () => setIsMenuOpen((prev) => !prev)
-
   return (
     <PopoverContext.Provider
       value={{
@@ -60,10 +47,6 @@ export const PopoverProvider: React.FC<IPopoverProvider> = ({ children }) => {
         numberJustRead,
         showRead,
         setShowRead,
-        isMenuOpen,
-        openMenu,
-        closeMenu,
-        toggleMenu,
       }}
     >
       {children}

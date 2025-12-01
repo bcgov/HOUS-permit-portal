@@ -11,6 +11,7 @@ import {
   IconButton,
   Show,
   Text,
+  useDisclosure,
   VStack,
 } from "@chakra-ui/react"
 import { List, X } from "@phosphor-icons/react"
@@ -18,7 +19,6 @@ import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
 import { useTranslation } from "react-i18next"
 import { LinkProps, useLocation } from "react-router-dom"
-import { useNotificationPopover } from "../../../hooks/use-notification-popover"
 import { useMst } from "../../../setup/root"
 import { EUserRoles } from "../../../types/enums"
 import { RouterLink } from "../../shared/navigation/router-link"
@@ -71,12 +71,35 @@ export const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
   const { sessionStore, userStore } = useMst()
   const { currentUser } = userStore
   const { loggedIn } = sessionStore
-  const { isMenuOpen: isOpen, closeMenu: onClose, toggleMenu: onToggle } = useNotificationPopover()
+  const { isOpen, onOpen, onClose, onToggle } = useDisclosure()
 
   // Close drawer when route changes
   useEffect(() => {
     onClose()
   }, [location.pathname])
+
+  // Close menu when clicking outside (including the navbar above the drawer)
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (isOpen) {
+        const target = event.target as HTMLElement
+        const isButton = target.closest('[aria-label="menu dropdown button"]')
+        const isDrawer = target.closest(".chakra-modal__content")
+
+        if (!isButton && !isDrawer) {
+          onClose()
+        }
+      }
+    }
+
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside)
+    }
+  }, [isOpen, onClose])
 
   // Column 1 - Project readiness tools
   const projectReadinessColumn = (
