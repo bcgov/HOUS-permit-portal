@@ -12,7 +12,7 @@ import { FormSection } from "./form-section"
 import { Sidebar } from "./sidebar"
 
 export const PreCheckForm = observer(function PreCheckForm() {
-  const { section, preCheckId } = useParams()
+  const { section, preCheckId, permitApplicationId } = useParams()
   const navigate = useNavigate()
   const {
     preCheckStore: { createPreCheck },
@@ -21,6 +21,7 @@ export const PreCheckForm = observer(function PreCheckForm() {
 
   // Create pre-check if this is /new route
   useEffect(() => {
+    if (permitApplicationId) return // Handled by usePreCheck
     if (preCheckId) return // Already has an ID, the hook will fetch it
     if (currentPreCheck) return // Already created
 
@@ -33,7 +34,7 @@ export const PreCheckForm = observer(function PreCheckForm() {
         navigate(`/pre-checks/${response.data.id}/edit/service-partner`, { replace: true })
       }
     })
-  }, [preCheckId, currentPreCheck])
+  }, [preCheckId, currentPreCheck, permitApplicationId])
 
   // handle redirect if no section is specified
   useEffect(() => {

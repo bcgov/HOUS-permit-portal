@@ -23,6 +23,7 @@ import { Form, defaultOptions } from "../chefs"
 import { ContactModal } from "../contact/contact-modal"
 import { PreviousSubmissionModal } from "../revisions/previous-submission-modal"
 import { PermitApplicationSubmitModal } from "./permit-application-submit-modal"
+import { PreCheckSelectModal } from "./pre-check-select-modal"
 import { StepCodeSelectModal } from "./step-code-select-modal"
 
 interface IRequirementFormProps {
@@ -213,6 +214,11 @@ export const RequirementForm = observer(
       }
     }
 
+    const handleOpenPreCheck = async (_event) => {
+      await triggerSave?.()
+      navigate("pre-check")
+    }
+
     const handleOpenContactAutofill = async (event) => {
       setAutofillContactKey(event.detail.key)
       onContactsOpen()
@@ -241,6 +247,19 @@ export const RequirementForm = observer(
       if (ok) setIsStepCodeSelectOpen(false)
     }
 
+    const [isPreCheckSelectOpen, setIsPreCheckSelectOpen] = useState(false)
+    const handleOpenExistingPreCheck = async (event) => {
+      setIsPreCheckSelectOpen(true)
+    }
+
+    const handleSelectExistingPreCheck = async (preCheckId: string) => {
+      await triggerSave?.()
+      // Assign by updating the PreCheck's permitApplicationId (belongs_to association)
+      // @ts-ignore method added on model
+      const ok = await permitApplication.assignExistingPreCheck(preCheckId)
+      if (ok) setIsPreCheckSelectOpen(false)
+    }
+
     const handleDownloadRequirementDocument = async (event) => {
       downloadFileFromStorage({
         model: EFileUploadAttachmentType.RequirementDocument,
@@ -252,16 +271,20 @@ export const RequirementForm = observer(
     useEffect(() => {
       document.addEventListener("openStepCode", handleOpenStepCodePart9)
       document.addEventListener("openStepCodePart3", handleOpenStepCodePart3)
+      document.addEventListener("openArchitecturalDrawingTool", handleOpenPreCheck)
       document.addEventListener("openAutofillContact", handleOpenContactAutofill)
       document.addEventListener("openPreviousSubmission", handleOpenPreviousSubmission)
       document.addEventListener("openExistingStepCode", handleOpenExistingStepCode)
+      document.addEventListener("openExistingArchitecturalDrawing", handleOpenExistingPreCheck)
       document.addEventListener("downloadRequirementDocument", handleDownloadRequirementDocument)
       return () => {
         document.removeEventListener("openStepCode", handleOpenStepCodePart9)
         document.removeEventListener("openStepCodePart3", handleOpenStepCodePart3)
+        document.removeEventListener("openArchitecturalDrawingTool", handleOpenPreCheck)
         document.removeEventListener("openAutofillContact", handleOpenContactAutofill)
         document.removeEventListener("openPreviousSubmission", handleOpenPreviousSubmission)
         document.removeEventListener("openExistingStepCode", handleOpenExistingStepCode)
+        document.removeEventListener("openExistingArchitecturalDrawing", handleOpenExistingPreCheck)
         document.removeEventListener("downloadRequirementDocument", handleDownloadRequirementDocument)
       }
     }, [])
@@ -559,6 +582,12 @@ export const RequirementForm = observer(
           onClose={() => setIsStepCodeSelectOpen(false)}
           stepCodeType={stepCodeSelectType}
           onSelect={handleSelectExistingStepCode}
+        />
+
+        <PreCheckSelectModal
+          isOpen={isPreCheckSelectOpen}
+          onClose={() => setIsPreCheckSelectOpen(false)}
+          onSelect={handleSelectExistingPreCheck}
         />
 
         {isPreviousSubmissionOpen && (
