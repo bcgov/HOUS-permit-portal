@@ -29,7 +29,11 @@ module Api::Concerns::Search::PermitProjects
     @permit_project_search =
       PermitProject.search(permit_project_query, **search_conditions)
     ids = @permit_project_search.hits.map { |h| h["_id"] }
-    loaded = PermitProject.with_status_counts.where(id: ids)
+    loaded =
+      PermitProject
+        .with_status_counts
+        .includes(:owner, :jurisdiction, permit_applications: :collaborators)
+        .where(id: ids)
     @permit_projects = loaded.sort_by { |p| ids.index(p.id) }
     @meta = {
       total_pages: @permit_project_search.total_pages,

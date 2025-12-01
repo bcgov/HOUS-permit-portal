@@ -24,9 +24,9 @@ import {
   IDenormalizedRequirementBlock,
   IRequirementBlockCustomization,
 } from "../../../types/types"
-import { isQuillEmpty } from "../../../utils/utility-functions"
+import { isTipTapEmpty } from "../../../utils/utility-functions"
 import { FileDownloadButton } from "../../shared/base/file-download-button"
-import { SafeQuillDisplay } from "../../shared/editor/safe-quill-display"
+import { SafeTipTapDisplay } from "../../shared/editor/safe-tiptap-display"
 import { ElectiveTag } from "../../shared/elective-tag"
 import { FirstNationsTag } from "../../shared/first-nations-tag"
 import { RichTextTip } from "../../shared/rich-text-tip"
@@ -147,10 +147,10 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
           bg="greys.white"
           borderBottomRadius="8px"
         >
-          {!isQuillEmpty(requirementBlock.displayDescription) && (
+          {!isTipTapEmpty(requirementBlock.displayDescription) && (
             <Box
               sx={{
-                ".ql-editor": {
+                ".tiptap-editor-readonly": {
                   p: 0,
                 },
               }}
@@ -161,8 +161,8 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
               borderBottom="1px solid"
               borderBottomColor="border.light"
             >
-              {/* Use SafeQuillDisplay instead of readonly Editor to prevent XSS (CVE-2021-3163) */}
-              <SafeQuillDisplay htmlContent={requirementBlock.displayDescription} />
+              {/* Use SafeTipTapDisplay for safe HTML rendering */}
+              <SafeTipTapDisplay htmlContent={requirementBlock.displayDescription} />
             </Box>
           )}
           {!R.isEmpty(requirementBlock.requirementDocuments) && (
@@ -186,7 +186,7 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
               ))}
             </Flex>
           )}
-          {(!isQuillEmpty(requirementBlockCustomization?.tip) || !!requirementBlockCustomization?.helpLink) && (
+          {(!isTipTapEmpty(requirementBlockCustomization?.tip) || !!requirementBlockCustomization?.helpLink) && (
             <Box px={2} my={4}>
               <RichTextTip tip={requirementBlockCustomization.tip} helpLink={requirementBlockCustomization.helpLink} />
             </Box>
@@ -197,7 +197,7 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
             spacing={2}
             px={2}
             mt={
-              isQuillEmpty(requirementBlock.displayDescription) && isQuillEmpty(requirementBlockCustomization?.tip)
+              isTipTapEmpty(requirementBlock.displayDescription) && isTipTapEmpty(requirementBlockCustomization?.tip)
                 ? 4
                 : 0
             }

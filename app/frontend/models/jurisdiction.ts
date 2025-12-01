@@ -5,8 +5,15 @@ import { withEnvironment } from "../lib/with-environment"
 import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
 import { IExternalApiKeyParams } from "../types/api-request"
-import { EEnergyStep, EJurisdictionExternalApiState, EZeroCarbonStep } from "../types/enums"
-import { IContact, IOption, IPermitTypeRequiredStep, IPermitTypeSubmissionContact, TLatLngTuple } from "../types/types"
+import { EEnergyStep, EJurisdictionExternalApiState, EPreCheckServicePartner, EZeroCarbonStep } from "../types/enums"
+import {
+  IContact,
+  IJurisdictionServicePartnerEnrollment,
+  IOption,
+  IPermitTypeRequiredStep,
+  IPermitTypeSubmissionContact,
+  TLatLngTuple,
+} from "../types/types"
 import { ExternalApiKeyModel } from "./external-api-key"
 import { PermitApplicationModel } from "./permit-application"
 import { SandboxModel } from "./sandbox"
@@ -29,6 +36,7 @@ export const JurisdictionModel = types
     reviewManagersSize: types.maybeNull(types.number),
     reviewersSize: types.maybeNull(types.number),
     permitApplicationsSize: types.maybeNull(types.number),
+    unviewedSubmissionsCount: types.maybeNull(types.number),
     descriptionHtml: types.maybeNull(types.string),
     checklistHtml: types.maybeNull(types.string),
     lookOutHtml: types.maybeNull(types.string),
@@ -51,6 +59,7 @@ export const JurisdictionModel = types
     sandboxes: types.array(types.reference(SandboxModel)),
     firstNation: types.optional(types.boolean, false),
     ltsaMatcher: types.maybeNull(types.string),
+    servicePartnerEnrollments: types.array(types.frozen<IJurisdictionServicePartnerEnrollment>()),
     heatingDegreeDays: types.maybeNull(types.number),
   })
   .extend(withEnvironment())
@@ -100,6 +109,15 @@ export const JurisdictionModel = types
         description: s.description,
       }))
     },
+    isEnrolledInServicePartner(servicePartner: EPreCheckServicePartner): boolean {
+      const enrollment = self.servicePartnerEnrollments.find(
+        (enrollment) => enrollment.servicePartner === servicePartner
+      )
+      return enrollment?.enabled || false
+    },
+    getServicePartnerEnrollment(servicePartner: EPreCheckServicePartner): IJurisdictionServicePartnerEnrollment | null {
+      return self.servicePartnerEnrollments.find((enrollment) => enrollment.servicePartner === servicePartner) || null
+    },
   }))
   .views((self) => ({
     get part9RequiredSteps(): IPermitTypeRequiredStep[] {
@@ -121,6 +139,9 @@ export const JurisdictionModel = types
   .actions((self) => ({
     setTablePermitApplications: (permitApplications) => {
       self.tablePermitApplications = permitApplications.map((pa) => pa.id)
+    },
+    setUnviewedSubmissionsCount: (count: number) => {
+      self.unviewedSubmissionsCount = count
     },
     update: flow(function* (params) {
       const { ok, data: response } = yield* toGenerator(self.environment.api.updateJurisdiction(self.id, params))

@@ -20,6 +20,11 @@ export const AdminGlobalFeatureAccessScreen = observer(() => {
       enabled: siteConfigurationStore?.allowDesignatedReviewer,
       route: "access-control-for-revision-requests-to-submitters",
     },
+    {
+      label: t(`${i18nPrefix}.codeCompliance`),
+      enabled: siteConfigurationStore?.codeComplianceEnabled,
+      route: "code-compliance",
+    },
     // Add more features here as needed
   ]
 

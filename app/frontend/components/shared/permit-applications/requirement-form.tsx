@@ -29,7 +29,7 @@ interface IRequirementFormProps {
   permitApplication?: IPermitApplication
   onCompletedBlocksChange?: (sections: any) => void
   formRef: any
-  triggerSave?: (params?: { autosave?: boolean; skipPristineCheck?: boolean }) => void
+  triggerSave?: (params?: { autosave?: boolean; skipPristineCheck?: boolean }) => Promise<boolean | void> | void
   showHelpButton?: boolean
   renderSaveButton?: () => JSX.Element
   isEditing?: boolean
@@ -234,6 +234,7 @@ export const RequirementForm = observer(
     }
 
     const handleSelectExistingStepCode = async (stepCodeId: string) => {
+      await triggerSave?.()
       // Assign by updating the StepCode's permitApplicationId (belongs_to association)
       // @ts-ignore method added on model
       const ok = await permitApplication.assignExistingStepCode(stepCodeId)

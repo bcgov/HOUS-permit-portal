@@ -1,12 +1,15 @@
 class PermitClassification < ApplicationRecord
   # This class will have a 'type' column for STI.
 
+  include ActionView::Helpers::SanitizeHelper
+
   validates :code, presence: true, uniqueness: true
   validates :name, presence: true
   validate :code_immutable, on: :update
   validate :type_immutable, on: :update
 
   before_validation :normalize_category
+  before_save :sanitize_html_fields
 
   scope :enabled, -> { where(enabled: true) }
 
@@ -38,5 +41,12 @@ class PermitClassification < ApplicationRecord
 
   def normalize_category
     self.category = category&.to_s&.strip&.underscore&.presence
+  end
+
+  def sanitize_html_fields
+    attributes.each do |name, value|
+      self[name] = sanitize(value) if name.ends_with?("_html") &&
+        will_save_change_to_attribute?(name)
+    end
   end
 end

@@ -132,6 +132,8 @@ class SubmissionVersion < ApplicationRecord
     # Check if the `viewed_at` was `nil` before the change and is now not `nil`.
     if (viewed_at_change&.first.nil? && viewed_at_change&.last.present?)
       NotificationService.publish_application_view_event(permit_application)
+      # broadcast jurisdiction count update to review staff
+      permit_application.broadcast_jurisdiction_count_update
     end
   end
 end

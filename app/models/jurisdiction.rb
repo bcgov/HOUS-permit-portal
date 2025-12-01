@@ -68,6 +68,9 @@ class Jurisdiction < ApplicationRecord
   has_many :sandboxes, dependent: :destroy
   has_many :property_plan_local_jurisdictions, dependent: :destroy
   has_many :jurisdiction_documents, dependent: :destroy
+  has_many :service_partner_enrollments,
+           class_name: "JurisdictionServicePartnerEnrollment",
+           dependent: :destroy
 
   # Scopes
   scope :with_confirmed_submission_contacts,
@@ -241,6 +244,16 @@ class Jurisdiction < ApplicationRecord
 
   def permit_applications_size
     permit_applications&.size || 0
+  end
+
+  def unviewed_submissions_count(sandbox: nil)
+    permit_applications
+      .for_sandbox(sandbox)
+      .where(status: %i[newly_submitted resubmitted])
+      .joins(:submission_versions)
+      .where(submission_versions: { viewed_at: nil })
+      .distinct
+      .count
   end
 
   def unviewed_permit_applications
@@ -437,5 +450,13 @@ class Jurisdiction < ApplicationRecord
         )
       )
     end
+  end
+
+  def enrolled_in_service_partner?(partner)
+    service_partner_enrollments.exists?(service_partner: partner, enabled: true)
+  end
+
+  def archistar_enabled?
+    enrolled_in_service_partner?(:archistar)
   end
 end
