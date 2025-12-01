@@ -451,7 +451,7 @@ const AppRoutes = observer(() => {
       resetAuth()
       setAfterLoginPath(location.pathname)
       navigate("/login")
-      uiStore.flashMessage.show(EFlashMessageStatus.warning, t("auth.tokenExpired"), null)
+      uiStore.flashMessage.show(EFlashMessageStatus.warning, null, t("auth.tokenExpired"), 3000)
     }
   }, [tokenExpired])
 
@@ -695,6 +695,7 @@ const AppRoutes = observer(() => {
               path="/project-readiness-tools/check-step-code-requirements/select"
               element={<SelectStepCodeRequirementsScreen />}
             />
+            <Route path="/project-readiness-tools/pre-check" element={<PreCheckInfoScreen />} />
           </Route>
         </Route>
 
@@ -782,7 +783,6 @@ const AppRoutes = observer(() => {
           path="/project-readiness-tools/look-up-step-codes-requirements-for-your-project"
           element={<LookUpStepCodesRequirementsForYourProjectScreen />}
         />
-        <Route path="/project-readiness-tools/pre-check" element={<PreCheckInfoScreen />} />
         <Route
           path="/onboarding-checklist-page-for-lg-adopting"
           element={<OnboardingChecklistPageForLgAdoptingScreen />}
