@@ -1,7 +1,9 @@
-import { Box, Container, Heading, Link, ListItem, Text, UnorderedList, VStack } from "@chakra-ui/react"
+import { Box, Button, Container, Heading, Link, ListItem, Text, UnorderedList, VStack } from "@chakra-ui/react"
+import { Bug } from "@phosphor-icons/react"
 import i18next from "i18next"
 import React from "react"
 import { Trans, useTranslation } from "react-i18next"
+import { openFeedbackDialog } from "../../../utils/feedback"
 import { JurisdictionSearch } from "../../shared/jurisdiction-search"
 
 export const ContactScreen = () => {
@@ -96,6 +98,9 @@ export const ContactScreen = () => {
         <Trans i18nKey="site.contactUs.jurisdictionFinder.prompt" />
       </Text>
       <JurisdictionSearch />
+      <Button variant="primary" mt="4" leftIcon={<Bug size={20} />} onClick={openFeedbackDialog}>
+        {t("site.reportAnIssue")}
+      </Button>
     </Container>
   )
 }
