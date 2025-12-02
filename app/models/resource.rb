@@ -5,6 +5,7 @@ class Resource < ApplicationRecord
   enum category: {
          planning_zoning: "planning_zoning",
          bylaws_requirements: "bylaws_requirements",
+         gis_mapping: "gis_mapping",
          additional_resources: "additional_resources"
        }
 

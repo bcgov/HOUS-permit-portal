@@ -26,15 +26,15 @@ import { Trans, useTranslation } from "react-i18next"
 import { useJurisdiction } from "../../../hooks/resources/use-jurisdiction"
 import { IJurisdiction } from "../../../models/jurisdiction"
 import { useMst } from "../../../setup/root"
-import { EFlashMessageStatus, EResourceCategory } from "../../../types/enums"
+import { EFlashMessageStatus } from "../../../types/enums"
 import { IContact, TLatLngTuple } from "../../../types/types"
 import { BlueTitleBar } from "../../shared/base/blue-title-bar"
 import { CustomMessageBox } from "../../shared/base/custom-message-box"
 import { ErrorScreen } from "../../shared/base/error-screen"
 import { LoadingScreen } from "../../shared/base/loading-screen"
-import { ResourceItem } from "../../shared/base/resource-item"
 import { EditorWithPreview } from "../../shared/editor/custom-extensions/editor-with-preview"
 import { SafeTipTapDisplay } from "../../shared/editor/safe-tiptap-display"
+import { JurisdictionResourcesSection } from "../../shared/jurisdiction/jurisdiction-resources-section"
 import { JurisdictionMap } from "../../shared/module-wrappers/jurisdiction-map"
 import { StepCodeRequirementsTable } from "../../shared/step-code-requirements-table"
 import { Can } from "../../shared/user/can"
@@ -191,33 +191,7 @@ export const JurisdictionScreen = observer(() => {
 
                     <StepCodeRequirementsTable currentJurisdiction={currentJurisdiction} />
                   </Flex>
-                  {currentJurisdiction.resources && currentJurisdiction.resources.length > 0 && (
-                    <Flex as="section" direction="column" gap={4}>
-                      <Heading as="h2" fontSize="xl" my={0}>
-                        {t("jurisdiction.resources.sectionTitle")}
-                      </Heading>
-                      <Text color="text.secondary" fontSize="sm" mt={1}>
-                        {t("jurisdiction.resources.description")}
-                      </Text>
-                      {Object.values(EResourceCategory).map((category) => {
-                        const categoryResources = currentJurisdiction.resources.filter((r) => r.category === category)
-                        if (categoryResources.length === 0) return null
-
-                        return (
-                          <Box key={category} mb={4}>
-                            <Heading as="h3" mb={2}>
-                              {t(`home.configurationManagement.resources.categories.${category as EResourceCategory}`)}
-                            </Heading>
-                            <Flex direction="column" gap={6}>
-                              {categoryResources.map((resource) => (
-                                <ResourceItem key={resource.id} resource={resource} />
-                              ))}
-                            </Flex>
-                          </Box>
-                        )
-                      })}
-                    </Flex>
-                  )}
+                  <JurisdictionResourcesSection jurisdiction={currentJurisdiction} />
                   <Flex as="section" direction="column" borderRadius="lg" boxShadow="md">
                     <Box py={3} px={6} bg="theme.blueAlt" borderTopRadius="lg">
                       <Heading as="h3" color="greys.white" fontSize="xl">
