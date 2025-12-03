@@ -27,6 +27,7 @@ class Api::TemplateVersionsController < Api::ApplicationController
       if params[:activity_id].present?
         policy_scope(TemplateVersion)
           .joins(:requirement_template)
+          .includes(requirement_template: %i[permit_type activity])
           .where(
             activity: {
               id: params[:activity_id]
@@ -42,6 +43,7 @@ class Api::TemplateVersionsController < Api::ApplicationController
         policy_scope(TemplateVersion)
           .order(updated_at: :desc)
           .joins(:requirement_template)
+          .includes(requirement_template: %i[permit_type activity])
           .where(status:, requirement_templates: { public: public, type: type })
       end
 
