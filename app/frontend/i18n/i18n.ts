@@ -2833,6 +2833,8 @@ Thank you,
             },
             lookUpStepCodesRequirementsForYourProjectScreen: {
               title: "Look up Step Codes requirements for your project",
+              jurisdiction: "Jurisdiction",
+              addressSearched: "Address Searched",
               description:
                 "The BC Energy Step Code and Zero Carbon Step Code set performance targets for new buildings. The Province sets minimum requirements for energy efficiency. Local governments and First Nations can choose to require higher steps.",
               enterYourProjectAddress:
