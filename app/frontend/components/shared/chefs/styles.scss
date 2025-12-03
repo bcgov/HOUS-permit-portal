@@ -656,6 +656,12 @@
 
     // upload area
     .fileSelector {
+      .browse {
+        &::after {
+          content: "";
+          display: block;
+        }
+      }
       background-color: var(--chakra-colors-theme-blueLight);
       border-color: var(--chakra-colors-theme-blueShadedLight);
       color: $bcgov-link;
