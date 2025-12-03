@@ -88,7 +88,7 @@ const generateResourceComponents = (resourcesByCategory: Record<string, IResourc
   // Add components for each category
   Object.entries(resourcesByCategory).forEach(([category, resources]) => {
     // Category label - category is in snake_case, matching the i18n keys
-    const categoryLabel: string = (t as any)(`home.configurationManagement.resources.categories.${category}`)
+    const categoryLabel: string = (t as any)(`jurisdiction.resources.categories.${category}`)
     const resourcesText: string = ((t as any)("home.configurationManagement.resources.title") as string).toLowerCase()
     components.push({
       type: "content",

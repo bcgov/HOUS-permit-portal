@@ -80,6 +80,9 @@ class PromoteJob
       "PromoteJob: Infected file detected for #{record.class.name}##{record.id} - #{error.virus_name}"
     )
 
+    # Capture filename before clearing data
+    file_name = record.try(:file_name)
+
     # Delete the infected file from cache storage
     begin
       attacher.file.delete if attacher.file
@@ -94,23 +97,29 @@ class PromoteJob
     record.update_columns(file_data: nil) if record.respond_to?(:file_data)
 
     # Notify the user that their file upload failed
-    notify_upload_failed(record)
+    notify_upload_failed(record, file_name)
 
     # Don't re-raise - we've handled this case
   end
 
   def handle_promotion_error(record)
+    # Capture filename before clearing data
+    file_name = record.try(:file_name)
+
     # Clear file data since promotion failed
     record.update_columns(file_data: nil) if record.respond_to?(:file_data)
 
     # Notify the user that their file upload failed
-    notify_upload_failed(record)
+    notify_upload_failed(record, file_name)
   end
 
-  def notify_upload_failed(record)
+  def notify_upload_failed(record, file_name = nil)
     return unless record.is_a?(FileUploadAttachment)
 
-    NotificationService.publish_file_upload_failed_event(record)
+    NotificationService.publish_file_upload_failed_event(
+      record,
+      file_name: file_name
+    )
   rescue => e
     Rails.logger.warn(
       "PromoteJob: Failed to send upload failed notification: #{e.message}"

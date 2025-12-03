@@ -107,16 +107,30 @@ class FileUploadAttachment < ApplicationRecord
   end
 
   # Notification data for failed file upload
-  def upload_failed_notification_data
-    {
-      id: SecureRandom.uuid,
-      action_type: Constants::NotificationActionTypes::FILE_UPLOAD_FAILED,
-      action_text: "notification.file_upload_failed",
-      object_data: {
-        file_name: file_name || "Unknown file",
-        record_type: self.class.name,
-        record_id: id
+  def upload_failed_notification_data(file_name_override = nil)
+    current_file_name = file_name_override || file_name || "Unknown file"
+
+    data = {
+      "id" => SecureRandom.uuid,
+      "action_type" => Constants::NotificationActionTypes::FILE_UPLOAD_FAILED,
+      "action_text" =>
+        I18n.t("notification.file_upload_failed", file_name: current_file_name),
+      "object_data" => {
+        "file_name" => current_file_name,
+        "record_type" => self.class.name,
+        "record_id" => id
       }
     }
+
+    if attached_to.is_a?(PermitApplication)
+      data["object_data"]["permit_application_id"] = attached_to.id
+    elsif attached_to.respond_to?(:permit_application) &&
+          attached_to.permit_application.present?
+      data["object_data"][
+        "permit_application_id"
+      ] = attached_to.permit_application.id
+    end
+
+    data
   end
 end

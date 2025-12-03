@@ -41,7 +41,7 @@ export const JurisdictionResourcesSection = ({
         return (
           <Box key={category} mb={4}>
             <Heading as="h3" mb={2} fontSize="lg">
-              {t(`home.configurationManagement.resources.categories.${category as EResourceCategory}`)}
+              {t(`jurisdiction.resources.categories.${category as EResourceCategory}`)}
             </Heading>
             <Flex direction="column" gap={6}>
               {categoryResources.map((resource) => (

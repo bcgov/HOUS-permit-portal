@@ -776,3 +776,9 @@ export enum EProfessionalContactType {
   structuralEngineer = "structuralEngineer",
   surveyor = "surveyor",
 }
+
+export enum EFileScanStatus {
+  pending = "pending",
+  clean = "clean",
+  infected = "infected",
+}

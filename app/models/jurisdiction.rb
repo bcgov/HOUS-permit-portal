@@ -125,6 +125,10 @@ class Jurisdiction < ApplicationRecord
     users&.kept&.review_manager
   end
 
+  def managers
+    review_managers + regional_review_managers
+  end
+
   def manager_emails
     [
       review_managers&.pluck(:email),

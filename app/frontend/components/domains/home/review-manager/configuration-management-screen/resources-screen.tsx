@@ -21,7 +21,7 @@ import {
   useDisclosure,
   VStack,
 } from "@chakra-ui/react"
-import { CaretLeft, Link, Pencil, Plus, Trash } from "@phosphor-icons/react"
+import { CaretLeft, Link, Pencil, Plus, Trash, X } from "@phosphor-icons/react"
 import { UppyFile } from "@uppy/core"
 import "@uppy/core/dist/style.min.css"
 import "@uppy/dashboard/dist/style.css"
@@ -34,13 +34,20 @@ import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { useJurisdiction } from "../../../../../hooks/resources/use-jurisdiction"
 import useUppyS3 from "../../../../../hooks/use-uppy-s3"
-import { EResourceCategory, EResourceType } from "../../../../../types/enums"
+import {
+  EFileScanStatus,
+  EFileUploadAttachmentType,
+  EResourceCategory,
+  EResourceType,
+} from "../../../../../types/enums"
 import { IResource } from "../../../../../types/types"
 import { getFileTypeInfo } from "../../../../../utils/file-utils"
 import { BlueTitleBar } from "../../../../shared/base/blue-title-bar"
 import { ErrorScreen } from "../../../../shared/base/error-screen"
+import { FileDownloadButton } from "../../../../shared/base/file-download-button"
 import { LoadingScreen } from "../../../../shared/base/loading-screen"
 import { ConfirmationModal } from "../../../../shared/confirmation-modal"
+import { FileRemovedTag } from "../../../../shared/file-removed-tag"
 import {
   SelectFormControl,
   TextAreaFormControl,
@@ -256,7 +263,7 @@ export const ResourcesScreen = observer(function ResourcesScreen() {
               return (
                 <Box key={category} as="section" w="full">
                   <Heading as="h3" fontSize="lg" fontWeight={700} mb={3}>
-                    {t(`home.configurationManagement.resources.categories.${category as EResourceCategory}`)}
+                    {t(`jurisdiction.resources.categories.${category as EResourceCategory}`)}
                   </Heading>
                   <VStack spacing={4} w="full" alignItems="stretch">
                     {categoryResources.map((resource) => (
@@ -292,7 +299,7 @@ export const ResourcesScreen = observer(function ResourcesScreen() {
                   fieldName="category"
                   required
                   options={Object.values(EResourceCategory).map((cat) => ({
-                    label: t(`home.configurationManagement.resources.categories.${cat}`),
+                    label: t(`jurisdiction.resources.categories.${cat}`),
                     value: cat,
                   }))}
                 />
@@ -377,8 +384,11 @@ const ResourceInputCard: React.FC<IResourceInputCardProps> = ({ resource, onEdit
       ? { icon: <Link />, label: "LINK" }
       : getFileTypeInfo(resource.resourceDocument?.file?.metadata?.mimeType)
 
+  const isInfected =
+    resource.resourceType === EResourceType.file && resource.resourceDocument?.scanStatus === EFileScanStatus.infected
+
   return (
-    <Box p={4} bg="greys.grey03" borderRadius="lg" position="relative">
+    <Box p={4} bg={"greys.grey04"} borderRadius="lg" position="relative">
       <Flex gap={4} justify="space-between" alignItems="flex-start">
         {/* Content */}
         <VStack align="start" spacing={2} flex={1}>
@@ -387,17 +397,29 @@ const ResourceInputCard: React.FC<IResourceInputCardProps> = ({ resource, onEdit
           </Text>
 
           <Flex align="center" gap={2}>
-            <Tag backgroundColor="semantic.infoLight" size="sm" fontWeight="medium" color="text.secondary">
-              <Flex align="center" gap={1}>
-                {fileTypeInfo.icon}
-                <Text as="span">{fileTypeInfo.label}</Text>
-              </Flex>
-            </Tag>
-            {resource.resourceType === EResourceType.file && resource.resourceDocument?.file?.metadata?.filename && (
-              <Text fontSize="sm" color="text.primary" noOfLines={1}>
-                {resource.resourceDocument.file.metadata.filename}
-              </Text>
+            {isInfected ? (
+              <FileRemovedTag />
+            ) : (
+              <Tag backgroundColor="semantic.infoLight" size="sm" fontWeight="medium" color="text.secondary">
+                <Flex align="center" gap={1}>
+                  {fileTypeInfo.icon}
+                  <Text as="span">{fileTypeInfo.label}</Text>
+                </Flex>
+              </Tag>
             )}
+
+            {resource.resourceType === EResourceType.file &&
+              resource.resourceDocument?.file?.metadata?.filename &&
+              (isInfected ? (
+                <Text fontSize="sm" color="text.primary" noOfLines={1}>
+                  {resource.resourceDocument.file.metadata.filename}
+                </Text>
+              ) : (
+                <FileDownloadButton
+                  document={resource.resourceDocument}
+                  modelType={EFileUploadAttachmentType.ResourceDocument}
+                />
+              ))}
             {resource.resourceType === EResourceType.link && resource.linkUrl && (
               <Text fontSize="sm" color="text.primary" noOfLines={1}>
                 {resource.linkUrl}
@@ -405,7 +427,13 @@ const ResourceInputCard: React.FC<IResourceInputCardProps> = ({ resource, onEdit
             )}
           </Flex>
 
-          {resource.description && (
+          {isInfected && (
+            <Text color="text.primary" fontSize="sm">
+              {t("resource.fileRemovedDescription")}
+            </Text>
+          )}
+
+          {!isInfected && resource.description && (
             <Text color="text.secondary" fontSize="sm">
               {resource.description}
             </Text>
@@ -417,22 +445,30 @@ const ResourceInputCard: React.FC<IResourceInputCardProps> = ({ resource, onEdit
 
         {/* Actions */}
         <Flex direction="column" align="flex-end" gap={2} flexShrink={0}>
-          <Button variant="secondary" onClick={() => onEdit(resource)} leftIcon={<Pencil />}>
-            {t("ui.edit")}
-          </Button>
-          <ConfirmationModal
-            title={t("home.configurationManagement.resources.confirmDelete")}
-            body={t("home.configurationManagement.resources.confirmDeleteBody")}
-            onConfirm={async (closeModal) => {
-              await onDelete(resource)
-              closeModal()
-            }}
-            renderTriggerButton={(props) => (
-              <Button {...props} variant="tertiary" px={0} leftIcon={<Trash />}>
-                {t("ui.delete")}
+          {isInfected ? (
+            <Button variant="ghost" onClick={() => onDelete(resource)} leftIcon={<X />} size="sm">
+              {t("ui.dismiss")}
+            </Button>
+          ) : (
+            <>
+              <Button variant="secondary" onClick={() => onEdit(resource)} leftIcon={<Pencil />}>
+                {t("ui.edit")}
               </Button>
-            )}
-          />
+              <ConfirmationModal
+                title={t("home.configurationManagement.resources.confirmDelete")}
+                body={t("home.configurationManagement.resources.confirmDeleteBody")}
+                onConfirm={async (closeModal) => {
+                  await onDelete(resource)
+                  closeModal()
+                }}
+                renderTriggerButton={(props) => (
+                  <Button {...props} variant="tertiary" px={0} leftIcon={<Trash />}>
+                    {t("ui.delete")}
+                  </Button>
+                )}
+              />
+            </>
+          )}
         </Flex>
       </Flex>
     </Box>

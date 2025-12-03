@@ -384,17 +384,26 @@ class NotificationService
     end
   end
 
-  def self.publish_file_upload_failed_event(file_attachment)
+  def self.publish_file_upload_failed_event(file_attachment, file_name: nil)
     return if file_attachment.blank?
 
-    # Determine the user to notify based on the attached_to relationship
-    user_to_notify = determine_file_owner(file_attachment)
-    return if user_to_notify.blank?
+    # Determine the users to notify based on the attached_to relationship
+    users_to_notify = determine_file_owner(file_attachment)
+    return if users_to_notify.blank?
 
-    notification_user_hash = {
-      user_to_notify.id => file_attachment.upload_failed_notification_data
-    }
+    # Ensure users_to_notify is an array
+    users_to_notify = [users_to_notify] unless users_to_notify.is_a?(Array)
 
+    notification_user_hash = {}
+    users_to_notify.each do |user|
+      next if user.blank?
+      # Ensure user.id is a string
+      notification_user_hash[
+        user.id
+      ] = file_attachment.upload_failed_notification_data(file_name)
+    end
+
+    return if notification_user_hash.empty?
     NotificationPushJob.perform_async(notification_user_hash)
   end
 
@@ -405,14 +414,18 @@ class NotificationService
 
     case attached_to
     when PermitApplication
-      attached_to.submitter
+      [attached_to.submitter]
     when RequirementBlock
-      # For requirement blocks, notify the last editor or creator
-      nil # Requirement block files are admin-uploaded, skip notification
+      # For requirement blocks, notify all super admins
+      User.where(role: :super_admin).to_a
+    when Resource
+      attached_to.jurisdiction.managers
     else
       # Try common patterns
-      attached_to.try(:submitter) || attached_to.try(:creator) ||
-        attached_to.try(:user)
+      user =
+        attached_to.try(:submitter) || attached_to.try(:creator) ||
+          attached_to.try(:user) || attached_to.try(:owner)
+      user ? [user] : nil
     end
   end
 

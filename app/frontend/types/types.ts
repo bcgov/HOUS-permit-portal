@@ -16,6 +16,7 @@ import {
   EEnergyOutputSource,
   EEnergyOutputUseType,
   EEnergyStep,
+  EFileScanStatus,
   EFossilFuelsPresence,
   EFuelType,
   EHotWaterPerformanceType,
@@ -311,6 +312,7 @@ export interface IReportDocument extends IBaseFileAttachment {
 
 export interface IResourceDocument extends IBaseFileAttachment {
   resourceId: string
+  scanStatus: EFileScanStatus
 }
 
 export interface IResource {

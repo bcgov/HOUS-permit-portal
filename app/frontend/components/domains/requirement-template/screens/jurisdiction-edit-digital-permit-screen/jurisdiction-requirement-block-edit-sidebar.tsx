@@ -35,7 +35,12 @@ import { useTranslation } from "react-i18next"
 import { Link as RouterLink } from "react-router-dom"
 import { getEnabledElectiveReasonOptions } from "../../../../../constants"
 import { useMst } from "../../../../../setup/root"
-import { EEnabledElectiveFieldReason, EFlashMessageStatus } from "../../../../../types/enums"
+import {
+  EEnabledElectiveFieldReason,
+  EFileScanStatus,
+  EFlashMessageStatus,
+  EResourceType,
+} from "../../../../../types/enums"
 import {
   IDenormalizedRequirement,
   IDenormalizedRequirementBlock,
@@ -45,6 +50,8 @@ import {
 import { getFileTypeInfo } from "../../../../../utils/file-utils"
 import { CustomMessageBox } from "../../../../shared/base/custom-message-box"
 import { Editor } from "../../../../shared/editor/editor"
+import { FileRemovedTag } from "../../../../shared/file-removed-tag"
+import { RouterLinkButton } from "../../../../shared/navigation/router-link-button"
 
 interface ICustomizationForm extends IRequirementBlockCustomization {}
 
@@ -334,13 +341,23 @@ const MainView = ({
               </AccordionButton>
               <AccordionPanel pb={4} px={0}>
                 <VStack align="stretch" spacing={4}>
+                  <RouterLinkButton
+                    to={`/jurisdictions/${currentJurisdiction.slug}/configuration-management/resources`}
+                    variant="link"
+                  >
+                    {t("digitalBuildingPermits.edit.requirementBlockSidebar.manageResourcesLink")}
+                  </RouterLinkButton>
                   {(Object.entries(resourcesByCategory) as [string, IResource[]][]).map(([category, resources]) => (
                     <Box key={category}>
                       <Text fontSize="sm" fontWeight={600} mb={2}>
-                        {t(`home.configurationManagement.resources.categories.${category}`)}
+                        {t(`jurisdiction.resources.categories.${category}` as any)}
                       </Text>
                       <VStack align="stretch" spacing={2}>
                         {resources.map((resource) => {
+                          const isInfected =
+                            resource.resourceType === EResourceType.file &&
+                            resource.resourceDocument?.scanStatus === EFileScanStatus.infected
+
                           const fileTypeInfo =
                             resource.resourceType === "link"
                               ? { icon: <Link />, label: "LINK" }
@@ -351,19 +368,25 @@ const MainView = ({
                               key={resource.id}
                               isChecked={watchedResourceIds.includes(resource.id)}
                               onChange={(e) => handleResourceToggle(resource.id, e.target.checked)}
+                              isDisabled={isInfected}
                             >
                               <Flex align="center" gap={2}>
-                                <Tag
-                                  backgroundColor="semantic.infoLight"
-                                  size="sm"
-                                  fontWeight="medium"
-                                  color="text.secondary"
-                                >
-                                  <Flex align="center" gap={1}>
-                                    {fileTypeInfo.icon}
-                                    <Text as="span">{fileTypeInfo.label}</Text>
-                                  </Flex>
-                                </Tag>
+                                {isInfected ? (
+                                  <FileRemovedTag />
+                                ) : (
+                                  <Tag
+                                    backgroundColor="semantic.infoLight"
+                                    size="sm"
+                                    fontWeight="medium"
+                                    color="text.secondary"
+                                  >
+                                    <Flex align="center" gap={1}>
+                                      {fileTypeInfo.icon}
+                                      <Text as="span">{fileTypeInfo.label}</Text>
+                                    </Flex>
+                                  </Tag>
+                                )}
+
                                 <Text fontSize="sm">{resource.title}</Text>
                               </Flex>
                             </Checkbox>
