@@ -1,16 +1,13 @@
-import { Box, Container, VStack } from "@chakra-ui/react"
+import { Container, VStack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
 import { useTranslation } from "react-i18next"
-import { RemoveScroll } from "react-remove-scroll"
 import { useParams } from "react-router-dom"
 import { usePart9StepCode } from "../../../../hooks/resources/use-part-9-step-code"
 import { usePermitApplication } from "../../../../hooks/resources/use-permit-application"
 import { useMst } from "../../../../setup/root"
 import { NotFoundScreen } from "../../../shared/base/not-found-screen"
 import { FloatingHelpDrawer } from "../../../shared/floating-help-drawer"
-import { StepCodeNavBar } from "../nav-bar"
-import { Part9NavLinks } from "../nav-bar/part-9-nav-links"
 import { StepCodeChecklistForm } from "./checklist"
 import { DrawingsWarning } from "./drawings-warning"
 import { H2KImport } from "./import"
@@ -37,37 +34,24 @@ export const Part9StepCodeForm = observer(function Part9StepCodeForm() {
   if (currentStepCode?.isDiscarded) return <NotFoundScreen />
 
   return (
-    <RemoveScroll>
-      <Box
-        id="stepCodeScroll"
-        overflow="auto"
-        pos="fixed"
-        top="0"
-        left="0"
-        right="0"
-        bottom="0"
-        zIndex="modal"
-        bg="white"
-      >
-        <StepCodeNavBar title={t("stepCode.title")} NavLinks={<Part9NavLinks />} />
-        {isOptionsLoaded && (
-          <Container maxW="container.lg">
-            <FloatingHelpDrawer top="24" />
-            <Container my={10} maxW="780px" px={0}>
-              {!currentStepCode ? (
-                <VStack spacing={8} align="start" w="full" pb={20}>
-                  <Title />
-                  <Info />
-                  {permitApplicationId && <DrawingsWarning />}
-                  <H2KImport />
-                </VStack>
-              ) : (
-                <StepCodeChecklistForm />
-              )}
-            </Container>
+    <>
+      {isOptionsLoaded && (
+        <Container maxW="container.lg">
+          <FloatingHelpDrawer top="36" />
+          <Container my={10} maxW="780px" px={0}>
+            {!currentStepCode ? (
+              <VStack spacing={8} align="start" w="full" pb={20}>
+                <Title />
+                <Info />
+                {permitApplicationId && <DrawingsWarning />}
+                <H2KImport />
+              </VStack>
+            ) : (
+              <StepCodeChecklistForm />
+            )}
           </Container>
-        )}
-      </Box>
-    </RemoveScroll>
+        </Container>
+      )}
+    </>
   )
 })
