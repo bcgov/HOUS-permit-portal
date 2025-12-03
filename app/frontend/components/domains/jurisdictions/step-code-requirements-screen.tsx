@@ -30,7 +30,7 @@ export const JurisdictionStepCodeRequirementsScreen = observer(() => {
       <Container maxW="container.lg" py={12}>
         <Heading as="h1" mb={4}>
           {t("home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.stepCodeRequirementsFor")}{" "}
-          {currentJurisdiction.name}
+          {currentJurisdiction.qualifiedName}
         </Heading>
 
         <Text fontSize="md" color="text.primary" mb={6}>
