@@ -50,7 +50,18 @@ class Wrappers::Archistar < Wrappers::Base
           if ENV["ARCHISTAR_DEVELOPOMENT_OVERRIDE_FILE_LINK"].present?
             ENV["ARCHISTAR_DEVELOPOMENT_OVERRIDE_FILE_LINK"]
           else
-            pre_check.primary_design_document&.file_url
+            # Explicitly construct the URL with content disposition to force download,
+            # ensuring Archistar receives a link that downloads rather than displaying inline.
+            # We also access the file attachment directly to bypass any potential shadowing of file_url.
+            if (doc = pre_check.primary_design_document) && doc.file
+              doc.file.url(
+                response_content_disposition:
+                  ActionDispatch::Http::ContentDisposition.format(
+                    disposition: "attachment",
+                    filename: doc.file.original_filename
+                  )
+              )
+            end
           end
         ),
       additionalFiles: []

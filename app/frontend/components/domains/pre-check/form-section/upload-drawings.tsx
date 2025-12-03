@@ -115,7 +115,7 @@ export const UploadDrawings = observer(function UploadDrawings() {
     maxNumberOfFiles: 1,
     autoProceed: true,
     maxFileSizeMB: 200,
-    allowedFileTypes: ["application/pdf", ".pdf"],
+    allowedFileTypes: ["application/pdf", ".pdf", ".chk"],
   })
 
   return (
