@@ -50,7 +50,7 @@ class Api::PermitProjectsController < Api::ApplicationController
     authorize @permit_project
     if @permit_project.update(permit_project_params)
       render_success @permit_project,
-                     nil,
+                     "permit_project.update_success",
                      {
                        blueprint: PermitProjectBlueprint,
                        blueprint_opts: blueprint_options(view: :extended)
