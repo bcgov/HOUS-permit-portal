@@ -169,7 +169,22 @@ const Control = ({
   return (
     <components.Control {...props}>
       {children}
-      <Button variant="primary" size="lg" onClick={onButtonClick} pt="6" pb="6" pl="3" pr="3" zIndex={10}>
+      <Button
+        variant="primary"
+        size="lg"
+        onClick={onButtonClick}
+        onMouseDown={(e) => {
+          e.stopPropagation()
+        }}
+        onTouchEnd={(e) => {
+          e.stopPropagation()
+        }}
+        pt="6"
+        pb="6"
+        pl="3"
+        pr="3"
+        zIndex={10}
+      >
         {buttonText}
       </Button>
     </components.Control>
