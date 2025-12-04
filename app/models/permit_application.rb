@@ -824,12 +824,13 @@ class PermitApplication < ApplicationRecord
   def jurisdiction_has_matching_submission_contact
     return if sandbox.present?
     return unless jurisdiction
-    matching_contacts =
-      PermitTypeSubmissionContact.where(
-        jurisdiction: jurisdiction,
-        permit_type: permit_type
-      )
-    if matching_contacts.empty?
+
+    matching_confirmed_contacts =
+      PermitTypeSubmissionContact
+        .where(jurisdiction: jurisdiction, permit_type: permit_type)
+        .where.not(confirmed_at: nil)
+
+    if matching_confirmed_contacts.empty?
       errors.add(
         :jurisdiction_id,
         I18n.t(
