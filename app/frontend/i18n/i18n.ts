@@ -564,6 +564,30 @@ const options = {
               expiredTitle: "This pre-check is expired",
               expiredDescription:
                 "This pre-check is expired because it was created more than 150 days ago. You will not be able to download the PDF report or explore the interactive results.",
+
+              sections: {
+                whatYouCanDo: {
+                  title: "What you can do now",
+                  download:
+                    "Download a PDF report listing all pre-check results, or explore them interactively in alongside your drawings.",
+                  address:
+                    "You can use these results to address any compliance issues and prepare your drawings for a permit application.",
+                  beta: "This service is in beta. If you experience issues or have questions about your results, contact us at",
+                },
+                reportPreparedBy: {
+                  title: "Report prepared by {{serviceProvider}}",
+                  providedBy: "This service is provided by {{serviceProvider}} to give you early guidance only.",
+                  ministryDisclaimer:
+                    "The Ministry of Housing and Municipal Affairs (“we”) does not guarantee the accuracy or completeness of any information produced by this service.",
+                  liability:
+                    "We are not liable for any errors, omissions, or any actions you take in reliance upon this service.",
+                  notShared:
+                    "Results from this service are not shared with your local building officials and are not part of your official permit submission.",
+                  noGuarantee:
+                    "A passing result does not guarantee approval: a building official will still carry out a full review as part of the permit application process.",
+                  jurisdiction: "Only your local jurisdiction can approve or reject a permit application.",
+                },
+              },
             },
           },
           viewer: {
