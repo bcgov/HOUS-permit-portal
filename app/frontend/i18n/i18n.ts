@@ -184,6 +184,7 @@ const options = {
           beta: "Beta",
           optional: "(optional)",
           next: "Next",
+          check: "Check",
           saveAndcontinue: "Save and continue",
           selectParticipatingJurisdiction: "Please select a participating jurisdiction to continue",
           participatingCommunityTitle: "Your project is in a participating community",
