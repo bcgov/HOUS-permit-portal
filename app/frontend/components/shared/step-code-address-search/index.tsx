@@ -1,4 +1,4 @@
-import { Box, FormControl, FormLabel, InputGroup, VStack } from "@chakra-ui/react"
+import { Box, FormControl, FormLabel, InputGroup, useBreakpointValue, VStack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useState } from "react"
 import { Controller, FormProvider, useForm } from "react-hook-form"
@@ -28,7 +28,7 @@ const StepCodeAddressSearch = observer(
     const [selectedOption, setSelectedOption] = useState<IOption | null>(null)
     const [searchKey, setSearchKey] = useState(0)
     const [manualJurisdiction, setManualJurisdiction] = useState<IJurisdiction | null>(null)
-
+    const isMobile = useBreakpointValue({ base: true, md: false })
     const isHomePage = location.pathname === "/welcome" ? true : false
     const { geocoderStore, jurisdictionStore } = useMst()
     const { addJurisdiction } = jurisdictionStore
@@ -105,7 +105,7 @@ const StepCodeAddressSearch = observer(
             {showError && (
               <FormControl w="full" zIndex={1} mt={4}>
                 <FormLabel fontWeight="bold">{t("ui.cityOrJurisdiction")}</FormLabel>
-                <InputGroup w="57%">
+                <InputGroup w={isMobile ? "100%" : "57%"}>
                   <JurisdictionSelect
                     onChange={(value) => {
                       if (value) addJurisdiction(value)
