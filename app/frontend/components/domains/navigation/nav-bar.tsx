@@ -19,6 +19,9 @@ import { RegionalRMJurisdictionSelect } from "./regional-rm-jurisdiction-select"
 import { SubNavBar } from "./sub-nav-bar"
 
 import { PreCheckNavBar } from "../pre-check/pre-check-nav-bar"
+import { StepCodeNavBar } from "../step-code/nav-bar"
+import { Part3NavLinks } from "../step-code/nav-bar/part-3-nav-links"
+import { Part9NavLinks } from "../step-code/nav-bar/part-9-nav-links"
 
 function isTemplateEditPath(path: string): boolean {
   const regex = /^\/requirement-templates\/([a-f\d-]+)\/edit$/
@@ -112,14 +115,42 @@ function shouldHideSubNavbarForPath(path: string): boolean {
 }
 
 function shouldHideFullNavBarForPath(path: string): boolean {
-  const matchers: Array<(path: string) => boolean> = [isStepCodePath]
+  const matchers: Array<(path: string) => boolean> = []
 
   return matchers.some((matcher) => matcher(path))
 }
 
 export const NavBar = observer(function NavBar() {
   const { t } = useTranslation()
-  const { sessionStore, userStore, notificationStore, uiStore, sandboxStore } = useMst()
+  const location = useLocation()
+  const path = location.pathname
+
+  if (isPreCheckPath(path)) {
+    return <PreCheckNavBar />
+  }
+
+  if (isStepCodePath(path)) {
+    if (path.includes("part-9")) {
+      return <StepCodeNavBar title={t("stepCode.title")} NavLinks={<Part9NavLinks />} />
+    } else {
+      return <StepCodeNavBar title={t("stepCode.part3.title")} NavLinks={<Part3NavLinks />} />
+    }
+  }
+
+  if (shouldHideFullNavBarForPath(path)) {
+    return null
+  }
+
+  return (
+    <PopoverProvider>
+      <NavBarContent />
+    </PopoverProvider>
+  )
+})
+
+const NavBarContent = observer(function NavBarContent() {
+  const { t } = useTranslation()
+  const { sessionStore, userStore, notificationStore, uiStore } = useMst()
 
   const { currentUser } = userStore
   const { loggedIn } = sessionStore
@@ -129,16 +160,8 @@ export const NavBar = observer(function NavBar() {
   const location = useLocation()
   const path = location.pathname
 
-  if (isPreCheckPath(path)) {
-    return <PreCheckNavBar />
-  }
-
-  if (shouldHideFullNavBarForPath(path)) {
-    return null
-  }
-
   return (
-    <PopoverProvider>
+    <>
       <Box
         as="nav"
         id="mainNav"
@@ -253,7 +276,7 @@ export const NavBar = observer(function NavBar() {
         />
       )}
       {!shouldHideSubNavbarForPath(path) && <SubNavBar />}
-    </PopoverProvider>
+    </>
   )
 })
 

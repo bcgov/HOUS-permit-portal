@@ -25,7 +25,7 @@ export const ProjectTabPanelContent = observer(() => {
           <Flex justify="space-between" align="center">
             <Heading as="h1">{t("permitProject.index.title", "Projects")}</Heading>
             <RouterLinkButton to="/projects/new" variant="primary">
-              {t("permitProject.startNew", "Start New Project")}
+              {t("permitProject.startNew", "Start new project")}
             </RouterLinkButton>
           </Flex>
           <PinnedProjectsGrid />

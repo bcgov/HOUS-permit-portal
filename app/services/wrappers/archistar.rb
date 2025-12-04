@@ -45,14 +45,7 @@ class Wrappers::Archistar < Wrappers::Base
       complyCertificateId: pre_check.comply_certificate_id,
       cityKey: "bcbc",
       address: pre_check.formatted_address,
-      fileLink:
-        (
-          if ENV["ARCHISTAR_DEVELOPOMENT_OVERRIDE_FILE_LINK"].present?
-            ENV["ARCHISTAR_DEVELOPOMENT_OVERRIDE_FILE_LINK"]
-          else
-            pre_check.primary_design_document&.file_url
-          end
-        ),
+      fileLink: pre_check.primary_design_document&.file_url,
       additionalFiles: []
     }
 
