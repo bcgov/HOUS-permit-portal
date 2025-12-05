@@ -49,12 +49,11 @@ function formFormDefaults(
   customization: IRequirementBlockCustomization | undefined
 ): ICustomizationForm {
   return {
-    tip: customization?.tip,
-    helpLink: customization?.helpLink,
-    enabledElectiveFieldIds: customization?.enabledElectiveFieldIds?.filter(
-      (id) => !!availableElectiveFields.find((f) => f.id === id)
-    ),
-    enabledElectiveFieldReasons: customization?.enabledElectiveFieldReasons,
+    tip: customization?.tip ?? "",
+    helpLink: customization?.helpLink ?? "",
+    enabledElectiveFieldIds:
+      customization?.enabledElectiveFieldIds?.filter((id) => !!availableElectiveFields.find((f) => f.id === id)) ?? [],
+    enabledElectiveFieldReasons: customization?.enabledElectiveFieldReasons ?? {},
   }
 }
 
