@@ -1,4 +1,4 @@
-import { Alert, Button, FormControl, HStack, InputGroup, Text } from "@chakra-ui/react"
+import { Alert, Button, FormControl, HStack, InputGroup, Text, useBreakpointValue } from "@chakra-ui/react"
 import { MapPin, WarningCircle } from "@phosphor-icons/react"
 import debounce from "lodash/debounce"
 import { observer } from "mobx-react-lite"
@@ -44,6 +44,9 @@ export const StepCodeLookupAddressSelect = observer(function ({
   const isHomePage = location.pathname === "/welcome"
   const placeholderText = isHomePage ? t("ui.projectAddress") : t("ui.enterAddress")
 
+  const isMobile = useBreakpointValue({ base: true, md: false })
+  const responsiveButtonText = isMobile ? (t("ui.check", { defaultValue: "Check" } as any) as string) : buttonText
+
   const fetchSiteOptions = (address: string, callback: (options) => void) => {
     if (address.length > 3) {
       fetchOptions(address).then((options: IOption[]) => {
@@ -65,8 +68,8 @@ export const StepCodeLookupAddressSelect = observer(function ({
       borderRadius: "4px",
       paddingInline: "0.75rem",
       height: "75px",
-      width: "57%",
-      minWidth: "423px",
+      width: isMobile ? "100%" : "57%",
+      minWidth: isMobile ? "100%" : "423px",
     }),
     valueContainer: (provided) => ({
       ...provided,
@@ -76,7 +79,7 @@ export const StepCodeLookupAddressSelect = observer(function ({
     }),
     menu: (provided) => ({
       ...provided,
-      width: "57%",
+      width: isMobile ? "100%" : "57%",
       background: "var(--chakra-colors-greys-grey10)",
     }),
     placeholder: (base) => ({
@@ -111,7 +114,7 @@ export const StepCodeLookupAddressSelect = observer(function ({
                 {...props}
                 onButtonClick={onButtonClick}
                 isButtonDisabled={isButtonDisabled}
-                buttonText={buttonText}
+                buttonText={responsiveButtonText}
               />
             ),
             Option,
@@ -133,7 +136,7 @@ export const StepCodeLookupAddressSelect = observer(function ({
           borderWidth={1}
           borderColor="semantic.error"
           bg="semantic.errorLight"
-          w="57%"
+          w={isMobile ? "100%" : "57%"}
           mt="4"
           color="text.error"
         >
@@ -166,7 +169,22 @@ const Control = ({
   return (
     <components.Control {...props}>
       {children}
-      <Button variant="primary" size="lg" onClick={onButtonClick} pt="6" pb="6" pl="3" pr="3" zIndex={10}>
+      <Button
+        variant="primary"
+        size="lg"
+        onClick={onButtonClick}
+        onMouseDown={(e) => {
+          e.stopPropagation()
+        }}
+        onTouchEnd={(e) => {
+          e.stopPropagation()
+        }}
+        pt="6"
+        pb="6"
+        pl="3"
+        pr="3"
+        zIndex={10}
+      >
         {buttonText}
       </Button>
     </components.Control>
