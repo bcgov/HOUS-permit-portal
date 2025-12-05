@@ -25,6 +25,7 @@ import { EFlashMessageStatus, EPermitClassificationCode } from "../../../types/e
 import { IOption } from "../../../types/types"
 import { CustomMessageBox } from "../../shared/base/custom-message-box"
 import { ErrorScreen } from "../../shared/base/error-screen"
+import { SafeTipTapDisplay } from "../../shared/editor/safe-tiptap-display"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import ProjectInfoRow from "../../shared/project/project-info-row"
 import { Can } from "../../shared/user/can"
@@ -263,7 +264,7 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
                           <Heading as="h3" fontSize="lg" mb={2}>
                             {opt.value.name}
                           </Heading>
-                          <Text color="text.secondary">{opt.value.descriptionHtml}</Text>
+                          <SafeTipTapDisplay htmlContent={opt.value.descriptionHtml} />
                         </Box>
                         <Flex
                           align="center"
