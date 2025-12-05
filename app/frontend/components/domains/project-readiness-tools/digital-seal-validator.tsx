@@ -2,13 +2,10 @@ import {
   Alert,
   AlertIcon,
   Box,
+  Button,
   Container,
-  FormControl,
-  FormLabel,
   HStack,
   Heading,
-  Input,
-  Link,
   List,
   ListIcon,
   ListItem,
@@ -18,88 +15,83 @@ import {
   PopoverCloseButton,
   PopoverContent,
   PopoverTrigger,
-  Spinner,
   Text,
   UnorderedList,
   VStack,
-  useToast,
 } from "@chakra-ui/react"
 import { CheckCircle, Info, XCircle } from "@phosphor-icons/react"
-import React, { useState } from "react"
+import { UppyFile } from "@uppy/core"
+import "@uppy/core/dist/style.min.css"
+import "@uppy/dashboard/dist/style.css"
+import Dashboard from "@uppy/react/lib/Dashboard.js"
+import { observer } from "mobx-react-lite"
+import React from "react"
 import { useTranslation } from "react-i18next"
-import { useServerAPI } from "../../../setup/root"
+import useUppyTransient from "../../../hooks/use-uppy-transient"
+import { useMst } from "../../../setup/root"
 
-export const DigitalSealValidatorScreen = () => {
+export const DigitalSealValidatorScreen = observer(() => {
   const { t } = useTranslation()
-  const api = useServerAPI()
-  const [file, setFile] = useState<File | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
-  const [result, setResult] = useState<any>(null)
-  const [error, setError] = useState<string | null>(null)
-  const [isDragOver, setIsDragOver] = useState(false)
-  const toast = useToast()
+  const { digitalSealValidatorStore } = useMst()
+  const {
+    file,
+    validationResult: result,
+    error,
+    setFile,
+    setValidationResult,
+    setError,
+    reset,
+  } = digitalSealValidatorStore
 
-  const validateFile = async (fileToValidate: File) => {
-    setIsLoading(true)
+  const handleUploadSuccess = (uppyFile: UppyFile<{}, {}>, response: any) => {
+    setFile(uppyFile.data as File)
+    setValidationResult(null)
     setError(null)
-    setResult(null)
 
-    try {
-      const response = await api.validateDigitalSeal(fileToValidate)
-      if (response.ok && response.data.status === "success") {
-        setResult(response.data.signatures)
-      } else {
-        setError(t("projectReadinessTools.digitalSealValidator.notValidated" as any) as string)
-      }
-    } catch (e: any) {
-      setError(e.message || (t("projectReadinessTools.digitalSealValidator.notValidated" as any) as string))
-    } finally {
-      setIsLoading(false)
+    if (response.body?.meta?.status === "success") {
+      setValidationResult(response.body.meta.signatures)
+    } else {
+      // Explicit cast to avoid type issues
+      const key = "projectReadinessTools.digitalSealValidator.notValidated" as any
+      // @ts-ignore
+      const errorMsg = t(key, { defaultValue: "Document could not be validated." }) as string
+      setError(errorMsg)
     }
   }
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = event.target.files?.[0]
-    if (selectedFile) {
-      processFile(selectedFile)
-    }
+  const handleUploadError = (uppyFile: UppyFile<{}, {}>, error: any, response: any) => {
+    console.error("Upload error:", error, response)
+    setFile(uppyFile.data as File)
+    setValidationResult(null)
+    const errorMessage = response?.body?.meta?.message?.options?.error_message || "Document could not be validated."
+    setError(errorMessage)
   }
 
-  const onDragOver = (event: React.DragEvent<HTMLDivElement>) => {
-    event.preventDefault()
-    setIsDragOver(true)
+  const handleFileAdded = () => {
+    setError(null)
+    setValidationResult(null)
   }
 
-  const onDragLeave = (event: React.DragEvent<HTMLDivElement>) => {
-    event.preventDefault()
-    setIsDragOver(false)
+  const handleUploadStart = () => {
+    setError(null)
+    setValidationResult(null)
   }
 
-  const onDrop = (event: React.DragEvent<HTMLDivElement>) => {
-    event.preventDefault()
-    setIsDragOver(false)
-    const droppedFiles = event.dataTransfer.files
-    if (droppedFiles && droppedFiles.length > 0) {
-      processFile(droppedFiles[0])
-    }
+  const handleFileRemoved = () => {
+    resetValidator()
   }
 
-  const processFile = (selectedFile: File) => {
-    if (selectedFile.type !== "application/pdf") {
-      const title = t("ui.invalidFileType", { defaultValue: "Invalid File Type" }) as string
-      const description = t("ui.onlyPdfAllowed", { defaultValue: "Only PDF files are allowed" }) as string
-      toast({
-        title,
-        description,
-        status: "error",
-        duration: 3000,
-        isClosable: true,
-      })
-      return
-    }
-    setFile(selectedFile)
-    validateFile(selectedFile)
-  }
+  const uppy = useUppyTransient({
+    endpoint: digitalSealValidatorStore.uploadEndpoint,
+    onUploadSuccess: handleUploadSuccess,
+    onUploadError: handleUploadError,
+    onFileAdded: handleFileAdded,
+    onFileRemoved: handleFileRemoved,
+    onUploadStart: handleUploadStart,
+    allowedFileTypes: [".pdf"],
+    maxNumberOfFiles: 1,
+    autoProceed: true,
+  })
 
   const formatSignerName = (subjectName: string) => {
     if (!subjectName) return "Unknown Signer"
@@ -124,6 +116,11 @@ export const DigitalSealValidatorScreen = () => {
     return subjectName
   }
 
+  const resetValidator = () => {
+    uppy.cancelAll()
+    reset()
+  }
+
   return (
     <Container maxW="container.lg" py="16" px="8">
       <HStack mb="4" spacing={2} alignItems="center">
@@ -142,20 +139,46 @@ export const DigitalSealValidatorScreen = () => {
             <PopoverBody>
               <Text mb={3}>
                 {
+                  // @ts-ignore
                   t("projectReadinessTools.digitalSealValidator.help.description", {
                     defaultValue:
                       "A digital seal confirms the identity of the professional who signed the document and ensures the document hasn't been altered.",
-                  }) as string
+                  } as any) as any as string
                 }
               </Text>
               <Text fontWeight="bold" mb={1}>
-                {t("projectReadinessTools.digitalSealValidator.help.pass") as string}
+                {
+                  // @ts-ignore
+                  t("projectReadinessTools.digitalSealValidator.help.pass", {
+                    defaultValue: "PASS/VERIFIED",
+                  } as any) as any as string
+                }
               </Text>
-              <Text mb={3}>{t("projectReadinessTools.digitalSealValidator.help.passDesc") as string}</Text>
+              <Text mb={3}>
+                {
+                  // @ts-ignore
+                  t("projectReadinessTools.digitalSealValidator.help.passDesc", {
+                    defaultValue: "This confirms the digital signature is valid and authentic.",
+                  } as any) as any as string
+                }
+              </Text>
               <Text fontWeight="bold" mb={1}>
-                {t("projectReadinessTools.digitalSealValidator.help.fail") as string}
+                {
+                  // @ts-ignore
+                  t("projectReadinessTools.digitalSealValidator.help.fail", {
+                    defaultValue: "FAIL/UNABLE TO VERIFY",
+                  } as any) as any as string
+                }
               </Text>
-              <Text>{t("projectReadinessTools.digitalSealValidator.help.failDesc") as string}</Text>
+              <Text>
+                {
+                  // @ts-ignore
+                  t("projectReadinessTools.digitalSealValidator.help.failDesc", {
+                    defaultValue:
+                      "We couldn't verify the signature. This could be due to a revoked certificate, an altered document, or an unknown signer.",
+                  }) as string
+                }
+              </Text>
             </PopoverBody>
           </PopoverContent>
         </Popover>
@@ -240,7 +263,7 @@ export const DigitalSealValidatorScreen = () => {
                       const isValid = sig.result === "SUCCESS"
 
                       return (
-                        <ListItem key={index}>
+                        <ListItem key={rawSignerName || index}>
                           <VStack align="start" spacing={1}>
                             <HStack spacing={2}>
                               <ListIcon
@@ -263,6 +286,14 @@ export const DigitalSealValidatorScreen = () => {
                       )
                     })}
                 </List>
+                <Button variant="outline" mt={6} onClick={resetValidator}>
+                  {
+                    // @ts-ignore
+                    t("projectReadinessTools.digitalSealValidator.tryAnotherFile", {
+                      defaultValue: "Try another file",
+                    }) as string
+                  }
+                </Button>
               </Box>
             )}
           </Box>
@@ -275,41 +306,56 @@ export const DigitalSealValidatorScreen = () => {
           </Alert>
         )}
 
-        <FormControl>
-          <FormLabel htmlFor="file-upload" cursor="pointer" m={0} w="full">
-            <Box
-              bg={isDragOver ? "blue.100" : "blue.50"}
-              border="2px dashed"
-              borderColor={isDragOver ? "blue.500" : "blue.300"}
-              borderRadius="md"
-              p={10}
-              textAlign="center"
-              _hover={{ borderColor: "blue.500", bg: "blue.100" }}
-              transition="all 0.2s"
-              onDragOver={onDragOver}
-              onDragLeave={onDragLeave}
-              onDrop={onDrop}
-            >
-              <Input type="file" id="file-upload" accept="application/pdf" onChange={handleFileChange} display="none" />
-              <VStack spacing={4}>
-                {isLoading ? (
-                  <Spinner size="xl" color="blue.500" thickness="4px" />
-                ) : (
-                  <>
-                    <Text fontSize="lg">
-                      <Box as="i" className="fa fa-cloud-upload" mr={2} />
-                      {t("projectReadinessTools.digitalSealValidator.dragAndDrop") as string}{" "}
-                      <Link color="blue.600" textDecoration="underline" as="span">
-                        {t("projectReadinessTools.digitalSealValidator.browseDevice") as string}
-                      </Link>
-                    </Text>
-                  </>
-                )}
-              </VStack>
-            </Box>
-          </FormLabel>
-        </FormControl>
+        <Box
+          position="relative"
+          mb={6}
+          sx={{
+            ".uppy-Dashboard": {
+              border: "2px dashed var(--chakra-colors-border-light)",
+              borderRadius: "var(--chakra-radii-lg)",
+              borderColor: "var(--chakra-colors-theme-blue)",
+              width: "100%",
+              height: "100%",
+            },
+            ".uppy-Dashboard-inner": {
+              border: "none",
+              borderRadius: "var(--chakra-radii-lg)",
+              backgroundColor: "var(--chakra-colors-theme-blueLight)",
+              width: "100%",
+              height: "100%",
+            },
+            ".uppy-Dashboard-dropFilesHereHint": {
+              display: "none",
+            },
+            ".uppy-DashboardContent-title": {
+              display: "none",
+            },
+            ".uppy-DashboardContent-back": {
+              display: "none",
+            },
+            ".uppy-DashboardContent-bar": {
+              display: "none",
+            },
+            ".uppy-StatusBar-actionBtn--done": {
+              display: "none",
+            },
+            ".uppy-Informer": {
+              display: "none",
+            },
+            ".uppy-StatusBar.is-error .uppy-StatusBar-statusPrimary": {
+              display: "none",
+            },
+            ".uppy-StatusBar.is-error .uppy-StatusBar-statusSecondary": {
+              display: "none",
+            },
+            ".uppy-StatusBar-actionBtn--retry": {
+              display: "none",
+            },
+          }}
+        >
+          <Dashboard uppy={uppy} width="100%" height={276} proudlyDisplayPoweredByUppy={false} />
+        </Box>
       </VStack>
     </Container>
   )
-}
+})

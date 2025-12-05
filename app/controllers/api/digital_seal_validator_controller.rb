@@ -1,12 +1,10 @@
 class Api::DigitalSealValidatorController < Api::ApplicationController
-  skip_after_action :verify_authorized
-  skip_after_action :verify_policy_scoped
-
   def create
+    authorize :digital_seal_validator, :create?
     file = params[:file]
 
     if file.blank?
-      render json: { error: "No file provided" }, status: :unprocessable_entity
+      render_error "misc.no_file_provided", status: :unprocessable_entity
       return
     end
 
@@ -15,13 +13,25 @@ class Api::DigitalSealValidatorController < Api::ApplicationController
     result = validator.call(file.tempfile.path, file.content_type)
 
     if result.success
-      render json: { status: "success", signatures: result.signatures }
+      render_success(
+        nil,
+        nil,
+        {
+          meta: {
+            status: "success",
+            signatures: result.signatures
+          },
+          status: :ok
+        }
+      )
     else
-      render json: {
-               status: "error",
-               error: result.error
-             },
-             status: :unprocessable_entity
+      render_error "digital_seal_validator.validation_error",
+                   {
+                     message_opts: {
+                       error_message: result.error
+                     },
+                     status: :unprocessable_entity
+                   }
     end
   end
 end

@@ -948,14 +948,4 @@ export class Api {
       `/report_documents/${reportDocumentId}/share_with_jurisdiction`
     )
   }
-
-  async validateDigitalSeal(file: File) {
-    const formData = new FormData()
-    formData.append("file", file)
-    return this.client.post("/digital_seal_validator", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    })
-  }
 }
