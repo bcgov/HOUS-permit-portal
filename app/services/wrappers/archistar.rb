@@ -41,11 +41,21 @@ class Wrappers::Archistar < Wrappers::Base
   end
 
   def create_submission(pre_check)
+    doc = pre_check.primary_design_document
+    return unless doc&.file.present?
+
     payload = {
       complyCertificateId: pre_check.comply_certificate_id,
       cityKey: "bcbc",
       address: pre_check.formatted_address,
-      fileLink: pre_check.primary_design_document&.file_url,
+      fileLink:
+        doc.file.url(
+          response_content_disposition:
+            ActionDispatch::Http::ContentDisposition.format(
+              disposition: "attachment",
+              filename: doc.file.original_filename
+            )
+        ),
       additionalFiles: []
     }
 
