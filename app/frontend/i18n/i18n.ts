@@ -1067,8 +1067,7 @@ Thank you,
           seeBestPractices_link:
             "https://www2.gov.bc.ca/gov/content/housing-tenancy/building-or-renovating/permits/building-permit-hub#practices",
           searchKnowledge_CTA: "Ask a question",
-          searchKnowledge_link:
-            "https://www2.gov.bc.ca/gov/content/housing-tenancy/building-or-renovating/permits/building-permit-hub-search",
+          searchKnowledge_link: "https://www2.gov.bc.ca/gov/content?id=A5A88A4CE1D54D95AB23D57858EF11EE",
           pidLabel: "Parcel Identification (PID) No.",
           addressLabel: "Address",
           viewed: "Viewed",
@@ -2404,8 +2403,7 @@ Thank you,
           subTitle:
             "You can use this tool to generate your BC Energy Step Code Compliance Report. Approval is not automatic. After you've submitted your application, local officials will review it. They may ask you to fix issues or show that your application meets requirements before approving it.",
           checklistGuide: "See checklist guide",
-          helpLink:
-            "https://www2.gov.bc.ca/gov/content/housing-tenancy/building-or-renovating/permits/building-permit-hub/29065",
+          helpLink: "https://www2.gov.bc.ca/gov/content?id=C4F8CA77AC5648CBB86948C1AEA58C8F",
           helpLinkText: "What does each step code level mean?",
           saveAndGoBack: "Save and go back",
           markAsComplete: "Mark as complete",
