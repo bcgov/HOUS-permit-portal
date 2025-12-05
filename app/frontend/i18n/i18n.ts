@@ -292,6 +292,8 @@ const options = {
           returnHome: "Return to home",
           copied: "Copied!",
           failedToCopy: "Something went wrong while trying to copy",
+          fileUnavailable: "File unavailable",
+          fileRemoved: "FILE REMOVED",
           reset: "Reset",
           autofill: "Autofill",
           help: "Help",
@@ -334,6 +336,8 @@ const options = {
           title: "Notifications",
           nUnread: "{{ n }} new",
           noUnread: "No unread notifications",
+          file_upload_failed:
+            "A file you uploaded could not be processed and has been removed. Please try uploading the file again.",
         },
         eula: {
           title: "End-User License Agreement",
@@ -352,6 +356,7 @@ const options = {
           },
         },
         preCheck: {
+          disabled: "Code compliance pre-check is currently not available. ",
           startNew: "New pre-check",
           noneFoundExplanation: "No pre-checks found",
           index: {
@@ -725,10 +730,10 @@ const options = {
             sectionTitle: "Resources for applicants",
             description: "Additional resources and reference materials to help you with your application:",
             categories: {
-              planning_zoning: "Planning & Zoning",
-              bylaws_requirements: "Bylaws & Requirements",
-              gis_mapping: "GIS Mapping",
-              additional_resources: "Additional Resources",
+              planning_zoning: "Planning & zoning",
+              bylaws_requirements: "Bylaws & requirements",
+              gis_mapping: "GIS mapping",
+              additional_resources: "Additional resources",
             },
           },
           documents: {
@@ -1014,6 +1019,7 @@ Thank you,
           },
         },
         permitApplication: {
+          goToApplication: "Go to permit application",
           noneFound: "No permits yet",
           noneFoundExplanation:
             "Missing permits? You might have used a login option different from the one you used to create the permits. Log out and try logging back in with the BCeID or BC Services Card Account you used to create them.",
@@ -2754,6 +2760,9 @@ Thank you,
             },
           },
         },
+        resource: {
+          fileRemovedDescription: "This file was removed after a routine scan and can't be opened.",
+        },
         home: {
           jurisdictionsTitle: "Jurisdictions",
           projectReadinessTools: {
@@ -3166,12 +3175,6 @@ Thank you,
                 link: "Link",
                 pdf: "PDF",
                 linkTag: "LINK",
-              },
-              categories: {
-                planning_zoning: "Planning & Zoning",
-                bylaws_requirements: "Bylaws & Requirements",
-                gis_mapping: "GIS Mapping",
-                additional_resources: "Additional Resources",
               },
             },
             myJurisdictionAboutPage: {
@@ -3711,6 +3714,7 @@ Thank you,
               resourcesLabel: "Resources for applicants",
               noResourcesYet: "When you add resources, they'll appear here.",
               addResourcesLink: "Add resources for applicants",
+              manageResourcesLink: "Manage resources",
               filterLabel: "Search electives",
               sortLabel: "Sort by",
               filterPlaceholder: "Search electives",

@@ -51,6 +51,7 @@ export const getFileTypeInfo = (mimeType?: string): FileTypeInfo => {
  * @returns Formatted string like "1.5MB" or "256.0KB"
  */
 export const formatFileSize = (bytes: number): string => {
+  if (bytes == null) return ""
   if (bytes < 1024 * 1024) {
     return `${(bytes / 1024).toFixed(1)}KB`
   }
@@ -64,6 +65,7 @@ export const formatFileSize = (bytes: number): string => {
  * @returns Uppercase file extension like "PDF", "DOCX", etc.
  */
 export const getFileExtension = (filename: string, mimeType?: string): string => {
+  if (!filename) return "FILE"
   if (mimeType === "application/pdf") return "PDF"
   const ext = filename.split(".").pop()?.toUpperCase()
   return ext || "FILE"

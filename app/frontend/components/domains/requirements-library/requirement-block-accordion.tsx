@@ -222,7 +222,7 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
                 {(Object.entries(resourcesByCategory) as [string, IResource[]][]).map(([category, resources]) => (
                   <Box key={category} w="full">
                     <Text fontWeight={600} fontSize="xs" color="text.secondary" mb={2}>
-                      {t(`home.configurationManagement.resources.categories.${category as EResourceCategory}`)}{" "}
+                      {t(`jurisdiction.resources.categories.${category as EResourceCategory}`)}{" "}
                       {(t("home.configurationManagement.resources.title") as string).toLowerCase()}
                     </Text>
                     <VStack align="start" spacing={3} w="full">

@@ -88,7 +88,7 @@ const generateResourceComponents = (resourcesByCategory: Record<string, IResourc
   // Add components for each category
   Object.entries(resourcesByCategory).forEach(([category, resources]) => {
     // Category label - category is in snake_case, matching the i18n keys
-    const categoryLabel: string = (t as any)(`home.configurationManagement.resources.categories.${category}`)
+    const categoryLabel: string = (t as any)(`jurisdiction.resources.categories.${category}`)
     const resourcesText: string = ((t as any)("home.configurationManagement.resources.title") as string).toLowerCase()
     components.push({
       type: "content",
@@ -111,10 +111,10 @@ const generateResourceComponents = (resourcesByCategory: Record<string, IResourc
         })
       } else if (resource.resourceDocument) {
         const fileExt = getFileExtension(
-          resource.resourceDocument.file.metadata.filename,
-          resource.resourceDocument.file.metadata.mimeType
+          resource.resourceDocument.file?.metadata?.filename,
+          resource.resourceDocument.file?.metadata?.mimeType
         )
-        const fileSize = formatFileSize(resource.resourceDocument.file.metadata.size)
+        const fileSize = formatFileSize(resource.resourceDocument.file?.metadata?.size)
         const label = `${resource.title} (${fileExt}, ${fileSize})`
 
         components.push({
@@ -126,7 +126,7 @@ const generateResourceComponents = (resourcesByCategory: Record<string, IResourc
           custom: `document.dispatchEvent(new CustomEvent('downloadResourceDocument', {
             detail: {
               id: '${resource.resourceDocument.id}',
-              filename: '${escapeForSingleQuotedJsString(resource.resourceDocument.file.metadata.filename)}'
+              filename: '${escapeForSingleQuotedJsString(resource.resourceDocument.file?.metadata?.filename)}'
             }
           }));`,
         })

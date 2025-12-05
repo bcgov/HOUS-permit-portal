@@ -1,6 +1,7 @@
 import { Box, Link, Text } from "@chakra-ui/react"
-import { ArrowSquareOut } from "@phosphor-icons/react"
+import { ArrowSquareOut, WarningCircle } from "@phosphor-icons/react"
 import React from "react"
+import { useTranslation } from "react-i18next"
 import { EFileUploadAttachmentType, EResourceType } from "../../../types/enums"
 import { IRequirementDocument, IResource, IResourceDocument } from "../../../types/types"
 import { formatFileSize, getFileExtension } from "../../../utils/file-utils"
@@ -15,6 +16,18 @@ export const DownloadLinkButton = ({
   modelType: EFileUploadAttachmentType
   title?: string
 }) => {
+  const { t } = useTranslation()
+
+  // Handle missing file data (e.g., failed upload, virus detected)
+  if (!document?.file?.metadata) {
+    return (
+      <Text color="greys.grey01" fontSize="sm" display="inline-flex" alignItems="center" gap={1}>
+        <WarningCircle size={16} />
+        {t("ui.fileUnavailable")}
+      </Text>
+    )
+  }
+
   const fileExt = getFileExtension(document.file.metadata.filename, document.file.metadata.mimeType)
   const fileSize = formatFileSize(document.file.metadata.size)
   const displayTitle = title || document.file.metadata.filename

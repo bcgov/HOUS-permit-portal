@@ -105,7 +105,7 @@ export const NotificationsPopover: React.FC<INotificationsPopoverProps> = observ
             zIndex={1}
             {...rest}
           />
-          {anyUnread && !currentSandbox && (
+          {anyUnread && (
             <Badge
               position="absolute"
               top={0}
