@@ -18,7 +18,7 @@ class Api::StorageController < Api::ApplicationController
     "SupportingDocument" => SupportingDocument,
     "RequirementDocument" => RequirementDocument,
     "ProjectDocument" => ProjectDocument,
-    "JurisdictionDocument" => JurisdictionDocument,
+    "ResourceDocument" => ResourceDocument,
     "ReportDocument" => ReportDocument,
     "DesignDocument" => DesignDocument
   }.freeze

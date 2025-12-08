@@ -418,3 +418,12 @@ export function isBaselineChecklist(checklist: any): boolean {
   const { stepCodeOccs } = getStepCodeOccupancies(checklist)
   return stepCodeOccs.length === 0
 }
+
+/**
+ * Escapes a string for use inside a single-quoted JavaScript string literal.
+ * It escapes backslashes first, then single quotes.
+ */
+export function escapeForSingleQuotedJsString(str: string | null | undefined): string {
+  if (!str) return ""
+  return str.replace(/\\/g, "\\\\").replace(/'/g, "\\'")
+}
