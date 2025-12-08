@@ -58,6 +58,7 @@ en:
           attributes:
             submitter:
               incorrect_role: "must have the submitter role"
+              review_staff_requires_sandbox: "review staff cannot submit permit applications outside of a sandbox"
             jurisdiction:
               no_contact: "is not ready to accept applications through this tool yet. Please check with your local jurisdiction."
               inbox_not_enabled: "inbox for this permit application is not enabled"
@@ -220,7 +221,7 @@ en:
         message: Error encountered fetching permit classification options
       create_error:
         title: Error
-        message: "There was an error creating the permit classification"
+        message: "%{error_message}"
       update_error:
         title: Error
         message: "There was an error updating the permit classification"

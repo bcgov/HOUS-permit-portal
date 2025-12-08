@@ -68,13 +68,12 @@ function formFormDefaults(
   customization: IRequirementBlockCustomization | undefined
 ): ICustomizationForm {
   return {
-    tip: customization?.tip,
+    tip: customization?.tip ?? "",
     resourceIds: customization?.resourceIds || [],
-    enabledElectiveFieldIds: customization?.enabledElectiveFieldIds?.filter(
-      (id) => !!availableElectiveFields.find((f) => f.id === id)
-    ),
+    enabledElectiveFieldIds:
+      customization?.enabledElectiveFieldIds?.filter((id) => !!availableElectiveFields.find((f) => f.id === id)) ?? [],
     optionalElectiveFieldIds: customization?.optionalElectiveFieldIds || [],
-    enabledElectiveFieldReasons: customization?.enabledElectiveFieldReasons,
+    enabledElectiveFieldReasons: customization?.enabledElectiveFieldReasons ?? {},
   }
 }
 

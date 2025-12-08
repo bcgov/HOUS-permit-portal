@@ -38,7 +38,6 @@ export const NotificationsPopover: React.FC<INotificationsPopoverProps> = observ
   ...rest
 }) {
   const { notificationStore, sandboxStore } = useMst()
-  const { currentSandbox } = sandboxStore
   const { notifications, initialFetch, fetchNotifications, anyUnread, generateSpecificLinkData, getSemanticKey } =
     notificationStore
 

@@ -5,7 +5,7 @@ class RequirementFormJsonService
   attr_accessor :requirement
 
   ENERGY_STEP_CODE_TOOLTIP_URL =
-    "https://www2.gov.bc.ca/gov/content/housing-tenancy/building-or-renovating/permits/building-permit-hub/29065#Reports"
+    "https://www2.gov.bc.ca/gov/content?id=C4F8CA77AC5648CBB86948C1AEA58C8F#Reports"
 
   STEP_CODE_ACTIONS_CONTAINER =
     lambda do |start_event, step_code_type|

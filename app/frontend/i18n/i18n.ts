@@ -185,6 +185,7 @@ const options = {
           beta: "Beta",
           optional: "(optional)",
           next: "Next",
+          check: "Check",
           saveAndcontinue: "Save and continue",
           selectParticipatingJurisdiction: "Please select a participating jurisdiction to continue",
           participatingCommunityTitle: "Your project is in a participating community",
@@ -571,6 +572,30 @@ const options = {
               expiredTitle: "This pre-check is expired",
               expiredDescription:
                 "This pre-check is expired because it was created more than 150 days ago. You will not be able to download the PDF report or explore the interactive results.",
+
+              sections: {
+                whatYouCanDo: {
+                  title: "What you can do now",
+                  download:
+                    "Download a PDF report listing all pre-check results, or explore them interactively in alongside your drawings.",
+                  address:
+                    "You can use these results to address any compliance issues and prepare your drawings for a permit application.",
+                  beta: "This service is in beta. If you experience issues or have questions about your results, contact us at",
+                },
+                reportPreparedBy: {
+                  title: "Report prepared by {{serviceProvider}}",
+                  providedBy: "This service is provided by {{serviceProvider}} to give you early guidance only.",
+                  ministryDisclaimer:
+                    "The Ministry of Housing and Municipal Affairs (“we”) does not guarantee the accuracy or completeness of any information produced by this service.",
+                  liability:
+                    "We are not liable for any errors, omissions, or any actions you take in reliance upon this service.",
+                  notShared:
+                    "Results from this service are not shared with your local building officials and are not part of your official permit submission.",
+                  noGuarantee:
+                    "A passing result does not guarantee approval: a building official will still carry out a full review as part of the permit application process.",
+                  jurisdiction: "Only your local jurisdiction can approve or reject a permit application.",
+                },
+              },
             },
           },
           viewer: {
@@ -691,7 +716,7 @@ const options = {
           },
           index: {
             title: "Jurisdictions",
-            description: "Below is a list of all jurisdictions in the system",
+            description: "Search or sort to check if a community is accepting permit application submissions",
             createButton: "Create new jurisdiction",
             tableHeading: "Local governments",
             users: "Users",
@@ -1078,8 +1103,7 @@ Thank you,
           seeBestPractices_link:
             "https://www2.gov.bc.ca/gov/content/housing-tenancy/building-or-renovating/permits/building-permit-hub#practices",
           searchKnowledge_CTA: "Ask a question",
-          searchKnowledge_link:
-            "https://www2.gov.bc.ca/gov/content/housing-tenancy/building-or-renovating/permits/building-permit-hub-search",
+          searchKnowledge_link: "https://www2.gov.bc.ca/gov/content?id=A5A88A4CE1D54D95AB23D57858EF11EE",
           pidLabel: "Parcel Identification (PID) No.",
           addressLabel: "Address",
           viewed: "Viewed",
@@ -1227,10 +1251,10 @@ Thank you,
             viewRevisionRequests: "View revision requests",
             requestingRevisions: "Requesting revisions",
             requestedRevisions: "Requested revisions",
-            retriggerWebhook: "Retrigger submission webhook",
-            retriggeringWebhook: "Retriggering...",
-            retriggerWebhookSuccess: "Submission webhook retriggered successfully",
-            retriggerWebhookError: "Error retriggering submission webhook",
+            retriggerWebhook: "Re-push to connected systems",
+            retriggeringWebhook: "Re-pushing...",
+            retriggerWebhookSuccess: "Re-push to connected systems successful",
+            retriggerWebhookError: "Error re-pushing to connected systems",
             pleaseFix: "Please fix the requested revisions and re-submit your application",
             onlySpecified:
               "Only the the specified fields highlighted below (in yellow) and their corresponding blocks can be edited",
@@ -2415,8 +2439,7 @@ Thank you,
           subTitle:
             "You can use this tool to generate your BC Energy Step Code Compliance Report. Approval is not automatic. After you've submitted your application, local officials will review it. They may ask you to fix issues or show that your application meets requirements before approving it.",
           checklistGuide: "See checklist guide",
-          helpLink:
-            "https://www2.gov.bc.ca/gov/content/housing-tenancy/building-or-renovating/permits/building-permit-hub/29065",
+          helpLink: "https://www2.gov.bc.ca/gov/content?id=C4F8CA77AC5648CBB86948C1AEA58C8F",
           helpLinkText: "What does each step code level mean?",
           saveAndGoBack: "Save and go back",
           markAsComplete: "Mark as complete",
@@ -2872,6 +2895,8 @@ Thank you,
             },
             lookUpStepCodesRequirementsForYourProjectScreen: {
               title: "Look up Step Codes requirements for your project",
+              jurisdiction: "Jurisdiction",
+              addressSearched: "Address Searched",
               description:
                 "The BC Energy Step Code and Zero Carbon Step Code set performance targets for new buildings. The Province sets minimum requirements for energy efficiency. Local governments and First Nations can choose to require higher steps.",
               enterYourProjectAddress:
