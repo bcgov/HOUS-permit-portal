@@ -41,23 +41,35 @@ module Infrastructure
         puts "IMPORT NOT ENABLED, PLEASE SET IMPORT_ENABLED=true IN ENV" and
           return
       end
-      prepare_classification_map if @wipe_data
-      wipe_data! if @wipe_data
 
-      Zip::File.open(@input_path) do |zip_file|
-        IMPORT_ORDER.each { |config| import_model(zip_file, config) }
+      # Wrap the entire import process in a transaction
+      ActiveRecord::Base.transaction do
+        prepare_classification_map if @wipe_data
+        wipe_data! if @wipe_data
+
+        Zip::File.open(@input_path) do |zip_file|
+          IMPORT_ORDER.each { |config| import_model(zip_file, config) }
+        end
+
+        # Post-import: Update orphaned dependents if any were preserved but need remapping
+        # (Though we wiped most things, if we kept any that reference PermitType, we'd fix them here)
+
+        reindex_models
+
+        Rails.logger.info "Import completed from #{@input_path}"
+      rescue StandardError => e
+        Rails.logger.error "Import failed: #{e.message}"
+        Rails.logger.error e.backtrace.join("\n")
+        raise ActiveRecord::Rollback
       end
-
-      # Post-import: Update orphaned dependents if any were preserved but need remapping
-      # (Though we wiped most things, if we kept any that reference PermitType, we'd fix them here)
-      #
-
-      reindex_models
-
-      Rails.logger.info "Import completed from #{@input_path}"
     end
 
     private
+
+    def reindex_models
+      RequirementBlock.reindex
+      RequirementTemplate.reindex
+    end
 
     def prepare_classification_map
       # Store code -> id map to restore relationships later
@@ -175,8 +187,6 @@ module Infrastructure
       end
 
       Rails.logger.info "Imported #{filename}"
-    rescue NameError
-      Rails.logger.warn "Model for #{filename} not found. Skipping."
     end
 
     def track_classification_id_change(attributes)
@@ -298,14 +308,6 @@ module Infrastructure
 
           attributes["denormalized_template_json"] = json
         end
-
-        # FIX: Remap baked-in requirement_template_sections structure?
-        # The json has nested requirement_template_sections with IDs.
-        # Since we wipe and restore sections with ORIGINAL IDs (from export),
-        # these IDs inside the JSON should be consistent.
-        # EXCEPT if we did some ID remapping? We did NOT remap Section IDs.
-        # We only remapped Classification IDs.
-        # So sections should be fine.
       end
 
       # TemplateSectionBlock fixups (Orphan check)
@@ -335,14 +337,6 @@ module Infrastructure
       end
 
       attributes
-    end
-
-    def reindex_models
-      RequirementBlock.reindex
-      RequirementTemplate.reindex
-
-      RequirementBlock.search_index.refresh
-      RequirementTemplate.search_index.refresh
     end
   end
 end
