@@ -135,7 +135,7 @@
                     <p>
                       <a href="<%= root_url %>" target="_blank" style="margin-right: 20px">Home</a> 
                       <a href="<%= FrontendUrlHelper.frontend_url("/contact") %>" target="_blank" style="margin-right: 20px">Contact us</a>
-                      <a href="https://www2.gov.bc.ca/gov/content/housing-tenancy/building-or-renovating/permits/building-permit-hub" target="_blank" style="margin-right: 20px">Help</a>
+                      <a href="https://www2.gov.bc.ca/gov/content?id=F2AE1595C6044E819A316925F0A74E09" target="_blank" style="margin-right: 20px">Help</a>
                       <a href="<%= FrontendUrlHelper.frontend_url("/login") %>" target="_blank" style="margin-right: 20px">Login</a>
                     </p>
                     <hr>
