@@ -65,6 +65,11 @@ const SubmissionsInboxSetupScreenLazy = lazy(() =>
     default: module.SubmissionsInboxSetupScreen,
   }))
 )
+const ResourcesScreenLazy = lazy(() =>
+  import("../home/review-manager/configuration-management-screen/resources-screen").then((module) => ({
+    default: module.ResourcesScreen,
+  }))
+)
 const ReviewStaffMyJurisdictionAboutPageScreen = lazy(() =>
   import(
     "../home/review-manager/configuration-management-screen/feature-access-screen/my-jurisdiction-about-page"
@@ -594,6 +599,10 @@ const AppRoutes = observer(() => {
       <Route
         path="/jurisdictions/:jurisdictionId/configuration-management/feature-access/submissions-inbox-setup"
         element={<SubmissionsInboxSetupScreenLazy />}
+      />
+      <Route
+        path="/jurisdictions/:jurisdictionId/configuration-management/resources"
+        element={<ResourcesScreenLazy />}
       />
       <Route
         path="/jurisdictions/:jurisdictionId/configuration-management/feature-access"

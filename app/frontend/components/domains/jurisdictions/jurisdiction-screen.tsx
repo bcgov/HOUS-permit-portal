@@ -34,6 +34,7 @@ import { ErrorScreen } from "../../shared/base/error-screen"
 import { LoadingScreen } from "../../shared/base/loading-screen"
 import { EditorWithPreview } from "../../shared/editor/custom-extensions/editor-with-preview"
 import { SafeTipTapDisplay } from "../../shared/editor/safe-tiptap-display"
+import { JurisdictionResourcesSection } from "../../shared/jurisdiction/jurisdiction-resources-section"
 import { JurisdictionMap } from "../../shared/module-wrappers/jurisdiction-map"
 import { StepCodeRequirementsTable } from "../../shared/step-code-requirements-table"
 import { Can } from "../../shared/user/can"
@@ -190,6 +191,7 @@ export const JurisdictionScreen = observer(() => {
 
                     <StepCodeRequirementsTable currentJurisdiction={currentJurisdiction} />
                   </Flex>
+                  <JurisdictionResourcesSection jurisdiction={currentJurisdiction} />
                   <Flex as="section" direction="column" borderRadius="lg" boxShadow="md">
                     <Box py={3} px={6} bg="theme.blueAlt" borderTopRadius="lg">
                       <Heading as="h3" color="greys.white" fontSize="xl">

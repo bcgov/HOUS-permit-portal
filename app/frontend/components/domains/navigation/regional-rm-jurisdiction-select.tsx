@@ -33,8 +33,7 @@ export const RegionalRMJurisdictionSelect = observer(function RegionalRMJurisdic
         <ConditionalTooltip
           showTooltip={isSandboxActive}
           message={t("sandbox.disableJurisdictionSwitchTooltip")}
-          placement="bottom-end"
-          openDelay={200}
+          tooltipProps={{ placement: "bottom-end", openDelay: 200 }}
         >
           <Button
             rightIcon={<CaretDown />}

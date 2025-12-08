@@ -61,16 +61,7 @@ const SectionDisplay = observer(
         id={formScrollToId?.(section.id)}
         data-section-id={section.id}
       >
-        <Stack
-          w="full"
-          spacing="6"
-          mt="8"
-          mb="20"
-          mx="auto"
-          pl="8"
-          pr="var(--app-permit-form-right-white-space)"
-          maxWidth="container.lg"
-        >
+        <Stack w="full" spacing="6" mt="8" mb="20" mx="auto" px="8" maxWidth="container.lg">
           <Heading as="h3" variant="yellowline" fontSize="2xl">
             {sectionName}
           </Heading>
