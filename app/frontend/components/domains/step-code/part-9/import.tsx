@@ -141,7 +141,7 @@ export const H2KImport = function StepCodeH2kImport() {
               <VStack key={`step-code-data-entry-${index}`} w="full" spacing={4}>
                 <HStack w="full" align="start">
                   <FileFormControl
-                    inputProps={{ key: field.id, borderWidth: 0, p: 0 }}
+                    inputProps={{ borderWidth: 0, p: 0 }}
                     label={t("stepCode.import.selectFile")}
                     fieldName={`preConstructionChecklistAttributes.dataEntriesAttributes.${index}.h2kLocal`}
                     required
@@ -166,12 +166,10 @@ export const H2KImport = function StepCodeH2kImport() {
                 <VStack align="start" w="full">
                   <HStack w="full">
                     <NumberFormControl
-                      key={field.id}
                       label={t("stepCode.import.districtEnergyEF")}
                       fieldName={`preConstructionChecklistAttributes.dataEntriesAttributes.${index}.districtEnergyEf`}
                     />
                     <NumberFormControl
-                      inputProps={{ key: field.id }}
                       label={t("stepCode.import.districtEnergyConsumption")}
                       fieldName={`preConstructionChecklistAttributes.dataEntriesAttributes.${index}.districtEnergyConsumption`}
                     />
@@ -179,12 +177,10 @@ export const H2KImport = function StepCodeH2kImport() {
                 </VStack>
                 <HStack w="full">
                   <NumberFormControl
-                    inputProps={{ key: field.id }}
                     label={t("stepCode.import.otherGhgEf")}
                     fieldName={`preConstructionChecklistAttributes.dataEntriesAttributes.${index}.otherGhgEf`}
                   />
                   <NumberFormControl
-                    inputProps={{ key: field.id }}
                     label={t("stepCode.import.otherGhgConsumption")}
                     fieldName={`preConstructionChecklistAttributes.dataEntriesAttributes.${index}.otherGhgConsumption`}
                   />

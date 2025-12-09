@@ -287,7 +287,6 @@ export class Api {
     pid?: string
     jurisdictionId?: string
     pin?: string
-    propertyPlanJurisdictionId?: string
   }) {
     return this.client.post<ApiResponse<IPermitProject>>("/permit_projects", { permitProject: projectData })
   }

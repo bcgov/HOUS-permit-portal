@@ -176,6 +176,19 @@ export const NotificationStoreModel = types
             href: `/pre-checks/${preCheckData?.preCheckId}/edit/results-summary`,
           },
         ]
+      } else if (notification.actionType === ENotificationActionType.fileUploadFailed) {
+        const fileUploadData = notification.objectData as any
+        const permitApplicationId = fileUploadData?.permitApplicationId
+        if (!permitApplicationId) {
+          return []
+        }
+
+        return [
+          {
+            text: t("permitApplication.goToApplication"),
+            href: `/permit-applications/${permitApplicationId}/edit`,
+          },
+        ]
       }
     },
   }))

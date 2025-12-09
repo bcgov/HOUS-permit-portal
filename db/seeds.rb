@@ -248,8 +248,10 @@ if PermitApplication.first.blank?
 
   20.times do |index|
     current_review_manager = review_managers.sample
-    current_jurisdiction_id =
-      index.even? ? jurisdictions.first(10).sample.id : north_van.id
+    current_jurisdiction =
+      index.even? ? jurisdictions.first(10).sample : north_van
+    current_jurisdiction_id = current_jurisdiction.id
+    sandbox = current_jurisdiction.sandboxes.find_by(name: "Published")
 
     permit_project =
       PermitProject.create!(
@@ -269,7 +271,8 @@ if PermitApplication.first.blank?
         permit_project: permit_project,
         activity_id: template_version.activity.id,
         permit_type_id: template_version.permit_type.id,
-        template_version: template_version
+        template_version: template_version,
+        sandbox: sandbox
       )
 
     # Assign a random collaborator as a submission delegatee to the main application
@@ -299,7 +302,8 @@ if PermitApplication.first.blank?
           activity_id: draft_template_version.activity.id,
           permit_type_id: draft_template_version.permit_type.id,
           template_version: draft_template_version,
-          status: :new_draft
+          status: :new_draft,
+          sandbox: sandbox
         )
       # Assign a random collaborator as a submission delegatee to the draft application
       collaborator_user = (submitters.to_a - [current_review_manager]).sample
@@ -322,6 +326,7 @@ if PermitApplication.first.blank?
   # Seed a North Vancouver Example
   4.times do |i| # Added index i for unique titles if needed
     current_review_manager = review_managers.sample
+    sandbox = north_van.sandboxes.find_by(name: "Published")
     project_pid =
       (
         if (north_van.locality_type == "corporation of the city")
@@ -356,7 +361,8 @@ if PermitApplication.first.blank?
         permit_project: permit_project,
         activity_id: template_version.activity.id,
         permit_type_id: template_version.permit_type.id,
-        template_version: template_version
+        template_version: template_version,
+        sandbox: sandbox
       )
 
     # Assign a random collaborator as a submission delegatee
@@ -386,7 +392,8 @@ if PermitApplication.first.blank?
           activity_id: draft_template_version.activity.id,
           permit_type_id: draft_template_version.permit_type.id,
           template_version: draft_template_version,
-          status: :new_draft
+          status: :new_draft,
+          sandbox: sandbox
         )
       # Assign a random collaborator as a submission delegatee to the draft application
       collaborator_user = (submitters.to_a - [current_review_manager]).sample

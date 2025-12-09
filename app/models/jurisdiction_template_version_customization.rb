@@ -3,7 +3,10 @@ class JurisdictionTemplateVersionCustomization < ApplicationRecord
   # {
   #   requirement_block_changes?: Record<UUID, {
   #     tip?: string
+  #     resource_ids?: Array<UUID>
   #     enabled_elective_field_ids?: Array<UUID>
+  #     optional_elective_field_ids?: Array<UUID>
+  #     enabled_elective_field_reasons?: Record<UUID, string>
   #   }>
   # }
   # Where the key to requirement_block_changes object is the id of the requirement_block affected.

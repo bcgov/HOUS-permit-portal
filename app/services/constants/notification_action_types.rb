@@ -18,5 +18,6 @@ module Constants
     STEP_CODE_REPORT_GENERATED = "step_code_report_generated"
     PRE_CHECK_SUBMITTED = "pre_check_submitted"
     PRE_CHECK_COMPLETED = "pre_check_completed"
+    FILE_UPLOAD_FAILED = "file_upload_failed"
   end
 end

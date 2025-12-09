@@ -67,7 +67,7 @@ class Jurisdiction < ApplicationRecord
   has_many :collaborators, as: :collaboratorable, dependent: :destroy
   has_many :sandboxes, dependent: :destroy
   has_many :property_plan_local_jurisdictions, dependent: :destroy
-  has_many :jurisdiction_documents, dependent: :destroy
+  has_many :resources, dependent: :destroy
   has_many :service_partner_enrollments,
            class_name: "JurisdictionServicePartnerEnrollment",
            dependent: :destroy
@@ -108,7 +108,7 @@ class Jurisdiction < ApplicationRecord
                                   }
 
   accepts_nested_attributes_for :permit_type_required_steps, allow_destroy: true
-  accepts_nested_attributes_for :jurisdiction_documents, allow_destroy: true
+  accepts_nested_attributes_for :resources, allow_destroy: true
 
   before_create :assign_unique_prefix
 
@@ -123,6 +123,10 @@ class Jurisdiction < ApplicationRecord
 
   def review_managers
     users&.kept&.review_manager
+  end
+
+  def managers
+    review_managers + regional_review_managers
   end
 
   def manager_emails

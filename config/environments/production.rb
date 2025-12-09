@@ -68,7 +68,7 @@ Rails.application.configure do
   config.log_level = ENV.fetch("RAILS_LOG_LEVEL", "info")
 
   # Use a Redis cache store with Sentinel in production (skipped during Docker image builds)
-  if ENV["IS_DOCKER_BUILD"].blank?
+  if ENV["IS_DOCKER_BUILD"].blank? && ENV["REDIS_SENTINEL_HEADLESS"].present?
     config.cache_store =
       :redis_cache_store,
       {
