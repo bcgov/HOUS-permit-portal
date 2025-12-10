@@ -33,6 +33,8 @@ export const PermitProjectModel = types
     isFullyLoaded: types.optional(types.boolean, false),
     ownerName: types.maybeNull(types.string),
     ownerId: types.maybeNull(types.string),
+    latitude: types.maybeNull(types.string), // From decimal in backend
+    longitude: types.maybeNull(types.string), // From decimal in backend
   })
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -69,6 +71,12 @@ export const PermitProjectModel = types
     get jurisdictionDifferentFromSandbox() {
       if (!self.rootStore.sandboxStore.currentSandbox) return false
       return self.jurisdiction?.id !== self.rootStore.sandboxStore.currentSandbox?.jurisdictionId
+    },
+    get mapPosition(): [number, number] | null {
+      if (self.latitude && self.longitude) {
+        return [Number(self.longitude), Number(self.latitude)]
+      }
+      return null
     },
   }))
   .actions((self) => ({

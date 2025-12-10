@@ -95,6 +95,20 @@ module ProjectItem
       parent&.permit_date || self[:permit_date]
     end
 
+    def latitude
+      parent&.latitude || (self[:latitude] if self.has_attribute?(:latitude))
+    end
+
+    def longitude
+      parent&.longitude || (self[:longitude] if self.has_attribute?(:longitude))
+    end
+
+    def coordinates
+      return longitude, latitude if longitude && latitude
+
+      nil
+    end
+
     private
 
     def reindex_permit_project

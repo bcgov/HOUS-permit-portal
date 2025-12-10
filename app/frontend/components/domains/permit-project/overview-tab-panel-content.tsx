@@ -14,6 +14,7 @@ import {
 import { IOption } from "../../../types/types"
 import { CustomMessageBox } from "../../shared/base/custom-message-box"
 import { SearchGrid } from "../../shared/grid/search-grid"
+import { ProjectMap } from "../../shared/module-wrappers/project-map"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { AddPermitsButton } from "../../shared/permit-projects/add-permits-button"
 import ProjectInfoRow from "../../shared/project/project-info-row"
@@ -191,11 +192,9 @@ export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
             )}
           </Box>
           <Box>
-            {/* TODO: Add map */}
-            {/* <Image src="/images/map-placeholder.png" alt="Parcel map" borderRadius="md" />
-              <Icon as={MapPin} mr={2} />
-              Open parcel map
-            </Link> */}
+            <Box height="250px" borderRadius="md" overflow="hidden">
+              <ProjectMap coordinates={permitProject.mapPosition} pid={pid} />
+            </Box>
           </Box>
         </Grid>
       </Box>
