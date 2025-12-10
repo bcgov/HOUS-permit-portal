@@ -3,15 +3,14 @@ class ResourceReminderJob
   include Sidekiq::Worker
   sidekiq_options queue: :default
 
-  REMINDER_THRESHOLD_MONTHS = 6
-
   def perform
-    cutoff_date = REMINDER_THRESHOLD_MONTHS.months.ago
+    reminder_days = ENV.fetch("RESOURCE_REMINDER_DAYS", 180).to_i
+    cutoff_date = reminder_days.days.ago
 
     Jurisdiction.all.find_each do |jurisdiction|
       # Find resources that need reminder:
-      # - Updated more than 6 months ago
-      # - AND either never had a reminder OR last reminder was more than 6 months ago
+      # - Updated more than X days ago
+      # - AND either never had a reminder OR last reminder was more than X days ago
       stale_resources =
         jurisdiction.resources.where(
           "updated_at < ? AND (last_reminder_sent_at IS NULL OR last_reminder_sent_at < ?)",
