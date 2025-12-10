@@ -3230,6 +3230,40 @@ Thank you,
           lookupStepCodeDescription:
             "Enter an address to find the the Energy and Zero Carbon Step Code requirements for your project",
           meetStepCodeLink: "Create a Step Codes compliance report for your project",
+          digitalSealValidator: {
+            title: "Digital Sealing Validator",
+            description:
+              "Validate your digitally sealed documents before starting a permit application. This tool helps reduce submission errors and prepares you for a smoother application process.",
+            validateSeal: "Validate document",
+            cantFindYourSeal: "Can't find your document?",
+            noSignaturesFound: "No digital signatures found.",
+            browseListOfDocuments: "Browse list of documents",
+            fileRequirementsTitle: "File requirements",
+            tryAnotherFile: "Try another file",
+            Validated: "Validated",
+            notValidated: "Unable to Validate",
+            signedAt: "Signed at",
+            lastModified: "Last modified:",
+            digitalSignaturesDetected: "Digital Signatures Detected:",
+            dragAndDrop: "Drag and drop files here, or",
+            requirement1: "PDF format only",
+            requirement2: "One file, not multiple PDFs",
+            requirement3: "Design drawings must be legible and properly scaled",
+            requirement4: "Maximum file size: 200 MB",
+            fileName: "File Name",
+            size: "Size",
+            browseDevice: "browse your device",
+            help: {
+              description:
+                "A digital seal is an electronic version of a professional seal used by licensed engineers, architects, and other certified professionals. ",
+              pass: "Pass/Verified:",
+              passDesc:
+                "The seal is valid, the signer’s identity is confirmed, and the document was not modified after it was sealed. Your document is safe to submit.",
+              fail: "Fail/Unable to verify:",
+              failDesc:
+                "The system could not confirm the seal. This may mean the seal is invalid, the document was altered, or the signature does not meet Notarius verification standards. Try another file or contact the signing professional.",
+            },
+          },
           meetStepCodeDescription:
             "Generate a report that details a project's compliance with BC's Energy Step Code and Zero Carbon Step Code requirements",
           preCheckDrawingsLink: "Pre-check your drawings for compliance with BC Building Code",
@@ -4212,6 +4246,7 @@ Thank you,
           breadcrumb: {
             preCheck: "Pre-check",
             projects: "Projects",
+            digitalSealValidator: "Digital seal validator",
             codeCompliance: "Code compliance",
             permitClassifications: "Permit classifications",
             documents: "Documents",
