@@ -3494,6 +3494,7 @@ Thank you,
             collaboration: "Collaboration",
             integrationMapping: "API integration mapping",
             unmappedApiNotification: "Unmapped API Notification",
+            resourceReminder: "Resource reminder",
           },
           emailConfirmed: {
             heading: "Email confirmed!",
