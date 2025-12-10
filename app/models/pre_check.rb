@@ -82,32 +82,6 @@ class PreCheck < ApplicationRecord
     design_documents.order(created_at: :desc).first
   end
 
-  def latitude
-    coordinates&.last
-  end
-
-  def longitude
-    coordinates&.first
-  end
-
-  def coordinates
-    return @coordinates if defined?(@coordinates)
-
-    @coordinates =
-      if pid.present?
-        begin
-          Wrappers::LtsaParcelMapBc.new.get_coordinates_by_pid(pid)
-        rescue => e
-          Rails.logger.warn(
-            "Failed to fetch coordinates for PID #{pid}: #{e.message}"
-          )
-          nil
-        end
-      else
-        nil
-      end
-  end
-
   def submit_to_archistar
     archistar = Wrappers::Archistar.new
     ext_id = archistar.create_submission(self)

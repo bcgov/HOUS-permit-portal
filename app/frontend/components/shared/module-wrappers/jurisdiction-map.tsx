@@ -162,39 +162,14 @@ export const JurisdictionMap = ({
     }
   }, [linePositions])
 
-  // Manage Interactivity based on isEditingMap
+  // Manage Interactivity
   useEffect(() => {
     const view = viewRef.current
     if (!view) return
 
-    const stopPropagation = (event: any) => {
-      // If NOT editing, stop all map interactions
-      if (!isEditingMap) {
-        event.stopPropagation()
-      }
-    }
-
-    if (isEditingMap) {
-      // Enable interactions (default behavior)
-      view.ui.add("zoom", "top-left")
-    } else {
-      // Disable interactions manually since navigation properties are deprecated/removed
-      // We already have event listeners below that call stopPropagation() when !isEditingMap
-      view.ui.remove("zoom")
-    }
-
-    const dragHandle = view.on("drag", stopPropagation)
-    const keyHandle = view.on("key-down", stopPropagation)
-    const wheelHandle = view.on("mouse-wheel", stopPropagation)
-    const doubleClickHandle = view.on("double-click", stopPropagation)
-
-    return () => {
-      dragHandle.remove()
-      keyHandle.remove()
-      wheelHandle.remove()
-      doubleClickHandle.remove()
-    }
-  }, [isEditingMap])
+    // Always enable zoom UI
+    view.ui.add("zoom", "top-left")
+  }, [])
 
   return <div ref={mapDiv} style={{ height: "250px", width: "100%", zIndex: 0 }} />
 }
