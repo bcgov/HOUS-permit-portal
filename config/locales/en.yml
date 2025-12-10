@@ -920,6 +920,8 @@ en:
     permit_block_status:
       status_read_by_user: 'Requirement “%{requirement_block_name}” status set to "ready" by %{setter_name} for permit application %{number}'
       status_ready_no_user: 'Requirement “%{requirement_block_name}” status set to "ready" for permit application %{number}'
+    resource:
+      reminder: "Reminder: Review your jurisdiction resources"
     integration_mapping:
       published_template_missing_requirements_mapping: "Missing API mapping: A new version of “%{template_label}” has been published on %{version_date}"
       scheduled_template_missing_requirements_mapping: "Missing API Mapping: A new version of “%{template_label}” has been scheduled for %{version_date}, 01:00hrs PST."
