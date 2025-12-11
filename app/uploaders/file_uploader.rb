@@ -22,27 +22,43 @@ class FileUploader < Shrine
 
   def generate_location(io, derivative: nil, **options)
     record = options[:record]
-    if record
-      # If the record is a FileUploadAttachment or its subclass, use the attached_to interface
-      return unless record.is_a?(FileUploadAttachment)
+    return super unless record
 
-      parent_model = record.attached_to_model_name
-      parent_id = record.attached_to_id
+    # Build path based on record type
+    path = build_storage_path(record)
+    path << derivative.to_s if derivative
 
-      identifier = record.id || "temp" # Use 'temp' if record ID is nil
-      # Construct the path with support for derivatives
-      path = [parent_model, parent_id, identifier]
-      path << derivative.to_s if derivative # Append derivative name if present
-      if record.file_data && record.file_data["storage"] == "cache"
-        path << record[:file_data]["id"] #get the same name as it did in the cache
-      else
-        path << super # Call the original generate_location method for the filename
-      end
+    # Use cache filename if available, otherwise generate new
+    filename = extract_cache_filename(record) || super
+    path << filename
 
-      # Join the path components
-      File.join(path)
+    File.join(path)
+  end
+
+  private
+
+  def build_storage_path(record)
+    if record.is_a?(FileUploadAttachment)
+      # For FileUploadAttachment subclasses, use the attached_to interface
+      # e.g., "permit_application/123/doc-456"
+      [
+        record.attached_to_model_name,
+        record.attached_to_id,
+        record.id || "temp"
+      ]
     else
-      super # Fallback to the default behavior if no record is available
+      # For other records, use simple model/id structure
+      # e.g., "part9_step_code/data_entry/789"
+      [record.class.name.underscore, record.id || "temp"]
     end
+  end
+
+  def extract_cache_filename(record)
+    return nil unless record.respond_to?(:file_data)
+
+    file_data = record.file_data
+    return nil unless file_data.is_a?(Hash) && file_data["storage"] == "cache"
+
+    file_data["id"]
   end
 end

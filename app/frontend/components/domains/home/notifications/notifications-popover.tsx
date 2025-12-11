@@ -38,7 +38,6 @@ export const NotificationsPopover: React.FC<INotificationsPopoverProps> = observ
   ...rest
 }) {
   const { notificationStore, sandboxStore } = useMst()
-  const { currentSandbox } = sandboxStore
   const { notifications, initialFetch, fetchNotifications, anyUnread, generateSpecificLinkData, getSemanticKey } =
     notificationStore
 
@@ -105,7 +104,7 @@ export const NotificationsPopover: React.FC<INotificationsPopoverProps> = observ
             zIndex={1}
             {...rest}
           />
-          {anyUnread && !currentSandbox && (
+          {anyUnread && (
             <Badge
               position="absolute"
               top={0}

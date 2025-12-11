@@ -1,5 +1,5 @@
 import { Box, Container, Flex, HStack, Heading, Image, Link, Show, Spacer, Text, VStack } from "@chakra-ui/react"
-import { Folders, Tray, Warning } from "@phosphor-icons/react"
+import { Buildings, Tray, Warning } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React from "react"
@@ -19,6 +19,9 @@ import { RegionalRMJurisdictionSelect } from "./regional-rm-jurisdiction-select"
 import { SubNavBar } from "./sub-nav-bar"
 
 import { PreCheckNavBar } from "../pre-check/pre-check-nav-bar"
+import { StepCodeNavBar } from "../step-code/nav-bar"
+import { Part3NavLinks } from "../step-code/nav-bar/part-3-nav-links"
+import { Part9NavLinks } from "../step-code/nav-bar/part-9-nav-links"
 
 function isTemplateEditPath(path: string): boolean {
   const regex = /^\/requirement-templates\/([a-f\d-]+)\/edit$/
@@ -112,17 +115,26 @@ function shouldHideSubNavbarForPath(path: string): boolean {
 }
 
 function shouldHideFullNavBarForPath(path: string): boolean {
-  const matchers: Array<(path: string) => boolean> = [isStepCodePath]
+  const matchers: Array<(path: string) => boolean> = []
 
   return matchers.some((matcher) => matcher(path))
 }
 
 export const NavBar = observer(function NavBar() {
+  const { t } = useTranslation()
   const location = useLocation()
   const path = location.pathname
 
   if (isPreCheckPath(path)) {
     return <PreCheckNavBar />
+  }
+
+  if (isStepCodePath(path)) {
+    if (path.includes("part-9")) {
+      return <StepCodeNavBar title={t("stepCode.title")} NavLinks={<Part9NavLinks />} />
+    } else {
+      return <StepCodeNavBar title={t("stepCode.part3.title")} NavLinks={<Part3NavLinks />} />
+    }
   }
 
   if (shouldHideFullNavBarForPath(path)) {
@@ -243,8 +255,13 @@ const NavBarContent = observer(function NavBarContent() {
                 </RouterLinkButton>
               )}
               {currentUser?.isSubmitter && !currentUser.isUnconfirmed && (
-                <RouterLinkButton variant="tertiary" px={2} leftIcon={<Folders size={16} />} to={`/projects`}>
-                  <Show above="xl">{t("site.myProjects")}</Show>
+                <RouterLinkButton px={2} to={`/projects`} variant="ghost">
+                  <Buildings size={24} />
+                  <Show above="xl">
+                    <Box as="span" ml={2}>
+                      {t("site.myProjects")}
+                    </Box>
+                  </Show>
                 </RouterLinkButton>
               )}
               <NavBarMenu />

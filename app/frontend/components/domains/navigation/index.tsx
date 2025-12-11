@@ -65,6 +65,11 @@ const SubmissionsInboxSetupScreenLazy = lazy(() =>
     default: module.SubmissionsInboxSetupScreen,
   }))
 )
+const ResourcesScreenLazy = lazy(() =>
+  import("../home/review-manager/configuration-management-screen/resources-screen").then((module) => ({
+    default: module.ResourcesScreen,
+  }))
+)
 const ReviewStaffMyJurisdictionAboutPageScreen = lazy(() =>
   import(
     "../home/review-manager/configuration-management-screen/feature-access-screen/my-jurisdiction-about-page"
@@ -127,6 +132,11 @@ const LettersOfAssuranceScreen = lazy(() =>
 const LookUpStepCodesRequirementsForYourProjectScreen = lazy(() =>
   import("../project-readiness-tools/look-up-step-codes-requirements-for-your-project").then((module) => ({
     default: module.LookUpStepCodesRequirementsForYourProjectScreen,
+  }))
+)
+const DigitalSealValidatorScreen = lazy(() =>
+  import("../project-readiness-tools/digital-seal-validator").then((module) => ({
+    default: module.DigitalSealValidatorScreen,
   }))
 )
 const PreCheckInfoScreen = lazy(() =>
@@ -403,7 +413,7 @@ export const Navigation = observer(() => {
         </Box>
       </Box>
       {displaySitewideMessage && (
-        <Center h={16} bg="theme.yellowLight">
+        <Center h={16} bg="theme.yellowLight" zIndex={1500}>
           {sitewideMessage}
         </Center>
       )}
@@ -451,7 +461,7 @@ const AppRoutes = observer(() => {
       resetAuth()
       setAfterLoginPath(location.pathname)
       navigate("/login")
-      uiStore.flashMessage.show(EFlashMessageStatus.warning, t("auth.tokenExpired"), null)
+      uiStore.flashMessage.show(EFlashMessageStatus.warning, null, t("auth.tokenExpired"), 3000)
     }
   }, [tokenExpired])
 
@@ -596,6 +606,10 @@ const AppRoutes = observer(() => {
         element={<SubmissionsInboxSetupScreenLazy />}
       />
       <Route
+        path="/jurisdictions/:jurisdictionId/configuration-management/resources"
+        element={<ResourcesScreenLazy />}
+      />
+      <Route
         path="/jurisdictions/:jurisdictionId/configuration-management/feature-access"
         element={<ReviewManagerFeatureAccessScreen />}
       />
@@ -695,6 +709,7 @@ const AppRoutes = observer(() => {
               path="/project-readiness-tools/check-step-code-requirements/select"
               element={<SelectStepCodeRequirementsScreen />}
             />
+            <Route path="/project-readiness-tools/pre-check" element={<PreCheckInfoScreen />} />
           </Route>
         </Route>
 
@@ -782,6 +797,7 @@ const AppRoutes = observer(() => {
           path="/project-readiness-tools/look-up-step-codes-requirements-for-your-project"
           element={<LookUpStepCodesRequirementsForYourProjectScreen />}
         />
+        <Route path="/project-readiness-tools/digital-seal-validator" element={<DigitalSealValidatorScreen />} />
         <Route path="/project-readiness-tools/pre-check" element={<PreCheckInfoScreen />} />
         <Route
           path="/onboarding-checklist-page-for-lg-adopting"
