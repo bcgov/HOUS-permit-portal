@@ -91,7 +91,7 @@ class Requirement < ApplicationRecord
     "energy_step_code_tool_part_9".freeze
   ENERGY_STEP_CODE_METHOD_HASH = {
     "requirement_code" => ENERGY_STEP_CODE_SELECT_REQUIREMENT_CODE,
-    "input_type" => "select",
+    "input_type" => "radio",
     "input_options" => {
       "value_options" => [
         {
@@ -172,7 +172,7 @@ class Requirement < ApplicationRecord
   ARCHITECTURAL_DRAWING_DEPENDENCY_REQUIRED_SCHEMA = {
     architectural_drawing_method: {
       "requirement_code" => ARCHITECTURAL_DRAWING_METHOD_REQUIREMENT_CODE,
-      "input_type" => "select",
+      "input_type" => "radio",
       "input_options" => {
         "value_options" => [
           {

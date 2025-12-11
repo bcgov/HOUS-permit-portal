@@ -211,8 +211,24 @@ export const FieldsSetup = observer(function FieldsSetup({
     const isEnergyStepCodeRequirement =
       requirement.inputType === ERequirementType.energyStepCodePart9 ||
       requirement.inputType === ERequirementType.energyStepCodePart3
-    if (!isEnergyStepCodeRequirement) {
+
+    const isArchitecturalRequirement = requirement.inputType === ERequirementType.architecturalDrawing
+
+    if (!isEnergyStepCodeRequirement && !isArchitecturalRequirement) {
       remove(index)
+      return
+    }
+
+    if (isArchitecturalRequirement) {
+      const architecturalDependencyIndexes = watchedRequirements.reduce((acc: number[], req, idx) => {
+        if (isArchitecturalDrawingDependencyRequirementCode(req.requirementCode)) {
+          acc.push(idx)
+        }
+
+        return acc
+      }, [])
+
+      remove(architecturalDependencyIndexes)
       return
     }
 
@@ -340,7 +356,10 @@ export const FieldsSetup = observer(function FieldsSetup({
                     disabledMenuOptions.push("remove")
                   }
 
-                  if (isArchitecturalRequirement) {
+                  if (
+                    isArchitecturalRequirement &&
+                    watchedRequirementCode !== EArchitecturalDrawingDependencyRequirementCode.architecturalDrawingTool
+                  ) {
                     disabledMenuOptions.push("remove")
                   }
 
