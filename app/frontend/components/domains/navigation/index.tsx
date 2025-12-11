@@ -162,6 +162,18 @@ const OnboardingChecklistPageForLgAdoptingScreen = lazy(() =>
     default: module.OnboardingChecklistPageForLgAdoptingScreen,
   }))
 )
+
+const SingleZoneCoolingHeatingToolScreen = lazy(() =>
+  import("../single-zone-cooling-heating-tool/single-zone-cooling-heating-tool-screen").then((module) => ({
+    default: module.SingleZoneCoolingHeatingToolScreen,
+  }))
+)
+const SingleZoneCoolingHeatingToolStartScreen = lazy(() =>
+  import("../single-zone-cooling-heating-tool/single-zone-cooling-heating-tool-start-screen").then((module) => ({
+    default: module.SingleZoneCoolingHeatingToolStartScreen,
+  }))
+)
+
 const PermitApplicationIndexScreen = lazy(() =>
   import("../permit-application").then((module) => ({ default: module.PermitApplicationIndexScreen }))
 )
@@ -673,6 +685,7 @@ const AppRoutes = observer(() => {
             element={<ProtectedRoute isAllowed={loggedIn && !mustAcceptEula} redirectPath={mustAcceptEula && "/"} />}
           >
             <Route path="/step-codes" element={<ProjectDashboardScreen />} />
+            <Route path="/overheating" element={<ProjectDashboardScreen />} />
             <Route path="/pre-checks" element={<ProjectDashboardScreen />} />
             <Route path="/pre-checks/new" element={<PreCheckForm />} />
             <Route path="/pre-checks/new/:section" element={<PreCheckForm />} />
@@ -711,6 +724,10 @@ const AppRoutes = observer(() => {
             />
             <Route path="/project-readiness-tools/pre-check" element={<PreCheckInfoScreen />} />
           </Route>
+        </Route>
+
+        <Route element={<ProtectedRoute isAllowed={loggedIn && currentUser?.isSubmitter} />}>
+          <Route path="/single-zone-cooling-heating-tool/start" element={<SingleZoneCoolingHeatingToolStartScreen />} />
         </Route>
 
         <Route element={<ProtectedRoute isAllowed={loggedIn && !isUnconfirmed} />}>
@@ -784,6 +801,10 @@ const AppRoutes = observer(() => {
         <Route path="/accept-invitation" element={<AcceptInvitationScreen />} />
         <Route path="/contact" element={<ContactScreen />} />
         <Route path="/project-readiness-tools" element={<ProjectReadinessToolsIndexScreen />} />
+        <Route
+          path="/project-readiness-tools/single-zone-cooling-heating-tool"
+          element={<SingleZoneCoolingHeatingToolScreen />}
+        />
         <Route path="/privacy-policy" element={<PrivacyPolicyScreen />} />
         <Route
           path="/project-readiness-tools/create-your-letters-of-assurance"

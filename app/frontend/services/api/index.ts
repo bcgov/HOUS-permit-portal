@@ -11,6 +11,7 @@ import { IPart3StepCode } from "../../models/part-3-step-code"
 import { IPart3StepCodeChecklist } from "../../models/part-3-step-code-checklist"
 import { IPart9StepCode } from "../../models/part-9-step-code"
 import { IPart9StepCodeChecklist } from "../../models/part-9-step-code-checklist"
+import { IPdfForm } from "../../models/pdf-form"
 import { IPermitApplication } from "../../models/permit-application"
 import { IActivity, IPermitType } from "../../models/permit-classification"
 import { IPermitCollaboration } from "../../models/permit-collaboration"
@@ -946,5 +947,62 @@ export class Api {
     return this.client.post<ApiResponse<{ message: string }>>(
       `/report_documents/${reportDocumentId}/share_with_jurisdiction`
     )
+  }
+
+  async createPdfForm(formData: { formJson: any; formType: string; status?: boolean }) {
+    return this.client.post<ApiResponse<any>>("/pdf_forms", {
+      pdfForm: {
+        formJson: formData.formJson,
+        formType: formData.formType,
+        status: formData.status ?? true,
+      },
+    })
+  }
+
+  async getPdfForms(params?: {
+    page?: number
+    per_page?: number
+    query?: string
+    sort_field?: string
+    sort_direction?: string
+  }) {
+    return this.client.get<ApiResponse<IPdfForm[]>>("/pdf_forms", params)
+  }
+
+  async generatePdf(id: string) {
+    return this.client.post<ApiResponse<any>>(`/pdf_forms/${id}/generate_pdf`)
+  }
+
+  async archivePdf(id: string) {
+    return this.client.post<ApiResponse<any>>(`/pdf_forms/${id}/archive`)
+  }
+
+  async downloadPdf(id: string) {
+    const blobClient = create({
+      baseURL: "/api",
+      headers: {
+        "Cache-Control": "no-cache",
+        "X-CSRF-Token": getCsrfToken(),
+      },
+      timeout: 30000,
+      withCredentials: true,
+    })
+
+    return blobClient.get(
+      `/pdf_forms/${id}/download`,
+      {},
+      {
+        responseType: "blob",
+      }
+    )
+  }
+
+  async updatePdfForm(id: string, data: { formJson?: any; status?: boolean }) {
+    return this.client.put<ApiResponse<any>>(`/pdf_forms/${id}`, {
+      pdfForm: {
+        formJson: data.formJson,
+        status: data.status,
+      },
+    })
   }
 }

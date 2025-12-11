@@ -130,6 +130,11 @@ Rails.application.routes.draw do
 
     resources :integration_mappings, only: [:update]
 
+    resources :pdf_forms, only: %i[create index update]
+    post "pdf_forms/:id/generate_pdf", to: "pdf_forms#generate_pdf"
+    get "pdf_forms/:id/download", to: "pdf_forms#download"
+    post "pdf_forms/:id/archive", to: "pdf_forms#archive"
+
     resources :jurisdictions, only: %i[index update show create] do
       post "search", on: :collection, to: "jurisdictions#index"
       post "users/search", on: :member, to: "jurisdictions#search_users"

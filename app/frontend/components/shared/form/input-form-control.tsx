@@ -50,16 +50,18 @@ const isValidUrl = (url: string) => {
 }
 
 export const TextFormControl = (props: IInputFormControlProps) => {
-  const { inputProps, validate, ...rest } = props
+  const { inputProps, validate, maxLength, ...rest } = props
+  const effectiveMax = typeof maxLength === "number" ? maxLength : 128
   const mergedProps: IInputFormControlProps = {
     ...rest,
     inputProps: {
       type: "text",
+      ...(maxLength ? { maxLength } : {}),
       ...inputProps,
     },
     validate: {
       satisfiesLength: (str) =>
-        (!props.required && !str) || (str?.length >= 1 && str?.length < 128) || t("ui.invalidInput"),
+        (!props.required && !str) || (str?.length >= 1 && str?.length <= effectiveMax) || t("ui.invalidInput"),
       ...validate,
     },
   }
@@ -119,7 +121,7 @@ export const NumberFormControl = (props: IInputFormControlProps) => {
 export const PhoneFormControl = (props: IInputFormControlProps) => {
   return (
     <InputFormControl
-      {...R.mergeDeepRight({ inputProps: { type: "text", maxLength: 10 } }, props)}
+      {...R.mergeDeepRight({ inputProps: { type: "text", maxLength: 14 } }, props)}
       leftElement={<Phone />}
     />
   )
@@ -229,6 +231,14 @@ export const InputFormControl = ({
   const registerProps = fieldName
     ? { ...register(fieldName, { required: required && t("ui.isRequired", { field: label }), validate }) }
     : {}
+  const chainedOnChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if ((registerProps as any)?.onChange) {
+      ;(registerProps as any).onChange(event)
+    }
+    if ((inputProps as any)?.onChange) {
+      ;(inputProps as any).onChange(event)
+    }
+  }
   const chainedOnBlur = (event: React.FocusEvent<HTMLInputElement>) => {
     if ((registerProps as any)?.onBlur) {
       ;(registerProps as any).onBlur(event)
@@ -259,7 +269,7 @@ export const InputFormControl = ({
       )}
 
       <InputGroup w="full" display="flex" flexDirection="column">
-        <Input bg="greys.white" {...registerProps} {...inputProps} onBlur={chainedOnBlur} />
+        <Input bg="greys.white" {...registerProps} {...inputProps} onChange={chainedOnChange} onBlur={chainedOnBlur} />
         {errorMessage && <FormErrorMessage>{errorMessage}</FormErrorMessage>}
         {hint && (
           <FormHelperText mt={1} color="border.base">
