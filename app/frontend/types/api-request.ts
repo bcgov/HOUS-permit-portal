@@ -98,6 +98,8 @@ export interface IRequirementTemplateUpdateParams {
   nickname?: string | null
   public?: boolean | null
   assigneeId?: string | null
+  permitTypeId?: string | null
+  activityId?: string | null
   requirementTemplateSectionsAttributes?: IRequirementTemplateSectionAttributes[]
 }
 

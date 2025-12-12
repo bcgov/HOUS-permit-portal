@@ -19,6 +19,13 @@ class EarlyAccessRequirementTemplate < RequirementTemplate
     FrontendUrlHelper.frontend_url("early-access/requirement-templates/#{id}")
   end
 
+  def has_live_published_version?
+    LiveRequirementTemplate
+      .with_published_version
+      .where(permit_type_id: permit_type_id, activity_id: activity_id)
+      .exists?
+  end
+
   def maintain_published_early_access_version
     return if @maintaining_published_version
 
