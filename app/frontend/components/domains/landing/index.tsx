@@ -28,9 +28,7 @@ export const LandingScreen = observer(({}: ILandingScreenProps) => {
   const { t } = useTranslation()
   const mailto = "mailto:" + t("site.contactEmail")
   const iNeedRef = useRef<HTMLDivElement>(null)
-  const { sessionStore, userStore, siteConfigurationStore } = useMst()
-  const { landingPageEarlyAccessRequirementTemplates } = siteConfigurationStore
-  const { loggedIn } = sessionStore
+  const { userStore } = useMst()
   const { currentUser } = userStore
 
   const scrollToJurisdictionSearch = () => {
