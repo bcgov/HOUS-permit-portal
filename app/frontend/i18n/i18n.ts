@@ -4065,6 +4065,10 @@ Thank you,
                 label: "For local governments",
                 description: "Information for local governments interested in joining Building Permit Hub",
               },
+              standardPermitApplicationMaterials: {
+                label: "Standard permit application materials",
+                description: "Review and provide feedback on permit application materials under development",
+              },
             },
           },
           govFeedbackResponseNoReasons: {
