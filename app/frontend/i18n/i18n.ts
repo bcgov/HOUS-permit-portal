@@ -167,18 +167,10 @@ const options = {
           card2Body: "Consistent application forms, even when rules vary by community",
           card3Title: "Track progress and talk to reviewers",
           card3Body: "Stay up to date and respond to building officials directly, all in one place",
-          underDevelopmentTitle: "Share your feedback on permit applications under development",
-          underDevelopmentBody:
-            "We’re co-developing standard permit classifications with local governments and First Nations across BC. These drafts are available for review and discussion as we continue this work together.",
-          listedDrafts:
-            " The listed drafts are open for review. These permit applications are drafts; do not use for permit intake.",
-          shareFeedbackBody:
-            "We’re looking for your input. <1>Email us your feedback at:</1> <2>digital.codes.permits@gov.bc.ca</2>",
-          ssmuHousingTitle: "Small-scale / multi-unit housing permits",
-          part9ChecklistsTitle: "Part 9 checklists",
-          part9ChecklistsBody:
-            "These checklists help you gather the right documents and prepare your application for small buildings that fall under Part 9 of the BC Building Code (up to 3 storeys, fewer than 600m²).",
-          part9ChecklistsLink: "Part 9 checklists (PDF)",
+          helpShapeTitle: "Help shape standard permit application materials",
+          helpShapeBody:
+            "We are collaborating with local governments and First Nations across BC to develop standard permit application materials. We invite you to review the forms, requirements, and guidance and share your feedback.",
+          reviewMaterials: "Review materials",
         },
         ui: {
           updatedAt: "Updated at",
