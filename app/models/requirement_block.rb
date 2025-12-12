@@ -31,6 +31,7 @@ class RequirementBlock < ApplicationRecord
   validates :display_name, presence: true
   validate :validate_step_code_dependencies
   validate :validate_requirements_conditional
+  validate :validate_requirements_data_validation
   validate :early_access_on_appropriate_template
   validate :unique_name_among_non_discarded
 
@@ -223,6 +224,35 @@ class RequirementBlock < ApplicationRecord
           "conditional 'when' field must be a requirement code in the same requirement block"
         )
         break
+      end
+    end
+  end
+
+  def validate_requirements_data_validation
+    requirements.each do |requirement|
+      data_validation = requirement.input_options["data_validation"]
+      next unless data_validation.present?
+
+      unless requirement.input_type_number?
+        errors.add(
+          :input_options,
+          "data_validation is only allowed for number inputs"
+        )
+        next
+      end
+
+      if data_validation["operation"].blank? || data_validation["value"].blank?
+        errors.add(
+          :input_options,
+          "data_validation must have operation and value"
+        )
+      end
+
+      unless %w[min max].include?(data_validation["operation"])
+        errors.add(
+          :input_options,
+          "data_validation operation must be min or max"
+        )
       end
     end
   end

@@ -286,6 +286,23 @@ class RequirementFormJsonService
 
     json.merge!({ validate: { required: true } }) if requirement.required
 
+    if requirement.input_options["data_validation"].present?
+      data_validation = requirement.input_options["data_validation"]
+      validate_json = json[:validate] || {}
+
+      if data_validation["operation"] == "min"
+        validate_json[:min] = data_validation["value"].to_f
+      elsif data_validation["operation"] == "max"
+        validate_json[:max] = data_validation["value"].to_f
+      end
+
+      if data_validation["error_message"].present?
+        validate_json[:customMessage] = data_validation["error_message"]
+      end
+
+      json[:validate] = validate_json
+    end
+
     # assume all electives use a customConditional that defaults to false.  The customConditional works in tandem with the conditionals
     json.merge!({ elective: requirement.elective }) if requirement.elective
 

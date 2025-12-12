@@ -14,8 +14,10 @@ import { CaretDown, Warning, X } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
 import { useTranslation } from "react-i18next"
+import { ERequirementType } from "../../../../types/enums"
 import { ComputedComplianceSetupModal } from "./computed-compliance-setup-modal"
 import { ConditionalSetupModal } from "./conditional-setup-modal"
+import { DataValidationSetupModal } from "./data-validation-setup-modal"
 
 export interface IRequirementOptionsMenu {
   menuButtonProps?: Partial<ButtonProps>
@@ -23,6 +25,7 @@ export interface IRequirementOptionsMenu {
   emitOpenState?: (isOpen: boolean) => void
   index: number
   disabledOptions?: Array<"remove" | "conditional">
+  requirementType?: ERequirementType
 }
 
 export const OptionsMenu = observer(function OptionsMenu({
@@ -31,6 +34,7 @@ export const OptionsMenu = observer(function OptionsMenu({
   onRemove,
   emitOpenState,
   index,
+  requirementType,
 }: IRequirementOptionsMenu) {
   const { t } = useTranslation()
   const { isOpen, onOpen, onClose } = useDisclosure()
@@ -59,12 +63,17 @@ export const OptionsMenu = observer(function OptionsMenu({
         {t("requirementsLibrary.modals.optionsMenu.triggerButton")}
       </MenuButton>
       <MenuList w={"220px"}>
-        <MenuItem color={"text.primary"} isDisabled>
-          <HStack spacing={2} fontSize={"sm"}>
-            <Warning />
-            <Text as={"span"}>{t("requirementsLibrary.modals.optionsMenu.dataValidation")}</Text>
-          </HStack>
-        </MenuItem>
+        {requirementType === ERequirementType.number ? (
+          <DataValidationSetupModal index={index} />
+        ) : (
+          <MenuItem color={"text.primary"} isDisabled>
+            <HStack spacing={2} fontSize={"sm"}>
+              <Warning />
+              <Text as={"span"}>{t("requirementsLibrary.modals.optionsMenu.dataValidation")}</Text>
+            </HStack>
+          </MenuItem>
+        )}
+
         <ConditionalSetupModal
           index={index}
           triggerButtonProps={{

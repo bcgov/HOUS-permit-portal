@@ -80,6 +80,7 @@ export const RequirementFieldRow = ({ index, field, isEditing, toggleEdit, onRem
   const watchedConditional = watch(`requirementsAttributes.${index}.inputOptions.conditional`)
   const watchedRequirementCode = watch(`requirementsAttributes.${index}.requirementCode`)
   const watchedComputedCompliance = watch(`requirementsAttributes.${index}.inputOptions.computedCompliance`)
+  const watchedDataValidation = watch(`requirementsAttributes.${index}.inputOptions.dataValidation`)
 
   const { disabledMenuOptions, showEditControls } = getRequirementFieldState(watchedRequirementCode)
 
@@ -234,6 +235,7 @@ export const RequirementFieldRow = ({ index, field, isEditing, toggleEdit, onRem
         elective={watchedElective}
         conditional={watchedConditional as IFormConditional}
         computedCompliance={watchedComputedCompliance}
+        dataValidation={watchedDataValidation}
         requirementType={requirementType}
         index={index}
         disabledMenuOptions={disabledMenuOptions}
