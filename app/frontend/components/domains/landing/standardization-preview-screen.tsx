@@ -191,7 +191,11 @@ export const StandardizationPreviewScreen = observer(function StandardizationPre
                 </Heading>
                 <Text>
                   {t("standardizationPreview.feedback.demo.description")}{" "}
-                  <Link href="https://eepurl.com/iVryIE" isExternal textDecoration="underline">
+                  <Link
+                    href="https://e1.envoke.com/ext/pages/6e7bc0aa50913a261f468c45f52734e9"
+                    isExternal
+                    textDecoration="underline"
+                  >
                     {t("standardizationPreview.feedback.demo.link")}
                   </Link>
                 </Text>
