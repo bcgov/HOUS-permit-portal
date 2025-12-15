@@ -167,6 +167,10 @@ const options = {
           card2Body: "Consistent application forms, even when rules vary by community",
           card3Title: "Track progress and talk to reviewers",
           card3Body: "Stay up to date and respond to building officials directly, all in one place",
+          helpShapeTitle: "Help shape standard permit application materials",
+          helpShapeBody:
+            "We are collaborating with local governments and First Nations across BC to develop standard permit application materials. We invite you to review the forms, requirements, and guidance and share your feedback.",
+          reviewMaterials: "Review materials",
           underDevelopmentTitle: "Share your feedback on permit applications under development",
           underDevelopmentBody:
             "We’re co-developing standard permit classifications with local governments and First Nations across BC. These drafts are available for review and discussion as we continue this work together.",
@@ -4048,6 +4052,10 @@ Thank you,
               forLocalGovernments: {
                 label: "For local governments",
                 description: "Information for local governments interested in joining Building Permit Hub",
+              },
+              standardPermitApplicationMaterials: {
+                label: "Standard permit application materials",
+                description: "Review and provide feedback on permit application materials under development",
               },
             },
           },
