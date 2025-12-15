@@ -304,6 +304,12 @@ class RequirementFormJsonService
       json.merge!(
         { computedCompliance: requirement.input_options["computed_compliance"] }
       )
+
+      unless json[:tooltip].present?
+        json.merge!(
+          { tooltip: I18n.t("formio.requirement.auto_compliance.tooltip") }
+        )
+      end
     end
 
     if requirement.input_type.to_sym == :energy_step_code
