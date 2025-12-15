@@ -9,6 +9,9 @@ import { IHelpLinkItems } from "../types/types.js"
 interface ILandingPageTemplate {
   id: string
   nickname: string
+  description?: string
+  isAvailableForAdoption: boolean
+  activityCategory: string
 }
 
 // Define the SiteConfiguration model

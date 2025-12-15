@@ -45,6 +45,12 @@ const LoginScreen = lazy(() =>
 
 const HomeScreen = lazy(() => import("../home").then((module) => ({ default: module.HomeScreen })))
 
+const StandardizationPreviewScreen = lazy(() =>
+  import("../landing/standardization-preview-screen").then((module) => ({
+    default: module.StandardizationPreviewScreen,
+  }))
+)
+
 const ConfigurationManagementScreen = lazy(() =>
   import("../home/review-manager/configuration-management-screen").then((module) => ({
     default: module.ConfigurationManagementScreen,
@@ -769,6 +775,7 @@ const AppRoutes = observer(() => {
         {/* Public Routes */}
         <Route path="/accept-invitation" element={<AcceptInvitationScreen />} />
         <Route path="/contact" element={<ContactScreen />} />
+        <Route path="/standardization-preview" element={<StandardizationPreviewScreen />} />
         <Route path="/project-readiness-tools" element={<ProjectReadinessToolsIndexScreen />} />
         <Route path="/privacy-policy" element={<PrivacyPolicyScreen />} />
         <Route
