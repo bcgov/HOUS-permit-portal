@@ -28,8 +28,8 @@ export const ProjectReadinessToolsIndexScreen = () => {
         },
         {
           linkText: t("projectReadinessTools.digitalSealValidator.title"),
-          description: t("projectReadinessTools.digitalSealValidator.description"),
-          href: "/project-readiness-tools/digital-seal-validator",
+          description: t("projectReadinessTools.digitalSealValidator.descriptionToolPage"),
+          href: "/project-readiness-tools/check-digital-seals",
         },
       ],
     },
