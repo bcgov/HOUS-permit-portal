@@ -215,15 +215,6 @@ export const Editor = observer(
 
     return (
       <div className="tiptap-wrapper">
-        <style>
-          {`
-            .tiptap-editor-readonly, .tiptap-editor {
-              word-wrap: break-word;
-              overflow-wrap: break-word;
-              word-break: break-word;
-            }
-          `}
-        </style>
         {toolbarItems.length > 0 && (
           <div className="tiptap-toolbar">
             {toolbarItems.map((item, index) => (
