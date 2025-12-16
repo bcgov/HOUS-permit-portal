@@ -58,11 +58,11 @@ export const SiteConfigurationManagementScreen = observer(function SiteConfigura
           </GridItem>
           <GridItem>
             <HomeScreenBox
-              title={t(`${i18nPrefix}.landingPageSetup.title`)}
-              description={t(`${i18nPrefix}.landingPageSetup.description`)}
+              title={t(`${i18nPrefix}.standardizationPageSetup.title`)}
+              description={t(`${i18nPrefix}.standardizationPageSetup.description`)}
               linkText={t("ui.edit")}
               icon={<House size="24px" color="var(--chakra-colors-text-link)" />}
-              href="landing-setup"
+              href="standardization-setup"
               h="full"
             />
           </GridItem>

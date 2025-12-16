@@ -1,4 +1,4 @@
-class LandingPageEarlyAccessRequirementTemplateBlueprint < Blueprinter::Base
+class StandardizationPageEarlyAccessRequirementTemplateBlueprint < Blueprinter::Base
   identifier :id
   fields :nickname, :description
   field :is_available_for_adoption do |template|
