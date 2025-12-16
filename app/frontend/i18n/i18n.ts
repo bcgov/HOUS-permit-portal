@@ -4324,6 +4324,7 @@ Thank you,
         singleZoneCoolingHeatingTool: {
           title: "Create an overheating protection compliance report",
           indexTitle: "Overheating",
+          section: "Sections",
           createReportTitle: "Create an overheating protection compliance report for your project",
           createReportDescriptionPrefix:
             "Create a report that shows your project meets BC’s 2024 overheating protection requirement (one room at or below 26 °C) using cooling load data from CSA F280-12 certified software. When a report is finished, you’ll find it in",

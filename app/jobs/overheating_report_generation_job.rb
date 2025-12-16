@@ -2,7 +2,7 @@ require "open3"
 require "json"
 require "fileutils"
 
-class WebformToPdfJob
+class OverheatingReportGenerationJob
   include Sidekiq::Worker
   sidekiq_options lock: :until_executed,
                   queue: :file_processing,
@@ -19,6 +19,16 @@ class WebformToPdfJob
 
   def perform(pdf_form_id)
     pdf_form = PdfForm.find(pdf_form_id)
+
+    Rails.logger.info "pdf_form.id================================: #{pdf_form.id}"
+    Rails.logger.info "pdf_form.form_json: #{pdf_form.form_json}"
+    Rails.logger.info "pdf_form.form_json.class: #{pdf_form.form_json.class}"
+    Rails.logger.info "pdf_form.form_json.is_a?(Array): #{pdf_form.form_json.is_a?(Array)}"
+    Rails.logger.info "pdf_form.form_json.flatten(1): #{pdf_form.form_json.flatten(1)}"
+    Rails.logger.info "pdf_form.form_json.flatten(1).class: #{pdf_form.form_json.flatten(1).class}"
+    Rails.logger.info "pdf_form.form_json.flatten(1).is_a?(Array): #{pdf_form.form_json.flatten(1).is_a?(Array)}"
+    Rails.logger.info "pdf_form.form_json.flatten(1).map { |v| camelize_hash(v) }: #{pdf_form.form_json.flatten(1).map { |v| camelize_hash(v) }}"
+    Rails.logger.info "pdf_form.form_json.flatten(1).map { |v| camelize_hash(v) }.class: #{pdf_form.form_json.flatten(1).map { |v| camelize_hash(v) }.class}"
     return if pdf_form.blank?
 
     generation_directory_path = Rails.root.join("tmp/files")
@@ -67,11 +77,17 @@ class WebformToPdfJob
     end
   end
 
+  def store_pdf(pdf_form, path, application_filename)
+    return unless File.exist?(path) && File.size(path).positive?
+
+    File.open(path, "rb") { |file| pdf_form.update!(pdf_file: file) }
+  ensure
+    FileUtils.rm_f(path)
+  end
+
   def generate_pdfs(json_data_with_pdfs, generation_directory_path, pdf_form)
-    json_data = json_data_with_pdfs[:json_data]
     pdf_json_data = json_data_with_pdfs[:pdf_json_data]
     application_filename = json_data_with_pdfs[:application_filename]
-
     json_filename =
       "#{generation_directory_path}/pdf_json_data_#{SecureRandom.hex(8)}.json"
 
@@ -80,70 +96,50 @@ class WebformToPdfJob
     stdout_lines = []
     stderr_lines = []
 
-    stdout, stderr, status =
-      Open3.popen3(
-        "npm",
-        "run",
-        NodeScripts::GENERATE_PDF_SCRIPT_NAME,
-        json_filename,
-        chdir: Rails.root.to_s
-      ) do |stdin, stdout, stderr, wait_thr|
-        # Read and collect the standard output and stderr
-        stdout.each_line do |line|
-          puts line
-          stdout_lines << line.chomp
-        end
-
-        stderr.each_line do |line|
-          puts line
-          stderr_lines << line.chomp
-        end
-
-        # Wait for the process to exit and get the exit status
-        exit_status = wait_thr.value
-
-        #File.delete(json_filename) if Rails.env.production?
-        File.delete(json_filename)
-
-        # Check for errors or handle output based on the exit status
-        if exit_status.success?
-          pdfs = []
-          pdfs << {
-            fname: application_filename,
-            key: PdfForm::PDF_FORM_PDF_DATA_KEY
-          }
-
-          pdfs.each do |pdf|
-            path = "#{generation_directory_path}/#{pdf[:fname]}"
-            file = File.open(path)
-            # doc =
-            #   PdfForm
-            #     .where(
-            #       data_key: pdf[:key]
-            #     )
-            #     .first_or_initialize
-
-            # doc.update(file:) if doc.file.blank?
-
-            # File.delete(path) if Rails.env.production? # Keep PDF files for download
-          end
-        else
-          error_details = []
-          error_details << "Exit status: #{exit_status}"
-          if stdout_lines.any?
-            error_details << "STDOUT: #{stdout_lines.join("\n")}"
-          end
-          if stderr_lines.any?
-            error_details << "STDERR: #{stderr_lines.join("\n")}"
-          end
-
-          err = "Pdf generation process failed:\n#{error_details.join("\n")}"
-          Rails.logger.error err
-
-          # this will raise an error and retry the job
-          raise err
-        end
+    Open3.popen3(
+      "npm",
+      "run",
+      NodeScripts::GENERATE_PDF_SCRIPT_NAME,
+      json_filename,
+      chdir: Rails.root.to_s
+    ) do |stdin, stdout, stderr, wait_thr|
+      stdout.each_line do |line|
+        puts line
+        stdout_lines << line.chomp
       end
+
+      stderr.each_line do |line|
+        puts line
+        stderr_lines << line.chomp
+      end
+
+      exit_status = wait_thr.value
+
+      File.delete(json_filename) if Rails.env.production?
+
+      if exit_status.success?
+        path = "#{generation_directory_path}/#{application_filename}"
+        store_pdf(pdf_form, path, application_filename)
+      else
+        error_details = []
+        error_details << "Exit status: #{exit_status}"
+        if stdout_lines.any?
+          error_details << "STDOUT: #{stdout_lines.join("\n")}"
+        end
+        if stderr_lines.any?
+          error_details << "STDERR: #{stderr_lines.join("\n")}"
+        end
+
+        err = "Pdf generation process failed:\n#{error_details.join("\n")}"
+        Rails.logger.error err
+
+        raise err
+      end
+    end
+  ensure
+    if Rails.env.production? && json_filename && File.exist?(json_filename)
+      File.delete(json_filename)
+    end
   end
 
   def camelize_response(data)

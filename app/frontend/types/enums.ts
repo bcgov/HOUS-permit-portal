@@ -30,6 +30,7 @@ export enum EFileUploadAttachmentType {
   ReportDocument = "ReportDocument",
   ResourceDocument = "ResourceDocument",
   DesignDocument = "DesignDocument",
+  PdfForm = "PdfForm",
 }
 
 export enum EResourceCategory {

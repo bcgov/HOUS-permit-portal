@@ -1,69 +1,65 @@
-import { Box, Button, Divider, Flex, Heading, Icon, Input, Text } from "@chakra-ui/react"
-import { CloudArrowUp } from "@phosphor-icons/react"
-import React, { useCallback, useRef, useState } from "react"
+import { Box, Button, Divider, Flex, Heading, Text } from "@chakra-ui/react"
+import { UppyFile } from "@uppy/core"
+import "@uppy/core/dist/style.min.css"
+import "@uppy/dashboard/dist/style.css"
+import Dashboard from "@uppy/react/lib/Dashboard.js"
+import React, { useCallback, useEffect, useState } from "react"
 import { useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { uploadFile } from "../../../../utils/uploads"
+import useUppyS3 from "../../../../hooks/use-uppy-s3"
 
 export const UploadsForm: React.FC = () => {
   const { t } = useTranslation() as any
   const { setValue, watch } = useFormContext()
-  const inputRef = useRef<HTMLInputElement | null>(null)
-  const [isDragging, setIsDragging] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
 
   const uploadedUrl: string | undefined = watch("uploads.drawingsPdfUrl")
 
-  const handleFiles = useCallback(
-    async (files: FileList | null) => {
-      const file = files?.[0]
-      if (!file) return
-      setIsUploading(true)
-      try {
-        const res = await uploadFile(file, file.name)
-        const url =
-          (res as any)?.url ||
-          (res as any)?.location ||
-          ((res as any)?.signed_url ? (res as any).signed_url.split("?")[0] : null)
-        if (url) {
-          setValue("uploads.drawingsPdfUrl", url, { shouldDirty: true, shouldTouch: true, shouldValidate: true })
-        }
-      } catch (e) {
-        console.error("File upload failed", e)
-      } finally {
-        setIsUploading(false)
-        setIsDragging(false)
-      }
+  const handleUploadSuccess = useCallback(
+    (_file: UppyFile<{}, {}>, response: any) => {
+      const url =
+        response?.uploadURL ??
+        response?.location ??
+        response?.body?.location ??
+        response?.body?.url ??
+        response?.uploadResponse?.body?.location ??
+        response?.uploadResponse?.body?.url ??
+        response?.uploadResponse?.body?.Location ??
+        response?.url
+      if (!url) return
+      setValue("uploads.drawingsPdfUrl", url, {
+        shouldDirty: true,
+        shouldTouch: true,
+        shouldValidate: true,
+      })
     },
     [setValue]
   )
 
-  const onDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setIsDragging(false)
-    handleFiles(e.dataTransfer.files)
-  }
+  const uppy = useUppyS3({
+    onUploadSuccess: handleUploadSuccess,
+    maxNumberOfFiles: 1,
+    autoProceed: true,
+  })
 
-  const onDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setIsDragging(true)
-  }
+  useEffect(() => {
+    const startUpload = () => setIsUploading(true)
+    const endUpload = () => setIsUploading(false)
 
-  const onDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setIsDragging(false)
-  }
+    uppy.on("upload", startUpload)
+    uppy.on("upload-success", endUpload)
+    uppy.on("upload-error", endUpload)
 
-  const openFileDialog = () => inputRef.current?.click()
-
-  const onFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => handleFiles(e.target.files)
+    return () => {
+      uppy.off("upload", startUpload)
+      uppy.off("upload-success", endUpload)
+      uppy.off("upload-error", endUpload)
+    }
+  }, [uppy])
 
   return (
-    <Box as="section" p={4}>
-      <Heading as="h2" size="lg" mb={4}>
+    <Box as="section">
+      <Heading as="h2" size="lg" mb={4} variant="yellowline">
         {t("singleZoneCoolingHeatingTool.uploads.title")}
       </Heading>
       <Text mb={4}>{t("singleZoneCoolingHeatingTool.uploads.subtitle")}</Text>
@@ -78,38 +74,19 @@ export const UploadsForm: React.FC = () => {
         <Box as="li">{t("singleZoneCoolingHeatingTool.uploads.maximumFileSize")}</Box>
       </Box>
 
-      <Box
-        onDrop={onDrop}
-        onDragOver={onDragOver}
-        onDragLeave={onDragLeave}
-        onClick={openFileDialog}
-        cursor={isUploading ? "not-allowed" : "pointer"}
-        opacity={isUploading ? 0.7 : 1}
-        borderWidth="2px"
-        borderStyle="dashed"
-        borderColor={isDragging ? "blue.400" : "gray.300"}
-        p={10}
-        borderRadius="md"
-        backgroundColor={isDragging ? "blue.50" : "gray.50"}
-        transition="background-color 0.2s, border-color 0.2s"
-      >
-        <Flex direction="column" align="center" justify="center" gap={2}>
-          <Icon as={CloudArrowUp} boxSize={8} color="blue.500" />
-          <Text>
-            {t("singleZoneCoolingHeatingTool.uploads.dragAndDrop")}{" "}
-            <Box as="span" textDecoration="underline">
-              {t("singleZoneCoolingHeatingTool.uploads.browseDevice")}
-            </Box>
-          </Text>
-          {uploadedUrl ? (
-            <Text fontSize="sm" color="green.600">
-              {uploadedUrl}
-            </Text>
-          ) : null}
-          {isUploading ? <Text fontSize="sm">Uploading...</Text> : null}
-        </Flex>
-        <Input ref={inputRef} type="file" accept="application/pdf" display="none" onChange={onFileInputChange} />
+      <Box borderWidth="2px" borderStyle="dashed" borderRadius="md" borderColor="gray.300">
+        <Dashboard uppy={uppy} height={100} width="100%" proudlyDisplayPoweredByUppy={false} />
       </Box>
+      {uploadedUrl ? (
+        <Text mt={2} fontSize="sm" color="green.600">
+          {uploadedUrl}
+        </Text>
+      ) : null}
+      {isUploading ? (
+        <Text mt={2} fontSize="sm">
+          Uploading...
+        </Text>
+      ) : null}
 
       <Divider my={8} />
       <Heading as="h3" size="md" mb={2}>

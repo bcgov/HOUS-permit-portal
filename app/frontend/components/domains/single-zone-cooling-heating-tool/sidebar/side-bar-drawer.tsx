@@ -10,6 +10,7 @@ import {
 } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
+import { useTranslation } from "react-i18next"
 import { SingleZoneCoolingHeatingToolSidebar as Sidebar } from "."
 
 interface IProps {
@@ -19,11 +20,12 @@ interface IProps {
 export const SideBarDrawer = observer(function SideBarDrawer({ triggerProps }: IProps) {
   const { isOpen, onOpen, onClose } = useDisclosure()
   const btnRef = React.useRef()
+  const { t } = useTranslation() as any
 
   return (
     <>
       <Button ref={btnRef} variant="secondary" onClick={onOpen} zIndex={1} {...triggerProps}>
-        Sections
+        {t("singleZoneCoolingHeatingTool.sidebar.sections")}
       </Button>
       <Drawer isOpen={isOpen} placement="left" onClose={onClose} finalFocusRef={btnRef}>
         <DrawerOverlay />

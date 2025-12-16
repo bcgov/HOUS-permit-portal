@@ -1,9 +1,8 @@
-import { Box, useToast } from "@chakra-ui/react"
+import { Box } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
 import { FormProvider, useForm } from "react-hook-form"
 import { useLocation } from "react-router-dom"
-import { useMst } from "../../../../setup/root"
 import { CoverSheetForm } from "../cover-sheet-form"
 import { InputSummaryForm } from "../input-summary-form"
 import { RoomByRoomForm } from "../room-by-room-form"
@@ -15,9 +14,6 @@ export const FormSection = observer(function SingleZoneCoolingHeatingToolFormSec
   const { hash } = useLocation()
   const section = (hash || "#compliance").slice(1)
   const formMethods = useForm({ mode: "onSubmit", reValidateMode: "onSubmit" })
-  const { pdfFormStore } = useMst()
-  const toast = useToast()
-
   const handleNextFromCoverSheet = () => {
     window.location.hash = "#input-summary"
   }
@@ -39,62 +35,27 @@ export const FormSection = observer(function SingleZoneCoolingHeatingToolFormSec
     }
   }, [section])
 
-  switch (section) {
-    case "compliance":
-      return (
-        <FormProvider {...formMethods}>
-          <Box>
-            <CoverSheetForm onNext={handleNextFromCoverSheet} />
-          </Box>
-        </FormProvider>
-      )
-    case "input-summary":
-      return (
-        <FormProvider {...formMethods}>
-          <Box>
-            <InputSummaryForm onNext={handleNextRoomByRoom} />
-          </Box>
-        </FormProvider>
-      )
-    case "calculations":
-      return (
-        <FormProvider {...formMethods}>
-          <Box>
-            <RoomByRoomForm onSubmit={handleSubmit} />
-          </Box>
-        </FormProvider>
-      )
-    case "uploads":
-      return (
-        <FormProvider {...formMethods}>
-          <Box>
-            <UploadsForm />
-          </Box>
-        </FormProvider>
-      )
-    case "review":
-      return (
-        <FormProvider {...formMethods}>
-          <Box>
-            <ReviewForm />
-          </Box>
-        </FormProvider>
-      )
-    case "result":
-      return (
-        <FormProvider {...formMethods}>
-          <Box>
-            <ResultForm />
-          </Box>
-        </FormProvider>
-      )
-    default:
-      return (
-        <FormProvider {...formMethods}>
-          <Box>
-            <CoverSheetForm onNext={handleNextFromCoverSheet} />
-          </Box>
-        </FormProvider>
-      )
+  const sectionContent = () => {
+    switch (section) {
+      case "input-summary":
+        return <InputSummaryForm onNext={handleNextRoomByRoom} />
+      case "calculations":
+        return <RoomByRoomForm onSubmit={handleSubmit} />
+      case "uploads":
+        return <UploadsForm />
+      case "review":
+        return <ReviewForm />
+      case "result":
+        return <ResultForm />
+      case "compliance":
+      default:
+        return <CoverSheetForm onNext={handleNextFromCoverSheet} />
+    }
   }
+
+  return (
+    <FormProvider {...formMethods}>
+      <Box>{sectionContent()}</Box>
+    </FormProvider>
+  )
 })

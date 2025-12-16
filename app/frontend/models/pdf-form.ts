@@ -7,6 +7,7 @@ export const PdfFormModel = types.model("PdfFormModel", {
   formJson: types.frozen(),
   status: types.boolean,
   createdAt: types.maybe(types.Date),
+  pdfFileData: types.maybeNull(types.frozen()),
 })
 
 export interface IPdfForm extends Instance<typeof PdfFormModel> {}

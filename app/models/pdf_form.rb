@@ -1,5 +1,6 @@
 class PdfForm < ApplicationRecord
   include FormSupportingDocuments
+  include FileUploader.Attachment(:pdf_file)
 
   belongs_to :user
   validates :user_id, presence: true
@@ -12,4 +13,20 @@ class PdfForm < ApplicationRecord
   }.freeze
 
   validates :form_type, inclusion: { in: FORM_TYPES.keys }
+
+  def pdf_file_url
+    return nil unless pdf_file
+
+    pdf_file.url(
+      public: false,
+      expires_in: 3600,
+      response_content_disposition:
+        "attachment; filename=\"pdf_form_#{id}.pdf\""
+    )
+  end
+
+  # Compatible with StorageController expectations.
+  def file_url(*args)
+    pdf_file_url
+  end
 end

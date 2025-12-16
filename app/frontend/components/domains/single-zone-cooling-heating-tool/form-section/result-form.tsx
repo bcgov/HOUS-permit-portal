@@ -1,11 +1,21 @@
 import { Box, Button, Flex, Grid, GridItem, Heading, Icon, Link, ListItem, OrderedList, Text } from "@chakra-ui/react"
 import { ArrowsClockwise, Hourglass } from "@phosphor-icons/react"
-import React, { useMemo, useState } from "react"
+import React, { useEffect, useMemo, useRef, useState } from "react"
 import { useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
+import { useNavigate } from "react-router-dom"
+import { IPdfForm } from "../../../../models/pdf-form"
 import { useMst } from "../../../../setup/root"
+import { EFileUploadAttachmentType } from "../../../../types/enums"
+import { IBaseFileAttachment } from "../../../../types/types"
+import { FileDownloadButton } from "../../../shared/base/file-download-button"
 
-const ReportReadyPanel: React.FC<{ onDownload: () => void; onExplore: () => void }> = ({ onDownload, onExplore }) => {
+interface IReportReadyPanelProps {
+  onExplore: () => void
+  downloadDocument?: IBaseFileAttachment | null
+}
+
+const ReportReadyPanel: React.FC<IReportReadyPanelProps> = ({ onExplore, downloadDocument }) => {
   const { t } = useTranslation() as any
   const { getValues } = useFormContext()
   const values = getValues() || {}
@@ -34,7 +44,7 @@ const ReportReadyPanel: React.FC<{ onDownload: () => void; onExplore: () => void
   }, [getValues])
 
   return (
-    <Box>
+    <Box as="form">
       <Heading as="h2" size="xl" mb={6}>
         {t("singleZoneCoolingHeatingTool.ready.title")}
       </Heading>
@@ -97,9 +107,16 @@ const ReportReadyPanel: React.FC<{ onDownload: () => void; onExplore: () => void
       </Flex>
       <Text fontSize="sm">
         {t("singleZoneCoolingHeatingTool.ready.preferDownload")}{" "}
-        <Link onClick={onDownload} color="blue.600" textDecoration="underline">
-          {t("singleZoneCoolingHeatingTool.ready.downloadPdf")}
-        </Link>
+        {downloadDocument && values?.projectNumber && (
+          <FileDownloadButton
+            document={downloadDocument}
+            modelType={EFileUploadAttachmentType.PdfForm}
+            variant="link"
+            size="sm"
+          >
+            {t("singleZoneCoolingHeatingTool.ready.downloadPdf")}
+          </FileDownloadButton>
+        )}
       </Text>
     </Box>
   )
@@ -109,53 +126,82 @@ export const ResultForm: React.FC = () => {
   const { t } = useTranslation() as any
   const { pdfFormStore } = useMst()
   const [ready, setReady] = useState(false)
+  const pdfForm = useMemo<IPdfForm | undefined>(() => {
+    return (pdfFormStore.lastCreatedForm as IPdfForm) || pdfFormStore.pdfForms?.[0]
+  }, [pdfFormStore.lastCreatedForm, pdfFormStore.pdfForms])
+  const [downloadDocument, setDownloadDocument] = useState<IBaseFileAttachment | null>(null)
+  const lastRequestedPdfIdRef = useRef<string | null>(null)
+
+  useEffect(() => {
+    let active = true
+
+    const buildDocument = (form: IPdfForm): IBaseFileAttachment => {
+      const fileData =
+        form.pdfFileData ??
+        ({
+          id: form.id,
+          metadata: {
+            filename: `pdf_form_${form.id}.pdf`,
+            size: 0,
+            mimeType: "application/pdf",
+          },
+        } as any)
+      return {
+        id: form.id,
+        file: fileData,
+        createdAt: form.createdAt ?? new Date(),
+      }
+    }
+
+    const prepareDownloadDocument = async () => {
+      if (!pdfForm) {
+        if (active) setDownloadDocument(null)
+        lastRequestedPdfIdRef.current = null
+        return
+      }
+
+      const id = pdfForm.id
+      if (!pdfForm.pdfFileData && lastRequestedPdfIdRef.current !== id) {
+        lastRequestedPdfIdRef.current = id
+        try {
+          const response = await pdfFormStore.generatePdf(id)
+          if (response.success && response.data?.data) {
+            pdfFormStore.setPdfForm(response.data.data)
+          }
+        } catch (error) {
+          console.error("Failed to generate PDF", error)
+        }
+      }
+
+      if (!active) return
+
+      const latestForm = pdfFormStore.pdfForms.find((form) => form.id === id) ?? pdfForm
+      if (!latestForm) {
+        if (active) setDownloadDocument(null)
+        return
+      }
+
+      if (active) {
+        setDownloadDocument(buildDocument(latestForm))
+      }
+    }
+
+    void prepareDownloadDocument()
+
+    return () => {
+      active = false
+    }
+  }, [pdfForm, pdfFormStore])
   const handleRefresh = async () => {
     try {
       await pdfFormStore.searchPdfForms({ page: 1, countPerPage: pdfFormStore.countPerPage })
       setReady(true)
     } catch (e) {}
   }
+  const navigate = useNavigate()
   const handleExplore = () => {
-    window.location.href = "/overheating"
+    navigate("/overheating")
   }
-
-  const handleDownload = async () => {
-    const id = (pdfFormStore.lastCreatedForm as any)?.id || pdfFormStore.pdfForms?.[0]?.id
-    if (!id) return
-    try {
-      await pdfFormStore.generatePdf(id)
-
-      const pollUntilReady = async (maxAttempts = 15, delayMs = 2000) => {
-        for (let i = 0; i < maxAttempts; i++) {
-          try {
-            const res = await fetch(`/api/pdf_forms/${id}/download`, { method: "HEAD" })
-            if (res.ok) return true
-          } catch (_) {}
-          await new Promise((r) => setTimeout(r, delayMs))
-        }
-        return false
-      }
-
-      const isReady = await pollUntilReady()
-      if (!isReady) {
-        console.log("Your report is still being prepared. Please try again shortly.")
-        return
-      }
-
-      const response = await pdfFormStore.environment.api.downloadPdf(id)
-      if (!response.data || (response.data as Blob).size === 0) return
-      const blob = new Blob([response.data as Blob], { type: "application/pdf" })
-      const url = window.URL.createObjectURL(blob)
-      const link = document.createElement("a")
-      link.href = url
-      link.download = `pdf_form_${id}.pdf`
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-      window.URL.revokeObjectURL(url)
-    } catch (e) {}
-  }
-
   return (
     <Box>
       {!ready ? (
@@ -188,7 +234,7 @@ export const ResultForm: React.FC = () => {
           </Button>
         </Box>
       ) : (
-        <ReportReadyPanel onExplore={handleExplore} onDownload={handleDownload} />
+        <ReportReadyPanel onExplore={handleExplore} downloadDocument={downloadDocument} />
       )}
     </Box>
   )

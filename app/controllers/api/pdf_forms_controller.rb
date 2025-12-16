@@ -27,47 +27,24 @@ class Api::PdfFormsController < Api::ApplicationController
   end
 
   def generate_pdf
-    WebformToPdfJob.perform_async(@pdf_form.id)
+    OverheatingReportGenerationJob.perform_async(@pdf_form.id)
     render_success @pdf_form, nil, { blueprint: PdfFormBlueprint }
   end
 
   def download
-    file_path = Rails.root.join("tmp", "files", "pdf_form_#{@pdf_form.id}.pdf")
-
-    Rails.logger.info "Attempting to download PDF from: #{file_path}"
-    Rails.logger.info "File exists: #{File.exist?(file_path)}"
-
-    if File.exist?(file_path)
-      file_size = File.size(file_path)
-      Rails.logger.info "File size: #{file_size} bytes"
-
-      if file_size > 0
-        begin
-          file_content = File.read(file_path)
-          Rails.logger.info "Successfully read #{file_content.length} bytes from file"
-
-          send_file file_path,
-                    filename: "pdf_form_#{@pdf_form.id}.pdf",
-                    type: "application/pdf",
-                    disposition: "attachment"
-        rescue => e
-          Rails.logger.error "Error reading file: #{e.message}"
-          render_error "pdf_form.read_error",
-                       {
-                         message_opts: {
-                           error_message: "Error reading PDF file: #{e.message}"
-                         },
-                         status: 500
-                       }
-        end
-      else
-        render_error "pdf_form.empty_file",
+    if @pdf_form.pdf_file
+      begin
+        send_data @pdf_form.pdf_file.read,
+                  filename: "pdf_form_#{@pdf_form.id}.pdf",
+                  type: "application/pdf",
+                  disposition: "attachment"
+      rescue => e
+        render_error "pdf_form.read_error",
                      {
                        message_opts: {
-                         error_message:
-                           "PDF file is empty. The generation may still be in progress."
+                         error_message: "Error reading PDF file: #{e.message}"
                        },
-                       status: 202
+                       status: 500
                      }
       end
     else

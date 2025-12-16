@@ -4,6 +4,7 @@ class PdfFormBlueprint < Blueprinter::Base
   fields :form_type, :status, :created_at
 
   field :form_json
+  field :pdf_file_data
   field :user_id
 
   view :pdf_generation do

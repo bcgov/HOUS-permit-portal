@@ -10,14 +10,10 @@ import {
   Input,
   Text,
 } from "@chakra-ui/react"
-import debounce from "lodash/debounce"
-import { observer } from "mobx-react-lite"
-import React, { useCallback } from "react"
+import React from "react"
 import { useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { useMst } from "../../../setup/root"
-import { IOption } from "../../../types/types"
-import { AsyncSelect } from "../../shared/select/async-select"
+import AddressSearchSelect, { ParsedAddress } from "../../shared/address/address-search-select"
 
 export interface BuildingLocationFieldsProps {
   namePrefix?: string
@@ -28,93 +24,6 @@ export interface BuildingLocationFieldsProps {
 interface AddressSearchSelectProps {
   onAddressSelect: (addressData: { address: string; city: string; province: string; postalCode: string }) => void
   stylesToMerge?: any
-}
-
-const AddressSearchSelect = observer(function ({ onAddressSelect, stylesToMerge, ...rest }: AddressSearchSelectProps) {
-  const { geocoderStore } = useMst()
-  const { fetchSiteOptions: fetchOptions } = geocoderStore
-  const { t } = useTranslation() as any
-
-  const fetchAddressOptions = (inputValue: string, callback: (options: IOption[]) => void) => {
-    if (inputValue.length > 3) {
-      fetchOptions(inputValue)
-        .then((response) => {
-          callback(response || [])
-        })
-        .catch(() => {
-          callback([])
-        })
-    } else {
-      callback([])
-    }
-  }
-
-  const debouncedFetchAddressOptions: any = useCallback(debounce(fetchAddressOptions, 600), [])
-
-  const handleAddressSelect = (option: IOption | null) => {
-    if (!option) return
-
-    const fullAddress = option.label || ""
-    const parsedAddress = parseAddress(fullAddress)
-
-    onAddressSelect(parsedAddress)
-  }
-
-  const props = {
-    loadOptions: debouncedFetchAddressOptions,
-    onChange: handleAddressSelect,
-    placeholder: t("ui.enterAddress"),
-    noOptionsMessage: () => "Type at least 4 characters to search",
-    isClearable: true,
-    isCreatable: false,
-    defaultOptions: true,
-    cacheOptions: true,
-    menuPortalTarget: document.body,
-    styles: {
-      menuPortal: (base: any) => ({ ...base, zIndex: 9999 }),
-      menu: (base: any) => ({ ...base, zIndex: 9999 }),
-    } as any,
-  }
-
-  return (<AsyncSelect {...(props as any)} />) as any
-})
-
-const parseAddress = (fullAddress: string) => {
-  const parts = fullAddress.split(",").map((part) => part.trim())
-
-  let address = ""
-  let city = ""
-  let province = ""
-  let postalCode = ""
-  if (parts.length >= 4) {
-    address = parts[0] || ""
-    city = parts[1] || ""
-    province = parts[2] || ""
-    postalCode = parts[3] || ""
-  } else if (parts.length >= 3) {
-    address = parts[0] || ""
-    city = parts[1] || ""
-    province = parts[2] || ""
-    postalCode = parts[3] || ""
-  } else if (parts.length >= 2) {
-    address = parts[0] || ""
-    const secondPart = parts[1] || ""
-
-    if (/^[A-Z]\d[A-Z]\s?\d[A-Z]\d$/i.test(secondPart.replace(/\s/g, ""))) {
-      postalCode = secondPart
-    } else {
-      city = secondPart
-    }
-  } else {
-    address = fullAddress
-  }
-
-  return {
-    address: address,
-    city: city,
-    province: province,
-    postalCode: postalCode,
-  }
 }
 
 export const BuildingLocationFields: React.FC<BuildingLocationFieldsProps> = ({
@@ -134,12 +43,7 @@ export const BuildingLocationFields: React.FC<BuildingLocationFieldsProps> = ({
   const drawingIssueForHelpText: string = String((t as any)(`${prefix}.drawingIssueForHelpText`))
   const projectNumberLabel: string = String((t as any)(`${prefix}.projectNumber`))
 
-  const handleAddressSelect = (addressData: {
-    address: string
-    city: string
-    province: string
-    postalCode: string
-  }) => {
+  const handleAddressSelect = (addressData: ParsedAddress) => {
     setValue(field("address"), addressData.address, { shouldDirty: true, shouldTouch: true, shouldValidate: true })
     setValue(field("city"), addressData.city, { shouldDirty: true, shouldTouch: true, shouldValidate: true })
     setValue(field("province"), addressData.province, { shouldDirty: true, shouldTouch: true, shouldValidate: true })

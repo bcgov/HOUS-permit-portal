@@ -95,8 +95,8 @@ export const ReviewForm = observer(function ReviewForm() {
   const nonEmptyRooms = roomRows.filter((r) => hasValue(r.heating) && hasValue(r.cooling))
 
   return (
-    <Box>
-      <Heading as="h2" size="lg" mb={6}>
+    <Box as="form">
+      <Heading as="h2" size="lg" mb={6} variant="yellowline">
         {(useTranslation() as any).t("singleZoneCoolingHeatingTool.review.title") || "Review"}
       </Heading>
 

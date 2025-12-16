@@ -145,7 +145,7 @@ export const CoverSheetForm = ({ onNext }: ICoverSheetFormProps) => {
   }
 
   return (
-    <Box as="form" p={4}>
+    <Box as="form">
       <Box mb={6}>
         <Heading as="h2" size="lg" mb={6} variant="yellowline">
           {t(`${prefix}.title`)}
