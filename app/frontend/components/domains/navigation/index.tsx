@@ -287,9 +287,9 @@ const RevisionReasonSetupScreen = lazy(() =>
   }))
 )
 
-const LandingSetupScreen = lazy(() =>
-  import("../super-admin/site-configuration-management/landing-setup-screen").then((module) => ({
-    default: module.LandingSetupScreen,
+const StandardizationSetupScreen = lazy(() =>
+  import("../super-admin/site-configuration-management/standardization-setup-screen").then((module) => ({
+    default: module.StandardizationSetupScreen,
   }))
 )
 
@@ -492,7 +492,7 @@ const AppRoutes = observer(() => {
       <Route path="/configuration-management/sitewide-message" element={<SitewideMessageScreen />} />
       <Route path="/configuration-management/help-drawer-setup" element={<HelpDrawerSetupScreen />} />
       <Route path="/configuration-management/revision-reason-setup" element={<RevisionReasonSetupScreen />} />
-      <Route path="/configuration-management/landing-setup" element={<LandingSetupScreen />} />
+      <Route path="/configuration-management/standardization-setup" element={<StandardizationSetupScreen />} />
       <Route path="/configuration-management/users" element={<AdminUserIndexScreen />} />
       <Route path="/configuration-management/global-feature-access" element={<AdminGlobalFeatureAccessScreen />} />
       <Route

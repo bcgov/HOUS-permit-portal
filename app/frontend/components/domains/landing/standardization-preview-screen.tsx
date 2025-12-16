@@ -24,12 +24,14 @@ import { RouterLink } from "../../shared/navigation/router-link"
 export const StandardizationPreviewScreen = observer(function StandardizationPreviewScreen() {
   const { t } = useTranslation()
   const { siteConfigurationStore } = useMst()
-  const { landingPageEarlyAccessRequirementTemplates } = siteConfigurationStore
+  const { standardizationPageEarlyAccessRequirementTemplates } = siteConfigurationStore
 
-  const availableForAdoption = landingPageEarlyAccessRequirementTemplates.filter((t) => t.isAvailableForAdoption)
-  const underDevelopment = landingPageEarlyAccessRequirementTemplates.filter((t) => !t.isAvailableForAdoption)
+  const availableForAdoption = standardizationPageEarlyAccessRequirementTemplates.filter(
+    (t) => t.isAvailableForAdoption
+  )
+  const underDevelopment = standardizationPageEarlyAccessRequirementTemplates.filter((t) => !t.isAvailableForAdoption)
 
-  const renderTemplateGrid = (templates: typeof landingPageEarlyAccessRequirementTemplates) => {
+  const renderTemplateGrid = (templates: typeof standardizationPageEarlyAccessRequirementTemplates) => {
     const groupedTemplates = R.groupBy((t) => t.activityCategory, templates)
 
     return (
