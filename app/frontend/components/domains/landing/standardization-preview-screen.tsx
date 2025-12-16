@@ -1,4 +1,16 @@
-import { Box, Container, Heading, Link, ListItem, SimpleGrid, Text, UnorderedList, VStack } from "@chakra-ui/react"
+import {
+  Box,
+  Container,
+  Grid,
+  Heading,
+  Link,
+  LinkBox,
+  LinkOverlay,
+  ListItem,
+  Text,
+  UnorderedList,
+  VStack,
+} from "@chakra-ui/react"
 import { CaretRight } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
@@ -27,9 +39,9 @@ export const StandardizationPreviewScreen = observer(function StandardizationPre
             <Heading as="h3" size="md" mb={2} pb={1}>
               {t(`classification.categories.${category}`, { defaultValue: category })}
             </Heading>
-            <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6} w="full">
+            <Grid templateColumns={{ base: "minmax(0, 400px)", md: "repeat(2, minmax(0, 400px))" }} gap={6} w="full">
               {categoryTemplates?.map((template) => (
-                <Box
+                <LinkBox
                   key={template.id}
                   border="1px solid"
                   borderColor="border.light"
@@ -38,6 +50,8 @@ export const StandardizationPreviewScreen = observer(function StandardizationPre
                   h="full"
                   position="relative"
                   _hover={{ borderColor: "theme.blue", boxShadow: "sm" }}
+                  transition="all 0.2s"
+                  cursor="pointer"
                 >
                   <VStack align="start" spacing={4} h="full" justify="space-between">
                     <Box>
@@ -48,7 +62,7 @@ export const StandardizationPreviewScreen = observer(function StandardizationPre
                         {template.description}
                       </Text>
                     </Box>
-                    <Link
+                    <LinkOverlay
                       as={RouterLink}
                       to={`/early-access/requirement-templates/${template.id}`}
                       color="text.link"
@@ -58,13 +72,15 @@ export const StandardizationPreviewScreen = observer(function StandardizationPre
                       gap={2}
                       _hover={{ textDecoration: "underline" }}
                       alignSelf="flex-end"
+                      width="full"
+                      justifyContent="flex-end"
                     >
                       {t("standardizationPreview.previewDraftForm")} <CaretRight />
-                    </Link>
+                    </LinkOverlay>
                   </VStack>
-                </Box>
+                </LinkBox>
               ))}
-            </SimpleGrid>
+            </Grid>
           </VStack>
         ))}
       </VStack>

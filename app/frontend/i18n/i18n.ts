@@ -187,7 +187,7 @@ const options = {
         standardizationPreview: {
           title: "Standard permit application materials",
           subtitle: "Review and provide feedback on permit application materials under development",
-          previewDraftForm: "Preview draft form",
+          previewDraftForm: "Preview",
           about: {
             title: "About this work",
             description1:
