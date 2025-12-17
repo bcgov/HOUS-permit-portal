@@ -32,6 +32,7 @@ class Api::PdfFormsController < Api::ApplicationController
   end
 
   def download
+    authorize @pdf_form, :download?
     if @pdf_form.pdf_file
       begin
         send_data @pdf_form.pdf_file.read,

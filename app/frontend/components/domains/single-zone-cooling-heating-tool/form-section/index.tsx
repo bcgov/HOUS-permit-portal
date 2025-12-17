@@ -14,18 +14,6 @@ export const FormSection = observer(function SingleZoneCoolingHeatingToolFormSec
   const { hash } = useLocation()
   const section = (hash || "#compliance").slice(1)
   const formMethods = useForm({ mode: "onSubmit", reValidateMode: "onSubmit" })
-  const handleNextFromCoverSheet = () => {
-    window.location.hash = "#input-summary"
-  }
-
-  const handleNextRoomByRoom = () => {
-    window.location.hash = "#calculations"
-  }
-
-  const handleSubmit = async () => {
-    window.location.hash = "#uploads"
-  }
-
   useEffect(() => {
     const scroller = document.getElementById("stepCodeScroll")
     if (scroller) {
@@ -38,9 +26,9 @@ export const FormSection = observer(function SingleZoneCoolingHeatingToolFormSec
   const sectionContent = () => {
     switch (section) {
       case "input-summary":
-        return <InputSummaryForm onNext={handleNextRoomByRoom} />
+        return <InputSummaryForm />
       case "calculations":
-        return <RoomByRoomForm onSubmit={handleSubmit} />
+        return <RoomByRoomForm />
       case "uploads":
         return <UploadsForm />
       case "review":
@@ -49,7 +37,7 @@ export const FormSection = observer(function SingleZoneCoolingHeatingToolFormSec
         return <ResultForm />
       case "compliance":
       default:
-        return <CoverSheetForm onNext={handleNextFromCoverSheet} />
+        return <CoverSheetForm />
     }
   }
 

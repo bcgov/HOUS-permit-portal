@@ -21,11 +21,7 @@ import { useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { NumberFormControl, TextFormControl } from "../../shared/form/input-form-control"
 
-interface IInputSummaryFormProps {
-  onNext: () => void
-}
-
-export const InputSummaryForm = ({ onNext }: IInputSummaryFormProps) => {
+export const InputSummaryForm = () => {
   const { t } = useTranslation() as any
   const prefix = "singleZoneCoolingHeatingTool.inputSummary"
   const { setValue, watch, trigger, clearErrors, register, formState } = useFormContext()
@@ -549,7 +545,7 @@ export const InputSummaryForm = ({ onNext }: IInputSummaryFormProps) => {
       ].map((section) => (
         <Box key={section} mb={6}>
           <Heading as="h2" size="md" mb={4} variant="yellowline">
-            {t(`${section}` as any)}
+            {section}
           </Heading>
           <Grid templateColumns="1fr" gap={6}>
             {(() => {
@@ -601,7 +597,7 @@ export const InputSummaryForm = ({ onNext }: IInputSummaryFormProps) => {
                 })
                 return
               }
-              onNext()
+              window.location.hash = "#calculations"
             }}
           >
             {t(`${prefix}.next`)}

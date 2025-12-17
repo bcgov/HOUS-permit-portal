@@ -26,11 +26,7 @@ import { ContactModal } from "../../shared/contact/contact-modal"
 import { DatePickerFormControl, TextFormControl } from "../../shared/form/input-form-control"
 import { BuildingLocationFields } from "./building-location-fields"
 
-interface ICoverSheetFormProps {
-  onNext: () => void
-}
-
-export const CoverSheetForm = ({ onNext }: ICoverSheetFormProps) => {
+export const CoverSheetForm = () => {
   const { t } = useTranslation() as any
   const prefix = "singleZoneCoolingHeatingTool.coverSheet"
   const { setValue, watch, getValues, register, formState } = useFormContext()
@@ -89,6 +85,10 @@ export const CoverSheetForm = ({ onNext }: ICoverSheetFormProps) => {
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [firstName, lastName])
+
+  const goToInputSummary = () => {
+    window.location.hash = "#input-summary"
+  }
 
   const onContactChange = (option: IOption<IContact>) => {
     const contact = option.value
@@ -526,9 +526,10 @@ export const CoverSheetForm = ({ onNext }: ICoverSheetFormProps) => {
       <Text as="p" mt={3} mb={2} fontWeight="bold">
         {t(`${prefix}.cooling.helpText4`)}
       </Text>
+
       <Flex justify="flex-start" mt={10} mb={10}>
         {canContinue && (
-          <Button variant="primary" onClick={onNext}>
+          <Button variant="primary" onClick={goToInputSummary}>
             {t(`${prefix}.calculationPerformedBy.next`)}
           </Button>
         )}

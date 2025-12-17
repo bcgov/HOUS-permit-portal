@@ -4,11 +4,7 @@ import { useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { DatePickerFormControl, NumberFormControl, TextFormControl } from "../../shared/form/input-form-control"
 
-interface IRoomByRoomFormProps {
-  onSubmit: () => void
-}
-
-export const RoomByRoomForm = ({ onSubmit }: IRoomByRoomFormProps) => {
+export const RoomByRoomForm = () => {
   const { t } = useTranslation() as any
   const prefix = "singleZoneCoolingHeatingTool.roomByRoom"
   const { setValue, trigger, clearErrors, watch } = useFormContext()
@@ -123,7 +119,7 @@ export const RoomByRoomForm = ({ onSubmit }: IRoomByRoomFormProps) => {
                 })
                 return
               }
-              onSubmit()
+              window.location.hash = "#uploads"
             }}
             variant="primary"
           >

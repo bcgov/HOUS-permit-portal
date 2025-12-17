@@ -1,9 +1,9 @@
 import { Document, Image, Page, Text, View } from "@react-pdf/renderer"
 import React from "react"
 import { useTranslation } from "react-i18next"
+import { pdfStyles as styles } from "../shared-pdf-styles"
 import { SingleZoneCoolingHeatingInputSummaryContent } from "./input-summary-content"
 import { SingleZoneCoolingHeatingRoomByRoomContent } from "./room-by-room-content"
-import { pdfStyles as styles } from "./shared-pdf-styles"
 
 interface PDFComponentProps {
   data: any
