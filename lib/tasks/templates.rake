@@ -23,19 +23,20 @@ namespace :templates do
 
     wipe = ENV["WIPE"] == "true"
 
-    if wipe
-      puts "WARNING: You have requested to WIPE existing template data."
-      puts "This will destroy PermitApplications, Templates, and Blocks."
-      puts "Are you sure? (y/n)"
-      input = STDIN.gets.strip.downcase
-      unless input == "y"
-        puts "Aborted."
-        exit 0
-      end
+    puts "please add WIPE=true to the command to continue" unless wipe
+    exit 0 unless wipe
+
+    puts "WARNING: You have requested to WIPE existing template data."
+    puts "This will destroy PermitApplications, Templates, Step Codes, Blocks, and all other template related data."
+    puts "Are you sure? (y/n)"
+    input = STDIN.gets.strip.downcase
+    unless input == "y"
+      puts "Aborted."
+      exit 0
     end
 
     puts "Starting import from #{input_path} (Wipe: #{wipe})..."
-    Infrastructure::TemplateImportService.new(input_path, wipe_data: wipe).call
+    Infrastructure::TemplateImportService.new(input_path).call
     puts "Import finished."
   end
 end
