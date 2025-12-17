@@ -11,20 +11,20 @@ import { LoadingScreen } from "../../../shared/base/loading-screen"
 import { PermitTypeTabSwitcher } from "../../requirement-template/permit-type-tab-switcher"
 import { TemplateVersionsList } from "../../requirement-template/template-versions-list"
 
-interface ILandingPageSetupForm {
+interface IStandardizationSetupForm {
   templateIds: { id: string }[]
 }
 
-export const LandingSetupScreen = observer(() => {
+export const StandardizationSetupScreen = observer(() => {
   const { t } = useTranslation()
   const { siteConfigurationStore } = useMst()
-  const { updateSiteConfiguration, landingPageEarlyAccessRequirementTemplateIds } = siteConfigurationStore
+  const { updateSiteConfiguration, standardizationPageEarlyAccessRequirementTemplateIds } = siteConfigurationStore
   const { permitTypeOptions: allPermitTypeOptions, error: permitTypeOptionsError } = usePermitTypeOptions()
   const [searchParams, setSearchParams] = useSearchParams({ earlyAccess: "true" })
   const enabledPermitTypeOptions = allPermitTypeOptions?.filter((option) => option.value.enabled) ?? null
   const permitTypeId = searchParams.get("permitTypeId")
 
-  const { control, handleSubmit, reset } = useForm<ILandingPageSetupForm>({
+  const { control, handleSubmit, reset } = useForm<IStandardizationSetupForm>({
     defaultValues: { templateIds: [] },
   })
 
@@ -35,16 +35,16 @@ export const LandingSetupScreen = observer(() => {
   })
 
   useEffect(() => {
-    if (landingPageEarlyAccessRequirementTemplateIds) {
+    if (standardizationPageEarlyAccessRequirementTemplateIds) {
       reset({
-        templateIds: landingPageEarlyAccessRequirementTemplateIds.map((id) => ({ id })),
+        templateIds: standardizationPageEarlyAccessRequirementTemplateIds.map((id) => ({ id })),
       })
     }
-  }, [landingPageEarlyAccessRequirementTemplateIds, reset])
+  }, [standardizationPageEarlyAccessRequirementTemplateIds, reset])
 
-  const onSubmit = async (data: ILandingPageSetupForm) => {
+  const onSubmit = async (data: IStandardizationSetupForm) => {
     await updateSiteConfiguration({
-      landingPageEarlyAccessRequirementTemplateIds: data.templateIds.map((field) => field.id),
+      standardizationPageEarlyAccessRequirementTemplateIds: data.templateIds.map((field) => field.id),
     })
   }
 
@@ -77,10 +77,10 @@ export const LandingSetupScreen = observer(() => {
       <form onSubmit={handleSubmit(onSubmit)}>
         <Flex direction="column" w="full" px={8}>
           <Heading as="h1" size="2xl">
-            {t("siteConfiguration.landingPageSetup.title")}
+            {t("siteConfiguration.standardizationPageSetup.title")}
           </Heading>
           <Text color="text.secondary" my={6}>
-            {t("siteConfiguration.landingPageSetup.description")}
+            {t("siteConfiguration.standardizationPageSetup.description")}
           </Text>
 
           <PermitTypeTabSwitcher

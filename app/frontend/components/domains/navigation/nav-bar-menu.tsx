@@ -149,6 +149,11 @@ export const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
           to="/onboarding-checklist-page-for-lg-adopting"
           description={t("site.navMenu.about.forLocalGovernments.description")}
         />
+        <StaticLinkItem
+          label={t("site.navMenu.about.standardPermitApplicationMaterials.label")}
+          to="/standardization-preview"
+          description={t("site.navMenu.about.standardPermitApplicationMaterials.description")}
+        />
       </MenuSection>
     </VStack>
   )
