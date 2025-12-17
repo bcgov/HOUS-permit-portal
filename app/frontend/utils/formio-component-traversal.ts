@@ -408,3 +408,25 @@ export const processFieldsForEphemeral = (formJson: IFormJson) => {
   })
   return formJson
 }
+
+export const findPidComponentKey = (component: any) => {
+  if (component.key && component.key.endsWith("|pid")) {
+    return component.key
+  }
+
+  if (component.components) {
+    for (const child of component.components) {
+      const key = findPidComponentKey(child)
+      if (key) return key
+    }
+  }
+
+  if (component.columns) {
+    for (const column of component.columns) {
+      const key = findPidComponentKey(column)
+      if (key) return key
+    }
+  }
+
+  return null
+}

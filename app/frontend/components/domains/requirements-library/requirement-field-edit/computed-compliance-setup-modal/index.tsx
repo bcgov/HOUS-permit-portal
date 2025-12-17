@@ -16,7 +16,6 @@ import {
   useDisclosure,
 } from "@chakra-ui/react"
 import { LightningA } from "@phosphor-icons/react"
-import { computed } from "mobx"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React, { useEffect, useMemo } from "react"
@@ -86,7 +85,11 @@ export const ComputedComplianceSetupModal = observer(function ComputedCompliance
     formState: { isValid },
     handleSubmit,
     watch,
-  } = useForm<IComputedComplianceForm>({ defaultValues: formFormDefaults(watchedComputedCompliance) })
+  } = useForm<IComputedComplianceForm>({
+    defaultValues: formFormDefaults(watchedComputedCompliance),
+    mode: "onChange",
+    reValidateMode: "onChange",
+  })
 
   const watchedModule = watch("module")
   const watchedValueExtractionField = watch("value")
@@ -95,6 +98,9 @@ export const ComputedComplianceSetupModal = observer(function ComputedCompliance
     watchedModule,
     watchedRequirementType
   )
+  const selectedModuleRawConfig =
+    requirementBlockStore.autoComplianceModuleConfigurations?.[watchedModule as EAutoComplianceModule]
+  const effectiveModuleConfig = selectedModuleConfig ?? (selectedModuleRawConfig as TAutoComplianceModuleConfiguration)
 
   useEffect(() => {
     if (isOpen) {
@@ -107,12 +113,15 @@ export const ComputedComplianceSetupModal = observer(function ComputedCompliance
     control,
     rules: {
       validate: {
-        isSupportedModule: (module) =>
-          !module ||
-          !!requirementBlockStore.getAutoComplianceModuleConfigurationForRequirementType(
+        isSupportedModule: (module) => {
+          if (!module) return true
+          const filtered = requirementBlockStore.getAutoComplianceModuleConfigurationForRequirementType(
             module,
             watchedRequirementType
-          ),
+          )
+          // Allow selection if either filtered config exists, or raw exists (e.g., pidInfo fallback)
+          return !!filtered || !!requirementBlockStore.autoComplianceModuleConfigurations?.[module]
+        },
       },
     },
   })
@@ -120,7 +129,7 @@ export const ComputedComplianceSetupModal = observer(function ComputedCompliance
     name: "value",
     control,
     rules: {
-      required: isValueExtractorModuleConfiguration(selectedModuleConfig),
+      required: isValueExtractorModuleConfiguration(effectiveModuleConfig as any),
       validate: {
         isValidField: isValidValueExtractionField,
       },
@@ -138,62 +147,54 @@ export const ComputedComplianceSetupModal = observer(function ComputedCompliance
     },
   })
 
-  const moduleSelectOptions = useMemo(
-    () =>
-      computed(() =>
-        availableAutoComplianceModuleConfigurations.map((option) => ({
-          value: option.module,
-          label: option.label,
-        }))
-      ),
-    []
-  ).get()
+  const moduleSelectOptions = useMemo(() => {
+    return availableAutoComplianceModuleConfigurations.map((option) => ({
+      value: option.module,
+      label: option.label,
+    }))
+  }, [availableAutoComplianceModuleConfigurations])
 
   const selectedModuleOption = useMemo(() => {
     return moduleSelectOptions.find((option) => option.value === watchedModule) ?? null
   }, [moduleSelectOptions, watchedModule])
 
-  const valueExtractionFieldOptions = useMemo(
-    () =>
-      computed(() => {
-        const moduleConfiguration = requirementBlockStore.getAutoComplianceModuleConfigurationForRequirementType(
-          selectedModuleOption?.value,
-          watchedRequirementType
-        )
-
-        if (!moduleConfiguration || !isValueExtractorModuleConfiguration(moduleConfiguration)) {
-          return null
-        }
-
-        return (moduleConfiguration as TValueExtractorAutoComplianceModuleConfiguration).availableFields.map(
-          (field) => ({ ...field })
-        )
-      }),
-    [selectedModuleOption]
-  ).get()
+  const valueExtractionFieldOptions = useMemo(() => {
+    const filteredConfig = requirementBlockStore.getAutoComplianceModuleConfigurationForRequirementType(
+      selectedModuleOption?.value as any,
+      watchedRequirementType as any
+    )
+    const rawConfig = (requirementBlockStore as any).autoComplianceModuleConfigurations?.[
+      selectedModuleOption?.value as any
+    ]
+    const moduleConfiguration = filteredConfig ?? rawConfig
+    if (!moduleConfiguration || !isValueExtractorModuleConfiguration(moduleConfiguration)) {
+      return null
+    }
+    return (moduleConfiguration as TValueExtractorAutoComplianceModuleConfiguration).availableFields.map((field) => ({
+      ...field,
+    }))
+  }, [selectedModuleOption, watchedRequirementType, requirementBlockStore.autoComplianceModuleConfigurationsList])
 
   const selectedValueExtractionFieldOption = useMemo(() => {
     return valueExtractionFieldOptions?.find((option) => option.value === watchedValueExtractionField) ?? null
   }, [watchedValueExtractionField, valueExtractionFieldOptions])
 
-  const mappableExternalOptions = useMemo(
-    () =>
-      computed(() => {
-        const moduleConfiguration = requirementBlockStore.getAutoComplianceModuleConfigurationForRequirementType(
-          selectedModuleOption?.value,
-          watchedRequirementType
-        )
-
-        if (!moduleConfiguration || !isOptionsMapperModuleConfiguration(moduleConfiguration)) {
-          return null
-        }
-
-        return (moduleConfiguration as TOptionsMapperAutoComplianceModuleConfiguration).mappableExternalOptions.map(
-          (option) => ({ ...option })
-        )
-      }),
-    [selectedModuleOption]
-  ).get()
+  const mappableExternalOptions = useMemo(() => {
+    const filteredConfig = requirementBlockStore.getAutoComplianceModuleConfigurationForRequirementType(
+      selectedModuleOption?.value as any,
+      watchedRequirementType as any
+    )
+    const rawConfig = (requirementBlockStore as any).autoComplianceModuleConfigurations?.[
+      selectedModuleOption?.value as any
+    ]
+    const moduleConfiguration = filteredConfig ?? rawConfig
+    if (!moduleConfiguration || !isOptionsMapperModuleConfiguration(moduleConfiguration)) {
+      return null
+    }
+    return (moduleConfiguration as TOptionsMapperAutoComplianceModuleConfiguration).mappableExternalOptions.map(
+      (option) => ({ ...option })
+    )
+  }, [selectedModuleOption, watchedRequirementType, requirementBlockStore.autoComplianceModuleConfigurationsList])
 
   const optionValueToRequirementOption = useMemo(() => {
     return watchedRequirementValueOptions.reduce((acc, currOption) => {
@@ -331,20 +332,22 @@ export const ComputedComplianceSetupModal = observer(function ComputedCompliance
       return false
     }
 
-    const moduleConfiguration = autoComplianceModuleConfigurations[watchedModule] as TAutoComplianceModuleConfiguration
+    const moduleConfiguration = (autoComplianceModuleConfigurations[watchedModule] ??
+      effectiveModuleConfig) as TAutoComplianceModuleConfiguration
 
     if (
       !isValueExtractorModuleConfiguration(moduleConfiguration) ||
-      !moduleConfiguration.availableOnInputTypes.includes(watchedRequirementType)
+      !requirementBlockStore.getAutoComplianceModuleConfigurationForRequirementType(
+        watchedModule,
+        watchedRequirementType
+      )
     ) {
       return false
     }
 
     const isSelectedFieldValid = !!(
       moduleConfiguration as TValueExtractorAutoComplianceModuleConfiguration
-    ).availableFields.find(
-      (field) => field.value === value && field.availableOnInputTypes.includes(watchedRequirementType)
-    )
+    ).availableFields.find((field) => field.value === value)
 
     return isSelectedFieldValid
   }
@@ -358,11 +361,15 @@ export const ComputedComplianceSetupModal = observer(function ComputedCompliance
       return false
     }
 
-    const moduleConfiguration = selectedModuleConfig as TOptionsMapperAutoComplianceModuleConfiguration
+    const moduleConfiguration = (effectiveModuleConfig ??
+      autoComplianceModuleConfigurations[watchedModule]) as TOptionsMapperAutoComplianceModuleConfiguration
 
     if (
       !isOptionsMapperModuleConfiguration(moduleConfiguration) ||
-      !moduleConfiguration.availableOnInputTypes.includes(watchedRequirementType)
+      !requirementBlockStore.getAutoComplianceModuleConfigurationForRequirementType(
+        watchedModule,
+        watchedRequirementType
+      )
     ) {
       return false
     }

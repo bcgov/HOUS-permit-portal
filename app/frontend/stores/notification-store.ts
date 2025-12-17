@@ -189,6 +189,19 @@ export const NotificationStoreModel = types
             href: `/permit-applications/${permitApplicationId}/edit`,
           },
         ]
+      } else if (notification.actionType === ENotificationActionType.resourceReminder) {
+        const data = notification.objectData as any
+        const jurisdictionId = data?.jurisdictionId
+        if (!jurisdictionId) {
+          return []
+        }
+        // Assuming link goes to jurisdiction resources page
+        return [
+          {
+            text: t("ui.show"),
+            href: `/jurisdictions/${jurisdictionId}/configuration-management/resources`,
+          },
+        ]
       }
     },
   }))

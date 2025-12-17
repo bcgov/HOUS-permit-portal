@@ -122,7 +122,7 @@ export const TemplateVersionsList = observer(function TemplateVersionsList({
                 <Flex w="full" as="section">
                   <Stack spacing={3} flex={1}>
                     <Text as="h4" color={"text.link"} fontWeight={700} fontSize="xl">
-                      {tv.denormalizedTemplateJson.label}
+                      {tv.denormalizedTemplateJson?.nickname}
                     </Text>
                     <Text fontSize={"sm"} color={"text.secondary"}>
                       {tv.denormalizedTemplateJson?.description}

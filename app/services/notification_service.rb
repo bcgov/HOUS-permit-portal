@@ -429,6 +429,38 @@ class NotificationService
     end
   end
 
+  def self.publish_resource_reminder_event(jurisdiction, resource_ids)
+    all_managers = jurisdiction.managers
+
+    return if all_managers.empty?
+
+    notification_user_hash = {}
+
+    notification_data =
+      Resource.resource_reminder_notification_data(
+        jurisdiction.id,
+        resource_ids
+      )
+
+    all_managers.each do |manager|
+      if manager.preference&.enable_in_app_resource_reminder_notification
+        notification_user_hash[manager.id] = notification_data
+      end
+
+      if manager.preference&.enable_email_resource_reminder_notification
+        PermitHubMailer.remind_resource_update(
+          manager,
+          jurisdiction,
+          resource_ids
+        ).deliver_later
+      end
+    end
+
+    unless notification_user_hash.empty?
+      NotificationPushJob.perform_async(notification_user_hash)
+    end
+  end
+
   private_class_method :determine_file_owner
 
   # this is just a wrapper around the activity's metadata methods

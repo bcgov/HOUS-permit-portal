@@ -37,7 +37,7 @@ class AutomatedComplianceConfigurationService
             I18n.t(
               "services.auto_compliance_configuration.parcel_info_extractor.available_field_labels.pid"
             ),
-          available_on_input_types: %w[text]
+          available_on_input_types: %w[text pid_info additional_pid_info]
         },
         {
           value: "PIN",
@@ -56,7 +56,7 @@ class AutomatedComplianceConfigurationService
           available_on_input_types: %w[text]
         }
       ],
-      available_on_input_types: %w[text number]
+      available_on_input_types: %w[text number pid_info additional_pid_info]
     },
     PermitApplication: {
       module: "PermitApplication",
@@ -80,7 +80,7 @@ class AutomatedComplianceConfigurationService
             I18n.t(
               "services.auto_compliance_configuration.permit_application.available_field_labels.pid"
             ),
-          available_on_input_types: %w[text]
+          available_on_input_types: %w[text pid_info additional_pid_info]
         },
         {
           value: "pin",
@@ -91,7 +91,7 @@ class AutomatedComplianceConfigurationService
           available_on_input_types: %w[text]
         }
       ],
-      available_on_input_types: %w[text]
+      available_on_input_types: %w[text pid_info additional_pid_info]
     },
     HistoricSite: {
       module: "HistoricSite",

@@ -19,5 +19,6 @@ module Constants
     PRE_CHECK_SUBMITTED = "pre_check_submitted"
     PRE_CHECK_COMPLETED = "pre_check_completed"
     FILE_UPLOAD_FAILED = "file_upload_failed"
+    RESOURCE_REMINDER = "resource_reminder"
   end
 end

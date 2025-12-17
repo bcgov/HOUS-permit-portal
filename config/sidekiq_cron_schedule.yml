@@ -23,7 +23,7 @@ check_expiring_api_keys:
   active_job: false
 
 remind_resource_update:
-  cron: "0 9 1 1,7 * America/Vancouver" # Runs on the 1st of January and July at 9:00 AM (every 6 months)
+  cron: "0 9 * * * America/Vancouver" # Runs daily at 9:00 AM
   class: "ResourceReminderJob"
   queue: default
   active_job: false
