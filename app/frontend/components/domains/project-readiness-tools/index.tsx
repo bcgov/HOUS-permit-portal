@@ -26,6 +26,11 @@ export const ProjectReadinessToolsIndexScreen = () => {
           description: t("projectReadinessTools.preCheckDrawingsDescription"),
           href: "/project-readiness-tools/pre-check",
         },
+        {
+          linkText: t("projectReadinessTools.digitalSealValidator.title"),
+          description: t("projectReadinessTools.digitalSealValidator.descriptionToolPage"),
+          href: "/project-readiness-tools/check-digital-seals",
+        },
       ],
     },
     {

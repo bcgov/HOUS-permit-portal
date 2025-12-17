@@ -2,7 +2,7 @@ import { Button, HStack } from "@chakra-ui/react"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { IDataValidation, IFormConditional } from "../../../../types/api-request"
-import { EAutoComplianceModule, ERequirementType } from "../../../../types/enums"
+import { ERequirementType } from "../../../../types/enums"
 import { TComputedCompliance } from "../../../../types/types"
 import { ElectiveTag } from "../../../shared/elective-tag"
 import { HasAutomatedComplianceTag } from "../../../shared/has-automated-compliance-tag"
@@ -63,11 +63,9 @@ export function FieldControlsHeader({
         {dataValidation && !isRequirementInEditMode && (
           <HasDataValidationTag display={isRequirementInEditMode ? "none" : "flex"} />
         )}
-        {computedCompliance &&
-          !isRequirementInEditMode &&
-          Object.values(EAutoComplianceModule).includes(computedCompliance?.module) && (
-            <HasAutomatedComplianceTag display={isRequirementInEditMode ? "none" : "flex"} />
-          )}
+        {!isRequirementInEditMode && computedCompliance?.module && (
+          <HasAutomatedComplianceTag display={isRequirementInEditMode ? "none" : "flex"} />
+        )}
         {!isRequirementInEditMode && (
           <RequirementTypeTag type={requirementType} className={"requirement-edit-controls"} display={"none"} />
         )}
