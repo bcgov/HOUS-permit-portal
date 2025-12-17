@@ -170,13 +170,13 @@ export const useRequirementLogic = ({
 
   const disabledRequirementTypeOptions = (() => {
     const hasEnergyStepCodeRequirement = watchedRequirements?.some(
-      (r) => (r as IRequirementAttributes).inputType === ERequirementType.energyStepCodePart9
+      (r) => r.inputType === ERequirementType.energyStepCodePart9
     )
     const hasEnergyStepCodePart3Requirement = watchedRequirements?.some(
-      (r) => (r as IRequirementAttributes).inputType === ERequirementType.energyStepCodePart3
+      (r) => r.inputType === ERequirementType.energyStepCodePart3
     )
     const hasArchitecturalRequirement = watchedRequirements?.some(
-      (r) => (r as IRequirementAttributes).inputType === ERequirementType.architecturalDrawing
+      (r) => r.inputType === ERequirementType.architecturalDrawing
     )
     const disabledTypes: Array<{
       requirementType: ERequirementType

@@ -37,39 +37,25 @@ const fieldContainerSharedProps = {
   mt: 7,
 }
 
-export const RequirementFieldRow = ({ index, field, isEditing, toggleEdit, onRemove }: RequirementFieldRowProps) => {
-  const { t } = useTranslation()
-  const { setValue, control, watch } = useFormContext<IRequirementBlockForm>()
-
-  const watchedHint = watch(`requirementsAttributes.${index}.hint`)
-  const watchedRequired = watch(`requirementsAttributes.${index}.required`)
-  const requirementType = (field as IRequirementAttributes).inputType
-  const watchedElective = watch(`requirementsAttributes.${index}.elective`)
-  const watchedConditional = watch(`requirementsAttributes.${index}.inputOptions.conditional`)
-  const watchedRequirementCode = watch(`requirementsAttributes.${index}.requirementCode`)
-  const watchedComputedCompliance = watch(`requirementsAttributes.${index}.inputOptions.computedCompliance`)
-
+const getRequirementFieldState = (requirementCode: string | undefined) => {
   // Disables remove and conditional options for all energy_step_code dependency requirements except for the Energy Step Code requirement itself
   const isStepCodeDependency = Object.values(EEnergyStepCodeDependencyRequirementCode).includes(
-    watchedRequirementCode as EEnergyStepCodeDependencyRequirementCode
+    requirementCode as EEnergyStepCodeDependencyRequirementCode
   )
-  const isArchitecturalRequirement = isArchitecturalDrawingDependencyRequirementCode(watchedRequirementCode)
+  const isArchitecturalRequirement = isArchitecturalDrawingDependencyRequirementCode(requirementCode)
 
   const disabledMenuOptions: ("remove" | "conditional")[] =
     isStepCodeDependency || isArchitecturalRequirement ? ["conditional"] : []
 
   // for step code dependency only the step_code requirement is removable and the other
   // dependencies rely on it for removal
-  if (
-    isStepCodeDependency &&
-    watchedRequirementCode !== EEnergyStepCodeDependencyRequirementCode.energyStepCodeMethod
-  ) {
+  if (isStepCodeDependency && requirementCode !== EEnergyStepCodeDependencyRequirementCode.energyStepCodeMethod) {
     disabledMenuOptions.push("remove")
   }
 
   if (
     isArchitecturalRequirement &&
-    watchedRequirementCode !== EArchitecturalDrawingDependencyRequirementCode.architecturalDrawingMethod
+    requirementCode !== EArchitecturalDrawingDependencyRequirementCode.architecturalDrawingMethod
   ) {
     disabledMenuOptions.push("remove")
   }
@@ -77,8 +63,25 @@ export const RequirementFieldRow = ({ index, field, isEditing, toggleEdit, onRem
   const showEditControls =
     !isStepCodeDependency && !isArchitecturalRequirement
       ? true
-      : watchedRequirementCode === EEnergyStepCodeDependencyRequirementCode.energyStepCodeMethod ||
-        watchedRequirementCode === EArchitecturalDrawingDependencyRequirementCode.architecturalDrawingMethod
+      : requirementCode === EEnergyStepCodeDependencyRequirementCode.energyStepCodeMethod ||
+        requirementCode === EArchitecturalDrawingDependencyRequirementCode.architecturalDrawingMethod
+
+  return { disabledMenuOptions, showEditControls }
+}
+
+export const RequirementFieldRow = ({ index, field, isEditing, toggleEdit, onRemove }: RequirementFieldRowProps) => {
+  const { t } = useTranslation()
+  const { setValue, control, watch } = useFormContext<IRequirementBlockForm>()
+
+  const watchedHint = watch(`requirementsAttributes.${index}.hint`)
+  const watchedRequired = watch(`requirementsAttributes.${index}.required`)
+  const requirementType = field.inputType
+  const watchedElective = watch(`requirementsAttributes.${index}.elective`)
+  const watchedConditional = watch(`requirementsAttributes.${index}.inputOptions.conditional`)
+  const watchedRequirementCode = watch(`requirementsAttributes.${index}.requirementCode`)
+  const watchedComputedCompliance = watch(`requirementsAttributes.${index}.inputOptions.computedCompliance`)
+
+  const { disabledMenuOptions, showEditControls } = getRequirementFieldState(watchedRequirementCode)
 
   return (
     <Box
@@ -103,7 +106,7 @@ export const RequirementFieldRow = ({ index, field, isEditing, toggleEdit, onRem
       }}
       tabIndex={0}
       px={3}
-      pt={index !== 0 ? 1 : 0}
+      pt={index === 0 ? 0 : 1}
       pb={5}
       pos={"relative"}
     >
@@ -197,7 +200,7 @@ export const RequirementFieldRow = ({ index, field, isEditing, toggleEdit, onRem
           requirementCode={watchedRequirementCode}
         />
       </Box>
-      <Box className={"requirement-display"} display={!isEditing ? "block" : "none"} {...fieldContainerSharedProps}>
+      <Box className={"requirement-display"} display={isEditing ? "none" : "block"} {...fieldContainerSharedProps}>
         <RequirementFieldDisplay
           requirementType={requirementType}
           label={watch(`requirementsAttributes.${index}.label`)}

@@ -142,7 +142,7 @@ export const FieldsSetup = observer(function FieldsSetup({
                     <RequirementFieldRow
                       key={field.id}
                       index={index}
-                      field={field as IRequirementAttributes}
+                      field={field}
                       isEditing={isRequirementInEditMode(field.id)}
                       toggleEdit={() => toggleRequirementToEdit(field.id)}
                       onRemove={() => onRemoveRequirement(index)}
