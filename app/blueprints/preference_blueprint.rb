@@ -13,6 +13,8 @@ class PreferenceBlueprint < Blueprinter::Base
          :enable_email_integration_mapping_notification,
          :enable_in_app_unmapped_api_notification,
          :enable_email_unmapped_api_notification,
+         :enable_in_app_resource_reminder_notification,
+         :enable_email_resource_reminder_notification,
          :created_at,
          :updated_at
 end

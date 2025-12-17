@@ -237,6 +237,13 @@
     margin: 0.5em 0;
   }
 
+.tiptap-editor,
+.tiptap-editor-readonly {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
   li {
     margin: 0.25em 0;
   }

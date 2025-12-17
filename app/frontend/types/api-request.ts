@@ -98,6 +98,8 @@ export interface IRequirementTemplateUpdateParams {
   nickname?: string | null
   public?: boolean | null
   assigneeId?: string | null
+  permitTypeId?: string | null
+  activityId?: string | null
   requirementTemplateSectionsAttributes?: IRequirementTemplateSectionAttributes[]
 }
 
@@ -114,7 +116,7 @@ export interface ISiteConfigurationUpdateParams {
   sitewideMessage?: string | null
   helpLinkItems?: IHelpLinkItems
   revisionReasonsMap?: { [key: string]: IRevisionReason }
-  landingPageEarlyAccessRequirementTemplateIds?: string[] | null
+  standardizationPageEarlyAccessRequirementTemplateIds?: string[] | null
   revisionReasonsAttributes?: IRevisionReasonsAttributes[]
 }
 
