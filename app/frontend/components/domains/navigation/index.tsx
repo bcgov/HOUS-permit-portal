@@ -71,6 +71,11 @@ const SubmissionsInboxSetupScreenLazy = lazy(() =>
     default: module.SubmissionsInboxSetupScreen,
   }))
 )
+const ResourcesScreenLazy = lazy(() =>
+  import("../home/review-manager/configuration-management-screen/resources-screen").then((module) => ({
+    default: module.ResourcesScreen,
+  }))
+)
 const ReviewStaffMyJurisdictionAboutPageScreen = lazy(() =>
   import(
     "../home/review-manager/configuration-management-screen/feature-access-screen/my-jurisdiction-about-page"
@@ -133,6 +138,11 @@ const LettersOfAssuranceScreen = lazy(() =>
 const LookUpStepCodesRequirementsForYourProjectScreen = lazy(() =>
   import("../project-readiness-tools/look-up-step-codes-requirements-for-your-project").then((module) => ({
     default: module.LookUpStepCodesRequirementsForYourProjectScreen,
+  }))
+)
+const CheckDigitalSealsScreen = lazy(() =>
+  import("../project-readiness-tools/check-digital-seals").then((module) => ({
+    default: module.CheckDigitalSealsScreen,
   }))
 )
 const PreCheckInfoScreen = lazy(() =>
@@ -602,6 +612,10 @@ const AppRoutes = observer(() => {
         element={<SubmissionsInboxSetupScreenLazy />}
       />
       <Route
+        path="/jurisdictions/:jurisdictionId/configuration-management/resources"
+        element={<ResourcesScreenLazy />}
+      />
+      <Route
         path="/jurisdictions/:jurisdictionId/configuration-management/feature-access"
         element={<ReviewManagerFeatureAccessScreen />}
       />
@@ -790,6 +804,8 @@ const AppRoutes = observer(() => {
           path="/project-readiness-tools/look-up-step-codes-requirements-for-your-project"
           element={<LookUpStepCodesRequirementsForYourProjectScreen />}
         />
+        <Route path="/project-readiness-tools/check-digital-seals" element={<CheckDigitalSealsScreen />} />
+        <Route path="/project-readiness-tools/pre-check" element={<PreCheckInfoScreen />} />
         <Route
           path="/onboarding-checklist-page-for-lg-adopting"
           element={<OnboardingChecklistPageForLgAdoptingScreen />}

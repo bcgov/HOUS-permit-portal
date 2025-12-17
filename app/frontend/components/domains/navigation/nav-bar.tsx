@@ -1,5 +1,5 @@
 import { Box, Container, Flex, HStack, Heading, Image, Link, Show, Spacer, Text, VStack } from "@chakra-ui/react"
-import { Folders, Tray, Warning } from "@phosphor-icons/react"
+import { Buildings, Tray, Warning } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React from "react"
@@ -255,8 +255,13 @@ const NavBarContent = observer(function NavBarContent() {
                 </RouterLinkButton>
               )}
               {currentUser?.isSubmitter && !currentUser.isUnconfirmed && (
-                <RouterLinkButton variant="tertiary" px={2} leftIcon={<Folders size={16} />} to={`/projects`}>
-                  <Show above="xl">{t("site.myProjects")}</Show>
+                <RouterLinkButton px={2} to={`/projects`} variant="ghost">
+                  <Buildings size={24} />
+                  <Show above="xl">
+                    <Box as="span" ml={2}>
+                      {t("site.myProjects")}
+                    </Box>
+                  </Show>
                 </RouterLinkButton>
               )}
               <NavBarMenu />

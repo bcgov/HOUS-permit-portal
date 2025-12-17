@@ -384,6 +384,85 @@ class NotificationService
     end
   end
 
+  def self.publish_file_upload_failed_event(file_attachment, file_name: nil)
+    return if file_attachment.blank?
+
+    # Determine the users to notify based on the attached_to relationship
+    users_to_notify = determine_file_owner(file_attachment)
+    return if users_to_notify.blank?
+
+    # Ensure users_to_notify is an array
+    users_to_notify = [users_to_notify] unless users_to_notify.is_a?(Array)
+
+    notification_user_hash = {}
+    users_to_notify.each do |user|
+      next if user.blank?
+      # Ensure user.id is a string
+      notification_user_hash[
+        user.id
+      ] = file_attachment.upload_failed_notification_data(file_name)
+    end
+
+    return if notification_user_hash.empty?
+    NotificationPushJob.perform_async(notification_user_hash)
+  end
+
+  # Determines the owner/uploader of a file attachment for notification purposes
+  def self.determine_file_owner(file_attachment)
+    attached_to = file_attachment.attached_to
+    return nil if attached_to.blank?
+
+    case attached_to
+    when PermitApplication
+      [attached_to.submitter]
+    when RequirementBlock
+      # For requirement blocks, notify all super admins
+      User.where(role: :super_admin).to_a
+    when Resource
+      attached_to.jurisdiction.managers
+    else
+      # Try common patterns
+      user =
+        attached_to.try(:submitter) || attached_to.try(:creator) ||
+          attached_to.try(:user) || attached_to.try(:owner)
+      user ? [user] : nil
+    end
+  end
+
+  def self.publish_resource_reminder_event(jurisdiction, resource_ids)
+    all_managers = jurisdiction.managers
+
+    return if all_managers.empty?
+
+    notification_user_hash = {}
+
+    notification_data =
+      Resource.resource_reminder_notification_data(
+        jurisdiction.id,
+        resource_ids
+      )
+
+    all_managers.each do |manager|
+      if manager.preference&.enable_in_app_resource_reminder_notification
+        notification_user_hash[manager.id] = notification_data
+      end
+
+      if manager.preference&.enable_email_resource_reminder_notification
+        PermitHubMailer.remind_resource_update(
+          manager,
+          jurisdiction,
+          resource_ids
+        ).deliver_later
+      end
+    end
+
+    unless notification_user_hash.empty?
+      NotificationPushJob.perform_async(notification_user_hash)
+    end
+  end
+
+  private_class_method :determine_file_owner
+
   # this is just a wrapper around the activity's metadata methods
   # since in the case of a single instance it returns a specific return type (eg. Integer)
   # but in the case of multiple user_ids the activity is a hash object

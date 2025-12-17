@@ -182,7 +182,7 @@ export const PermitProjectStoreModel = types
           const attribute: IProjectDocumentAttribute = {
             id: doc.id,
             permitProjectId: doc.permitProjectId,
-            file: doc.file
+            file: doc.file?.metadata
               ? {
                   ...doc.file,
                   metadata: {
@@ -226,7 +226,6 @@ export const PermitProjectStoreModel = types
       pid?: string
       jurisdictionId?: string
       pin?: string
-      propertyPlanJurisdictionId?: string
     }) {
       const response = yield self.environment.api.createPermitProject(projectData)
       if (response.ok && response.data?.data) {

@@ -270,7 +270,7 @@ const BareBox: React.FC<IBareBoxProps> = ({ children }) => {
   return (
     <Box p={4} borderRadius="lg" bg="theme.blueLight" color="theme.blueAlt" flex={1}>
       <Flex gap={6} align="center" h="full">
-        <Text fontSize="md" fontWeight="bold" textAlign="left">
+        <Text as="div" fontSize="md" fontWeight="bold" textAlign="left">
           {children}
         </Text>
       </Flex>

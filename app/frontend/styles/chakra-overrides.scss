@@ -155,6 +155,31 @@
   flex-wrap: wrap;
 }
 
+.tiptap-bubble-menu {
+  display: flex;
+  gap: 4px;
+  background-color: white;
+  padding: 4px;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
+
+  .tiptap-toolbar-button {
+    width: 28px;
+    height: 28px;
+    padding: 4px;
+    
+    &:hover {
+      background-color: #edf2f7;
+    }
+
+    &.is-active {
+      background-color: #e2e8f0;
+      color: #2d3748;
+    }
+  }
+}
+
 .tiptap-toolbar-button {
   display: inline-flex;
   align-items: center;
@@ -211,6 +236,13 @@
     padding-left: 1.5em;
     margin: 0.5em 0;
   }
+
+.tiptap-editor,
+.tiptap-editor-readonly {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
 
   li {
     margin: 0.25em 0;
@@ -306,4 +338,30 @@
   border: none;
   background: transparent;
   padding: 0;
+}
+
+/* ======================================
+
+  Uppy Dashboard Overrides
+
+====================================== */
+
+.uppy-Dashboard {
+  border: 2px dashed var(--chakra-colors-border-light);
+  border-radius: var(--chakra-radii-lg);
+  border-color: var(--chakra-colors-theme-blue);
+}
+
+.uppy-Dashboard-inner {
+  border: none;
+  border-radius: var(--chakra-radii-lg);
+  background-color: var(--chakra-colors-theme-blueLight);
+}
+
+.uppy-Dashboard-dropFilesHereHint,
+.uppy-DashboardContent-title,
+.uppy-DashboardContent-back,
+.uppy-DashboardContent-bar,
+.uppy-StatusBar-actionBtn--done {
+  display: none !important;
 }

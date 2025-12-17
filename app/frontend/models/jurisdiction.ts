@@ -12,6 +12,7 @@ import {
   IOption,
   IPermitTypeRequiredStep,
   IPermitTypeSubmissionContact,
+  IResource,
   TLatLngTuple,
 } from "../types/types"
 import { ExternalApiKeyModel } from "./external-api-key"
@@ -57,6 +58,7 @@ export const JurisdictionModel = types
     ),
     permitTypeRequiredSteps: types.array(types.frozen<IPermitTypeRequiredStep>()),
     sandboxes: types.array(types.reference(SandboxModel)),
+    resources: types.array(types.frozen<IResource>()),
     firstNation: types.optional(types.boolean, false),
     ltsaMatcher: types.maybeNull(types.string),
     servicePartnerEnrollments: types.array(types.frozen<IJurisdictionServicePartnerEnrollment>()),
@@ -117,6 +119,14 @@ export const JurisdictionModel = types
     },
     getServicePartnerEnrollment(servicePartner: EPreCheckServicePartner): IJurisdictionServicePartnerEnrollment | null {
       return self.servicePartnerEnrollments.find((enrollment) => enrollment.servicePartner === servicePartner) || null
+    },
+    get resourcesByCategory(): Record<string, IResource[]> {
+      const grouped: Record<string, IResource[]> = {}
+      self.resources.forEach((resource) => {
+        if (!grouped[resource.category]) grouped[resource.category] = []
+        grouped[resource.category].push(resource)
+      })
+      return grouped
     },
   }))
   .views((self) => ({
