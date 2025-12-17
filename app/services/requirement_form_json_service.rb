@@ -674,6 +674,8 @@ class RequirementFormJsonService
 
     grid_key = "#{requirement.key(requirement_block_key)}|grid"
     total_key = "#{requirement.key(requirement_block_key)}|totalLoad"
+    quantity_total_key =
+      "#{requirement.key(requirement_block_key)}|totalQuantity"
     section_key = PermitApplication.section_from_key(requirement_block_key)
 
     # Allow rows to be provided via input_options["rows"]. Each row should
@@ -694,18 +696,18 @@ class RequirementFormJsonService
       rows.map { |r| { "name" => r["name"], "a" => r["a"] } }
 
     headers = requirement.input_options["headers"] || {}
-    first_col_label =
-      headers["first_column"].presence || headers["first_column"] ||
-        "Fixture or Device"
-    a_col_base = headers["a"].presence || headers["a"] || "Fixture Units"
-    a_col_label = "#{a_col_base} (A)"
+    first_col_label = headers["first_column"].presence || "Item name"
+    a_col_label = "#{headers["a"].presence} (A)"
+    quantity_col_label = "#{headers["quantity"].presence} (B)"
+    ab_col_label = "#{headers["ab"].presence} (A × B)"
 
     # Version the component keys based on configuration so stale submission data from
     # previous template versions (with different headers/rows) will not be reused.
     begin
       raw_rows = configured_rows.is_a?(Array) ? configured_rows : []
       signature_payload = {
-        "rows" => raw_rows.map { |r| { "name" => r["name"], "a" => r["a"] } }
+        "rows" => raw_rows.map { |r| { "name" => r["name"], "a" => r["a"] } },
+        "headers" => headers
       }
       version_sig =
         Digest::MD5.hexdigest(JSON.generate(signature_payload))[0, 8]
@@ -713,6 +715,8 @@ class RequirementFormJsonService
         "#{requirement.key(requirement_block_key)}|grid|v#{version_sig}"
       total_key =
         "#{requirement.key(requirement_block_key)}|totalLoad|v#{version_sig}"
+      quantity_total_key =
+        "#{requirement.key(requirement_block_key)}|totalQuantity|v#{version_sig}"
     rescue => e
       # If anything goes wrong computing the signature, fall back to non-versioned keys
     end
@@ -757,7 +761,7 @@ class RequirementFormJsonService
             "var defs=(instance && instance.parent && instance.parent.component && instance.parent.component.defaultValue)||[]; var i=rowIndex; if(!value && defs[i]){ value = Number(defs[i].a || 0); }"
         },
         {
-          label: "Quantity (B)",
+          label: quantity_col_label,
           type: "number",
           key: "quantity",
           input: true,
@@ -767,7 +771,7 @@ class RequirementFormJsonService
           decimalLimit: 7
         },
         {
-          label: "A × B",
+          label: ab_col_label,
           type: "number",
           key: "load",
           disabled: true,
@@ -781,8 +785,24 @@ class RequirementFormJsonService
       ]
     }
 
+    total_quantity_component = {
+      label: "Total #{quantity_col_label}:",
+      type: "number",
+      defaultValue: 0,
+      key: quantity_total_key,
+      disabled: true,
+      readOnly: true,
+      input: true,
+      validate: {
+        required: true
+      },
+      decimalLimit: 7,
+      calculateValue:
+        "var section = '#{section_key}'; var list = (data && data[section] && data[section]['#{grid_key}']) || []; var sum = 0; for (var i=0;i<list.length;i++){ var b = Number(list[i] && list[i].quantity || 0); sum += b; } value = sum;"
+    }
+
     total_component = {
-      label: "Total:",
+      label: "Total #{ab_col_label}:",
       type: "number",
       defaultValue: 0,
       key: total_key,
@@ -807,7 +827,11 @@ class RequirementFormJsonService
       hideLabel: true,
       input: false,
       tableView: false,
-      components: [datagrid_component, total_component]
+      components: [
+        datagrid_component,
+        total_quantity_component,
+        total_component
+      ]
     }
   end
 

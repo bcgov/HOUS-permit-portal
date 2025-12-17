@@ -33,7 +33,7 @@ export type TRequirementFieldDisplayProps = {
   helperText?: string
   instructions?: string
   unit?: ENumberUnit | null
-  headers?: { firstColumn?: string; a?: string }
+  headers?: { firstColumn?: string; a?: string; quantity?: string; ab?: string }
   inputOptions?: any
   selectProps?: Partial<SelectProps>
   addMultipleContactProps?: {
@@ -386,9 +386,15 @@ const requirementsComponentMap = {
   [ERequirementType.multiplySumGrid](props: TRequirementFieldDisplayProps & { inputOptions?: any }) {
     const firstColumnHeader = props.headers?.firstColumn ?? props.inputOptions?.headers?.firstColumn
     const aHeader = props.headers?.a ?? props.inputOptions?.headers?.a
+    const quantityHeader = props.headers?.quantity ?? props.inputOptions?.headers?.quantity
+    const abHeader = props.headers?.ab ?? props.inputOptions?.headers?.ab
     return (
       <GenericFieldDisplay
-        inputDisplay={<MultiplySumGridPreview headers={{ firstColumn: firstColumnHeader, a: aHeader }} />}
+        inputDisplay={
+          <MultiplySumGridPreview
+            headers={{ firstColumn: firstColumnHeader, a: aHeader, quantity: quantityHeader, ab: abHeader }}
+          />
+        }
         {...props}
       />
     )
