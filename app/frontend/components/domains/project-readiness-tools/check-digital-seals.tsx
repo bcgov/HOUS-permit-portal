@@ -9,17 +9,11 @@ import {
   List,
   ListIcon,
   ListItem,
-  Popover,
-  PopoverArrow,
-  PopoverBody,
-  PopoverCloseButton,
-  PopoverContent,
-  PopoverTrigger,
   Text,
   UnorderedList,
   VStack,
 } from "@chakra-ui/react"
-import { CheckCircle, Info, XCircle } from "@phosphor-icons/react"
+import { CheckCircle, XCircle } from "@phosphor-icons/react"
 import { UppyFile } from "@uppy/core"
 import "@uppy/core/dist/style.min.css"
 import "@uppy/dashboard/dist/style.css"
@@ -30,7 +24,7 @@ import { useTranslation } from "react-i18next"
 import useUppyTransient from "../../../hooks/use-uppy-transient"
 import { useMst } from "../../../setup/root"
 
-export const DigitalSealValidatorScreen = observer(() => {
+export const CheckDigitalSealsScreen = observer(() => {
   const { t } = useTranslation()
   const { digitalSealValidatorStore } = useMst()
   const {
@@ -54,7 +48,7 @@ export const DigitalSealValidatorScreen = observer(() => {
       // Explicit cast to avoid type issues
       const key = "projectReadinessTools.digitalSealValidator.notValidated" as any
       // @ts-ignore
-      const errorMsg = t(key, { defaultValue: "Document could not be validated." }) as string
+      const errorMsg = t(key, { defaultValue: "There was a problem checking the seal on" }) as string
       setError(errorMsg)
     }
   }
@@ -63,7 +57,9 @@ export const DigitalSealValidatorScreen = observer(() => {
     console.error("Upload error:", error, response)
     setFile(uppyFile.data as File)
     setValidationResult(null)
-    const errorMessage = response?.body?.meta?.message?.options?.error_message || "Document could not be validated."
+    const errorMessage =
+      response?.body?.meta?.message?.options?.error_message ||
+      t("projectReadinessTools.digitalSealValidator.notValidated") + ": " + (uppyFile.data as File).name + "."
     setError(errorMessage)
   }
 
@@ -127,79 +123,41 @@ export const DigitalSealValidatorScreen = observer(() => {
         <Heading as="h1" mb="0">
           {t("projectReadinessTools.digitalSealValidator.title") as string}
         </Heading>
-        <Popover trigger="hover" placement="right">
-          <PopoverTrigger>
-            <Box as="button" aria-label="Help" display="flex" alignItems="center" color="blue.500" cursor="pointer">
-              <Info size={24} />
-            </Box>
-          </PopoverTrigger>
-          <PopoverContent fontSize="sm" p={2} mt={16} maxW="sm">
-            <PopoverArrow />
-            <PopoverCloseButton />
-            <PopoverBody>
-              <Text mb={3}>
-                {
-                  // @ts-ignore
-                  t("projectReadinessTools.digitalSealValidator.help.description", {
-                    defaultValue:
-                      "A digital seal confirms the identity of the professional who signed the document and ensures the document hasn't been altered.",
-                  } as any) as any as string
-                }
-              </Text>
-              <Text fontWeight="bold" mb={1}>
-                {
-                  // @ts-ignore
-                  t("projectReadinessTools.digitalSealValidator.help.pass", {
-                    defaultValue: "PASS/VERIFIED",
-                  } as any) as any as string
-                }
-              </Text>
-              <Text mb={3}>
-                {
-                  // @ts-ignore
-                  t("projectReadinessTools.digitalSealValidator.help.passDesc", {
-                    defaultValue: "This confirms the digital signature is valid and authentic.",
-                  } as any) as any as string
-                }
-              </Text>
-              <Text fontWeight="bold" mb={1}>
-                {
-                  // @ts-ignore
-                  t("projectReadinessTools.digitalSealValidator.help.fail", {
-                    defaultValue: "FAIL/UNABLE TO VERIFY",
-                  } as any) as any as string
-                }
-              </Text>
-              <Text>
-                {
-                  // @ts-ignore
-                  t("projectReadinessTools.digitalSealValidator.help.failDesc", {
-                    defaultValue:
-                      "We couldn't verify the signature. This could be due to a revoked certificate, an altered document, or an unknown signer.",
-                  }) as string
-                }
-              </Text>
-            </PopoverBody>
-          </PopoverContent>
-        </Popover>
       </HStack>
-      <Text fontSize="lg" color="text.primary" mb="8">
+      <Text fontSize="lg" color="text.primary" mb="6">
         {t("projectReadinessTools.digitalSealValidator.description") as string}
+      </Text>
+      <UnorderedList fontSize="lg" spacing={2} mb="8" pl="4">
+        <ListItem>{t("projectReadinessTools.digitalSealValidator.listItem1") as string}</ListItem>
+        <ListItem>{t("projectReadinessTools.digitalSealValidator.listItem2") as string}</ListItem>
+      </UnorderedList>
+
+      <Heading as="h2" size="md" mb="4">
+        {t("projectReadinessTools.digitalSealValidator.howItWorks.title") as string}
+      </Heading>
+      <Text fontSize="lg" color="text.primary" mb="6">
+        {t("projectReadinessTools.digitalSealValidator.howItWorks.description") as string}
+      </Text>
+      <UnorderedList spacing={2} mb="4" pl="4" fontSize="lg">
+        <ListItem>{t("projectReadinessTools.digitalSealValidator.howItWorks.listItem1") as string}</ListItem>
+        <ListItem>{t("projectReadinessTools.digitalSealValidator.howItWorks.listItem2") as string}</ListItem>
+      </UnorderedList>
+      <Text fontSize="lg" color="text.primary" mb="6">
+        {t("projectReadinessTools.digitalSealValidator.howItWorks.listItem3") as string}
       </Text>
 
       <Heading as="h2" size="md" mb="4">
         {t("projectReadinessTools.digitalSealValidator.fileRequirementsTitle") as string}
       </Heading>
-      <UnorderedList spacing={2} mb="8" pl="4">
+      <UnorderedList spacing={2} mb="8" pl="4" fontSize="lg">
         <ListItem>{t("projectReadinessTools.digitalSealValidator.requirement1") as string}</ListItem>
         <ListItem>{t("projectReadinessTools.digitalSealValidator.requirement2") as string}</ListItem>
         <ListItem>{t("projectReadinessTools.digitalSealValidator.requirement3") as string}</ListItem>
-        <ListItem>{t("projectReadinessTools.digitalSealValidator.requirement4") as string}</ListItem>
       </UnorderedList>
 
       <VStack spacing={6} align="stretch" maxW="full">
         {result && (
-          <Box bg="blue.50" borderLeft="4px solid" borderColor="blue.500" p={4} borderRadius="sm">
+          <Box bg="blue.50" borderLeft="8px solid" borderColor="blue.500" p={4} borderRadius="sm">
             {result.length === 0 ? (
               <Text>
                 {
@@ -210,17 +168,14 @@ export const DigitalSealValidatorScreen = observer(() => {
               </Text>
             ) : (
               <Box>
-                <Heading as="h3" size="sm" mb={4} fontWeight="bold">
+                <Heading as="h2" mb={4} fontWeight="bold">
                   {t("projectReadinessTools.digitalSealValidator.digitalSignaturesDetected") as string}
                 </Heading>
                 <Box mb={4}>
                   <HStack spacing={2} align="center">
-                    <Box as="span" fontSize="xl" color="gray.600">
-                      •
-                    </Box>
-                    <Text fontWeight="bold">{file?.name}</Text>
+                    <Text>File: {file?.name}</Text>
                   </HStack>
-                  <Text fontSize="sm" color="gray.600" pl={6}>
+                  <Text fontSize="sm" color="gray.600">
                     {t("projectReadinessTools.digitalSealValidator.lastModified") as string}{" "}
                     {file?.lastModified
                       ? new Date(file.lastModified).toLocaleString("en-CA", {
@@ -235,7 +190,7 @@ export const DigitalSealValidatorScreen = observer(() => {
                       : ""}
                   </Text>
                 </Box>
-                <List spacing={4}>
+                <List fontSize="lg" spacing={4} pl={0}>
                   {result
                     .filter(
                       (sig: any, index: number, self: any[]) =>
@@ -268,16 +223,16 @@ export const DigitalSealValidatorScreen = observer(() => {
                             <HStack spacing={2}>
                               <ListIcon
                                 as={isValid ? CheckCircle : XCircle}
-                                color={isValid ? "green.500" : "red.500"}
+                                color={isValid ? "blue.500" : "red.500"}
                                 m={0}
                               />
-                              <Text>{signerName}</Text>
+                              <Text fontWeight="bold">{signerName}</Text>
                             </HStack>
-                            <Text fontSize="sm" color="gray.600" pl={6}>
+                            <Text fontSize="sm" color="gray.600">
                               {t("projectReadinessTools.digitalSealValidator.signedAt") as string} {date}
                             </Text>
                             {!isValid && (
-                              <Text fontSize="sm" color="red.500" pl={6}>
+                              <Text fontSize="sm" color="red.500">
                                 {sig.result}
                               </Text>
                             )}
@@ -286,14 +241,6 @@ export const DigitalSealValidatorScreen = observer(() => {
                       )
                     })}
                 </List>
-                <Button variant="outline" mt={6} onClick={resetValidator}>
-                  {
-                    // @ts-ignore
-                    t("projectReadinessTools.digitalSealValidator.tryAnotherFile", {
-                      defaultValue: "Try another file",
-                    }) as string
-                  }
-                </Button>
               </Box>
             )}
           </Box>
@@ -302,8 +249,42 @@ export const DigitalSealValidatorScreen = observer(() => {
         {error && (
           <Alert status="error" borderRadius="md">
             <AlertIcon />
-            {error}
+            <HStack spacing={2} align="start" flexWrap="wrap">
+              <Text>{error}</Text>
+              <Button
+                variant="link"
+                onClick={resetValidator}
+                color="text.link"
+                textDecoration="underline"
+                fontWeight="normal"
+                _hover={{ textDecoration: "none" }}
+              >
+                Upload another file
+              </Button>
+            </HStack>
           </Alert>
+        )}
+
+        {result && !error && (
+          <Box display="flex" justifyContent="flex-start" width="100%">
+            <Button
+              variant="link"
+              mt={4}
+              fontSize="lg"
+              onClick={resetValidator}
+              color="text.link"
+              textDecoration="none"
+              fontWeight="normal"
+              _hover={{ textDecoration: "none" }}
+            >
+              {
+                // @ts-ignore
+                t("projectReadinessTools.digitalSealValidator.checkAnotherDocument", {
+                  defaultValue: "Check another document",
+                }) as string
+              }
+            </Button>
+          </Box>
         )}
 
         <Box
@@ -317,12 +298,19 @@ export const DigitalSealValidatorScreen = observer(() => {
               width: "100%",
               height: "100%",
             },
+            ".uppy-Container": {
+              display: result || error ? "none" : "",
+            },
             ".uppy-Dashboard-inner": {
               border: "none",
               borderRadius: "var(--chakra-radii-lg)",
               backgroundColor: "var(--chakra-colors-theme-blueLight)",
               width: "100%",
               height: "100%",
+              display: result || error ? "none" : "",
+            },
+            ".uppy-Dashboard-innerWrap": {
+              display: result || error ? "none" : "",
             },
             ".uppy-Dashboard-dropFilesHereHint": {
               display: "none",
@@ -342,10 +330,10 @@ export const DigitalSealValidatorScreen = observer(() => {
             ".uppy-Informer": {
               display: "none",
             },
-            ".uppy-StatusBar.is-error .uppy-StatusBar-statusPrimary": {
+            ".uppy-StatusBar-statusPrimary": {
               display: "none",
             },
-            ".uppy-StatusBar.is-error .uppy-StatusBar-statusSecondary": {
+            ".uppy-StatusBar-statusSecondary": {
               display: "none",
             },
             ".uppy-StatusBar-actionBtn--retry": {
@@ -353,7 +341,7 @@ export const DigitalSealValidatorScreen = observer(() => {
             },
           }}
         >
-          <Dashboard uppy={uppy} width="100%" height={276} proudlyDisplayPoweredByUppy={false} />
+          <Dashboard uppy={uppy} width="100%" height={118} proudlyDisplayPoweredByUppy={false} />
         </Box>
       </VStack>
     </Container>

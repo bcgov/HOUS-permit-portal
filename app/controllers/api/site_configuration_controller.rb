@@ -94,7 +94,7 @@ class Api::SiteConfigurationController < Api::ApplicationController
       :allow_designated_reviewer,
       :code_compliance_enabled,
       :archistar_enabled_for_all_jurisdictions,
-      landing_page_early_access_requirement_template_ids: [],
+      standardization_page_early_access_requirement_template_ids: [],
       help_link_items: [
         get_started_link_item: %i[href title description show],
         best_practices_link_item: %i[href title description show],
