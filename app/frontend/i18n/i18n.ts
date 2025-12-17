@@ -3811,7 +3811,7 @@ Thank you,
             category: "Category",
           },
           standardizationPageSetup: {
-            title: "Standardizationpreview page setup",
+            title: "Standardization preview page setup",
             description: "Select the open access previews that will be displayed on the standardization preview page.",
             selectOpenAccessPreviews:
               "Set open access previews to display on the standardization preview page. Select from the available public access previews below.",
