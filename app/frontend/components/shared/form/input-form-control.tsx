@@ -280,7 +280,6 @@ export const SelectFormControl = ({
   validate,
   hint,
   inputProps = {},
-  key = fieldName,
   options,
   optionGroups,
   showOptional = true,

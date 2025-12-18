@@ -33,7 +33,7 @@ export const PreChecksGrid = observer(({ ...restProps }: StackProps) => {
     <VStack align="stretch" spacing={4} w="full" {...restProps}>
       <Flex direction="column" gap={4} w="full">
         <Heading as="h3" size="lg" mb={4}>
-          {t("preCheck.index.resultTitle", "Pre-Checks")}
+          {t("preCheck.index.resultTitle", "Pre-checks")}
         </Heading>
         <FormControl w="full">
           <ModelSearchInput

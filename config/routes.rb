@@ -319,6 +319,8 @@ Rails.application.routes.draw do
         end
       end
     end
+
+    resources :digital_seal_validator, only: [:create]
   end
 
   scope module: :external_api, path: :external_api do

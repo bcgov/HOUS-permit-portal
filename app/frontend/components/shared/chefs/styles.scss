@@ -484,21 +484,14 @@
   }
 
   .card-panel-addition {
-    padding-top: var(--chakra-space-6);
-    padding-right: var(--chakra-space-6);
-    padding-left: var(--chakra-space-6);
+    padding: var(--chakra-space-6);
   }
 
   .tips {
     border-left: 4px solid;
     border-color: $bcgov-blue-secondary;
     background-color: $blue-light;
-    padding-left: var(--chakra-space-6);
-    padding-top: var(--chakra-space-3);
-    padding-bottom: var(--chakra-space-3);
-    padding-right: var(--chakra-space-6);
-    margin-top: 4px;
-    margin-bottom: 4px;
+    padding: var(--chakra-space-6);
 
     .tips-header {
       color: $bcgov-blue-secondary;
@@ -656,6 +649,12 @@
 
     // upload area
     .fileSelector {
+      .browse {
+        &::after {
+          content: "";
+          display: block;
+        }
+      }
       background-color: var(--chakra-colors-theme-blueLight);
       border-color: var(--chakra-colors-theme-blueShadedLight);
       color: $bcgov-link;
@@ -906,6 +905,65 @@
         font-size: 16px;
         color: inherit;
       }
+    }
+  }
+
+  // Resource buttons styling
+  .resource-link-button,
+  .resource-document-download-button {
+    &.formio-component-button {
+      margin-top: 0;
+      margin-bottom: var(--chakra-space-1) !important;
+    }
+
+    .btn {
+      text-transform: none;
+      background: none;
+      border: none;
+      color: $bcgov-link;
+      text-decoration: underline;
+      text-decoration-thickness: 1px;
+      padding: 0;
+      padding-right: 24px;
+      margin-top: 0;
+      letter-spacing: normal;
+      line-height: 1.5;
+      text-align: left;
+      white-space: normal;
+      position: relative;
+      font-size: var(--chakra-fontSizes-md);
+      font-weight: bold;
+
+      &:hover {
+        background: none;
+        color: $bcgov-font;
+        text-decoration: underline;
+        text-decoration-thickness: 3px;
+      }
+
+      &::after {
+        font-family: "FontAwesome";
+        position: absolute;
+        right: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        color: inherit;
+        font-weight: normal;
+      }
+    }
+  }
+
+  .resource-link-button {
+    .btn::after {
+      content: "\f08e"; // FontAwesome external link icon
+      font-size: var(--chakra-fontSizes-md);
+    }
+  }
+
+  .resource-document-download-button {
+    .btn::after {
+      content: "\f019"; // FontAwesome download icon
+      font-size: var(--chakra-fontSizes-md);
     }
   }
 

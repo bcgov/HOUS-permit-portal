@@ -5,7 +5,7 @@ class RequirementFormJsonService
   attr_accessor :requirement
 
   ENERGY_STEP_CODE_TOOLTIP_URL =
-    "https://www2.gov.bc.ca/gov/content/housing-tenancy/building-or-renovating/permits/building-permit-hub/29065#Reports"
+    "https://www2.gov.bc.ca/gov/content?id=C4F8CA77AC5648CBB86948C1AEA58C8F#Reports"
 
   STEP_CODE_ACTIONS_CONTAINER =
     lambda do |start_event, step_code_type|
@@ -304,6 +304,12 @@ class RequirementFormJsonService
       json.merge!(
         { computedCompliance: requirement.input_options["computed_compliance"] }
       )
+
+      unless json[:tooltip].present?
+        json.merge!(
+          { tooltip: I18n.t("formio.requirement.auto_compliance.tooltip") }
+        )
+      end
     end
 
     if requirement.input_type.to_sym == :energy_step_code
@@ -527,6 +533,8 @@ class RequirementFormJsonService
   end
 
   def get_autofill_contact_button_form_json(parent_key, is_multi)
+    # NOTE: parent_key is interpolated into a template literal, so we escape it.
+    # is_multi is boolean, so safe.
     {
       type: "button",
       action: "custom",
@@ -534,7 +542,7 @@ class RequirementFormJsonService
       title: I18n.t("formio.requirement_template.autofill_contact"),
       label: I18n.t("formio.requirement_template.autofill_contact"),
       custom:
-        "document.dispatchEvent(new CustomEvent('openAutofillContact', { detail: { key: `#{parent_key}|#{is_multi ? "${rowIndex}" : "in_section"}` } } ));"
+        "document.dispatchEvent(new CustomEvent('openAutofillContact', { detail: { key: `#{escape_for_js(parent_key)}|#{is_multi ? "${rowIndex}" : "in_section"}` } } ));"
     }
   end
 
@@ -818,7 +826,7 @@ class RequirementFormJsonService
       input: true,
       theme: "primary",
       custom:
-        "document.dispatchEvent(new CustomEvent('openArchitecturalDrawingTool', { detail: { requirementCode: '#{requirement.key(requirement_block_key)}' } }));"
+        "document.dispatchEvent(new CustomEvent('openArchitecturalDrawingTool', { detail: { requirementCode: '#{escape_for_js(requirement.key(requirement_block_key))}' } }));"
     }
   end
 
@@ -915,7 +923,7 @@ class RequirementFormJsonService
 
       link_button[
         :custom
-      ] = "document.dispatchEvent(new CustomEvent('openExistingStepCode', { detail: { key: '#{key}', stepCodeType: '#{step_code_type}' } }));"
+      ] = "document.dispatchEvent(new CustomEvent('openExistingStepCode', { detail: { key: '#{escape_for_js(key)}', stepCodeType: '#{step_code_type}' } }));"
     rescue StandardError
       # no-op
     end
@@ -949,5 +957,10 @@ class RequirementFormJsonService
         "required" => required
       }
     }
+  end
+
+  # Escape for single-quoted JS strings
+  def escape_for_js(str)
+    str.to_s.gsub(/['\\]/) { |match| "\\#{match}" }
   end
 end

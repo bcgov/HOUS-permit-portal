@@ -93,6 +93,38 @@ export const SafeTipTapDisplay: React.FC<SafeTipTapDisplayProps> = ({
           paddingLeft: "1.5em",
           marginBottom: "1em",
         },
+        "& ol.paren-alpha": {
+          listStyle: "none",
+          counterReset: "paren-alpha-counter",
+          paddingLeft: "2.5em",
+          "& > li": {
+            counterIncrement: "paren-alpha-counter",
+            position: "relative",
+            "&::before": {
+              content: '"(" counter(paren-alpha-counter, lower-alpha) ")"',
+              position: "absolute",
+              left: "-2.5em",
+              width: "2em",
+              textAlign: "right",
+            },
+          },
+        },
+        "& ol.paren-roman": {
+          listStyle: "none",
+          counterReset: "paren-roman-counter",
+          paddingLeft: "2.5em",
+          "& > li": {
+            counterIncrement: "paren-roman-counter",
+            position: "relative",
+            "&::before": {
+              content: '"(" counter(paren-roman-counter, lower-roman) ")"',
+              position: "absolute",
+              left: "-2.5em",
+              width: "2em",
+              textAlign: "right",
+            },
+          },
+        },
         "& li": {
           marginBottom: "0.5em",
         },

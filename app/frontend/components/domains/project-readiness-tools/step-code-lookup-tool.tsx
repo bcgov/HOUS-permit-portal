@@ -13,10 +13,12 @@ interface IStepCodeLookupToolProps {
 export const StepCodeLookupTool = ({ showJurisdictionOnPage = false }: IStepCodeLookupToolProps) => {
   const { t } = useTranslation()
   const [jurisdiction, setJurisdiction] = useState<IJurisdiction | null>(null)
+  const [searchedAddress, setSearchedAddress] = useState<string>("")
   const [showError, setShowError] = useState(false)
 
-  const handleJurisdictionFound = (j: IJurisdiction) => {
+  const handleJurisdictionFound = (j: IJurisdiction | null, address?: string) => {
     setJurisdiction(j)
+    setSearchedAddress(address || "")
     setShowError(false)
   }
 
@@ -87,7 +89,9 @@ export const StepCodeLookupTool = ({ showJurisdictionOnPage = false }: IStepCode
             </>
           )}
           <Divider />
-          <RouterLink to={`/jurisdictions/${jurisdiction.slug}/step-code-requirements`}>
+          <RouterLink
+            to={`/jurisdictions/${jurisdiction.slug}/step-code-requirements?address=${encodeURIComponent(searchedAddress)}`}
+          >
             <HStack spacing={4}>
               <Steps size={24} color="var(--chakra-colors-semantic-info)" />
               <Text as="span" textDecoration="underline" fontSize="lg">

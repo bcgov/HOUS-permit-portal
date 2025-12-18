@@ -1,4 +1,4 @@
-import { Box, FormControl, FormLabel, InputGroup, VStack } from "@chakra-ui/react"
+import { Box, FormControl, FormLabel, InputGroup, useBreakpointValue, VStack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useState } from "react"
 import { Controller, FormProvider, useForm } from "react-hook-form"
@@ -15,7 +15,7 @@ interface IStepCodeAddressSearchForm {
 }
 
 interface IStepCodeAddressSearchProps {
-  onJurisdictionFound?: (jurisdiction: IJurisdiction | null) => void
+  onJurisdictionFound?: (jurisdiction: IJurisdiction | null, address?: string) => void
   setShowError: (show: boolean) => void
   showError: boolean
 }
@@ -25,9 +25,10 @@ const StepCodeAddressSearch = observer(
     const { t } = useTranslation()
     const navigate = useNavigate()
     const [selectedSite, setSelectedSite] = useState<number | null>(null)
+    const [selectedOption, setSelectedOption] = useState<IOption | null>(null)
     const [searchKey, setSearchKey] = useState(0)
     const [manualJurisdiction, setManualJurisdiction] = useState<IJurisdiction | null>(null)
-
+    const isMobile = useBreakpointValue({ base: true, md: false })
     const isHomePage = location.pathname === "/welcome" ? true : false
     const { geocoderStore, jurisdictionStore } = useMst()
     const { addJurisdiction } = jurisdictionStore
@@ -50,6 +51,7 @@ const StepCodeAddressSearch = observer(
 
       const result = await geocoderStore.fetchGeocodedJurisdiction(String(selectedSite))
       const jurisdiction = result?.jurisdiction
+      const addressLabel = selectedOption?.label || ""
 
       if (!jurisdiction) {
         onJurisdictionFound?.(null)
@@ -59,11 +61,18 @@ const StepCodeAddressSearch = observer(
       }
 
       if (isHomePage) {
-        onJurisdictionFound?.(jurisdiction)
+        onJurisdictionFound?.(jurisdiction, addressLabel)
         setSearchKey((k) => k + 1)
         setSelectedSite(null)
+        setSelectedOption(null)
+      } else if (onJurisdictionFound) {
+        // If parent provided a callback (like in StepCodeLookupTool), call it
+        onJurisdictionFound(jurisdiction, addressLabel)
+        // We don't clear state or navigate here if we're using the lookup tool inline
       } else {
-        navigate(`/jurisdictions/${jurisdiction.slug}/step-code-requirements`)
+        navigate(
+          `/jurisdictions/${jurisdiction.slug}/step-code-requirements?address=${encodeURIComponent(addressLabel)}`
+        )
       }
     }
 
@@ -80,6 +89,7 @@ const StepCodeAddressSearch = observer(
                 onChange={(option) => {
                   field.onChange(option)
                   setSelectedSite(option?.value as number)
+                  setSelectedOption(option)
                 }}
                 onButtonClick={handleCheckAddress}
                 isButtonDisabled={!selectedSite}
@@ -95,12 +105,13 @@ const StepCodeAddressSearch = observer(
             {showError && (
               <FormControl w="full" zIndex={1} mt={4}>
                 <FormLabel fontWeight="bold">{t("ui.cityOrJurisdiction")}</FormLabel>
-                <InputGroup w="57%">
+                <InputGroup w={isMobile ? "100%" : "57%"}>
                   <JurisdictionSelect
                     onChange={(value) => {
                       if (value) addJurisdiction(value)
                       setManualJurisdiction(value)
-                      onJurisdictionFound?.(value)
+                      const addressLabel = selectedOption?.label || ""
+                      onJurisdictionFound?.(value, addressLabel)
                       setShowError(false) // hide the error and dropdown once selected
                     }}
                     selectedOption={{ label: manualJurisdiction?.reverseQualifiedName, value: manualJurisdiction }}

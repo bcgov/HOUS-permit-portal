@@ -110,6 +110,9 @@ function EditableControls({
       ml={1}
       size={"sm"}
       variant={"unstyled"}
+      display={"flex"}
+      alignItems={"center"}
+      justifyContent={"center"}
       aria-label={"Enter edit mode"}
       color={"text.link"}
       icon={<Pencil size={14} />}

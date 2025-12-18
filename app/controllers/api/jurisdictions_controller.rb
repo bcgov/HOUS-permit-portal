@@ -254,11 +254,20 @@ class Api::JurisdictionsController < Api::ApplicationController
         zero_carbon_step_required
         _destroy
       ],
-      jurisdiction_documents_attributes: [
+      resources_attributes: [
         :id,
         :jurisdiction_id,
+        :category,
+        :title,
+        :description,
+        :resource_type,
+        :link_url,
         :_destroy,
-        file: [:id, :storage, metadata: %i[size filename mime_type]]
+        resource_document_attributes: [
+          :id,
+          :_destroy,
+          file: [:id, :storage, metadata: %i[size filename mime_type]]
+        ]
       ]
     )
   end

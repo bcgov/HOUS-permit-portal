@@ -28,9 +28,7 @@ export const LandingScreen = observer(({}: ILandingScreenProps) => {
   const { t } = useTranslation()
   const mailto = "mailto:" + t("site.contactEmail")
   const iNeedRef = useRef<HTMLDivElement>(null)
-  const { sessionStore, userStore, siteConfigurationStore } = useMst()
-  const { landingPageEarlyAccessRequirementTemplates } = siteConfigurationStore
-  const { loggedIn } = sessionStore
+  const { userStore } = useMst()
   const { currentUser } = userStore
 
   const scrollToJurisdictionSearch = () => {
@@ -213,49 +211,21 @@ export const LandingScreen = observer(({}: ILandingScreenProps) => {
               </Text>
             </BareBox>
           </Flex>
-
-          {landingPageEarlyAccessRequirementTemplates.length > 0 && (
-            <VStack as="section" w="full" gap={2} my={16} alignItems="flex-start">
-              <Heading as="h2" variant="yellowline">
-                {t("landing.underDevelopmentTitle")}
-              </Heading>
-              <Text textAlign="left">{t("landing.underDevelopmentBody")}</Text>
-              <Text textAlign="left">{t("landing.listedDrafts")}</Text>
-              <Heading as="h4" size="md" pt={6}>
-                {t("landing.ssmuHousingTitle")}
-              </Heading>
-              <VStack spacing={2} mt={2} alignItems="flex-start">
-                {landingPageEarlyAccessRequirementTemplates?.map((template) => (
-                  <RouterLink key={template.id} to={`/early-access/requirement-templates/${template.id}`}>
-                    {template.nickname}
-                  </RouterLink>
-                ))}
-              </VStack>
-              <Text mt={4}>
-                <Trans
-                  i18nKey="landing.shareFeedbackBody"
-                  components={{
-                    1: <Text as="strong"></Text>,
-                    2: <Link href="mailto:digital.codes.permits@gov.bc.ca" isExternal color="link.default"></Link>,
-                  }}
-                />
-              </Text>
-            </VStack>
-          )}
-
-          <Box textAlign="left" mt={8}>
-            <Box width="50px" height="4px" bg="yellow.400" mb={4} />
+          <Box mt={16} p={8} bg="theme.blueLight" borderRadius="lg" w="full" textAlign="left">
             <Heading as="h2" size="lg" mb={4}>
-              {t("landing.part9ChecklistsTitle")}
+              {t("landing.helpShapeTitle")}
             </Heading>
-            <Text mb={2}>{t("landing.part9ChecklistsBody")}</Text>
-            <Link
-              href="/pdfs/BPH-Standardized List of Requirements V.2024.09.01 - SEP 2024.pdf"
-              download="BPH-Standardized List of Requirements V.2024.09.01 - SEP 2024.pdf"
-              textDecoration="underline"
-            >
-              {t("landing.part9ChecklistsLink")}
-            </Link>
+            <Text mb={4}>{t("landing.helpShapeBody")}</Text>
+            <Flex justifyContent="space-between" alignItems="center">
+              <Button
+                as={RouterLink}
+                to="/standardization-preview"
+                rightIcon={<CaretRight size={20} />}
+                variant="primary"
+              >
+                {t("landing.reviewMaterials")}
+              </Button>
+            </Flex>
           </Box>
         </Container>
       </Box>
@@ -300,7 +270,7 @@ const BareBox: React.FC<IBareBoxProps> = ({ children }) => {
   return (
     <Box p={4} borderRadius="lg" bg="theme.blueLight" color="theme.blueAlt" flex={1}>
       <Flex gap={6} align="center" h="full">
-        <Text fontSize="md" fontWeight="bold" textAlign="left">
+        <Text as="div" fontSize="md" fontWeight="bold" textAlign="left">
           {children}
         </Text>
       </Flex>

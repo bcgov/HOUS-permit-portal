@@ -27,7 +27,7 @@ export const ProjectDashboardScreen = observer(({}: IProjectDashboardScreenProps
     { label: t("permitProject.index.title", "Projects"), icon: FolderSimple, to: "projects", tabIndex: 0 },
     { label: t("stepCode.index.title", "Step Codes"), icon: ClipboardText, to: "step-codes", tabIndex: 1 },
     {
-      label: t("preCheck.index.title", "Pre-Checks"),
+      label: t("preCheck.index.title", "Pre-checks"),
       icon: ListMagnifyingGlass,
       to: "pre-checks",
       tabIndex: 2,

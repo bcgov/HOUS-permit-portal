@@ -1,5 +1,5 @@
 import { Box, Container, Flex, HStack, Heading, Image, Link, Show, Spacer, Text, VStack } from "@chakra-ui/react"
-import { Folders, Tray, Warning } from "@phosphor-icons/react"
+import { Buildings, Tray, Warning } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React from "react"
@@ -9,7 +9,6 @@ import { PopoverProvider, useNotificationPopover } from "../../../hooks/use-noti
 import { useMst } from "../../../setup/root"
 import { EUserRoles } from "../../../types/enums"
 import { INotification, IPermitNotificationObjectData } from "../../../types/types"
-import { HelpDrawer } from "../../shared/help-drawer"
 import { RouterLink } from "../../shared/navigation/router-link"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import SandboxHeader from "../../shared/sandbox/sandbox-header"
@@ -19,6 +18,9 @@ import { RegionalRMJurisdictionSelect } from "./regional-rm-jurisdiction-select"
 import { SubNavBar } from "./sub-nav-bar"
 
 import { PreCheckNavBar } from "../pre-check/pre-check-nav-bar"
+import { StepCodeNavBar } from "../step-code/nav-bar"
+import { Part3NavLinks } from "../step-code/nav-bar/part-3-nav-links"
+import { Part9NavLinks } from "../step-code/nav-bar/part-9-nav-links"
 
 function isTemplateEditPath(path: string): boolean {
   const regex = /^\/requirement-templates\/([a-f\d-]+)\/edit$/
@@ -112,14 +114,42 @@ function shouldHideSubNavbarForPath(path: string): boolean {
 }
 
 function shouldHideFullNavBarForPath(path: string): boolean {
-  const matchers: Array<(path: string) => boolean> = [isStepCodePath]
+  const matchers: Array<(path: string) => boolean> = []
 
   return matchers.some((matcher) => matcher(path))
 }
 
 export const NavBar = observer(function NavBar() {
   const { t } = useTranslation()
-  const { sessionStore, userStore, notificationStore, uiStore, sandboxStore } = useMst()
+  const location = useLocation()
+  const path = location.pathname
+
+  if (isPreCheckPath(path)) {
+    return <PreCheckNavBar />
+  }
+
+  if (isStepCodePath(path)) {
+    if (path.includes("part-9")) {
+      return <StepCodeNavBar title={t("stepCode.title")} NavLinks={<Part9NavLinks />} />
+    } else {
+      return <StepCodeNavBar title={t("stepCode.part3.title")} NavLinks={<Part3NavLinks />} />
+    }
+  }
+
+  if (shouldHideFullNavBarForPath(path)) {
+    return null
+  }
+
+  return (
+    <PopoverProvider>
+      <NavBarContent />
+    </PopoverProvider>
+  )
+})
+
+const NavBarContent = observer(function NavBarContent() {
+  const { t } = useTranslation()
+  const { sessionStore, userStore, notificationStore, uiStore } = useMst()
 
   const { currentUser } = userStore
   const { loggedIn } = sessionStore
@@ -129,16 +159,8 @@ export const NavBar = observer(function NavBar() {
   const location = useLocation()
   const path = location.pathname
 
-  if (isPreCheckPath(path)) {
-    return <PreCheckNavBar />
-  }
-
-  if (shouldHideFullNavBarForPath(path)) {
-    return null
-  }
-
   return (
-    <PopoverProvider>
+    <>
       <Box
         as="nav"
         id="mainNav"
@@ -178,8 +200,6 @@ export const NavBar = observer(function NavBar() {
               <Spacer />
             </Show>
             <HStack gap={3} w="full" justify="flex-end">
-              {!loggedIn && <HelpDrawer />}
-
               {(currentUser?.isReviewStaff || currentUser?.isTechnicalSupport) &&
                 !currentUser.isRegionalReviewManager && (
                   <Flex direction="column">
@@ -232,8 +252,13 @@ export const NavBar = observer(function NavBar() {
                 </RouterLinkButton>
               )}
               {currentUser?.isSubmitter && !currentUser.isUnconfirmed && (
-                <RouterLinkButton variant="tertiary" px={2} leftIcon={<Folders size={16} />} to={`/projects`}>
-                  <Show above="xl">{t("site.myProjects")}</Show>
+                <RouterLinkButton px={2} to={`/projects`} variant="ghost">
+                  <Buildings size={24} />
+                  <Show above="xl">
+                    <Box as="span" ml={2}>
+                      {t("site.myProjects")}
+                    </Box>
+                  </Show>
                 </RouterLinkButton>
               )}
               <NavBarMenu />
@@ -253,7 +278,7 @@ export const NavBar = observer(function NavBar() {
         />
       )}
       {!shouldHideSubNavbarForPath(path) && <SubNavBar />}
-    </PopoverProvider>
+    </>
   )
 })
 

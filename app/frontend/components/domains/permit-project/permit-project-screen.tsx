@@ -1,5 +1,5 @@
 import { Box, Container, Flex, IconButton, TabPanel, TabPanels, Tabs, Text } from "@chakra-ui/react"
-import { CaretLeft, ClipboardText, SquaresFour } from "@phosphor-icons/react"
+import { CaretLeft, ClipboardText, Folder, SquaresFour } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useTransition } from "react"
 import { useForm } from "react-hook-form"
@@ -11,6 +11,7 @@ import { ErrorScreen } from "../../shared/base/error-screen"
 import { LoadingScreen } from "../../shared/base/loading-screen"
 import { EditableInputWithControls } from "../../shared/editable-input-with-controls"
 import { RollupStatusBox } from "../../shared/permit-projects/rollup-status-box"
+import { LocalResourcesTabPanelContent } from "./local-resources-tab-panel-content"
 import { OverviewTabPanelContent } from "./overview-tab-panel-content"
 import { PermitsTabPanelContent } from "./permits-tab-panel-content"
 import { ITabItem, ProjectSidebarTabList } from "./project-sidebar-tab-list"
@@ -25,6 +26,7 @@ export const PermitProjectScreen = observer(() => {
   const TABS_DATA: ITabItem[] = [
     { label: t("permitProject.details.overview"), icon: SquaresFour, to: "overview", tabIndex: 0 },
     { label: t("permitProject.details.permits"), icon: ClipboardText, to: "permits", tabIndex: 1 },
+    { label: t("permitProject.details.localResources"), icon: Folder, to: "local-resources", tabIndex: 2 },
   ]
 
   const getDefaultValues = () => {
@@ -128,6 +130,9 @@ export const PermitProjectScreen = observer(() => {
           </TabPanel>
           <TabPanel>
             {isPending ? <LoadingScreen /> : <PermitsTabPanelContent permitProject={currentPermitProject} />}
+          </TabPanel>
+          <TabPanel>
+            {isPending ? <LoadingScreen /> : <LocalResourcesTabPanelContent permitProject={currentPermitProject} />}
           </TabPanel>
         </TabPanels>
       </Tabs>

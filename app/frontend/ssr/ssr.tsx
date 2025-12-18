@@ -6,7 +6,7 @@ import { Part9PDFContent } from "../components/domains/step-code/part-9/checklis
 import { PDFContent as PermitApplicationPDFContent } from "../components/shared/permit-applications/pdf-content"
 import "../i18n/i18n"
 import { EPermitClassificationCode, EStepCodeType } from "../types/enums"
-import { combineComplianceHints } from "../utils/formio-component-traversal"
+import { combineCustomizations } from "../utils/formio-component-traversal"
 
 const ChecklistComponentMap = {
   [EPermitClassificationCode.lowResidential]: Part9PDFContent,
@@ -37,10 +37,11 @@ const main = async () => {
     }
 
     if (pdfData.permitApplication) {
-      pdfData.permitApplication.formattedFormJson = combineComplianceHints(
+      pdfData.permitApplication.formattedFormJson = combineCustomizations(
         pdfData.permitApplication?.formJson ?? {},
         pdfData.permitApplication?.formCustomizations ?? {},
-        pdfData.permitApplication?.formattedComplianceData ?? {}
+        pdfData.permitApplication?.formattedComplianceData ?? {},
+        pdfData.permitApplication?.jurisdiction?.resources
       )
     }
 

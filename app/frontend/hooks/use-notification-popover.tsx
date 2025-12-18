@@ -1,3 +1,4 @@
+import { observer } from "mobx-react-lite"
 import React, { createContext, useContext, useState } from "react"
 import { useMst } from "../setup/root"
 
@@ -16,7 +17,7 @@ interface IPopoverProvider {
   children: React.ReactNode
 }
 
-export const PopoverProvider: React.FC<IPopoverProvider> = ({ children }) => {
+export const PopoverProvider: React.FC<IPopoverProvider> = observer(({ children }) => {
   const [isOpen, setIsOpen] = useState(false)
   const [showRead, setShowRead] = useState<boolean>(false)
   const [numberJustRead, setNumberJustRead] = useState<number>()
@@ -39,11 +40,20 @@ export const PopoverProvider: React.FC<IPopoverProvider> = ({ children }) => {
   }
 
   return (
-    <PopoverContext.Provider value={{ isOpen, handleOpen, handleClose, numberJustRead, showRead, setShowRead }}>
+    <PopoverContext.Provider
+      value={{
+        isOpen,
+        handleOpen,
+        handleClose,
+        numberJustRead,
+        showRead,
+        setShowRead,
+      }}
+    >
       {children}
     </PopoverContext.Provider>
   )
-}
+})
 
 export const useNotificationPopover = () => {
   const context = useContext(PopoverContext)

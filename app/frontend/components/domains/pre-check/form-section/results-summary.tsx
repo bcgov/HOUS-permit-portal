@@ -108,42 +108,24 @@ export const ResultsSummary = observer(function ResultsSummary() {
             </Heading>
             {currentPreCheck && <PreCheckReviewDetails preCheck={currentPreCheck} />}
             <Heading as="h3" size="md" mb={4}>
-              {t("preCheck.sections.resultsSummary.whatYouCanDoNow", "What you can do now")}
+              {t("preCheck.sections.resultsSummary.sections.whatYouCanDo.title", "What you can do now")}
             </Heading>
             <UnorderedList spacing={2} pl={6} mb={6}>
               <ListItem>
                 {t(
-                  "preCheck.sections.resultsSummary.downloadOrExplore",
+                  "preCheck.sections.resultsSummary.sections.whatYouCanDo.download",
                   "Download a PDF report listing all pre-check results, or explore them interactively in alongside your drawings."
                 )}
               </ListItem>
               <ListItem>
                 {t(
-                  "preCheck.sections.resultsSummary.addressCompliance",
+                  "preCheck.sections.resultsSummary.sections.whatYouCanDo.address",
                   "You can use these results to address any compliance issues and prepare your drawings for a permit application."
                 )}
               </ListItem>
               <ListItem>
                 {t(
-                  "preCheck.sections.resultsSummary.notShared",
-                  "These results are not shared with your local building officials and are not part of your official permit submission."
-                )}
-              </ListItem>
-              <ListItem>
-                {t(
-                  "preCheck.sections.resultsSummary.noGuarantee",
-                  "A passing result does not guarantee approval: a building official will still carry out a full review as part of the permit application process."
-                )}
-              </ListItem>
-              <ListItem>
-                {t(
-                  "preCheck.sections.resultsSummary.jurisdictionApproval",
-                  "Only your local jurisdiction can approve or reject a permit application."
-                )}
-              </ListItem>
-              <ListItem>
-                {t(
-                  "preCheck.sections.resultsSummary.betaNotice",
+                  "preCheck.sections.resultsSummary.sections.whatYouCanDo.beta",
                   "This service is in beta. If you experience issues or have questions about your results, contact us at"
                 )}
                 {"  "}
@@ -152,6 +134,55 @@ export const ResultsSummary = observer(function ResultsSummary() {
                 >
                   digital.codes.permits@gov.bc.ca
                 </Link>
+              </ListItem>
+            </UnorderedList>
+
+            <Heading as="h3" size="md" mb={4}>
+              {t(
+                "preCheck.sections.resultsSummary.sections.reportPreparedBy.title",
+                "Report prepared by {{serviceProvider}}",
+                {
+                  serviceProvider: currentPreCheck?.providerName,
+                }
+              )}
+            </Heading>
+            <UnorderedList spacing={2} pl={6} mb={6}>
+              <ListItem>
+                {t(
+                  "preCheck.sections.resultsSummary.sections.reportPreparedBy.providedBy",
+                  "This service is provided by {{serviceProvider}} to give you early guidance only.",
+                  { serviceProvider: currentPreCheck?.providerName }
+                )}
+              </ListItem>
+              <ListItem>
+                {t(
+                  "preCheck.sections.resultsSummary.sections.reportPreparedBy.ministryDisclaimer",
+                  "The Ministry of Housing and Municipal Affairs (“we”) does not guarantee the accuracy or completeness of any information produced by this service."
+                )}
+              </ListItem>
+              <ListItem>
+                {t(
+                  "preCheck.sections.resultsSummary.sections.reportPreparedBy.liability",
+                  "We are not liable for any errors, omissions, or any actions you take in reliance upon this service."
+                )}
+              </ListItem>
+              <ListItem>
+                {t(
+                  "preCheck.sections.resultsSummary.sections.reportPreparedBy.notShared",
+                  "Results from this service are not shared with your local building officials and are not part of your official permit submission."
+                )}
+              </ListItem>
+              <ListItem>
+                {t(
+                  "preCheck.sections.resultsSummary.sections.reportPreparedBy.noGuarantee",
+                  "A passing result does not guarantee approval: a building official will still carry out a full review as part of the permit application process."
+                )}
+              </ListItem>
+              <ListItem>
+                {t(
+                  "preCheck.sections.resultsSummary.sections.reportPreparedBy.jurisdiction",
+                  "Only your local jurisdiction can approve or reject a permit application."
+                )}
               </ListItem>
             </UnorderedList>
             {!currentPreCheck?.expired && (

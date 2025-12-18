@@ -25,6 +25,7 @@ import { useInterval } from "../../../hooks/use-interval"
 import { useMst } from "../../../setup/root"
 import { ICustomEventMap } from "../../../types/dom"
 import { ECollaborationType, ECustomEvents, ERequirementType } from "../../../types/enums"
+import { findPidComponentKey } from "../../../utils/formio-component-traversal"
 import { handleScrollToBottom } from "../../../utils/utility-functions"
 import { CopyableValue } from "../../shared/base/copyable-value"
 import { ErrorScreen } from "../../shared/base/error-screen"
@@ -167,7 +168,22 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
 
   const updateFormIoValues = (formio, frontEndFormUpdate) => {
     for (const [key, value] of Object.entries(frontEndFormUpdate)) {
-      const componentToSet = formio.getComponent(key)
+      let componentToSet = formio.getComponent(key)
+
+      if (key.endsWith("additional_pid_info")) {
+        if (componentToSet) {
+          const pidKey = findPidComponentKey(componentToSet.component)
+          if (pidKey) {
+            const dataValue = componentToSet.getValue()
+
+            if (!dataValue || dataValue.length === 0) {
+              componentToSet.addRow()
+            }
+            componentToSet = formio.getComponent(pidKey)
+          }
+        }
+      }
+
       if (!R.isNil(value)) {
         if (!R.isNil(componentToSet)) {
           componentSetValue(componentToSet, value)

@@ -45,6 +45,12 @@ const LoginScreen = lazy(() =>
 
 const HomeScreen = lazy(() => import("../home").then((module) => ({ default: module.HomeScreen })))
 
+const StandardizationPreviewScreen = lazy(() =>
+  import("../landing/standardization-preview-screen").then((module) => ({
+    default: module.StandardizationPreviewScreen,
+  }))
+)
+
 const ConfigurationManagementScreen = lazy(() =>
   import("../home/review-manager/configuration-management-screen").then((module) => ({
     default: module.ConfigurationManagementScreen,
@@ -63,6 +69,11 @@ const ReviewManagerFeatureAccessScreen = lazy(() =>
 const SubmissionsInboxSetupScreenLazy = lazy(() =>
   import("../home/review-manager/configuration-management-screen/submissions-inbox-setup-screen").then((module) => ({
     default: module.SubmissionsInboxSetupScreen,
+  }))
+)
+const ResourcesScreenLazy = lazy(() =>
+  import("../home/review-manager/configuration-management-screen/resources-screen").then((module) => ({
+    default: module.ResourcesScreen,
   }))
 )
 const ReviewStaffMyJurisdictionAboutPageScreen = lazy(() =>
@@ -127,6 +138,11 @@ const LettersOfAssuranceScreen = lazy(() =>
 const LookUpStepCodesRequirementsForYourProjectScreen = lazy(() =>
   import("../project-readiness-tools/look-up-step-codes-requirements-for-your-project").then((module) => ({
     default: module.LookUpStepCodesRequirementsForYourProjectScreen,
+  }))
+)
+const CheckDigitalSealsScreen = lazy(() =>
+  import("../project-readiness-tools/check-digital-seals").then((module) => ({
+    default: module.CheckDigitalSealsScreen,
   }))
 )
 const PreCheckInfoScreen = lazy(() =>
@@ -281,9 +297,9 @@ const RevisionReasonSetupScreen = lazy(() =>
   }))
 )
 
-const LandingSetupScreen = lazy(() =>
-  import("../super-admin/site-configuration-management/landing-setup-screen").then((module) => ({
-    default: module.LandingSetupScreen,
+const StandardizationSetupScreen = lazy(() =>
+  import("../super-admin/site-configuration-management/standardization-setup-screen").then((module) => ({
+    default: module.StandardizationSetupScreen,
   }))
 )
 
@@ -403,7 +419,7 @@ export const Navigation = observer(() => {
         </Box>
       </Box>
       {displaySitewideMessage && (
-        <Center h={16} bg="theme.yellowLight">
+        <Center h={16} bg="theme.yellowLight" zIndex={1500}>
           {sitewideMessage}
         </Center>
       )}
@@ -451,7 +467,7 @@ const AppRoutes = observer(() => {
       resetAuth()
       setAfterLoginPath(location.pathname)
       navigate("/login")
-      uiStore.flashMessage.show(EFlashMessageStatus.warning, t("auth.tokenExpired"), null)
+      uiStore.flashMessage.show(EFlashMessageStatus.warning, null, t("auth.tokenExpired"), 3000)
     }
   }, [tokenExpired])
 
@@ -486,7 +502,7 @@ const AppRoutes = observer(() => {
       <Route path="/configuration-management/sitewide-message" element={<SitewideMessageScreen />} />
       <Route path="/configuration-management/help-drawer-setup" element={<HelpDrawerSetupScreen />} />
       <Route path="/configuration-management/revision-reason-setup" element={<RevisionReasonSetupScreen />} />
-      <Route path="/configuration-management/landing-setup" element={<LandingSetupScreen />} />
+      <Route path="/configuration-management/standardization-setup" element={<StandardizationSetupScreen />} />
       <Route path="/configuration-management/users" element={<AdminUserIndexScreen />} />
       <Route path="/configuration-management/global-feature-access" element={<AdminGlobalFeatureAccessScreen />} />
       <Route
@@ -596,6 +612,10 @@ const AppRoutes = observer(() => {
         element={<SubmissionsInboxSetupScreenLazy />}
       />
       <Route
+        path="/jurisdictions/:jurisdictionId/configuration-management/resources"
+        element={<ResourcesScreenLazy />}
+      />
+      <Route
         path="/jurisdictions/:jurisdictionId/configuration-management/feature-access"
         element={<ReviewManagerFeatureAccessScreen />}
       />
@@ -695,6 +715,7 @@ const AppRoutes = observer(() => {
               path="/project-readiness-tools/check-step-code-requirements/select"
               element={<SelectStepCodeRequirementsScreen />}
             />
+            <Route path="/project-readiness-tools/pre-check" element={<PreCheckInfoScreen />} />
           </Route>
         </Route>
 
@@ -768,6 +789,7 @@ const AppRoutes = observer(() => {
         {/* Public Routes */}
         <Route path="/accept-invitation" element={<AcceptInvitationScreen />} />
         <Route path="/contact" element={<ContactScreen />} />
+        <Route path="/standardization-preview" element={<StandardizationPreviewScreen />} />
         <Route path="/project-readiness-tools" element={<ProjectReadinessToolsIndexScreen />} />
         <Route path="/privacy-policy" element={<PrivacyPolicyScreen />} />
         <Route
@@ -782,6 +804,7 @@ const AppRoutes = observer(() => {
           path="/project-readiness-tools/look-up-step-codes-requirements-for-your-project"
           element={<LookUpStepCodesRequirementsForYourProjectScreen />}
         />
+        <Route path="/project-readiness-tools/check-digital-seals" element={<CheckDigitalSealsScreen />} />
         <Route path="/project-readiness-tools/pre-check" element={<PreCheckInfoScreen />} />
         <Route
           path="/onboarding-checklist-page-for-lg-adopting"

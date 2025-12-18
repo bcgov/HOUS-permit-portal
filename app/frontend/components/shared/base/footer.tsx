@@ -65,9 +65,7 @@ export const Footer = observer(() => {
                           {t("site.contact")}
                         </RouterLink>
                         <Link
-                          href={
-                            "https://www2.gov.bc.ca/gov/content/housing-tenancy/building-or-renovating/permits/building-permit-hub"
-                          }
+                          href={"https://www2.gov.bc.ca/gov/content?id=F2AE1595C6044E819A316925F0A74E09"}
                           target="_blank"
                           rel="noopener noreferrer"
                           color="text.primary"

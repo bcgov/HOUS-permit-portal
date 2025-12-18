@@ -240,6 +240,14 @@ class PermitHubMailer < ApplicationMailer
     )
   end
 
+  def remind_resource_update(user, jurisdiction, resource_ids)
+    @user = user
+    @jurisdiction = jurisdiction
+    @resources = Resource.where(id: resource_ids)
+
+    send_user_mail(email: user.email, template_key: "remind_resource_update")
+  end
+
   def notify_api_key_status_change(
     external_api_key,
     status,

@@ -80,11 +80,16 @@ export const StepCodeChecklistForm = observer(function StepCodeChecklistForm() {
 
     // timeout to allow for accordion transition to complete so scroll position can be determined accurately
     setTimeout(() => {
-      const yOffset = document.getElementById("stepCodeNav")?.offsetHeight + 20
+      const yOffset = (document.getElementById("stepCodeNav")?.offsetHeight || 0) + 20
       const scrollParent = document.getElementById("stepCodeScroll")
-      const y = scrollRef.getBoundingClientRect().top + scrollParent.scrollTop - yOffset
 
-      scrollParent.scrollTo({ top: y, behavior: "smooth" })
+      if (scrollParent) {
+        const y = scrollRef.getBoundingClientRect().top + scrollParent.scrollTop - yOffset
+        scrollParent.scrollTo({ top: y, behavior: "smooth" })
+      } else {
+        const y = window.scrollY + scrollRef.getBoundingClientRect().top - yOffset
+        window.scrollTo({ top: y, behavior: "smooth" })
+      }
 
       setScrollRef(null)
     }, 200)

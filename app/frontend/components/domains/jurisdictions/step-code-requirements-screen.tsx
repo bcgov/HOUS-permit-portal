@@ -2,7 +2,7 @@ import { Button, Container, Heading, HStack, Link, Text, VStack } from "@chakra-
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useSearchParams } from "react-router-dom"
 import { useJurisdiction } from "../../../hooks/resources/use-jurisdiction"
 import { useMst } from "../../../setup/root"
 import { ErrorScreen } from "../../shared/base/error-screen"
@@ -14,6 +14,8 @@ export const JurisdictionStepCodeRequirementsScreen = observer(() => {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { currentJurisdiction, error } = useJurisdiction()
+  const [searchParams] = useSearchParams()
+  const addressSearched = searchParams.get("address")
 
   const handleCheckAnotherAddress = () => {
     navigate("/project-readiness-tools/look-up-step-codes-requirements-for-your-project/")
@@ -30,7 +32,7 @@ export const JurisdictionStepCodeRequirementsScreen = observer(() => {
       <Container maxW="container.lg" py={12}>
         <Heading as="h1" mb={4}>
           {t("home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.stepCodeRequirementsFor")}{" "}
-          {currentJurisdiction.name}
+          {currentJurisdiction.qualifiedName}
         </Heading>
 
         <Text fontSize="md" color="text.primary" mb={6}>
@@ -38,6 +40,19 @@ export const JurisdictionStepCodeRequirementsScreen = observer(() => {
             "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.stepCodeRequirementsDescription"
           )}
         </Text>
+
+        <VStack align="start" spacing={1} mb={6}>
+          <Text fontSize="md">
+            {t("home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.jurisdiction")}:{" "}
+            {currentJurisdiction.qualifiedName}
+          </Text>
+          {addressSearched && (
+            <Text fontSize="md">
+              {t("home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.addressSearched")}:{" "}
+              {addressSearched}
+            </Text>
+          )}
+        </VStack>
 
         <StepCodeRequirementsTable currentJurisdiction={currentJurisdiction} />
 

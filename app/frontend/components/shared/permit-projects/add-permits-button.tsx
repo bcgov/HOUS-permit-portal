@@ -35,8 +35,7 @@ export const AddPermitsButton = observer(({ permitProject }: IProps) => {
     <ConditionalTooltip
       showTooltip={isDisabled}
       message={t("permitProject.addPermits.sandboxWarning")}
-      openDelay={200}
-      placement="top"
+      tooltipProps={{ openDelay: 200, placement: "top" }}
     >
       {button}
     </ConditionalTooltip>

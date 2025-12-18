@@ -14,7 +14,8 @@ RSpec.shared_examples AN_INVITED_USER do
   end
 
   it "sends an invitation email to the user" do
-    expect { subject.call }.to have_enqueued_job(ActionMailer::MailDeliveryJob)
+    expect(Devise.mailer).to receive(:invitation_instructions).and_call_original
+    subject.call
   end
 
   it "includes the user in the invited results" do

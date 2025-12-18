@@ -77,7 +77,7 @@ en:
           attributes:
             public:
               true_on_early_access_only: "can only be true for early access"
-              landing_published_requires_public: "cannot be set to false because a site configuration is set to use this template on the landing page."
+              standardization_published_requires_public: "cannot be set to false because a site configuration is set to use this template on the standardization preview page."
             template_versions:
               published_required_for_early_access: "requires one or less published template version on early access"
         requirement_block:
@@ -147,6 +147,7 @@ en:
       notify_application_viewed: "Application update: %{permit_application_number}"
       notify_application_revisions_requested: "Revisions requested on application %{permit_application_number}"
       remind_reviewer: "Your report on outstanding permit applications"
+      remind_resource_update: "Reminder: Review your jurisdiction resources"
       permit_type_submission_contact_confirm: "Confirm submission inbox email"
       new_jurisdiction_membership: "New jurisdiction membership"
       notify_permit_collaboration: "Welcome you have been invited to Collaborate in the Building Permit Hub"
@@ -589,6 +590,9 @@ en:
         title: Error
         message: "There was an error updating permit block status"
     permit_project:
+      update_success:
+        title: ""
+        message: "Project updated successfully"
       update_error:
         title: Error
         message: "%{error_message}"
@@ -917,11 +921,21 @@ en:
     permit_block_status:
       status_read_by_user: 'Requirement “%{requirement_block_name}” status set to "ready" by %{setter_name} for permit application %{number}'
       status_ready_no_user: 'Requirement “%{requirement_block_name}” status set to "ready" for permit application %{number}'
+    resource:
+      reminder: "Reminder: Review your jurisdiction resources"
     integration_mapping:
       published_template_missing_requirements_mapping: "Missing API mapping: A new version of “%{template_label}” has been published on %{version_date}"
       scheduled_template_missing_requirements_mapping: "Missing API Mapping: A new version of “%{template_label}” has been scheduled for %{version_date}, 01:00hrs PST."
+    file_upload_failed: "File upload failed: %{file_name} was removed during a routine scan."
   export:
     template_version_csv_headers: "Requirement Block,Requirement block tip,Question,Requirement code,Input type,Optional,Is elective,Elective enabled,Elective reason"
     requirement_summary_csv_headers: "Field Name,Is Elective,Used By (Number of Jurisdictions),Reason: Bylaw Count, Reason: Zoning count,Reason: Policy Count"
     step_code_summary_csv_headers: "Jurisdiction,Permit type,Enabled/disabled,Energy step code level,Zero carbon level"
     application_metrics_csv_headers: "Jurisdiction,Permit type,Work type,First Nations,In draft,In inbox,Average days before first submit,Average days before latest submit"
+  digital_seal_validator:
+    validation_error:
+      title: "Validation Error"
+      message: "%{error_message}"
+    no_file_provided:
+      title: "No File Provided"
+      message: "No file provided"

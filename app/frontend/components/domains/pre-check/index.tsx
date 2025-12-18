@@ -16,7 +16,9 @@ export const PreCheckForm = observer(function PreCheckForm() {
   const navigate = useNavigate()
   const {
     preCheckStore: { createPreCheck },
+    siteConfigurationStore,
   } = useMst()
+  const { displaySitewideMessage } = siteConfigurationStore
   const { currentPreCheck } = usePreCheck()
 
   // Create pre-check if this is /new route
@@ -87,7 +89,7 @@ export const PreCheckForm = observer(function PreCheckForm() {
               overflow="auto"
               top={0}
               px={{ base: 0, xl: 20 }}
-              py={10}
+              py={displaySitewideMessage ? 24 : 10}
               id="preCheckScroll"
             >
               <Flex direction="column" flex={1} px={6} py={3}>

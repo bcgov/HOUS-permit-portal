@@ -130,7 +130,7 @@ class RequirementBlock < ApplicationRecord
               "document.dispatchEvent(new CustomEvent('downloadRequirementDocument', {
             detail: {
               id: '#{document.id}',
-              filename: '#{document.file.metadata["filename"]}'
+              filename: '#{escape_for_js(document.file.metadata["filename"])}'
             }
           }));"
           }
@@ -160,6 +160,11 @@ class RequirementBlock < ApplicationRecord
   end
 
   private
+
+  # Escape for single-quoted JS strings
+  def escape_for_js(str)
+    str.to_s.gsub(/['\\]/) { |match| "\\#{match}" }
+  end
 
   def early_access_on_appropriate_template
     # Determine the required visibility based on the current object's state

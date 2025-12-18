@@ -16,7 +16,7 @@ import {
 } from "@chakra-ui/react"
 import { List, X } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
-import React, { useEffect } from "react"
+import React, { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { LinkProps, useLocation } from "react-router-dom"
 import { useMst } from "../../../setup/root"
@@ -72,11 +72,45 @@ export const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
   const { currentUser } = userStore
   const { loggedIn } = sessionStore
   const { isOpen, onOpen, onClose, onToggle } = useDisclosure()
+  const [menuOffset, setMenuOffset] = useState<string>("var(--app-navbar-height)")
+
+  const handleToggle = () => {
+    if (!isOpen) {
+      const nav = document.getElementById("mainNav")
+      if (nav) {
+        setMenuOffset(`${nav.getBoundingClientRect().bottom}px`)
+      }
+    }
+    onToggle()
+  }
 
   // Close drawer when route changes
   useEffect(() => {
     onClose()
   }, [location.pathname])
+
+  // Close menu when clicking outside (including the navbar above the drawer)
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (isOpen) {
+        const target = event.target as HTMLElement
+        const isButton = target.closest('[aria-label="menu dropdown button"]')
+        const isDrawer = target.closest(".chakra-modal__content")
+
+        if (!isButton && !isDrawer) {
+          onClose()
+        }
+      }
+    }
+
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside)
+    }
+  }, [isOpen, onClose])
 
   // Column 1 - Project readiness tools
   const projectReadinessColumn = (
@@ -114,6 +148,11 @@ export const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
           label={t("site.navMenu.about.forLocalGovernments.label")}
           to="/onboarding-checklist-page-for-lg-adopting"
           description={t("site.navMenu.about.forLocalGovernments.description")}
+        />
+        <StaticLinkItem
+          label={t("site.navMenu.about.standardPermitApplicationMaterials.label")}
+          to="/standardization-preview"
+          description={t("site.navMenu.about.standardPermitApplicationMaterials.description")}
         />
       </MenuSection>
     </VStack>
@@ -158,7 +197,7 @@ export const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
           variant={currentUser?.isSubmitter || !loggedIn ? "secondary" : "primary"}
           aria-label="menu dropdown button"
           icon={<List size={16} weight="bold" />}
-          onClick={onToggle}
+          onClick={handleToggle}
         />
       </Show>
 
@@ -171,17 +210,17 @@ export const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
           variant={currentUser?.isSubmitter || !loggedIn ? "secondary" : "primary"}
           aria-label="menu dropdown button"
           leftIcon={isOpen ? <X size={16} weight="bold" /> : <List size={16} weight="bold" />}
-          onClick={onToggle}
+          onClick={handleToggle}
         >
           {t("site.menu")}
         </Button>
       </Show>
 
       <Drawer isOpen={isOpen} placement="top" onClose={onClose} size="full">
-        <DrawerOverlay mt="var(--app-navbar-height)" zIndex={1400} />
+        <DrawerOverlay mt={menuOffset} zIndex={1400} />
         <DrawerContent
-          mt="var(--app-navbar-height)"
-          maxH="calc(100vh - var(--app-navbar-height))"
+          mt={menuOffset}
+          maxH={`calc(100vh - ${menuOffset})`}
           zIndex={1400}
           display="flex"
           flexDirection="column"

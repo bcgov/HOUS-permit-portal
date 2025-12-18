@@ -25,7 +25,7 @@ import {
 } from "../types/types"
 import {
   combineChangeMarkers,
-  combineComplianceHints,
+  combineCustomizations,
   combineDiff,
   combineRevisionAnnotations,
   combineRevisionButtons,
@@ -221,10 +221,11 @@ export const PermitApplicationModel = types.snapshotProcessor(
           self.latestRevisionRequests
         )
         //merge the formattedComliance data.  This should trigger a form redraw when it is updated
-        const complianceHintedFormJson = combineComplianceHints(
+        const complianceHintedFormJson = combineCustomizations(
           revisionAnnotatedFormJson,
           self.formCustomizations,
-          self.formattedComplianceData
+          self.formattedComplianceData,
+          self.jurisdiction?.resources
         )
         const diffColoredFormJson = combineDiff(complianceHintedFormJson, self.diff)
         const revisionRequestsToUse = self.isViewingPastRequests
