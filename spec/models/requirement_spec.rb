@@ -205,7 +205,6 @@ RSpec.describe Requirement, type: :model, search: true do
             }
           )
         ]
-
         expect(valid_requirement).to be_valid
         invalid_requirements.each do |requirement|
           expect(requirement).to_not be_valid
