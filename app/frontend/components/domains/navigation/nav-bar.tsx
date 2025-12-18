@@ -9,7 +9,6 @@ import { PopoverProvider, useNotificationPopover } from "../../../hooks/use-noti
 import { useMst } from "../../../setup/root"
 import { EUserRoles } from "../../../types/enums"
 import { INotification, IPermitNotificationObjectData } from "../../../types/types"
-import { HelpDrawer } from "../../shared/help-drawer"
 import { RouterLink } from "../../shared/navigation/router-link"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import SandboxHeader from "../../shared/sandbox/sandbox-header"
@@ -201,8 +200,6 @@ const NavBarContent = observer(function NavBarContent() {
               <Spacer />
             </Show>
             <HStack gap={3} w="full" justify="flex-end">
-              {!loggedIn && <HelpDrawer />}
-
               {(currentUser?.isReviewStaff || currentUser?.isTechnicalSupport) &&
                 !currentUser.isRegionalReviewManager && (
                   <Flex direction="column">
