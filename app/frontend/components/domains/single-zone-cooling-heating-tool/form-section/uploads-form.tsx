@@ -1,45 +1,78 @@
-import { Box, Button, Divider, Flex, Heading, Text } from "@chakra-ui/react"
+import {
+  Box,
+  Button,
+  Divider,
+  Flex,
+  Heading,
+  Icon,
+  IconButton,
+  Table,
+  TableContainer,
+  Tbody,
+  Td,
+  Text,
+  Th,
+  Thead,
+  Tr,
+} from "@chakra-ui/react"
+import { Trash } from "@phosphor-icons/react"
 import { UppyFile } from "@uppy/core"
 import "@uppy/core/dist/style.min.css"
 import "@uppy/dashboard/dist/style.css"
 import Dashboard from "@uppy/react/lib/Dashboard.js"
-import React, { useCallback, useEffect, useState } from "react"
-import { useFormContext } from "react-hook-form"
+import React, { useEffect, useState } from "react"
+import { useFieldArray, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import useUppyS3 from "../../../../hooks/use-uppy-s3"
+import { EFileUploadAttachmentType } from "../../../../types/enums"
+import { formatBytes } from "../../../../utils/utility-functions"
+import { FileDownloadButton } from "../../../shared/base/file-download-button"
 
 export const UploadsForm: React.FC = () => {
   const { t } = useTranslation() as any
-  const { setValue, watch } = useFormContext()
+  const { setValue, watch, control } = useFormContext()
   const [isUploading, setIsUploading] = useState(false)
+
+  const { fields, append, update } = useFieldArray({
+    control,
+    name: "overheatingDocumentsAttributes",
+  })
+
+  const overheatingDocumentsAttributes = watch("overheatingDocumentsAttributes") || []
 
   const uploadedUrl: string | undefined = watch("uploads.drawingsPdfUrl")
 
-  const handleUploadSuccess = useCallback(
-    (_file: UppyFile<{}, {}>, response: any) => {
-      const url =
-        response?.uploadURL ??
-        response?.location ??
-        response?.body?.location ??
-        response?.body?.url ??
-        response?.uploadResponse?.body?.location ??
-        response?.uploadResponse?.body?.url ??
-        response?.uploadResponse?.body?.Location ??
-        response?.url
-      if (!url) return
-      setValue("uploads.drawingsPdfUrl", url, {
-        shouldDirty: true,
-        shouldTouch: true,
-        shouldValidate: true,
-      })
-    },
-    [setValue]
-  )
+  const handleRemoveFile = (documentId: string) => {
+    const index = overheatingDocumentsAttributes.findIndex((doc) => (doc.id || doc.file?.id) === documentId)
+    if (index !== -1) {
+      const doc = overheatingDocumentsAttributes[index]
+      update(index, { ...doc, _destroy: true })
+    }
+  }
+
+  const handleUploadSuccess = (file: UppyFile<{}, {}>, response: any) => {
+    const parts = response.uploadURL.split("/")
+    const key = parts[parts.length - 1]
+    const newDocument = {
+      file: {
+        id: key,
+        storage: "cache",
+        metadata: {
+          filename: file.name,
+          size: file.size || 0,
+          mimeType: file.type || "application/pdf",
+        },
+      },
+    }
+    append(newDocument as any, { shouldFocus: false })
+  }
 
   const uppy = useUppyS3({
     onUploadSuccess: handleUploadSuccess,
     maxNumberOfFiles: 1,
     autoProceed: true,
+    maxFileSizeMB: 50,
+    allowedFileTypes: ["application/pdf", ".pdf"],
   })
 
   useEffect(() => {
@@ -73,6 +106,52 @@ export const UploadsForm: React.FC = () => {
         <Box as="li">{t("singleZoneCoolingHeatingTool.uploads.drawingsMustBeLegibleAndProperlyScaled")}</Box>
         <Box as="li">{t("singleZoneCoolingHeatingTool.uploads.maximumFileSize")}</Box>
       </Box>
+
+      {overheatingDocumentsAttributes && overheatingDocumentsAttributes.length > 0 && (
+        <TableContainer mb={6}>
+          <Table variant="simple" size="sm">
+            <Thead bg="gray.50">
+              <Tr>
+                <Th width="40px" fontWeight="bold"></Th>
+                <Th fontWeight="bold" textTransform="capitalize">
+                  {t("preCheck.sections.uploadDrawings.fileName", "File Name")}
+                </Th>
+                <Th isNumeric fontWeight="bold" textTransform="capitalize">
+                  {t("preCheck.sections.uploadDrawings.size", "Size")}
+                </Th>
+              </Tr>
+            </Thead>
+            <Tbody>
+              {overheatingDocumentsAttributes
+                .filter((doc) => !doc._destroy)
+                .map((doc) => (
+                  <Tr key={doc.id || doc.file?.id}>
+                    <Td>
+                      <IconButton
+                        aria-label={t("ui.remove")}
+                        color="semantic.error"
+                        icon={<Icon as={Trash} />}
+                        variant="ghost"
+                        size="xs"
+                        onClick={() => handleRemoveFile(doc.id || doc.file?.id)}
+                      />
+                    </Td>
+                    <Td>
+                      {doc.id ? (
+                        <FileDownloadButton document={doc} modelType={EFileUploadAttachmentType.OverheatingDocument} />
+                      ) : (
+                        <Text>{doc.file?.metadata?.filename}</Text>
+                      )}
+                    </Td>
+                    <Td isNumeric>
+                      <Text>{formatBytes(doc.file?.metadata?.size || 0)}</Text>
+                    </Td>
+                  </Tr>
+                ))}
+            </Tbody>
+          </Table>
+        </TableContainer>
+      )}
 
       <Box borderWidth="2px" borderStyle="dashed" borderRadius="md" borderColor="gray.300">
         <Dashboard uppy={uppy} height={100} width="100%" proudlyDisplayPoweredByUppy={false} />

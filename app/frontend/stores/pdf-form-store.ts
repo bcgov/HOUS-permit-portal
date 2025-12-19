@@ -167,7 +167,12 @@ export const PdfFormStoreModel = types
       setLoading(loading: boolean) {
         self.isLoading = loading
       },
-      createPdfForm: flow(function* (formData: { formJson: any; formType: string; status?: boolean }) {
+      createPdfForm: flow(function* (formData: {
+        formJson: any
+        formType: string
+        status?: boolean
+        overheatingDocumentsAttributes?: any[]
+      }) {
         try {
           const response = yield self.environment.api.createPdfForm(formData)
           if (response.ok) {
@@ -232,7 +237,10 @@ export const PdfFormStoreModel = types
         }
       }),
 
-      updatePdfForm: flow(function* (id: string, data: { formJson?: any; status?: boolean }) {
+      updatePdfForm: flow(function* (
+        id: string,
+        data: { formJson?: any; status?: boolean; overheatingDocumentsAttributes?: any[] }
+      ) {
         self.isLoading = true
         try {
           const response = yield self.environment.api.updatePdfForm(id, data)

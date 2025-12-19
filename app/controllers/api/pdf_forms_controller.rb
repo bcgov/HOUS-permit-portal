@@ -97,7 +97,16 @@ class Api::PdfFormsController < Api::ApplicationController
 
   def pdf_form_params
     p = params.require(:pdf_form)
-    permitted = p.permit(:form_type, :status)
+    permitted =
+      p.permit(
+        :form_type,
+        :status,
+        overheating_documents_attributes: [
+          :id,
+          :_destroy,
+          file: [:id, :storage, metadata: %i[size filename mime_type]]
+        ]
+      )
     permitted[:form_json] = p[:form_json].permit! if p[:form_json].respond_to?(
       :permit!
     )

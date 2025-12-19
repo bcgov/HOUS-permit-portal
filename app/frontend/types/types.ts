@@ -298,6 +298,10 @@ export interface IDesignDocument extends IBaseFileAttachment {
   preCheckId: string
 }
 
+export interface IOverheatingDocument extends IBaseFileAttachment {
+  pdfFormId: string
+}
+
 export interface IJurisdictionServicePartnerEnrollment {
   id: string
   servicePartner: string

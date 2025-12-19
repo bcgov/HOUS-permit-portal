@@ -1,4 +1,4 @@
-import { Box, Button, Flex, Grid, GridItem, Heading, Icon, Link, ListItem, OrderedList, Text } from "@chakra-ui/react"
+import { Box, Button, Flex, Grid, GridItem, Heading, Icon, ListItem, OrderedList, Text } from "@chakra-ui/react"
 import { ArrowsClockwise, Hourglass } from "@phosphor-icons/react"
 import React, { useEffect, useMemo, useRef, useState } from "react"
 import { useFormContext } from "react-hook-form"
@@ -13,35 +13,36 @@ import { FileDownloadButton } from "../../../shared/base/file-download-button"
 interface IReportReadyPanelProps {
   onExplore: () => void
   downloadDocument?: IBaseFileAttachment | null
+  pdfForm?: IPdfForm
 }
 
-const ReportReadyPanel: React.FC<IReportReadyPanelProps> = ({ onExplore, downloadDocument }) => {
+const ReportReadyPanel: React.FC<IReportReadyPanelProps> = ({ onExplore, downloadDocument, pdfForm }) => {
   const { t } = useTranslation() as any
   const { getValues } = useFormContext()
   const values = getValues() || {}
+  const formJson = pdfForm?.formJson || values
+
   const addressLines = useMemo(() => {
-    const a = values?.buildingLocation?.address
-    const city = values?.buildingLocation?.city
-    const prov = values?.buildingLocation?.province
-    const postal = values?.buildingLocation?.postalCode
+    const a = formJson?.buildingLocation?.address
+    const city = formJson?.buildingLocation?.city
+    const prov = formJson?.buildingLocation?.province
+    const postal = formJson?.buildingLocation?.postalCode
     return {
       line1: [a, city, prov].filter(Boolean).join(", "),
       line2: postal || "—",
     }
-  }, [getValues])
+  }, [formJson])
+
+  const uploadedDocument = useMemo(() => {
+    return (
+      pdfForm?.overheatingDocuments?.find((doc) => !doc._destroy) ||
+      values?.overheatingDocumentsAttributes?.find((doc) => !doc._destroy)
+    )
+  }, [pdfForm, values])
 
   const uploadedName = useMemo(() => {
-    const url: string | undefined = values?.uploads?.drawingsPdfUrl
-    if (!url) return "—"
-    try {
-      const u = new URL(url)
-      const base = u.pathname.split("/").pop()
-      return base || url
-    } catch {
-      const parts = url.split("/")
-      return parts[parts.length - 1] || url
-    }
-  }, [getValues])
+    return uploadedDocument?.file?.metadata?.filename || "—"
+  }, [uploadedDocument])
 
   return (
     <Box as="form">
@@ -57,7 +58,7 @@ const ReportReadyPanel: React.FC<IReportReadyPanelProps> = ({ onExplore, downloa
           <Text fontWeight="bold" mb={1}>
             {t("singleZoneCoolingHeatingTool.ready.projectNumber")}
           </Text>
-          <Text>{values?.projectNumber || "—"}</Text>
+          <Text>{formJson?.projectNumber || "—"}</Text>
         </Box>
         <GridItem colSpan={2}>
           <Text fontWeight="bold" mb={1}>
@@ -70,23 +71,21 @@ const ReportReadyPanel: React.FC<IReportReadyPanelProps> = ({ onExplore, downloa
           <Text fontWeight="bold" mb={1}>
             {t("singleZoneCoolingHeatingTool.ready.jurisdiction")}
           </Text>
-          <Text>{values?.buildingLocation?.city || "—"}</Text>
+          <Text>{formJson?.buildingLocation?.city || "—"}</Text>
         </GridItem>
         <GridItem colSpan={2}>
           <Text fontWeight="bold" mb={1}>
             {t("singleZoneCoolingHeatingTool.ready.uploadedFiles")}
           </Text>
-          {values?.uploads?.drawingsPdfUrl ? (
-            <Link
-              href={(values.uploads.drawingsPdfUrl as string).split("?")[0]}
-              isExternal
-              color="blue.600"
-              textDecoration="underline"
-              target="_blank"
-              rel="noopener"
+          {uploadedDocument?.id && uploadedDocument.file?.metadata?.filename ? (
+            <FileDownloadButton
+              document={uploadedDocument}
+              modelType={EFileUploadAttachmentType.OverheatingDocument}
+              variant="link"
+              size="sm"
             >
-              {uploadedName}
-            </Link>
+              {t("singleZoneCoolingHeatingTool.ready.downloadPdf")}
+            </FileDownloadButton>
           ) : (
             <Text>{uploadedName}</Text>
           )}
@@ -107,7 +106,7 @@ const ReportReadyPanel: React.FC<IReportReadyPanelProps> = ({ onExplore, downloa
       </Flex>
       <Text fontSize="sm">
         {t("singleZoneCoolingHeatingTool.ready.preferDownload")}{" "}
-        {downloadDocument && values?.projectNumber && (
+        {downloadDocument && formJson?.projectNumber && (
           <FileDownloadButton
             document={downloadDocument}
             modelType={EFileUploadAttachmentType.PdfForm}
@@ -234,7 +233,7 @@ export const ResultForm: React.FC = () => {
           </Button>
         </Box>
       ) : (
-        <ReportReadyPanel onExplore={handleExplore} downloadDocument={downloadDocument} />
+        <ReportReadyPanel onExplore={handleExplore} downloadDocument={downloadDocument} pdfForm={pdfForm} />
       )}
     </Box>
   )

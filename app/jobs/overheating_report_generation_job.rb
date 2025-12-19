@@ -20,15 +20,6 @@ class OverheatingReportGenerationJob
   def perform(pdf_form_id)
     pdf_form = PdfForm.find(pdf_form_id)
 
-    Rails.logger.info "pdf_form.id================================: #{pdf_form.id}"
-    Rails.logger.info "pdf_form.form_json: #{pdf_form.form_json}"
-    Rails.logger.info "pdf_form.form_json.class: #{pdf_form.form_json.class}"
-    Rails.logger.info "pdf_form.form_json.is_a?(Array): #{pdf_form.form_json.is_a?(Array)}"
-    Rails.logger.info "pdf_form.form_json.flatten(1): #{pdf_form.form_json.flatten(1)}"
-    Rails.logger.info "pdf_form.form_json.flatten(1).class: #{pdf_form.form_json.flatten(1).class}"
-    Rails.logger.info "pdf_form.form_json.flatten(1).is_a?(Array): #{pdf_form.form_json.flatten(1).is_a?(Array)}"
-    Rails.logger.info "pdf_form.form_json.flatten(1).map { |v| camelize_hash(v) }: #{pdf_form.form_json.flatten(1).map { |v| camelize_hash(v) }}"
-    Rails.logger.info "pdf_form.form_json.flatten(1).map { |v| camelize_hash(v) }.class: #{pdf_form.form_json.flatten(1).map { |v| camelize_hash(v) }.class}"
     return if pdf_form.blank?
 
     generation_directory_path = Rails.root.join("tmp/files")

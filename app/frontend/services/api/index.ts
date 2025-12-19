@@ -949,12 +949,18 @@ export class Api {
     )
   }
 
-  async createPdfForm(formData: { formJson: any; formType: string; status?: boolean }) {
+  async createPdfForm(formData: {
+    formJson: any
+    formType: string
+    status?: boolean
+    overheatingDocumentsAttributes?: any[]
+  }) {
     return this.client.post<ApiResponse<any>>("/pdf_forms", {
       pdfForm: {
         formJson: formData.formJson,
         formType: formData.formType,
         status: formData.status ?? true,
+        overheatingDocumentsAttributes: formData.overheatingDocumentsAttributes,
       },
     })
   }
@@ -997,11 +1003,12 @@ export class Api {
     )
   }
 
-  async updatePdfForm(id: string, data: { formJson?: any; status?: boolean }) {
+  async updatePdfForm(id: string, data: { formJson?: any; status?: boolean; overheatingDocumentsAttributes?: any[] }) {
     return this.client.put<ApiResponse<any>>(`/pdf_forms/${id}`, {
       pdfForm: {
         formJson: data.formJson,
         status: data.status,
+        overheatingDocumentsAttributes: data.overheatingDocumentsAttributes,
       },
     })
   }

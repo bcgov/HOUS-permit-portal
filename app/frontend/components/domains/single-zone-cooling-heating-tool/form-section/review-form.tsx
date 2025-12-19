@@ -59,11 +59,12 @@ export const ReviewForm = observer(function ReviewForm() {
   const { pdfFormStore } = useMst()
 
   const generate = async () => {
-    const formData = getValues()
+    const { overheatingDocumentsAttributes, ...formData } = getValues()
     const result = await pdfFormStore.createPdfForm({
       formJson: formData,
       formType: "single_zone_cooling_heating_tool",
       status: true,
+      overheatingDocumentsAttributes,
     })
     if ((result as any)?.success) {
       window.location.href = "#result"
