@@ -1,4 +1,4 @@
-class TemplateExportService
+class TemplateReportingService
   attr_accessor :template_version, :customizations
 
   def initialize(

@@ -167,6 +167,10 @@ const options = {
           card2Body: "Consistent application forms, even when rules vary by community",
           card3Title: "Track progress and talk to reviewers",
           card3Body: "Stay up to date and respond to building officials directly, all in one place",
+          helpShapeTitle: "Help shape standard permit application materials",
+          helpShapeBody:
+            "We are collaborating with local governments and First Nations across BC to develop standard permit application materials. We invite you to review the forms, requirements, and guidance and share your feedback.",
+          reviewMaterials: "Review materials",
           underDevelopmentTitle: "Share your feedback on permit applications under development",
           underDevelopmentBody:
             "We’re co-developing standard permit classifications with local governments and First Nations across BC. These drafts are available for review and discussion as we continue this work together.",
@@ -179,6 +183,97 @@ const options = {
           part9ChecklistsBody:
             "These checklists help you gather the right documents and prepare your application for small buildings that fall under Part 9 of the BC Building Code (up to 3 storeys, fewer than 600m²).",
           part9ChecklistsLink: "Part 9 checklists (PDF)",
+        },
+        standardizationPreview: {
+          title: "Standard permit application materials",
+          subtitle: "Review and provide feedback on permit application materials under development",
+          previewDraftForm: "Preview",
+          about: {
+            title: "About this work",
+            description1:
+              "Building Permit Hub is working with BC communities to bring more clarity and consistency to building permit application materials.",
+            description2:
+              "We are developing shared forms and guidance that communities can choose to adopt. Feedback from local governments and First Nations helps shape these materials so they meet local needs. Published and draft versions are available for review.",
+          },
+          resources: {
+            title: "Creating shared, common permitting resources",
+            description:
+              "We’re working with local governments and First Nations to develop shared application materials for many permit types. This work includes creating common versions of the following materials.",
+            forms: {
+              title: "Application forms",
+              description: "A consistent structure with clear, plain-language questions.",
+            },
+            checklists: {
+              title: "Requirement checklists",
+              description: "Permit requirements written in a clear format, easy to read at a glance.",
+            },
+            drawing: {
+              title: "Drawing content",
+              description: "Guidance on how to prepare and organize design documents and drawings.",
+            },
+            terminology: {
+              title: "Terminology and definitions",
+              description:
+                "Shared language to create consistency for applicants working across multiple jurisdictions.",
+            },
+          },
+          voluntaryUse: {
+            title: "Voluntary use of standard permit application materials",
+            description1:
+              "Communities can choose to adopt the shared forms and are invited to provide feedback to help refine them. You may hear this work described as standardization. In this context, standardization refers only to the application materials, not to permitting processes. Local governments continue to use their own review methods and make their own decisions.",
+          },
+          benefits: {
+            title: "Benefits for applicants and local governments",
+            description:
+              "Clear, consistent application materials help applicants understand what to submit and support smoother reviews. Building Permit Hub’s catalogue of standard forms does not change local government processes and authority.",
+            applicants: {
+              title: "Applicants and industry",
+              list: [
+                "Clearer questions and requirements",
+                "Shorter application forms",
+                "More consistent expectations about what to submit",
+                "Clearer guidance on drawings and attachments",
+                "Less guesswork when preparing applications",
+              ],
+            },
+            localGovernments: {
+              title: "Local governments and First Nations",
+              list: [
+                "Clearer and more complete submissions",
+                "Shared terminology across forms and requirements",
+                "Submitted information presented in consistent formats",
+              ],
+            },
+          },
+          feedback: {
+            title: "Share your feedback and stay informed",
+            description:
+              "You can help shape the standard forms, checklists, and guidance in development by reviewing drafts and sending us your feedback.",
+            email: "Email feedback to: ",
+            emailAddress: "digital.codes.permits@gov.bc.ca",
+            demo: {
+              title: "Demo sessions and engagement opportunities",
+              description:
+                "The Building Permit Hub team hosts regular public demos where we share updates, walk through early designs, and invite discussion. These sessions help us understand how the materials work for applicants, industry, and communities across BC.",
+              link: "Sign up for the public demo mailing list",
+            },
+          },
+          explore: {
+            title: "Explore standard permit application forms",
+            description:
+              "You are invited to review and provide feedback on the draft forms, requirements, and guidance for the permit types currently available in Building Permit Hub.",
+            smallScale: {
+              title: "Small-scale projects only",
+              description:
+                "Building Permit Hub currently supports permits for small-scale projects. This includes residential buildings, small structures, trades permits, and site work.",
+            },
+          },
+          availableForAdoption: {
+            title: "Published permits available for adoption",
+          },
+          underDevelopment: {
+            title: "Permit application materials under development",
+          },
         },
         ui: {
           updatedAt: "Updated at",
@@ -3836,12 +3931,12 @@ Thank you,
             enabled: "Enabled",
             category: "Category",
           },
-          landingPageSetup: {
-            title: "Landing page setup",
-            description: "Select the open access previews that will be displayed on the landing page.",
+          standardizationPageSetup: {
+            title: "Standardization preview page setup",
+            description: "Select the open access previews that will be displayed on the standardization preview page.",
             selectOpenAccessPreviews:
-              "Set open access previews to display on the front page. Select from the available public access previews below.",
-            smallScale: "Set as Small Scale New Contruction Preview on landing page",
+              "Set open access previews to display on the standardization preview page. Select from the available public access previews below.",
+            smallScale: "Set as Small Scale New Contruction Preview on standardization preview page",
             fourPlus: "Set as Four Plus New Construction Preview",
           },
           globalFeatureAccess: {
@@ -4079,6 +4174,10 @@ Thank you,
                 label: "For local governments",
                 description: "Information for local governments interested in joining Building Permit Hub",
               },
+              standardPermitApplicationMaterials: {
+                label: "Standard permit application materials",
+                description: "Review and provide feedback on permit application materials under development",
+              },
             },
           },
           govFeedbackResponseNoReasons: {
@@ -4259,6 +4358,8 @@ Thank you,
           privacyPolicyContactUsEmail: "Email:",
           privacyPolicyContactUsEmailAddress: "digital.codes.permits@gov.bc.ca",
           breadcrumb: {
+            standardizationSetup: "Standardization setup",
+            standardizationPreview: "Standardization preview",
             preCheck: "Pre-check",
             projects: "Projects",
             checkDigitalSeals: "Check digital seals",
@@ -4308,7 +4409,6 @@ Thank you,
             apiMappings: "API mappings",
             manageMapping: "Manage mapping",
             revisionReasonSetup: "Revision reason setup",
-            landingSetup: "Landing setup",
             acceptInvitation: "Accept invitation",
             eula: "End user license agreement",
             earlyAccess: "Early access",

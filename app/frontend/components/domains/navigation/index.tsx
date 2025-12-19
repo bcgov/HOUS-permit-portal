@@ -45,6 +45,12 @@ const LoginScreen = lazy(() =>
 
 const HomeScreen = lazy(() => import("../home").then((module) => ({ default: module.HomeScreen })))
 
+const StandardizationPreviewScreen = lazy(() =>
+  import("../landing/standardization-preview-screen").then((module) => ({
+    default: module.StandardizationPreviewScreen,
+  }))
+)
+
 const ConfigurationManagementScreen = lazy(() =>
   import("../home/review-manager/configuration-management-screen").then((module) => ({
     default: module.ConfigurationManagementScreen,
@@ -303,9 +309,9 @@ const RevisionReasonSetupScreen = lazy(() =>
   }))
 )
 
-const LandingSetupScreen = lazy(() =>
-  import("../super-admin/site-configuration-management/landing-setup-screen").then((module) => ({
-    default: module.LandingSetupScreen,
+const StandardizationSetupScreen = lazy(() =>
+  import("../super-admin/site-configuration-management/standardization-setup-screen").then((module) => ({
+    default: module.StandardizationSetupScreen,
   }))
 )
 
@@ -508,7 +514,7 @@ const AppRoutes = observer(() => {
       <Route path="/configuration-management/sitewide-message" element={<SitewideMessageScreen />} />
       <Route path="/configuration-management/help-drawer-setup" element={<HelpDrawerSetupScreen />} />
       <Route path="/configuration-management/revision-reason-setup" element={<RevisionReasonSetupScreen />} />
-      <Route path="/configuration-management/landing-setup" element={<LandingSetupScreen />} />
+      <Route path="/configuration-management/standardization-setup" element={<StandardizationSetupScreen />} />
       <Route path="/configuration-management/users" element={<AdminUserIndexScreen />} />
       <Route path="/configuration-management/global-feature-access" element={<AdminGlobalFeatureAccessScreen />} />
       <Route
@@ -800,6 +806,7 @@ const AppRoutes = observer(() => {
         {/* Public Routes */}
         <Route path="/accept-invitation" element={<AcceptInvitationScreen />} />
         <Route path="/contact" element={<ContactScreen />} />
+        <Route path="/standardization-preview" element={<StandardizationPreviewScreen />} />
         <Route path="/project-readiness-tools" element={<ProjectReadinessToolsIndexScreen />} />
         <Route
           path="/project-readiness-tools/single-zone-cooling-heating-tool"

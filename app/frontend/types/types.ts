@@ -224,6 +224,7 @@ export interface IDenormalizedRequirementTemplateSection {
 export interface IDenormalizedTemplate {
   id: string
   label: string
+  nickname: string
   description?: string
   permitType: IPermitType
   activity: IActivity

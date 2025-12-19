@@ -105,7 +105,7 @@ export function getEnergyStepCodeRequirementRequiredSchema(
   const requirementCodeToSchema: Record<EEnergyStepCodeDependencyRequirementCode, IRequirementAttributes> = {
     [EEnergyStepCodeDependencyRequirementCode.energyStepCodeMethod]: {
       requirementCode: EEnergyStepCodeDependencyRequirementCode.energyStepCodeMethod,
-      inputType: ERequirementType.select,
+      inputType: ERequirementType.radio,
       label: t("requirementsLibrary.modals.stepCodeDependencies.energyStepCodeMethod.label"),
       inputOptions: {
         valueOptions: [
@@ -171,7 +171,7 @@ export function getEnergyStepCodePart3RequirementRequiredSchema(
   const requirementCodeToSchema: Record<EEnergyStepCodePart3DependencyRequirementCode, IRequirementAttributes> = {
     [EEnergyStepCodePart3DependencyRequirementCode.energyStepCodeMethod]: {
       requirementCode: EEnergyStepCodePart3DependencyRequirementCode.energyStepCodeMethod,
-      inputType: ERequirementType.select,
+      inputType: ERequirementType.radio,
       label: t("requirementsLibrary.modals.stepCodeDependencies.energyStepCodeMethod.label"),
       inputOptions: {
         valueOptions: [
@@ -224,7 +224,7 @@ export function getArchitecturalDrawingRequirementRequiredSchema(
   const requirementCodeToSchema: Record<EArchitecturalDrawingDependencyRequirementCode, IRequirementAttributes> = {
     [EArchitecturalDrawingDependencyRequirementCode.architecturalDrawingMethod]: {
       requirementCode: EArchitecturalDrawingDependencyRequirementCode.architecturalDrawingMethod,
-      inputType: ERequirementType.select,
+      inputType: ERequirementType.radio,
       label: t("requirementsLibrary.modals.architecturalDrawing.dependencies.method.label"),
       inputOptions: {
         valueOptions: [

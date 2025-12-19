@@ -238,7 +238,7 @@ class Api::TemplateVersionsController < Api::ApplicationController
   def download_summary_csv
     authorize @template_version
 
-    csv_data = TemplateExportService.new(@template_version).summary_csv
+    csv_data = TemplateReportingService.new(@template_version).summary_csv
     send_data csv_data, type: "text/csv"
   end
 
@@ -246,7 +246,7 @@ class Api::TemplateVersionsController < Api::ApplicationController
     authorize @template_version
 
     csv_data =
-      TemplateExportService.new(
+      TemplateReportingService.new(
         @template_version,
         @jurisdiction_template_version_customization
       ).to_csv
@@ -257,7 +257,7 @@ class Api::TemplateVersionsController < Api::ApplicationController
     authorize @template_version
 
     json_data =
-      TemplateExportService.new(
+      TemplateReportingService.new(
         @template_version,
         @jurisdiction_template_version_customization
       ).to_json

@@ -77,7 +77,7 @@ en:
           attributes:
             public:
               true_on_early_access_only: "can only be true for early access"
-              landing_published_requires_public: "cannot be set to false because a site configuration is set to use this template on the landing page."
+              standardization_published_requires_public: "cannot be set to false because a site configuration is set to use this template on the standardization preview page."
             template_versions:
               published_required_for_early_access: "requires one or less published template version on early access"
         requirement_block:
