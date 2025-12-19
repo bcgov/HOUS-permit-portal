@@ -69,9 +69,16 @@ export const CoverSheetForm = () => {
     const hasVal = (v: any) => v !== undefined && v !== null && String(v).toString().trim() !== ""
     const valid = requiredFields.every((p) => hasVal(getNested(values, p)))
     setCanContinue(valid)
+    // [OVERHEATING REVIEW] Mini-lesson: avoid “window event bus” for app state.
+    // This custom event is acting like a global state channel. It’s hard to type, hard to test, and easy to break.
+    // Prefer lifting “section completion” into a store (MST) or a parent component state and passing it down.
     window.dispatchEvent(new CustomEvent("szch:section", { detail: { key: "coverSheet", complete: valid } }))
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allValues])
+
+  // [OVERHEATING REVIEW] Reuse opportunity: this “required field completion” pattern repeats across sections.
+  // Consider extracting a small hook like `useSectionCompletion({ key, requiredPaths, getValues })`
+  // to remove repeated `getNested/hasVal + dispatch` logic.
 
   // Keep calculationPerformedBy.name in sync with first/last name fields
   const firstName = watch("calculationPerformedBy.firstName") as string

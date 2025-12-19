@@ -28,6 +28,8 @@ class OverheatingReportGenerationJob
     # Check if the directory exists, and if not, create it
     unless File.directory?(generation_directory_path)
       FileUtils.mkdir_p(generation_directory_path)
+      # [OVERHEATING REVIEW] Mini-lesson: jobs should log via `Rails.logger` not `puts`.
+      # `puts` may not show up where you expect (and can be noisy); `Rails.logger` is structured.
       puts "Directory created: #{generation_directory_path}"
     end
 
@@ -50,6 +52,12 @@ class OverheatingReportGenerationJob
     # Convert form_json to proper hash if it's in array format
     form_json_data =
       if pdf_form.form_json.is_a?(Array)
+        # [OVERHEATING REVIEW] Mini-lesson: understand your data shape (don’t “guess until it works”).
+        # This kind of “maybe it’s an Array, maybe it’s a Hash” code is often AI slop: it papers over
+        # the real question (what does `form_json` *actually* contain?).
+        #
+        # In this codebase, having a clear, stable contract (and giving a smart AI model a concrete example
+        # of the real payload) goes a long way—prefer making `form_json` consistently a Hash at the source.
         Hash[*pdf_form.form_json.flatten(1)]
       else
         pdf_form.form_json
@@ -71,8 +79,17 @@ class OverheatingReportGenerationJob
   def store_pdf(pdf_form, path, application_filename)
     return unless File.exist?(path) && File.size(path).positive?
 
+    # [OVERHEATING REVIEW] Mini-lesson: what actually “uploads” to S3 here?
+    # `include FileUploader.Attachment(:pdf_file)` wires PdfForm into Shrine.
+    # When you do `pdf_form.update!(pdf_file: file)` it updates `pdf_file_data` and triggers Shrine’s
+    # promotion/upload pipeline (similar to how `PdfGenerationJob` does `doc.update(file:)` for SupportingDocument).
+    # That’s the “magic” you want—so don’t bypass it with manual S3 calls.
+    #
+    # Note: `application_filename` is unused; either remove it or use it as part of metadata/notifications.
     File.open(path, "rb") { |file| pdf_form.update!(pdf_file: file) }
   ensure
+    # [OVERHEATING REVIEW] Good instinct cleaning up tmp files. Consider also removing
+    # stale/partial PDFs before generation (see PdfGenerationJob) so you never upload old output.
     FileUtils.rm_f(path)
   end
 
@@ -82,6 +99,9 @@ class OverheatingReportGenerationJob
     json_filename =
       "#{generation_directory_path}/pdf_json_data_#{SecureRandom.hex(8)}.json"
 
+    # [OVERHEATING REVIEW] Mini-lesson: avoid copy/pasting infra helpers.
+    # This job duplicates logic from `PdfGenerationJob` and `PdfRenderer` (write temp JSON, run node renderer, cleanup).
+    # Prefer using the shared concern (`app/jobs/concerns/pdf_renderer.rb`) so behavior stays consistent.
     File.open(json_filename, "w") { |file| file.write(pdf_json_data) }
 
     stdout_lines = []
@@ -95,11 +115,14 @@ class OverheatingReportGenerationJob
       chdir: Rails.root.to_s
     ) do |stdin, stdout, stderr, wait_thr|
       stdout.each_line do |line|
+        # [OVERHEATING REVIEW] Prefer `Rails.logger.info(line)` so Sidekiq logs are consistent
+        # and can be filtered. Also consider redacting large JSON if it ever appears here.
         puts line
         stdout_lines << line.chomp
       end
 
       stderr.each_line do |line|
+        # [OVERHEATING REVIEW] Same logging note: use Rails.logger.error for stderr.
         puts line
         stderr_lines << line.chomp
       end
@@ -124,6 +147,9 @@ class OverheatingReportGenerationJob
         err = "Pdf generation process failed:\n#{error_details.join("\n")}"
         Rails.logger.error err
 
+        # [OVERHEATING REVIEW] Mini-lesson: retries + failure modes.
+        # Raising here will retry the job, which is good, but consider also recording failure state on PdfForm
+        # so the UI can show a helpful message without hunting Sidekiq logs.
         raise err
       end
     end

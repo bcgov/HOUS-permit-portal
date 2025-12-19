@@ -25,6 +25,13 @@ function getSectionObject(formData: any, sectionKey: string): any | undefined {
   if (direct !== undefined) return direct
 
   // Fuzzy match: compare alphanumeric-only lowercased keys
+  // [OVERHEATING REVIEW] Lead note: this is likely AI-generated slop (and it fights our stack).
+  // We already have an established convention: frontend uses camelCase, backend uses snake_case, and
+  // our API layer handles conversion between them. We should NOT need “fuzzy key matching” anywhere.
+  //
+  // Heuristics like this can hide real bugs (wrong key names) and make behavior unpredictable.
+  // Prefer removing this and relying on the existing key-conversion system.
+  // Can you explain why this is needed and what it's trying to solve?
   const normalize = (s: string) => (s || "").toLowerCase().replace(/[^a-z0-9]/g, "")
   const target = normalize(sectionKey)
   for (const key of Object.keys(formData)) {

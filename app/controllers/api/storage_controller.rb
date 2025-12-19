@@ -26,6 +26,12 @@ class Api::StorageController < Api::ApplicationController
   }.freeze
 
   def download
+    # [OVERHEATING REVIEW] Mini-lesson: centralized download entrypoint.
+    # This controller already provides a consistent pattern: authorize the model instance,
+    # then return a presigned URL (`file_url`) for the browser to download.
+    #
+    # Given that, consider whether `/api/pdf_forms/:id/download` should exist at all,
+    # or if PdfForm downloads should exclusively go through this path for consistency.
     authorize @record
     render json: { url: @record.file_url }, status: :ok
   end
