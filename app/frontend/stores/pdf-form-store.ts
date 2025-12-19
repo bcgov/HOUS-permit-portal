@@ -9,6 +9,12 @@ export enum EPdfFormSortFields {
   address = "address",
 }
 
+// [OVERHEATING REVIEW] Mini-lesson: avoid duplicate/conflicting enums.
+// There is also an `EPdfFormSortFields` in `app/frontend/types/enums.ts` with different values.
+// Pick one source of truth (usually `types/enums.ts`) so sort behavior + column labels don’t drift.
+//
+// Bonus: if the backend eventually supports server-side sort, keep the enum values aligned with
+// the API query params (e.g. `createdAt`, `projectNumber`, etc.).
 export const PdfFormStoreModel = types
   .model("PdfFormStoreModel", {
     pdfFormsMap: types.map(PdfFormModel),
@@ -29,6 +35,17 @@ export const PdfFormStoreModel = types
   })
   .extend(withEnvironment())
   .extend(withRootStore())
+  // [OVERHEATING REVIEW] Lead note: this store should probably adopt our standard search model pattern.
+  // Example: `JurisdictionStoreModel` composes `createSearchModel(...)` which gives query/sort/pagination helpers
+  // and a consistent URL-sync story:
+  // - `app/frontend/lib/create-search-model.ts`
+  // - `app/frontend/stores/jurisdiction-store.ts`
+  //
+  // If PdfForms are meant to be searchable/filterable, composing `createSearchModel` here will remove
+  // a lot of hand-rolled pagination/sort code and make the UI behavior consistent across the app.
+  //
+  // Also: “PdfForm” is very generic naming. Consider a more specific domain name (e.g. `OverheatingForm`,
+  // `SingleZoneCoolingHeatingForm`) so intent is obvious across backend + frontend.
   .views((self) => ({
     get pdfForms(): IPdfForm[] {
       return Array.from(self.pdfFormsMap.values()).sort((a, b) => {
@@ -116,6 +133,9 @@ export const PdfFormStoreModel = types
           params.query = self.query.trim()
         }
 
+        // [OVERHEATING REVIEW] Lead note: “correctly using the search concern + createSearchModel solves this”.
+        // Once the backend uses the standard search concern pattern (and returns `meta`), this store can simply
+        // call the search action and use `setPageFields(response.data.meta, opts)` like JurisdictionStore does.
         const response = yield self.environment.api.getPdfForms(params)
         if (response.ok) {
           const pdfForms = response.data.data || []
@@ -221,6 +241,8 @@ export const PdfFormStoreModel = types
         return yield searchPdfForms()
       }),
       generatePdf: flow(function* (id: string) {
+        // [OVERHEATING REVIEW] Mini-lesson: avoid stray console logging in production UI flows.
+        // Prefer NotificationStore/UI feedback and rely on backend/job status for observability.
         console.log("Generating PDF for form:", id)
         self.isLoading = true
         try {

@@ -69,6 +69,9 @@ export const InputSummaryForm = () => {
     const ok = requiredFields.every((path) => hasVal(getNested(values, path)))
     setCanContinue(ok)
     clearErrors()
+    // [OVERHEATING REVIEW] Mini-lesson: centralize section completion logic.
+    // This same “requiredFields + hasVal + getNested + window event” logic is repeated in other sections.
+    // Extracting a hook/helper keeps bugs fixed in one place and makes future form additions easier.
     window.dispatchEvent(new CustomEvent("szch:section", { detail: { key: "inputSummary", complete: ok } }))
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [all])

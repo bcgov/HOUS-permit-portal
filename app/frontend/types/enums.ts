@@ -683,6 +683,16 @@ export enum EPermitProjectSortFields {
 }
 
 export enum EPdfFormSortFields {
+  // [OVERHEATING REVIEW] Mini-lesson: enum values should represent stable keys, not display labels.
+  // Right now these are human-readable strings (good for UI), but the store also has another enum
+  // with key-like values (`createdAt`, `projectNumber`, `address`). Mixing both makes it hard to
+  // implement server-side sorting later.
+  //
+  // Lead note: look at other enums here — they use snake_case values.
+  // That’s intentional: we can use enum values as i18n keys and render labels via `t(...)`
+  // (see `JurisdictionStoreModel#getSortColumnHeader` using `t()` + `toCamelCase(field)`).
+  //
+  // Consider: make these values snake_case “keys”, and translate them in i18n rather than embedding labels here.
   projectNumber = "Project reference number",
   buildingLocationAddress = "Address",
   createdAt = "Last Modified",

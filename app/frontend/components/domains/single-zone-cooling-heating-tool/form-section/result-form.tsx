@@ -145,6 +145,11 @@ export const ResultForm: React.FC = () => {
             mimeType: "application/pdf",
           },
         } as any)
+      // [OVERHEATING REVIEW] Mini-lesson: avoid fabricating “file_data” shapes.
+      // Downloads are driven by `modelType + document.id` (StorageController), not by `file.id`,
+      // so this works — but it can hide backend contract issues (e.g. missing `pdfFileData`).
+      // Prefer having the API return the real `pdfFileData` once generation completes and render
+      // the “Download” UI based on that.
       return {
         id: form.id,
         file: fileData,
@@ -163,6 +168,9 @@ export const ResultForm: React.FC = () => {
       if (!pdfForm.pdfFileData && lastRequestedPdfIdRef.current !== id) {
         lastRequestedPdfIdRef.current = id
         try {
+          // [OVERHEATING REVIEW] Mini-lesson: async jobs need polling/refresh semantics.
+          // `generatePdf` just queues a Sidekiq job; it likely won’t return `pdfFileData` immediately.
+          // Consider: enqueue -> show “Generating…” -> poll `getPdfForms` or a `show` endpoint until ready.
           const response = await pdfFormStore.generatePdf(id)
           if (response.success && response.data?.data) {
             pdfFormStore.setPdfForm(response.data.data)

@@ -10,6 +10,11 @@ interface PDFComponentProps {
   assetDirectoryPath: string
 }
 
+// [OVERHEATING REVIEW] Mini-lesson: keep PDF rendering components small and reusable.
+// This file is doing layout primitives + domain rendering in one place. Consider extracting shared PDF atoms
+// (Checkbox, LabeledCheckboxBox, header layout) into `app/frontend/components/shared/pdf/` so other forms can reuse them.
+//
+// Also note: we already introduced `BasePDFForm` — consider using it here (or delete it) to avoid dead abstractions.
 const Checkbox: React.FC<{ checked?: boolean; text: string }> = ({ checked = false, text }) => (
   <View style={{ flexDirection: "row", alignItems: "center", marginLeft: 20 }}>
     <View style={checked ? styles.checkboxChecked : styles.checkbox}>

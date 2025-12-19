@@ -25,6 +25,14 @@ export const PdfFormGridRow = observer(function PdfFormGridRow({
     let cancelled = false
     const check = async () => {
       try {
+        // [OVERHEATING REVIEW] Mini-lesson: avoid using `HEAD` against a download endpoint.
+        // Rails will route HEAD -> the same controller action, which can still do heavy work
+        // (and here it may even read the file). Prefer a lightweight “status” field from the API
+        // (e.g. `pdfFileData` present / `status` enum) or a dedicated metadata endpoint.
+        //
+        // Lead note: we also generally avoid `fetch` directly inside `useEffect` in this codebase.
+        // Prefer store actions (MST flows), or a shared utility/service method, so side effects are centralized
+        // and errors/loading are handled consistently.
         const res = await fetch(`/api/pdf_forms/${pdfForm.id}/download`, { method: "HEAD" })
         if (!cancelled) setHasPdf(res.ok)
       } catch (_) {
@@ -86,6 +94,9 @@ export const PdfFormGridRow = observer(function PdfFormGridRow({
                 <>
                   <ManageMenuItemButton
                     leftIcon={<ArrowSquareOut size={16} />}
+                    // [OVERHEATING REVIEW] Mini-lesson: reuse the centralized download component.
+                    // Elsewhere we use `FileDownloadButton` -> `downloadFileFromStorage` (presigned URL + consistent errors).
+                    // `window.open` bypasses that and can produce confusing blank tabs on 403/404.
                     onClick={() => window.open(`/api/pdf_forms/${pdfForm.id}/download`, "_blank", "noopener")}
                   >
                     Open
