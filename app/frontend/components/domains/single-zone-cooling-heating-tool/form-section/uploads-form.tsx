@@ -28,10 +28,19 @@ import { EFileUploadAttachmentType } from "../../../../types/enums"
 import { formatBytes } from "../../../../utils/utility-functions"
 import { FileDownloadButton } from "../../../shared/base/file-download-button"
 
+import { useSectionCompletion } from "../../../../hooks/use-section-completion"
+
 export const UploadsForm: React.FC = () => {
   const { t } = useTranslation() as any
-  const { setValue, watch, control } = useFormContext()
+  const { watch, control } = useFormContext()
   const [isUploading, setIsUploading] = useState(false)
+
+  const validate = React.useCallback((values: any) => {
+    const docs = values?.overheatingDocumentsAttributes || []
+    return docs.some((doc: any) => !doc._destroy)
+  }, [])
+
+  useSectionCompletion({ key: "uploads", validate })
 
   const { fields, append, update } = useFieldArray({
     control,

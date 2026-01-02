@@ -26,13 +26,14 @@ import { ContactModal } from "../../shared/contact/contact-modal"
 import { DatePickerFormControl, TextFormControl } from "../../shared/form/input-form-control"
 import { BuildingLocationFields } from "./building-location-fields"
 
+import { useSectionCompletion } from "../../../hooks/use-section-completion"
+
 export const CoverSheetForm = () => {
   const { t } = useTranslation() as any
   const prefix = "singleZoneCoolingHeatingTool.coverSheet"
-  const { setValue, watch, getValues, register, formState } = useFormContext()
+  const { setValue, watch, register, formState } = useFormContext()
   const { errors } = formState as any
   const { isOpen: isContactsOpen, onOpen: onContactsOpen, onClose: onContactsClose } = useDisclosure()
-  const [canContinue, setCanContinue] = React.useState(false)
 
   const requiredFields = React.useMemo(
     () => [
@@ -62,23 +63,7 @@ export const CoverSheetForm = () => {
     []
   )
 
-  const allValues = watch()
-  React.useEffect(() => {
-    const values = getValues()
-    const getNested = (obj: any, path: string) => path.split(".").reduce((o, k) => (o ? o[k] : undefined), obj)
-    const hasVal = (v: any) => v !== undefined && v !== null && String(v).toString().trim() !== ""
-    const valid = requiredFields.every((p) => hasVal(getNested(values, p)))
-    setCanContinue(valid)
-    // [OVERHEATING REVIEW] Mini-lesson: avoid “window event bus” for app state.
-    // This custom event is acting like a global state channel. It’s hard to type, hard to test, and easy to break.
-    // Prefer lifting “section completion” into a store (MST) or a parent component state and passing it down.
-    window.dispatchEvent(new CustomEvent("szch:section", { detail: { key: "coverSheet", complete: valid } }))
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allValues])
-
-  // [OVERHEATING REVIEW] Reuse opportunity: this “required field completion” pattern repeats across sections.
-  // Consider extracting a small hook like `useSectionCompletion({ key, requiredPaths, getValues })`
-  // to remove repeated `getNested/hasVal + dispatch` logic.
+  const canContinue = useSectionCompletion({ key: "coverSheet", requiredFields })
 
   // Keep calculationPerformedBy.name in sync with first/last name fields
   const firstName = watch("calculationPerformedBy.firstName") as string

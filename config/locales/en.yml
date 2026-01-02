@@ -722,6 +722,9 @@ en:
         title: "Error"
         message: 404 - The requested resource could not be found
     pdf_form:
+      generate_queued:
+        title: ""
+        message: "PDF generation has been queued."
       create_success:
         title: ""
         message: "PDF form saved successfully!"

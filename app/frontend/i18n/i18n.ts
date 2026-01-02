@@ -4622,6 +4622,11 @@ Thank you,
               designSummary: "Design summary",
               roomByRoomResults: "Room by room results",
             },
+            fields: {
+              projectNumber: "Project number",
+              buildingLocationAddress: "Building location address",
+              createdAt: "Created at",
+            },
             notes: "Notes",
             other: "Other",
             calculationPerformedBy: {

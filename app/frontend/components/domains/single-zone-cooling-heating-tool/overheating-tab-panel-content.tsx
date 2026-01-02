@@ -25,7 +25,7 @@ import * as R from "ramda"
 import React, { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../setup/root"
-import { EFlashMessageStatus, EPdfFormSortFields } from "../../../types/enums"
+import { EFlashMessageStatus } from "../../../types/enums"
 import { CustomMessageBox } from "../../shared/base/custom-message-box"
 import { Paginator } from "../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../shared/base/inputs/per-page-select"
@@ -41,11 +41,22 @@ export const OverheatingTabPanelContent = observer(() => {
   const { pdfFormStore } = useMst()
   const [statusChoice, setStatusChoice] = useState<string>(pdfFormStore.statusFilter)
   const { isOpen, onOpen, onClose } = useDisclosure()
-  const { isSearching, tablePdfForms, searchPdfForms, countPerPage, totalCount, currentPage, totalPages } = pdfFormStore
+  const {
+    isLoading,
+    tablePdfForms,
+    search,
+    countPerPage,
+    totalCount,
+    currentPage,
+    totalPages,
+    handleCountPerPageChange,
+    handlePageChange,
+  } = pdfFormStore
 
   useEffect(() => {
-    // Initial load: page 1, 10 per page
-    searchPdfForms({ page: 1, countPerPage: 10 })
+    // Initial load: sync with URL or use defaults
+    pdfFormStore.syncWithUrl()
+    search({ page: 1, countPerPage: 10 })
   }, [])
 
   const archivePdf = async (id: string) => {
@@ -107,7 +118,8 @@ export const OverheatingTabPanelContent = observer(() => {
                           w="full"
                           variant="primary"
                           onClick={() => {
-                            ;(pdfFormStore as any).setStatusFilter(statusChoice as any)
+                            pdfFormStore.setStatusFilter(statusChoice as any)
+                            search({ page: 1 })
                             onClose()
                           }}
                         >
@@ -128,9 +140,9 @@ export const OverheatingTabPanelContent = observer(() => {
             </Flex>
           </Flex>
           <SearchGrid templateColumns={OVERHEATING_GRID_TEMPLATE_COLUMNS} gridRowClassName="project-grid-row">
-            <GridHeaders columns={Object.values(EPdfFormSortFields)} includeActionColumn />
+            <GridHeaders includeActionColumn />
 
-            {isSearching ? (
+            {isLoading ? (
               <Flex gridColumn="span 6" justify="center" align="center" minH="200px">
                 <SharedSpinner />
               </Flex>
@@ -148,14 +160,12 @@ export const OverheatingTabPanelContent = observer(() => {
                   const pn = (pdfForm as any)?.formJson?.projectNumber
                   return pn !== undefined && pn !== null && String(pn).toString().trim() !== ""
                 })
-                .map((pdfForm) => (
-                  <PdfFormGridRow onArchivePdf={archivePdf} isGenerating={false} key={pdfForm.id} pdfForm={pdfForm} />
-                ))
+                .map((pdfForm) => <PdfFormGridRow onArchivePdf={archivePdf} key={pdfForm.id} pdfForm={pdfForm} />)
             )}
           </SearchGrid>
           <Flex w={"full"} justifyContent={"space-between"}>
             <PerPageSelect
-              handleCountPerPageChange={(pdfFormStore as any).handleCountPerPageChange}
+              handleCountPerPageChange={handleCountPerPageChange}
               countPerPage={countPerPage}
               totalCount={totalCount}
             />
@@ -164,7 +174,7 @@ export const OverheatingTabPanelContent = observer(() => {
               total={totalCount}
               totalPages={totalPages}
               pageSize={countPerPage}
-              handlePageChange={(pdfFormStore as any).handlePageChange}
+              handlePageChange={handlePageChange}
               showLessItems={true}
             />
           </Flex>

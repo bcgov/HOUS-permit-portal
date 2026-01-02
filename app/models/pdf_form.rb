@@ -16,6 +16,12 @@ class PdfForm < ApplicationRecord
 
   validates :form_type, inclusion: { in: FORM_TYPES.keys }
 
+  attribute :pdf_generation_status, :integer, default: 0
+  enum :pdf_generation_status,
+       { not_started: 0, queued: 1, generating: 2, completed: 3, failed: 4 },
+       default: :not_started,
+       prefix: true
+
   def pdf_file_url
     return nil unless pdf_file
 

@@ -1,7 +1,7 @@
 class PdfFormBlueprint < Blueprinter::Base
   identifier :id
 
-  fields :form_type, :status, :created_at
+  fields :form_type, :status, :created_at, :pdf_generation_status
 
   field :form_json
   field :pdf_file_data

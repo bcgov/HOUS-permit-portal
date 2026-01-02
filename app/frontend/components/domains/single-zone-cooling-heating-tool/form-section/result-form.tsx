@@ -1,12 +1,13 @@
 import { Box, Button, Flex, Grid, GridItem, Heading, Icon, ListItem, OrderedList, Text } from "@chakra-ui/react"
 import { ArrowsClockwise, Hourglass } from "@phosphor-icons/react"
+import { observer } from "mobx-react-lite"
 import React, { useEffect, useMemo, useRef, useState } from "react"
 import { useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { IPdfForm } from "../../../../models/pdf-form"
 import { useMst } from "../../../../setup/root"
-import { EFileUploadAttachmentType } from "../../../../types/enums"
+import { EFileUploadAttachmentType, EPdfGenerationStatus } from "../../../../types/enums"
 import { IBaseFileAttachment } from "../../../../types/types"
 import { FileDownloadButton } from "../../../shared/base/file-download-button"
 
@@ -16,7 +17,7 @@ interface IReportReadyPanelProps {
   pdfForm?: IPdfForm
 }
 
-const ReportReadyPanel: React.FC<IReportReadyPanelProps> = ({ onExplore, downloadDocument, pdfForm }) => {
+const ReportReadyPanel: React.FC<IReportReadyPanelProps> = observer(({ onExplore, downloadDocument, pdfForm }) => {
   const { t } = useTranslation() as any
   const { getValues } = useFormContext()
   const values = getValues() || {}
@@ -119,17 +120,40 @@ const ReportReadyPanel: React.FC<IReportReadyPanelProps> = ({ onExplore, downloa
       </Text>
     </Box>
   )
-}
+})
 
-export const ResultForm: React.FC = () => {
+export const ResultForm: React.FC = observer(() => {
   const { t } = useTranslation() as any
   const { pdfFormStore } = useMst()
   const [ready, setReady] = useState(false)
+  const [isRefreshing, setIsRefreshing] = useState(false)
   const pdfForm = useMemo<IPdfForm | undefined>(() => {
     return (pdfFormStore.lastCreatedForm as IPdfForm) || pdfFormStore.pdfForms?.[0]
   }, [pdfFormStore.lastCreatedForm, pdfFormStore.pdfForms])
   const [downloadDocument, setDownloadDocument] = useState<IBaseFileAttachment | null>(null)
   const lastRequestedPdfIdRef = useRef<string | null>(null)
+
+  useEffect(() => {
+    if (pdfForm?.pdfGenerationStatus === EPdfGenerationStatus.completed) {
+      setReady(true)
+    }
+  }, [pdfForm?.pdfGenerationStatus])
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout
+    const isGenerating =
+      pdfForm?.pdfGenerationStatus === EPdfGenerationStatus.queued ||
+      pdfForm?.pdfGenerationStatus === EPdfGenerationStatus.generating
+
+    if (!ready && pdfForm?.id && isGenerating) {
+      interval = setInterval(() => {
+        pdfFormStore.searchPdfForms({ page: 1 })
+      }, 5000)
+    }
+    return () => {
+      if (interval) clearInterval(interval)
+    }
+  }, [ready, pdfForm?.id, pdfForm?.pdfGenerationStatus])
 
   useEffect(() => {
     let active = true
@@ -145,11 +169,6 @@ export const ResultForm: React.FC = () => {
             mimeType: "application/pdf",
           },
         } as any)
-      // [OVERHEATING REVIEW] Mini-lesson: avoid fabricating “file_data” shapes.
-      // Downloads are driven by `modelType + document.id` (StorageController), not by `file.id`,
-      // so this works — but it can hide backend contract issues (e.g. missing `pdfFileData`).
-      // Prefer having the API return the real `pdfFileData` once generation completes and render
-      // the “Download” UI based on that.
       return {
         id: form.id,
         file: fileData,
@@ -168,9 +187,6 @@ export const ResultForm: React.FC = () => {
       if (!pdfForm.pdfFileData && lastRequestedPdfIdRef.current !== id) {
         lastRequestedPdfIdRef.current = id
         try {
-          // [OVERHEATING REVIEW] Mini-lesson: async jobs need polling/refresh semantics.
-          // `generatePdf` just queues a Sidekiq job; it likely won’t return `pdfFileData` immediately.
-          // Consider: enqueue -> show “Generating…” -> poll `getPdfForms` or a `show` endpoint until ready.
           const response = await pdfFormStore.generatePdf(id)
           if (response.success && response.data?.data) {
             pdfFormStore.setPdfForm(response.data.data)
@@ -199,16 +215,28 @@ export const ResultForm: React.FC = () => {
       active = false
     }
   }, [pdfForm, pdfFormStore])
+
   const handleRefresh = async () => {
+    setIsRefreshing(true)
     try {
-      await pdfFormStore.searchPdfForms({ page: 1, countPerPage: pdfFormStore.countPerPage })
-      setReady(true)
-    } catch (e) {}
+      const response = await pdfFormStore.searchPdfForms({ page: 1, countPerPage: pdfFormStore.countPerPage })
+      if (response.success && response.data) {
+        const currentForm = response.data.find((f) => f.id === pdfForm?.id)
+        if (currentForm?.pdfGenerationStatus === EPdfGenerationStatus.completed) {
+          setReady(true)
+        }
+      }
+    } catch (e) {
+    } finally {
+      setIsRefreshing(false)
+    }
   }
+
   const navigate = useNavigate()
   const handleExplore = () => {
     navigate("/overheating")
   }
+
   return (
     <Box>
       {!ready ? (
@@ -236,7 +264,12 @@ export const ResultForm: React.FC = () => {
             {t("singleZoneCoolingHeatingTool.result.noNeedToStay")}
           </Text>
 
-          <Button leftIcon={<Icon as={ArrowsClockwise} />} onClick={handleRefresh} variant="secondary">
+          <Button
+            leftIcon={<Icon as={ArrowsClockwise} />}
+            onClick={handleRefresh}
+            variant="secondary"
+            isLoading={isRefreshing}
+          >
             {t("singleZoneCoolingHeatingTool.result.refreshStatus")}
           </Button>
         </Box>
@@ -245,4 +278,4 @@ export const ResultForm: React.FC = () => {
       )}
     </Box>
   )
-}
+})

@@ -49,6 +49,7 @@ import {
   ECollaboratorType,
   EEarlyAccessRequirementTemplateSortFields,
   EJurisdictionSortFields,
+  EPdfFormSortFields,
   EPermitApplicationSortFields,
   EPermitBlockStatus,
   EPermitClassificationType,
@@ -950,15 +951,12 @@ export class Api {
   }
 
   async createPdfForm(formData: {
-    formJson: any
+    formJson: Record<string, any>
     formType: string
     status?: boolean
-    overheatingDocumentsAttributes?: any[]
+    overheatingDocumentsAttributes?: Partial<IOverheatingDocument>[]
   }) {
-    // [OVERHEATING REVIEW] Mini-lesson: tighten the API contract (avoid `any`).
-    // If we define a typed shape for `formJson` and `overheatingDocumentsAttributes`, TS will catch
-    // mismatches early (and you’ll spend less time debugging “undefined” at runtime).
-    return this.client.post<ApiResponse<any>>("/pdf_forms", {
+    return this.client.post<IApiResponse<IPdfForm, {}>>("/pdf_forms", {
       pdfForm: {
         formJson: formData.formJson,
         formType: formData.formType,
@@ -968,67 +966,27 @@ export class Api {
     })
   }
 
-  async getPdfForms(params?: {
-    page?: number
-    // [OVERHEATING REVIEW] Naming consistency: frontend code should use camelCase keys.
-    // We auto-convert to snake_case for Rails, so prefer `perPage`, `sortField`, `sortDirection` here
-    // (and let the client/transformer handle conversion).
-    //
-    // Lead note: we also have a well-designed *search store* pattern (see `createSearchModel`),
-    // so the “shape” of this API method should align with that pattern (query + sort + perPage, etc.)
-    // and be called from a search-enabled store (vs ad-hoc param passing sprinkled around the UI).
-    //
-    // Lead note (typing pattern): model this after `fetchPreChecks`:
-    // - `fetchPreChecks(params?: TSearchParams<EPreCheckSortFields>)`
-    // - returns `IApiResponse<IPreCheck[], IPageMeta>`
-    //
-    // Mini-lesson: using `TSearchParams<SortEnum>` gives you a consistent, typed shape for
-    // `{ query, sort, page, perPage, filters }` across the app, and `IPageMeta` ensures pagination
-    // stays in sync with `createSearchModel` (`setPageFields(response.data.meta, opts)`).
-    //
-    // When you hand-roll `{ page, per_page, sort_field, sort_direction }` you tend to drift from the
-    // “house standard” and end up duplicating glue code in every store/component.
-    per_page?: number
-    query?: string
-    sort_field?: string
-    sort_direction?: string
-  }) {
-    return this.client.get<ApiResponse<IPdfForm[]>>("/pdf_forms", params)
+  async getPdfForms(params?: TSearchParams<EPdfFormSortFields>) {
+    return this.client.get<IApiResponse<IPdfForm[], IPageMeta>>("/pdf_forms", params)
   }
 
   async generatePdf(id: string) {
-    return this.client.post<ApiResponse<any>>(`/pdf_forms/${id}/generate_pdf`)
+    return this.client.post<IApiResponse<IPdfForm, {}>>(`/pdf_forms/${id}/generate_pdf`)
   }
 
   async archivePdf(id: string) {
-    return this.client.post<ApiResponse<any>>(`/pdf_forms/${id}/archive`)
+    return this.client.post<IApiResponse<IPdfForm, {}>>(`/pdf_forms/${id}/archive`)
   }
 
-  async downloadPdf(id: string) {
-    // [OVERHEATING REVIEW] Mini-lesson: reuse the existing “StorageController presigned URL” path.
-    // The app already standardizes file downloads via `/api/s3/params/download` + `downloadFileFromStorage`.
-    // This custom blob client adds another download mechanism and makes error handling inconsistent.
-    const blobClient = create({
-      baseURL: "/api",
-      headers: {
-        "Cache-Control": "no-cache",
-        "X-CSRF-Token": getCsrfToken(),
-      },
-      timeout: 30000,
-      withCredentials: true,
-    })
-
-    return blobClient.get(
-      `/pdf_forms/${id}/download`,
-      {},
-      {
-        responseType: "blob",
-      }
-    )
-  }
-
-  async updatePdfForm(id: string, data: { formJson?: any; status?: boolean; overheatingDocumentsAttributes?: any[] }) {
-    return this.client.put<ApiResponse<any>>(`/pdf_forms/${id}`, {
+  async updatePdfForm(
+    id: string,
+    data: {
+      formJson?: Record<string, any>
+      status?: boolean
+      overheatingDocumentsAttributes?: Partial<IOverheatingDocument>[]
+    }
+  ) {
+    return this.client.put<IApiResponse<IPdfForm, {}>>(`/pdf_forms/${id}`, {
       pdfForm: {
         formJson: data.formJson,
         status: data.status,

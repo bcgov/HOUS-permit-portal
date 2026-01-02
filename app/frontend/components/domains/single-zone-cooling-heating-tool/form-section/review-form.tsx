@@ -52,11 +52,22 @@ const KeyValue: React.FC<{ label: string; value: any }> = ({ label, value }) => 
   </GridItem>
 )
 
+import { useSectionCompletion } from "../../../../hooks/use-section-completion"
+
 export const ReviewForm = observer(function ReviewForm() {
   const { getValues } = useFormContext()
   const values = getValues() || {}
   const { labelFor } = useLabels()
   const { pdfFormStore } = useMst()
+
+  const validate = React.useCallback((vals: any) => {
+    const bl = vals?.buildingLocation || {}
+    const hasVal = (v: any) => v !== undefined && v !== null && String(v).toString().trim() !== ""
+    const requiredKeys = ["model", "site", "lot", "city", "province", "postalCode"]
+    return requiredKeys.every((k) => hasVal((bl as any)[k]))
+  }, [])
+
+  useSectionCompletion({ key: "review", validate })
 
   const generate = async () => {
     const { overheatingDocumentsAttributes, ...formData } = getValues()

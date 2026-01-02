@@ -4,23 +4,25 @@ import { useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { DatePickerFormControl, NumberFormControl, TextFormControl } from "../../shared/form/input-form-control"
 
+import { useSectionCompletion } from "../../../hooks/use-section-completion"
+
 export const RoomByRoomForm = () => {
   const { t } = useTranslation() as any
   const prefix = "singleZoneCoolingHeatingTool.roomByRoom"
-  const { setValue, trigger, clearErrors, watch } = useFormContext()
+  const { trigger, clearErrors, watch } = useFormContext()
   const toast = useToast()
-  const [canContinue, setCanContinue] = React.useState(false)
-  const all = watch()
-  React.useEffect(() => {
-    const values = (watch() as any) || {}
+
+  const validate = React.useCallback((values: any) => {
     const rows = values?.roomByRoom || {}
     const hasVal = (v: any) => v !== undefined && v !== null && String(v).toString().trim() !== ""
-    const ok = Object.values(rows).some((r: any) => hasVal(r?.heating) || hasVal(r?.cooling))
-    setCanContinue(ok)
+    return Object.values(rows).some((r: any) => hasVal(r?.heating) || hasVal(r?.cooling))
+  }, [])
+
+  const canContinue = useSectionCompletion({ key: "calculations", validate })
+
+  React.useEffect(() => {
     clearErrors()
-    window.dispatchEvent(new CustomEvent("szch:section", { detail: { key: "calculations", complete: ok } }))
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [all])
+  }, [canContinue, clearErrors])
 
   return (
     <Box as="form">

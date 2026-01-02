@@ -1,6 +1,7 @@
 import { Image, Page, StyleSheet, Text, View } from "@react-pdf/renderer"
 import React from "react"
 import { useTranslation } from "react-i18next"
+import { Checkbox } from "../../../shared/pdf"
 
 const styles = StyleSheet.create({
   page: {
@@ -232,15 +233,6 @@ interface PDFComponentProps {
   data: any
   assetDirectoryPath: string
 }
-
-const Checkbox: React.FC<{ checked?: boolean; text: string }> = ({ checked = false, text }) => (
-  <View style={{ flexDirection: "row", alignItems: "center", marginLeft: 20 }}>
-    <View style={checked ? styles.checkboxChecked : styles.checkbox}>
-      {checked && <Text style={{ color: "white" }}>X</Text>}
-    </View>
-    <Text style={{ fontSize: 6 }}>{text}</Text>
-  </View>
-)
 
 export const SingleZoneCoolingHeatingInputSummaryContent: React.FC<PDFComponentProps> = ({
   data,

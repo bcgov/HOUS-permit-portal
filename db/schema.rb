@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_12_10_181530) do
+ActiveRecord::Schema[7.2].define(version: 2025_12_24_140000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -377,6 +377,15 @@ ActiveRecord::Schema[7.2].define(version: 2025_12_10_181530) do
                id: :uuid,
                default: -> { "gen_random_uuid()" },
                force: :cascade do |t|
+  create_table "overheating_documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "pdf_form_id", null: false
+    t.text "file_data"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "scan_status", default: "pending", null: false
+    t.index ["pdf_form_id"], name: "index_overheating_documents_on_pdf_form_id"
+    t.index ["scan_status"], name: "index_overheating_documents_on_scan_status"
+  end
     t.uuid "step_code_id"
     t.decimal "building_height"
     t.integer "building_code_version"
@@ -486,15 +495,15 @@ ActiveRecord::Schema[7.2].define(version: 2025_12_10_181530) do
             name: "index_part_9_step_code_checklists_on_step_requirement_id"
   end
 
-  create_table "pdf_forms",
-               id: :uuid,
-               default: -> { "gen_random_uuid()" },
-               force: :cascade do |t|
+  create_table "pdf_forms", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "user_id", null: false
     t.jsonb "form_json", default: {}
     t.string "form_type"
     t.boolean "status", default: false
     t.datetime "created_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
+    t.jsonb "pdf_file_data"
+    t.integer "pdf_generation_status", default: 0, null: false
+    t.index ["pdf_file_data"], name: "index_pdf_forms_on_pdf_file_data", using: :gin
     t.index ["user_id"], name: "index_pdf_forms_on_user_id"
   end
 

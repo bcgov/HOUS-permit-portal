@@ -1,53 +1,33 @@
 import { Button, Flex, Grid, GridItem, Menu, MenuButton, MenuList, Spinner, Text } from "@chakra-ui/react"
 import { Archive, ArrowSquareOut, DotsThree } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
-import React, { useEffect, useState } from "react"
+import React from "react"
 import { useTranslation } from "react-i18next"
 import { IPdfForm } from "../../../models/pdf-form"
+import { EFileUploadAttachmentType, EPdfGenerationStatus } from "../../../types/enums"
+import { downloadFileFromStorage } from "../../../utils/utility-functions"
 import { ManageMenuItemButton } from "../../shared/base/manage-menu-item"
 
 interface IPdfFormGridRowProps {
   pdfForm: IPdfForm
   onArchivePdf: (id: string) => void
-  isGenerating: boolean
+  isGenerating?: boolean
 }
 
 export const PdfFormGridRow = observer(function PdfFormGridRow({
   pdfForm,
   onArchivePdf,
-  isGenerating,
+  isGenerating: isGeneratingProp,
 }: IPdfFormGridRowProps) {
   const { t } = useTranslation() as any
-  const [hasPdf, setHasPdf] = useState(false)
-  const [isArchived, setIsArchived] = useState(false)
 
-  useEffect(() => {
-    let cancelled = false
-    const check = async () => {
-      try {
-        // [OVERHEATING REVIEW] Mini-lesson: avoid using `HEAD` against a download endpoint.
-        // Rails will route HEAD -> the same controller action, which can still do heavy work
-        // (and here it may even read the file). Prefer a lightweight “status” field from the API
-        // (e.g. `pdfFileData` present / `status` enum) or a dedicated metadata endpoint.
-        //
-        // Lead note: we also generally avoid `fetch` directly inside `useEffect` in this codebase.
-        // Prefer store actions (MST flows), or a shared utility/service method, so side effects are centralized
-        // and errors/loading are handled consistently.
-        const res = await fetch(`/api/pdf_forms/${pdfForm.id}/download`, { method: "HEAD" })
-        if (!cancelled) setHasPdf(res.ok)
-      } catch (_) {
-        if (!cancelled) setHasPdf(false)
-      }
-    }
-    check()
-    return () => {
-      cancelled = true
-    }
-  }, [pdfForm.id])
+  const hasPdf = !!pdfForm.pdfFileData
+  const isArchived = pdfForm.status === false
 
-  useEffect(() => {
-    setIsArchived(pdfForm.status === false)
-  }, [pdfForm.status])
+  const isGenerating =
+    isGeneratingProp ||
+    pdfForm.pdfGenerationStatus === EPdfGenerationStatus.queued ||
+    pdfForm.pdfGenerationStatus === EPdfGenerationStatus.generating
 
   return (
     <Grid
@@ -90,21 +70,24 @@ export const PdfFormGridRow = observer(function PdfFormGridRow({
               <DotsThree size={16} />
             </MenuButton>
             <MenuList minW="160px">
-              {hasPdf && !isArchived && (
-                <>
-                  <ManageMenuItemButton
-                    leftIcon={<ArrowSquareOut size={16} />}
-                    // [OVERHEATING REVIEW] Mini-lesson: reuse the centralized download component.
-                    // Elsewhere we use `FileDownloadButton` -> `downloadFileFromStorage` (presigned URL + consistent errors).
-                    // `window.open` bypasses that and can produce confusing blank tabs on 403/404.
-                    onClick={() => window.open(`/api/pdf_forms/${pdfForm.id}/download`, "_blank", "noopener")}
-                  >
-                    Open
-                  </ManageMenuItemButton>
-                  <ManageMenuItemButton leftIcon={<Archive size={16} />} onClick={() => onArchivePdf(pdfForm.id)}>
-                    Archive
-                  </ManageMenuItemButton>
-                </>
+              {hasPdf && (
+                <ManageMenuItemButton
+                  leftIcon={<ArrowSquareOut size={16} />}
+                  onClick={() =>
+                    downloadFileFromStorage({
+                      model: EFileUploadAttachmentType.PdfForm,
+                      modelId: pdfForm.id,
+                      filename: pdfForm.pdfFileData?.metadata?.filename || `pdf_form_${pdfForm.id}.pdf`,
+                    })
+                  }
+                >
+                  Open
+                </ManageMenuItemButton>
+              )}
+              {!isArchived && (
+                <ManageMenuItemButton leftIcon={<Archive size={16} />} onClick={() => onArchivePdf(pdfForm.id)}>
+                  Archive
+                </ManageMenuItemButton>
               )}
             </MenuList>
           </Menu>

@@ -21,23 +21,19 @@ import { useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { NumberFormControl, TextFormControl } from "../../shared/form/input-form-control"
 
+import { useSectionCompletion } from "../../../hooks/use-section-completion"
+
 export const InputSummaryForm = () => {
   const { t } = useTranslation() as any
   const prefix = "singleZoneCoolingHeatingTool.inputSummary"
-  const { setValue, watch, trigger, clearErrors, register, formState } = useFormContext()
+  const { setValue, watch, trigger, register, formState } = useFormContext()
   const { errors } = formState as any
   const toast = useToast()
-  const [canContinue, setCanContinue] = React.useState(false)
   const ventilated = watch("climateData.ventilated")
   const hrvErv = watch("climateData.hrvErv")
-  const all = watch()
 
-  React.useEffect(() => {
-    const values = (watch() as any) || {}
-    const getNested = (obj: any, path: string) => path.split(".").reduce((o, k) => (o ? o[k] : undefined), obj)
-    const hasVal = (v: any) => v !== undefined && v !== null && String(v).toString().trim() !== ""
-
-    const requiredFields = [
+  const requiredFields = React.useMemo(
+    () => [
       "calculationBasedOn.dimensionalInfo",
       "calculationBasedOn.attachment",
       "calculationBasedOn.frontFacing",
@@ -64,17 +60,11 @@ export const InputSummaryForm = () => {
       "coolingDesignConditions.range",
       "coolingDesignConditions.indoorTemp",
       "coolingDesignConditions.latitude",
-    ]
+    ],
+    []
+  )
 
-    const ok = requiredFields.every((path) => hasVal(getNested(values, path)))
-    setCanContinue(ok)
-    clearErrors()
-    // [OVERHEATING REVIEW] Mini-lesson: centralize section completion logic.
-    // This same “requiredFields + hasVal + getNested + window event” logic is repeated in other sections.
-    // Extracting a hook/helper keeps bugs fixed in one place and makes future form additions easier.
-    window.dispatchEvent(new CustomEvent("szch:section", { detail: { key: "inputSummary", complete: ok } }))
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [all])
+  const canContinue = useSectionCompletion({ key: "inputSummary", requiredFields })
 
   return (
     <Box as="form">
