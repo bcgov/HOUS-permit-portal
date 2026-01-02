@@ -28,6 +28,7 @@ const resolveComponentDisplay = (component: any, value: any): string => {
     case ERequirementType.multiOptionSelect:
       return String(optionValueToLabel(component, value) ?? "")
     case "simplefile":
+    case ERequirementType.architecturalDrawing:
     case ERequirementType.file: {
       const files = Array.isArray(value) ? value : []
       if (files.length === 0) return ""
@@ -69,6 +70,19 @@ const resolveComponentDisplay = (component: any, value: any): string => {
     case ERequirementType.pidInfo:
       if (Array.isArray(value)) {
         return value.map((item) => item.pid || JSON.stringify(item)).join("; ")
+      }
+      return String(value ?? "")
+    case ERequirementType.energyStepCodePart9:
+    case ERequirementType.energyStepCodePart3:
+    case ERequirementType.multiplySumGrid:
+      if (value == null) return ""
+      return typeof value === "object" ? JSON.stringify(value) : String(value)
+    case ERequirementType.generalContact:
+    case ERequirementType.professionalContact:
+      if (value && typeof value === "object") {
+        return Object.values(value)
+          .filter((v) => v != null && v !== "")
+          .join(", ")
       }
       return String(value ?? "")
     default: {
