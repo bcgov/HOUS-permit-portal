@@ -131,7 +131,7 @@ class Api::UsersController < Api::ApplicationController
 
   def restore
     authorize @user
-    if @user.update(discarded_at: nil)
+    if @user.undiscard
       render_success(
         @user,
         "user.restore_success",

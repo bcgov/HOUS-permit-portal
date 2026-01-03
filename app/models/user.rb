@@ -217,8 +217,9 @@ class User < ApplicationRecord
   end
 
   # Override active_for_authentication? to check if the user is discarded
+  # Review managers should still be able to login even if they are archived (discarded)
   def active_for_authentication?
-    super && !discarded?
+    super && (!discarded? || review_manager?)
   end
 
   private
