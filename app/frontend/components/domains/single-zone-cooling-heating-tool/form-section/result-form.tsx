@@ -169,6 +169,12 @@ export const ResultForm: React.FC = observer(() => {
             mimeType: "application/pdf",
           },
         } as any)
+      // [OVERHEATING AUDIT] I don't think you understand the relationship between the pdf form and the overheating_documents.
+      // notice where this file metadata is constructed elsewhere in the app.
+      // such as in app/frontend/components/domains/pre-check/form-section/upload-drawings.tsx
+      // this metadata is constructed using the resultant data from upload success using uppy.
+      // are you able to explain why file metadata is constructed in two different places? Here and in
+      // app/frontend/components/domains/single-zone-cooling-heating-tool/form-section/upload-overheating-report-form.tsx
       return {
         id: form.id,
         file: fileData,
@@ -187,6 +193,11 @@ export const ResultForm: React.FC = observer(() => {
       if (!pdfForm.pdfFileData && lastRequestedPdfIdRef.current !== id) {
         lastRequestedPdfIdRef.current = id
         try {
+          // [OVERHEATING AUDIT] Mini-lesson: I think I understand what you are trying to accomplish here.
+          // But the problem is that the upload is that you are awaiting a process that happens asynchronously.
+          // To accomplish this correctly, you will need to fetch the pdf url after generation is complete.
+          // see: app/frontend/components/domains/pre-check/form-section/results-summary.tsx for an example of how to do this.
+
           const response = await pdfFormStore.generatePdf(id)
           if (response.success && response.data?.data) {
             pdfFormStore.setPdfForm(response.data.data)

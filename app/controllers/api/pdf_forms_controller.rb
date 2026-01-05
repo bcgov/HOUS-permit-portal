@@ -23,6 +23,7 @@ class Api::PdfFormsController < Api::ApplicationController
   end
 
   def index
+    # [OVERHEATING AUDIT] This looks better but we are not using the search concern correctly.
     perform_search
     render_success @search,
                    nil,

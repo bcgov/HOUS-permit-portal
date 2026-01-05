@@ -1,3 +1,5 @@
+# [OVERHEATING AUDIT] Lead note: You seem to have missed the point entirely here
+# please see app/controllers/api/concerns/search/jurisdictions.rb for how to set up search with searchkick
 module Api::Concerns::Search::PdfForms
   extend ActiveSupport::Concern
 
@@ -24,6 +26,10 @@ module Api::Concerns::Search::PdfForms
 
     if search_params[:query].present?
       # Simple search on form_json for now, matching the frontend hand-rolled behavior
+      # [OVERHEATING AUDIT] Mini-lesson: this will not scale.
+      # `LOWER(form_json::text) LIKE '%query%'` is a full scan and will get slow fast.
+      # Move the searchable fields into real columns and use the established Searchkick pattern
+      # like Jurisdictions does, so queries are indexed and sortable.
       query = "%#{search_params[:query].downcase}%"
       @search = @search.where("LOWER(form_json::text) LIKE ?", query)
     end

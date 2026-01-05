@@ -70,7 +70,9 @@ export const ReviewForm = observer(function ReviewForm() {
   useSectionCompletion({ key: "review", validate })
 
   const generate = async () => {
+    // [OVERHEATING AUDIT] Instead of using getValues, it is recommended to use the handleSubmit mechanism seen throughout the app.
     const { overheatingDocumentsAttributes, ...formData } = getValues()
+    // The fields in the form should match the columns in the database, with backend validations.
     const result = await pdfFormStore.createPdfForm({
       formJson: formData,
       formType: "single_zone_cooling_heating_tool",

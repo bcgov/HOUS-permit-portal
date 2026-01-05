@@ -67,6 +67,7 @@ import {
   ICopyRequirementTemplateFormData,
   IJurisdictionFilters,
   IJurisdictionSearchFilters,
+  IOverheatingDocument,
   IPart9ChecklistSelectOptions,
   IPermitApplicationSearchFilters,
   IPermitProjectSearchFilters,
@@ -951,11 +952,17 @@ export class Api {
   }
 
   async createPdfForm(formData: {
+    // [OVERHEATING AUDIT] Mini-lesson: tighten the API contract (avoid `any`).
+    // im not really sure what "formJson" is. Why aren't we using well defined database fields for this?
     formJson: Record<string, any>
     formType: string
     status?: boolean
     overheatingDocumentsAttributes?: Partial<IOverheatingDocument>[]
   }) {
+    // [OVERHEATING AUDIT] Mini-lesson: tighten the API contract (avoid `any`).
+    // If we define a typed shape for `formJson` and `overheatingDocumentsAttributes`, TS will catch
+    // mismatches early (and you’ll spend less time debugging “undefined” at runtime).
+    // The fields in the form should match the columns in the database, with backend validations.
     return this.client.post<IApiResponse<IPdfForm, {}>>("/pdf_forms", {
       pdfForm: {
         formJson: formData.formJson,
@@ -976,6 +983,29 @@ export class Api {
 
   async archivePdf(id: string) {
     return this.client.post<IApiResponse<IPdfForm, {}>>(`/pdf_forms/${id}/archive`)
+  }
+
+  async downloadPdf(id: string) {
+    const blobClient = create({
+      baseURL: "/api",
+      headers: {
+        "Cache-Control": "no-cache",
+        "X-CSRF-Token": getCsrfToken(),
+      },
+      timeout: 30000,
+      withCredentials: true,
+    })
+
+    // [OVERHEATING AUDIT] You have correctly removed this endpoint, and should remove this method as well.
+    // Mini-lesson: the “house” way is `FileDownloadButton` -> `downloadFileFromStorage` -> `/api/s3/params/download`.
+    // Keeping a second blob-download path here makes errors inconsistent and encourages bypassing authorization conventions.
+    return blobClient.get(
+      `/pdf_forms/${id}/download`,
+      {},
+      {
+        responseType: "blob",
+      }
+    )
   }
 
   async updatePdfForm(

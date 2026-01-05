@@ -57,7 +57,6 @@ export const PdfFormStoreModel = types
             },
           })
         )
-
         if (response.ok) {
           const pdfForms = response.data.data || []
           const meta = response.data.meta
@@ -177,6 +176,8 @@ export const PdfFormStoreModel = types
       self.pdfFormsMap.put(pdfForm)
     },
     setStatusFilter(filter: "all" | "archived" | "unarchived") {
+      // [OVERHEATING AUDIT] Use an enum here for the type
+      //  Mini-lesson: avoid repeating string unions across the app.
       self.statusFilter = filter
     },
   }))

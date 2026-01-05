@@ -29,7 +29,6 @@ class OverheatingReportGenerationJob
     generation_directory_path = Rails.root.join("tmp/files")
     asset_directory_path = Rails.root.join("public")
 
-    # Ensure clean directory
     ensure_directory_exists(generation_directory_path)
 
     # Convert data to JSON string
@@ -54,6 +53,10 @@ class OverheatingReportGenerationJob
     # Convert form_json to proper hash if it's in array format
     form_json_data =
       if pdf_form.form_json.is_a?(Array)
+        # [OVERHEATING AUDIT] Mini-lesson: understand your data shape (don’t “guess until it works”).
+        # This kind of “maybe it’s an Array, maybe it’s a Hash” code is often AI slop: it papers over
+        # the real question (what does `form_json` *actually* contain?).
+        # What we really want are real form fields that map to actual keys in the database, not some mystery object or array.
         Hash[*pdf_form.form_json.flatten(1)]
       else
         pdf_form.form_json
