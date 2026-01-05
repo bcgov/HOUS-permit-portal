@@ -236,6 +236,7 @@ Rails.application.routes.draw do
     resources :users, only: %i[destroy update] do
       patch "restore", on: :member
       patch "accept_eula", on: :member
+      delete "revoke_membership", on: :member
       post "search", on: :collection, to: "users#index"
       post "resend_confirmation", on: :member
       post "reinvite", on: :member

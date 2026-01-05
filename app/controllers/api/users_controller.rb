@@ -5,6 +5,7 @@ class Api::UsersController < Api::ApplicationController
                 only: %i[
                   destroy
                   restore
+                  revoke_membership
                   accept_eula
                   update
                   reinvite
@@ -118,6 +119,13 @@ class Api::UsersController < Api::ApplicationController
 
   def destroy
     authorize @user
+
+    # Prevent discarding users who still have jurisdiction memberships
+    # (except super_admins who don't require jurisdictions)
+    if @user.jurisdictions.any? && !@user.super_admin?
+      render_error "user.cannot_discard_with_jurisdictions", {} and return
+    end
+
     if @user.discard
       render_success(
         @user,
@@ -141,6 +149,35 @@ class Api::UsersController < Api::ApplicationController
       )
     else
       render_error "user.restore_error", {}
+    end
+  end
+
+  def revoke_membership
+    authorize @user
+    jurisdiction = Jurisdiction.find(params[:jurisdiction_id])
+
+    # Check if user is a member of this jurisdiction
+    unless @user.jurisdictions.include?(jurisdiction)
+      render_error "user.not_member_of_jurisdiction", {} and return
+    end
+
+    # Prevent revoking membership if user would have no jurisdictions left
+    # and they are not a super_admin (who don't need jurisdictions)
+    if @user.jurisdictions.count == 1 && !@user.super_admin?
+      render_error "user.cannot_revoke_last_jurisdiction", {} and return
+    end
+
+    # Remove the jurisdiction membership
+    jurisdiction_membership =
+      @user.jurisdiction_memberships.find_by(jurisdiction: jurisdiction)
+    if jurisdiction_membership&.destroy
+      render_success(
+        @user,
+        "user.membership_revoked",
+        { blueprint_opts: { view: :base } }
+      )
+    else
+      render_error "user.revoke_membership_error", {}
     end
   end
 

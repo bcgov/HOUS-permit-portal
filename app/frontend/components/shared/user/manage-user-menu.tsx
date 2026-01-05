@@ -1,5 +1,5 @@
 import { Button, Menu, MenuButton, MenuList } from "@chakra-ui/react"
-import { Archive, ArrowsLeftRight, ClockClockwise, PaperPlaneTilt } from "@phosphor-icons/react"
+import { Archive, ArrowsLeftRight, ClockClockwise, PaperPlaneTilt, UserMinus } from "@phosphor-icons/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -58,6 +58,9 @@ export const ManageUserMenu = observer(function ManageUserMenu<TSearchModel exte
               </ManageMenuItemButton>
             </Can>
           )}
+          {user.jurisdictionStaff && user.jurisdictions && user.jurisdictions.length > 1 && (
+            <RevokeMembershipForm user={user} searchModel={searchModel} />
+          )}
           {(user.isUnconfirmed || user.isDiscarded) && <ReinviteUserForm user={user} />}
           {user.isDiscarded ? (
             <ManageMenuItemButton
@@ -67,7 +70,7 @@ export const ManageUserMenu = observer(function ManageUserMenu<TSearchModel exte
             >
               {t("ui.restore")}
             </ManageMenuItemButton>
-          ) : (
+          ) : user.jurisdictions && user.jurisdictions.length > 0 && !user.superAdmin ? null : (
             <ManageMenuItemButton
               color={isCurrentUser ? "greys.grey01" : "semantic.error"}
               onClick={handleRemove}
@@ -106,3 +109,53 @@ const ReinviteUserForm = function ReinviteUserForm({ user }: IFormProps) {
     </form>
   )
 }
+
+interface IRevokeMembershipFormProps<TSearchModel extends ISearch> {
+  user: IUser
+  searchModel?: TSearchModel
+}
+
+const RevokeMembershipForm = observer(function RevokeMembershipForm<TSearchModel extends ISearch>({
+  user,
+  searchModel,
+}: IRevokeMembershipFormProps<TSearchModel>) {
+  const { handleSubmit, formState } = useForm()
+  const { isSubmitting } = formState
+
+  const handleRevokeFromJurisdiction = async (jurisdictionId: string) => {
+    if (await user.revokeMembership(jurisdictionId)) {
+      searchModel?.search()
+    }
+  }
+
+  // Only show if user has multiple jurisdictions
+  const showRevokeOption = user.jurisdictions && user.jurisdictions.length > 1
+
+  if (!showRevokeOption) return null
+
+  return (
+    <Menu>
+      <MenuButton
+        as={ManageMenuItemButton}
+        color="semantic.warning"
+        leftIcon={<UserMinus size={16} />}
+        isLoading={isSubmitting}
+        isDisabled={isSubmitting}
+      >
+        {t("user.revokeMembership")}
+      </MenuButton>
+      <MenuList>
+        {user.jurisdictions?.map((jurisdiction) => (
+          <ManageMenuItemButton
+            key={jurisdiction.id}
+            color="text.primary"
+            onClick={() => handleRevokeFromJurisdiction(jurisdiction.id)}
+            type="button"
+          >
+            {jurisdiction.name}
+          </ManageMenuItemButton>
+        ))}
+      </MenuList>
+    </Menu>
+  )
+})

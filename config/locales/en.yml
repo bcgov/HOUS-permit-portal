@@ -354,6 +354,21 @@ en:
       restore_error:
         title: "Error"
         message: "There was an error restoring the user"
+      cannot_discard_with_jurisdictions:
+        title: "Cannot archive user"
+        message: "Cannot archive user with active jurisdiction memberships. Please revoke memberships first."
+      membership_revoked:
+        title: ""
+        message: "User membership revoked successfully"
+      revoke_membership_error:
+        title: "Error"
+        message: "There was an error revoking user membership"
+      not_member_of_jurisdiction:
+        title: "Error"
+        message: "User is not a member of this jurisdiction"
+      cannot_revoke_last_jurisdiction:
+        title: "Cannot revoke membership"
+        message: "Cannot revoke the user's last jurisdiction membership"
       eula_accepted:
         title: ""
         message: "End-User License Agreement accepted"

@@ -366,6 +366,12 @@ export class Api {
     return this.client.patch<ApiResponse<IUser>>(`/users/${id}/restore`)
   }
 
+  async revokeUserMembership(userId: string, jurisdictionId: string) {
+    return this.client.delete<ApiResponse<IUser>>(`/users/${userId}/revoke_membership`, {
+      data: { jurisdiction_id: jurisdictionId },
+    })
+  }
+
   async acceptEULA(userId: string) {
     return this.client.patch<ApiResponse<IUser>>(`/users/${userId}/accept_eula`)
   }

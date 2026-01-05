@@ -129,6 +129,11 @@ export const UserModel = types
       if (response.ok) applySnapshot(self, response.data.data)
       return response.ok
     }),
+    revokeMembership: flow(function* (jurisdictionId: string) {
+      const response = yield self.environment.api.revokeUserMembership(self.id, jurisdictionId)
+      if (response.ok) applySnapshot(self, response.data.data)
+      return response.ok
+    }),
     changeRole: flow(function* () {
       let newRole = null
       if (self.role === EUserRoles.reviewManager) {
