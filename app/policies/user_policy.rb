@@ -64,6 +64,11 @@ class UserPolicy < ApplicationPolicy
     invite?
   end
 
+  def revoke_membership?
+    return true if user.super_admin?
+    user.manager? && record_in_users_jurisdictions?
+  end
+
   class Scope < Scope
     # NOTE: Be explicit about which records you allow access to!
     # def resolve

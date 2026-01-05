@@ -59,7 +59,9 @@ export const ManageUserMenu = observer(function ManageUserMenu<TSearchModel exte
             </Can>
           )}
           {user.jurisdictionStaff && user.jurisdictions && user.jurisdictions.length > 1 && (
-            <RevokeMembershipForm user={user} searchModel={searchModel} />
+            <Can action="user:revokeMembership" data={{ user }}>
+              <RevokeMembershipForm user={user} searchModel={searchModel} />
+            </Can>
           )}
           {(user.isUnconfirmed || user.isDiscarded) && <ReinviteUserForm user={user} />}
           {user.isDiscarded ? (

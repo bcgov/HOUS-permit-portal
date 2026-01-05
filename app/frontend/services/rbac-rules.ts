@@ -8,6 +8,8 @@ const sharedStaticRules = ["jurisdiction:view"]
 
 const sharedDynamicRules = {
   "user:manage": (currentUser: IUser, data: { user: IUser }) => userRule(currentUser, data),
+  "user:revokeMembership": (currentUser: IUser, data: { user: IUser }) =>
+    currentUser.isManager || currentUser.isSuperAdmin,
 }
 
 const reviewManagerRules = {
