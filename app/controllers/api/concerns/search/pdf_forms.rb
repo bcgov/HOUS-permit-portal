@@ -16,11 +16,9 @@ module Api::Concerns::Search::PdfForms
             else
               nil
             end
-          )
+          ),
+        scope_results: ->(relation) { policy_scope(relation) }
       )
-    # [OVERHEATING AUDIT] Here you want to set the policy_scope kind of like
-    # scope_results: ->(relation) { policy_scope(relation) }
-    # (see app/controllers/api/concerns/search/permit_applications.rb)
   end
 
   private

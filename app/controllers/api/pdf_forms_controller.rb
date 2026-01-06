@@ -25,10 +25,7 @@ class Api::PdfFormsController < Api::ApplicationController
 
   def index
     perform_search
-    # [OVERHEATING AUDIT] This apply_search_authorization method is actually a legacy method that we are moving away from.
-    # Please use the policy_scope method instead. (in the search concern)
-    authorized_results = apply_search_authorization(@search.results)
-    render_success authorized_results,
+    render_success @search.results,
                    nil,
                    { blueprint: PdfFormBlueprint, meta: page_meta(@search) }
   end

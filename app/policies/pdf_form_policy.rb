@@ -45,9 +45,13 @@ class PdfFormPolicy < ApplicationPolicy
 
   class Scope < Scope
     def resolve
-      # [OVERHEATING AUDIT] The review staff should only be able to see their own jurisdiction's pdf forms
-
-      user.review_staff? ? scope.all : scope.where(user_id: user.id)
+      if user.super_admin?
+        scope.all
+      elsif user.review_staff?
+        scope.where(jurisdiction_id: user.jurisdiction_ids)
+      else
+        scope.where(user_id: user.id)
+      end
     end
   end
 end
