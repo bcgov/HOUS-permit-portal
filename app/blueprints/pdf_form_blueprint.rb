@@ -11,10 +11,7 @@ class PdfFormBlueprint < Blueprinter::Base
          :lot,
          :address
 
-  field :form_json do |pdf_form|
-    exclude_duplicated_fields(pdf_form.form_json)
-  end
-
+  field :form_json
   field :pdf_file_data
   field :user_id
 
@@ -32,34 +29,6 @@ class PdfFormBlueprint < Blueprinter::Base
            :lot,
            :address
 
-    field :form_json do |pdf_form|
-      exclude_duplicated_fields(pdf_form.form_json)
-    end
-  end
-
-  private
-
-  def self.exclude_duplicated_fields(json)
-    return json unless json.is_a?(Hash)
-    json = json.deep_dup
-    json.delete("project_number")
-    json.delete("projectNumber")
-    if json["building_location"].is_a?(Hash)
-      json["building_location"] = json["building_location"].except(
-        "model",
-        "site",
-        "lot",
-        "address"
-      )
-    end
-    if json["buildingLocation"].is_a?(Hash)
-      json["buildingLocation"] = json["buildingLocation"].except(
-        "model",
-        "site",
-        "lot",
-        "address"
-      )
-    end
-    json
+    field :form_json
   end
 end
