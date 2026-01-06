@@ -11,6 +11,7 @@ class PdfFormBlueprint < Blueprinter::Base
          :lot,
          :address
 
+  # [OVERHEATING AUDIT] Can you confirm that there is no duplicated data between the form_json and the new columns?
   field :form_json
   field :pdf_file_data
   field :user_id
