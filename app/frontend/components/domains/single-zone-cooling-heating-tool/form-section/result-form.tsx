@@ -125,7 +125,6 @@ const ReportReadyPanel: React.FC<IReportReadyPanelProps> = observer(({ onExplore
 export const ResultForm: React.FC = observer(() => {
   const { t } = useTranslation() as any
   const { pdfFormStore } = useMst()
-  const [ready, setReady] = useState(false)
   const [isRefreshing, setIsRefreshing] = useState(false)
   const pdfForm = useMemo<IPdfForm | undefined>(() => {
     return (pdfFormStore.lastCreatedForm as IPdfForm) || pdfFormStore.pdfForms?.[0]
@@ -133,11 +132,7 @@ export const ResultForm: React.FC = observer(() => {
   const [downloadDocument, setDownloadDocument] = useState<IBaseFileAttachment | null>(null)
   const lastRequestedPdfIdRef = useRef<string | null>(null)
 
-  useEffect(() => {
-    if (pdfForm?.pdfGenerationStatus === EPdfGenerationStatus.completed) {
-      setReady(true)
-    }
-  }, [pdfForm?.pdfGenerationStatus])
+  const isReady = pdfForm?.pdfGenerationStatus === EPdfGenerationStatus.completed
 
   useEffect(() => {
     let interval: NodeJS.Timeout
@@ -145,7 +140,7 @@ export const ResultForm: React.FC = observer(() => {
       pdfForm?.pdfGenerationStatus === EPdfGenerationStatus.queued ||
       pdfForm?.pdfGenerationStatus === EPdfGenerationStatus.generating
 
-    if (!ready && pdfForm?.id && isGenerating) {
+    if (!isReady && pdfForm?.id && isGenerating) {
       interval = setInterval(() => {
         pdfFormStore.searchPdfForms({ page: 1 })
       }, 5000)
@@ -153,7 +148,7 @@ export const ResultForm: React.FC = observer(() => {
     return () => {
       if (interval) clearInterval(interval)
     }
-  }, [ready, pdfForm?.id, pdfForm?.pdfGenerationStatus])
+  }, [isReady, pdfForm?.id, pdfForm?.pdfGenerationStatus])
 
   useEffect(() => {
     let active = true
@@ -230,13 +225,7 @@ export const ResultForm: React.FC = observer(() => {
   const handleRefresh = async () => {
     setIsRefreshing(true)
     try {
-      const response = await pdfFormStore.searchPdfForms({ page: 1, countPerPage: pdfFormStore.countPerPage })
-      if (response.success && response.data) {
-        const currentForm = response.data.find((f) => f.id === pdfForm?.id)
-        if (currentForm?.pdfGenerationStatus === EPdfGenerationStatus.completed) {
-          setReady(true)
-        }
-      }
+      await pdfFormStore.searchPdfForms({ page: 1, countPerPage: pdfFormStore.countPerPage })
     } catch (e) {
     } finally {
       setIsRefreshing(false)
@@ -250,7 +239,7 @@ export const ResultForm: React.FC = observer(() => {
 
   return (
     <Box>
-      {!ready ? (
+      {!isReady ? (
         <Box bg="theme.blueLight" p={8} borderRadius="lg">
           <Flex align="center" gap={3} mb={4}>
             <Icon as={Hourglass} boxSize={7} color="theme.blueAlt" />

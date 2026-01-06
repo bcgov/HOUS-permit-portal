@@ -4,8 +4,8 @@ import { createSearchModel } from "../lib/create-search-model"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
 import { IPdfForm, PdfFormModel } from "../models/pdf-form"
-import { EPdfFormSortFields } from "../types/enums"
-import { IOverheatingDocument } from "../types/types"
+import { EPdfFormSortFields, EPdfFormStatusFilter } from "../types/enums"
+import { IOverheatingDocument, IPdfFormJson } from "../types/types"
 
 export const PdfFormStoreModel = types
   .compose(
@@ -14,7 +14,10 @@ export const PdfFormStoreModel = types
       tablePdfForms: types.array(types.safeReference(PdfFormModel)),
       isLoading: types.optional(types.boolean, false),
       lastCreatedForm: types.maybeNull(types.safeReference(PdfFormModel)),
-      statusFilter: types.optional(types.enumeration(["all", "archived", "unarchived"]), "unarchived"),
+      statusFilter: types.optional(
+        types.enumeration<EPdfFormStatusFilter>(Object.values(EPdfFormStatusFilter)),
+        EPdfFormStatusFilter.unarchived
+      ),
     }),
     createSearchModel<EPdfFormSortFields>("searchPdfForms", "setPdfFormFilters")
   )
@@ -84,9 +87,14 @@ export const PdfFormStoreModel = types
       }
     }),
     createPdfForm: flow(function* (formData: {
-      formJson: Record<string, any>
+      formJson: IPdfFormJson
       formType: string
       status?: boolean
+      projectNumber?: string
+      model?: string
+      site?: string
+      lot?: string
+      address?: string
       overheatingDocumentsAttributes?: Partial<IOverheatingDocument>[]
     }) {
       self.isLoading = true
@@ -130,8 +138,13 @@ export const PdfFormStoreModel = types
     updatePdfForm: flow(function* (
       id: string,
       data: {
-        formJson?: Record<string, any>
+        formJson?: IPdfFormJson
         status?: boolean
+        projectNumber?: string
+        model?: string
+        site?: string
+        lot?: string
+        address?: string
         overheatingDocumentsAttributes?: Partial<IOverheatingDocument>[]
       }
     ) {
@@ -175,9 +188,7 @@ export const PdfFormStoreModel = types
     setPdfForm(pdfForm: IPdfForm) {
       self.pdfFormsMap.put(pdfForm)
     },
-    setStatusFilter(filter: "all" | "archived" | "unarchived") {
-      // [OVERHEATING AUDIT] Use an enum here for the type
-      //  Mini-lesson: avoid repeating string unions across the app.
+    setStatusFilter(filter: EPdfFormStatusFilter) {
       self.statusFilter = filter
     },
   }))

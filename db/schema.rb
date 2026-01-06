@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_12_24_140000) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_06_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -503,6 +503,11 @@ ActiveRecord::Schema[7.2].define(version: 2025_12_24_140000) do
     t.datetime "created_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
     t.jsonb "pdf_file_data"
     t.integer "pdf_generation_status", default: 0, null: false
+    t.string "project_number"
+    t.string "model"
+    t.string "site"
+    t.string "lot"
+    t.string "address"
     t.index ["pdf_file_data"], name: "index_pdf_forms_on_pdf_file_data", using: :gin
     t.index ["user_id"], name: "index_pdf_forms_on_user_id"
   end

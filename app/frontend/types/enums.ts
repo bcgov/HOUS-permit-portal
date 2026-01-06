@@ -682,9 +682,15 @@ export enum EPermitProjectSortFields {
   rollupStatus = "rollup_status",
 }
 
+export enum EPdfFormStatusFilter {
+  all = "all",
+  archived = "archived",
+  unarchived = "unarchived",
+}
+
 export enum EPdfFormSortFields {
-  // [OVERHEATING AUDIT] Are these all the columns you want to sort by?
   projectNumber = "projectNumber",
+  address = "address",
   createdAt = "createdAt",
 }
 

@@ -157,7 +157,7 @@ export const OverheatingTabPanelContent = observer(() => {
             ) : (
               tablePdfForms
                 .filter((pdfForm) => {
-                  const pn = (pdfForm as any)?.formJson?.projectNumber
+                  const pn = pdfForm.projectNumber
                   return pn !== undefined && pn !== null && String(pn).toString().trim() !== ""
                 })
                 .map((pdfForm) => <PdfFormGridRow onArchivePdf={archivePdf} key={pdfForm.id} pdfForm={pdfForm} />)

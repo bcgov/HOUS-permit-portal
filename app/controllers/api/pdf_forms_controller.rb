@@ -1,6 +1,7 @@
 class Api::PdfFormsController < Api::ApplicationController
   include Api::Concerns::Search::PdfForms
   before_action :set_pdf_form, only: %i[generate_pdf update archive]
+  skip_after_action :verify_policy_scoped, only: %i[index]
 
   def create
     @pdf_form = PdfForm.new(pdf_form_params.merge(user_id: current_user.id))
@@ -23,17 +24,16 @@ class Api::PdfFormsController < Api::ApplicationController
   end
 
   def index
-    # [OVERHEATING AUDIT] This looks better but we are not using the search concern correctly.
     perform_search
-    render_success @search,
+    authorized_results = apply_search_authorization(@search.results)
+    render_success authorized_results,
                    nil,
                    { blueprint: PdfFormBlueprint, meta: page_meta(@search) }
   end
 
   def generate_pdf
     authorize @pdf_form
-    @pdf_form.pdf_generation_status_queued!
-    OverheatingReportGenerationJob.perform_async(@pdf_form.id)
+    @pdf_form.schedule_pdf_generation!
     render_success @pdf_form,
                    "pdf_form.generate_queued",
                    { blueprint: PdfFormBlueprint }
@@ -81,6 +81,11 @@ class Api::PdfFormsController < Api::ApplicationController
       p.permit(
         :form_type,
         :status,
+        :project_number,
+        :model,
+        :site,
+        :lot,
+        :address,
         overheating_documents_attributes: [
           :id,
           :_destroy,

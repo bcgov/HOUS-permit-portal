@@ -55,7 +55,7 @@ const KeyValue: React.FC<{ label: string; value: any }> = ({ label, value }) => 
 import { useSectionCompletion } from "../../../../hooks/use-section-completion"
 
 export const ReviewForm = observer(function ReviewForm() {
-  const { getValues } = useFormContext()
+  const { getValues, handleSubmit } = useFormContext()
   const values = getValues() || {}
   const { labelFor } = useLabels()
   const { pdfFormStore } = useMst()
@@ -69,14 +69,17 @@ export const ReviewForm = observer(function ReviewForm() {
 
   useSectionCompletion({ key: "review", validate })
 
-  const generate = async () => {
-    // [OVERHEATING AUDIT] Instead of using getValues, it is recommended to use the handleSubmit mechanism seen throughout the app.
-    const { overheatingDocumentsAttributes, ...formData } = getValues()
-    // The fields in the form should match the columns in the database, with backend validations.
+  const onSubmit = async (data: any) => {
+    const { overheatingDocumentsAttributes, ...formData } = data
     const result = await pdfFormStore.createPdfForm({
       formJson: formData,
       formType: "single_zone_cooling_heating_tool",
       status: true,
+      projectNumber: formData.projectNumber,
+      model: formData.buildingLocation?.model,
+      site: formData.buildingLocation?.site,
+      lot: formData.buildingLocation?.lot,
+      address: formData.buildingLocation?.address,
       overheatingDocumentsAttributes,
     })
     if ((result as any)?.success) {
@@ -182,7 +185,7 @@ export const ReviewForm = observer(function ReviewForm() {
         return (
           canGenerate && (
             <Flex justify="flex-start" mt={10}>
-              <Button variant="primary" onClick={generate}>
+              <Button variant="primary" onClick={handleSubmit(onSubmit)}>
                 {(useTranslation() as any).t("singleZoneCoolingHeatingTool.uploads.generate")}
               </Button>
             </Flex>

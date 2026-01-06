@@ -43,18 +43,12 @@ export const PdfFormGridRow = observer(function PdfFormGridRow({
     >
       <GridItem display="flex" alignItems="center" px={4} py={2}>
         <Text w="300px" fontWeight="bold">
-          {pdfForm.formJson?.projectNumber}
+          {pdfForm.projectNumber}
         </Text>
       </GridItem>
       <GridItem display="flex" alignItems="center" px={4} py={2}>
         <Text w="400px" fontWeight="bold">
-          {[
-            pdfForm.formJson?.buildingLocation?.city,
-            pdfForm.formJson?.buildingLocation?.province,
-            pdfForm.formJson?.buildingLocation?.postalCode,
-          ]
-            .filter((p) => !!p && String(p).trim() !== "")
-            .join(", ")}
+          {pdfForm.address}
         </Text>
       </GridItem>
 

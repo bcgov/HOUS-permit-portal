@@ -31,8 +31,16 @@ export const GridHeaders = observer(function GridHeaders({ includeActionColumn }
       </GridHeader>
 
       <GridHeader role={"columnheader"}>
-        <Flex w={"full"} justifyContent={"flex-start"} px={4}>
+        <Flex
+          w={"full"}
+          as={"button"}
+          justifyContent={"space-between"}
+          cursor="pointer"
+          onClick={() => toggleSort(EPdfFormSortFields.address)}
+          px={4}
+        >
           <Text textAlign="left">{t("singleZoneCoolingHeatingTool.coverSheet.fields.buildingLocationAddress")}</Text>
+          <SortIcon<EPdfFormSortFields> field={EPdfFormSortFields.address} currentSort={sort} />
         </Flex>
       </GridHeader>
 

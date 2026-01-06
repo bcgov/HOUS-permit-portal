@@ -69,6 +69,7 @@ import {
   IJurisdictionSearchFilters,
   IOverheatingDocument,
   IPart9ChecklistSelectOptions,
+  IPdfFormJson,
   IPermitApplicationSearchFilters,
   IPermitProjectSearchFilters,
   ITemplateVersionDiff,
@@ -952,22 +953,26 @@ export class Api {
   }
 
   async createPdfForm(formData: {
-    // [OVERHEATING AUDIT] Mini-lesson: tighten the API contract (avoid `any`).
-    // im not really sure what "formJson" is. Why aren't we using well defined database fields for this?
-    formJson: Record<string, any>
+    formJson: IPdfFormJson
     formType: string
     status?: boolean
+    projectNumber?: string
+    model?: string
+    site?: string
+    lot?: string
+    address?: string
     overheatingDocumentsAttributes?: Partial<IOverheatingDocument>[]
   }) {
-    // [OVERHEATING AUDIT] Mini-lesson: tighten the API contract (avoid `any`).
-    // If we define a typed shape for `formJson` and `overheatingDocumentsAttributes`, TS will catch
-    // mismatches early (and you’ll spend less time debugging “undefined” at runtime).
-    // The fields in the form should match the columns in the database, with backend validations.
     return this.client.post<IApiResponse<IPdfForm, {}>>("/pdf_forms", {
       pdfForm: {
         formJson: formData.formJson,
         formType: formData.formType,
         status: formData.status ?? true,
+        projectNumber: formData.projectNumber,
+        model: formData.model,
+        site: formData.site,
+        lot: formData.lot,
+        address: formData.address,
         overheatingDocumentsAttributes: formData.overheatingDocumentsAttributes,
       },
     })
@@ -985,34 +990,16 @@ export class Api {
     return this.client.post<IApiResponse<IPdfForm, {}>>(`/pdf_forms/${id}/archive`)
   }
 
-  async downloadPdf(id: string) {
-    const blobClient = create({
-      baseURL: "/api",
-      headers: {
-        "Cache-Control": "no-cache",
-        "X-CSRF-Token": getCsrfToken(),
-      },
-      timeout: 30000,
-      withCredentials: true,
-    })
-
-    // [OVERHEATING AUDIT] You have correctly removed this endpoint, and should remove this method as well.
-    // Mini-lesson: the “house” way is `FileDownloadButton` -> `downloadFileFromStorage` -> `/api/s3/params/download`.
-    // Keeping a second blob-download path here makes errors inconsistent and encourages bypassing authorization conventions.
-    return blobClient.get(
-      `/pdf_forms/${id}/download`,
-      {},
-      {
-        responseType: "blob",
-      }
-    )
-  }
-
   async updatePdfForm(
     id: string,
     data: {
-      formJson?: Record<string, any>
+      formJson?: IPdfFormJson
       status?: boolean
+      projectNumber?: string
+      model?: string
+      site?: string
+      lot?: string
+      address?: string
       overheatingDocumentsAttributes?: Partial<IOverheatingDocument>[]
     }
   ) {
@@ -1020,6 +1007,11 @@ export class Api {
       pdfForm: {
         formJson: data.formJson,
         status: data.status,
+        projectNumber: data.projectNumber,
+        model: data.model,
+        site: data.site,
+        lot: data.lot,
+        address: data.address,
         overheatingDocumentsAttributes: data.overheatingDocumentsAttributes,
       },
     })
