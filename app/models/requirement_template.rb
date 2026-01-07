@@ -116,7 +116,7 @@ class RequirementTemplate < ApplicationRecord
   end
 
   def published_customizations_count
-    # Returns the count of customizations for the published template version
+    # Returns the cached count of unique jurisdictions using the published template version
     published_template_version&.jurisdiction_template_version_customizations_count ||
       0
   end
@@ -318,7 +318,7 @@ class RequirementTemplate < ApplicationRecord
   def validate_uniqueness_of_blocks
     requirement_block_ids = requirement_block_ids_from_nested_attributes_copy
     grouped_ids = requirement_block_ids.group_by { |e| e }
-    duplicate_ids = grouped_ids.select { |k, v| v.length > 1 }.keys
+    duplicate_ids = grouped_ids.select { |_k, v| v.length > 1 }.keys
     duplicates = RequirementBlock.where(id: duplicate_ids).pluck(:name)
 
     duplicates.each do |duplicate_block_name|
