@@ -140,7 +140,8 @@ class Api::RequirementBlocksController < Api::ApplicationController
           { rows: %i[name a] },
           value_options: [%i[value label]],
           conditional: %i[eq show when hide],
-          computed_compliance: [:value, :module, options_map: {}]
+          computed_compliance: [:value, :module, options_map: {}],
+          data_validation: %i[operation value error_message]
         ]
       ]
     )
