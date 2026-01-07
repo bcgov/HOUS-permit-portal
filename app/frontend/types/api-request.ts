@@ -26,6 +26,12 @@ export interface IFormConditional {
   then: string
 }
 
+export interface IDataValidation {
+  operation: "min" | "max"
+  value: string
+  errorMessage?: string
+}
+
 export interface IRequirementAttributes {
   id?: string
   label?: string
@@ -43,6 +49,7 @@ export interface IRequirementAttributes {
     energyStepCode?: string
     computedCompliance?: TComputedCompliance
     multiple?: boolean
+    dataValidation?: IDataValidation
   }
   position?: number
 }

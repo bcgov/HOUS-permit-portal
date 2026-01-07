@@ -540,20 +540,31 @@ const requirementsComponentMap = {
     const basePath = editableLabelName ? editableLabelName.replace(/\.label$/, "") : undefined
 
     const first = useController({
-      control,
-      name: `${basePath}.inputOptions.headers.firstColumn` as any,
+      control: control as any,
+      name: `${basePath}.inputOptions.headers.firstColumn`,
       defaultValue: t("requirementsLibrary.multiplySumGrid.addHeaderPlaceholder"),
     })
     const a = useController({
-      control,
-      name: `${basePath}.inputOptions.headers.a` as any,
+      control: control as any,
+      name: `${basePath}.inputOptions.headers.a`,
       defaultValue: t("requirementsLibrary.multiplySumGrid.addHeaderPlaceholder"),
     })
-    // b and load are fixed labels in the preview now
+
+    const quantity = useController({
+      control: control as any,
+      name: `${basePath}.inputOptions.headers.quantity`,
+      defaultValue: t("requirementsLibrary.multiplySumGrid.quantityB"),
+    })
+
+    const ab = useController({
+      control: control as any,
+      name: `${basePath}.inputOptions.headers.ab`,
+      defaultValue: t("requirementsLibrary.multiplySumGrid.ab"),
+    })
 
     const { fields, append, remove } = useFieldArray({
-      control,
-      name: `${basePath}.inputOptions.rows` as any,
+      control: control as any,
+      name: `${basePath}.inputOptions.rows`,
     })
 
     return (
@@ -561,10 +572,17 @@ const requirementsComponentMap = {
         editableInput={
           <Stack spacing={3}>
             <MultiplySumGridPreview
-              headers={{ firstColumn: first.field.value as any, a: a.field.value as any }}
+              headers={{
+                firstColumn: first.field.value as any,
+                a: a.field.value as any,
+                quantity: quantity.field.value as any,
+                ab: ab.field.value as any,
+              }}
               controls={{
                 firstColumn: { value: first.field.value as any, onChange: first.field.onChange },
                 a: { value: a.field.value as any, onChange: a.field.onChange },
+                quantity: { value: quantity.field.value as any, onChange: quantity.field.onChange },
+                ab: { value: ab.field.value as any, onChange: ab.field.onChange },
               }}
             />
             <Stack spacing={2}>
