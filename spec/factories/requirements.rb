@@ -44,7 +44,7 @@ FactoryBot.define do
 
     factory :energy_step_code_method_requirement do
       requirement_code { "energy_step_code_method" }
-      input_type { "select" }
+      input_type { "radio" }
       input_options do
         {
           "value_options" => [
@@ -62,7 +62,7 @@ FactoryBot.define do
       requirement_code do
         Requirement::ARCHITECTURAL_DRAWING_METHOD_REQUIREMENT_CODE
       end
-      input_type { "select" }
+      input_type { "radio" }
       input_options do
         {
           "value_options" => [

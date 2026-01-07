@@ -29,9 +29,8 @@ module Infrastructure
       { model: ActsAsTaggableOn::Tagging, filename: "taggings.ndjson" }
     ]
 
-    def initialize(input_path, wipe_data: false)
+    def initialize(input_path)
       @input_path = input_path
-      @wipe_data = wipe_data
       @site_configuration_id = SiteConfiguration.first&.id
       @classification_id_map = {}
     end
@@ -44,8 +43,8 @@ module Infrastructure
 
       # Wrap the entire import process in a transaction
       ActiveRecord::Base.transaction do
-        prepare_classification_map if @wipe_data
-        wipe_data! if @wipe_data
+        prepare_classification_map
+        wipe_data!
 
         Zip::File.open(@input_path) do |zip_file|
           IMPORT_ORDER.each { |config| import_model(zip_file, config) }
@@ -89,47 +88,48 @@ module Infrastructure
       Rails.logger.info "Wiping data..."
 
       # 1. Submission Data & Collaborations
-      SubmissionVersion.delete_all
-      PermitCollaboration.delete_all
-      PermitBlockStatus.delete_all
-      SupportingDocument.delete_all
-      StepCode.delete_all
+      SubmissionVersion.destroy_all
+      PermitCollaboration.destroy_all
+      PermitBlockStatus.destroy_all
+      SupportingDocument.destroy_all
+
+      StepCode.destroy_all
 
       # 2. Permit Applications
-      PermitApplication.delete_all
+      PermitApplication.destroy_all
 
       # 3. Pre-Checks
-      DesignDocument.delete_all
-      PreCheck.delete_all
+      DesignDocument.destroy_all
+      PreCheck.destroy_all
 
       # 3.5. Jurisdiction Customizations (Dependent on TemplateVersion)
-      JurisdictionTemplateVersionCustomization.delete_all
-      IntegrationMapping.delete_all
-      IntegrationMappingNotification.delete_all
+      JurisdictionTemplateVersionCustomization.destroy_all
+      IntegrationMapping.destroy_all
+      IntegrationMappingNotification.destroy_all
 
       # 4. Template-related
-      RequirementDocument.delete_all
-      TemplateVersion.delete_all
-      Requirement.delete_all
-      TemplateSectionBlock.delete_all
-      RequirementTemplateSection.delete_all
-      RequirementTemplate.delete_all
-      RequirementBlock.delete_all
+      RequirementDocument.destroy_all
+      TemplateVersion.destroy_all
+      Requirement.destroy_all
+      TemplateSectionBlock.destroy_all
+      RequirementTemplateSection.destroy_all
+      RequirementTemplate.destroy_all
+      RequirementBlock.destroy_all
 
-      # 5. PermitClassification Dependents - PRESERVE but will need fixing
-      # PermitTypeRequiredStep.delete_all  <-- Preserving
-      # PermitTypeSubmissionContact.delete_all <-- Preserving
+      # 5. PermitClassification Dependents - PRESERVE - fix up is handled by handle_classification_upsert
+      # PermitTypeRequiredStep.destroy_all  <-- Preserving
+      # PermitTypeSubmissionContact.destroy_all <-- Preserving
 
       # 6. PermitClassifications
       # If we are keeping children, we cannot delete the parents (classifications)
       # without violating FK constraints.
       # So we skip deletion here. The import step will use `handle_classification_upsert`
       # to update them in place or insert new ones.
-      # PermitClassification.delete_all <-- SKIPPING to avoid FK violation
+      # PermitClassification.destroy_all <-- SKIPPING to avoid FK violation
 
       # Tagging cleanup
-      ActsAsTaggableOn::Tagging.delete_all
-      ActsAsTaggableOn::Tag.delete_all
+      ActsAsTaggableOn::Tagging.destroy_all
+      ActsAsTaggableOn::Tag.destroy_all
 
       Rails.logger.info "Data wiped."
     end
@@ -167,7 +167,7 @@ module Infrastructure
         end
 
         # If this is PermitClassification, track the mapping from Old ID to New ID
-        if model_class == PermitClassification && @wipe_data
+        if model_class == PermitClassification
           track_classification_id_change(attributes)
         end
 
@@ -218,7 +218,7 @@ module Infrastructure
     end
 
     def upsert_batch(model_class, records)
-      if model_class == PermitClassification && @wipe_data
+      if model_class == PermitClassification
         # Special handling for Classifications to preserve existing IDs
         handle_classification_upsert(records)
       else

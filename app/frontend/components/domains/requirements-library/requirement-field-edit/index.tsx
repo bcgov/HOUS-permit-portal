@@ -20,6 +20,7 @@ import { Controller, FieldValues, useController, useFieldArray, useFormContext }
 import { UseFieldArrayProps } from "react-hook-form/dist/types"
 import { useTranslation } from "react-i18next"
 import {
+  EArchitecturalDrawingDependencyRequirementCode,
   EEnergyStepCodeDependencyRequirementCode,
   ENumberUnit,
   ERequirementContactFieldItemType,
@@ -184,6 +185,10 @@ const requirementsComponentMap = {
 
     const { fields, append, remove } = useFieldArray<TFieldValues>(useFieldArrayProps)
 
+    const isLockedOptions =
+      editableGroupProps.requirementCode === EEnergyStepCodeDependencyRequirementCode.energyStepCodeMethod ||
+      editableGroupProps.requirementCode === EArchitecturalDrawingDependencyRequirementCode.architecturalDrawingMethod
+
     return (
       <EditableGroup
         multiOptionEditableInput={
@@ -204,18 +209,25 @@ const requirementsComponentMap = {
                   value={getOptionValue(idx)?.label}
                   onChange={(e) => onOptionValueChange(idx, e.target.value)}
                   w={"150px"}
+                  isDisabled={isLockedOptions}
                 />
                 <IconButton
                   aria-label={"remove option"}
                   variant={"unstyled"}
                   icon={<X />}
                   onClick={() => remove(idx)}
+                  isDisabled={isLockedOptions}
                 />
               </HStack>
             ))}
 
             {/*  @ts-ignore*/}
-            <Button variant={"link"} textDecoration={"underline"} onClick={() => append({ value: "", label: "" })}>
+            <Button
+              variant={"link"}
+              textDecoration={"underline"}
+              onClick={() => append({ value: "", label: "" })}
+              isDisabled={isLockedOptions}
+            >
               {t("requirementsLibrary.modals.addOptionButton")}
             </Button>
           </>

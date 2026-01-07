@@ -9,6 +9,7 @@ export function FloatingHelpDrawer({ ...boxProps }: IProps) {
   return (
     <Box top="30" right="0" position="fixed" width="fit-content" mt="6" mr="6" mb="6" ml="auto" {...boxProps}>
       <Stack spacing="4" align="right" width="fit-content">
+        {" "}
         <HelpDrawer
           defaultButtonProps={{
             size: "sm",

@@ -267,7 +267,7 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
                     key={requirement.id}
                     w={"full"}
                     borderRadius={"sm"}
-                    pt={index !== 0 ? 1 : 0}
+                    pt={index === 0 ? 0 : 1}
                     pb={5}
                     pos={"relative"}
                   >
