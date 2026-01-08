@@ -6,7 +6,7 @@ import { SectionHeader } from "./section-header"
 import { SectionLink } from "./section-link"
 import { SubLink } from "./sub-link"
 
-export const SingleZoneCoolingHeatingToolSidebar = observer(function SingleZoneCoolingHeatingToolSidebar() {
+export const OverheatingToolSidebar = observer(function OverheatingToolSidebar() {
   React.useEffect(() => {
     if (!window.location.hash) {
       window.location.hash = "#compliance"

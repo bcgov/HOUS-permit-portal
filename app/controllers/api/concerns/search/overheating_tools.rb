@@ -1,9 +1,9 @@
-module Api::Concerns::Search::PdfForms
+module Api::Concerns::Search::OverheatingTools
   extend ActiveSupport::Concern
 
   def perform_search
     @search =
-      PdfForm.search(
+      OverheatingTool.search(
         search_query,
         where: where_clause,
         order: order_clause,
@@ -42,7 +42,7 @@ module Api::Concerns::Search::PdfForms
 
     if (status_filter = search_params.dig(:filters, :status_filter))
       if status_filter != "all"
-        clauses[:status] = (status_filter == "unarchived")
+        clauses[:discarded] = (status_filter == "archived")
       end
     end
 

@@ -11,7 +11,7 @@ import {
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
-import { SingleZoneCoolingHeatingToolSidebar as Sidebar } from "."
+import { OverheatingToolSidebar as Sidebar } from "."
 
 interface IProps {
   triggerProps?: ButtonProps

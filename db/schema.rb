@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_01_06_120000) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_07_100000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -74,9 +74,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_06_120000) do
     t.uuid "contactable_id"
     t.string "contact_type"
     t.index ["contactable_type", "contactable_id"], name: "index_contacts_on_contactable"
-  end
-
-  create_table "data_migrations", primary_key: "version", id: :string, force: :cascade do |t|
   end
 
   create_table "design_documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -286,13 +283,26 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_06_120000) do
   end
 
   create_table "overheating_documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.uuid "pdf_form_id", null: false
+    t.uuid "overheating_tool_id", null: false
     t.text "file_data"
-    t.string "scan_status", default: "pending", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["pdf_form_id"], name: "index_overheating_documents_on_pdf_form_id"
+    t.string "scan_status", default: "pending", null: false
+    t.index ["overheating_tool_id"], name: "index_overheating_documents_on_overheating_tool_id"
     t.index ["scan_status"], name: "index_overheating_documents_on_scan_status"
+  end
+
+  create_table "overheating_tools", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "user_id", null: false
+    t.jsonb "form_json", default: {}
+    t.string "form_type"
+    t.datetime "created_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
+    t.jsonb "pdf_file_data"
+    t.integer "pdf_generation_status", default: 0, null: false
+    t.datetime "discarded_at"
+    t.index ["discarded_at"], name: "index_overheating_tools_on_discarded_at"
+    t.index ["pdf_file_data"], name: "index_overheating_tools_on_pdf_file_data", using: :gin
+    t.index ["user_id"], name: "index_overheating_tools_on_user_id"
   end
 
   create_table "part_3_step_code_checklists", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -397,23 +407,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_06_120000) do
     t.index ["status"], name: "index_part_9_step_code_checklists_on_status"
     t.index ["step_code_id"], name: "index_part_9_step_code_checklists_on_step_code_id"
     t.index ["step_requirement_id"], name: "index_part_9_step_code_checklists_on_step_requirement_id"
-  end
-
-  create_table "pdf_forms", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.uuid "user_id", null: false
-    t.jsonb "form_json", default: {}
-    t.string "form_type"
-    t.boolean "status", default: false
-    t.datetime "created_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
-    t.jsonb "pdf_file_data"
-    t.integer "pdf_generation_status", default: 0, null: false
-    t.string "project_number"
-    t.string "model"
-    t.string "site"
-    t.string "lot"
-    t.string "address"
-    t.index ["pdf_file_data"], name: "index_pdf_forms_on_pdf_file_data", using: :gin
-    t.index ["user_id"], name: "index_pdf_forms_on_user_id"
   end
 
   create_table "permit_applications", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -1046,11 +1039,11 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_06_120000) do
   add_foreign_key "jurisdictions", "jurisdictions", column: "regional_district_id"
   add_foreign_key "make_up_air_fuels", "part_3_step_code_checklists", column: "checklist_id"
   add_foreign_key "occupancy_classifications", "part_3_step_code_checklists", column: "checklist_id"
-  add_foreign_key "overheating_documents", "pdf_forms"
+  add_foreign_key "overheating_documents", "overheating_tools"
+  add_foreign_key "overheating_tools", "users"
   add_foreign_key "part_3_step_code_checklists", "step_codes"
   add_foreign_key "part_9_step_code_checklists", "permit_type_required_steps", column: "step_requirement_id"
   add_foreign_key "part_9_step_code_checklists", "step_codes"
-  add_foreign_key "pdf_forms", "users"
   add_foreign_key "permit_applications", "jurisdictions"
   add_foreign_key "permit_applications", "permit_classifications", column: "activity_id"
   add_foreign_key "permit_applications", "permit_classifications", column: "permit_type_id"

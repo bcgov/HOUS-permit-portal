@@ -403,14 +403,14 @@ export const CoverSheetForm = () => {
           fieldName={"calculationPerformedBy.issuedForDate"}
           showOptional={false}
           width="50%"
-          isReadOnly
+          zIndex={2}
         />
         <DatePickerFormControl
           label={t(`${prefix}.calculationPerformedBy.issuedForDate2`)}
           fieldName={"calculationPerformedBy.issuedForDate2"}
           showOptional={false}
           width="50%"
-          isReadOnly
+          zIndex={1}
         />
       </Grid>
       <Divider my={10} />

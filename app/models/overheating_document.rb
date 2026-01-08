@@ -1,11 +1,11 @@
 class OverheatingDocument < FileUploadAttachment
-  belongs_to :pdf_form, inverse_of: :overheating_documents
+  belongs_to :overheating_tool, inverse_of: :overheating_documents
 
   include FileUploader.Attachment(:file)
 
-  validates :pdf_form, presence: true
+  validates :overheating_tool, presence: true
 
   def attached_to
-    pdf_form
+    overheating_tool
   end
 end

@@ -10,7 +10,7 @@ import { ResultForm } from "./result-form"
 import { ReviewForm } from "./review-form"
 import { UploadsForm } from "./uploads-form"
 
-export const FormSection = observer(function SingleZoneCoolingHeatingToolFormSection() {
+export const FormSection = observer(function OverheatingToolFormSection() {
   const { hash } = useLocation()
   const section = (hash || "#compliance").slice(1)
   const formMethods = useForm({ mode: "onSubmit", reValidateMode: "onSubmit" })

@@ -3,31 +3,31 @@ import { Archive, ArrowSquareOut, DotsThree } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
-import { IPdfForm } from "../../../models/pdf-form"
+import { IOverheatingTool } from "../../../models/overheating-tool"
 import { EFileUploadAttachmentType, EPdfGenerationStatus } from "../../../types/enums"
 import { downloadFileFromStorage } from "../../../utils/utility-functions"
 import { ManageMenuItemButton } from "../../shared/base/manage-menu-item"
 
-interface IPdfFormGridRowProps {
-  pdfForm: IPdfForm
-  onArchivePdf: (id: string) => void
+interface IOverheatingToolGridRowProps {
+  overheatingTool: IOverheatingTool
+  onArchiveTool: (id: string) => void
   isGenerating?: boolean
 }
 
-export const PdfFormGridRow = observer(function PdfFormGridRow({
-  pdfForm,
-  onArchivePdf,
+export const OverheatingToolGridRow = observer(function OverheatingToolGridRow({
+  overheatingTool,
+  onArchiveTool,
   isGenerating: isGeneratingProp,
-}: IPdfFormGridRowProps) {
+}: IOverheatingToolGridRowProps) {
   const { t } = useTranslation() as any
 
-  const hasPdf = !!pdfForm.pdfFileData
-  const isArchived = pdfForm.status === false
+  const hasPdf = !!overheatingTool.pdfFileData
+  const isDiscarded = overheatingTool.isDiscarded
 
   const isGenerating =
     isGeneratingProp ||
-    pdfForm.pdfGenerationStatus === EPdfGenerationStatus.queued ||
-    pdfForm.pdfGenerationStatus === EPdfGenerationStatus.generating
+    overheatingTool.pdfGenerationStatus === EPdfGenerationStatus.queued ||
+    overheatingTool.pdfGenerationStatus === EPdfGenerationStatus.generating
 
   return (
     <Grid
@@ -43,17 +43,17 @@ export const PdfFormGridRow = observer(function PdfFormGridRow({
     >
       <GridItem display="flex" alignItems="center" px={4} py={2}>
         <Text w="300px" fontWeight="bold">
-          {pdfForm.projectNumber}
+          {overheatingTool.formJson?.projectNumber}
         </Text>
       </GridItem>
       <GridItem display="flex" alignItems="center" px={4} py={2}>
         <Text w="400px" fontWeight="bold">
-          {pdfForm.address}
+          {overheatingTool.formJson?.buildingLocation?.address}
         </Text>
       </GridItem>
 
       <GridItem display="flex" alignItems="center" px={4} py={2}>
-        <Text w="360px">{pdfForm.createdAt?.toLocaleDateString()}</Text>
+        <Text w="360px">{overheatingTool.createdAt?.toLocaleDateString()}</Text>
       </GridItem>
 
       <GridItem display="flex" alignItems="center" justifyContent="flex-end" px={2} py={2} w="100%">
@@ -69,17 +69,21 @@ export const PdfFormGridRow = observer(function PdfFormGridRow({
                   leftIcon={<ArrowSquareOut size={16} />}
                   onClick={() =>
                     downloadFileFromStorage({
-                      model: EFileUploadAttachmentType.PdfForm,
-                      modelId: pdfForm.id,
-                      filename: pdfForm.pdfFileData?.metadata?.filename || `pdf_form_${pdfForm.id}.pdf`,
+                      model: EFileUploadAttachmentType.OverheatingTool,
+                      modelId: overheatingTool.id,
+                      filename:
+                        overheatingTool.pdfFileData?.metadata?.filename || `overheating_tool_${overheatingTool.id}.pdf`,
                     })
                   }
                 >
                   Open
                 </ManageMenuItemButton>
               )}
-              {!isArchived && (
-                <ManageMenuItemButton leftIcon={<Archive size={16} />} onClick={() => onArchivePdf(pdfForm.id)}>
+              {!isDiscarded && (
+                <ManageMenuItemButton
+                  leftIcon={<Archive size={16} />}
+                  onClick={() => onArchiveTool(overheatingTool.id)}
+                >
                   Archive
                 </ManageMenuItemButton>
               )}

@@ -300,10 +300,10 @@ export interface IDesignDocument extends IBaseFileAttachment {
 }
 
 export interface IOverheatingDocument extends IBaseFileAttachment {
-  pdfFormId: string
+  overheatingToolId: string
 }
 
-export interface IPdfFormJson {
+export interface IOverheatingToolJson {
   notes?: string
   other?: string
   cooling?: {

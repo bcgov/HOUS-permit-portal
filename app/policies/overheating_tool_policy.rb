@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class PdfFormPolicy < ApplicationPolicy
+class OverheatingToolPolicy < ApplicationPolicy
   def index?
     user.present?
   end
@@ -10,7 +10,7 @@ class PdfFormPolicy < ApplicationPolicy
   end
 
   def show?
-    user.present? && (record.user_id == user.id)
+    user.present? && (record.user_id == user.id || user.review_staff?)
   end
 
   def update?
@@ -25,12 +25,18 @@ class PdfFormPolicy < ApplicationPolicy
     return false if user.blank?
 
     return true if record.user_id == user.id
+
+    user.review_staff? && record.respond_to?(:jurisdiction_id) &&
+      user.member_of?(record.jurisdiction_id)
   end
 
   def download?
     return false if user.blank?
 
     return true if record.user_id == user.id
+
+    user.review_staff? && record.respond_to?(:jurisdiction_id) &&
+      user.member_of?(record.jurisdiction_id)
   end
 
   def archive?

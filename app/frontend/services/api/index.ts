@@ -7,11 +7,11 @@ import { IExternalApiKey } from "../../models/external-api-key"
 import { IIntegrationMapping } from "../../models/integration-mapping"
 import { IJurisdiction } from "../../models/jurisdiction"
 import { IJurisdictionTemplateVersionCustomization } from "../../models/jurisdiction-template-version-customization"
+import { IOverheatingTool } from "../../models/overheating-tool"
 import { IPart3StepCode } from "../../models/part-3-step-code"
 import { IPart3StepCodeChecklist } from "../../models/part-3-step-code-checklist"
 import { IPart9StepCode } from "../../models/part-9-step-code"
 import { IPart9StepCodeChecklist } from "../../models/part-9-step-code-checklist"
-import { IPdfForm } from "../../models/pdf-form"
 import { IPermitApplication } from "../../models/permit-application"
 import { IActivity, IPermitType } from "../../models/permit-classification"
 import { IPermitCollaboration } from "../../models/permit-collaboration"
@@ -49,7 +49,7 @@ import {
   ECollaboratorType,
   EEarlyAccessRequirementTemplateSortFields,
   EJurisdictionSortFields,
-  EPdfFormSortFields,
+  EOverheatingToolSortFields,
   EPermitApplicationSortFields,
   EPermitBlockStatus,
   EPermitClassificationType,
@@ -68,8 +68,8 @@ import {
   IJurisdictionFilters,
   IJurisdictionSearchFilters,
   IOverheatingDocument,
+  IOverheatingToolJson,
   IPart9ChecklistSelectOptions,
-  IPdfFormJson,
   IPermitApplicationSearchFilters,
   IPermitProjectSearchFilters,
   ITemplateVersionDiff,
@@ -952,68 +952,33 @@ export class Api {
     )
   }
 
-  async createPdfForm(formData: {
-    formJson: IPdfFormJson
+  async createOverheatingTool(formData: {
+    formJson: IOverheatingToolJson
     formType: string
-    status?: boolean
-    projectNumber?: string
-    model?: string
-    site?: string
-    lot?: string
-    address?: string
     overheatingDocumentsAttributes?: Partial<IOverheatingDocument>[]
   }) {
-    return this.client.post<IApiResponse<IPdfForm, {}>>("/pdf_forms", {
-      pdfForm: {
+    return this.client.post<IApiResponse<IOverheatingTool, {}>>("/overheating", {
+      overheatingTool: {
         formJson: formData.formJson,
         formType: formData.formType,
-        status: formData.status ?? true,
-        projectNumber: formData.projectNumber,
-        model: formData.model,
-        site: formData.site,
-        lot: formData.lot,
-        address: formData.address,
         overheatingDocumentsAttributes: formData.overheatingDocumentsAttributes,
       },
     })
   }
 
-  async getPdfForms(params?: TSearchParams<EPdfFormSortFields>) {
-    return this.client.get<IApiResponse<IPdfForm[], IPageMeta>>("/pdf_forms", params)
+  async getOverheatingTools(params?: TSearchParams<EOverheatingToolSortFields>) {
+    return this.client.get<IApiResponse<IOverheatingTool[], IPageMeta>>("/overheating", params)
+  }
+
+  async fetchOverheatingTool(id: string) {
+    return this.client.get<IApiResponse<IOverheatingTool, {}>>(`/overheating/${id}`)
   }
 
   async generatePdf(id: string) {
-    return this.client.post<IApiResponse<IPdfForm, {}>>(`/pdf_forms/${id}/generate_pdf`)
+    return this.client.post<IApiResponse<IOverheatingTool, {}>>(`/overheating/${id}/generate_pdf`)
   }
 
-  async archivePdf(id: string) {
-    return this.client.post<IApiResponse<IPdfForm, {}>>(`/pdf_forms/${id}/archive`)
-  }
-
-  async updatePdfForm(
-    id: string,
-    data: {
-      formJson?: IPdfFormJson
-      status?: boolean
-      projectNumber?: string
-      model?: string
-      site?: string
-      lot?: string
-      address?: string
-      overheatingDocumentsAttributes?: Partial<IOverheatingDocument>[]
-    }
-  ) {
-    return this.client.put<IApiResponse<IPdfForm, {}>>(`/pdf_forms/${id}`, {
-      pdfForm: {
-        formJson: data.formJson,
-        status: data.status,
-        projectNumber: data.projectNumber,
-        model: data.model,
-        site: data.site,
-        lot: data.lot,
-        address: data.address,
-        overheatingDocumentsAttributes: data.overheatingDocumentsAttributes,
-      },
-    })
+  async archiveOverheatingTool(id: string) {
+    return this.client.post<IApiResponse<IOverheatingTool, {}>>(`/overheating/${id}/archive`)
   }
 }

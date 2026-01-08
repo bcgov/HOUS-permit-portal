@@ -5,12 +5,12 @@ import { useTranslation } from "react-i18next"
 import { RemoveScroll } from "react-remove-scroll"
 import { FloatingHelpDrawer } from "../../shared/floating-help-drawer"
 import { FormSection } from "./form-section"
-import { SingleZoneCoolingHeatingToolNavBar } from "./nav-bar"
+import { OverheatingToolNavBar } from "./nav-bar"
 import { OverheatingNavLinks } from "./nav-bar/overheating-nav-links"
-import { SingleZoneCoolingHeatingToolSidebar } from "./sidebar"
+import { OverheatingToolSidebar } from "./sidebar"
 import { SideBarDrawer } from "./sidebar/side-bar-drawer"
 
-export const SingleZoneCoolingHeatingToolStartScreen = observer(() => {
+export const OverheatingToolStartScreen = observer(() => {
   const { t } = useTranslation() as any
   return (
     <RemoveScroll>
@@ -26,14 +26,11 @@ export const SingleZoneCoolingHeatingToolStartScreen = observer(() => {
         zIndex="modal"
         bg="white"
       >
-        <SingleZoneCoolingHeatingToolNavBar
-          title={t("singleZoneCoolingHeatingTool.title")}
-          NavLinks={<OverheatingNavLinks />}
-        />
+        <OverheatingToolNavBar title={t("singleZoneCoolingHeatingTool.title")} NavLinks={<OverheatingNavLinks />} />
         <Flex flex={1} w="full" overflow="auto" position="relative">
           <Show above="lg">
             <Flex w={"sidebar.width"} boxShadow="md" borderRightWidth={1} borderColor="greys.grey02" overflow="auto">
-              <SingleZoneCoolingHeatingToolSidebar />
+              <OverheatingToolSidebar />
             </Flex>
           </Show>
           <Flex

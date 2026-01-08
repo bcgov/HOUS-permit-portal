@@ -30,7 +30,7 @@ export enum EFileUploadAttachmentType {
   ReportDocument = "ReportDocument",
   ResourceDocument = "ResourceDocument",
   DesignDocument = "DesignDocument",
-  PdfForm = "PdfForm",
+  OverheatingTool = "OverheatingTool",
   OverheatingDocument = "OverheatingDocument",
 }
 
@@ -682,13 +682,13 @@ export enum EPermitProjectSortFields {
   rollupStatus = "rollup_status",
 }
 
-export enum EPdfFormStatusFilter {
+export enum EOverheatingToolStatusFilter {
   all = "all",
   archived = "archived",
   unarchived = "unarchived",
 }
 
-export enum EPdfFormSortFields {
+export enum EOverheatingToolSortFields {
   projectNumber = "projectNumber",
   address = "address",
   createdAt = "createdAt",

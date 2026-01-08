@@ -93,7 +93,7 @@ function isPreCheckPath(path: string): boolean {
 }
 
 function isSingleZoneCoolingHeatingToolPath(path: string): boolean {
-  const regex = /^\/single-zone-cooling-heating-tool\/[a-z\d-]+/
+  const regex = /^\/overheating-tool\/[a-z\d-]+/
   return regex.test(path)
 }
 

@@ -2,9 +2,11 @@ import { Button, Container, Flex, Heading, Link, ListItem, Text, UnorderedList }
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { Trans, useTranslation } from "react-i18next"
+import { useNavigate } from "react-router-dom"
 import { useMst } from "../../../setup/root"
 
-export const SingleZoneCoolingHeatingToolScreen = observer(() => {
+export const OverheatingToolScreen = observer(() => {
+  const navigate = useNavigate()
   const { t } = useTranslation() as any
   const { sessionStore } = useMst()
   const { loggedIn } = sessionStore
@@ -38,13 +40,7 @@ export const SingleZoneCoolingHeatingToolScreen = observer(() => {
         </Flex>
       </Flex>
 
-      <Button
-        size="lg"
-        variant="primary"
-        mb={10}
-        fontWeight="bold"
-        onClick={() => (window.location.href = "/single-zone-cooling-heating-tool/start")}
-      >
+      <Button size="lg" variant="primary" mb={10} fontWeight="bold" onClick={() => navigate("/overheating-tool/start")}>
         {loggedIn ? t(`singleZoneCoolingHeatingTool.start`) : t(`singleZoneCoolingHeatingTool.loginToStart`)}
       </Button>
 

@@ -8,14 +8,11 @@ interface IProps {
   NavLinks?: JSX.Element
 }
 
-export const SingleZoneCoolingHeatingToolNavBar = observer(function SingleZoneCoolingHeatingToolNavBar({
-  title,
-  NavLinks,
-}: IProps) {
+export const OverheatingToolNavBar = observer(function OverheatingToolNavBar({ title, NavLinks }: IProps) {
   return (
     <Box
       as="nav"
-      id="singleZoneCoolingHeatingToolNav"
+      id="overheatingToolNav"
       position="sticky"
       py={4}
       top={0}

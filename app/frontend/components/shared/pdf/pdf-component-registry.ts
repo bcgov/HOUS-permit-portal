@@ -1,4 +1,4 @@
-import { SingleZoneCoolingHeatingPDFContent } from "../../domains/single-zone-cooling-heating-tool/pdf-content/pdf-content"
+import { SingleZoneCoolingHeatingPDFContent } from "../../domains/overheating-tool/pdf-content/pdf-content"
 
 interface PDFComponentProps {
   data: any

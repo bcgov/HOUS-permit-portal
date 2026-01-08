@@ -3,7 +3,7 @@ class OverheatingDocumentBlueprint < Blueprinter::Base
 
   fields :created_at
 
-  field :pdf_form_id
+  field :overheating_tool_id
 
   field :file, transformer: Transformers::FileAttachmentTransformer
 end

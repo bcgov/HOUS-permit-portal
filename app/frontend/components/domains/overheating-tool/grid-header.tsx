@@ -3,16 +3,16 @@ import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../setup/root"
-import { EPdfFormSortFields } from "../../../types/enums"
+import { EOverheatingToolSortFields } from "../../../types/enums"
 import { GridHeader } from "../../shared/grid/grid-header"
 import { SortIcon } from "../../shared/sort-icon"
 
-export const OVERHEATING_GRID_TEMPLATE_COLUMNS = "2fr 1.5fr 1.5fr 2fr 2fr 0.5fr"
+export const OVERHEATING_GRID_TEMPLATE_COLUMNS = "minmax(0, 2fr) minmax(0, 2fr) minmax(0, 1fr) minmax(0, 0.5fr)"
 
 export const GridHeaders = observer(function GridHeaders({ includeActionColumn }: { includeActionColumn?: boolean }) {
   const { t } = useTranslation() as any
-  const { pdfFormStore } = useMst()
-  const { sort, toggleSort, getSortColumnHeader } = pdfFormStore
+  const { overheatingToolStore } = useMst()
+  const { sort, toggleSort, getSortColumnHeader } = overheatingToolStore
 
   return (
     <Box display={"contents"} role={"row"}>
@@ -22,11 +22,11 @@ export const GridHeaders = observer(function GridHeaders({ includeActionColumn }
           as={"button"}
           justifyContent={"space-between"}
           cursor="pointer"
-          onClick={() => toggleSort(EPdfFormSortFields.projectNumber)}
+          onClick={() => toggleSort(EOverheatingToolSortFields.projectNumber)}
           px={4}
         >
-          <Text textAlign="left">{getSortColumnHeader(EPdfFormSortFields.projectNumber)}</Text>
-          <SortIcon<EPdfFormSortFields> field={EPdfFormSortFields.projectNumber} currentSort={sort} />
+          <Text textAlign="left">{getSortColumnHeader(EOverheatingToolSortFields.projectNumber)}</Text>
+          <SortIcon<EOverheatingToolSortFields> field={EOverheatingToolSortFields.projectNumber} currentSort={sort} />
         </Flex>
       </GridHeader>
 
@@ -36,11 +36,11 @@ export const GridHeaders = observer(function GridHeaders({ includeActionColumn }
           as={"button"}
           justifyContent={"space-between"}
           cursor="pointer"
-          onClick={() => toggleSort(EPdfFormSortFields.address)}
+          onClick={() => toggleSort(EOverheatingToolSortFields.address)}
           px={4}
         >
           <Text textAlign="left">{t("singleZoneCoolingHeatingTool.coverSheet.fields.buildingLocationAddress")}</Text>
-          <SortIcon<EPdfFormSortFields> field={EPdfFormSortFields.address} currentSort={sort} />
+          <SortIcon<EOverheatingToolSortFields> field={EOverheatingToolSortFields.address} currentSort={sort} />
         </Flex>
       </GridHeader>
 
@@ -50,11 +50,11 @@ export const GridHeaders = observer(function GridHeaders({ includeActionColumn }
           as={"button"}
           justifyContent={"space-between"}
           cursor="pointer"
-          onClick={() => toggleSort(EPdfFormSortFields.createdAt)}
+          onClick={() => toggleSort(EOverheatingToolSortFields.createdAt)}
           px={4}
         >
-          <Text textAlign="left">{getSortColumnHeader(EPdfFormSortFields.createdAt)}</Text>
-          <SortIcon<EPdfFormSortFields> field={EPdfFormSortFields.createdAt} currentSort={sort} />
+          <Text textAlign="left">{getSortColumnHeader(EOverheatingToolSortFields.createdAt)}</Text>
+          <SortIcon<EOverheatingToolSortFields> field={EOverheatingToolSortFields.createdAt} currentSort={sort} />
         </Flex>
       </GridHeader>
 

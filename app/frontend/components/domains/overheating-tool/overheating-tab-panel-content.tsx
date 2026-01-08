@@ -33,17 +33,17 @@ import { ModelSearchInput } from "../../shared/base/model-search-input"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
 import { SearchGrid } from "../../shared/grid/search-grid"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
-import { PdfFormGridRow } from "../single-zone-cooling-heating-tool/pdf-form-grid-row"
 import { GridHeaders, OVERHEATING_GRID_TEMPLATE_COLUMNS } from "./grid-header"
+import { OverheatingToolGridRow } from "./overheating-tool-grid-row"
 
 export const OverheatingTabPanelContent = observer(() => {
   const { t } = useTranslation() as any
-  const { pdfFormStore } = useMst()
-  const [statusChoice, setStatusChoice] = useState<string>(pdfFormStore.statusFilter)
+  const { overheatingToolStore } = useMst()
+  const [statusChoice, setStatusChoice] = useState<string>(overheatingToolStore.statusFilter)
   const { isOpen, onOpen, onClose } = useDisclosure()
   const {
     isLoading,
-    tablePdfForms,
+    tableOverheatingTools,
     search,
     countPerPage,
     totalCount,
@@ -51,16 +51,16 @@ export const OverheatingTabPanelContent = observer(() => {
     totalPages,
     handleCountPerPageChange,
     handlePageChange,
-  } = pdfFormStore
+  } = overheatingToolStore
 
   useEffect(() => {
     // Initial load: sync with URL or use defaults
-    pdfFormStore.syncWithUrl()
+    overheatingToolStore.syncWithUrl()
     search({ page: 1, countPerPage: 10 })
   }, [])
 
-  const archivePdf = async (id: string) => {
-    await pdfFormStore.archivePdfForm(id)
+  const archiveTool = async (id: string) => {
+    await overheatingToolStore.archiveOverheatingTool(id)
   }
 
   return (
@@ -79,7 +79,7 @@ export const OverheatingTabPanelContent = observer(() => {
                 {t("singleZoneCoolingHeatingTool.createReportDescriptionPrefix")}{" "}
                 {t("singleZoneCoolingHeatingTool.createReportDescriptionLink")}
               </Text>
-              <RouterLinkButton rightIcon={<CaretRight />} to="/single-zone-cooling-heating-tool/start">
+              <RouterLinkButton rightIcon={<CaretRight />} to="/overheating-tool/start">
                 {t("stepCode.createButton")}
               </RouterLinkButton>
               <Divider borderColor="greys.grey03" my={4} />
@@ -118,7 +118,7 @@ export const OverheatingTabPanelContent = observer(() => {
                           w="full"
                           variant="primary"
                           onClick={() => {
-                            pdfFormStore.setStatusFilter(statusChoice as any)
+                            overheatingToolStore.setStatusFilter(statusChoice as any)
                             search({ page: 1 })
                             onClose()
                           }}
@@ -132,7 +132,7 @@ export const OverheatingTabPanelContent = observer(() => {
               </FormControl>
               <FormControl w="full">
                 <ModelSearchInput
-                  searchModel={pdfFormStore as any}
+                  searchModel={overheatingToolStore as any}
                   inputProps={{ placeholder: t("ui.search"), width: "full" }}
                   inputGroupProps={{ width: "full" }}
                 />
@@ -143,24 +143,28 @@ export const OverheatingTabPanelContent = observer(() => {
             <GridHeaders includeActionColumn />
 
             {isLoading ? (
-              <Flex gridColumn="span 6" justify="center" align="center" minH="200px">
-                <SharedSpinner />
-              </Flex>
-            ) : R.isEmpty(tablePdfForms) ? (
-              <GridItem gridColumn="span 6">
+              <GridItem gridColumn="1 / -1">
+                <Flex justify="center" align="center" minH="200px">
+                  <SharedSpinner />
+                </Flex>
+              </GridItem>
+            ) : R.isEmpty(tableOverheatingTools) ? (
+              <GridItem gridColumn="1 / -1">
                 <CustomMessageBox
                   m={4}
                   status={EFlashMessageStatus.info}
-                  description={t("permitProject.noneFoundExplanation")}
+                  description={t("singleZoneCoolingHeatingTool.noneFoundExplanation")}
                 />
               </GridItem>
             ) : (
-              tablePdfForms
-                .filter((pdfForm) => {
-                  const pn = pdfForm.projectNumber
+              tableOverheatingTools
+                .filter((tool) => {
+                  const pn = tool.formJson?.projectNumber
                   return pn !== undefined && pn !== null && String(pn).toString().trim() !== ""
                 })
-                .map((pdfForm) => <PdfFormGridRow onArchivePdf={archivePdf} key={pdfForm.id} pdfForm={pdfForm} />)
+                .map((tool) => (
+                  <OverheatingToolGridRow onArchiveTool={archiveTool} key={tool.id} overheatingTool={tool} />
+                ))
             )}
           </SearchGrid>
           <Flex w={"full"} justifyContent={"space-between"}>

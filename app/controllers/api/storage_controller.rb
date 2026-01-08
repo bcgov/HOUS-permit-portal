@@ -21,7 +21,7 @@ class Api::StorageController < Api::ApplicationController
     "ResourceDocument" => ResourceDocument,
     "ReportDocument" => ReportDocument,
     "DesignDocument" => DesignDocument,
-    "PdfForm" => PdfForm,
+    "OverheatingTool" => OverheatingTool,
     "OverheatingDocument" => OverheatingDocument
   }.freeze
 

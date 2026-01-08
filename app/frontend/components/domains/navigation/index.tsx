@@ -169,14 +169,14 @@ const OnboardingChecklistPageForLgAdoptingScreen = lazy(() =>
   }))
 )
 
-const SingleZoneCoolingHeatingToolScreen = lazy(() =>
-  import("../single-zone-cooling-heating-tool/single-zone-cooling-heating-tool-screen").then((module) => ({
-    default: module.SingleZoneCoolingHeatingToolScreen,
+const OverheatingToolScreen = lazy(() =>
+  import("../overheating-tool/overheating-tool-screen").then((module) => ({
+    default: module.OverheatingToolScreen,
   }))
 )
-const SingleZoneCoolingHeatingToolStartScreen = lazy(() =>
-  import("../single-zone-cooling-heating-tool/single-zone-cooling-heating-tool-start-screen").then((module) => ({
-    default: module.SingleZoneCoolingHeatingToolStartScreen,
+const OverheatingToolStartScreen = lazy(() =>
+  import("../overheating-tool/overheating-tool-start-screen").then((module) => ({
+    default: module.OverheatingToolStartScreen,
   }))
 )
 
@@ -733,7 +733,7 @@ const AppRoutes = observer(() => {
         </Route>
 
         <Route element={<ProtectedRoute isAllowed={loggedIn && currentUser?.isSubmitter} />}>
-          <Route path="/single-zone-cooling-heating-tool/start" element={<SingleZoneCoolingHeatingToolStartScreen />} />
+          <Route path="/overheating-tool/start" element={<OverheatingToolStartScreen />} />
         </Route>
 
         <Route element={<ProtectedRoute isAllowed={loggedIn && !isUnconfirmed} />}>
@@ -808,10 +808,7 @@ const AppRoutes = observer(() => {
         <Route path="/contact" element={<ContactScreen />} />
         <Route path="/standardization-preview" element={<StandardizationPreviewScreen />} />
         <Route path="/project-readiness-tools" element={<ProjectReadinessToolsIndexScreen />} />
-        <Route
-          path="/project-readiness-tools/single-zone-cooling-heating-tool"
-          element={<SingleZoneCoolingHeatingToolScreen />}
-        />
+        <Route path="/project-readiness-tools/overheating-tool" element={<OverheatingToolScreen />} />
         <Route path="/privacy-policy" element={<PrivacyPolicyScreen />} />
         <Route
           path="/project-readiness-tools/create-your-letters-of-assurance"

@@ -58,7 +58,7 @@ export const ReviewForm = observer(function ReviewForm() {
   const { getValues, handleSubmit } = useFormContext()
   const values = getValues() || {}
   const { labelFor } = useLabels()
-  const { pdfFormStore } = useMst()
+  const { overheatingToolStore } = useMst()
 
   const validate = React.useCallback((vals: any) => {
     const bl = vals?.buildingLocation || {}
@@ -71,15 +71,9 @@ export const ReviewForm = observer(function ReviewForm() {
 
   const onSubmit = async (data: any) => {
     const { overheatingDocumentsAttributes, ...formData } = data
-    const result = await pdfFormStore.createPdfForm({
+    const result = await overheatingToolStore.createOverheatingTool({
       formJson: formData,
       formType: "single_zone_cooling_heating_tool",
-      status: true,
-      projectNumber: formData.projectNumber,
-      model: formData.buildingLocation?.model,
-      site: formData.buildingLocation?.site,
-      lot: formData.buildingLocation?.lot,
-      address: formData.buildingLocation?.address,
       overheatingDocumentsAttributes,
     })
     if ((result as any)?.success) {

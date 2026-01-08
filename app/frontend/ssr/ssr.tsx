@@ -87,23 +87,23 @@ const main = async () => {
         />,
         stepCodeChecklistPDFPath
       )
-    } else if (pdfData.pdfForm) {
-      const { pdfForm: pdfFormPDFPath } = pdfData.meta.generationPaths
+    } else if (pdfData.overheatingTool) {
+      const { overheatingTool: overheatingToolPDFPath } = pdfData.meta.generationPaths
       const assetDirectoryPath = pdfData.meta.assetDirectoryPath
 
-      if (!pdfFormPDFPath) {
-        throw new Error("No pdfForm path provided in generationPaths")
+      if (!overheatingToolPDFPath) {
+        throw new Error("No overheatingTool path provided in generationPaths")
       }
 
-      const formType = pdfData.pdfForm.formType
+      const formType = pdfData.overheatingTool.formType
       const PDFComponent = PDFComponentRegistry[formType]
 
       if (!PDFComponent) {
         throw new Error(`No PDF component found for form type: ${formType}`)
       }
       await ReactPDF.renderToFile(
-        <PDFComponent data={pdfData.pdfForm} assetDirectoryPath={assetDirectoryPath} />,
-        pdfFormPDFPath
+        <PDFComponent data={pdfData.overheatingTool} assetDirectoryPath={assetDirectoryPath} />,
+        overheatingToolPDFPath
       )
     }
   } catch (error) {
