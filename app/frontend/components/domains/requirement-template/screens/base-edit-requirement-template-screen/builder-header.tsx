@@ -58,7 +58,7 @@ export const BuilderHeader = observer(function BuilderHeader({
           />
           {status === ETemplateVersionStatus.deprecated && (
             <RouterLinkButton
-              to={`/digital-building-permits/${latestVersionId}/edit`}
+              to={`/template-versions/${latestVersionId}`}
               variant="secondary"
               size="xs"
               p={3}
