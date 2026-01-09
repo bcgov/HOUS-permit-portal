@@ -6,6 +6,7 @@ import {
   AccordionPanel,
   AccordionProps,
   Box,
+  Button,
   Flex,
   HStack,
   IconButton,
@@ -13,7 +14,7 @@ import {
   useDisclosure,
   VStack,
 } from "@chakra-ui/react"
-import { X } from "@phosphor-icons/react"
+import { Trash } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React, { useEffect, useMemo } from "react"
@@ -127,7 +128,7 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
                 {requirementBlock.displayName}
               </Box>
               {isOpen && onRemove && (
-                <IconButton
+                <Button
                   color={"text.primary"}
                   variant={"ghost"}
                   aria-label={"Remove Requirement Block"}
@@ -135,8 +136,12 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
                     e.stopPropagation()
                     onRemove()
                   }}
-                  icon={<X size={16} />}
-                />
+                  leftIcon={<Trash size={16} />}
+                  size="sm"
+                  fontWeight="normal"
+                >
+                  {t("ui.remove")}
+                </Button>
               )}
             </HStack>
 

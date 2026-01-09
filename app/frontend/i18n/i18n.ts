@@ -3735,6 +3735,9 @@ Thank you,
               body: "Any requirements inside this section will also be removed along with it.",
             },
             emptyTemplateSectionText: "Start by clicking the Add Section button",
+            blockRemoved: "Requirement block removed",
+            sectionRemoved: "Section removed",
+            wasRemoved: "{{name}} was removed",
             stepCodeWarnings: {
               energyStepCodeRecommended:
                 'Warning:"Design package energy step code file" is present in the template, but there is no "Energy step code" requirement.',
