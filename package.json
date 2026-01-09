@@ -89,7 +89,7 @@
     "react-leaflet": "^4.2.1",
     "react-password-strength-bar": "^0.4.1",
     "react-remove-scroll": "^2.5.7",
-    "react-router-dom": "^6.20.0",
+    "react-router-dom": "^6.30.3",
     "react-select": "^5.8.0",
     "restructure": "^3.0.0",
     "rollup": "^4.22.4",
