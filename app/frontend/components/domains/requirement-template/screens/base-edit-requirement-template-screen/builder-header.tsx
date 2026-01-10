@@ -18,6 +18,7 @@ interface IProps {
   versionDate?: Date
   breadCrumbs?: { href: string; title: string }[]
   latestVersionId?: string
+  forEdit?: boolean
 }
 
 export const BuilderHeader = observer(function BuilderHeader({
@@ -28,9 +29,9 @@ export const BuilderHeader = observer(function BuilderHeader({
   renderHeading,
   breadCrumbs = [],
   latestVersionId,
+  forEdit = false,
 }: IProps) {
   const { t } = useTranslation()
-
   return (
     <Container as={"header"} maxW={"container.lg"} px={8}>
       <HStack justifyContent={"space-between"}>
@@ -58,7 +59,9 @@ export const BuilderHeader = observer(function BuilderHeader({
           />
           {status === ETemplateVersionStatus.deprecated && (
             <RouterLinkButton
-              to={`/template-versions/${latestVersionId}`}
+              to={
+                forEdit ? `/digital-building-permits/${latestVersionId}/edit` : `/template-versions/${latestVersionId}`
+              }
               variant="secondary"
               size="xs"
               p={3}
