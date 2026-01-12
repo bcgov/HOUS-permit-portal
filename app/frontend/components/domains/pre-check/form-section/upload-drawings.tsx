@@ -199,38 +199,7 @@ export const UploadDrawings = observer(function UploadDrawings() {
       )}
 
       {!currentPreCheck?.isSubmitted && !currentPreCheck?.isUploadDrawingsComplete && (
-        <Box
-          position="relative"
-          mb={6}
-          sx={{
-            ".uppy-Dashboard": {
-              border: "2px dashed var(--chakra-colors-border-light)",
-              borderRadius: "var(--chakra-radii-lg)",
-              borderColor: "var(--chakra-colors-theme-blue)",
-            },
-            ".uppy-Dashboard-inner": {
-              border: "none",
-              borderRadius: "var(--chakra-radii-lg)",
-              backgroundColor: "var(--chakra-colors-theme-blueLight)",
-            },
-            ".uppy-Dashboard-dropFilesHereHint": {
-              display: "none",
-            },
-            ".uppy-DashboardContent-title": {
-              display: "none",
-            },
-            ".uppy-DashboardContent-back": {
-              display: "none",
-            },
-            ".uppy-DashboardContent-bar": {
-              display: "none",
-            },
-            // Todo: remove when supporting multiple files
-            ".uppy-StatusBar-actionBtn--done": {
-              display: "none",
-            },
-          }}
-        >
+        <Box position="relative" mb={6}>
           <Dashboard uppy={uppy} width="100%" height={276} proudlyDisplayPoweredByUppy={false} />
         </Box>
       )}

@@ -23,6 +23,23 @@ class AutomatedCompliance::ParcelInfoExtractor < AutomatedCompliance::Base
           .each do |field_id, req|
             value = attributes[req.dig("computedCompliance", "value")]
 
+            if req["key"]&.ends_with?("additional_pid_info") && value.present?
+              # Path: components[0] -> components[0] -> columns[0] -> components[0]
+              pid_key =
+                req.dig(
+                  "components",
+                  0,
+                  "components",
+                  0,
+                  "columns",
+                  0,
+                  "components",
+                  0,
+                  "key"
+                )
+              value = [{ pid_key => value }] if pid_key
+            end
+
             if value != permit_application.compliance_data[field_id]
               updated = true
               permit_application.compliance_data[field_id] = value

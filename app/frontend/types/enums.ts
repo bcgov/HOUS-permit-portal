@@ -28,7 +28,20 @@ export enum EFileUploadAttachmentType {
   SupportingDocument = "SupportingDocument",
   ProjectDocument = "ProjectDocument",
   ReportDocument = "ReportDocument",
+  ResourceDocument = "ResourceDocument",
   DesignDocument = "DesignDocument",
+}
+
+export enum EResourceCategory {
+  planningZoning = "planning_zoning",
+  bylawsRequirements = "bylaws_requirements",
+  gisMapping = "gis_mapping",
+  additionalResources = "additional_resources",
+}
+
+export enum EResourceType {
+  file = "file",
+  link = "link",
 }
 
 export enum EPermitApplicationStatus {
@@ -450,6 +463,8 @@ export enum ENotificationActionType {
   stepCodeReportGenerated = "step_code_report_generated",
   preCheckSubmitted = "pre_check_submitted",
   preCheckCompleted = "pre_check_completed",
+  fileUploadFailed = "file_upload_failed",
+  resourceReminder = "resource_reminder",
 }
 
 export enum ECollaboratorableType {
@@ -761,4 +776,10 @@ export enum EProfessionalContactType {
   registeredOnsiteWastewaterPractitioner = "registeredOnsiteWastewaterPractitioner",
   structuralEngineer = "structuralEngineer",
   surveyor = "surveyor",
+}
+
+export enum EFileScanStatus {
+  pending = "pending",
+  clean = "clean",
+  infected = "infected",
 }

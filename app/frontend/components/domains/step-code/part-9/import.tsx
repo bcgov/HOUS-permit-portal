@@ -11,10 +11,11 @@ import { SitesSelect } from "../../../shared/select/selectors/sites-select"
 import { CompliancePathSelect } from "./compliance-path-select"
 
 export const H2KImport = function StepCodeH2kImport() {
-  const {
-    stepCodeStore: { createPart9StepCode },
-    jurisdictionStore,
-  } = useMst()
+  const { stepCodeStore, permitApplicationStore } = useMst()
+
+  const { createPart9StepCode, getStepCode } = stepCodeStore
+  const { currentPermitApplication } = permitApplicationStore
+
   const { permitApplicationId } = useParams()
   const navigate = useNavigate()
 
@@ -42,7 +43,8 @@ export const H2KImport = function StepCodeH2kImport() {
     },
   })
 
-  const { control, handleSubmit, setValue, setError, clearErrors, formState } = formMethods
+  const { control, handleSubmit, setValue, setError, clearErrors, formState, watch } = formMethods
+  const watchJurisdictionId = watch("jurisdictionId")
   const { isValid, isSubmitting } = formState
   const { fields, append, remove } = useFieldArray({
     control,
@@ -60,7 +62,7 @@ export const H2KImport = function StepCodeH2kImport() {
   const onSubmit = async (values) => {
     const result = await createPart9StepCode(values)
     if (result?.ok && result.data?.id) {
-      const created = jurisdictionStore.rootStore.stepCodeStore.getStepCode(result.data.id) as any
+      const created = getStepCode(result.data.id) as any
       const targetPath = created?.targetPath
       if (created) {
         navigate(targetPath)
@@ -99,7 +101,6 @@ export const H2KImport = function StepCodeH2kImport() {
       setIsUploading({ ...isUploading, [index]: false })
     }
   }
-
   return (
     <Flex direction="column" w="full" p={6} gap={6} borderWidth={1} borderColor="border.light" rounded="base">
       <Heading as="h4" fontSize="lg">
@@ -141,7 +142,7 @@ export const H2KImport = function StepCodeH2kImport() {
               <VStack key={`step-code-data-entry-${index}`} w="full" spacing={4}>
                 <HStack w="full" align="start">
                   <FileFormControl
-                    inputProps={{ key: field.id, borderWidth: 0, p: 0 }}
+                    inputProps={{ borderWidth: 0, p: 0 }}
                     label={t("stepCode.import.selectFile")}
                     fieldName={`preConstructionChecklistAttributes.dataEntriesAttributes.${index}.h2kLocal`}
                     required
@@ -166,12 +167,10 @@ export const H2KImport = function StepCodeH2kImport() {
                 <VStack align="start" w="full">
                   <HStack w="full">
                     <NumberFormControl
-                      key={field.id}
                       label={t("stepCode.import.districtEnergyEF")}
                       fieldName={`preConstructionChecklistAttributes.dataEntriesAttributes.${index}.districtEnergyEf`}
                     />
                     <NumberFormControl
-                      inputProps={{ key: field.id }}
                       label={t("stepCode.import.districtEnergyConsumption")}
                       fieldName={`preConstructionChecklistAttributes.dataEntriesAttributes.${index}.districtEnergyConsumption`}
                     />
@@ -179,12 +178,10 @@ export const H2KImport = function StepCodeH2kImport() {
                 </VStack>
                 <HStack w="full">
                   <NumberFormControl
-                    inputProps={{ key: field.id }}
                     label={t("stepCode.import.otherGhgEf")}
                     fieldName={`preConstructionChecklistAttributes.dataEntriesAttributes.${index}.otherGhgEf`}
                   />
                   <NumberFormControl
-                    inputProps={{ key: field.id }}
                     label={t("stepCode.import.otherGhgConsumption")}
                     fieldName={`preConstructionChecklistAttributes.dataEntriesAttributes.${index}.otherGhgConsumption`}
                   />
@@ -200,7 +197,9 @@ export const H2KImport = function StepCodeH2kImport() {
               variant="primary"
               w="full"
               type="submit"
-              isDisabled={!isValid || isSubmitting || !areAllUploaded}
+              isDisabled={
+                !isValid || isSubmitting || !areAllUploaded || !(currentPermitApplication || watchJurisdictionId)
+              }
               isLoading={isSubmitting}
             >
               {t("stepCode.import.create")}

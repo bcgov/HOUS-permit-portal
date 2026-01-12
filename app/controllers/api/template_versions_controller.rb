@@ -27,6 +27,7 @@ class Api::TemplateVersionsController < Api::ApplicationController
       if params[:activity_id].present?
         policy_scope(TemplateVersion)
           .joins(:requirement_template)
+          .includes(requirement_template: %i[permit_type activity])
           .where(
             activity: {
               id: params[:activity_id]
@@ -42,6 +43,7 @@ class Api::TemplateVersionsController < Api::ApplicationController
         policy_scope(TemplateVersion)
           .order(updated_at: :desc)
           .joins(:requirement_template)
+          .includes(requirement_template: %i[permit_type activity])
           .where(status:, requirement_templates: { public: public, type: type })
       end
 
@@ -236,7 +238,7 @@ class Api::TemplateVersionsController < Api::ApplicationController
   def download_summary_csv
     authorize @template_version
 
-    csv_data = TemplateExportService.new(@template_version).summary_csv
+    csv_data = TemplateReportingService.new(@template_version).summary_csv
     send_data csv_data, type: "text/csv"
   end
 
@@ -244,7 +246,7 @@ class Api::TemplateVersionsController < Api::ApplicationController
     authorize @template_version
 
     csv_data =
-      TemplateExportService.new(
+      TemplateReportingService.new(
         @template_version,
         @jurisdiction_template_version_customization
       ).to_csv
@@ -255,7 +257,7 @@ class Api::TemplateVersionsController < Api::ApplicationController
     authorize @template_version
 
     json_data =
-      TemplateExportService.new(
+      TemplateReportingService.new(
         @template_version,
         @jurisdiction_template_version_customization
       ).to_json

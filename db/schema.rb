@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_11_18_000000) do
+ActiveRecord::Schema[7.2].define(version: 2025_12_10_181530) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -76,15 +76,14 @@ ActiveRecord::Schema[7.2].define(version: 2025_11_18_000000) do
     t.index ["contactable_type", "contactable_id"], name: "index_contacts_on_contactable"
   end
 
-  create_table "data_migrations", primary_key: "version", id: :string, force: :cascade do |t|
-  end
-
   create_table "design_documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "pre_check_id", null: false
     t.text "file_data"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "scan_status", default: "pending", null: false
     t.index ["pre_check_id"], name: "index_design_documents_on_pre_check_id"
+    t.index ["scan_status"], name: "index_design_documents_on_scan_status"
   end
 
   create_table "document_references", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -181,14 +180,6 @@ ActiveRecord::Schema[7.2].define(version: 2025_11_18_000000) do
     t.datetime "updated_at", null: false
     t.index ["jurisdiction_id"], name: "index_integration_mappings_on_jurisdiction_id"
     t.index ["template_version_id"], name: "index_integration_mappings_on_template_version_id"
-  end
-
-  create_table "jurisdiction_documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.uuid "jurisdiction_id", null: false
-    t.text "file_data"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["jurisdiction_id"], name: "index_jurisdiction_documents_on_jurisdiction_id"
   end
 
   create_table "jurisdiction_memberships", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -575,6 +566,8 @@ ActiveRecord::Schema[7.2].define(version: 2025_11_18_000000) do
     t.boolean "enable_email_integration_mapping_notification", default: true
     t.boolean "enable_in_app_unmapped_api_notification", default: true
     t.boolean "enable_email_unmapped_api_notification", default: true
+    t.boolean "enable_in_app_resource_reminder_notification", default: true
+    t.boolean "enable_email_resource_reminder_notification", default: true
     t.index ["user_id"], name: "index_preferences_on_user_id"
   end
 
@@ -583,7 +576,9 @@ ActiveRecord::Schema[7.2].define(version: 2025_11_18_000000) do
     t.text "file_data"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "scan_status", default: "pending", null: false
     t.index ["permit_project_id"], name: "index_project_documents_on_permit_project_id"
+    t.index ["scan_status"], name: "index_project_documents_on_scan_status"
   end
 
   create_table "report_documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -591,6 +586,8 @@ ActiveRecord::Schema[7.2].define(version: 2025_11_18_000000) do
     t.jsonb "file_data"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "scan_status", default: "pending", null: false
+    t.index ["scan_status"], name: "index_report_documents_on_scan_status"
     t.index ["step_code_id"], name: "index_report_documents_on_step_code_id"
   end
 
@@ -618,7 +615,9 @@ ActiveRecord::Schema[7.2].define(version: 2025_11_18_000000) do
     t.jsonb "file_data"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "scan_status", default: "pending", null: false
     t.index ["requirement_block_id"], name: "index_requirement_documents_on_requirement_block_id"
+    t.index ["scan_status"], name: "index_requirement_documents_on_scan_status"
   end
 
   create_table "requirement_template_sections", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -673,6 +672,31 @@ ActiveRecord::Schema[7.2].define(version: 2025_11_18_000000) do
     t.boolean "elective", default: false
     t.text "instructions"
     t.index ["requirement_block_id"], name: "index_requirements_on_requirement_block_id"
+  end
+
+  create_table "resource_documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.text "file_data"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.uuid "resource_id", null: false
+    t.string "scan_status", default: "pending", null: false
+    t.index ["resource_id"], name: "index_resource_documents_on_resource_id"
+    t.index ["scan_status"], name: "index_resource_documents_on_scan_status"
+  end
+
+  create_table "resources", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "jurisdiction_id", null: false
+    t.string "category", null: false
+    t.string "title", null: false
+    t.text "description"
+    t.string "resource_type", null: false
+    t.string "link_url"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.datetime "last_reminder_sent_at"
+    t.index ["jurisdiction_id", "category"], name: "index_resources_on_jurisdiction_id_and_category"
+    t.index ["jurisdiction_id"], name: "index_resources_on_jurisdiction_id"
+    t.index ["last_reminder_sent_at"], name: "index_resources_on_last_reminder_sent_at"
   end
 
   create_table "revision_reasons", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -835,7 +859,9 @@ ActiveRecord::Schema[7.2].define(version: 2025_11_18_000000) do
     t.jsonb "compliance_data", default: {}, null: false
     t.string "data_key"
     t.uuid "submission_version_id"
+    t.string "scan_status", default: "pending", null: false
     t.index ["permit_application_id"], name: "index_supporting_documents_on_permit_application_id"
+    t.index ["scan_status"], name: "index_supporting_documents_on_scan_status"
     t.index ["submission_version_id"], name: "index_supporting_documents_on_submission_version_id"
   end
 
@@ -981,7 +1007,6 @@ ActiveRecord::Schema[7.2].define(version: 2025_11_18_000000) do
   add_foreign_key "integration_mapping_notifications", "template_versions"
   add_foreign_key "integration_mappings", "jurisdictions"
   add_foreign_key "integration_mappings", "template_versions"
-  add_foreign_key "jurisdiction_documents", "jurisdictions"
   add_foreign_key "jurisdiction_memberships", "jurisdictions"
   add_foreign_key "jurisdiction_memberships", "users"
   add_foreign_key "jurisdiction_service_partner_enrollments", "jurisdictions"
@@ -1027,6 +1052,8 @@ ActiveRecord::Schema[7.2].define(version: 2025_11_18_000000) do
   add_foreign_key "requirement_templates", "site_configurations"
   add_foreign_key "requirement_templates", "users", column: "assignee_id"
   add_foreign_key "requirements", "requirement_blocks"
+  add_foreign_key "resource_documents", "resources"
+  add_foreign_key "resources", "jurisdictions"
   add_foreign_key "revision_reasons", "site_configurations"
   add_foreign_key "revision_requests", "submission_versions"
   add_foreign_key "revision_requests", "users"

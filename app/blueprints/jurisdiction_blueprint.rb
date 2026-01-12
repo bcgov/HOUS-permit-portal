@@ -39,6 +39,7 @@ class JurisdictionBlueprint < Blueprinter::Base
                   options[:current_user]&.jurisdictions&.include?(jurisdiction)
                 end
     association :sandboxes, blueprint: SandboxBlueprint
+    association :resources, blueprint: ResourceBlueprint
     association :permit_type_required_steps,
                 blueprint: PermitTypeRequiredStepBlueprint
 

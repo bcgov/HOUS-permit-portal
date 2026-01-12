@@ -53,7 +53,7 @@ gem "elasticsearch", "~> 8.11.0"
 gem "kaminari", "~> 1.2.2"
 gem "acts-as-taggable-on", "~> 12.0"
 # Assuming BC Common Object Management Service (COMS) is compatible with S3 formats:
-gem "aws-sdk-s3", "~> 1.141.0"
+gem "aws-sdk-s3", "~> 1.208.0"
 gem "pundit", "~> 2.3.1"
 gem "phonelib", "~> 0.8.5"
 gem "roo", "~> 2.10"
@@ -83,6 +83,9 @@ gem "rgeo", "~> 3.0.1"
 # brew install proj
 gem "rgeo-proj4", "~> 4.0.0"
 gem "aasm", "~> 5.5.0"
+
+# Virus scanning via ClamAV daemon
+gem "clamav-client", "~> 3.2", require: "clamav/client"
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem

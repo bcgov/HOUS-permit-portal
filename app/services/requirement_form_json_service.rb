@@ -286,6 +286,23 @@ class RequirementFormJsonService
 
     json.merge!({ validate: { required: true } }) if requirement.required
 
+    if requirement.input_options["data_validation"].present?
+      data_validation = requirement.input_options["data_validation"]
+      validate_json = json[:validate] || {}
+
+      if data_validation["operation"] == "min"
+        validate_json[:min] = data_validation["value"].to_f
+      elsif data_validation["operation"] == "max"
+        validate_json[:max] = data_validation["value"].to_f
+      end
+
+      if data_validation["error_message"].present?
+        validate_json[:customMessage] = data_validation["error_message"]
+      end
+
+      json[:validate] = validate_json
+    end
+
     # assume all electives use a customConditional that defaults to false.  The customConditional works in tandem with the conditionals
     json.merge!({ elective: requirement.elective }) if requirement.elective
 
@@ -304,6 +321,12 @@ class RequirementFormJsonService
       json.merge!(
         { computedCompliance: requirement.input_options["computed_compliance"] }
       )
+
+      unless json[:tooltip].present?
+        json.merge!(
+          { tooltip: I18n.t("formio.requirement.auto_compliance.tooltip") }
+        )
+      end
     end
 
     if requirement.input_type.to_sym == :energy_step_code
@@ -527,6 +550,8 @@ class RequirementFormJsonService
   end
 
   def get_autofill_contact_button_form_json(parent_key, is_multi)
+    # NOTE: parent_key is interpolated into a template literal, so we escape it.
+    # is_multi is boolean, so safe.
     {
       type: "button",
       action: "custom",
@@ -534,7 +559,7 @@ class RequirementFormJsonService
       title: I18n.t("formio.requirement_template.autofill_contact"),
       label: I18n.t("formio.requirement_template.autofill_contact"),
       custom:
-        "document.dispatchEvent(new CustomEvent('openAutofillContact', { detail: { key: `#{parent_key}|#{is_multi ? "${rowIndex}" : "in_section"}` } } ));"
+        "document.dispatchEvent(new CustomEvent('openAutofillContact', { detail: { key: `#{escape_for_js(parent_key)}|#{is_multi ? "${rowIndex}" : "in_section"}` } } ));"
     }
   end
 
@@ -666,6 +691,8 @@ class RequirementFormJsonService
 
     grid_key = "#{requirement.key(requirement_block_key)}|grid"
     total_key = "#{requirement.key(requirement_block_key)}|totalLoad"
+    quantity_total_key =
+      "#{requirement.key(requirement_block_key)}|totalQuantity"
     section_key = PermitApplication.section_from_key(requirement_block_key)
 
     # Allow rows to be provided via input_options["rows"]. Each row should
@@ -686,18 +713,18 @@ class RequirementFormJsonService
       rows.map { |r| { "name" => r["name"], "a" => r["a"] } }
 
     headers = requirement.input_options["headers"] || {}
-    first_col_label =
-      headers["first_column"].presence || headers["first_column"] ||
-        "Fixture or Device"
-    a_col_base = headers["a"].presence || headers["a"] || "Fixture Units"
-    a_col_label = "#{a_col_base} (A)"
+    first_col_label = headers["first_column"].presence || "Item name"
+    a_col_label = "#{headers["a"].presence} (A)"
+    quantity_col_label = "#{headers["quantity"].presence} (B)"
+    ab_col_label = "#{headers["ab"].presence} (A × B)"
 
     # Version the component keys based on configuration so stale submission data from
     # previous template versions (with different headers/rows) will not be reused.
     begin
       raw_rows = configured_rows.is_a?(Array) ? configured_rows : []
       signature_payload = {
-        "rows" => raw_rows.map { |r| { "name" => r["name"], "a" => r["a"] } }
+        "rows" => raw_rows.map { |r| { "name" => r["name"], "a" => r["a"] } },
+        "headers" => headers
       }
       version_sig =
         Digest::MD5.hexdigest(JSON.generate(signature_payload))[0, 8]
@@ -705,6 +732,8 @@ class RequirementFormJsonService
         "#{requirement.key(requirement_block_key)}|grid|v#{version_sig}"
       total_key =
         "#{requirement.key(requirement_block_key)}|totalLoad|v#{version_sig}"
+      quantity_total_key =
+        "#{requirement.key(requirement_block_key)}|totalQuantity|v#{version_sig}"
     rescue => e
       # If anything goes wrong computing the signature, fall back to non-versioned keys
     end
@@ -749,7 +778,7 @@ class RequirementFormJsonService
             "var defs=(instance && instance.parent && instance.parent.component && instance.parent.component.defaultValue)||[]; var i=rowIndex; if(!value && defs[i]){ value = Number(defs[i].a || 0); }"
         },
         {
-          label: "Quantity (B)",
+          label: quantity_col_label,
           type: "number",
           key: "quantity",
           input: true,
@@ -759,7 +788,7 @@ class RequirementFormJsonService
           decimalLimit: 7
         },
         {
-          label: "A × B",
+          label: ab_col_label,
           type: "number",
           key: "load",
           disabled: true,
@@ -773,8 +802,24 @@ class RequirementFormJsonService
       ]
     }
 
+    total_quantity_component = {
+      label: "Total #{quantity_col_label}:",
+      type: "number",
+      defaultValue: 0,
+      key: quantity_total_key,
+      disabled: true,
+      readOnly: true,
+      input: true,
+      validate: {
+        required: true
+      },
+      decimalLimit: 7,
+      calculateValue:
+        "var section = '#{section_key}'; var list = (data && data[section] && data[section]['#{grid_key}']) || []; var sum = 0; for (var i=0;i<list.length;i++){ var b = Number(list[i] && list[i].quantity || 0); sum += b; } value = sum;"
+    }
+
     total_component = {
-      label: "Total:",
+      label: "Total #{ab_col_label}:",
       type: "number",
       defaultValue: 0,
       key: total_key,
@@ -799,7 +844,11 @@ class RequirementFormJsonService
       hideLabel: true,
       input: false,
       tableView: false,
-      components: [datagrid_component, total_component]
+      components: [
+        datagrid_component,
+        total_quantity_component,
+        total_component
+      ]
     }
   end
 
@@ -818,7 +867,7 @@ class RequirementFormJsonService
       input: true,
       theme: "primary",
       custom:
-        "document.dispatchEvent(new CustomEvent('openArchitecturalDrawingTool', { detail: { requirementCode: '#{requirement.key(requirement_block_key)}' } }));"
+        "document.dispatchEvent(new CustomEvent('openArchitecturalDrawingTool', { detail: { requirementCode: '#{escape_for_js(requirement.key(requirement_block_key))}' } }));"
     }
   end
 
@@ -915,7 +964,7 @@ class RequirementFormJsonService
 
       link_button[
         :custom
-      ] = "document.dispatchEvent(new CustomEvent('openExistingStepCode', { detail: { key: '#{key}', stepCodeType: '#{step_code_type}' } }));"
+      ] = "document.dispatchEvent(new CustomEvent('openExistingStepCode', { detail: { key: '#{escape_for_js(key)}', stepCodeType: '#{step_code_type}' } }));"
     rescue StandardError
       # no-op
     end
@@ -949,5 +998,10 @@ class RequirementFormJsonService
         "required" => required
       }
     }
+  end
+
+  # Escape for single-quoted JS strings
+  def escape_for_js(str)
+    str.to_s.gsub(/['\\]/) { |match| "\\#{match}" }
   end
 end

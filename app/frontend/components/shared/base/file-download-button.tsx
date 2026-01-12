@@ -33,10 +33,10 @@ export const FileDownloadButton: React.FC<FileDownloadButtonProps> = ({
       variant="link"
       leftIcon={<Download size={16} />}
       onClick={handleDownload}
-      textDecoration={document._destroy ? "line-through" : "none"} // Keep destroy visual cue if applicable
+      textDecoration={document._destroy ? "line-through" : "underline"} // Keep destroy visual cue if applicable
       {...buttonProps}
     >
-      {simpleLabel ? t("ui.download") : document.file.metadata.filename}
+      {buttonProps.children ? buttonProps.children : simpleLabel ? t("ui.download") : document.file?.metadata?.filename}
     </Button>
   )
 }

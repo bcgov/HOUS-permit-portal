@@ -16,16 +16,18 @@ import {
 import { X } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
-import React, { useEffect } from "react"
+import React, { useEffect, useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import { EFileUploadAttachmentType, ERequirementType, EVisibility } from "../../../types/enums"
+import { useMst } from "../../../setup/root"
+import { EFileUploadAttachmentType, ERequirementType, EResourceCategory, EVisibility } from "../../../types/enums"
 import {
   IDenormalizedRequirement,
   IDenormalizedRequirementBlock,
   IRequirementBlockCustomization,
+  IResource,
 } from "../../../types/types"
 import { isTipTapEmpty } from "../../../utils/utility-functions"
-import { FileDownloadButton } from "../../shared/base/file-download-button"
+import { DownloadLinkButton, ResourceItem } from "../../shared/base/resource-item"
 import { SafeTipTapDisplay } from "../../shared/editor/safe-tiptap-display"
 import { ElectiveTag } from "../../shared/elective-tag"
 import { FirstNationsTag } from "../../shared/first-nations-tag"
@@ -33,6 +35,7 @@ import { RichTextTip } from "../../shared/rich-text-tip"
 import { VisibilityTag } from "../../shared/visibility-tag.tsx"
 import { RequirementFieldDisplay } from "./requirement-field-display"
 import { RequirementsBlockModal } from "./requirements-block-modal"
+
 type TProps = {
   requirementBlock: IDenormalizedRequirementBlock
   onRemove?: () => void
@@ -62,7 +65,29 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
   ...accordionProps
 }: TProps) {
   const { t } = useTranslation()
+  const { userStore } = useMst()
+  const { currentUser } = userStore
   const { isOpen, onToggle, onClose, onOpen } = useDisclosure({ defaultIsOpen: true })
+
+  // Get resources based on resourceIds in customization
+  const selectedResources = useMemo(() => {
+    const resourceIds = requirementBlockCustomization?.resourceIds
+    if (!resourceIds || resourceIds.length === 0 || !currentUser?.jurisdiction?.resources) {
+      return []
+    }
+
+    return currentUser.jurisdiction.resources.filter((resource) => resourceIds.includes(resource.id))
+  }, [requirementBlockCustomization?.resourceIds, currentUser?.jurisdiction?.resources])
+
+  // Group resources by category
+  const resourcesByCategory = useMemo(() => {
+    const grouped: Record<string, IResource[]> = {}
+    selectedResources.forEach((resource) => {
+      if (!grouped[resource.category]) grouped[resource.category] = []
+      grouped[resource.category].push(resource)
+    })
+    return grouped
+  }, [selectedResources])
 
   useEffect(() => {
     if (isCollapsedAll) {
@@ -178,7 +203,7 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
             >
               <Text fontWeight={700}>{t("requirementsLibrary.fields.requirementDocuments")}</Text>
               {requirementBlock.requirementDocuments?.map((document) => (
-                <FileDownloadButton
+                <DownloadLinkButton
                   key={document.id}
                   document={document}
                   modelType={EFileUploadAttachmentType.RequirementDocument}
@@ -186,9 +211,28 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
               ))}
             </Flex>
           )}
-          {(!isTipTapEmpty(requirementBlockCustomization?.tip) || !!requirementBlockCustomization?.helpLink) && (
+          {!isTipTapEmpty(requirementBlockCustomization?.tip) && (
             <Box px={2} my={4}>
-              <RichTextTip tip={requirementBlockCustomization.tip} helpLink={requirementBlockCustomization.helpLink} />
+              <RichTextTip tip={requirementBlockCustomization.tip} />
+            </Box>
+          )}
+          {selectedResources.length > 0 && (
+            <Box px={2} my={4}>
+              <VStack align="start" spacing={4} w="full">
+                {(Object.entries(resourcesByCategory) as [string, IResource[]][]).map(([category, resources]) => (
+                  <Box key={category} w="full">
+                    <Text fontWeight={600} fontSize="xs" color="text.secondary" mb={2}>
+                      {t(`jurisdiction.resources.categories.${category as EResourceCategory}`)}{" "}
+                      {(t("home.configurationManagement.resources.title") as string).toLowerCase()}
+                    </Text>
+                    <VStack align="start" spacing={3} w="full">
+                      {resources.map((resource) => {
+                        return <ResourceItem key={resource.id} resource={resource} />
+                      })}
+                    </VStack>
+                  </Box>
+                ))}
+              </VStack>
             </Box>
           )}
           <VStack
@@ -223,7 +267,7 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
                     key={requirement.id}
                     w={"full"}
                     borderRadius={"sm"}
-                    pt={index !== 0 ? 1 : 0}
+                    pt={index === 0 ? 0 : 1}
                     pb={5}
                     pos={"relative"}
                   >

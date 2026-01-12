@@ -26,13 +26,11 @@ export const Ventilation = function BuildingCharacteristicsSummaryVentilation() 
       </GridColumnHeader>
 
       {fields.map((field, index) => {
-        GridData.defaultProps = {
-          borderTopWidth: index == 0 ? 1 : 0,
-        }
+        const borderTopWidth = index === 0 ? 1 : 0
 
         return (
           <React.Fragment key={`${fieldArrayName}.${index}`}>
-            <GridData gap={1} alignItems="start" pos="relative">
+            <GridData gap={1} alignItems="start" pos="relative" borderTopWidth={borderTopWidth}>
               <DetailsInput
                 fieldName={`${fieldArrayName}.${index}.details`}
                 isRemovable={fields.length > 1}
@@ -41,13 +39,13 @@ export const Ventilation = function BuildingCharacteristicsSummaryVentilation() 
                 onRemove={() => remove(index)}
               />
             </GridData>
-            <GridData>
+            <GridData borderTopWidth={borderTopWidth}>
               <NumberFormControl
                 fieldName={`${fieldArrayName}.${index}.percentEff`}
                 hint={index == fields.length - 1 && t(`${i18nPrefix}.percent_eff`)}
               />
             </GridData>
-            <GridData borderRightWidth={1}>
+            <GridData borderRightWidth={1} borderTopWidth={borderTopWidth}>
               <TextFormControl
                 fieldName={`${fieldArrayName}.${index}.litersPerSec`}
                 hint={index == fields.length - 1 && t(`${i18nPrefix}.litersPerSec`)}

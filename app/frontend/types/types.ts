@@ -16,6 +16,7 @@ import {
   EEnergyOutputSource,
   EEnergyOutputUseType,
   EEnergyStep,
+  EFileScanStatus,
   EFossilFuelsPresence,
   EFuelType,
   EHotWaterPerformanceType,
@@ -310,14 +311,33 @@ export interface IReportDocument extends IBaseFileAttachment {
   stepCodeId: string
 }
 
+export interface IResourceDocument extends IBaseFileAttachment {
+  resourceId: string
+  scanStatus: EFileScanStatus
+}
+
+export interface IResource {
+  id: string
+  jurisdictionId: string
+  category: string
+  title: string
+  description?: string
+  resourceType: string
+  linkUrl?: string
+  updatedAt: string
+  createdAt: string
+  resourceDocument?: IResourceDocument
+}
+
 export interface IProjectDocument extends IBaseFileAttachment {
   permitProjectId: string // Foreign key to link to PermitProject
 }
 
 export interface IRequirementBlockCustomization {
   tip?: string
-  helpLink?: string
+  resourceIds?: string[]
   enabledElectiveFieldIds?: Array<string>
+  optionalElectiveFieldIds?: Array<string>
   enabledElectiveFieldReasons?: Record<string, EEnabledElectiveFieldReason>
 }
 

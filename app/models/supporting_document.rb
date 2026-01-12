@@ -93,6 +93,8 @@ class SupportingDocument < FileUploadAttachment
   end
 
   def standardized_filename
+    return "FILE REMOVED" unless file_available?
+
     name =
       "#{permit_application.number}_#{data_key.split("|").last.gsub("_file", "")}"
 
@@ -135,6 +137,8 @@ class SupportingDocument < FileUploadAttachment
   end
 
   def file_url(disposition: "attachment", **options)
+    return nil unless file_available?
+
     file.url(
       response_content_disposition:
         "#{disposition}; filename=\"#{standardized_filename}\"",

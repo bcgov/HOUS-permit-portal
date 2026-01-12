@@ -118,7 +118,7 @@ export const Button = {
       fontWeight: "normal",
       textDecoration: "underline",
       textDecorationThickness: "1px",
-      fontSize: "inherit",
+      fontSize: "md",
       _hover: { color: "text.primary", textDecorationThickness: "3px" },
       _disabled: { ...disabledStyles, bg: "inherit" },
     },
