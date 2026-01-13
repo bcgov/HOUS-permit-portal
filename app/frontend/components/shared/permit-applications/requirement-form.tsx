@@ -407,7 +407,6 @@ export const RequirementForm = observer(
       }
     }
     const showVersionDiffContactWarning = shouldShowDiff && !userShouldSeeDiff
-    console.log(formattedFormJson)
     return (
       <>
         <Flex

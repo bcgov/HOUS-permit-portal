@@ -319,6 +319,8 @@ class RequirementFormJsonService
         validate_json[:minSelectedCount] = data_validation["value"].to_i
       elsif data_validation["operation"] == "max_selected_count"
         validate_json[:maxSelectedCount] = data_validation["value"].to_i
+      elsif data_validation["operation"] == "allowed_file_types"
+        json[:filePattern] = data_validation["value"]
       end
 
       if data_validation["error_message"].present?

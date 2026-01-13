@@ -65,7 +65,8 @@ export const OptionsMenu = observer(function OptionsMenu({
       <MenuList w={"220px"}>
         {requirementType === ERequirementType.number ||
         requirementType === ERequirementType.date ||
-        requirementType === ERequirementType.multiOptionSelect ? (
+        requirementType === ERequirementType.multiOptionSelect ||
+        requirementType === ERequirementType.file ? (
           <DataValidationSetupModal index={index} requirementType={requirementType} />
         ) : (
           <MenuItem color={"text.primary"} isDisabled>

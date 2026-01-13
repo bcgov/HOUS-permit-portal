@@ -791,4 +791,5 @@ export enum EDataValidationOperation {
   after = "after",
   minSelectedCount = "min_selected_count",
   maxSelectedCount = "max_selected_count",
+  allowedFileTypes = "allowed_file_types",
 }
