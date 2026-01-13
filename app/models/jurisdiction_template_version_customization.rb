@@ -54,6 +54,7 @@ class JurisdictionTemplateVersionCustomization < ApplicationRecord
         "#{I18n.t("notification.template_version.new_customization_notification", jurisdiction_name: jurisdiction.qualified_name, template_label: template_version.label)}",
       "object_data" => {
         "template_version_id" => template_version.id,
+        "requirement_template_id" => template_version.requirement_template_id,
         "customizations" => customizations
       }
     }
