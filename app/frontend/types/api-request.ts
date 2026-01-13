@@ -27,7 +27,7 @@ export interface IFormConditional {
 }
 
 export interface IDataValidation {
-  operation: "min" | "max"
+  operation: "min" | "max" | "before" | "after" | "min_selected_count" | "max_selected_count"
   value: string
   errorMessage?: string
 }

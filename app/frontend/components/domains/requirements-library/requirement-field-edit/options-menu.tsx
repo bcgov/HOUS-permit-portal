@@ -63,8 +63,10 @@ export const OptionsMenu = observer(function OptionsMenu({
         {t("requirementsLibrary.modals.optionsMenu.triggerButton")}
       </MenuButton>
       <MenuList w={"220px"}>
-        {requirementType === ERequirementType.number ? (
-          <DataValidationSetupModal index={index} />
+        {requirementType === ERequirementType.number ||
+        requirementType === ERequirementType.date ||
+        requirementType === ERequirementType.multiOptionSelect ? (
+          <DataValidationSetupModal index={index} requirementType={requirementType} />
         ) : (
           <MenuItem color={"text.primary"} isDisabled>
             <HStack spacing={2} fontSize={"sm"}>

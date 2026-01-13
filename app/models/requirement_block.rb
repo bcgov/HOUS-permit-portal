@@ -233,10 +233,11 @@ class RequirementBlock < ApplicationRecord
       data_validation = requirement.input_options["data_validation"]
       next unless data_validation.present?
 
-      unless requirement.input_type_number?
+      unless requirement.input_type_number? || requirement.input_type_date? ||
+               requirement.input_type_multi_option_select?
         errors.add(
           :input_options,
-          "data_validation is only allowed for number inputs"
+          "data_validation is only allowed for number, date and multi-select inputs"
         )
         next
       end
@@ -248,10 +249,29 @@ class RequirementBlock < ApplicationRecord
         )
       end
 
-      unless %w[min max].include?(data_validation["operation"])
+      if requirement.input_type_number? &&
+           !%w[min max].include?(data_validation["operation"])
         errors.add(
           :input_options,
-          "data_validation operation must be min or max"
+          "data_validation operation must be min or max for number inputs"
+        )
+      end
+
+      if requirement.input_type_date? &&
+           !%w[before after].include?(data_validation["operation"])
+        errors.add(
+          :input_options,
+          "data_validation operation must be before or after for date inputs"
+        )
+      end
+
+      if requirement.input_type_multi_option_select? &&
+           !%w[min_selected_count max_selected_count].include?(
+             data_validation["operation"]
+           )
+        errors.add(
+          :input_options,
+          "data_validation operation must be min_selected_count or max_selected_count for multi-select inputs"
         )
       end
     end
