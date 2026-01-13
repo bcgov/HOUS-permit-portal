@@ -950,7 +950,7 @@ class RequirementFormJsonService
         end
       )
     end
-    options = DEFAULT_FORMIO_TYPE_TO_OPTIONS[input_type.to_sym] || {}
+    options = (DEFAULT_FORMIO_TYPE_TO_OPTIONS[input_type.to_sym] || {}).dup
     if input_options["computed_compliance"].present?
       options[:tooltip] = I18n.t("formio.requirement.auto_compliance.tooltip")
     end
