@@ -10,7 +10,7 @@ class OverheatingToolPolicy < ApplicationPolicy
   end
 
   def show?
-    user.present? && (record.user_id == user.id || user.review_staff?)
+    user.present? && record.user_id == user.id
   end
 
   def update?
@@ -22,21 +22,11 @@ class OverheatingToolPolicy < ApplicationPolicy
   end
 
   def generate_pdf?
-    return false if user.blank?
-
-    return true if record.user_id == user.id
-
-    user.review_staff? && record.respond_to?(:jurisdiction_id) &&
-      user.member_of?(record.jurisdiction_id)
+    user.present? && record.user_id == user.id
   end
 
   def download?
-    return false if user.blank?
-
-    return true if record.user_id == user.id
-
-    user.review_staff? && record.respond_to?(:jurisdiction_id) &&
-      user.member_of?(record.jurisdiction_id)
+    user.present? && record.user_id == user.id
   end
 
   def archive?
@@ -45,13 +35,7 @@ class OverheatingToolPolicy < ApplicationPolicy
 
   class Scope < Scope
     def resolve
-      if user.super_admin?
-        scope.all
-      elsif user.review_staff?
-        scope.where(jurisdiction_id: user.jurisdiction_ids)
-      else
-        scope.where(user_id: user.id)
-      end
+      scope.where(user_id: user.id)
     end
   end
 end

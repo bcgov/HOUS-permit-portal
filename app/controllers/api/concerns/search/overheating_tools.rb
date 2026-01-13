@@ -38,7 +38,7 @@ module Api::Concerns::Search::OverheatingTools
   end
 
   def where_clause
-    clauses = {}
+    clauses = { user_id: current_user.id }
 
     if (status_filter = search_params.dig(:filters, :status_filter))
       if status_filter != "all"
