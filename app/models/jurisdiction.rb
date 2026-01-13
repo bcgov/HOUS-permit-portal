@@ -222,16 +222,26 @@ class Jurisdiction < ApplicationRecord
       .join(" ")
   end
 
+  def self.display_locality_type(locality_type)
+    return "" if locality_type.blank?
+
+    locality_type.gsub(/\Acorporation\s+of(\s+the)?\s+/i, "").titleize
+  end
+
+  def display_locality_type
+    Jurisdiction.display_locality_type(locality_type)
+  end
+
   def qualifier
     "#{Jurisdiction.custom_titleize_locality_type(locality_type)} of"
   end
 
   def qualified_name
-    "#{qualifier} #{name}"
+    "#{disambiguated_name} (#{display_locality_type})"
   end
 
   def reverse_qualified_name
-    "#{name}, #{qualifier}"
+    "#{display_locality_type} #{disambiguated_name}"
   end
 
   def disambiguated_name
