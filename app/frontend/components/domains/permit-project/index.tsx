@@ -1,5 +1,5 @@
 import { Flex, TabPanel, TabPanels, Tabs } from "@chakra-ui/react"
-import { ClipboardText, FolderSimple, ListMagnifyingGlass, ThermometerHot } from "@phosphor-icons/react"
+import { Buildings, ClipboardText, ListMagnifyingGlass } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useTransition } from "react"
 import { useTranslation } from "react-i18next"
@@ -25,7 +25,7 @@ export const ProjectDashboardScreen = observer(({}: IProjectDashboardScreenProps
   const [isPending, startTransition] = useTransition()
 
   const TABS_DATA: ITabItem[] = [
-    { label: t("permitProject.index.title", "Projects"), icon: FolderSimple, to: "projects", tabIndex: 0 },
+    { label: t("permitProject.index.title", "Projects"), icon: Buildings, to: "projects", tabIndex: 0 },
     { label: t("stepCode.index.title", "Step Codes"), icon: ClipboardText, to: "step-codes", tabIndex: 1 },
     {
       label: t("singleZoneCoolingHeatingTool.indexTitle", "Overheating"),

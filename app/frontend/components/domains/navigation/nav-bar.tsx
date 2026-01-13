@@ -81,6 +81,21 @@ function isProjectDetailPath(path: string): boolean {
   return regex.test(path)
 }
 
+function isProjectPath(path: string): boolean {
+  const regex = /^\/projects/
+  return regex.test(path)
+}
+
+function isProjectStepCodePath(path: string): boolean {
+  const regex = /^\/step-codes/
+  return regex.test(path)
+}
+
+function isProjectPreCheckPath(path: string): boolean {
+  const regex = /^\/pre-checks/
+  return regex.test(path)
+}
+
 function isStepCodePath(path: string): boolean {
   const regex = /^(\/part-(3|9)-step-code|\/permit-applications\/[a-f\d-]+\/edit\/part-(3|9)-step-code).*$/
   return regex.test(path)
@@ -110,6 +125,9 @@ function shouldHideSubNavbarForPath(path: string): boolean {
     isApiMappingPath,
     isLoginPath,
     isProjectDetailPath,
+    isProjectStepCodePath,
+    isProjectPreCheckPath,
+    isProjectPath,
     isStepCodePath,
     isAdminPath,
     isPreCheckPath,
