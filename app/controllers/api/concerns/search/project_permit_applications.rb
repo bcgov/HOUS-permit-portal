@@ -39,8 +39,10 @@ module Api::Concerns::Search::ProjectPermitApplications
   def permit_application_search_params
     params.permit(
       :query,
+      :show_archived,
       :page,
       :per_page,
+      :show_archived,
       filters: [
         :requirement_template_id,
         :template_version_id,
@@ -79,6 +81,13 @@ module Api::Concerns::Search::ProjectPermitApplications
     if !current_user.super_admin?
       and_conditions << { sandbox_id: current_sandbox&.id }
     end
+    and_conditions << { discarded: discarded }
+
+    if discarded.present?
+      and_conditions << { discarded: true }
+    else
+      and_conditions << { discarded: false }
+    end
 
     search_filters.each do |key, value|
       case key
@@ -94,5 +103,11 @@ module Api::Concerns::Search::ProjectPermitApplications
     end
 
     { _and: and_conditions }
+  end
+
+  def discarded
+    ActiveModel::Type::Boolean.new.cast(
+      permit_application_search_params[:show_archived] || false
+    )
   end
 end

@@ -20,6 +20,8 @@ class PermitApplicationPolicy < ApplicationPolicy
   end
 
   def update?
+    return false if record.discarded?
+
     if record.draft?
       record.submission_requirement_block_edit_permissions(
         user_id: user.id
@@ -149,6 +151,14 @@ class PermitApplicationPolicy < ApplicationPolicy
     user.super_admin?
   end
 
+  def destroy?
+    record.draft? && record.submitter == user
+  end
+
+  def restore?
+    record.submitter == user
+  end
+
   # we may want to separate an admin update to a secondary policy
 
   class Scope < Scope
@@ -202,7 +212,10 @@ class PermitApplicationPolicy < ApplicationPolicy
         end
       end
 
-      scope.where(clauses.map { |c| "(#{c})" }.join(" OR "), values).distinct
+      scope
+        .where(discarded_at: nil)
+        .where(clauses.map { |c| "(#{c})" }.join(" OR "), values)
+        .distinct
     end
   end
 end

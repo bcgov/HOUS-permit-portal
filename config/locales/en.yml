@@ -558,6 +558,18 @@ en:
       update_version_succes:
         title: ""
         message: "Permit application successfully updated to new version!"
+      destroy_success:
+        title: ""
+        message: "Permit application archived successfully"
+      destroy_error:
+        title: Error
+        message: "There was an error archiving the permit application"
+      restore_success:
+        title: ""
+        message: "Permit application restored successfully"
+      restore_error:
+        title: Error
+        message: "There was an error restoring the permit application"
       save_draft_success:
         title: ""
         message: "Permit application successfully saved as draft!"

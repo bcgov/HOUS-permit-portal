@@ -9,6 +9,7 @@ import { IUser } from "../../../models/user"
 import { useMst } from "../../../setup/root"
 import { EUserRoles } from "../../../types/enums"
 import { ManageMenuItemButton } from "../base/manage-menu-item"
+import { ConfirmationModal } from "../confirmation-modal"
 import { Can } from "./can"
 
 interface IManageUserMenuProps<TSearchModel extends ISearch> {
@@ -60,22 +61,46 @@ export const ManageUserMenu = observer(function ManageUserMenu<TSearchModel exte
           )}
           {(user.isUnconfirmed || user.isDiscarded) && <ReinviteUserForm user={user} />}
           {user.isDiscarded ? (
-            <ManageMenuItemButton
-              color="semantic.success"
-              onClick={handleRestore}
-              leftIcon={<ClockClockwise size={16} />}
-            >
-              {t("ui.restore")}
-            </ManageMenuItemButton>
+            <ConfirmationModal
+              title={t("ui.confirmRestore")}
+              onConfirm={(closeModal) => {
+                handleRestore()
+                closeModal()
+              }}
+              renderTriggerButton={(props) => (
+                <ManageMenuItemButton color="semantic.success" leftIcon={<ClockClockwise size={16} />} {...props}>
+                  {t("ui.restore")}
+                </ManageMenuItemButton>
+              )}
+              renderConfirmationButton={(props) => (
+                <Button {...props} colorScheme="green">
+                  {t("ui.restore")}
+                </Button>
+              )}
+            />
           ) : (
-            <ManageMenuItemButton
-              color={isCurrentUser ? "greys.grey01" : "semantic.error"}
-              onClick={handleRemove}
-              leftIcon={<Archive size={16} />}
-              isDisabled={isCurrentUser}
-            >
-              {t("ui.archive")}
-            </ManageMenuItemButton>
+            <ConfirmationModal
+              title={t("ui.confirmArchive")}
+              onConfirm={(closeModal) => {
+                handleRemove()
+                closeModal()
+              }}
+              renderTriggerButton={(props) => (
+                <ManageMenuItemButton
+                  color={isCurrentUser ? "greys.grey01" : "semantic.error"}
+                  leftIcon={<Archive size={16} />}
+                  isDisabled={isCurrentUser}
+                  {...props}
+                >
+                  {t("ui.archive")}
+                </ManageMenuItemButton>
+              )}
+              renderConfirmationButton={(props) => (
+                <Button {...props} colorScheme="red">
+                  {t("ui.archive")}
+                </Button>
+              )}
+            />
           )}
         </MenuList>
       </Menu>

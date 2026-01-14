@@ -168,9 +168,7 @@ const OnboardingChecklistPageForLgAdoptingScreen = lazy(() =>
     default: module.OnboardingChecklistPageForLgAdoptingScreen,
   }))
 )
-const PermitApplicationIndexScreen = lazy(() =>
-  import("../permit-application").then((module) => ({ default: module.PermitApplicationIndexScreen }))
-)
+
 const ProjectDashboardScreen = lazy(() =>
   import("../permit-project").then((module) => ({ default: module.ProjectDashboardScreen }))
 )

@@ -276,6 +276,8 @@ const options = {
           },
         },
         ui: {
+          confirmArchive: "Are you sure you want to archive this item?",
+          confirmRestore: "Are you sure you want to restore this item?",
           updatedAt: "Updated at",
           beta: "Beta",
           optional: "(optional)",

@@ -219,9 +219,17 @@ export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
                 columns={Object.values(EProjectPermitApplicationSortFields)}
                 includeActionColumn
               />
-              {permitProject.recentPermitApplications.map((permitApplication) => (
-                <PermitApplicationGridRow key={permitApplication.id} permitApplication={permitApplication} />
-              ))}
+              {permitProject.recentPermitApplications
+                .filter((pa) => !pa.isDiscarded)
+                .map((permitApplication) => (
+                  <PermitApplicationGridRow
+                    key={permitApplication.id}
+                    permitApplication={permitApplication}
+                    searchModel={{
+                      search: () => permitProjectStore.fetchPermitProject(permitProject.id),
+                    }}
+                  />
+                ))}
             </SearchGrid>
             <Flex justify="flex-end" mt={4}>
               <RouterLinkButton
