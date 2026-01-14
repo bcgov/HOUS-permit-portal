@@ -1,4 +1,4 @@
-import { flow, Instance, types } from "mobx-state-tree"
+import { flow, types } from "mobx-state-tree"
 import { ESortDirection } from "../types/enums"
 import { ISort, TVisibility } from "../types/types"
 import { parseBoolean, setQueryParam } from "../utils/utility-functions"
@@ -12,8 +12,8 @@ interface IFetchOptions {
 export const createSearchModel = <TSortField, TFetchOptions extends IFetchOptions = IFetchOptions>(
   fetchDataActionName: string,
   setFiltersName?: string
-) =>
-  types
+) => {
+  const model = types
     .model()
     .props({
       query: types.maybeNull(types.string),
@@ -147,4 +147,33 @@ export const createSearchModel = <TSortField, TFetchOptions extends IFetchOption
       },
     }))
 
-export interface ISearch extends Instance<ReturnType<typeof createSearchModel>> {}
+  return model
+}
+
+export interface ISearchable {
+  search: (opts?: any) => Promise<any>
+}
+
+export interface ISearch {
+  query: string | null
+  setQuery: (query: string) => void
+  search: (opts?: any) => Promise<any>
+  showArchived: boolean | null
+  setShowArchived: (bool: boolean) => void
+  toggleShowArchived: () => Promise<void>
+  sort: ISort<any> | null | undefined
+  applySort: (sort: ISort<any>) => void
+  clearSort: () => void
+  toggleSort: (sortField: any, opts?: any) => Promise<any>
+  currentPage: number
+  setCurrentPage: (page: number) => void
+  totalPages: number | null
+  totalCount: number | null
+  countPerPage: number
+  setCountPerPage: (count: number) => void
+  handlePageChange: (page: number, opts?: any) => Promise<any>
+  handleCountPerPageChange: (count: number, opts?: any) => Promise<any>
+  resetAll: () => void
+  syncWithUrl: () => void
+  isSearching: boolean
+}
