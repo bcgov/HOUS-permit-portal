@@ -5,6 +5,7 @@ class PermitApplication < ApplicationRecord
   include ZipfileUploader.Attachment(:zipfile)
   include PermitApplicationStatus
   include ProjectItem
+  include Discard::Model
   has_parent :permit_project
 
   SEARCH_INCLUDES = [
@@ -72,6 +73,7 @@ class PermitApplication < ApplicationRecord
   before_save :take_form_customizations_snapshot_if_submitted
 
   after_commit :reindex_jurisdiction_permit_application_size
+  after_commit :reindex, if: :saved_change_to_discarded_at
   after_commit :send_submitted_webhook, if: :saved_change_to_status?
   after_commit :notify_user_reference_number_updated,
                if: :saved_change_to_reference_number?
@@ -244,7 +246,8 @@ class PermitApplication < ApplicationRecord
       has_collaborator: has_collaborator?,
       sandbox_id: sandbox_id,
       permit_project_id: permit_project_id,
-      submission_delegatee_id: submission_delegatee&.id
+      submission_delegatee_id: submission_delegatee&.id,
+      discarded: discarded?
     }
   end
 

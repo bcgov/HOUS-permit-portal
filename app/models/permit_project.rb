@@ -151,7 +151,7 @@ class PermitProject < ApplicationRecord
   def recent_permit_applications(user = nil)
     return PermitApplication.none if user.nil?
 
-    scope = permit_applications.order(updated_at: :desc)
+    scope = permit_applications.kept.order(updated_at: :desc)
     return scope.limit(3) if owner_id == user.id
 
     scope

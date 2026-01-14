@@ -39,6 +39,7 @@ module Api::Concerns::Search::PermitApplications
   def permit_application_search_params
     params.permit(
       :query,
+      :show_archived,
       :page,
       :per_page,
       filters: [
@@ -88,8 +89,15 @@ module Api::Concerns::Search::PermitApplications
       else
         { user_ids_with_submission_edit_permissions: current_user.id }
       end
-    where[:sandbox_id] = current_sandbox&.id if !current_user.super_admin?
+    where[:sandbox_id] = current_sandbox&.id unless current_user.super_admin?
+    where[:discarded] = discarded
 
     (filters&.to_h || {}).deep_symbolize_keys.compact_blank.merge!(where)
+  end
+
+  def discarded
+    ActiveModel::Type::Boolean.new.cast(
+      permit_application_search_params[:show_archived] || false
+    )
   end
 end
