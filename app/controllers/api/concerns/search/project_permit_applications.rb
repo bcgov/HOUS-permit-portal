@@ -42,6 +42,7 @@ module Api::Concerns::Search::ProjectPermitApplications
       :show_archived,
       :page,
       :per_page,
+      :show_archived,
       filters: [
         :requirement_template_id,
         :template_version_id,
@@ -81,6 +82,12 @@ module Api::Concerns::Search::ProjectPermitApplications
       and_conditions << { sandbox_id: current_sandbox&.id }
     end
     and_conditions << { discarded: discarded }
+
+    if discarded.present?
+      and_conditions << { discarded: true }
+    else
+      and_conditions << { discarded: false }
+    end
 
     search_filters.each do |key, value|
       case key

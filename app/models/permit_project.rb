@@ -28,37 +28,37 @@ class PermitProject < ApplicationRecord
         -> do
           select(
             "permit_projects.*, " +
-              "(SELECT COUNT(*) FROM permit_applications pa WHERE pa.permit_project_id = permit_projects.id) AS total_permits_count, " +
-              "(SELECT COUNT(*) FROM permit_applications pa WHERE pa.permit_project_id = permit_projects.id AND pa.status = 0) AS new_draft_count, " +
-              "(SELECT COUNT(*) FROM permit_applications pa WHERE pa.permit_project_id = permit_projects.id AND pa.status = 1) AS newly_submitted_count, " +
-              "(SELECT COUNT(*) FROM permit_applications pa WHERE pa.permit_project_id = permit_projects.id AND pa.status = 3) AS revisions_requested_count, " +
-              "(SELECT COUNT(*) FROM permit_applications pa WHERE pa.permit_project_id = permit_projects.id AND pa.status = 4) AS resubmitted_count, " +
-              "(SELECT COUNT(*) FROM permit_applications pa WHERE pa.permit_project_id = permit_projects.id AND pa.status = 5) AS approved_count"
+              "(SELECT COUNT(*) FROM permit_applications pa WHERE pa.permit_project_id = permit_projects.id AND pa.discarded_at IS NULL) AS total_permits_count, " +
+              "(SELECT COUNT(*) FROM permit_applications pa WHERE pa.permit_project_id = permit_projects.id AND pa.status = 0 AND pa.discarded_at IS NULL) AS new_draft_count, " +
+              "(SELECT COUNT(*) FROM permit_applications pa WHERE pa.permit_project_id = permit_projects.id AND pa.status = 1 AND pa.discarded_at IS NULL) AS newly_submitted_count, " +
+              "(SELECT COUNT(*) FROM permit_applications pa WHERE pa.permit_project_id = permit_projects.id AND pa.status = 3 AND pa.discarded_at IS NULL) AS revisions_requested_count, " +
+              "(SELECT COUNT(*) FROM permit_applications pa WHERE pa.permit_project_id = permit_projects.id AND pa.status = 4 AND pa.discarded_at IS NULL) AS resubmitted_count, " +
+              "(SELECT COUNT(*) FROM permit_applications pa WHERE pa.permit_project_id = permit_projects.id AND pa.status = 5 AND pa.discarded_at IS NULL) AS approved_count"
           )
         end
 
   def total_permits_count
-    self[:total_permits_count] || permit_applications.count
+    self[:total_permits_count] || permit_applications.kept.count
   end
 
   def new_draft_count
     self[:new_draft_count] ||
-      permit_applications.where(status: :new_draft).count
+      permit_applications.kept.where(status: :new_draft).count
   end
 
   def newly_submitted_count
     self[:newly_submitted_count] ||
-      permit_applications.where(status: :newly_submitted).count
+      permit_applications.kept.where(status: :newly_submitted).count
   end
 
   def revisions_requested_count
     self[:revisions_requested_count] ||
-      permit_applications.where(status: :revisions_requested).count
+      permit_applications.kept.where(status: :revisions_requested).count
   end
 
   def resubmitted_count
     self[:resubmitted_count] ||
-      permit_applications.where(status: :resubmitted).count
+      permit_applications.kept.where(status: :resubmitted).count
   end
 
   def reference_number
@@ -85,7 +85,7 @@ class PermitProject < ApplicationRecord
     self[:approved_count] ||
       (
         begin
-          permit_applications.where(status: :approved).count
+          permit_applications.kept.where(status: :approved).count
         rescue StandardError
           0
         end
@@ -109,17 +109,19 @@ class PermitProject < ApplicationRecord
       forcasted_completion_date: forcasted_completion_date,
       requirement_template_ids:
         permit_applications
+          .kept
           .map { |pa| pa.requirement_template&.id }
           .compact
           .uniq,
-      total_permits_count: permit_applications.count,
-      new_draft_count: permit_applications.where(status: :new_draft).count,
+      total_permits_count: permit_applications.kept.count,
+      new_draft_count: permit_applications.kept.where(status: :new_draft).count,
       newly_submitted_count:
-        permit_applications.where(status: :newly_submitted).count,
+        permit_applications.kept.where(status: :newly_submitted).count,
       revisions_requested_count:
-        permit_applications.where(status: :revisions_requested).count,
-      resubmitted_count: permit_applications.where(status: :resubmitted).count,
-      approved_count: permit_applications.where(status: :approved).count
+        permit_applications.kept.where(status: :revisions_requested).count,
+      resubmitted_count:
+        permit_applications.kept.where(status: :resubmitted).count,
+      approved_count: permit_applications.kept.where(status: :approved).count
     }
   end
 
@@ -134,9 +136,9 @@ class PermitProject < ApplicationRecord
   # and the possibility of multiple items of different types in the future.
 
   def rollup_status
-    return "empty" if permit_applications.blank?
+    return "empty" if permit_applications.kept.blank?
 
-    permit_applications.max_by(&:pertinence_score).status
+    permit_applications.kept.max_by(&:pertinence_score).status
   end
 
   def forcasted_completion_date
@@ -170,7 +172,7 @@ class PermitProject < ApplicationRecord
           .joins(:permit_collaborations)
           .where(
             permit_collaborations: {
-              permit_application_id: permit_applications.select(:id),
+              permit_application_id: permit_applications.kept.select(:id),
               collaboration_type: :submission
             }
           )
