@@ -212,7 +212,10 @@ class PermitApplicationPolicy < ApplicationPolicy
         end
       end
 
-      scope.where(clauses.map { |c| "(#{c})" }.join(" OR "), values).distinct
+      scope
+        .where(discarded_at: nil)
+        .where(clauses.map { |c| "(#{c})" }.join(" OR "), values)
+        .distinct
     end
   end
 end
