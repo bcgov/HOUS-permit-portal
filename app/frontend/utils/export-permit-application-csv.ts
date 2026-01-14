@@ -1,7 +1,102 @@
 import { format } from "date-fns"
+import * as R from "ramda"
 import { IPermitApplication } from "../models/permit-application"
-import { TRow, traverseComponents } from "./formio-component-traversal"
-import { startBlobDownload } from "./utility-functions"
+import { ERequirementType } from "../types/enums"
+import { traverseFormIOComponents } from "./formio-component-traversal"
+import { startBlobDownload, urlForPath } from "./utility-functions"
+
+type TRow = {
+  section: string
+  panel: string
+  multi: string
+  label: string
+  value: string
+}
+
+const readValue = (submissionData: any, path: (string | number)[]) => R.path(path, submissionData)
+
+const optionValueToLabel = (component: any, value: any) => {
+  if (!component?.values || value == null) return value
+  const found = (component.values || []).find((opt: any) => opt.value === value)
+  return found?.label ?? value
+}
+
+const resolveComponentDisplay = (component: any, value: any): string => {
+  const type = component?.type
+  switch (type) {
+    case ERequirementType.radio:
+    case ERequirementType.select:
+    case ERequirementType.multiOptionSelect:
+      return String(optionValueToLabel(component, value) ?? "")
+    case "simplefile":
+    case ERequirementType.architecturalDrawing:
+    case ERequirementType.file: {
+      const files = Array.isArray(value) ? value : []
+      if (files.length === 0) return ""
+
+      const fileSummaries = files.map((f: any) => {
+        const original = f?.originalName || f?.name
+        const apiUrl =
+          f?.model && f?.modelId ? urlForPath(`/api/s3/params/download?model=${f.model}&modelId=${f.modelId}`) : null
+        const path = f?.fileUrl || f?.url || apiUrl || f?.filename || f?.id
+        if (original && path) return `${original} → ${path}`
+        if (path) return String(path)
+        return original ? String(original) : "(file)"
+      })
+      return `(file uploaded: ${fileSummaries.join("; ")})`
+    }
+    case ERequirementType.checkbox: {
+      return value ? "Yes" : value === false ? "No" : ""
+    }
+    case "checklist": {
+      if (!value || typeof value !== "object") return ""
+      const selected = Object.keys(value).filter((k) => !!value[k])
+      if (!selected.length) return ""
+
+      const labelMap = new Map<string, string>()
+      ;(component.values || []).forEach((opt: any) => labelMap.set(opt.value, opt.label))
+      return selected.map((v) => labelMap.get(v) || v).join("; ")
+    }
+    case ERequirementType.signature:
+      return value ? "(signed)" : ""
+    case ERequirementType.text:
+    case ERequirementType.number:
+    case ERequirementType.date:
+    case ERequirementType.address:
+    case ERequirementType.bcaddress:
+    case ERequirementType.textArea:
+    case ERequirementType.phone:
+    case ERequirementType.email:
+      return String(value ?? "")
+    case ERequirementType.pidInfo:
+      if (Array.isArray(value)) {
+        return value.map((item) => item.pid || JSON.stringify(item)).join("; ")
+      }
+      return String(value ?? "")
+    case ERequirementType.energyStepCodePart9:
+    case ERequirementType.energyStepCodePart3:
+    case ERequirementType.multiplySumGrid:
+      if (value == null) return ""
+      return typeof value === "object" ? JSON.stringify(value) : String(value)
+    case ERequirementType.generalContact:
+    case ERequirementType.professionalContact:
+      if (value && typeof value === "object") {
+        return Object.values(value)
+          .filter((v) => v != null && v !== "")
+          .join(", ")
+      }
+      return String(value ?? "")
+    default: {
+      if (value == null) return ""
+      if (Array.isArray(value)) return value.join("; ")
+      if (typeof value === "object") {
+        return JSON.stringify(value)
+      }
+
+      return String(value)
+    }
+  }
+}
 
 export function exportPermitApplicationCsv(permitApplication: IPermitApplication) {
   const formJson = (permitApplication as any)?.formJson
@@ -9,7 +104,16 @@ export function exportPermitApplicationCsv(permitApplication: IPermitApplication
   const today = format(new Date(), "yyyy-MM-dd")
 
   const rows: TRow[] = []
-  traverseComponents(formJson?.components || [], submissionData, rows, { section: "", panel: "", dataPath: [] })
+  traverseFormIOComponents(
+    formJson?.components || [],
+    submissionData,
+    readValue,
+    ({ section, panel, multi, component, value }) => {
+      const label = component?.label || ""
+      rows.push({ section, panel, multi, label, value: resolveComponentDisplay(component, value) })
+    },
+    { section: "", panel: "", dataPath: [] }
+  )
 
   rows.push({ section: "-", panel: "", multi: "", label: "", value: "" })
   const requirementTemplateId = (permitApplication as any)?.templateVersion?.requirementTemplateId || ""
