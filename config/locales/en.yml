@@ -139,6 +139,7 @@ en:
       update_password_success: "You have successfully updated your password"
       welcome: "Welcome to the Building Permit Hub"
       onboarding: "Welcome to the Building Permit Hub"
+      account_closed: "Your Building Permit Hub account has been closed"
       notify_submitter_application_submitted: "Your Building Permit Hub application has been submitted"
       notify_new_integration_mapping: "New API mappings available"
       notify_missing_integration_mapping: "Missing API mappings"
