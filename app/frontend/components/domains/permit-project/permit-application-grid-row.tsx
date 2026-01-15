@@ -122,6 +122,7 @@ export const PermitApplicationGridRow = observer(
                 {!permitApplication.isDiscarded && permitApplication.isDraft && isSubmitter && (
                   <ConfirmationModal
                     title={t("ui.confirmArchive")}
+                    body={t("ui.archiveRetentionNotice" as any)}
                     onConfirm={async (closeModal) => {
                       if (await permitApplication.archive()) {
                         await searchModel?.search()
