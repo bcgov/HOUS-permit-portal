@@ -81,6 +81,7 @@ export const ManageUserMenu = observer(function ManageUserMenu<TSearchModel exte
           ) : (
             <ConfirmationModal
               title={t("ui.confirmArchive")}
+              body={t("ui.archiveRetentionNotice" as any)}
               onConfirm={(closeModal) => {
                 handleRemove()
                 closeModal()

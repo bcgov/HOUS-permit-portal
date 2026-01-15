@@ -37,7 +37,7 @@ class UserPolicy < ApplicationPolicy
   end
 
   def destroy?
-    search_jurisdiction_users?
+    profile? || search_jurisdiction_users?
   end
 
   def restore?

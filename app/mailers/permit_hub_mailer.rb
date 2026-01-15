@@ -5,6 +5,13 @@ class PermitHubMailer < ApplicationMailer
     send_user_mail(email: user.email, template_key: "welcome")
   end
 
+  # Sent only when a user archives (discards) their own account.
+  # NOTE: This must bypass send_user_mail because the user is discarded at send-time.
+  def account_closed(user)
+    @user = user
+    send_mail(email: user.email, template_key: "account_closed")
+  end
+
   def onboarding(user)
     @user = user
     send_user_mail(email: user.email, template_key: "onboarding")
@@ -124,7 +131,7 @@ class PermitHubMailer < ApplicationMailer
       )
     elsif notifiable.is_a?(ExternalApiKey)
       @external_api_key = notifiable
-      @jurisdiction_name = @external_api_key&.jurisdiction.qualified_name
+      @jurisdiction_name = @external_api_key.jurisdiction&.qualified_name
       send_mail(
         email: notifiable.notification_email,
         template_key: "notify_batched_integration_mapping"
