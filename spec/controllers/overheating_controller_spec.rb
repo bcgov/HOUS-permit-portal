@@ -38,7 +38,7 @@ RSpec.describe Api::OverheatingController, type: :controller do
     end
 
     context "with invalid params" do
-      it "does not create an OverheatingTool and returns unprocessable_entity" do
+      it "does not create an OverheatingTool and returns 422" do
         post :create,
              params: {
                overheating_tool: {
@@ -46,7 +46,7 @@ RSpec.describe Api::OverheatingController, type: :controller do
                }
              },
              as: :json
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(422)
         expect(OverheatingTool.count).to eq(0)
       end
     end
