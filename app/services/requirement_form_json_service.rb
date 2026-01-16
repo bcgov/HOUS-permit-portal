@@ -601,41 +601,54 @@ class RequirementFormJsonService
     parent_key,
     label,
     required,
-    field_type = nil
+    field_type = nil,
+    computed_compliance = nil
   )
     key = snake_to_camel(field_key.to_s)
     key = "#{parent_key}|#{key}" if parent_key.present?
 
-    if field_type.present?
-      raise Error if DEFAULT_FORMIO_TYPE_TO_OPTIONS[field_type.to_sym].blank?
-      {
-        key: key,
-        type: field_type,
-        requirementInputType: field_type,
-        tableView: true,
-        input: true,
-        label: label,
-        widget: {
-          type: "input"
-        },
-        validate: {
-          required: required
+    component =
+      if field_type.present?
+        raise Error if DEFAULT_FORMIO_TYPE_TO_OPTIONS[field_type.to_sym].blank?
+        {
+          key: key,
+          type: field_type,
+          requirementInputType: field_type,
+          tableView: true,
+          input: true,
+          label: label,
+          widget: {
+            type: "input"
+          },
+          validate: {
+            required: required
+          }
+        }.merge!(DEFAULT_FORMIO_TYPE_TO_OPTIONS[field_type.to_sym])
+      else
+        {
+          applyMaskOn: "change",
+          tableView: true,
+          input: true,
+          key: key,
+          label: label,
+          type: "textfield",
+          validate: {
+            required: required
+          },
+          **DEFAULT_FORMIO_TYPE_TO_OPTIONS[:text]
         }
-      }.merge!(DEFAULT_FORMIO_TYPE_TO_OPTIONS[field_type.to_sym])
-    else
-      {
-        applyMaskOn: "change",
-        tableView: true,
-        input: true,
-        key: key,
-        label: label,
-        type: "textfield",
-        validate: {
-          required: required
-        },
-        **DEFAULT_FORMIO_TYPE_TO_OPTIONS[:text]
-      }
+      end
+
+    if computed_compliance.present?
+      component.merge!({ computedCompliance: computed_compliance })
+      unless component[:tooltip].present?
+        component.merge!(
+          { tooltip: I18n.t("formio.requirement.auto_compliance.tooltip") }
+        )
+      end
     end
+
+    component
   end
 
   def get_pid_info_components(
@@ -662,7 +675,9 @@ class RequirementFormJsonService
               :pid,
               requirement_block_key,
               "PID",
-              required
+              required,
+              nil,
+              requirement.input_options["computed_compliance"]
             ),
             get_nested_info_component(
               :folio_number,
@@ -935,7 +950,7 @@ class RequirementFormJsonService
         end
       )
     end
-    options = DEFAULT_FORMIO_TYPE_TO_OPTIONS[input_type.to_sym] || {}
+    options = (DEFAULT_FORMIO_TYPE_TO_OPTIONS[input_type.to_sym] || {})
     if input_options["computed_compliance"].present?
       options[:tooltip] = I18n.t("formio.requirement.auto_compliance.tooltip")
     end
