@@ -344,6 +344,8 @@ const options = {
           resume: "Resume",
           cancel: "Cancel",
           remove: "Remove",
+          removeRequirementBlock: "Remove requirement block",
+          removeRequirementBlockConfirm: "Are you sure you want to remove this requirement block?",
           save: "Save changes",
           onlySave: "Save",
           done: "Done",
