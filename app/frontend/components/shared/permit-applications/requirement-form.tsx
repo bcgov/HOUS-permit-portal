@@ -1,20 +1,4 @@
-import {
-  Box,
-  Button,
-  Center,
-  Flex,
-  Link,
-  ListItem,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalHeader,
-  ModalOverlay,
-  Text,
-  UnorderedList,
-  useDisclosure,
-} from "@chakra-ui/react"
+import { Box, Button, Center, Flex, Link, Text, useDisclosure } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 
 import { ArrowSquareOut } from "@phosphor-icons/react"
@@ -27,7 +11,7 @@ import { useMountStatus } from "../../../hooks/use-mount-status"
 import { IPermitApplication } from "../../../models/permit-application"
 import { EFileUploadAttachmentType, EFlashMessageStatus, EStepCodeType } from "../../../types/enums"
 import { IErrorsBoxData } from "../../../types/types"
-import { collectOptionalElectiveLabels } from "../../../utils/early-access-view-optional-electives"
+import { getOptionalElectivesByPanelId } from "../../../utils/early-access-view-optional-electives"
 import { getCompletedBlocksFromForm, getRequirementByKey } from "../../../utils/formio-component-traversal"
 import { singleRequirementFormJson, singleRequirementSubmissionData } from "../../../utils/formio-helpers"
 import { downloadFileFromStorage } from "../../../utils/utility-functions"
@@ -39,6 +23,7 @@ import { SharedSpinner } from "../base/shared-spinner"
 import { Form, defaultOptions } from "../chefs"
 import { ContactModal } from "../contact/contact-modal"
 import { PreviousSubmissionModal } from "../revisions/previous-submission-modal"
+import { OptionalElectivesModal } from "./optional-electives-modal"
 import { PermitApplicationSubmitModal } from "./permit-application-submit-modal"
 import { StepCodeSelectModal } from "./step-code-select-modal"
 
@@ -289,7 +274,27 @@ export const RequirementForm = observer(
       })
     }
 
+    const optionalElectivesByPanelId = useMemo(() => {
+      if (!isEarlyAccess) return new Map<string, { blockTitle?: string; labels: string[] }>()
+      return getOptionalElectivesByPanelId(formattedFormJson)
+    }, [formattedFormJson, isEarlyAccess])
+
+    const handleOpenOptionalElectives = useCallback(
+      (event) => {
+        const panelId = event?.detail?.panelId as string | undefined
+        if (!panelId) return
+
+        const data = optionalElectivesByPanelId.get(panelId) || { labels: [] }
+        setOptionalElectivesModalData(data)
+        onOptionalElectivesOpen()
+      },
+      [onOptionalElectivesOpen, optionalElectivesByPanelId]
+    )
+
     useEffect(() => {
+      // Wrapper to handle event listener type compatibility and deps
+      const handleOpenOptionalElectivesWrapper = (e: any) => handleOpenOptionalElectives(e)
+
       document.addEventListener("openStepCode", handleOpenStepCodePart9)
       document.addEventListener("openStepCodePart3", handleOpenStepCodePart3)
       document.addEventListener("openAutofillContact", handleOpenContactAutofill)
@@ -298,6 +303,11 @@ export const RequirementForm = observer(
       document.addEventListener("downloadRequirementDocument", handleDownloadRequirementDocument)
       document.addEventListener("openResourceLink", handleOpenResourceLink)
       document.addEventListener("downloadResourceDocument", handleDownloadResourceDocument)
+
+      if (isEarlyAccess) {
+        document.addEventListener("openOptionalElectives", handleOpenOptionalElectivesWrapper)
+      }
+
       return () => {
         document.removeEventListener("openStepCode", handleOpenStepCodePart9)
         document.removeEventListener("openStepCodePart3", handleOpenStepCodePart3)
@@ -307,8 +317,12 @@ export const RequirementForm = observer(
         document.removeEventListener("downloadRequirementDocument", handleDownloadRequirementDocument)
         document.removeEventListener("openResourceLink", handleOpenResourceLink)
         document.removeEventListener("downloadResourceDocument", handleDownloadResourceDocument)
+
+        if (isEarlyAccess) {
+          document.removeEventListener("openOptionalElectives", handleOpenOptionalElectivesWrapper)
+        }
       }
-    }, [])
+    }, [isEarlyAccess, handleOpenOptionalElectives])
 
     const setIsCollapsedAll = (isCollapsedAll: boolean) => {
       if (isCollapsedAll) {
@@ -436,123 +450,6 @@ export const RequirementForm = observer(
     }
     const showVersionDiffContactWarning = shouldShowDiff && !userShouldSeeDiff
 
-    const optionalElectivesByPanelId = useMemo(() => {
-      if (!isEarlyAccess) return new Map<string, { blockTitle?: string; labels: string[] }>()
-
-      const map = new Map<string, { blockTitle?: string; labels: string[] }>()
-
-      const visit = (component: any) => {
-        if (!component) return
-
-        if (component.type === "panel" && component.id) {
-          map.set(component.id, {
-            blockTitle: component.title ?? component.label,
-            labels: collectOptionalElectiveLabels(component),
-          })
-        }
-
-        if (Array.isArray(component.components)) component.components.forEach(visit)
-        if (Array.isArray(component.columns)) {
-          component.columns.forEach((col) => {
-            if (Array.isArray(col?.components)) col.components.forEach(visit)
-            if (Array.isArray(col?.component?.components)) col.component.components.forEach(visit)
-          })
-        }
-        if (Array.isArray(component.rows)) {
-          component.rows.forEach((row) => {
-            if (!Array.isArray(row)) return
-            row.forEach((cell) => {
-              if (Array.isArray(cell?.components)) cell.components.forEach(visit)
-            })
-          })
-        }
-      }
-
-      if (Array.isArray(formattedFormJson?.components)) {
-        formattedFormJson.components.forEach(visit)
-      }
-
-      return map
-    }, [formattedFormJson, isEarlyAccess])
-
-    const handleOpenOptionalElectives = useCallback(
-      (event) => {
-        const panelId = event?.detail?.panelId as string | undefined
-        if (!panelId) return
-
-        const data = optionalElectivesByPanelId.get(panelId) || { labels: [] }
-        setOptionalElectivesModalData(data)
-        onOptionalElectivesOpen()
-      },
-      [onOptionalElectivesOpen, optionalElectivesByPanelId]
-    )
-
-    useEffect(() => {
-      if (!isEarlyAccess) return
-      document.addEventListener("openOptionalElectives", handleOpenOptionalElectives as any)
-      return () => {
-        document.removeEventListener("openOptionalElectives", handleOpenOptionalElectives as any)
-      }
-    }, [handleOpenOptionalElectives, isEarlyAccess])
-
-    const formForRender = useMemo(() => {
-      if (!isEarlyAccess) return formattedFormJson
-
-      const cloned = R.clone(formattedFormJson)
-
-      const injectIntoPanels = (component: any) => {
-        if (!component) return
-
-        if (component.type === "panel" && component.id) {
-          const electiveLabels = collectOptionalElectiveLabels(component)
-          if (!electiveLabels.length) {
-            // No `elective: true` fields in this requirement block; don't add the button.
-            // Still recurse to support unexpected nested panels.
-          } else {
-            const buttonKey = `${component.id}-view-optional-electives`
-            const alreadyHasButton =
-              Array.isArray(component.components) && component.components.some((c) => c?.key === buttonKey)
-
-            if (!alreadyHasButton) {
-              component.components ||= []
-              component.components.unshift({
-                id: buttonKey,
-                key: buttonKey,
-                type: "button",
-                input: true,
-                action: "custom",
-                label: (t as any)("earlyAccessRequirementTemplate.viewOptionalElectives") as string,
-                customClass: "optional-electives-button btn btn-primary",
-                custom: `document.dispatchEvent(new CustomEvent('openOptionalElectives', { detail: { panelId: '${component.id}' } }));`,
-              })
-            }
-          }
-        }
-
-        if (Array.isArray(component.components)) component.components.forEach(injectIntoPanels)
-        if (Array.isArray(component.columns)) {
-          component.columns.forEach((col) => {
-            if (Array.isArray(col?.components)) col.components.forEach(injectIntoPanels)
-            if (Array.isArray(col?.component?.components)) col.component.components.forEach(injectIntoPanels)
-          })
-        }
-        if (Array.isArray(component.rows)) {
-          component.rows.forEach((row) => {
-            if (!Array.isArray(row)) return
-            row.forEach((cell) => {
-              if (Array.isArray(cell?.components)) cell.components.forEach(injectIntoPanels)
-            })
-          })
-        }
-      }
-
-      if (Array.isArray(cloned?.components)) {
-        cloned.components.forEach(injectIntoPanels)
-      }
-
-      return cloned
-    }, [formattedFormJson, isEarlyAccess])
-
     return (
       <>
         <Flex
@@ -678,7 +575,7 @@ export const RequirementForm = observer(
           </Box>
           <Form
             key={permitApplication.formFormatKey}
-            form={formForRender}
+            form={formattedFormJson}
             formReady={formReady}
             /* Needs cloned submissionData otherwise it's not possible to use data grid as mst props can't be mutated*/
             submission={unsavedSubmissionData}
@@ -690,26 +587,11 @@ export const RequirementForm = observer(
           />
         </Flex>
 
-        <Modal isOpen={isOptionalElectivesOpen} onClose={onOptionalElectivesClose} size="lg">
-          <ModalOverlay />
-          <ModalContent>
-            <ModalHeader>{optionalElectivesModalData?.blockTitle || "Optional electives"}</ModalHeader>
-            <ModalCloseButton />
-            <ModalBody pb={6}>
-              {optionalElectivesModalData?.labels?.length ? (
-                <UnorderedList spacing={2}>
-                  {optionalElectivesModalData.labels.map((label) => (
-                    <ListItem key={label}>
-                      <Text whiteSpace="pre-line">{label}</Text>
-                    </ListItem>
-                  ))}
-                </UnorderedList>
-              ) : (
-                <Text>{t("earlyAccessRequirementTemplate.noOptionalElectives")}</Text>
-              )}
-            </ModalBody>
-          </ModalContent>
-        </Modal>
+        <OptionalElectivesModal
+          isOpen={isOptionalElectivesOpen}
+          onClose={onOptionalElectivesClose}
+          data={optionalElectivesModalData}
+        />
 
         <BuilderBottomFloatingButtons
           isCollapsedAll={isCollapsedAll}
