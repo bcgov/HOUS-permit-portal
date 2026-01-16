@@ -294,6 +294,33 @@ class RequirementFormJsonService
         validate_json[:min] = data_validation["value"].to_f
       elsif data_validation["operation"] == "max"
         validate_json[:max] = data_validation["value"].to_f
+      elsif data_validation["operation"] == "after"
+        if json[:widget].present?
+          json[:widget][:minDate] = data_validation["value"]
+        end
+
+        if json[:datePicker].present?
+          json[:datePicker][:minDate] = data_validation["value"]
+        end
+        # Keep validate_json for backward compatibility or alternative validation logic
+        validate_json[:minDate] = data_validation["value"]
+        json[:enableMinDateInput] = true
+      elsif data_validation["operation"] == "before"
+        if json[:widget].present?
+          json[:widget][:maxDate] = data_validation["value"]
+        end
+        if json[:datePicker].present?
+          json[:datePicker][:maxDate] = data_validation["value"]
+        end
+        # Keep validate_json for backward compatibility or alternative validation logic
+        validate_json[:maxDate] = data_validation["value"]
+        json[:enableMaxDateInput] = true
+      elsif data_validation["operation"] == "min_selected_count"
+        validate_json[:minSelectedCount] = data_validation["value"].to_i
+      elsif data_validation["operation"] == "max_selected_count"
+        validate_json[:maxSelectedCount] = data_validation["value"].to_i
+      elsif data_validation["operation"] == "allowed_file_types"
+        json[:filePattern] = data_validation["value"]
       end
 
       if data_validation["error_message"].present?

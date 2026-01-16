@@ -74,7 +74,6 @@ export function FieldControlsHeader({
           size={"sm"}
           onClick={() => {
             toggleRequirementToEdit()
-            console.log("requirementCode", requirementCode)
           }}
           className={"requirement-edit-controls"}
           display={isRequirementInEditMode ? "flex" : "none"}
