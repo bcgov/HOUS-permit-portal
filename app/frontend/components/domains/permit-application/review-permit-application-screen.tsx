@@ -133,7 +133,6 @@ export const ReviewPermitApplicationScreen = observer(() => {
       setIsRetriggeringWebhook(false)
     }
   }
-
   // @ts-ignore
   const permitHeaderHeight = permitHeaderRef?.current?.offsetHeight ?? 0
 
@@ -200,23 +199,25 @@ export const ReviewPermitApplicationScreen = observer(() => {
                 {t("ui.back")}
               </Button>
             </Stack>
-            <Menu>
-              <MenuButton as={Button} variant="tertiaryInverse" rightIcon={<CaretDown />}>
-                {t("ui.options")}
-              </MenuButton>
-              <MenuList>
-                <MenuItem
-                  icon={<ArrowsClockwise size={16} />}
-                  onClick={handleRetriggerWebhook}
-                  isDisabled={isRetriggeringWebhook}
-                  color="text.primary"
-                >
-                  {isRetriggeringWebhook
-                    ? t("permitApplication.show.retriggeringWebhook")
-                    : t("permitApplication.show.retriggerWebhook")}
-                </MenuItem>
-              </MenuList>
-            </Menu>
+            {currentPermitApplication.jurisdiction.externalApiEnabled && (
+              <Menu>
+                <MenuButton as={Button} variant="tertiaryInverse" rightIcon={<CaretDown />}>
+                  {t("ui.options")}
+                </MenuButton>
+                <MenuList>
+                  <MenuItem
+                    icon={<ArrowsClockwise size={16} />}
+                    onClick={handleRetriggerWebhook}
+                    isDisabled={isRetriggeringWebhook}
+                    color="text.primary"
+                  >
+                    {isRetriggeringWebhook
+                      ? t("permitApplication.show.retriggeringWebhook")
+                      : t("permitApplication.show.retriggerWebhook")}
+                  </MenuItem>
+                </MenuList>
+              </Menu>
+            )}
           </Flex>
         </Flex>
         {revisionMode && (
