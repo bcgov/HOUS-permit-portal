@@ -3700,6 +3700,8 @@ Thank you,
             updatedAt: "Updated at",
             assignee: "Assigned",
           },
+          viewOptionalElectives: "View optional electives",
+          noOptionalElectives: "No optional electives in this requirement block.",
         },
         requirementTemplate: {
           compareAction: 'Requirement "{{ requirementName }}" has been {{ action }}',
