@@ -1331,7 +1331,7 @@ Thank you,
               "Submissions for this local jurisdictions are currently disabled. You will be able to make edits to this permit application but will not be able to submit until this jurisdiction's is accepting submissions again and inboxes are enabled globally.",
             inboxDisabledTitleEarlyAccess: "Early Access – Submissions Not Yet Enabled",
             inboxDisabledEarlyAccess:
-              "This permit is available for early access to help your team get familiar with the application process. You can view and edit your application, but submission is currently disabled. Submissions will be enabled once this permit classification is officially launched in your jurisdiction.",
+              "This permit is available for early access to help your team become familiar with the application process. You can view the application in this preview, but submission is currently disabled. <p> You are viewing the baseline standardized form. Click 'View optional electives' within any section to explore additional questions that jurisdictions may configure based on local needs.</p><p><1>Go to My projects to submit a permit.</1></p>",
             downloadApplication: "Download application",
             fetchingMissingPdf: "Fetching {{missingPdf}}...",
             missingPdfLabels: {
