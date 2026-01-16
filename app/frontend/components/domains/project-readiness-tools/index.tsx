@@ -46,6 +46,11 @@ export const ProjectReadinessToolsIndexScreen = () => {
           description: t("projectReadinessTools.createLoaDescription"),
           href: "/project-readiness-tools/create-your-letters-of-assurance",
         },
+        {
+          linkText: t("projectReadinessTools.singleZoneCoolingHeatingTool"),
+          description: t("projectReadinessTools.singleZoneCoolingHeatingToolDescription"),
+          href: "/project-readiness-tools/overheating-tool",
+        },
       ],
     },
   ]

@@ -299,6 +299,124 @@ export interface IDesignDocument extends IBaseFileAttachment {
   preCheckId: string
 }
 
+export interface IOverheatingDocument extends IBaseFileAttachment {
+  overheatingToolId: string
+}
+
+export interface IOverheatingToolJson {
+  notes?: string
+  other?: string
+  cooling?: {
+    nominal?: string
+    maximumCoolingCapacity?: string
+    minimumCoolingCapacity?: string
+  }
+  heating?: {
+    building?: string
+  }
+  climateData?: {
+    ase?: string
+    atre?: string
+    hrvErv?: string
+    ventilated?: string
+    windExposure?: string
+    windSheilding?: string
+  }
+  roomByRoom?: Array<{
+    name?: string
+    cooling?: string
+    heating?: string
+  }>
+  doorsStyleA?: string
+  doorsStyleB?: string
+  doorsStyleC?: string
+  projectNumber?: string
+  windowsStyleA?: string
+  windowsStyleB?: string
+  windowsStyleC?: string
+  ceilingsStyleA?: string
+  ceilingsStyleB?: string
+  ceilingsStyleC?: string
+  buildingLocation?: {
+    lot?: string
+    city?: string
+    site?: string
+    model?: string
+    province?: string
+    postalCode?: string
+    address?: string
+  }
+  drawingIssueFor?: string
+  skylightsStyleA?: string
+  skylightsStyleB?: string
+  skylightsStyleC?: string
+  calculationBasedOn?: {
+    assumed?: string
+    stories?: string
+    occupants?: string
+    attachment?: string
+    frontFacing?: string
+    airTightness?: string
+    dimensionalInfo?: string
+    internalShading?: string
+    weatherLocation?: string
+    occupantsAssumed?: string
+    frontFacingAssumed?: string
+    airTightnessAssumed?: string
+  }
+  floorsonsoilStyleA?: string
+  floorsonsoilStyleB?: string
+  floorsonsoilStyleC?: string
+  roomByRoomSummary?: {
+    issued?: string
+    latentGain?: string
+    ventilationLoss?: string
+    totalBuildingLoss?: string
+    nominalCoolingCapacity?: string
+  }
+  exposedfloorsStyleA?: string
+  exposedfloorsStyleB?: string
+  exposedfloorsStyleC?: string
+  "above-gradewallsStyleA"?: string
+  "above-gradewallsStyleB"?: string
+  "above-gradewallsStyleC"?: string
+  "below-gradewallsStyleA"?: string
+  "below-gradewallsStyleB"?: string
+  "below-gradewallsStyleC"?: string
+  calculationPerformedBy?: {
+    fax?: string
+    city?: string
+    name?: string
+    email?: string
+    phone?: string
+    address?: string
+    company?: string
+    province?: string
+    lastName?: string
+    firstName?: string
+    reference1?: string
+    reference2?: string
+    attestation?: boolean
+    postalCode?: string
+    issuedForDate?: string
+    issuedForDate2?: string
+  }
+  coolingDesignConditions?: {
+    range?: string
+    latitude?: string
+    indoorTemp?: string
+    outdoorTemp?: string
+  }
+  heatingDesignConditions?: {
+    indoorTemp?: string
+    outdoorTemp?: string
+    meanSoilTemp?: string
+    slabFluidTemp?: string
+    soilConductivity?: string
+    waterTableDepth?: string
+  }
+}
+
 export interface IJurisdictionServicePartnerEnrollment {
   id: string
   servicePartner: string
