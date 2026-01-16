@@ -476,7 +476,30 @@ export const RequirementForm = observer(
           {!inboxEnabled && !sandbox && isEarlyAccess && (
             <CustomMessageBox
               title={t("permitApplication.show.inboxDisabledTitleEarlyAccess")}
-              description={t("permitApplication.show.inboxDisabledEarlyAccess")}
+              description={
+                <Trans
+                  t={t}
+                  i18nKey={"permitApplication.show.inboxDisabledEarlyAccess"}
+                  components={{
+                    1: (
+                      <Button
+                        sx={{
+                          span: {
+                            ml: 0,
+                          },
+                        }}
+                        as={Link}
+                        rightIcon={<ArrowSquareOut />}
+                        href={"/projects/"}
+                        variant={"link"}
+                        target="_blank"
+                        color={"text.primary !important"}
+                        rel="noopener noreferrer"
+                      />
+                    ),
+                  }}
+                />
+              }
               status={EFlashMessageStatus.warning}
             />
           )}
