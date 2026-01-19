@@ -140,6 +140,8 @@ en:
       welcome: "Welcome to the Building Permit Hub"
       onboarding: "Welcome to the Building Permit Hub"
       account_closed: "Your Building Permit Hub account has been closed"
+      user_archive_warning: "Your account will be archived in %{days} days"
+      user_delete_warning: "Your account will be deleted in %{days} days"
       notify_submitter_application_submitted: "Your Building Permit Hub application has been submitted"
       notify_new_integration_mapping: "New API mappings available"
       notify_missing_integration_mapping: "Missing API mappings"
