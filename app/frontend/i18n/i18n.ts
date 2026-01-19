@@ -276,6 +276,8 @@ const options = {
           },
         },
         ui: {
+          confirmArchive: "Are you sure you want to archive this item?",
+          confirmRestore: "Are you sure you want to restore this item?",
           updatedAt: "Updated at",
           beta: "Beta",
           optional: "(optional)",
@@ -310,6 +312,8 @@ const options = {
           confirmation: "Are you sure you want to proceed?",
           confirmOverwrite: "Are you sure you want to save and overwrite this item?",
           sureDelete: "Are you sure you want to delete this item?",
+          archiveRetentionNotice:
+            "Archived records will be kept for one year. After one year, it will be permanently deleted and cannot be recovered.",
           disable: "Disable",
           ok: "OK",
           dismiss: "Dismiss",
@@ -3551,6 +3555,19 @@ Thank you,
           newEmail: "New notification email address",
           changeEmail: "Change email",
           deleteAccount: "To delete your account, please contact <1>digital.codes.permits@gov.bc.ca</1>.",
+          archiveMyAccount: "Close account",
+          archiveMyAccountTitle: "Close your account?",
+          archiveMyAccountBody:
+            "This will close your account, archive your data, and log you out immediately. You will not be able to log in again unless an administrator reactivates your account.",
+          closeAccountSectionTitle: "Close your account",
+          closeAccountParagraph1:
+            "When you close your account, we archive your data and log you out. You will not be able to log in again unless an administrator reactivates your account.",
+          closeAccountParagraph2:
+            "Your archived account data will be kept for one year. After one year, it will be permanently deleted and cannot be recovered.",
+          closeAccountParagraph3:
+            "Applications you’ve already submitted will stay with the local authority that received them, but you will no longer be able to view them in Building Permit Hub.",
+          closeAccountAcknowledge:
+            "I understand that I won’t be able to access my account or view my applications after closing it",
           addUser: "Add more emails",
           invite: "Invite",
           invitedBy: "<strong>{{email}}</strong> has invited you to join:",
