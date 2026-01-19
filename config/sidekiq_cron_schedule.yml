@@ -22,6 +22,12 @@ check_expiring_api_keys:
   queue: default
   active_job: false
 
+user_data_cleanup:
+  cron: "15 0 * * * America/Vancouver" # Runs nightly at 12:15 AM
+  class: "UserDataCleanupJob"
+  queue: default
+  active_job: false
+
 remind_resource_update:
   cron: "0 9 1 */6 * America/Vancouver" # Runs every 6 months (Jan 1st and July 1st at 9:00 AM)
   class: "ResourceReminderJob"
