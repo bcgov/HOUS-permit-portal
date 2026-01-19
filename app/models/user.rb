@@ -92,6 +92,18 @@ class User < ApplicationRecord
   has_one :preference, dependent: :destroy
   accepts_nested_attributes_for :preference
 
+  scope :with_last_sign_in, -> { where.not(last_sign_in_at: nil) }
+  scope :last_sign_in_between,
+        ->(start_time, end_time) do
+          with_last_sign_in.where(last_sign_in_at: start_time..end_time)
+        end
+  scope :inactive_since,
+        ->(time) { with_last_sign_in.where(last_sign_in_at: ..time) }
+  scope :discarded_between,
+        ->(start_time, end_time) do
+          discarded.where(discarded_at: start_time..end_time)
+        end
+
   # Validations
   validates :role, presence: true
   validate :valid_role_change, if: :role_changed?, on: :update
