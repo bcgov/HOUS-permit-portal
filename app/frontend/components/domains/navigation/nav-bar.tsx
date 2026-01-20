@@ -169,7 +169,7 @@ const NavBarContent = observer(function NavBarContent() {
         maxH="var(--app-navbar-height)"
         bg={currentUser?.isSubmitter || !loggedIn ? "greys.white" : "theme.blue"}
         color={currentUser?.isSubmitter || !loggedIn ? "theme.blue" : "greys.white"}
-        zIndex={1400}
+        zIndex={1500}
         shadow="elevations.elevation01"
         position="relative"
       >
