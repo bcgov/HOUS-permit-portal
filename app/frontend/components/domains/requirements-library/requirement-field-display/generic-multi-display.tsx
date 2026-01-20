@@ -72,7 +72,7 @@ export function GenericMultiDisplay<TFieldValues>({
         <Box w={"full"} display={"grid"} gridTemplateColumns={"repeat(2, calc(50% - 0.75rem))"} gap={"1rem 1.5rem"}>
           {fieldItems.map(({ type, key, label, required, containerProps }) => (
             <Box
-              key={type}
+              key={key}
               sx={{
                 ".chakra-form-control": {
                   display: "flex",
