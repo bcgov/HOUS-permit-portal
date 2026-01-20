@@ -200,8 +200,10 @@ class PermitProject < ApplicationRecord
 
   def assign_unique_number
     return if number.present?
+    return if jurisdiction.blank?
 
     prefix = jurisdiction.prefix
+    return if prefix.blank?
     last_number =
       PermitProject
         .where("number LIKE ?", "#{prefix}-%")
