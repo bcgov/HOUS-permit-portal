@@ -83,12 +83,6 @@ module Api::Concerns::Search::ProjectPermitApplications
     end
     and_conditions << { discarded: discarded }
 
-    if discarded.present?
-      and_conditions << { discarded: true }
-    else
-      and_conditions << { discarded: false }
-    end
-
     search_filters.each do |key, value|
       case key
       when :requirement_template_id
