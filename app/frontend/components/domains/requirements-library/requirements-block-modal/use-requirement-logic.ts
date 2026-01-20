@@ -46,21 +46,22 @@ export const useRequirementLogic = ({
         inputType: requirementType,
         label: [ERequirementType.generalContact, ERequirementType.professionalContact].includes(requirementType)
           ? t("requirementsLibrary.modals.defaultContactLabel")
-          : undefined,
-        ...(isMultiOptionRequirement(requirementType)
+          : "",
+        hint: "",
+        required: true,
+        elective: false,
+        inputOptions: isMultiOptionRequirement(requirementType)
           ? {
-              inputOptions: {
-                valueOptions: [
-                  { value: "Option 1", label: "Option 1" },
-                  {
-                    value: "Option 2",
-                    label: "Option 2",
-                  },
-                  { value: "Option 3", label: "Option 3" },
-                ],
-              },
+              valueOptions: [
+                { value: "Option 1", label: "Option 1" },
+                {
+                  value: "Option 2",
+                  label: "Option 2",
+                },
+                { value: "Option 3", label: "Option 3" },
+              ],
             }
-          : {}),
+          : {},
       }
       append(defaults)
 
