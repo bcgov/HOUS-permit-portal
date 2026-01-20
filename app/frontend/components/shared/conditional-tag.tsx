@@ -1,16 +1,9 @@
-import { Tag, TagProps } from "@chakra-ui/react"
+import { Tag } from "@chakra-ui/react"
 import React from "react"
 import { useTranslation } from "react-i18next"
 
-interface ConditionalTagProps extends TagProps {
-  hasConditional?: boolean
-}
-
-export const ConditionalTag: React.FC<ConditionalTagProps> = ({ hasConditional, ...rest }) => {
+export const ConditionalTag: React.FC = () => {
   const { t } = useTranslation()
-
-  const isConditionalText = t("requirementsLibrary.conditional")
-  const hasConditionalText = t("requirementsLibrary.hasConditional")
 
   return (
     <Tag
@@ -20,9 +13,8 @@ export const ConditionalTag: React.FC<ConditionalTagProps> = ({ hasConditional, 
       color={"text.secondary"}
       fontWeight={700}
       fontSize={"xs"}
-      {...rest}
     >
-      {hasConditional ? hasConditionalText : isConditionalText}
+      {t("requirementsLibrary.conditional")}
     </Tag>
   )
 }
