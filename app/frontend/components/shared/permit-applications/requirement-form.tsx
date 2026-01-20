@@ -449,7 +449,6 @@ export const RequirementForm = observer(
       }
     }
     const showVersionDiffContactWarning = shouldShowDiff && !userShouldSeeDiff
-
     return (
       <>
         <Flex
