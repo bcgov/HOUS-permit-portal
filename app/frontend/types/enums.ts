@@ -805,3 +805,13 @@ export enum EPdfGenerationStatus {
   completed = "completed",
   failed = "failed",
 }
+
+export enum EDataValidationOperation {
+  min = "min",
+  max = "max",
+  before = "before",
+  after = "after",
+  minSelectedCount = "min_selected_count",
+  maxSelectedCount = "max_selected_count",
+  allowedFileTypes = "allowed_file_types",
+}
