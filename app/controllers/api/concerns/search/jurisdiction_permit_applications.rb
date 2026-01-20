@@ -6,7 +6,8 @@ module Api::Concerns::Search::JurisdictionPermitApplications
       order: order,
       match: :word_start,
       where: {
-        jurisdiction_id: @jurisdiction&.id
+        jurisdiction_id: @jurisdiction&.id,
+        discarded: false
       },
       page: permit_application_search_params[:page],
       per_page:
