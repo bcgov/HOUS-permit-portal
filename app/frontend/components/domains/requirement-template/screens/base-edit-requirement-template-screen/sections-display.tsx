@@ -135,6 +135,7 @@ const SectionDisplay = observer(
             onCancel={(previousValue) => {
               setEditableSectionName(previousValue)
             }}
+            controlsProps={{ iconButtonProps: { marginTop: 6 } }}
           />
 
           {watchedSectionBlocks.length === 0 ? (
