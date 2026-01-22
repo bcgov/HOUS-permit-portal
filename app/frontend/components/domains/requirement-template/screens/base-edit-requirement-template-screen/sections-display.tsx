@@ -144,6 +144,7 @@ const SectionDisplay = observer(
               color={"error"}
               visibility={"hidden"}
               onClick={() => removeSection(sectionIndex)}
+              marginTop={9}
             >
               {t("ui.remove")}
             </Button>
@@ -152,7 +153,7 @@ const SectionDisplay = observer(
               title={t("requirementTemplate.edit.removeConfirmationModal.title")}
               body={t("requirementTemplate.edit.removeConfirmationModal.body")}
               onRemove={() => removeSection(sectionIndex)}
-              triggerButtonProps={{ visibility: "hidden" }}
+              triggerButtonProps={{ marginTop: 9, visibility: "hidden" }}
             />
           )}
         </HStack>
