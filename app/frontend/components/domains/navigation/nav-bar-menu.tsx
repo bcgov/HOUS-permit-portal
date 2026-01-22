@@ -161,6 +161,18 @@ export const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
   // Right column - Role-dependent content
   const renderRightColumnContent = () => {
     if (!loggedIn || currentUser?.isUnconfirmed) {
+      // [HUB-4416] There's your problem right there. If the user is unconfirmed, they are getting the logged out menu content.
+      // This prevents the user from being able to log out when unconfirmed, which is a problem.
+      // Likely fix: just remove the isUnconfirmed check, and they can see to their role's full menu content.
+      // remember you can unconfirm a user by querying the user in the rails console and setting the confirmed_at to nil:
+      //
+      // bundle exec rails c
+      // User.find_by_omniauth_username("review_manager").update(confirmed_at: nil)
+      //
+      // Presenting the role specific menu content when unconfirmed is not a problem,
+      // because logic in app/frontend/components/domains/navigation/index.tsx should prevent unconfirmed users from accessing the rest of the app.
+      // Maybe double check that the user cant access other pages linked in this right column role content when unconfirmed
+      // (once you remove the isUnconfirmed check). - Remove this whole comment in your final PR.
       return <LoggedOutMenuContent />
     }
 
