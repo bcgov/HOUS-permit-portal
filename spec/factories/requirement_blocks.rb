@@ -28,7 +28,7 @@ FactoryBot.define do
             "requirement_code" => "energy_step_code_method",
             "label" =>
               "Which method do you want to do use for the energy step code:",
-            "input_type" => "select",
+            "input_type" => "radio",
             "input_options" => {
               "value_options" => [
                 {

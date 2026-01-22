@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_12_09_235013) do
+ActiveRecord::Schema[7.2].define(version: 2025_12_10_181530) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -74,9 +74,6 @@ ActiveRecord::Schema[7.2].define(version: 2025_12_09_235013) do
     t.uuid "contactable_id"
     t.string "contact_type"
     t.index ["contactable_type", "contactable_id"], name: "index_contacts_on_contactable"
-  end
-
-  create_table "data_migrations", primary_key: "version", id: :string, force: :cascade do |t|
   end
 
   create_table "design_documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -572,6 +569,8 @@ ActiveRecord::Schema[7.2].define(version: 2025_12_09_235013) do
     t.boolean "enable_email_integration_mapping_notification", default: true
     t.boolean "enable_in_app_unmapped_api_notification", default: true
     t.boolean "enable_email_unmapped_api_notification", default: true
+    t.boolean "enable_in_app_resource_reminder_notification", default: true
+    t.boolean "enable_email_resource_reminder_notification", default: true
     t.index ["user_id"], name: "index_preferences_on_user_id"
   end
 

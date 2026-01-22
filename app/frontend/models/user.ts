@@ -208,4 +208,7 @@ export interface IPreference {
 
   enableInAppUnmappedApiNotification: boolean
   enableEmailUnmappedApiNotification: boolean
+
+  enableInAppResourceReminderNotification: boolean
+  enableEmailResourceReminderNotification: boolean
 }

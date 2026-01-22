@@ -23,6 +23,7 @@ import {
   ITemplateCustomization,
   ITemplateVersionDiff,
 } from "../types/types"
+import { injectOptionalElectivesButtons } from "../utils/early-access-view-optional-electives"
 import {
   combineChangeMarkers,
   combineCustomizations,
@@ -252,6 +253,13 @@ export const PermitApplicationModel = types.snapshotProcessor(
           self.revisionMode || self.isRevisionsRequested
             ? combineRevisionButtons(changedMarkedFormJson, self.isSubmitted, revisionRequestsToUse)
             : changedMarkedFormJson // Use changedMarkedFormJson if not in revision mode
+
+        if (self.templateVersion?.earlyAccess) {
+          return injectOptionalElectivesButtons(
+            revisionModeFormJson,
+            t("earlyAccessRequirementTemplate.viewOptionalElectives")
+          )
+        }
 
         return revisionModeFormJson
       },

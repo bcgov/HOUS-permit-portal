@@ -1,0 +1,5 @@
+---
+alwaysApply: true
+---
+
+You may notice that in several cases, especially around installing modules and database operations, you may run into permission issues. Please do not attempt to get around these issues, as this is intentional. Please simply give the user the command you want to run, and the user will gladly perform the operation for you.

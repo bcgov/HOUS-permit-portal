@@ -84,6 +84,21 @@ export const TemplateVersionsList = observer(function TemplateVersionsList({
     return { groups, uncategorized }
   }, [enabledActivityOptions])
 
+  const templateVersionsByActivityId = useMemo(() => {
+    const map = new Map<string, ITemplateVersion[]>()
+    templateVersions.forEach((tv) => {
+      const activityId = tv.denormalizedTemplateJson?.activity?.id
+      const permitTypeMatches = tv.denormalizedTemplateJson?.permitType?.id === permitTypeId
+      if (activityId && permitTypeMatches) {
+        if (!map.has(activityId)) {
+          map.set(activityId, [])
+        }
+        map.get(activityId)!.push(tv)
+      }
+    })
+    return map
+  }, [templateVersions, permitTypeId])
+
   const { showStatus = false, showVersionDate = true } = statusDisplayOptions || {}
   const showStatusTag = showStatus || can("requirementTemplate:manage")
 
@@ -107,65 +122,57 @@ export const TemplateVersionsList = observer(function TemplateVersionsList({
       )}
 
       {groupedByCategory.groups.map((group) => {
-        const cards = group.options
-          .map((activityOption) => {
-            const tv = templateVersions.find(
-              (v) =>
-                (v as ITemplateVersion).denormalizedTemplateJson?.activity?.id === activityOption.value.id &&
-                (v as ITemplateVersion).denormalizedTemplateJson?.permitType?.id === permitTypeId
-            ) as ITemplateVersion | undefined
+        const cards = group.options.flatMap((activityOption) => {
+          const tvs = templateVersionsByActivityId.get(activityOption.value.id) || []
 
-            if (!tv) return null
-
-            return (
-              <SectionBox key={tv.id} w="full">
-                <Flex w="full" as="section">
-                  <Stack spacing={3} flex={1}>
-                    <Text as="h4" color={"text.link"} fontWeight={700} fontSize="xl">
-                      {tv.denormalizedTemplateJson.label}
+          return tvs.map((tv) => (
+            <SectionBox key={tv.id} w="full">
+              <Flex w="full" as="section">
+                <Stack spacing={3} flex={1}>
+                  <Text as="h4" color={"text.link"} fontWeight={700} fontSize="xl">
+                    {tv.denormalizedTemplateJson?.nickname}
+                  </Text>
+                  <Text fontSize={"sm"} color={"text.secondary"}>
+                    {tv.denormalizedTemplateJson?.description}
+                  </Text>
+                  <Text fontSize={"sm"} color={"text.secondary"}>
+                    <Text as="span" fontWeight={700}>
+                      {t("digitalBuildingPermits.index.lastUpdated")}:{" "}
                     </Text>
-                    <Text fontSize={"sm"} color={"text.secondary"}>
-                      {tv.denormalizedTemplateJson?.description}
-                    </Text>
-                    <Text fontSize={"sm"} color={"text.secondary"}>
-                      <Text as="span" fontWeight={700}>
-                        {t("digitalBuildingPermits.index.lastUpdated")}:{" "}
-                      </Text>
-                      {format(tv.updatedAt, "MMM d, yyyy")}
-                    </Text>
-                    <HStack gap={4} align="center">
-                      <VersionTag versionDate={tv.versionDate} w="fit-content" />
-                      {tv.denormalizedTemplateJson.firstNations && <FirstNationsTag />}
-                      {showStatusTag && (
-                        <TemplateStatusTag
-                          status={tv.status}
-                          scheduledFor={
-                            showVersionDate && tv.status === ETemplateVersionStatus.scheduled && tv.versionDate
-                              ? tv.versionDate
-                              : undefined
-                          }
-                        />
-                      )}
-                    </HStack>
-                  </Stack>
-                  {renderButton ? (
-                    renderButton(tv)
-                  ) : (
-                    <Button
-                      to={`/digital-building-permits/${tv.id}/edit`}
-                      as={RouterLink}
-                      variant={"primary"}
-                      ml={4}
-                      alignSelf={"center"}
-                    >
-                      {t("ui.manage")}
-                    </Button>
-                  )}
-                </Flex>
-              </SectionBox>
-            )
-          })
-          .filter((c) => c !== null) as JSX.Element[]
+                    {format(tv.updatedAt, "MMM d, yyyy")}
+                  </Text>
+                  <HStack gap={4} align="center">
+                    <VersionTag versionDate={tv.versionDate} w="fit-content" />
+                    {tv.denormalizedTemplateJson.firstNations && <FirstNationsTag />}
+                    {showStatusTag && (
+                      <TemplateStatusTag
+                        status={tv.status}
+                        scheduledFor={
+                          showVersionDate && tv.status === ETemplateVersionStatus.scheduled && tv.versionDate
+                            ? tv.versionDate
+                            : undefined
+                        }
+                      />
+                    )}
+                  </HStack>
+                </Stack>
+                {renderButton ? (
+                  renderButton(tv)
+                ) : (
+                  <Button
+                    to={`/digital-building-permits/${tv.id}/edit`}
+                    as={RouterLink}
+                    variant={"primary"}
+                    ml={4}
+                    alignSelf={"center"}
+                  >
+                    {t("ui.manage")}
+                  </Button>
+                )}
+              </Flex>
+            </SectionBox>
+          ))
+        })
 
         if (cards.length === 0) return null
 
@@ -180,16 +187,10 @@ export const TemplateVersionsList = observer(function TemplateVersionsList({
       })}
       {groupedByCategory.uncategorized.length > 0 && (
         <Stack spacing={3} mb={6}>
-          {groupedByCategory.uncategorized.map((activityOption) => {
-            const tv = templateVersions.find(
-              (v) =>
-                (v as ITemplateVersion).denormalizedTemplateJson?.activity?.id === activityOption.value.id &&
-                (v as ITemplateVersion).denormalizedTemplateJson?.permitType?.id === permitTypeId
-            ) as ITemplateVersion | undefined
+          {groupedByCategory.uncategorized.flatMap((activityOption) => {
+            const tvs = templateVersionsByActivityId.get(activityOption.value.id) || []
 
-            if (!tv) return null
-
-            return (
+            return tvs.map((tv) => (
               <SectionBox key={tv.id} w="full">
                 <Flex w="full" as="section">
                   <Stack spacing={3} flex={1}>
@@ -235,103 +236,10 @@ export const TemplateVersionsList = observer(function TemplateVersionsList({
                   )}
                 </Flex>
               </SectionBox>
-            )
+            ))
           })}
         </Stack>
       )}
     </Stack>
-  )
-})
-
-interface IActivityTemplateVersionsSectionBoxProps {
-  activityId: string
-  permitTypeId: string
-  status?: ETemplateVersionStatus
-  earlyAccess?: boolean
-  isPublic?: boolean
-  showStatusTag: boolean
-  showVersionDate: boolean
-  renderButton?: (templateVersion: ITemplateVersion) => React.ReactNode
-}
-
-const ActivityTemplateVersionsSectionBox = observer(function ActivityTemplateVersionsSectionBox({
-  activityId,
-  permitTypeId,
-  status,
-  earlyAccess,
-  isPublic,
-  showStatusTag,
-  showVersionDate,
-  renderButton,
-}: IActivityTemplateVersionsSectionBoxProps) {
-  const { t } = useTranslation()
-  const { templateVersions } = useTemplateVersions({
-    activityId,
-    permitTypeId,
-    customErrorMessage: t("errors.fetchBuildingPermits"),
-    status,
-    earlyAccess,
-    isPublic,
-  })
-
-  if (templateVersions.length === 0) return null
-
-  const filteredTemplateVersions = templateVersions.filter(
-    (tv) => tv.denormalizedTemplateJson?.permitType?.id === permitTypeId
-  )
-
-  if (filteredTemplateVersions.length === 0) return null
-
-  const templateVersion = filteredTemplateVersions[0]
-
-  return (
-    <SectionBox key={templateVersion.id} w="full">
-      <Flex w="full" as="section">
-        <Stack spacing={3} flex={1}>
-          <Text as="h4" color={"text.link"} fontWeight={700} fontSize="xl">
-            {templateVersion.denormalizedTemplateJson.label}
-          </Text>
-          <Text fontSize={"sm"} color={"text.secondary"}>
-            {templateVersion.denormalizedTemplateJson?.description}
-          </Text>
-          <Text fontSize={"sm"} color={"text.secondary"}>
-            <Text as="span" fontWeight={700}>
-              {t("digitalBuildingPermits.index.lastUpdated")}:{" "}
-            </Text>
-            {format(templateVersion.updatedAt, "MMM d, yyyy")}
-          </Text>
-          <HStack gap={4} align="center">
-            <VersionTag versionDate={templateVersion.versionDate} w="fit-content" />
-            {templateVersion.denormalizedTemplateJson.firstNations && <FirstNationsTag />}
-            {showStatusTag && (
-              <TemplateStatusTag
-                status={templateVersion.status}
-                scheduledFor={
-                  showVersionDate &&
-                  templateVersion.status === ETemplateVersionStatus.scheduled &&
-                  templateVersion.versionDate
-                    ? templateVersion.versionDate
-                    : undefined
-                }
-              />
-            )}
-          </HStack>
-        </Stack>
-
-        {renderButton ? (
-          renderButton(templateVersion)
-        ) : (
-          <Button
-            to={`/digital-building-permits/${templateVersion.id}/edit`}
-            as={RouterLink}
-            variant={"primary"}
-            ml={4}
-            alignSelf={"center"}
-          >
-            {t("ui.manage")}
-          </Button>
-        )}
-      </Flex>
-    </SectionBox>
   )
 })

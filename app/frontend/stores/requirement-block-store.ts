@@ -69,7 +69,13 @@ export const RequirementBlockStoreModel = types
     ) {
       const moduleConfig = self.autoComplianceModuleConfigurations?.[moduleName]
 
-      if (!moduleConfig || !moduleConfig.availableOnInputTypes.includes(requirementType)) {
+      if (!moduleConfig) return null
+
+      // If pidInfo, we allow the module even if it doesn't explicitly list pidInfo
+      const isSupported =
+        moduleConfig.availableOnInputTypes.includes(requirementType) || requirementType === ERequirementType.pidInfo
+
+      if (!isSupported) {
         return null
       }
 
@@ -80,12 +86,13 @@ export const RequirementBlockStoreModel = types
       return {
         ...moduleConfig,
         availableFields: (moduleConfig as TValueExtractorAutoComplianceModuleConfiguration).availableFields.filter(
-          (field) => field.availableOnInputTypes.includes(requirementType)
+          (field) =>
+            field.availableOnInputTypes.includes(requirementType) || requirementType === ERequirementType.pidInfo
         ),
       }
     },
     getAvailableAutoComplianceModuleConfigurationsForRequirementType(requirementType: ERequirementType) {
-      return self.autoComplianceModuleConfigurationsList
+      const filteredOptions = self.autoComplianceModuleConfigurationsList
         .filter((option) => option.availableOnInputTypes.includes(requirementType))
         .map((option) => {
           if (
@@ -102,6 +109,12 @@ export const RequirementBlockStoreModel = types
 
           return option
         })
+
+      if (filteredOptions.length === 0 && requirementType === ERequirementType.pidInfo) {
+        return self.autoComplianceModuleConfigurationsList
+      }
+
+      return filteredOptions
     },
     getIsRequirementBlockEditable(requirementBlock: IRequirementBlock | IDenormalizedRequirementBlock) {
       return !self.isEditingEarlyAccess || requirementBlock.visibility === EVisibility.earlyAccess

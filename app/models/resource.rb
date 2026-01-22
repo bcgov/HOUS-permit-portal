@@ -37,4 +37,16 @@ class Resource < ApplicationRecord
 
     errors.add(:base, "Resource document must exist for file type resources")
   end
+
+  def self.resource_reminder_notification_data(jurisdiction_id, resource_ids)
+    {
+      "id" => SecureRandom.uuid,
+      "action_type" => Constants::NotificationActionTypes::RESOURCE_REMINDER,
+      "action_text" => I18n.t("notification.resource.reminder"),
+      "object_data" => {
+        "jurisdiction_id" => jurisdiction_id,
+        "resource_ids" => resource_ids
+      }
+    }
+  end
 end

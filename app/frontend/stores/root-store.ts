@@ -4,6 +4,7 @@ import { createUserChannelConsumer } from "../channels/user_channel"
 import { withEnvironment } from "../lib/with-environment"
 import { CollaboratorStoreModel, ICollaboratorStore } from "./collaborator-store"
 import { ContactStoreModel, IContactStore } from "./contact-store"
+import { DigitalSealValidatorStoreModel, IDigitalSealValidatorStore } from "./digital-seal-validator-store"
 import { EarlyAccessPreviewStoreModel, IEarlyAccessPreviewStoreModel } from "./early-access-preview-store"
 import {
   EarlyAccessRequirementBlockStoreModel,
@@ -45,6 +46,7 @@ export const RootStoreModel = types
     earlyAccessRequirementBlockStore: types.optional(EarlyAccessRequirementBlockStoreModel, {}),
     requirementTemplateStore: types.optional(RequirementTemplateStoreModel, {}),
     earlyAccessRequirementTemplateStore: types.optional(EarlyAccessRequirementTemplateStoreModel, {}),
+    digitalSealValidatorStore: types.optional(DigitalSealValidatorStoreModel, {}),
     earlyAccessPreviewStore: types.optional(EarlyAccessPreviewStoreModel, {}),
     collaboratorStore: types.optional(CollaboratorStoreModel, {}),
     templateVersionStore: types.optional(TemplateVersionStoreModel, {}),
@@ -123,6 +125,7 @@ export interface IRootStore extends IStateTreeNode {
   requirementBlockStore: IRequirementBlockStoreModel
   requirementTemplateStore: IRequirementTemplateStoreModel
   earlyAccessRequirementTemplateStore: IEarlyAccessRequirementTemplateStoreModel
+  digitalSealValidatorStore: IDigitalSealValidatorStore
   earlyAccessPreviewStore: IEarlyAccessPreviewStoreModel
   templateVersionStore: ITemplateVersionStoreModel
   geocoderStore: IGeocoderStore

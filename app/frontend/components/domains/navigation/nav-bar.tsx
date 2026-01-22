@@ -9,7 +9,6 @@ import { PopoverProvider, useNotificationPopover } from "../../../hooks/use-noti
 import { useMst } from "../../../setup/root"
 import { EUserRoles } from "../../../types/enums"
 import { INotification, IPermitNotificationObjectData } from "../../../types/types"
-import { HelpDrawer } from "../../shared/help-drawer"
 import { RouterLink } from "../../shared/navigation/router-link"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import SandboxHeader from "../../shared/sandbox/sandbox-header"
@@ -82,6 +81,21 @@ function isProjectDetailPath(path: string): boolean {
   return regex.test(path)
 }
 
+function isProjectPath(path: string): boolean {
+  const regex = /^\/projects/
+  return regex.test(path)
+}
+
+function isProjectStepCodePath(path: string): boolean {
+  const regex = /^\/step-codes/
+  return regex.test(path)
+}
+
+function isProjectPreCheckPath(path: string): boolean {
+  const regex = /^\/pre-checks/
+  return regex.test(path)
+}
+
 function isStepCodePath(path: string): boolean {
   const regex = /^(\/part-(3|9)-step-code|\/permit-applications\/[a-f\d-]+\/edit\/part-(3|9)-step-code).*$/
   return regex.test(path)
@@ -106,6 +120,9 @@ function shouldHideSubNavbarForPath(path: string): boolean {
     isApiMappingPath,
     isLoginPath,
     isProjectDetailPath,
+    isProjectStepCodePath,
+    isProjectPreCheckPath,
+    isProjectPath,
     isStepCodePath,
     isAdminPath,
     isPreCheckPath,
@@ -201,8 +218,6 @@ const NavBarContent = observer(function NavBarContent() {
               <Spacer />
             </Show>
             <HStack gap={3} w="full" justify="flex-end">
-              {!loggedIn && <HelpDrawer />}
-
               {(currentUser?.isReviewStaff || currentUser?.isTechnicalSupport) &&
                 !currentUser.isRegionalReviewManager && (
                   <Flex direction="column">

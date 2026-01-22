@@ -1,11 +1,27 @@
-import { Button, Checkbox, Menu, MenuButton, MenuItem, MenuList } from "@chakra-ui/react"
-import { Archive, ArrowSquareOut, CaretDown } from "@phosphor-icons/react"
+import {
+  Button,
+  Checkbox,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalHeader,
+  ModalOverlay,
+  VStack,
+  useDisclosure,
+} from "@chakra-ui/react"
+import { Archive, ArrowSquareOut, CaretDown, PencilSimple } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
 import { Controller, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { useMst } from "../../../../../setup/root"
+import { AsyncRadioGroup } from "../../../../shared/base/inputs/async-radio-group"
 import { ConfirmationModal } from "../../../../shared/confirmation-modal"
 import {
   BaseEditRequirementTemplateScreen,
@@ -59,6 +75,13 @@ const EditEarlyAccessRequirementOptions = ({ requirementTemplate }: IEditRequire
       </MenuButton>
 
       <MenuList pt={0}>
+        <EditClassificationsModal
+          renderTrigger={(props) => (
+            <MenuItem icon={<PencilSimple />} {...props}>
+              {t("ui.edit")} {t("siteConfiguration.permitClassifications.title")}
+            </MenuItem>
+          )}
+        />
         <ConfirmationModal
           title={t("earlyAccessRequirementTemplate.edit.confirmRemoveModalTitle")}
           body={t("earlyAccessRequirementTemplate.edit.confirmRemoveModalBody")}
@@ -81,6 +104,43 @@ const EditEarlyAccessRequirementOptions = ({ requirementTemplate }: IEditRequire
     </Menu>
   )
 }
+
+const EditClassificationsModal = observer(({ renderTrigger }: { renderTrigger: (props: any) => React.ReactNode }) => {
+  const { t } = useTranslation()
+  const {
+    permitClassificationStore: { fetchPermitTypeOptions, fetchActivityOptions },
+  } = useMst()
+  const { isOpen, onOpen, onClose } = useDisclosure()
+
+  return (
+    <>
+      {renderTrigger({ onClick: onOpen })}
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>{t("siteConfiguration.permitClassifications.title")}</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody pb={8}>
+            <VStack gap={4} align="stretch">
+              <AsyncRadioGroup
+                valueField="id"
+                label={t("requirementTemplate.fields.permitType")}
+                fetchOptions={fetchPermitTypeOptions}
+                fieldName={"permitTypeId"}
+              />
+              <AsyncRadioGroup
+                valueField="id"
+                label={t("requirementTemplate.fields.activity")}
+                fetchOptions={fetchActivityOptions}
+                fieldName={"activityId"}
+              />
+            </VStack>
+          </ModalBody>
+        </ModalContent>
+      </Modal>
+    </>
+  )
+})
 
 const EditEarlyAccessRequirementActions = ({ requirementTemplate, onSaveDraft }: IEditRequirementActionsProps) => {
   const { t } = useTranslation()

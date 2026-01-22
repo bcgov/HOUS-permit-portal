@@ -65,3 +65,5 @@ deleteme.*
 /cypress/screenshots/
 
 .npm/
+
+.cursor/

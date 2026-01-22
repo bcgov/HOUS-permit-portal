@@ -43,6 +43,7 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
 
   const { userStore } = useMst()
   const { currentUser, updateProfile } = userStore
+  const isManager = currentUser?.isManager
 
   const confirmationRequired =
     currentUser.unconfirmedEmail || (currentUser.isUnconfirmed && currentUser.confirmationSentAt)
@@ -110,6 +111,14 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
       emailControl: "preferenceAttributes.enableEmailUnmappedApiNotification",
     },
   ]
+
+  if (isManager) {
+    events.push({
+      event: t("user.notifications.resourceReminder"),
+      inAppControl: "preferenceAttributes.enableInAppResourceReminderNotification",
+      emailControl: "preferenceAttributes.enableEmailResourceReminderNotification",
+    })
+  }
 
   return (
     <Container maxW="container.sm" p={8} as="main">

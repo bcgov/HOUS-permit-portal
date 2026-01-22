@@ -6,6 +6,8 @@ import { EditableInputWithControls } from "../../shared/editable-input-with-cont
 export type TMultiplySumGridHeaders = {
   firstColumn?: string
   a?: string
+  quantity?: string
+  ab?: string
 }
 
 type THeaderControl = { value?: string; onChange?: (next: string) => void }
@@ -18,12 +20,18 @@ export function MultiplySumGridPreview({
   controls?: {
     firstColumn?: THeaderControl
     a?: THeaderControl
+    quantity?: THeaderControl
+    ab?: THeaderControl
   }
 }) {
   const { t } = useTranslation()
   const first = headers?.firstColumn || t("requirementsLibrary.multiplySumGrid.addHeaderPlaceholder")
   const aBase = headers?.a || t("requirementsLibrary.multiplySumGrid.addHeaderPlaceholder")
   const a = `${aBase} (A)`
+  const quantityBase = headers?.quantity || t("requirementsLibrary.multiplySumGrid.quantityB")
+  const quantity = `${quantityBase} (B)`
+  const abBase = headers?.ab || t("requirementsLibrary.multiplySumGrid.ab")
+  const ab = `${abBase} (A × B)`
   return (
     <Box bg={"white"} border={"1px solid"} borderColor={"border.light"} p={2}>
       <Box fontWeight={600} mb={1.5}>
@@ -56,8 +64,32 @@ export function MultiplySumGridPreview({
             a
           )}
         </Box>
-        <Box>{t("requirementsLibrary.multiplySumGrid.quantityB")}</Box>
-        <Box>{t("requirementsLibrary.multiplySumGrid.ab")}</Box>
+        <Box>
+          {controls?.quantity ? (
+            <EditableInputWithControls
+              value={(controls.quantity.value ?? quantityBase) as any}
+              onChange={(val: string) => controls.quantity?.onChange?.(val)}
+              onSubmit={(val: string) => controls.quantity?.onChange?.(val)}
+              initialHint={t("ui.clickToEdit")}
+              compact
+            />
+          ) : (
+            quantity
+          )}
+        </Box>
+        <Box>
+          {controls?.ab ? (
+            <EditableInputWithControls
+              value={(controls.ab.value ?? abBase) as any}
+              onChange={(val: string) => controls.ab?.onChange?.(val)}
+              onSubmit={(val: string) => controls.ab?.onChange?.(val)}
+              initialHint={t("ui.clickToEdit")}
+              compact
+            />
+          ) : (
+            ab
+          )}
+        </Box>
         <Box>...</Box>
         <Box>...</Box>
         <Box>...</Box>

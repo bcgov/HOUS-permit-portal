@@ -167,6 +167,10 @@ const options = {
           card2Body: "Consistent application forms, even when rules vary by community",
           card3Title: "Track progress and talk to reviewers",
           card3Body: "Stay up to date and respond to building officials directly, all in one place",
+          helpShapeTitle: "Help shape standard permit application materials",
+          helpShapeBody:
+            "We are collaborating with local governments and First Nations across BC to develop standard permit application materials. We invite you to review the forms, requirements, and guidance and share your feedback.",
+          reviewMaterials: "Review materials",
           underDevelopmentTitle: "Share your feedback on permit applications under development",
           underDevelopmentBody:
             "We’re co-developing standard permit classifications with local governments and First Nations across BC. These drafts are available for review and discussion as we continue this work together.",
@@ -180,7 +184,99 @@ const options = {
             "These checklists help you gather the right documents and prepare your application for small buildings that fall under Part 9 of the BC Building Code (up to 3 storeys, fewer than 600m²).",
           part9ChecklistsLink: "Part 9 checklists (PDF)",
         },
+        standardizationPreview: {
+          title: "Standard permit application materials",
+          subtitle: "Review and provide feedback on permit application materials under development",
+          previewDraftForm: "Preview",
+          about: {
+            title: "About this work",
+            description1:
+              "Building Permit Hub is working with BC communities to bring more clarity and consistency to building permit application materials.",
+            description2:
+              "We are developing shared forms and guidance that communities can choose to adopt. Feedback from local governments and First Nations helps shape these materials so they meet local needs. Published and draft versions are available for review.",
+          },
+          resources: {
+            title: "Creating shared, common permitting resources",
+            description:
+              "We’re working with local governments and First Nations to develop shared application materials for many permit types. This work includes creating common versions of the following materials.",
+            forms: {
+              title: "Application forms",
+              description: "A consistent structure with clear, plain-language questions.",
+            },
+            checklists: {
+              title: "Requirement checklists",
+              description: "Permit requirements written in a clear format, easy to read at a glance.",
+            },
+            drawing: {
+              title: "Drawing content",
+              description: "Guidance on how to prepare and organize design documents and drawings.",
+            },
+            terminology: {
+              title: "Terminology and definitions",
+              description:
+                "Shared language to create consistency for applicants working across multiple jurisdictions.",
+            },
+          },
+          voluntaryUse: {
+            title: "Voluntary use of standard permit application materials",
+            description1:
+              "Communities can choose to adopt the shared forms and are invited to provide feedback to help refine them. You may hear this work described as standardization. In this context, standardization refers only to the application materials, not to permitting processes. Local governments continue to use their own review methods and make their own decisions.",
+          },
+          benefits: {
+            title: "Benefits for applicants and local governments",
+            description:
+              "Clear, consistent application materials help applicants understand what to submit and support smoother reviews. Building Permit Hub’s catalogue of standard forms does not change local government processes and authority.",
+            applicants: {
+              title: "Applicants and industry",
+              list: [
+                "Clearer questions and requirements",
+                "Shorter application forms",
+                "More consistent expectations about what to submit",
+                "Clearer guidance on drawings and attachments",
+                "Less guesswork when preparing applications",
+              ],
+            },
+            localGovernments: {
+              title: "Local governments and First Nations",
+              list: [
+                "Clearer and more complete submissions",
+                "Shared terminology across forms and requirements",
+                "Submitted information presented in consistent formats",
+              ],
+            },
+          },
+          feedback: {
+            title: "Share your feedback and stay informed",
+            description:
+              "You can help shape the standard forms, checklists, and guidance in development by reviewing drafts and sending us your feedback.",
+            email: "Email feedback to: ",
+            emailAddress: "digital.codes.permits@gov.bc.ca",
+            demo: {
+              title: "Demo sessions and engagement opportunities",
+              description:
+                "The Building Permit Hub team hosts regular public demos where we share updates, walk through early designs, and invite discussion. These sessions help us understand how the materials work for applicants, industry, and communities across BC.",
+              link: "Sign up for the public demo mailing list",
+            },
+          },
+          explore: {
+            title: "Explore standard permit application forms",
+            description:
+              "You are invited to review and provide feedback on the draft forms, requirements, and guidance for the permit types currently available in Building Permit Hub.",
+            smallScale: {
+              title: "Small-scale projects only",
+              description:
+                "Building Permit Hub currently supports permits for small-scale projects. This includes residential buildings, small structures, trades permits, and site work.",
+            },
+          },
+          availableForAdoption: {
+            title: "Published permits available for adoption",
+          },
+          underDevelopment: {
+            title: "Permit application materials under development",
+          },
+        },
         ui: {
+          other: "Other",
           updatedAt: "Updated at",
           beta: "Beta",
           optional: "(optional)",
@@ -249,6 +345,8 @@ const options = {
           resume: "Resume",
           cancel: "Cancel",
           remove: "Remove",
+          removeRequirementBlock: "Remove requirement block",
+          removeRequirementBlockConfirm: "Are you sure you want to remove this requirement block?",
           save: "Save changes",
           onlySave: "Save",
           done: "Done",
@@ -1234,7 +1332,7 @@ Thank you,
               "Submissions for this local jurisdictions are currently disabled. You will be able to make edits to this permit application but will not be able to submit until this jurisdiction's is accepting submissions again and inboxes are enabled globally.",
             inboxDisabledTitleEarlyAccess: "Early Access – Submissions Not Yet Enabled",
             inboxDisabledEarlyAccess:
-              "This permit is available for early access to help your team get familiar with the application process. You can view and edit your application, but submission is currently disabled. Submissions will be enabled once this permit classification is officially launched in your jurisdiction.",
+              "This permit is available for early access to help your team become familiar with the application process. You can view the application in this preview, but submission is currently disabled. <p> You are viewing the baseline standardized form. Click 'View optional electives' within any section to explore additional questions that jurisdictions may configure based on local needs.</p><p><1>Go to My projects to submit a permit.</1></p>",
             downloadApplication: "Download application",
             fetchingMissingPdf: "Fetching {{missingPdf}}...",
             missingPdfLabels: {
@@ -1325,6 +1423,7 @@ Thank you,
           },
         },
         requirementsLibrary: {
+          hasDataValidation: "Has data validation",
           addAnother: "Add",
           addAnotherPerson: "Add another person",
           elective: "Elective",
@@ -1439,6 +1538,24 @@ Thank you,
               then: "Then...",
               show: "Show this field",
               hide: "Hide this field",
+            },
+            dataValidationSetup: {
+              valueMustBe: "Value must be:",
+              greaterOrEqual: "Greater or equal to",
+              lessOrEqual: "Less than or equal to",
+              before: "On or before",
+              after: "On or after",
+              minSelectedCount: "Must check at least",
+              maxSelectedCount: "Must check at most",
+              thisNumber: "this number",
+              thisDate: "this date",
+              thisAmount: "this amount",
+              limitAcceptedFileFormatsTo: "Limit accepted file formats to:",
+              customErrorMessage: "Custom error message (Optional)",
+              errorMessagePlaceholder: "Value must be greater than or equal to ...",
+              dateErrorMessagePlaceholder: "Value must be on or after ...",
+              selectionErrorMessagePlaceholder: "Must select at least ...",
+              fileTypeErrorMessagePlaceholder: "File type must be ...",
             },
             computedComplianceSetup: {
               module: "Module",
@@ -1563,8 +1680,8 @@ Thank you,
           unitLabels: {
             option: {
               noUnit: "(no unit)",
-              mm: "mm - millimeters",
-              cm: "cm - centimeters",
+              mm: "mm - millimetres",
+              cm: "cm - centimetres",
               m: "m - metres",
               in: "in - inches",
               ft: "ft - feet",
@@ -1575,8 +1692,8 @@ Thank you,
             },
             display: {
               noUnit: "(no unit)",
-              mm: "millimeters (mm)",
-              cm: "centimeters (cm)",
+              mm: "millimetres (mm)",
+              cm: "centimetres (cm)",
               m: "metres (m)",
               in: "inches (in)",
               ft: "feet (ft)",
@@ -3230,6 +3347,51 @@ Thank you,
           lookupStepCodeDescription:
             "Enter an address to find the the Energy and Zero Carbon Step Code requirements for your project",
           meetStepCodeLink: "Create a Step Codes compliance report for your project",
+          digitalSealValidator: {
+            title: "Check digital seals",
+            descriptionToolPage:
+              "Check that a document has a valid digital seal (signature) from an AIBC or EGBC member",
+            description:
+              "Use this service to check whether a document includes a digital seal (signature) from a member of:",
+            listItem1: "the Architectural Institute of British Columbia (AIBC)",
+            listItem2: "Engineers and Geoscientists British Columbia (EGBC)",
+            howItWorks: {
+              title: "How it works",
+              description:
+                "Upload a document to check whether a supported digital seal is present. If a digital seal is found, the service will show:",
+              listItem1: "the name of the person who applied the seal",
+              listItem2: "the date the document was sealed",
+              listItem3: "This service does not save your document or the result of the check.",
+            },
+            validateSeal: "Validate document",
+            cantFindYourSeal: "Can't find your document?",
+            noSignaturesFound: "No digital signatures found.",
+            browseListOfDocuments: "Browse list of documents",
+            fileRequirementsTitle: "File requirements",
+            checkAnotherDocument: "Check another document",
+            Validated: "Validated",
+            notValidated: "There was a problem checking the seal on {{fileName}}",
+            signedAt: "Signed at",
+            lastModified: "Last modified:",
+            digitalSignaturesDetected: "Digital seal Detected",
+            dragAndDrop: "Drag and drop files here, or",
+            requirement1: "PDF format only",
+            requirement2: "Upload one file at a time",
+            requirement3: "Maximum file size: 200 MB",
+            fileName: "File Name",
+            size: "Size",
+            browseDevice: "browse your device",
+            help: {
+              description:
+                "A digital seal is an electronic version of a professional seal used by licensed engineers, architects, and other certified professionals. ",
+              pass: "Pass/Verified:",
+              passDesc:
+                "The seal is valid, the signer’s identity is confirmed, and the document was not modified after it was sealed. Your document is safe to submit.",
+              fail: "Fail/Unable to verify:",
+              failDesc:
+                "The system could not confirm the seal. This may mean the seal is invalid, the document was altered, or the signature does not meet Notarius verification standards. Try another file or contact the signing professional.",
+            },
+          },
           meetStepCodeDescription:
             "Generate a report that details a project's compliance with BC's Energy Step Code and Zero Carbon Step Code requirements",
           preCheckDrawingsLink: "Pre-check your drawings for compliance with BC Building Code",
@@ -3460,6 +3622,7 @@ Thank you,
             collaboration: "Collaboration",
             integrationMapping: "API integration mapping",
             unmappedApiNotification: "Unmapped API Notification",
+            resourceReminder: "Resource reminder",
           },
           emailConfirmed: {
             heading: "Email confirmed!",
@@ -3500,7 +3663,6 @@ Thank you,
             invitationInfo:
               "Early access previews are non-submittable and accessible only by registered users who are invited. Access is granted for 60 days and can be extended or revoked at any time.",
             createButton: "Create new early access template",
-            seeArchivedButton: "See archived",
             sharePreviewLink: "Share ({{ n }})",
             sharePreviewTitle: "Share preview",
             inviteToPreviewTitle: "Invite to preview",
@@ -3550,6 +3712,8 @@ Thank you,
             updatedAt: "Updated at",
             assignee: "Assigned",
           },
+          viewOptionalElectives: "View optional electives",
+          noOptionalElectives: "No optional electives in this requirement block.",
         },
         requirementTemplate: {
           compareAction: 'Requirement "{{ requirementName }}" has been {{ action }}',
@@ -3646,7 +3810,6 @@ Thank you,
             description:
               "List of all permit templates in the system that's been created by the Super Admin. Only published templates will be visible to jurisdictions and submitters.",
             createButton: "Create new template",
-            seeArchivedButton: "See archived",
           },
           new: {
             title: "Create new template",
@@ -3787,12 +3950,12 @@ Thank you,
             enabled: "Enabled",
             category: "Category",
           },
-          landingPageSetup: {
-            title: "Landing page setup",
-            description: "Select the open access previews that will be displayed on the landing page.",
+          standardizationPageSetup: {
+            title: "Standardization preview page setup",
+            description: "Select the open access previews that will be displayed on the standardization preview page.",
             selectOpenAccessPreviews:
-              "Set open access previews to display on the front page. Select from the available public access previews below.",
-            smallScale: "Set as Small Scale New Contruction Preview on landing page",
+              "Set open access previews to display on the standardization preview page. Select from the available public access previews below.",
+            smallScale: "Set as Small Scale New Contruction Preview on standardization preview page",
             fourPlus: "Set as Four Plus New Construction Preview",
           },
           globalFeatureAccess: {
@@ -4030,6 +4193,10 @@ Thank you,
                 label: "For local governments",
                 description: "Information for local governments interested in joining Building Permit Hub",
               },
+              standardPermitApplicationMaterials: {
+                label: "Standard permit application materials",
+                description: "Review and provide feedback on permit application materials under development",
+              },
             },
           },
           govFeedbackResponseNoReasons: {
@@ -4210,8 +4377,11 @@ Thank you,
           privacyPolicyContactUsEmail: "Email:",
           privacyPolicyContactUsEmailAddress: "digital.codes.permits@gov.bc.ca",
           breadcrumb: {
+            standardizationSetup: "Standardization setup",
+            standardizationPreview: "Standardization preview",
             preCheck: "Pre-check",
             projects: "Projects",
+            checkDigitalSeals: "Check digital seals",
             codeCompliance: "Code compliance",
             permitClassifications: "Permit classifications",
             documents: "Documents",
@@ -4257,7 +4427,6 @@ Thank you,
             apiMappings: "API mappings",
             manageMapping: "Manage mapping",
             revisionReasonSetup: "Revision reason setup",
-            landingSetup: "Landing setup",
             acceptInvitation: "Accept invitation",
             eula: "End user license agreement",
             earlyAccess: "Early access",

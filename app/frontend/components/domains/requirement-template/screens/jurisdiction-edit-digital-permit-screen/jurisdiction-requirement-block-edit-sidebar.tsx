@@ -137,7 +137,7 @@ export const JurisdictionRequirementBlockEditSidebar = observer(function Jurisdi
       </Button>
       <Drawer isOpen={isOpen} placement="right" onClose={handleCancel} finalFocusRef={btnRef}>
         <DrawerOverlay />
-        <DrawerContent maxW="430px">
+        <DrawerContent maxW="430px" pt={"var(--app-navbar-height)"}>
           <DrawerCloseButton />
           <DrawerHeader mt={4} px={8} pb={0} borderColor={"border.light"}>
             <Text as="h2" fontWeight={700} fontSize={"2xl"}>

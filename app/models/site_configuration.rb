@@ -2,10 +2,11 @@ class SiteConfiguration < ApplicationRecord
   # Ensures that only one SiteConfiguration record can be created
   before_create :ensure_single_record
   validate :validate_help_link_items
-  validate :validate_landing_page_early_access_requirement_templates_are_public
+  validate :validate_standardization_page_early_access_requirement_templates_are_public
 
   has_many :revision_reasons
-  has_many :landing_page_early_access_requirement_templates,
+  has_many :standardization_page_early_access_requirement_templates,
+           -> { kept.where(public: true) },
            class_name: "EarlyAccessRequirementTemplate",
            foreign_key: "site_configuration_id"
 
@@ -147,11 +148,11 @@ class SiteConfiguration < ApplicationRecord
     end
   end
 
-  def validate_landing_page_early_access_requirement_templates_are_public
-    landing_page_early_access_requirement_templates.each do |template|
+  def validate_standardization_page_early_access_requirement_templates_are_public
+    standardization_page_early_access_requirement_templates.each do |template|
       unless template.public
         errors.add(
-          :landing_page_early_access_requirement_templates,
+          :standardization_page_early_access_requirement_templates,
           "must be public"
         )
       end

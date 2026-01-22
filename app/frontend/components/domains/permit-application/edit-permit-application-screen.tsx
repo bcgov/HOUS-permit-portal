@@ -25,6 +25,7 @@ import { useInterval } from "../../../hooks/use-interval"
 import { useMst } from "../../../setup/root"
 import { ICustomEventMap } from "../../../types/dom"
 import { ECollaborationType, ECustomEvents, ERequirementType } from "../../../types/enums"
+import { findPidComponentKey } from "../../../utils/formio-component-traversal"
 import { handleScrollToBottom } from "../../../utils/utility-functions"
 import { CopyableValue } from "../../shared/base/copyable-value"
 import { ErrorScreen } from "../../shared/base/error-screen"
@@ -35,7 +36,6 @@ import { BrowserSearchPrompt } from "../../shared/permit-applications/browser-se
 import { PermitApplicationStatusTag } from "../../shared/permit-applications/permit-application-status-tag"
 import { PermitApplicationSubmitModal } from "../../shared/permit-applications/permit-application-submit-modal"
 import { RequirementForm } from "../../shared/permit-applications/requirement-form"
-import SandboxHeader from "../../shared/sandbox/sandbox-header"
 import { ChecklistSideBar } from "./checklist-sidebar"
 import { BlockCollaboratorAssignmentManagement } from "./collaborator-management/block-collaborator-assignment-management"
 import { CollaboratorsSidebar } from "./collaborator-management/collaborators-sidebar"
@@ -167,7 +167,22 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
 
   const updateFormIoValues = (formio, frontEndFormUpdate) => {
     for (const [key, value] of Object.entries(frontEndFormUpdate)) {
-      const componentToSet = formio.getComponent(key)
+      let componentToSet = formio.getComponent(key)
+
+      if (key.endsWith("additional_pid_info")) {
+        if (componentToSet) {
+          const pidKey = findPidComponentKey(componentToSet.component)
+          if (pidKey) {
+            const dataValue = componentToSet.getValue()
+
+            if (!dataValue || dataValue.length === 0) {
+              componentToSet.addRow()
+            }
+            componentToSet = formio.getComponent(pidKey)
+          }
+        }
+      }
+
       if (!R.isNil(value)) {
         if (!R.isNil(componentToSet)) {
           componentSetValue(componentToSet, value)
@@ -422,9 +437,6 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
                 <Divider orientation="vertical" height="24px" mx={4} borderColor="greys.grey01" />
               </Flex>
             </Flex>
-          )}
-          {currentPermitApplication.sandbox && (
-            <SandboxHeader borderTopRadius={0} override sandbox={currentPermitApplication.sandbox} position="sticky" />
           )}
         </Flex>
       )}

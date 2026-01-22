@@ -486,6 +486,8 @@ function formFormDefaults(requirementTemplate?: IRequirementTemplate): IRequirem
     description: requirementTemplate.description,
     nickname: requirementTemplate.nickname,
     public: requirementTemplate.public,
+    permitTypeId: requirementTemplate.permitType?.id,
+    activityId: requirementTemplate.activity?.id,
     requirementTemplateSectionsAttributes,
   }
 }

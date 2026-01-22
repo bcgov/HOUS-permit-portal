@@ -95,7 +95,7 @@ Templates.current = {
                     return `
                       <div class="compliance-file-item">
                         <div class="compliance-file-name">• ${fileName}</div>
-                        <div class="compliance-file-message">No signature detected</div>
+                        <div class="compliance-file-message">${t("projectReadinessTools.digitalSealValidator.noSignaturesFound")}</div>
                       </div>
                     `
                   }
@@ -104,7 +104,7 @@ Templates.current = {
 
               computedComplianceHtml = `
                 <div class="compliance-digital-signatures">
-                  <div class="compliance-section-title"><i class="ph-fill ph-lightning-a"></i> Digital Signatures Detected:</div>
+                  <div class="compliance-section-title"><i class="ph-fill ph-lightning-a"></i>${t("projectReadinessTools.digitalSealValidator.digitalSignaturesDetected")}:</div>
                   ${fileItems}
                 </div>
               `

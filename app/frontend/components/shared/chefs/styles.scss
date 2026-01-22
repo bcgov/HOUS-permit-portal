@@ -384,7 +384,9 @@
 
   input[name$="[load]"],
   input[id*="totalLoad"],
-  input[name*="totalLoad"] {
+  input[name*="totalLoad"],
+  input[id*="totalQuantity"],
+  input[name*="totalQuantity"] {
     font-weight: 700;
     color: var(--chakra-colors-text-primary);
     text-align: right;
@@ -399,12 +401,12 @@
     }
   }
 
-  .formio-component-number[class*="totalLoad"] {
+  .formio-component-number[class*="totalLoad"],
+  .formio-component-number[class*="totalQuantity"] {
     display: flex;
     justify-content: flex-end;
     align-items: flex-end;
     gap: var(--chakra-space-1);
-    margin-top: var(--chakra-space-4);
     margin-left: auto;
     width: fit-content;
 

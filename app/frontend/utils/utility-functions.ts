@@ -5,7 +5,12 @@ import {
   VALUE_EXTRACTION_AUTO_COMPLIANCE_TYPES,
   vancouverTimeZone,
 } from "../constants"
-import { EArchitecturalDrawingDependencyRequirementCode, ERequirementType } from "../types/enums"
+import {
+  EArchitecturalDrawingDependencyRequirementCode,
+  EEnergyStepCodeDependencyRequirementCode,
+  EEnergyStepCodePart3DependencyRequirementCode,
+  ERequirementType,
+} from "../types/enums"
 import { TAutoComplianceModuleConfiguration, TDebouncedFunction } from "../types/types"
 
 export function isUUID(str) {
@@ -173,12 +178,35 @@ export function startBlobDownload(blobData: BlobPart, mimeType: string, fileName
 }
 
 export function isArchitecturalDrawingDependencyRequirementCode(
-  requirementCode?: string | null
+  requirementCode?: string | null,
+  inputType?: ERequirementType
 ): requirementCode is EArchitecturalDrawingDependencyRequirementCode {
+  if (inputType === ERequirementType.architecturalDrawing) return true
+
   if (!requirementCode) return false
 
   return Object.values(EArchitecturalDrawingDependencyRequirementCode).includes(
     requirementCode as EArchitecturalDrawingDependencyRequirementCode
+  )
+}
+
+export function isEnergyStepCodeDependencyRequirementCode(
+  requirementCode?: string | null,
+  inputType?: ERequirementType
+): requirementCode is EEnergyStepCodeDependencyRequirementCode | EEnergyStepCodePart3DependencyRequirementCode {
+  if (inputType === ERequirementType.energyStepCodePart9 || inputType === ERequirementType.energyStepCodePart3) {
+    return true
+  }
+
+  if (!requirementCode) return false
+
+  return (
+    Object.values(EEnergyStepCodeDependencyRequirementCode).includes(
+      requirementCode as EEnergyStepCodeDependencyRequirementCode
+    ) ||
+    Object.values(EEnergyStepCodePart3DependencyRequirementCode).includes(
+      requirementCode as EEnergyStepCodePart3DependencyRequirementCode
+    )
   )
 }
 

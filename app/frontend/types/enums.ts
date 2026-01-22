@@ -464,6 +464,7 @@ export enum ENotificationActionType {
   preCheckSubmitted = "pre_check_submitted",
   preCheckCompleted = "pre_check_completed",
   fileUploadFailed = "file_upload_failed",
+  resourceReminder = "resource_reminder",
 }
 
 export enum ECollaboratorableType {
@@ -781,4 +782,14 @@ export enum EFileScanStatus {
   pending = "pending",
   clean = "clean",
   infected = "infected",
+}
+
+export enum EDataValidationOperation {
+  min = "min",
+  max = "max",
+  before = "before",
+  after = "after",
+  minSelectedCount = "min_selected_count",
+  maxSelectedCount = "max_selected_count",
+  allowedFileTypes = "allowed_file_types",
 }

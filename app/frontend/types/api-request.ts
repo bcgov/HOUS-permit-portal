@@ -1,5 +1,5 @@
 import { IRevisionReason } from "../models/revision-reason"
-import { ENumberUnit, ERequirementType, ETagType, EVisibility } from "./enums"
+import { EDataValidationOperation, ENumberUnit, ERequirementType, ETagType, EVisibility } from "./enums"
 import {
   IHelpLinkItems,
   IOption,
@@ -26,6 +26,12 @@ export interface IFormConditional {
   then: string
 }
 
+export interface IDataValidation {
+  operation: EDataValidationOperation
+  value: string
+  errorMessage?: string
+}
+
 export interface IRequirementAttributes {
   id?: string
   label?: string
@@ -43,6 +49,7 @@ export interface IRequirementAttributes {
     energyStepCode?: string
     computedCompliance?: TComputedCompliance
     multiple?: boolean
+    dataValidation?: IDataValidation
   }
   position?: number
 }
@@ -98,6 +105,8 @@ export interface IRequirementTemplateUpdateParams {
   nickname?: string | null
   public?: boolean | null
   assigneeId?: string | null
+  permitTypeId?: string | null
+  activityId?: string | null
   requirementTemplateSectionsAttributes?: IRequirementTemplateSectionAttributes[]
 }
 
@@ -114,7 +123,7 @@ export interface ISiteConfigurationUpdateParams {
   sitewideMessage?: string | null
   helpLinkItems?: IHelpLinkItems
   revisionReasonsMap?: { [key: string]: IRevisionReason }
-  landingPageEarlyAccessRequirementTemplateIds?: string[] | null
+  standardizationPageEarlyAccessRequirementTemplateIds?: string[] | null
   revisionReasonsAttributes?: IRevisionReasonsAttributes[]
 }
 

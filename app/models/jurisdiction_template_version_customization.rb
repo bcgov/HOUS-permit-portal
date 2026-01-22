@@ -14,8 +14,7 @@ class JurisdictionTemplateVersionCustomization < ApplicationRecord
   # enabled
   belongs_to :sandbox, optional: true
   belongs_to :jurisdiction
-  belongs_to :template_version,
-             counter_cache: :jurisdiction_template_version_customizations_count
+  belongs_to :template_version
 
   before_save :sanitize_tip
   # Ensure that there is no two customizations with the same sandbox, jurisdiction, and template_version
@@ -55,6 +54,7 @@ class JurisdictionTemplateVersionCustomization < ApplicationRecord
         "#{I18n.t("notification.template_version.new_customization_notification", jurisdiction_name: jurisdiction.qualified_name, template_label: template_version.label)}",
       "object_data" => {
         "template_version_id" => template_version.id,
+        "requirement_template_id" => template_version.requirement_template_id,
         "customizations" => customizations
       }
     }
@@ -122,11 +122,32 @@ class JurisdictionTemplateVersionCustomization < ApplicationRecord
 
   private
 
+  after_commit :update_template_version_unique_customizations_count,
+               on: %i[create destroy]
+
+  private
+
+  def update_template_version_unique_customizations_count
+    return unless template_version
+
+    unique_count =
+      template_version
+        .jurisdiction_template_version_customizations
+        .live
+        .distinct
+        .count(:jurisdiction_id)
+    template_version.update_columns(
+      jurisdiction_template_version_customizations_count: unique_count
+    )
+    template_version.requirement_template&.reindex
+  end
+
   def reindex_jurisdiction_templates_used_size
     return unless jurisdiction.present?
     return unless new_record? || destroyed? || saved_change_to_jurisdiction_id?
 
     jurisdiction.reindex
+    template_version&.requirement_template&.reindex
   end
 
   def sanitize_tip
