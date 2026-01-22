@@ -54,7 +54,7 @@ export const ProjectReadinessToolsIndexScreen = () => {
       ],
     },
   ]
-  console.log("projectReadinessPageItems===========>", projectReadinessPageItems)
+  console.log("project Readiness Page Items===========>", projectReadinessPageItems)
   return (
     <Container maxW="container.lg" pb="36" px="8">
       <Heading as="h1" mt="16" color="text.primary">
