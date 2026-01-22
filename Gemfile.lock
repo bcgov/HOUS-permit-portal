@@ -729,6 +729,7 @@ DEPENDENCIES
   syntax_tree-rbs (~> 1.0)
   timecop (~> 0.9.8)
   tzinfo-data
+  uri (>= 1.0.4)
   vcr (~> 6.2)
   vite_rails (= 3.0.17)
   web-console
