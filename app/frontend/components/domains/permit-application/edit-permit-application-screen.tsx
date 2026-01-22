@@ -36,7 +36,6 @@ import { BrowserSearchPrompt } from "../../shared/permit-applications/browser-se
 import { PermitApplicationStatusTag } from "../../shared/permit-applications/permit-application-status-tag"
 import { PermitApplicationSubmitModal } from "../../shared/permit-applications/permit-application-submit-modal"
 import { RequirementForm } from "../../shared/permit-applications/requirement-form"
-import SandboxHeader from "../../shared/sandbox/sandbox-header"
 import { ChecklistSideBar } from "./checklist-sidebar"
 import { BlockCollaboratorAssignmentManagement } from "./collaborator-management/block-collaborator-assignment-management"
 import { CollaboratorsSidebar } from "./collaborator-management/collaborators-sidebar"
@@ -438,9 +437,6 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
                 <Divider orientation="vertical" height="24px" mx={4} borderColor="greys.grey01" />
               </Flex>
             </Flex>
-          )}
-          {currentPermitApplication.sandbox && (
-            <SandboxHeader borderTopRadius={0} override sandbox={currentPermitApplication.sandbox} position="sticky" />
           )}
         </Flex>
       )}
