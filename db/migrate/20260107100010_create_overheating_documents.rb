@@ -9,6 +9,7 @@ class CreateOverheatingDocuments < ActiveRecord::Migration[7.0]
     end
 
     add_index :overheating_documents, :pdf_form_id
+    add_index :overheating_documents, :scan_status
     add_foreign_key :overheating_documents, :pdf_forms
   end
 end
