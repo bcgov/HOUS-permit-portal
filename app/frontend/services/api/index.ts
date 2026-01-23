@@ -7,6 +7,7 @@ import { IExternalApiKey } from "../../models/external-api-key"
 import { IIntegrationMapping } from "../../models/integration-mapping"
 import { IJurisdiction } from "../../models/jurisdiction"
 import { IJurisdictionTemplateVersionCustomization } from "../../models/jurisdiction-template-version-customization"
+import { IOverheatingTool } from "../../models/overheating-tool"
 import { IPart3StepCode } from "../../models/part-3-step-code"
 import { IPart3StepCodeChecklist } from "../../models/part-3-step-code-checklist"
 import { IPart9StepCode } from "../../models/part-9-step-code"
@@ -48,6 +49,7 @@ import {
   ECollaboratorType,
   EEarlyAccessRequirementTemplateSortFields,
   EJurisdictionSortFields,
+  EOverheatingToolSortFields,
   EPermitApplicationSortFields,
   EPermitBlockStatus,
   EPermitClassificationType,
@@ -65,6 +67,8 @@ import {
   ICopyRequirementTemplateFormData,
   IJurisdictionFilters,
   IJurisdictionSearchFilters,
+  IOverheatingDocument,
+  IOverheatingToolJson,
   IPart9ChecklistSelectOptions,
   IPermitApplicationSearchFilters,
   IPermitProjectSearchFilters,
@@ -946,5 +950,35 @@ export class Api {
     return this.client.post<ApiResponse<{ message: string }>>(
       `/report_documents/${reportDocumentId}/share_with_jurisdiction`
     )
+  }
+
+  async createOverheatingTool(formData: {
+    formJson: IOverheatingToolJson
+    formType: string
+    overheatingDocumentsAttributes?: Partial<IOverheatingDocument>[]
+  }) {
+    return this.client.post<IApiResponse<IOverheatingTool, {}>>("/overheating", {
+      overheatingTool: {
+        formJson: formData.formJson,
+        formType: formData.formType,
+        overheatingDocumentsAttributes: formData.overheatingDocumentsAttributes,
+      },
+    })
+  }
+
+  async getOverheatingTools(params?: TSearchParams<EOverheatingToolSortFields>) {
+    return this.client.get<IApiResponse<IOverheatingTool[], IPageMeta>>("/overheating", params)
+  }
+
+  async fetchOverheatingTool(id: string) {
+    return this.client.get<IApiResponse<IOverheatingTool, {}>>(`/overheating/${id}`)
+  }
+
+  async generatePdf(id: string) {
+    return this.client.post<IApiResponse<IOverheatingTool, {}>>(`/overheating/${id}/generate_pdf`)
+  }
+
+  async archiveOverheatingTool(id: string) {
+    return this.client.post<IApiResponse<IOverheatingTool, {}>>(`/overheating/${id}/archive`)
   }
 }
