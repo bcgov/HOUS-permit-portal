@@ -8,7 +8,7 @@ import { useNavigate, useSearchParams } from "react-router-dom"
 import { IUser } from "../../../models/user"
 import { useMst } from "../../../setup/root"
 import { EUserRoles } from "../../../types/enums"
-import { BceidLoginForm, IdirLoginForm } from "../../shared/auth/login-forms"
+import { BceidLoginForm, BcscLoginForm, IdirLoginForm } from "../../shared/auth/login-forms"
 import { LoadingScreen } from "../../shared/base/loading-screen"
 import { CenterContainer } from "../../shared/containers/center-container"
 import { HelpDrawer } from "../../shared/help-drawer"
@@ -101,6 +101,7 @@ const Content = observer(function Content({ invitedUser }: Readonly<IProps>) {
             ) : (
               <GridItem>
                 <Flex direction="column" gap={6}>
+                  {role === "submitter" && <BcscLoginForm />}
                   <BceidLoginForm />
                 </Flex>
               </GridItem>
