@@ -3,16 +3,23 @@ require "rails_helper"
 RSpec.describe UserDataCleanupJob, type: :job do
   include ActiveSupport::Testing::TimeHelpers
 
+  # This job handles the entire lifecycle of user data retention:
+  # 1. Warns active users before they are archived (discarded).
+  # 2. Archives (discards) users who have been inactive for too long.
+  # 3. Warns discarded users before they are permanently deleted.
+  # 4. Permanently deletes users who have been discarded for too long.
   describe "#perform" do
     include ActiveJob::TestHelper
 
+    # Setup time and configuration constants for testing
     let(:now) { Time.current }
-    let(:archive_after) { 1095 }
-    let(:delete_after) { 1095 }
-    let(:archive_warn_days) { [30, 7] }
-    let(:delete_warn_days) { [30, 7] }
+    let(:archive_after) { 1095 } # 3 years
+    let(:delete_after) { 1095 } # 3 years after discard (total 6 years)
+    let(:archive_warn_days) { [30, 7] } # Warn 30 and 7 days before archiving
+    let(:delete_warn_days) { [30, 7] } # Warn 30 and 7 days before deleting
 
     before do
+      # Spy on the mailer to verify emails are sent
       allow(PermitHubMailer).to receive(
         :notify_user_archive_warning
       ).and_call_original
@@ -20,6 +27,7 @@ RSpec.describe UserDataCleanupJob, type: :job do
         :notify_user_delete_warning
       ).and_call_original
 
+      # Mock ENV variables to use our test values instead of real config
       allow(ENV).to receive(:fetch).and_call_original
       allow(ENV).to receive(:fetch).with(
         "USER_ARCHIVE_AFTER_DAYS",
@@ -38,13 +46,19 @@ RSpec.describe UserDataCleanupJob, type: :job do
       )
     end
 
+    # ==========================================
+    # PHASE 1: Archiving (Soft Delete) Logic
+    # ==========================================
     context "archiving users" do
+      # User who signed in recently -> Should be safe
       let!(:active_user) do
         create(:user, last_sign_in_at: now - (archive_after - 1).days)
       end
+      # User inactive for > 3 years -> Should be archived
       let!(:user_to_archive) do
         create(:user, last_sign_in_at: now - (archive_after + 1).days)
       end
+      # User already archived -> Should be ignored by this step
       let!(:already_discarded_user) do
         create(
           :user,
@@ -70,7 +84,11 @@ RSpec.describe UserDataCleanupJob, type: :job do
       end
     end
 
+    # ==========================================
+    # PHASE 2: Archive Warnings
+    # ==========================================
     context "sending archive warnings" do
+      # User approaching the 30-day warning threshold
       let!(:user_warn_30) do
         create(
           :user,
@@ -78,6 +96,7 @@ RSpec.describe UserDataCleanupJob, type: :job do
           discarded_at: nil
         )
       end
+      # User approaching the 7-day warning threshold
       let!(:user_warn_7) do
         create(
           :user,
@@ -85,6 +104,7 @@ RSpec.describe UserDataCleanupJob, type: :job do
           discarded_at: nil
         )
       end
+      # User in between warnings -> Should receive nothing
       let!(:user_no_warn) do
         create(
           :user,
@@ -118,20 +138,27 @@ RSpec.describe UserDataCleanupJob, type: :job do
       end
     end
 
+    # ==========================================
+    # PHASE 3: Permanent Deletion Logic
+    # ==========================================
     context "deleting discarded users" do
+      # User discarded recently -> Should be safe
       let!(:recently_discarded_user) do
         create(:user, :discarded, discarded_at: now - (delete_after - 1).days)
       end
+      # User discarded > 3 years ago -> Should be deleted
       let!(:user_to_delete) do
         create(:user, :discarded, discarded_at: now - (delete_after + 1).days)
       end
 
-      # Setup public record data
+      # Setup public record data (e.g. Submitted Permit)
+      # This should be PRESERVED (orphaned) when user is deleted
       let!(:permit_application) do
         create(:permit_application, :newly_submitted, submitter: user_to_delete)
       end
 
-      # Setup non-public record data (draft)
+      # Setup non-public record data (e.g. Draft Permit)
+      # This should be DELETED when user is deleted
       let!(:draft_application) do
         create(
           :permit_application,
@@ -159,7 +186,9 @@ RSpec.describe UserDataCleanupJob, type: :job do
         travel_to(now) { subject.perform }
 
         permit_application.reload
+        # Verify the link to the user is gone
         expect(permit_application.submitter_id).to be_nil
+        # Verify snapshots were taken
         expect(permit_application.omniauth_username_snapshot).to be_present
         expect(permit_application.first_name_snapshot).to be_present
         expect(permit_application.orphaned_at).to be_present
@@ -177,6 +206,7 @@ RSpec.describe UserDataCleanupJob, type: :job do
 
         travel_to(now) { subject.perform }
 
+        # Draft should be gone because it belongs_to user (dependent: :destroy)
         expect { draft_application.reload }.to raise_error(
           ActiveRecord::RecordNotFound
         )
@@ -199,7 +229,11 @@ RSpec.describe UserDataCleanupJob, type: :job do
       end
     end
 
+    # ==========================================
+    # PHASE 4: Delete Warnings
+    # ==========================================
     context "sending delete warnings" do
+      # Discarded user approaching the 30-day deletion threshold
       let!(:user_warn_30) do
         create(
           :user,
@@ -208,6 +242,7 @@ RSpec.describe UserDataCleanupJob, type: :job do
           last_sign_in_at: 5.years.ago
         )
       end
+      # Discarded user approaching the 7-day deletion threshold
       let!(:user_warn_7) do
         create(
           :user,
