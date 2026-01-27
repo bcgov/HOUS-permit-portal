@@ -52,7 +52,7 @@ class SiteConfiguration < ApplicationRecord
   # This override allows discarding of reasons and updating them by reason_code
   # if a discarded reason of a particular code is found and updated, it will be undiscarded.
   def revision_reasons_attributes=(attributes)
-    attributes.each do |_, attribute|
+    attributes.each do |attribute|
       next unless attribute["id"].blank? && attribute["reason_code"].present?
 
       existing_reason =

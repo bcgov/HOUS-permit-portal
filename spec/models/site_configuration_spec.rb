@@ -92,13 +92,11 @@ RSpec.describe SiteConfiguration, type: :model do
       expect(reason.discarded_at).to be_present
 
       config.update!(
-        revision_reasons_attributes: {
-          "0" => {
-            "id" => nil,
-            "reason_code" => "same_code",
-            "description" => "New"
-          }
-        }
+        revision_reasons_attributes: [
+          "id" => nil,
+          "reason_code" => "same_code",
+          "description" => "New"
+        ]
       )
 
       reason.reload
