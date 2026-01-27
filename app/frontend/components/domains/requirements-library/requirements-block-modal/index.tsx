@@ -2,12 +2,9 @@ import {
   Button,
   ButtonProps,
   HStack,
-  Modal,
   ModalBody,
   ModalCloseButton,
-  ModalContent,
   ModalHeader,
-  ModalOverlay,
   Tag,
   Text,
   useDisclosure,
@@ -16,7 +13,7 @@ import { Archive } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React, { useEffect } from "react"
-import { FormProvider, useForm } from "react-hook-form"
+import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useAutoComplianceModuleConfigurations } from "../../../../hooks/resources/use-auto-compliance-module-configurations"
 import { IRequirementBlock } from "../../../../models/requirement-block"
@@ -32,6 +29,7 @@ import { IDenormalizedRequirementBlock, TAutoComplianceModuleConfigurations } fr
 import { AUTO_COMPLIANCE_OPTIONS_MAP_KEY_PREFIX } from "../../../../utils"
 import { isOptionsMapperModuleConfiguration } from "../../../../utils/utility-functions"
 import { CalloutBanner } from "../../../shared/base/callout-banner"
+import { FormModal } from "../../../shared/form-modal"
 import { BlockSetup } from "./block-setup"
 import { FieldsSetup } from "./fields-setup"
 
@@ -171,12 +169,6 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
     }
   }
 
-  const handleClose = () => {
-    //  reset the entire form state
-    reset(getDefaultValues())
-    onClose()
-  }
-
   useEffect(() => {
     if (isOpen) {
       reset(getDefaultValues())
@@ -201,87 +193,80 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
 
       {/*this is so that the modal children unmount on close to reset their states*/}
       {isOpen && (
-        <Modal onClose={handleClose} isOpen>
-          <ModalOverlay />
-          <FormProvider {...formProps}>
-            <ModalContent
-              as={"form"}
-              w={"min(1170px, 95%)"}
-              maxW={"full"}
-              py={9}
-              pb={12}
-              onClick={(e) => e.stopPropagation()}
+        <FormModal
+          onClose={onClose}
+          isOpen
+          formProps={formProps}
+          confirmCloseTitle={t("requirementsLibrary.modals.unsavedChanges.title")}
+          confirmCloseBody={t("requirementsLibrary.modals.unsavedChanges.body")}
+          confirmCloseButtonText={t("requirementsLibrary.modals.unsavedChanges.discard")}
+        >
+          <ModalCloseButton fontSize={"11px"} />
+          {(requirementBlock as IRequirementBlock)?.isDiscarded && (
+            <Tag
+              borderRadius="sm"
+              border="1px solid"
+              borderColor={"semantic.error"}
+              backgroundColor={"semantic.errorLight"}
+              w={"fit-content"}
+              py={1}
+              px={2}
+              color={"semantic.error"}
+              ml={"2.75rem"}
+              mb={2}
             >
-              <ModalCloseButton fontSize={"11px"} />
-              {(requirementBlock as IRequirementBlock)?.isDiscarded && (
-                <Tag
-                  borderRadius="sm"
-                  border="1px solid"
-                  borderColor={"semantic.error"}
-                  backgroundColor={"semantic.errorLight"}
-                  w={"fit-content"}
-                  py={1}
-                  px={2}
-                  color={"semantic.error"}
-                  ml={"2.75rem"}
-                  mb={2}
-                >
-                  <HStack>
-                    <Archive />
-                    <Text textTransform={"capitalize"} fontSize={"sm"}>
-                      {t("requirementsLibrary.modals.archived")}
-                    </Text>
-                  </HStack>
-                </Tag>
-              )}
-              <ModalHeader display={"flex"} justifyContent={"space-between"} p={0} px={"2.75rem"}>
-                <Text as={"h2"} fontSize={"2xl"}>
-                  {t(`requirementsLibrary.modals.${requirementBlock ? "edit" : "create"}.title`)}
+              <HStack>
+                <Archive />
+                <Text textTransform={"capitalize"} fontSize={"sm"}>
+                  {t("requirementsLibrary.modals.archived")}
                 </Text>
-                <HStack>
-                  <Button
-                    variant={"primary"}
-                    isLoading={isSubmitting}
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      handleSubmit(onSubmit)()
-                    }}
-                  >
-                    {t("ui.onlySave")}
-                  </Button>
-                  <Button variant={"secondary"} onClick={handleClose} isDisabled={isSubmitting}>
-                    {t("ui.cancel")}
-                  </Button>
-                </HStack>
-              </ModalHeader>
-              <ModalBody px={"2.75rem"}>
-                {showEditWarning && (
-                  <CalloutBanner
-                    type={"warning"}
-                    title={
-                      isEditingEarlyAccess
-                        ? t("requirementsLibrary.modals.previewEditWarning")
-                        : t("requirementsLibrary.modals.templateEditWarning")
-                    }
-                  />
-                )}
-                <HStack spacing={9} w={"full"} h={"full"} alignItems={"flex-start"}>
-                  <BlockSetup
-                    forEarlyAccess={forEarlyAccess}
-                    requirementBlock={
-                      (requirementBlock as IRequirementBlock)?.restore
-                        ? (requirementBlock as IRequirementBlock)
-                        : undefined
-                    }
-                    withOptionsMenu={withOptionsMenu}
-                  />
+              </HStack>
+            </Tag>
+          )}
+          <ModalHeader display={"flex"} justifyContent={"space-between"} p={0} px={"2.75rem"}>
+            <Text as={"h2"} fontSize={"2xl"}>
+              {t(`requirementsLibrary.modals.${requirementBlock ? "edit" : "create"}.title`)}
+            </Text>
+            <HStack>
+              <Button
+                variant={"primary"}
+                isLoading={isSubmitting}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleSubmit(onSubmit)()
+                }}
+              >
+                {t("ui.onlySave")}
+              </Button>
+              <Button variant={"secondary"} onClick={onClose} isDisabled={isSubmitting}>
+                {t("ui.cancel")}
+              </Button>
+            </HStack>
+          </ModalHeader>
+          <ModalBody px={"2.75rem"}>
+            {showEditWarning && (
+              <CalloutBanner
+                type={"warning"}
+                title={
+                  isEditingEarlyAccess
+                    ? t("requirementsLibrary.modals.previewEditWarning")
+                    : t("requirementsLibrary.modals.templateEditWarning")
+                }
+              />
+            )}
+            <HStack spacing={9} w={"full"} h={"full"} alignItems={"flex-start"}>
+              <BlockSetup
+                forEarlyAccess={forEarlyAccess}
+                requirementBlock={
+                  (requirementBlock as IRequirementBlock)?.restore ? (requirementBlock as IRequirementBlock) : undefined
+                }
+                withOptionsMenu={withOptionsMenu}
+              />
 
-                  <FieldsSetup requirementBlock={requirementBlock} isEditable={isEditable} />
-                </HStack>
-              </ModalBody>
-            </ModalContent>
-          </FormProvider>
-        </Modal>
+              <FieldsSetup requirementBlock={requirementBlock} isEditable={isEditable} />
+            </HStack>
+          </ModalBody>
+        </FormModal>
       )}
     </>
   )

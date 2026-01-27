@@ -101,6 +101,7 @@ export const EditableBuilderHeader = observer(function EditableBuilderHeader({ r
           onCancel={onDescriptionChange}
         />
       )}
+      forEdit
     />
   )
 })
