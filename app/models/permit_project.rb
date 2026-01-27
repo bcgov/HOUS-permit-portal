@@ -1,8 +1,10 @@
 class PermitProject < ApplicationRecord
   include Discard::Model
+  include PublicRecordable
   searchkick word_middle: %i[title full_address pid pin number] # Search configuration for PermitProject
 
-  belongs_to :owner, class_name: "User"
+  belongs_to :owner, class_name: "User", optional: true
+  public_recordable user_association: :owner
   belongs_to :jurisdiction, optional: false # Direct association to Jurisdiction
 
   has_many :permit_applications
@@ -36,6 +38,10 @@ class PermitProject < ApplicationRecord
               "(SELECT COUNT(*) FROM permit_applications pa WHERE pa.permit_project_id = permit_projects.id AND pa.status = 5 AND pa.discarded_at IS NULL) AS approved_count"
           )
         end
+
+  def public_record?
+    permit_applications.any?(&:public_record?)
+  end
 
   def total_permits_count
     self[:total_permits_count] || permit_applications.kept.count

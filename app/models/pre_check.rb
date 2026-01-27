@@ -1,6 +1,7 @@
 class PreCheck < ApplicationRecord
   include ProjectItem
   include AASM
+  include PublicRecordable
   has_parent :permit_application
 
   searchkick word_middle: %i[full_address external_id]
@@ -36,7 +37,11 @@ class PreCheck < ApplicationRecord
     end
   end
 
-  belongs_to :creator, class_name: "User", foreign_key: "creator_id"
+  belongs_to :creator,
+             class_name: "User",
+             foreign_key: "creator_id",
+             optional: true
+  public_recordable user_association: :creator
   belongs_to :permit_application, optional: true
   has_one :permit_project, through: :permit_application
   has_many :design_documents, dependent: :destroy, inverse_of: :pre_check
@@ -315,5 +320,9 @@ class PreCheck < ApplicationRecord
     return if complete?
 
     errors.add(:assessment_result, "can only be set when status is complete")
+  end
+
+  def public_record?
+    true
   end
 end

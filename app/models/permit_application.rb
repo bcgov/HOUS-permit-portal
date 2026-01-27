@@ -6,6 +6,7 @@ class PermitApplication < ApplicationRecord
   include PermitApplicationStatus
   include ProjectItem
   include Discard::Model
+  include PublicRecordable
   has_parent :permit_project
 
   SEARCH_INCLUDES = [
@@ -27,7 +28,8 @@ class PermitApplication < ApplicationRecord
              ],
              text_end: %i[number]
 
-  belongs_to :submitter, class_name: "User"
+  belongs_to :submitter, class_name: "User", optional: true
+  public_recordable user_association: :submitter
   belongs_to :permit_type
   belongs_to :activity
   belongs_to :template_version
@@ -90,6 +92,10 @@ class PermitApplication < ApplicationRecord
         end
 
   COMPLETION_SECTION_KEY = "section-completion-key"
+
+  def public_record?
+    !draft?
+  end
 
   def inbox_enabled?
     jurisdiction&.inbox_enabled? && SiteConfiguration.inbox_enabled?
