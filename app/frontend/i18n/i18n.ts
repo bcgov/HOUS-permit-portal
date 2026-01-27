@@ -3723,7 +3723,7 @@ Thank you,
             updatedAt: "Updated at",
             assignee: "Assigned",
           },
-          viewOptionalElectives: "View optional electives",
+          viewOptionalElectives: "View electives",
           noOptionalElectives: "No optional electives in this requirement block.",
         },
         requirementTemplate: {

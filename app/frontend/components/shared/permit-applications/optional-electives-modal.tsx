@@ -41,7 +41,7 @@ export const OptionalElectivesModal = ({ isOpen, onClose, data }: IOptionalElect
       <ModalContent>
         <ModalHeader>{data?.blockTitle || "Optional electives"}</ModalHeader>
         <ModalCloseButton />
-        <ModalBody pb={6}>
+        <ModalBody pb={6} overflowY="auto" maxH="50vh">
           {electives.length ? (
             <UnorderedList spacing={4}>
               {electives.map((elective) => (
