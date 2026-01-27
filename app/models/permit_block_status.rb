@@ -119,11 +119,27 @@ class PermitBlockStatus < ApplicationRecord
     users_to_notify_status_ready.each do |user|
       next unless user.preference&.enable_email_collaboration_notification
 
-      PermitHubMailer.notify_block_status_ready(
-        permit_block_status: self,
-        user:,
-        status_set_by: set_by_user
-      )&.deliver_later
+      debounce_window_seconds =
+        (Rails.env.development? ? 10.seconds : 5.minutes).to_i
+      lock_key =
+        "permit_block_status_ready_summary:" \
+          "#{permit_application_id}:#{collaboration_type}:#{user.id}"
+      Rails.logger.info(
+        "[PermitBlockStatus] Scheduling debounced email job with lock_key: #{lock_key}"
+      )
+      DebouncedNotificationEmailJob.perform_in(
+        debounce_window_seconds.seconds,
+        lock_key,
+        debounce_window_seconds,
+        "NotificationAggregators::PermitBlockReadySummary",
+        {
+          "permit_application_id" => permit_application_id,
+          "collaboration_type" => collaboration_type,
+          "user_id" => user.id
+        },
+        "PermitHubMailer",
+        "notify_block_status_ready_summary"
+      )
     end
   end
 
