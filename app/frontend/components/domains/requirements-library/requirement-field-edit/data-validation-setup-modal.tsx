@@ -215,7 +215,95 @@ interface IValidationConfig {
   operations: { value: string; label: string }[] | null
   valueLabel: string
   errorMessagePlaceholder: string
-  renderInput: (props: { onChange: (val: any) => void; value: any }) => JSX.Element
+}
+
+const useValidationConfig = (requirementType: ERequirementType | undefined): IValidationConfig => {
+  const { t } = useTranslation()
+
+  return useMemo<IValidationConfig>(() => {
+    const configs: any = {
+      [ERequirementType.number]: {
+        defaultOperation: "min",
+        operations: [
+          {
+            value: "min",
+            label: t("requirementsLibrary.modals.dataValidationSetup.greaterOrEqual"),
+          },
+          {
+            value: "max",
+            label: t("requirementsLibrary.modals.dataValidationSetup.lessOrEqual"),
+          },
+        ],
+        valueLabel: t("requirementsLibrary.modals.dataValidationSetup.thisNumber"),
+        errorMessagePlaceholder: t("requirementsLibrary.modals.dataValidationSetup.errorMessagePlaceholder"),
+      },
+      [ERequirementType.date]: {
+        defaultOperation: "after",
+        operations: [
+          {
+            value: "after",
+            label: t("requirementsLibrary.modals.dataValidationSetup.after"),
+          },
+          {
+            value: "before",
+            label: t("requirementsLibrary.modals.dataValidationSetup.before"),
+          },
+        ],
+        valueLabel: t("requirementsLibrary.modals.dataValidationSetup.thisDate"),
+        errorMessagePlaceholder: t("requirementsLibrary.modals.dataValidationSetup.dateErrorMessagePlaceholder"),
+      },
+      [ERequirementType.multiOptionSelect]: {
+        defaultOperation: "min_selected_count",
+        operations: [
+          {
+            value: "min_selected_count",
+            label: t("requirementsLibrary.modals.dataValidationSetup.minSelectedCount"),
+          },
+          {
+            value: "max_selected_count",
+            label: t("requirementsLibrary.modals.dataValidationSetup.maxSelectedCount"),
+          },
+        ],
+        valueLabel: t("requirementsLibrary.modals.dataValidationSetup.thisAmount"),
+        errorMessagePlaceholder: t("requirementsLibrary.modals.dataValidationSetup.selectionErrorMessagePlaceholder"),
+      },
+      [ERequirementType.file]: {
+        defaultOperation: "allowed_file_types",
+        operations: null,
+        valueLabel: t("requirementsLibrary.modals.dataValidationSetup.limitAcceptedFileFormatsTo"),
+        errorMessagePlaceholder: t("requirementsLibrary.modals.dataValidationSetup.fileTypeErrorMessagePlaceholder"),
+      },
+    }
+
+    return configs[requirementType as ERequirementType] || configs[ERequirementType.number]!
+  }, [requirementType, t])
+}
+
+interface IValidationValueInputProps {
+  requirementType: ERequirementType | undefined
+  value: any
+  onChange: (value: any) => void
+}
+
+const ValidationValueInput = ({ requirementType, value, onChange }: IValidationValueInputProps) => {
+  switch (requirementType) {
+    case ERequirementType.date: {
+      const parsed = value && value.length > 5 ? parseISO(value) : null
+      const isValidDate = parsed && isValid(parsed)
+      return (
+        <DatePicker
+          selected={isValidDate ? parsed : null}
+          onChange={(date) => onChange(date ? format(date, "yyyy-MM-dd") : "")}
+        />
+      )
+    }
+    case ERequirementType.file:
+      return <FileTypeSelector value={value} onChange={onChange} />
+    case ERequirementType.number:
+    case ERequirementType.multiOptionSelect:
+    default:
+      return <Input onChange={onChange} value={value} type="number" width="150px" bg="white" />
+  }
 }
 
 export const DataValidationSetupModal = observer(
@@ -223,7 +311,25 @@ export const DataValidationSetupModal = observer(
     const { isOpen, onOpen, onClose } = useDisclosure()
     const { t } = useTranslation()
 
-    const { control, setValue } = useFormContext<IRequirementBlockForm>()
+    const { control, setValue, getValues } = useFormContext<IRequirementBlockForm>()
+
+    const validationConfig = useValidationConfig(requirementType) as any
+    const { defaultOperation, operations, valueLabel, errorMessagePlaceholder } = validationConfig as IValidationConfig
+
+    useEffect(() => {
+      if (isOpen) {
+        const operationPath = `requirementsAttributes.${index}.inputOptions.dataValidation.operation` as any
+        const currentOperation = getValues(operationPath)
+
+        if (!currentOperation && defaultOperation) {
+          setValue(operationPath, defaultOperation as EDataValidationOperation, {
+            shouldDirty: true,
+            shouldTouch: true,
+            shouldValidate: true,
+          })
+        }
+      }
+    }, [isOpen, defaultOperation, index, setValue, getValues])
 
     const onReset = () => {
       setValue(`requirementsAttributes.${index}.inputOptions.dataValidation`, undefined, {
@@ -232,83 +338,6 @@ export const DataValidationSetupModal = observer(
         shouldValidate: true,
       })
     }
-
-    const validationConfig = useMemo(() => {
-      const configs: Partial<Record<ERequirementType, IValidationConfig>> = {
-        [ERequirementType.number]: {
-          defaultOperation: "min",
-          operations: [
-            {
-              value: "min",
-              label: t("requirementsLibrary.modals.dataValidationSetup.greaterOrEqual"),
-            },
-            {
-              value: "max",
-              label: t("requirementsLibrary.modals.dataValidationSetup.lessOrEqual"),
-            },
-          ],
-          valueLabel: t("requirementsLibrary.modals.dataValidationSetup.thisNumber"),
-          errorMessagePlaceholder: t("requirementsLibrary.modals.dataValidationSetup.errorMessagePlaceholder"),
-          renderInput: ({ onChange, value }) => (
-            <Input onChange={onChange} value={value} type="number" width="150px" bg="white" />
-          ),
-        },
-        [ERequirementType.date]: {
-          defaultOperation: "after",
-          operations: [
-            {
-              value: "after",
-              label: t("requirementsLibrary.modals.dataValidationSetup.after"),
-            },
-            {
-              value: "before",
-              label: t("requirementsLibrary.modals.dataValidationSetup.before"),
-            },
-          ],
-          valueLabel: t("requirementsLibrary.modals.dataValidationSetup.thisDate"),
-          errorMessagePlaceholder: t("requirementsLibrary.modals.dataValidationSetup.dateErrorMessagePlaceholder"),
-          renderInput: ({ onChange, value }) => {
-            const parsed = value && value.length > 5 ? parseISO(value) : null
-            const isValidDate = parsed && isValid(parsed)
-            return (
-              <DatePicker
-                selected={isValidDate ? parsed : null}
-                onChange={(date) => onChange(date ? format(date, "yyyy-MM-dd") : "")}
-              />
-            )
-          },
-        },
-        [ERequirementType.multiOptionSelect]: {
-          defaultOperation: "min_selected_count",
-          operations: [
-            {
-              value: "min_selected_count",
-              label: t("requirementsLibrary.modals.dataValidationSetup.minSelectedCount"),
-            },
-            {
-              value: "max_selected_count",
-              label: t("requirementsLibrary.modals.dataValidationSetup.maxSelectedCount"),
-            },
-          ],
-          valueLabel: t("requirementsLibrary.modals.dataValidationSetup.thisAmount"),
-          errorMessagePlaceholder: t("requirementsLibrary.modals.dataValidationSetup.selectionErrorMessagePlaceholder"),
-          renderInput: ({ onChange, value }) => (
-            <Input onChange={onChange} value={value} type="number" width="150px" bg="white" />
-          ),
-        },
-        [ERequirementType.file]: {
-          defaultOperation: "allowed_file_types",
-          operations: null,
-          valueLabel: t("requirementsLibrary.modals.dataValidationSetup.limitAcceptedFileFormatsTo"),
-          errorMessagePlaceholder: t("requirementsLibrary.modals.dataValidationSetup.fileTypeErrorMessagePlaceholder"),
-          renderInput: ({ onChange, value }) => <FileTypeSelector value={value} onChange={onChange} />,
-        },
-      }
-
-      return configs[requirementType] || configs[ERequirementType.number]
-    }, [requirementType, t])
-
-    const { defaultOperation, operations, valueLabel, errorMessagePlaceholder, renderInput } = validationConfig
 
     return (
       <>
@@ -381,13 +410,7 @@ export const DataValidationSetupModal = observer(
                       name={`requirementsAttributes.${index}.inputOptions.dataValidation.operation`}
                       control={control}
                       defaultValue={defaultOperation as EDataValidationOperation}
-                      render={({ field: { onChange, value } }) => {
-                        // Ensure the default operation is set if value is missing
-                        if (!value) {
-                          onChange(defaultOperation)
-                        }
-                        return <></>
-                      }}
+                      render={() => <></>}
                     />
                   )}
 
@@ -398,7 +421,9 @@ export const DataValidationSetupModal = observer(
                     <Controller
                       name={`requirementsAttributes.${index}.inputOptions.dataValidation.value`}
                       control={control}
-                      render={({ field: { onChange, value } }) => renderInput({ onChange, value })}
+                      render={({ field: { onChange, value } }) => (
+                        <ValidationValueInput requirementType={requirementType} onChange={onChange} value={value} />
+                      )}
                     />
                   </Box>
 
