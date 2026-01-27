@@ -2,6 +2,7 @@ module EnvHelper
   module_function
 
   def integer_env(name, default_value)
+    # NOTE: The 10 is a radix for the Integer constructor, not a default value.
     Integer(ENV.fetch(name, default_value), 10)
   rescue ArgumentError, TypeError
     default_value
