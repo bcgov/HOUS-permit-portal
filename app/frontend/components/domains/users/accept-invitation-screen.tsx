@@ -101,7 +101,7 @@ const Content = observer(function Content({ invitedUser }: Readonly<IProps>) {
             ) : (
               <GridItem>
                 <Flex direction="column" gap={6}>
-                  {role === "submitter" && <BcscLoginForm />}
+                  {role === EUserRoles.submitter && <BcscLoginForm />}
                   <BceidLoginForm />
                 </Flex>
               </GridItem>
