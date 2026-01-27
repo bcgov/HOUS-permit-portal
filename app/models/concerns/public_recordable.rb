@@ -229,5 +229,13 @@ module PublicRecordable
     def system_admin?
       false
     end
+
+    def method_missing(method_name, *args, &block)
+      nil
+    end
+
+    def respond_to_missing?(method_name, include_private = false)
+      true
+    end
   end
 end

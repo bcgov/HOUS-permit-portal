@@ -3,6 +3,9 @@ require "rails_helper"
 RSpec.describe OrphanCleanupJob, type: :job do
   include ActiveSupport::Testing::TimeHelpers
 
+  # This job is the final stage of the lifecycle.
+  # It deletes records that were "orphaned" (anonymized) a long time ago.
+  # For example, if we keep public records for 4 years after the user is deleted.
   describe "#perform" do
     let(:now) { Time.current }
     let(:retention_days) { 1460 } # 4 years
@@ -17,6 +20,8 @@ RSpec.describe OrphanCleanupJob, type: :job do
 
     context "cleaning up orphaned public records" do
       let!(:user) { create(:user) }
+
+      # Record orphaned recently -> Should be KEPT
       let!(:recent_orphan) do
         create(
           :permit_application,
@@ -25,6 +30,8 @@ RSpec.describe OrphanCleanupJob, type: :job do
           orphaned_at: now - (retention_days - 1).days
         )
       end
+
+      # Record orphaned > 4 years ago -> Should be DELETED
       let!(:old_orphan) do
         create(
           :permit_application,
@@ -33,6 +40,8 @@ RSpec.describe OrphanCleanupJob, type: :job do
           orphaned_at: now - (retention_days + 1).days
         )
       end
+
+      # Normal record with a user -> Should be IGNORED
       let!(:non_orphan) do
         create(:permit_application, :newly_submitted, submitter: user)
       end
