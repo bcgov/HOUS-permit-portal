@@ -28,6 +28,8 @@
 #       enabled: "ON"
 
 en:
+  misc:
+    removed_placeholder: "<Removed>"
   activerecord:
     attributes:
       contact:

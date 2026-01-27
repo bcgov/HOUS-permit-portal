@@ -89,6 +89,17 @@ class User < ApplicationRecord
            foreign_key: :previewer_id
   has_many :early_access_requirement_templates, through: :early_access_previews
 
+  # Shared resources that should not be deleted with the user
+  has_many :revision_requests, dependent: :destroy
+  has_many :assigned_requirement_templates,
+           class_name: "RequirementTemplate",
+           foreign_key: "assignee_id",
+           dependent: :nullify
+  has_many :deprecated_template_versions,
+           class_name: "TemplateVersion",
+           foreign_key: "deprecated_by_id",
+           dependent: :nullify
+
   has_one :preference, dependent: :destroy
   accepts_nested_attributes_for :preference
 
