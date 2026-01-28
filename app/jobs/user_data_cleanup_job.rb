@@ -103,6 +103,8 @@ class UserDataCleanupJob
           if record.public_record?
             record.take_user_snapshots!
             record.update_column(foreign_key, nil)
+            # Reindex if the model is searchable to ensure consistency
+            record.reindex if record.respond_to?(:search_data)
           end
         end
     end
