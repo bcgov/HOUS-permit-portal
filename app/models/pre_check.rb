@@ -323,6 +323,6 @@ class PreCheck < ApplicationRecord
   end
 
   def public_record?
-    true
+    false # Pre-checks are not public records until they are attached to a permit application - revist this after merging HUB-4112
   end
 end

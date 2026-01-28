@@ -94,7 +94,7 @@ class PermitApplication < ApplicationRecord
   COMPLETION_SECTION_KEY = "section-completion-key"
 
   def public_record?
-    !draft?
+    !new_draft?
   end
 
   def inbox_enabled?
