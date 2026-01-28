@@ -13,7 +13,6 @@ class PermitProject < ApplicationRecord
   has_many :collaborators, through: :permit_applications
   has_many :pinned_projects, dependent: :destroy
   has_many :pinning_users, through: :pinned_projects, source: :user
-
   accepts_nested_attributes_for :project_documents, allow_destroy: true
 
   validates :title, presence: true
