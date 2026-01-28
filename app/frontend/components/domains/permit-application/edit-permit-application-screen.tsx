@@ -18,7 +18,7 @@ import * as R from "ramda"
 import React, { useEffect, useRef, useState } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { useNavigate } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { requirementTypeToFormioType } from "../../../constants"
 import { usePermitApplication } from "../../../hooks/resources/use-permit-application"
 import { useInterval } from "../../../hooks/use-interval"
@@ -234,7 +234,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   const handleClickFinishLater = async () => {
     const success = await handleSave()
     if (success) {
-      navigate("/")
+      navigate(parentProjectPath)
     }
   }
 
@@ -270,6 +270,10 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   const doesUserHaveSubmissionPermission =
     currentUser?.id === currentPermitApplication.submitter?.id ||
     currentUser?.id === currentPermitApplication?.designatedSubmitter?.collaborator?.user?.id
+
+  const parentProjectPath = currentPermitApplication.projectId
+    ? `/projects/${currentPermitApplication.projectId}/overview`
+    : "/projects"
 
   return (
     <Box as="main" id="submitter-view-permit">
@@ -360,9 +364,9 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
                 {doesUserHaveSubmissionPermission && (
                   <SubmissionDownloadModal permitApplication={currentPermitApplication} />
                 )}
-                <Button rightIcon={<CaretRight />} onClick={() => navigate("/")}>
-                  {t("ui.back")}
-                </Button>
+                <Link to={parentProjectPath}>
+                  <Button rightIcon={<CaretRight />}>{t("ui.back")}</Button>
+                </Link>
               </Stack>
             ) : (
               <HStack
