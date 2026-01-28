@@ -2,6 +2,7 @@ class StepCode < ApplicationRecord
   include ProjectItem
   include Discard::Model
   include ChecklistReportDocumentConcern
+  include PublicRecordable
 
   has_parent :permit_application
 
@@ -18,6 +19,8 @@ class StepCode < ApplicationRecord
              class_name: "User",
              foreign_key: "creator_id",
              optional: true
+
+  public_recordable user_association: :creator
 
   after_commit :refresh_search_index, if: :saved_change_to_discarded_at
 
@@ -90,5 +93,9 @@ class StepCode < ApplicationRecord
 
   def generate_report_document
     StepCodeReportGenerationJob.perform_async(id)
+  end
+
+  def public_record?
+    permit_application&.public_record? || false
   end
 end

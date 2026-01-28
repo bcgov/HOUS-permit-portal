@@ -1,5 +1,6 @@
 class UserDataCleanupJob
   include Sidekiq::Worker
+  include EnvHelper
 
   DEFAULT_ARCHIVE_AFTER_DAYS = 1095
   DEFAULT_DELETE_AFTER_DAYS = 1460
@@ -33,7 +34,10 @@ class UserDataCleanupJob
       users = User.kept.last_sign_in_between(start_time, end_time)
 
       users.find_each do |user|
-        PermitHubMailer.notify_user_archive_warning(user, warning_day).deliver
+        PermitHubMailer.notify_user_archive_warning(
+          user,
+          warning_day
+        ).deliver_later
       end
     end
   end
@@ -52,45 +56,61 @@ class UserDataCleanupJob
       users = User.discarded_between(start_time, end_time)
 
       users.find_each do |user|
-        PermitHubMailer.notify_user_delete_warning(user, warning_day).deliver
+        PermitHubMailer.notify_user_delete_warning(
+          user,
+          warning_day
+        ).deliver_later
       end
     end
   end
 
   def delete_discarded_users(current_time, delete_after_days)
     cutoff_time = current_time - delete_after_days.days
-    User.discarded.where(discarded_at: ..cutoff_time).find_each(&:destroy!)
+    User
+      .discarded
+      .where(discarded_at: ..cutoff_time)
+      .find_each do |user|
+        handle_user_resources(user)
+        user.destroy!
+      rescue ActiveRecord::InvalidForeignKey,
+             ActiveRecord::RecordNotDestroyed => e
+        Rails.logger.error(
+          "[UserDataCleanupJob] FAILED to delete user #{user.id}: #{e.message}"
+        )
+      rescue => e
+        Rails.logger.error(
+          "[UserDataCleanupJob] Unexpected error deleting user #{user.id}: #{e.message}"
+        )
+      end
+  end
+
+  def handle_user_resources(user)
+    PublicRecordable.recordable_models.each do |model_class|
+      # Skip if the model doesn't have a user association (shouldn't happen if using the concern correctly)
+      association_name = model_class.public_recordable_user_association
+      next unless association_name
+
+      # Construct the foreign key from the association name
+      foreign_key = "#{association_name}_id"
+
+      # Find records belonging to this user
+      # We need to use the association name to query, or manually construct the where clause
+      # Since we don't know the inverse association name on User (e.g. created_step_codes vs step_codes),
+      # we query the model directly.
+      model_class
+        .where(foreign_key => user.id)
+        .find_each do |record|
+          if record.public_record?
+            record.take_user_snapshots!
+            record.update_column(foreign_key, nil)
+          end
+        end
+    end
   end
 
   def day_window_ending(current_time, target_days_ago)
     start_time = current_time - target_days_ago.days
     end_time = current_time - (target_days_ago - 1).days
     [start_time, end_time]
-  end
-
-  def integer_env(name, default_value)
-    Integer(ENV.fetch(name, default_value), 10)
-  rescue ArgumentError, TypeError
-    default_value
-  end
-
-  def integer_list_env(name, default_value)
-    raw_value = ENV[name]
-    return default_value if raw_value.blank?
-
-    parsed =
-      raw_value
-        .split(",")
-        .map do |item|
-          begin
-            Integer(item.strip, 10)
-          rescue StandardError
-            nil
-          end
-        end
-        .compact
-        .uniq
-
-    parsed.any? ? parsed : default_value
   end
 end
