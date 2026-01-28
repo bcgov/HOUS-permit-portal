@@ -60,15 +60,25 @@ module PublicRecordable
 
         # Return a non-persisted, readonly User populated with snapshot data.
         # This avoids maintaining a separate DeletedUser class that must mirror User's interface.
-        User.new(
-          omniauth_username:
-            public_send(username_field) || I18n.t("misc.removed_placeholder"),
-          first_name:
-            public_send(first_name_field) || I18n.t("misc.removed_placeholder"),
-          last_name:
-            public_send(last_name_field) || I18n.t("misc.removed_placeholder"),
-          discarded_at: Time.current
-        ).tap(&:readonly!)
+        # We generate a synthetic ID so the frontend MST model doesn't choke on null.
+        record_id = id
+        User
+          .new(
+            omniauth_username:
+              public_send(username_field) || I18n.t("misc.removed_placeholder"),
+            first_name:
+              public_send(first_name_field) ||
+                I18n.t("misc.removed_placeholder"),
+            last_name:
+              public_send(last_name_field) ||
+                I18n.t("misc.removed_placeholder"),
+            discarded_at: Time.current
+          )
+          .tap do |user|
+            # Override id to return a synthetic value for serialization
+            user.define_singleton_method(:id) { "deleted-#{record_id}" }
+            user.readonly!
+          end
       end
     end
   end
