@@ -116,6 +116,9 @@ module PublicRecordable
       )
 
       update_columns(columns_to_update)
+
+      # Reindex if the model is searchable to ensure consistency
+      reindex if respond_to?(:search_data)
     end
   end
 
