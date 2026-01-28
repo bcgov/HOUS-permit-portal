@@ -10,7 +10,7 @@ import { useNavigate } from "react-router-dom"
 import { useMountStatus } from "../../../hooks/use-mount-status"
 import { IPermitApplication } from "../../../models/permit-application"
 import { EFileUploadAttachmentType, EFlashMessageStatus, EStepCodeType } from "../../../types/enums"
-import { IErrorsBoxData } from "../../../types/types"
+import { IErrorsBoxData, IOptionalElectiveFieldInfo } from "../../../types/types"
 import { getOptionalElectivesByPanelId } from "../../../utils/early-access-view-optional-electives"
 import { getCompletedBlocksFromForm, getRequirementByKey } from "../../../utils/formio-component-traversal"
 import { singleRequirementFormJson, singleRequirementSubmissionData } from "../../../utils/formio-helpers"
@@ -97,6 +97,7 @@ export const RequirementForm = observer(
     const [optionalElectivesModalData, setOptionalElectivesModalData] = useState<{
       blockTitle?: string
       labels: string[]
+      electives: IOptionalElectiveFieldInfo[]
     } | null>(null)
 
     const currentSubmissionData = useMemo(() => {
@@ -275,7 +276,8 @@ export const RequirementForm = observer(
     }
 
     const optionalElectivesByPanelId = useMemo(() => {
-      if (!isEarlyAccess) return new Map<string, { blockTitle?: string; labels: string[] }>()
+      if (!isEarlyAccess)
+        return new Map<string, { blockTitle?: string; labels: string[]; electives: IOptionalElectiveFieldInfo[] }>()
       return getOptionalElectivesByPanelId(formattedFormJson)
     }, [formattedFormJson, isEarlyAccess])
 
@@ -284,7 +286,7 @@ export const RequirementForm = observer(
         const panelId = event?.detail?.panelId as string | undefined
         if (!panelId) return
 
-        const data = optionalElectivesByPanelId.get(panelId) || { labels: [] }
+        const data = optionalElectivesByPanelId.get(panelId) || { labels: [], electives: [] }
         setOptionalElectivesModalData(data)
         onOptionalElectivesOpen()
       },
@@ -520,7 +522,7 @@ export const RequirementForm = observer(
               description={
                 <Trans
                   t={t}
-                  i18nKey={"permitApplication.show.inboxDisabledEarlyAccess"}
+                  i18nKey={"permitApplication.show.inboxDisabledEarlyAccessInstructions"}
                   components={{
                     1: (
                       <Button
