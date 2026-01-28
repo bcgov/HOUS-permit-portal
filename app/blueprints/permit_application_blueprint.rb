@@ -31,6 +31,10 @@ class PermitApplicationBlueprint < Blueprinter::Base
     field :using_current_template_version do |pa, _options|
       pa.using_current_template_version
     end
+
+    field :project_id do |pa, _options|
+      pa.permit_project&.id
+    end
   end
 
   view :project_base do
