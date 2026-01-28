@@ -35,6 +35,7 @@ export const FieldsSetup = observer(function FieldsSetup({
     control,
     name: "requirementsAttributes",
   })
+
   const {
     field: { onChange: onDisplayNameChange, value: displayNameValue },
   } = useController({

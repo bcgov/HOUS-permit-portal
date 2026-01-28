@@ -63,7 +63,7 @@ To make things easier to develop on various platforms locally, there is a `docke
 The app uses the [Sidekiq](https://github.com/sidekiq/sidekiq) library for background job processing. To run this locally:
 
 - Ensure you have `Redis` installed locally
-- Set ENV var `REDIS_URL=localhost:6379/0`
+- Set ENV var `SIDEKIQ_DEV_REDIS_URL=localhost:6379/0`
 - Run `bundle exec sidekiq` (add a `-q queue_name`) to start that particular queue, you can see which queues are currently in the app in `config/initializers/sidekiq.rb` under `config.queues`
 
 * Note that the Openshift deployed versions make use of HA-Redis via Sentinels so the environment variables required for that are different

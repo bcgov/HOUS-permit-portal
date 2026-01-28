@@ -4,7 +4,7 @@
 x-env-vars: &default-env-vars
   BROWSER: true # so that launchy does not error out - @TODO: figure out local emails in docker compose environment
   RAILS_ENV: development
-  REDIS_URL: redis://redis:6379/0
+  SIDEKIQ_DEV_REDIS_URL: redis://redis:6379/0
   ANYCABLE_DEV_REDIS_URL: redis://localhost:6379/1
   ANYCABLE_URL: ws://localhost:8080/cable
   RATE_LIMIT_DEV_REDIS_URL: redis://redis:6379/2

@@ -30,7 +30,6 @@ import { EditableInputWithControls } from "../../shared/editable-input-with-cont
 import { BrowserSearchPrompt } from "../../shared/permit-applications/browser-search-prompt"
 import { PermitApplicationViewedAtTag } from "../../shared/permit-applications/permit-application-viewed-at-tag"
 import { RequirementForm } from "../../shared/permit-applications/requirement-form"
-import SandboxHeader from "../../shared/sandbox/sandbox-header"
 import { ChecklistSideBar } from "./checklist-sidebar"
 import { BlockCollaboratorAssignmentManagement } from "./collaborator-management/block-collaborator-assignment-management"
 import { CollaboratorsSidebar } from "./collaborator-management/collaborators-sidebar"
@@ -133,7 +132,6 @@ export const ReviewPermitApplicationScreen = observer(() => {
       setIsRetriggeringWebhook(false)
     }
   }
-
   // @ts-ignore
   const permitHeaderHeight = permitHeaderRef?.current?.offsetHeight ?? 0
 
@@ -200,23 +198,25 @@ export const ReviewPermitApplicationScreen = observer(() => {
                 {t("ui.back")}
               </Button>
             </Stack>
-            <Menu>
-              <MenuButton as={Button} variant="tertiaryInverse" rightIcon={<CaretDown />}>
-                {t("ui.options")}
-              </MenuButton>
-              <MenuList>
-                <MenuItem
-                  icon={<ArrowsClockwise size={16} />}
-                  onClick={handleRetriggerWebhook}
-                  isDisabled={isRetriggeringWebhook}
-                  color="text.primary"
-                >
-                  {isRetriggeringWebhook
-                    ? t("permitApplication.show.retriggeringWebhook")
-                    : t("permitApplication.show.retriggerWebhook")}
-                </MenuItem>
-              </MenuList>
-            </Menu>
+            {currentPermitApplication.jurisdiction.externalApiEnabled && (
+              <Menu>
+                <MenuButton as={Button} variant="tertiaryInverse" rightIcon={<CaretDown />}>
+                  {t("ui.options")}
+                </MenuButton>
+                <MenuList>
+                  <MenuItem
+                    icon={<ArrowsClockwise size={16} />}
+                    onClick={handleRetriggerWebhook}
+                    isDisabled={isRetriggeringWebhook}
+                    color="text.primary"
+                  >
+                    {isRetriggeringWebhook
+                      ? t("permitApplication.show.retriggeringWebhook")
+                      : t("permitApplication.show.retriggerWebhook")}
+                  </MenuItem>
+                </MenuList>
+              </Menu>
+            )}
           </Flex>
         </Flex>
         {revisionMode && (
@@ -252,9 +252,6 @@ export const ReviewPermitApplicationScreen = observer(() => {
             </Flex>
             <Flex align="center" gap={2} flex={1} justify="flex-end" ref={sendRevisionContainerRef}></Flex>
           </Flex>
-        )}
-        {currentPermitApplication.sandbox && (
-          <SandboxHeader borderTopRadius={0} override sandbox={currentPermitApplication.sandbox} position="sticky" />
         )}
       </Flex>
       <Box id="sidebar-and-form-container" sx={{ "&:after": { content: `""`, display: "block", clear: "both" } }}>

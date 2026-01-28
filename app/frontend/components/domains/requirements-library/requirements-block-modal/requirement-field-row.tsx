@@ -1,4 +1,5 @@
-import { Box } from "@chakra-ui/react"
+import { Box, Text } from "@chakra-ui/react"
+import { ErrorMessage } from "@hookform/error-message"
 import React from "react"
 import { useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
@@ -71,7 +72,12 @@ const getRequirementFieldState = (requirementCode: string | undefined) => {
 
 export const RequirementFieldRow = ({ index, field, isEditing, toggleEdit, onRemove }: RequirementFieldRowProps) => {
   const { t } = useTranslation()
-  const { setValue, control, watch } = useFormContext<IRequirementBlockForm>()
+  const {
+    setValue,
+    control,
+    watch,
+    formState: { errors },
+  } = useFormContext<IRequirementBlockForm>()
 
   const watchedHint = watch(`requirementsAttributes.${index}.hint`)
   const watchedRequired = watch(`requirementsAttributes.${index}.required`)
@@ -110,7 +116,17 @@ export const RequirementFieldRow = ({ index, field, isEditing, toggleEdit, onRem
       pt={index === 0 ? 0 : 1}
       pb={5}
       pos={"relative"}
+      bg={isEditing ? "greys.grey04" : "transparent"}
     >
+      <ErrorMessage
+        errors={errors}
+        name={`requirementsAttributes.${index}.label`}
+        render={({ message }) => (
+          <Text mb={1} mt={0} color="semantic.error" fontSize="sm">
+            {message}
+          </Text>
+        )}
+      />
       <Box {...fieldContainerSharedProps} display={isEditing ? "block" : "none"}>
         <RequirementFieldEdit<IRequirementBlockForm>
           requirementType={requirementType}
@@ -119,7 +135,9 @@ export const RequirementFieldRow = ({ index, field, isEditing, toggleEdit, onRem
             controlProps: {
               control,
               name: `requirementsAttributes.${index}.label`,
-              rules: { required: true },
+              rules: {
+                required: `${t("requirementsLibrary.modals.fieldLabel")} ${t("ui.required" as any)}`.toLowerCase(),
+              },
             },
             color: "text.link",
             // @ts-ignore

@@ -69,7 +69,7 @@ export const CollaboratorsSidebar = observer(function CollaboratorsSidebar({
       </Button>
       <Drawer isOpen={isOpen} placement="right" onClose={onClose} finalFocusRef={btnRef}>
         <DrawerOverlay />
-        <DrawerContent maxW={"430px"}>
+        <DrawerContent maxW={"430px"} pt={"var(--app-navbar-height)"}>
           <DrawerCloseButton />
           <DrawerHeader gap={2} alignItems={"center"} display={"flex"} mt={7} px={8} pb={0}>
             <Users size={23} />

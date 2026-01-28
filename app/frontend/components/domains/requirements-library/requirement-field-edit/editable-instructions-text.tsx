@@ -15,7 +15,6 @@ export function EditableInstructionsText<TFieldValues extends FieldValues>({
     field: { onChange, value },
   } = useController({ ...controlProps })
   const { t } = useTranslation()
-  console.log("value", value)
   return (
     <EditorWithPreview
       label={t("requirementsLibrary.modals.addInstructionsLabel")}

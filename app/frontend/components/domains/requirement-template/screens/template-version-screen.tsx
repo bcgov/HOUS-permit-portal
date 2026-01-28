@@ -51,7 +51,6 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
         status={templateVersion.status}
         versionDate={templateVersion.versionDate}
         latestVersionId={templateVersion.latestVersionId}
-        forEdit
       />
       <Box borderTop={"1px solid"} borderColor={"border.base"}>
         <SectionsSidebar

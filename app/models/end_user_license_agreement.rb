@@ -3,7 +3,7 @@ class EndUserLicenseAgreement < ApplicationRecord
 
   sanitizable :content
 
-  has_many :user_license_agreements
+  has_many :user_license_agreements, foreign_key: :agreement_id
 
   after_create :replace_active_agreement, if: :active
 

@@ -25,13 +25,18 @@ class Api::DigitalSealValidatorController < Api::ApplicationController
         }
       )
     else
-      render_error "digital_seal_validator.validation_error",
-                   {
-                     message_opts: {
-                       error_message: result.error
-                     },
-                     status: :unprocessable_entity
-                   }
+      render_success(
+        nil,
+        nil,
+        {
+          meta: {
+            status: "failure",
+            signatures: result.signatures || [],
+            error: result.error
+          },
+          status: :ok
+        }
+      )
     end
   end
 end

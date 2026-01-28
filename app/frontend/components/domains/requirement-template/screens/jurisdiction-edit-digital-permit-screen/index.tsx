@@ -176,6 +176,7 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
         status={templateVersion.status}
         versionDate={templateVersion.versionDate}
         latestVersionId={templateVersion.latestVersionId}
+        forEdit
       />
       <Box
         borderTop={"1px solid"}

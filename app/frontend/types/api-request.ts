@@ -1,5 +1,5 @@
 import { IRevisionReason } from "../models/revision-reason"
-import { ENumberUnit, ERequirementType, ETagType, EVisibility } from "./enums"
+import { EDataValidationOperation, ENumberUnit, ERequirementType, ETagType, EVisibility } from "./enums"
 import {
   IHelpLinkItems,
   IOption,
@@ -27,7 +27,7 @@ export interface IFormConditional {
 }
 
 export interface IDataValidation {
-  operation: "min" | "max"
+  operation: EDataValidationOperation
   value: string
   errorMessage?: string
 }

@@ -135,6 +135,7 @@ const SectionDisplay = observer(
             onCancel={(previousValue) => {
               setEditableSectionName(previousValue)
             }}
+            controlsProps={{ iconButtonProps: { marginTop: 6 } }}
           />
 
           {watchedSectionBlocks.length === 0 ? (
@@ -144,6 +145,7 @@ const SectionDisplay = observer(
               color={"error"}
               visibility={"hidden"}
               onClick={() => removeSection(sectionIndex)}
+              marginTop={isInEditMode ? 3 : 9}
             >
               {t("ui.remove")}
             </Button>
@@ -152,7 +154,7 @@ const SectionDisplay = observer(
               title={t("requirementTemplate.edit.removeConfirmationModal.title")}
               body={t("requirementTemplate.edit.removeConfirmationModal.body")}
               onRemove={() => removeSection(sectionIndex)}
-              triggerButtonProps={{ visibility: "hidden" }}
+              triggerButtonProps={{ marginTop: isInEditMode ? 3 : 9, visibility: "hidden" }}
             />
           )}
         </HStack>

@@ -45,21 +45,19 @@ export const CheckDigitalSealsScreen = observer(() => {
     if (response.body?.meta?.status === "success") {
       setValidationResult(response.body.meta.signatures)
     } else {
-      // Explicit cast to avoid type issues
-      const key = "projectReadinessTools.digitalSealValidator.notValidated" as any
-      // @ts-ignore
-      const errorMsg = t(key, { defaultValue: "There was a problem checking the seal on" }) as string
-      setError(errorMsg)
+      const baseMsg = t("projectReadinessTools.digitalSealValidator.notValidated", {
+        fileName: (uppyFile.data as File)?.name,
+      }) as string
+      setError(baseMsg)
     }
   }
 
   const handleUploadError = (uppyFile: UppyFile<{}, {}>, error: any, response: any) => {
-    console.error("Upload error:", error, response)
     setFile(uppyFile.data as File)
     setValidationResult(null)
     const errorMessage =
       response?.body?.meta?.message?.options?.error_message ||
-      t("projectReadinessTools.digitalSealValidator.notValidated") + ": " + (uppyFile.data as File).name + "."
+      t("projectReadinessTools.digitalSealValidator.notValidated", { fileName: (uppyFile.data as File).name })
     setError(errorMessage)
   }
 

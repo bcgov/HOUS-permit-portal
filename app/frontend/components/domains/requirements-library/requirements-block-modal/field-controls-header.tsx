@@ -55,7 +55,7 @@ export function FieldControlsHeader({
             requirementType={requirementType}
           />
         )}
-      <HStack className={"requirement-edit-controls-container"}>
+      <HStack className={"requirement-edit-controls-container"} p={2}>
         {elective && !isRequirementInEditMode && <ElectiveTag display={isRequirementInEditMode ? "none" : "flex"} />}
         {conditional && !isRequirementInEditMode && (
           <HasConditionalTag display={isRequirementInEditMode ? "none" : "flex"} />
@@ -67,14 +67,13 @@ export function FieldControlsHeader({
           <HasAutomatedComplianceTag display={isRequirementInEditMode ? "none" : "flex"} />
         )}
         {!isRequirementInEditMode && (
-          <RequirementTypeTag type={requirementType} className={"requirement-edit-controls"} display={"none"} />
+          <RequirementTypeTag type={requirementType} className={"requirement-edit-controls"} />
         )}
         <Button
           variant={"primary"}
           size={"sm"}
           onClick={() => {
             toggleRequirementToEdit()
-            console.log("requirementCode", requirementCode)
           }}
           className={"requirement-edit-controls"}
           display={isRequirementInEditMode ? "flex" : "none"}
