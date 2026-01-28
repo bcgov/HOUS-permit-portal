@@ -192,10 +192,9 @@ RSpec.describe UserDataCleanupJob, type: :job do
         expect(permit_application.omniauth_username_snapshot).to be_present
         expect(permit_application.first_name_snapshot).to be_present
         expect(permit_application.orphaned_at).to be_present
-        # Check that we can access the "submitter" via the deleted user mock
-        expect(permit_application.submitter).to be_a(
-          PublicRecordable::DeletedUser
-        )
+        # Check that we can access the "submitter" via the readonly User
+        expect(permit_application.submitter).to be_a(User)
+        expect(permit_application.submitter).to be_readonly
         expect(permit_application.submitter.name).to eq(
           "#{user_to_delete.first_name} #{user_to_delete.last_name}"
         )

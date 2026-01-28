@@ -67,7 +67,7 @@ RSpec.describe PublicRecordable, type: :model do
     end
   end
 
-  describe "DeletedUser mock" do
+  describe "orphaned record user accessor" do
     before do
       # Manually orphan the record to simulate the cleanup job
       permit_application.take_user_snapshots!
@@ -75,15 +75,14 @@ RSpec.describe PublicRecordable, type: :model do
       permit_application.reload
     end
 
-    it "returns a DeletedUser object when user is nil" do
-      # Even though submitter_id is nil, .submitter returns a Null Object
-      expect(permit_application.submitter).to be_a(
-        PublicRecordable::DeletedUser
-      )
+    it "returns a readonly User when submitter is nil" do
+      # Even though submitter_id is nil, .submitter returns a User populated with snapshot data
+      expect(permit_application.submitter).to be_a(User)
+      expect(permit_application.submitter).to be_readonly
     end
 
-    it "populates DeletedUser with snapshot data" do
-      # The mock object should read from the snapshot columns
+    it "populates User with snapshot data" do
+      # The User object should be populated from the snapshot columns
       deleted_user = permit_application.submitter
       expect(deleted_user.first_name).to eq("Jane")
       expect(deleted_user.last_name).to eq("Doe")
@@ -98,12 +97,10 @@ RSpec.describe PublicRecordable, type: :model do
       )
     end
 
-    it "returns specific role checks as false" do
-      # Ensure the mock object behaves safely for role checks
+    it "marks the user as discarded" do
+      # The readonly User should appear as discarded
       deleted_user = permit_application.submitter
-      expect(deleted_user.submitter?).to be false
-      expect(deleted_user.review_staff?).to be false
-      expect(deleted_user.jurisdiction_staff?).to be false
+      expect(deleted_user.discarded_at).to be_present
     end
   end
 
@@ -166,7 +163,8 @@ RSpec.describe PublicRecordable, type: :model do
         user.destroy
         # Public project had owner_id=nil, so it survived the user deletion
         expect(public_project.reload).to be_present
-        expect(public_project.owner).to be_a(PublicRecordable::DeletedUser)
+        expect(public_project.owner).to be_a(User)
+        expect(public_project.owner).to be_readonly
       end
     end
   end
