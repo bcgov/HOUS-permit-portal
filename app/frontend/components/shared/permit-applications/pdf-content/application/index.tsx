@@ -78,7 +78,12 @@ const FormComponent = function ApplicationPDFFormComponent({
         const options = R.path([dataPath, component.key], permitApplication.submissionData.data)
         const label = component.label
         const values: any = Object.keys(options ?? {}).filter((key) => !!options[key])
-        return { options, values, label, isVisible: !R.isEmpty(values) && !R.isNil(label) }
+        const optionValues = Array.isArray(component.values)
+          ? component.values
+          : Array.isArray(component.data?.values)
+            ? component.data.values
+            : []
+        return { options, values, label, optionValues, isVisible: !R.isEmpty(values) && !R.isNil(label) }
       }
       case EComponentType.datagrid: {
         return { value: null, label: null }
@@ -245,8 +250,8 @@ const FormComponent = function ApplicationPDFFormComponent({
       return isVisible ? <FileField value={value} label={label} /> : null
     }
     case EComponentType.checklist: {
-      const { options, values, label, isVisible } = extractFieldInfo(component)
-      return isVisible ? <ChecklistField options={options} label={label} /> : null
+      const { options, values, label, optionValues, isVisible } = extractFieldInfo(component)
+      return isVisible ? <ChecklistField options={options} label={label} optionValues={optionValues} /> : null
     }
     case EComponentType.checkbox: {
       const { value, label, isVisible } = extractFieldInfo(component)
@@ -321,7 +326,35 @@ const PanelHeader = function ApplicationPDFPanelHeader({ component }) {
   )
 }
 
-const ChecklistField = function ApplicationPDFPanelChecklistField({ options, label }) {
+const ChecklistField = function ApplicationPDFPanelChecklistField({ options, label, optionValues }) {
+  const labelByValue = new Map<string, string>()
+  if (Array.isArray(optionValues)) {
+    optionValues.forEach((option) => {
+      if (!option || typeof option !== "object") return
+      const value = option.value ?? option.label
+      if (value === undefined || value === null) return
+      labelByValue.set(String(value), option.label ?? String(value))
+    })
+  }
+
+  const orderedOptions =
+    optionValues?.length > 0 ? optionValues : Object.keys(options || {}).map((key) => ({ label: key, value: key }))
+
+  const normalizedOptions = orderedOptions
+    .map((option) => {
+      if (typeof option === "string") {
+        const value = option
+        return { value, label: labelByValue.get(value) ?? value }
+      }
+      if (!option || typeof option !== "object") return null
+      const value = option.value ?? option.label
+      if (value === undefined || value === null) return null
+      const valueKey = String(value)
+      const label = option.label ?? labelByValue.get(valueKey) ?? valueKey
+      return { value: valueKey, label }
+    })
+    .filter((option): option is { value: string; label: string } => !!option)
+
   return (
     <View style={{ gap: 4, paddingTop: 4 }} wrap={false}>
       <Text
@@ -335,8 +368,8 @@ const ChecklistField = function ApplicationPDFPanelChecklistField({ options, lab
         {label}
       </Text>
       <View style={{ gap: 8 }}>
-        {Object.keys(options).map((key) => {
-          return <Checkbox key={key} isChecked={options[key]} label={key} />
+        {normalizedOptions.map((option) => {
+          return <Checkbox key={option.value} isChecked={options?.[option.value]} label={option.label} />
         })}
       </View>
     </View>
