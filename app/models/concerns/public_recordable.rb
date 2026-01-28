@@ -116,6 +116,8 @@ module PublicRecordable
   end
 
   class DeletedUser
+    # This class is a mock user object that is used to represent a deleted user.
+
     attr_reader :omniauth_username, :first_name, :last_name
 
     def initialize(username:, first_name:, last_name:)
