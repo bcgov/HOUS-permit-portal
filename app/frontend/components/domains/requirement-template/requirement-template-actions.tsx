@@ -1,5 +1,5 @@
 import { Button, Menu, MenuButton, MenuItem, MenuList, useDisclosure } from "@chakra-ui/react"
-import { CaretDown, ClockCounterClockwise, Globe } from "@phosphor-icons/react"
+import { ClockCounterClockwise, Globe } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
@@ -21,8 +21,8 @@ export const RequirementTemplateActions = observer(function RequirementTemplateA
   return (
     <>
       <Menu>
-        <MenuButton as={Button} size="sm" rightIcon={<CaretDown weight="bold" />} variant="primary">
-          {t("ui.manage")}
+        <MenuButton as={Button} aria-label="more options" variant="link">
+          {t("ui.moreOptions")}
         </MenuButton>
         <MenuList>
           <MenuItem icon={<ClockCounterClockwise size={20} />} onClick={onVersionsOpen}>

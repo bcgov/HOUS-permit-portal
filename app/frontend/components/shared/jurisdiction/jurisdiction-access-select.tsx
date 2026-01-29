@@ -4,6 +4,7 @@ import {
   AccordionIcon,
   AccordionItem,
   AccordionPanel,
+  AccordionProps,
   Box,
   Flex,
   Heading,
@@ -18,7 +19,8 @@ import { useMst } from "../../../setup/root"
 import { IOption } from "../../../types/types"
 import { SwitchButton } from "../buttons/switch-button"
 
-interface JurisdictionAccessSelectProps {
+interface JurisdictionAccessSelectProps
+  extends Omit<AccordionProps, "defaultIndex" | "allowToggle" | "children" | "onChange"> {
   title: string
   description?: string
   value: IOption[]
@@ -30,6 +32,7 @@ interface JurisdictionAccessSelectProps {
   enableForAllLabel?: string
   enableForAllDescription?: string
   searchPlaceholder?: string
+  defaultOpen?: boolean
 }
 
 export const JurisdictionAccessSelect = observer(function JurisdictionAccessSelect({
@@ -44,6 +47,8 @@ export const JurisdictionAccessSelect = observer(function JurisdictionAccessSele
   enableForAllLabel,
   enableForAllDescription,
   searchPlaceholder,
+  defaultOpen = false,
+  ...accordionProps
 }: JurisdictionAccessSelectProps) {
   const { t } = useTranslation()
   const { jurisdictionStore } = useMst()
@@ -84,7 +89,7 @@ export const JurisdictionAccessSelect = observer(function JurisdictionAccessSele
   }
 
   return (
-    <Accordion allowToggle defaultIndex={[]} mb={24}>
+    <Accordion allowToggle defaultIndex={defaultOpen ? [0] : []} mb={24} {...accordionProps}>
       <AccordionItem border="1px solid" borderColor="border.light" borderRadius="md">
         <AccordionButton _hover={{ bg: "greys.grey03" }} px={4} py={4}>
           <Box flex="1" textAlign="left">

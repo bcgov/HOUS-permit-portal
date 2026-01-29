@@ -17,6 +17,10 @@ class RequirementTemplateBlueprint < Blueprinter::Base
     rt.published_customizations_count
   end
 
+  field :available_in do |rt|
+    rt.available_globally ? "All" : rt.jurisdiction_requirement_templates.count
+  end
+
   association :permit_type, blueprint: PermitClassificationBlueprint
   association :activity, blueprint: PermitClassificationBlueprint
   association :last_three_deprecated_template_versions,

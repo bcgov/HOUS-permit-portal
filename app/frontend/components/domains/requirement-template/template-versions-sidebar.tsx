@@ -61,7 +61,7 @@ export const TemplateVersionsSidebar = observer(function TemplateVersionsSidebar
       )}
       <Drawer isOpen={isOpen} placement="right" onClose={onClose} finalFocusRef={btnRef}>
         <DrawerOverlay />
-        <DrawerContent maxW="644px">
+        <DrawerContent maxW="644px" pt="var(--app-navbar-height)">
           <DrawerCloseButton />
           <DrawerHeader mt={4} px={8} borderBottom="1px solid" borderColor={"border.light"}>
             <Text as="h2" fontWeight={700} fontSize={"2xl"}>

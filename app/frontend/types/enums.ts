@@ -115,7 +115,7 @@ export enum ERequirementTemplateSortFields {
   firstNations = "first_nations",
   description = "description",
   currentVersion = "current_version",
-  usedBy = "used_by",
+  availableIn = "available_in",
 }
 
 export enum EPreCheckSortFields {
