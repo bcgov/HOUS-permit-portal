@@ -4,7 +4,12 @@ import { IPermitType } from "../../models/permit-classification"
 import { useMst } from "../../setup/root"
 import { IOption } from "../../types/types"
 
-export function usePermitTypeOptions() {
+interface IUsePermitTypeOptionsProps {
+  publishedOnly?: boolean
+  jurisdictionId?: string
+}
+
+export function usePermitTypeOptions(props?: IUsePermitTypeOptionsProps) {
   const { t } = useTranslation()
   const { permitClassificationStore } = useMst()
   const { fetchPermitTypeOptions } = permitClassificationStore
@@ -12,24 +17,27 @@ export function usePermitTypeOptions() {
   const [error, setError] = React.useState<Error | undefined>()
 
   useEffect(() => {
-    if (!permitTypeOptions && !error) {
-      ;(async () => {
-        try {
-          const permitTypeOptions = await fetchPermitTypeOptions()
+    let isMounted = true
+    ;(async () => {
+      try {
+        const permitTypeOptions = await fetchPermitTypeOptions(props?.publishedOnly, null, null, props?.jurisdictionId)
 
-          if (!permitTypeOptions) {
-            throw new Error(t("errors.fetchPermitTypeOptions"))
-          } else {
-            setError(null)
-          }
-
-          setPermitTypeOptions(permitTypeOptions)
-        } catch (error) {
-          setError(error instanceof Error ? error : new Error(t("errors.fetchPermitTypeOptions")))
+        if (!permitTypeOptions) {
+          throw new Error(t("errors.fetchPermitTypeOptions"))
+        } else {
+          if (isMounted) setError(null)
         }
-      })()
+
+        if (isMounted) setPermitTypeOptions(permitTypeOptions)
+      } catch (error) {
+        if (isMounted) setError(error instanceof Error ? error : new Error(t("errors.fetchPermitTypeOptions")))
+      }
+    })()
+
+    return () => {
+      isMounted = false
     }
-  }, [])
+  }, [props?.publishedOnly, props?.jurisdictionId])
 
   return { permitTypeOptions, error }
 }

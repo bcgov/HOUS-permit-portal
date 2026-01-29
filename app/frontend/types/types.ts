@@ -307,6 +307,11 @@ export interface IJurisdictionServicePartnerEnrollment {
   updatedAt: Date
 }
 
+export interface IEnabledJurisdiction {
+  id: string
+  qualifiedName: string
+}
+
 export interface IReportDocument extends IBaseFileAttachment {
   stepCodeId: string
 }
@@ -819,4 +824,14 @@ interface IPart3ComplianceReportPerformance {
 
 export interface IPart3ComplianceReport {
   performance: IPart3ComplianceReportPerformance
+}
+
+export interface IRequirementTemplateFormJson {
+  id: string
+  legend: string
+  key: string
+  label: string
+  input: boolean
+  tableView: boolean
+  components: any[] // Todo: define component type
 }

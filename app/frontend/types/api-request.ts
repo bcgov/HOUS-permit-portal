@@ -108,6 +108,7 @@ export interface IRequirementTemplateUpdateParams {
   permitTypeId?: string | null
   activityId?: string | null
   requirementTemplateSectionsAttributes?: IRequirementTemplateSectionAttributes[]
+  availableGlobally?: boolean | null
 }
 
 export interface IInvitePreviewersParams {

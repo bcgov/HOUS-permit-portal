@@ -7,6 +7,7 @@ import { vancouverTimeZone } from "../constants"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
 import { EFlashMessageStatus, ERequirementTemplateType, EVisibility } from "../types/enums"
+import { IEnabledJurisdiction, IRequirementTemplateFormJson } from "../types/types"
 import { EarlyAccessPreviewModel } from "./early-access-preview"
 import { IActivity, IPermitType } from "./permit-classification"
 import { RequirementTemplateSectionModel } from "./requirement-template-section"
@@ -87,6 +88,8 @@ export const RequirementTemplateModel = types.snapshotProcessor(
       fetchedAt: types.maybeNull(types.Date),
       isFullyLoaded: types.optional(types.boolean, false),
       public: types.boolean,
+      availableGlobally: types.maybeNull(types.boolean),
+      enabledJurisdictions: types.maybe(types.array(types.frozen<IEnabledJurisdiction>())),
     })
     .extend(withRootStore())
     .extend(withEnvironment())
@@ -212,6 +215,27 @@ export const RequirementTemplateModel = types.snapshotProcessor(
           return self
         }
       }),
+      updateJurisdictionAvailabilities: flow(function* (jurisdictionIds: string[]) {
+        const response = yield self.environment.api.updateRequirementTemplateJurisdictionAvailabilities(
+          self.id,
+          jurisdictionIds
+        )
+        if (response.ok) {
+          const templateData = response.data.data
+          templateData.isFullyLoaded = true
+          self.rootStore.requirementTemplateStore.mergeUpdate(templateData, "requirementTemplateMap")
+          return self
+        }
+      }),
+      updateAvailableGlobally: flow(function* (availableGlobally: boolean) {
+        const response = yield self.environment.api.updateRequirementTemplate(self.id, { availableGlobally })
+        if (response.ok) {
+          const templateData = response.data.data
+          templateData.isFullyLoaded = true
+          self.rootStore.requirementTemplateStore.mergeUpdate(templateData, "requirementTemplateMap")
+          return self
+        }
+      }),
     })),
   {
     preProcessor,
@@ -219,13 +243,3 @@ export const RequirementTemplateModel = types.snapshotProcessor(
 )
 
 export interface IRequirementTemplate extends Instance<typeof RequirementTemplateModel> {}
-
-export interface IRequirementTemplateFormJson {
-  id: string
-  legend: string
-  key: string
-  label: string
-  input: boolean
-  tableView: boolean
-  components: any[] // Todo: define component type
-}

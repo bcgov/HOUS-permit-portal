@@ -37,6 +37,10 @@ class RequirementTemplate < ApplicationRecord
              ).limit(3)
            end,
            class_name: "TemplateVersion"
+  has_many :jurisdiction_requirement_templates, dependent: :destroy
+  has_many :enabled_jurisdictions,
+           through: :jurisdiction_requirement_templates,
+           source: :jurisdiction
   has_many :jurisdiction_template_version_customizations
 
   belongs_to :copied_from,

@@ -10,7 +10,8 @@ class RequirementTemplateBlueprint < Blueprinter::Base
          :created_at,
          :updated_at,
          :visibility,
-         :public
+         :public,
+         :available_globally
 
   field :used_by do |rt|
     rt.published_customizations_count
@@ -38,6 +39,13 @@ class RequirementTemplateBlueprint < Blueprinter::Base
               blueprint: EarlyAccessPreviewBlueprint,
               if: ->(_field_name, rt, options) do
                 rt.early_access? && options[:current_user]&.super_admin?
+              end
+
+  association :enabled_jurisdictions,
+              blueprint: JurisdictionBlueprint,
+              view: :minimal,
+              if: ->(_field_name, _rt, options) do
+                options[:current_user]&.super_admin?
               end
 
   view :extended do

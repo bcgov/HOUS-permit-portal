@@ -529,6 +529,13 @@ export class Api {
     })
   }
 
+  async updateRequirementTemplateJurisdictionAvailabilities(templateId: string, jurisdictionIds: string[]) {
+    return this.client.post<ApiResponse<IRequirementTemplate>>(
+      `/requirement_templates/${templateId}/jurisdiction_availabilities`,
+      { jurisdictionIds }
+    )
+  }
+
   async copyRequirementTemplate(params?: ICopyRequirementTemplateFormData) {
     return this.client.post<ApiResponse<IRequirementTemplate>>(`/requirement_templates/copy`, {
       requirementTemplate: params,

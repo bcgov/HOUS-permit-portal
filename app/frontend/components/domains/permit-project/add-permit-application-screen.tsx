@@ -49,12 +49,24 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
     ;(async () => {
       if (!currentPermitProject) return
 
+      const jurisdictionId = currentPermitProject.jurisdiction?.id
+
       // Default hidden selections
-      const permitTypeOptions = await permitClassificationStore.fetchPermitTypeOptions(true, isFirstNation, null, null)
+      const permitTypeOptions = await permitClassificationStore.fetchPermitTypeOptions(
+        true,
+        isFirstNation,
+        null,
+        jurisdictionId
+      )
       const lowRes = permitTypeOptions.find((o) => o.value.code === EPermitClassificationCode.lowResidential)?.value
       if (lowRes) {
         setPermitType(lowRes)
-        const activityOptions = await permitClassificationStore.fetchActivityOptions(true, isFirstNation, lowRes.id)
+        const activityOptions = await permitClassificationStore.fetchActivityOptions(
+          true,
+          isFirstNation,
+          lowRes.id,
+          jurisdictionId
+        )
         setActivityOptions(activityOptions)
       }
     })()
@@ -237,60 +249,69 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
             />
           </Flex>
 
-          {groupedActivities.map((group) => (
-            <Box key={group.key} mb={10}>
-              <Heading as="h3" fontSize="lg" mb={4}>
-                {group.label}
-              </Heading>
-              <Flex gap={6} wrap="wrap">
-                {group.options.map((opt) => {
-                  const checked = selectedActivityIds.includes(opt.value.id)
-                  return (
-                    <Box
-                      key={opt.value.id}
-                      onClick={() => toggleSelection(opt.value.id)}
-                      borderRadius="lg"
-                      p={6}
-                      border="1px solid"
-                      borderColor={checked ? "theme.blueAlt" : "border.light"}
-                      bg="white"
-                      w={{ base: "100%", md: "48%" }}
-                      transition="all 0.2s ease-in-out"
-                      _hover={{ bg: "hover.blue" }}
-                      cursor="pointer"
-                    >
-                      <Flex direction="column" justify="space-between" align="start" gap={4}>
-                        <Box>
-                          <Heading as="h3" fontSize="lg" mb={2}>
-                            {opt.value.name}
-                          </Heading>
-                          <SafeTipTapDisplay htmlContent={opt.value.descriptionHtml} />
-                        </Box>
-                        <Flex
-                          align="center"
-                          gap={2}
-                          border="1px solid"
-                          borderColor={checked ? "theme.blueAlt" : "border.light"}
-                          bg="white"
-                          px={4}
-                          py={2}
-                          borderRadius="md"
-                          alignSelf="flex-end"
-                        >
-                          <Checkbox
-                            isChecked={checked}
-                            onChange={() => toggleSelection(opt.value.id)}
-                            pointerEvents="none"
-                          />
-                          <Text fontWeight="medium">{t("permitProject.addPermits.addToProject")}</Text>
+          {activityOptions.length === 0 ? (
+            <CustomMessageBox
+              status={EFlashMessageStatus.info}
+              title={t("permitProject.addPermits.noPermitsAvailable")}
+              description={t("permitProject.addPermits.noPermitsAvailableDescription")}
+              my={12}
+            />
+          ) : (
+            groupedActivities.map((group) => (
+              <Box key={group.key} mb={10}>
+                <Heading as="h3" fontSize="lg" mb={4}>
+                  {group.label}
+                </Heading>
+                <Flex gap={6} wrap="wrap">
+                  {group.options.map((opt) => {
+                    const checked = selectedActivityIds.includes(opt.value.id)
+                    return (
+                      <Box
+                        key={opt.value.id}
+                        onClick={() => toggleSelection(opt.value.id)}
+                        borderRadius="lg"
+                        p={6}
+                        border="1px solid"
+                        borderColor={checked ? "theme.blueAlt" : "border.light"}
+                        bg="white"
+                        w={{ base: "100%", md: "48%" }}
+                        transition="all 0.2s ease-in-out"
+                        _hover={{ bg: "hover.blue" }}
+                        cursor="pointer"
+                      >
+                        <Flex direction="column" justify="space-between" align="start" gap={4}>
+                          <Box>
+                            <Heading as="h3" fontSize="lg" mb={2}>
+                              {opt.value.name}
+                            </Heading>
+                            <SafeTipTapDisplay htmlContent={opt.value.descriptionHtml} />
+                          </Box>
+                          <Flex
+                            align="center"
+                            gap={2}
+                            border="1px solid"
+                            borderColor={checked ? "theme.blueAlt" : "border.light"}
+                            bg="white"
+                            px={4}
+                            py={2}
+                            borderRadius="md"
+                            alignSelf="flex-end"
+                          >
+                            <Checkbox
+                              isChecked={checked}
+                              onChange={() => toggleSelection(opt.value.id)}
+                              pointerEvents="none"
+                            />
+                            <Text fontWeight="medium">{t("permitProject.addPermits.addToProject")}</Text>
+                          </Flex>
                         </Flex>
-                      </Flex>
-                    </Box>
-                  )
-                })}
-              </Flex>
-            </Box>
-          ))}
+                      </Box>
+                    )
+                  })}
+                </Flex>
+              </Box>
+            ))
+          )}
 
           {/* Action controls below the activity list */}
           <Flex w="full" gap={4} mt={2}>

@@ -36,17 +36,29 @@ import { VersionTag } from "../../shared/version-tag"
 
 interface IProps {
   requirementTemplate: IRequirementTemplate
+  isOpen?: boolean
+  onClose?: () => void
 }
 
-export const TemplateVersionsSidebar = observer(function TemplateVersionsSidebar({ requirementTemplate }: IProps) {
-  const { isOpen, onOpen, onClose } = useDisclosure()
+export const TemplateVersionsSidebar = observer(function TemplateVersionsSidebar({
+  requirementTemplate,
+  isOpen: externalIsOpen,
+  onClose: externalOnClose,
+}: IProps) {
+  const { isOpen: internalIsOpen, onOpen: internalOnOpen, onClose: internalOnClose } = useDisclosure()
   const btnRef = React.useRef()
+
+  const isOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen
+  const onClose = externalOnClose || internalOnClose
+  const onOpen = internalOnOpen
 
   return (
     <>
-      <Button size="sm" variant={"primary"} onClick={onOpen}>
-        {t("requirementTemplate.versionSidebar.triggerButton")}
-      </Button>
+      {externalIsOpen === undefined && (
+        <Button size="sm" variant={"primary"} onClick={onOpen}>
+          {t("requirementTemplate.versionSidebar.triggerButton")}
+        </Button>
+      )}
       <Drawer isOpen={isOpen} placement="right" onClose={onClose} finalFocusRef={btnRef}>
         <DrawerOverlay />
         <DrawerContent maxW="644px">

@@ -444,7 +444,7 @@ en:
         message: "New template created successfully!"
       update_success:
         title: ""
-        message: "This draft has been saved."
+        message: "This template has been saved."
       schedule_success:
         title: ""
         message: "Permit has been scheduled to published."
