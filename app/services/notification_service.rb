@@ -62,7 +62,10 @@ class NotificationService
   end
 
   def self.publish_new_template_version_publish_event(template_version)
-    manager_ids =
+    requirement_template = template_version.requirement_template
+
+    # Build manager query filtered by template availability
+    manager_query =
       User
         .joins(:preference)
         .where(role: %i[review_manager regional_review_manager])
@@ -73,7 +76,25 @@ class NotificationService
             }
           }
         )
-        .pluck(:id)
+
+    # Only notify managers whose jurisdictions have access to this template
+    unless requirement_template.available_globally
+      available_jurisdiction_ids =
+        requirement_template.jurisdiction_requirement_templates.pluck(
+          :jurisdiction_id
+        )
+      manager_query =
+        manager_query
+          .joins(:jurisdiction_memberships)
+          .where(
+            jurisdiction_memberships: {
+              jurisdiction_id: available_jurisdiction_ids
+            }
+          )
+          .distinct
+    end
+
+    manager_ids = manager_query.pluck(:id)
 
     relevant_permit_applications =
       PermitApplication

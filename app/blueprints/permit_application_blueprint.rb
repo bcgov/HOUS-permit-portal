@@ -81,6 +81,10 @@ class PermitApplicationBlueprint < Blueprinter::Base
     association :template_version, blueprint: TemplateVersionBlueprint
     association :published_template_version, blueprint: TemplateVersionBlueprint
 
+    field :template_version_disabled_by_jurisdiction do |pa, _options|
+      pa.template_version_disabled_by_jurisdiction?
+    end
+
     association :supporting_documents,
                 blueprint: SupportingDocumentBlueprint do |pa, options|
       pa.supporting_documents_for_submitter_based_on_user_permissions(

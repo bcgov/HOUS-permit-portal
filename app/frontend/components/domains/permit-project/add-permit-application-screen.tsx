@@ -52,11 +52,13 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
       const jurisdictionId = currentPermitProject.jurisdiction?.id
 
       // Default hidden selections
+      // hideDisabled: true to exclude templates disabled by this jurisdiction
       const permitTypeOptions = await permitClassificationStore.fetchPermitTypeOptions(
         true,
         isFirstNation,
         null,
-        jurisdictionId
+        jurisdictionId,
+        true // hideDisabled
       )
       const lowRes = permitTypeOptions.find((o) => o.value.code === EPermitClassificationCode.lowResidential)?.value
       if (lowRes) {
@@ -65,7 +67,8 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
           true,
           isFirstNation,
           lowRes.id,
-          jurisdictionId
+          jurisdictionId,
+          true // hideDisabled
         )
         setActivityOptions(activityOptions)
       }

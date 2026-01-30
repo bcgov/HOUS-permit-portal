@@ -86,6 +86,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
       isDirty: types.optional(types.boolean, false),
       isLoading: types.optional(types.boolean, false),
       usingCurrentTemplateVersion: types.maybeNull(types.boolean),
+      templateVersionDisabledByJurisdiction: types.optional(types.boolean, false),
       showingCompareAfter: types.optional(types.boolean, false),
       revisionMode: types.optional(types.boolean, false),
       diff: types.maybeNull(types.frozen<ITemplateVersionDiff>()),

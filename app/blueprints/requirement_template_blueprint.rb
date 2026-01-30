@@ -18,7 +18,17 @@ class RequirementTemplateBlueprint < Blueprinter::Base
   end
 
   field :available_in do |rt|
-    rt.available_globally ? "All" : rt.jurisdiction_requirement_templates.count
+    if rt.available_globally
+      I18n.t("activerecord.attributes.requirement_template.available_in_all")
+    else
+      rt.jurisdiction_requirement_templates.count
+    end
+  end
+
+  field :explicitly_disabled_jurisdictions do |rt|
+    rt.explicitly_disabled_jurisdictions.map do |j|
+      { id: j.id, qualified_name: j.qualified_name }
+    end
   end
 
   association :permit_type, blueprint: PermitClassificationBlueprint

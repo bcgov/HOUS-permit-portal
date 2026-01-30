@@ -307,7 +307,7 @@ export interface IJurisdictionServicePartnerEnrollment {
   updatedAt: Date
 }
 
-export interface IEnabledJurisdiction {
+export interface IJurisdictionStub {
   id: string
   qualifiedName: string
 }

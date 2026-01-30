@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_01_28_141002) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_29_185814) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -227,6 +227,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_28_141002) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.uuid "sandbox_id"
+    t.boolean "disabled", default: false, null: false
     t.index "jurisdiction_id, template_version_id, COALESCE(sandbox_id, '00000000-0000-0000-0000-000000000000'::uuid)", name: "index_jtvcs_unique_on_jurisdiction_template_sandbox", unique: true
     t.index ["jurisdiction_id"], name: "idx_on_jurisdiction_id_57cd0a7ea7"
     t.index ["sandbox_id"], name: "idx_on_sandbox_id_e5e6ef72b0"

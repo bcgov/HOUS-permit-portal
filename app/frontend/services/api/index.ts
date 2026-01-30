@@ -209,7 +209,8 @@ export class Api {
     permitTypeId: string = null,
     activityId: string = null,
     pid: string = null,
-    jurisdictionId: string = null
+    jurisdictionId: string = null,
+    hideDisabled = false
   ) {
     return this.client.post<IOptionResponse<IPermitType | IActivity>>(
       `/permit_classifications/permit_classification_options`,
@@ -221,6 +222,7 @@ export class Api {
         activityId,
         pid,
         jurisdictionId,
+        hideDisabled,
       }
     )
   }

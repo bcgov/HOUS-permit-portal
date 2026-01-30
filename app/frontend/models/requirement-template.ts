@@ -7,7 +7,7 @@ import { vancouverTimeZone } from "../constants"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
 import { EFlashMessageStatus, ERequirementTemplateType, EVisibility } from "../types/enums"
-import { IEnabledJurisdiction, IRequirementTemplateFormJson } from "../types/types"
+import { IJurisdictionStub, IRequirementTemplateFormJson } from "../types/types"
 import { EarlyAccessPreviewModel } from "./early-access-preview"
 import { IActivity, IPermitType } from "./permit-classification"
 import { RequirementTemplateSectionModel } from "./requirement-template-section"
@@ -90,7 +90,8 @@ export const RequirementTemplateModel = types.snapshotProcessor(
       isFullyLoaded: types.optional(types.boolean, false),
       public: types.boolean,
       availableGlobally: types.maybeNull(types.boolean),
-      enabledJurisdictions: types.maybe(types.array(types.frozen<IEnabledJurisdiction>())),
+      enabledJurisdictions: types.maybe(types.array(types.frozen<IJurisdictionStub>())),
+      explicitlyDisabledJurisdictions: types.optional(types.array(types.frozen<IJurisdictionStub>()), []),
     })
     .extend(withRootStore())
     .extend(withEnvironment())
