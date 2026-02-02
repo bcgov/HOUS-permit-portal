@@ -73,7 +73,8 @@ class Api::PreChecksController < Api::ApplicationController
     authorize @pre_check
 
     begin
-      if @pre_check.submit
+      method_to_use = Rails.env.development? ? :simulate_submit! : :submit!
+      if @pre_check.send(method_to_use)
         render_success @pre_check,
                        "pre_check.submit_success",
                        { blueprint: PreCheckBlueprint }
