@@ -76,9 +76,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_30_180440) do
     t.index ["contactable_type", "contactable_id"], name: "index_contacts_on_contactable"
   end
 
-  create_table "data_migrations", primary_key: "version", id: :string, force: :cascade do |t|
-  end
-
   create_table "design_documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "pre_check_id", null: false
     t.text "file_data"
@@ -152,12 +149,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_30_180440) do
     t.index ["token"], name: "index_external_api_keys_on_token", unique: true
   end
 
-  create_table "fancy_widgets", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.string "name", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-  end
-
   create_table "fuel_types", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "checklist_id"
     t.string "description"
@@ -200,16 +191,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_30_180440) do
     t.index ["user_id"], name: "index_jurisdiction_memberships_on_user_id"
   end
 
-  create_table "jurisdiction_requirement_templates", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.uuid "jurisdiction_id", null: false
-    t.uuid "requirement_template_id", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["jurisdiction_id", "requirement_template_id"], name: "index_jrt_on_jurisdiction_and_template", unique: true
-    t.index ["jurisdiction_id"], name: "index_jurisdiction_requirement_templates_on_jurisdiction_id"
-    t.index ["requirement_template_id"], name: "idx_on_requirement_template_id_df1d54db04"
-  end
-
   create_table "jurisdiction_service_partner_enrollments", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "jurisdiction_id", null: false
     t.integer "service_partner", null: false
@@ -227,7 +208,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_30_180440) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.uuid "sandbox_id"
-    t.boolean "disabled", default: false, null: false
     t.index "jurisdiction_id, template_version_id, COALESCE(sandbox_id, '00000000-0000-0000-0000-000000000000'::uuid)", name: "index_jtvcs_unique_on_jurisdiction_template_sandbox", unique: true
     t.index ["jurisdiction_id"], name: "idx_on_jurisdiction_id_57cd0a7ea7"
     t.index ["sandbox_id"], name: "idx_on_sandbox_id_e5e6ef72b0"
@@ -501,8 +481,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_30_180440) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "number"
-    t.decimal "latitude", precision: 10, scale: 6
-    t.decimal "longitude", precision: 10, scale: 6
     t.string "omniauth_username_snapshot"
     t.string "first_name_snapshot"
     t.string "last_name_snapshot"
@@ -683,7 +661,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_30_180440) do
     t.uuid "assignee_id"
     t.boolean "public", default: false
     t.uuid "site_configuration_id"
-    t.boolean "available_globally"
     t.index ["activity_id"], name: "index_requirement_templates_on_activity_id"
     t.index ["assignee_id"], name: "index_requirement_templates_on_assignee_id"
     t.index ["copied_from_id"], name: "index_requirement_templates_on_copied_from_id"
@@ -1059,8 +1036,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_30_180440) do
   add_foreign_key "integration_mappings", "template_versions"
   add_foreign_key "jurisdiction_memberships", "jurisdictions"
   add_foreign_key "jurisdiction_memberships", "users"
-  add_foreign_key "jurisdiction_requirement_templates", "jurisdictions"
-  add_foreign_key "jurisdiction_requirement_templates", "requirement_templates"
   add_foreign_key "jurisdiction_service_partner_enrollments", "jurisdictions"
   add_foreign_key "jurisdiction_template_version_customizations", "jurisdictions"
   add_foreign_key "jurisdiction_template_version_customizations", "sandboxes"
