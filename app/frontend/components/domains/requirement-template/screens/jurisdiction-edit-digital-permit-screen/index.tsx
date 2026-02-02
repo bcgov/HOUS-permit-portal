@@ -276,7 +276,7 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
             </ButtonGroup>
           </Flex>
 
-          <FloatingHelpDrawer top="100px" />
+          <FloatingHelpDrawer />
           {isCompare &&
             (diff ? (
               <CompareRequirementsBox data={infoBoxData} />
