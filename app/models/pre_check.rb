@@ -91,6 +91,47 @@ class PreCheck < ApplicationRecord
     raise # This will rollback the AASM transition
   end
 
+  # Simulates submitting a pre-check without making actual API calls
+  # Only works in development/test environments
+  # Bypasses the need for a tunnel and Archistar API authentication
+  # @return [Boolean] true if successful, raises error otherwise
+  # @example
+  #   pre_check = PreCheck.find(123)
+  #   pre_check.simulate_submit!
+  def simulate_submit!
+    unless Rails.env.development? || Rails.env.test?
+      raise "simulate_submit! can only be called in development or test environments"
+    end
+
+    # Generate a fake external_id that looks like a real Archistar certificate number
+    fake_external_id = "SIM-#{Time.current.to_i}-#{SecureRandom.hex(4).upcase}"
+
+    # Temporarily override submit_to_archistar to skip the API call
+    define_singleton_method(:submit_to_archistar) do
+      self.update(external_id: fake_external_id, submitted_at: Time.current)
+    end
+
+    begin
+      # Use the normal submit! method which handles all validations and state transitions
+      # This will also trigger notifications (which is fine for development)
+      submit!
+      Rails.logger.info(
+        "Simulated submission for pre-check #{id} with external_id: #{fake_external_id}"
+      )
+      true
+    rescue => e
+      Rails.logger.error("Simulated submission failed: #{e.message}")
+      raise
+    ensure
+      # Remove the singleton method to restore the original instance method
+      singleton_class.class_eval do
+        if method_defined?(:submit_to_archistar)
+          remove_method(:submit_to_archistar)
+        end
+      end
+    end
+  end
+
   def formatted_address
     return nil if full_address.blank?
 
@@ -201,7 +242,7 @@ class PreCheck < ApplicationRecord
   end
 
   def agreements_accepted_before_permit_type
-    return unless permit_type_id.present?
+    return unless permit_type_id.present? && permit_application.nil?
     return if required_agreements_accepted?
 
     errors.add(

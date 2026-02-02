@@ -707,6 +707,10 @@ const AppRoutes = observer(() => {
             <Route path="/permit-applications/:permitApplicationId/edit" element={<EditPermitApplicationScreen />} />
             <Route path="/permit-applications/:permitApplicationId/edit/pre-check" element={<PreCheckForm />} />
             <Route
+              path="/permit-applications/:permitApplicationId/edit/pre-check/:section"
+              element={<PreCheckForm />}
+            />
+            <Route
               path="/permit-applications/:permitApplicationId/edit/part-9-step-code"
               element={<Part9StepCodeForm />}
             />

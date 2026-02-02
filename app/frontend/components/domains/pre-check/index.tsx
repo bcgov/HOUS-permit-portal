@@ -41,12 +41,18 @@ export const PreCheckForm = observer(function PreCheckForm() {
   // handle redirect if no section is specified
   useEffect(() => {
     if (!section && currentPreCheck) {
-      navigate(
-        `/pre-checks/${currentPreCheck.id}/edit/${currentPreCheck.status === EPreCheckStatus.complete ? "results-summary" : "service-partner"}`,
-        { replace: true }
-      )
+      const defaultSection = currentPreCheck.status === EPreCheckStatus.complete ? "results-summary" : "service-partner"
+
+      // Determine which route pattern we're using based on the current pathname
+      if (permitApplicationId) {
+        // Permit application route pattern
+        navigate(`/permit-applications/${permitApplicationId}/edit/pre-check/${defaultSection}`, { replace: true })
+      } else if (preCheckId) {
+        // Pre-check route pattern
+        navigate(`/pre-checks/${preCheckId}/edit/${defaultSection}`, { replace: true })
+      }
     }
-  }, [section, currentPreCheck])
+  }, [section, currentPreCheck, permitApplicationId, preCheckId, navigate])
 
   // ensure scroll resets on section change at the container level
   useEffect(() => {
