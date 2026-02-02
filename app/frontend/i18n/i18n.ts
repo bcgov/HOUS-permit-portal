@@ -772,6 +772,8 @@ const options = {
           },
         },
         jurisdiction: {
+          allJurisdictionsEnabledDescription:
+            "All jurisdictions are currently enabled. Turn off the switch above to select specific jurisdictions.",
           yourJurisdiction: "your jurisdiction",
           edit: {
             displayDescriptionLabel: "Jurisdiction description (public)",
@@ -3741,6 +3743,9 @@ Thank you,
           filter: "Template",
           versions: "Versions",
           access: {
+            subtitle: "Control which jurisdictions can use this template:",
+            jurisdictionOverrides: "Jurisdiction overrides",
+            disabledBy: "Disabled by:",
             title: "Manage access",
             jurisdictionAccess: "Jurisdiction access",
             description: "Control which jurisdictions can use this template.",
@@ -4027,8 +4032,6 @@ Thank you,
               enableForAll: "Enable for all jurisdictions",
               enrolledJurisdictions: "Select jurisdictions",
               allJurisdictionsEnabled: "All jurisdictions enabled",
-              allJurisdictionsEnabledDescription:
-                "All jurisdictions are currently enabled for Archistar eCheck. Turn off the switch above to select specific jurisdictions.",
               jurisdictionsCount: "{{count}} jurisdictions enabled",
               jurisdictionsCount_one: "{{count}} jurisdiction enabled",
               jurisdictionsCount_other: "{{count}} jurisdictions enabled",

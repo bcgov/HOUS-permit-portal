@@ -160,7 +160,7 @@ export const JurisdictionAccessSelect = observer(function JurisdictionAccessSele
               <Text>
                 {enableForAllDescription ||
                   t(
-                    "siteConfiguration.globalFeatureAccess.codeComplianceSetup.allJurisdictionsEnabledDescription",
+                    "jurisdiction.allJurisdictionsEnabledDescription",
                     "All jurisdictions are currently enabled. Turn off the switch above to select specific jurisdictions."
                   )}
               </Text>
