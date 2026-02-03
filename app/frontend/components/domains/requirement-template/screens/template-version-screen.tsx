@@ -82,7 +82,7 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
               {t("ui.close")}
             </Button>
           </Flex>
-          <FloatingHelpDrawer top="24" />
+          <FloatingHelpDrawer />
 
           <SectionsDisplay
             sections={templateSections}
