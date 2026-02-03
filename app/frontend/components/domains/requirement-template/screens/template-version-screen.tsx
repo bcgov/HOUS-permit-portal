@@ -51,7 +51,6 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
         status={templateVersion.status}
         versionDate={templateVersion.versionDate}
         latestVersionId={templateVersion.latestVersionId}
-        forEdit
       />
       <Box borderTop={"1px solid"} borderColor={"border.base"}>
         <SectionsSidebar
@@ -83,7 +82,7 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
               {t("ui.close")}
             </Button>
           </Flex>
-          <FloatingHelpDrawer top="24" />
+          <FloatingHelpDrawer />
 
           <SectionsDisplay
             sections={templateSections}
