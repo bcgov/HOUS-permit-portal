@@ -403,7 +403,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
                 )}
               </HStack>
             )}
-            <FloatingHelpDrawer top={permitHeaderHeight + 20} position="absolute" />
+            <FloatingHelpDrawer top="250px" />
           </Flex>
           {currentPermitApplication.isRevisionsRequested && (
             <Flex

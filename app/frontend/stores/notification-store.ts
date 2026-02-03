@@ -10,7 +10,6 @@ import {
   IPermitBlockStatusReadyNotificationObjectData,
   IPermitCollaborationNotificationObjectData,
   IPermitNotificationObjectData,
-  IRequirementTemplateNotificationObjectData,
   ITemplateVersionNotificationObjectData,
   IUserPushPayload,
 } from "../types/types"
@@ -51,18 +50,11 @@ export const NotificationStoreModel = types
       const currentUser = self.rootStore.userStore.currentUser
       const jurisdiction = currentUser.jurisdiction
       let objectData = notification.objectData
-      const draftFilterUriComponent = encodeURIComponent(self.rootStore.permitApplicationStore.draftStatuses.join(","))
       if (notification.actionType === ENotificationActionType.newTemplateVersionPublish) {
         const linkData = [
           {
             text: t("permitApplication.reviewOutdatedSubmissionLink"),
-            href: `/permit-applications?requirementTemplateId=${(objectData as IRequirementTemplateNotificationObjectData).requirementTemplateId}&status=${draftFilterUriComponent}&flash=${encodeURIComponent(
-              JSON.stringify({
-                type: "success",
-                title: t("permitApplication.reviewOutdatedTitle"),
-                message: t("permitApplication.reviewOutdatedMessage"),
-              })
-            )}`,
+            href: `/projects`,
           },
         ]
         if (currentUser?.isReviewStaff && currentUser.jurisdiction?.slug) {
@@ -83,13 +75,7 @@ export const NotificationStoreModel = types
         return [
           {
             text: t("permitApplication.reviewCustomizedSubmissionLink"),
-            href: `/permit-applications?requirementTemplateId=${(objectData as IRequirementTemplateNotificationObjectData).requirementTemplateId}&status=${draftFilterUriComponent}&flash=${encodeURIComponent(
-              JSON.stringify({
-                type: "success",
-                title: t("permitApplication.reviewCustomizedTitle"),
-                message: t("permitApplication.reviewCustomizedMessage"),
-              })
-            )}`,
+            href: `/projects`,
           },
         ]
       } else if (
