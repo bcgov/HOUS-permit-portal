@@ -37,6 +37,10 @@ class RequirementTemplate < ApplicationRecord
              ).limit(3)
            end,
            class_name: "TemplateVersion"
+  has_many :jurisdiction_requirement_templates, dependent: :destroy
+  has_many :enabled_jurisdictions,
+           through: :jurisdiction_requirement_templates,
+           source: :jurisdiction
   has_many :jurisdiction_template_version_customizations
 
   belongs_to :copied_from,
@@ -241,7 +245,9 @@ class RequirementTemplate < ApplicationRecord
       visibility: visibility,
       public: public?,
       created_at: created_at,
-      used_by: published_customizations_count
+      used_by: published_customizations_count,
+      available_in:
+        (available_globally ? "All" : jurisdiction_requirement_templates.count)
     }
   end
 

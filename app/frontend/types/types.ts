@@ -307,6 +307,11 @@ export interface IJurisdictionServicePartnerEnrollment {
   updatedAt: Date
 }
 
+export interface IEnabledJurisdiction {
+  id: string
+  qualifiedName: string
+}
+
 export interface IReportDocument extends IBaseFileAttachment {
   stepCodeId: string
 }
@@ -819,4 +824,46 @@ interface IPart3ComplianceReportPerformance {
 
 export interface IPart3ComplianceReport {
   performance: IPart3ComplianceReportPerformance
+}
+
+interface IFormIOComponent {
+  type: string
+  key: string
+  id?: string
+  label?: string
+  input: boolean
+  tableView?: boolean
+  components?: IFormIOComponent[]
+  columns?: IFormIOComponent[]
+  // Common optional properties
+  validate?: { required?: boolean; [key: string]: any }
+  conditional?: any
+  customConditional?: string
+  widget?: any
+  customClass?: string
+  disabled?: boolean
+  hidden?: boolean
+  multiple?: boolean
+  persistent?: boolean | string
+  html?: string
+  action?: string
+  custom?: string
+  defaultValue?: any
+  placeholder?: string
+  prefix?: string
+  suffix?: string
+  clearOnHide?: boolean
+  unique?: boolean
+  protected?: boolean
+  [key: string]: any // Allow additional properties for component-specific fields
+}
+
+export interface IRequirementTemplateFormJson {
+  id: string
+  legend: string
+  key: string
+  label: string
+  input: boolean
+  tableView: boolean
+  components: IFormIOComponent[]
 }

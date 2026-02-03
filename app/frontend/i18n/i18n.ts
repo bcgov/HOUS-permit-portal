@@ -325,6 +325,7 @@ const options = {
           unverified: "Unverified",
           tip: "Tip",
           manage: "Manage",
+          moreOptions: "More options",
           export: "Export",
           preview: "Preview",
           back: "Back",
@@ -1042,6 +1043,9 @@ Thank you,
             bcbcPartHeading: "BCBC Part",
             bcbcPart:
               "Right now, you can apply for permits for small-scale projects. This includes residential buildings, small structures, trades permits, and site work.",
+            noPermitsAvailable: "No permits are available",
+            noPermitsAvailableDescription:
+              "There are currently no permits available for this jurisdiction. Contact your local government for more information.",
             beforeYouBegin: {
               heading: "Before you begin",
               intro:
@@ -3732,6 +3736,21 @@ Thank you,
           added: "added",
           removed: "removed",
           filter: "Template",
+          versions: "Versions",
+          access: {
+            title: "Manage access",
+            jurisdictionAccess: "Jurisdiction access",
+            description: "Control which jurisdictions can use this template.",
+            enableForAll: "Available to all jurisdictions",
+            enableForAllDesc: "This template is available to all jurisdictions.",
+            usageStats: "Usage statistics",
+            jurisdictionsUsingTemplate: "jurisdictions using this template",
+            availability: "Availability",
+            statusGlobal: "Globally available",
+            statusRestricted: "Restricted access",
+            statusGlobalDesc: "All jurisdictions can access and use this template.",
+            statusRestrictedDesc: "{{count}} jurisdictions have been granted access to this template.",
+          },
           edit: {
             requirementsLibraryTab: "Requirements Library",
             earlyAccessRequirementsLibraryTab: "Early Access Requirements Library",
@@ -3806,7 +3825,7 @@ Thank you,
             firstNations: "First Nations",
             description: "Description",
             currentVersion: "Current version",
-            usedBy: "Used by",
+            availableIn: "Available in",
           },
           status: {
             published: "Published",
@@ -3819,7 +3838,7 @@ Thank you,
             tableHeading: "Templates",
             title: "Permit templates catalogue",
             description:
-              "List of all permit templates in the system that's been created by the Super Admin. Only published templates will be visible to jurisdictions and submitters.",
+              "View all permit templates and manage which ones are available to jurisdictions and applicants. Only published templates are visible to jurisdictions and applicants.",
             createButton: "Create new template",
           },
           new: {
@@ -3898,12 +3917,15 @@ Thank you,
             permitType: "BCBC part",
             selectPermit: "Select a digital permit:",
             workType: "Work type",
-            manageButton: "Manage",
+            manageButton: "More options",
             lastUpdated: "Last updated",
             requestNewPromptWithLink:
               "Your administrator has made the above permit classifications available for digital submissions. If there is another classification you want please <1>request a new classification</1>.",
             emptyPermitsText:
               "No available building permits of the selected work type. Please wait for updates from the Ministry of Housing.",
+            noPermitsAvailable: "No permits are available for your jurisdiction",
+            noPermitsAvailableDescription:
+              "There are currently no permit templates enabled for your jurisdiction. Contact your administrator for more information.",
           },
           edit: {
             requirementBlockSidebar: {

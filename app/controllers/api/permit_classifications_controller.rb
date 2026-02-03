@@ -33,6 +33,15 @@ class Api::PermitClassificationsController < Api::ApplicationController
                 :permit_type_id
               )
             query = query.where(permit_type_id: permit_type_ids)
+
+            # Filter by jurisdiction availability (globally available or explicitly enabled)
+
+            query =
+              query.left_joins(:jurisdiction_requirement_templates).where(
+                "requirement_templates.available_globally = ? OR jurisdiction_requirement_templates.jurisdiction_id = ?",
+                true,
+                jurisdiction.id
+              )
           end
 
           query =

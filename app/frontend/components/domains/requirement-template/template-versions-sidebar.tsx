@@ -36,20 +36,32 @@ import { VersionTag } from "../../shared/version-tag"
 
 interface IProps {
   requirementTemplate: IRequirementTemplate
+  isOpen?: boolean
+  onClose?: () => void
 }
 
-export const TemplateVersionsSidebar = observer(function TemplateVersionsSidebar({ requirementTemplate }: IProps) {
-  const { isOpen, onOpen, onClose } = useDisclosure()
+export const TemplateVersionsSidebar = observer(function TemplateVersionsSidebar({
+  requirementTemplate,
+  isOpen: externalIsOpen,
+  onClose: externalOnClose,
+}: IProps) {
+  const { isOpen: internalIsOpen, onOpen: internalOnOpen, onClose: internalOnClose } = useDisclosure()
   const btnRef = React.useRef()
+
+  const isOpen = externalIsOpen ?? internalIsOpen
+  const onClose = externalOnClose || internalOnClose
+  const onOpen = internalOnOpen
 
   return (
     <>
-      <Button size="sm" variant={"primary"} onClick={onOpen}>
-        {t("requirementTemplate.versionSidebar.triggerButton")}
-      </Button>
+      {externalIsOpen === undefined && (
+        <Button size="sm" variant={"primary"} onClick={onOpen}>
+          {t("requirementTemplate.versionSidebar.triggerButton")}
+        </Button>
+      )}
       <Drawer isOpen={isOpen} placement="right" onClose={onClose} finalFocusRef={btnRef}>
         <DrawerOverlay />
-        <DrawerContent maxW="644px">
+        <DrawerContent maxW="644px" pt="var(--app-navbar-height)">
           <DrawerCloseButton />
           <DrawerHeader mt={4} px={8} borderBottom="1px solid" borderColor={"border.light"}>
             <Text as="h2" fontWeight={700} fontSize={"2xl"}>
