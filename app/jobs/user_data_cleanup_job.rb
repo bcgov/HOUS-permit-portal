@@ -111,8 +111,9 @@ class UserDataCleanupJob
   end
 
   def day_window_ending(current_time, target_days_ago)
-    start_time = current_time - target_days_ago.days
-    end_time = current_time - (target_days_ago - 1).days
+    target_date = (current_time - target_days_ago.days).to_date
+    start_time = target_date.beginning_of_day
+    end_time = target_date.end_of_day
     [start_time, end_time]
   end
 end
