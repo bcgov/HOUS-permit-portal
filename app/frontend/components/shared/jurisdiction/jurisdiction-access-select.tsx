@@ -147,7 +147,7 @@ export const JurisdictionAccessSelect = observer(function JurisdictionAccessSele
                 }
                 isLoading={isSaving || isLoading}
                 isDisabled={isSaving || isLoading}
-                menuPortalTarget={typeof document !== "undefined" ? document.body : undefined}
+                menuPortalTarget={document.body}
                 styles={{
                   menuPortal: (base) => ({ ...base, zIndex: 9999 }),
                 }}

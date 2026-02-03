@@ -48,7 +48,7 @@ export const TemplateVersionsSidebar = observer(function TemplateVersionsSidebar
   const { isOpen: internalIsOpen, onOpen: internalOnOpen, onClose: internalOnClose } = useDisclosure()
   const btnRef = React.useRef()
 
-  const isOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen
+  const isOpen = externalIsOpen ?? internalIsOpen
   const onClose = externalOnClose || internalOnClose
   const onOpen = internalOnOpen
 

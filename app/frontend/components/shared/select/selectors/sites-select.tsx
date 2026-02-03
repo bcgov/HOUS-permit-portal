@@ -202,9 +202,7 @@ export const SitesSelect = observer(function ({
               closeMenuOnSelect={true}
               isCreatable={false}
               // Render menu in a portal by default to avoid clipping in overflow contexts
-              menuPortalTarget={
-                (rest as any).menuPortalTarget ?? (typeof document !== "undefined" ? document.body : undefined)
-              }
+              menuPortalTarget={(rest as any).menuPortalTarget ?? document.body}
               {...rest}
             />
           </InputGroup>

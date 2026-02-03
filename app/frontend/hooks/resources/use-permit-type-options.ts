@@ -24,9 +24,8 @@ export function usePermitTypeOptions(props?: IUsePermitTypeOptionsProps) {
 
         if (!permitTypeOptions) {
           throw new Error(t("errors.fetchPermitTypeOptions"))
-        } else {
-          if (isMounted) setError(null)
         }
+        if (isMounted) setError(null)
 
         if (isMounted) setPermitTypeOptions(permitTypeOptions)
       } catch (error) {
