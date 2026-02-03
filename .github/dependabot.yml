@@ -1,0 +1,67 @@
+# Dependabot configuration
+# https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+
+version: 2
+updates:
+  # Ruby gems (Bundler)
+  - package-ecosystem: "bundler"
+    directory: "/"
+    target-branch: "stable"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "ruby"
+
+  # npm packages (JavaScript/TypeScript frontend)
+  - package-ecosystem: "npm"
+    directory: "/"
+    target-branch: "stable"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "javascript"
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    target-branch: "stable"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "github-actions"
+
+  # Docker - main app
+  - package-ecosystem: "docker"
+    directory: "/devops/docker/app"
+    target-branch: "stable"
+    schedule:
+      interval: "daily"
+    labels:
+      - "dependencies"
+      - "docker"
+
+  # Docker - clamav
+  - package-ecosystem: "docker"
+    directory: "/devops/helm-charts/clamav"
+    target-branch: "stable"
+    schedule:
+      interval: "daily"
+    labels:
+      - "dependencies"
+      - "docker"
+
+  # Docker - consigno-verifio-notarius-server
+  - package-ecosystem: "docker"
+    directory: "/devops/docker/consigno-verifio-notarius-server"
+    target-branch: "stable"
+    schedule:
+      interval: "daily"
+    labels:
+      - "dependencies"
+      - "docker"
