@@ -112,7 +112,7 @@ export const JurisdictionScreen = observer(() => {
         <JurisdictionMap
           mapPosition={mapPositionWatch}
           mapZoom={mapZoomWatch}
-          linePositions={currentJurisdiction.boundryPoints}
+          linePositions={currentJurisdiction.boundaryPoints}
         />
       </Show>
       <Container maxW="container.lg" py={{ base: 6, md: 16 }} px={8}>
@@ -418,7 +418,7 @@ const EditableMap = ({ currentJurisdiction }: IEditableMapProps) => {
         <JurisdictionMap
           mapPosition={mapPositionWatch}
           mapZoom={mapZoomWatch}
-          linePositions={currentJurisdiction.boundryPoints}
+          linePositions={currentJurisdiction.boundaryPoints}
           onMapDrag={isEditingMap && ((latLng) => setValue("mapPosition", latLng))}
           onZoomChange={isEditingMap && ((zoom) => setValue("mapZoom", zoom))}
           isEditingMap={isEditingMap}

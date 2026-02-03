@@ -17,7 +17,7 @@ class JurisdictionBlueprint < Blueprinter::Base
            :reviewers_size,
            :permit_applications_size,
            :map_position,
-           :boundry_points,
+           :boundary_points,
            :inbox_enabled,
            :show_about_page,
            :allow_designated_reviewer,

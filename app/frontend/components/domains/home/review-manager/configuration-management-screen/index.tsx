@@ -50,7 +50,7 @@ export const ConfigurationManagementScreen = observer(function ConfigurationMana
                 {/* TODO: what to show here? */}
                 {/* <FormControl>
               <FormLabel>{t(`${i18nPrefix}.jurisdictionLocationLabel`)}</FormLabel>
-              <Input bg="greys.white" value={jurisdiction.boundryPoints} isDisabled />
+              <Input bg="greys.white" value={jurisdiction.boundaryPoints} isDisabled />
             </FormControl> */}
               </Flex>
             </SectionBox>
