@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_01_30_180440) do
+ActiveRecord::Schema[7.2].define(version: 2026_02_03_163643) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -74,6 +74,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_30_180440) do
     t.uuid "contactable_id"
     t.string "contact_type"
     t.index ["contactable_type", "contactable_id"], name: "index_contacts_on_contactable"
+  end
+
+  create_table "data_migrations", primary_key: "version", id: :string, force: :cascade do |t|
   end
 
   create_table "design_documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -1025,12 +1028,12 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_30_180440) do
   add_foreign_key "api_key_expiration_notifications", "external_api_keys"
   add_foreign_key "collaborators", "users"
   add_foreign_key "design_documents", "pre_checks"
-  add_foreign_key "document_references", "part_3_step_code_checklists", column: "checklist_id"
+  add_foreign_key "document_references", "part_3_step_code_checklists", column: "checklist_id", on_delete: :cascade
   add_foreign_key "early_access_previews", "users", column: "previewer_id"
-  add_foreign_key "energy_outputs", "part_3_step_code_checklists", column: "checklist_id"
+  add_foreign_key "energy_outputs", "part_3_step_code_checklists", column: "checklist_id", on_delete: :cascade
   add_foreign_key "external_api_keys", "jurisdictions"
   add_foreign_key "external_api_keys", "sandboxes"
-  add_foreign_key "fuel_types", "part_3_step_code_checklists", column: "checklist_id"
+  add_foreign_key "fuel_types", "part_3_step_code_checklists", column: "checklist_id", on_delete: :cascade
   add_foreign_key "integration_mapping_notifications", "template_versions"
   add_foreign_key "integration_mappings", "jurisdictions"
   add_foreign_key "integration_mappings", "template_versions"
@@ -1041,11 +1044,11 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_30_180440) do
   add_foreign_key "jurisdiction_template_version_customizations", "sandboxes"
   add_foreign_key "jurisdiction_template_version_customizations", "template_versions"
   add_foreign_key "jurisdictions", "jurisdictions", column: "regional_district_id"
-  add_foreign_key "make_up_air_fuels", "part_3_step_code_checklists", column: "checklist_id"
-  add_foreign_key "occupancy_classifications", "part_3_step_code_checklists", column: "checklist_id"
+  add_foreign_key "make_up_air_fuels", "part_3_step_code_checklists", column: "checklist_id", on_delete: :cascade
+  add_foreign_key "occupancy_classifications", "part_3_step_code_checklists", column: "checklist_id", on_delete: :cascade
   add_foreign_key "part_3_step_code_checklists", "step_codes", on_delete: :cascade
   add_foreign_key "part_9_step_code_checklists", "permit_type_required_steps", column: "step_requirement_id"
-  add_foreign_key "part_9_step_code_checklists", "step_codes"
+  add_foreign_key "part_9_step_code_checklists", "step_codes", on_delete: :cascade
   add_foreign_key "permit_applications", "jurisdictions"
   add_foreign_key "permit_applications", "permit_classifications", column: "activity_id"
   add_foreign_key "permit_applications", "permit_classifications", column: "permit_type_id"
@@ -1085,8 +1088,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_30_180440) do
   add_foreign_key "revision_requests", "submission_versions"
   add_foreign_key "revision_requests", "users"
   add_foreign_key "sandboxes", "jurisdictions"
-  add_foreign_key "step_code_building_characteristics_summaries", "part_9_step_code_checklists", column: "checklist_id"
-  add_foreign_key "step_code_data_entries", "part_9_step_code_checklists", column: "checklist_id"
+  add_foreign_key "step_code_building_characteristics_summaries", "part_9_step_code_checklists", column: "checklist_id", on_delete: :cascade
+  add_foreign_key "step_code_data_entries", "part_9_step_code_checklists", column: "checklist_id", on_delete: :cascade
   add_foreign_key "step_codes", "jurisdictions"
   add_foreign_key "step_codes", "permit_applications"
   add_foreign_key "step_codes", "permit_projects"
