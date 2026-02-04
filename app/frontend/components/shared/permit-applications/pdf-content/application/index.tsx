@@ -78,11 +78,7 @@ const FormComponent = function ApplicationPDFFormComponent({
         const options = R.path([dataPath, component.key], permitApplication.submissionData.data)
         const label = component.label
         const values: any = Object.keys(options ?? {}).filter((key) => !!options[key])
-        const optionValues = Array.isArray(component.values)
-          ? component.values
-          : Array.isArray(component.data?.values)
-            ? component.data.values
-            : []
+        const optionValues = Array.isArray(component.values) ? component.values : []
         return { options, values, label, optionValues, isVisible: !R.isEmpty(values) && !R.isNil(label) }
       }
       case EComponentType.datagrid: {
@@ -342,15 +338,11 @@ const ChecklistField = function ApplicationPDFPanelChecklistField({ options, lab
 
   const normalizedOptions = orderedOptions
     .map((option) => {
-      if (typeof option === "string") {
-        const value = option
-        return { value, label: labelByValue.get(value) ?? value }
-      }
       if (!option || typeof option !== "object") return null
       const value = option.value ?? option.label
       if (value === undefined || value === null) return null
       const valueKey = String(value)
-      const label = option.label ?? labelByValue.get(valueKey) ?? valueKey
+      const label = option.label
       return { value: valueKey, label }
     })
     .filter((option): option is { value: string; label: string } => !!option)
