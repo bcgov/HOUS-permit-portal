@@ -85,6 +85,11 @@ class UserDataCleanupJob
   end
 
   def handle_user_resources(user)
+    # Ensure all models are loaded so PublicRecordable.recordable_models is fully populated.
+    # In development/test, Rails uses lazy loading, so models that include PublicRecordable
+    # won't register themselves until their class file is loaded.
+    Rails.application.eager_load! unless Rails.application.config.eager_load
+
     PublicRecordable.recordable_models.each do |model_class|
       # Skip if the model doesn't have a user association (shouldn't happen if using the concern correctly)
       association_name = model_class.public_recordable_user_association
