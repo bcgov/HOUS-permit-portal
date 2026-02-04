@@ -1,12 +1,5 @@
 class StepCode < ApplicationRecord
-  include ProjectItem
-  include Discard::Model
-  include ChecklistReportDocumentConcern
-  include PublicRecordable
-
-  has_parent :permit_application
-
-  # Enable search for StepCodes
+  # searchkick must be declared before Discard::Model to ensure auto-callbacks register correctly
   searchkick word_middle: %i[
                title
                full_address
@@ -14,6 +7,13 @@ class StepCode < ApplicationRecord
                type
                permit_application_number
              ]
+
+  include ProjectItem
+  include Discard::Model
+  include ChecklistReportDocumentConcern
+  include PublicRecordable
+
+  has_parent :permit_application
 
   belongs_to :creator,
              class_name: "User",

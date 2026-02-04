@@ -1,7 +1,9 @@
 class PermitProject < ApplicationRecord
+  # searchkick must be declared before Discard::Model to ensure auto-callbacks register correctly
+  searchkick word_middle: %i[title full_address pid pin number]
+
   include Discard::Model
   include PublicRecordable
-  searchkick word_middle: %i[title full_address pid pin number] # Search configuration for PermitProject
 
   belongs_to :owner, class_name: "User", optional: true
   public_recordable user_association: :owner
