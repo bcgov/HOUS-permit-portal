@@ -405,6 +405,14 @@ export class Api {
     return this.client.patch<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/update_version`)
   }
 
+  async archivePermitApplication(id: string) {
+    return this.client.delete<ApiResponse<IPermitApplication>>(`/permit_applications/${id}`)
+  }
+
+  async restorePermitApplication(id: string) {
+    return this.client.post<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/restore`)
+  }
+
   async assignCollaboratorToPermitApplication(
     permitApplicationId: string,
     params: {

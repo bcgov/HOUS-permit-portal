@@ -3,7 +3,7 @@ require "rails_helper"
 RSpec.describe RevisionRequest, type: :model do
   describe "associations" do
     it { should belong_to(:submission_version) }
-    it { should belong_to(:user) }
+    it { should belong_to(:user).optional }
     it do
       should belong_to(:revision_reason)
                .with_foreign_key(:reason_code)

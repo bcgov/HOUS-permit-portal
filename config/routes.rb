@@ -167,7 +167,8 @@ Rails.application.routes.draw do
       get "form_bc_addresses", on: :collection
     end
 
-    resources :permit_applications, only: %i[create update show] do
+    resources :permit_applications, only: %i[create update show destroy] do
+      post "restore", on: :member
       post "generate_missing_pdfs",
            on: :member,
            to: "permit_applications#generate_missing_pdfs"

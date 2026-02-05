@@ -168,7 +168,6 @@ const OnboardingChecklistPageForLgAdoptingScreen = lazy(() =>
     default: module.OnboardingChecklistPageForLgAdoptingScreen,
   }))
 )
-
 const OverheatingToolScreen = lazy(() =>
   import("../overheating-tool/overheating-tool-screen").then((module) => ({
     default: module.OverheatingToolScreen,
@@ -179,7 +178,6 @@ const OverheatingToolStartScreen = lazy(() =>
     default: module.OverheatingToolStartScreen,
   }))
 )
-
 const PermitApplicationIndexScreen = lazy(() =>
   import("../permit-application").then((module) => ({ default: module.PermitApplicationIndexScreen }))
 )
