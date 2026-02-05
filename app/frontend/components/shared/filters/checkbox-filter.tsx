@@ -37,7 +37,7 @@ export const CheckboxFilter = observer(function CheckboxFilter({ value, onChange
 
   const hasSelection = !!value && value.length > 0
 
-  const filteredOptions = options.filter((option) => option.label.toLowerCase().includes(searchTerm.toLowerCase()))
+  const filteredOptions = options.filter((option) => option.label?.toLowerCase().includes(searchTerm.toLowerCase()))
 
   const { getCheckboxProps } = useCheckboxGroup({
     value,

@@ -89,8 +89,31 @@ class User < ApplicationRecord
            foreign_key: :previewer_id
   has_many :early_access_requirement_templates, through: :early_access_previews
 
+  # Shared resources that should not be deleted with the user
+  has_many :revision_requests, dependent: :destroy
+  has_many :assigned_requirement_templates,
+           class_name: "RequirementTemplate",
+           foreign_key: "assignee_id",
+           dependent: :nullify
+  has_many :deprecated_template_versions,
+           class_name: "TemplateVersion",
+           foreign_key: "deprecated_by_id",
+           dependent: :nullify
+
   has_one :preference, dependent: :destroy
   accepts_nested_attributes_for :preference
+
+  scope :with_last_sign_in, -> { where.not(last_sign_in_at: nil) }
+  scope :last_sign_in_between,
+        ->(start_time, end_time) do
+          with_last_sign_in.where(last_sign_in_at: start_time..end_time)
+        end
+  scope :inactive_since,
+        ->(time) { with_last_sign_in.where(last_sign_in_at: ..time) }
+  scope :discarded_between,
+        ->(start_time, end_time) do
+          discarded.where(discarded_at: start_time..end_time)
+        end
 
   # Validations
   validates :role, presence: true
@@ -102,6 +125,7 @@ class User < ApplicationRecord
   validate :single_jurisdiction, unless: :regional_review_manager?
 
   after_commit :refresh_search_index, if: :saved_change_to_discarded_at
+  after_commit :revoke_jwt_allowlist, if: :should_revoke_jwt_allowlist?
   after_commit :reindex_jurisdiction_user_size,
                :reindex_jurisdiction_review_manager_email
   before_save :create_default_preference
@@ -221,7 +245,22 @@ class User < ApplicationRecord
     super && !discarded?
   end
 
+  # Provide a specific Devise failure message when a user is archived (discarded)
+  def inactive_message
+    return :archived if discarded?
+
+    super
+  end
+
   private
+
+  def should_revoke_jwt_allowlist?
+    saved_change_to_discarded_at? && discarded_at.present?
+  end
+
+  def revoke_jwt_allowlist
+    AllowlistedJwt.where(user_id: id).delete_all
+  end
 
   def omniauth_provider_appropriate_for_role
     return unless omniauth_provider.present?

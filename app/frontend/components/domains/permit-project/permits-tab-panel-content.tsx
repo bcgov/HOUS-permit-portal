@@ -13,6 +13,7 @@ import {
 import { CustomMessageBox } from "../../shared/base/custom-message-box"
 import { Paginator } from "../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../shared/base/inputs/per-page-select"
+import { ToggleArchivedButton } from "../../shared/buttons/toggle-archived-button"
 import { SearchGrid } from "../../shared/grid/search-grid"
 import { AddPermitsButton } from "../../shared/permit-projects/add-permits-button"
 import { PermitApplicationGridHeaders } from "./permit-application-grid-headers"
@@ -62,9 +63,15 @@ export const PermitsTabPanelContent = observer(({ permitProject }: IProps) => {
                 columns={Object.values(EProjectPermitApplicationSortFields)}
                 includeActionColumn
               />
-              {permitProject.tablePermitApplications?.map((permitApplication) => (
-                <PermitApplicationGridRow key={permitApplication.id} permitApplication={permitApplication} />
-              ))}
+              {permitProject.tablePermitApplications
+                ?.filter((pa) => pa.isDiscarded === permitApplicationStore.showArchived)
+                .map((permitApplication) => (
+                  <PermitApplicationGridRow
+                    key={permitApplication.id}
+                    permitApplication={permitApplication}
+                    searchModel={permitApplicationStore}
+                  />
+                ))}
             </SearchGrid>
             <Flex w={"full"} justifyContent={"space-between"} mt={6}>
               <PerPageSelect
@@ -80,6 +87,9 @@ export const PermitsTabPanelContent = observer(({ permitProject }: IProps) => {
                 handlePageChange={handlePageChange}
                 showLessItems={true}
               />
+            </Flex>
+            <Flex mt={4}>
+              <ToggleArchivedButton searchModel={permitApplicationStore} />
             </Flex>
           </>
         )}
