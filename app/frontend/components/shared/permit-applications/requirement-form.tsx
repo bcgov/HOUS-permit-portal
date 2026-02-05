@@ -514,6 +514,13 @@ export const RequirementForm = observer(
               status={EFlashMessageStatus.error}
             />
           )}
+          {permitApplication.templateVersionDisabledByJurisdiction && !sandbox && (
+            <CustomMessageBox
+              title={t("permitApplication.show.templateDisabledByJurisdictionTitle")}
+              description={t("permitApplication.show.templateDisabledByJurisdiction")}
+              status={EFlashMessageStatus.error}
+            />
+          )}
           {!inboxEnabled && !sandbox && isEarlyAccess && (
             <CustomMessageBox
               title={t("permitApplication.show.inboxDisabledTitleEarlyAccess")}

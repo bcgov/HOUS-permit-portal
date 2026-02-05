@@ -7,6 +7,7 @@ import { IOption } from "../../types/types"
 interface IUsePermitTypeOptionsProps {
   publishedOnly?: boolean
   jurisdictionId?: string
+  hideDisabled?: boolean
 }
 
 export function usePermitTypeOptions(props?: IUsePermitTypeOptionsProps) {
@@ -20,7 +21,13 @@ export function usePermitTypeOptions(props?: IUsePermitTypeOptionsProps) {
     let isMounted = true
     ;(async () => {
       try {
-        const permitTypeOptions = await fetchPermitTypeOptions(props?.publishedOnly, null, null, props?.jurisdictionId)
+        const permitTypeOptions = await fetchPermitTypeOptions(
+          props?.publishedOnly,
+          null,
+          null,
+          props?.jurisdictionId,
+          props?.hideDisabled
+        )
 
         if (!permitTypeOptions) {
           throw new Error(t("errors.fetchPermitTypeOptions"))
@@ -36,7 +43,7 @@ export function usePermitTypeOptions(props?: IUsePermitTypeOptionsProps) {
     return () => {
       isMounted = false
     }
-  }, [props?.publishedOnly, props?.jurisdictionId])
+  }, [props?.publishedOnly, props?.jurisdictionId, props?.hideDisabled])
 
   return { permitTypeOptions, error }
 }

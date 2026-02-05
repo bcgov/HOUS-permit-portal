@@ -772,6 +772,8 @@ const options = {
           },
         },
         jurisdiction: {
+          allJurisdictionsEnabledDescription:
+            "All jurisdictions are currently enabled. Turn off the switch above to select specific jurisdictions.",
           yourJurisdiction: "your jurisdiction",
           edit: {
             displayDescriptionLabel: "Jurisdiction description (public)",
@@ -1342,6 +1344,9 @@ Thank you,
             inboxDisabledTitleEarlyAccess: "Early Access – Submissions Not Yet Enabled",
             inboxDisabledEarlyAccess:
               "This permit is available for early access to help your team become familiar with the application process. You can view the application in this preview, but submission is currently disabled. <p> You are viewing the baseline standardized form. Click 'View optional electives' within any section to explore additional questions that jurisdictions may configure based on local needs.</p><p><1>Go to My projects to submit a permit.</1></p>",
+            templateDisabledByJurisdictionTitle: "Permit Type No Longer Accepted",
+            templateDisabledByJurisdiction:
+              "This jurisdiction is no longer accepting applications for this permit type. You can continue to edit this application, but you will not be able to submit it. Please contact the jurisdiction for more information.",
             downloadApplication: "Download application",
             fetchingMissingPdf: "Fetching {{missingPdf}}...",
             missingPdfLabels: {
@@ -3738,6 +3743,9 @@ Thank you,
           filter: "Template",
           versions: "Versions",
           access: {
+            subtitle: "Control which jurisdictions can use this template:",
+            jurisdictionOverrides: "Jurisdiction overrides",
+            disabledBy: "Disabled by:",
             title: "Manage access",
             jurisdictionAccess: "Jurisdiction access",
             description: "Control which jurisdictions can use this template.",
@@ -3745,6 +3753,7 @@ Thank you,
             enableForAllDesc: "This template is available to all jurisdictions.",
             usageStats: "Usage statistics",
             jurisdictionsUsingTemplate: "jurisdictions using this template",
+            explicitlyDisabledBy: "Explicitly disabled by:",
             availability: "Availability",
             statusGlobal: "Globally available",
             statusRestricted: "Restricted access",
@@ -3755,6 +3764,7 @@ Thank you,
             requirementsLibraryTab: "Requirements Library",
             earlyAccessRequirementsLibraryTab: "Early Access Requirements Library",
             earlyAccessTabDescription: "Early access previews cannot add 'Preview omitted' blocks ",
+            availableToApplicants: "Available to applicants",
             options: {
               button: "Options",
               copyTips: "Import tips from ({{ templateLabel }})",
@@ -4022,8 +4032,6 @@ Thank you,
               enableForAll: "Enable for all jurisdictions",
               enrolledJurisdictions: "Select jurisdictions",
               allJurisdictionsEnabled: "All jurisdictions enabled",
-              allJurisdictionsEnabledDescription:
-                "All jurisdictions are currently enabled for Archistar eCheck. Turn off the switch above to select specific jurisdictions.",
               jurisdictionsCount: "{{count}} jurisdictions enabled",
               jurisdictionsCount_one: "{{count}} jurisdiction enabled",
               jurisdictionsCount_other: "{{count}} jurisdictions enabled",

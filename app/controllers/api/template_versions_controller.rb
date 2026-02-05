@@ -319,6 +319,7 @@ class Api::TemplateVersionsController < Api::ApplicationController
 
   def jurisdiction_template_version_customization_params
     params.require(:jurisdiction_template_version_customization).permit(
+      :disabled,
       customizations: {
         requirement_block_changes: {
         }

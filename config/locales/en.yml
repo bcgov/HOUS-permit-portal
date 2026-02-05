@@ -35,6 +35,7 @@ en:
         phone: "Phone no."
       requirement_template:
         first_nations: "First Nations"
+        available_in_all: "All"
     errors:
       models:
         early_access_preview:

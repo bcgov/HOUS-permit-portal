@@ -111,7 +111,8 @@ export const PermitClassificationStoreModel = types
       publishedOnly = false,
       firstNations = null,
       pid = null,
-      jurisdictionId = null
+      jurisdictionId = null,
+      hideDisabled = false
     ) {
       self.isPermitTypeLoading = true
       const response = yield* toGenerator(
@@ -122,7 +123,8 @@ export const PermitClassificationStoreModel = types
           null,
           null,
           pid,
-          jurisdictionId
+          jurisdictionId,
+          hideDisabled
         )
       )
       self.isPermitTypeLoading = false
@@ -132,7 +134,8 @@ export const PermitClassificationStoreModel = types
       publishedOnly = false,
       firstNations = null,
       permitTypeId = null,
-      jurisdictionId = null
+      jurisdictionId = null,
+      hideDisabled = false
     ) {
       self.isActivityLoading = true
       const response = yield* toGenerator(
@@ -143,7 +146,8 @@ export const PermitClassificationStoreModel = types
           permitTypeId,
           null, // activityId
           null, // pid
-          jurisdictionId
+          jurisdictionId,
+          hideDisabled
         )
       )
       self.isActivityLoading = false

@@ -42,6 +42,29 @@ class Api::PermitClassificationsController < Api::ApplicationController
                 true,
                 jurisdiction.id
               )
+
+            # Exclude templates explicitly disabled by this jurisdiction
+            # (only when hide_disabled param is true, used on submitter-facing screens)
+            if classification_option_params[:hide_disabled].present?
+              disabled_template_ids =
+                RequirementTemplate
+                  .joins(
+                    published_template_version:
+                      :jurisdiction_template_version_customizations
+                  )
+                  .where(
+                    jurisdiction_template_version_customizations: {
+                      jurisdiction_id: jurisdiction.id,
+                      sandbox_id: nil,
+                      disabled: true
+                    }
+                  )
+                  .pluck(:id)
+              query =
+                query.where.not(
+                  id: disabled_template_ids
+                ) if disabled_template_ids.any?
+            end
           end
 
           query =
@@ -152,6 +175,7 @@ class Api::PermitClassificationsController < Api::ApplicationController
         activity_id
         jurisdiction_id
         first_nations
+        hide_disabled
       ]
     )
   end

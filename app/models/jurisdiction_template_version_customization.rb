@@ -30,6 +30,7 @@ class JurisdictionTemplateVersionCustomization < ApplicationRecord
   scope :sandboxed, -> { where.not(sandbox_id: nil) }
   scope :live, -> { where(sandbox_id: nil) }
   scope :for_sandbox, ->(sandbox) { where(sandbox_id: sandbox&.id) }
+  scope :not_disabled, -> { where(disabled: false) }
 
   ACCEPTED_ENABLED_ELECTIVE_FIELD_REASONS = %w[bylaw policy zoning].freeze
 
@@ -120,10 +121,11 @@ class JurisdictionTemplateVersionCustomization < ApplicationRecord
     target_record.save!
   end
 
-  private
-
   after_commit :update_template_version_unique_customizations_count,
                on: %i[create destroy]
+  after_commit :update_template_version_unique_customizations_count,
+               on: :update,
+               if: -> { saved_change_to_disabled? }
 
   private
 

@@ -28,6 +28,8 @@ interface IProps {
     showStatus?: boolean
     showVersionDate?: boolean
   }
+  jurisdictionId?: string
+  hideDisabled?: boolean
 }
 
 export const TemplateVersionsList = observer(function TemplateVersionsList({
@@ -37,6 +39,8 @@ export const TemplateVersionsList = observer(function TemplateVersionsList({
   statusDisplayOptions,
   earlyAccess,
   isPublic,
+  jurisdictionId,
+  hideDisabled,
 }: IProps) {
   const { t } = useTranslation()
   const { permitClassificationStore } = useMst()
@@ -53,14 +57,20 @@ export const TemplateVersionsList = observer(function TemplateVersionsList({
   useEffect(() => {
     ;(async () => {
       try {
-        const options = await permitClassificationStore.fetchActivityOptions(false, null, permitTypeId)
+        const options = await permitClassificationStore.fetchActivityOptions(
+          false,
+          null,
+          permitTypeId,
+          jurisdictionId,
+          hideDisabled
+        )
         setActivityOptions(options ?? [])
         setActivityOptionsError(undefined)
       } catch (e) {
         setActivityOptionsError(e as Error)
       }
     })()
-  }, [permitTypeId])
+  }, [permitTypeId, jurisdictionId, hideDisabled])
 
   const enabledActivityOptions = activityOptions?.filter((option) => option.value.enabled) ?? []
 
