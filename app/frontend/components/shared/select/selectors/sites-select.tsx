@@ -68,6 +68,24 @@ export const SitesSelect = observer(function ({
   const pidWatch = watch(pidName)
   const siteWatch = watch(siteName)
 
+  // Sync jurisdiction state when initialJurisdiction prop changes
+  useEffect(() => {
+    // Only update if initialJurisdiction is provided and different from current jurisdiction
+    // Skip if manual mode is enabled (user is manually selecting)
+    if (manualMode) {
+      return
+    }
+    if (initialJurisdiction) {
+      // Compare by ID to handle MobX observable reference changes
+      const currentJurisdictionId = jurisdiction?.id
+      const initialJurisdictionId = initialJurisdiction.id
+      if (currentJurisdictionId !== initialJurisdictionId) {
+        setJurisdiction(initialJurisdiction)
+        setValue(jurisdictionIdFieldName, initialJurisdictionId)
+      }
+    }
+  }, [initialJurisdiction?.id, jurisdiction?.id, manualMode, jurisdictionIdFieldName, setValue])
+
   const fetchSiteOptions = (address: string, callback: (options) => void) => {
     if (address.length > 3) {
       fetchOptions(address).then((options: IOption[]) => {
@@ -116,8 +134,19 @@ export const SitesSelect = observer(function ({
     const siteValue: string | undefined = siteWatch?.value
     if (R.isNil(siteValue) || siteValue === "") {
       // Don't clear jurisdiction if we have an initialJurisdiction and haven't selected a site yet
-      if (!initialJurisdiction || jurisdiction !== initialJurisdiction) {
+      // Only clear if we don't have an initialJurisdiction, or if the current jurisdiction is different from initial
+      if (!initialJurisdiction) {
         setJurisdiction(null)
+        setValue(jurisdictionIdFieldName, null)
+      } else {
+        // Compare by ID to handle MobX observable reference changes
+        const currentJurisdictionId = jurisdiction?.id
+        const initialJurisdictionId = initialJurisdiction.id
+        if (currentJurisdictionId !== initialJurisdictionId) {
+          // If we have an initialJurisdiction but current jurisdiction differs, restore initial
+          setJurisdiction(initialJurisdiction)
+          setValue(jurisdictionIdFieldName, initialJurisdictionId)
+        }
       }
       return
     }
@@ -152,7 +181,7 @@ export const SitesSelect = observer(function ({
     return () => {
       isActive = false
     }
-  }, [siteWatch?.value, manualMode])
+  }, [siteWatch?.value, manualMode, initialJurisdiction?.id, jurisdictionIdFieldName, setValue, onLtsaMatcherFound])
 
   const debouncedFetchOptions = useCallback(debounce(fetchSiteOptions, 1000), [])
 
@@ -219,7 +248,7 @@ export const SitesSelect = observer(function ({
                 control={control}
                 rules={{
                   required:
-                    pidRequired || pidOptions.length > 0
+                    (pidRequired || pidOptions.length > 0) && !initialJurisdiction
                       ? String(t("ui.isRequired", { field: t("permitApplication.pidLabel") }))
                       : false,
                 }}

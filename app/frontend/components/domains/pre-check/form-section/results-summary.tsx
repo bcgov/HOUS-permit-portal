@@ -1,5 +1,5 @@
 import { Box, Button, Flex, Heading, Icon, Link, List, ListItem, Text, UnorderedList } from "@chakra-ui/react"
-import { ArrowsClockwise, Download, Hourglass, Layout } from "@phosphor-icons/react"
+import { ArrowsClockwise, Download, FileText, Hourglass, Layout } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -262,6 +262,17 @@ export const ResultsSummary = observer(function ResultsSummary() {
     <Box>
       <PreCheckBackLink />
       {renderContent()}
+      {currentPreCheck?.permitApplicationId && (
+        <Flex justify="center" mt={8}>
+          <RouterLinkButton
+            to={`/permit-applications/${currentPreCheck.permitApplicationId}/edit`}
+            variant="secondary"
+            leftIcon={<Icon as={FileText} />}
+          >
+            {t("permitApplication.goToApplication", "Back to permit application")}
+          </RouterLinkButton>
+        </Flex>
+      )}
     </Box>
   )
 })
