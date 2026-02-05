@@ -21,18 +21,23 @@ class RenamePdfFormsToOverheatingTools < ActiveRecord::Migration[7.2]
   def down
     if table_exists?(:overheating_documents)
       # Remove foreign key
-      if foreign_key_exists?(:overheating_documents, :overheating_tools)
-        remove_foreign_key :overheating_documents, :overheating_tools
+      if foreign_key_exists?(
+           :overheating_documents,
+           column: :overheating_tool_id
+         )
+        remove_foreign_key :overheating_documents, column: :overheating_tool_id
       end
 
       # Rename column back
       rename_column :overheating_documents, :overheating_tool_id, :pdf_form_id
-
-      # Add foreign key back
-      add_foreign_key :overheating_documents, :pdf_forms
     end
 
-    # Rename table back
+    # Rename table back BEFORE adding FK that references pdf_forms
     rename_table :overheating_tools, :pdf_forms
+
+    if table_exists?(:overheating_documents)
+      # Add foreign key back (now that pdf_forms exists)
+      add_foreign_key :overheating_documents, :pdf_forms
+    end
   end
 end
