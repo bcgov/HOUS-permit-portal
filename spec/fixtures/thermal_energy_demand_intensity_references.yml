@@ -1,0 +1,25 @@
+zone_5_step_3:
+  hdd: "[3000,4000)"
+  step: 3
+  ach: 2.0
+  nla: 0.5
+  nlr: 0.3
+  ltrh_over_300: 50
+  ltrh_under_300: 40
+  tedi: 10
+  hdd_adjusted_tedi: 15
+  gshl_over_300: 10
+  gshl_under_300: 20
+
+zone_6_step_4:
+  hdd: "[4000,5000)"
+  step: 4
+  ach: 2.5
+  nla: 0.6
+  nlr: 0.4
+  ltrh_over_300: 45
+  ltrh_under_300: 35
+  tedi: 12
+  hdd_adjusted_tedi: 18
+  gshl_over_300: 12
+  gshl_under_300: 22

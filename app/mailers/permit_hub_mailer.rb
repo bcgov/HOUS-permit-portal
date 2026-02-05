@@ -5,6 +5,46 @@ class PermitHubMailer < ApplicationMailer
     send_user_mail(email: user.email, template_key: "welcome")
   end
 
+  # Sent only when a user archives (discards) their own account.
+  # NOTE: This must bypass send_user_mail because the user is discarded at send-time.
+  def account_closed(user)
+    @user = user
+    send_mail(email: user.email, template_key: "account_closed")
+  end
+
+  def notify_user_archive_warning(user, days_until_archive)
+    @user = user
+    @days_until_archive = days_until_archive
+    @retention_days = user_delete_after_days
+    @scheduled_action = "archiving"
+    @scheduled_date = Time.current + days_until_archive.days
+    @login_type = login_type_label(user)
+    @login_identifier = login_identifier(user)
+    send_user_mail(
+      email: user.email,
+      template_key: "user_archive_warning",
+      subject_i18n_params: {
+        days: days_until_archive
+      }
+    )
+  end
+
+  def notify_user_delete_warning(user, days_until_delete)
+    @user = user
+    @days_until_delete = days_until_delete
+    @scheduled_action = "deletion"
+    @scheduled_date = Time.current + days_until_delete.days
+    @login_type = login_type_label(user)
+    @login_identifier = login_identifier(user)
+    send_mail(
+      email: user.email,
+      template_key: "user_delete_warning",
+      subject_i18n_params: {
+        days: days_until_delete
+      }
+    )
+  end
+
   def onboarding(user)
     @user = user
     send_user_mail(email: user.email, template_key: "onboarding")
@@ -142,7 +182,7 @@ class PermitHubMailer < ApplicationMailer
       )
     elsif notifiable.is_a?(ExternalApiKey)
       @external_api_key = notifiable
-      @jurisdiction_name = @external_api_key&.jurisdiction.qualified_name
+      @jurisdiction_name = @external_api_key.jurisdiction&.qualified_name
       send_mail(
         email: notifiable.notification_email,
         template_key: "notify_batched_integration_mapping"
@@ -299,6 +339,26 @@ class PermitHubMailer < ApplicationMailer
   end
 
   private
+
+  def user_delete_after_days
+    default_days = UserDataCleanupJob::DEFAULT_DELETE_AFTER_DAYS
+    Integer(ENV.fetch("USER_DELETE_AFTER_DAYS", default_days), 10)
+  rescue ArgumentError, TypeError
+    default_days
+  end
+
+  def login_type_label(user)
+    provider = user.omniauth_provider.to_s
+    return "BCeID" if provider.start_with?("bceid")
+    return "BC Services Card" if provider == "digital-building-permit-5120"
+    return "IDIR" if provider == "idir"
+
+    provider.titleize
+  end
+
+  def login_identifier(user)
+    user.omniauth_username.presence || user.email
+  end
 
   # Helper method to attach a file from a FileUploadAttachment subclass instance
   # @param file_upload_attachment [FileUploadAttachment] A FileUploadAttachment subclass instance (e.g., ReportDocument)
