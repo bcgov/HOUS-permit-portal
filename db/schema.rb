@@ -242,7 +242,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_02_03_163643) do
     t.string "disambiguator"
     t.boolean "first_nation", default: false
     t.string "ltsa_matcher"
-    t.jsonb "boundry_points", default: []
     t.index ["ltsa_matcher"], name: "index_jurisdictions_on_ltsa_matcher"
     t.index ["prefix"], name: "index_jurisdictions_on_prefix", unique: true
     t.index ["regional_district_id"], name: "index_jurisdictions_on_regional_district_id"
@@ -284,6 +283,29 @@ ActiveRecord::Schema[7.2].define(version: 2026_02_03_163643) do
     t.datetime "updated_at", null: false
     t.index ["checklist_id"], name: "index_occupancy_classifications_on_checklist_id"
     t.index ["key", "checklist_id"], name: "index_occupancy_classifications_on_key_and_checklist_id", unique: true
+  end
+
+  create_table "overheating_documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "overheating_tool_id", null: false
+    t.text "file_data"
+    t.string "scan_status", default: "pending", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["overheating_tool_id"], name: "index_overheating_documents_on_overheating_tool_id"
+    t.index ["scan_status"], name: "index_overheating_documents_on_scan_status"
+  end
+
+  create_table "overheating_tools", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "user_id", null: false
+    t.jsonb "form_json", default: {}
+    t.string "form_type"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.jsonb "pdf_file_data"
+    t.integer "pdf_generation_status", default: 0, null: false
+    t.datetime "discarded_at"
+    t.index ["discarded_at"], name: "index_overheating_tools_on_discarded_at"
+    t.index ["user_id"], name: "index_overheating_tools_on_user_id"
   end
 
   create_table "part_3_step_code_checklists", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -1046,6 +1068,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_02_03_163643) do
   add_foreign_key "jurisdictions", "jurisdictions", column: "regional_district_id"
   add_foreign_key "make_up_air_fuels", "part_3_step_code_checklists", column: "checklist_id", on_delete: :cascade
   add_foreign_key "occupancy_classifications", "part_3_step_code_checklists", column: "checklist_id", on_delete: :cascade
+  add_foreign_key "overheating_documents", "overheating_tools"
+  add_foreign_key "overheating_documents", "overheating_tools"
+  add_foreign_key "overheating_tools", "users"
   add_foreign_key "part_3_step_code_checklists", "step_codes", on_delete: :cascade
   add_foreign_key "part_9_step_code_checklists", "permit_type_required_steps", column: "step_requirement_id"
   add_foreign_key "part_9_step_code_checklists", "step_codes", on_delete: :cascade
