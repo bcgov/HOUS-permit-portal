@@ -18,7 +18,9 @@ class RevisionRequest < ApplicationRecord
   private
 
   def user_must_be_review_staff
-    unless user&.review_staff?
+    return if user_id.blank?
+
+    unless user.review_staff?
       errors.add(
         :user,
         I18n.t(
