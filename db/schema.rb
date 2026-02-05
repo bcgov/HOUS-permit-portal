@@ -76,9 +76,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_02_03_163643) do
     t.index ["contactable_type", "contactable_id"], name: "index_contacts_on_contactable"
   end
 
-  create_table "data_migrations", primary_key: "version", id: :string, force: :cascade do |t|
-  end
-
   create_table "design_documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "pre_check_id", null: false
     t.text "file_data"
@@ -1068,7 +1065,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_02_03_163643) do
   add_foreign_key "jurisdictions", "jurisdictions", column: "regional_district_id"
   add_foreign_key "make_up_air_fuels", "part_3_step_code_checklists", column: "checklist_id", on_delete: :cascade
   add_foreign_key "occupancy_classifications", "part_3_step_code_checklists", column: "checklist_id", on_delete: :cascade
-  add_foreign_key "overheating_documents", "overheating_tools"
   add_foreign_key "overheating_documents", "overheating_tools"
   add_foreign_key "overheating_tools", "users"
   add_foreign_key "part_3_step_code_checklists", "step_codes", on_delete: :cascade
