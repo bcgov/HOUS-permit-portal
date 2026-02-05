@@ -61,6 +61,24 @@ class PermitHubMailer < ApplicationMailer
     send_user_mail(email: @user.email, template_key: :notify_block_status_ready)
   end
 
+  def notify_block_status_ready_summary(
+    permit_application:,
+    user:,
+    collaboration_type:,
+    requirement_block_names:
+  )
+    @permit_application = permit_application
+    @user = user
+    @collaboration_type = collaboration_type
+    @requirement_block_names = requirement_block_names
+    @requirement_block_count = requirement_block_names.size
+
+    send_user_mail(
+      email: @user.email,
+      template_key: :notify_block_status_ready_summary
+    )
+  end
+
   def notify_new_or_unconfirmed_permit_collaboration(
     permit_collaboration:,
     user:

@@ -276,6 +276,11 @@ const options = {
           },
         },
         ui: {
+          confirmation: {
+            unsavedChangesTitle: "Unsaved changes",
+            unsavedChangesBody: "You have unsaved changes. Are you sure you want to discard them?",
+            discardChanges: "Discard changes",
+          },
           other: "Other",
           updatedAt: "Updated at",
           beta: "Beta",
@@ -308,7 +313,7 @@ const options = {
           reorder: "Reorder",
           delete: "Delete",
           confirmDelete: "Confirm delete",
-          confirmation: "Are you sure you want to proceed?",
+          defaultConfirmation: "Are you sure you want to proceed?",
           confirmOverwrite: "Are you sure you want to save and overwrite this item?",
           sureDelete: "Are you sure you want to delete this item?",
           disable: "Disable",
@@ -1463,6 +1468,12 @@ Thank you,
             earlyAccess: "Preview only",
           },
           modals: {
+            unsavedChanges: {
+              title: "Unsaved changes",
+              body: "You have unsaved changes. Are you sure you want to discard them?",
+              discard: "Discard changes",
+            },
+            fieldLabel: "Field label",
             archived: "Archived",
             unlabeled: "Unlabeled",
             defaultContactLabel: "Contact",
