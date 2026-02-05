@@ -247,11 +247,12 @@ class Jurisdiction < ApplicationRecord
   end
 
   def permit_applications_size
-    permit_applications&.size || 0
+    permit_applications&.kept&.size || 0
   end
 
   def unviewed_submissions_count(sandbox: nil)
     permit_applications
+      .kept
       .for_sandbox(sandbox)
       .where(status: %i[newly_submitted resubmitted])
       .joins(:submission_versions)
@@ -261,7 +262,7 @@ class Jurisdiction < ApplicationRecord
   end
 
   def unviewed_permit_applications
-    permit_applications.unviewed
+    permit_applications.kept.unviewed
   end
 
   def submission_inbox_set_up

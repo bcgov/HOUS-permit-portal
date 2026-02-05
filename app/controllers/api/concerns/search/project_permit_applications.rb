@@ -30,6 +30,7 @@ module Api::Concerns::Search::ProjectPermitApplications
       includes: PermitApplication::SEARCH_INCLUDES,
       scope_results: ->(relation) { policy_scope(relation) }
     }
+
     @permit_application_search =
       PermitApplication.search(permit_application_query, **search_conditions)
   end
@@ -39,6 +40,7 @@ module Api::Concerns::Search::ProjectPermitApplications
   def permit_application_search_params
     params.permit(
       :query,
+      :show_archived,
       :page,
       :per_page,
       filters: [
@@ -79,6 +81,7 @@ module Api::Concerns::Search::ProjectPermitApplications
     if !current_user.super_admin?
       and_conditions << { sandbox_id: current_sandbox&.id }
     end
+    and_conditions << { discarded: discarded }
 
     search_filters.each do |key, value|
       case key
@@ -94,5 +97,11 @@ module Api::Concerns::Search::ProjectPermitApplications
     end
 
     { _and: and_conditions }
+  end
+
+  def discarded
+    ActiveModel::Type::Boolean.new.cast(
+      permit_application_search_params[:show_archived] || false
+    )
   end
 end

@@ -119,6 +119,9 @@ class Api::UsersController < Api::ApplicationController
   def destroy
     authorize @user
     if @user.discard
+      if current_user&.id == @user.id
+        PermitHubMailer.account_closed(@user).deliver_later
+      end
       render_success(
         @user,
         "user.destroy_success",
