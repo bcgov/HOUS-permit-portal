@@ -5,47 +5,18 @@ import * as R from "ramda"
 import React, { useState } from "react"
 import { Controller, useController, useFieldArray, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { v4 as uuidv4 } from "uuid"
-import {
-  getArchitecturalDrawingRequirementRequiredSchema,
-  getEnergyStepCodePart3RequirementRequiredSchema,
-  getEnergyStepCodeRequirementRequiredSchema,
-} from "../../../../constants"
 import { IRequirementBlock } from "../../../../models/requirement-block"
-import { IFormConditional, IRequirementAttributes } from "../../../../types/api-request"
-import {
-  EArchitecturalDrawingDependencyRequirementCode,
-  EEnergyStepCodeDependencyRequirementCode,
-  EEnergyStepCodePart3DependencyRequirementCode,
-  EFlashMessageStatus,
-  ENumberUnit,
-  ERequirementType,
-} from "../../../../types/enums"
+import { IRequirementAttributes } from "../../../../types/api-request"
+import { EFlashMessageStatus } from "../../../../types/enums"
 import { IDenormalizedRequirementBlock } from "../../../../types/types"
-import {
-  isArchitecturalDrawingDependencyRequirementCode,
-  isContactRequirement,
-  isMultiOptionRequirement,
-} from "../../../../utils/utility-functions"
 import { CustomMessageBox } from "../../../shared/base/custom-message-box"
 import { EditableInputWithControls } from "../../../shared/editable-input-with-controls"
 import { EditorWithPreview } from "../../../shared/editor/custom-extensions/editor-with-preview"
 import { FieldsSetupDrawer } from "../fields-setup-drawer"
-import { RequirementFieldDisplay } from "../requirement-field-display"
-import { RequirementFieldEdit } from "../requirement-field-edit"
-import { FieldControlsHeader } from "./field-controls-header"
 import { IRequirementBlockForm } from "./index"
 import { ReorderList } from "./reorder-list"
-
-const fieldContainerSharedProps = {
-  w: "full",
-  sx: {
-    "& input": {
-      maxW: "339px",
-    },
-  },
-  mt: 7,
-}
+import { RequirementFieldRow } from "./requirement-field-row"
+import { useRequirementLogic } from "./use-requirement-logic"
 
 export const FieldsSetup = observer(function FieldsSetup({
   requirementBlock,
@@ -56,12 +27,11 @@ export const FieldsSetup = observer(function FieldsSetup({
 }) {
   const { t } = useTranslation()
   const {
-    setValue,
     control,
     watch,
     formState: { errors },
   } = useFormContext<IRequirementBlockForm>()
-  const { fields, append, remove, move } = useFieldArray<IRequirementBlockForm>({
+  const { fields, append, remove } = useFieldArray<IRequirementBlockForm>({
     control,
     name: "requirementsAttributes",
   })
@@ -82,161 +52,17 @@ export const FieldsSetup = observer(function FieldsSetup({
     setRequirementIdsToEdit((pastState) => ({ ...pastState, [requirementId]: !pastState[requirementId] }))
   }
 
-  const onUseRequirement = (requirementType: ERequirementType, _callBack: any) => {
-    if (
-      requirementType !== ERequirementType.energyStepCodePart9 &&
-      requirementType !== ERequirementType.energyStepCodePart3 &&
-      requirementType !== ERequirementType.architecturalDrawing
-    ) {
-      const defaults = {
-        requirementCode: `dummy-${uuidv4()}`,
-        id: `dummy-${uuidv4()}`,
-        inputType: requirementType,
-        label: [ERequirementType.generalContact, ERequirementType.professionalContact].includes(requirementType)
-          ? t("requirementsLibrary.modals.defaultContactLabel")
-          : undefined,
-        ...(isMultiOptionRequirement(requirementType)
-          ? {
-              inputOptions: {
-                valueOptions: [
-                  { value: "Option 1", label: "Option 1" },
-                  {
-                    value: "Option 2",
-                    label: "Option 2",
-                  },
-                  { value: "Option 3", label: "Option 3" },
-                ],
-              },
-            }
-          : {}),
-      }
-      append(defaults)
-
-      return
-    }
-
-    const dependencyMap: Record<
-      ERequirementType,
-      {
-        codes:
-          | EEnergyStepCodeDependencyRequirementCode[]
-          | EEnergyStepCodePart3DependencyRequirementCode[]
-          | EArchitecturalDrawingDependencyRequirementCode[]
-        schemaGetter: (
-          code:
-            | EEnergyStepCodeDependencyRequirementCode
-            | EEnergyStepCodePart3DependencyRequirementCode
-            | EArchitecturalDrawingDependencyRequirementCode
-        ) => IRequirementAttributes
-      }
-    > = {
-      [ERequirementType.energyStepCodePart9]: {
-        codes: Object.values(EEnergyStepCodeDependencyRequirementCode),
-        schemaGetter: (code) =>
-          getEnergyStepCodeRequirementRequiredSchema(code as EEnergyStepCodeDependencyRequirementCode),
-      },
-      [ERequirementType.energyStepCodePart3]: {
-        codes: Object.values(EEnergyStepCodePart3DependencyRequirementCode),
-        schemaGetter: (code) =>
-          getEnergyStepCodePart3RequirementRequiredSchema(code as EEnergyStepCodePart3DependencyRequirementCode),
-      },
-      [ERequirementType.architecturalDrawing]: {
-        codes: Object.values(EArchitecturalDrawingDependencyRequirementCode),
-        schemaGetter: (code) =>
-          getArchitecturalDrawingRequirementRequiredSchema(code as EArchitecturalDrawingDependencyRequirementCode),
-      },
-    }
-
-    const dependencyConfig = dependencyMap[requirementType]
-
-    if (dependencyConfig) {
-      const dependencyDefaults = dependencyConfig.codes
-        .map((code) => dependencyConfig.schemaGetter(code))
-        .map((requirement) => {
-          const existingRequirement = requirementBlock?.requirements.find(
-            (r) => requirement.requirementCode === r.requirementCode
-          )
-
-          if (existingRequirement) {
-            requirement.id = existingRequirement.id
-          }
-
-          return requirement
-        })
-
-      append(dependencyDefaults)
-    }
-  }
+  const { onUseRequirement, onRemoveRequirement, disabledRequirementTypeOptions } = useRequirementLogic({
+    append,
+    remove,
+    watchedRequirements: watchedRequirements as IRequirementAttributes[],
+    requirementBlock,
+  })
 
   const hasFields = fields.length > 0
 
-  const disabledRequirementTypeOptions = (() => {
-    const hasEnergyStepCodeRequirement = watchedRequirements?.some(
-      (r) => (r as IRequirementAttributes).inputType === ERequirementType.energyStepCodePart9
-    )
-    const hasEnergyStepCodePart3Requirement = watchedRequirements?.some(
-      (r) => (r as IRequirementAttributes).inputType === ERequirementType.energyStepCodePart3
-    )
-    const hasArchitecturalRequirement = watchedRequirements?.some(
-      (r) => (r as IRequirementAttributes).inputType === ERequirementType.architecturalDrawing
-    )
-    const disabledTypes: Array<{
-      requirementType: ERequirementType
-    }> = []
-
-    if (hasEnergyStepCodeRequirement) {
-      disabledTypes.push({ requirementType: ERequirementType.energyStepCodePart9 })
-    }
-
-    if (hasEnergyStepCodePart3Requirement) {
-      disabledTypes.push({ requirementType: ERequirementType.energyStepCodePart3 })
-    }
-    if (hasArchitecturalRequirement) {
-      disabledTypes.push({ requirementType: ERequirementType.architecturalDrawing })
-    }
-    return disabledTypes
-  })()
-
   function isRequirementInEditMode(id: string) {
     return !isInReorderMode && !!requirementIdsToEdit[id]
-  }
-
-  const onRemoveRequirement = (index: number) => {
-    const requirement = watchedRequirements[index]
-
-    if (!requirement) {
-      return
-    }
-
-    const isEnergyStepCodeRequirement =
-      requirement.inputType === ERequirementType.energyStepCodePart9 ||
-      requirement.inputType === ERequirementType.energyStepCodePart3
-    if (!isEnergyStepCodeRequirement) {
-      remove(index)
-      return
-    }
-
-    const stepCodeDependencyIndexes = watchedRequirements.reduce((acc, req, idx) => {
-      const isEnergyStepCodeDependency = Object.values(EEnergyStepCodeDependencyRequirementCode).includes(
-        req.requirementCode as EEnergyStepCodeDependencyRequirementCode
-      )
-
-      if (isEnergyStepCodeDependency) {
-        acc.push(idx)
-      }
-
-      const isEnergyStepCodePart3Dependency = Object.values(EEnergyStepCodePart3DependencyRequirementCode).includes(
-        req.requirementCode as EEnergyStepCodePart3DependencyRequirementCode
-      )
-
-      if (isEnergyStepCodePart3Dependency) {
-        acc.push(idx)
-      }
-
-      return acc
-    }, [])
-
-    remove(stepCodeDependencyIndexes)
   }
 
   return (
@@ -312,205 +138,15 @@ export const FieldsSetup = observer(function FieldsSetup({
             ) : (
               <VStack w={"full"} alignItems={"flex-start"} spacing={2} px={3}>
                 {fields.map((field, index) => {
-                  const watchedHint = watch(`requirementsAttributes.${index}.hint`)
-                  const watchedRequired = watch(`requirementsAttributes.${index}.required`)
-                  const requirementType = (field as IRequirementAttributes).inputType
-                  const watchedElective = watch(`requirementsAttributes.${index}.elective`)
-                  const watchedConditional = watch(`requirementsAttributes.${index}.inputOptions.conditional`)
-                  const watchedRequirementCode = watch(`requirementsAttributes.${index}.requirementCode`)
-                  const watchedComputedCompliance = watch(
-                    `requirementsAttributes.${index}.inputOptions.computedCompliance`
-                  )
-                  // Disables remove and conditional options for all energy_step_code dependency requirements except for the Energy Step Code requirement itself
-                  const isStepCodeDependency = Object.values(EEnergyStepCodeDependencyRequirementCode).includes(
-                    watchedRequirementCode as EEnergyStepCodeDependencyRequirementCode
-                  )
-                  const isArchitecturalRequirement =
-                    isArchitecturalDrawingDependencyRequirementCode(watchedRequirementCode)
-
-                  const disabledMenuOptions: ("remove" | "conditional")[] =
-                    isStepCodeDependency || isArchitecturalRequirement ? ["conditional"] : []
-
-                  // for step code dependency only the step_code requirement is removable and the other
-                  // dependencies rely on it for removal
-                  if (
-                    isStepCodeDependency &&
-                    watchedRequirementCode !== EEnergyStepCodeDependencyRequirementCode.energyStepCodeToolPart9
-                  ) {
-                    disabledMenuOptions.push("remove")
-                  }
-
-                  if (isArchitecturalRequirement) {
-                    disabledMenuOptions.push("remove")
-                  }
-
                   return (
-                    <Box
+                    <RequirementFieldRow
                       key={field.id}
-                      w={"full"}
-                      borderRadius={"sm"}
-                      _hover={{
-                        bg: "theme.blueLight",
-                        "& .requirement-edit-controls-container": {
-                          ".requirement-edit-controls": {
-                            display: "flex",
-                          },
-                        },
-                      }}
-                      _focus={{
-                        bg: "theme.blueLight",
-                        "& .requirement-edit-controls-container": {
-                          flexFlow: "row",
-                          ".requirement-edit-controls": {
-                            visibility: "visible",
-                          },
-                        },
-                      }}
-                      tabIndex={0}
-                      px={3}
-                      pt={index !== 0 ? 1 : 0}
-                      pb={5}
-                      pos={"relative"}
-                    >
-                      <Box
-                        {...fieldContainerSharedProps}
-                        display={isRequirementInEditMode(field.id) ? "block" : "none"}
-                      >
-                        <RequirementFieldEdit<IRequirementBlockForm>
-                          requirementType={requirementType}
-                          label={watch(`requirementsAttributes.${index}.label`)}
-                          editableLabelProps={{
-                            controlProps: {
-                              control,
-                              name: `requirementsAttributes.${index}.label`,
-                              rules: { required: true },
-                            },
-                            color: "text.link",
-                            // ts-ignore
-                            "aria-label": t("requirementsLibrary.modals.fieldLabel"),
-                          }}
-                          editableHelperTextProps={{
-                            controlProps: { control, name: `requirementsAttributes.${index}.hint` },
-                          }}
-                          editableInstructionsTextProps={{
-                            controlProps: { control, name: `requirementsAttributes.${index}.instructions` },
-                          }}
-                          isOptionalCheckboxProps={{
-                            controlProps: {
-                              control,
-                              name: `requirementsAttributes.${index}.required`,
-                              defaultValue: true,
-                            },
-                          }}
-                          isElectiveCheckboxProps={{
-                            controlProps: {
-                              control,
-                              name: `requirementsAttributes.${index}.elective`,
-                            },
-                          }}
-                          unitSelectProps={
-                            requirementType === ERequirementType.number
-                              ? {
-                                  controlProps: {
-                                    control: control,
-
-                                    name: `requirementsAttributes.${index}.inputOptions.numberUnit`,
-                                    // @ts-ignore
-                                    defaultValue: ENumberUnit.noUnit,
-                                  },
-                                }
-                              : undefined
-                          }
-                          multiOptionProps={
-                            isMultiOptionRequirement(requirementType)
-                              ? {
-                                  useFieldArrayProps: {
-                                    control,
-                                    name: `requirementsAttributes.${index}.inputOptions.valueOptions`,
-                                  },
-                                  onOptionValueChange: (optionNIndex, optionValue) => {
-                                    setValue(
-                                      `requirementsAttributes.${index}.inputOptions.valueOptions.${optionNIndex}.value`,
-                                      optionValue
-                                    )
-                                    setValue(
-                                      `requirementsAttributes.${index}.inputOptions.valueOptions.${optionNIndex}.label`,
-                                      optionValue
-                                    )
-                                  },
-                                  getOptionValue: (idx) =>
-                                    watch(`requirementsAttributes.${index}.inputOptions.valueOptions.${idx}`),
-                                }
-                              : undefined
-                          }
-                          canAddMultipleContactProps={
-                            isContactRequirement(requirementType)
-                              ? {
-                                  controlProps: {
-                                    control: control,
-                                    name: `requirementsAttributes.${index}.inputOptions.canAddMultipleContacts`,
-                                  },
-                                }
-                              : undefined
-                          }
-                          isMultipleFilesCheckboxProps={
-                            requirementType === ERequirementType.file
-                              ? {
-                                  controlProps: {
-                                    control: control,
-                                    name: `requirementsAttributes.${index}.inputOptions.multiple` as any,
-                                  },
-                                }
-                              : undefined
-                          }
-                          requirementCode={watchedRequirementCode}
-                        />
-                      </Box>
-                      <Box
-                        className={"requirement-display"}
-                        display={!isRequirementInEditMode(field.id) ? "block" : "none"}
-                        {...fieldContainerSharedProps}
-                      >
-                        <RequirementFieldDisplay
-                          requirementType={requirementType}
-                          label={watch(`requirementsAttributes.${index}.label`)}
-                          helperText={watchedHint}
-                          inputOptions={watch(`requirementsAttributes.${index}.inputOptions`)}
-                          unit={
-                            requirementType === ERequirementType.number
-                              ? (watch(`requirementsAttributes.${index}.inputOptions.numberUnit`) ?? null)
-                              : undefined
-                          }
-                          options={watch(`requirementsAttributes.${index}.inputOptions.valueOptions`)?.map(
-                            (option) => option.label
-                          )}
-                          selectProps={{
-                            maxW: "339px",
-                          }}
-                          addMultipleContactProps={{
-                            shouldRender: true,
-                            formControlProps: { isDisabled: true },
-                            switchProps: {
-                              isChecked: !!watch(`requirementsAttributes.${index}.inputOptions.canAddMultipleContacts`),
-                            },
-                          }}
-                          required={watchedRequired}
-                          showAddLabelIndicator
-                        />
-                      </Box>
-                      <FieldControlsHeader
-                        requirementCode={watchedRequirementCode as ERequirementType}
-                        isRequirementInEditMode={isRequirementInEditMode(field.id)}
-                        toggleRequirementToEdit={() => toggleRequirementToEdit(field.id)}
-                        onRemove={() => onRemoveRequirement(index)}
-                        elective={watchedElective}
-                        conditional={watchedConditional as IFormConditional}
-                        computedCompliance={watchedComputedCompliance}
-                        requirementType={requirementType}
-                        index={index}
-                        disabledMenuOptions={disabledMenuOptions}
-                      />
-                    </Box>
+                      index={index}
+                      field={field}
+                      isEditing={isRequirementInEditMode(field.id)}
+                      toggleEdit={() => toggleRequirementToEdit(field.id)}
+                      onRemove={() => onRemoveRequirement(index)}
+                    />
                   )
                 })}
                 {hasFields && (

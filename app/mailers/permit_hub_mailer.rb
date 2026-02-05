@@ -193,12 +193,10 @@ class PermitHubMailer < ApplicationMailer
   def notify_new_template_version_published(
     template_version,
     user,
-    permit_application = nil,
     jurisdiction = nil
   )
     @template_version = template_version
     @user = user
-    @permit_application = permit_application
     @jurisdiction = jurisdiction
 
     # Check if action is required (manager's jurisdiction missing submission contact for this permit type)

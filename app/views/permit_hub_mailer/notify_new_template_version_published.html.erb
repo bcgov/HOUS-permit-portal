@@ -5,13 +5,16 @@
       <tr>
       <!-- START CONTENT ROW -->
         <td style="font-family: 'Open Sans', sans-serif; font-size: 16px; vertical-align: top;" valign="top">
-          <h1 style="color: #292929; font-family: 'Open Sans', sans-serif; font-weight: 700; line-height: 1.4; text-align: left; font-size: 28px; margin-top: 0; margin-bottom: 48px;">New Template Version Published</h1>
+          <h1 style="color: #292929; font-family: 'Open Sans', sans-serif; font-weight: 700; line-height: 1.4; text-align: left; font-size: 28px; margin-top: 0; margin-bottom: 48px;">Permit template updated: <%= @template_version.label %></h1>
           <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">Dear <%= @user.name %>,</p>
           <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
-            A new version of the permit template "<strong><%= @template_version.label %></strong>" has been published.
+            We've published a new version of the <%= @template_version.label %> template.
+          </p>
+          <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
+            If you have customized permit application forms based on this template, some questions or requirements may no longer match the latest version.
           </p>
 
-          <h2 style="color: #292929; font-family: 'Open Sans', sans-serif; font-weight: 700; line-height: 1.4; margin-top: 24px; margin-bottom: 16px; text-align: left; font-size: 22px;">Template details:</h2>
+          <h2 style="color: #292929; font-family: 'Open Sans', sans-serif; font-weight: 700; line-height: 1.4; margin-top: 24px; margin-bottom: 16px; text-align: left; font-size: 22px;">Template details</h2>
           <table class="basic-table" role="presentation" border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; min-width: 100%; width: 100%; background: #f2f2f2; border: 1px solid #d9d9d9; margin-bottom: 32px;" width="100%">
             <tr>
               <td style="font-family: 'Open Sans', sans-serif; font-size: 16px; vertical-align: top;" valign="top">
@@ -20,57 +23,52 @@
                   <dt style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; font-size: 11px; text-transform: uppercase; font-weight: bold; padding-top: 10px; padding-bottom: 8px; text-align: left;">Template</dt>
                   <dd style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; margin: 0; padding-bottom: 10px; border-bottom: 1px solid #d9d9d9;"><%= @template_version.label %></dd>
 
-                  <dt style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; font-size: 11px; text-transform: uppercase; font-weight: bold; padding-top: 10px; padding-bottom: 8px; text-align: left;">BCBC Part</dt>
+                  <dt style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; font-size: 11px; text-transform: uppercase; font-weight: bold; padding-top: 10px; padding-bottom: 8px; text-align: left;">Permit type</dt>
                   <dd style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; margin: 0; padding-bottom: 10px; border-bottom: 1px solid #d9d9d9;"><%= @template_version.permit_type&.name %></dd>
 
                   <dt style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; font-size: 11px; text-transform: uppercase; font-weight: bold; padding-top: 10px; padding-bottom: 8px; text-align: left;">Version</dt>
-                  <dd style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; margin: 0; padding-bottom: 10px; border-bottom: <%= @permit_application.present? ? '1px solid #d9d9d9' : '0' %>;"><%= @template_version.version_date&.strftime("%B %d, %Y") %></dd>
-
-                  <% if @permit_application.present? %>
-                    <dt style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; font-size: 11px; text-transform: uppercase; font-weight: bold; padding-top: 10px; padding-bottom: 8px; text-align: left;">Affected application</dt>
-                    <dd style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; margin: 0; padding-bottom: 10px; border-bottom: 0;"><a href="<%= @permit_application.submitter_frontend_url %>" style="color: #1a5a96; text-decoration: underline;"><%= @permit_application.number %></a></dd>
-                  <% end %>
+                  <dd style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; margin: 0; padding-bottom: 10px; border-bottom: 0;"><%= @template_version.version_date&.strftime("%B %d, %Y") %></dd>
 
                 </dl>
               </td>
             </tr>
           </table>
-          
+
+          <h2 style="color: #292929; font-family: 'Open Sans', sans-serif; font-weight: 700; line-height: 1.4; margin-top: 24px; margin-bottom: 16px; text-align: left; font-size: 22px;">What to do next</h2>
+
           <% if @action_required %>
-            <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; min-width: 100%; width: 100%; background: #fef3c7; border: 1px solid #f59e0b; margin-bottom: 32px; border-radius: 4px;" width="100%">
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; min-width: 100%; width: 100%; background: #fef3c7; border: 1px solid #f59e0b; margin-bottom: 24px; border-radius: 4px;" width="100%">
               <tr>
                 <td style="font-family: 'Open Sans', sans-serif; font-size: 16px; vertical-align: top; padding: 16px;" valign="top">
-                  <h2 style="color: #92400e; font-family: 'Open Sans', sans-serif; font-weight: 700; line-height: 1.4; margin-top: 0; margin-bottom: 12px; text-align: left; font-size: 18px;">⚠️ Action Required: Set Up Submission Inbox</h2>
-                  <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 16px; color: #78350f;">
-                    Your jurisdiction does not have a submission inbox contact configured for the "<strong><%= @template_version.permit_type&.name %></strong>" permit types. To receive application submissions for these permit types, please set up a submission inbox contact.
+                  <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: bold; margin: 0; margin-bottom: 12px; color: #78350f;">
+                    ⚠️ Action required: set up a submission email address for this permit type
                   </p>
-                  <a href="<%= @inbox_setup_url %>" style="display: inline-block; background-color: #1a5a96; color: #ffffff; font-family: 'Open Sans', sans-serif; font-size: 14px; font-weight: 600; text-decoration: none; padding: 10px 20px; border-radius: 4px;">Set Up Submission Inbox</a>
+                  <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 12px; color: #78350f;">
+                    Applications for <%= @template_version.permit_type&.name %> cannot be received until a submission email address is set up.
+                  </p>
+                  <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; color: #78350f;">
+                    Set up an email address in the <a href="<%= @inbox_setup_url %>" style="color: #1a5a96; text-decoration: underline;">submissions inbox setup screen</a> to receive applications for this permit type.
+                  </p>
                 </td>
               </tr>
             </table>
           <% end %>
 
+          <ul style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px; padding-left: 20px;">
+            <li style="margin-bottom: 8px;">Review the changes in this version of the template.</li>
+            <li style="margin-bottom: 8px;">Check any permit application form based on this template to confirm your customizations still reflect your requirements.</li>
+          </ul>
+
           <% if @user.manager? %>
-            <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 16px; margin-top: 24px;">
-              You may manage customizations on this template version here:
-            </p>
-            <a href="<%= FrontendUrlHelper.frontend_url("/digital-building-permits/#{@template_version.id}/edit") %>" style="display: inline-block; background-color: #1a5a96; color: #ffffff; font-family: 'Open Sans', sans-serif; font-size: 14px; font-weight: 600; text-decoration: none; padding: 10px 20px; border-radius: 4px;">Manage Customizations</a>
-          <% end %>
-
-          <h2 style="color: #292929; font-family: 'Open Sans', sans-serif; font-weight: 700; line-height: 1.4; margin-top: 24px; margin-bottom: 16px; text-align: left; font-size: 22px;">What this means:</h2>
-
-          <% if @permit_application.present? %>
-            <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
-              The requirements for your draft application may have changed. Please review your application to ensure it meets the updated requirements.
-            </p>
-          <% else %>
-            <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
-              This update may affect permit applications using this template. Please review the changes to stay informed of the latest requirements.
-            </p>
+            <a href="<%= FrontendUrlHelper.frontend_url("/digital-building-permits/#{@template_version.id}/edit") %>" style="display: inline-block; background-color: #1a5a96; color: #ffffff; font-family: 'Open Sans', sans-serif; font-size: 14px; font-weight: 600; text-decoration: none; padding: 10px 20px; border-radius: 4px; margin-bottom: 24px;">View permit application forms</a>
           <% end %>
 
           <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
-            Thank you,<br><br>
+            If you have any questions or require assistance, please contact <a href="mailto:digital.codes.permits@gov.bc.ca" style="color: #1a5a96; text-decoration: underline;">digital.codes.permits@gov.bc.ca</a>
+          </p>
+
+          <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
+            Best regards,<br><br>
             The Building Permit Hub Team
           </p>
           
@@ -82,4 +80,3 @@
 </tr>
 
 <!-- END MAIN CONTENT AREA -->
-

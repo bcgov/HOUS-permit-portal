@@ -90,7 +90,7 @@ class VirusScanService
   #
   # @return [Boolean]
   def enabled?
-    CLAMAV_ENABLED
+    ::CLAMAV_ENABLED
   end
 
   private
@@ -137,7 +137,7 @@ class VirusScanService
 
   def build_clamav_client
     # Create TCP socket connection to ClamAV daemon
-    socket = TCPSocket.new(CLAMAV_CONFIG[:host], CLAMAV_CONFIG[:port])
+    socket = TCPSocket.new(::CLAMAV_CONFIG[:host], ::CLAMAV_CONFIG[:port])
 
     # Build connection with the TCP socket
     connection =

@@ -45,6 +45,12 @@ const LoginScreen = lazy(() =>
 
 const HomeScreen = lazy(() => import("../home").then((module) => ({ default: module.HomeScreen })))
 
+const StandardizationPreviewScreen = lazy(() =>
+  import("../landing/standardization-preview-screen").then((module) => ({
+    default: module.StandardizationPreviewScreen,
+  }))
+)
+
 const ConfigurationManagementScreen = lazy(() =>
   import("../home/review-manager/configuration-management-screen").then((module) => ({
     default: module.ConfigurationManagementScreen,
@@ -134,9 +140,9 @@ const LookUpStepCodesRequirementsForYourProjectScreen = lazy(() =>
     default: module.LookUpStepCodesRequirementsForYourProjectScreen,
   }))
 )
-const DigitalSealValidatorScreen = lazy(() =>
-  import("../project-readiness-tools/digital-seal-validator").then((module) => ({
-    default: module.DigitalSealValidatorScreen,
+const CheckDigitalSealsScreen = lazy(() =>
+  import("../project-readiness-tools/check-digital-seals").then((module) => ({
+    default: module.CheckDigitalSealsScreen,
   }))
 )
 const PreCheckInfoScreen = lazy(() =>
@@ -291,9 +297,9 @@ const RevisionReasonSetupScreen = lazy(() =>
   }))
 )
 
-const LandingSetupScreen = lazy(() =>
-  import("../super-admin/site-configuration-management/landing-setup-screen").then((module) => ({
-    default: module.LandingSetupScreen,
+const StandardizationSetupScreen = lazy(() =>
+  import("../super-admin/site-configuration-management/standardization-setup-screen").then((module) => ({
+    default: module.StandardizationSetupScreen,
   }))
 )
 
@@ -496,7 +502,7 @@ const AppRoutes = observer(() => {
       <Route path="/configuration-management/sitewide-message" element={<SitewideMessageScreen />} />
       <Route path="/configuration-management/help-drawer-setup" element={<HelpDrawerSetupScreen />} />
       <Route path="/configuration-management/revision-reason-setup" element={<RevisionReasonSetupScreen />} />
-      <Route path="/configuration-management/landing-setup" element={<LandingSetupScreen />} />
+      <Route path="/configuration-management/standardization-setup" element={<StandardizationSetupScreen />} />
       <Route path="/configuration-management/users" element={<AdminUserIndexScreen />} />
       <Route path="/configuration-management/global-feature-access" element={<AdminGlobalFeatureAccessScreen />} />
       <Route
@@ -783,6 +789,7 @@ const AppRoutes = observer(() => {
         {/* Public Routes */}
         <Route path="/accept-invitation" element={<AcceptInvitationScreen />} />
         <Route path="/contact" element={<ContactScreen />} />
+        <Route path="/standardization-preview" element={<StandardizationPreviewScreen />} />
         <Route path="/project-readiness-tools" element={<ProjectReadinessToolsIndexScreen />} />
         <Route path="/privacy-policy" element={<PrivacyPolicyScreen />} />
         <Route
@@ -797,7 +804,7 @@ const AppRoutes = observer(() => {
           path="/project-readiness-tools/look-up-step-codes-requirements-for-your-project"
           element={<LookUpStepCodesRequirementsForYourProjectScreen />}
         />
-        <Route path="/project-readiness-tools/digital-seal-validator" element={<DigitalSealValidatorScreen />} />
+        <Route path="/project-readiness-tools/check-digital-seals" element={<CheckDigitalSealsScreen />} />
         <Route path="/project-readiness-tools/pre-check" element={<PreCheckInfoScreen />} />
         <Route
           path="/onboarding-checklist-page-for-lg-adopting"

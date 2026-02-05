@@ -131,20 +131,12 @@ class NotificationService
       user = users_with_email_enabled[user_id]
       next unless user
 
-      permit_application_id =
-        notification_data.dig("object_data", "permit_application_id")
-      permit_application =
-        PermitApplication.find_by(
-          id: permit_application_id
-        ) if permit_application_id
-
       # For managers, pass their jurisdiction so the email can check for missing submission contacts
       jurisdiction = user.manager? ? user.jurisdictions.first : nil
 
       PermitHubMailer.notify_new_template_version_published(
         template_version,
         user,
-        permit_application,
         jurisdiction
       ).deliver_later
     end
