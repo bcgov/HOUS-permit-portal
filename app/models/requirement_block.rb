@@ -1,8 +1,5 @@
 class RequirementBlock < ApplicationRecord
-  include HtmlSanitizeAttributes
-  include Discard::Model
-
-  sanitizable :display_description
+  # searchkick must be declared before Discard::Model to ensure auto-callbacks register correctly
   searchkick searchable: %i[
                name
                requirement_labels
@@ -10,6 +7,11 @@ class RequirementBlock < ApplicationRecord
                configurations
              ],
              word_start: %i[name requirement_labels associations configurations]
+
+  include HtmlSanitizeAttributes
+  include Discard::Model
+
+  sanitizable :display_description
 
   has_many :requirements, -> { order(position: :asc) }, dependent: :destroy
   has_many :requirement_documents,
@@ -31,6 +33,7 @@ class RequirementBlock < ApplicationRecord
   validates :display_name, presence: true
   validate :validate_step_code_dependencies
   validate :validate_requirements_conditional
+  validate :validate_requirements_data_validation
   validate :early_access_on_appropriate_template
   validate :unique_name_among_non_discarded
 
@@ -223,6 +226,64 @@ class RequirementBlock < ApplicationRecord
           "conditional 'when' field must be a requirement code in the same requirement block"
         )
         break
+      end
+    end
+  end
+
+  def validate_requirements_data_validation
+    requirements.each do |requirement|
+      data_validation = requirement.input_options["data_validation"]
+      next unless data_validation.present?
+
+      unless requirement.input_type_number? || requirement.input_type_date? ||
+               requirement.input_type_multi_option_select? ||
+               requirement.input_type_file?
+        errors.add(
+          :input_options,
+          "data_validation is only allowed for number, date, multi-select and file inputs"
+        )
+        next
+      end
+
+      if data_validation["operation"].blank? || data_validation["value"].blank?
+        errors.add(
+          :input_options,
+          "data_validation must have operation and value"
+        )
+      end
+
+      if requirement.input_type_number? &&
+           !%w[min max].include?(data_validation["operation"])
+        errors.add(
+          :input_options,
+          "data_validation operation must be min or max for number inputs"
+        )
+      end
+
+      if requirement.input_type_date? &&
+           !%w[before after].include?(data_validation["operation"])
+        errors.add(
+          :input_options,
+          "data_validation operation must be before or after for date inputs"
+        )
+      end
+
+      if requirement.input_type_multi_option_select? &&
+           !%w[min_selected_count max_selected_count].include?(
+             data_validation["operation"]
+           )
+        errors.add(
+          :input_options,
+          "data_validation operation must be min_selected_count or max_selected_count for multi-select inputs"
+        )
+      end
+
+      if requirement.input_type_file? &&
+           !%w[allowed_file_types].include?(data_validation["operation"])
+        errors.add(
+          :input_options,
+          "data_validation operation must be allowed_file_types for file inputs"
+        )
       end
     end
   end

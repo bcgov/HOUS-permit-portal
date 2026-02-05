@@ -2,7 +2,7 @@ require "rails_helper"
 
 RSpec.describe PreCheck, type: :model do
   describe "associations" do
-    it { is_expected.to belong_to(:creator).class_name("User") }
+    it { is_expected.to belong_to(:creator).class_name("User").optional }
     it { is_expected.to belong_to(:permit_application).optional }
     it { is_expected.to have_one(:permit_project).through(:permit_application) }
   end

@@ -1,4 +1,9 @@
 import {
+  Accordion,
+  AccordionButton,
+  AccordionIcon,
+  AccordionItem,
+  AccordionPanel,
   Alert,
   Avatar,
   Button,
@@ -40,8 +45,10 @@ interface IProfileScreenProps {}
 export const ProfileScreen = observer(({}: IProfileScreenProps) => {
   const { t } = useTranslation()
   const [isEditingEmail, setIsEditingEmail] = useState(false)
+  const [isArchiving, setIsArchiving] = useState(false)
+  const [closeAccountAcknowledged, setCloseAccountAcknowledged] = useState(false)
 
-  const { userStore } = useMst()
+  const { userStore, sessionStore } = useMst()
   const { currentUser, updateProfile } = userStore
   const isManager = currentUser?.isManager
 
@@ -66,6 +73,19 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
 
   const handleResendConfirmationEmail = async () => {
     await currentUser.resendConfirmation()
+  }
+
+  const handleArchiveMyAccount = async () => {
+    setIsArchiving(true)
+    const archivedUserId = currentUser.id
+    const ok = await currentUser.destroy()
+
+    if (ok && archivedUserId === currentUser.id) {
+      await sessionStore.logout()
+      return
+    }
+
+    setIsArchiving(false)
   }
 
   const events = [
@@ -335,6 +355,44 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
 
             {!currentUser.isSuperAdmin && <UserEulas />}
 
+            <Section>
+              <Accordion allowToggle>
+                <AccordionItem border="none">
+                  <AccordionButton px={0}>
+                    <Heading as="h3" m={0}>
+                      {t("user.closeAccountSectionTitle")}
+                    </Heading>
+                    <AccordionIcon />
+                  </AccordionButton>
+                  <AccordionPanel px={0} pt={2}>
+                    <Flex direction="column" gap={4}>
+                      <Text>{t("user.closeAccountParagraph1" as any)}</Text>
+                      <Text>{t("user.closeAccountParagraph2" as any)}</Text>
+                      <Text>{t("user.closeAccountParagraph3" as any)}</Text>
+                      <Checkbox
+                        isChecked={closeAccountAcknowledged}
+                        onChange={(e) => setCloseAccountAcknowledged(e.target.checked)}
+                      >
+                        {t("user.closeAccountAcknowledge" as any)}
+                      </Checkbox>
+
+                      <Button
+                        colorScheme="red"
+                        variant="outline"
+                        alignSelf="flex-start"
+                        isLoading={isArchiving}
+                        loadingText={t("ui.loading")}
+                        isDisabled={!closeAccountAcknowledged || isSubmitting || isArchiving}
+                        onClick={handleArchiveMyAccount}
+                      >
+                        {t("user.archiveMyAccount" as any)}
+                      </Button>
+                    </Flex>
+                  </AccordionPanel>
+                </AccordionItem>
+              </Accordion>
+            </Section>
+
             <Flex as="section" gap={4} mt={4}>
               <Button variant="primary" type="submit" isLoading={isSubmitting} loadingText={t("ui.loading")}>
                 {t("ui.save")}
@@ -345,12 +403,6 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
                 </Button>
               )}
             </Flex>
-            <Text fontSize="xs">
-              <Trans
-                i18nKey={"user.deleteAccount"}
-                components={{ 1: <Link href={`mailto:digital.codes.permits@gov.bc.ca`}></Link> }}
-              />
-            </Text>
           </Flex>
         </form>
       </FormProvider>

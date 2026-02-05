@@ -1,5 +1,5 @@
 import { IRevisionReason } from "../models/revision-reason"
-import { ENumberUnit, ERequirementType, ETagType, EVisibility } from "./enums"
+import { EDataValidationOperation, ENumberUnit, ERequirementType, ETagType, EVisibility } from "./enums"
 import {
   IHelpLinkItems,
   IOption,
@@ -26,6 +26,12 @@ export interface IFormConditional {
   then: string
 }
 
+export interface IDataValidation {
+  operation: EDataValidationOperation
+  value: string
+  errorMessage?: string
+}
+
 export interface IRequirementAttributes {
   id?: string
   label?: string
@@ -43,6 +49,7 @@ export interface IRequirementAttributes {
     energyStepCode?: string
     computedCompliance?: TComputedCompliance
     multiple?: boolean
+    dataValidation?: IDataValidation
   }
   position?: number
 }

@@ -30,6 +30,8 @@ export enum EFileUploadAttachmentType {
   ReportDocument = "ReportDocument",
   ResourceDocument = "ResourceDocument",
   DesignDocument = "DesignDocument",
+  OverheatingTool = "OverheatingTool",
+  OverheatingDocument = "OverheatingDocument",
 }
 
 export enum EResourceCategory {
@@ -680,6 +682,18 @@ export enum EPermitProjectSortFields {
   rollupStatus = "rollup_status",
 }
 
+export enum EOverheatingToolStatusFilter {
+  all = "all",
+  archived = "archived",
+  unarchived = "unarchived",
+}
+
+export enum EOverheatingToolSortFields {
+  projectNumber = "projectNumber",
+  address = "address",
+  createdAt = "createdAt",
+}
+
 export enum EPermitProjectRollupStatus {
   empty = "empty",
   newDraft = "new_draft",
@@ -782,4 +796,22 @@ export enum EFileScanStatus {
   pending = "pending",
   clean = "clean",
   infected = "infected",
+}
+
+export enum EPdfGenerationStatus {
+  notStarted = "not_started",
+  queued = "queued",
+  generating = "generating",
+  completed = "completed",
+  failed = "failed",
+}
+
+export enum EDataValidationOperation {
+  min = "min",
+  max = "max",
+  before = "before",
+  after = "after",
+  minSelectedCount = "min_selected_count",
+  maxSelectedCount = "max_selected_count",
+  allowedFileTypes = "allowed_file_types",
 }

@@ -28,6 +28,8 @@
 #       enabled: "ON"
 
 en:
+  misc:
+    removed_placeholder: "<Removed>"
   activerecord:
     attributes:
       contact:
@@ -139,6 +141,9 @@ en:
       update_password_success: "You have successfully updated your password"
       welcome: "Welcome to the Building Permit Hub"
       onboarding: "Welcome to the Building Permit Hub"
+      account_closed: "Your Building Permit Hub account has been closed"
+      user_archive_warning: "Your account will be archived in %{days} days"
+      user_delete_warning: "Your account will be deleted in %{days} days"
       notify_submitter_application_submitted: "Your Building Permit Hub application has been submitted"
       notify_new_integration_mapping: "New API mappings available"
       notify_missing_integration_mapping: "Missing API mappings"
@@ -559,6 +564,18 @@ en:
       update_version_succes:
         title: ""
         message: "Permit application successfully updated to new version!"
+      destroy_success:
+        title: ""
+        message: "Permit application archived successfully"
+      destroy_error:
+        title: Error
+        message: "There was an error archiving the permit application"
+      restore_success:
+        title: ""
+        message: "Permit application restored successfully"
+      restore_error:
+        title: Error
+        message: "There was an error restoring the permit application"
       save_draft_success:
         title: ""
         message: "Permit application successfully saved as draft!"
@@ -722,6 +739,25 @@ en:
       not_found_error:
         title: "Error"
         message: 404 - The requested resource could not be found
+    overheating_tool:
+      generate_queued:
+        title: ""
+        message: "PDF generation has been queued."
+      create_success:
+        title: ""
+        message: "PDF form saved successfully!"
+      create_error:
+        title: "Oops"
+        message: "%{error_message}"
+      file_not_found:
+        title: "Error"
+        message: "%{error_message}"
+      empty_file:
+        title: "Error"
+        message: "%{error_message}"
+      read_error:
+        title: "Error"
+        message: "%{error_message}"
     s3:
       multipart_init_failed:
         title: "File Upload Error"
@@ -932,10 +968,3 @@ en:
     requirement_summary_csv_headers: "Field Name,Is Elective,Used By (Number of Jurisdictions),Reason: Bylaw Count, Reason: Zoning count,Reason: Policy Count"
     step_code_summary_csv_headers: "Jurisdiction,Permit type,Enabled/disabled,Energy step code level,Zero carbon level"
     application_metrics_csv_headers: "Jurisdiction,Permit type,Work type,First Nations,In draft,In inbox,Average days before first submit,Average days before latest submit"
-  digital_seal_validator:
-    validation_error:
-      title: "Validation Error"
-      message: "%{error_message}"
-    no_file_provided:
-      title: "No File Provided"
-      message: "No file provided"

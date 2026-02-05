@@ -1,0 +1,98 @@
+<!-- START MAIN CONTENT AREA -->
+<tr>
+  <td
+    class="wrapper"
+    style="font-family: 'Open Sans', sans-serif; font-size: 16px; vertical-align: top; box-sizing: border-box; padding: 56px 32px;"
+    valign="top"
+  >
+    <table
+      role="presentation"
+      border="0"
+      cellpadding="0"
+      cellspacing="0"
+      style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; min-width: 100%; width: 100%;"
+      width="100%"
+    >
+      <tr>
+        <!-- START CONTENT ROW -->
+        <td style="font-family: 'Open Sans', sans-serif; font-size: 16px; vertical-align: top;" valign="top">
+          <h1
+            style="color: #292929; font-family: 'Open Sans', sans-serif; font-weight: 700; line-height: 1.4; text-align: left; font-size: 28px; margin-top: 0; margin-bottom: 24px;"
+          >
+            Your Building Permit Hub account will be deleted soon
+          </h1>
+
+          <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
+            Hello <%= @user.first_name.presence || @user.name %>,
+          </p>
+
+          <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 12px;">
+            Your Building Permit Hub account is scheduled for deletion.
+          </p>
+          <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
+            You must contact an administrator to reactivate your account to prevent deletion.
+          </p>
+
+          <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: 700; margin: 0; margin-bottom: 12px;">
+            Account scheduled for deletion:
+          </p>
+          <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; min-width: 100%; width: 100%; margin-bottom: 24px;" width="100%">
+            <thead>
+              <tr>
+                <th align="left" style="font-family: 'Open Sans', sans-serif; font-size: 12px; letter-spacing: 0.05em; text-transform: uppercase; color: #6e6e6e; padding: 8px 12px; border-bottom: 1px solid #dddddd;">
+                  Login Type
+                </th>
+                <th align="left" style="font-family: 'Open Sans', sans-serif; font-size: 12px; letter-spacing: 0.05em; text-transform: uppercase; color: #6e6e6e; padding: 8px 12px; border-bottom: 1px solid #dddddd;">
+                  ID
+                </th>
+                <th align="left" style="font-family: 'Open Sans', sans-serif; font-size: 12px; letter-spacing: 0.05em; text-transform: uppercase; color: #6e6e6e; padding: 8px 12px; border-bottom: 1px solid #dddddd;">
+                  Scheduled Deletion Date
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="font-family: 'Open Sans', sans-serif; font-size: 16px; padding: 10px 12px; border-bottom: 1px solid #f0f0f0;">
+                  <%= @login_type %>
+                </td>
+                <td style="font-family: 'Open Sans', sans-serif; font-size: 16px; padding: 10px 12px; border-bottom: 1px solid #f0f0f0;">
+                  <%= @login_identifier %>
+                </td>
+                <td style="font-family: 'Open Sans', sans-serif; font-size: 16px; padding: 10px 12px; border-bottom: 1px solid #f0f0f0;">
+                  <%= @scheduled_date.strftime("%Y-%m-%d") %>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: 700; margin: 0; margin-bottom: 12px;">
+            Actions you can take:
+          </p>
+          <ul style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px; padding-left: 24px;">
+            <li style="list-style-position: initial; margin-left: 5px;">
+              Contact an administrator to reactivate your account before the scheduled deletion date.
+            </li>
+            <li style="list-style-position: initial; margin-left: 5px;">
+              After deletion, all user data is permanently removed and unrecoverable, including permit applications, projects, and related records.
+            </li>
+            <li style="list-style-position: initial; margin-left: 5px;">
+              Contact us at
+              <a href="mailto:digital.codes.permits@gov.bc.ca" style="color: #1a5a96; text-decoration: underline;">
+                digital.codes.permits@gov.bc.ca
+              </a>
+              if you need help.
+            </li>
+          </ul>
+
+          <hr style="border: 0; border-bottom: 1px solid #dddddd; margin: 24px 0;" />
+
+          <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0;">
+            The Building Permit Hub Team
+          </p>
+        </td>
+        <!-- END OF CONTENT ROW -->
+      </tr>
+    </table>
+  </td>
+</tr>
+<!-- END MAIN CONTENT AREA -->

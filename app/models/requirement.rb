@@ -256,9 +256,7 @@ class Requirement < ApplicationRecord
   end
 
   def has_data_validation?
-    # TODO: false for now, but will be implemented in the future when
-    # custom data validation is added
-    false
+    input_options["data_validation"].present?
   end
 
   def self.extract_requirement_id_from_submission_key(key)

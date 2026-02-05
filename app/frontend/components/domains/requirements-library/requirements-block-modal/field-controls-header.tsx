@@ -1,12 +1,13 @@
 import { Button, HStack } from "@chakra-ui/react"
 import React from "react"
 import { useTranslation } from "react-i18next"
-import { IFormConditional } from "../../../../types/api-request"
+import { IDataValidation, IFormConditional } from "../../../../types/api-request"
 import { ERequirementType } from "../../../../types/enums"
 import { TComputedCompliance } from "../../../../types/types"
 import { ElectiveTag } from "../../../shared/elective-tag"
 import { HasAutomatedComplianceTag } from "../../../shared/has-automated-compliance-tag"
 import { HasConditionalTag } from "../../../shared/has-conditional-tag"
+import { HasDataValidationTag } from "../../../shared/has-data-validation-tag"
 import { RequirementTypeTag } from "../../../shared/requirement-type-tag"
 import { IRequirementOptionsMenu, OptionsMenu } from "../requirement-field-edit/options-menu"
 
@@ -20,6 +21,7 @@ interface IProps {
   elective?: boolean
   conditional?: IFormConditional
   computedCompliance?: TComputedCompliance
+  dataValidation?: IDataValidation
   index: number
 }
 
@@ -31,6 +33,7 @@ export function FieldControlsHeader({
   conditional,
   requirementType,
   computedCompliance,
+  dataValidation,
   onRemove,
   index,
   requirementCode,
@@ -49,25 +52,28 @@ export function FieldControlsHeader({
             onRemove={onRemove}
             disabledOptions={disabledMenuOptions}
             index={index}
+            requirementType={requirementType}
           />
         )}
-      <HStack className={"requirement-edit-controls-container"}>
+      <HStack className={"requirement-edit-controls-container"} p={2}>
         {elective && !isRequirementInEditMode && <ElectiveTag display={isRequirementInEditMode ? "none" : "flex"} />}
         {conditional && !isRequirementInEditMode && (
           <HasConditionalTag display={isRequirementInEditMode ? "none" : "flex"} />
         )}
-        {computedCompliance && !isRequirementInEditMode && computedCompliance?.module && (
+        {dataValidation && !isRequirementInEditMode && (
+          <HasDataValidationTag display={isRequirementInEditMode ? "none" : "flex"} />
+        )}
+        {!isRequirementInEditMode && computedCompliance?.module && (
           <HasAutomatedComplianceTag display={isRequirementInEditMode ? "none" : "flex"} />
         )}
         {!isRequirementInEditMode && (
-          <RequirementTypeTag type={requirementType} className={"requirement-edit-controls"} display={"none"} />
+          <RequirementTypeTag type={requirementType} className={"requirement-edit-controls"} />
         )}
         <Button
           variant={"primary"}
           size={"sm"}
           onClick={() => {
             toggleRequirementToEdit()
-            console.log("requirementCode", requirementCode)
           }}
           className={"requirement-edit-controls"}
           display={isRequirementInEditMode ? "flex" : "none"}

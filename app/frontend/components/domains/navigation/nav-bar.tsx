@@ -81,6 +81,21 @@ function isProjectDetailPath(path: string): boolean {
   return regex.test(path)
 }
 
+function isProjectPath(path: string): boolean {
+  const regex = /^\/projects/
+  return regex.test(path)
+}
+
+function isProjectStepCodePath(path: string): boolean {
+  const regex = /^\/step-codes/
+  return regex.test(path)
+}
+
+function isProjectPreCheckPath(path: string): boolean {
+  const regex = /^\/pre-checks/
+  return regex.test(path)
+}
+
 function isStepCodePath(path: string): boolean {
   const regex = /^(\/part-(3|9)-step-code|\/permit-applications\/[a-f\d-]+\/edit\/part-(3|9)-step-code).*$/
   return regex.test(path)
@@ -89,6 +104,11 @@ function isStepCodePath(path: string): boolean {
 function isPreCheckPath(path: string): boolean {
   // TODO: Update for pre checks that are attached to a permit application
   const regex = /^\/pre-checks\/[a-f\d-]+/
+  return regex.test(path)
+}
+
+function isSingleZoneCoolingHeatingToolPath(path: string): boolean {
+  const regex = /^\/overheating-tool\/[a-z\d-]+/
   return regex.test(path)
 }
 
@@ -105,9 +125,13 @@ function shouldHideSubNavbarForPath(path: string): boolean {
     isApiMappingPath,
     isLoginPath,
     isProjectDetailPath,
+    isProjectStepCodePath,
+    isProjectPreCheckPath,
+    isProjectPath,
     isStepCodePath,
     isAdminPath,
     isPreCheckPath,
+    isSingleZoneCoolingHeatingToolPath,
   ]
 
   return matchers.some((matcher) => matcher(path))
@@ -134,6 +158,15 @@ export const NavBar = observer(function NavBar() {
     } else {
       return <StepCodeNavBar title={t("stepCode.part3.title")} NavLinks={<Part3NavLinks />} />
     }
+  }
+
+  if (isSingleZoneCoolingHeatingToolPath(path)) {
+    return (
+      <StepCodeNavBar
+        title={t("singleZoneCoolingHeatingTool.title")}
+        NavLinks={null} // Or add custom links if needed
+      />
+    )
   }
 
   if (shouldHideFullNavBarForPath(path)) {

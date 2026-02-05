@@ -26,6 +26,7 @@ import { SearchGrid } from "../../shared/grid/search-grid"
 import { SearchGridItem } from "../../shared/grid/search-grid-item"
 import { HasAutomatedComplianceTag } from "../../shared/has-automated-compliance-tag"
 import { HasConditionalTag } from "../../shared/has-conditional-tag"
+import { HasDataValidationTag } from "../../shared/has-data-validation-tag"
 import { YesNoTag } from "../../shared/yes-no-tag"
 import { GridHeaders } from "./grid-header"
 import { RequirementsBlockModal } from "./requirements-block-modal"
@@ -124,6 +125,7 @@ export const RequirementBlocksTable = observer(function RequirementBlocksTable({
                   <HStack flexWrap={"wrap"} maxW={"full"} alignSelf={"middle"}>
                     {requirementBlock.hasAnyElective && <ElectiveTag hasElective />}
                     {requirementBlock.hasAnyConditional && <HasConditionalTag />}
+                    {requirementBlock.hasAnyDataValidation && <HasDataValidationTag />}
                     {requirementBlock.hasAutomatedCompliance && <HasAutomatedComplianceTag />}
                   </HStack>
                 </SearchGridItem>

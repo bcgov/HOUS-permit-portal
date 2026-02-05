@@ -13,7 +13,7 @@ import {
   useDisclosure,
   VStack,
 } from "@chakra-ui/react"
-import { X } from "@phosphor-icons/react"
+import { Trash } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React, { useEffect, useMemo } from "react"
@@ -31,6 +31,7 @@ import { DownloadLinkButton, ResourceItem } from "../../shared/base/resource-ite
 import { SafeTipTapDisplay } from "../../shared/editor/safe-tiptap-display"
 import { ElectiveTag } from "../../shared/elective-tag"
 import { FirstNationsTag } from "../../shared/first-nations-tag"
+import { ConfirmationModal } from "../../shared/modals/confirmation-modal"
 import { RichTextTip } from "../../shared/rich-text-tip"
 import { VisibilityTag } from "../../shared/visibility-tag.tsx"
 import { RequirementFieldDisplay } from "./requirement-field-display"
@@ -122,20 +123,36 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
             justifyContent={"space-between"}
             onClick={onToggle}
           >
-            <HStack spacing={1}>
+            <HStack spacing={4}>
               <Box fontWeight={700} fontSize={"base"}>
                 {requirementBlock.displayName}
               </Box>
               {isOpen && onRemove && (
-                <IconButton
-                  color={"text.primary"}
-                  variant={"ghost"}
-                  aria-label={"Remove Requirement Block"}
-                  onClick={(e) => {
-                    e.stopPropagation()
+                <ConfirmationModal
+                  promptHeader={t("ui.removeRequirementBlock" as any)}
+                  promptMessage={t("ui.removeRequirementBlockConfirm" as any)}
+                  renderTrigger={(onConfirmationModalOpen) => {
+                    return (
+                      <IconButton
+                        color={"text.primary"}
+                        variant={"ghost"}
+                        aria-label={"Remove Requirement Block"}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          onConfirmationModalOpen()
+                        }}
+                        icon={
+                          <Flex align="center">
+                            <Trash size={16} />
+                            <Text ml={2}> {t("ui.remove" as any)}</Text>
+                          </Flex>
+                        }
+                      />
+                    )
+                  }}
+                  onConfirm={() => {
                     onRemove()
                   }}
-                  icon={<X size={16} />}
                 />
               )}
             </HStack>

@@ -615,7 +615,7 @@ GEM
     unicode-display_width (2.6.0)
     unicode_utils (1.4.0)
     uniform_notifier (1.18.0)
-    uri (1.0.3)
+    uri (1.0.4)
     useragent (0.16.11)
     vcr (6.2.0)
     version_gem (1.1.6)
@@ -690,7 +690,7 @@ DEPENDENCIES
   json-jwt (>= 1.16.6)
   kaminari (~> 1.2.2)
   letter_opener (~> 1.8)
-  nokogiri (>= 1.18.8)
+  nokogiri (>= 1.18.9)
   omniauth-keycloak (= 1.5.2)
   omniauth-rails_csrf_protection (= 1.0.1)
   pg (~> 1.1)
@@ -729,6 +729,7 @@ DEPENDENCIES
   syntax_tree-rbs (~> 1.0)
   timecop (~> 0.9.8)
   tzinfo-data
+  uri (>= 1.0.4)
   vcr (~> 6.2)
   vite_rails (= 3.0.17)
   web-console

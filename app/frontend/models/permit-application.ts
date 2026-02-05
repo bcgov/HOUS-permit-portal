@@ -23,6 +23,7 @@ import {
   ITemplateCustomization,
   ITemplateVersionDiff,
 } from "../types/types"
+import { injectOptionalElectivesButtons } from "../utils/early-access-view-optional-electives"
 import {
   combineChangeMarkers,
   combineCustomizations,
@@ -94,10 +95,14 @@ export const PermitApplicationModel = types.snapshotProcessor(
       permitBlockStatusMap: types.map(PermitBlockStatusModel),
       isViewingPastRequests: types.optional(types.boolean, false),
       templateNickname: types.maybeNull(types.string),
+      discardedAt: types.maybeNull(types.Date),
     })
     .extend(withEnvironment())
     .extend(withRootStore())
     .views((self) => ({
+      get isDiscarded() {
+        return !!self.discardedAt
+      },
       get isPart3() {
         // TODO
         return false
@@ -252,6 +257,13 @@ export const PermitApplicationModel = types.snapshotProcessor(
           self.revisionMode || self.isRevisionsRequested
             ? combineRevisionButtons(changedMarkedFormJson, self.isSubmitted, revisionRequestsToUse)
             : changedMarkedFormJson // Use changedMarkedFormJson if not in revision mode
+
+        if (self.templateVersion?.earlyAccess) {
+          return injectOptionalElectivesButtons(
+            revisionModeFormJson,
+            t("earlyAccessRequirementTemplate.viewOptionalElectives")
+          )
+        }
 
         return revisionModeFormJson
       },
@@ -863,6 +875,22 @@ export const PermitApplicationModel = types.snapshotProcessor(
       retriggerSubmissionWebhook: flow(function* () {
         const response = yield self.environment.api.retriggerPermitApplicationWebhook(self.id)
         return response
+      }),
+
+      archive: flow(function* () {
+        const response = yield self.environment.api.archivePermitApplication(self.id)
+        if (response.ok) {
+          self.discardedAt = new Date()
+        }
+        return response.ok
+      }),
+
+      restore: flow(function* () {
+        const response = yield self.environment.api.restorePermitApplication(self.id)
+        if (response.ok) {
+          self.discardedAt = null
+        }
+        return response.ok
       }),
     })),
   {
