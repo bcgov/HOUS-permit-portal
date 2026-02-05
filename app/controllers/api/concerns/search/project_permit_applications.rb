@@ -30,6 +30,7 @@ module Api::Concerns::Search::ProjectPermitApplications
       includes: PermitApplication::SEARCH_INCLUDES,
       scope_results: ->(relation) { policy_scope(relation) }
     }
+
     @permit_application_search =
       PermitApplication.search(permit_application_query, **search_conditions)
   end
