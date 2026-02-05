@@ -162,6 +162,7 @@ en:
       notify_batched_integration_mapping: "New API mappings"
       notify_pre_check_submitted: "Your pre-check has been submitted"
       notify_pre_check_completed: "Your pre-check has been completed"
+      notify_new_template_version_published: "New version published for %{template_label}"
       notify_api_key_status_change: "API Key for %{jurisdiction_name} is expiring %{interval}"
       send_step_code_report_to_jurisdiction: "Step Code Report Shared: %{step_code_title} for %{jurisdiction_name}"
   arbitrary_message_construct:

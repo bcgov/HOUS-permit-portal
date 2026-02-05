@@ -1,0 +1,83 @@
+<!-- START MAIN CONTENT AREA -->
+<tr>
+  <td class="wrapper" style="font-family: 'Open Sans', sans-serif; font-size: 16px; vertical-align: top; box-sizing: border-box; padding: 56px 32px;" valign="top">
+    <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; min-width: 100%; width: 100%;" width="100%">
+      <tr>
+      <!-- START CONTENT ROW -->
+        <td style="font-family: 'Open Sans', sans-serif; font-size: 16px; vertical-align: top;" valign="top">
+          <h1 style="color: #292929; font-family: 'Open Sans', sans-serif; font-weight: 700; line-height: 1.4; text-align: left; font-size: 28px; margin-top: 0; margin-bottom: 48px;">Permit template updated: <%= @template_version.label %></h1>
+          <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">Dear <%= @user.name %>,</p>
+          <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
+            We've published a new version of the <%= @template_version.label %> template.
+          </p>
+          <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
+            If you have customized permit application forms based on this template, some questions or requirements may no longer match the latest version.
+          </p>
+
+          <h2 style="color: #292929; font-family: 'Open Sans', sans-serif; font-weight: 700; line-height: 1.4; margin-top: 24px; margin-bottom: 16px; text-align: left; font-size: 22px;">Template details</h2>
+          <table class="basic-table" role="presentation" border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; min-width: 100%; width: 100%; background: #f2f2f2; border: 1px solid #d9d9d9; margin-bottom: 32px;" width="100%">
+            <tr>
+              <td style="font-family: 'Open Sans', sans-serif; font-size: 16px; vertical-align: top;" valign="top">
+                <dl class="table-like" style="margin: 0;">
+                  
+                  <dt style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; font-size: 11px; text-transform: uppercase; font-weight: bold; padding-top: 10px; padding-bottom: 8px; text-align: left;">Template</dt>
+                  <dd style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; margin: 0; padding-bottom: 10px; border-bottom: 1px solid #d9d9d9;"><%= @template_version.label %></dd>
+
+                  <dt style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; font-size: 11px; text-transform: uppercase; font-weight: bold; padding-top: 10px; padding-bottom: 8px; text-align: left;">Permit type</dt>
+                  <dd style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; margin: 0; padding-bottom: 10px; border-bottom: 1px solid #d9d9d9;"><%= @template_version.permit_type&.name %></dd>
+
+                  <dt style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; font-size: 11px; text-transform: uppercase; font-weight: bold; padding-top: 10px; padding-bottom: 8px; text-align: left;">Version</dt>
+                  <dd style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; margin: 0; padding-bottom: 10px; border-bottom: 0;"><%= @template_version.version_date&.strftime("%B %d, %Y") %></dd>
+
+                </dl>
+              </td>
+            </tr>
+          </table>
+
+          <h2 style="color: #292929; font-family: 'Open Sans', sans-serif; font-weight: 700; line-height: 1.4; margin-top: 24px; margin-bottom: 16px; text-align: left; font-size: 22px;">What to do next</h2>
+
+          <% if @action_required %>
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; min-width: 100%; width: 100%; background: #fef3c7; border: 1px solid #f59e0b; margin-bottom: 24px; border-radius: 4px;" width="100%">
+              <tr>
+                <td style="font-family: 'Open Sans', sans-serif; font-size: 16px; vertical-align: top; padding: 16px;" valign="top">
+                  <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: bold; margin: 0; margin-bottom: 12px; color: #78350f;">
+                    ⚠️ Action required: set up a submission email address for this permit type
+                  </p>
+                  <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 12px; color: #78350f;">
+                    Applications for <%= @template_version.permit_type&.name %> cannot be received until a submission email address is set up.
+                  </p>
+                  <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; color: #78350f;">
+                    Set up an email address in the <a href="<%= @inbox_setup_url %>" style="color: #1a5a96; text-decoration: underline;">submissions inbox setup screen</a> to receive applications for this permit type.
+                  </p>
+                </td>
+              </tr>
+            </table>
+          <% end %>
+
+          <ul style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px; padding-left: 20px;">
+            <li style="margin-bottom: 8px;">Review the changes in this template version.</li>
+            <li style="margin-bottom: 8px;">Check that your customizations still meet your needs.</li>
+            <li style="margin-bottom: 8px;">Review submitted applications. If an application used an older template, you may choose to send it back for revisions.</li>
+          </ul>
+
+          <% if @user.manager? %>
+            <a href="<%= FrontendUrlHelper.frontend_url("/digital-building-permits/#{@template_version.id}/edit") %>" style="display: inline-block; background-color: #1a5a96; color: #ffffff; font-family: 'Open Sans', sans-serif; font-size: 14px; font-weight: 600; text-decoration: none; padding: 10px 20px; border-radius: 4px; margin-bottom: 24px;">View permit application forms</a>
+          <% end %>
+
+          <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
+            If you have any questions or require assistance, please contact <a href="mailto:digital.codes.permits@gov.bc.ca" style="color: #1a5a96; text-decoration: underline;">digital.codes.permits@gov.bc.ca</a>
+          </p>
+
+          <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
+            Best regards,<br><br>
+            The Building Permit Hub Team
+          </p>
+          
+        </td>
+        <!-- END OF CONTENT ROW -->
+      </tr>
+    </table>
+  </td>
+</tr>
+
+<!-- END MAIN CONTENT AREA -->
