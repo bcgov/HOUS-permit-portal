@@ -3743,6 +3743,8 @@ Thank you,
           filter: "Template",
           versions: "Versions",
           access: {
+            statusNone: "Not available in any jurisdictions",
+            statusNoneDesc: "Please grant access below to allow this template to be used in any jurisdictions.",
             subtitle: "Control which jurisdictions can use this template:",
             jurisdictionOverrides: "Jurisdiction overrides",
             disabledBy: "Disabled by:",

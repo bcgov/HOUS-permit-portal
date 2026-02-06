@@ -76,9 +76,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_29_185814) do
     t.index ["contactable_type", "contactable_id"], name: "index_contacts_on_contactable"
   end
 
-  create_table "data_migrations", primary_key: "version", id: :string, force: :cascade do |t|
-  end
-
   create_table "design_documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "pre_check_id", null: false
     t.text "file_data"
@@ -150,12 +147,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_29_185814) do
     t.index ["jurisdiction_id"], name: "index_external_api_keys_on_jurisdiction_id"
     t.index ["sandbox_id"], name: "index_external_api_keys_on_sandbox_id"
     t.index ["token"], name: "index_external_api_keys_on_token", unique: true
-  end
-
-  create_table "fancy_widgets", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.string "name", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
   end
 
   create_table "fuel_types", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -259,7 +250,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_29_185814) do
     t.string "disambiguator"
     t.boolean "first_nation", default: false
     t.string "ltsa_matcher"
-    t.jsonb "boundry_points", default: []
     t.index ["ltsa_matcher"], name: "index_jurisdictions_on_ltsa_matcher"
     t.index ["prefix"], name: "index_jurisdictions_on_prefix", unique: true
     t.index ["regional_district_id"], name: "index_jurisdictions_on_regional_district_id"
@@ -409,7 +399,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_29_185814) do
 
   create_table "permit_applications", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.integer "status", default: 0
-    t.uuid "submitter_id"
+    t.uuid "submitter_id", null: false
     t.uuid "jurisdiction_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -433,13 +423,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_29_185814) do
     t.uuid "sandbox_id"
     t.datetime "newly_submitted_at", precision: nil
     t.uuid "permit_project_id"
-    t.datetime "discarded_at"
-    t.string "omniauth_username_snapshot"
-    t.string "first_name_snapshot"
-    t.string "last_name_snapshot"
-    t.datetime "orphaned_at"
     t.index ["activity_id"], name: "index_permit_applications_on_activity_id"
-    t.index ["discarded_at"], name: "index_permit_applications_on_discarded_at"
     t.index ["jurisdiction_id"], name: "index_permit_applications_on_jurisdiction_id"
     t.index ["number"], name: "index_permit_applications_on_number", unique: true
     t.index ["permit_project_id"], name: "index_permit_applications_on_permit_project_id"
@@ -488,7 +472,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_29_185814) do
   end
 
   create_table "permit_projects", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.uuid "owner_id"
+    t.uuid "owner_id", null: false
     t.uuid "jurisdiction_id", null: false
     t.string "title"
     t.text "full_address"
@@ -501,12 +485,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_29_185814) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "number"
-    t.decimal "latitude", precision: 10, scale: 6
-    t.decimal "longitude", precision: 10, scale: 6
-    t.string "omniauth_username_snapshot"
-    t.string "first_name_snapshot"
-    t.string "last_name_snapshot"
-    t.datetime "orphaned_at"
     t.index ["jurisdiction_id"], name: "index_permit_projects_on_jurisdiction_id"
     t.index ["number"], name: "index_permit_projects_on_number", unique: true
     t.index ["owner_id"], name: "index_permit_projects_on_owner_id"
@@ -548,7 +526,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_29_185814) do
   create_table "pre_checks", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "permit_application_id"
     t.uuid "permit_type_id"
-    t.uuid "creator_id"
+    t.uuid "creator_id", null: false
     t.uuid "jurisdiction_id"
     t.string "external_id"
     t.string "full_address"
@@ -568,10 +546,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_29_185814) do
     t.boolean "consent_to_research_contact", default: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "omniauth_username_snapshot"
-    t.string "first_name_snapshot"
-    t.string "last_name_snapshot"
-    t.datetime "orphaned_at"
     t.index ["assessment_result"], name: "index_pre_checks_on_assessment_result"
     t.index ["completed_at"], name: "index_pre_checks_on_completed_at"
     t.index ["creator_id"], name: "index_pre_checks_on_creator_id"
@@ -755,13 +729,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_29_185814) do
     t.jsonb "submission_data"
     t.string "comment", limit: 350
     t.uuid "submission_version_id", null: false
-    t.uuid "user_id"
+    t.uuid "user_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "omniauth_username_snapshot"
-    t.string "first_name_snapshot"
-    t.string "last_name_snapshot"
-    t.datetime "orphaned_at"
     t.index ["submission_version_id"], name: "index_revision_requests_on_submission_version_id"
     t.index ["user_id"], name: "index_revision_requests_on_user_id"
   end
@@ -864,7 +834,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_29_185814) do
     t.string "plan_date"
     t.string "type"
     t.uuid "permit_project_id"
-    t.uuid "creator_id"
+    t.uuid "creator_id", null: false
     t.string "full_address"
     t.string "pid"
     t.string "pin"
@@ -875,10 +845,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_29_185814) do
     t.string "phase"
     t.string "building_code_version"
     t.datetime "discarded_at"
-    t.string "omniauth_username_snapshot"
-    t.string "first_name_snapshot"
-    t.string "last_name_snapshot"
-    t.datetime "orphaned_at"
     t.index ["creator_id"], name: "index_step_codes_on_creator_id"
     t.index ["discarded_at"], name: "index_step_codes_on_discarded_at"
     t.index ["jurisdiction_id"], name: "index_step_codes_on_jurisdiction_id"
@@ -987,15 +953,11 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_29_185814) do
   end
 
   create_table "user_license_agreements", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.uuid "user_id"
+    t.uuid "user_id", null: false
     t.uuid "agreement_id", null: false
     t.datetime "accepted_at", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "omniauth_username_snapshot"
-    t.string "first_name_snapshot"
-    t.string "last_name_snapshot"
-    t.datetime "orphaned_at"
     t.index ["agreement_id"], name: "index_user_license_agreements_on_agreement_id"
     t.index ["user_id"], name: "index_user_license_agreements_on_user_id"
   end
