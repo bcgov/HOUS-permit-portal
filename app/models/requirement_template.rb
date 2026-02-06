@@ -305,9 +305,7 @@ class RequirementTemplate < ApplicationRecord
       available_in:
         (
           if available_globally
-            I18n.t(
-              "activerecord.attributes.requirement_template.available_in_all"
-            )
+            Jurisdiction.count
           else
             jurisdiction_requirement_templates.count
           end

@@ -3759,6 +3759,8 @@ Thank you,
             statusRestricted: "Restricted access",
             statusGlobalDesc: "All jurisdictions can access and use this template.",
             statusRestrictedDesc: "{{count}} jurisdictions have been granted access to this template.",
+            statusSelect: "Available in select jurisdictions",
+            statusSelectDesc: "{{count}} jurisdictions have been granted access to this template.",
           },
           edit: {
             requirementsLibraryTab: "Requirements Library",
