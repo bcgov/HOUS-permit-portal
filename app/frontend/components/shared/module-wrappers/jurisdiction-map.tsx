@@ -26,7 +26,7 @@ const MapUpdater: React.FC<{ center: [number, number] }> = ({ center }) => {
   return null
 }
 
-// Component to listen for map drag events
+// Component to listen for map drag events.
 const MapChangeListener: React.FC<{
   onDrag: (newCenter: [number, number]) => void
   onZoomChange?: (newZoom: number) => void

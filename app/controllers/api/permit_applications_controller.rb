@@ -18,6 +18,8 @@ class Api::PermitApplicationsController < Api::ApplicationController
                   remove_collaborator_collaborations
                   create_or_update_permit_block_status
                   retrigger_submission_webhook
+                  destroy
+                  restore
                 ]
   skip_after_action :verify_policy_scoped, only: [:index]
 
@@ -412,6 +414,44 @@ class Api::PermitApplicationsController < Api::ApplicationController
     render_success nil, "permit_application.retrigger_webhook_success", {}
   rescue StandardError => e
     render_error "permit_application.retrigger_webhook_error", {}, e
+  end
+
+  def destroy
+    authorize @permit_application
+    if @permit_application.discarded? || @permit_application.discard
+      render_success(
+        @permit_application,
+        "permit_application.destroy_success",
+        {
+          blueprint: PermitApplicationBlueprint,
+          blueprint_opts: {
+            view: :extended,
+            current_user: current_user
+          }
+        }
+      )
+    else
+      render_error "permit_application.destroy_error"
+    end
+  end
+
+  def restore
+    authorize @permit_application
+    if !@permit_application.discarded? || @permit_application.undiscard
+      render_success(
+        @permit_application,
+        "permit_application.restore_success",
+        {
+          blueprint: PermitApplicationBlueprint,
+          blueprint_opts: {
+            view: :extended,
+            current_user: current_user
+          }
+        }
+      )
+    else
+      render_error "permit_application.restore_error"
+    end
   end
 
   private

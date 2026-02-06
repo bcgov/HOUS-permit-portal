@@ -83,7 +83,7 @@ export const PreCheckViewer = observer(function PreCheckViewer() {
             }}
             allow="fullscreen"
           />
-          <FloatingHelpDrawer top="100px" />
+          <FloatingHelpDrawer />
         </Box>
       </Flex>
     </RemoveScroll>
