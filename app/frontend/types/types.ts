@@ -196,6 +196,12 @@ export interface IDenormalizedRequirement {
   requirementCode: string
 }
 
+export interface IOptionalElectiveFieldInfo {
+  label: string
+  tooltip?: string
+  description?: string
+}
+
 export interface IDenormalizedRequirementBlock {
   id: string
   name: string
