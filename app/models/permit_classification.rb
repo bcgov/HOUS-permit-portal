@@ -41,8 +41,7 @@ class PermitClassification < ApplicationRecord
 
   def normalize_category
     # `underscore` doesn't convert spaces -> underscores, so normalize whitespace first.
-    self.category =
-      category&.to_s&.strip&.gsub(/\s+/, "_")&.underscore&.presence
+    self.category = category&.to_s&.strip&.underscore&.presence
   end
 
   def sanitize_html_fields

@@ -48,7 +48,7 @@ RSpec.describe PermitClassification, type: :model do
           category: " Planning Zoning  ",
           type: "PermitClassification"
         )
-      expect(pc.category).to eq("planning_zoning")
+      expect(pc.category).to eq("planning zoning")
     end
 
     it "sanitizes *_html attributes on save" do
@@ -87,7 +87,7 @@ RSpec.describe PermitClassification, type: :model do
         pc =
           build(
             :permit_classification,
-            category: "planning_zoning",
+            category: "planning zoning",
             type: "PermitClassification"
           )
         expect(pc.category_label).to eq("Planning zoning")
