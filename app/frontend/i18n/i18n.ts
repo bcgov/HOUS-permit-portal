@@ -1340,8 +1340,8 @@ Thank you,
             inboxDisabled:
               "Submissions for this local jurisdictions are currently disabled. You will be able to make edits to this permit application but will not be able to submit until this jurisdiction's is accepting submissions again and inboxes are enabled globally.",
             inboxDisabledTitleEarlyAccess: "Early Access – Submissions Not Yet Enabled",
-            inboxDisabledEarlyAccess:
-              "This permit is available for early access to help your team become familiar with the application process. You can view the application in this preview, but submission is currently disabled. <p> You are viewing the baseline standardized form. Click 'View optional electives' within any section to explore additional questions that jurisdictions may configure based on local needs.</p><p><1>Go to My projects to submit a permit.</1></p>",
+            inboxDisabledEarlyAccessInstructions:
+              "<br />This permit is available for early access to help your team become familiar with the application process. You can view the application in this preview, but submission is currently disabled.<br /><br /> You are viewing the base form. Click 'View optional electives' within any group of questions to explore additional questions that jurisdictions may configure based on local needs.<br /><1>Go to My projects to submit a permit.</1>",
             downloadApplication: "Download application",
             fetchingMissingPdf: "Fetching {{missingPdf}}...",
             missingPdfLabels: {
@@ -3744,7 +3744,7 @@ Thank you,
             updatedAt: "Updated at",
             assignee: "Assigned",
           },
-          viewOptionalElectives: "View optional electives",
+          viewOptionalElectives: "View electives",
           noOptionalElectives: "No optional electives in this requirement block.",
         },
         requirementTemplate: {

@@ -1,5 +1,5 @@
 import { Flex, TabPanel, TabPanels, Tabs } from "@chakra-ui/react"
-import { Buildings, ClipboardText, ListMagnifyingGlass } from "@phosphor-icons/react"
+import { Buildings, ClipboardText, ListMagnifyingGlass, ThermometerHot } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useTransition } from "react"
 import { useTranslation } from "react-i18next"
