@@ -44,7 +44,7 @@ export const ConfirmationModal = ({
       <Modal isOpen={isOpen} onClose={onClose} size="lg">
         <ModalOverlay />
         <ModalContent p={4}>
-          <ModalHeader>{promptHeader ?? t("ui.confirmation")}</ModalHeader>
+          <ModalHeader>{promptHeader ?? t("ui.defaultConfirmation")}</ModalHeader>
           <ModalCloseButton />
           <ModalBody>{promptMessage ?? t("ui.confirm")}</ModalBody>
           <ModalFooter>

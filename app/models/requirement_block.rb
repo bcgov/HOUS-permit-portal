@@ -1,8 +1,5 @@
 class RequirementBlock < ApplicationRecord
-  include HtmlSanitizeAttributes
-  include Discard::Model
-
-  sanitizable :display_description
+  # searchkick must be declared before Discard::Model to ensure auto-callbacks register correctly
   searchkick searchable: %i[
                name
                requirement_labels
@@ -10,6 +7,11 @@ class RequirementBlock < ApplicationRecord
                configurations
              ],
              word_start: %i[name requirement_labels associations configurations]
+
+  include HtmlSanitizeAttributes
+  include Discard::Model
+
+  sanitizable :display_description
 
   has_many :requirements, -> { order(position: :asc) }, dependent: :destroy
   has_many :requirement_documents,

@@ -32,6 +32,10 @@ FactoryBot.define do
       jurisdiction { nil }
     end
 
+    trait :discarded do
+      discarded_at { Time.current }
+    end
+
     transient do
       jurisdictions_count { 1 }
       jurisdiction { build(:sub_district) }

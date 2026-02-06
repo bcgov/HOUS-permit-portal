@@ -160,7 +160,7 @@ export const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
 
   // Right column - Role-dependent content
   const renderRightColumnContent = () => {
-    if (!loggedIn || currentUser?.isUnconfirmed) {
+    if (!loggedIn) {
       return <LoggedOutMenuContent />
     }
 
