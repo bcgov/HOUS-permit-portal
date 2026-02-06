@@ -1,0 +1,13 @@
+zone_5_step_3_low_area:
+  hdd: "[3000,4000)"
+  conditioned_space_percent: "[0.0,0.5]"
+  step: 3
+  conditioned_space_area: "[0,51)"
+  meui: 90
+
+zone_6_step_4_large_area:
+  hdd: "[4000,5000)"
+  conditioned_space_percent: "(0.5,1.0]"
+  step: 4
+  conditioned_space_area: "[51,121)"
+  meui: 75

@@ -241,6 +241,7 @@ export const PermitApplicationStoreModel = types
         sort: self.sort,
         page: opts?.page ?? self.currentPage,
         perPage: opts?.countPerPage ?? self.countPerPage,
+        showArchived: self.showArchived,
         filters: {
           status: self.statusFilter,
           templateVersionId: self.templateVersionIdFilter,
