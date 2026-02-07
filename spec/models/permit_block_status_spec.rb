@@ -232,6 +232,9 @@ RSpec.describe PermitBlockStatus, type: :model do
         allow(status).to receive(:ready?).and_return(true)
 
         user_enabled = create(:user)
+        user_enabled.preference.update!(
+          enable_email_collaboration_notification: true
+        )
         user_disabled = create(:user)
         user_disabled.preference.update!(
           enable_email_collaboration_notification: false
@@ -241,20 +244,27 @@ RSpec.describe PermitBlockStatus, type: :model do
           [user_enabled, user_disabled]
         )
 
-        mail = instance_double(ActionMailer::MessageDelivery)
-        allow(mail).to receive(:deliver_later)
-        allow(PermitHubMailer).to receive(
-          :notify_block_status_ready
-        ).and_return(mail)
+        allow(DebouncedNotificationEmailJob).to receive(:perform_in)
 
         status.send(:send_status_ready_email)
 
-        expect(PermitHubMailer).to have_received(
-          :notify_block_status_ready
+        expect(DebouncedNotificationEmailJob).to have_received(
+          :perform_in
         ).with(
-          permit_block_status: status,
-          user: user_enabled,
-          status_set_by: status.set_by_user
+          kind_of(ActiveSupport::Duration),
+          "permit_block_status_ready_summary:" \
+            "#{status.permit_application_id}:" \
+            "#{status.collaboration_type}:" \
+            "#{user_enabled.id}",
+          kind_of(Integer),
+          "NotificationAggregators::PermitBlockReadySummary",
+          {
+            "permit_application_id" => status.permit_application_id,
+            "collaboration_type" => status.collaboration_type,
+            "user_id" => user_enabled.id
+          },
+          "PermitHubMailer",
+          "notify_block_status_ready_summary"
         )
       end
     end

@@ -6,7 +6,7 @@ RSpec.describe PermitProject, type: :model do
   describe "associations" do
     subject { build(:permit_project) }
 
-    it { should belong_to(:owner).class_name("User") }
+    it { should belong_to(:owner).class_name("User").optional }
     it { should belong_to(:jurisdiction) }
     it { should have_many(:permit_applications) }
     it { should have_many(:project_documents).dependent(:destroy) }
@@ -111,7 +111,8 @@ RSpec.describe PermitProject, type: :model do
             pertinence_score: 5,
             status: "newly_submitted"
           )
-        allow(project).to receive(:permit_applications).and_return([a, b])
+        relation = double("PermitApplicationRelation", kept: [a, b])
+        allow(project).to receive(:permit_applications).and_return(relation)
 
         expect(project.rollup_status).to eq("newly_submitted")
       end
