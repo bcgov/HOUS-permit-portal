@@ -337,15 +337,8 @@ const ChecklistField = function ApplicationPDFPanelChecklistField({ options, lab
     optionValues?.length > 0 ? optionValues : Object.keys(options || {}).map((key) => ({ label: key, value: key }))
 
   const normalizedOptions = orderedOptions
-    .map((option) => {
-      if (!option || typeof option !== "object") return null
-      const value = option.value ?? option.label
-      if (value === undefined || value === null) return null
-      const valueKey = String(value)
-      const label = option.label
-      return { value: valueKey, label }
-    })
-    .filter((option): option is { value: string; label: string } => !!option)
+    .filter((o) => o.value != null)
+    .map((o) => ({ value: String(o.value), label: o.label }))
 
   return (
     <View style={{ gap: 4, paddingTop: 4 }} wrap={false}>
