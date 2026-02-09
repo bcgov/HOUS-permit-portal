@@ -301,14 +301,7 @@ const NavBarContent = observer(function NavBarContent() {
       </Box>
       {!R.isEmpty(criticalNotifications) && <ActionRequiredBox notification={criticalNotifications[0]} />}
       {currentUser?.isReviewStaff && (
-        <SandboxHeader
-          justify="center"
-          align="center"
-          position="static"
-          borderTopRadius={0}
-          color="text.primary"
-          expanded
-        />
+        <SandboxHeader justify="center" align="center" position="static" borderTopRadius={0} color="text.primary" />
       )}
       {!shouldHideSubNavbarForPath(path) && <SubNavBar />}
     </>
