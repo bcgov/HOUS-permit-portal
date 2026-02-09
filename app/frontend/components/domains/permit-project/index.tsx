@@ -51,10 +51,9 @@ export const ProjectDashboardScreen = observer(({}: IProjectDashboardScreenProps
 
   const handleTabChange = (index: number) => {
     startTransition(() => {
-      navigate(index === 0 ? "/projects" : index === 1 ? "/step-codes" : index === 2 ? "/overheating" : "/documents", {
+      navigate(`/${TABS_DATA[index].to}`, {
         replace: true,
       })
-      const routes = ["/projects", "/step-codes", "/overheating", "/pre-checks", "/documents"]
     })
   }
 
