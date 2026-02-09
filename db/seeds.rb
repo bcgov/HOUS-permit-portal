@@ -198,19 +198,23 @@ if PermitApplication.first.blank?
   # Create LiveRequirementTemplate records
   LiveRequirementTemplate.find_or_create_by!(
     activity: activity1,
-    permit_type: permit_type1
+    permit_type: permit_type1,
+    available_globally: true
   )
   LiveRequirementTemplate.find_or_create_by!(
     activity: activity1,
-    permit_type: permit_type2
+    permit_type: permit_type2,
+    available_globally: true
   )
   LiveRequirementTemplate.find_or_create_by!(
     activity: activity2,
-    permit_type: permit_type1
+    permit_type: permit_type1,
+    available_globally: true
   )
   LiveRequirementTemplate.find_or_create_by!(
     activity: activity2,
-    permit_type: permit_type2
+    permit_type: permit_type2,
+    available_globally: true
   )
 
   RequirementTemplate.reindex
