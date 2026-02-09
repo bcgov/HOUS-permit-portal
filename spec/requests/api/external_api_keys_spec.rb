@@ -105,7 +105,7 @@ RSpec.describe "Api::ExternalApiKeys", type: :request do
       expect(json_response.dig("data", "revoked_at")).to be_present
     end
   end
-
+  # Adding comment to trigger a build
   describe "DELETE /api/external_api_keys/:id" do
     it "deletes an existing key" do
       sign_in review_manager
