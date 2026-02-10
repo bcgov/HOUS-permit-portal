@@ -76,7 +76,7 @@ gem "rack", ">= 3.1.18"
 gem "simple-feed", "~> 3.2.0"
 # For external api docs
 gem "rswag-api", "~> 2.13"
-gem "rswag-ui", "~> 2.13"
+gem "rswag-ui", "~> 2.17"
 
 # brew install geos
 # bundle config build.rgeo --with-geos-dir=/usr/local/opt/geos
