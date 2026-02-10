@@ -7,7 +7,7 @@ gem "rails", "7.2.2.2"
 
 # Use postgresql as the database for Active Record
 gem "pg", "~> 1.1"
-gem "activerecord-nulldb-adapter", "~> 1.1.0" # for Dockerfile asset build
+gem "activerecord-nulldb-adapter", "~> 1.2.2" # for Dockerfile asset build
 
 # Use the Puma web server [https://github.com/puma/puma]
 gem "puma", ">= 6.4.2"
