@@ -123,7 +123,7 @@ group :development do
   gem "letter_opener", "~> 1.8"
   gem "rails-erd", "~> 1.5"
   gem "rubocop", "~> 1.67", require: false
-  gem "rubocop-rails", "~> 2.26", require: false
+  gem "rubocop-rails", "~> 2.34", require: false
   gem "solargraph", "~> 0.50.0", require: false
 end
 
