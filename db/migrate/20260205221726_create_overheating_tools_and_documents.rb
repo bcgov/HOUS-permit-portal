@@ -25,5 +25,7 @@ class CreateOverheatingToolsAndDocuments < ActiveRecord::Migration[7.2]
     end
 
     add_index :overheating_documents, :scan_status
+
+    OverheatingTool.reindex
   end
 end
