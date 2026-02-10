@@ -31,7 +31,7 @@
     "ts-node": "^10.9.2",
     "typescript": "^5.4.3",
     "vite": "^6.4.1",
-    "vite-plugin-ruby": "^5.1.1"
+    "vite-plugin-ruby": "^5.1.2"
   },
   "dependencies": {
     "@anycable/web": "^0.8.0",
