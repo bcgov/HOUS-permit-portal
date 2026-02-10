@@ -46,7 +46,7 @@
     "@formio/js": "^5.0.0-rc.37",
     "@formio/react": "^5.3.0",
     "@hookform/error-message": "^2.0.1",
-    "@phosphor-icons/react": "^2.0.15",
+    "@phosphor-icons/react": "^2.1.10",
     "@react-pdf/renderer": "^4.3.0",
     "@tiptap/extension-image": "^3.10.2",
     "@tiptap/extension-link": "^3.10.2",
