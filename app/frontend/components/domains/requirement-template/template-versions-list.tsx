@@ -14,6 +14,7 @@ import { SharedSpinner } from "../../shared/base/shared-spinner"
 import { FirstNationsTag } from "../../shared/first-nations-tag"
 import { RouterLink } from "../../shared/navigation/router-link"
 import { TemplateStatusTag } from "../../shared/requirement-template/template-status-tag"
+import SandboxHeader from "../../shared/sandbox/sandbox-header"
 import { can } from "../../shared/user/can"
 import { VersionTag } from "../../shared/version-tag"
 import { SectionBox } from "../home/section-box"
@@ -42,6 +43,8 @@ export const TemplateVersionsList = observer(function TemplateVersionsList({
   const { permitClassificationStore } = useMst()
   const [activityOptions, setActivityOptions] = useState<IOption<IActivity>[] | null>(null)
   const [activityOptionsError, setActivityOptionsError] = useState<Error | undefined>()
+  const { sandboxStore } = useMst()
+  const { isSandboxActive } = sandboxStore
   const { templateVersions, isLoading, error } = useTemplateVersions({
     permitTypeId,
     customErrorMessage: t("errors.fetchBuildingPermits"),
@@ -126,7 +129,8 @@ export const TemplateVersionsList = observer(function TemplateVersionsList({
           const tvs = templateVersionsByActivityId.get(activityOption.value.id) || []
 
           return tvs.map((tv) => (
-            <SectionBox key={tv.id} w="full">
+            <SectionBox key={tv.id} w="full" pt={isSandboxActive ? 12 : 6}>
+              {isSandboxActive && <SandboxHeader sandbox={tv.sandbox} />}
               <Flex w="full" as="section">
                 <Stack spacing={3} flex={1}>
                   <Text as="h4" color={"text.link"} fontWeight={700} fontSize="xl">
