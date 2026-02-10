@@ -26,7 +26,7 @@ jobs:
           sudo apt-get install git-lfs
           git lfs install
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: ${{ github.event.inputs.branch }}
           lfs: true

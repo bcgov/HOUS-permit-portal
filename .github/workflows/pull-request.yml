@@ -74,7 +74,7 @@ jobs:
           sudo apt-get install -y git-lfs libproj-dev libgeos-dev proj-bin
           git lfs install
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
         with:
           lfs: true
       - name: Set up Ruby 3.2.5
