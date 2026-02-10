@@ -98,7 +98,7 @@ group :development, :test do
   gem "faker", "~> 3.2.2"
   gem "shoulda-matchers", "~> 5.3.0"
   gem "database_cleaner-active_record"
-  gem "vcr", "~> 6.2"
+  gem "vcr", "~> 6.4"
   gem "bullet", "~> 8.0"
 end
 

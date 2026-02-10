@@ -617,7 +617,7 @@ GEM
     uniform_notifier (1.18.0)
     uri (1.0.4)
     useragent (0.16.11)
-    vcr (6.2.0)
+    vcr (6.4.0)
     version_gem (1.1.6)
     vite_rails (3.0.17)
       railties (>= 5.1, < 8)
@@ -730,7 +730,7 @@ DEPENDENCIES
   timecop (~> 0.9.8)
   tzinfo-data
   uri (>= 1.0.4)
-  vcr (~> 6.2)
+  vcr (~> 6.4)
   vite_rails (= 3.0.17)
   web-console
 
