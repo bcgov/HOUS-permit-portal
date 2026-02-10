@@ -52,7 +52,7 @@
     "@tiptap/extension-link": "^3.10.2",
     "@tiptap/extension-placeholder": "^3.10.2",
     "@tiptap/extension-strike": "^3.10.2",
-    "@tiptap/extension-underline": "^3.10.2",
+    "@tiptap/extension-underline": "^3.19.0",
     "@tiptap/react": "^3.10.2",
     "@tiptap/starter-kit": "^3.10.2",
     "@types/jest": "^29.5.10",
