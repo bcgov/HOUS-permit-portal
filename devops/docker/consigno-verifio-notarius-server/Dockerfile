@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM ubuntu:24.04
 
 # Update system and install necessary packages
 RUN apt-get update && \
