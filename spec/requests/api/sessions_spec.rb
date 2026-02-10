@@ -34,23 +34,7 @@ RSpec.describe "Api::Sessions", type: :request do
   end
 
   describe "POST /api/login" do
-    let(:token_encoder) do
-      instance_double(Warden::JWTAuth::TokenEncoder, call: "stub-token")
-    end
-    let(:user_decoder) do
-      instance_double(Warden::JWTAuth::UserDecoder, call: user)
-    end
-
-    before do
-      allow(Warden::JWTAuth::TokenEncoder).to receive(:new).and_return(
-        token_encoder
-      )
-      allow(Warden::JWTAuth::UserDecoder).to receive(:new).and_return(
-        user_decoder
-      )
-      allow_any_instance_of(User).to receive(:on_jwt_dispatch)
-      allow(JWT).to receive(:decode).and_return([{}, {}])
-    end
+    before { stub_jwt_auth(user: user) }
 
     it "sets session and csrf cookies on success" do
       login_as(user)
@@ -69,22 +53,7 @@ RSpec.describe "Api::Sessions", type: :request do
   end
 
   describe "GET /api/validate_token" do
-    let(:token_encoder) do
-      instance_double(Warden::JWTAuth::TokenEncoder, call: "stub-token")
-    end
-    let(:user_decoder) do
-      instance_double(Warden::JWTAuth::UserDecoder, call: user)
-    end
-
     before do
-      allow(Warden::JWTAuth::TokenEncoder).to receive(:new).and_return(
-        token_encoder
-      )
-      allow(Warden::JWTAuth::UserDecoder).to receive(:new).and_return(
-        user_decoder
-      )
-      allow_any_instance_of(User).to receive(:on_jwt_dispatch)
-      allow(JWT).to receive(:decode).and_return([{}, {}])
       EndUserLicenseAgreement.create!(
         variant: user.eula_variant,
         active: true,
@@ -99,6 +68,8 @@ RSpec.describe "Api::Sessions", type: :request do
     end
 
     it "returns current user when authenticated" do
+      stub_jwt_auth(user: user)
+
       login_as(user)
 
       get "/api/validate_token", headers: cookie_header_from_response
@@ -109,6 +80,8 @@ RSpec.describe "Api::Sessions", type: :request do
     end
 
     it "returns unauthorized for an expired token" do
+      stub_jwt_expired
+
       token = expired_jwt_for(user)
 
       get "/api/validate_token",
