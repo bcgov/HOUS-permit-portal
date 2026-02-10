@@ -47,6 +47,7 @@ RSpec.describe "Api::OmniauthCallbacks", type: :request do
     it "handles BCeID callback success" do
       OmniAuth.config.mock_auth[:keycloak] = mock_auth_hash(idp_hint: "bceid")
       stub_resolver_for(invitation_token: "invite-token", result_user: user)
+      allow(JWT).to receive(:decode).and_return([{}, {}])
 
       get "/api/auth/keycloak/callback",
           env: {
@@ -54,6 +55,7 @@ RSpec.describe "Api::OmniauthCallbacks", type: :request do
             "omniauth.origin" => set_origin(invitation_token: "invite-token")
           }
 
+      expect(JWT).to have_received(:decode)
       expect(response).to have_http_status(:found)
       expect(response.headers["Location"]).to eq(root_url)
       set_cookie = response.headers["Set-Cookie"]

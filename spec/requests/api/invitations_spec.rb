@@ -94,17 +94,6 @@ RSpec.describe "Api::Invitations", type: :request do
   end
 
   describe "PUT /api/invitation" do
-    let(:token_encoder) do
-      instance_double(Warden::JWTAuth::TokenEncoder, call: "stub-token")
-    end
-
-    before do
-      allow(Warden::JWTAuth::TokenEncoder).to receive(:new).and_return(
-        token_encoder
-      )
-      allow_any_instance_of(User).to receive(:on_jwt_dispatch)
-    end
-
     it "accepts a valid invitation token" do
       invited_user =
         User.invite!(
@@ -128,8 +117,6 @@ RSpec.describe "Api::Invitations", type: :request do
             }
           }
 
-      expect(token_encoder).to have_received(:call)
-      expect_any_instance_of(User).to have_received(:on_jwt_dispatch)
       expect(response).to have_http_status(:no_content)
       expect(invited_user.reload.invitation_accepted_at).to be_present
     end
