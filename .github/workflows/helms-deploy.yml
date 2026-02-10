@@ -50,7 +50,7 @@ jobs:
         oc version
 
     - name: Install Helm
-      uses: azure/setup-helm@v3
+      uses: azure/setup-helm@v4
       with:
         version: 'v3.14.0'
 
