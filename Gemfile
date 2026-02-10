@@ -75,7 +75,7 @@ gem "uri", ">= 1.0.4"
 gem "rack", ">= 3.1.18"
 gem "simple-feed", "~> 3.2.0"
 # For external api docs
-gem "rswag-api", "~> 2.13"
+gem "rswag-api", "~> 2.17"
 gem "rswag-ui", "~> 2.13"
 
 # brew install geos
