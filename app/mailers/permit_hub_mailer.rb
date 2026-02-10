@@ -248,6 +248,46 @@ class PermitHubMailer < ApplicationMailer
     )
   end
 
+  def notify_new_template_version_published(
+    template_version,
+    user,
+    jurisdiction = nil
+  )
+    @template_version = template_version
+    @user = user
+    @jurisdiction = jurisdiction
+
+    # Check if action is required (manager's jurisdiction missing submission contact for this permit type)
+    @action_required = false
+    @inbox_setup_url = nil
+    if @jurisdiction.present?
+      has_contact =
+        @jurisdiction
+          .permit_type_submission_contacts
+          .where(permit_type_id: template_version.permit_type.id)
+          .where.not(confirmed_at: nil)
+          .exists?
+
+      unless has_contact
+        @action_required = true
+        @inbox_setup_url =
+          FrontendUrlHelper.frontend_url(
+            "/jurisdictions/#{@jurisdiction.slug}/configuration-management/feature-access/submissions-inbox-setup"
+          )
+      end
+    end
+
+    subject_prefix = @action_required ? "ACTION REQUIRED: " : ""
+
+    send_user_mail(
+      email: @user.email,
+      template_key: "notify_new_template_version_published",
+      subject_i18n_params: {
+        template_label: "#{subject_prefix}#{template_version.label}"
+      }
+    )
+  end
+
   def remind_reviewer(permit_type_submission_contact, permit_applications)
     @permit_applications = permit_applications
     send_mail(
