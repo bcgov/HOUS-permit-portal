@@ -37,7 +37,7 @@ export const Part9StepCodeForm = observer(function Part9StepCodeForm() {
     <>
       {isOptionsLoaded && (
         <Container maxW="container.lg">
-          <FloatingHelpDrawer top="36" />
+          <FloatingHelpDrawer />
           <Container my={10} maxW="780px" px={0}>
             {!currentStepCode ? (
               <VStack spacing={8} align="start" w="full" pb={20}>

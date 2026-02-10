@@ -119,6 +119,9 @@ class Api::UsersController < Api::ApplicationController
   def destroy
     authorize @user
     if @user.discard
+      if current_user&.id == @user.id
+        PermitHubMailer.account_closed(@user).deliver_later
+      end
       render_success(
         @user,
         "user.destroy_success",
@@ -228,6 +231,7 @@ class Api::UsersController < Api::ApplicationController
       :department,
       preference_attributes: %i[
         enable_in_app_new_template_version_publish_notification
+        enable_email_new_template_version_publish_notification
         enable_in_app_customization_update_notification
         enable_email_application_submission_notification
         enable_in_app_application_submission_notification

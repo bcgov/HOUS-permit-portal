@@ -1,0 +1,68 @@
+module Api::Concerns::Search::OverheatingTools
+  extend ActiveSupport::Concern
+
+  def perform_search
+    @search =
+      OverheatingTool.search(
+        search_query,
+        where: where_clause,
+        order: order_clause,
+        match: :word_start,
+        page: search_params[:page],
+        per_page:
+          (
+            if search_params[:page]
+              search_params[:per_page] || Kaminari.config.default_per_page
+            else
+              nil
+            end
+          ),
+        scope_results: ->(relation) { policy_scope(relation) }
+      )
+  end
+
+  private
+
+  def search_params
+    params.permit(
+      :query,
+      :page,
+      :per_page,
+      filters: [:status_filter],
+      sort: %i[field direction]
+    )
+  end
+
+  def search_query
+    search_params[:query].present? ? search_params[:query] : "*"
+  end
+
+  def where_clause
+    clauses = { user_id: current_user.id }
+
+    if (status_filter = search_params.dig(:filters, :status_filter))
+      if status_filter != "all"
+        clauses[:discarded] = (status_filter == "archived")
+      end
+    end
+
+    clauses
+  end
+
+  def order_clause
+    if (sort = search_params[:sort])
+      field =
+        case sort[:field]
+        when "projectNumber"
+          "project_number"
+        when "address"
+          "address"
+        else
+          "created_at"
+        end
+      { field => { order: sort[:direction] || "desc", unmapped_type: "long" } }
+    else
+      { created_at: { order: :desc, unmapped_type: "long" } }
+    end
+  end
+end

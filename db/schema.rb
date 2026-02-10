@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_12_10_181530) do
+ActiveRecord::Schema[7.2].define(version: 2026_02_05_221726) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -239,6 +239,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_12_10_181530) do
     t.string "disambiguator"
     t.boolean "first_nation", default: false
     t.string "ltsa_matcher"
+    t.jsonb "boundry_points", default: []
     t.index ["ltsa_matcher"], name: "index_jurisdictions_on_ltsa_matcher"
     t.index ["prefix"], name: "index_jurisdictions_on_prefix", unique: true
     t.index ["regional_district_id"], name: "index_jurisdictions_on_regional_district_id"
@@ -280,6 +281,29 @@ ActiveRecord::Schema[7.2].define(version: 2025_12_10_181530) do
     t.datetime "updated_at", null: false
     t.index ["checklist_id"], name: "index_occupancy_classifications_on_checklist_id"
     t.index ["key", "checklist_id"], name: "index_occupancy_classifications_on_key_and_checklist_id", unique: true
+  end
+
+  create_table "overheating_documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "overheating_tool_id", null: false
+    t.text "file_data"
+    t.string "scan_status", default: "pending", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["overheating_tool_id"], name: "index_overheating_documents_on_overheating_tool_id"
+    t.index ["scan_status"], name: "index_overheating_documents_on_scan_status"
+  end
+
+  create_table "overheating_tools", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "user_id", null: false
+    t.jsonb "form_json", default: {}
+    t.string "form_type"
+    t.jsonb "pdf_file_data"
+    t.integer "pdf_generation_status", default: 0, null: false
+    t.datetime "discarded_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["discarded_at"], name: "index_overheating_tools_on_discarded_at"
+    t.index ["user_id"], name: "index_overheating_tools_on_user_id"
   end
 
   create_table "part_3_step_code_checklists", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -388,7 +412,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_12_10_181530) do
 
   create_table "permit_applications", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.integer "status", default: 0
-    t.uuid "submitter_id", null: false
+    t.uuid "submitter_id"
     t.uuid "jurisdiction_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -412,7 +436,13 @@ ActiveRecord::Schema[7.2].define(version: 2025_12_10_181530) do
     t.uuid "sandbox_id"
     t.datetime "newly_submitted_at", precision: nil
     t.uuid "permit_project_id"
+    t.datetime "discarded_at"
+    t.string "omniauth_username_snapshot"
+    t.string "first_name_snapshot"
+    t.string "last_name_snapshot"
+    t.datetime "orphaned_at"
     t.index ["activity_id"], name: "index_permit_applications_on_activity_id"
+    t.index ["discarded_at"], name: "index_permit_applications_on_discarded_at"
     t.index ["jurisdiction_id"], name: "index_permit_applications_on_jurisdiction_id"
     t.index ["number"], name: "index_permit_applications_on_number", unique: true
     t.index ["permit_project_id"], name: "index_permit_applications_on_permit_project_id"
@@ -461,7 +491,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_12_10_181530) do
   end
 
   create_table "permit_projects", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.uuid "owner_id", null: false
+    t.uuid "owner_id"
     t.uuid "jurisdiction_id", null: false
     t.string "title"
     t.text "full_address"
@@ -474,6 +504,12 @@ ActiveRecord::Schema[7.2].define(version: 2025_12_10_181530) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "number"
+    t.decimal "latitude", precision: 10, scale: 6
+    t.decimal "longitude", precision: 10, scale: 6
+    t.string "omniauth_username_snapshot"
+    t.string "first_name_snapshot"
+    t.string "last_name_snapshot"
+    t.datetime "orphaned_at"
     t.index ["jurisdiction_id"], name: "index_permit_projects_on_jurisdiction_id"
     t.index ["number"], name: "index_permit_projects_on_number", unique: true
     t.index ["owner_id"], name: "index_permit_projects_on_owner_id"
@@ -515,7 +551,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_12_10_181530) do
   create_table "pre_checks", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "permit_application_id"
     t.uuid "permit_type_id"
-    t.uuid "creator_id", null: false
+    t.uuid "creator_id"
     t.uuid "jurisdiction_id"
     t.string "external_id"
     t.string "full_address"
@@ -535,6 +571,10 @@ ActiveRecord::Schema[7.2].define(version: 2025_12_10_181530) do
     t.boolean "consent_to_research_contact", default: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "omniauth_username_snapshot"
+    t.string "first_name_snapshot"
+    t.string "last_name_snapshot"
+    t.datetime "orphaned_at"
     t.index ["assessment_result"], name: "index_pre_checks_on_assessment_result"
     t.index ["completed_at"], name: "index_pre_checks_on_completed_at"
     t.index ["creator_id"], name: "index_pre_checks_on_creator_id"
@@ -717,9 +757,13 @@ ActiveRecord::Schema[7.2].define(version: 2025_12_10_181530) do
     t.jsonb "submission_data"
     t.string "comment", limit: 350
     t.uuid "submission_version_id", null: false
-    t.uuid "user_id", null: false
+    t.uuid "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "omniauth_username_snapshot"
+    t.string "first_name_snapshot"
+    t.string "last_name_snapshot"
+    t.datetime "orphaned_at"
     t.index ["submission_version_id"], name: "index_revision_requests_on_submission_version_id"
     t.index ["user_id"], name: "index_revision_requests_on_user_id"
   end
@@ -822,7 +866,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_12_10_181530) do
     t.string "plan_date"
     t.string "type"
     t.uuid "permit_project_id"
-    t.uuid "creator_id", null: false
+    t.uuid "creator_id"
     t.string "full_address"
     t.string "pid"
     t.string "pin"
@@ -833,6 +877,10 @@ ActiveRecord::Schema[7.2].define(version: 2025_12_10_181530) do
     t.string "phase"
     t.string "building_code_version"
     t.datetime "discarded_at"
+    t.string "omniauth_username_snapshot"
+    t.string "first_name_snapshot"
+    t.string "last_name_snapshot"
+    t.datetime "orphaned_at"
     t.index ["creator_id"], name: "index_step_codes_on_creator_id"
     t.index ["discarded_at"], name: "index_step_codes_on_discarded_at"
     t.index ["jurisdiction_id"], name: "index_step_codes_on_jurisdiction_id"
@@ -941,11 +989,15 @@ ActiveRecord::Schema[7.2].define(version: 2025_12_10_181530) do
   end
 
   create_table "user_license_agreements", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.uuid "user_id", null: false
+    t.uuid "user_id"
     t.uuid "agreement_id", null: false
     t.datetime "accepted_at", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "omniauth_username_snapshot"
+    t.string "first_name_snapshot"
+    t.string "last_name_snapshot"
+    t.datetime "orphaned_at"
     t.index ["agreement_id"], name: "index_user_license_agreements_on_agreement_id"
     t.index ["user_id"], name: "index_user_license_agreements_on_user_id"
   end
@@ -998,12 +1050,12 @@ ActiveRecord::Schema[7.2].define(version: 2025_12_10_181530) do
   add_foreign_key "api_key_expiration_notifications", "external_api_keys"
   add_foreign_key "collaborators", "users"
   add_foreign_key "design_documents", "pre_checks"
-  add_foreign_key "document_references", "part_3_step_code_checklists", column: "checklist_id"
+  add_foreign_key "document_references", "part_3_step_code_checklists", column: "checklist_id", on_delete: :cascade
   add_foreign_key "early_access_previews", "users", column: "previewer_id"
-  add_foreign_key "energy_outputs", "part_3_step_code_checklists", column: "checklist_id"
+  add_foreign_key "energy_outputs", "part_3_step_code_checklists", column: "checklist_id", on_delete: :cascade
   add_foreign_key "external_api_keys", "jurisdictions"
   add_foreign_key "external_api_keys", "sandboxes"
-  add_foreign_key "fuel_types", "part_3_step_code_checklists", column: "checklist_id"
+  add_foreign_key "fuel_types", "part_3_step_code_checklists", column: "checklist_id", on_delete: :cascade
   add_foreign_key "integration_mapping_notifications", "template_versions"
   add_foreign_key "integration_mappings", "jurisdictions"
   add_foreign_key "integration_mappings", "template_versions"
@@ -1014,11 +1066,13 @@ ActiveRecord::Schema[7.2].define(version: 2025_12_10_181530) do
   add_foreign_key "jurisdiction_template_version_customizations", "sandboxes"
   add_foreign_key "jurisdiction_template_version_customizations", "template_versions"
   add_foreign_key "jurisdictions", "jurisdictions", column: "regional_district_id"
-  add_foreign_key "make_up_air_fuels", "part_3_step_code_checklists", column: "checklist_id"
-  add_foreign_key "occupancy_classifications", "part_3_step_code_checklists", column: "checklist_id"
-  add_foreign_key "part_3_step_code_checklists", "step_codes"
+  add_foreign_key "make_up_air_fuels", "part_3_step_code_checklists", column: "checklist_id", on_delete: :cascade
+  add_foreign_key "occupancy_classifications", "part_3_step_code_checklists", column: "checklist_id", on_delete: :cascade
+  add_foreign_key "overheating_documents", "overheating_tools"
+  add_foreign_key "overheating_tools", "users"
+  add_foreign_key "part_3_step_code_checklists", "step_codes", on_delete: :cascade
   add_foreign_key "part_9_step_code_checklists", "permit_type_required_steps", column: "step_requirement_id"
-  add_foreign_key "part_9_step_code_checklists", "step_codes"
+  add_foreign_key "part_9_step_code_checklists", "step_codes", on_delete: :cascade
   add_foreign_key "permit_applications", "jurisdictions"
   add_foreign_key "permit_applications", "permit_classifications", column: "activity_id"
   add_foreign_key "permit_applications", "permit_classifications", column: "permit_type_id"
@@ -1058,8 +1112,8 @@ ActiveRecord::Schema[7.2].define(version: 2025_12_10_181530) do
   add_foreign_key "revision_requests", "submission_versions"
   add_foreign_key "revision_requests", "users"
   add_foreign_key "sandboxes", "jurisdictions"
-  add_foreign_key "step_code_building_characteristics_summaries", "part_9_step_code_checklists", column: "checklist_id"
-  add_foreign_key "step_code_data_entries", "part_9_step_code_checklists", column: "checklist_id"
+  add_foreign_key "step_code_building_characteristics_summaries", "part_9_step_code_checklists", column: "checklist_id", on_delete: :cascade
+  add_foreign_key "step_code_data_entries", "part_9_step_code_checklists", column: "checklist_id", on_delete: :cascade
   add_foreign_key "step_codes", "jurisdictions"
   add_foreign_key "step_codes", "permit_applications"
   add_foreign_key "step_codes", "permit_projects"

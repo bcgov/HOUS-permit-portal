@@ -96,10 +96,14 @@ export const PermitApplicationModel = types.snapshotProcessor(
       isViewingPastRequests: types.optional(types.boolean, false),
       templateNickname: types.maybeNull(types.string),
       projectId: types.maybeNull(types.string),
+      discardedAt: types.maybeNull(types.Date),
     })
     .extend(withEnvironment())
     .extend(withRootStore())
     .views((self) => ({
+      get isDiscarded() {
+        return !!self.discardedAt
+      },
       get isPart3() {
         // TODO
         return false
@@ -872,6 +876,22 @@ export const PermitApplicationModel = types.snapshotProcessor(
       retriggerSubmissionWebhook: flow(function* () {
         const response = yield self.environment.api.retriggerPermitApplicationWebhook(self.id)
         return response
+      }),
+
+      archive: flow(function* () {
+        const response = yield self.environment.api.archivePermitApplication(self.id)
+        if (response.ok) {
+          self.discardedAt = new Date()
+        }
+        return response.ok
+      }),
+
+      restore: flow(function* () {
+        const response = yield self.environment.api.restorePermitApplication(self.id)
+        if (response.ok) {
+          self.discardedAt = null
+        }
+        return response.ok
       }),
     })),
   {

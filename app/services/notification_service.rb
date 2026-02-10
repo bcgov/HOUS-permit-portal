@@ -77,6 +77,7 @@ class NotificationService
 
     relevant_permit_applications =
       PermitApplication
+        .kept
         .select("DISTINCT ON (submitter_id) permit_applications.*")
         .joins(:template_version)
         .joins(submitter: :preference)
@@ -108,9 +109,40 @@ class NotificationService
         hash[manager_id] = template_version.publish_event_notification_data
       end
 
-    NotificationPushJob.perform_async(
-      { **notification_manager_hash, **notification_submitter_hash }
-    )
+    notification_hash = {
+      **notification_manager_hash,
+      **notification_submitter_hash
+    }
+
+    # Send emails to users who have email notifications enabled
+    user_ids = notification_hash.keys
+    users_with_email_enabled =
+      User
+        .includes(:jurisdictions)
+        .joins(:preference)
+        .where(id: user_ids)
+        .where(
+          preferences: {
+            enable_email_new_template_version_publish_notification: true
+          }
+        )
+        .index_by(&:id)
+
+    notification_hash.each do |user_id, notification_data|
+      user = users_with_email_enabled[user_id]
+      next unless user
+
+      # For managers, pass their jurisdiction so the email can check for missing submission contacts
+      jurisdiction = user.manager? ? user.jurisdictions.first : nil
+
+      PermitHubMailer.notify_new_template_version_published(
+        template_version,
+        user,
+        jurisdiction
+      ).deliver_later
+    end
+
+    NotificationPushJob.perform_async(notification_hash)
   end
 
   def self.publish_missing_requirements_mapping_event(integration_mapping)
@@ -147,6 +179,7 @@ class NotificationService
     template_version = customization.template_version
     relevant_submitter_ids =
       PermitApplication
+        .kept
         .joins(:template_version)
         .joins(submitter: :preference)
         .where(

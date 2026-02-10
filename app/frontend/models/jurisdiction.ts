@@ -48,7 +48,7 @@ export const JurisdictionModel = types
     createdAt: types.maybeNull(types.Date),
     updatedAt: types.maybeNull(types.Date),
     tablePermitApplications: types.array(types.reference(PermitApplicationModel)),
-    boundryPoints: types.optional(types.array(types.frozen<TLatLngTuple>()), []),
+    boundaryPoints: types.optional(types.array(types.frozen<TLatLngTuple>()), []),
     mapPosition: types.frozen<TLatLngTuple>(),
     mapZoom: types.maybeNull(types.number),
     externalApiEnabled: types.optional(types.boolean, false),

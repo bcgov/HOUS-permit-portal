@@ -8,7 +8,8 @@ en:
       send_paranoid_instructions: "If your username exists in our database, you will receive an email with instructions for how to confirm your email address in a few minutes."
     failure:
       already_authenticated: "You are already signed in."
-      inactive: "Your account is not activated yet."
+      inactive: "Your account is unconfirmed. Check your email for a confirmation link. If you don't see it, check your spam folder or reach out to digital.codes.permits@gov.bc.ca."
+      archived: "Your account has been archived. Please reach out to digital.codes.permits@gov.bc.ca to reactivate your account."
       invalid: "Invalid %{authentication_keys} or password."
       locked: "Your account is locked."
       last_attempt: "You have one more attempt before your account is locked."
@@ -28,7 +29,7 @@ en:
       password_change:
         subject: "Password Changed"
     omniauth_callbacks:
-      failure: "Could not authenticate you from %{kind} because \"%{reason}\"."
+      failure: 'Could not authenticate you from %{kind} because "%{reason}".'
       success: "Successfully authenticated from %{kind} account."
     passwords:
       no_token: "You can't access this page without coming from a password reset email. If you do come from a password reset email, please make sure you used the full URL provided."

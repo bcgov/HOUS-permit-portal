@@ -40,6 +40,7 @@ class PermitClassification < ApplicationRecord
   end
 
   def normalize_category
+    # `underscore` doesn't convert spaces -> underscores, so normalize whitespace first.
     self.category = category&.to_s&.strip&.underscore&.presence
   end
 

@@ -2,7 +2,7 @@ require "rails_helper"
 
 RSpec.describe UserLicenseAgreement, type: :model do
   describe "associations" do
-    it { should belong_to(:user) }
+    it { should belong_to(:user).optional }
     it { should belong_to(:agreement).class_name("EndUserLicenseAgreement") }
   end
 
