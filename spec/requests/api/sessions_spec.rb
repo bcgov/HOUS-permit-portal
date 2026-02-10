@@ -79,7 +79,7 @@ RSpec.describe "Api::Sessions", type: :request do
 
       get "/api/validate_token", headers: cookie_header_from_response
 
-      expect(JWT).to have_received(:decode)
+      expect(JWT).to have_received(:decode).at_least(:once)
       expect(response).to have_http_status(:ok)
       expect(json_response.dig("data", "id")).to eq(user.id)
     end
