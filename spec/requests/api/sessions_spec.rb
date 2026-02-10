@@ -34,6 +34,24 @@ RSpec.describe "Api::Sessions", type: :request do
   end
 
   describe "POST /api/login" do
+    let(:token_encoder) do
+      instance_double(Warden::JWTAuth::TokenEncoder, call: "stub-token")
+    end
+    let(:user_decoder) do
+      instance_double(Warden::JWTAuth::UserDecoder, call: user)
+    end
+
+    before do
+      allow(Warden::JWTAuth::TokenEncoder).to receive(:new).and_return(
+        token_encoder
+      )
+      allow(Warden::JWTAuth::UserDecoder).to receive(:new).and_return(
+        user_decoder
+      )
+      allow_any_instance_of(User).to receive(:on_jwt_dispatch)
+      allow(JWT).to receive(:decode).and_return([{}, {}])
+    end
+
     it "sets session and csrf cookies on success" do
       login_as(user)
 
@@ -54,10 +72,16 @@ RSpec.describe "Api::Sessions", type: :request do
     let(:token_encoder) do
       instance_double(Warden::JWTAuth::TokenEncoder, call: "stub-token")
     end
+    let(:user_decoder) do
+      instance_double(Warden::JWTAuth::UserDecoder, call: user)
+    end
 
     before do
       allow(Warden::JWTAuth::TokenEncoder).to receive(:new).and_return(
         token_encoder
+      )
+      allow(Warden::JWTAuth::UserDecoder).to receive(:new).and_return(
+        user_decoder
       )
       allow_any_instance_of(User).to receive(:on_jwt_dispatch)
       allow(JWT).to receive(:decode).and_return([{}, {}])

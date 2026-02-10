@@ -44,6 +44,24 @@ RSpec.describe "Api::OmniauthCallbacks", type: :request do
   end
 
   describe "GET /api/auth/keycloak/callback" do
+    let(:token_encoder) do
+      instance_double(Warden::JWTAuth::TokenEncoder, call: "stub-token")
+    end
+    let(:user_decoder) do
+      instance_double(Warden::JWTAuth::UserDecoder, call: user)
+    end
+
+    before do
+      allow(Warden::JWTAuth::TokenEncoder).to receive(:new).and_return(
+        token_encoder
+      )
+      allow(Warden::JWTAuth::UserDecoder).to receive(:new).and_return(
+        user_decoder
+      )
+      allow_any_instance_of(User).to receive(:on_jwt_dispatch)
+      allow(JWT).to receive(:decode).and_return([{}, {}])
+    end
+
     it "handles BCeID callback success" do
       OmniAuth.config.mock_auth[:keycloak] = mock_auth_hash(idp_hint: "bceid")
       stub_resolver_for(invitation_token: "invite-token", result_user: user)
