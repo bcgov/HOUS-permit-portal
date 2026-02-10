@@ -239,6 +239,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_02_05_221726) do
     t.string "disambiguator"
     t.boolean "first_nation", default: false
     t.string "ltsa_matcher"
+    t.jsonb "boundry_points", default: []
     t.index ["ltsa_matcher"], name: "index_jurisdictions_on_ltsa_matcher"
     t.index ["prefix"], name: "index_jurisdictions_on_prefix", unique: true
     t.index ["regional_district_id"], name: "index_jurisdictions_on_regional_district_id"
@@ -503,6 +504,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_02_05_221726) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "number"
+    t.decimal "latitude", precision: 10, scale: 6
+    t.decimal "longitude", precision: 10, scale: 6
     t.string "omniauth_username_snapshot"
     t.string "first_name_snapshot"
     t.string "last_name_snapshot"
