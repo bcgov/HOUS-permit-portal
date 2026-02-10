@@ -23,6 +23,8 @@ north_van =
     locality_type: "corporation of the city"
   )
 
+north_van.update(external_api_state: :j_on)
+
 van = Jurisdiction.find_by(name: "Vancouver")
 
 # Seed Archistar enrollment for North Vancouver

@@ -1,4 +1,4 @@
-import { Flex, FlexProps } from "@chakra-ui/react"
+import { Flex, FlexProps, Text } from "@chakra-ui/react"
 import { CubeFocus } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -9,12 +9,11 @@ import { colors } from "../../../styles/theme/foundations/colors"
 import { ETemplateVersionStatus } from "../../../types/enums"
 
 interface ISandboxHeaderProps extends FlexProps {
-  expanded?: boolean
   sandbox?: ISandbox
   override?: boolean
 }
 
-const SandboxHeader: React.FC<ISandboxHeaderProps> = observer(({ expanded, sandbox, override, ...rest }) => {
+const SandboxHeader: React.FC<ISandboxHeaderProps> = observer(({ sandbox, override, ...rest }) => {
   const { t } = useTranslation()
   const { sandboxStore } = useMst()
   const { isSandboxActive, currentSandbox } = sandboxStore
@@ -49,11 +48,12 @@ const SandboxHeader: React.FC<ISandboxHeaderProps> = observer(({ expanded, sandb
       {...rest}
     >
       <CubeFocus size={24} />
-      {expanded && <>{t("sandbox.inMode")}</>}
-      {(currentSandbox || sandbox)?.templateVersionStatusScope === ETemplateVersionStatus.scheduled &&
-        ` (${t("sandbox.scheduledModeDescription")})`}
-      {(currentSandbox || sandbox)?.templateVersionStatusScope === ETemplateVersionStatus.published &&
-        ` (${t("sandbox.publishedModeDescription")})`}
+      {(currentSandbox || sandbox)?.templateVersionStatusScope === ETemplateVersionStatus.scheduled && (
+        <Text>{t("sandbox.scheduledModeDescription")}</Text>
+      )}
+      {(currentSandbox || sandbox)?.templateVersionStatusScope === ETemplateVersionStatus.published && (
+        <Text>{t("sandbox.publishedModeDescription")}</Text>
+      )}
     </Flex>
   )
 })
