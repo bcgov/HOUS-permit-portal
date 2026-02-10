@@ -51,7 +51,16 @@ RSpec.describe "Api::Sessions", type: :request do
   end
 
   describe "GET /api/validate_token" do
+    let(:token_encoder) do
+      instance_double(Warden::JWTAuth::TokenEncoder, call: "stub-token")
+    end
+
     before do
+      allow(Warden::JWTAuth::TokenEncoder).to receive(:new).and_return(
+        token_encoder
+      )
+      allow_any_instance_of(User).to receive(:on_jwt_dispatch)
+      allow(JWT).to receive(:decode).and_return([{}, {}])
       EndUserLicenseAgreement.create!(
         variant: user.eula_variant,
         active: true,
@@ -70,6 +79,7 @@ RSpec.describe "Api::Sessions", type: :request do
 
       get "/api/validate_token", headers: cookie_header_from_response
 
+      expect(JWT).to have_received(:decode)
       expect(response).to have_http_status(:ok)
       expect(json_response.dig("data", "id")).to eq(user.id)
     end
