@@ -3,6 +3,11 @@ class OrphanCleanupJob
   include EnvHelper
 
   def perform
+    # Ensure all models are loaded so PublicRecordable.recordable_models is fully populated.
+    # In development/test, Rails uses lazy loading, so models that include PublicRecordable
+    # won't register themselves until their class file is loaded.
+    Rails.application.eager_load! unless Rails.application.config.eager_load
+
     # This can be configured via environment variable if needed
     default_days = 1460 # 4 years
     retention_days = integer_env("ORPHAN_DELETE_AFTER_DAYS", default_days)

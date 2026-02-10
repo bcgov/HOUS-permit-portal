@@ -1,4 +1,14 @@
 class PermitApplication < ApplicationRecord
+  searchkick word_middle: %i[
+               nickname
+               full_address
+               permit_classifications
+               submitter
+               status
+               review_delegatee_name
+             ],
+             text_end: %i[number]
+
   include FormSupportingDocuments
   include AutomatedComplianceUtils
   include StepCodeFieldExtraction
@@ -17,16 +27,6 @@ class PermitApplication < ApplicationRecord
     :submitter,
     { permit_collaborations: :collaborator }
   ]
-
-  searchkick word_middle: %i[
-               nickname
-               full_address
-               permit_classifications
-               submitter
-               status
-               review_delegatee_name
-             ],
-             text_end: %i[number]
 
   belongs_to :submitter, class_name: "User", optional: true
   public_recordable user_association: :submitter
@@ -75,7 +75,6 @@ class PermitApplication < ApplicationRecord
   before_save :take_form_customizations_snapshot_if_submitted
 
   after_commit :reindex_jurisdiction_permit_application_size
-  after_commit :reindex, if: :saved_change_to_discarded_at
   after_commit :send_submitted_webhook, if: :saved_change_to_status?
   after_commit :notify_user_reference_number_updated,
                if: :saved_change_to_reference_number?

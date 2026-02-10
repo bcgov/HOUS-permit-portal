@@ -11,7 +11,7 @@ on:
       branch:
         description: "Branch Name"
         required: true
-        default: "main"
+        default: "stable"
 
 jobs:
   build-and-push-image:

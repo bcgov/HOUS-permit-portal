@@ -24,6 +24,8 @@ north_van =
   )
 north_van&.update(map_position: [49.319981, -123.072414], map_zoom: 13)
 
+north_van.update(external_api_state: :j_on)
+
 van = Jurisdiction.find_by(name: "Vancouver")
 
 # Seed Archistar enrollment for North Vancouver

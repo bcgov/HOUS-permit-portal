@@ -77,11 +77,11 @@ const ResourcesScreenLazy = lazy(() =>
   }))
 )
 const ReviewStaffMyJurisdictionAboutPageScreen = lazy(() =>
-  import(
-    "../home/review-manager/configuration-management-screen/feature-access-screen/my-jurisdiction-about-page"
-  ).then((module) => ({
-    default: module.myJurisdictionAboutPageScreen,
-  }))
+  import("../home/review-manager/configuration-management-screen/feature-access-screen/my-jurisdiction-about-page").then(
+    (module) => ({
+      default: module.myJurisdictionAboutPageScreen,
+    })
+  )
 )
 
 const DesignatedReviewerScreen = lazy(() =>
@@ -168,7 +168,19 @@ const OnboardingChecklistPageForLgAdoptingScreen = lazy(() =>
     default: module.OnboardingChecklistPageForLgAdoptingScreen,
   }))
 )
-
+const OverheatingToolScreen = lazy(() =>
+  import("../overheating-tool/overheating-tool-screen").then((module) => ({
+    default: module.OverheatingToolScreen,
+  }))
+)
+const OverheatingToolStartScreen = lazy(() =>
+  import("../overheating-tool/overheating-tool-start-screen").then((module) => ({
+    default: module.OverheatingToolStartScreen,
+  }))
+)
+const PermitApplicationIndexScreen = lazy(() =>
+  import("../permit-application").then((module) => ({ default: module.PermitApplicationIndexScreen }))
+)
 const ProjectDashboardScreen = lazy(() =>
   import("../permit-project").then((module) => ({ default: module.ProjectDashboardScreen }))
 )
@@ -677,6 +689,7 @@ const AppRoutes = observer(() => {
             element={<ProtectedRoute isAllowed={loggedIn && !mustAcceptEula} redirectPath={mustAcceptEula && "/"} />}
           >
             <Route path="/step-codes" element={<ProjectDashboardScreen />} />
+            <Route path="/overheating" element={<ProjectDashboardScreen />} />
             <Route path="/pre-checks" element={<ProjectDashboardScreen />} />
             <Route path="/pre-checks/new" element={<PreCheckForm />} />
             <Route path="/pre-checks/new/:section" element={<PreCheckForm />} />
@@ -715,6 +728,10 @@ const AppRoutes = observer(() => {
             />
             <Route path="/project-readiness-tools/pre-check" element={<PreCheckInfoScreen />} />
           </Route>
+        </Route>
+
+        <Route element={<ProtectedRoute isAllowed={loggedIn && currentUser?.isSubmitter} />}>
+          <Route path="/overheating-tool/start" element={<OverheatingToolStartScreen />} />
         </Route>
 
         <Route element={<ProtectedRoute isAllowed={loggedIn && !isUnconfirmed} />}>
@@ -789,6 +806,7 @@ const AppRoutes = observer(() => {
         <Route path="/contact" element={<ContactScreen />} />
         <Route path="/standardization-preview" element={<StandardizationPreviewScreen />} />
         <Route path="/project-readiness-tools" element={<ProjectReadinessToolsIndexScreen />} />
+        <Route path="/project-readiness-tools/overheating-tool" element={<OverheatingToolScreen />} />
         <Route path="/privacy-policy" element={<PrivacyPolicyScreen />} />
         <Route
           path="/project-readiness-tools/create-your-letters-of-assurance"
