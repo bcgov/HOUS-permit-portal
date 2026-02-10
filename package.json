@@ -67,7 +67,7 @@
     "apisauce": "^3.0.1",
     "date-fns": "^2.30.0",
     "date-fns-tz": "^2.0.1",
-    "dompurify": "^3.3.0",
+    "dompurify": "^3.3.1",
     "follow-redirects": ">=1.15.6",
     "formiojs": "^4.17.4",
     "framer-motion": "^10.16.5",
