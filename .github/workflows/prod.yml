@@ -61,7 +61,7 @@ jobs:
             VITE_BCEID_URL=${{ vars.VITE_BCEID_URL }}
             VITE_BCEID_PARTNER_URL=${{ vars.VITE_BCEID_PARTNER_URL }}
       - name: Push to Openshift Registry using Service Account
-        uses: redhat-actions/push-to-registry@v2.7
+        uses: redhat-actions/push-to-registry@v2.8
         with:
           image: prod-hous-permit-portal
           registry: ${{ secrets.REGISTRY_URL }}

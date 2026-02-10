@@ -58,7 +58,7 @@ jobs:
             VITE_KEYCLOAK_LOGOUT_URL=${{ vars.VITE_KEYCLOAK_LOGOUT_URL }}
             VITE_POST_LOGOUT_REDIRECT_URL=${{ vars.VITE_POST_LOGOUT_REDIRECT_URL }}
       - name: Push to Openshift Registry using Service Account
-        uses: redhat-actions/push-to-registry@v2.7
+        uses: redhat-actions/push-to-registry@v2.8
         with:
           image: dev-hous-permit-portal
           registry: ${{ secrets.REGISTRY_URL }}
