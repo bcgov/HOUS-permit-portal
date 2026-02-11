@@ -100,6 +100,7 @@ class User < ApplicationRecord
            foreign_key: "deprecated_by_id",
            dependent: :nullify
 
+  has_many :overheating_tools, dependent: :destroy
   has_one :preference, dependent: :destroy
   accepts_nested_attributes_for :preference
 
