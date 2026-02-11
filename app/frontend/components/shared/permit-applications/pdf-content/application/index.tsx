@@ -326,10 +326,9 @@ const ChecklistField = function ApplicationPDFPanelChecklistField({ options, lab
   const labelByValue = new Map<string, string>()
   if (Array.isArray(optionValues)) {
     optionValues.forEach((option) => {
-      if (!option || typeof option !== "object") return
-      const value = option.value ?? option.label
+      const value = option.value
       if (value === undefined || value === null) return
-      labelByValue.set(String(value), option.label ?? String(value))
+      labelByValue.set(String(value), option.label)
     })
   }
 
