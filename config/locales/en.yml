@@ -217,6 +217,10 @@ en:
       ltsa_unavailable_error:
         title: Error
         message: The land title service is currently unavailable
+    step_code:
+      update_archived_error:
+        title: Error
+        message: "Cannot update archived step code. Please restore it first."
       jurisdiction_ltsa_error:
         title: Error
         message: Jurisdiction could not be determined. Please check back later.
@@ -672,6 +676,9 @@ en:
       update_error:
         title: Error
         message: "%{error_message}"
+      update_archived_error:
+        title: Error
+        message: "Cannot update archived step code. Please restore it first."
       restore_success:
         title: ""
         message: "Step code restored successfully!"
