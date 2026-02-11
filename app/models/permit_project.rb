@@ -22,6 +22,7 @@ class PermitProject < ApplicationRecord
   before_validation :set_default_title
 
   before_validation :assign_unique_number, if: -> { number.blank? }
+  before_save :fetch_coordinates, if: -> { pid_changed? }
 
   delegate :name, to: :owner, prefix: true
 
@@ -202,6 +203,25 @@ class PermitProject < ApplicationRecord
   end
 
   private
+
+  def fetch_coordinates
+    return if pid.blank?
+
+    coords = Wrappers::LtsaParcelMapBc.new.get_coordinates_by_pid(pid)
+    if coords
+      self.longitude = coords.first
+      self.latitude = coords.last
+    else
+      self.latitude = nil
+      self.longitude = nil
+    end
+  rescue => e
+    Rails.logger.warn(
+      "Failed to fetch coordinates for PID #{pid}: #{e.message}"
+    )
+    self.latitude = nil
+    self.longitude = nil
+  end
 
   def set_default_title
     self.title = shortened_address if title.blank? && full_address.present?
