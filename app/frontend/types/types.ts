@@ -641,16 +641,13 @@ type TAutoComplianceOptionsMapperTypeConfiguration<EModule extends EAutoComplian
     mappableExternalOptions: Array<IOption<string>>
   }
 
-export interface IDigitalSealValidatorModuleConfiguration
-  extends ICommonAutoComplianceModuleConfiguration<EAutoComplianceModule.DigitalSealValidator> {}
+export interface IDigitalSealValidatorModuleConfiguration extends ICommonAutoComplianceModuleConfiguration<EAutoComplianceModule.DigitalSealValidator> {}
 
-export interface IParcelInfoExtractorModuleConfiguration
-  extends TAutoComplianceValueExtractorTypeConfiguration<EAutoComplianceModule.ParcelInfoExtractor> {
+export interface IParcelInfoExtractorModuleConfiguration extends TAutoComplianceValueExtractorTypeConfiguration<EAutoComplianceModule.ParcelInfoExtractor> {
   type: EAutoComplianceType.externalValueExtractor
 }
 
-export interface IPermitApplicationModuleConfiguration
-  extends TAutoComplianceValueExtractorTypeConfiguration<EAutoComplianceModule.PermitApplication> {
+export interface IPermitApplicationModuleConfiguration extends TAutoComplianceValueExtractorTypeConfiguration<EAutoComplianceModule.PermitApplication> {
   type: EAutoComplianceType.internalValueExtractor
 }
 
@@ -658,8 +655,7 @@ export type TValueExtractorAutoComplianceModuleConfiguration =
   | IParcelInfoExtractorModuleConfiguration
   | IPermitApplicationModuleConfiguration
 
-export interface IHistoricSiteModuleConfiguration
-  extends TAutoComplianceOptionsMapperTypeConfiguration<EAutoComplianceModule.HistoricSite> {}
+export interface IHistoricSiteModuleConfiguration extends TAutoComplianceOptionsMapperTypeConfiguration<EAutoComplianceModule.HistoricSite> {}
 
 export type TOptionsMapperAutoComplianceModuleConfiguration = IHistoricSiteModuleConfiguration
 

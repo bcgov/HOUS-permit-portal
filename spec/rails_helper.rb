@@ -36,6 +36,7 @@ rescue ActiveRecord::PendingMigrationError => e
 end
 RSpec.configure do |config|
   config.include CustomizationHelpers
+  config.include JwtHelpers, type: :request
 
   config.include StepCodeSpecHelpers, type: :controller
 
