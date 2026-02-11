@@ -11,7 +11,9 @@ class PermitProjectBlueprint < Blueprinter::Base
            :is_pinned,
            :created_at,
            :updated_at,
-           :owner_id
+           :owner_id,
+           :latitude,
+           :longitude
 
     field :total_permits_count, default: 0
     field :new_draft_count, default: 0

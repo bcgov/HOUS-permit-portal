@@ -77,11 +77,11 @@ const ResourcesScreenLazy = lazy(() =>
   }))
 )
 const ReviewStaffMyJurisdictionAboutPageScreen = lazy(() =>
-  import(
-    "../home/review-manager/configuration-management-screen/feature-access-screen/my-jurisdiction-about-page"
-  ).then((module) => ({
-    default: module.myJurisdictionAboutPageScreen,
-  }))
+  import("../home/review-manager/configuration-management-screen/feature-access-screen/my-jurisdiction-about-page").then(
+    (module) => ({
+      default: module.myJurisdictionAboutPageScreen,
+    })
+  )
 )
 
 const DesignatedReviewerScreen = lazy(() =>
