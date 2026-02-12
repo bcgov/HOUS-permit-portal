@@ -3,7 +3,7 @@ import { flow, Instance, toGenerator, types } from "mobx-state-tree"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
 import { EPermitProjectRollupStatus } from "../types/enums"
-import { IProjectDocument } from "../types/types" // Updated import
+import { IParcelGeometry, IProjectDocument } from "../types/types"
 import { JurisdictionModel } from "./jurisdiction"
 import { IPermitApplication, PermitApplicationModel } from "./permit-application"
 
@@ -35,6 +35,7 @@ export const PermitProjectModel = types
     ownerId: types.maybeNull(types.string),
     latitude: types.maybeNull(types.string), // From decimal in backend
     longitude: types.maybeNull(types.string), // From decimal in backend
+    parcelGeometry: types.maybeNull(types.frozen<IParcelGeometry>()),
   })
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -77,6 +78,9 @@ export const PermitProjectModel = types
         return [Number(self.longitude), Number(self.latitude)]
       }
       return null
+    },
+    get parcelRings(): [number, number][][] | null {
+      return self.parcelGeometry?.rings ?? null
     },
   }))
   .actions((self) => ({

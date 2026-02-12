@@ -18,57 +18,6 @@ interface IJurisdictionMapProps {
   isEditingMap?: boolean
 }
 
-const MapUpdater: React.FC<{ center: [number, number] }> = ({ center }) => {
-  let [lat, lng] = center
-  lat ||= 0
-  lng ||= 0
-  center = [lat, lng] as TLatLngTuple
-  const map = useMap()
-  const currentCenter = map.getCenter()
-  const distance = map.distance(currentCenter, center)
-  if (distance > 10) {
-    map.setView(center)
-  }
-  return null
-}
-
-// Component to listen for map drag events.
-const MapChangeListener: React.FC<{
-  onDrag: (newCenter: [number, number]) => void
-  onZoomChange?: (newZoom: number) => void
-}> = ({ onDrag, onZoomChange }) => {
-  useMapEvents({
-    moveend: (e) => {
-      const newCenter = e.target.getCenter()
-      onDrag && onDrag([newCenter.lat, newCenter.lng])
-    },
-    zoomend: (e) => {
-      const newZoom = e.target.getZoom()
-      onZoomChange && onZoomChange(newZoom)
-    },
-  })
-  return null
-}
-
-const SetMapBehaviour = ({ isEditingMap }: { isEditingMap: boolean }) => {
-  const map = useMap()
-  map.attributionControl.remove()
-
-  useEffect(() => {
-    if (isEditingMap) {
-      map.dragging.enable()
-      map.scrollWheelZoom.enable()
-      map.zoomControl.addTo(map)
-    } else {
-      map.dragging.disable()
-      map.scrollWheelZoom.disable()
-      map.zoomControl.remove()
-    }
-  }, [isEditingMap, map])
-
-  return null // This component does not render anything itself
-}
-
 export const JurisdictionMap = ({
   mapPosition,
   mapZoom,

@@ -1037,6 +1037,14 @@ Thank you,
           permits: {
             title: "Permits",
           },
+          map: {
+            errorLoading: "Unable to load map",
+            noLocation: "Map location unavailable for this parcel",
+            openFullscreen: "Open map in fullscreen",
+            fullscreenTitle: "Parcel Map",
+            ariaLabel: "Parcel location map",
+            ariaLabelWithPid: "Parcel location map for PID {{pid}}",
+          },
           back: "Back to my projects",
           addPermits: {
             title: "Add permits to your project",

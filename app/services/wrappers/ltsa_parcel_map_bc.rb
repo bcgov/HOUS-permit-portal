@@ -152,8 +152,11 @@ class Wrappers::LtsaParcelMapBc < Wrappers::Base
 
       raise Errors::FeatureAttributesRetrievalError if !known_wkid?(wkid)
 
-      geometry_coords =
-        parsed_response.dig("features", 0, "geometry", "rings", 0)
+      # Get all rings (outer boundary + any holes)
+      all_geometry_rings =
+        parsed_response.dig("features", 0, "geometry", "rings")
+
+      geometry_coords = all_geometry_rings&.first
 
       if (geometry_coords)
         #cartesians system for 102190 OR 3005 #{"wkid"=>, "latestWkid"=>3005}
@@ -183,7 +186,25 @@ class Wrappers::LtsaParcelMapBc < Wrappers::Base
         transformed_centroid =
           RGeo::Feature.cast(centroid, factory: target_factory, project: true)
 
-        [transformed_centroid.x, transformed_centroid.y]
+        # Reproject all rings to WGS84 for frontend map display
+        wgs84_rings =
+          all_geometry_rings.map do |ring|
+            ring.map do |xy|
+              source_point = factory.point(xy[0], xy[1])
+              transformed_point =
+                RGeo::Feature.cast(
+                  source_point,
+                  factory: target_factory,
+                  project: true
+                )
+              [transformed_point.x, transformed_point.y]
+            end
+          end
+
+        {
+          centroid: [transformed_centroid.x, transformed_centroid.y],
+          rings: wgs84_rings
+        }
       else
         raise Errors::FeatureAttributesRetrievalError
       end
