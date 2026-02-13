@@ -1608,15 +1608,15 @@ Thank you,
             architecturalDrawing: {
               dependencies: {
                 method: {
-                  label: "Which method do you want to use for the architectural drawing?",
-                  tool: "Use the architectural drawing tool",
+                  label: "Which method do you want to use for the design drawing?",
+                  tool: "Use the design drawing tool",
                   file: "Upload a file",
                 },
                 tool: {
-                  label: "Open the architectural drawing tool",
+                  label: "Open the design drawing tool",
                 },
                 file: {
-                  label: "Architectural drawing file",
+                  label: "Design drawing file",
                 },
               },
             },
@@ -1660,7 +1660,7 @@ Thank you,
             energyStepCodePart3: "Energy Step Code Part 3",
             energyStepCodePart9: "Energy Step Code Part 9",
             multiplySumGrid: "Grid (A × B with Total)",
-            architecturalDrawing: "Architectural drawing",
+            architecturalDrawing: "Design drawing",
           },
           multiplySumGrid: {
             title: "Grid (A × B with Total)",
@@ -2465,7 +2465,7 @@ Thank you,
             documentReferences: {
               heading: "Document references",
               documentTypes: {
-                architectural_drawing: "Architectural drawing",
+                architectural_drawing: "Design drawing",
                 mechanical_drawing: "Mechanical drawing",
                 electrical_drawing: "Electrical drawing",
                 other: "Other",
