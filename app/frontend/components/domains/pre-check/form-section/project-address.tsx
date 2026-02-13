@@ -3,7 +3,6 @@ import { observer } from "mobx-react-lite"
 import React from "react"
 import { FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { useParams } from "react-router-dom"
 import { usePreCheck } from "../../../../hooks/resources/use-pre-check"
 import { useMst } from "../../../../setup/root"
 import { EFlashMessageStatus, EPreCheckServicePartner } from "../../../../types/enums"
@@ -28,7 +27,7 @@ export const ProjectAddress = observer(function ProjectAddress() {
     siteConfigurationStore,
   } = useMst()
   const { codeComplianceEnabled } = siteConfigurationStore
-  const { permitApplicationId } = useParams()
+
   const methods = useForm<IProjectAddressFormData>({
     defaultValues: {
       site: currentPreCheck?.fullAddress ? { label: currentPreCheck.fullAddress, value: null } : null,
@@ -128,7 +127,7 @@ export const ProjectAddress = observer(function ProjectAddress() {
             showManualModeToggle={true}
             showJurisdiction={true}
             initialJurisdiction={currentPreCheck?.jurisdiction || null}
-            isDisabled={currentPreCheck?.isSubmitted || !!permitApplicationId}
+            isDisabled={currentPreCheck?.isSubmitted}
           />
 
           {/* Show form validation errors */}

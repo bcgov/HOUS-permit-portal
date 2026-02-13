@@ -12,7 +12,7 @@ import { FormSection } from "./form-section"
 import { Sidebar } from "./sidebar"
 
 export const PreCheckForm = observer(function PreCheckForm() {
-  const { section, preCheckId, permitApplicationId } = useParams()
+  const { section, preCheckId } = useParams()
   const navigate = useNavigate()
   const {
     preCheckStore: { createPreCheck },
@@ -23,7 +23,6 @@ export const PreCheckForm = observer(function PreCheckForm() {
 
   // Create pre-check if this is /new route
   useEffect(() => {
-    if (permitApplicationId) return // Handled by usePreCheck
     if (preCheckId) return // Already has an ID, the hook will fetch it
     if (currentPreCheck) return // Already created
 
@@ -36,23 +35,17 @@ export const PreCheckForm = observer(function PreCheckForm() {
         navigate(`/pre-checks/${response.data.id}/edit/service-partner`, { replace: true })
       }
     })
-  }, [preCheckId, currentPreCheck, permitApplicationId])
+  }, [preCheckId, currentPreCheck])
 
   // handle redirect if no section is specified
   useEffect(() => {
     if (!section && currentPreCheck) {
-      const defaultSection = currentPreCheck.status === EPreCheckStatus.complete ? "results-summary" : "service-partner"
-
-      // Determine which route pattern we're using based on the current pathname
-      if (permitApplicationId) {
-        // Permit application route pattern
-        navigate(`/permit-applications/${permitApplicationId}/edit/pre-check/${defaultSection}`, { replace: true })
-      } else if (preCheckId) {
-        // Pre-check route pattern
-        navigate(`/pre-checks/${preCheckId}/edit/${defaultSection}`, { replace: true })
-      }
+      navigate(
+        `/pre-checks/${currentPreCheck.id}/edit/${currentPreCheck.status === EPreCheckStatus.complete ? "results-summary" : "service-partner"}`,
+        { replace: true }
+      )
     }
-  }, [section, currentPreCheck, permitApplicationId, preCheckId, navigate])
+  }, [section, currentPreCheck])
 
   // ensure scroll resets on section change at the container level
   useEffect(() => {

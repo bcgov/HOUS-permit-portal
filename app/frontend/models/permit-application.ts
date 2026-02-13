@@ -809,19 +809,6 @@ export const PermitApplicationModel = types.snapshotProcessor(
         }
         return response.ok
       }),
-      assignExistingPreCheck: flow(function* (preCheckId: string) {
-        // Since PreCheck belongs_to PermitApplication, assign by updating the PreCheck with permitApplicationId
-        const response = yield self.environment.api.updatePreCheck(preCheckId, {
-          permitApplicationId: self.id,
-        })
-        if (response.ok) {
-          const { data: preCheck } = response.data
-          self.rootStore.preCheckStore.mergeUpdate(preCheck, "preChecksMap")
-          // Refresh current permit application from server so associations are consistent
-          yield self.rootStore.permitApplicationStore.fetchPermitApplication(self.id)
-        }
-        return response.ok
-      }),
       submit: flow(function* (params) {
         const response = yield self.environment.api.submitPermitApplication(self.id, params)
         if (response.ok) {
