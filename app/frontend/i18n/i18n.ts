@@ -3765,15 +3765,14 @@ Thank you,
                 'Warning:"Design package energy step code file" is present in the template, but there is no "Energy step code" requirement.',
 
               duplicateStepCodePackage:
-                'Warning: Multiple "Design package energy step code files" found. Please ensure there is only one "Design package energy step code file".',
+                'Warning: Multiple "Design package energy step code fields" found. Please ensure there is only one "Design package field".',
             },
             stepCodeErrors: {
               duplicateEnergyStepCode:
                 'Warning: Multiple "Energy step code" requirements found. Please ensure there is only one "Energy step code" in the template.',
-              stepCodePackageRequired:
-                'Warning: "Energy step code" is required to have the "Design package energy step code file".',
+              stepCodePackageRequired: 'Warning: "Energy step code" is required to have the "Design package field".',
               duplicateStepCodePackage:
-                'Multiple "Design package energy step code files" found. Please ensure there is only one "Design package energy step code file" when there is an "Energy step code" requirement',
+                'Multiple "Design package fields" found. Please ensure there is only one "Design package field" when there is an "Energy step code" requirement',
             },
             goToTop: "Go to top",
             collapseAll: "Collapse all",

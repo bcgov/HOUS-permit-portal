@@ -20,7 +20,6 @@ import { Controller, FieldValues, useController, useFieldArray, useFormContext }
 import { UseFieldArrayProps } from "react-hook-form/dist/types"
 import { useTranslation } from "react-i18next"
 import {
-  EArchitecturalDrawingDependencyRequirementCode,
   EEnergyStepCodeDependencyRequirementCode,
   ENumberUnit,
   ERequirementContactFieldItemType,
@@ -186,8 +185,7 @@ const requirementsComponentMap = {
     const { fields, append, remove } = useFieldArray<TFieldValues>(useFieldArrayProps)
 
     const isLockedOptions =
-      editableGroupProps.requirementCode === EEnergyStepCodeDependencyRequirementCode.energyStepCodeMethod ||
-      editableGroupProps.requirementCode === EArchitecturalDrawingDependencyRequirementCode.architecturalDrawingMethod
+      editableGroupProps.requirementCode === EEnergyStepCodeDependencyRequirementCode.energyStepCodeMethod
 
     return (
       <EditableGroup
@@ -676,7 +674,7 @@ export const RequirementFieldEdit = observer(function RequirementFieldEdit<TFiel
     return toRemove
   })()
   const formattedProps = R.omit(propsToRemove, rest)
-  return requirementsComponentMap[requirementType]?.(formattedProps) ?? null
+  return requirementsComponentMap[requirementType]?.({ ...formattedProps, requirementType }) ?? null
 })
 
 export function hasRequirementFieldEditComponent(requirementType: ERequirementType): boolean {
