@@ -170,40 +170,16 @@ class Requirement < ApplicationRecord
   }
 
   ARCHITECTURAL_DRAWING_DEPENDENCY_REQUIRED_SCHEMA = {
-    architectural_drawing_method: {
-      "requirement_code" => ARCHITECTURAL_DRAWING_METHOD_REQUIREMENT_CODE,
-      "input_type" => "radio",
-      "input_options" => {
-        "value_options" => [
-          {
-            "label" => "Use the architectural drawing tool",
-            "value" => "tool"
-          },
-          { "label" => "Upload a file", "value" => "file" }
-        ]
-      }
-    },
-    architectural_drawing_tool: {
-      "requirement_code" => ARCHITECTURAL_DRAWING_TOOL_REQUIREMENT_CODE,
-      "input_type" => "architectural_drawing",
-      "input_options" => {
-        "conditional" => {
-          "eq" => "tool",
-          "show" => true,
-          "when" => ARCHITECTURAL_DRAWING_METHOD_REQUIREMENT_CODE
-        }
-      }
-    },
     architectural_drawing_file: {
       "requirement_code" => ARCHITECTURAL_DRAWING_REQUIREMENT_CODE,
-      "input_type" => "file",
+      "input_type" => "architectural_drawing",
       "input_options" => {
-        "conditional" => {
-          "eq" => "file",
-          "show" => true,
-          "when" => ARCHITECTURAL_DRAWING_METHOD_REQUIREMENT_CODE
-        },
-        "multiple" => true
+        "multiple" => true,
+        "computed_compliance" => {
+          "module" => "DigitalSealValidator",
+          "trigger" => "on_save",
+          "value_on" => "compliance_data"
+        }
       }
     }
   }.freeze
@@ -279,7 +255,11 @@ class Requirement < ApplicationRecord
 
     matches_package_file_required_schema =
       attributes.slice("input_type", "required", "elective") !=
-        { "input_type" => "file", "required" => true, "elective" => false }
+        {
+          "input_type" => "architectural_drawing",
+          "required" => true,
+          "elective" => false
+        }
 
     return unless matches_package_file_required_schema
 
@@ -327,7 +307,8 @@ class Requirement < ApplicationRecord
           end
 
           if input_type_architectural_drawing?
-            return ARCHITECTURAL_DRAWING_TOOL_REQUIREMENT_CODE
+            self.requirement_code = ARCHITECTURAL_DRAWING_REQUIREMENT_CODE
+            return
           end
 
           if label.blank?
@@ -340,7 +321,7 @@ class Requirement < ApplicationRecord
         end
       )
 
-    # this happens when the label is "Architectural Drawing File" as the generated requirement code
+    # this happens when the label is "Drawing File" as the generated requirement code
     # will clash with the step code package file requirement code. This needs to be handled only
     # when the requirement code is generated from the label, because if it was intended to be used
     # as a step code package file requirement code, it would have been set as such from the front-end.
@@ -575,11 +556,11 @@ class Requirement < ApplicationRecord
       return
     end
 
-    unless requirement_code == ARCHITECTURAL_DRAWING_TOOL_REQUIREMENT_CODE
+    unless requirement_code == ARCHITECTURAL_DRAWING_REQUIREMENT_CODE
       errors.add(
         :requirement_code,
         :incorrect_architectural_requirement_code,
-        correct_requirement_code: ARCHITECTURAL_DRAWING_TOOL_REQUIREMENT_CODE,
+        correct_requirement_code: ARCHITECTURAL_DRAWING_REQUIREMENT_CODE,
         incorrect_requirement_code: requirement_code
       )
     end

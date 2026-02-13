@@ -2,8 +2,8 @@ import { Stack, StackProps } from "@chakra-ui/react"
 import React, { ReactNode } from "react"
 import { FieldValues } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { EEnergyStepCodeDependencyRequirementCode } from "../../../../types/enums"
-import { isArchitecturalDrawingDependencyRequirementCode } from "../../../../utils/utility-functions"
+import { EEnergyStepCodeDependencyRequirementCode, ERequirementType } from "../../../../types/enums"
+import { isArchitecturalDrawingRequirement } from "../../../../utils/utility-functions"
 import { EditableHelperText, TEditableHelperTextProps } from "./editable-helper-text"
 import { EditableInstructionsText, TEditableInstructionsTextProps } from "./editable-instructions-text"
 import { EditableLabel, TEditableLabelProps } from "./editable-label"
@@ -14,6 +14,7 @@ import { TIsElectiveCheckboxProps, TIsMultipleFilesCheckboxProps, TIsOptionalChe
 
 export type TEditableGroupProps<TFieldValues extends FieldValues> = {
   requirementCode?: string
+  requirementType?: ERequirementType
   editableLabelProps: TEditableLabelProps<TFieldValues>
   editableHelperTextProps?: TEditableHelperTextProps<TFieldValues>
   isOptionalCheckboxProps: TIsOptionalCheckboxProps<TFieldValues>
@@ -28,6 +29,7 @@ export type TEditableGroupProps<TFieldValues extends FieldValues> = {
 
 export function EditableGroup<TFieldValues>({
   requirementCode,
+  requirementType,
   editableLabelProps,
   editableHelperTextProps,
   isOptionalCheckboxProps,
@@ -44,7 +46,7 @@ export function EditableGroup<TFieldValues>({
   const isEnergyStepCodeDependency = Object.values(EEnergyStepCodeDependencyRequirementCode).includes(
     requirementCode as EEnergyStepCodeDependencyRequirementCode
   )
-  const isArchitecturalDependency = isArchitecturalDrawingDependencyRequirementCode(requirementCode)
+  const isArchitecturalDependency = isArchitecturalDrawingRequirement(requirementType)
   const isEditLimited = isEnergyStepCodeDependency || isArchitecturalDependency
 
   return (

@@ -1,21 +1,18 @@
 import { useTranslation } from "react-i18next"
 import { v4 as uuidv4 } from "uuid"
 import {
-  getArchitecturalDrawingRequirementRequiredSchema,
   getEnergyStepCodePart3RequirementRequiredSchema,
   getEnergyStepCodeRequirementRequiredSchema,
 } from "../../../../constants"
 import { IRequirementBlock } from "../../../../models/requirement-block"
 import { IRequirementAttributes } from "../../../../types/api-request"
 import {
-  EArchitecturalDrawingDependencyRequirementCode,
   EEnergyStepCodeDependencyRequirementCode,
   EEnergyStepCodePart3DependencyRequirementCode,
   ERequirementType,
 } from "../../../../types/enums"
 import { IDenormalizedRequirementBlock } from "../../../../types/types"
 import {
-  isArchitecturalDrawingDependencyRequirementCode,
   isEnergyStepCodeDependencyRequirementCode,
   isMultiOptionRequirement,
 } from "../../../../utils/utility-functions"
@@ -35,10 +32,36 @@ export const useRequirementLogic = ({
 }: UseRequirementLogicProps) => {
   const { t } = useTranslation()
   const onUseRequirement = (requirementType: ERequirementType) => {
+    // Architectural drawing is a single requirement with pre-configured defaults
+    if (requirementType === ERequirementType.architecturalDrawing) {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore - deeply nested i18n key causes "excessively deep" type error
+      const archLabel: string = t("requirementsLibrary.modals.architecturalDrawing.dependencies.file.label")
+      const defaults = {
+        requirementCode: `dummy-${uuidv4()}`,
+        id: `dummy-${uuidv4()}`,
+        inputType: ERequirementType.architecturalDrawing,
+        label: archLabel,
+        hint: "",
+        required: true,
+        elective: false,
+        inputOptions: {
+          multiple: true,
+          computedCompliance: {
+            module: "DigitalSealValidator",
+            trigger: "on_save",
+            valueOn: "compliance_data",
+          },
+        },
+      }
+      append(defaults)
+      return
+    }
+
+    // Energy step code types use a dependency map pattern (multiple related requirements)
     if (
       requirementType !== ERequirementType.energyStepCodePart9 &&
-      requirementType !== ERequirementType.energyStepCodePart3 &&
-      requirementType !== ERequirementType.architecturalDrawing
+      requirementType !== ERequirementType.energyStepCodePart3
     ) {
       const defaults = {
         requirementCode: `dummy-${uuidv4()}`,
@@ -68,21 +91,14 @@ export const useRequirementLogic = ({
       return
     }
 
-    const dependencyMap: Record<
-      ERequirementType,
-      {
-        codes:
-          | EEnergyStepCodeDependencyRequirementCode[]
-          | EEnergyStepCodePart3DependencyRequirementCode[]
-          | EArchitecturalDrawingDependencyRequirementCode[]
+    const dependencyMap: {
+      [key in ERequirementType]?: {
+        codes: EEnergyStepCodeDependencyRequirementCode[] | EEnergyStepCodePart3DependencyRequirementCode[]
         schemaGetter: (
-          code:
-            | EEnergyStepCodeDependencyRequirementCode
-            | EEnergyStepCodePart3DependencyRequirementCode
-            | EArchitecturalDrawingDependencyRequirementCode
+          code: EEnergyStepCodeDependencyRequirementCode | EEnergyStepCodePart3DependencyRequirementCode
         ) => IRequirementAttributes
       }
-    > = {
+    } = {
       [ERequirementType.energyStepCodePart9]: {
         codes: Object.values(EEnergyStepCodeDependencyRequirementCode),
         schemaGetter: (code) =>
@@ -92,11 +108,6 @@ export const useRequirementLogic = ({
         codes: Object.values(EEnergyStepCodePart3DependencyRequirementCode),
         schemaGetter: (code) =>
           getEnergyStepCodePart3RequirementRequiredSchema(code as EEnergyStepCodePart3DependencyRequirementCode),
-      },
-      [ERequirementType.architecturalDrawing]: {
-        codes: Object.values(EArchitecturalDrawingDependencyRequirementCode),
-        schemaGetter: (code) =>
-          getArchitecturalDrawingRequirementRequiredSchema(code as EArchitecturalDrawingDependencyRequirementCode),
       },
     }
 
@@ -133,26 +144,9 @@ export const useRequirementLogic = ({
       requirement.inputType
     )
 
-    const isArchitecturalRequirement = isArchitecturalDrawingDependencyRequirementCode(
-      requirement.requirementCode,
-      requirement.inputType
-    )
-
-    if (!isEnergyStepCodeRequirement && !isArchitecturalRequirement) {
+    // Architectural drawing is a single requirement, just remove by index
+    if (!isEnergyStepCodeRequirement) {
       remove(index)
-      return
-    }
-
-    if (isArchitecturalRequirement) {
-      const architecturalDependencyIndexes = watchedRequirements.reduce((acc: number[], req, idx) => {
-        if (isArchitecturalDrawingDependencyRequirementCode(req.requirementCode)) {
-          acc.push(idx)
-        }
-
-        return acc
-      }, [])
-
-      remove(architecturalDependencyIndexes)
       return
     }
 
