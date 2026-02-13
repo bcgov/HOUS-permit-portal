@@ -53,15 +53,6 @@ RSpec.describe RequirementTemplate, type: :model do
     end
   end
 
-  describe "public visibility validation" do
-    it "only allows public templates for early access" do
-      template = build(:live_requirement_template, public: true)
-
-      expect(template).not_to be_valid
-      expect(template.errors[:public]).to be_present
-    end
-  end
-
   describe "template version associations" do
     it "returns the published template version" do
       template = create(:live_requirement_template)

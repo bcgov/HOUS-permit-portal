@@ -156,6 +156,192 @@ class TemplateVersioningService
     version.save!
   end
 
+  # ── Draft workflow methods ──────────────────────────────────────────────
+
+  # Creates a new draft TemplateVersion for a LiveRequirementTemplate.
+  # Snapshots the current template state (sections, blocks, form JSON)
+  # into the draft's JSON columns so edits are isolated from canonical records.
+  def self.create_draft!(requirement_template, assignee: nil)
+    if requirement_template.draft_template_version.present?
+      raise TemplateVersionDraftError,
+            "A draft version already exists for this template. Discard or promote it first."
+    end
+
+    template_version =
+      requirement_template.template_versions.build(
+        denormalized_template_json:
+          RequirementTemplateBlueprint.render_as_hash(
+            requirement_template,
+            view: :template_snapshot
+          ),
+        form_json: requirement_template.to_form_json,
+        requirement_blocks_json:
+          form_requirement_blocks_hash(requirement_template),
+        version_date: Date.current,
+        status: "draft",
+        assignee: assignee
+      )
+
+    unless template_version.save
+      raise TemplateVersionDraftError,
+            template_version.errors.full_messages.join(", ")
+    end
+
+    template_version
+  end
+
+  # Updates a specific block within the draft's requirement_blocks_json.
+  # This is copy-on-write: the canonical RequirementBlock record is NOT modified.
+  # block_data should be a hash matching the RequirementBlockBlueprint format.
+  def self.update_draft_block!(draft_version, block_id, block_data)
+    unless draft_version.draft?
+      raise TemplateVersionDraftError,
+            "Can only update blocks on a draft version"
+    end
+
+    blocks_json = draft_version.requirement_blocks_json.deep_dup
+    unless blocks_json.key?(block_id)
+      raise TemplateVersionDraftError,
+            "Block #{block_id} not found in this draft version"
+    end
+
+    blocks_json[block_id] = blocks_json[block_id].merge(block_data)
+    draft_version.update!(requirement_blocks_json: blocks_json)
+
+    # Also regenerate the form_json to reflect the block changes
+    regenerate_draft_form_json!(draft_version)
+
+    draft_version
+  end
+
+  # Refreshes the draft's denormalized snapshots from the current live template state.
+  # Useful when the template's sections have been reorganized but you want to
+  # keep any draft-specific block edits.
+  def self.refresh_draft_snapshot!(draft_version)
+    unless draft_version.draft?
+      raise TemplateVersionDraftError, "Can only refresh a draft version"
+    end
+
+    requirement_template = draft_version.requirement_template
+    fresh_blocks_json = form_requirement_blocks_hash(requirement_template)
+
+    # Preserve any draft-specific block edits (copy-on-write overrides)
+    merged_blocks_json =
+      fresh_blocks_json.merge(
+        draft_version.requirement_blocks_json.slice(*fresh_blocks_json.keys)
+      )
+
+    draft_version.update!(
+      denormalized_template_json:
+        RequirementTemplateBlueprint.render_as_hash(
+          requirement_template,
+          view: :template_snapshot
+        ),
+      requirement_blocks_json: merged_blocks_json,
+      form_json: requirement_template.to_form_json
+    )
+
+    draft_version
+  end
+
+  # Promotes a draft to scheduled status with a future version_date.
+  # The draft's JSON snapshot becomes the scheduled version's snapshot.
+  def self.promote_draft_to_scheduled!(
+    draft_version,
+    version_date,
+    change_notes: nil,
+    change_significance: nil
+  )
+    unless draft_version.draft?
+      raise TemplateVersionDraftError, "Can only promote a draft version"
+    end
+
+    requirement_template = draft_version.requirement_template
+    unless is_valid_schedule_version_date?(requirement_template, version_date)
+      raise TemplateVersionScheduleError.new(
+              I18n.t(
+                "services.template_versioning_service.invalid_schedule_date"
+              )
+            )
+    end
+
+    # Compute the diff against the currently published version
+    version_diff = compute_version_diff(draft_version)
+
+    draft_version.assign_attributes(
+      status: "scheduled",
+      version_date: version_date,
+      version_diff: version_diff,
+      change_notes: change_notes,
+      change_significance: change_significance
+    )
+
+    unless draft_version.save
+      raise TemplateVersionScheduleError.new(
+              draft_version.errors.full_messages.join(", ")
+            )
+    end
+
+    draft_version
+  end
+
+  # When a draft is published, optionally write block changes back to the
+  # canonical RequirementBlock records so other templates pick them up.
+  # block_ids_to_promote is an array of block IDs whose draft edits should
+  # be written back. If nil/empty, no canonical records are modified.
+  def self.promote_block_changes!(draft_version, block_ids_to_promote = [])
+    return if block_ids_to_promote.blank?
+    unless draft_version.draft? || draft_version.scheduled? ||
+             draft_version.published?
+      raise TemplateVersionDraftError,
+            "Can only promote block changes from a draft, scheduled, or published version"
+    end
+
+    blocks_json = draft_version.requirement_blocks_json
+
+    block_ids_to_promote.each do |block_id|
+      draft_block_data = blocks_json[block_id]
+      next if draft_block_data.blank?
+
+      canonical_block = RequirementBlock.find_by(id: block_id)
+      next if canonical_block.blank?
+
+      # Update requirements on the canonical block from the draft's snapshot
+      draft_requirements = draft_block_data["requirements"]
+      next if draft_requirements.blank?
+
+      draft_requirements.each do |draft_req|
+        requirement = canonical_block.requirements.find_by(id: draft_req["id"])
+        next if requirement.blank?
+
+        # Update mutable fields from the draft snapshot
+        requirement.update(
+          label: draft_req["label"],
+          input_type: draft_req["input_type"],
+          hint: draft_req["hint"],
+          required: draft_req["required"],
+          elective: draft_req["elective"]
+        )
+      end
+    end
+  end
+
+  # Discards a draft version (sets to deprecated).
+  def self.discard_draft!(draft_version)
+    unless draft_version.draft?
+      raise TemplateVersionDraftError, "Can only discard a draft version"
+    end
+
+    draft_version.update!(
+      status: "deprecated",
+      deprecation_reason: "unscheduled"
+    )
+
+    draft_version
+  end
+
+  # ── End draft workflow methods ──────────────────────────────────────────
+
   def self.publish_version!(template_version, skip_date_check = false)
     if template_version.status == "published" ||
          template_version.status == "deprecated"
@@ -172,6 +358,12 @@ class TemplateVersioningService
     end
 
     ActiveRecord::Base.transaction do
+      # Populate version_diff before publishing (replaces the old TODO)
+      if template_version.version_diff.blank? ||
+           template_version.version_diff == {}
+        template_version.version_diff = compute_version_diff(template_version)
+      end
+
       template_version.status = "published"
 
       deprecate_versions_before_template(template_version)
@@ -206,10 +398,13 @@ class TemplateVersioningService
         end
       end
     end
-    # Publish the notification after the transaction successfully completes
-    NotificationService.publish_new_template_version_publish_event(
-      template_version
-    )
+    # Publish the notification after the transaction successfully completes,
+    # respecting the notification_scope set on the template version.
+    unless template_version.notification_scope_silent?
+      NotificationService.publish_new_template_version_publish_event(
+        template_version
+      )
+    end
 
     template_version
   end
@@ -537,5 +732,34 @@ class TemplateVersioningService
   def self.diff_of_current_changes_and_last_version
     # TODO
     return {}
+  end
+
+  # Computes a structured diff between a template_version and the previously
+  # published version of its requirement_template. Used to populate version_diff.
+  def self.compute_version_diff(template_version)
+    previous = previous_published_version(template_version)
+    return {} if previous.blank?
+
+    produce_diff_hash(previous, template_version)
+  rescue StandardError => e
+    Rails.logger.error("Failed to compute version diff: #{e.message}")
+    {}
+  end
+
+  # Regenerates the form_json on a draft version from its requirement_blocks_json.
+  # Called after draft block edits so the form preview stays in sync.
+  def self.regenerate_draft_form_json!(draft_version)
+    requirement_template = draft_version.requirement_template
+    # Re-generate form_json from the live template structure.
+    # Block-level form_json within requirement_blocks_json is already updated
+    # by update_draft_block!, so the form rendering will pick up those changes.
+    draft_version.update!(
+      form_json: requirement_template.to_form_json,
+      denormalized_template_json:
+        RequirementTemplateBlueprint.render_as_hash(
+          requirement_template,
+          view: :template_snapshot
+        )
+    )
   end
 end

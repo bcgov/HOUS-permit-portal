@@ -1,7 +1,6 @@
 import {
   Box,
   Button,
-  ButtonGroup,
   Modal,
   ModalBody,
   ModalContent,
@@ -35,6 +34,7 @@ function PublishScheduleModal({
   onScheduleConfirm,
   triggerButtonProps,
   onForcePublishNow,
+  onCreateDraft,
 }: IEditRequirementTemplateScreenRenderActionProps) {
   const { t } = useTranslation()
   const { isOpen, onOpen, onClose } = useDisclosure()
@@ -62,7 +62,7 @@ function PublishScheduleModal({
       </Button>
       <Modal isOpen={isOpen} onClose={onClose} autoFocus={false}>
         <ModalOverlay />
-        <ModalContent w={onForcePublishNow ? "container.sm" : "436px"}>
+        <ModalContent w="full" maxW={onForcePublishNow || onCreateDraft ? "680px" : "436px"} mx={4}>
           <ModalHeader fontSize={"2xl"} mt={2}>
             {t("requirementTemplate.edit.scheduleModalTitle")}
           </ModalHeader>
@@ -84,20 +84,29 @@ function PublishScheduleModal({
             </Stack>
           </ModalBody>
 
-          <ModalFooter justifyContent={"flex-start"} mt={4}>
-            <ButtonGroup spacing={4}>
-              <Button variant={"primary"} isDisabled={!scheduleDate} onClick={onSchedule}>
-                {t("ui.confirm")}
+          <ModalFooter justifyContent={"flex-start"} mt={4} gap={3} flexWrap={"wrap"}>
+            <Button variant={"primary"} isDisabled={!scheduleDate} onClick={onSchedule}>
+              {t("ui.confirm")}
+            </Button>
+            <Button variant={"secondary"} onClick={onCancel}>
+              {t("ui.neverMind")}
+            </Button>
+            {onCreateDraft && (
+              <Button variant={"secondary"} onClick={onCreateDraft}>
+                Create draft version
               </Button>
-              <Button variant={"secondary"} onClick={onCancel}>
-                {t("ui.neverMind")}
+            )}
+            {onForcePublishNow && (
+              <Button
+                variant={"secondary"}
+                color={"error"}
+                borderColor={"error"}
+                onClick={onForcePublishNow}
+                ml={{ base: 0, md: "auto" }}
+              >
+                {t("requirementTemplate.edit.forcePublishNow")}
               </Button>
-              {onForcePublishNow && (
-                <Button variant={"secondary"} color={"error"} borderColor={"error"} onClick={onForcePublishNow}>
-                  {t("requirementTemplate.edit.forcePublishNow")}
-                </Button>
-              )}
-            </ButtonGroup>
+            )}
           </ModalFooter>
         </ModalContent>
       </Modal>

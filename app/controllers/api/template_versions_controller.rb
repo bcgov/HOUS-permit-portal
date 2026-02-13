@@ -22,7 +22,6 @@ class Api::TemplateVersionsController < Api::ApplicationController
           "LiveRequirementTemplate"
         end
       )
-    public = template_version_params[:public] == "true" || false
     @template_versions =
       if params[:activity_id].present?
         policy_scope(TemplateVersion)
@@ -33,7 +32,6 @@ class Api::TemplateVersionsController < Api::ApplicationController
               id: params[:activity_id]
             },
             requirement_templates: {
-              public: public,
               type: type
             }
           )
@@ -44,7 +42,7 @@ class Api::TemplateVersionsController < Api::ApplicationController
           .order(updated_at: :desc)
           .joins(:requirement_template)
           .includes(requirement_template: %i[permit_type activity])
-          .where(status:, requirement_templates: { public: public, type: type })
+          .where(status:, requirement_templates: { type: type })
       end
 
     render_success @template_versions,
@@ -264,10 +262,145 @@ class Api::TemplateVersionsController < Api::ApplicationController
     send_data json_data, type: "text/plain"
   end
 
+  # ── Draft-specific actions ────────────────────────────────────────────
+
+  def update_draft_block
+    authorize @template_version, :update?
+
+    begin
+      TemplateVersioningService.update_draft_block!(
+        @template_version,
+        draft_block_params[:block_id],
+        draft_block_params[:block_data].to_unsafe_h
+      )
+
+      render_success @template_version,
+                     "template_version.update_draft_block_success",
+                     {
+                       blueprint: TemplateVersionBlueprint,
+                       blueprint_opts: {
+                         view: :extended
+                       }
+                     }
+    rescue TemplateVersionDraftError => e
+      render_error "template_version.update_draft_block_error",
+                   message_opts: {
+                     error_message: e.message
+                   }
+    end
+  end
+
+  def refresh_draft
+    authorize @template_version, :update?
+
+    begin
+      TemplateVersioningService.refresh_draft_snapshot!(@template_version)
+
+      render_success @template_version,
+                     "template_version.refresh_draft_success",
+                     {
+                       blueprint: TemplateVersionBlueprint,
+                       blueprint_opts: {
+                         view: :extended
+                       }
+                     }
+    rescue TemplateVersionDraftError => e
+      render_error "template_version.refresh_draft_error",
+                   message_opts: {
+                     error_message: e.message
+                   }
+    end
+  end
+
+  def share_draft
+    authorize @template_version, :update?
+
+    unless @template_version.draft?
+      render_error "template_version.not_draft_error" and return
+    end
+
+    previewer_count = @template_version.template_version_previews.kept.count
+    if previewer_count.zero?
+      render_error "template_version.no_previewers_error" and return
+    end
+
+    NotificationService.publish_draft_shared_event(@template_version)
+
+    render_success @template_version,
+                   "template_version.share_draft_success",
+                   {
+                     message_opts: {
+                       count: previewer_count
+                     },
+                     blueprint: TemplateVersionBlueprint,
+                     blueprint_opts: {
+                       view: :extended
+                     }
+                   }
+  end
+
+  def invite_draft_previewers
+    authorize @template_version, :update?
+
+    unless @template_version.draft?
+      render_error "template_version.not_draft_error" and return
+    end
+
+    if draft_previewer_params[:emails].blank?
+      render_error "template_version.invite_previewers_error" and return
+    end
+
+    results = { previews: [], failed_emails: [] }
+
+    draft_previewer_params[:emails].each do |email|
+      begin
+        email = email.strip
+        user =
+          User.where(omniauth_email: email).or(User.where(email: email)).first
+        unless user
+          # Create a minimal user for previewing
+          username = email.split("@").first
+          name_parts = username.split(".")
+          user =
+            User.create!(
+              first_name: name_parts[0]&.capitalize || "Preview",
+              last_name: (name_parts[1] || "User").capitalize,
+              email: email,
+              role: :submitter
+            )
+        end
+
+        preview =
+          @template_version
+            .template_version_previews
+            .find_or_create_by!(previewer: user) do |p|
+              p.expires_at = 60.days.from_now
+            end
+
+        results[:previews] << preview
+      rescue StandardError => e
+        results[:failed_emails] << {
+          email: email,
+          error: e.message.truncate(80)
+        }
+      end
+    end
+
+    render_success @template_version,
+                   "template_version.invite_previewers_success",
+                   {
+                     blueprint: TemplateVersionBlueprint,
+                     blueprint_opts: {
+                       view: :extended
+                     },
+                     meta: results
+                   }
+  end
+
   private
 
   def template_version_params
-    params.permit(:activity_id, :status, :early_access, :public)
+    params.permit(:activity_id, :status, :early_access)
   end
 
   def template_version_sandbox_scope
@@ -324,5 +457,13 @@ class Api::TemplateVersionsController < Api::ApplicationController
         }
       }
     )
+  end
+
+  def draft_block_params
+    params.permit(:block_id, block_data: {})
+  end
+
+  def draft_previewer_params
+    params.permit(emails: [])
   end
 end

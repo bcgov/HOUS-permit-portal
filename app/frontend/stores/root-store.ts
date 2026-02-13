@@ -10,10 +10,6 @@ import {
   EarlyAccessRequirementBlockStoreModel,
   IEarlyAccessRequirementBlockStoreModel,
 } from "./early-access-requirement-block-store"
-import {
-  EarlyAccessRequirementTemplateStoreModel,
-  IEarlyAccessRequirementTemplateStoreModel,
-} from "./early-access-requirement-template-store"
 import { GeocoderStoreModel, IGeocoderStore } from "./geocoder-store"
 import { IJurisdictionStore, JurisdictionStoreModel } from "./jurisdiction-store"
 import { INotificationStore, NotificationStoreModel } from "./notification-store"
@@ -46,7 +42,6 @@ export const RootStoreModel = types
     requirementBlockStore: types.optional(RequirementBlockStoreModel, {}),
     earlyAccessRequirementBlockStore: types.optional(EarlyAccessRequirementBlockStoreModel, {}),
     requirementTemplateStore: types.optional(RequirementTemplateStoreModel, {}),
-    earlyAccessRequirementTemplateStore: types.optional(EarlyAccessRequirementTemplateStoreModel, {}),
     digitalSealValidatorStore: types.optional(DigitalSealValidatorStoreModel, {}),
     earlyAccessPreviewStore: types.optional(EarlyAccessPreviewStoreModel, {}),
     collaboratorStore: types.optional(CollaboratorStoreModel, {}),
@@ -126,7 +121,6 @@ export interface IRootStore extends IStateTreeNode {
   earlyAccessRequirementBlockStore: IEarlyAccessRequirementBlockStoreModel
   requirementBlockStore: IRequirementBlockStoreModel
   requirementTemplateStore: IRequirementTemplateStoreModel
-  earlyAccessRequirementTemplateStore: IEarlyAccessRequirementTemplateStoreModel
   digitalSealValidatorStore: IDigitalSealValidatorStore
   earlyAccessPreviewStore: IEarlyAccessPreviewStoreModel
   templateVersionStore: ITemplateVersionStoreModel

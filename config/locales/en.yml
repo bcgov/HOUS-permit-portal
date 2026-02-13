@@ -449,7 +449,7 @@ en:
         message: "New template created successfully!"
       update_success:
         title: ""
-        message: "This draft has been saved."
+        message: "Template has been saved."
       schedule_success:
         title: ""
         message: "Permit has been scheduled to published."
@@ -492,6 +492,27 @@ en:
       force_publish_now_error:
         title: Error force publishing template
         message: "%{error_message}"
+      create_draft_success:
+        title: ""
+        message: "Draft version created successfully"
+      create_draft_error:
+        title: Error
+        message: "%{error_message}"
+      discard_draft_success:
+        title: ""
+        message: "Draft version discarded"
+      discard_draft_error:
+        title: Error
+        message: "%{error_message}"
+      promote_draft_success:
+        title: ""
+        message: "Draft promoted to scheduled version"
+      promote_draft_error:
+        title: Error
+        message: "%{error_message}"
+      no_draft_error:
+        title: Error
+        message: "No draft version exists for this template"
       delete_error:
         title: Error
         message: "%{error_message}"
@@ -795,6 +816,50 @@ en:
       copy_success:
         title: ""
         message: "Jurisdiction Template Customization copied!"
+      no_copy_target_error:
+        title: Error
+        message: "Could not find a template version to copy from"
+    template_version:
+      update_draft_block_success:
+        title: ""
+        message: "Draft block updated"
+      update_draft_block_error:
+        title: Error
+        message: "%{error_message}"
+      refresh_draft_success:
+        title: ""
+        message: "Draft refreshed from current template"
+      refresh_draft_error:
+        title: Error
+        message: "%{error_message}"
+      share_draft_success:
+        title: ""
+        message: "Draft shared with %{count} previewer(s)"
+      no_previewers_error:
+        title: Error
+        message: "No previewers are invited to this draft yet. Invite previewers first."
+      not_draft_error:
+        title: Error
+        message: "This version is not a draft"
+      invite_previewers_success:
+        title: ""
+        message: "Previewers invited to draft"
+      invite_previewers_error:
+        title: Error
+        message: "Could not invite previewers"
+    template_version_feedback:
+      create_success:
+        title: ""
+        message: "Feedback submitted"
+      create_error:
+        title: Error
+        message: "%{error_message}"
+      resolve_success:
+        title: ""
+        message: "Feedback resolved"
+      unresolve_success:
+        title: ""
+        message: "Feedback unresolved"
       no_copy_target_error:
         title: Error
         message: "Could not copy from non-first nations template version - please ensure a non-first nations template version exists"

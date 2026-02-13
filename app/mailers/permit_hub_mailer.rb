@@ -147,7 +147,7 @@ class PermitHubMailer < ApplicationMailer
     @early_access_preview = early_access_preview
     @user = user
 
-    return unless @early_access_preview.early_access_requirement_template
+    return unless @early_access_preview.template_version
 
     if !@user.discarded? && @user.submitter?
       @user.skip_confirmation_notification!

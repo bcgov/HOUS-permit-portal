@@ -6,6 +6,14 @@ RSpec.describe EarlyAccess::PreviewManagementService,
   let(:early_access_requirement_template) do
     create(:early_access_requirement_template)
   end
+  let!(:published_version) do
+    early_access_requirement_template.published_template_version ||
+      create(
+        :template_version,
+        requirement_template: early_access_requirement_template,
+        status: :published
+      )
+  end
   let(:service) { described_class.new(early_access_requirement_template) }
 
   before do
@@ -138,17 +146,10 @@ RSpec.describe EarlyAccess::PreviewManagementService,
       let!(:user) { create(:user, email: "user@example.com") }
       let(:emails) { %w[user@example.com user@example.com] }
 
-      before do
-        # Simulate uniqueness constraint on early_access_previews
-        allow_any_instance_of(EarlyAccessRequirementTemplate).to receive(
-          :early_access_previews
-        ).and_return(double("Association", build: build(:early_access_preview)))
-      end
-
       it "handles ActiveRecord::RecordNotUnique errors" do
-        allow_any_instance_of(EarlyAccessRequirementTemplate).to receive(
-          :early_access_previews
-        ).and_raise(ActiveRecord::RecordNotUnique)
+        allow(TemplateVersionPreview).to receive(:new).and_raise(
+          ActiveRecord::RecordNotUnique
+        )
 
         result = subject
 
@@ -200,16 +201,13 @@ RSpec.describe EarlyAccess::PreviewManagementService,
       let(:emails) { ["user@example.com"] }
 
       before do
-        allow_any_instance_of(EarlyAccessRequirementTemplate).to receive(
-          :early_access_previews
-        ).and_return(
+        preview_double =
           double(
-            build:
-              double(
-                save: false,
-                errors: double(full_messages: ["Preview cannot be blank"])
-              )
+            save: false,
+            errors: double(full_messages: ["Preview cannot be blank"])
           )
+        allow(TemplateVersionPreview).to receive(:new).and_return(
+          preview_double
         )
       end
 

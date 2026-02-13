@@ -464,8 +464,11 @@ early_access_requirement_templates.each do |eart|
   previewers = users.sample(rand(1..5))
 
   previewers.each do |user|
-    EarlyAccessPreview.create!(
-      early_access_requirement_template: eart,
+    template_version = eart.published_template_version
+    next unless template_version
+
+    TemplateVersionPreview.create!(
+      template_version: template_version,
       previewer: user
     )
   end

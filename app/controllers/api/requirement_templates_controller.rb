@@ -9,6 +9,9 @@ class Api::RequirementTemplatesController < Api::ApplicationController
                   schedule
                   force_publish_now
                   invite_previewers
+                  create_draft
+                  discard_draft
+                  promote_draft
                 ]
   before_action :set_template_version, only: %i[unschedule_template_version]
   skip_after_action :verify_policy_scoped, only: [:index]
@@ -300,6 +303,131 @@ class Api::RequirementTemplatesController < Api::ApplicationController
     end
   end
 
+  # ── Draft workflow actions ────────────────────────────────────────────
+
+  def create_draft
+    authorize @requirement_template
+
+    begin
+      draft_version =
+        TemplateVersioningService.create_draft!(
+          @requirement_template,
+          assignee:
+            (
+              if draft_params[:assignee_id].present?
+                User.find(draft_params[:assignee_id])
+              else
+                nil
+              end
+            )
+        )
+
+      @requirement_template.reload
+
+      render_success @requirement_template,
+                     "requirement_template.create_draft_success",
+                     {
+                       blueprint: RequirementTemplateBlueprint,
+                       blueprint_opts: {
+                         view: :extended,
+                         current_user: current_user
+                       }
+                     }
+    rescue TemplateVersionDraftError => e
+      render_error "requirement_template.create_draft_error",
+                   message_opts: {
+                     error_message: e.message
+                   }
+    end
+  end
+
+  def discard_draft
+    authorize @requirement_template
+
+    draft_version = @requirement_template.draft_template_version
+    if draft_version.blank?
+      render_error "requirement_template.no_draft_error" and return
+    end
+
+    begin
+      TemplateVersioningService.discard_draft!(draft_version)
+      @requirement_template.reload
+
+      render_success @requirement_template,
+                     "requirement_template.discard_draft_success",
+                     {
+                       blueprint: RequirementTemplateBlueprint,
+                       blueprint_opts: {
+                         view: :extended,
+                         current_user: current_user
+                       }
+                     }
+    rescue TemplateVersionDraftError => e
+      render_error "requirement_template.discard_draft_error",
+                   message_opts: {
+                     error_message: e.message
+                   }
+    end
+  end
+
+  def promote_draft
+    authorize @requirement_template
+
+    draft_version = @requirement_template.draft_template_version
+    if draft_version.blank?
+      render_error "requirement_template.no_draft_error" and return
+    end
+
+    begin
+      promoted =
+        TemplateVersioningService.promote_draft_to_scheduled!(
+          draft_version,
+          Date.parse(promote_draft_params[:version_date]),
+          change_notes: promote_draft_params[:change_notes],
+          change_significance: promote_draft_params[:change_significance]
+        )
+
+      # Set notification preferences on the version
+      if promote_draft_params[:notification_scope].present?
+        promoted.update!(
+          notification_scope: promote_draft_params[:notification_scope],
+          notified_jurisdiction_ids:
+            promote_draft_params[:notified_jurisdiction_ids] || []
+        )
+      end
+
+      # Optionally promote block changes back to canonical records
+      if promote_draft_params[:promote_block_ids].present?
+        TemplateVersioningService.promote_block_changes!(
+          promoted,
+          promote_draft_params[:promote_block_ids]
+        )
+      end
+
+      # Optionally send advance notice to jurisdictions
+      if promote_draft_params[:send_advance_notice]
+        NotificationService.publish_version_scheduled_event(promoted)
+      end
+
+      @requirement_template.reload
+
+      render_success @requirement_template,
+                     "requirement_template.promote_draft_success",
+                     {
+                       blueprint: RequirementTemplateBlueprint,
+                       blueprint_opts: {
+                         view: :extended,
+                         current_user: current_user
+                       }
+                     }
+    rescue TemplateVersionDraftError, TemplateVersionScheduleError => e
+      render_error "requirement_template.promote_draft_error",
+                   message_opts: {
+                     error_message: e.message
+                   }
+    end
+  end
+
   private
 
   def set_requirement_template
@@ -331,12 +459,10 @@ class Api::RequirementTemplatesController < Api::ApplicationController
         :id,
         :description,
         :nickname,
-        :assignee_id,
         :first_nations,
         :activity_id,
         :permit_type_id,
         :type,
-        :public,
         requirement_template_sections_attributes: [
           :id,
           :name,
@@ -365,5 +491,21 @@ class Api::RequirementTemplatesController < Api::ApplicationController
 
   def schedule_params
     params.require(:version_date)
+  end
+
+  def draft_params
+    params.permit(:assignee_id)
+  end
+
+  def promote_draft_params
+    params.permit(
+      :version_date,
+      :change_notes,
+      :change_significance,
+      :notification_scope,
+      :send_advance_notice,
+      notified_jurisdiction_ids: [],
+      promote_block_ids: []
+    )
   end
 end

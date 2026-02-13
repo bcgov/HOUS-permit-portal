@@ -4,7 +4,7 @@ RSpec.describe EarlyAccessPreview, type: :model, search: true do
   let(:early_access_preview) { create(:early_access_preview) }
 
   describe "Associations" do
-    it { should belong_to(:early_access_requirement_template) }
+    it { should belong_to(:template_version) }
     it { should belong_to(:previewer).class_name("User") }
   end
 
@@ -31,16 +31,6 @@ RSpec.describe EarlyAccessPreview, type: :model, search: true do
     context "without setting expires_at manually" do
       it "is valid when all required fields are present" do
         expect(early_access_preview).to be_valid
-      end
-    end
-
-    context "when early_access_requirement_template_id is missing" do
-      it "is invalid" do
-        early_access_preview.early_access_requirement_template = nil
-        expect(early_access_preview).not_to be_valid
-        expect(
-          early_access_preview.errors[:early_access_requirement_template]
-        ).to include("must exist")
       end
     end
 
@@ -153,14 +143,6 @@ RSpec.describe EarlyAccessPreview, type: :model, search: true do
           end
         end
       end
-    end
-  end
-
-  describe "Delegations" do
-    it do
-      should delegate_method(:frontend_url).to(
-               :early_access_requirement_template
-             )
     end
   end
 

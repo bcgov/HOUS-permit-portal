@@ -267,109 +267,100 @@ RSpec.describe Api::RequirementTemplatesController,
 
   # Adding the GET #show tests here
   describe "GET #show" do
-    let(:public_template) do
-      create(:early_access_requirement_template, public: true)
-    end
-    let(:private_template) do
-      create(:early_access_requirement_template, public: false)
+    let(:early_access_template) { create(:early_access_requirement_template) }
+    let!(:early_access_published_version) do
+      early_access_template.published_template_version ||
+        create(
+          :template_version,
+          requirement_template: early_access_template,
+          status: :published
+        )
     end
 
-    context "when the requirement template is public" do
-      it "allows access without authentication" do
-        get :show, params: { id: public_template.id }
+    context "when not authenticated" do
+      # Ensure no user is signed in
+      before { sign_out :user }
+
+      it "denies access" do
+        get :show, params: { id: early_access_template.id }
+
+        expect(response).to have_http_status(:forbidden)
+        expect(json_response["meta"]["message"]["message"]).to eq(
+          "The user is not authorized to do this action"
+        )
+      end
+    end
+
+    context "when authenticated as a super admin" do
+      let(:super_admin_user) { create(:user, :super_admin) }
+
+      before { sign_in super_admin_user }
+
+      it "allows access" do
+        get :show, params: { id: early_access_template.id }
 
         expect(response).to have_http_status(:ok)
         expect(json_response).to include("meta", "data")
-        expect(json_response["data"]["id"]).to eq(public_template.id.to_s)
+        expect(json_response["data"]["id"]).to eq(early_access_template.id.to_s)
       end
     end
 
-    context "when the requirement template is not public" do
-      context "when not authenticated" do
-        # Ensure no user is signed in
-        before { sign_out :user }
-
-        it "denies access" do
-          get :show, params: { id: private_template.id }
-
-          expect(response).to have_http_status(:forbidden)
-          expect(json_response["meta"]["message"]["message"]).to eq(
-            "The user is not authorized to do this action"
-          )
-        end
+    context "when authenticated as a user with a valid early access preview" do
+      let(:user_with_preview) { create(:user, :submitter) }
+      let!(:early_access_preview) do
+        create(
+          :early_access_preview,
+          previewer: user_with_preview,
+          template_version: early_access_published_version,
+          expires_at: 1.day.from_now
+        )
       end
 
-      context "when authenticated as a super admin" do
-        let(:super_admin_user) { create(:user, :super_admin) }
+      before { sign_in user_with_preview }
 
-        before { sign_in super_admin_user }
+      it "allows access" do
+        get :show, params: { id: early_access_template.id }
 
-        it "allows access" do
-          get :show, params: { id: private_template.id }
+        expect(response).to have_http_status(:ok)
+        expect(json_response).to include("meta", "data")
+        expect(json_response["data"]["id"]).to eq(early_access_template.id.to_s)
+      end
+    end
 
-          expect(response).to have_http_status(:ok)
-          expect(json_response).to include("meta", "data")
-          expect(json_response["data"]["id"]).to eq(private_template.id.to_s)
-        end
+    context "when authenticated as a user without the necessary early access preview" do
+      let(:user_without_preview) { create(:user, :submitter) }
+
+      before { sign_in user_without_preview }
+
+      it "denies access" do
+        get :show, params: { id: early_access_template.id }
+        expect(response).to have_http_status(:forbidden)
+        expect(json_response["meta"]["message"]["message"]).to eq(
+          "The user is not authorized to do this action"
+        )
+      end
+    end
+
+    context "when authenticated as a user with an expired early access preview" do
+      let(:user_with_expired_preview) { create(:user, :submitter) }
+      let!(:expired_early_access_preview) do
+        create(
+          :early_access_preview,
+          previewer: user_with_expired_preview,
+          template_version: early_access_published_version,
+          expires_at: 1.day.ago
+        )
       end
 
-      context "when authenticated as a user with a valid early access preview" do
-        let(:user_with_preview) { create(:user, :submitter) }
-        let!(:early_access_preview) do
-          create(
-            :early_access_preview,
-            previewer: user_with_preview,
-            early_access_requirement_template: private_template,
-            expires_at: 1.day.from_now
-          )
-        end
+      before { sign_in user_with_expired_preview }
 
-        before { sign_in user_with_preview }
+      it "denies access" do
+        get :show, params: { id: early_access_template.id }
 
-        it "allows access" do
-          get :show, params: { id: private_template.id }
-
-          expect(response).to have_http_status(:ok)
-          expect(json_response).to include("meta", "data")
-          expect(json_response["data"]["id"]).to eq(private_template.id.to_s)
-        end
-      end
-
-      context "when authenticated as a user without the necessary early access preview" do
-        let(:user_without_preview) { create(:user, :submitter) }
-
-        before { sign_in user_without_preview }
-
-        it "denies access" do
-          get :show, params: { id: private_template.id }
-          expect(response).to have_http_status(:forbidden)
-          expect(json_response["meta"]["message"]["message"]).to eq(
-            "The user is not authorized to do this action"
-          )
-        end
-      end
-
-      context "when authenticated as a user with an expired early access preview" do
-        let(:user_with_expired_preview) { create(:user, :submitter) }
-        let!(:expired_early_access_preview) do
-          create(
-            :early_access_preview,
-            previewer: user_with_expired_preview,
-            early_access_requirement_template: private_template,
-            expires_at: 1.day.ago
-          )
-        end
-
-        before { sign_in user_with_expired_preview }
-
-        it "denies access" do
-          get :show, params: { id: private_template.id }
-
-          expect(response).to have_http_status(:forbidden)
-          expect(json_response["meta"]["message"]["message"]).to eq(
-            "The user is not authorized to do this action"
-          )
-        end
+        expect(response).to have_http_status(:forbidden)
+        expect(json_response["meta"]["message"]["message"]).to eq(
+          "The user is not authorized to do this action"
+        )
       end
     end
   end

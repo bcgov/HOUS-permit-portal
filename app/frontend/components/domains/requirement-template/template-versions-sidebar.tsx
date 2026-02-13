@@ -33,6 +33,7 @@ import { RemoveConfirmationModal } from "../../shared/modals/remove-confirmation
 import { RouterLink } from "../../shared/navigation/router-link"
 import { TemplateStatusTag } from "../../shared/requirement-template/template-status-tag"
 import { VersionTag } from "../../shared/version-tag"
+import { SharePreviewAccordion } from "./share-preview-popover"
 
 interface IProps {
   requirementTemplate: IRequirementTemplate
@@ -75,14 +76,32 @@ export const TemplateVersionsSidebar = observer(function TemplateVersionsSidebar
               {!requirementTemplate.isDiscarded && (
                 <Box>
                   <Text as="h3" fontSize={"xl"} fontWeight={700} mb={2}>
-                    {t("requirementTemplate.versionSidebar.listTitles.draft")}
+                    {t("requirementTemplate.versionSidebar.listTitles.templateBuilder")}
                   </Text>
 
                   <VersionCard
                     viewRoute={`/requirement-templates/${requirementTemplate.id}/edit`}
-                    status={ETemplateVersionStatus.draft}
+                    status={"builder"}
                     updatedAt={requirementTemplate.updatedAt}
                   />
+                </Box>
+              )}
+              {requirementTemplate.draftTemplateVersion && (
+                <Box>
+                  <Text as="h3" fontSize={"xl"} fontWeight={700} mb={2}>
+                    {t("requirementTemplate.versionSidebar.listTitles.draft")}
+                  </Text>
+
+                  <Box border="1px solid" borderColor="border.light" borderRadius="sm" overflow="hidden">
+                    <VersionCard
+                      viewRoute={`/template-versions/${requirementTemplate.draftTemplateVersion.id}`}
+                      status={ETemplateVersionStatus.draft}
+                      updatedAt={requirementTemplate.draftTemplateVersion.updatedAt}
+                      borderRadius="none"
+                      border="none"
+                    />
+                    <SharePreviewAccordion draftTemplateVersion={requirementTemplate.draftTemplateVersion} />
+                  </Box>
                 </Box>
               )}
 
@@ -162,7 +181,12 @@ type TVersionCardProps = Partial<FlexProps> & { viewRoute: string; onUnschedule?
         updatedAt?: never
         deprecationReasonLabel?: string
       }
-    | { status: ETemplateVersionStatus.draft; versionDate?: never; updatedAt: Date; deprecationReasonLabel?: never }
+    | {
+        status: "builder" | ETemplateVersionStatus.draft
+        versionDate?: never
+        updatedAt: Date
+        deprecationReasonLabel?: never
+      }
   )
 
 const VersionCard = observer(function VersionCard({
@@ -183,10 +207,16 @@ const VersionCard = observer(function VersionCard({
           {t("requirementTemplate.versionSidebar.viewTemplateButton")}
         </Button>
       )
-    } else if (status === ETemplateVersionStatus.draft) {
+    } else if (status === "builder") {
       return (
         <Button as={RouterLink} to={viewRoute} variant={"primary"} size="sm" leftIcon={<Pencil />}>
-          {t("translation:requirementTemplate.versionSidebar.resumeDraftButton")}
+          {t("translation:requirementTemplate.versionSidebar.openBuilderButton")}
+        </Button>
+      )
+    } else if (status === ETemplateVersionStatus.draft) {
+      return (
+        <Button as={RouterLink} to={viewRoute} variant={"primary"} size="sm">
+          {t("requirementTemplate.versionSidebar.viewDraftButton")}
         </Button>
       )
     } else {
@@ -228,7 +258,7 @@ const VersionCard = observer(function VersionCard({
           scheduledFor={status === ETemplateVersionStatus.scheduled && versionDate ? versionDate : undefined}
           subText={status === ETemplateVersionStatus.deprecated ? deprecationReasonLabel : undefined}
         />
-        {status === ETemplateVersionStatus.draft ? (
+        {status === "builder" || status === ETemplateVersionStatus.draft ? (
           <Text>
             {t("requirementTemplate.versionSidebar.lastUpdated")}
             <br />

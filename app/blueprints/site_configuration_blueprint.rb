@@ -11,7 +11,6 @@ class SiteConfigurationBlueprint < Blueprinter::Base
   end
 
   association :revision_reasons, blueprint: RevisionReasonBlueprint
-  association :standardization_page_early_access_requirement_templates,
-              blueprint:
-                StandardizationPageEarlyAccessRequirementTemplateBlueprint
+  association :standardization_template_versions,
+              blueprint: TemplateVersionBlueprint
 end

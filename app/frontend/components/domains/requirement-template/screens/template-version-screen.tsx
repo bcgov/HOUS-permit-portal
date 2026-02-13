@@ -1,4 +1,4 @@
-import { Box, Button, Flex } from "@chakra-ui/react"
+import { Box, Button, Flex, HStack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -10,6 +10,7 @@ import { FloatingHelpDrawer } from "../../../shared/floating-help-drawer"
 import { BuilderBottomFloatingButtons } from "../builder-bottom-floating-buttons"
 import { SectionsDisplay } from "../sections-display"
 import { SectionsSidebar } from "../sections-sidebar"
+import { SharePreviewPopover } from "../share-preview-popover"
 import { useSectionHighlight } from "../use-section-highlight"
 import { BuilderHeader } from "./base-edit-requirement-template-screen/builder-header"
 
@@ -78,9 +79,14 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
             justifyContent={"flex-end"}
             boxShadow={"elevations.elevation02"}
           >
-            <Button variant={"secondary"} onClick={onClose}>
-              {t("ui.close")}
-            </Button>
+            <HStack spacing={3}>
+              {templateVersion.isDraft && (
+                <SharePreviewPopover draftTemplateVersion={templateVersion} variant="primary" />
+              )}
+              <Button variant={"secondary"} onClick={onClose}>
+                {t("ui.close")}
+              </Button>
+            </HStack>
           </Flex>
           <FloatingHelpDrawer />
 

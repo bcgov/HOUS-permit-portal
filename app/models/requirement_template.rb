@@ -1,6 +1,7 @@
 class RequirementTemplate < ApplicationRecord
   SEARCH_INCLUDES = %i[
     published_template_version
+    draft_template_version
     permit_type
     last_three_deprecated_template_versions
     activity
@@ -54,6 +55,10 @@ class RequirementTemplate < ApplicationRecord
           -> { where(status: "published") },
           class_name: "TemplateVersion"
 
+  has_one :draft_template_version,
+          -> { where(status: "draft") },
+          class_name: "TemplateVersion"
+
   # Scope to get RequirementTemplates with a published template version
   scope :for_sandbox,
         ->(sandbox) do
@@ -76,7 +81,6 @@ class RequirementTemplate < ApplicationRecord
 
   validate :validate_uniqueness_of_blocks
   validate :validate_step_code_related_dependencies
-  validate :public_only_for_early_access_preview
 
   before_validation :set_default_nickname
 
@@ -239,24 +243,12 @@ class RequirementTemplate < ApplicationRecord
       discarded: discarded_at.present?,
       assignee: assignee&.name,
       visibility: visibility,
-      public: public?,
       created_at: created_at,
       used_by: published_customizations_count
     }
   end
 
   private
-
-  def public_only_for_early_access_preview
-    if public && !early_access?
-      errors.add(
-        :public,
-        I18n.t(
-          "activerecord.errors.models.requirement_template.attributes.public.true_on_early_access_only"
-        )
-      )
-    end
-  end
 
   def validate_uniqueness_of_blocks
     # Track duplicates across all sections within the same template

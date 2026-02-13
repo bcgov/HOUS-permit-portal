@@ -28,18 +28,6 @@ function isTemplateEditPath(path: string): boolean {
   return regex.test(path)
 }
 
-function isEarlyAccessTemplateEditPath(path: string): boolean {
-  const regex = /^\/early-access?\/requirement-templates\/([a-f\d-]+)\/edit$/
-
-  return regex.test(path)
-}
-
-function isEarlyAccessTemplateViewPath(path: string): boolean {
-  const regex = /^\/early-access\/requirement-templates\/([a-f\d-]+)$/
-
-  return regex.test(path)
-}
-
 function isDigitalPermitEditPath(path: string): boolean {
   const regex = /^\/digital-building-permits\/([a-f\d-]+)\/edit$/
 
@@ -116,8 +104,6 @@ function shouldHideSubNavbarForPath(path: string): boolean {
   const matchers: Array<(path: string) => boolean> = [
     (path) => path === "/",
     isTemplateEditPath,
-    isEarlyAccessTemplateEditPath,
-    isEarlyAccessTemplateViewPath,
     isTemplateVersionPath,
     isPermitApplicationEditPath,
     isPermitApplicationPath,

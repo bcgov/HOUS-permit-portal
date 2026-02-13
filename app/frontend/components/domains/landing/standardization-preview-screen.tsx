@@ -66,7 +66,7 @@ export const StandardizationPreviewScreen = observer(function StandardizationPre
                     </Box>
                     <LinkOverlay
                       as={RouterLink}
-                      to={`/early-access/requirement-templates/${template.id}`}
+                      to={`/template-versions/${template.id}`}
                       color="text.link"
                       fontWeight="bold"
                       display="flex"

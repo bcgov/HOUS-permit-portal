@@ -86,6 +86,13 @@ Rails.application.routes.draw do
            on: :collection,
            to: "requirement_templates#unschedule_template_version"
       post "copy", on: :collection
+
+      # Draft workflow endpoints
+      member do
+        post "create_draft", to: "requirement_templates#create_draft"
+        delete "discard_draft", to: "requirement_templates#discard_draft"
+        post "promote_draft", to: "requirement_templates#promote_draft"
+      end
     end
 
     resources :early_access_previews do
@@ -93,6 +100,26 @@ Rails.application.routes.draw do
         post :revoke_access
         post :unrevoke_access
         post :extend_access
+      end
+    end
+
+    # Draft version-specific endpoints (feedback, previews, block editing)
+    resources :template_versions, only: [] do
+      member do
+        patch "update_draft_block", to: "template_versions#update_draft_block"
+        post "refresh_draft", to: "template_versions#refresh_draft"
+        post "invite_draft_previewers",
+             to: "template_versions#invite_draft_previewers"
+        post "share_draft", to: "template_versions#share_draft"
+      end
+
+      resources :template_version_feedbacks,
+                only: %i[index create],
+                path: "feedbacks" do
+        member do
+          post "resolve"
+          post "unresolve"
+        end
       end
     end
 

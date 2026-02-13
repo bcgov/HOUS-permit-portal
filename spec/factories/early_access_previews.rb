@@ -2,7 +2,7 @@
 
 FactoryBot.define do
   factory :early_access_preview do
-    association :early_access_requirement_template
+    association :template_version
     association :previewer, factory: %i[user submitter] # Associates with a user who has the submitter trait
 
     expires_at { 1.week.from_now } # Default expiration set a week from creation

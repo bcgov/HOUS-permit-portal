@@ -93,7 +93,7 @@ export const StandardizationSetupScreen = observer(() => {
                 <TemplateVersionsList
                   permitTypeId={permitTypeOption.value.id}
                   earlyAccess={true}
-                  isPublic={true}
+                  isPubliclyPreviewable={true}
                   renderButton={(templateVersion) => {
                     const fieldIndex = fields.findIndex((field) => field.id === templateVersion.requirementTemplateId)
                     return (

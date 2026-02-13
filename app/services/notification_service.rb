@@ -62,18 +62,11 @@ class NotificationService
   end
 
   def self.publish_new_template_version_publish_event(template_version)
-    manager_ids =
-      User
-        .joins(:preference)
-        .where(role: %i[review_manager regional_review_manager])
-        .where(
-          users: {
-            preferences: {
-              enable_in_app_new_template_version_publish_notification: true
-            }
-          }
-        )
-        .pluck(:id)
+    # Respect notification_scope: silent publishes skip all notifications.
+    return if template_version.notification_scope_silent?
+
+    # Determine which managers to notify based on notification_scope.
+    manager_ids = targeted_manager_ids_for_publish(template_version)
 
     relevant_permit_applications =
       PermitApplication
@@ -109,9 +102,73 @@ class NotificationService
         hash[manager_id] = template_version.publish_event_notification_data
       end
 
-    NotificationPushJob.perform_async(
-      { **notification_manager_hash, **notification_submitter_hash }
-    )
+    notification_hash = {
+      **notification_manager_hash,
+      **notification_submitter_hash
+    }
+    if notification_hash.any?
+      NotificationPushJob.perform_async(notification_hash)
+    end
+  end
+
+  # ── Draft notification methods ────────────────────────────────────────
+
+  # Notifies invited previewers when a draft version is shared for review.
+  # Low noise: only the invited users receive this notification.
+  def self.publish_draft_shared_event(template_version)
+    return unless template_version.draft?
+
+    previewer_ids =
+      template_version.template_version_previews.kept.pluck(:previewer_id)
+    return if previewer_ids.blank?
+
+    notification_data = {
+      "id" => SecureRandom.uuid,
+      "action_type" => "draft_shared_for_review",
+      "action_text" =>
+        "You've been invited to preview a draft template: #{template_version.label}",
+      "object_data" => {
+        "template_version_id" => template_version.id,
+        "requirement_template_id" => template_version.requirement_template_id
+      }
+    }
+
+    notification_hash =
+      previewer_ids.each_with_object({}) do |user_id, hash|
+        hash[user_id] = notification_data
+      end
+
+    NotificationPushJob.perform_async(notification_hash)
+  end
+
+  # Sends advance notice to jurisdictions when a template version is scheduled.
+  # Only notifies jurisdictions that currently use this template (via customizations
+  # on the published version). Opt-in: caller decides whether to trigger this.
+  def self.publish_version_scheduled_event(template_version)
+    return unless template_version.scheduled?
+
+    manager_ids = targeted_manager_ids_for_publish(template_version)
+    return if manager_ids.blank?
+
+    notification_data = {
+      "id" => SecureRandom.uuid,
+      "action_type" => "template_version_scheduled",
+      "action_text" =>
+        "A new version of #{template_version.requirement_template.label} is scheduled for #{template_version.version_date}.",
+      "object_data" => {
+        "template_version_id" => template_version.id,
+        "requirement_template_id" => template_version.requirement_template_id,
+        "version_date" => template_version.version_date.to_s,
+        "change_notes" => template_version.change_notes
+      }
+    }
+
+    notification_hash =
+      manager_ids.each_with_object({}) do |manager_id, hash|
+        hash[manager_id] = notification_data
+      end
+
+    NotificationPushJob.perform_async(notification_hash)
   end
 
   def self.publish_missing_requirements_mapping_event(integration_mapping)
@@ -464,6 +521,47 @@ class NotificationService
   end
 
   private_class_method :determine_file_owner
+
+  # Determines which review managers to notify based on the template version's
+  # notification_scope. This is the core targeting logic.
+  #
+  # - all_jurisdictions (default): All managers with the notification preference enabled.
+  # - specific_jurisdictions: Only managers belonging to the jurisdictions listed
+  #   in notified_jurisdiction_ids. This is for targeted fixes (e.g., a typo
+  #   reported by one jurisdiction -- only notify them, not everyone).
+  # - silent: Returns empty (caller should skip notifications entirely).
+  def self.targeted_manager_ids_for_publish(template_version)
+    return [] if template_version.notification_scope_silent?
+
+    base_query =
+      User
+        .joins(:preference)
+        .where(role: %i[review_manager regional_review_manager])
+        .where(
+          users: {
+            preferences: {
+              enable_in_app_new_template_version_publish_notification: true
+            }
+          }
+        )
+
+    if template_version.notification_scope_specific_jurisdictions?
+      target_jurisdiction_ids = template_version.notified_jurisdiction_ids || []
+      return [] if target_jurisdiction_ids.blank?
+
+      # Only notify managers who belong to the targeted jurisdictions
+      base_query
+        .joins(:jurisdictions)
+        .where(jurisdictions: { id: target_jurisdiction_ids })
+        .distinct
+        .pluck(:id)
+    else
+      # all_jurisdictions (default): notify all managers with the preference enabled
+      base_query.pluck(:id)
+    end
+  end
+
+  private_class_method :targeted_manager_ids_for_publish
 
   # this is just a wrapper around the activity's metadata methods
   # since in the case of a single instance it returns a specific return type (eg. Integer)

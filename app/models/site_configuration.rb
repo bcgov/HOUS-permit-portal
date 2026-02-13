@@ -2,12 +2,12 @@ class SiteConfiguration < ApplicationRecord
   # Ensures that only one SiteConfiguration record can be created
   before_create :ensure_single_record
   validate :validate_help_link_items
-  validate :validate_standardization_page_early_access_requirement_templates_are_public
-
   has_many :revision_reasons
-  has_many :standardization_page_early_access_requirement_templates,
-           -> { kept.where(public: true) },
-           class_name: "EarlyAccessRequirementTemplate",
+
+  # Standardization page now uses publicly previewable published template versions
+  has_many :standardization_template_versions,
+           -> { where(publicly_previewable: true, status: :published) },
+           class_name: "TemplateVersion",
            foreign_key: "site_configuration_id"
 
   accepts_nested_attributes_for :revision_reasons, allow_destroy: true
@@ -145,17 +145,6 @@ class SiteConfiguration < ApplicationRecord
             )
           )
         end
-      end
-    end
-  end
-
-  def validate_standardization_page_early_access_requirement_templates_are_public
-    standardization_page_early_access_requirement_templates.each do |template|
-      unless template.public
-        errors.add(
-          :standardization_page_early_access_requirement_templates,
-          "must be public"
-        )
       end
     end
   end

@@ -1,4 +1,5 @@
 import { flow, Instance, toGenerator, types } from "mobx-state-tree"
+import * as R from "ramda"
 import { withEnvironment } from "../lib/with-environment"
 import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
@@ -16,6 +17,28 @@ export const TemplateVersionStoreModel = types
   .extend(withEnvironment())
   .extend(withRootStore())
   .extend(withMerge())
+  .actions((self) => ({
+    __beforeMergeUpdate(templateVersion) {
+      // Merge template version previews into the earlyAccessPreviewStore (same table/shape)
+      if (templateVersion.templateVersionPreviews?.length > 0) {
+        self.rootStore.earlyAccessPreviewStore.mergeUpdateAll(
+          templateVersion.templateVersionPreviews,
+          "earlyAccessPreviewsMap"
+        )
+      }
+
+      // Merge assignee into usersMap if present
+      if (templateVersion.assignee) {
+        self.rootStore.userStore.mergeUpdate(templateVersion.assignee, "usersMap")
+      }
+
+      return R.mergeRight(templateVersion, {
+        templateVersionPreviewIds: (templateVersion.templateVersionPreviews ?? []).map((p: any) => p.id ?? p),
+        templateVersionPreviews: undefined, // Remove the raw objects; IDs are stored in templateVersionPreviewIds
+        assignee: templateVersion.assignee?.id ?? templateVersion.assignee,
+      })
+    },
+  }))
   .views((self) => ({
     get templateVersions() {
       return Array.from(self.templateVersionMap.values())
@@ -29,20 +52,20 @@ export const TemplateVersionStoreModel = types
     getTemplateVersionsByStatus(
       status: ETemplateVersionStatus = ETemplateVersionStatus.published,
       earlyAccess: boolean = false,
-      isPublic: boolean = false
+      isPubliclyPreviewable: boolean = false
     ) {
       return self.templateVersions.filter(
-        (t) => t.status === status && t.public === isPublic && t.earlyAccess === earlyAccess
+        (t) => t.status === status && t.publiclyPreviewable === isPubliclyPreviewable && t.earlyAccess === earlyAccess
       )
     },
     getTemplateVersionsByActivityId: (
       permitTypeId: string,
       status: ETemplateVersionStatus = ETemplateVersionStatus.published,
       earlyAccess: boolean = false,
-      isPublic: boolean = false
+      isPubliclyPreviewable: boolean = false
     ) => {
       return (self.templateVersionsByActivityId.get(permitTypeId) ?? []).filter(
-        (t) => t.status === status && t.public === isPublic && t.earlyAccess === earlyAccess
+        (t) => t.status === status && t.publiclyPreviewable === isPubliclyPreviewable && t.earlyAccess === earlyAccess
       )
     },
   }))
@@ -51,12 +74,12 @@ export const TemplateVersionStoreModel = types
       activityId?: string,
       status?: ETemplateVersionStatus,
       earlyAccess?: boolean,
-      isPublic?: boolean,
+      isPubliclyPreviewable?: boolean,
       permitTypeId?: string
     ) {
       self.isLoading = true
       const response = yield* toGenerator(
-        self.environment.api.fetchTemplateVersions(activityId, status, earlyAccess, isPublic, permitTypeId)
+        self.environment.api.fetchTemplateVersions(activityId, status, earlyAccess, isPubliclyPreviewable, permitTypeId)
       )
 
       if (response.ok) {

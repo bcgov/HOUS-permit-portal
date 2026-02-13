@@ -24,7 +24,7 @@ interface IProps {
   renderButton?: (templateVersion: ITemplateVersion) => React.ReactNode
   status?: ETemplateVersionStatus
   earlyAccess?: boolean
-  isPublic?: boolean
+  isPubliclyPreviewable?: boolean
   statusDisplayOptions?: {
     showStatus?: boolean
     showVersionDate?: boolean
@@ -37,7 +37,7 @@ export const TemplateVersionsList = observer(function TemplateVersionsList({
   status,
   statusDisplayOptions,
   earlyAccess,
-  isPublic,
+  isPubliclyPreviewable,
 }: IProps) {
   const { t } = useTranslation()
   const { permitClassificationStore } = useMst()
@@ -50,7 +50,7 @@ export const TemplateVersionsList = observer(function TemplateVersionsList({
     customErrorMessage: t("errors.fetchBuildingPermits"),
     status,
     earlyAccess,
-    isPublic,
+    isPubliclyPreviewable,
   })
 
   useEffect(() => {

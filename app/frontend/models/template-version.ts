@@ -27,9 +27,19 @@ export const TemplateVersionModel = types
     latestVersionId: types.maybeNull(types.string),
     formJson: types.maybeNull(types.frozen<IFormJson>()),
     isFullyLoaded: types.optional(types.boolean, false),
-    public: types.boolean,
     earlyAccess: types.boolean,
     requirementTemplateId: types.string,
+    // Draft workflow fields
+    changeNotes: types.maybeNull(types.string),
+    changeSignificance: types.maybeNull(types.string),
+    notificationScope: types.maybeNull(types.string),
+    publiclyPreviewable: types.optional(types.boolean, false),
+    hasUnresolvedFeedbacks: types.optional(types.boolean, false),
+    feedbacksCount: types.optional(types.number, 0),
+    // Preview IDs (populated on extended view for drafts).
+    // Stored as string IDs instead of safeReferences to avoid circular dependency:
+    // TemplateVersion -> EarlyAccessPreview -> User -> Jurisdiction -> PermitApplication -> TemplateVersion
+    templateVersionPreviewIds: types.optional(types.array(types.string), []),
   })
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -44,6 +54,16 @@ export const TemplateVersionModel = types
 
     get isDeprecated() {
       return self.status === ETemplateVersionStatus.deprecated
+    },
+
+    get isDraft() {
+      return self.status === ETemplateVersionStatus.draft
+    },
+
+    // Resolve preview IDs to actual EarlyAccessPreview models from the store
+    get templateVersionPreviews() {
+      const previewStore = self.rootStore.earlyAccessPreviewStore
+      return self.templateVersionPreviewIds.map((id) => previewStore.getPreviewById(id)).filter(Boolean)
     },
 
     get nonFirstNationLabel() {
@@ -254,6 +274,38 @@ export const TemplateVersionModel = types
       }
 
       return response.ok
+    }),
+    shareDraft: flow(function* () {
+      if (!self.isDraft) {
+        return false
+      }
+      const response = yield* toGenerator(self.environment.api.shareDraft(self.id))
+      if (response.ok) {
+        // Merge updated template version data (extended view with previews)
+        const tvData = response.data.data
+        tvData.isFullyLoaded = true
+        self.rootStore.templateVersionStore.mergeUpdate(tvData, "templateVersionMap")
+      }
+      return response.ok
+    }),
+    inviteDraftPreviewersByEmail: flow(function* (emails: string[]) {
+      if (!self.isDraft) {
+        return null
+      }
+      const response = yield* toGenerator(self.environment.api.inviteDraftPreviewers(self.id, emails))
+      if (response.ok) {
+        // The response.data.data is the full template version (extended view) with templateVersionPreviews embedded.
+        // Merge the template version (including its previews) back through the store.
+        const responseData = response.data as any
+        const tvData = responseData.data
+        tvData.isFullyLoaded = true
+        self.rootStore.templateVersionStore.mergeUpdate(tvData, "templateVersionMap")
+
+        // Return failed emails from meta
+        const meta = responseData.meta
+        return { failedEmails: meta?.failedEmails ?? [] }
+      }
+      return null
     }),
   }))
   .actions((self) => ({

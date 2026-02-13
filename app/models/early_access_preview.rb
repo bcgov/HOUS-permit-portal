@@ -1,15 +1,25 @@
 class EarlyAccessPreview < ApplicationRecord
+  # The table was renamed from early_access_previews to template_version_previews
+  self.table_name = "template_version_previews"
+
   include Discard::Model
-  belongs_to :early_access_requirement_template
+
+  belongs_to :template_version
   belongs_to :previewer, class_name: "User"
 
   # Ensure expires_at is set before validation
   before_validation :set_expires_at
 
-  validates :early_access_requirement_template_id, presence: true
   validates :previewer_id, presence: true
   validates :expires_at, presence: true
-  delegate :frontend_url, to: :early_access_requirement_template
+
+  def frontend_url
+    if template_version.present?
+      FrontendUrlHelper.frontend_url(
+        "template-versions/#{template_version.id}/preview"
+      )
+    end
+  end
 
   def extend_access
     self.expires_at =

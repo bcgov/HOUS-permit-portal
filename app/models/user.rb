@@ -85,14 +85,18 @@ class User < ApplicationRecord
            dependent: :destroy
 
   has_many :early_access_previews,
+           class_name: "EarlyAccessPreview",
            dependent: :destroy,
            foreign_key: :previewer_id
-  has_many :early_access_requirement_templates, through: :early_access_previews
+  has_many :template_version_previews,
+           dependent: :destroy,
+           foreign_key: :previewer_id
 
   # Shared resources that should not be deleted with the user
   has_many :revision_requests, dependent: :destroy
-  has_many :assigned_requirement_templates,
-           class_name: "RequirementTemplate",
+  # Draft template versions assigned to this user
+  has_many :assigned_template_versions,
+           class_name: "TemplateVersion",
            foreign_key: "assignee_id",
            dependent: :nullify
   has_many :deprecated_template_versions,

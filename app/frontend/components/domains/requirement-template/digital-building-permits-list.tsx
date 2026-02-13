@@ -20,7 +20,7 @@ interface IProps {
   renderButton?: (templateVersion: ITemplateVersion) => React.ReactNode
   status?: ETemplateVersionStatus
   earlyAccess?: boolean
-  isPublic?: boolean
+  isPubliclyPreviewable?: boolean
   statusDisplayOptions?: {
     showStatus?: boolean
     showVersionDate?: boolean
@@ -33,7 +33,7 @@ export const DigitalBuildingPermitsList = observer(function DigitalBuildingPermi
   status,
   statusDisplayOptions,
   earlyAccess,
-  isPublic,
+  isPubliclyPreviewable,
 }: IProps) {
   const { t } = useTranslation()
   const { error, templateVersions, isLoading } = useTemplateVersions({
@@ -41,7 +41,7 @@ export const DigitalBuildingPermitsList = observer(function DigitalBuildingPermi
     customErrorMessage: t("errors.fetchBuildingPermits"),
     status,
     earlyAccess,
-    isPublic,
+    isPubliclyPreviewable,
   })
   const { showStatus = false, showVersionDate = true } = statusDisplayOptions || {}
   const showStatusTag = showStatus || can("requirementTemplate:manage")

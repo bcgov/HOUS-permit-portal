@@ -37,6 +37,7 @@ export interface IEditRequirementActionsProps {
   minDate?: Date
   onScheduleConfirm?: (date: Date) => void
   onForcePublishNow?: () => void
+  onCreateDraft?: () => void
   triggerButtonProps?: Partial<ButtonProps>
   requirementTemplate?: IRequirementTemplate
   onSaveDraft?: () => void
@@ -168,6 +169,26 @@ export const BaseEditRequirementTemplateScreen = observer(function BaseEditRequi
         }
       : undefined
 
+  const onCreateDraft = async () => {
+    await handleSubmit(async (templateFormData) => {
+      const formattedSubmitData = formatSubmitData(templateFormData)
+      const updatedTemplate = await requirementTemplateStore.updateRequirementTemplate(
+        requirementTemplate.id,
+        formattedSubmitData
+      )
+
+      if (!updatedTemplate) return
+
+      const templateWithDraft = await requirementTemplateStore.createDraft(requirementTemplate.id)
+      if (!templateWithDraft) return
+
+      const draftTemplateVersion = templateWithDraft.draftTemplateVersion
+      draftTemplateVersion
+        ? navigate(`/template-versions/${draftTemplateVersion.id}`)
+        : navigate("/requirement-templates")
+    })()
+  }
+
   const hasNoSections = watchedSectionsAttributes.length === 0
 
   const allTemplateSectionBlocks = watchedSectionsAttributes.flatMap(
@@ -209,6 +230,7 @@ export const BaseEditRequirementTemplateScreen = observer(function BaseEditRequi
               onSaveDraft={onSaveDraft}
               onScheduleDate={onSchedule}
               onForcePublishNow={onForcePublishNow}
+              onCreateDraft={onCreateDraft}
               onAddSection={onAddSection}
               requirementTemplate={requirementTemplate}
               hasStepCodeDependencyError={hasStepCodeDependencyError}
@@ -485,7 +507,6 @@ function formFormDefaults(requirementTemplate?: IRequirementTemplate): IRequirem
   return {
     description: requirementTemplate.description,
     nickname: requirementTemplate.nickname,
-    public: requirementTemplate.public,
     permitTypeId: requirementTemplate.permitType?.id,
     activityId: requirementTemplate.activity?.id,
     requirementTemplateSectionsAttributes,

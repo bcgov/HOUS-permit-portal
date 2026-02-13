@@ -77,11 +77,11 @@ const ResourcesScreenLazy = lazy(() =>
   }))
 )
 const ReviewStaffMyJurisdictionAboutPageScreen = lazy(() =>
-  import("../home/review-manager/configuration-management-screen/feature-access-screen/my-jurisdiction-about-page").then(
-    (module) => ({
-      default: module.myJurisdictionAboutPageScreen,
-    })
-  )
+  import(
+    "../home/review-manager/configuration-management-screen/feature-access-screen/my-jurisdiction-about-page"
+  ).then((module) => ({
+    default: module.myJurisdictionAboutPageScreen,
+  }))
 )
 
 const DesignatedReviewerScreen = lazy(() =>
@@ -353,48 +353,6 @@ const ExportTemplateSummaryScreen = lazy(() =>
   }))
 )
 
-const EarlyAccessScreen = lazy(() =>
-  import("../super-admin/early-access/early-access-screen").then((module) => ({
-    default: module.EarlyAccessScreen,
-  }))
-)
-
-const EarlyAccessRequirementTemplatesIndexScreen = lazy(() =>
-  import("../super-admin/early-access/requirement-templates").then((module) => ({
-    default: module.EarlyAccessRequirementTemplatesIndexScreen,
-  }))
-)
-
-const EarlyAccessRequirementTemplateScreen = lazy(() =>
-  import("../super-admin/early-access/requirement-templates/early-access-requirement-template-screen").then(
-    (module) => ({
-      default: module.EarlyAccessRequirementTemplateScreen,
-    })
-  )
-)
-
-const NewEarlyAccessRequirementTemplateScreen = lazy(() =>
-  import("../super-admin/early-access/requirement-templates/new-early-access-requirement-template-screen").then(
-    (module) => ({
-      default: module.NewEarlyAccessRequirementTemplateScreen,
-    })
-  )
-)
-
-const EditEarlyAccessRequirementTemplateScreen = lazy(() =>
-  import("../super-admin/early-access/requirement-templates/edit-early-access-requirement-template-screen").then(
-    (module) => ({
-      default: module.EditEarlyAccessRequirementTemplateScreen,
-    })
-  )
-)
-
-const EarlyAccessRequirementsLibraryScreen = lazy(() =>
-  import("../super-admin/early-access/requirements-library").then((module) => ({
-    default: module.EarlyAccessRequirementsLibraryScreen,
-  }))
-)
-
 const AcceptInvitationScreen = lazy(() =>
   import("../users/accept-invitation-screen").then((module) => ({ default: module.AcceptInvitationScreen }))
 )
@@ -496,14 +454,7 @@ const AppRoutes = observer(() => {
     <>
       <Route path="/jurisdictions/new" element={<NewJurisdictionScreen />} />
       <Route path="/requirements-library" element={<RequirementsLibraryScreen />} />
-      <Route path="/early-access/requirements-library" element={<EarlyAccessRequirementsLibraryScreen />} />
       <Route path="/requirement-templates" element={<RequirementTemplatesScreen />} />
-      <Route path="/early-access/requirement-templates" element={<EarlyAccessRequirementTemplatesIndexScreen />} />
-      <Route path="/early-access/requirement-templates/new" element={<NewEarlyAccessRequirementTemplateScreen />} />
-      <Route
-        path="/early-access/requirement-templates/:requirementTemplateId/edit"
-        element={<EditEarlyAccessRequirementTemplateScreen />}
-      />
       <Route path="/requirement-templates/new" element={<NewRequirementTemplateScreen />} />
       <Route path="/requirement-templates/:requirementTemplateId/edit" element={<EditRequirementTemplateScreen />} />
       <Route path="/template-versions/:templateVersionId" element={<TemplateVersionScreen />} />
@@ -530,7 +481,6 @@ const AppRoutes = observer(() => {
       <Route path="/configuration-management/users/invite" element={<AdminInviteScreen />} />
       <Route path="/reporting" element={<ReportingScreen />} />
       <Route path="/reporting/export-template-summary" element={<ExportTemplateSummaryScreen />} />
-      <Route path="/early-access" element={<EarlyAccessScreen />} />
     </>
   )
 
@@ -833,10 +783,6 @@ const AppRoutes = observer(() => {
         />
         <Route path="/confirmed" element={<EmailConfirmedScreen />} />
         <Route path="/welcome" element={<LandingScreen />} />
-        <Route
-          path="/early-access/requirement-templates/:requirementTemplateId"
-          element={<EarlyAccessRequirementTemplateScreen />}
-        />
         <Route
           path="/jurisdictions"
           element={

@@ -41,11 +41,7 @@ class EarlyAccess::PreviewManagementService
 
     user = find_or_create_user(email)
     early_access_preview =
-      assign_previewer!(
-        previewer: user,
-        early_access_requirement_template: early_access_requirement_template,
-        expires_at: 60.days.from_now
-      )
+      assign_previewer!(previewer: user, expires_at: 60.days.from_now)
     previews << early_access_preview
   end
 
@@ -67,13 +63,19 @@ class EarlyAccess::PreviewManagementService
     { email: email, first_name: first_name, last_name: last_name }
   end
 
-  def assign_previewer!(
-    previewer:,
-    early_access_requirement_template:,
-    expires_at:
-  )
+  def assign_previewer!(previewer:, expires_at:)
+    # Find or create preview linked to the published template version
+    # Reload to ensure the association is fresh (the version may have been created in a callback)
+    template_version =
+      early_access_requirement_template.reload.published_template_version
+
+    unless template_version
+      raise PreviewError, "No published template version found"
+    end
+
     early_access_preview =
-      early_access_requirement_template.early_access_previews.build(
+      TemplateVersionPreview.new(
+        template_version: template_version,
         previewer: previewer,
         expires_at: expires_at
       )

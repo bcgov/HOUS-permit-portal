@@ -10,14 +10,14 @@ export const useTemplateVersions = ({
   customErrorMessage,
   status,
   earlyAccess = false,
-  isPublic = false,
+  isPubliclyPreviewable = false,
 }: {
   activityId?: string
   permitTypeId?: string
   customErrorMessage?: string
   status?: ETemplateVersionStatus
   earlyAccess?: boolean
-  isPublic?: boolean
+  isPubliclyPreviewable?: boolean
 }) => {
   const [error, setError] = useState<Error | undefined>(undefined)
   const { templateVersionStore, sandboxStore } = useMst()
@@ -26,9 +26,14 @@ export const useTemplateVersions = ({
     templateVersionStore
   status ??= currentSandbox?.templateVersionStatusScope || ETemplateVersionStatus.published
 
-  let templateVersions = getTemplateVersionsByStatus(status, earlyAccess, isPublic) as ITemplateVersion[]
+  let templateVersions = getTemplateVersionsByStatus(status, earlyAccess, isPubliclyPreviewable) as ITemplateVersion[]
   if (activityId) {
-    templateVersions = getTemplateVersionsByActivityId(activityId, status, earlyAccess, isPublic) as ITemplateVersion[]
+    templateVersions = getTemplateVersionsByActivityId(
+      activityId,
+      status,
+      earlyAccess,
+      isPubliclyPreviewable
+    ) as ITemplateVersion[]
   } else if (permitTypeId) {
     templateVersions = (templateVersions as ITemplateVersion[]).filter(
       (tv) => tv.denormalizedTemplateJson?.permitType?.id === permitTypeId
@@ -40,7 +45,13 @@ export const useTemplateVersions = ({
     ;(async () => {
       const errorMessage = customErrorMessage ?? t("errors.fetchTemplateVersions")
       try {
-        const isSuccess = await fetchTemplateVersions(activityId, status, earlyAccess, isPublic, permitTypeId)
+        const isSuccess = await fetchTemplateVersions(
+          activityId,
+          status,
+          earlyAccess,
+          isPubliclyPreviewable,
+          permitTypeId
+        )
 
         if (isSuccess) {
           setError(null)

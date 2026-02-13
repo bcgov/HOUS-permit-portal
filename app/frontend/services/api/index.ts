@@ -635,14 +635,14 @@ export class Api {
     activityId?: string,
     status?: ETemplateVersionStatus,
     earlyAccess?: boolean,
-    isPublic?: boolean,
+    isPubliclyPreviewable?: boolean,
     permitTypeId?: string
   ) {
     return this.client.get<ApiResponse<ITemplateVersion[]>>(`/template_versions`, {
       activityId,
       status,
       earlyAccess,
-      public: isPublic,
+      publiclyPreviewable: isPubliclyPreviewable,
       permitTypeId,
     })
   }
@@ -698,6 +698,84 @@ export class Api {
   async unscheduleTemplateVersion(templateId: string) {
     return this.client.post<ApiResponse<ITemplateVersion>>(
       `requirement_templates/template_versions/${templateId}/unschedule`
+    )
+  }
+
+  // ── Draft workflow API methods ──────────────────────────────────────
+
+  async createDraft(templateId: string, params?: { assigneeId?: string }) {
+    return this.client.post<ApiResponse<IRequirementTemplate>>(
+      `/requirement_templates/${templateId}/create_draft`,
+      params
+    )
+  }
+
+  async discardDraft(templateId: string) {
+    return this.client.delete<ApiResponse<IRequirementTemplate>>(`/requirement_templates/${templateId}/discard_draft`)
+  }
+
+  async promoteDraft(
+    templateId: string,
+    params: {
+      versionDate: string
+      changeNotes?: string
+      changeSignificance?: string
+      notificationScope?: string
+      notifiedJurisdictionIds?: string[]
+      promoteBlockIds?: string[]
+      sendAdvanceNotice?: boolean
+    }
+  ) {
+    return this.client.post<ApiResponse<IRequirementTemplate>>(
+      `/requirement_templates/${templateId}/promote_draft`,
+      params
+    )
+  }
+
+  async updateDraftBlock(templateVersionId: string, blockId: string, blockData: Record<string, unknown>) {
+    return this.client.patch<ApiResponse<ITemplateVersion>>(
+      `/template_versions/${templateVersionId}/update_draft_block`,
+      { blockId, blockData }
+    )
+  }
+
+  async refreshDraft(templateVersionId: string) {
+    return this.client.post<ApiResponse<ITemplateVersion>>(`/template_versions/${templateVersionId}/refresh_draft`)
+  }
+
+  async shareDraft(templateVersionId: string) {
+    return this.client.post<ApiResponse<ITemplateVersion>>(`/template_versions/${templateVersionId}/share_draft`)
+  }
+
+  async inviteDraftPreviewers(templateVersionId: string, emails: string[]) {
+    return this.client.post<ApiResponse<ITemplateVersion>>(
+      `/template_versions/${templateVersionId}/invite_draft_previewers`,
+      { emails }
+    )
+  }
+
+  // ── Draft feedback API methods ──────────────────────────────────────
+
+  async fetchDraftFeedbacks(templateVersionId: string) {
+    return this.client.get<ApiResponse<ITemplateVersionFeedback[]>>(`/template_versions/${templateVersionId}/feedbacks`)
+  }
+
+  async createDraftFeedback(templateVersionId: string, params: { body: string; sentiment?: string }) {
+    return this.client.post<ApiResponse<ITemplateVersionFeedback>>(
+      `/template_versions/${templateVersionId}/feedbacks`,
+      params
+    )
+  }
+
+  async resolveDraftFeedback(templateVersionId: string, feedbackId: string) {
+    return this.client.post<ApiResponse<ITemplateVersionFeedback>>(
+      `/template_versions/${templateVersionId}/feedbacks/${feedbackId}/resolve`
+    )
+  }
+
+  async unresolveDraftFeedback(templateVersionId: string, feedbackId: string) {
+    return this.client.post<ApiResponse<ITemplateVersionFeedback>>(
+      `/template_versions/${templateVersionId}/feedbacks/${feedbackId}/unresolve`
     )
   }
 

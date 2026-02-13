@@ -53,6 +53,10 @@ export const RequirementTemplateStoreModel = types
         templateVersions.push(requirementTemplate.publishedTemplateVersion)
       }
 
+      if (requirementTemplate.draftTemplateVersion) {
+        templateVersions.push(requirementTemplate.draftTemplateVersion)
+      }
+
       if (requirementTemplate.scheduledTemplateVersions?.length > 0) {
         templateVersions.push(...requirementTemplate.scheduledTemplateVersions)
       }
@@ -63,11 +67,6 @@ export const RequirementTemplateStoreModel = types
 
       self.rootStore.templateVersionStore.mergeUpdateAll(templateVersions, "templateVersionMap")
       if (requirementTemplate.assignee) self.rootStore.userStore.mergeUpdate(requirementTemplate.assignee, "usersMap")
-
-      self.rootStore.earlyAccessPreviewStore.mergeUpdateAll(
-        requirementTemplate.earlyAccessPreviews,
-        "earlyAccessPreviewsMap"
-      )
 
       return R.mergeRight(requirementTemplate, {
         assignee: requirementTemplate.assignee?.id,
@@ -200,6 +199,59 @@ export const RequirementTemplateStoreModel = types
         self.requirementTemplateMap.put(response.data)
         return response.data
       }
+    }),
+
+    // Draft workflow actions
+    createDraft: flow(function* (templateId: string, assigneeId?: string) {
+      const response = yield* toGenerator(
+        self.environment.api.createDraft(templateId, assigneeId ? { assigneeId } : undefined)
+      )
+
+      if (response.ok) {
+        const templateData = response.data.data
+        templateData.isFullyLoaded = true
+        self.mergeUpdate(templateData, "requirementTemplateMap")
+        return self.requirementTemplateMap.get(templateData.id) as IRequirementTemplate
+      }
+
+      return false
+    }),
+
+    discardDraft: flow(function* (templateId: string) {
+      const response = yield* toGenerator(self.environment.api.discardDraft(templateId))
+
+      if (response.ok) {
+        const templateData = response.data.data
+        templateData.isFullyLoaded = true
+        self.mergeUpdate(templateData, "requirementTemplateMap")
+        return self.requirementTemplateMap.get(templateData.id) as IRequirementTemplate
+      }
+
+      return false
+    }),
+
+    promoteDraft: flow(function* (
+      templateId: string,
+      params: {
+        versionDate: string
+        changeNotes?: string
+        changeSignificance?: string
+        notificationScope?: string
+        notifiedJurisdictionIds?: string[]
+        promoteBlockIds?: string[]
+        sendAdvanceNotice?: boolean
+      }
+    ) {
+      const response = yield* toGenerator(self.environment.api.promoteDraft(templateId, params))
+
+      if (response.ok) {
+        const templateData = response.data.data
+        templateData.isFullyLoaded = true
+        self.mergeUpdate(templateData, "requirementTemplateMap")
+        return self.requirementTemplateMap.get(templateData.id) as IRequirementTemplate
+      }
+
+      return false
     }),
   }))
 

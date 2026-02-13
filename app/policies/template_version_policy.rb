@@ -49,6 +49,12 @@ class TemplateVersionPolicy < ApplicationPolicy
     show?
   end
 
+  # Draft workflow mutations (share, invite previewers, refresh, update block)
+  # should only be available to super admins and only on draft versions.
+  def update?
+    user&.super_admin? && record&.draft?
+  end
+
   class Scope < Scope
     def resolve
       template_versions =
