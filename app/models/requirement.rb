@@ -321,7 +321,7 @@ class Requirement < ApplicationRecord
         end
       )
 
-    # this happens when the label is "Architectural Drawing File" as the generated requirement code
+    # this happens when the label is "Drawing File" as the generated requirement code
     # will clash with the step code package file requirement code. This needs to be handled only
     # when the requirement code is generated from the label, because if it was intended to be used
     # as a step code package file requirement code, it would have been set as such from the front-end.

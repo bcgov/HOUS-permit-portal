@@ -1605,21 +1605,6 @@ Thank you,
                 label: "Pre construction Hot2000 model details, Hot2000 report",
               },
             },
-            architecturalDrawing: {
-              dependencies: {
-                method: {
-                  label: "Which method do you want to use for the design drawing?",
-                  tool: "Use the design drawing tool",
-                  file: "Upload a file",
-                },
-                tool: {
-                  label: "Open the design drawing tool",
-                },
-                file: {
-                  label: "Design drawing file",
-                },
-              },
-            },
           },
           fields: {
             name: "Name",
@@ -1655,12 +1640,12 @@ Thank you,
             phone: "Phone",
             email: "E-mail",
             energyStepCode: "Energy Step Code Part 9",
-            stepCodePackageFile: "Design package file for energy step code",
+            stepCodePackageFile: "Design drawing file for energy step code",
             pidInfo: "Pid Info",
             energyStepCodePart3: "Energy Step Code Part 3",
             energyStepCodePart9: "Energy Step Code Part 9",
             multiplySumGrid: "Grid (A × B with Total)",
-            architecturalDrawing: "Design drawing",
+            architecturalDrawing: "Design drawing package",
           },
           multiplySumGrid: {
             title: "Grid (A × B with Total)",
@@ -3762,17 +3747,17 @@ Thank you,
             emptyTemplateSectionText: "Start by clicking the Add Section button",
             stepCodeWarnings: {
               energyStepCodeRecommended:
-                'Warning:"Design package energy step code file" is present in the template, but there is no "Energy step code" requirement.',
+                'Warning:"Design drawing energy step code file" is present in the template, but there is no "Energy step code" requirement.',
 
               duplicateStepCodePackage:
-                'Warning: Multiple "Design package energy step code fields" found. Please ensure there is only one "Design package field".',
+                'Warning: Multiple "Design drawing energy step code fields" found. Please ensure there is only one "Design drawing field".',
             },
             stepCodeErrors: {
               duplicateEnergyStepCode:
                 'Warning: Multiple "Energy step code" requirements found. Please ensure there is only one "Energy step code" in the template.',
-              stepCodePackageRequired: 'Warning: "Energy step code" is required to have the "Design package field".',
+              stepCodePackageRequired: 'Warning: "Energy step code" is required to have the "Design drawing field".',
               duplicateStepCodePackage:
-                'Multiple "Design package fields" found. Please ensure there is only one "Design package field" when there is an "Energy step code" requirement',
+                'Multiple "Design drawing fields" found. Please ensure there is only one "Design drawing field" when there is an "Energy step code" requirement',
             },
             goToTop: "Go to top",
             collapseAll: "Collapse all",
