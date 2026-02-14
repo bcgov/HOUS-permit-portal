@@ -207,13 +207,15 @@ class PermitProject < ApplicationRecord
   def fetch_coordinates
     return if pid.blank?
 
-    coords = Wrappers::LtsaParcelMapBc.new.get_coordinates_by_pid(pid)
-    if coords
-      self.longitude = coords.first
-      self.latitude = coords.last
+    result = Wrappers::LtsaParcelMapBc.new.get_coordinates_by_pid(pid)
+    if result
+      self.longitude = result[:centroid].first
+      self.latitude = result[:centroid].last
+      self.parcel_geometry = { rings: result[:rings] }
     else
       self.latitude = nil
       self.longitude = nil
+      self.parcel_geometry = nil
     end
   rescue => e
     Rails.logger.warn(
@@ -221,6 +223,7 @@ class PermitProject < ApplicationRecord
     )
     self.latitude = nil
     self.longitude = nil
+    self.parcel_geometry = nil
   end
 
   def set_default_title
