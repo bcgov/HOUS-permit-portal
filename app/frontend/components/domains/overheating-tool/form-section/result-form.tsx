@@ -86,20 +86,13 @@ const ReportReadyPanel: React.FC<IReportReadyPanelProps> = observer(
                 variant="link"
                 size="sm"
               >
-                {t("singleZoneCoolingHeatingTool.ready.downloadPdf")}
+                {uploadedDocument.file.metadata.filename}
               </FileDownloadButton>
-            ) : (
+            ) : uploadedName !== "—" ? (
               <Text>{uploadedName}</Text>
-            )}
+            ) : null}
           </GridItem>
         </Grid>
-
-        <Heading as="h3" size="md" mb={3}>
-          {t("singleZoneCoolingHeatingTool.ready.whatNow")}
-        </Heading>
-        <Text color="gray.700" mb={6}>
-          {t("singleZoneCoolingHeatingTool.ready.subtitle")}
-        </Text>
 
         <Flex gap={4} align="center" mb={4}>
           <Button variant="primary" onClick={onExplore}>
@@ -261,16 +254,6 @@ export const ResultForm: React.FC = observer(() => {
         </Box>
       ) : !isReady ? (
         <Box bg="theme.blueLight" p={8} borderRadius="lg">
-          <Flex align="center" gap={3} mb={4}>
-            <Icon as={Hourglass} boxSize={7} color="theme.blueAlt" />
-            <Heading as="h2" size="lg" lineHeight="shorter" color="theme.blueAlt" m={0}>
-              {t("singleZoneCoolingHeatingTool.result.preparingTitle")}
-            </Heading>
-          </Flex>
-          <Text fontSize="lg" color="theme.blueAlt" mb={6}>
-            {t("singleZoneCoolingHeatingTool.result.preparingSubtitle")}
-          </Text>
-
           <Heading as="h3" size="md" mb={3} color="theme.blueAlt">
             {t("singleZoneCoolingHeatingTool.result.whatHappensNext")}
           </Heading>

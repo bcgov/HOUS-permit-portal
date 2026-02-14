@@ -6,12 +6,14 @@ class CreateOverheatingToolsAndDocuments < ActiveRecord::Migration[7.2]
       t.string :form_type
       t.jsonb :pdf_file_data
       t.integer :pdf_generation_status, default: 0, null: false
+      t.string :rollup_status, null: false, default: "new_draft"
       t.datetime :discarded_at
 
       t.timestamps
     end
 
     add_index :overheating_tools, :discarded_at
+    add_index :overheating_tools, :rollup_status
 
     create_table :overheating_documents, id: :uuid do |t|
       t.references :overheating_tool,

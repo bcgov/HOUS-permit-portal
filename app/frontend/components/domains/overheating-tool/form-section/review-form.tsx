@@ -71,7 +71,7 @@ export const ReviewForm = observer(function ReviewForm() {
 
   const onSubmit = async (data: any) => {
     const { overheatingDocumentsAttributes, ...formData } = data
-    const result = await overheatingToolStore.createOverheatingTool({
+    const result = await overheatingToolStore.saveOverheatingToolDraft({
       formJson: formData,
       formType: "single_zone_cooling_heating_tool",
       overheatingDocumentsAttributes,

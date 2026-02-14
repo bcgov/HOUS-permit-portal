@@ -13,6 +13,7 @@ import {
 import React from "react"
 import { useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
+import { useMst } from "../../../setup/root"
 import AddressSearchSelect, { ParsedAddress } from "../../shared/address/address-search-select"
 
 export interface BuildingLocationFieldsProps {
@@ -33,7 +34,8 @@ export const BuildingLocationFields: React.FC<BuildingLocationFieldsProps> = ({
 }) => {
   const { t } = useTranslation() as any
   const prefix = "singleZoneCoolingHeatingTool"
-  const { setValue, clearErrors, register, formState } = useFormContext()
+  const { overheatingToolStore } = useMst()
+  const { setValue, clearErrors, register, formState, getValues } = useFormContext()
   const { errors } = formState as any
 
   const field = (key: string) => `${namePrefix}.${key}`
@@ -85,6 +87,17 @@ export const BuildingLocationFields: React.FC<BuildingLocationFieldsProps> = ({
               {...(register as any)("projectNumber", {
                 required: t("ui.isRequired", { field: projectNumberLabel }) as string,
               })}
+              onBlur={async () => {
+                const values = getValues()
+                const projectNumber = values?.projectNumber
+                if (!projectNumber || String(projectNumber).trim() === "") return
+                const { overheatingDocumentsAttributes, ...formJson } = values
+                await overheatingToolStore.saveOverheatingToolDraft({
+                  formJson,
+                  formType: "single_zone_cooling_heating_tool",
+                  overheatingDocumentsAttributes,
+                })
+              }}
             />
             <FormErrorMessage>{(errors as any)?.projectNumber?.message as any}</FormErrorMessage>
           </FormControl>

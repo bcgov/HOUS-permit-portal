@@ -6,13 +6,10 @@ import { useNavigate } from "react-router-dom"
 export const OverheatingNavLinks = function OverheatingNavLinks() {
   const navigate = useNavigate()
   const { t } = useTranslation() as any
-  const handleBack = async () => {
-    navigate(-1)
-  }
 
   return (
     <HStack>
-      <Button variant="secondary" onClick={handleBack}>
+      <Button variant="secondary" onClick={() => navigate("/overheating")}>
         {t("ui.back")}
       </Button>
     </HStack>

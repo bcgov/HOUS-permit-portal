@@ -46,10 +46,16 @@ export const OverheatingToolStoreModel = types
     },
   }))
   .actions((self) => ({
+    afterCreate() {
+      if (self.showArchived == null) {
+        self.setShowArchived(false)
+      }
+    },
     setOverheatingToolFilters(queryParams: URLSearchParams) {
       const statusFilter = queryParams.get("statusFilter")
       if (statusFilter) {
         self.statusFilter = statusFilter as any
+        self.setShowArchived(statusFilter === EOverheatingToolStatusFilter.archived)
       }
     },
     searchOverheatingTools: flow(function* (opts?: { reset?: boolean; page?: number; countPerPage?: number }) {
@@ -66,7 +72,10 @@ export const OverheatingToolStoreModel = types
             page: opts?.page ?? self.currentPage,
             perPage: opts?.countPerPage ?? self.countPerPage,
             filters: {
-              statusFilter: self.statusFilter,
+              statusFilter:
+                self.showArchived === true
+                  ? EOverheatingToolStatusFilter.archived
+                  : EOverheatingToolStatusFilter.unarchived,
             },
           })
         )
@@ -177,12 +186,77 @@ export const OverheatingToolStoreModel = types
         self.isLoading = false
       }
     }),
+    restoreOverheatingTool: flow(function* (id: string) {
+      self.isLoading = true
+      try {
+        const response = yield* toGenerator(self.environment.api.restoreOverheatingTool(id))
+        if (response.ok) {
+          const restored = response.data.data
+          if (restored && restored.id) {
+            self.overheatingToolsMap.put(restored)
+          }
+          return { success: true, data: restored }
+        } else {
+          return { success: false, error: response.data }
+        }
+      } catch (error) {
+        return { success: false, error: (error as any).message }
+      } finally {
+        self.isLoading = false
+      }
+    }),
+    updateOverheatingTool: flow(function* (
+      id: string,
+      formData: {
+        formJson: IOverheatingToolJson
+        formType: string
+        overheatingDocumentsAttributes?: Partial<IOverheatingDocument>[]
+      }
+    ) {
+      self.isLoading = true
+      try {
+        const response = yield* toGenerator(self.environment.api.updateOverheatingTool(id, formData))
+        if (response.ok) {
+          const updated = response.data.data
+          if (updated && updated.id) {
+            self.overheatingToolsMap.put(updated)
+          }
+          return { success: true, data: updated }
+        } else {
+          return { success: false, error: response.data }
+        }
+      } catch (error) {
+        return { success: false, error: (error as any).message }
+      } finally {
+        self.isLoading = false
+      }
+    }),
+    saveOverheatingToolDraft: flow(function* (formData: {
+      formJson: IOverheatingToolJson
+      formType: string
+      overheatingDocumentsAttributes?: Partial<IOverheatingDocument>[]
+    }) {
+      const current = self.lastCreatedTool
+      if (current?.id) {
+        return yield (self as any).updateOverheatingTool(current.id, formData)
+      }
+      return yield (self as any).createOverheatingTool(formData)
+    }),
+    setLastCreatedTool(id: string) {
+      self.lastCreatedTool = id as any
+    },
     setOverheatingTool(overheatingTool: IOverheatingTool) {
       self.overheatingToolsMap.put(overheatingTool)
     },
     setStatusFilter(filter: EOverheatingToolStatusFilter) {
       self.statusFilter = filter
+      self.setShowArchived(filter === EOverheatingToolStatusFilter.archived)
     },
+    toggleShowArchived: flow(function* () {
+      const next = !self.showArchived
+      self.setShowArchived(next)
+      self.statusFilter = next ? EOverheatingToolStatusFilter.archived : EOverheatingToolStatusFilter.unarchived
+    }),
   }))
 
 export interface IOverheatingToolStore extends Instance<typeof OverheatingToolStoreModel> {}

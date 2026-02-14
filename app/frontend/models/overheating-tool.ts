@@ -1,5 +1,5 @@
 import { Instance, types } from "mobx-state-tree"
-import { EPdfGenerationStatus } from "../types/enums"
+import { EPdfGenerationStatus, EPermitProjectRollupStatus } from "../types/enums"
 import { IOverheatingDocument, IOverheatingToolJson } from "../types/types"
 
 export const OverheatingToolModel = types
@@ -14,6 +14,10 @@ export const OverheatingToolModel = types
     pdfGenerationStatus: types.optional(
       types.enumeration(Object.values(EPdfGenerationStatus)),
       EPdfGenerationStatus.notStarted
+    ),
+    rollupStatus: types.optional(
+      types.enumeration([EPermitProjectRollupStatus.newDraft, EPermitProjectRollupStatus.newlySubmitted]),
+      EPermitProjectRollupStatus.newDraft
     ),
     discardedAt: types.maybeNull(types.Date),
   })

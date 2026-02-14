@@ -989,4 +989,25 @@ export class Api {
   async archiveOverheatingTool(id: string) {
     return this.client.post<IApiResponse<IOverheatingTool, {}>>(`/overheating/${id}/archive`)
   }
+
+  async restoreOverheatingTool(id: string) {
+    return this.client.post<IApiResponse<IOverheatingTool, {}>>(`/overheating/${id}/restore`)
+  }
+
+  async updateOverheatingTool(
+    id: string,
+    formData: {
+      formJson: IOverheatingToolJson
+      formType: string
+      overheatingDocumentsAttributes?: Partial<IOverheatingDocument>[]
+    }
+  ) {
+    return this.client.patch<IApiResponse<IOverheatingTool, {}>>(`/overheating/${id}`, {
+      overheatingTool: {
+        formJson: formData.formJson,
+        formType: formData.formType,
+        overheatingDocumentsAttributes: formData.overheatingDocumentsAttributes,
+      },
+    })
+  }
 }

@@ -1,36 +1,17 @@
-import {
-  Box,
-  Button,
-  Container,
-  Divider,
-  Flex,
-  FormControl,
-  GridItem,
-  Heading,
-  Popover,
-  PopoverArrow,
-  PopoverBody,
-  PopoverContent,
-  PopoverTrigger,
-  Radio,
-  RadioGroup,
-  Stack,
-  Text,
-  useDisclosure,
-  VStack,
-} from "@chakra-ui/react"
+import { Box, Container, Divider, Flex, FormControl, GridItem, Heading, Text, VStack } from "@chakra-ui/react"
 import { CaretRight } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
-import React, { useEffect, useState } from "react"
+import React, { useEffect } from "react"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../setup/root"
-import { EFlashMessageStatus } from "../../../types/enums"
+import { EFlashMessageStatus, EOverheatingToolStatusFilter } from "../../../types/enums"
 import { CustomMessageBox } from "../../shared/base/custom-message-box"
 import { Paginator } from "../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../shared/base/inputs/per-page-select"
 import { ModelSearchInput } from "../../shared/base/model-search-input"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
+import { ToggleArchivedButton } from "../../shared/buttons/toggle-archived-button"
 import { SearchGrid } from "../../shared/grid/search-grid"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { GridHeaders, OVERHEATING_GRID_TEMPLATE_COLUMNS } from "./grid-header"
@@ -39,8 +20,6 @@ import { OverheatingToolGridRow } from "./overheating-tool-grid-row"
 export const OverheatingTabPanelContent = observer(() => {
   const { t } = useTranslation() as any
   const { overheatingToolStore } = useMst()
-  const [statusChoice, setStatusChoice] = useState<string>(overheatingToolStore.statusFilter)
-  const { isOpen, onOpen, onClose } = useDisclosure()
   const {
     isLoading,
     tableOverheatingTools,
@@ -60,7 +39,23 @@ export const OverheatingTabPanelContent = observer(() => {
   }, [])
 
   const archiveTool = async (id: string) => {
-    await overheatingToolStore.archiveOverheatingTool(id)
+    const archived = await overheatingToolStore.archiveOverheatingTool(id)
+    if (archived) {
+      search({ page: currentPage })
+    }
+  }
+
+  const restoreTool = async (id: string) => {
+    const restored = await overheatingToolStore.restoreOverheatingTool(id)
+    if (restored) {
+      if (overheatingToolStore.statusFilter === EOverheatingToolStatusFilter.archived) {
+        const tool = overheatingToolStore.overheatingToolsMap.get(id)
+        if (tool) {
+          overheatingToolStore.tableOverheatingTools.remove(tool)
+        }
+      }
+      search({ page: currentPage })
+    }
   }
 
   return (
@@ -79,7 +74,7 @@ export const OverheatingTabPanelContent = observer(() => {
                 {t("singleZoneCoolingHeatingTool.createReportDescriptionPrefix")}{" "}
                 {t("singleZoneCoolingHeatingTool.createReportDescriptionLink")}
               </Text>
-              <RouterLinkButton rightIcon={<CaretRight />} to="/overheating-tool/start">
+              <RouterLinkButton rightIcon={<CaretRight />} to="/overheating-tool/start?new=true">
                 {t("stepCode.createButton")}
               </RouterLinkButton>
               <Divider borderColor="greys.grey03" my={4} />
@@ -90,46 +85,6 @@ export const OverheatingTabPanelContent = observer(() => {
               {t("singleZoneCoolingHeatingTool.pickUpWhereYouLeftOff")}
             </Heading>
             <Flex gap={4} w="full" align="center">
-              <FormControl maxW="240px">
-                <Popover isOpen={isOpen} onClose={onClose} placement="bottom-start">
-                  <PopoverTrigger>
-                    <Button variant="outline" onClick={onOpen} w="full">
-                      {statusChoice === "archived"
-                        ? (t as any)("singleZoneCoolingHeatingTool.archived") || "Archived"
-                        : (t as any)("singleZoneCoolingHeatingTool.active") || "Active"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent w="240px">
-                    <PopoverArrow />
-                    <PopoverBody p={0}>
-                      <Box p={4}>
-                        <RadioGroup value={statusChoice} onChange={(v) => setStatusChoice(v as string)}>
-                          <Stack direction="column" spacing={6}>
-                            <Radio value="unarchived">
-                              {(t as any)("singleZoneCoolingHeatingTool.active") || "Active"}
-                            </Radio>
-                            <Radio value="archived">
-                              {(t as any)("singleZoneCoolingHeatingTool.archived") || "Archived"}
-                            </Radio>
-                          </Stack>
-                        </RadioGroup>
-                        <Button
-                          mt={6}
-                          w="full"
-                          variant="primary"
-                          onClick={() => {
-                            overheatingToolStore.setStatusFilter(statusChoice as any)
-                            search({ page: 1 })
-                            onClose()
-                          }}
-                        >
-                          {(t as any)("ui.apply") || "Apply"}
-                        </Button>
-                      </Box>
-                    </PopoverBody>
-                  </PopoverContent>
-                </Popover>
-              </FormControl>
               <FormControl w="full">
                 <ModelSearchInput
                   searchModel={overheatingToolStore as any}
@@ -162,8 +117,14 @@ export const OverheatingTabPanelContent = observer(() => {
                   const pn = tool.formJson?.projectNumber
                   return pn !== undefined && pn !== null && String(pn).toString().trim() !== ""
                 })
+                ?.filter((tool) => tool.isDiscarded === overheatingToolStore.showArchived)
                 .map((tool) => (
-                  <OverheatingToolGridRow onArchiveTool={archiveTool} key={tool.id} overheatingTool={tool} />
+                  <OverheatingToolGridRow
+                    onArchiveTool={archiveTool}
+                    onRestoreTool={restoreTool}
+                    key={tool.id}
+                    overheatingTool={tool}
+                  />
                 ))
             )}
           </SearchGrid>
@@ -181,6 +142,9 @@ export const OverheatingTabPanelContent = observer(() => {
               handlePageChange={handlePageChange}
               showLessItems={true}
             />
+          </Flex>
+          <Flex mt={4}>
+            <ToggleArchivedButton searchModel={overheatingToolStore as any} />
           </Flex>
         </VStack>
       </Container>
