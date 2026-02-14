@@ -5,11 +5,13 @@ import { useTranslation } from "react-i18next"
 import { DatePickerFormControl, NumberFormControl, TextFormControl } from "../../shared/form/input-form-control"
 
 import { useSectionCompletion } from "../../../hooks/use-section-completion"
+import { useMst } from "../../../setup/root"
 
 export const RoomByRoomForm = () => {
   const { t } = useTranslation() as any
   const prefix = "singleZoneCoolingHeatingTool.roomByRoom"
-  const { trigger, clearErrors, watch } = useFormContext()
+  const { overheatingToolStore } = useMst()
+  const { trigger, clearErrors, watch, getValues } = useFormContext()
   const toast = useToast()
 
   const validate = React.useCallback((values: any) => {
@@ -121,6 +123,13 @@ export const RoomByRoomForm = () => {
                 })
                 return
               }
+              const values = getValues()
+              const { overheatingDocumentsAttributes, ...formJson } = values
+              await overheatingToolStore.saveOverheatingToolDraft({
+                formJson,
+                formType: "single_zone_cooling_heating_tool",
+                overheatingDocumentsAttributes,
+              })
               window.location.hash = "#uploads"
             }}
             variant="primary"

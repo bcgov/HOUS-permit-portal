@@ -31,6 +31,10 @@ class OverheatingToolPolicy < ApplicationPolicy
     user.present? && record.user_id == user.id
   end
 
+  def restore?
+    user.present? && record.user_id == user.id
+  end
+
   class Scope < Scope
     def resolve
       scope.where(user_id: user.id)

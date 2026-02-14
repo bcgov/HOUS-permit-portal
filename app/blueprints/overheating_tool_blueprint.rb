@@ -1,7 +1,7 @@
 class OverheatingToolBlueprint < Blueprinter::Base
   identifier :id
 
-  fields :form_type, :created_at, :discarded_at
+  fields :form_type, :created_at, :updated_at, :discarded_at, :rollup_status
 
   field :pdf_generation_status do |tool, _options|
     tool.pdf_generation_status

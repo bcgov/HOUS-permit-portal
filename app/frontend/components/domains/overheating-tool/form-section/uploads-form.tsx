@@ -1,7 +1,6 @@
 import {
   Box,
   Button,
-  Divider,
   Flex,
   Heading,
   Icon,
@@ -24,6 +23,7 @@ import React, { useEffect, useState } from "react"
 import { useFieldArray, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import useUppyS3 from "../../../../hooks/use-uppy-s3"
+import { useMst } from "../../../../setup/root"
 import { EFileUploadAttachmentType } from "../../../../types/enums"
 import { formatBytes } from "../../../../utils/utility-functions"
 import { FileDownloadButton } from "../../../shared/base/file-download-button"
@@ -32,7 +32,8 @@ import { useSectionCompletion } from "../../../../hooks/use-section-completion"
 
 export const UploadsForm: React.FC = () => {
   const { t } = useTranslation() as any
-  const { watch, control } = useFormContext()
+  const { overheatingToolStore } = useMst()
+  const { watch, control, getValues } = useFormContext()
   const [isUploading, setIsUploading] = useState(false)
 
   const validate = React.useCallback((values: any) => {
@@ -117,7 +118,7 @@ export const UploadsForm: React.FC = () => {
       </Box>
 
       {overheatingDocumentsAttributes && overheatingDocumentsAttributes.length > 0 && (
-        <TableContainer mb={6}>
+        <TableContainer mb={6} width="70%">
           <Table variant="simple" size="sm">
             <Thead bg="gray.50">
               <Tr>
@@ -162,8 +163,59 @@ export const UploadsForm: React.FC = () => {
         </TableContainer>
       )}
 
-      <Box borderWidth="2px" borderStyle="dashed" borderRadius="md" borderColor="gray.300">
-        <Dashboard uppy={uppy} height={100} width="100%" proudlyDisplayPoweredByUppy={false} />
+      <Box
+        position="relative"
+        mb={6}
+        width="70%"
+        sx={{
+          ".uppy-Dashboard-inner": {
+            background: "#f3f8ff",
+            borderRadius: "12px",
+            boxShadow: "none",
+          },
+          ".uppy-Dashboard-progressindicators": {
+            display: "none",
+          },
+          ".uppy-Dashboard-AddFiles": {
+            padding: "24px 16px",
+          },
+          ".chakra-table__container, .chakra-table": {
+            maxWidth: "70%",
+          },
+          ".uppy-size--md .uppy-Dashboard-AddFiles-title, .uppy-size--lg .uppy-Dashboard-AddFiles-title, .uppy-Dashboard-AddFiles-title":
+            {
+              fontSize: "16px",
+              color: "#1A5A96",
+              maxWidth: "500px",
+              fontWeight: 400,
+            },
+          ".uppy-size--md .uppy-Dashboard-browse, .uppy-size--lg .uppy-Dashboard-browse, .uppy-Dashboard-browse": {
+            color: "#1A5A96",
+            textDecoration: "underline",
+            fontWeight: 300,
+          },
+          ".uppy-Dashboard-AddFiles-info": {
+            display: "none",
+          },
+        }}
+      >
+        <Dashboard
+          uppy={uppy}
+          width="100%"
+          height={116}
+          proudlyDisplayPoweredByUppy={false}
+          hideUploadButton
+          showProgressDetails={false}
+          locale={
+            {
+              strings: {
+                dropPasteFiles: t("singleZoneCoolingHeatingTool.uploads.dragAndDrop", {
+                  browseFiles: t("singleZoneCoolingHeatingTool.uploads.browseDevice"),
+                }),
+              },
+            } as any
+          }
+        />
       </Box>
       {uploadedUrl ? (
         <Text mt={2} fontSize="sm" color="green.600">
@@ -176,20 +228,18 @@ export const UploadsForm: React.FC = () => {
         </Text>
       ) : null}
 
-      <Divider my={8} />
-      <Heading as="h3" size="md" mb={2}>
-        {t("singleZoneCoolingHeatingTool.uploads.storageTitle") || "How we protect and store your drawings"}
-      </Heading>
-      <Text mb={6}>
-        {t("singleZoneCoolingHeatingTool.uploads.storageDescription") ||
-          "Our service partners use industry‑standard security to protect your drawings. Your drawings may be kept for a limited time, then deleted."}
-      </Text>
-
       <Flex justify="flex-start">
         <Button
           variant="primary"
           onClick={() => {
             if (isUploading) return
+            const values = getValues()
+            const { overheatingDocumentsAttributes, ...formJson } = values
+            overheatingToolStore.saveOverheatingToolDraft({
+              formJson,
+              formType: "single_zone_cooling_heating_tool",
+              overheatingDocumentsAttributes,
+            })
             window.location.hash = "#review"
           }}
           isDisabled={isUploading}

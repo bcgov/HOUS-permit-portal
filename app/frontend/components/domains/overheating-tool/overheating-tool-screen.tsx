@@ -29,7 +29,7 @@ export const OverheatingToolScreen = observer(() => {
           </Heading>
           <Text fontSize="lg" color="semantic.info">
             {t("singleZoneCoolingHeatingTool.beforeYouStartDescription")}{" "}
-            <Link href="https://hvacdc.ca/f280-12software/" target="_blank" color="blue.600" textDecoration="underline">
+            <Link href="https://hvacdc.ca/software/" target="_blank" color="blue.600" textDecoration="underline">
               {t("singleZoneCoolingHeatingTool.beforeYouStartDescriptionLink")}
             </Link>
           </Text>
@@ -40,7 +40,15 @@ export const OverheatingToolScreen = observer(() => {
         </Flex>
       </Flex>
 
-      <Button size="lg" variant="primary" mb={10} fontWeight="bold" onClick={() => navigate("/overheating-tool/start")}>
+      <Button
+        size="lg"
+        variant="primary"
+        mb={10}
+        fontWeight="bold"
+        onClick={() => {
+          navigate("/overheating-tool/start?new=true")
+        }}
+      >
         {loggedIn ? t(`singleZoneCoolingHeatingTool.start`) : t(`singleZoneCoolingHeatingTool.loginToStart`)}
       </Button>
 

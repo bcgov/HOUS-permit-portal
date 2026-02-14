@@ -20,7 +20,8 @@ import {
 import { AddressBook } from "@phosphor-icons/react"
 import React from "react"
 import { useFormContext } from "react-hook-form"
-import { useTranslation } from "react-i18next"
+import { Trans, useTranslation } from "react-i18next"
+import { useMst } from "../../../setup/root"
 import { IContact, IOption } from "../../../types/types"
 import { ContactModal } from "../../shared/contact/contact-modal"
 import { DatePickerFormControl, TextFormControl } from "../../shared/form/input-form-control"
@@ -31,7 +32,8 @@ import { useSectionCompletion } from "../../../hooks/use-section-completion"
 export const CoverSheetForm = () => {
   const { t } = useTranslation() as any
   const prefix = "singleZoneCoolingHeatingTool.coverSheet"
-  const { setValue, watch, register, formState } = useFormContext()
+  const { overheatingToolStore } = useMst()
+  const { setValue, watch, register, formState, getValues } = useFormContext()
   const { errors } = formState as any
   const { isOpen: isContactsOpen, onOpen: onContactsOpen, onClose: onContactsClose } = useDisclosure()
 
@@ -78,7 +80,14 @@ export const CoverSheetForm = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [firstName, lastName])
 
-  const goToInputSummary = () => {
+  const goToInputSummary = async () => {
+    const values = getValues()
+    const { overheatingDocumentsAttributes, ...formJson } = values
+    await overheatingToolStore.saveOverheatingToolDraft({
+      formJson,
+      formType: "single_zone_cooling_heating_tool",
+      overheatingDocumentsAttributes,
+    })
     window.location.hash = "#input-summary"
   }
 
@@ -142,9 +151,9 @@ export const CoverSheetForm = () => {
         <Heading as="h2" size="lg" mb={6} variant="yellowline">
           {t(`${prefix}.title`)}
         </Heading>
-        <Text as="p" mb={2}>
-          {t(`${prefix}.helpText`)}
-        </Text>
+        <Trans i18nKey={`${prefix}.helpText`} as="p" mb={2}>
+          <span>{t(`${prefix}.helpText`)}</span>
+        </Trans>
       </Box>
       <Divider my={10} />
       <BuildingLocationFields i18nPrefix="singleZoneCoolingHeatingTool.coverSheet.buildingLocation" />
@@ -226,13 +235,7 @@ export const CoverSheetForm = () => {
                 required: t("ui.isRequired", { field: t(`${prefix}.calculationPerformedBy.firstName`) }) as string,
               })}
             />
-            <Button
-              variant="outline"
-              size="md"
-              leftIcon={<AddressBook size={16} />}
-              onClick={onContactsOpen}
-              alignSelf="start"
-            >
+            <Button variant="primary" leftIcon={<AddressBook size={20} />} onClick={onContactsOpen}>
               {t("ui.autofill")}
             </Button>
           </Flex>
@@ -251,18 +254,14 @@ export const CoverSheetForm = () => {
             })}
           />
         </Box>
-        {/* Autofill button moved next to first name input */}
         <Box>
           <HStack spacing={3} align="start">
             <Box flex={1}>
               <Checkbox {...(register as any)("calculationPerformedBy.attestation")} mt={8}>
-                {t(`${prefix}.calculationPerformedBy.attestation`)}
+                {t(`${prefix}.calculationPerformedBy.attestation`)} {t(`${prefix}.calculationPerformedBy.helpText`)}
               </Checkbox>
             </Box>
           </HStack>
-          <Text as="p" mt={1} mb={2}>
-            {t(`${prefix}.calculationPerformedBy.helpText`)}
-          </Text>
         </Box>
 
         <FormControl isInvalid={!!errors?.calculationPerformedBy?.address}>
@@ -402,15 +401,15 @@ export const CoverSheetForm = () => {
           label={t(`${prefix}.calculationPerformedBy.issuedForDate`)}
           fieldName={"calculationPerformedBy.issuedForDate"}
           showOptional={false}
-          width="50%"
+          width="20%"
           zIndex={2}
         />
         <DatePickerFormControl
           label={t(`${prefix}.calculationPerformedBy.issuedForDate2`)}
           fieldName={"calculationPerformedBy.issuedForDate2"}
           showOptional={false}
-          width="50%"
-          zIndex={1}
+          width="20%"
+          zIndex={2}
         />
       </Grid>
       <Divider my={10} />
@@ -437,11 +436,10 @@ export const CoverSheetForm = () => {
         </FormControl>
       </Box>
       <Text as="p" mb={2} mt={2}>
-        <Text as="span" fontWeight="bold">
+        <Text as="p" mt={3} mb={2} fontWeight="bold">
           {t(`${prefix}.heating.helpText`)}
         </Text>
-        <br />
-        <Text as="span" fontWeight="bold">
+        <Text as="p" mt={3} mb={2} fontWeight="bold">
           {t(`${prefix}.heating.helpText2`)}
         </Text>
       </Text>

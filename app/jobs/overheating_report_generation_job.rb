@@ -77,7 +77,8 @@ class OverheatingReportGenerationJob
     File.open(path, "rb") do |file|
       overheating_tool.update!(
         pdf_file: file,
-        pdf_generation_status: :completed
+        pdf_generation_status: :completed,
+        rollup_status: :newly_submitted
       )
     end
   ensure

@@ -86,6 +86,11 @@ function isProjectPath(path: string): boolean {
   return regex.test(path)
 }
 
+function isOverheatingToolPath(path: string): boolean {
+  const regex = /^\/overheating/
+  return regex.test(path)
+}
+
 function isProjectStepCodePath(path: string): boolean {
   const regex = /^\/step-codes/
   return regex.test(path)
@@ -132,6 +137,7 @@ function shouldHideSubNavbarForPath(path: string): boolean {
     isAdminPath,
     isPreCheckPath,
     isSingleZoneCoolingHeatingToolPath,
+    isOverheatingToolPath,
   ]
 
   return matchers.some((matcher) => matcher(path))

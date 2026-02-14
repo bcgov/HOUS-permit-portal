@@ -136,6 +136,7 @@ Rails.application.routes.draw do
     post "overheating/:id/generate_pdf", to: "overheating#generate_pdf"
     get "overheating/:id/download", to: "overheating#download"
     post "overheating/:id/archive", to: "overheating#archive"
+    post "overheating/:id/restore", to: "overheating#restore"
 
     resources :jurisdictions, only: %i[index update show create] do
       post "search", on: :collection, to: "jurisdictions#index"

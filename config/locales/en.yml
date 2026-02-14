@@ -748,6 +748,12 @@ en:
       create_error:
         title: "Oops"
         message: "%{error_message}"
+      restore_success:
+        title: ""
+        message: "PDF form restored successfully!"
+      restore_error:
+        title: "Oops"
+        message: "%{error_message}"
       file_not_found:
         title: "Error"
         message: "%{error_message}"

@@ -7,7 +7,8 @@ import { EOverheatingToolSortFields } from "../../../types/enums"
 import { GridHeader } from "../../shared/grid/grid-header"
 import { SortIcon } from "../../shared/sort-icon"
 
-export const OVERHEATING_GRID_TEMPLATE_COLUMNS = "minmax(0, 2fr) minmax(0, 2fr) minmax(0, 1fr) minmax(0, 0.5fr)"
+export const OVERHEATING_GRID_TEMPLATE_COLUMNS =
+  "minmax(0, 2fr) minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 0.5fr)"
 
 export const GridHeaders = observer(function GridHeaders({ includeActionColumn }: { includeActionColumn?: boolean }) {
   const { t } = useTranslation() as any
@@ -55,6 +56,12 @@ export const GridHeaders = observer(function GridHeaders({ includeActionColumn }
         >
           <Text textAlign="left">{getSortColumnHeader(EOverheatingToolSortFields.createdAt)}</Text>
           <SortIcon<EOverheatingToolSortFields> field={EOverheatingToolSortFields.createdAt} currentSort={sort} />
+        </Flex>
+      </GridHeader>
+
+      <GridHeader role={"columnheader"}>
+        <Flex w={"full"} px={4}>
+          <Text textAlign="left">{t("singleZoneCoolingHeatingTool.coverSheet.rollupStatus")}</Text>
         </Flex>
       </GridHeader>
 

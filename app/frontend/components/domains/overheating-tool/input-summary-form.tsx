@@ -19,21 +19,94 @@ import {
 import React from "react"
 import { useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { NumberFormControl, TextFormControl } from "../../shared/form/input-form-control"
+import { TextFormControl } from "../../shared/form/input-form-control"
 
 import { useSectionCompletion } from "../../../hooks/use-section-completion"
+import { useMst } from "../../../setup/root"
+
+/** Helper to access nested error object from a dot-separated path like "calculationBasedOn.stories" */
+const getNestedError = (errors: any, fieldName: string) => {
+  return fieldName.split(".").reduce((obj, key) => obj?.[key], errors)
+}
+
+interface RequiredInputFieldProps {
+  fieldName: string
+  label: string
+  maxLength?: number
+  width?: string
+  type?: string
+  step?: number
+  filterPattern?: RegExp
+}
+
+/** Reusable required input field with validation, replacing repeated IIFE patterns */
+const RequiredInputField: React.FC<RequiredInputFieldProps> = ({
+  fieldName,
+  label,
+  maxLength = 60,
+  width = "50%",
+  type = "text",
+  step,
+  filterPattern,
+}) => {
+  const { t } = useTranslation() as any
+  const { register, formState } = useFormContext()
+  const { errors } = formState as any
+  const fieldError = getNestedError(errors, fieldName)
+
+  return (
+    <FormControl isInvalid={!!fieldError}>
+      <FormLabel htmlFor={fieldName}>{label}</FormLabel>
+      <Input
+        id={fieldName}
+        type={type}
+        maxLength={maxLength}
+        width={width}
+        step={step}
+        {...(register as any)(fieldName, {
+          required: t("ui.isRequired", { field: label }) as string,
+        })}
+        {...(filterPattern && {
+          onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+            const value = e.target.value
+            const filtered = value.replace(filterPattern, "")
+            if (filtered !== value) {
+              e.target.value = filtered
+            }
+          },
+        })}
+      />
+      <FormErrorMessage>{fieldError?.message as any}</FormErrorMessage>
+    </FormControl>
+  )
+}
 
 export const InputSummaryForm = () => {
   const { t } = useTranslation() as any
   const prefix = "singleZoneCoolingHeatingTool.inputSummary"
-  const { setValue, watch, trigger, register, formState } = useFormContext()
+  const { overheatingToolStore } = useMst()
+  const { setValue, watch, trigger, register, formState, getValues } = useFormContext()
   const { errors } = formState as any
   const toast = useToast()
   const ventilated = watch("climateData.ventilated")
   const hrvErv = watch("climateData.hrvErv")
 
-  const requiredFields = React.useMemo(
+  const inputSummarySections = React.useMemo(
     () => [
+      t(`${prefix}.inputSummarySections.aboveGradeWalls`),
+      t(`${prefix}.inputSummarySections.belowGradeWalls`),
+      t(`${prefix}.inputSummarySections.ceilings`),
+      t(`${prefix}.inputSummarySections.floorsOnSoil`),
+      t(`${prefix}.inputSummarySections.windows`),
+      t(`${prefix}.inputSummarySections.exposedFloors`),
+      t(`${prefix}.inputSummarySections.doors`),
+      t(`${prefix}.inputSummarySections.skylights`),
+    ],
+    [t]
+  )
+
+  const requiredFields = React.useMemo(() => {
+    const baseFields = [
       "calculationBasedOn.dimensionalInfo",
       "calculationBasedOn.attachment",
       "calculationBasedOn.frontFacing",
@@ -60,9 +133,13 @@ export const InputSummaryForm = () => {
       "coolingDesignConditions.range",
       "coolingDesignConditions.indoorTemp",
       "coolingDesignConditions.latitude",
-    ],
-    []
-  )
+    ]
+    const sectionFields = inputSummarySections.flatMap((section) => {
+      const normalized = section.replace(/\s+/g, "")
+      return [`${normalized}_styleA`, `${normalized}_styleB`, `${normalized}_styleC`]
+    })
+    return [...baseFields, ...sectionFields]
+  }, [inputSummarySections])
 
   const canContinue = useSectionCompletion({ key: "inputSummary", requiredFields })
 
@@ -80,11 +157,10 @@ export const InputSummaryForm = () => {
         </Heading>
       </Box>
       <Grid templateColumns="1fr" gap={6} mb={6}>
-        <TextFormControl
+        <RequiredInputField
           fieldName="calculationBasedOn.dimensionalInfo"
           label={t(`${prefix}.calculationBasedOn.dimensionalInfo`)}
           maxLength={70}
-          width="50%"
         />
       </Grid>
       <Grid templateColumns="1fr" gap={6}>
@@ -94,20 +170,10 @@ export const InputSummaryForm = () => {
           maxLength={60}
           width="50%"
         />
-        <TextFormControl
+        <RequiredInputField
           fieldName="calculationBasedOn.frontFacing"
           label={t(`${prefix}.calculationBasedOn.frontFacing`)}
-          maxLength={60}
-          width="50%"
-          inputProps={{
-            onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
-              const value = e.target.value
-              const filtered = value.replace(/[^a-zA-Z\s\-'\.,]/g, "")
-              if (filtered !== value) {
-                e.target.value = filtered
-              }
-            },
-          }}
+          filterPattern={/[^a-zA-Z\s\-'\.,]/g}
         />
 
         <FormControl>
@@ -133,18 +199,10 @@ export const InputSummaryForm = () => {
           </RadioGroup>
         </FormControl>
 
-        <TextFormControl
-          fieldName="calculationBasedOn.stories"
-          maxLength={60}
-          label={t(`${prefix}.calculationBasedOn.stories`)}
-          width="50%"
-        />
-
-        <TextFormControl
+        <RequiredInputField fieldName="calculationBasedOn.stories" label={t(`${prefix}.calculationBasedOn.stories`)} />
+        <RequiredInputField
           fieldName="calculationBasedOn.airTightness"
-          maxLength={60}
           label={t(`${prefix}.calculationBasedOn.airTightness`)}
-          width="50%"
         />
         <FormControl>
           <FormLabel>{t(`${prefix}.calculationBasedOn.airTightnessAssumed`)}</FormLabel>
@@ -169,26 +227,14 @@ export const InputSummaryForm = () => {
           </RadioGroup>
         </FormControl>
 
-        <TextFormControl
+        <RequiredInputField
           fieldName="calculationBasedOn.weatherLocation"
           label={t(`${prefix}.calculationBasedOn.weatherLocation`)}
-          maxLength={60}
-          width="50%"
         />
-        <TextFormControl
+        <RequiredInputField
           fieldName="calculationBasedOn.internalShading"
           label={t(`${prefix}.climateData.internalShading`)}
-          maxLength={60}
-          width="50%"
-          inputProps={{
-            onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
-              const value = e.target.value
-              const filtered = value.replace(/[^a-zA-Z\s\-'\.,]/g, "")
-              if (filtered !== value) {
-                e.target.value = filtered
-              }
-            },
-          }}
+          filterPattern={/[^a-zA-Z\s\-'\.,]/g}
         />
         <FormControl>
           <FormLabel>{t(`${prefix}.calculationBasedOn.assumed`)}</FormLabel>
@@ -213,10 +259,11 @@ export const InputSummaryForm = () => {
           </RadioGroup>
         </FormControl>
 
-        <NumberFormControl
+        <RequiredInputField
           fieldName="calculationBasedOn.occupants"
           label={t(`${prefix}.climateData.occupants`)}
-          width="50%"
+          type="number"
+          step={0.01}
         />
         <FormControl>
           <FormLabel>{t(`${prefix}.calculationBasedOn.occupantsAssumed`)}</FormLabel>
@@ -247,18 +294,8 @@ export const InputSummaryForm = () => {
         {t(`${prefix}.climateData.title`)}
       </Heading>
       <Grid templateColumns="1fr" gap={6}>
-        <TextFormControl
-          fieldName="climateData.windExposure"
-          maxLength={60}
-          label={t(`${prefix}.climateData.windExposure`)}
-          width="50%"
-        />
-        <TextFormControl
-          fieldName="climateData.windSheilding"
-          maxLength={60}
-          label={t(`${prefix}.climateData.windSheilding`)}
-          width="50%"
-        />
+        <RequiredInputField fieldName="climateData.windExposure" label={t(`${prefix}.climateData.windExposure`)} />
+        <RequiredInputField fieldName="climateData.windSheilding" label={t(`${prefix}.climateData.windSheilding`)} />
         <FormControl>
           <FormLabel>{t(`${prefix}.climateData.ventilated`)}</FormLabel>
           <RadioGroup
@@ -497,79 +534,49 @@ export const InputSummaryForm = () => {
           <Heading as="h2" size="md" mb={4} variant="yellowline">
             {t(`${prefix}.coolingDesignConditions.title`)}
           </Heading>
-          <TextFormControl
+          <RequiredInputField
             fieldName="coolingDesignConditions.outdoorTemp"
             label={t(`${prefix}.coolingDesignConditions.outdoorTemp`)}
             maxLength={25}
-            width="50%"
+            width="17%"
           />
-          <TextFormControl
+          <RequiredInputField
             fieldName="coolingDesignConditions.range"
             label={t(`${prefix}.coolingDesignConditions.range`)}
             maxLength={25}
-            width="50%"
+            width="17%"
           />
-          <TextFormControl
+          <RequiredInputField
             fieldName="coolingDesignConditions.indoorTemp"
             label={t(`${prefix}.coolingDesignConditions.indoorTemp`)}
             maxLength={25}
-            width="50%"
+            width="17%"
           />
-          <TextFormControl
+          <RequiredInputField
             fieldName="coolingDesignConditions.latitude"
             label={t(`${prefix}.coolingDesignConditions.latitude`)}
             maxLength={25}
-            width="50%"
+            width="17%"
           />
         </Box>
       </Grid>
       <Divider my={10} />
 
       {/* Sections for Above Grade Walls, Below Grade Walls, Ceilings, etc. */}
-      {[
-        t(`${prefix}.inputSummarySections.aboveGradeWalls`),
-        t(`${prefix}.inputSummarySections.belowGradeWalls`),
-        t(`${prefix}.inputSummarySections.ceilings`),
-        t(`${prefix}.inputSummarySections.floorsOnSoil`),
-        t(`${prefix}.inputSummarySections.windows`),
-        t(`${prefix}.inputSummarySections.exposedFloors`),
-        t(`${prefix}.inputSummarySections.doors`),
-        t(`${prefix}.inputSummarySections.skylights`),
-      ].map((section) => (
+      {inputSummarySections.map((section) => (
         <Box key={section} mb={6}>
           <Heading as="h2" size="md" mb={4} variant="yellowline">
             {section}
           </Heading>
           <Grid templateColumns="1fr" gap={6}>
-            {(() => {
-              const styleAName = `${section.replace(/\s+/g, "")}_styleA`
-              return (
-                <FormControl isInvalid={!!errors?.[styleAName]}>
-                  <FormLabel htmlFor={styleAName}>{t(`${prefix}.belowGradeWalls.styleA` as any)}</FormLabel>
-                  <Input
-                    id={styleAName}
-                    maxLength={50}
-                    width="50%"
-                    {...(register as any)(styleAName, {
-                      required: t("ui.isRequired", { field: t(`${prefix}.belowGradeWalls.styleA` as any) }) as string,
-                    })}
-                  />
-                  <FormErrorMessage>{errors?.[styleAName]?.message as any}</FormErrorMessage>
-                </FormControl>
-              )
-            })()}
-            <TextFormControl
-              fieldName={`${section.replace(/\s+/g, "")}_styleB`}
-              maxLength={50}
-              label={t(`${prefix}.belowGradeWalls.styleB` as any)}
-              width="50%"
-            />
-            <TextFormControl
-              fieldName={`${section.replace(/\s+/g, "")}_styleC`}
-              maxLength={50}
-              label={t(`${prefix}.belowGradeWalls.styleC` as any)}
-              width="50%"
-            />
+            {(["A", "B", "C"] as const).map((style) => (
+              <RequiredInputField
+                key={`${section}_style${style}`}
+                fieldName={`${section.replace(/\s+/g, "")}_style${style}`}
+                label={t(`${prefix}.belowGradeWalls.style${style}` as any)}
+                maxLength={50}
+              />
+            ))}
           </Grid>
           <Divider my={10} />
         </Box>
@@ -590,6 +597,13 @@ export const InputSummaryForm = () => {
                 })
                 return
               }
+              const values = getValues()
+              const { overheatingDocumentsAttributes, ...formJson } = values
+              await overheatingToolStore.saveOverheatingToolDraft({
+                formJson,
+                formType: "single_zone_cooling_heating_tool",
+                overheatingDocumentsAttributes,
+              })
               window.location.hash = "#calculations"
             }}
           >

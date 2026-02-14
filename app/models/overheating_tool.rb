@@ -20,8 +20,16 @@ class OverheatingTool < ApplicationRecord
        default: :not_started,
        prefix: true
 
+  attribute :rollup_status, :string
+  enum :rollup_status,
+       { new_draft: "new_draft", newly_submitted: "newly_submitted" },
+       default: :new_draft,
+       prefix: true
+
+  before_validation :set_rollup_status_for_draft
+
   def schedule_pdf_generation!
-    pdf_generation_status_queued!
+    update!(pdf_generation_status: :queued, rollup_status: :newly_submitted)
     OverheatingReportGenerationJob.perform_async(id)
   end
 
@@ -45,10 +53,20 @@ class OverheatingTool < ApplicationRecord
       created_at: created_at,
       user_id: user_id,
       discarded: discarded_at.present?,
+      rollup_status: rollup_status,
       project_number: form_json["project_number"] || form_json["projectNumber"],
       address:
         form_json.dig("building_location", "address") ||
           form_json.dig("buildingLocation", "address")
     }
+  end
+
+  private
+
+  def set_rollup_status_for_draft
+    return if rollup_status_newly_submitted?
+    return if form_json.blank?
+
+    self.rollup_status = "new_draft"
   end
 end

@@ -1,7 +1,7 @@
 class Api::OverheatingController < Api::ApplicationController
   include Api::Concerns::Search::OverheatingTools
   before_action :set_overheating_tool,
-                only: %i[show generate_pdf update archive download]
+                only: %i[show generate_pdf update archive restore download]
   skip_after_action :verify_policy_scoped, only: %i[index]
 
   def show
@@ -91,6 +91,17 @@ class Api::OverheatingController < Api::ApplicationController
                      },
                      status: 422
                    }
+    end
+  end
+
+  def restore
+    authorize @overheating_tool
+    if !@overheating_tool.discarded? || @overheating_tool.undiscard
+      render_success @overheating_tool,
+                     "overheating_tool.restore_success",
+                     { blueprint: OverheatingToolBlueprint }
+    else
+      render_error "overheating_tool.restore_error"
     end
   end
 
