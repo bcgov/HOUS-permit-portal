@@ -73,16 +73,30 @@
 
                   <% if @diff_summary.present? %>
                     <% if @diff_summary[:added_count] > 0 %>
-                      <p style="font-family: 'Open Sans', sans-serif; font-size: 14px; line-height: 22px; font-weight: normal; margin: 0; margin-bottom: 8px; color: #78350f;">
-                        <strong><%= @diff_summary[:added_count] %> new field<%= @diff_summary[:added_count] == 1 ? "" : "s" %> added:</strong>
-                        <%= @diff_summary[:added_fields].first(10).join(", ") %><%= @diff_summary[:added_count] > 10 ? ", and #{@diff_summary[:added_count] - 10} more..." : "" %>
+                      <p style="font-family: 'Open Sans', sans-serif; font-size: 14px; line-height: 22px; font-weight: bold; margin: 0; margin-bottom: 4px; color: #78350f;">
+                        <%= @diff_summary[:added_count] %> new field<%= @diff_summary[:added_count] == 1 ? "" : "s" %> added:
                       </p>
+                      <ul style="font-family: 'Open Sans', sans-serif; font-size: 13px; line-height: 20px; margin: 0; margin-bottom: 12px; padding-left: 20px; color: #78350f;">
+                        <% @diff_summary[:added_fields].first(10).each do |field| %>
+                          <li><%= field[:label] %><% if field[:requirement_code].present? %> <span style="color: #a16207;">(<%= field[:requirement_code] %>)</span><% end %><% if field[:section].present? %> &mdash; <em><%= field[:section] %></em><% end %></li>
+                        <% end %>
+                        <% if @diff_summary[:added_count] > 10 %>
+                          <li><em>and <%= @diff_summary[:added_count] - 10 %> more&hellip;</em></li>
+                        <% end %>
+                      </ul>
                     <% end %>
                     <% if @diff_summary[:removed_count] > 0 %>
-                      <p style="font-family: 'Open Sans', sans-serif; font-size: 14px; line-height: 22px; font-weight: normal; margin: 0; margin-bottom: 8px; color: #78350f;">
-                        <strong><%= @diff_summary[:removed_count] %> field<%= @diff_summary[:removed_count] == 1 ? "" : "s" %> removed:</strong>
-                        <%= @diff_summary[:removed_fields].first(10).join(", ") %><%= @diff_summary[:removed_count] > 10 ? ", and #{@diff_summary[:removed_count] - 10} more..." : "" %>
+                      <p style="font-family: 'Open Sans', sans-serif; font-size: 14px; line-height: 22px; font-weight: bold; margin: 0; margin-bottom: 4px; color: #78350f;">
+                        <%= @diff_summary[:removed_count] %> field<%= @diff_summary[:removed_count] == 1 ? "" : "s" %> removed:
                       </p>
+                      <ul style="font-family: 'Open Sans', sans-serif; font-size: 13px; line-height: 20px; margin: 0; margin-bottom: 12px; padding-left: 20px; color: #78350f;">
+                        <% @diff_summary[:removed_fields].first(10).each do |field| %>
+                          <li><%= field[:label] %><% if field[:requirement_code].present? %> <span style="color: #a16207;">(<%= field[:requirement_code] %>)</span><% end %><% if field[:section].present? %> &mdash; <em><%= field[:section] %></em><% end %></li>
+                        <% end %>
+                        <% if @diff_summary[:removed_count] > 10 %>
+                          <li><em>and <%= @diff_summary[:removed_count] - 10 %> more&hellip;</em></li>
+                        <% end %>
+                      </ul>
                     <% end %>
                   <% end %>
 
@@ -129,17 +143,63 @@
           <!-- DIFF SUMMARY (for non-new templates with changes) -->
           <% if !is_new_template && @diff_summary.present? && (@diff_summary[:added_count] > 0 || @diff_summary[:removed_count] > 0 || @diff_summary[:changed_count] > 0) %>
             <h2 style="color: #292929; font-family: 'Open Sans', sans-serif; font-weight: 700; line-height: 1.4; margin-top: 24px; margin-bottom: 16px; text-align: left; font-size: 22px;">What changed:</h2>
-            <ul style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px; padding-left: 20px;">
-              <% if @diff_summary[:added_count] > 0 %>
-                <li style="margin-bottom: 8px;"><strong><%= @diff_summary[:added_count] %></strong> new requirement field<%= @diff_summary[:added_count] == 1 ? "" : "s" %> added</li>
-              <% end %>
-              <% if @diff_summary[:removed_count] > 0 %>
-                <li style="margin-bottom: 8px;"><strong><%= @diff_summary[:removed_count] %></strong> requirement field<%= @diff_summary[:removed_count] == 1 ? "" : "s" %> removed</li>
-              <% end %>
-              <% if @diff_summary[:changed_count] > 0 %>
-                <li style="margin-bottom: 8px;"><strong><%= @diff_summary[:changed_count] %></strong> requirement field<%= @diff_summary[:changed_count] == 1 ? "" : "s" %> modified</li>
-              <% end %>
-            </ul>
+
+            <% if @diff_summary[:added_count] > 0 %>
+              <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: bold; margin: 0; margin-bottom: 4px;">
+                <span style="color: #15803d;"><%= @diff_summary[:added_count] %> requirement field<%= @diff_summary[:added_count] == 1 ? "" : "s" %> added:</span>
+              </p>
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="border-collapse: collapse; min-width: 100%; width: 100%; margin-bottom: 16px;" width="100%">
+                <% @diff_summary[:added_fields].first(15).each do |field| %>
+                  <tr>
+                    <td style="font-family: 'Open Sans', sans-serif; font-size: 14px; padding: 4px 8px 4px 16px; color: #15803d;">+</td>
+                    <td style="font-family: 'Open Sans', sans-serif; font-size: 14px; padding: 4px 8px; line-height: 20px;">
+                      <strong><%= field[:label] %></strong><% if field[:requirement_code].present? %> <span style="color: #6b7280;">(<%= field[:requirement_code] %>)</span><% end %><% if field[:section].present? %><br><span style="font-size: 12px; color: #9ca3af;"><%= field[:section] %></span><% end %>
+                    </td>
+                  </tr>
+                <% end %>
+                <% if @diff_summary[:added_count] > 15 %>
+                  <tr><td colspan="2" style="font-family: 'Open Sans', sans-serif; font-size: 13px; padding: 4px 8px 4px 16px; color: #6b7280; font-style: italic;">and <%= @diff_summary[:added_count] - 15 %> more&hellip;</td></tr>
+                <% end %>
+              </table>
+            <% end %>
+
+            <% if @diff_summary[:removed_count] > 0 %>
+              <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: bold; margin: 0; margin-bottom: 4px;">
+                <span style="color: #dc2626;"><%= @diff_summary[:removed_count] %> requirement field<%= @diff_summary[:removed_count] == 1 ? "" : "s" %> removed:</span>
+              </p>
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="border-collapse: collapse; min-width: 100%; width: 100%; margin-bottom: 16px;" width="100%">
+                <% @diff_summary[:removed_fields].first(15).each do |field| %>
+                  <tr>
+                    <td style="font-family: 'Open Sans', sans-serif; font-size: 14px; padding: 4px 8px 4px 16px; color: #dc2626;">&minus;</td>
+                    <td style="font-family: 'Open Sans', sans-serif; font-size: 14px; padding: 4px 8px; line-height: 20px;">
+                      <strong><%= field[:label] %></strong><% if field[:requirement_code].present? %> <span style="color: #6b7280;">(<%= field[:requirement_code] %>)</span><% end %><% if field[:section].present? %><br><span style="font-size: 12px; color: #9ca3af;"><%= field[:section] %></span><% end %>
+                    </td>
+                  </tr>
+                <% end %>
+                <% if @diff_summary[:removed_count] > 15 %>
+                  <tr><td colspan="2" style="font-family: 'Open Sans', sans-serif; font-size: 13px; padding: 4px 8px 4px 16px; color: #6b7280; font-style: italic;">and <%= @diff_summary[:removed_count] - 15 %> more&hellip;</td></tr>
+                <% end %>
+              </table>
+            <% end %>
+
+            <% if @diff_summary[:changed_count] > 0 %>
+              <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: bold; margin: 0; margin-bottom: 4px;">
+                <span style="color: #d97706;"><%= @diff_summary[:changed_count] %> requirement field<%= @diff_summary[:changed_count] == 1 ? "" : "s" %> modified:</span>
+              </p>
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="border-collapse: collapse; min-width: 100%; width: 100%; margin-bottom: 16px;" width="100%">
+                <% @diff_summary[:changed_fields].first(15).each do |field| %>
+                  <tr>
+                    <td style="font-family: 'Open Sans', sans-serif; font-size: 14px; padding: 4px 8px 4px 16px; color: #d97706;">~</td>
+                    <td style="font-family: 'Open Sans', sans-serif; font-size: 14px; padding: 4px 8px; line-height: 20px;">
+                      <strong><%= field[:label] %></strong><% if field[:requirement_code].present? %> <span style="color: #6b7280;">(<%= field[:requirement_code] %>)</span><% end %><% if field[:section].present? %><br><span style="font-size: 12px; color: #9ca3af;"><%= field[:section] %></span><% end %>
+                    </td>
+                  </tr>
+                <% end %>
+                <% if @diff_summary[:changed_count] > 15 %>
+                  <tr><td colspan="2" style="font-family: 'Open Sans', sans-serif; font-size: 13px; padding: 4px 8px 4px 16px; color: #6b7280; font-style: italic;">and <%= @diff_summary[:changed_count] - 15 %> more&hellip;</td></tr>
+                <% end %>
+              </table>
+            <% end %>
           <% end %>
 
           <!-- WHAT TO DO NEXT -->
@@ -147,7 +207,7 @@
 
           <% if is_new_template %>
             <ul style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px; padding-left: 20px;">
-              <li style="margin-bottom: 8px;">Review the new template and its requirements.</li>
+              <li style="margin-bottom: 8px;">Review the new template and its requirements. (Scheduled templates can only be viewed in Training Mode: Upcoming templates)</li>
               <% if @api_enabled %>
                 <li style="margin-bottom: 8px;">Set up API mappings for this template before it goes live.</li>
               <% end %>

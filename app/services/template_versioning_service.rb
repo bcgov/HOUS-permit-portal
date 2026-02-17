@@ -61,6 +61,11 @@ class TemplateVersioningService
             )
     end
 
+    # Notify managers and API partners about the scheduled template version
+    NotificationService.publish_new_template_version_publish_event(
+      template_version
+    )
+
     template_version
   end
 
@@ -346,22 +351,28 @@ class TemplateVersioningService
   end
 
   # Returns a summary of the diff suitable for inclusion in notification emails.
-  # The summary contains counts and field labels for added/removed/changed requirements.
+  # Each field entry is a hash with :label, :requirement_code, and :section.
   def self.diff_summary_for_notification(template_version)
     previous = previous_published_version(template_version)
     return nil if previous.blank?
 
     diff = produce_diff_hash(previous, template_version)
 
+    extract_field_info = ->(req) do
+      {
+        label: req["label"] || req["key"] || req["id"],
+        requirement_code: req["requirement_code"],
+        section: req["diff_section_label"]
+      }
+    end
+
     {
       added_count: diff[:added].size,
       removed_count: diff[:removed].size,
       changed_count: diff[:changed].size,
-      added_fields: diff[:added].map { |r| r["label"] || r["key"] || r["id"] },
-      removed_fields:
-        diff[:removed].map { |r| r["label"] || r["key"] || r["id"] },
-      changed_fields:
-        diff[:changed].map { |r| r["label"] || r["key"] || r["id"] }
+      added_fields: diff[:added].map(&extract_field_info),
+      removed_fields: diff[:removed].map(&extract_field_info),
+      changed_fields: diff[:changed].map(&extract_field_info)
     }
   end
 
