@@ -328,6 +328,43 @@ class TemplateVersioningService
     }
   end
 
+  # Determines the type of change for a template version relative to its predecessor.
+  # Returns a symbol: :new_template, :action_required, or :no_action
+  #   :new_template     - No previous published version exists (brand new permit template)
+  #   :action_required  - Requirements were added or removed (API mappings need updating)
+  #   :no_action        - Only requirement field content changed or no requirement changes at all
+  def self.determine_change_type(template_version)
+    previous = previous_published_version(template_version)
+    return :new_template if previous.blank?
+
+    diff = produce_diff_hash(previous, template_version)
+    if diff[:added].any? || diff[:removed].any?
+      :action_required
+    else
+      :no_action
+    end
+  end
+
+  # Returns a summary of the diff suitable for inclusion in notification emails.
+  # The summary contains counts and field labels for added/removed/changed requirements.
+  def self.diff_summary_for_notification(template_version)
+    previous = previous_published_version(template_version)
+    return nil if previous.blank?
+
+    diff = produce_diff_hash(previous, template_version)
+
+    {
+      added_count: diff[:added].size,
+      removed_count: diff[:removed].size,
+      changed_count: diff[:changed].size,
+      added_fields: diff[:added].map { |r| r["label"] || r["key"] || r["id"] },
+      removed_fields:
+        diff[:removed].map { |r| r["label"] || r["key"] || r["id"] },
+      changed_fields:
+        diff[:changed].map { |r| r["label"] || r["key"] || r["id"] }
+    }
+  end
+
   def self.previous_published_version(template_version)
     template_version
       .requirement_template

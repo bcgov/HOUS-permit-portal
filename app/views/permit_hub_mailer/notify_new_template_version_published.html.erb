@@ -1,3 +1,11 @@
+<%
+  recipient_name = @user.present? ? @user.name : (@external_api_key.present? ? @external_api_key.connecting_application : "Partner")
+  is_new_template = @change_type == :new_template
+  is_action_required = @change_type == :action_required
+  is_no_action = @change_type == :no_action
+  is_scheduled = @template_version.scheduled?
+%>
+
 <!-- START MAIN CONTENT AREA -->
 <tr>
   <td class="wrapper" style="font-family: 'Open Sans', sans-serif; font-size: 16px; vertical-align: top; box-sizing: border-box; padding: 56px 32px;" valign="top">
@@ -5,33 +13,106 @@
       <tr>
       <!-- START CONTENT ROW -->
         <td style="font-family: 'Open Sans', sans-serif; font-size: 16px; vertical-align: top;" valign="top">
-          <h1 style="color: #292929; font-family: 'Open Sans', sans-serif; font-weight: 700; line-height: 1.4; text-align: left; font-size: 28px; margin-top: 0; margin-bottom: 48px;">New Template Version Published</h1>
-          <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">Dear <%= @user.present? ? @user.name : "API Partner" %>,</p>
-          <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
-            A new version of the permit template "<strong><%= @template_version.label %></strong>" has been published.
-          </p>
 
+          <!-- HEADLINE - varies by change type -->
+          <% if is_new_template %>
+            <h1 style="color: #292929; font-family: 'Open Sans', sans-serif; font-weight: 700; line-height: 1.4; text-align: left; font-size: 28px; margin-top: 0; margin-bottom: 48px;">New Permit Template Scheduled</h1>
+          <% elsif is_action_required %>
+            <h1 style="color: #292929; font-family: 'Open Sans', sans-serif; font-weight: 700; line-height: 1.4; text-align: left; font-size: 28px; margin-top: 0; margin-bottom: 48px;">Permit Template Updated &mdash; Action Required</h1>
+          <% else %>
+            <h1 style="color: #292929; font-family: 'Open Sans', sans-serif; font-weight: 700; line-height: 1.4; text-align: left; font-size: 28px; margin-top: 0; margin-bottom: 48px;">Permit Template Updated &mdash; No Action Required</h1>
+          <% end %>
+
+          <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">Dear <%= recipient_name %>,</p>
+
+          <!-- INTRO - varies by change type -->
+          <% if is_new_template %>
+            <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
+              A new permit template "<strong><%= @template_version.label %></strong>" has been scheduled for publication on <strong><%= @template_version.version_date&.strftime("%B %d, %Y") %></strong>.
+            </p>
+          <% elsif is_action_required %>
+            <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
+              A new version of the permit template "<strong><%= @template_version.label %></strong>" has been published. This update includes changes to requirement fields that <strong>may require updates to your configuration<%= @api_enabled ? " and API mappings" : "" %></strong>.
+            </p>
+          <% else %>
+            <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
+              A new version of the permit template "<strong><%= @template_version.label %></strong>" has been published. This update includes minor changes such as UI text or requirement organization improvements. <strong>No action is required on your part.</strong>
+            </p>
+          <% end %>
+
+          <!-- TEMPLATE DETAILS TABLE -->
           <h2 style="color: #292929; font-family: 'Open Sans', sans-serif; font-weight: 700; line-height: 1.4; margin-top: 24px; margin-bottom: 16px; text-align: left; font-size: 22px;">Template details:</h2>
           <table class="basic-table" role="presentation" border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; min-width: 100%; width: 100%; background: #f2f2f2; border: 1px solid #d9d9d9; margin-bottom: 32px;" width="100%">
             <tr>
               <td style="font-family: 'Open Sans', sans-serif; font-size: 16px; vertical-align: top;" valign="top">
                 <dl class="table-like" style="margin: 0;">
-                  
+
                   <dt style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; font-size: 11px; text-transform: uppercase; font-weight: bold; padding-top: 10px; padding-bottom: 8px; text-align: left;">Template</dt>
                   <dd style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; margin: 0; padding-bottom: 10px; border-bottom: 1px solid #d9d9d9;"><%= @template_version.label %></dd>
 
-                  <dt style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; font-size: 11px; text-transform: uppercase; font-weight: bold; padding-top: 10px; padding-bottom: 8px; text-align: left;">BCBC Part</dt>
+                  <dt style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; font-size: 11px; text-transform: uppercase; font-weight: bold; padding-top: 10px; padding-bottom: 8px; text-align: left;">Permit type</dt>
                   <dd style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; margin: 0; padding-bottom: 10px; border-bottom: 1px solid #d9d9d9;"><%= @template_version.permit_type&.name %></dd>
 
-                  <dt style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; font-size: 11px; text-transform: uppercase; font-weight: bold; padding-top: 10px; padding-bottom: 8px; text-align: left;">Version</dt>
+                  <dt style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; font-size: 11px; text-transform: uppercase; font-weight: bold; padding-top: 10px; padding-bottom: 8px; text-align: left;"><%= is_scheduled ? "Scheduled date" : "Version" %></dt>
                   <dd style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; margin: 0; padding-bottom: 10px; border-bottom: 0;"><%= @template_version.version_date&.strftime("%B %d, %Y") %></dd>
 
                 </dl>
               </td>
             </tr>
           </table>
-          
-          <% if @action_required %>
+
+          <!-- ACTION REQUIRED: API MAPPING CHANGES (for action_required + api_enabled) -->
+          <% if is_action_required && @api_enabled %>
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; min-width: 100%; width: 100%; background: #fef3c7; border: 1px solid #f59e0b; margin-bottom: 32px; border-radius: 4px;" width="100%">
+              <tr>
+                <td style="font-family: 'Open Sans', sans-serif; font-size: 16px; vertical-align: top; padding: 16px;" valign="top">
+                  <h2 style="color: #92400e; font-family: 'Open Sans', sans-serif; font-weight: 700; line-height: 1.4; margin-top: 0; margin-bottom: 12px; text-align: left; font-size: 18px;">API Mapping Review Required</h2>
+                  <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 12px; color: #78350f;">
+                    This template update includes new or removed requirement fields. Your API integration mappings may need to be updated to reflect these changes.
+                  </p>
+
+                  <% if @diff_summary.present? %>
+                    <% if @diff_summary[:added_count] > 0 %>
+                      <p style="font-family: 'Open Sans', sans-serif; font-size: 14px; line-height: 22px; font-weight: normal; margin: 0; margin-bottom: 8px; color: #78350f;">
+                        <strong><%= @diff_summary[:added_count] %> new field<%= @diff_summary[:added_count] == 1 ? "" : "s" %> added:</strong>
+                        <%= @diff_summary[:added_fields].first(10).join(", ") %><%= @diff_summary[:added_count] > 10 ? ", and #{@diff_summary[:added_count] - 10} more..." : "" %>
+                      </p>
+                    <% end %>
+                    <% if @diff_summary[:removed_count] > 0 %>
+                      <p style="font-family: 'Open Sans', sans-serif; font-size: 14px; line-height: 22px; font-weight: normal; margin: 0; margin-bottom: 8px; color: #78350f;">
+                        <strong><%= @diff_summary[:removed_count] %> field<%= @diff_summary[:removed_count] == 1 ? "" : "s" %> removed:</strong>
+                        <%= @diff_summary[:removed_fields].first(10).join(", ") %><%= @diff_summary[:removed_count] > 10 ? ", and #{@diff_summary[:removed_count] - 10} more..." : "" %>
+                      </p>
+                    <% end %>
+                  <% end %>
+
+                  <% if @api_mapping_url.present? %>
+                    <a href="<%= @api_mapping_url %>" style="display: inline-block; background-color: #92400e; color: #ffffff; font-family: 'Open Sans', sans-serif; font-size: 14px; font-weight: 600; text-decoration: none; padding: 10px 20px; border-radius: 4px; margin-top: 8px;">Review API Mappings</a>
+                  <% end %>
+                </td>
+              </tr>
+            </table>
+          <% end %>
+
+          <!-- ACTION REQUIRED: NEW TEMPLATE NEEDS FULL MAPPING (for new_template + api_enabled) -->
+          <% if is_new_template && @api_enabled %>
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; min-width: 100%; width: 100%; background: #dbeafe; border: 1px solid #3b82f6; margin-bottom: 32px; border-radius: 4px;" width="100%">
+              <tr>
+                <td style="font-family: 'Open Sans', sans-serif; font-size: 16px; vertical-align: top; padding: 16px;" valign="top">
+                  <h2 style="color: #1e3a5f; font-family: 'Open Sans', sans-serif; font-weight: 700; line-height: 1.4; margin-top: 0; margin-bottom: 12px; text-align: left; font-size: 18px;">New API Mapping Required</h2>
+                  <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 12px; color: #1e3a5f;">
+                    This is a new permit template. API integration mappings will need to be configured before this template goes live to ensure applications can be received through the API.
+                  </p>
+                  <% if @api_mapping_url.present? %>
+                    <a href="<%= @api_mapping_url %>" style="display: inline-block; background-color: #1a5a96; color: #ffffff; font-family: 'Open Sans', sans-serif; font-size: 14px; font-weight: 600; text-decoration: none; padding: 10px 20px; border-radius: 4px; margin-top: 8px;">Configure API Mappings</a>
+                  <% end %>
+                </td>
+              </tr>
+            </table>
+          <% end %>
+
+          <!-- SUBMISSION INBOX WARNING (for managers missing inbox contacts) -->
+          <% if @submission_inbox_action_required %>
             <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; min-width: 100%; width: 100%; background: #fef3c7; border: 1px solid #f59e0b; margin-bottom: 32px; border-radius: 4px;" width="100%">
               <tr>
                 <td style="font-family: 'Open Sans', sans-serif; font-size: 16px; vertical-align: top; padding: 16px;" valign="top">
@@ -45,27 +126,67 @@
             </table>
           <% end %>
 
-          <ul style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px; padding-left: 20px;">
-            <li style="margin-bottom: 8px;">Review the changes in this template version.</li>
-            <li style="margin-bottom: 8px;">Check that your customizations still meet your needs.</li>
-            <li style="margin-bottom: 8px;">Review submitted applications. If an application used an older template, you may choose to send it back for revisions.</li>
-          </ul>
-
-          <% if @user.present? && @user.manager? %>
-            <a href="<%= FrontendUrlHelper.frontend_url("/digital-building-permits/#{@template_version.id}/edit") %>" style="display: inline-block; background-color: #1a5a96; color: #ffffff; font-family: 'Open Sans', sans-serif; font-size: 14px; font-weight: 600; text-decoration: none; padding: 10px 20px; border-radius: 4px; margin-bottom: 24px;">View permit application forms</a>
+          <!-- DIFF SUMMARY (for non-new templates with changes) -->
+          <% if !is_new_template && @diff_summary.present? && (@diff_summary[:added_count] > 0 || @diff_summary[:removed_count] > 0 || @diff_summary[:changed_count] > 0) %>
+            <h2 style="color: #292929; font-family: 'Open Sans', sans-serif; font-weight: 700; line-height: 1.4; margin-top: 24px; margin-bottom: 16px; text-align: left; font-size: 22px;">What changed:</h2>
+            <ul style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px; padding-left: 20px;">
+              <% if @diff_summary[:added_count] > 0 %>
+                <li style="margin-bottom: 8px;"><strong><%= @diff_summary[:added_count] %></strong> new requirement field<%= @diff_summary[:added_count] == 1 ? "" : "s" %> added</li>
+              <% end %>
+              <% if @diff_summary[:removed_count] > 0 %>
+                <li style="margin-bottom: 8px;"><strong><%= @diff_summary[:removed_count] %></strong> requirement field<%= @diff_summary[:removed_count] == 1 ? "" : "s" %> removed</li>
+              <% end %>
+              <% if @diff_summary[:changed_count] > 0 %>
+                <li style="margin-bottom: 8px;"><strong><%= @diff_summary[:changed_count] %></strong> requirement field<%= @diff_summary[:changed_count] == 1 ? "" : "s" %> modified</li>
+              <% end %>
+            </ul>
           <% end %>
 
-          <h2 style="color: #292929; font-family: 'Open Sans', sans-serif; font-weight: 700; line-height: 1.4; margin-top: 24px; margin-bottom: 16px; text-align: left; font-size: 22px;">What this means:</h2>
+          <!-- WHAT TO DO NEXT -->
+          <h2 style="color: #292929; font-family: 'Open Sans', sans-serif; font-weight: 700; line-height: 1.4; margin-top: 24px; margin-bottom: 16px; text-align: left; font-size: 22px;">What to do next:</h2>
+
+          <% if is_new_template %>
+            <ul style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px; padding-left: 20px;">
+              <li style="margin-bottom: 8px;">Review the new template and its requirements.</li>
+              <% if @api_enabled %>
+                <li style="margin-bottom: 8px;">Set up API mappings for this template before it goes live.</li>
+              <% end %>
+              <li style="margin-bottom: 8px;">Configure any jurisdiction-specific customizations.</li>
+            </ul>
+          <% elsif is_action_required %>
+            <ul style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px; padding-left: 20px;">
+              <li style="margin-bottom: 8px;">Review the changes in this template version.</li>
+              <% if @api_enabled %>
+                <li style="margin-bottom: 8px;">Update your API mappings to include the new or modified requirement fields.</li>
+              <% end %>
+              <li style="margin-bottom: 8px;">Check that your customizations still meet your needs.</li>
+              <li style="margin-bottom: 8px;">Review submitted applications. If an application used an older template, you may choose to send it back for revisions.</li>
+            </ul>
+          <% else %>
+            <ul style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px; padding-left: 20px;">
+              <li style="margin-bottom: 8px;">No immediate action is needed.</li>
+              <li style="margin-bottom: 8px;">Review the changes at your convenience to stay informed.</li>
+              <li style="margin-bottom: 8px;">Check that your customizations still meet your needs.</li>
+            </ul>
+          <% end %>
+
+          <!-- CTA BUTTONS -->
+          <% if @user.present? && @user.manager? %>
+            <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 16px;">
+              You may manage customizations on this template version here:
+            </p>
+            <a href="<%= FrontendUrlHelper.frontend_url("/digital-building-permits/#{@template_version.id}/edit") %>" style="display: inline-block; background-color: #1a5a96; color: #ffffff; font-family: 'Open Sans', sans-serif; font-size: 14px; font-weight: 600; text-decoration: none; padding: 10px 20px; border-radius: 4px; margin-bottom: 24px;">Manage Customizations</a>
+          <% end %>
 
           <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
-            This update may affect permit applications using this template. Please review the changes to stay informed of the latest requirements.
+            If you have any questions or require assistance, please contact <a href="mailto:digital.codes.permits@gov.bc.ca" style="color: #1a5a96; text-decoration: underline;">digital.codes.permits@gov.bc.ca</a>.
           </p>
 
           <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
             Thank you,<br><br>
             The Building Permit Hub Team
           </p>
-          
+
         </td>
         <!-- END OF CONTENT ROW -->
       </tr>

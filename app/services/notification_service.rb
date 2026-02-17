@@ -64,6 +64,25 @@ class NotificationService
   def self.publish_new_template_version_publish_event(template_version)
     requirement_template = template_version.requirement_template
 
+    # Determine change type and diff summary once for all recipients
+    change_type =
+      TemplateVersioningService.determine_change_type(template_version)
+    diff_summary =
+      TemplateVersioningService.diff_summary_for_notification(template_version)
+
+    # Determine which jurisdictions have access to this template
+    available_jurisdiction_ids =
+      available_jurisdiction_ids_for(requirement_template)
+
+    # Determine which jurisdictions have explicitly disabled this template
+    disabled_jurisdiction_ids =
+      template_version
+        .jurisdiction_template_version_customizations
+        .live
+        .where(disabled: true)
+        .distinct
+        .pluck(:jurisdiction_id)
+
     # Build manager query filtered by template availability
     manager_query =
       User
@@ -78,17 +97,26 @@ class NotificationService
         )
 
     # Only notify managers whose jurisdictions have access to this template
-    unless requirement_template.available_globally
-      available_jurisdiction_ids =
-        requirement_template.jurisdiction_requirement_templates.pluck(
-          :jurisdiction_id
-        )
+    if available_jurisdiction_ids.present?
       manager_query =
         manager_query
           .joins(:jurisdiction_memberships)
           .where(
             jurisdiction_memberships: {
               jurisdiction_id: available_jurisdiction_ids
+            }
+          )
+          .distinct
+    end
+
+    # Exclude managers whose jurisdictions have disabled this template
+    if disabled_jurisdiction_ids.any?
+      manager_query =
+        manager_query
+          .joins(:jurisdiction_memberships)
+          .where.not(
+            jurisdiction_memberships: {
+              jurisdiction_id: disabled_jurisdiction_ids
             }
           )
           .distinct
@@ -152,55 +180,79 @@ class NotificationService
       user = users_with_email_enabled[user_id]
       next unless user
 
-      permit_application_id =
-        notification_data.dig("object_data", "permit_application_id")
-      permit_application =
-        PermitApplication.find_by(
-          id: permit_application_id
-        ) if permit_application_id
-
-      # For managers, pass their jurisdiction so the email can check for missing submission contacts
       jurisdiction = user.manager? ? user.jurisdictions.first : nil
 
       PermitHubMailer.notify_new_template_version_published(
         template_version,
         user,
-        permit_application,
-        jurisdiction
+        jurisdiction: jurisdiction,
+        change_type: change_type,
+        diff_summary: diff_summary
       ).deliver_later
     end
+
+    # Send emails to ExternalApiKey recipients for API-enabled jurisdictions
+    send_external_api_key_notifications(
+      template_version,
+      available_jurisdiction_ids,
+      disabled_jurisdiction_ids,
+      change_type: change_type,
+      diff_summary: diff_summary
+    )
 
     NotificationPushJob.perform_async(notification_hash)
   end
 
-  def self.publish_missing_requirements_mapping_event(integration_mapping)
-    unless integration_mapping.present? &&
-             integration_mapping.can_send_template_missing_requirements_communication?
-      return
+  # Sends differentiated template update emails to ExternalApiKey contacts
+  # for all API-enabled jurisdictions that have access to this template.
+  def self.send_external_api_key_notifications(
+    template_version,
+    available_jurisdiction_ids,
+    disabled_jurisdiction_ids,
+    change_type:,
+    diff_summary:
+  )
+    api_jurisdictions = Jurisdiction.where(external_api_state: "j_on")
+
+    if available_jurisdiction_ids.present?
+      api_jurisdictions =
+        api_jurisdictions.where(id: available_jurisdiction_ids)
     end
 
-    user_ids_to_notify =
-      integration_mapping
-        .jurisdiction
-        .users
-        .includes(:preference)
-        &.kept
-        &.where(
-          role: %i[review_manager regional_review_manager],
-          preferences: {
-            enable_in_app_integration_mapping_notification: true
-          }
-        )
-        &.pluck(:id) || []
+    if disabled_jurisdiction_ids.any?
+      api_jurisdictions =
+        api_jurisdictions.where.not(id: disabled_jurisdiction_ids)
+    end
 
-    notification_hash =
-      user_ids_to_notify.each_with_object({}) do |user_id, hash|
-        hash[
-          user_id
-        ] = integration_mapping.template_missing_requirements_mapping_event_notification_data if integration_mapping.template_missing_requirements_mapping_event_notification_data.present?
+    api_jurisdictions.find_each do |jurisdiction|
+      active_keys =
+        jurisdiction
+          .external_api_keys
+          .where(revoked_at: nil)
+          .where("expired_at IS NULL OR expired_at > ?", Time.current)
+          .where.not(notification_email: [nil, ""])
+
+      active_keys.each do |api_key|
+        PermitHubMailer.notify_external_api_key_template_update(
+          template_version,
+          api_key,
+          change_type: change_type,
+          diff_summary: diff_summary
+        ).deliver_later
       end
+    end
+  end
 
-    NotificationPushJob.perform_async(notification_hash)
+  # Returns jurisdiction IDs that have access to this template,
+  # or nil if the template is globally available.
+  def self.available_jurisdiction_ids_for(requirement_template)
+    if requirement_template.available_globally
+      nil
+    else
+      requirement_template.jurisdiction_requirement_templates.pluck(
+        :jurisdiction_id
+      )
+    end
   end
 
   def self.publish_customization_update_event(customization)
@@ -522,6 +574,8 @@ class NotificationService
   end
 
   private_class_method :determine_file_owner
+  private_class_method :send_external_api_key_notifications
+  private_class_method :available_jurisdiction_ids_for
 
   # this is just a wrapper around the activity's metadata methods
   # since in the case of a single instance it returns a specific return type (eg. Integer)
