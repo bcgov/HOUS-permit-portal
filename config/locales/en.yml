@@ -32,6 +32,10 @@ en:
     removed_placeholder: "<Removed>"
   activerecord:
     attributes:
+  sandbox:
+    scope_names:
+      published: 'Training mode: "Published"'
+      scheduled: 'Training mode: "Upcoming"'
       contact:
         cell: "Mobile no."
         phone: "Phone no."

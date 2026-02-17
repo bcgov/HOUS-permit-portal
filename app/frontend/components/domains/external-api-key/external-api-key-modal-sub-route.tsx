@@ -137,6 +137,24 @@ export const ExternalApiKeyModalSubRoute = observer(function ExternalApiKeyModal
               <GridItem>
                 <TextFormControl label={t("externalApiKey.fieldLabels.name")} fieldName={"name"} required />
               </GridItem>
+              <GridItem colSpan={2}>
+                <FormLabel>{t("externalApiKey.fieldLabels.sandbox")}</FormLabel>
+                <Controller
+                  control={control}
+                  name={"sandboxId"}
+                  render={({ field: { onChange, value } }) => {
+                    return (
+                      <SandboxSelect
+                        onChange={onChange}
+                        value={value}
+                        options={currentJurisdiction.sandboxOptions}
+                        includeLive
+                        isDisabled={!!externalApiKey}
+                      />
+                    )
+                  }}
+                />
+              </GridItem>
               <GridItem>
                 <TextFormControl
                   label={t("externalApiKey.fieldLabels.connectingApplication")}
@@ -191,24 +209,6 @@ export const ExternalApiKeyModalSubRoute = observer(function ExternalApiKeyModal
                     type: "email",
                   }}
                   hint={t("externalApiKey.notificationEmailHint")}
-                />
-              </GridItem>
-              <GridItem colSpan={2}>
-                <FormLabel>{t("externalApiKey.fieldLabels.sandbox")}</FormLabel>
-                <Controller
-                  control={control}
-                  name={"sandboxId"}
-                  render={({ field: { onChange, value } }) => {
-                    return (
-                      <SandboxSelect
-                        onChange={onChange}
-                        value={value}
-                        options={currentJurisdiction.sandboxOptions}
-                        includeLive
-                        isDisabled={!!externalApiKey}
-                      />
-                    )
-                  }}
                 />
               </GridItem>
               <GridItem colSpan={2}>
