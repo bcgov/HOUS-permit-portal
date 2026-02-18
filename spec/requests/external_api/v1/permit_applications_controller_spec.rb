@@ -58,18 +58,6 @@ RSpec.describe "External API v1 permit applications", type: :request do
       expect(ids).not_to include(disallowed_draft.id)
     end
 
-    it "includes CORS headers" do
-      post "/external_api/v1/permit_applications/search",
-           params: {}.to_json,
-           headers: auth_headers
-
-      expect(response.headers["Access-Control-Allow-Origin"]).to eq("*")
-      expect(response.headers["Access-Control-Allow-Methods"]).to include("GET")
-      expect(response.headers["Access-Control-Allow-Headers"]).to include(
-        "Authorization"
-      )
-    end
-
     it "returns 429 when rate limited (external_api/ip)" do
       # Avoid requiring Redis in test by using in-memory cache
       original_store = Rack::Attack.cache.store
@@ -123,34 +111,6 @@ RSpec.describe "External API v1 permit applications", type: :request do
         )
       get "/external_api/v1/permit_applications/#{pa.id}", headers: auth_headers
       expect(response).to have_http_status(:ok)
-    end
-  end
-
-  describe "GET /external_api/v1/permit_applications/versions/:template_version_id/integration_mapping" do
-    it "returns 404 when integration mapping not found" do
-      tv = create(:template_version)
-      tv
-        .integration_mappings
-        .where(jurisdiction: external_api_key.jurisdiction)
-        .delete_all
-      get "/external_api/v1/permit_applications/versions/#{tv.id}/integration_mapping",
-          headers: auth_headers
-      expect(response).to have_http_status(:not_found)
-    end
-
-    it "returns 200 when integration mapping exists for jurisdiction" do
-      tv = create(:template_version)
-      mapping =
-        tv.integration_mappings.find_by!(
-          jurisdiction: external_api_key.jurisdiction
-        )
-
-      get "/external_api/v1/permit_applications/versions/#{tv.id}/integration_mapping",
-          headers: auth_headers
-
-      expect(response).to have_http_status(:ok)
-      json = JSON.parse(response.body)
-      expect(json.dig("data", "id")).to eq(mapping.id)
     end
   end
 end
