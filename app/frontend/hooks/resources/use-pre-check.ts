@@ -5,11 +5,10 @@ import { useMst } from "../../setup/root"
 import { isUUID } from "../../utils/utility-functions"
 
 export const usePreCheck = () => {
-  const { preCheckId, permitApplicationId } = useParams()
+  const { preCheckId } = useParams()
   const { preCheckStore } = useMst()
-  const { fetchPreCheck, preChecksMap, createPreCheck } = preCheckStore
+  const { fetchPreCheck, preChecksMap } = preCheckStore
   const [isLoading, setIsLoading] = useState(true)
-  const [foundPreCheckId, setFoundPreCheckId] = useState<string | null>(null)
 
   useEffect(() => {
     const loadPreCheck = async () => {
@@ -19,20 +18,14 @@ export const usePreCheck = () => {
         if (!preCheck) {
           preCheck = await fetchPreCheck(preCheckId)
         }
-      } else if (isUUID(permitApplicationId)) {
-        const response = await createPreCheck({ permitApplicationId })
-        if (response.ok && response.data) {
-          setFoundPreCheckId(response.data.id)
-        }
       }
       setIsLoading(false)
     }
 
     loadPreCheck()
-  }, [preCheckId, permitApplicationId, fetchPreCheck, preChecksMap, createPreCheck])
+  }, [preCheckId, fetchPreCheck, preChecksMap])
 
-  const effectivePreCheckId = preCheckId || foundPreCheckId
-  const currentPreCheck = effectivePreCheckId ? preChecksMap.get(effectivePreCheckId) : null
+  const currentPreCheck = preCheckId ? preChecksMap.get(preCheckId) : null
 
   return { currentPreCheck, isLoading }
 }

@@ -62,6 +62,10 @@ class RequirementTemplatePolicy < ApplicationPolicy
     create? && record.early_access?
   end
 
+  def update_jurisdiction_availabilities?
+    create?
+  end
+
   class Scope < Scope
     def resolve
       scope.all

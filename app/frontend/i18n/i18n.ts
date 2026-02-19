@@ -329,6 +329,7 @@ const options = {
           unverified: "Unverified",
           tip: "Tip",
           manage: "Manage",
+          moreOptions: "More options",
           export: "Export",
           preview: "Preview",
           back: "Back",
@@ -775,6 +776,8 @@ const options = {
           },
         },
         jurisdiction: {
+          allJurisdictionsEnabledDescription:
+            "All jurisdictions are currently enabled. Turn off the switch above to select specific jurisdictions.",
           yourJurisdiction: "your jurisdiction",
           edit: {
             displayDescriptionLabel: "Jurisdiction description (public)",
@@ -1054,6 +1057,9 @@ Thank you,
             bcbcPartHeading: "BCBC Part",
             bcbcPart:
               "Right now, you can apply for permits for small-scale projects. This includes residential buildings, small structures, trades permits, and site work.",
+            noPermitsAvailable: "No permits are available",
+            noPermitsAvailableDescription:
+              "There are currently no permits available for this jurisdiction. Contact your local government for more information.",
             beforeYouBegin: {
               heading: "Before you begin",
               intro:
@@ -1348,6 +1354,11 @@ Thank you,
             inboxDisabled:
               "Submissions for this local jurisdictions are currently disabled. You will be able to make edits to this permit application but will not be able to submit until this jurisdiction's is accepting submissions again and inboxes are enabled globally.",
             inboxDisabledTitleEarlyAccess: "Early Access – Submissions Not Yet Enabled",
+            inboxDisabledEarlyAccess:
+              "This permit is available for early access to help your team become familiar with the application process. You can view the application in this preview, but submission is currently disabled. <p> You are viewing the baseline standardized form. Click 'View optional electives' within any section to explore additional questions that jurisdictions may configure based on local needs.</p><p><1>Go to My projects to submit a permit.</1></p>",
+            templateDisabledByJurisdictionTitle: "Permit Type No Longer Accepted",
+            templateDisabledByJurisdiction:
+              "This jurisdiction is no longer accepting applications for this permit type. You can continue to edit this application, but you will not be able to submit it. Please contact the jurisdiction for more information.",
             inboxDisabledEarlyAccessInstructions:
               "<br />This permit is available for early access to help your team become familiar with the application process. You can view the application in this preview, but submission is currently disabled.<br /><br /> You are viewing the base form. Click 'View optional electives' within any group of questions to explore additional questions that jurisdictions may configure based on local needs.<br /><1>Go to My projects to submit a permit.</1>",
             downloadApplication: "Download application",
@@ -3772,10 +3783,34 @@ Thank you,
           added: "added",
           removed: "removed",
           filter: "Template",
+          versions: "Versions",
+          access: {
+            statusNone: "Not available in any jurisdictions",
+            statusNoneDesc: "Please grant access below to allow this template to be used in any jurisdictions.",
+            subtitle: "Control which jurisdictions can use this template:",
+            jurisdictionOverrides: "Jurisdiction overrides",
+            disabledBy: "Disabled by:",
+            title: "Manage access",
+            jurisdictionAccess: "Jurisdiction access",
+            description: "Control which jurisdictions can use this template.",
+            enableForAll: "Available to all jurisdictions",
+            enableForAllDesc: "This template is available to all jurisdictions.",
+            usageStats: "Usage statistics",
+            jurisdictionsUsingTemplate: "jurisdictions using this template",
+            explicitlyDisabledBy: "Explicitly disabled by:",
+            availability: "Availability",
+            statusGlobal: "Globally available",
+            statusRestricted: "Restricted access",
+            statusGlobalDesc: "All jurisdictions can access and use this template.",
+            statusRestrictedDesc: "{{count}} jurisdictions have been granted access to this template.",
+            statusSelect: "Available in select jurisdictions",
+            statusSelectDesc: "{{count}} jurisdictions have been granted access to this template.",
+          },
           edit: {
             requirementsLibraryTab: "Requirements Library",
             earlyAccessRequirementsLibraryTab: "Early Access Requirements Library",
             earlyAccessTabDescription: "Early access previews cannot add 'Preview omitted' blocks ",
+            availableToApplicants: "Available to applicants",
             options: {
               button: "Options",
               copyTips: "Import tips from ({{ templateLabel }})",
@@ -3846,7 +3881,7 @@ Thank you,
             firstNations: "First Nations",
             description: "Description",
             currentVersion: "Current version",
-            usedBy: "Used by",
+            availableIn: "Available in",
           },
           status: {
             published: "Published",
@@ -3859,7 +3894,7 @@ Thank you,
             tableHeading: "Templates",
             title: "Permit templates catalogue",
             description:
-              "List of all permit templates in the system that's been created by the Super Admin. Only published templates will be visible to jurisdictions and submitters.",
+              "View all permit templates and manage which ones are available to jurisdictions and applicants. Only published templates are visible to jurisdictions and applicants.",
             createButton: "Create new template",
           },
           new: {
@@ -3938,12 +3973,15 @@ Thank you,
             permitType: "BCBC part",
             selectPermit: "Select a digital permit:",
             workType: "Work type",
-            manageButton: "Manage",
+            manageButton: "More options",
             lastUpdated: "Last updated",
             requestNewPromptWithLink:
               "Your administrator has made the above permit classifications available for digital submissions. If there is another classification you want please <1>request a new classification</1>.",
             emptyPermitsText:
               "No available building permits of the selected work type. Please wait for updates from the Ministry of Housing.",
+            noPermitsAvailable: "No permits are available for your jurisdiction",
+            noPermitsAvailableDescription:
+              "There are currently no permit templates enabled for your jurisdiction. Contact your administrator for more information.",
           },
           edit: {
             requirementBlockSidebar: {
@@ -4040,8 +4078,6 @@ Thank you,
               enableForAll: "Enable for all jurisdictions",
               enrolledJurisdictions: "Select jurisdictions",
               allJurisdictionsEnabled: "All jurisdictions enabled",
-              allJurisdictionsEnabledDescription:
-                "All jurisdictions are currently enabled for Archistar eCheck. Turn off the switch above to select specific jurisdictions.",
               jurisdictionsCount: "{{count}} jurisdictions enabled",
               jurisdictionsCount_one: "{{count}} jurisdiction enabled",
               jurisdictionsCount_other: "{{count}} jurisdictions enabled",
