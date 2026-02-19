@@ -12,27 +12,27 @@ class OverheatingToolPolicy < ApplicationPolicy
   end
 
   def update?
-    user.present? && record.user_id == user.id
+    show?
   end
 
   def destroy?
-    user.present? && record.user_id == user.id
+    show?
   end
 
   def generate_pdf?
-    user.present? && record.user_id == user.id
+    show?
   end
 
   def download?
-    user.present? && record.user_id == user.id
+    show?
   end
 
   def archive?
-    user.present? && record.user_id == user.id
+    show?
   end
 
   def restore?
-    user.present? && record.user_id == user.id
+    show?
   end
 
   class Scope < Scope

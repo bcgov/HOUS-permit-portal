@@ -703,6 +703,11 @@ export enum EPermitProjectRollupStatus {
   approved = "approved",
 }
 
+export enum EOverheatingToolStatus {
+  newDraft = "new_draft",
+  newlySubmitted = "newly_submitted",
+}
+
 export enum EStepCodeSortFields {
   type = "type",
   permitProjectTitle = "permit_project_title",

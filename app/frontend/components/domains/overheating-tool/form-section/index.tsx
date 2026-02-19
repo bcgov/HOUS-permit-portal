@@ -4,6 +4,7 @@ import React, { useEffect, useRef } from "react"
 import { FormProvider, useForm } from "react-hook-form"
 import { useLocation } from "react-router-dom"
 import { useMst } from "../../../../setup/root"
+import { EOverheatingToolStatus } from "../../../../types/enums"
 import { CoverSheetForm } from "../cover-sheet-form"
 import { InputSummaryForm } from "../input-summary-form"
 import { RoomByRoomForm } from "../room-by-room-form"
@@ -57,7 +58,9 @@ export const FormSection = observer(function OverheatingToolFormSection() {
       }
       const result = await overheatingToolStore.searchOverheatingTools({ page: 1, countPerPage: 10, reset: true })
       if (!isMounted || !(result as any)?.success) return
-      const draft = overheatingToolStore.overheatingTools.find((tool) => tool.rollupStatus === "new_draft")
+      const draft = overheatingToolStore.overheatingTools.find(
+        (tool) => tool.status === EOverheatingToolStatus.newDraft
+      )
       if (!draft) return
       overheatingToolStore.setLastCreatedTool(draft.id)
       const overheatingDocumentsAttributes = draft.overheatingDocuments || []

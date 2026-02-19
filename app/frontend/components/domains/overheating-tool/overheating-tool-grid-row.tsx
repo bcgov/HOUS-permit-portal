@@ -5,7 +5,7 @@ import React from "react"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { IOverheatingTool } from "../../../models/overheating-tool"
-import { EFileUploadAttachmentType, EPdfGenerationStatus } from "../../../types/enums"
+import { EFileUploadAttachmentType, EOverheatingToolStatus, EPdfGenerationStatus } from "../../../types/enums"
 import { downloadFileFromStorage } from "../../../utils/utility-functions"
 import { ManageMenuItemButton } from "../../shared/base/manage-menu-item"
 import { ConfirmationModal } from "../../shared/confirmation-modal"
@@ -63,7 +63,7 @@ export const OverheatingToolGridRow = observer(function OverheatingToolGridRow({
       </GridItem>
 
       <GridItem display="flex" alignItems="center" px={4} py={2}>
-        {overheatingTool.rollupStatus && <RollupStatusTag rollupStatus={overheatingTool.rollupStatus as any} />}
+        {overheatingTool.status && <RollupStatusTag rollupStatus={overheatingTool.status as any} />}
       </GridItem>
 
       <GridItem display="flex" alignItems="center" justifyContent="flex-end" px={2} py={2} w="100%">
@@ -74,7 +74,7 @@ export const OverheatingToolGridRow = observer(function OverheatingToolGridRow({
               <DotsThreeVertical size={16} />
             </MenuButton>
             <MenuList minW="160px">
-              {overheatingTool.rollupStatus === "new_draft" && (
+              {overheatingTool.status === EOverheatingToolStatus.newDraft && (
                 <ManageMenuItemButton
                   leftIcon={<ArrowSquareOut size={16} />}
                   onClick={() => navigate(`/overheating-tool/start?toolId=${overheatingTool.id}`)}

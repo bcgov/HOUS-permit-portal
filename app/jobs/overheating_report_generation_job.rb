@@ -78,7 +78,7 @@ class OverheatingReportGenerationJob
       overheating_tool.update!(
         pdf_file: file,
         pdf_generation_status: :completed,
-        rollup_status: :newly_submitted
+        status: :newly_submitted
       )
     end
   ensure
