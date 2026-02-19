@@ -32,15 +32,15 @@ en:
     removed_placeholder: "<Removed>"
   activerecord:
     attributes:
-  sandbox:
-    scope_names:
-      published: 'Training mode: "Published"'
-      scheduled: 'Training mode: "Upcoming"'
       contact:
         cell: "Mobile no."
         phone: "Phone no."
       requirement_template:
         first_nations: "First Nations"
+      sandbox:
+        scope_names:
+          published: 'Training mode: "Published"'
+          scheduled: 'Training mode: "Upcoming"'
     errors:
       models:
         early_access_preview:

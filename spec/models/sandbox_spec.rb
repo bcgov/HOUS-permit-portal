@@ -52,12 +52,16 @@ RSpec.describe Sandbox, type: :model do
   describe "#name" do
     it "returns the translated name for published scope" do
       sandbox = build(:sandbox, template_version_status_scope: :published)
-      expect(sandbox.name).to eq(I18n.t("sandbox.scope_names.published"))
+      expect(sandbox.name).to eq(
+        I18n.t("activerecord.attributes.sandbox.scope_names.published")
+      )
     end
 
     it "returns the translated name for scheduled scope" do
       sandbox = build(:sandbox, :scheduled)
-      expect(sandbox.name).to eq(I18n.t("sandbox.scope_names.scheduled"))
+      expect(sandbox.name).to eq(
+        I18n.t("activerecord.attributes.sandbox.scope_names.scheduled")
+      )
     end
   end
 end
