@@ -4644,7 +4644,7 @@ Thank you,
           },
           coverSheet: {
             title: "CSA Standard F280-12 compliance",
-            rollupStatus: "Status",
+            status: "Status",
             helpText:
               "NBC 2015: 9.33.5.1.; 9.36.3.2. & 9.36.5.15;<br />NBC 2020; 9.33.5.1.; 9.36.3.2.; 9.36.5.15 (5); 9.36.8.9. (1); ",
             buildingLocation: {

@@ -61,7 +61,7 @@ export const GridHeaders = observer(function GridHeaders({ includeActionColumn }
 
       <GridHeader role={"columnheader"}>
         <Flex w={"full"} px={4}>
-          <Text textAlign="left">{t("singleZoneCoolingHeatingTool.coverSheet.rollupStatus")}</Text>
+          <Text textAlign="left">{t("singleZoneCoolingHeatingTool.coverSheet.status")}</Text>
         </Flex>
       </GridHeader>
 
