@@ -213,7 +213,8 @@ export class Api {
     permitTypeId: string = null,
     activityId: string = null,
     pid: string = null,
-    jurisdictionId: string = null
+    jurisdictionId: string = null,
+    hideDisabled = false
   ) {
     return this.client.post<IOptionResponse<IPermitType | IActivity>>(
       `/permit_classifications/permit_classification_options`,
@@ -225,6 +226,7 @@ export class Api {
         activityId,
         pid,
         jurisdictionId,
+        hideDisabled,
       }
     )
   }
@@ -539,6 +541,13 @@ export class Api {
     return this.client.post<ApiResponse<IRequirementTemplate>>(`/requirement_templates`, {
       requirementTemplate: params,
     })
+  }
+
+  async updateRequirementTemplateJurisdictionAvailabilities(templateId: string, jurisdictionIds: string[]) {
+    return this.client.post<ApiResponse<IRequirementTemplate>>(
+      `/requirement_templates/${templateId}/jurisdiction_availabilities`,
+      { jurisdictionIds }
+    )
   }
 
   async copyRequirementTemplate(params?: ICopyRequirementTemplateFormData) {

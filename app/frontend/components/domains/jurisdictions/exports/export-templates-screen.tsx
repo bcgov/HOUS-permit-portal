@@ -26,7 +26,11 @@ import { TemplateVersionsList } from "../../requirement-template/template-versio
 
 export const ExportTemplatesScreen = observer(function JurisdictionSubmissionInbox() {
   const { t } = useTranslation()
-  const { permitTypeOptions: allPermitTypeOptions, error: permitTypeOptionsError } = usePermitTypeOptions()
+  const { currentJurisdiction, error: jurisdictionError } = useJurisdiction()
+  const { permitTypeOptions: allPermitTypeOptions, error: permitTypeOptionsError } = usePermitTypeOptions({
+    publishedOnly: true,
+    jurisdictionId: currentJurisdiction?.id,
+  })
   const [searchParams, setSearchParams] = useSearchParams()
   const enabledPermitTypeOptions = allPermitTypeOptions?.filter((option) => option.value.enabled) ?? null
   const permitTypeId = searchParams.get("permitTypeId")
@@ -44,8 +48,6 @@ export const ExportTemplatesScreen = observer(function JurisdictionSubmissionInb
 
     navigateToPermitTypeTab(firstPermitTypeId, true)
   }, [permitTypeId, enabledPermitTypeOptions, permitTypeOptionsError])
-
-  const { currentJurisdiction, error: jurisdictionError } = useJurisdiction()
 
   if (permitTypeOptionsError) return <ErrorScreen error={permitTypeOptionsError} />
   if (jurisdictionError) return <ErrorScreen error={jurisdictionError} />

@@ -86,6 +86,9 @@ Rails.application.routes.draw do
            on: :collection,
            to: "requirement_templates#unschedule_template_version"
       post "copy", on: :collection
+      post "jurisdiction_availabilities",
+           on: :member,
+           to: "requirement_templates#update_jurisdiction_availabilities"
     end
 
     resources :early_access_previews do
