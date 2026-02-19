@@ -773,6 +773,13 @@ export interface IPermitTypeRequiredStep {
   activityName?: string
 }
 
+export interface IPart3OccupancyRequiredStep {
+  id?: string
+  occupancyKey: string
+  energyStepRequired: number
+  zeroCarbonStepRequired: number | null
+}
+
 export type TCreateRequirementTemplateFormData = {
   description: string
   firstNations?: boolean

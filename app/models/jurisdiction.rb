@@ -64,6 +64,7 @@ class Jurisdiction < ApplicationRecord
   has_many :external_api_keys, dependent: :destroy
   has_many :integration_mappings
   has_many :permit_type_required_steps, dependent: :destroy
+  has_many :part3_occupancy_required_steps, dependent: :destroy
   has_many :collaborators, as: :collaboratorable, dependent: :destroy
   has_many :sandboxes, dependent: :destroy
   has_many :property_plan_local_jurisdictions, dependent: :destroy
@@ -108,6 +109,8 @@ class Jurisdiction < ApplicationRecord
                                   }
 
   accepts_nested_attributes_for :permit_type_required_steps, allow_destroy: true
+  accepts_nested_attributes_for :part3_occupancy_required_steps,
+                                allow_destroy: true
   accepts_nested_attributes_for :resources, allow_destroy: true
 
   before_create :assign_unique_prefix

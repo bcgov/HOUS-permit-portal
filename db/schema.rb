@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_02_12_200000) do
+ActiveRecord::Schema[7.2].define(version: 2026_02_13_200000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -194,6 +194,16 @@ ActiveRecord::Schema[7.2].define(version: 2026_02_12_200000) do
     t.index ["user_id"], name: "index_jurisdiction_memberships_on_user_id"
   end
 
+  create_table "jurisdiction_requirement_templates", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "jurisdiction_id", null: false
+    t.uuid "requirement_template_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["jurisdiction_id", "requirement_template_id"], name: "index_jrt_on_jurisdiction_and_template", unique: true
+    t.index ["jurisdiction_id"], name: "index_jurisdiction_requirement_templates_on_jurisdiction_id"
+    t.index ["requirement_template_id"], name: "idx_on_requirement_template_id_df1d54db04"
+  end
+
   create_table "jurisdiction_service_partner_enrollments", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "jurisdiction_id", null: false
     t.integer "service_partner", null: false
@@ -211,6 +221,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_02_12_200000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.uuid "sandbox_id"
+    t.boolean "disabled", default: false, null: false
     t.index "jurisdiction_id, template_version_id, COALESCE(sandbox_id, '00000000-0000-0000-0000-000000000000'::uuid)", name: "index_jtvcs_unique_on_jurisdiction_template_sandbox", unique: true
     t.index ["jurisdiction_id"], name: "idx_on_jurisdiction_id_57cd0a7ea7"
     t.index ["sandbox_id"], name: "idx_on_sandbox_id_e5e6ef72b0"
@@ -307,6 +318,17 @@ ActiveRecord::Schema[7.2].define(version: 2026_02_12_200000) do
     t.datetime "updated_at", null: false
     t.index ["discarded_at"], name: "index_overheating_tools_on_discarded_at"
     t.index ["user_id"], name: "index_overheating_tools_on_user_id"
+  end
+
+  create_table "part3_occupancy_required_steps", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "jurisdiction_id", null: false
+    t.string "occupancy_key", null: false
+    t.integer "energy_step_required", null: false
+    t.integer "zero_carbon_step_required"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["jurisdiction_id", "occupancy_key"], name: "idx_part3_occ_req_steps_jurisdiction_occupancy"
+    t.index ["jurisdiction_id"], name: "index_part3_occupancy_required_steps_on_jurisdiction_id"
   end
 
   create_table "part_3_step_code_checklists", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -690,6 +712,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_02_12_200000) do
     t.uuid "assignee_id"
     t.boolean "public", default: false
     t.uuid "site_configuration_id"
+    t.boolean "available_globally"
     t.index ["activity_id"], name: "index_requirement_templates_on_activity_id"
     t.index ["assignee_id"], name: "index_requirement_templates_on_assignee_id"
     t.index ["copied_from_id"], name: "index_requirement_templates_on_copied_from_id"
@@ -774,10 +797,10 @@ ActiveRecord::Schema[7.2].define(version: 2026_02_12_200000) do
 
   create_table "sandboxes", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "jurisdiction_id", null: false
-    t.string "name", null: false
     t.integer "template_version_status_scope", default: 0, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "name", null: false
     t.text "description"
     t.index ["jurisdiction_id"], name: "index_sandboxes_on_jurisdiction_id"
   end
@@ -1065,6 +1088,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_02_12_200000) do
   add_foreign_key "integration_mappings", "template_versions"
   add_foreign_key "jurisdiction_memberships", "jurisdictions"
   add_foreign_key "jurisdiction_memberships", "users"
+  add_foreign_key "jurisdiction_requirement_templates", "jurisdictions"
+  add_foreign_key "jurisdiction_requirement_templates", "requirement_templates"
   add_foreign_key "jurisdiction_service_partner_enrollments", "jurisdictions"
   add_foreign_key "jurisdiction_template_version_customizations", "jurisdictions"
   add_foreign_key "jurisdiction_template_version_customizations", "sandboxes"
@@ -1074,6 +1099,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_02_12_200000) do
   add_foreign_key "occupancy_classifications", "part_3_step_code_checklists", column: "checklist_id", on_delete: :cascade
   add_foreign_key "overheating_documents", "overheating_tools"
   add_foreign_key "overheating_tools", "users"
+  add_foreign_key "part3_occupancy_required_steps", "jurisdictions", on_delete: :cascade
   add_foreign_key "part_3_step_code_checklists", "step_codes", on_delete: :cascade
   add_foreign_key "part_9_step_code_checklists", "permit_type_required_steps", column: "step_requirement_id"
   add_foreign_key "part_9_step_code_checklists", "step_codes", on_delete: :cascade

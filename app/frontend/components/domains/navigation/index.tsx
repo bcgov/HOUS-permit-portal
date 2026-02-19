@@ -61,6 +61,34 @@ const EnergyStepRequirementsScreen = lazy(() =>
     default: module.EnergyStepRequirementsScreen,
   }))
 )
+const Part9StepCodeConfigScreen = lazy(() =>
+  import(
+    "../home/review-manager/configuration-management-screen/energy-step-requirements-screen/part-9-step-code-config-screen"
+  ).then((module) => ({
+    default: module.Part9StepCodeConfigScreen,
+  }))
+)
+const ClimateZonesScreen = lazy(() =>
+  import(
+    "../home/review-manager/configuration-management-screen/energy-step-requirements-screen/climate-zones-screen"
+  ).then((module) => ({
+    default: module.ClimateZonesScreen,
+  }))
+)
+const Part3OccupancyOverviewScreen = lazy(() =>
+  import(
+    "../home/review-manager/configuration-management-screen/energy-step-requirements-screen/part-3-occupancy-overview-screen"
+  ).then((module) => ({
+    default: module.Part3OccupancyOverviewScreen,
+  }))
+)
+const Part3OccupancyDetailScreen = lazy(() =>
+  import(
+    "../home/review-manager/configuration-management-screen/energy-step-requirements-screen/part-3-occupancy-detail-screen"
+  ).then((module) => ({
+    default: module.Part3OccupancyDetailScreen,
+  }))
+)
 const ReviewManagerFeatureAccessScreen = lazy(() =>
   import("../home/review-manager/configuration-management-screen/feature-access-screen").then((module) => ({
     default: module.ReviewManagerFeatureAccessScreen,
@@ -77,11 +105,11 @@ const ResourcesScreenLazy = lazy(() =>
   }))
 )
 const ReviewStaffMyJurisdictionAboutPageScreen = lazy(() =>
-  import("../home/review-manager/configuration-management-screen/feature-access-screen/my-jurisdiction-about-page").then(
-    (module) => ({
-      default: module.myJurisdictionAboutPageScreen,
-    })
-  )
+  import(
+    "../home/review-manager/configuration-management-screen/feature-access-screen/my-jurisdiction-about-page"
+  ).then((module) => ({
+    default: module.myJurisdictionAboutPageScreen,
+  }))
 )
 
 const DesignatedReviewerScreen = lazy(() =>
@@ -548,6 +576,22 @@ const AppRoutes = observer(() => {
         path="/jurisdictions/:jurisdictionId/configuration-management/energy-step"
         element={<EnergyStepRequirementsScreen />}
       />
+      <Route
+        path="/jurisdictions/:jurisdictionId/configuration-management/energy-step/part-9"
+        element={<Part9StepCodeConfigScreen />}
+      />
+      <Route
+        path="/jurisdictions/:jurisdictionId/configuration-management/energy-step/part-3"
+        element={<Part3OccupancyOverviewScreen />}
+      />
+      <Route
+        path="/jurisdictions/:jurisdictionId/configuration-management/energy-step/part-3/:occupancyKey"
+        element={<Part3OccupancyDetailScreen />}
+      />
+      <Route
+        path="/jurisdictions/:jurisdictionId/configuration-management/energy-step/climate-zones"
+        element={<ClimateZonesScreen />}
+      />
     </>
   )
 
@@ -578,6 +622,22 @@ const AppRoutes = observer(() => {
       <Route
         path="/jurisdictions/:jurisdictionId/configuration-management/energy-step"
         element={<EnergyStepRequirementsScreen />}
+      />
+      <Route
+        path="/jurisdictions/:jurisdictionId/configuration-management/energy-step/part-9"
+        element={<Part9StepCodeConfigScreen />}
+      />
+      <Route
+        path="/jurisdictions/:jurisdictionId/configuration-management/energy-step/part-3"
+        element={<Part3OccupancyOverviewScreen />}
+      />
+      <Route
+        path="/jurisdictions/:jurisdictionId/configuration-management/energy-step/part-3/:occupancyKey"
+        element={<Part3OccupancyDetailScreen />}
+      />
+      <Route
+        path="/jurisdictions/:jurisdictionId/configuration-management/energy-step/climate-zones"
+        element={<ClimateZonesScreen />}
       />
       <Route path="/permit-applications/:permitApplicationId" element={<ReviewPermitApplicationScreen />} />
       {import.meta.env.DEV && (
