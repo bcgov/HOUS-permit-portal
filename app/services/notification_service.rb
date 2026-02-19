@@ -98,6 +98,7 @@ class NotificationService
 
     relevant_permit_applications =
       PermitApplication
+        .kept
         .select("DISTINCT ON (submitter_id) permit_applications.*")
         .joins(:template_version)
         .joins(submitter: :preference)
@@ -168,6 +169,7 @@ class NotificationService
     template_version = customization.template_version
     relevant_submitter_ids =
       PermitApplication
+        .kept
         .joins(:template_version)
         .joins(submitter: :preference)
         .where(

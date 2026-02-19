@@ -48,7 +48,7 @@ export const StepCodeRequirementsTable: React.FC<IStepCodeRequirementsTableProps
                     {t("jurisdiction.edit.stepCode.zeroCarbonStepRequired")}
                   </GridItem>
                   {part9RequiredSteps.map((ptrs, i) => (
-                    <>
+                    <React.Fragment key={ptrs.id || i}>
                       <GridItem as={Center}>
                         <Tag bg="semantic.successLight" color="inherit" rounded="xs" fontWeight="bold">
                           {currentJurisdiction.energyStepRequiredTranslation(ptrs.energyStepRequired)}
@@ -76,7 +76,7 @@ export const StepCodeRequirementsTable: React.FC<IStepCodeRequirementsTableProps
                           {t("ui.or")}
                         </GridItem>
                       )}
-                    </>
+                    </React.Fragment>
                   ))}
                 </Grid>
               </Flex>

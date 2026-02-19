@@ -28,6 +28,7 @@ import {
 } from "../../../types/types"
 import { isTipTapEmpty } from "../../../utils/utility-functions"
 import { DownloadLinkButton, ResourceItem } from "../../shared/base/resource-item"
+import { ConditionalTag } from "../../shared/conditional-tag"
 import { SafeTipTapDisplay } from "../../shared/editor/safe-tiptap-display"
 import { ElectiveTag } from "../../shared/elective-tag"
 import { FirstNationsTag } from "../../shared/first-nations-tag"
@@ -279,6 +280,8 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
               })
               .map((requirement: IDenormalizedRequirement, index) => {
                 const requirementType = requirement.inputType
+                const showConditionalTag = !!currentUser?.isReviewStaff && !!requirement?.inputOptions?.conditional
+                const showElectiveTag = !!requirement?.elective
                 return (
                   <Box
                     key={requirement.id}
@@ -316,7 +319,12 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
                         showAddButton={!!requirement?.inputOptions?.canAddMultipleContacts}
                         required={requirement.required}
                       />
-                      {requirement?.elective && <ElectiveTag position="absolute" right="0" top="0" />}
+                      {(showConditionalTag || showElectiveTag) && (
+                        <Flex position="absolute" right="0" top="0" gap={2}>
+                          {showConditionalTag && <ConditionalTag />}
+                          {showElectiveTag && <ElectiveTag />}
+                        </Flex>
+                      )}
                     </Box>
                   </Box>
                 )

@@ -1,6 +1,6 @@
 import {
+  Box,
   Button,
-  Checkbox,
   Flex,
   Modal,
   ModalBody,
@@ -8,6 +8,9 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
+  Radio,
+  RadioGroup,
+  Stack,
   Text,
 } from "@chakra-ui/react"
 import React, { useEffect, useMemo, useRef } from "react"
@@ -58,18 +61,6 @@ export const SandboxSwitchModal = ({
     [currentUser.jurisdiction]
   )
 
-  // Determine if checkbox should be checked (true if scheduled is selected)
-  const isTrainOnUpcomingChecked = selectedOption === scheduledSandbox?.id
-
-  // Handle checkbox change
-  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.checked && scheduledSandbox) {
-      onSelectedOptionChange(scheduledSandbox.id)
-    } else if (publishedSandbox) {
-      onSelectedOptionChange(publishedSandbox.id)
-    }
-  }
-
   // Find published sandbox and default to it when modal first opens
   useEffect(() => {
     if (isOpen && !isSandboxActive && publishedSandbox && !hasInitializedRef.current) {
@@ -102,6 +93,34 @@ export const SandboxSwitchModal = ({
               <Text my={4}>{t("sandbox.switch.descriptionParagraph1")}</Text>
               <Text my={4}>{t("sandbox.switch.descriptionParagraph2")}</Text>
 
+              <Text fontWeight="bold" mt={6} mb={3}>
+                {t("sandbox.switch.chooseWhichFormsToPreview")}
+              </Text>
+              <RadioGroup value={selectedOption ?? ""} onChange={onSelectedOptionChange}>
+                <Stack spacing={4}>
+                  {publishedSandbox && (
+                    <Radio value={publishedSandbox.id} size="lg" alignItems="flex-start">
+                      <Box mt={-1}>
+                        <Text fontWeight="bold">{t("sandbox.switch.publishedForms")}</Text>
+                        <Text fontSize="sm" color="gray.600">
+                          {t("sandbox.switch.publishedFormsDescription")}
+                        </Text>
+                      </Box>
+                    </Radio>
+                  )}
+                  {scheduledSandbox && (
+                    <Radio value={scheduledSandbox.id} size="lg" alignItems="flex-start">
+                      <Box mt={-1}>
+                        <Text fontWeight="bold">{t("sandbox.switch.scheduledForms")}</Text>
+                        <Text fontSize="sm" color="gray.600">
+                          {t("sandbox.switch.scheduledFormsDescription")}
+                        </Text>
+                      </Box>
+                    </Radio>
+                  )}
+                </Stack>
+              </RadioGroup>
+
               <CustomMessageBox
                 mt={6}
                 p={4}
@@ -109,15 +128,6 @@ export const SandboxSwitchModal = ({
                 title={t(`sandbox.switch.warningTitle`)}
                 description={t(`sandbox.switch.warning`)}
               />
-              <Checkbox
-                isChecked={isTrainOnUpcomingChecked}
-                onChange={handleCheckboxChange}
-                mt={4}
-                mb={2}
-                colorScheme="blue"
-              >
-                {t("sandbox.switch.trainOnUpcomingTemplates")}
-              </Checkbox>
             </>
           )}
         </ModalBody>
