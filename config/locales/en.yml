@@ -45,6 +45,8 @@ en:
         jurisdiction:
           no_sandboxes: "Jurisdiction must have at least one sandbox."
           enabled_inbox_requires_setup: "can only be toggled on once all emails are set up."
+        part3_occupancy_required_step:
+          duplicate_pathway: "A pathway with identical energy step and zero carbon step already exists for this occupancy."
         jurisdiction_template_version_customizations:
           uniqueness: "already exists for this jurisdiction and template version."
         site_configuration:

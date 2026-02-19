@@ -84,6 +84,7 @@ class Jurisdiction < ApplicationRecord
   validates :name, uniqueness: { scope: :locality_type, case_sensitive: false }
   validates :locality_type, presence: true
   validate :inbox_enabled_requires_inbox_setup
+  validate :no_duplicate_part3_occupancy_pathways
 
   # Validation to ensure at least one sandbox exists
   validate :must_have_one_sandbox
@@ -453,6 +454,30 @@ class Jurisdiction < ApplicationRecord
           "activerecord.errors.models.jurisdiction.enabled_inbox_requires_setup"
         )
       )
+    end
+  end
+
+  def no_duplicate_part3_occupancy_pathways
+    active_steps =
+      part3_occupancy_required_steps.reject(&:marked_for_destruction?)
+
+    seen = Set.new
+    active_steps.each do |step|
+      key = [
+        step.occupancy_key,
+        step.energy_step_required,
+        step.zero_carbon_step_required
+      ]
+      if seen.include?(key)
+        errors.add(
+          :base,
+          I18n.t(
+            "activerecord.errors.models.part3_occupancy_required_step.duplicate_pathway"
+          )
+        )
+        break
+      end
+      seen.add(key)
     end
   end
 
