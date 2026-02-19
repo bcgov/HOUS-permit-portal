@@ -1,4 +1,4 @@
-import { Grid, GridItem, IconButton, Menu, MenuButton, MenuItem, MenuList, Text } from "@chakra-ui/react"
+import { Button, Grid, GridItem, IconButton, Menu, MenuButton, MenuItem, MenuList, Text } from "@chakra-ui/react"
 import { Archive, ArrowSquareOut, ClockClockwise, DotsThreeVertical, ShareNetwork } from "@phosphor-icons/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
@@ -10,6 +10,7 @@ import { useMst } from "../../../setup/root"
 import { IStepCode } from "../../../stores/step-code-store"
 import { EFileUploadAttachmentType, EStepCodeType } from "../../../types/enums"
 import { FileDownloadButton } from "../../shared/base/file-download-button"
+import { ConfirmationModal } from "../../shared/confirmation-modal"
 
 export const StepCodesGridRow = observer(({ stepCode }: { stepCode: IStepCode }) => {
   const navigate = useNavigate()
@@ -18,16 +19,16 @@ export const StepCodesGridRow = observer(({ stepCode }: { stepCode: IStepCode })
   const { stepCodeStore } = useMst()
   const { type, permitProjectTitle, fullAddress, updatedAt, targetPath, isDiscarded } = stepCode as any
 
-  const handleArchive = async (e: React.MouseEvent) => {
-    e.stopPropagation()
+  const handleArchive = async (e?: React.MouseEvent | null) => {
+    e?.stopPropagation()
     const success = await stepCode.archive()
     if (success) {
       await stepCodeStore.search()
     }
   }
 
-  const handleRestore = async (e: React.MouseEvent) => {
-    e.stopPropagation()
+  const handleRestore = async (e?: React.MouseEvent | null) => {
+    e?.stopPropagation()
     const success = await stepCode.restore()
     if (success) {
       await stepCodeStore.search()
@@ -83,9 +84,30 @@ export const StepCodesGridRow = observer(({ stepCode }: { stepCode: IStepCode })
           />
           <MenuList>
             {isDiscarded ? (
-              <MenuItem icon={<ClockClockwise size={16} />} onClick={handleRestore} color="semantic.success">
-                {t("ui.restore")}
-              </MenuItem>
+              <ConfirmationModal
+                title={t("ui.confirmRestore")}
+                onConfirm={(closeModal) => {
+                  handleRestore()
+                  closeModal()
+                }}
+                renderTriggerButton={({ onClick }) => (
+                  <MenuItem
+                    icon={<ClockClockwise size={16} />}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onClick(e)
+                    }}
+                    color="semantic.success"
+                  >
+                    {t("ui.restore")}
+                  </MenuItem>
+                )}
+                renderConfirmationButton={(props) => (
+                  <Button {...props} colorScheme="green">
+                    {t("ui.restore")}
+                  </Button>
+                )}
+              />
             ) : (
               <>
                 {(stepCode as any)?.reportDocuments?.length > 0 ? (
@@ -123,9 +145,30 @@ export const StepCodesGridRow = observer(({ stepCode }: { stepCode: IStepCode })
                   {t("ui.open")}
                 </MenuItem>
 
-                <MenuItem icon={<Archive size={16} />} onClick={handleArchive} color="semantic.error">
-                  {t("ui.archive")}
-                </MenuItem>
+                <ConfirmationModal
+                  title={t("ui.confirmArchive")}
+                  onConfirm={(closeModal) => {
+                    handleArchive()
+                    closeModal()
+                  }}
+                  renderTriggerButton={({ onClick }) => (
+                    <MenuItem
+                      icon={<Archive size={16} />}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onClick(e)
+                      }}
+                      color="semantic.error"
+                    >
+                      {t("ui.archive")}
+                    </MenuItem>
+                  )}
+                  renderConfirmationButton={(props) => (
+                    <Button {...props} colorScheme="red">
+                      {t("ui.archive")}
+                    </Button>
+                  )}
+                />
               </>
             )}
           </MenuList>

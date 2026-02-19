@@ -7,8 +7,9 @@ module PermitApplicationStatus
            new_draft: 0,
            newly_submitted: 1,
            revisions_requested: 3,
-           resubmitted: 4
-           #  approved: 5
+           resubmitted: 4,
+           closed: 5,
+           occupancy_issued: 6
          },
          default: 0
 
@@ -51,6 +52,10 @@ module PermitApplicationStatus
 
     def submitted?
       newly_submitted? || resubmitted?
+    end
+
+    def decided?
+      closed? || occupancy_issued?
     end
 
     def pertinence_score

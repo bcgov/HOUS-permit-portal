@@ -21,7 +21,7 @@ import { useTemplateVersion } from "../../../../../hooks/resources/use-template-
 import { IJurisdictionTemplateVersionCustomization } from "../../../../../models/jurisdiction-template-version-customization"
 import { IRequirement } from "../../../../../models/requirement"
 import { useMst } from "../../../../../setup/root"
-import { ERequirementChangeAction } from "../../../../../types/enums"
+import { EFlashMessageStatus, ERequirementChangeAction } from "../../../../../types/enums"
 import {
   ICompareRequirementsBoxData,
   ICompareRequirementsBoxDiff,
@@ -29,6 +29,7 @@ import {
   ITemplateCustomization,
   ITemplateVersionDiff,
 } from "../../../../../types/types"
+import { CustomMessageBox } from "../../../../shared/base/custom-message-box"
 import { ErrorScreen } from "../../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../../shared/base/loading-screen"
 import { SharedSpinner } from "../../../../shared/base/shared-spinner"
@@ -74,6 +75,7 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
   const { t } = useTranslation()
   const { userStore, sandboxStore } = useMst()
   const { currentSandbox } = sandboxStore
+  const { isSandboxActive } = sandboxStore
   const { currentUser } = userStore
   const { templateVersion, error: templateVersionError } = useTemplateVersion({
     customErrorMessage: t("errors.fetchBuildingPermit"),
@@ -263,8 +265,15 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
               <BrowserSearchPrompt color="text.primary" />
               {currentSandbox && (
                 <ConfirmationModal
-                  promptHeader={t("requirementTemplate.edit.promoteElectives")}
-                  promptMessage={t("requirementTemplate.edit.promoteElectivesMessage")}
+                  promptHeader={t("sandbox.exportChanges")}
+                  promptMessage={
+                    <CustomMessageBox
+                      status={EFlashMessageStatus.special}
+                      title={t("sandbox.replacementWarning")}
+                      description={t("sandbox.replacementWarningMessage")}
+                    />
+                  }
+                  confirmText={t("sandbox.exportAndSeeInDraftPermit")}
                   renderTrigger={(onOpen) => (
                     <Button
                       variant={"primary"}
@@ -301,7 +310,6 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
               </Button>
             </ButtonGroup>
           </Flex>
-
           <FloatingHelpDrawer />
           {isCompare &&
             (diff ? (
@@ -309,6 +317,14 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
             ) : (
               <SharedSpinner position="fixed" right={24} top="50vh" />
             ))}
+          {isSandboxActive && (
+            <CustomMessageBox
+              mt={8}
+              mx={8}
+              status={EFlashMessageStatus.special}
+              description={t("sandbox.anyChanges")}
+            />
+          )}
           <SectionsDisplay
             sections={templateSections}
             isCollapsedAll={isCollapsedAll}
