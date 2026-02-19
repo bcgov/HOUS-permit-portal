@@ -37,6 +37,7 @@ en:
         phone: "Phone no."
       requirement_template:
         first_nations: "First Nations"
+        available_in_all: "All"
     errors:
       models:
         early_access_preview:
@@ -453,7 +454,7 @@ en:
         message: "New template created successfully!"
       update_success:
         title: ""
-        message: "This draft has been saved."
+        message: "This template has been saved."
       schedule_success:
         title: ""
         message: "Permit has been scheduled to published."

@@ -18,7 +18,10 @@ export const JurisdictionApiMappingsSetupIndexScreen = observer(function Jurisdi
   const { t } = useTranslation()
   const { userStore } = useMst()
   const { currentUser } = userStore
-  const { permitTypeOptions: allPermitTypeOptions, error: permitTypeOptionsError } = usePermitTypeOptions()
+  const { permitTypeOptions: allPermitTypeOptions, error: permitTypeOptionsError } = usePermitTypeOptions({
+    publishedOnly: true,
+    jurisdictionId: currentUser?.jurisdiction?.id,
+  })
   const [searchParams, setSearchParams] = useSearchParams()
   const enabledPermitTypeOptions = allPermitTypeOptions?.filter((option) => option.value.enabled) ?? null
   const permitTypeId = searchParams.get("permitTypeId")

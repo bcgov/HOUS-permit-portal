@@ -1,5 +1,5 @@
 class JurisdictionTemplateVersionCustomizationBlueprint < Blueprinter::Base
   identifier :id
 
-  fields :jurisdiction_id, :customizations
+  fields :jurisdiction_id, :customizations, :disabled
 end
