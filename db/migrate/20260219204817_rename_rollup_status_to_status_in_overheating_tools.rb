@@ -1,7 +1,9 @@
 class RenameRollupStatusToStatusInOverheatingTools < ActiveRecord::Migration[
-  7.1
+  7.2
 ]
   def change
-    rename_column :overheating_tools, :rollup_status, :status
+    unless column_exists?(:overheating_tools, :rollup_status)
+      rename_column :overheating_tools, :rollup_status, :status
+    end
   end
 end
