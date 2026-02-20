@@ -93,7 +93,7 @@ export const Part3StepCodeForm = observer(function Part3StepCodeForm() {
                 <SideBarDrawer triggerProps={{ ml: 6, size: "md" }} />
               </Hide>
 
-              <FloatingHelpDrawer top="36" zIndex={1} />
+              <FloatingHelpDrawer />
               <Flex direction="column" flex={1} maxW="780px" px={6} py={3}>
                 <FormSection />
               </Flex>

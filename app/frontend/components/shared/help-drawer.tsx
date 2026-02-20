@@ -14,7 +14,6 @@ import {
   Heading,
   IconButton,
   Link,
-  Portal,
   Text,
   useDisclosure,
 } from "@chakra-ui/react"
@@ -40,23 +39,21 @@ export function HelpDrawer({ defaultButtonProps, renderTriggerButton }: IProps) 
   return (
     <>
       {renderTriggerButton?.({ onClick: onOpen, ref: btnRef }) ?? (
-        <Portal>
-          <Button
-            variant={"ghost"}
-            position="fixed"
-            top="100px"
-            right="20px"
-            p={0}
-            onClick={onOpen}
-            aria-label={"add requirement to template"}
-            _hover={{
-              textDecoration: "underline",
-            }}
-            {...defaultButtonProps}
-          >
-            {t("ui.help")}
-          </Button>
-        </Portal>
+        <Button
+          variant={"ghost"}
+          position="fixed"
+          top="0px"
+          right="20px"
+          p={0}
+          onClick={onOpen}
+          aria-label={"open help drawer"}
+          _hover={{
+            textDecoration: "underline",
+          }}
+          {...defaultButtonProps}
+        >
+          {t("ui.help")}
+        </Button>
       )}
       <Drawer isOpen={isOpen} onClose={onClose} finalFocusRef={btnRef} placement={"right"}>
         <DrawerOverlay />

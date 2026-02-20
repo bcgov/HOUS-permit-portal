@@ -109,7 +109,11 @@ export const JurisdictionScreen = observer(() => {
     <Flex as="main" direction="column" w="full" bg="greys.white" pb="24">
       <BlueTitleBar title={qualifiedName} />
       <Show below="md">
-        <JurisdictionMap mapPosition={mapPositionWatch} mapZoom={mapZoomWatch} />
+        <JurisdictionMap
+          mapPosition={mapPositionWatch}
+          mapZoom={mapZoomWatch}
+          linePositions={currentJurisdiction.boundaryPoints}
+        />
       </Show>
       <Container maxW="container.lg" py={{ base: 6, md: 16 }} px={8}>
         {!currentJurisdiction.inboxEnabled && (
@@ -414,6 +418,7 @@ const EditableMap = ({ currentJurisdiction }: IEditableMapProps) => {
         <JurisdictionMap
           mapPosition={mapPositionWatch}
           mapZoom={mapZoomWatch}
+          linePositions={currentJurisdiction.boundaryPoints}
           onMapDrag={isEditingMap && ((latLng) => setValue("mapPosition", latLng))}
           onZoomChange={isEditingMap && ((zoom) => setValue("mapZoom", zoom))}
           isEditingMap={isEditingMap}

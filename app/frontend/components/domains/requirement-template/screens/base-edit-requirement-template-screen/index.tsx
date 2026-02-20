@@ -215,7 +215,7 @@ export const BaseEditRequirementTemplateScreen = observer(function BaseEditRequi
               renderOptionsMenu={renderOptionsMenu}
               renderActions={renderActions}
             />
-            <FloatingHelpDrawer top="100px" />
+            <FloatingHelpDrawer />
             {hasNoSections ? (
               <Flex
                 justifyContent={hasNoSections ? "center" : undefined}

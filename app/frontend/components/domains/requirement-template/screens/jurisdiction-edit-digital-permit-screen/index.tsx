@@ -1,8 +1,19 @@
-import { Box, Button, ButtonGroup, Flex, Menu, MenuButton, MenuItem, MenuList, Spacer } from "@chakra-ui/react"
+import {
+  Box,
+  Button,
+  ButtonGroup,
+  Checkbox,
+  Flex,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
+  Spacer,
+} from "@chakra-ui/react"
 import { ArrowUp, CaretDown, CaretRight } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
-import { useForm } from "react-hook-form"
+import { Controller, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useNavigate, useSearchParams } from "react-router-dom"
 import { useJurisdictionTemplateVersionCustomization } from "../../../../../hooks/resources/use-jurisdiction-template-version-customization"
@@ -10,7 +21,7 @@ import { useTemplateVersion } from "../../../../../hooks/resources/use-template-
 import { IJurisdictionTemplateVersionCustomization } from "../../../../../models/jurisdiction-template-version-customization"
 import { IRequirement } from "../../../../../models/requirement"
 import { useMst } from "../../../../../setup/root"
-import { ERequirementChangeAction } from "../../../../../types/enums"
+import { EFlashMessageStatus, ERequirementChangeAction } from "../../../../../types/enums"
 import {
   ICompareRequirementsBoxData,
   ICompareRequirementsBoxDiff,
@@ -18,6 +29,7 @@ import {
   ITemplateCustomization,
   ITemplateVersionDiff,
 } from "../../../../../types/types"
+import { CustomMessageBox } from "../../../../shared/base/custom-message-box"
 import { ErrorScreen } from "../../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../../shared/base/loading-screen"
 import { SharedSpinner } from "../../../../shared/base/shared-spinner"
@@ -38,6 +50,7 @@ export const formScrollToId = (id: string) => `${scrollToIdPrefix}${id}`
 export interface IJurisdictionTemplateVersionCustomizationForm {
   jurisdictionId?: string
   customizations: ITemplateCustomization
+  disabled?: boolean
 }
 
 function formFormDefaults(
@@ -48,11 +61,13 @@ function formFormDefaults(
       customizations: {
         requirementBlockChanges: {},
       },
+      disabled: false,
     }
   }
 
   return {
     customizations: { requirementBlockChanges: {}, ...jurisdictionTemplateVersionCustomization.customizations },
+    disabled: jurisdictionTemplateVersionCustomization.disabled ?? false,
   }
 }
 
@@ -60,6 +75,7 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
   const { t } = useTranslation()
   const { userStore, sandboxStore } = useMst()
   const { currentSandbox } = sandboxStore
+  const { isSandboxActive } = sandboxStore
   const { currentUser } = userStore
   const { templateVersion, error: templateVersionError } = useTemplateVersion({
     customErrorMessage: t("errors.fetchBuildingPermit"),
@@ -90,7 +106,7 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
   const formMethods = useForm<IJurisdictionTemplateVersionCustomizationForm>({
     defaultValues: formFormDefaults(jurisdictionTemplateVersionCustomization),
   })
-  const { formState, handleSubmit, setValue, reset, watch } = formMethods
+  const { formState, handleSubmit, setValue, reset, watch, control } = formMethods
 
   const { isSubmitting, isValid } = formState
 
@@ -102,7 +118,7 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
 
   useEffect(() => {
     reset(formFormDefaults(jurisdictionTemplateVersionCustomization))
-  }, [jurisdictionTemplateVersionCustomization?.customizations])
+  }, [jurisdictionTemplateVersionCustomization])
 
   const [searchParams] = useSearchParams()
   const isCompare = searchParams.get("compare") === "true"
@@ -210,6 +226,18 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
             justifyContent="space-between"
             boxShadow="elevations.elevation02"
           >
+            {jurisdictionTemplateVersionCustomization && (
+              <Controller
+                name="disabled"
+                control={control}
+                render={({ field: { value, onChange } }) => (
+                  <Checkbox isChecked={!value} onChange={(e) => onChange(!e.target.checked)} fontWeight="medium">
+                    {t("requirementTemplate.edit.availableToApplicants")}
+                  </Checkbox>
+                )}
+              />
+            )}
+
             {templateVersion.firstNations ? (
               <Menu>
                 <MenuButton as={Button} rightIcon={<CaretDown />} variant="ghost">
@@ -237,8 +265,15 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
               <BrowserSearchPrompt color="text.primary" />
               {currentSandbox && (
                 <ConfirmationModal
-                  promptHeader={t("requirementTemplate.edit.promoteElectives")}
-                  promptMessage={t("requirementTemplate.edit.promoteElectivesMessage")}
+                  promptHeader={t("sandbox.exportChanges")}
+                  promptMessage={
+                    <CustomMessageBox
+                      status={EFlashMessageStatus.special}
+                      title={t("sandbox.replacementWarning")}
+                      description={t("sandbox.replacementWarningMessage")}
+                    />
+                  }
+                  confirmText={t("sandbox.exportAndSeeInDraftPermit")}
                   renderTrigger={(onOpen) => (
                     <Button
                       variant={"primary"}
@@ -275,14 +310,21 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
               </Button>
             </ButtonGroup>
           </Flex>
-
-          <FloatingHelpDrawer top="100px" />
+          <FloatingHelpDrawer />
           {isCompare &&
             (diff ? (
               <CompareRequirementsBox data={infoBoxData} />
             ) : (
               <SharedSpinner position="fixed" right={24} top="50vh" />
             ))}
+          {isSandboxActive && (
+            <CustomMessageBox
+              mt={8}
+              mx={8}
+              status={EFlashMessageStatus.special}
+              description={t("sandbox.anyChanges")}
+            />
+          )}
           <SectionsDisplay
             sections={templateSections}
             isCollapsedAll={isCollapsedAll}

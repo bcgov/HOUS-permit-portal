@@ -14,6 +14,7 @@ import { SharedSpinner } from "../../shared/base/shared-spinner"
 import { FirstNationsTag } from "../../shared/first-nations-tag"
 import { RouterLink } from "../../shared/navigation/router-link"
 import { TemplateStatusTag } from "../../shared/requirement-template/template-status-tag"
+import SandboxHeader from "../../shared/sandbox/sandbox-header"
 import { can } from "../../shared/user/can"
 import { VersionTag } from "../../shared/version-tag"
 import { SectionBox } from "../home/section-box"
@@ -28,6 +29,8 @@ interface IProps {
     showStatus?: boolean
     showVersionDate?: boolean
   }
+  jurisdictionId?: string
+  hideDisabled?: boolean
 }
 
 export const TemplateVersionsList = observer(function TemplateVersionsList({
@@ -37,11 +40,15 @@ export const TemplateVersionsList = observer(function TemplateVersionsList({
   statusDisplayOptions,
   earlyAccess,
   isPublic,
+  jurisdictionId,
+  hideDisabled,
 }: IProps) {
   const { t } = useTranslation()
   const { permitClassificationStore } = useMst()
   const [activityOptions, setActivityOptions] = useState<IOption<IActivity>[] | null>(null)
   const [activityOptionsError, setActivityOptionsError] = useState<Error | undefined>()
+  const { sandboxStore } = useMst()
+  const { isSandboxActive } = sandboxStore
   const { templateVersions, isLoading, error } = useTemplateVersions({
     permitTypeId,
     customErrorMessage: t("errors.fetchBuildingPermits"),
@@ -53,14 +60,20 @@ export const TemplateVersionsList = observer(function TemplateVersionsList({
   useEffect(() => {
     ;(async () => {
       try {
-        const options = await permitClassificationStore.fetchActivityOptions(false, null, permitTypeId)
+        const options = await permitClassificationStore.fetchActivityOptions(
+          false,
+          null,
+          permitTypeId,
+          jurisdictionId,
+          hideDisabled
+        )
         setActivityOptions(options ?? [])
         setActivityOptionsError(undefined)
       } catch (e) {
         setActivityOptionsError(e as Error)
       }
     })()
-  }, [permitTypeId])
+  }, [permitTypeId, jurisdictionId, hideDisabled])
 
   const enabledActivityOptions = activityOptions?.filter((option) => option.value.enabled) ?? []
 
@@ -126,7 +139,8 @@ export const TemplateVersionsList = observer(function TemplateVersionsList({
           const tvs = templateVersionsByActivityId.get(activityOption.value.id) || []
 
           return tvs.map((tv) => (
-            <SectionBox key={tv.id} w="full">
+            <SectionBox key={tv.id} w="full" pt={isSandboxActive ? 12 : 6}>
+              {isSandboxActive && <SandboxHeader sandbox={tv.sandbox} />}
               <Flex w="full" as="section">
                 <Stack spacing={3} flex={1}>
                   <Text as="h4" color={"text.link"} fontWeight={700} fontSize="xl">

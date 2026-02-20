@@ -15,8 +15,9 @@ import { useTranslation } from "react-i18next"
 
 interface IConfirmationModalProps {
   onConfirm: () => void // Function type for the confirmation action
-  promptMessage?: string
+  promptMessage?: string | ReactNode
   promptHeader?: string
+  confirmText?: string
   renderTrigger: (onOpen: () => void) => ReactNode
 }
 
@@ -24,6 +25,7 @@ export const ConfirmationModal = ({
   onConfirm,
   promptMessage,
   promptHeader,
+  confirmText,
   renderTrigger,
 }: IConfirmationModalProps) => {
   const { isOpen, onOpen, onClose } = useDisclosure()
@@ -50,7 +52,7 @@ export const ConfirmationModal = ({
           <ModalFooter>
             <Flex justify="flex-start" w="full" gap={4}>
               <Button variant="primary" onClick={handleConfirm}>
-                {t("ui.confirm")}
+                {confirmText ?? t("ui.confirm")}
               </Button>
               <Button variant="secondary" onClick={handleCancel}>
                 {t("ui.neverMind")}

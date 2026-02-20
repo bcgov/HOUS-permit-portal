@@ -12,7 +12,8 @@ export const ReviewManagerHomeScreen = observer(({ ...rest }: IHomeScreenProps) 
   const { t } = useTranslation()
   const { userStore } = useMst()
   const { currentUser } = userStore
-
+  const { sandboxStore } = useMst()
+  const { isSandboxActive } = sandboxStore
   if (!currentUser?.jurisdiction) return <ErrorScreen error={new Error(t("errors.fetchJurisdiction"))} />
   const jurisdiction = currentUser.jurisdiction
 
@@ -29,12 +30,14 @@ export const ReviewManagerHomeScreen = observer(({ ...rest }: IHomeScreenProps) 
             icon={<Tray size={24} />}
             href={`jurisdictions/${jurisdiction.slug}/submission-inbox`}
             linkText={t("ui.view")}
+            markForSandbox={isSandboxActive}
           />
           <HomeScreenBox
             title={t("home.permitsTitle")}
             description={t("home.permitsDescription")}
             icon={<FileText size={24} />}
             href={`/digital-building-permits`}
+            markForSandbox={isSandboxActive}
           />
           <HomeScreenBox
             title={t("home.configurationManagement.title")}
