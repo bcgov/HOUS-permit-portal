@@ -1,13 +1,14 @@
-import { Button, Container, Divider, Flex, Heading, Text, VStack } from "@chakra-ui/react"
+import { Button, Container, Divider, Flex, GridItem, Heading, Text, VStack } from "@chakra-ui/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React, { Suspense, useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { Trans } from "react-i18next"
 import { useNavigate, useSearchParams } from "react-router-dom"
-import { IUser, OMNIAUTH_PROVIDERS } from "../../../models/user"
+import { IUser } from "../../../models/user"
 import { useMst } from "../../../setup/root"
 import { EUserRoles } from "../../../types/enums"
+import { BceidLoginForm, BcscLoginForm, IdirLoginForm } from "../../shared/auth/login-forms"
 import { LoadingScreen } from "../../shared/base/loading-screen"
 import { CenterContainer } from "../../shared/containers/center-container"
 import { HelpDrawer } from "../../shared/help-drawer"
@@ -95,21 +96,16 @@ const Content = observer(function Content({ invitedUser }: Readonly<IProps>) {
             <Heading as="h3" textAlign="center">
               {t("user.createAccount")}
             </Heading>
-            <form action={`/api/auth/keycloak`} method="post">
-              <input
-                type="hidden"
-                name="kc_idp_hint"
-                value={isSuperAdmin ? OMNIAUTH_PROVIDERS.idir : OMNIAUTH_PROVIDERS.bceid}
-              />
-              <input
-                type="hidden"
-                name="authenticity_token"
-                value={(document.querySelector("[name=csrf-token]") as HTMLMetaElement).content}
-              />
-              <Button variant="primary" w="full" type="submit">
-                {isSuperAdmin ? t("auth.idirLogin") : t("auth.bceidLogin")}
-              </Button>
-            </form>
+            {isSuperAdmin ? (
+              <IdirLoginForm />
+            ) : (
+              <GridItem>
+                <Flex direction="column" gap={6}>
+                  {role === EUserRoles.submitter && <BcscLoginForm />}
+                  <BceidLoginForm />
+                </Flex>
+              </GridItem>
+            )}
           </>
         )}
 
