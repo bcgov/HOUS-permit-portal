@@ -56,6 +56,7 @@ import { useSectionCompletion } from "../../../../hooks/use-section-completion"
 
 export const ReviewForm = observer(function ReviewForm() {
   const { getValues, handleSubmit } = useFormContext()
+  const { t } = useTranslation() as any
   const values = getValues() || {}
   const { labelFor } = useLabels()
   const { overheatingToolStore } = useMst()
@@ -108,7 +109,7 @@ export const ReviewForm = observer(function ReviewForm() {
   return (
     <Box as="form">
       <Heading as="h2" size="lg" mb={6} variant="yellowline">
-        {(useTranslation() as any).t("singleZoneCoolingHeatingTool.review.title") || "Review"}
+        {t("singleZoneCoolingHeatingTool.review.title") || "Review"}
       </Heading>
 
       {section("Building location", asList(values?.buildingLocation || {}, "buildingLocation"))}
@@ -144,21 +145,13 @@ export const ReviewForm = observer(function ReviewForm() {
 
       <Divider my={6} />
       <Heading as="h3" size="md" mb={3}>
-        {(useTranslation() as any).t("singleZoneCoolingHeatingTool.review.roomByRoom")}
+        {t("singleZoneCoolingHeatingTool.review.roomByRoom")}
       </Heading>
       <Grid templateColumns={{ base: "1fr", md: "40px 1fr 1fr 1fr" }} gap={2}>
-        <GridItem fontWeight="bold">
-          {(useTranslation() as any).t("singleZoneCoolingHeatingTool.review.roomByRoomIndex")}
-        </GridItem>
-        <GridItem fontWeight="bold">
-          {(useTranslation() as any).t("singleZoneCoolingHeatingTool.review.roomByRoomName")}
-        </GridItem>
-        <GridItem fontWeight="bold">
-          {(useTranslation() as any).t("singleZoneCoolingHeatingTool.review.roomByRoomHeating")}
-        </GridItem>
-        <GridItem fontWeight="bold">
-          {(useTranslation() as any).t("singleZoneCoolingHeatingTool.review.roomByRoomCooling")}
-        </GridItem>
+        <GridItem fontWeight="bold">{t("singleZoneCoolingHeatingTool.review.roomByRoomIndex")}</GridItem>
+        <GridItem fontWeight="bold">{t("singleZoneCoolingHeatingTool.review.roomByRoomName")}</GridItem>
+        <GridItem fontWeight="bold">{t("singleZoneCoolingHeatingTool.review.roomByRoomHeating")}</GridItem>
+        <GridItem fontWeight="bold">{t("singleZoneCoolingHeatingTool.review.roomByRoomCooling")}</GridItem>
         {nonEmptyRooms.map((r) => (
           <React.Fragment key={r.index}>
             <GridItem>{r.index}</GridItem>
@@ -180,7 +173,7 @@ export const ReviewForm = observer(function ReviewForm() {
           canGenerate && (
             <Flex justify="flex-start" mt={10}>
               <Button variant="primary" onClick={handleSubmit(onSubmit)}>
-                {(useTranslation() as any).t("singleZoneCoolingHeatingTool.uploads.generate")}
+                {t("singleZoneCoolingHeatingTool.uploads.generate")}
               </Button>
             </Flex>
           )
