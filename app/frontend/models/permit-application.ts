@@ -96,6 +96,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
       permitBlockStatusMap: types.map(PermitBlockStatusModel),
       isViewingPastRequests: types.optional(types.boolean, false),
       templateNickname: types.maybeNull(types.string),
+      projectId: types.maybeNull(types.string),
       discardedAt: types.maybeNull(types.Date),
     })
     .extend(withEnvironment())
