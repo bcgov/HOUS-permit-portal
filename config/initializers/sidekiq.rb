@@ -20,16 +20,15 @@ redis_config =
       role: :master
     }
   else
-    { url: ENV["SIDEKIQ_DEV_REDIS_URL"] }
+    { url: ENV.fetch("SIDEKIQ_DEV_REDIS_URL") }
   end
 
 Sidekiq.configure_server do |config|
   config.redis = redis_config if redis_config
   config.queues = %w[file_processing webhooks websocket model_callbacks default]
 
-  if ENV["SIDEKIQ_CONCURRENCY"].present?
-    config.concurrency = ENV["SIDEKIQ_CONCURRENCY"].to_i
-  end
+  sidekiq_concurrency = ENV["SIDEKIQ_CONCURRENCY"]
+  config.concurrency = sidekiq_concurrency.to_i if sidekiq_concurrency.present?
 
   config.client_middleware do |chain|
     chain.add SidekiqUniqueJobs::Middleware::Client
@@ -51,7 +50,8 @@ Sidekiq.configure_client do |config|
 end
 
 # # Don't load crons in test and dev mode
-if Rails.env.production? && ENV["IS_DOCKER_BUILD"].blank?
+is_docker_build = ENV["IS_DOCKER_BUILD"]
+if Rails.env.production? && is_docker_build.blank?
   schedule_file = "config/sidekiq_cron_schedule.yml"
   if File.exist?(schedule_file)
     Sidekiq::Cron::Job.load_from_hash YAML.load_file(schedule_file)
