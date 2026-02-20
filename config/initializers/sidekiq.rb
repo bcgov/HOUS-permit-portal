@@ -50,8 +50,7 @@ Sidekiq.configure_client do |config|
 end
 
 # # Don't load crons in test and dev mode
-is_docker_build = ENV["IS_DOCKER_BUILD"]
-if Rails.env.production? && is_docker_build.blank?
+if Rails.env.production? && ENV.fetch("IS_DOCKER_BUILD", nil).blank?
   schedule_file = "config/sidekiq_cron_schedule.yml"
   if File.exist?(schedule_file)
     Sidekiq::Cron::Job.load_from_hash YAML.load_file(schedule_file)
