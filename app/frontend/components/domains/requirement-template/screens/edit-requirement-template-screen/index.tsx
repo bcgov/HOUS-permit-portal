@@ -19,6 +19,7 @@ import { Trans, useTranslation } from "react-i18next"
 import { useMst } from "../../../../../setup/root"
 import { EFlashMessageStatus } from "../../../../../types/enums"
 import { DatePicker } from "../../../../shared/date-picker"
+import { TemplateAccessSidebar } from "../../template-access-sidebar"
 import {
   BaseEditRequirementTemplateScreen,
   IEditRequirementActionsProps,
@@ -35,9 +36,11 @@ function PublishScheduleModal({
   onScheduleConfirm,
   triggerButtonProps,
   onForcePublishNow,
+  requirementTemplate,
 }: IEditRequirementTemplateScreenRenderActionProps) {
   const { t } = useTranslation()
   const { isOpen, onOpen, onClose } = useDisclosure()
+  const { isOpen: isAccessOpen, onOpen: onAccessOpen, onClose: onAccessClose } = useDisclosure()
   const [scheduleDate, setScheduleDate] = React.useState(null)
   const { uiStore } = useMst()
 
@@ -57,9 +60,19 @@ function PublishScheduleModal({
 
   return (
     <>
+      <Button variant="secondary" onClick={onAccessOpen}>
+        {t("requirementTemplate.access.title", "Manage access")}
+      </Button>
       <Button variant={"primary"} rightIcon={<CaretRight />} onClick={onOpen} {...triggerButtonProps}>
         {t("ui.publish")}
       </Button>
+      {requirementTemplate && (
+        <TemplateAccessSidebar
+          requirementTemplate={requirementTemplate}
+          isOpen={isAccessOpen}
+          onClose={onAccessClose}
+        />
+      )}
       <Modal isOpen={isOpen} onClose={onClose} autoFocus={false}>
         <ModalOverlay />
         <ModalContent w={onForcePublishNow ? "container.sm" : "436px"}>
@@ -67,7 +80,15 @@ function PublishScheduleModal({
             {t("requirementTemplate.edit.scheduleModalTitle")}
           </ModalHeader>
           <ModalBody>
-            <Text>{t("requirementTemplate.edit.scheduleModalBody")}</Text>
+            <Text>
+              <Trans
+                i18nKey="requirementTemplate.edit.scheduleModalBody"
+                values={{ count: requirementTemplate?.availableIn ?? 0 }}
+                components={{
+                  1: <Text as="span" fontWeight="bold" />,
+                }}
+              />
+            </Text>
             <Stack spacing={1} mt={6}>
               <Text>
                 <Trans
