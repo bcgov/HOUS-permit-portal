@@ -1,5 +1,6 @@
 class PreferenceBlueprint < Blueprinter::Base
   fields :enable_in_app_new_template_version_publish_notification,
+         :enable_email_new_template_version_publish_notification,
          :enable_in_app_customization_update_notification,
          :enable_email_application_submission_notification,
          :enable_in_app_application_submission_notification,

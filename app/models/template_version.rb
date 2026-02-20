@@ -27,7 +27,6 @@ class TemplateVersion < ApplicationRecord
 
   after_save :reindex_models_if_published, if: :saved_change_to_status?
   after_save :create_integration_mappings
-  after_save :notify_users_of_missing_requirements_mappings
   after_save :clear_published_ids_cache,
              if: -> do
                saved_change_to_status? &&
@@ -168,18 +167,6 @@ class TemplateVersion < ApplicationRecord
         id,
         "create_integration_mappings"
       )
-    end
-  end
-
-  def notify_users_of_missing_requirements_mappings
-    return unless saved_change_to_status? && (published? || scheduled?)
-    relevant_integration_mappings =
-      integration_mappings.joins(:jurisdiction).where(
-        { jurisdictions: { external_api_state: "j_on" } }
-      )
-
-    relevant_integration_mappings.each do |im|
-      im.send_missing_requirements_mapping_communication
     end
   end
 

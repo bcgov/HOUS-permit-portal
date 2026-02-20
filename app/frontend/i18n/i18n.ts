@@ -3854,7 +3854,7 @@ Thank you,
             collapseAll: "Collapse all",
             scheduleModalTitle: "Publish permit?",
             scheduleModalBody:
-              "Once you publish, local jurisdictions and submitters will be able to see and use this new version of the form.",
+              "Once you publish, local jurisdictions and submitters will be able to see and use this new version of the form. <br><br><1>Notifications will only be sent out to those jurisdictions you have set available, which is currently: {{count}}</1>",
             scheduleModalHelperText: "Schedule to <1>publish</1> (at midnight 00:01 PST)",
             scheduleModalCancelMessage: "Changes were not scheduled.",
             forcePublishNow: "Force publish!",
