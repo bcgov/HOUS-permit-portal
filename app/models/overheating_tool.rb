@@ -27,8 +27,6 @@ class OverheatingTool < ApplicationRecord
        default: :new_draft,
        prefix: true
 
-  before_validation :set_status_for_draft
-
   def schedule_pdf_generation!
     update!(pdf_generation_status: :queued, status: :newly_submitted)
     OverheatingReportGenerationJob.perform_async(id)

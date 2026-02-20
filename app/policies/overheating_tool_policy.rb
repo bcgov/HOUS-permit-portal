@@ -1,6 +1,6 @@
 class OverheatingToolPolicy < ApplicationPolicy
   def index?
-    user.present?
+    create?
   end
 
   def create?
@@ -8,31 +8,31 @@ class OverheatingToolPolicy < ApplicationPolicy
   end
 
   def show?
-    user.present? && record.user_id == user.id
+    update?
   end
 
   def update?
-    show?
+    user.present? && record.user_id == user.id
   end
 
   def destroy?
-    show?
+    update?
   end
 
   def generate_pdf?
-    show?
+    update?
   end
 
   def download?
-    show?
+    update?
   end
 
   def archive?
-    show?
+    update?
   end
 
   def restore?
-    show?
+    update?
   end
 
   class Scope < Scope
