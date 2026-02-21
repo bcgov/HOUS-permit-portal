@@ -107,11 +107,6 @@ function isPreCheckPath(path: string): boolean {
   return regex.test(path)
 }
 
-function isSingleZoneCoolingHeatingToolPath(path: string): boolean {
-  const regex = /^\/overheating-tool\/[a-z\d-]+/
-  return regex.test(path)
-}
-
 function shouldHideSubNavbarForPath(path: string): boolean {
   const matchers: Array<(path: string) => boolean> = [
     (path) => path === "/",
@@ -131,7 +126,6 @@ function shouldHideSubNavbarForPath(path: string): boolean {
     isStepCodePath,
     isAdminPath,
     isPreCheckPath,
-    isSingleZoneCoolingHeatingToolPath,
   ]
 
   return matchers.some((matcher) => matcher(path))
@@ -158,15 +152,6 @@ export const NavBar = observer(function NavBar() {
     } else {
       return <StepCodeNavBar title={t("stepCode.part3.title")} NavLinks={<Part3NavLinks />} />
     }
-  }
-
-  if (isSingleZoneCoolingHeatingToolPath(path)) {
-    return (
-      <StepCodeNavBar
-        title={t("singleZoneCoolingHeatingTool.title")}
-        NavLinks={null} // Or add custom links if needed
-      />
-    )
   }
 
   if (shouldHideFullNavBarForPath(path)) {
