@@ -3,6 +3,7 @@ import fs from "fs"
 import React from "react"
 import { Part3PDFContent } from "../components/domains/step-code/part-3/checklist/pdf-content"
 import { Part9PDFContent } from "../components/domains/step-code/part-9/checklist/pdf-content"
+import { PDFComponentRegistry } from "../components/shared/pdf/pdf-component-registry"
 import { PDFContent as PermitApplicationPDFContent } from "../components/shared/permit-applications/pdf-content"
 import "../i18n/i18n"
 import { EPermitClassificationCode, EStepCodeType } from "../types/enums"
@@ -85,6 +86,24 @@ const main = async () => {
           assetDirectoryPath={assetDirectoryPath}
         />,
         stepCodeChecklistPDFPath
+      )
+    } else if (pdfData.overheatingTool) {
+      const { overheatingTool: overheatingToolPDFPath } = pdfData.meta.generationPaths
+      const assetDirectoryPath = pdfData.meta.assetDirectoryPath
+
+      if (!overheatingToolPDFPath) {
+        throw new Error("No overheatingTool path provided in generationPaths")
+      }
+
+      const formType = pdfData.overheatingTool.formType
+      const PDFComponent = PDFComponentRegistry[formType]
+
+      if (!PDFComponent) {
+        throw new Error(`No PDF component found for form type: ${formType}`)
+      }
+      await ReactPDF.renderToFile(
+        <PDFComponent data={pdfData.overheatingTool} assetDirectoryPath={assetDirectoryPath} />,
+        overheatingToolPDFPath
       )
     }
   } catch (error) {

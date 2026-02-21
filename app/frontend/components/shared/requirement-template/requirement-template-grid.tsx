@@ -62,7 +62,7 @@ export const RequirementTemplateGrid: React.FC<RequirementTemplateGridProps> = o
                   <VersionTag versionDate={rt.publishedTemplateVersion.versionDate} />
                 ) : null}
               </SearchGridItem>
-              <SearchGridItem>{rt.usedBy}</SearchGridItem>
+              <SearchGridItem>{rt.availableIn}</SearchGridItem>
               <SearchGridItem>{renderActions(rt)}</SearchGridItem>
             </Box>
           ))

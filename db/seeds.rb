@@ -22,6 +22,9 @@ north_van =
     name: "North Vancouver",
     locality_type: "corporation of the city"
   )
+north_van&.update(map_position: [49.319981, -123.072414], map_zoom: 13)
+
+north_van.update(external_api_state: :j_on)
 
 van = Jurisdiction.find_by(name: "Vancouver")
 
@@ -198,19 +201,23 @@ if PermitApplication.first.blank?
   # Create LiveRequirementTemplate records
   LiveRequirementTemplate.find_or_create_by!(
     activity: activity1,
-    permit_type: permit_type1
+    permit_type: permit_type1,
+    available_globally: true
   )
   LiveRequirementTemplate.find_or_create_by!(
     activity: activity1,
-    permit_type: permit_type2
+    permit_type: permit_type2,
+    available_globally: true
   )
   LiveRequirementTemplate.find_or_create_by!(
     activity: activity2,
-    permit_type: permit_type1
+    permit_type: permit_type1,
+    available_globally: true
   )
   LiveRequirementTemplate.find_or_create_by!(
     activity: activity2,
-    permit_type: permit_type2
+    permit_type: permit_type2,
+    available_globally: true
   )
 
   RequirementTemplate.reindex

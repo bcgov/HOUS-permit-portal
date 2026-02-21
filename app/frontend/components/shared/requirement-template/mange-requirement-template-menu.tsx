@@ -5,7 +5,8 @@ import React from "react"
 import { useTranslation } from "react-i18next"
 import { ISearch } from "../../../lib/create-search-model"
 import { IRequirementTemplate } from "../../../models/requirement-template"
-import { ManageMenuItem } from "../base/manage-menu-item"
+import { ConfirmationModal } from "../../confirmation-modal"
+import { ManageMenuItemButton } from "../base/manage-menu-item"
 import { Can } from "../user/can"
 
 interface IManageRequirementTemplateMenuProps<TSearchModel extends ISearch> {
@@ -33,13 +34,41 @@ export const ManageRequirementTemplateMenu = observer(function ManageRequirement
         </MenuButton>
         <MenuList>
           {requirementTemplate.isDiscarded ? (
-            <ManageMenuItem color="semantic.success" onClick={handleRestore} icon={<ClockClockwise />}>
-              {t("ui.restore")}
-            </ManageMenuItem>
+            <ConfirmationModal
+              title={t("ui.confirmRestore")}
+              onConfirm={(closeModal) => {
+                handleRestore()
+                closeModal()
+              }}
+              renderTriggerButton={(props) => (
+                <ManageMenuItemButton color="semantic.success" leftIcon={<ClockClockwise size={16} />} {...props}>
+                  {t("ui.restore")}
+                </ManageMenuItemButton>
+              )}
+              renderConfirmationButton={(props) => (
+                <Button {...props} colorScheme="green">
+                  {t("ui.restore")}
+                </Button>
+              )}
+            />
           ) : (
-            <ManageMenuItem color="semantic.error" onClick={handleRemove} icon={<Archive />}>
-              {t("ui.archive")}
-            </ManageMenuItem>
+            <ConfirmationModal
+              title={t("ui.confirmArchive")}
+              onConfirm={(closeModal) => {
+                handleRemove()
+                closeModal()
+              }}
+              renderTriggerButton={(props) => (
+                <ManageMenuItemButton color="semantic.error" leftIcon={<Archive size={16} />} {...props}>
+                  {t("ui.archive")}
+                </ManageMenuItemButton>
+              )}
+              renderConfirmationButton={(props) => (
+                <Button {...props} colorScheme="red">
+                  {t("ui.archive")}
+                </Button>
+              )}
+            />
           )}
         </MenuList>
       </Menu>

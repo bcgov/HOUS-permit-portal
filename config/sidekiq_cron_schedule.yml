@@ -10,15 +10,21 @@ remind_reviewers:
   queue: default
   active_job: false
 
-send_batched_integration_mapping_notifications:
-  cron: "0 * * * * America/Vancouver" # Runs every hour
-  class: "SendBatchedIntegrationMappingNotificationsJob"
-  queue: default
-  active_job: false
-
 check_expiring_api_keys:
   cron: "0 0 * * * America/Vancouver" # Runs daily at midnight
   class: "CheckExpiringApiKeysJob"
+  queue: default
+  active_job: false
+
+user_data_cleanup:
+  cron: "15 0 * * * America/Vancouver" # Runs nightly at 12:15 AM
+  class: "UserDataCleanupJob"
+  queue: default
+  active_job: false
+
+orphan_cleanup:
+  cron: "45 0 * * * America/Vancouver" # Runs nightly at 12:45 AM
+  class: "OrphanCleanupJob"
   queue: default
   active_job: false
 

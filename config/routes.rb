@@ -86,6 +86,9 @@ Rails.application.routes.draw do
            on: :collection,
            to: "requirement_templates#unschedule_template_version"
       post "copy", on: :collection
+      post "jurisdiction_availabilities",
+           on: :member,
+           to: "requirement_templates#update_jurisdiction_availabilities"
     end
 
     resources :early_access_previews do
@@ -130,6 +133,13 @@ Rails.application.routes.draw do
 
     resources :integration_mappings, only: [:update]
 
+    resources :overheating,
+              controller: "overheating",
+              only: %i[create index update show]
+    post "overheating/:id/generate_pdf", to: "overheating#generate_pdf"
+    get "overheating/:id/download", to: "overheating#download"
+    post "overheating/:id/archive", to: "overheating#archive"
+
     resources :jurisdictions, only: %i[index update show create] do
       post "search", on: :collection, to: "jurisdictions#index"
       post "users/search", on: :member, to: "jurisdictions#search_users"
@@ -160,7 +170,8 @@ Rails.application.routes.draw do
       get "form_bc_addresses", on: :collection
     end
 
-    resources :permit_applications, only: %i[create update show] do
+    resources :permit_applications, only: %i[create update show destroy] do
+      post "restore", on: :member
       post "generate_missing_pdfs",
            on: :member,
            to: "permit_applications#generate_missing_pdfs"

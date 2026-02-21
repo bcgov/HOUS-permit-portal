@@ -20,6 +20,8 @@ class PermitApplicationPolicy < ApplicationPolicy
   end
 
   def update?
+    return false if record.discarded?
+
     if record.draft?
       record.submission_requirement_block_edit_permissions(
         user_id: user.id
@@ -149,13 +151,24 @@ class PermitApplicationPolicy < ApplicationPolicy
     user.super_admin?
   end
 
+  def destroy?
+    record.draft? && record.submitter == user
+  end
+
+  def restore?
+    record.submitter == user
+  end
+
   # we may want to separate an admin update to a secondary policy
 
   class Scope < Scope
     def resolve
+      # Identify the collaboration type used for "submission" access checks.
       submission_type =
         PermitCollaboration.collaboration_types.fetch(:submission)
 
+      # Access rule 1: user is a submission collaborator on the permit application.
+      # Uses EXISTS to avoid JOINs that could duplicate rows.
       exists_sql = <<-SQL.squish
         EXISTS (
           SELECT 1 FROM permit_collaborations pc
@@ -166,6 +179,7 @@ class PermitApplicationPolicy < ApplicationPolicy
         )
       SQL
 
+      # Access rule 2: user owns the parent permit project.
       owner_exists_sql = <<-SQL.squish
         EXISTS (
           SELECT 1 FROM permit_projects pp
@@ -174,15 +188,23 @@ class PermitApplicationPolicy < ApplicationPolicy
         )
       SQL
 
+      # Base access rules (ORed together later):
+      # - submitter of the application
+      # - submission collaborator
+      # - owner of the parent permit project
       clauses = [
         "permit_applications.submitter_id = :uid",
         exists_sql,
         owner_exists_sql
       ]
 
+      # Values for parameterized SQL.
       values = { uid: user.id, submission_type: submission_type }
 
       if user.review_staff?
+        # Access rule 3 (review staff only):
+        # user can see applications for their jurisdictions, but only once
+        # they have reached a submitted status.
         review_exists_sql = <<-SQL.squish
           EXISTS (
             SELECT 1 FROM permit_projects pp
@@ -191,17 +213,20 @@ class PermitApplicationPolicy < ApplicationPolicy
           )
         SQL
 
+        # Add the review-staff rule to the OR list, and bind parameters.
         clauses << "#{review_exists_sql} AND permit_applications.status IN (:submitted_statuses)"
         values[:jur_ids] = user.jurisdictions.pluck(:id)
         values[:submitted_statuses] = PermitApplication
           .submitted_statuses
           .map { |name| PermitApplication.statuses.fetch(name) }
         if sandbox.present?
+          # In sandbox mode, restrict to the active sandbox.
           clauses.last << " AND permit_applications.sandbox_id = :sandbox_id"
           values[:sandbox_id] = sandbox.id
         end
       end
 
+      # Combine all access rules with OR and de-duplicate results.
       scope.where(clauses.map { |c| "(#{c})" }.join(" OR "), values).distinct
     end
   end

@@ -56,13 +56,15 @@ export const ConfirmationModal = observer(function ConfirmationModal({
 
   const { t } = useTranslation()
 
+  const isConfirmDisabled = confirmButtonProps?.isDisabled ?? false
+
   return (
     <>
       {renderTriggerButton ? (
         renderTriggerButton({ onClick: onOpen, ...triggerButtonProps })
       ) : (
         <Button variant={"ghost"} color={"text.link"} onClick={onOpen} {...triggerButtonProps}>
-          {triggerText ?? t("ui.confirm")}
+          {triggerText ?? (t as any)("ui.confirm")}
         </Button>
       )}
       <Modal isOpen={isOpen} onClose={onClose} {...modalProps}>
@@ -79,14 +81,19 @@ export const ConfirmationModal = observer(function ConfirmationModal({
           <ModalFooter justifyContent={"flex-start"}>
             <ButtonGroup spacing={4}>
               {renderConfirmationButton ? (
-                renderConfirmationButton({ onClick: () => onConfirm(onClose) })
+                renderConfirmationButton({ onClick: () => onConfirm(onClose), isDisabled: isConfirmDisabled })
               ) : (
-                <Button variant={"primary"} onClick={() => onConfirm(onClose)} {...confirmButtonProps}>
-                  {triggerText ?? t("ui.confirm")}
+                <Button
+                  variant={"primary"}
+                  onClick={() => onConfirm(onClose)}
+                  {...confirmButtonProps}
+                  isDisabled={isConfirmDisabled}
+                >
+                  {triggerText ?? (t as any)("ui.confirm")}
                 </Button>
               )}
               <Button variant={"secondary"} onClick={onClose}>
-                {t("ui.neverMind")}
+                {(t as any)("ui.neverMind")}
               </Button>
             </ButtonGroup>
           </ModalFooter>
