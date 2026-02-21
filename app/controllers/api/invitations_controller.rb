@@ -1,11 +1,14 @@
 class Api::InvitationsController < Devise::InvitationsController
   include BaseControllerMethods
+  include Pundit::Authorization
   respond_to :json
   before_action :authenticate_user!
   before_action :find_invited_user, only: %i[show]
   skip_before_action :authenticate_user!, only: %i[show]
 
   def create
+    authorize :invitation, :create?
+
     inviter =
       Jurisdiction::UserInviter.new(
         inviter: current_user,
