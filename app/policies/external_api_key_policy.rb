@@ -1,14 +1,11 @@
 class ExternalApiKeyPolicy < ApplicationPolicy
   def index?
-    user.super_admin? || user.review_manager? || user.regional_review_manager?
+    user.super_admin? || user.jurisdiction_staff?
   end
 
   def show?
     return true if user.super_admin?
-    (
-      user.review_manager? || user.regional_review_manager? ||
-        user.technical_support?
-    ) && record.jurisdiction.external_api_enabled? &&
+    user.jurisdiction_staff? && record.jurisdiction.external_api_enabled? &&
       user.member_of?(record.jurisdiction_id)
   end
 
@@ -30,8 +27,7 @@ class ExternalApiKeyPolicy < ApplicationPolicy
 
   class Scope < Scope
     def resolve
-      unless user.super_admin? || user.review_manager? ||
-               user.regional_review_manager? || user.technical_support?
+      unless user.super_admin? || user.jurisdiction_staff?
         raise Pundit::NotAuthorizedError
       end
 
