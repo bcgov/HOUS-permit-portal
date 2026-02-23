@@ -807,9 +807,14 @@ const options = {
             editMapEnd:
               "This process ensures the map accurately represents the center of your jurisdiction and is displayed with the appropriate level of detail.",
             stepCode: {
-              title: "Step code requirements",
+              title: "Step Codes requirements",
               description:
                 "Below are the step code requirements for each permit application type. <1>What does each step code level mean?<2></2></1>",
+              aboutPageDescription:
+                "This page shows the Energy Step Code and Zero Carbon Step Code requirements for buildings in this community. Requirements may vary based on building type, occupancies, permit-processing date, and local bylaws.",
+              aboutPageNotice:
+                "These requirements apply to new buildings only. For existing buildings or renovations, contact your local building officials.",
+              viewStepCodeRequirements: "View full Step Codes requirements",
               permitType: "BCBC Part",
               workType: "Work type",
               energyStepRequired: "Energy step code required",
@@ -3079,7 +3084,21 @@ Thank you,
               generateStepCodesReportDescription:
                 "If you're ready to create a Step Codes report to include in an application package, you can create a report using the separate reporting tool.",
               stepCodeRequirementsDescription:
-                "This page shows which Energy and Zero Carbon Step Codes apply to new buildings in this community. Requirements may vary based on building type, occupancies, and local bylaws.",
+                "This page shows the Energy Step Code and Zero Carbon Step Code requirements for buildings in this community. Requirements may vary based on building type, occupancies, permit-processing date, and local bylaws.",
+              stepCodeRequirementsNotice:
+                "These requirements apply to new buildings only. For existing buildings or renovations, contact your local building officials.",
+              smallSimpleBuildings: "Small, simple buildings",
+              smallSimpleBuildingsDescription:
+                "Energy Step Code and Zero Carbon Step Code requirements for residential buildings included in Part 9 of the BC Building Code. These requirements are organized by building type.",
+              smallSimpleBuildingsCharacteristic1: "3 storeys or less, and",
+              smallSimpleBuildingsCharacteristic2: "600 square metres or smaller in building footprint.",
+              largeComplexBuildings: "Large, complex buildings",
+              largeComplexBuildingsDescription:
+                "Energy Step Code and Zero Carbon Step Code requirements for buildings included in Part 3 of the BC Building Code. These requirements are organized by major occupancy.",
+              largeComplexBuildingsCharacteristic1: "more than 3 storeys, or",
+              largeComplexBuildingsCharacteristic2: "600 square metres or larger in building footprint.",
+              part3BuildingsAreGenerally: "Part 3 buildings are generally:",
+              part9BuildingsAreGenerally: "Part 9 buildings are generally:",
             },
           },
           joinTheBuildingPermitHub: {
@@ -3325,6 +3344,10 @@ Thank you,
                 alternativePathwaysNotApplicable: "Alternative pathways not applicable",
                 complianceTag: "Energy Step {{energyStep}} + Zero Carbon {{zeroCarbon}}",
                 zeroCarbonNA: "NA",
+              },
+              part3Public: {
+                groupLabel: "Group {{group}}",
+                divisionLabel: "Division {{division}}: {{description}}",
               },
               part9Title: "Part 9 (Small, simple buildings)",
               part9Description:
