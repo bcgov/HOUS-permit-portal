@@ -3264,9 +3264,54 @@ Thank you,
               landingDescription:
                 "The Province establishes minimum energy efficiency requirements. Local governments have the authority to require higher steps of the Energy and Zero Carbon Step Codes through bylaw. Configure compliance requirements for your jurisdiction.",
               bcDefinitionsLink: "BC Energy Step Code and Zero Carbon Step Code definitions",
-              climateZonesTitle: "Climate zones and Heating Degree Days (HDD)",
+              climateZonesTitle: "Climate zones and Heating Degree Days",
               climateZonesDescription:
                 "Define climate zones and Heating Degree Days for your jurisdiction. These values are used to determine energy performance targets.",
+              climateZones: {
+                description:
+                  "Climate zones reflect regional climate conditions that affect building energy performance. Select the climate zones that exist within your jurisdiction.",
+                hddDescription:
+                  "For each climate zone, you can set a Heating Degree Days (HDD) value that applicants must use in their energy modelling calculations for Step Code reporting. If you do not set an HDD value for a climate zone, applicants may use any appropriate HDD value for that climate zone when performing their calculations.",
+                addClimateZone: "Add climate zone",
+                bcClimateZone: "BC Climate Zone",
+                heatingDegreeDaysLabel: "Heating degree days (optional)",
+                tableClimateZone: "Climate zone",
+                tableHdd: "Heating Degree Days (HDD)",
+                notConfigured: "Not configured",
+                emptyState: {
+                  title: "No climate zones added",
+                  description:
+                    'At least one climate zone must be added for your jurisdiction. Click "Add climate zone" above to select the climate zones that apply to your area.',
+                },
+                remove: "Remove",
+                removeConfirmationModal: {
+                  title: "Are you sure you want to remove this climate zone?",
+                  body: "This will remove the climate zone and any associated Heating Degree Days value from your jurisdiction's configuration.",
+                },
+                cancel: "Cancel",
+                save: "Save",
+                validation: {
+                  hddMin: "HDD must be greater than 0",
+                  hddMax: "HDD must be less than or equal to 10,000",
+                  zoneRequired: "Please select a climate zone",
+                },
+                zoneLabels: {
+                  zone_4: "Climate Zone 4",
+                  zone_5: "Climate Zone 5",
+                  zone_6: "Climate Zone 6",
+                  zone_7a: "Climate Zone 7A",
+                  zone_7b: "Climate Zone 7B",
+                  zone_8: "Climate Zone 8",
+                },
+                zoneShortLabels: {
+                  zone_4: "4",
+                  zone_5: "5",
+                  zone_6: "6",
+                  zone_7a: "7A",
+                  zone_7b: "7B",
+                  zone_8: "8",
+                },
+              },
               part3Title: "Part 3 (Large, complex buildings)",
               part3Description:
                 "Configure Energy and Zero Carbon Step Codes compliance requirements for each occupancy",
