@@ -29,12 +29,13 @@ import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { useJurisdiction } from "../../../../../../hooks/resources/use-jurisdiction"
 import { IJurisdiction } from "../../../../../../models/jurisdiction"
+import { EClimateZone } from "../../../../../../types/enums"
 import { ErrorScreen } from "../../../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../../../shared/base/loading-screen"
 import { ConfirmationModal } from "../../../../../shared/modals/confirmation-modal"
 import { i18nPrefix } from "./i18n-prefix"
 
-const CLIMATE_ZONE_OPTIONS = ["zone_4", "zone_5", "zone_6", "zone_7a", "zone_7b", "zone_8"] as const
+const CLIMATE_ZONE_OPTIONS = Object.values(EClimateZone)
 
 type TCzPrefix = `${typeof i18nPrefix}.climateZones`
 const czPrefix: TCzPrefix = `${i18nPrefix}.climateZones`
