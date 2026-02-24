@@ -250,6 +250,33 @@ export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
         )}
       </Box>
 
+      {/* Recent Activity Section */}
+      <Box as="section" mt={10}>
+        <Flex justify="space-between" align="center" mb={6}>
+          <Heading as="h3" size="md">
+            {t("permitProject.overview.recentActivity")}
+          </Heading>
+        </Flex>
+
+        {/* [AUDITED VIBES TODO]: Fetch and show 5 most recent activities here
+            1. Call ProjectActivityService.fetch_recent_activities (via store action)
+            2. Map over results using <ActivityFeedItem> from ./activity-feed-item.tsx
+            3. Show empty state if no activities: "No activity yet" + help text
+            4. Show "All activity ->" link at bottom right navigating to /projects/:id/activity */}
+
+        <CustomMessageBox
+          status={EFlashMessageStatus.info}
+          description={t("permitProject.overview.noActivityYet")}
+          mt={2}
+        />
+
+        <Flex justify="flex-end" mt={4}>
+          <RouterLinkButton variant="tertiary" rightIcon={<CaretRight />} to={`/projects/${permitProject.id}/activity`}>
+            {t("permitProject.overview.allActivity")}
+          </RouterLinkButton>
+        </Flex>
+      </Box>
+
       <FullscreenMapModal
         isOpen={isMapFullscreen}
         onClose={onCloseMapFullscreen}

@@ -19,6 +19,21 @@ class PermitApplication < ApplicationRecord
   include PublicRecordable
   has_parent :permit_project
 
+  # ── Activity Feed Auditing ──────────────────────────────────────────
+  # ACTIVITY EVENTS COVERED:
+  # - Permit created (within project)
+  # - Permit application archived / restored
+  # - Application submitted
+  # - Application resubmitted
+  # - Reference number assigned
+  # See: Activity Feed Event Trigger Reference (Project-Level + Permit-Level + Reviewer-Side Triggers)
+  #
+  # [AUDITED VIBES TODO]: The `associated_with: :permit_project` rolls these
+  # audits up so ProjectActivityService can query them at the project level.
+  # Consider whether :nickname should also be tracked.
+  # Status changes drive multiple display texts — see ProjectActivityPresenter.
+  audited only: %i[status reference_number], associated_with: :permit_project
+
   SEARCH_INCLUDES = [
     :permit_type,
     :submission_versions,

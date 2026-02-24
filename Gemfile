@@ -84,6 +84,7 @@ gem "rgeo", "~> 3.0.1"
 # brew install proj
 gem "rgeo-proj4", "~> 4.0.0"
 gem "aasm", "~> 5.5.0"
+gem "audited", "~> 5.7"
 
 # Virus scanning via ClamAV daemon
 gem "clamav-client", "~> 3.2", require: "clamav/client"

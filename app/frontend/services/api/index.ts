@@ -283,6 +283,13 @@ export class Api {
     return this.client.get<ApiResponse<IPermitProject[]>>(`/permit_projects/pinned`)
   }
 
+  // [AUDITED VIBES TODO]: Replace `any` with a proper IProjectActivity interface
+  // once the backend response shape is finalized. The response should match
+  // ProjectActivityBlueprint's :base view.
+  async fetchProjectActivities(permitProjectId: string, params?: { page?: number; perPage?: number }) {
+    return this.client.get<ApiResponse<any[]>>(`/permit_projects/${permitProjectId}/activities`, params)
+  }
+
   async fetchPermitProjectJurisdictionOptions() {
     return this.client.get<IOptionResponse>(`/permit_projects/jurisdiction_options`)
   }

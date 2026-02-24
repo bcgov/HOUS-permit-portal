@@ -5,6 +5,18 @@ class PermitProject < ApplicationRecord
   include Discard::Model
   include PublicRecordable
 
+  # ── Activity Feed Auditing ──────────────────────────────────────────
+  # ACTIVITY EVENTS COVERED:
+  # - Project created (timestamp only)
+  # - Project address changed
+  # - Project name changed
+  # See: Activity Feed Event Trigger Reference (Project-Level Triggers)
+  #
+  # [AUDITED VIBES TODO]: Verify these tracked fields cover all project-level
+  # triggers. Add :discarded_at if archive events should be captured here
+  # rather than via a custom callback. Check Keith's archive branch first.
+  audited only: %i[title full_address]
+
   belongs_to :owner, class_name: "User", optional: true
   public_recordable user_association: :owner
   belongs_to :jurisdiction, optional: false # Direct association to Jurisdiction

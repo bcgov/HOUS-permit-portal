@@ -2,6 +2,25 @@ class PermitCollaboration < ApplicationRecord
   belongs_to :collaborator
   belongs_to :permit_application, touch: true
 
+  # ── Activity Feed Auditing ──────────────────────────────────────────
+  # ACTIVITY EVENTS COVERED:
+  # - Collaborator invited to permit
+  # - Permit assigned to individual
+  # - Permit un-assigned from individual
+  # - User assigned to requirement block
+  # - User unassigned from requirement block
+  # - Designated submitter set
+  # - Reviewer assigned to application
+  # - Reviewer unassigned from application
+  # See: Activity Feed Event Trigger Reference (Permit-Level + Reviewer-Side Triggers)
+  #
+  # [AUDITED VIBES TODO]: The `associated_with: :permit_application` links
+  # these audits to the permit, which in turn links to the project via
+  # PermitApplication's `associated_with: :permit_project`.
+  # The presenter will need to resolve collaborator names and
+  # requirement block names from the audit's auditable record.
+  audited associated_with: :permit_application
+
   enum :collaboration_type, { submission: 0, review: 1 }
   enum :collaborator_type, { delegatee: 0, assignee: 1 }, default: 0
 

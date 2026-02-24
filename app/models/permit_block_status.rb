@@ -1,6 +1,17 @@
 class PermitBlockStatus < ApplicationRecord
   belongs_to :permit_application
 
+  # ── Activity Feed Auditing ──────────────────────────────────────────
+  # ACTIVITY EVENTS COVERED:
+  # - Requirement block status changed
+  # - Template changes dismissed (via status reset)
+  # See: Activity Feed Event Trigger Reference (Permit-Level Triggers)
+  #
+  # [AUDITED VIBES TODO]: The `associated_with: :permit_application` links
+  # these audits to the permit. The presenter should use requirement_block_name
+  # to build display text like "[Username] changed status of [Block Name]".
+  audited only: %i[status], associated_with: :permit_application
+
   enum :status, { draft: 0, in_progress: 1, ready: 2 }, default: 0
   enum :collaboration_type, { submission: 0, review: 1 }, default: 0
 
