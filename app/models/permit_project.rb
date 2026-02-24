@@ -1,6 +1,7 @@
 class PermitProject < ApplicationRecord
   # searchkick must be declared before Discard::Model to ensure auto-callbacks register correctly
   searchkick word_middle: %i[title full_address pid pin number]
+  audited on: %i[create update], only: %i[title full_address]
 
   include Discard::Model
   include PublicRecordable
