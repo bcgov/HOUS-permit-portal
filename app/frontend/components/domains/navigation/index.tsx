@@ -168,16 +168,6 @@ const OnboardingChecklistPageForLgAdoptingScreen = lazy(() =>
     default: module.OnboardingChecklistPageForLgAdoptingScreen,
   }))
 )
-const OverheatingToolScreen = lazy(() =>
-  import("../overheating-tool/overheating-tool-screen").then((module) => ({
-    default: module.OverheatingToolScreen,
-  }))
-)
-const OverheatingToolStartScreen = lazy(() =>
-  import("../overheating-tool/overheating-tool-start-screen").then((module) => ({
-    default: module.OverheatingToolStartScreen,
-  }))
-)
 const PermitApplicationIndexScreen = lazy(() =>
   import("../permit-application").then((module) => ({ default: module.PermitApplicationIndexScreen }))
 )
@@ -273,6 +263,9 @@ const Part3StepCodeForm = lazy(() =>
 const PreCheckForm = lazy(() => import("../pre-check").then((module) => ({ default: module.PreCheckForm })))
 const PreCheckViewer = lazy(() =>
   import("../pre-check/pre-check-viewer").then((module) => ({ default: module.PreCheckViewer }))
+)
+const OverheatingCodeForm = lazy(() =>
+  import("../overheating-code").then((module) => ({ default: module.OverheatingCodeForm }))
 )
 
 const StepCodeChecklistPDFViewer = lazy(() =>
@@ -689,13 +682,17 @@ const AppRoutes = observer(() => {
             element={<ProtectedRoute isAllowed={loggedIn && !mustAcceptEula} redirectPath={mustAcceptEula && "/"} />}
           >
             <Route path="/step-codes" element={<ProjectDashboardScreen />} />
-            <Route path="/overheating" element={<ProjectDashboardScreen />} />
             <Route path="/pre-checks" element={<ProjectDashboardScreen />} />
             <Route path="/pre-checks/new" element={<PreCheckForm />} />
             <Route path="/pre-checks/new/:section" element={<PreCheckForm />} />
             <Route path="/pre-checks/:preCheckId/edit/" element={<PreCheckForm />} />
             <Route path="/pre-checks/:preCheckId/edit/:section" element={<PreCheckForm />} />
             <Route path="/pre-checks/:preCheckId/viewer" element={<PreCheckViewer />} />
+            <Route path="/overheating-codes" element={<ProjectDashboardScreen />} />
+            <Route path="/overheating-codes/new" element={<OverheatingCodeForm />} />
+            <Route path="/overheating-codes/new/:section" element={<OverheatingCodeForm />} />
+            <Route path="/overheating-codes/:overheatingCodeId/edit/" element={<OverheatingCodeForm />} />
+            <Route path="/overheating-codes/:overheatingCodeId/edit/:section" element={<OverheatingCodeForm />} />
             <Route path="/documents" element={<ProjectDashboardScreen />} />
             {/* Already handled above with path-based tabs */}
             <Route path="/projects" element={<ProjectDashboardScreen />} />
@@ -728,10 +725,6 @@ const AppRoutes = observer(() => {
             />
             <Route path="/project-readiness-tools/pre-check" element={<PreCheckInfoScreen />} />
           </Route>
-        </Route>
-
-        <Route element={<ProtectedRoute isAllowed={loggedIn && currentUser?.isSubmitter} />}>
-          <Route path="/overheating-tool/start" element={<OverheatingToolStartScreen />} />
         </Route>
 
         <Route element={<ProtectedRoute isAllowed={loggedIn && !isUnconfirmed} />}>
@@ -806,7 +799,6 @@ const AppRoutes = observer(() => {
         <Route path="/contact" element={<ContactScreen />} />
         <Route path="/standardization-preview" element={<StandardizationPreviewScreen />} />
         <Route path="/project-readiness-tools" element={<ProjectReadinessToolsIndexScreen />} />
-        <Route path="/project-readiness-tools/overheating-tool" element={<OverheatingToolScreen />} />
         <Route path="/privacy-policy" element={<PrivacyPolicyScreen />} />
         <Route
           path="/project-readiness-tools/create-your-letters-of-assurance"
