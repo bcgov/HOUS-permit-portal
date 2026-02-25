@@ -751,85 +751,10 @@ export enum EOverheatingCodeSortFields {
   status = "status",
 }
 
-export enum EOverheatingCodeSubmittalType {
-  wholeHouse = "whole_house",
-  roomByRoom = "room_by_room",
-}
-
-export enum EOverheatingCodeUnits {
+// [OVERHEATING TODO] Units field purpose unclear — btuh is already labeled on the capacity input
+export enum EOverheatingCodeCoolingZoneUnits {
   imperial = "imperial",
   metric = "metric",
-}
-
-// [OVERHEATING TODO] Confirm attachment enum values with domain expert
-export enum EOverheatingCodeAttachment {
-  detached = "detached",
-  left = "left",
-  right = "right",
-  midRow = "mid_row",
-  top = "top",
-  bottom = "bottom",
-  midLevel = "mid_level",
-}
-
-export enum EOverheatingCodeFrontFacing {
-  north = "north",
-  northeast = "northeast",
-  east = "east",
-  southeast = "southeast",
-  south = "south",
-  southwest = "southwest",
-  west = "west",
-  northwest = "northwest",
-}
-
-export enum EOverheatingCodeAirTightnessCategory {
-  test = "test",
-  loose = "loose",
-  average = "average",
-  present = "present",
-  energyTight = "energy_tight",
-}
-
-export enum EOverheatingCodeWindExposure {
-  openSea = "open_sea",
-  mudFlats = "mud_flats",
-  openFlatTerrain = "open_flat_terrain",
-  lowCrops = "low_crops",
-  highCrops = "high_crops",
-  parkland = "parkland",
-  suburban = "suburban",
-  cityCentre = "city_centre",
-}
-
-export enum EOverheatingCodeWindSheltering {
-  none = "none",
-  light = "light",
-  heavy = "heavy",
-  veryHeavy = "very_heavy",
-  complete = "complete",
-}
-
-export enum EOverheatingCodeInternalShading {
-  none = "none",
-  lightTranslucent = "light_translucent",
-  opaqueReflective = "opaque_reflective",
-}
-
-export enum EOverheatingCodeCalculationUnits {
-  imperial = "imperial",
-  metric = "metric",
-}
-
-export enum EOverheatingCodeSoilConductivity {
-  normal = "normal",
-  high = "high",
-}
-
-export enum EOverheatingCodeWaterTableDepth {
-  shallow = "shallow",
-  normal = "normal",
-  deep = "deep",
 }
 
 export enum EGeneralContactType {

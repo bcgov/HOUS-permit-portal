@@ -177,6 +177,23 @@ export function startBlobDownload(blobData: BlobPart, mimeType: string, fileName
   window.URL.revokeObjectURL(url)
 }
 
+export async function downloadFromApi(apiPath: string, fallbackFilename: string): Promise<void> {
+  const response = await fetch(apiPath, {
+    method: "GET",
+    headers: { "X-CSRF-Token": getCsrfToken() || "" },
+  })
+
+  if (!response.ok) throw new Error(`Download failed: ${response.statusText}`)
+
+  const blob = await response.blob()
+  const disposition = response.headers.get("Content-Disposition")
+  const match = disposition?.match(/filename="?(.+?)"?$/)
+  const filename = match?.[1] || fallbackFilename
+  const mimeType = response.headers.get("Content-Type") || "application/octet-stream"
+
+  startBlobDownload(blob, mimeType, filename)
+}
+
 export function isArchitecturalDrawingDependencyRequirementCode(
   requirementCode?: string | null,
   inputType?: ERequirementType

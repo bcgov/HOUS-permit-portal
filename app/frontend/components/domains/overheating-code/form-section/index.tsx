@@ -2,16 +2,14 @@ import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
 import { useParams } from "react-router-dom"
 import { LoadingScreen } from "../../../shared/base/loading-screen"
-import { BuildingEnvelope } from "./building-envelope"
+import { AttachedDocuments } from "./attached-documents"
+import { BuildingComponentsAndAssemblies } from "./building-components-and-assemblies"
 import { BuildingLocation } from "./building-location"
-import { CalculationsBasedOn } from "./calculations-based-on"
-import { Compliance } from "./compliance"
-import { Cooling } from "./cooling"
-import { CoolingDesignConditions } from "./cooling-design-conditions"
-import { Heating } from "./heating"
-import { HeatingDesignConditions } from "./heating-design-conditions"
+import { CalculationsPerformedBy } from "./calculations-performed-by"
+import { CoolingZoneCompliance } from "./cooling-zone-compliance"
+import { DesignConditions } from "./design-conditions"
 import { Introduction } from "./introduction"
-import { RoomByRoom } from "./room-by-room"
+import { Summary } from "./summary"
 
 export const FormSection = observer(function OverheatingCodeFormSection() {
   const { section } = useParams()
@@ -30,22 +28,18 @@ export const FormSection = observer(function OverheatingCodeFormSection() {
       return <Introduction />
     case "building-location":
       return <BuildingLocation />
-    case "compliance":
-      return <Compliance />
-    case "calculations-based-on":
-      return <CalculationsBasedOn />
-    case "heating":
-      return <Heating />
-    case "cooling":
-      return <Cooling />
-    case "heating-design-conditions":
-      return <HeatingDesignConditions />
-    case "cooling-design-conditions":
-      return <CoolingDesignConditions />
-    case "building-envelope":
-      return <BuildingEnvelope />
-    case "room-by-room":
-      return <RoomByRoom />
+    case "cooling-zone-compliance":
+      return <CoolingZoneCompliance />
+    case "design-conditions":
+      return <DesignConditions />
+    case "building-components-and-assemblies":
+      return <BuildingComponentsAndAssemblies />
+    case "attached-documents":
+      return <AttachedDocuments />
+    case "calculations-performed-by":
+      return <CalculationsPerformedBy />
+    case "summary":
+      return <Summary />
     default:
       return <LoadingScreen />
   }

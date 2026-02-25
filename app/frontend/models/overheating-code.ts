@@ -1,28 +1,8 @@
-import { Instance, types } from "mobx-state-tree"
+import { flow, Instance, types } from "mobx-state-tree"
 import { withEnvironment } from "../lib/with-environment"
-import {
-  EOverheatingCodeAirTightnessCategory,
-  EOverheatingCodeAttachment,
-  EOverheatingCodeCalculationUnits,
-  EOverheatingCodeFrontFacing,
-  EOverheatingCodeInternalShading,
-  EOverheatingCodeSoilConductivity,
-  EOverheatingCodeStatus,
-  EOverheatingCodeSubmittalType,
-  EOverheatingCodeUnits,
-  EOverheatingCodeWaterTableDepth,
-  EOverheatingCodeWindExposure,
-  EOverheatingCodeWindSheltering,
-} from "../types/enums"
+import { EOverheatingCodeStatus } from "../types/enums"
+import { downloadFromApi } from "../utils/utility-functions"
 import { JurisdictionModel } from "./jurisdiction"
-
-const RoomResultModel = types.model("RoomResult", {
-  roomName: types.optional(types.string, ""),
-  heating: types.maybeNull(types.number),
-  cooling: types.maybeNull(types.number),
-})
-
-export interface IRoomResult extends Instance<typeof RoomResultModel> {}
 
 export const OverheatingCodeModel = types
   .model("OverheatingCode", {
@@ -37,55 +17,33 @@ export const OverheatingCodeModel = types
     siteName: types.maybeNull(types.string),
     lot: types.maybeNull(types.string),
     postalCode: types.maybeNull(types.string),
-    submittalType: types.maybeNull(types.enumeration(Object.values(EOverheatingCodeSubmittalType))),
-    units: types.maybeNull(types.enumeration(Object.values(EOverheatingCodeUnits))),
-    dimensionalInfoBasedOn: types.maybeNull(types.string),
-    attachment: types.maybeNull(types.enumeration(Object.values(EOverheatingCodeAttachment))),
-    numberOfStories: types.maybeNull(types.number),
-    hasBasement: types.maybeNull(types.boolean),
-    weatherLocation: types.maybeNull(types.string),
-    ventilated: types.maybeNull(types.boolean),
-    hrvErv: types.maybeNull(types.boolean),
-    asePercentage: types.maybeNull(types.number),
-    atrePercentage: types.maybeNull(types.number),
-    frontFacing: types.maybeNull(types.enumeration(Object.values(EOverheatingCodeFrontFacing))),
-    frontFacingAssumed: types.maybeNull(types.boolean),
-    airTightnessCategory: types.maybeNull(types.enumeration(Object.values(EOverheatingCodeAirTightnessCategory))),
-    airTightnessAch50: types.maybeNull(types.number),
-    airTightnessEla10: types.maybeNull(types.number),
-    airTightnessAssumed: types.maybeNull(types.boolean),
-    windExposure: types.maybeNull(types.enumeration(Object.values(EOverheatingCodeWindExposure))),
-    windSheltering: types.maybeNull(types.enumeration(Object.values(EOverheatingCodeWindSheltering))),
-    internalShading: types.maybeNull(types.enumeration(Object.values(EOverheatingCodeInternalShading))),
-    internalShadingAssumed: types.maybeNull(types.boolean),
-    occupants: types.maybeNull(types.number),
-    occupantsAssumed: types.maybeNull(types.boolean),
-    calculationUnits: types.maybeNull(types.enumeration(Object.values(EOverheatingCodeCalculationUnits))),
-    heatingOutdoorTemp: types.maybeNull(types.number),
-    heatingIndoorTemp: types.maybeNull(types.number),
-    meanSoilTemp: types.maybeNull(types.number),
-    soilConductivity: types.maybeNull(types.enumeration(Object.values(EOverheatingCodeSoilConductivity))),
-    waterTableDepth: types.maybeNull(types.enumeration(Object.values(EOverheatingCodeWaterTableDepth))),
-    slabFluidTemp: types.maybeNull(types.number),
-    coolingOutdoorTemp: types.maybeNull(types.number),
-    coolingIndoorTemp: types.maybeNull(types.number),
-    dailyTempRange: types.maybeNull(types.number),
-    latitude: types.maybeNull(types.number),
-    aboveGradeWalls: types.optional(types.array(types.string), []),
-    belowGradeWalls: types.optional(types.array(types.string), []),
-    floorsOnSoil: types.optional(types.array(types.string), []),
-    ceilings: types.optional(types.array(types.string), []),
-    exposedFloors: types.optional(types.array(types.string), []),
-    doors: types.optional(types.array(types.string), []),
-    windows: types.optional(types.array(types.string), []),
-    skylights: types.optional(types.array(types.string), []),
-    minimumHeatingCapacity: types.maybeNull(types.number),
-    nominalCoolingCapacity: types.maybeNull(types.number),
+    designatedRooms: types.maybeNull(types.string),
+    coolingZoneUnits: types.maybeNull(types.string),
     minimumCoolingCapacity: types.maybeNull(types.number),
-    maximumCoolingCapacity: types.maybeNull(types.number),
-    roomResults: types.optional(types.array(RoomResultModel), []),
-    ventilationLoss: types.maybeNull(types.number),
-    latentGain: types.maybeNull(types.number),
+    designOutdoorTemp: types.maybeNull(types.number),
+    designIndoorTemp: types.maybeNull(types.number),
+    designAdjacentTemp: types.maybeNull(types.number),
+    coolingZoneArea: types.maybeNull(types.number),
+    weatherLocation: types.maybeNull(types.string),
+    ventilationRate: types.maybeNull(types.number),
+    hrvErv: types.optional(types.boolean, false),
+    atrePercentage: types.maybeNull(types.number),
+    componentsFacingOutside: types.optional(types.array(types.string), []),
+    componentsFacingAdjacent: types.optional(types.array(types.string), []),
+    documentNotes: types.optional(types.array(types.string), []),
+    // Calculations Performed By
+    performerName: types.maybeNull(types.string),
+    performerCompany: types.maybeNull(types.string),
+    performerAddress: types.maybeNull(types.string),
+    performerCityProvince: types.maybeNull(types.string),
+    performerPostalCode: types.maybeNull(types.string),
+    performerPhone: types.maybeNull(types.string),
+    performerFax: types.maybeNull(types.string),
+    performerEmail: types.maybeNull(types.string),
+    accreditationRef1: types.maybeNull(types.string),
+    accreditationRef2: types.maybeNull(types.string),
+    issuedFor1: types.maybeNull(types.string),
+    issuedFor2: types.maybeNull(types.string),
     createdAt: types.maybeNull(types.Date),
     updatedAt: types.maybeNull(types.Date),
   })
@@ -100,39 +58,36 @@ export const OverheatingCodeModel = types
     get isBuildingLocationComplete() {
       return !!self.fullAddress
     },
-    get isComplianceComplete() {
-      return !!self.submittalType && !!self.units
+    get isCoolingZoneComplianceComplete() {
+      return self.minimumCoolingCapacity != null && self.minimumCoolingCapacity > 0
     },
-    get isCalculationsBasedOnComplete() {
-      return !!self.dimensionalInfoBasedOn && !!self.weatherLocation
-    },
-    get isHeatingDesignConditionsComplete() {
-      return self.heatingOutdoorTemp != null && self.heatingIndoorTemp != null
-    },
-    get isCoolingDesignConditionsComplete() {
-      return self.coolingOutdoorTemp != null && self.coolingIndoorTemp != null
-    },
-    get isBuildingEnvelopeComplete() {
+    get isDesignConditionsComplete() {
       return (
-        self.aboveGradeWalls.length > 0 ||
-        self.belowGradeWalls.length > 0 ||
-        self.floorsOnSoil.length > 0 ||
-        self.ceilings.length > 0 ||
-        self.exposedFloors.length > 0 ||
-        self.doors.length > 0 ||
-        self.windows.length > 0 ||
-        self.skylights.length > 0
+        self.designOutdoorTemp != null &&
+        self.designIndoorTemp != null &&
+        self.coolingZoneArea != null &&
+        self.coolingZoneArea > 0 &&
+        !!self.weatherLocation
       )
     },
-    get isRoomByRoomComplete() {
-      return self.roomResults.length > 0 && self.roomResults.every((r) => r.roomName.trim() !== "")
+    get isBuildingComponentsComplete() {
+      return self.componentsFacingOutside.length > 0
     },
-    get isHeatingComplete() {
-      return self.minimumHeatingCapacity != null && self.minimumHeatingCapacity > 0
+    get isAttachedDocumentsComplete() {
+      return self.documentNotes.length > 0
     },
-    get isCoolingComplete() {
-      return self.nominalCoolingCapacity != null && self.nominalCoolingCapacity > 0
+    get isCalculationsPerformedByComplete() {
+      return !!self.performerName && !!self.performerEmail
     },
+    get pdfFilename() {
+      const project = self.projectNumber || self.id.slice(0, 8)
+      return `BC-SZCG-Report-${project}.pdf`
+    },
+  }))
+  .actions((self) => ({
+    downloadPdf: flow(function* () {
+      yield downloadFromApi(`/api/overheating_codes/${self.id}/generate_pdf`, self.pdfFilename)
+    }),
   }))
 
 export interface IOverheatingCode extends Instance<typeof OverheatingCodeModel> {}

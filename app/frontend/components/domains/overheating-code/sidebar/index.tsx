@@ -10,14 +10,11 @@ import { SectionLink } from "./section-link"
 const completionMap: Record<string, string> = {
   introduction: "isIntroductionComplete",
   buildingLocation: "isBuildingLocationComplete",
-  compliance: "isComplianceComplete",
-  calculationsBasedOn: "isCalculationsBasedOnComplete",
-  heating: "isHeatingComplete",
-  cooling: "isCoolingComplete",
-  heatingDesignConditions: "isHeatingDesignConditionsComplete",
-  coolingDesignConditions: "isCoolingDesignConditionsComplete",
-  buildingEnvelope: "isBuildingEnvelopeComplete",
-  roomByRoom: "isRoomByRoomComplete",
+  coolingZoneCompliance: "isCoolingZoneComplianceComplete",
+  designConditions: "isDesignConditionsComplete",
+  buildingComponents: "isBuildingComponentsComplete",
+  attachedDocuments: "isAttachedDocumentsComplete",
+  calculationsPerformedBy: "isCalculationsPerformedByComplete",
 }
 
 export const Sidebar = observer(function OverheatingCodeSidebar() {

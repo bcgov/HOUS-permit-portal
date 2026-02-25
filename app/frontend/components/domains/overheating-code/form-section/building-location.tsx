@@ -37,6 +37,7 @@ export const BuildingLocation = observer(function BuildingLocation() {
   } = useMst()
 
   const methods = useForm<IBuildingLocationFormData>({
+    mode: "onChange",
     defaultValues: {
       site: currentOverheatingCode?.fullAddress ? { label: currentOverheatingCode.fullAddress, value: null } : null,
       pid: currentOverheatingCode?.pid || null,

@@ -24,6 +24,7 @@ export const Introduction = observer(function Introduction() {
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<IIntroductionFormData>({
+    mode: "onChange",
     defaultValues: {
       issuedTo: currentOverheatingCode?.issuedTo || "",
       projectNumber: currentOverheatingCode?.projectNumber || "",
@@ -49,12 +50,12 @@ export const Introduction = observer(function Introduction() {
             <Text fontSize="sm" mt={1} color="gray.300">
               {t(
                 "overheatingCode.sections.introduction.standardReferences",
-                "NBC 2015: 9.33.5.1; 9.36.3.2. & 9.36.5.5; NBC 2020: 9.33.5.1; 9.36.3.2; 9.36.5.15 (5); 9.36.8.9. (1);"
+                "BCBC 2024: 9.33.2.1.(2); 9.33.3.1.(2); 9.33.5.1.(1); 9.36.3.2.(1); 9.36.5.15.(5)"
               )}
             </Text>
           </Box>
           <Text fontSize="xs" color="gray.400" textAlign="right" whiteSpace="nowrap">
-            {t("overheatingCode.sections.introduction.formVersion", "CSA F280-12 Form Set Ver 24.10")}
+            {t("overheatingCode.sections.introduction.formVersion", "BC Single Zone Cooling Guide Ver 1.0")}
           </Text>
         </Flex>
       </Box>
