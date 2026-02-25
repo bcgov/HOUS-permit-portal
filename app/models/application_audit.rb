@@ -20,7 +20,12 @@ class ApplicationAudit < Audited::Audit
       created_at: created_at,
       omniauth_username: omniauth_username_for_search,
       permit_application_nickname: permit_application_nickname_for_search,
-      jurisdiction_name: jurisdiction_name_for_search
+      jurisdiction_name: jurisdiction_name_for_search,
+      # Resolved project ID regardless of whether this audit is directly on a
+      # PermitProject or on a child record associated_with one. This lets us
+      # run a single Searchkick query scoped to a project and get the full
+      # unified activity feed (project + all child PermitApplication audits).
+      permit_project_id: permit_project_id_for_search
     }
   end
 
@@ -62,6 +67,17 @@ class ApplicationAudit < Audited::Audit
          associated.respond_to?(:jurisdiction)
       return associated.jurisdiction&.qualified_name
     end
+
+    nil
+  end
+
+  # When the audit is directly on a PermitProject, the project IS the auditable.
+  # When it's on a child (e.g. PermitApplication with `associated_with: :permit_project`),
+  # the project is stored in associated_id. This unifies both cases into a single
+  # filterable field so we can query "all audits for project X" in one shot.
+  def permit_project_id_for_search
+    return auditable_id if auditable_type == "PermitProject"
+    return associated_id if associated_type == "PermitProject"
 
     nil
   end
