@@ -692,7 +692,6 @@ DEPENDENCIES
   json-jwt (>= 1.16.6)
   kaminari (~> 1.2.2)
   letter_opener (~> 1.8)
-  net-http (~> 0.6.0)
   nokogiri (>= 1.18.9)
   omniauth-keycloak (= 1.5.2)
   omniauth-rails_csrf_protection (= 1.0.1)
