@@ -47,7 +47,7 @@ const formFormDefaultValues = (externalApiKey?: IExternalApiKey): IExternalApiKe
     webhookUrl: externalApiKey?.webhookUrl,
     revokedAt: externalApiKey?.revokedAt,
     notificationEmail: externalApiKey?.notificationEmail,
-    sandboxId: null,
+    sandboxId: externalApiKey?.sandboxId ?? null,
   }
 }
 

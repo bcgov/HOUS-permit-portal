@@ -4470,6 +4470,8 @@ Thank you,
           privacyPolicyContactUsEmail: "Email:",
           privacyPolicyContactUsEmailAddress: "digital.codes.permits@gov.bc.ca",
           breadcrumb: {
+            manage: "Manage",
+            notFound: "Not found",
             standardizationSetup: "Standardization setup",
             standardizationPreview: "Standardization preview",
             preCheck: "Pre-check",
