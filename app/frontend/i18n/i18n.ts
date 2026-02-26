@@ -864,6 +864,8 @@ const options = {
             title: "Resources",
             sectionTitle: "Resources for applicants",
             description: "Additional resources and reference materials to help you with your application:",
+            emptyForStaff: "No resources for applicants have been set up yet.",
+            configureResourcesLink: "Add resources in Configuration.",
             categories: {
               planning_zoning: "Planning & zoning",
               bylaws_requirements: "Bylaws & requirements",
