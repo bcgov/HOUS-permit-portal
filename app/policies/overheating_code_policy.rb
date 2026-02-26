@@ -12,15 +12,15 @@ class OverheatingCodePolicy < ApplicationPolicy
   end
 
   def update?
-    record.creator_id == user.id
+    show?
   end
 
   def destroy?
-    record.creator_id == user.id
+    show?
   end
 
   def restore?
-    record.creator_id == user.id
+    show?
   end
 
   class Scope < Scope
