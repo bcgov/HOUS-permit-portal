@@ -747,8 +747,10 @@ export enum EOverheatingCodeStatus {
 }
 
 export enum EOverheatingCodeSortFields {
-  updatedAt = "updated_at",
-  status = "status",
+  issuedTo = "issued_to",
+  projectNumber = "project_number",
+  buildingModel = "building_model",
+  fullAddress = "full_address",
 }
 
 // [OVERHEATING TODO] Units field purpose unclear — btuh is already labeled on the capacity input

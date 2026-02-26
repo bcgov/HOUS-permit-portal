@@ -264,6 +264,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_02_24_120000) do
     t.boolean "first_nation", default: false
     t.string "ltsa_matcher"
     t.jsonb "boundary_points", default: []
+    t.string "weather_location"
+    t.decimal "design_summer_temp", precision: 5, scale: 1
     t.index ["ltsa_matcher"], name: "index_jurisdictions_on_ltsa_matcher"
     t.index ["prefix"], name: "index_jurisdictions_on_prefix", unique: true
     t.index ["regional_district_id"], name: "index_jurisdictions_on_regional_district_id"
@@ -345,9 +347,11 @@ ActiveRecord::Schema[7.2].define(version: 2026_02_24_120000) do
     t.string "accreditation_ref2"
     t.string "issued_for1"
     t.string "issued_for2"
+    t.datetime "discarded_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["creator_id"], name: "index_overheating_codes_on_creator_id"
+    t.index ["discarded_at"], name: "index_overheating_codes_on_discarded_at"
     t.index ["jurisdiction_id"], name: "index_overheating_codes_on_jurisdiction_id"
   end
 

@@ -813,6 +813,14 @@ export class Api {
     })
   }
 
+  async archiveOverheatingCode(id: string) {
+    return this.client.delete<IApiResponse<IOverheatingCode, {}>>(`/overheating_codes/${id}`)
+  }
+
+  async restoreOverheatingCode(id: string) {
+    return this.client.patch<IApiResponse<IOverheatingCode, {}>>(`/overheating_codes/${id}/restore`)
+  }
+
   async downloadApplicationMetricsCsv() {
     return this.client.get<BlobPart>(`/permit_applications/download_application_metrics_csv`)
   }

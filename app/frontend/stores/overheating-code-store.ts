@@ -62,6 +62,7 @@ export const OverheatingCodeStoreModel = types
         sort: self.sort,
         page: opts?.page ?? self.currentPage,
         perPage: opts?.countPerPage ?? self.countPerPage,
+        showArchived: self.showArchived,
       }
 
       const response = yield self.environment.api.fetchOverheatingCodes(params)

@@ -715,14 +715,20 @@ const options = {
         },
         overheatingCode: {
           startNew: "Start New Overheating Code Check",
+          form: {
+            title: "Verify compliance with BC overheating requirements",
+            backToOverheatingCodes: "Go to overheating codes",
+          },
           index: {
             title: "Overheating Codes",
             intro:
               "Your overheating code check results are stored here. Use this service to verify compliance with overheating requirements before submitting a permit application.",
           },
           columns: {
-            updated_at: "Last Updated",
-            status: "Status",
+            issued_to: "Issued To",
+            project_number: "Project #",
+            building_model: "Building Model",
+            full_address: "Address",
           },
           sidebar: {
             sections: {
@@ -739,10 +745,8 @@ const options = {
           },
           sections: {
             introduction: {
-              standardTitle: "CSA Standard F280-12 Compliance",
-              standardReferences:
-                "NBC 2015: 9.33.5.1; 9.36.3.2. & 9.36.5.5; NBC 2020: 9.33.5.1; 9.36.3.2; 9.36.5.15 (5); 9.36.8.9. (1);",
-              formVersion: "CSA F280-12 Form Set Ver 24.10",
+              standardTitle: "B.C. Single Zone Cooling Capacity — BCBC 9.33.3.1.; 9.33.5.1.",
+              formVersion: "B.C. SZCG Form Set Ver 1.0",
               title: "Overheating Code Check",
               description:
                 "Provide basic project identification details to get started with your overheating code compliance check.",

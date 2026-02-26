@@ -17,6 +17,7 @@ import { NavBarMenu } from "./nav-bar-menu"
 import { RegionalRMJurisdictionSelect } from "./regional-rm-jurisdiction-select"
 import { SubNavBar } from "./sub-nav-bar"
 
+import { OverheatingCodeNavBar } from "../overheating-code/overheating-code-nav-bar"
 import { PreCheckNavBar } from "../pre-check/pre-check-nav-bar"
 import { StepCodeNavBar } from "../step-code/nav-bar"
 import { Part3NavLinks } from "../step-code/nav-bar/part-3-nav-links"
@@ -108,7 +109,7 @@ function isPreCheckPath(path: string): boolean {
 }
 
 function isOverheatingCodePath(path: string): boolean {
-  const regex = /^\/overheating-codes/
+  const regex = /^\/overheating-codes\/[a-f\d-]+/
   return regex.test(path)
 }
 
@@ -158,6 +159,10 @@ export const NavBar = observer(function NavBar() {
     } else {
       return <StepCodeNavBar title={t("stepCode.part3.title")} NavLinks={<Part3NavLinks />} />
     }
+  }
+
+  if (isOverheatingCodePath(path)) {
+    return <OverheatingCodeNavBar />
   }
 
   if (shouldHideFullNavBarForPath(path)) {

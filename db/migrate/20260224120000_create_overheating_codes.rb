@@ -57,11 +57,14 @@ class CreateOverheatingCodes < ActiveRecord::Migration[7.1]
       t.string :issued_for1
       t.string :issued_for2
 
+      t.datetime :discarded_at
+
       t.timestamps
     end
 
     add_index :overheating_codes, :creator_id
     add_index :overheating_codes, :jurisdiction_id
+    add_index :overheating_codes, :discarded_at
     add_foreign_key :overheating_codes, :users, column: :creator_id
     add_foreign_key :overheating_codes, :jurisdictions, column: :jurisdiction_id
   end

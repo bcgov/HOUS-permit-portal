@@ -1,7 +1,8 @@
 class Api::OverheatingCodesController < Api::ApplicationController
   include Api::Concerns::Search::OverheatingCodes
 
-  before_action :set_overheating_code, only: %i[show update generate_pdf]
+  before_action :set_overheating_code,
+                only: %i[show update destroy restore generate_pdf]
   skip_after_action :verify_policy_scoped, only: %i[index]
 
   def index
@@ -47,6 +48,40 @@ class Api::OverheatingCodesController < Api::ApplicationController
                      { blueprint: OverheatingCodeBlueprint }
     else
       render_error "overheating_code.update_error",
+                   message_opts: {
+                     error_message:
+                       @overheating_code.errors.full_messages.to_sentence
+                   }
+    end
+  end
+
+  def destroy
+    authorize @overheating_code
+    if @overheating_code.discard
+      render_success(
+        @overheating_code,
+        "overheating_code.destroy_success",
+        { blueprint: OverheatingCodeBlueprint }
+      )
+    else
+      render_error "overheating_code.destroy_error",
+                   message_opts: {
+                     error_message:
+                       @overheating_code.errors.full_messages.to_sentence
+                   }
+    end
+  end
+
+  def restore
+    authorize @overheating_code
+    if @overheating_code.update(discarded_at: nil)
+      render_success(
+        @overheating_code,
+        "overheating_code.restore_success",
+        { blueprint: OverheatingCodeBlueprint }
+      )
+    else
+      render_error "overheating_code.restore_error",
                    message_opts: {
                      error_message:
                        @overheating_code.errors.full_messages.to_sentence

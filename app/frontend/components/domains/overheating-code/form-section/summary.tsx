@@ -1,9 +1,11 @@
-import { Alert, AlertIcon, Box, Button, Heading, Icon, List, ListIcon, ListItem, Text, VStack } from "@chakra-ui/react"
+import { Box, Button, Heading, Icon, List, ListIcon, ListItem, Text, VStack } from "@chakra-ui/react"
 import { CheckCircle, DownloadSimple, WarningCircle } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useOverheatingCode } from "../../../../hooks/resources/use-overheating-code"
+import { EFlashMessageStatus } from "../../../../types/enums"
+import { CustomMessageBox } from "../../../shared/base/custom-message-box"
 
 interface ISectionStatus {
   labelKey: string
@@ -65,7 +67,7 @@ export const Summary = observer(function Summary() {
                 <ListIcon
                   as={section.complete ? CheckCircle : WarningCircle}
                   color={section.complete ? "green.500" : "yellow.600"}
-                  weight="fill"
+                  weight="regular"
                   boxSize={5}
                 />
                 <Text fontSize="sm">{t(`overheatingCode.sidebar.${section.labelKey}` as const as any)}</Text>
@@ -75,10 +77,10 @@ export const Summary = observer(function Summary() {
         </Box>
 
         {!allComplete && (
-          <Alert status="warning" borderRadius="md">
-            <AlertIcon />
-            <Text fontSize="sm">{t("overheatingCode.sections.summary.incompleteWarning" as const as any)}</Text>
-          </Alert>
+          <CustomMessageBox
+            status={EFlashMessageStatus.warning}
+            description={t("overheatingCode.sections.summary.incompleteWarning" as const as any)}
+          />
         )}
 
         {/* Download button */}

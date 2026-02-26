@@ -26,7 +26,13 @@ module Api::Concerns::Search::OverheatingCodes
   private
 
   def overheating_code_search_params
-    params.permit(:query, :page, :per_page, { sort: %i[field direction] })
+    params.permit(
+      :query,
+      :page,
+      :per_page,
+      :show_archived,
+      { sort: %i[field direction] }
+    )
   end
 
   def overheating_code_query
@@ -43,6 +49,10 @@ module Api::Concerns::Search::OverheatingCodes
   end
 
   def overheating_code_where_clause
-    { creator_id: current_user.id }
+    show_archived =
+      ActiveModel::Type::Boolean.new.cast(
+        overheating_code_search_params[:show_archived] || false
+      )
+    { creator_id: current_user.id, discarded: show_archived }
   end
 end

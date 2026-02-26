@@ -13,7 +13,7 @@ import {
   VStack,
 } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
-import React, { useEffect } from "react"
+import React, { useEffect, useMemo } from "react"
 import { Controller, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useOverheatingCode } from "../../../../hooks/resources/use-overheating-code"
@@ -47,6 +47,21 @@ export const DesignConditions = observer(function DesignConditions() {
   const areaUnit = isMetric ? "m²" : "ft²"
   const ventilationUnit = isMetric ? "L/s" : "cfm"
 
+  const jurisdictionWeatherLocation = currentOverheatingCode?.jurisdiction?.weatherLocation
+  const jurisdictionDesignTemp = currentOverheatingCode?.jurisdiction?.designSummerTemp
+  const hasJurisdictionWeather = !!jurisdictionWeatherLocation
+  const hasJurisdictionTemp = jurisdictionDesignTemp != null
+
+  const initialOutdoorTemp = useMemo(() => {
+    if (hasJurisdictionTemp) return jurisdictionDesignTemp.toString()
+    return currentOverheatingCode?.designOutdoorTemp?.toString() || ""
+  }, [currentOverheatingCode?.id])
+
+  const initialWeatherLocation = useMemo(() => {
+    if (hasJurisdictionWeather) return jurisdictionWeatherLocation
+    return currentOverheatingCode?.weatherLocation || ""
+  }, [currentOverheatingCode?.id])
+
   const {
     register,
     handleSubmit,
@@ -57,11 +72,11 @@ export const DesignConditions = observer(function DesignConditions() {
   } = useForm<IDesignConditionsFormData>({
     mode: "onChange",
     defaultValues: {
-      designOutdoorTemp: currentOverheatingCode?.designOutdoorTemp?.toString() || "",
+      designOutdoorTemp: initialOutdoorTemp,
       designIndoorTemp: FIXED_INDOOR_TEMP.toString(),
-      designAdjacentTemp: currentOverheatingCode?.designAdjacentTemp?.toString() || "",
+      designAdjacentTemp: currentOverheatingCode?.designAdjacentTemp?.toString() || initialOutdoorTemp,
       coolingZoneArea: currentOverheatingCode?.coolingZoneArea?.toString() || "",
-      weatherLocation: currentOverheatingCode?.weatherLocation || "",
+      weatherLocation: initialWeatherLocation,
       ventilationRate: currentOverheatingCode?.ventilationRate?.toString() || "",
       hrvErv: currentOverheatingCode?.hrvErv ?? false,
       atrePercentage: currentOverheatingCode?.atrePercentage?.toString() || "",
@@ -141,14 +156,22 @@ export const DesignConditions = observer(function DesignConditions() {
                   step="any"
                   {...register("designOutdoorTemp", { validate: validateTemp })}
                   placeholder="e.g. 31"
+                  isReadOnly={hasJurisdictionTemp}
+                  bg={hasJurisdictionTemp ? "greys.grey03" : undefined}
+                  fontWeight={hasJurisdictionTemp ? "semibold" : undefined}
                 />
                 <InputRightAddon>{tempUnit}</InputRightAddon>
               </InputGroup>
               <Text fontSize="xs" color="text.secondary" mt={1}>
-                {t(
-                  "overheatingCode.sections.designConditions.outdoorTempHint",
-                  "From BCBC Appendix C — July 2.5% dry bulb"
-                )}
+                {hasJurisdictionTemp
+                  ? t(
+                      "overheatingCode.sections.designConditions.outdoorTempAutoHint",
+                      "Auto-populated from jurisdiction (BCBC Appendix C)"
+                    )
+                  : t(
+                      "overheatingCode.sections.designConditions.outdoorTempHint",
+                      "From BCBC Appendix C — July 2.5% dry bulb"
+                    )}
               </Text>
               <FormErrorMessage>{errors.designOutdoorTemp?.message}</FormErrorMessage>
             </FormControl>
@@ -250,7 +273,6 @@ export const DesignConditions = observer(function DesignConditions() {
               <FormErrorMessage>{errors.coolingZoneArea?.message}</FormErrorMessage>
             </FormControl>
 
-            {/* [OVERHEATING TODO] Weather location — should this be a dropdown tied to BCBC Appendix C climatic data? */}
             <FormControl>
               <FormLabel>
                 {t("overheatingCode.sections.designConditions.weatherLocationLabel", "Weather Location")}
@@ -265,7 +287,18 @@ export const DesignConditions = observer(function DesignConditions() {
                   "overheatingCode.sections.designConditions.weatherLocationPlaceholder",
                   "e.g. Kaslo, BC"
                 )}
+                isReadOnly={hasJurisdictionWeather}
+                bg={hasJurisdictionWeather ? "greys.grey03" : undefined}
+                fontWeight={hasJurisdictionWeather ? "semibold" : undefined}
               />
+              {hasJurisdictionWeather && (
+                <Text fontSize="xs" color="text.secondary" mt={1}>
+                  {t(
+                    "overheatingCode.sections.designConditions.weatherLocationAutoHint",
+                    "Auto-populated from jurisdiction"
+                  )}
+                </Text>
+              )}
             </FormControl>
 
             <FormControl isInvalid={!!errors.ventilationRate}>

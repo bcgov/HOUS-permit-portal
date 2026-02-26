@@ -44,11 +44,15 @@ export const OverheatingCodeModel = types
     accreditationRef2: types.maybeNull(types.string),
     issuedFor1: types.maybeNull(types.string),
     issuedFor2: types.maybeNull(types.string),
+    discardedAt: types.maybeNull(types.Date),
     createdAt: types.maybeNull(types.Date),
     updatedAt: types.maybeNull(types.Date),
   })
   .extend(withEnvironment())
   .views((self) => ({
+    get isDiscarded() {
+      return !!self.discardedAt
+    },
     get isSubmitted() {
       return self.status === EOverheatingCodeStatus.submitted
     },
@@ -77,7 +81,7 @@ export const OverheatingCodeModel = types
       return self.documentNotes.length > 0
     },
     get isCalculationsPerformedByComplete() {
-      return !!self.performerName && !!self.performerEmail
+      return !!self.performerName && !!self.performerEmail && !!self.accreditationRef1
     },
     get pdfFilename() {
       const project = self.projectNumber || self.id.slice(0, 8)
@@ -87,6 +91,20 @@ export const OverheatingCodeModel = types
   .actions((self) => ({
     downloadPdf: flow(function* () {
       yield downloadFromApi(`/api/overheating_codes/${self.id}/generate_pdf`, self.pdfFilename)
+    }),
+    archive: flow(function* () {
+      const response = yield self.environment.api.archiveOverheatingCode(self.id)
+      if (response.ok) {
+        self.discardedAt = new Date()
+      }
+      return response.ok
+    }),
+    restore: flow(function* () {
+      const response = yield self.environment.api.restoreOverheatingCode(self.id)
+      if (response.ok) {
+        self.discardedAt = null
+      }
+      return response.ok
     }),
   }))
 

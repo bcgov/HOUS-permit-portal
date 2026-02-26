@@ -36,6 +36,7 @@ class OverheatingCodeBlueprint < Blueprinter::Base
          :accreditation_ref2,
          :issued_for1,
          :issued_for2,
+         :discarded_at,
          :created_at,
          :updated_at
 

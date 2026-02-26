@@ -15,6 +15,14 @@ class OverheatingCodePolicy < ApplicationPolicy
     record.creator_id == user.id
   end
 
+  def destroy?
+    record.creator_id == user.id
+  end
+
+  def restore?
+    record.creator_id == user.id
+  end
+
   class Scope < Scope
     def resolve
       scope.where(creator_id: user.id)

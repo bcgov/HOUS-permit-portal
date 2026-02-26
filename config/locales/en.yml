@@ -254,6 +254,18 @@ en:
       update_error:
         title: Error
         message: "Error updating overheating code check"
+      destroy_success:
+        title: ""
+        message: "Overheating code check archived successfully!"
+      destroy_error:
+        title: Error
+        message: "Error archiving overheating code check"
+      restore_success:
+        title: ""
+        message: "Overheating code check restored successfully!"
+      restore_error:
+        title: Error
+        message: "Error restoring overheating code check"
     pre_check:
       create_success:
         title: ""

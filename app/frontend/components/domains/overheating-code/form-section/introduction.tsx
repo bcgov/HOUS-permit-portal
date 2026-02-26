@@ -1,10 +1,12 @@
-import { Box, Flex, FormControl, FormErrorMessage, FormLabel, Heading, Input, Text, VStack } from "@chakra-ui/react"
+import { Box, FormControl, FormErrorMessage, FormLabel, Heading, Input, Text, VStack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useOverheatingCode } from "../../../../hooks/resources/use-overheating-code"
 import { useMst } from "../../../../setup/root"
+import { EFlashMessageStatus } from "../../../../types/enums"
+import { CustomMessageBox } from "../../../shared/base/custom-message-box"
 import { FormFooter } from "./form-footer"
 
 interface IIntroductionFormData {
@@ -41,24 +43,15 @@ export const Introduction = observer(function Introduction() {
 
   return (
     <Box>
-      <Box bg="gray.800" color="white" px={6} py={4} borderRadius="md" mb={6}>
-        <Flex justify="space-between" align="center" wrap="wrap" gap={2}>
-          <Box>
-            <Heading as="h3" size="md" fontWeight="bold">
-              {t("overheatingCode.sections.introduction.standardTitle", "CSA Standard F280-12 Compliance")}
-            </Heading>
-            <Text fontSize="sm" mt={1} color="gray.300">
-              {t(
-                "overheatingCode.sections.introduction.standardReferences",
-                "BCBC 2024: 9.33.2.1.(2); 9.33.3.1.(2); 9.33.5.1.(1); 9.36.3.2.(1); 9.36.5.15.(5)"
-              )}
-            </Text>
-          </Box>
-          <Text fontSize="xs" color="gray.400" textAlign="right" whiteSpace="nowrap">
-            {t("overheatingCode.sections.introduction.formVersion", "BC Single Zone Cooling Guide Ver 1.0")}
-          </Text>
-        </Flex>
-      </Box>
+      <CustomMessageBox
+        status={EFlashMessageStatus.info}
+        title={t(
+          "overheatingCode.sections.introduction.standardTitle",
+          "B.C. Single Zone Cooling Capacity — BCBC 9.33.3.1.; 9.33.5.1."
+        )}
+        description={t("overheatingCode.sections.introduction.formVersion", "B.C. SZCG Form Set Ver 1.0")}
+        mb={6}
+      />
 
       <Heading as="h2" size="lg" mb={2}>
         {t("overheatingCode.sections.introduction.title", "Overheating Code Check")}

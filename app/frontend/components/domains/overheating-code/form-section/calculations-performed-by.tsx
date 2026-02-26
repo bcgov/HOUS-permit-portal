@@ -24,6 +24,8 @@ interface ICalculationsPerformedByFormData {
 
 // [OVERHEATING TODO] Should these fields be pre-populated with the logged-in user's data?
 // Currently assuming YES — we seed defaults from currentUser on first load when fields are empty.
+// [OVERHEATING TODO] Which fields here should be mandatory? Currently requiring: name, email,
+// accreditationRef1. Should company, address, phone, issuedFor1 also be required?
 export const CalculationsPerformedBy = observer(function CalculationsPerformedBy() {
   const { t } = useTranslation()
   const { currentOverheatingCode } = useOverheatingCode()
@@ -169,9 +171,9 @@ export const CalculationsPerformedBy = observer(function CalculationsPerformedBy
       </Box>
 
       <SimpleGrid columns={{ base: 1, md: 2 }} spacing={5} mb={6}>
-        <FormControl>
+        <FormControl isRequired isInvalid={!!errors.accreditationRef1}>
           <FormLabel>{t("overheatingCode.sections.calculationsPerformedBy.fields.accreditationRef1")}</FormLabel>
-          <Input {...register("accreditationRef1")} />
+          <Input {...register("accreditationRef1", { required: true })} />
         </FormControl>
 
         <FormControl>
