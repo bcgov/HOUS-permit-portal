@@ -31,6 +31,7 @@ RSpec.describe StepCodeReportSharingService do
 
     it "returns confirmed email when contact exists" do
       jurisdiction = create(:sub_district)
+      jurisdiction.permit_type_submission_contacts.destroy_all
       contact =
         create(
           :permit_type_submission_contact,
