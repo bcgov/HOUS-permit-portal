@@ -7,6 +7,7 @@ import { IExternalApiKey } from "../../models/external-api-key"
 import { IIntegrationMapping } from "../../models/integration-mapping"
 import { IJurisdiction } from "../../models/jurisdiction"
 import { IJurisdictionTemplateVersionCustomization } from "../../models/jurisdiction-template-version-customization"
+import { IOverheatingCode } from "../../models/overheating-code"
 import { IPart3StepCode } from "../../models/part-3-step-code"
 import { IPart3StepCodeChecklist } from "../../models/part-3-step-code-checklist"
 import { IPart9StepCode } from "../../models/part-9-step-code"
@@ -792,6 +793,32 @@ export class Api {
 
   async downloadPreCheckUserConsentCsv() {
     return this.client.get<BlobPart>(`/pre_checks/download_pre_check_user_consent_csv`)
+  }
+
+  async fetchOverheatingCodes(params?: TSearchParams<any>) {
+    return this.client.get<IApiResponse<IOverheatingCode[], IPageMeta>>(`/overheating_codes`, params)
+  }
+
+  async fetchOverheatingCode(id: string) {
+    return this.client.get<IApiResponse<IOverheatingCode, {}>>(`/overheating_codes/${id}`)
+  }
+
+  async createOverheatingCode(params: Partial<IOverheatingCode>) {
+    return this.client.post<IApiResponse<IOverheatingCode, {}>>(`/overheating_codes`, { overheatingCode: params })
+  }
+
+  async updateOverheatingCode(id: string, params: Partial<IOverheatingCode>) {
+    return this.client.patch<IApiResponse<IOverheatingCode, {}>>(`/overheating_codes/${id}`, {
+      overheatingCode: params,
+    })
+  }
+
+  async archiveOverheatingCode(id: string) {
+    return this.client.delete<IApiResponse<IOverheatingCode, {}>>(`/overheating_codes/${id}`)
+  }
+
+  async restoreOverheatingCode(id: string) {
+    return this.client.patch<IApiResponse<IOverheatingCode, {}>>(`/overheating_codes/${id}/restore`)
   }
 
   async downloadApplicationMetricsCsv() {

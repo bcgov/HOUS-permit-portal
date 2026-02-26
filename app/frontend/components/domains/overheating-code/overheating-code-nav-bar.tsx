@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next"
 import { Link as RouterLink } from "react-router-dom"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 
-export const PreCheckNavBar = observer(function PreCheckNavBar() {
+export const OverheatingCodeNavBar = observer(function OverheatingCodeNavBar() {
   const { t } = useTranslation()
 
   return (
@@ -26,11 +26,11 @@ export const PreCheckNavBar = observer(function PreCheckNavBar() {
         </Box>
       </RouterLink>
       <FormLabel fontWeight="bold" fontSize="lg" m={0}>
-        {t("preCheck.form.title", "Pre-check your drawings for compliance with BC Building Code")}
+        {t("overheatingCode.form.title", "Verify compliance with BC overheating requirements")}
       </FormLabel>
       <Spacer />
-      <RouterLinkButton to="/pre-checks" variant="link">
-        {t("preCheck.form.backToPreChecks", "Back to pre-checks")}
+      <RouterLinkButton to="/overheating-codes" variant="link">
+        {t("overheatingCode.form.backToOverheatingCodes", "Go to overheating codes")}
       </RouterLinkButton>
     </Flex>
   )

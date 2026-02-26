@@ -28,7 +28,9 @@ class JurisdictionBlueprint < Blueprinter::Base
            :external_api_state,
            :first_nation,
            :ltsa_matcher,
-           :heating_degree_days
+           :heating_degree_days,
+           :weather_location,
+           :design_summer_temp
 
     field :external_api_enabled do |jurisdiction, _options|
       jurisdiction.external_api_enabled?

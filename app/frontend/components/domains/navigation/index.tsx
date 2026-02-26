@@ -264,6 +264,9 @@ const PreCheckForm = lazy(() => import("../pre-check").then((module) => ({ defau
 const PreCheckViewer = lazy(() =>
   import("../pre-check/pre-check-viewer").then((module) => ({ default: module.PreCheckViewer }))
 )
+const OverheatingCodeForm = lazy(() =>
+  import("../overheating-code").then((module) => ({ default: module.OverheatingCodeForm }))
+)
 
 const StepCodeChecklistPDFViewer = lazy(() =>
   import("../step-code/checklist/pdf-content/viewer").then((module) => ({
@@ -685,6 +688,11 @@ const AppRoutes = observer(() => {
             <Route path="/pre-checks/:preCheckId/edit/" element={<PreCheckForm />} />
             <Route path="/pre-checks/:preCheckId/edit/:section" element={<PreCheckForm />} />
             <Route path="/pre-checks/:preCheckId/viewer" element={<PreCheckViewer />} />
+            <Route path="/overheating-codes" element={<ProjectDashboardScreen />} />
+            <Route path="/overheating-codes/new" element={<OverheatingCodeForm />} />
+            <Route path="/overheating-codes/new/:section" element={<OverheatingCodeForm />} />
+            <Route path="/overheating-codes/:overheatingCodeId/edit/" element={<OverheatingCodeForm />} />
+            <Route path="/overheating-codes/:overheatingCodeId/edit/:section" element={<OverheatingCodeForm />} />
             <Route path="/documents" element={<ProjectDashboardScreen />} />
             {/* Already handled above with path-based tabs */}
             <Route path="/projects" element={<ProjectDashboardScreen />} />
