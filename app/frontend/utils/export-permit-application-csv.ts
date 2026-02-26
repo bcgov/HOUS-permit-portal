@@ -118,14 +118,14 @@ export function exportPermitApplicationCsv(permitApplication: IPermitApplication
   rows.push({ section: "-", panel: "", multi: "", label: "", value: "" })
   const requirementTemplateId = (permitApplication as any)?.templateVersion?.requirementTemplateId || ""
   rows.push({ section: "Requirement template:", panel: "", multi: "", label: "", value: String(requirementTemplateId) })
-  const permitType = (permitApplication as any)?.permitType?.name || ""
-  const workType = (permitApplication as any)?.activity?.name || ""
+  const tags = (permitApplication as any)?.tags ?? []
+  const tagsValue = Array.isArray(tags) ? tags.join(" ") : String(tags ?? "")
   rows.push({
     section: "Permit Application:",
     panel: "",
     multi: "",
     label: "",
-    value: `${permitType} ${workType}`.trim(),
+    value: (tagsValue.trim() || (permitApplication as any)?.templateNickname) ?? "",
   })
   const version = (permitApplication as any)?.templateVersion?.versionDate
     ? `v.${format(new Date((permitApplication as any).templateVersion.versionDate), "yyyy.MM.dd")}`

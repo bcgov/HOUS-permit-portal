@@ -53,8 +53,7 @@ RSpec.describe "Api::PermitApplications", type: :request do
     let(:valid_params) do
       {
         permit_application: {
-          activity_id: permit_application.activity_id,
-          permit_type_id: permit_application.permit_type_id,
+          template_version_id: template_version.id,
           jurisdiction_id: permit_project.jurisdiction_id,
           permit_project_id: permit_project.id,
           full_address: "123 Main St"
@@ -99,8 +98,7 @@ RSpec.describe "Api::PermitApplications", type: :request do
       post "/api/permit_applications",
            params: {
              permit_application: {
-               activity_id: permit_application.activity_id,
-               permit_type_id: permit_application.permit_type_id,
+               template_version_id: template_version.id,
                jurisdiction_id: permit_project.jurisdiction_id,
                permit_project_id: permit_project.id
              }

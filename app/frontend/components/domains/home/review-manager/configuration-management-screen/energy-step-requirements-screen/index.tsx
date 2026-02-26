@@ -4,7 +4,6 @@ import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
 import { useJurisdiction } from "../../../../../../hooks/resources/use-jurisdiction"
-import { usePermitClassificationsLoad } from "../../../../../../hooks/resources/use-permit-classifications-load"
 import { useMst } from "../../../../../../setup/root"
 import { ErrorScreen } from "../../../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../../../shared/base/loading-screen"
@@ -15,10 +14,7 @@ import { Part3HeatingDegreeDaysForm } from "./part-3-heating-degree-days-form"
 export const EnergyStepRequirementsScreen = observer(function EnergyStepRequirementsScreen() {
   const {
     stepCodeStore: { isOptionsLoaded, fetchPart9SelectOptions },
-    permitClassificationStore: { part9BuildingPermitType },
   } = useMst()
-
-  const { isLoaded: isClassificationsLoaded } = usePermitClassificationsLoad()
 
   useEffect(() => {
     const fetch = async () => await fetchPart9SelectOptions()
@@ -27,12 +23,12 @@ export const EnergyStepRequirementsScreen = observer(function EnergyStepRequirem
 
   const { currentJurisdiction, error } = useJurisdiction()
 
-  if (!isOptionsLoaded || !part9BuildingPermitType) return <LoadingScreen />
+  if (!isOptionsLoaded) return <LoadingScreen />
   if (error) return <ErrorScreen error={error} />
 
   return (
     <Container maxW="container.lg" py={8} px={{ base: 8, xl: 0 }} flexGrow={1}>
-      {currentJurisdiction && isOptionsLoaded && isClassificationsLoaded && (
+      {currentJurisdiction && isOptionsLoaded && (
         <VStack spacing={2} align="start" w="full">
           <Heading mb={0} fontSize="3xl">
             {t(`${i18nPrefix}.title`)}
@@ -56,9 +52,7 @@ export const EnergyStepRequirementsScreen = observer(function EnergyStepRequirem
                     </Link>
                   </Text>
                   <Part9EnergyStepEditableBlock
-                    key={part9BuildingPermitType.id}
-                    heading={part9BuildingPermitType.name}
-                    permitTypeId={part9BuildingPermitType.id}
+                    heading={t(`${i18nPrefix}.stepRequired.tagsHeading`)}
                     jurisdiction={currentJurisdiction}
                   />
                 </VStack>

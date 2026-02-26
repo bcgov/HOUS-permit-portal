@@ -11,7 +11,6 @@ export const TemplateVersionStoreModel = types
   .model("TemplateVersionStoreModel")
   .props({
     templateVersionMap: types.map(TemplateVersionModel),
-    templateVersionsByActivityId: types.map(types.array(types.safeReference(TemplateVersionModel))),
     isLoading: types.optional(types.boolean, false),
   })
   .extend(withEnvironment())
@@ -58,28 +57,16 @@ export const TemplateVersionStoreModel = types
         (t) => t.status === status && t.publiclyPreviewable === isPubliclyPreviewable && t.earlyAccess === earlyAccess
       )
     },
-    getTemplateVersionsByActivityId: (
-      permitTypeId: string,
-      status: ETemplateVersionStatus = ETemplateVersionStatus.published,
-      earlyAccess: boolean = false,
-      isPubliclyPreviewable: boolean = false
-    ) => {
-      return (self.templateVersionsByActivityId.get(permitTypeId) ?? []).filter(
-        (t) => t.status === status && t.publiclyPreviewable === isPubliclyPreviewable && t.earlyAccess === earlyAccess
-      )
-    },
   }))
   .actions((self) => ({
     fetchTemplateVersions: flow(function* (
-      activityId?: string,
       status?: ETemplateVersionStatus,
       earlyAccess?: boolean,
-      isPubliclyPreviewable?: boolean,
-      permitTypeId?: string
+      isPubliclyPreviewable?: boolean
     ) {
       self.isLoading = true
       const response = yield* toGenerator(
-        self.environment.api.fetchTemplateVersions(activityId, status, earlyAccess, isPubliclyPreviewable, permitTypeId)
+        self.environment.api.fetchTemplateVersions(status, earlyAccess, isPubliclyPreviewable)
       )
 
       if (response.ok) {
@@ -89,12 +76,6 @@ export const TemplateVersionStoreModel = types
           version.isFullyLoaded = true
         })
         self.mergeUpdateAll(templateVersions, "templateVersionMap")
-
-        !!activityId &&
-          self.templateVersionsByActivityId.set(
-            activityId,
-            templateVersions.map((templateVersion) => templateVersion.id)
-          )
       }
       self.isLoading = false
       return response.ok

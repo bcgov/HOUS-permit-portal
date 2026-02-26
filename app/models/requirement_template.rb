@@ -2,18 +2,14 @@ class RequirementTemplate < ApplicationRecord
   SEARCH_INCLUDES = %i[
     published_template_version
     draft_template_version
-    permit_type
     last_three_deprecated_template_versions
-    activity
     scheduled_template_versions
   ]
 
-  searchkick searchable: %i[description current_version permit_type activity],
-             word_start: %i[description current_version permit_type activity],
+  searchkick searchable: %i[description current_version nickname tags],
+             word_start: %i[description current_version nickname tags],
              text_middle: %i[current_version description]
 
-  belongs_to :activity, optional: false
-  belongs_to :permit_type, optional: false
   belongs_to :copied_from, class_name: "RequirementTemplate", optional: true
 
   has_many :requirement_template_sections,
@@ -45,7 +41,6 @@ class RequirementTemplate < ApplicationRecord
              foreign_key: "copied_from_id",
              optional: true
 
-  # Self-referential association for sections copied from this section
   has_many :copied_sections,
            class_name: "RequirementTemplate",
            foreign_key: "copied_from_id",
@@ -59,7 +54,6 @@ class RequirementTemplate < ApplicationRecord
           -> { where(status: "draft") },
           class_name: "TemplateVersion"
 
-  # Scope to get RequirementTemplates with a published template version
   scope :for_sandbox,
         ->(sandbox) do
           joins(:template_versions).where(
@@ -73,10 +67,11 @@ class RequirementTemplate < ApplicationRecord
 
   include Discard::Model
 
+  acts_as_taggable_on :tags
+
   accepts_nested_attributes_for :requirement_template_sections,
                                 allow_destroy: true
 
-  # This is a workaround needed to validate step code related errors
   attr_accessor :requirement_template_sections_attributes_copy
 
   validate :validate_uniqueness_of_blocks
@@ -87,7 +82,7 @@ class RequirementTemplate < ApplicationRecord
   def set_default_nickname
     return if nickname.present?
 
-    self.nickname ||= label
+    self.nickname = tag_list.join(" | ").presence || "New template"
   end
 
   def assignee
@@ -115,20 +110,12 @@ class RequirementTemplate < ApplicationRecord
   end
 
   def customizations
-    # Convenience method to prevent carpal tunnel syndrome
     jurisdiction_template_version_customizations
   end
 
   def published_customizations_count
-    # Returns the cached count of unique jurisdictions using the published template version
     published_template_version&.jurisdiction_template_version_customizations_count ||
       0
-  end
-
-  def label
-    return "New template" if permit_type.nil? || activity.nil?
-
-    "#{permit_type.name} | #{activity.name}#{first_nations ? " (" + I18n.t("activerecord.attributes.requirement_template.first_nations") + ")" : ""}"
   end
 
   def key
@@ -218,28 +205,12 @@ class RequirementTemplate < ApplicationRecord
     )
   end
 
-  def self.published_requirement_template_version(
-    activity,
-    permit_type,
-    first_nations
-  )
-    find_by(
-      activity: activity,
-      permit_type: permit_type,
-      first_nations: first_nations
-    )&.published_template_version
-  rescue NoMethodError => e
-    rails.logger.error e.message
-  end
-
   def search_data
     {
       nickname: nickname,
       description: description,
-      first_nations: first_nations,
+      tags: tag_list.join(", "),
       current_version: published_template_version&.version_date,
-      permit_type: permit_type.name,
-      activity: activity.name,
       discarded: discarded_at.present?,
       assignee: assignee&.name,
       visibility: visibility,
@@ -251,20 +222,23 @@ class RequirementTemplate < ApplicationRecord
   private
 
   def validate_uniqueness_of_blocks
-    # Track duplicates across all sections within the same template
-    duplicates =
-      requirement_blocks
-        .unscope(:order)
-        .group(:id)
-        .having("COUNT(*) > 1")
-        .pluck(:name)
+    requirement_block_ids = requirement_block_ids_from_nested_attributes_copy
+    grouped_ids = requirement_block_ids.group_by { |e| e }
+    duplicate_ids = grouped_ids.select { |_k, v| v.length > 1 }.keys
+    duplicates = RequirementBlock.where(id: duplicate_ids).pluck(:name)
+
+    duplicates.each do |duplicate_block_name|
+      errors.add(
+        :base,
+        I18n.t(
+          "model_validation.requirement_template.duplicate_block_in_template",
+          requirement_block_name: duplicate_block_name
+        )
+      )
+    end
   end
 
   def requirement_block_ids_from_nested_attributes_copy
-    # have to manually loop instead of using association because
-    # when using deeply nested attributes to save, the queries go against the database
-    # which will have stale data e.g. records trying to delete currently
-
     if requirement_template_sections_attributes_copy.blank? ||
          !requirement_template_sections_attributes_copy.is_a?(Array)
       return []
@@ -305,23 +279,6 @@ class RequirementTemplate < ApplicationRecord
       requirement_block_id: requirement_block_ids,
       requirement_code: Requirement::ARCHITECTURAL_DRAWING_REQUIREMENT_CODE
     )
-  end
-
-  def validate_uniqueness_of_blocks
-    requirement_block_ids = requirement_block_ids_from_nested_attributes_copy
-    grouped_ids = requirement_block_ids.group_by { |e| e }
-    duplicate_ids = grouped_ids.select { |_k, v| v.length > 1 }.keys
-    duplicates = RequirementBlock.where(id: duplicate_ids).pluck(:name)
-
-    duplicates.each do |duplicate_block_name|
-      errors.add(
-        :base,
-        I18n.t(
-          "model_validation.requirement_template.duplicate_block_in_template",
-          requirement_block_name: duplicate_block_name
-        )
-      )
-    end
   end
 
   def validate_step_code_related_dependencies

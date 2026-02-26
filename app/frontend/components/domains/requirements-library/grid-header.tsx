@@ -26,7 +26,7 @@ export const GridHeaders = observer(function GridHeaders({ forEarlyAccess }: IPr
       <Box display={"contents"} role={"row"}>
         <GridItem
           as={Flex}
-          gridColumn={"span 7"}
+          gridColumn={"span 6"}
           p={6}
           bg={forEarlyAccess ? "semantic.warningLight" : "greys.grey10"}
           justifyContent={"space-between"}

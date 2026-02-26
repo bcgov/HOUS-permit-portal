@@ -20,15 +20,11 @@ class RequirementTemplateCopyService
 
       new_template =
         template_class.new(
-          activity_id: requirement_template.activity_id,
-          permit_type_id: requirement_template.permit_type_id,
           description:
             field_overrides[:description] ||
               "Copy of #{requirement_template.description}",
           nickname: field_overrides[:nickname],
-          first_nations:
-            field_overrides[:first_nations] ||
-              requirement_template.first_nations,
+          tag_list: requirement_template.tag_list,
           copied_from: requirement_template
         )
 

@@ -65,7 +65,6 @@ class RequirementBlock < ApplicationRecord
     {
       updated_at: updated_at,
       name: name,
-      first_nations: first_nations,
       requirement_labels: requirements.pluck(:label),
       associations: association_list,
       configurations: configurations_search_list,
@@ -375,11 +374,7 @@ class RequirementBlock < ApplicationRecord
     new_name = base_name
 
     # Loop to find a unique name
-    while self
-            .class
-            .where(discarded_at: nil)
-            .where(first_nations: first_nations)
-            .exists?(name: new_name)
+    while self.class.where(discarded_at: nil).exists?(name: new_name)
       new_name = increment_last_word(new_name)
     end
 
@@ -405,12 +400,7 @@ class RequirementBlock < ApplicationRecord
 
   def unique_name_among_non_discarded
     return if name.blank?
-    if self
-         .class
-         .where.not(id: id)
-         .where(first_nations: first_nations)
-         .where(discarded_at: nil)
-         .exists?(name: name)
+    if self.class.where.not(id: id).where(discarded_at: nil).exists?(name: name)
       errors.add(:name, "has already been taken")
     end
   end

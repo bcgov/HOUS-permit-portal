@@ -5,13 +5,6 @@ RSpec.describe Api::RequirementTemplatesController,
                type: :controller,
                search: true do
   let!(:super_admin) { create(:user, :super_admin) }
-  let!(:activity) { create(:activity) }
-  let!(:permit_type) { create(:permit_type, code: :high_residential) }
-  let!(:other_activity) { create(:activity, code: :demolition) }
-  let!(:other_permit_type) { create(:permit_type) }
-
-  # Move the sign_in into specific contexts to avoid affecting all tests
-  # before { sign_in super_admin }
 
   describe "POST #create" do
     before { sign_in super_admin }
@@ -22,9 +15,8 @@ RSpec.describe Api::RequirementTemplatesController,
              params: {
                requirement_template: {
                  description: "a template of some description",
-                 first_nations: false,
-                 activity_id: activity.id,
-                 permit_type_id: permit_type.id,
+                 nickname: "Test Template",
+                 tag_list: ["Part 9", "New Construction"],
                  requirement_template_sections_attributes: [
                    { name: "one section", position: 1 }
                  ],
@@ -38,21 +30,15 @@ RSpec.describe Api::RequirementTemplatesController,
         )
       end
 
-      it "does not create a requirement template when an existing template has the same combination of permit type and activity" do
-        create(
-          :live_requirement_template,
-          activity: activity,
-          permit_type: permit_type
-        )
+      it "creates a requirement template with a unique nickname" do
+        create(:live_requirement_template, nickname: "Existing Template")
 
         expect {
           post :create,
                params: {
                  requirement_template: {
                    description: "a new template",
-                   first_nations: false,
-                   activity_id: activity.id,
-                   permit_type_id: permit_type.id,
+                   nickname: "Existing Template",
                    type: LiveRequirementTemplate.name,
                    requirement_template_sections_attributes: [
                      { name: "another section", position: 1 }
@@ -62,50 +48,12 @@ RSpec.describe Api::RequirementTemplatesController,
         }.not_to change(RequirementTemplate, :count)
 
         expect(response).to have_http_status(:bad_request)
-        expect(json_response["meta"]["message"]).to include(
-          "message" =>
-            "There can only be one requirement template per permit type, activity, and First Nations combination",
-          "title" => "Error",
-          "type" => "error"
-        )
       end
 
-      it "creates a requirement template when the activity and permit type are the same, but first nations is true" do
+      it "copies sections from an existing requirement template when providing nickname to copy endpoint" do
         create(
           :live_requirement_template,
-          activity: activity,
-          permit_type: permit_type,
-          first_nations: false
-        )
-
-        expect {
-          post :create,
-               params: {
-                 requirement_template: {
-                   description: "a new template with first nations",
-                   first_nations: true,
-                   activity_id: activity.id,
-                   permit_type_id: permit_type.id,
-                   requirement_template_sections_attributes: [
-                     { name: "another section", position: 1 }
-                   ]
-                 }
-               }
-        }.to change(RequirementTemplate, :count).by(1)
-
-        expect(response).to have_http_status(:success)
-        expect(json_response).to include("meta", "data")
-        expect(json_response["data"]["description"]).to eq(
-          "a new template with first nations"
-        )
-      end
-
-      it "copies sections from an existing non-first-nation requirement template when providing classifications to copy endpoint" do
-        create(
-          :live_requirement_template,
-          activity: activity,
-          permit_type: permit_type,
-          first_nations: false,
+          nickname: "Source Template",
           requirement_template_sections_attributes: [
             { name: "existing section one", position: 1 },
             { name: "existing section two", position: 2 }
@@ -116,20 +64,15 @@ RSpec.describe Api::RequirementTemplatesController,
           post :copy,
                params: {
                  requirement_template: {
-                   description: "a copied template with first nations",
-                   activity_id: activity.id,
-                   permit_type_id: permit_type.id,
-                   first_nations: true
+                   description: "a copied template",
+                   nickname: "Copied Template"
                  }
                }
         }.to change(RequirementTemplate, :count).by(1)
 
         expect(response).to have_http_status(:success)
         new_template = RequirementTemplate.order(created_at: :asc).last
-        # For some reason this spec is prone to failing on GitHub Action
-        expect(new_template.description).to eq(
-          "a copied template with first nations"
-        )
+        expect(new_template.description).to eq("a copied template")
         expect(
           new_template.requirement_template_sections.map(&:name)
         ).to match_array(["existing section one", "existing section two"])
@@ -141,21 +84,9 @@ RSpec.describe Api::RequirementTemplatesController,
   end
 
   describe "POST #invite_previewers" do
-    let(:live_requirement_template) do
-      create(
-        :live_requirement_template,
-        first_nations: false,
-        activity: activity,
-        permit_type: permit_type
-      )
-    end
+    let(:live_requirement_template) { create(:live_requirement_template) }
     let(:early_access_requirement_template) do
-      create(
-        :early_access_requirement_template,
-        first_nations: false,
-        activity: activity,
-        permit_type: permit_type
-      )
+      create(:early_access_requirement_template)
     end
     let(:service_instance) do
       instance_double(EarlyAccess::PreviewManagementService)
@@ -278,7 +209,6 @@ RSpec.describe Api::RequirementTemplatesController,
     end
 
     context "when not authenticated" do
-      # Ensure no user is signed in
       before { sign_out :user }
 
       it "denies access" do
@@ -370,18 +300,15 @@ RSpec.describe Api::RequirementTemplatesController,
       create(
         :live_requirement_template_with_sections,
         description: "Original Description",
-        first_nations: false,
-        activity: activity,
-        permit_type: permit_type
+        nickname: "Original Nickname"
       )
     end
 
     let(:valid_attributes) do
       {
         description: "Updated Description",
-        first_nations: true,
-        activity_id: other_activity.id,
-        permit_type_id: other_permit_type.id,
+        nickname: "Updated Nickname",
+        tag_list: ["Part 9", "Demolition"],
         requirement_template_sections_attributes: [
           {
             id: requirement_template.requirement_template_sections.first.id,
@@ -391,8 +318,6 @@ RSpec.describe Api::RequirementTemplatesController,
         ]
       }
     end
-
-    let(:invalid_attributes) { { activity_id: nil, permit_type_id: nil } }
 
     context "when the user is authenticated as a super admin" do
       before { sign_in super_admin }
@@ -410,47 +335,15 @@ RSpec.describe Api::RequirementTemplatesController,
           expect(json_response["data"]["description"]).to eq(
             "Updated Description"
           )
-          expect(json_response["data"]["first_nations"]).to be_truthy
-          expect(json_response["data"]["activity"]["id"]).to eq(
-            other_activity.id
-          )
-          expect(json_response["data"]["permit_type"]["id"]).to eq(
-            other_permit_type.id
-          )
           expect(
             json_response["data"]["requirement_template_sections"].first["name"]
           ).to eq("Updated Section")
 
-          # Verify that the changes are persisted in the database
           requirement_template.reload
           expect(requirement_template.description).to eq("Updated Description")
-          expect(requirement_template.first_nations).to be_truthy
-          expect(requirement_template.activity_id).to eq(other_activity.id)
-          expect(requirement_template.permit_type_id).to eq(
-            other_permit_type.id
-          )
           expect(
             requirement_template.requirement_template_sections.first.name
           ).to eq("Updated Section")
-        end
-      end
-
-      context "with invalid parameters" do
-        it "does not update the requirement template and returns an error response" do
-          patch :update,
-                params: {
-                  id: requirement_template.id,
-                  requirement_template: invalid_attributes
-                }
-
-          expect(response).to have_http_status(:bad_request)
-          expect(json_response["meta"]["message"]["message"]).to eq(
-            "Activity must exist, Permit type must exist"
-          )
-
-          # Ensure that the description was not updated
-          requirement_template.reload
-          expect(requirement_template.description).to eq("Original Description")
         end
       end
 
@@ -458,15 +351,12 @@ RSpec.describe Api::RequirementTemplatesController,
         let(:early_access_template) do
           create(
             :early_access_requirement_template,
-            description: "Early Access Original",
-            first_nations: false,
-            activity: activity,
-            permit_type: permit_type
+            description: "Early Access Original"
           )
         end
 
         let(:early_access_attributes) do
-          { nickname: "Early Access Updated Nickname", first_nations: true }
+          { nickname: "Early Access Updated Nickname" }
         end
 
         it "reloads the requirement template after update" do
@@ -481,19 +371,15 @@ RSpec.describe Api::RequirementTemplatesController,
             "Early Access Updated Nickname"
           )
 
-          # Verify that the template is reloaded and changes are persisted
           early_access_template.reload
           expect(early_access_template.nickname).to eq(
             "Early Access Updated Nickname"
           )
-          expect(early_access_template.first_nations).to be_truthy
         end
       end
     end
 
     context "when the user is not authenticated" do
-      # before { sign_out :user }
-
       it "denies access and returns a forbidden response" do
         patch :update,
               params: {
@@ -506,7 +392,6 @@ RSpec.describe Api::RequirementTemplatesController,
           "You need to sign in or sign up before continuing."
         )
 
-        # Ensure that the description was not updated
         requirement_template.reload
         expect(requirement_template.description).to eq("Original Description")
       end
@@ -529,7 +414,6 @@ RSpec.describe Api::RequirementTemplatesController,
           "The user is not authorized to do this action"
         )
 
-        # Ensure that the description was not updated
         requirement_template.reload
         expect(requirement_template.description).to eq("Original Description")
       end

@@ -1,7 +1,6 @@
 import { Theme } from "@chakra-ui/react"
 import { IPermitApplication } from "../models/permit-application"
 import { IPermitBlockStatus } from "../models/permit-block-status"
-import { IActivity, IPermitType } from "../models/permit-classification"
 import { IRequirement } from "../models/requirement"
 import {
   EAutoComplianceModule,
@@ -73,11 +72,13 @@ export interface IContact {
   updatedAt?: number | string // has to allow string to stop errors with useFieldArray
 }
 
-export interface IPermitTypeSubmissionContact {
+export interface ISubmissionContact {
   id: string
   email: string
-  permitTypeId: string
+  title?: string
   confirmedAt: string
+  default: boolean
+  confirmationSentAt?: string
 }
 
 export interface ISort<TField = string> {
@@ -205,7 +206,6 @@ export interface IOptionalElectiveFieldInfo {
 export interface IDenormalizedRequirementBlock {
   id: string
   name: string
-  firstNations: boolean
   sku: string
   formJson?: IFormIOBlock
   description?: string
@@ -229,12 +229,9 @@ export interface IDenormalizedRequirementTemplateSection {
 
 export interface IDenormalizedTemplate {
   id: string
-  label: string
   nickname: string
   description?: string
-  permitType: IPermitType
-  activity: IActivity
-  firstNations: boolean
+  tags: string[]
   requirementTemplateSections: IDenormalizedRequirementTemplateSection[]
 }
 
@@ -641,13 +638,16 @@ type TAutoComplianceOptionsMapperTypeConfiguration<EModule extends EAutoComplian
     mappableExternalOptions: Array<IOption<string>>
   }
 
-export interface IDigitalSealValidatorModuleConfiguration extends ICommonAutoComplianceModuleConfiguration<EAutoComplianceModule.DigitalSealValidator> {}
+export interface IDigitalSealValidatorModuleConfiguration
+  extends ICommonAutoComplianceModuleConfiguration<EAutoComplianceModule.DigitalSealValidator> {}
 
-export interface IParcelInfoExtractorModuleConfiguration extends TAutoComplianceValueExtractorTypeConfiguration<EAutoComplianceModule.ParcelInfoExtractor> {
+export interface IParcelInfoExtractorModuleConfiguration
+  extends TAutoComplianceValueExtractorTypeConfiguration<EAutoComplianceModule.ParcelInfoExtractor> {
   type: EAutoComplianceType.externalValueExtractor
 }
 
-export interface IPermitApplicationModuleConfiguration extends TAutoComplianceValueExtractorTypeConfiguration<EAutoComplianceModule.PermitApplication> {
+export interface IPermitApplicationModuleConfiguration
+  extends TAutoComplianceValueExtractorTypeConfiguration<EAutoComplianceModule.PermitApplication> {
   type: EAutoComplianceType.internalValueExtractor
 }
 
@@ -655,7 +655,8 @@ export type TValueExtractorAutoComplianceModuleConfiguration =
   | IParcelInfoExtractorModuleConfiguration
   | IPermitApplicationModuleConfiguration
 
-export interface IHistoricSiteModuleConfiguration extends TAutoComplianceOptionsMapperTypeConfiguration<EAutoComplianceModule.HistoricSite> {}
+export interface IHistoricSiteModuleConfiguration
+  extends TAutoComplianceOptionsMapperTypeConfiguration<EAutoComplianceModule.HistoricSite> {}
 
 export type TOptionsMapperAutoComplianceModuleConfiguration = IHistoricSiteModuleConfiguration
 
@@ -754,33 +755,26 @@ export interface ISubmissionVersion {
   createdAt: number
 }
 
-export interface IPermitTypeRequiredStep {
+export interface IJurisdictionStepRequirement {
   id?: string
   default: boolean
-  permitTypeId: string
-  permitTypeName?: string
-  workType?: string
   energyStepRequired: EEnergyStep
   zeroCarbonStepRequired: EZeroCarbonStep
-  activityName?: string
 }
 
 export type TCreateRequirementTemplateFormData = {
   description: string
-  firstNations?: boolean
-  permitTypeId: string
-  activityId: string
+  tags?: string[]
   type: string
+  nickname?: string
 }
 
 export type TCreatePermitApplicationFormData = {
   pid?: string
   pin?: string
-  permitTypeId: string
-  activityId: string
+  templateVersionId: string
   jurisdictionId?: string
   site?: IOption
-  firstNations: boolean
   sandboxId?: string
 }
 

@@ -40,7 +40,6 @@ import { convertResourceArrayToRecord } from "../utils/utility-functions"
 import { ICollaborator } from "./collaborator"
 import { JurisdictionModel } from "./jurisdiction"
 import { IPermitBlockStatus, PermitBlockStatusModel } from "./permit-block-status"
-import { IActivity, IPermitType } from "./permit-classification"
 import { IPermitCollaboration, PermitCollaborationModel } from "./permit-collaboration"
 import { IRequirement } from "./requirement"
 import { SandboxModel } from "./sandbox"
@@ -56,8 +55,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
       fullAddress: types.maybeNull(types.string), // for now some seeds will not have this
       pin: types.maybeNull(types.string), // for now some seeds will not have this
       pid: types.maybeNull(types.string), // for now some seeds will not have this
-      permitType: types.frozen<IPermitType>(),
-      activity: types.frozen<IActivity>(),
+      tags: types.optional(types.array(types.string), []),
       status: types.enumeration(Object.values(EPermitApplicationStatus)),
       submitter: types.maybeNull(types.maybe(types.reference(types.late(() => UserModel)))),
       jurisdiction: types.maybeNull(types.maybe(types.reference(types.late(() => JurisdictionModel)))),
@@ -205,8 +203,8 @@ export const PermitApplicationModel = types.snapshotProcessor(
       get jurisdictionName() {
         return self.jurisdiction.name
       },
-      get permitTypeAndActivity() {
-        return `${self.activity.name} - ${self.permitType.name}`.trim()
+      get tagsOrNickname() {
+        return self.tags?.length ? self.tags.join(" | ") : (self.templateNickname ?? "N/A")
       },
       get flattenedBlocks() {
         return self.formJson.components

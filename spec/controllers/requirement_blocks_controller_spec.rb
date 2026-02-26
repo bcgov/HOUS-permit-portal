@@ -37,10 +37,8 @@ RSpec.describe Api::RequirementBlocksController,
   let(:invalid_attributes) do
     {
       name: "",
-      first_nations: false,
       description: "Invalid requirement block with missing name",
       visibility: "any"
-      # Missing other required fields if any
     }
   end
 

@@ -8,17 +8,17 @@ RSpec.describe Api::TemplateVersionsController,
     create(:user, :review_manager, jurisdiction: jurisdiction)
   end
 
-  let!(:non_first_nations_template) do
-    create(:live_requirement_template, first_nations: false)
+  let!(:source_template) do
+    create(:live_requirement_template, nickname: "Source Template")
   end
   let!(:non_first_nations_version) do
-    create(:template_version, requirement_template: non_first_nations_template)
+    create(:template_version, requirement_template: source_template)
   end
-  let!(:first_nations_template) do
-    create(:live_requirement_template, first_nations: true)
+  let!(:target_template) do
+    create(:live_requirement_template, nickname: "Target Template")
   end
   let!(:first_nations_version) do
-    create(:template_version, requirement_template: first_nations_template)
+    create(:template_version, requirement_template: target_template)
   end
 
   let!(:customization) do

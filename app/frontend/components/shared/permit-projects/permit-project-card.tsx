@@ -38,8 +38,7 @@ export const PermitProjectCard = observer(({ permitProject }: IPermitProjectCard
 
   // Use project's own title as nickname
   const nickname = permitProject.title
-  // Details potentially from the first permit application
-  const permitTypeAndActivity = displayApplication?.permitTypeAndActivity || "N/A"
+  const tagsOrNickname = displayApplication?.tagsOrNickname || "N/A"
   // Use project's own dates
   const createdAt = permitProject.createdAt
   const updatedAt = permitProject.updatedAt
@@ -75,7 +74,7 @@ export const PermitProjectCard = observer(({ permitProject }: IPermitProjectCard
           <Flex direction="column" flex={{ base: 0, md: 1 }} maxW={{ base: "100%", md: "20%" }}>
             <Box p={2}>
               <Image
-                src={displayApplication?.permitType?.imageUrl || "/images/permit_classifications/low_residential.png"} // Use display app image or fallback
+                src="/images/logo.png"
                 alt={`thumbnail for ${nickname}`}
                 w="200px"
                 h="110px"
@@ -83,7 +82,7 @@ export const PermitProjectCard = observer(({ permitProject }: IPermitProjectCard
                 objectFit="contain"
               />
               <Text align="center" mt="1" color="text.secondary" fontSize="sm" fontWeight="bold" lineHeight="1.2">
-                {permitTypeAndActivity}
+                {tagsOrNickname}
               </Text>
             </Box>
           </Flex>
@@ -91,7 +90,7 @@ export const PermitProjectCard = observer(({ permitProject }: IPermitProjectCard
         <Show below="md">
           <Flex justify="space-between" alignItems="center">
             <Image
-              src={displayApplication?.permitType?.imageUrl || "/images/permit_classifications/low_residential.png"} // Use display app image or fallback
+              src="/images/logo.png"
               alt={`thumbnail for ${nickname}`}
               w="150px"
               h="80px"

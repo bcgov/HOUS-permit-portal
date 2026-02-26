@@ -96,7 +96,7 @@ export const ReviewPermitApplicationScreen = observer(() => {
   if (error) return <ErrorScreen error={error} />
   if (!currentPermitApplication?.isFullyLoaded) return <LoadingScreen />
 
-  const { permitTypeAndActivity, formattedFormJson, number, revisionMode, setRevisionMode } = currentPermitApplication
+  const { tagsOrNickname, formattedFormJson, number, revisionMode, setRevisionMode } = currentPermitApplication
 
   const onSaveReferenceNumber = handleSubmit(async ({ referenceNumber: referenceNumberToSave }) => {
     if (referenceNumber === referenceNumberSnapshot) {
@@ -147,7 +147,7 @@ export const ReviewPermitApplicationScreen = observer(() => {
               <Heading fontSize="xl" as="h3">
                 {currentPermitApplication.nickname}
               </Heading>
-              <Text noOfLines={1}>{permitTypeAndActivity}</Text>
+              <Text noOfLines={1}>{tagsOrNickname}</Text>
               <HStack>
                 <CopyableValue
                   textTransform={"uppercase"}

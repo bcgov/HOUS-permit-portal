@@ -9,10 +9,10 @@ import { EEnergyStep, EJurisdictionExternalApiState, EPreCheckServicePartner, EZ
 import {
   IContact,
   IJurisdictionServicePartnerEnrollment,
+  IJurisdictionStepRequirement,
   IOption,
-  IPermitTypeRequiredStep,
-  IPermitTypeSubmissionContact,
   IResource,
+  ISubmissionContact,
   TLatLngTuple,
 } from "../types/types"
 import { ExternalApiKeyModel } from "./external-api-key"
@@ -43,7 +43,7 @@ export const JurisdictionModel = types
     lookOutHtml: types.maybeNull(types.string),
     contactSummaryHtml: types.maybeNull(types.string),
     contacts: types.array(types.frozen<IContact>()),
-    permitTypeSubmissionContacts: types.array(types.frozen<IPermitTypeSubmissionContact>()),
+    submissionContacts: types.array(types.frozen<ISubmissionContact>()),
     externalApiKeysMap: types.map(ExternalApiKeyModel),
     createdAt: types.maybeNull(types.Date),
     updatedAt: types.maybeNull(types.Date),
@@ -56,7 +56,7 @@ export const JurisdictionModel = types
       types.enumeration(Object.values(EJurisdictionExternalApiState)),
       EJurisdictionExternalApiState.gOff
     ),
-    permitTypeRequiredSteps: types.array(types.frozen<IPermitTypeRequiredStep>()),
+    jurisdictionStepRequirements: types.array(types.frozen<IJurisdictionStepRequirement>()),
     sandboxes: types.array(types.reference(SandboxModel)),
     resources: types.array(types.frozen<IResource>()),
     firstNation: types.optional(types.boolean, false),
@@ -79,15 +79,15 @@ export const JurisdictionModel = types
 
       return sortByCreatedAt(self.contacts)[0]
     },
-    permitTypeStepRequirements(permitTypeId: string) {
-      const all = self.permitTypeRequiredSteps.filter((r) => r.permitTypeId == permitTypeId)
-      return R.any((r) => !r.default, all) ? all.filter((r) => !r.default) : all
+    getSubmissionContact(id: string): ISubmissionContact | undefined {
+      return self.submissionContacts.find((c) => c.id == id)
     },
-    getPermitTypeSubmissionContact(id: string): IPermitTypeSubmissionContact {
-      return self.permitTypeSubmissionContacts.find((c) => c.id == id)
+    /** @deprecated Use getSubmissionContact instead */
+    getPermitTypeSubmissionContact(id: string): ISubmissionContact | undefined {
+      return self.getSubmissionContact(id)
     },
-    getRequiredStep(id: string): IPermitTypeRequiredStep {
-      return self.permitTypeRequiredSteps.find((rs) => rs.id == id)
+    getRequiredStep(id: string): IJurisdictionStepRequirement | undefined {
+      return self.jurisdictionStepRequirements.find((rs) => rs.id == id)
     },
     getExternalApiKey(externalApiKeyId: string) {
       return self.externalApiKeysMap.get(externalApiKeyId)
@@ -130,15 +130,15 @@ export const JurisdictionModel = types
     },
   }))
   .views((self) => ({
-    get part9RequiredSteps(): IPermitTypeRequiredStep[] {
-      // This assumes that the permitTypeRequiredSteps are all part 9
+    get part9RequiredSteps(): IJurisdictionStepRequirement[] {
+      // This assumes that the jurisdictionStepRequirements are all part 9
       // Revisit this once adding part 3 required steps
-      const nonDefaults = self.permitTypeRequiredSteps.filter((r) => !r.default)
+      const nonDefaults = self.jurisdictionStepRequirements.filter((r) => !r.default)
       if (nonDefaults.length > 0) {
         return nonDefaults
       }
 
-      const defaults = self.permitTypeRequiredSteps.filter((r) => r.default)
+      const defaults = self.jurisdictionStepRequirements.filter((r) => r.default)
       if (defaults.length > 0) {
         return defaults
       }

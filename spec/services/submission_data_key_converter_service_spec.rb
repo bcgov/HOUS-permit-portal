@@ -6,13 +6,6 @@ RSpec.describe SubmissionDataKeyConverterService,
   describe ".call" do
     # Ensure necessary base data for factories if they rely on `first` records
     let!(:jurisdiction) { FactoryBot.create(:sub_district) }
-    let!(:permit_type) do
-      PermitType.first ||
-        FactoryBot.create(:permit_type, code: :low_residential)
-    end
-    let!(:activity) do
-      Activity.first || FactoryBot.create(:activity, code: :new_construction)
-    end
     let!(:template_version) { FactoryBot.create(:template_version) }
 
     let!(:file_data_snake_case) do
@@ -106,12 +99,6 @@ RSpec.describe SubmissionDataKeyConverterService,
       PermitApplication.destroy_all
       # Ensure base records for factories if they are not created by let!
       FactoryBot.create(:sub_district) unless SubDistrict.exists?
-      unless PermitType.exists?(code: :low_residential)
-        FactoryBot.create(:permit_type, code: :low_residential)
-      end
-      unless Activity.exists?(code: :new_construction)
-        FactoryBot.create(:activity, code: :new_construction)
-      end
       FactoryBot.create(:template_version) unless TemplateVersion.exists?
     end
 

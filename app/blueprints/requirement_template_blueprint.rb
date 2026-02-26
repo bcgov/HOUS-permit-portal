@@ -3,8 +3,6 @@ class RequirementTemplateBlueprint < Blueprinter::Base
   fields :nickname,
          :type,
          :description,
-         :first_nations,
-         :label,
          :discarded_at,
          :fetched_at,
          :created_at,
@@ -15,8 +13,9 @@ class RequirementTemplateBlueprint < Blueprinter::Base
     rt.published_customizations_count
   end
 
-  association :permit_type, blueprint: PermitClassificationBlueprint
-  association :activity, blueprint: PermitClassificationBlueprint
+  field :tags do |rt, _options|
+    rt.tag_list
+  end
   association :last_three_deprecated_template_versions,
               blueprint: TemplateVersionBlueprint,
               name: :deprecated_template_versions

@@ -9,7 +9,7 @@ module Api::Concerns::Search::PermitApplications
         { number: :text_end },
         { nickname: :word_middle },
         { full_address: :word_middle },
-        { permit_classifications: :word_middle },
+        { template_tags: :word_middle },
         { submitter: :word_middle },
         { status: :word_middle },
         { review_delegatee_name: :word_middle }

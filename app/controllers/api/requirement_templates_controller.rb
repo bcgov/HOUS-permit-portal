@@ -33,11 +33,7 @@ class Api::RequirementTemplatesController < Api::ApplicationController
 
   def for_filter
     authorize :requirement_template, :for_filter?
-    templates =
-      LiveRequirementTemplate.with_published_version.kept.includes(
-        :permit_type,
-        :activity
-      )
+    templates = LiveRequirementTemplate.with_published_version.kept
     render_success templates,
                    nil,
                    { blueprint: OptionsBlueprint, view: :default }
@@ -83,12 +79,6 @@ class Api::RequirementTemplatesController < Api::ApplicationController
     found_template =
       if requirement_template_params[:id].present?
         RequirementTemplate.find_by(id: requirement_template_params[:id])
-      elsif requirement_template_params[:permit_type_id].present? &&
-            requirement_template_params[:activity_id].present?
-        LiveRequirementTemplate.find_by(
-          permit_type_id: requirement_template_params[:permit_type_id],
-          activity_id: requirement_template_params[:activity_id]
-        )
       end
 
     if found_template.nil?
@@ -434,8 +424,6 @@ class Api::RequirementTemplatesController < Api::ApplicationController
     # eager loading of associations as most of the time we return the extended view
     @requirement_template =
       RequirementTemplate.includes(
-        :activity,
-        :permit_type,
         :published_template_version,
         :last_three_deprecated_template_versions,
         :scheduled_template_versions,
@@ -459,10 +447,8 @@ class Api::RequirementTemplatesController < Api::ApplicationController
         :id,
         :description,
         :nickname,
-        :first_nations,
-        :activity_id,
-        :permit_type_id,
         :type,
+        tag_list: [],
         requirement_template_sections_attributes: [
           :id,
           :name,

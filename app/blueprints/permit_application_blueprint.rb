@@ -21,9 +21,11 @@ class PermitApplicationBlueprint < Blueprinter::Base
            :template_nickname,
            :discarded_at
 
-    association :permit_type, blueprint: PermitClassificationBlueprint
-    association :activity, blueprint: PermitClassificationBlueprint
     association :sandbox, blueprint: SandboxBlueprint
+
+    field :tags do |pa, _options|
+      pa.template_tag_list
+    end
     association :submission_versions,
                 blueprint: SubmissionVersionBlueprint,
                 view: :base
@@ -163,8 +165,8 @@ class PermitApplicationBlueprint < Blueprinter::Base
       pa.formatted_submission_data_for_external_use
     end
 
-    field :permit_classifications do |pa, _options|
-      pa.formatted_permit_classifications
+    field :tags do |pa, _options|
+      pa.template_tag_list
     end
 
     field :raw_h2k_files do |pa, _options|
@@ -179,10 +181,6 @@ class PermitApplicationBlueprint < Blueprinter::Base
                 blueprint: UserBlueprint,
                 view: :external_api,
                 name: :account_holder
-    association :permit_type, blueprint: PermitClassificationBlueprint
-    association :activity,
-                blueprint: PermitClassificationBlueprint,
-                name: :activity_type
   end
 
   view :supporting_docs_update do

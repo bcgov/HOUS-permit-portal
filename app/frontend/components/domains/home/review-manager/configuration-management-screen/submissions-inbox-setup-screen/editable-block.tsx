@@ -6,7 +6,7 @@ import * as R from "ramda"
 import React, { useEffect, useState } from "react"
 import { useFormContext } from "react-hook-form"
 import { useJurisdiction } from "../../../../../../hooks/resources/use-jurisdiction"
-import { IPermitTypeSubmissionContact } from "../../../../../../types/types"
+import { ISubmissionContact } from "../../../../../../types/types"
 import { generateUUID } from "../../../../../../utils/utility-functions"
 import { ErrorScreen } from "../../../../../shared/base/error-screen"
 import { EmailFormControl } from "../../../../../shared/form/email-form-control"
@@ -14,20 +14,18 @@ import { EditableBlockContainer, EditableBlockHeading } from "../shared/editable
 import { i18nPrefix } from "./i18n-prefix"
 
 interface IProps {
-  heading: string
-  permitTypeId: string
-  fields: Record<"id", string>[]
+  heading?: string | null
+  fields: Record<"id", string | null>[]
   fieldArrayName: string
   append: any
   remove: any
   update: any
-  getIndex: (field: Record<"id", string>) => number
+  getIndex: (field: Record<"id", string | null>) => number
   reset: () => any
 }
 
 export const EditableBlock = observer(function SubmissionsInboxSetupEditableBlock({
   heading,
-  permitTypeId,
   fields,
   fieldArrayName,
   reset,
@@ -39,13 +37,12 @@ export const EditableBlock = observer(function SubmissionsInboxSetupEditableBloc
   const [isEditing, setIsEditing] = useState(null)
   const { currentJurisdiction, error } = useJurisdiction()
 
-  const getPermitTypeSubmissionContact = currentJurisdiction?.getPermitTypeSubmissionContact
+  const getSubmissionContact = currentJurisdiction?.getSubmissionContact
 
-  const { formState, trigger, getValues, setValue } = useFormContext()
+  const { formState, trigger, getValues } = useFormContext()
   const { errors, isSubmitting, isSubmitted } = formState
 
   const isValid = () => {
-    // Check if the subset of fields for a particular index is valid
     return (
       isEditing &&
       R.all((f) => {
@@ -62,10 +59,10 @@ export const EditableBlock = observer(function SubmissionsInboxSetupEditableBloc
   }
 
   const onAdd = () => {
-    append({ permitTypeId, email: null })
+    append({ id: null, email: null, title: null, default: false })
   }
 
-  const onRemove = (index: number, contact?: IPermitTypeSubmissionContact) => {
+  const onRemove = (index: number, contact?: ISubmissionContact) => {
     if (contact) {
       update(index, { _destroy: true, id: contact.id })
     } else {
@@ -89,18 +86,19 @@ export const EditableBlock = observer(function SubmissionsInboxSetupEditableBloc
     <ErrorScreen error={error} />
   ) : (
     <EditableBlockContainer>
-      <FormControl flexBasis={"280px"} alignSelf="start">
-        <EditableBlockHeading>{heading}</EditableBlockHeading>
-      </FormControl>
+      {heading && (
+        <FormControl flexBasis={"280px"} alignSelf="start">
+          <EditableBlockHeading>{heading}</EditableBlockHeading>
+        </FormControl>
+      )}
       <VStack flex={1} spacing={5} alignSelf="end">
         {fields.map((f, index) => {
           const trueIndex = getIndex(f)
           const contactId = getValues(`${fieldArrayName}.${trueIndex}.id`)
-          const contact = contactId && getPermitTypeSubmissionContact && getPermitTypeSubmissionContact(contactId)
+          const contact = contactId && getSubmissionContact && getSubmissionContact(contactId)
           return (
             <React.Fragment key={f.id || generateUUID()}>
-              <Input type="hidden" name={`${fieldArrayName}.${trueIndex}.id`} value={contactId} />
-              <Input type="hidden" name={`${fieldArrayName}.${trueIndex}.permitTypeId`} value={permitTypeId} />
+              <Input type="hidden" name={`${fieldArrayName}.${trueIndex}.id`} value={contactId || ""} />
               <HStack flex={1} w="full">
                 <EmailFormControl
                   pos="relative"

@@ -2,7 +2,6 @@ import {
   Box,
   Button,
   Center,
-  Checkbox,
   Flex,
   FormControl,
   FormHelperText,
@@ -195,19 +194,6 @@ export const BlockSetup = observer(function BlockSetup({
           <FormHelperText {...helperTextStyles}>
             {t("requirementsLibrary.fieldDescriptions.associations")}
           </FormHelperText>
-        </FormControl>
-        <FormControl>
-          <Controller
-            name="firstNations"
-            control={control}
-            render={({ field: { onChange, value } }) => {
-              return (
-                <Checkbox isChecked={value} onChange={onChange}>
-                  {t("requirementsLibrary.forFirstNations")}
-                </Checkbox>
-              )
-            }}
-          />
         </FormControl>
         <FormControl isReadOnly={true}>
           <FormLabel>{t("requirementsLibrary.fields.requirementSku")}</FormLabel>

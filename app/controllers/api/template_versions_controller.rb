@@ -23,27 +23,10 @@ class Api::TemplateVersionsController < Api::ApplicationController
         end
       )
     @template_versions =
-      if params[:activity_id].present?
-        policy_scope(TemplateVersion)
-          .joins(:requirement_template)
-          .includes(requirement_template: %i[permit_type activity])
-          .where(
-            activity: {
-              id: params[:activity_id]
-            },
-            requirement_templates: {
-              type: type
-            }
-          )
-          .order(updated_at: :desc)
-          .where(status:)
-      else
-        policy_scope(TemplateVersion)
-          .order(updated_at: :desc)
-          .joins(:requirement_template)
-          .includes(requirement_template: %i[permit_type activity])
-          .where(status:, requirement_templates: { type: type })
-      end
+      policy_scope(TemplateVersion)
+        .order(updated_at: :desc)
+        .joins(:requirement_template)
+        .where(status:, requirement_templates: { type: type })
 
     render_success @template_versions,
                    nil,
@@ -146,15 +129,6 @@ class Api::TemplateVersionsController < Api::ApplicationController
         TemplateVersion.find(
           copy_customization_params[:from_template_version_id]
         )
-    elsif copy_customization_params[:from_non_first_nations] &&
-          @template_version.first_nations
-      requirement_template =
-        RequirementTemplate.find_by(
-          activity: @template_version.activity,
-          permit_type: @template_version.permit_type,
-          first_nations: false
-        )
-      from_template_version = requirement_template&.published_template_version
     end
 
     if requirement_template.nil? || from_template_version.nil?
@@ -400,7 +374,7 @@ class Api::TemplateVersionsController < Api::ApplicationController
   private
 
   def template_version_params
-    params.permit(:activity_id, :status, :early_access)
+    params.permit(:status, :early_access)
   end
 
   def template_version_sandbox_scope
@@ -423,7 +397,6 @@ class Api::TemplateVersionsController < Api::ApplicationController
         template_version_id
         jurisdiction_id
         from_template_version_id
-        from_non_first_nations
         include_tips
         include_electives
       ]

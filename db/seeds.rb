@@ -8,8 +8,7 @@
 #     MovieGenre.find_or_create_by!(name: genre_name)
 #   end
 
-puts "Seeding permit classifications..."
-PermitClassificationSeeder.seed
+puts "Seeding tags..."
 
 puts "Seeding jurisdictions..."
 
@@ -126,28 +125,16 @@ end
 
 User.reindex
 
-activity1 = Activity.find_by_code("new_construction")
-activity2 = Activity.find_by_code("demolition")
-
-# Create PermitType records
-permit_type1 = PermitType.find_by_code("low_residential")
-permit_type2 = PermitType.find_by_code("medium_residential")
-
 puts "Seeding contacts..."
 Jurisdiction.all.each do |j|
-  PermitType.find_each do |permit_type|
-    j
-      .permit_type_submission_contacts
-      .where(
-        email: "#{j.name.parameterize}@laterolabs.com",
-        permit_type: permit_type
-      )
-      .first_or_create!(
-        email: "#{j.name.parameterize}@laterolabs.com",
-        confirmed_at: Time.now,
-        permit_type: permit_type
-      )
-  end
+  j
+    .submission_contacts
+    .where(email: "#{j.name.parameterize}@laterolabs.com")
+    .first_or_create!(
+      email: "#{j.name.parameterize}@laterolabs.com",
+      confirmed_at: Time.now,
+      default: true
+    )
   j.update(inbox_enabled: true, show_about_page: true)
 end
 if PermitApplication.first.blank?
@@ -167,11 +154,11 @@ if PermitApplication.first.blank?
           )
         end
         jurisdiction.reload
-        if jurisdiction.permit_type_submission_contacts.blank?
-          jurisdiction.permit_type_submission_contacts.create!(
+        if jurisdiction.submission_contacts.blank?
+          jurisdiction.submission_contacts.create!(
             email: jurisdiction.contacts.first.email,
             confirmed_at: Time.now,
-            permit_type: permit_type1
+            default: true
           )
         end
       end
@@ -198,38 +185,51 @@ if PermitApplication.first.blank?
     end
   Contact.reindex
   puts "Seeding requirement templates..."
-  # Create LiveRequirementTemplate records
-  LiveRequirementTemplate.find_or_create_by!(
-    activity: activity1,
-    permit_type: permit_type1
+  t1 =
+    LiveRequirementTemplate.find_or_create_by!(
+      nickname: "New Construction - Small Scale"
+    )
+  t1.tag_list.add(
+    "New construction",
+    "Small-scale/Multi-unit housing (Part 9 BCBC)",
+    "Buildings And Structures"
   )
-  LiveRequirementTemplate.find_or_create_by!(
-    activity: activity1,
-    permit_type: permit_type2
+  t1.save!
+
+  t2 =
+    LiveRequirementTemplate.find_or_create_by!(
+      nickname: "New Construction - 4+ Unit"
+    )
+  t2.tag_list.add(
+    "New construction",
+    "4+ Unit housing",
+    "Buildings And Structures"
   )
-  LiveRequirementTemplate.find_or_create_by!(
-    activity: activity2,
-    permit_type: permit_type1
+  t2.save!
+
+  t3 =
+    LiveRequirementTemplate.find_or_create_by!(
+      nickname: "Demolition - Small Scale"
+    )
+  t3.tag_list.add(
+    "Demolition",
+    "Small-scale/Multi-unit housing (Part 9 BCBC)",
+    "Site Preparation"
   )
-  LiveRequirementTemplate.find_or_create_by!(
-    activity: activity2,
-    permit_type: permit_type2
-  )
+  t3.save!
+
+  t4 =
+    LiveRequirementTemplate.find_or_create_by!(nickname: "Demolition - 4+ Unit")
+  t4.tag_list.add("Demolition", "4+ Unit housing", "Site Preparation")
+  t4.save!
 
   RequirementTemplate.reindex
-
-  PermitTypeRequiredStepSeeder.seed
 
   # Requrements from seeder are idempotent
   # Requirments block will get created from requiremetms templates
   puts "Seeding requirements..."
   RequirementsFromXlsxSeeder.seed
-  if Rails.env.development?
-    PermitClassification.find_by_code("medium_residential").update(
-      enabled: true
-    )
-    RequirementsFromXlsxSeeder.seed_medium
-  end
+  RequirementsFromXlsxSeeder.seed_medium if Rails.env.development?
 
   # Remove any invalid records that prevent saving of the template
   RequirementBlock.find_each { |block| block.destroy unless block.valid? }
@@ -272,8 +272,6 @@ if PermitApplication.first.blank?
       PermitApplication.create!(
         submitter: current_review_manager,
         permit_project: permit_project,
-        activity_id: template_version.activity.id,
-        permit_type_id: template_version.permit_type.id,
         template_version: template_version,
         sandbox: sandbox
       )
@@ -302,8 +300,6 @@ if PermitApplication.first.blank?
         PermitApplication.create!(
           submitter: current_review_manager,
           permit_project: permit_project,
-          activity_id: draft_template_version.activity.id,
-          permit_type_id: draft_template_version.permit_type.id,
           template_version: draft_template_version,
           status: :new_draft,
           sandbox: sandbox
@@ -327,7 +323,7 @@ if PermitApplication.first.blank?
     end
   end
   # Seed a North Vancouver Example
-  4.times do |i| # Added index i for unique titles if needed
+  4.times do |i|
     current_review_manager = review_managers.sample
     sandbox = north_van.sandboxes.find_by(name: "Published")
     project_pid =
@@ -362,8 +358,6 @@ if PermitApplication.first.blank?
         nickname: "Permit application #{i + 1}",
         submitter: current_review_manager,
         permit_project: permit_project,
-        activity_id: template_version.activity.id,
-        permit_type_id: template_version.permit_type.id,
         template_version: template_version,
         sandbox: sandbox
       )
@@ -392,8 +386,6 @@ if PermitApplication.first.blank?
         PermitApplication.create!(
           submitter: current_review_manager,
           permit_project: permit_project,
-          activity_id: draft_template_version.activity.id,
-          permit_type_id: draft_template_version.permit_type.id,
           template_version: draft_template_version,
           status: :new_draft,
           sandbox: sandbox

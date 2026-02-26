@@ -206,16 +206,13 @@ in this document.
                   "Datetime in milliseconds since the epoch (Unix time). This is the timestamp when the permit application was last resubmitted due to a revision request. Note: there might be multiple resubmissions for a permit application, but this date is the last resubmission date.",
                 nullable: true
               },
-              permit_classifications: {
-                type: :string,
+              template_tags: {
+                type: :array,
+                items: {
+                  type: :string
+                },
                 description:
-                  "This is the combined permit type and activity (work) type of the permit application. This is derived as `${permit_type.name} - ${activity_type.name}` e.g. '4+ Unit housing - New Construction'"
-              },
-              permit_type: {
-                "$ref" => "#/components/schemas/PermitClassification"
-              },
-              activity: {
-                "$ref" => "#/components/schemas/PermitClassification"
+                  "Tags associated with the permit application's requirement template."
               },
               account_holder: {
                 "$ref" => "#/components/schemas/AccountHolder"
@@ -313,27 +310,6 @@ in this document.
                 }
               },
               required: %w[id requirement_block_code name requirements]
-            }
-          },
-          PermitClassification: {
-            type: :object,
-            description:
-              "This object represents a permit classification. e.g. a permit type or activity (work) type.",
-            properties: {
-              id: {
-                type: :string
-              },
-              name: {
-                type: :string
-              },
-              description: {
-                type: :string,
-                nullable: true
-              },
-              code: {
-                type: :string,
-                description: "The code of the permit classification."
-              }
             }
           },
           PermitVersion: {

@@ -68,16 +68,15 @@ class RequirementsFromXlsxSeeder
     valid_rows,
     errors
   )
-    errors << "#{activity} #{permit_type} loading"
+    nickname = "#{activity} - #{permit_type}"
+    errors << "#{nickname} loading"
 
-    # create requirements blocks
-    activity = Activity.find_by_code!(activity)
-    permit_type = PermitType.find_by_code!(permit_type)
     requirement_template =
-      LiveRequirementTemplate.where(
-        activity: activity,
-        permit_type: permit_type
-      ).first_or_create(activity: activity, permit_type: permit_type)
+      LiveRequirementTemplate.where(nickname: nickname).first_or_create(
+        nickname: nickname
+      )
+    requirement_template.tag_list.add(activity, permit_type)
+    requirement_template.save!
     setup_sheet(
       activity,
       permit_type,

@@ -5,7 +5,6 @@ import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { useJurisdiction } from "../../../../hooks/resources/use-jurisdiction"
-import { usePermitClassificationsLoad } from "../../../../hooks/resources/use-permit-classifications-load"
 import { useSearch } from "../../../../hooks/use-search"
 import { IPermitApplication } from "../../../../models/permit-application"
 import { useMst } from "../../../../setup/root"
@@ -31,8 +30,6 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
   const { t } = useTranslation()
   const { permitApplicationStore, sandboxStore } = useMst()
   const { currentJurisdiction, error } = useJurisdiction()
-  const { isLoaded: isPermitClassificationsLoaded } = usePermitClassificationsLoad()
-
   const { currentPage, totalPages, totalCount, countPerPage, handleCountPerPageChange, handlePageChange, isSearching } =
     permitApplicationStore
 
@@ -40,7 +37,7 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
   useSearch(permitApplicationStore, [currentJurisdiction?.id, JSON.stringify(currentSandboxId)])
 
   if (error) return <ErrorScreen error={error} />
-  if (!currentJurisdiction || !isPermitClassificationsLoaded) return <LoadingScreen />
+  if (!currentJurisdiction) return <LoadingScreen />
 
   return (
     <Container maxW="container.xl" p={8} as={"main"}>
@@ -91,8 +88,7 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
                   <SearchGridItem wordBreak={"break-word"}>{pa.referenceNumber}</SearchGridItem>
                   <SearchGridItem>
                     <Flex direction="column">
-                      <Text fontWeight={700}>{pa.permitType.name}</Text>
-                      <Text>{pa.activity.name}</Text>
+                      <Text fontWeight={700}>{pa.templateNickname || pa.tags?.join(" - ") || "—"}</Text>
                     </Flex>
                   </SearchGridItem>
                   <SearchGridItem>

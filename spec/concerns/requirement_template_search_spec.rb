@@ -3,11 +3,6 @@ require "rails_helper"
 RSpec.describe Api::RequirementTemplatesController,
                type: :controller,
                search: true do
-  let(:demolition_activity) { create(:activity, code: :demolition) }
-  let(:alteration_activity) { create(:activity, code: :site_alteration) }
-  let(:high_permit_type) { create(:permit_type, code: :high_residential) }
-
-  # Define a helper method to parse JSON responses
   def json_response
     JSON.parse(response.body)
   end
@@ -16,7 +11,7 @@ RSpec.describe Api::RequirementTemplatesController,
     create(
       :live_requirement_template,
       description: "Template One",
-      activity: demolition_activity,
+      nickname: "Demolition Template",
       created_at: 10.days.ago
     )
   end
@@ -25,8 +20,7 @@ RSpec.describe Api::RequirementTemplatesController,
     create(
       :live_requirement_template,
       description: "Template Two",
-      permit_type: high_permit_type,
-      first_nations: true,
+      nickname: "High Residential Template",
       created_at: 9.days.ago
     )
   end
@@ -35,7 +29,7 @@ RSpec.describe Api::RequirementTemplatesController,
     create(
       :live_requirement_template,
       description: "Template Three",
-      activity: alteration_activity,
+      nickname: "Alteration Template",
       created_at: 10.days.ago
     )
   end
@@ -44,8 +38,7 @@ RSpec.describe Api::RequirementTemplatesController,
     create(
       :live_requirement_template,
       description: "Template Four",
-      activity: alteration_activity,
-      first_nations: true,
+      nickname: "First Nations Template",
       created_at: 9.days.ago
     )
   end
@@ -63,7 +56,6 @@ RSpec.describe Api::RequirementTemplatesController,
     create(
       :early_access_requirement_template,
       description: "Early Access Template",
-      first_nations: false,
       created_at: 7.days.ago
     )
   end
@@ -72,7 +64,6 @@ RSpec.describe Api::RequirementTemplatesController,
   let!(:submitter) { create(:user) }
 
   before do
-    # Ensure search data is up-to-date
     RequirementTemplate.reindex
     RequirementTemplate.search_index.refresh
   end
@@ -195,9 +186,7 @@ RSpec.describe Api::RequirementTemplatesController,
         it "returns the correct page of results" do
           get :index, params: { query: "", page: 2, per_page: 2 }
           expect(response).to have_http_status(:success)
-          # Assuming the first page has 2, the second page should have the next 2
           expect(json_response["data"].size).to eq(2)
-          # Further assertions can be made based on the created templates
         end
       end
     end
@@ -209,7 +198,6 @@ RSpec.describe Api::RequirementTemplatesController,
         it "returns requirement templates based on user's permissions" do
           get :index, params: { query: "", page: 1, per_page: 20 }
           expect(response).to have_http_status(:success)
-          # should not return any search results for submitter
           expect(json_response["data"].map { |rt| rt["id"] }).to match_array([])
         end
       end
