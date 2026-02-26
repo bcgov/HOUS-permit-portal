@@ -1,33 +1,20 @@
 class ChesEmailDelivery
-  CHES_TIMEOUT = 30
-  CHES_OPEN_TIMEOUT = 10
-
   attr_accessor :config, :client, :bearer_token, :delivery_method
 
   def initialize(config)
     @config = config
 
-    Rails.logger.info(
-      "[EMAIL HANG DEBUG] Initializing ChesEmailDelivery, CHES_HOST=#{ENV["CHES_HOST"]}"
-    )
     obtain_bearer_token
-    Rails.logger.info(
-      "[EMAIL HANG DEBUG] Bearer token obtained: #{@bearer_token.present?}"
-    )
-    build_client
-    Rails.logger.info(
-      "[EMAIL HANG DEBUG] Faraday client built with timeout=#{CHES_TIMEOUT}s, open_timeout=#{CHES_OPEN_TIMEOUT}s"
-    )
+    @client =
+      Faraday.new(url: "#{ENV["CHES_HOST"]}/api/v1") do |conn|
+        conn.headers["Content-Type"] = "application/json"
+        conn.request :authorization, :bearer, @bearer_token
+        conn.adapter Faraday.default_adapter
+      end
   end
 
   def deliver!(mail)
-    Rails.logger.info(
-      "[EMAIL HANG DEBUG] deliver! called for mail to=#{mail.to}"
-    )
     ensure_ches_token_is_valid_and_health_check_passes
-    Rails.logger.info(
-      "[EMAIL HANG DEBUG] Health check passed, proceeding with delivery"
-    )
 
     formatted_attachments = format_attachments(mail)
     body_content = extract_body_content(mail)
@@ -45,11 +32,7 @@ class ChesEmailDelivery
       bodyType: body_type(mail)
     }
 
-    Rails.logger.info("[EMAIL HANG DEBUG] POSTing email to CHES API...")
     response = client.post("email", params.to_json)
-    Rails.logger.info(
-      "[EMAIL HANG DEBUG] POST complete, status=#{response.status}"
-    )
 
     if response.success?
       body = JSON.parse(response.body)
@@ -131,22 +114,11 @@ class ChesEmailDelivery
   end
 
   def ensure_ches_token_is_valid_and_health_check_passes
-    Rails.logger.info(
-      "[EMAIL HANG DEBUG] Starting health check GET #{ENV["CHES_HOST"]}/api/v1/health"
-    )
     response = client.get("health")
-    Rails.logger.info(
-      "[EMAIL HANG DEBUG] Health check response status=#{response.status}"
-    )
-
     return if response.success?
 
     if response.status == 401
-      Rails.logger.info(
-        "[EMAIL HANG DEBUG] Health check returned 401, refreshing token and rebuilding client"
-      )
       obtain_bearer_token
-      build_client
       ensure_ches_token_is_valid_and_health_check_passes
     else
       Rails.logger.error(
@@ -157,9 +129,6 @@ class ChesEmailDelivery
   end
 
   def obtain_bearer_token
-    Rails.logger.info(
-      "[EMAIL HANG DEBUG] Obtaining bearer token from #{ENV["CHES_AUTH_HOST"]}"
-    )
     auth_client =
       Faraday.new(url: ENV["CHES_AUTH_HOST"]) do |conn|
         conn.request :url_encoded
@@ -167,8 +136,6 @@ class ChesEmailDelivery
                      :basic,
                      ENV["CHES_CLIENT_ID"],
                      ENV["CHES_CLIENT_SECRET"]
-        conn.options.timeout = CHES_TIMEOUT
-        conn.options.open_timeout = CHES_OPEN_TIMEOUT
         conn.adapter Faraday.default_adapter
       end
 
@@ -180,23 +147,8 @@ class ChesEmailDelivery
     if response.success?
       body = JSON.parse(response.body)
       self.bearer_token = body["access_token"]
-      Rails.logger.info("[EMAIL HANG DEBUG] Bearer token obtained successfully")
     else
-      Rails.logger.error(
-        "[EMAIL HANG DEBUG] Token request failed, status=#{response.status}, body=#{response.body}"
-      )
       raise "Error: Unable to authenticate with CHES - check ENV vars"
     end
-  end
-
-  def build_client
-    @client =
-      Faraday.new(url: "#{ENV["CHES_HOST"]}/api/v1") do |conn|
-        conn.headers["Content-Type"] = "application/json"
-        conn.request :authorization, :bearer, @bearer_token
-        conn.options.timeout = CHES_TIMEOUT
-        conn.options.open_timeout = CHES_OPEN_TIMEOUT
-        conn.adapter Faraday.default_adapter
-      end
   end
 end
