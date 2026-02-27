@@ -377,11 +377,12 @@ class Api::RequirementTemplatesController < Api::ApplicationController
           :name,
           :position,
           :_destroy,
-          template_section_blocks_attributes: %i[
-            id
-            requirement_block_id
-            position
-            _destroy
+          template_section_blocks_attributes: [
+            :id,
+            :requirement_block_id,
+            :position,
+            :_destroy,
+            conditional: %i[when_block_id when_requirement_code eq show hide]
           ]
         ]
       )

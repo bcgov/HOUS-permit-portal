@@ -72,11 +72,20 @@ export interface IRequirementBlockParams {
   }>
 }
 
+export interface IBlockConditional {
+  whenBlockId: string
+  whenRequirementCode: string
+  eq: string
+  show?: boolean
+  hide?: boolean
+}
+
 export interface ITemplateSectionBlockAttributes {
   id?: string
   requirementTemplateSectionId?: string
   requirementBlockId?: string
   position?: number
+  conditional?: IBlockConditional | null
   _destroy?: true
 }
 

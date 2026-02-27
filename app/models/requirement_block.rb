@@ -79,8 +79,12 @@ class RequirementBlock < ApplicationRecord
     "formSubmissionDataRST#{section_key}|RB#{id}"
   end
 
-  def to_form_json(section_key = nil)
-    {
+  def to_form_json(
+    section_key = nil,
+    block_conditional: nil,
+    block_section_key_map: {}
+  )
+    json = {
       id: id,
       key: key(section_key),
       type: "panel",
@@ -90,6 +94,14 @@ class RequirementBlock < ApplicationRecord
       collapsed: false,
       components: components_form_json(section_key)
     }
+
+    if block_conditional.present?
+      resolved =
+        resolve_block_conditional(block_conditional, block_section_key_map)
+      json[:conditional] = resolved if resolved
+    end
+
+    json
   end
 
   def components_form_json(section_key)
@@ -163,6 +175,29 @@ class RequirementBlock < ApplicationRecord
   end
 
   private
+
+  def resolve_block_conditional(block_conditional, block_section_key_map)
+    when_block_id = block_conditional["when_block_id"]
+    when_requirement_code = block_conditional["when_requirement_code"]
+    return nil if when_block_id.blank? || when_requirement_code.blank?
+
+    target_section_key = block_section_key_map[when_block_id]
+    return nil if target_section_key.blank?
+
+    target_block_key =
+      "formSubmissionDataRST#{target_section_key}|RB#{when_block_id}"
+    when_path =
+      "#{target_section_key}.#{target_block_key}|#{when_requirement_code}"
+
+    resolved = { "when" => when_path, "eq" => block_conditional["eq"] }
+    resolved["show"] = block_conditional["show"] if block_conditional[
+      "show"
+    ].present?
+    resolved["hide"] = block_conditional["hide"] if block_conditional[
+      "hide"
+    ].present?
+    resolved
+  end
 
   # Escape for single-quoted JS strings
   def escape_for_js(str)
