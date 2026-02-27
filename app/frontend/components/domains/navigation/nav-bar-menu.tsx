@@ -6,7 +6,6 @@ import {
   DrawerBody,
   DrawerContent,
   DrawerOverlay,
-  Flex,
   Grid,
   Heading,
   IconButton,
@@ -234,11 +233,11 @@ export const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
                 <Grid templateColumns={{ base: "1fr", md: "3fr 3fr 2fr" }} gap={8} py={5}>
                   <Box order={{ base: 2, md: 1 }}>{projectReadinessColumn}</Box>
                   <Box order={{ base: 3, md: 2 }}>{aboutColumn}</Box>
-                  <Flex order={{ base: 1, md: 3 }} flexDirection="column">
+                  <Box order={{ base: 1, md: 3 }} flexDirection="column">
                     {renderRightColumnContent()}
-                    <VersionInfoMenuItem mt="auto" />
-                  </Flex>
+                  </Box>
                 </Grid>
+                <VersionInfoMenuItem />
               </Container>
             </MenuCloseProvider>
           </DrawerBody>
