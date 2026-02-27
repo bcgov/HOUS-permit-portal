@@ -33,9 +33,13 @@ class ProjectActivityPresenter
     return "System" if user.blank?
 
     # Do not expose the individual's name to submitters when the user is jurisdiction staff.
+    # [AUDITS SUGGESTION] Return the jurisdiction name instead of nil so descriptions
+    # don't render as " created this project" with a blank actor.
     if viewer.present? && viewer.submitter? && user.jurisdiction_staff?
       jurisdiction = resolve_jurisdiction_for_audit(audit)
-      return nil if jurisdiction.present? && user.member_of?(jurisdiction.id)
+      if jurisdiction.present? && user.member_of?(jurisdiction.id)
+        return jurisdiction.qualified_name
+      end
     end
 
     user.name
