@@ -65,6 +65,7 @@
     "@uppy/react": "^4.0.4",
     "@uppy/xhr-upload": "^4.4.2",
     "apisauce": "^3.0.1",
+    "axios": "^1.13.5",
     "date-fns": "^2.30.0",
     "date-fns-tz": "^2.0.1",
     "dompurify": "^3.3.0",
