@@ -92,7 +92,7 @@
     "react-router-dom": "^6.30.3",
     "react-select": "^5.8.0",
     "restructure": "^3.0.0",
-    "rollup": "^4.22.4",
+    "rollup": "^4.59.0",
     "uuid": "^9.0.1"
   },
   "overrides": {
