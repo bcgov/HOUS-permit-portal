@@ -115,7 +115,7 @@ export const ProjectMap = ({ coordinates, pid, parcelGeometry, onOpenFullscreen 
       layer.add(polygonGraphic)
 
       // Zoom to fit the parcel boundary with some padding
-      view.goTo(polygon.extent.expand(1.5)).catch(() => {
+      view.goTo(polygon.extent.expand(3.0)).catch(() => {
         // Silently handle animation interruption (e.g. user interaction during goTo)
       })
     } else if (coordinates) {

@@ -41,6 +41,7 @@ en:
         scope_names:
           published: 'Training mode: "Published"'
           scheduled: 'Training mode: "Upcoming"'
+        available_in_all: "All"
     errors:
       models:
         early_access_preview:
@@ -166,6 +167,10 @@ en:
       notify_batched_integration_mapping: "New API mappings"
       notify_pre_check_submitted: "Your pre-check has been submitted"
       notify_pre_check_completed: "Your pre-check has been completed"
+      notify_new_template_version_published: "New version published for %{template_label}"
+      notify_template_version_no_action: "Permit template updated - no action required: %{template_label}"
+      notify_template_version_action_required: "ACTION REQUIRED: Permit template updated - API mapping review required: %{template_label}"
+      notify_template_version_new_template: "New permit template scheduled: %{template_label} (%{version_date})"
       notify_api_key_status_change: "API Key for %{jurisdiction_name} is expiring %{interval}"
       send_step_code_report_to_jurisdiction: "Step Code Report Shared: %{step_code_title} for %{jurisdiction_name}"
   arbitrary_message_construct:
@@ -221,6 +226,10 @@ en:
       ltsa_unavailable_error:
         title: Error
         message: The land title service is currently unavailable
+    step_code:
+      update_archived_error:
+        title: Error
+        message: "Cannot update archived step code. Please restore it first."
       jurisdiction_ltsa_error:
         title: Error
         message: Jurisdiction could not be determined. Please check back later.
@@ -453,7 +462,7 @@ en:
         message: "New template created successfully!"
       update_success:
         title: ""
-        message: "This draft has been saved."
+        message: "This template has been saved."
       schedule_success:
         title: ""
         message: "Permit has been scheduled to published."
@@ -676,6 +685,9 @@ en:
       update_error:
         title: Error
         message: "%{error_message}"
+      update_archived_error:
+        title: Error
+        message: "Cannot update archived step code. Please restore it first."
       restore_success:
         title: ""
         message: "Step code restored successfully!"
@@ -865,7 +877,6 @@ en:
       signoff_checkbox_label: "I acknowledge that by checking this box and providing my digital signature, I am electronically signing."
       signoff_submit_title: "Review and Submit"
       energy_step_code: "Open or resume tool"
-      architectural_drawing: "Open or resume tool"
       select_energy_step_code: "Find and attach your report instead"
       autofill_contact: "Autofill"
       or_use_existing_html: 'Started a report outside this permit application? <a href="#">use existing step code</a>'

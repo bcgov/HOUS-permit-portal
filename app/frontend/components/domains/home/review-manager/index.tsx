@@ -50,6 +50,7 @@ export const ReviewManagerHomeScreen = observer(({ ...rest }: IHomeScreenProps) 
             description={t("home.userManagementDescription")}
             icon={<Users size={24} />}
             href={`jurisdictions/${jurisdiction.slug}/users`}
+            disableForSandbox
           />
         </Flex>
       </Flex>
