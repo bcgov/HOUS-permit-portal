@@ -1,4 +1,15 @@
 class PermitApplicationPolicy < ApplicationPolicy
+  # ── COLLABORATOR VISIBILITY QUESTIONS ──
+  #
+  # show? grants access to ANY submission collaborator (assignee or delegatee).
+  # The actual data restriction (which blocks they see) happens downstream in
+  # FormJsonService, SubmissionDataService, and the blueprint. But the activity
+  # feed currently only checks project-level access via ApplicationAuditPolicy::Scope.
+  #
+  #   Q: Should the activity feed reuse show? per permit application to decide
+  #      whether an audit is visible — e.g. an assignee on PA-A should not see
+  #      audits for PA-B (where show? would return false)?
+  #
   def show?
     if record.submitter == user ||
          record.collaborator?(user_id: user.id, collaboration_type: :submission)

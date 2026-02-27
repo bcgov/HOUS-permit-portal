@@ -1,3 +1,38 @@
+# ── COLLABORATOR VISIBILITY QUESTIONS ──
+#
+# This presenter formats every audit into a human-readable activity entry.
+# It currently has no awareness of the viewer's collaborator role or block
+# assignments. The existing partial-view system works like this:
+#
+#   PermitApplication#submission_requirement_block_edit_permissions(user_id:)
+#     → returns :all (owner/delegatee), an array of block IDs (assignee), or nil
+#
+#   This is enforced at three layers today:
+#     1. FormJsonService — strips requirement blocks from form_json
+#     2. SubmissionDataService — strips submission_data keys by block ID
+#     3. PermitApplicationBlueprint — filters supporting_documents and collaborations
+#
+# The activity feed bypasses all three because it renders through this
+# presenter, not through the blueprint/service pipeline. Questions:
+#
+#   Q1: format_permit_block_status_description exposes requirement_block_name
+#       ("Bob changed status of Electrical Requirements"). Should an assignee
+#       who isn't assigned to that block see this?
+#
+#   Q2: format_permit_collaboration_description names the collaborator and the
+#       block they were assigned to. If viewer is an assignee on a different
+#       block, should they see who else is working on other blocks?
+#
+#   Q3: resolve_permit_application_id and resolve_permit_name return info
+#       about sibling permit applications. An assignee on PA-A probably
+#       shouldn't learn the nickname or status of PA-B.
+#
+#   Q4: If we decide to filter, the simplest approach may be to call
+#       submission_requirement_block_edit_permissions here and skip/redact
+#       entries where the viewer doesn't have access. But that reintroduces
+#       per-record lookups — is there a way to batch this at the controller
+#       level before handing off to the presenter?
+#
 class ProjectActivityPresenter
   def self.format(audit, viewer:)
     {

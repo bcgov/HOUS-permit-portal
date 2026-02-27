@@ -104,6 +104,16 @@ class PermitApplication < ApplicationRecord
     inbox_enabled?
   end
 
+  # ── COLLABORATOR VISIBILITY QUESTIONS ──
+  #
+  # Filters supporting documents to only those matching the user's assigned
+  # requirement blocks. Called from PermitApplicationBlueprint.
+  #
+  #   Q: The activity feed could surface "User uploaded a document" audits
+  #      for documents the viewer can't access here. Should the presenter
+  #      cross-reference this method to decide whether to show or redact
+  #      document-related audit entries?
+  #
   def supporting_documents_for_submitter_based_on_user_permissions(
     supporting_documents,
     user: nil
@@ -276,6 +286,21 @@ class PermitApplication < ApplicationRecord
     collaborators.any?
   end
 
+  # ── COLLABORATOR VISIBILITY QUESTIONS ──
+  #
+  # This is the single source of truth for what a user can access on a permit
+  # application. Returns :all, an Array of block IDs, or nil. Every other
+  # layer (FormJsonService, SubmissionDataService, blueprint, policy) calls
+  # this method to decide what to show or allow.
+  #
+  #   Q1: The project activity feed (ProjectActivityPresenter) currently does
+  #       NOT call this method. Should it? If an assignee can only see blocks
+  #       ["B1", "B2"], should audits about block "B3" be hidden from them?
+  #
+  #   Q2: Could this method be extended with a `scope:` parameter to also
+  #       cover read-only visibility (e.g. activity feed) vs edit permissions?
+  #       Right now "can see" and "can edit" are the same set of blocks.
+  #
   def submission_requirement_block_edit_permissions(user_id:)
     if submitter_id != user_id &&
          !collaborator?(user_id:, collaboration_type: :submission)
