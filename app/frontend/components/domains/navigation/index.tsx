@@ -77,11 +77,11 @@ const ResourcesScreenLazy = lazy(() =>
   }))
 )
 const ReviewStaffMyJurisdictionAboutPageScreen = lazy(() =>
-  import("../home/review-manager/configuration-management-screen/feature-access-screen/my-jurisdiction-about-page").then(
-    (module) => ({
-      default: module.myJurisdictionAboutPageScreen,
-    })
-  )
+  import(
+    "../home/review-manager/configuration-management-screen/feature-access-screen/my-jurisdiction-about-page"
+  ).then((module) => ({
+    default: module.myJurisdictionAboutPageScreen,
+  }))
 )
 
 const DesignatedReviewerScreen = lazy(() =>
@@ -734,6 +734,10 @@ const AppRoutes = observer(() => {
           <Route path="/overheating-tool/start" element={<OverheatingToolStartScreen />} />
         </Route>
 
+        <Route element={<ProtectedRoute isAllowed={loggedIn} />}>
+          <Route path="/project-readiness-tools/check-digital-seals" element={<CheckDigitalSealsScreen />} />
+        </Route>
+
         <Route element={<ProtectedRoute isAllowed={loggedIn && !isUnconfirmed} />}>
           <Route path="/profile" element={<ProfileScreen />} />
         </Route>
@@ -820,7 +824,6 @@ const AppRoutes = observer(() => {
           path="/project-readiness-tools/look-up-step-codes-requirements-for-your-project"
           element={<LookUpStepCodesRequirementsForYourProjectScreen />}
         />
-        <Route path="/project-readiness-tools/check-digital-seals" element={<CheckDigitalSealsScreen />} />
         <Route path="/project-readiness-tools/pre-check" element={<PreCheckInfoScreen />} />
         <Route
           path="/onboarding-checklist-page-for-lg-adopting"

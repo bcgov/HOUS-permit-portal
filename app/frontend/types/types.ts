@@ -52,6 +52,10 @@ export type DeepPartial<T> = T extends object
 
 export type TLatLngTuple = [number, number]
 
+export interface IParcelGeometry {
+  rings: [number, number][][]
+}
+
 export interface IContact {
   contactType: string
   id: string
@@ -431,6 +435,11 @@ export interface IJurisdictionServicePartnerEnrollment {
   updatedAt: Date
 }
 
+export interface IJurisdictionStub {
+  id: string
+  qualifiedName: string
+}
+
 export interface IReportDocument extends IBaseFileAttachment {
   stepCodeId: string
 }
@@ -641,13 +650,16 @@ type TAutoComplianceOptionsMapperTypeConfiguration<EModule extends EAutoComplian
     mappableExternalOptions: Array<IOption<string>>
   }
 
-export interface IDigitalSealValidatorModuleConfiguration extends ICommonAutoComplianceModuleConfiguration<EAutoComplianceModule.DigitalSealValidator> {}
+export interface IDigitalSealValidatorModuleConfiguration
+  extends ICommonAutoComplianceModuleConfiguration<EAutoComplianceModule.DigitalSealValidator> {}
 
-export interface IParcelInfoExtractorModuleConfiguration extends TAutoComplianceValueExtractorTypeConfiguration<EAutoComplianceModule.ParcelInfoExtractor> {
+export interface IParcelInfoExtractorModuleConfiguration
+  extends TAutoComplianceValueExtractorTypeConfiguration<EAutoComplianceModule.ParcelInfoExtractor> {
   type: EAutoComplianceType.externalValueExtractor
 }
 
-export interface IPermitApplicationModuleConfiguration extends TAutoComplianceValueExtractorTypeConfiguration<EAutoComplianceModule.PermitApplication> {
+export interface IPermitApplicationModuleConfiguration
+  extends TAutoComplianceValueExtractorTypeConfiguration<EAutoComplianceModule.PermitApplication> {
   type: EAutoComplianceType.internalValueExtractor
 }
 
@@ -655,7 +667,8 @@ export type TValueExtractorAutoComplianceModuleConfiguration =
   | IParcelInfoExtractorModuleConfiguration
   | IPermitApplicationModuleConfiguration
 
-export interface IHistoricSiteModuleConfiguration extends TAutoComplianceOptionsMapperTypeConfiguration<EAutoComplianceModule.HistoricSite> {}
+export interface IHistoricSiteModuleConfiguration
+  extends TAutoComplianceOptionsMapperTypeConfiguration<EAutoComplianceModule.HistoricSite> {}
 
 export type TOptionsMapperAutoComplianceModuleConfiguration = IHistoricSiteModuleConfiguration
 
@@ -939,4 +952,46 @@ interface IPart3ComplianceReportPerformance {
 
 export interface IPart3ComplianceReport {
   performance: IPart3ComplianceReportPerformance
+}
+
+interface IFormIOComponent {
+  type: string
+  key: string
+  id?: string
+  label?: string
+  input: boolean
+  tableView?: boolean
+  components?: IFormIOComponent[]
+  columns?: IFormIOComponent[]
+  // Common optional properties
+  validate?: { required?: boolean; [key: string]: any }
+  conditional?: any
+  customConditional?: string
+  widget?: any
+  customClass?: string
+  disabled?: boolean
+  hidden?: boolean
+  multiple?: boolean
+  persistent?: boolean | string
+  html?: string
+  action?: string
+  custom?: string
+  defaultValue?: any
+  placeholder?: string
+  prefix?: string
+  suffix?: string
+  clearOnHide?: boolean
+  unique?: boolean
+  protected?: boolean
+  [key: string]: any // Allow additional properties for component-specific fields
+}
+
+export interface IRequirementTemplateFormJson {
+  id: string
+  legend: string
+  key: string
+  label: string
+  input: boolean
+  tableView: boolean
+  components: IFormIOComponent[]
 }

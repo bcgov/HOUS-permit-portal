@@ -13,7 +13,8 @@ class PermitProjectBlueprint < Blueprinter::Base
            :updated_at,
            :owner_id,
            :latitude,
-           :longitude
+           :longitude,
+           :parcel_geometry
 
     field :total_permits_count, default: 0
     field :new_draft_count, default: 0

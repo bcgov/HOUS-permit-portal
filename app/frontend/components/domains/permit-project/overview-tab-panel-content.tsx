@@ -1,4 +1,4 @@
-import { Box, Button, ButtonGroup, Flex, Grid, Heading, HStack, Text, VStack } from "@chakra-ui/react"
+import { Box, Button, ButtonGroup, Flex, Grid, Heading, HStack, Text, useDisclosure, VStack } from "@chakra-ui/react"
 import { CaretRight, Info, Pencil, SquaresFour, Steps } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useState } from "react"
@@ -14,6 +14,7 @@ import {
 import { IOption } from "../../../types/types"
 import { CustomMessageBox } from "../../shared/base/custom-message-box"
 import { SearchGrid } from "../../shared/grid/search-grid"
+import { FullscreenMapModal } from "../../shared/module-wrappers/fullscreen-map-modal"
 import { ProjectMap } from "../../shared/module-wrappers/project-map"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { AddPermitsButton } from "../../shared/permit-projects/add-permits-button"
@@ -38,6 +39,7 @@ export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
   const { permitProjectStore } = useMst()
   const [isEditing, setIsEditing] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const { isOpen: isMapFullscreen, onOpen: onOpenMapFullscreen, onClose: onCloseMapFullscreen } = useDisclosure()
 
   const formMethods = useForm<IProjectInfoForm>({
     defaultValues: {
@@ -192,8 +194,13 @@ export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
             )}
           </Box>
           <Box>
-            <Box height="250px" borderRadius="md" overflow="hidden">
-              <ProjectMap coordinates={permitProject.mapPosition} pid={pid} />
+            <Box height={{ base: "200px", lg: "250px" }} borderRadius="md" overflow="hidden">
+              <ProjectMap
+                coordinates={permitProject.mapPosition}
+                pid={pid}
+                parcelGeometry={permitProject.parcelGeometry}
+                onOpenFullscreen={onOpenMapFullscreen}
+              />
             </Box>
           </Box>
         </Grid>
@@ -242,6 +249,15 @@ export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
           </>
         )}
       </Box>
+
+      <FullscreenMapModal
+        isOpen={isMapFullscreen}
+        onClose={onCloseMapFullscreen}
+        coordinates={permitProject.mapPosition}
+        pid={pid}
+        parcelGeometry={permitProject.parcelGeometry}
+        address={fullAddress}
+      />
     </Flex>
   )
 })

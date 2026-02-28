@@ -37,6 +37,10 @@ class RequirementTemplate < ApplicationRecord
              ).limit(3)
            end,
            class_name: "TemplateVersion"
+  has_many :jurisdiction_requirement_templates, dependent: :destroy
+  has_many :enabled_jurisdictions,
+           through: :jurisdiction_requirement_templates,
+           source: :jurisdiction
   has_many :jurisdiction_template_version_customizations
 
   belongs_to :copied_from,
@@ -116,9 +120,65 @@ class RequirementTemplate < ApplicationRecord
   end
 
   def published_customizations_count
-    # Returns the cached count of unique jurisdictions using the published template version
-    published_template_version&.jurisdiction_template_version_customizations_count ||
-      0
+    # Returns the count of jurisdictions where this template is enabled
+    # (all jurisdictions with access minus those who have explicitly disabled it)
+    return 0 unless published_template_version
+
+    disabled_count =
+      published_template_version
+        .jurisdiction_template_version_customizations
+        .live
+        .where(disabled: true)
+        .distinct
+        .count(:jurisdiction_id)
+
+    if available_globally
+      # All jurisdictions minus those explicitly disabled
+      Jurisdiction.count - disabled_count
+    else
+      # Jurisdictions with access (via JurisdictionRequirementTemplate) minus disabled
+      access_count = jurisdiction_requirement_templates.count
+      # Only count disabled ones that actually have access
+      disabled_with_access_count =
+        published_template_version
+          .jurisdiction_template_version_customizations
+          .live
+          .where(disabled: true)
+          .where(
+            jurisdiction_id:
+              jurisdiction_requirement_templates.select(:jurisdiction_id)
+          )
+          .distinct
+          .count(:jurisdiction_id)
+      access_count - disabled_with_access_count
+    end
+  end
+
+  def explicitly_disabled_jurisdictions
+    # Returns the list of jurisdictions that have explicitly disabled this template
+    return [] unless published_template_version
+
+    disabled_jurisdiction_ids =
+      published_template_version
+        .jurisdiction_template_version_customizations
+        .live
+        .where(disabled: true)
+        .distinct
+        .pluck(:jurisdiction_id)
+
+    return [] if disabled_jurisdiction_ids.empty?
+
+    if available_globally
+      # All disabled jurisdictions
+      Jurisdiction.where(id: disabled_jurisdiction_ids)
+    else
+      # Only disabled ones that actually have access
+      Jurisdiction.where(
+        id:
+          disabled_jurisdiction_ids &
+            jurisdiction_requirement_templates.pluck(:jurisdiction_id)
+      )
+    end
   end
 
   def label
@@ -241,7 +301,15 @@ class RequirementTemplate < ApplicationRecord
       visibility: visibility,
       public: public?,
       created_at: created_at,
-      used_by: published_customizations_count
+      used_by: published_customizations_count,
+      available_in:
+        (
+          if available_globally
+            Jurisdiction.count
+          else
+            jurisdiction_requirement_templates.count
+          end
+        )
     }
   end
 
