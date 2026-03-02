@@ -82,10 +82,6 @@ class Requirement < ApplicationRecord
   CONTACT_TYPES = %w[general_contact professional_contact]
 
   ARCHITECTURAL_DRAWING_REQUIREMENT_CODE = "architectural_drawing_file".freeze
-  ARCHITECTURAL_DRAWING_METHOD_REQUIREMENT_CODE =
-    "architectural_drawing_method".freeze
-  ARCHITECTURAL_DRAWING_TOOL_REQUIREMENT_CODE =
-    "architectural_drawing_tool".freeze
   ENERGY_STEP_CODE_SELECT_REQUIREMENT_CODE = "energy_step_code_method".freeze
   ENERGY_STEP_CODE_PART_9_REQUIREMENT_CODE =
     "energy_step_code_tool_part_9".freeze

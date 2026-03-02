@@ -93,6 +93,7 @@ en:
           attributes:
             requirement_code:
               incorrect_energy_requirement_code: "must be %{correct_requirement_code} for energy step code requirements, but received %{incorrect_requirement_code}"
+              incorrect_architectural_requirement_code: "must be %{correct_requirement_code} for architectural drawing requirements, but received %{incorrect_requirement_code}"
               incorrect_architectural_drawing_file_attributes: "must have input type file, required true, and elective false for design package file for energy step code"
         supporting_document:
           attributes:
