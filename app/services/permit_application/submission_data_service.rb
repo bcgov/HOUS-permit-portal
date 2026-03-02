@@ -66,6 +66,18 @@ class PermitApplication::SubmissionDataService
 
   private
 
+  # ── COLLABORATOR VISIBILITY QUESTIONS ──
+  #
+  # Strips submission data keys that belong to requirement blocks outside
+  # the user's assigned set. This is the data-level enforcement — even if
+  # the form structure somehow leaked, the actual field values won't.
+  #
+  #   Q: Audited tracks changes to submission_data as a whole (the column
+  #      diff). If an audited_changes hash contains keys from a block the
+  #      viewer doesn't have access to, should the activity feed strip
+  #      those keys before rendering? Currently audited_changes is not
+  #      exposed to the frontend, but it's worth deciding the boundary.
+  #
   def filter_submission_data_based_on_user_permissions(submission_data:, user:)
     formatted_data = submission_data&.deep_dup || { "data" => {} }
     formatted_data["data"] ||= {}

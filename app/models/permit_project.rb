@@ -1,6 +1,8 @@
 class PermitProject < ApplicationRecord
   # searchkick must be declared before Discard::Model to ensure auto-callbacks register correctly
   searchkick word_middle: %i[title full_address pid pin number]
+  audited on: %i[create update], only: %i[title full_address]
+  has_associated_audits # [AUDITS SUGGESTION] Required for associated_audits relation used by reindex_audits
 
   include Discard::Model
   include PublicRecordable
@@ -27,6 +29,7 @@ class PermitProject < ApplicationRecord
   delegate :name, to: :owner, prefix: true
 
   after_commit :reindex
+  after_commit :reindex_audits
 
   scope :with_status_counts,
         -> do
@@ -275,5 +278,10 @@ class PermitProject < ApplicationRecord
     end
 
     self.number = new_number
+  end
+
+  def reindex_audits
+    audits.reindex
+    associated_audits.reindex
   end
 end

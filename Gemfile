@@ -131,3 +131,5 @@ gem "faraday-multipart", "~> 1.0"
 
 gem "rack-attack", "~> 6.7"
 gem "data_migrate", "~> 11.3"
+
+gem "audited", "~> 5.4"
