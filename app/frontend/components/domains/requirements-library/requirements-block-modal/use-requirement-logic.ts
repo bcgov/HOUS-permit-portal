@@ -36,7 +36,7 @@ export const useRequirementLogic = ({
     if (requirementType === ERequirementType.architecturalDrawing) {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore - deeply nested i18n key causes "excessively deep" type error
-      const archLabel: string = t("requirementsLibrary.modals.architecturalDrawing.dependencies.file.label")
+      const archLabel: string = t("requirementsLibrary.fields.architecturalDrawing")
       const defaults = {
         requirementCode: `dummy-${uuidv4()}`,
         id: `dummy-${uuidv4()}`,

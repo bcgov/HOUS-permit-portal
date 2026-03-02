@@ -1615,6 +1615,7 @@ Thank you,
             updatedAt: "Updated at",
             requirementSku: "Requirement SKU",
             requirementDocuments: "Related documents",
+            architecturalDrawing: "Design drawing package",
           },
           configurationsColumn: "Configurations",
           fieldDescriptions: {
