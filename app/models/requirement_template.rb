@@ -441,6 +441,25 @@ class RequirementTemplate < ApplicationRecord
     conditionals
   end
 
+  VALID_FORMIO_OPERATORS = %w[
+    isEqual
+    isNotEqual
+    greaterThan
+    greaterThanOrEqual
+    lessThan
+    lessThanOrEqual
+    isDateEqual
+    isNotDateEqual
+    dateGreaterThan
+    dateGreaterThanOrEqual
+    dateLessThan
+    dateLessThanOrEqual
+    isEmpty
+    isNotEmpty
+  ].freeze
+
+  VALUELESS_OPERATORS = %w[isEmpty isNotEmpty].freeze
+
   def validate_block_level_conditionals
     block_ids = requirement_block_ids_from_nested_attributes_copy
     return if block_ids.blank?
@@ -456,14 +475,26 @@ class RequirementTemplate < ApplicationRecord
 
       when_block_id = cond["when_block_id"]
       when_requirement_code = cond["when_requirement_code"]
+      operator = cond["operator"] || "isEqual"
       eq_value = cond["eq"]
       show = cond["show"]
       hide = cond["hide"]
 
-      if when_block_id.blank? || when_requirement_code.blank? || eq_value.blank?
+      unless VALID_FORMIO_OPERATORS.include?(operator)
         errors.add(
           :base,
-          "Block conditional must have when_block_id, when_requirement_code, and eq"
+          "Block conditional has an unrecognized operator: #{operator}"
+        )
+        next
+      end
+
+      needs_value = !VALUELESS_OPERATORS.include?(operator)
+
+      if when_block_id.blank? || when_requirement_code.blank? ||
+           (needs_value && eq_value.blank?)
+        errors.add(
+          :base,
+          "Block conditional must have when_block_id, when_requirement_code, and operator (plus eq for value-based operators)"
         )
         next
       end

@@ -1,10 +1,12 @@
 import { Instance, types } from "mobx-state-tree"
+import { EConditionalOperator } from "../types/enums"
 import { RequirementBlockModel } from "./requirement-block"
 
 const BlockConditionalModel = types.model("BlockConditionalModel", {
   whenBlockId: types.string,
   whenRequirementCode: types.string,
-  eq: types.string,
+  operator: types.optional(types.string, EConditionalOperator.isEqual),
+  eq: types.optional(types.string, ""),
   show: types.maybe(types.boolean),
   hide: types.maybe(types.boolean),
 })

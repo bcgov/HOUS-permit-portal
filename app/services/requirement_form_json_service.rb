@@ -370,15 +370,29 @@ class RequirementFormJsonService
     end
 
     if requirement.input_options["conditional"].present?
-      # assumption that conditional is only within the same requirement block for now
       conditional = requirement.input_options["conditional"].clone
       section = PermitApplication.section_from_key(requirement_block_key)
-      if conditional["when"].present?
-        conditional.merge!(
-          "when" => "#{section}.#{requirement_block_key}|#{conditional["when"]}"
-        )
-      end
-      json.merge!({ conditional: conditional })
+      component_path =
+        if conditional["when"].present?
+          "#{section}.#{requirement_block_key}|#{conditional["when"]}"
+        else
+          conditional["when"]
+        end
+      operator = conditional["operator"] || "isEqual"
+      show = conditional["show"].present? ? true : false
+
+      condition_entry = { component: component_path, operator: operator }
+      condition_entry[:value] = conditional["eq"] unless operator.in?(
+        %w[isEmpty isNotEmpty]
+      )
+
+      json.merge!(
+        conditional: {
+          show: show,
+          conjunction: "all",
+          conditions: [condition_entry]
+        }
+      )
     end
 
     # indicates code-based conditionals.  Always merge elective show = false to end.

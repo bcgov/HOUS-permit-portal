@@ -382,10 +382,19 @@ class Api::RequirementTemplatesController < Api::ApplicationController
             :requirement_block_id,
             :position,
             :_destroy,
-            conditional: %i[when_block_id when_requirement_code eq show hide]
+            conditional: %i[
+              when_block_id
+              when_requirement_code
+              operator
+              eq
+              show
+              hide
+            ]
           ]
         ]
       )
+
+    restore_cleared_block_conditionals(permitted_params)
 
     # This is a workaround needed to validate step code related errors
     if permitted_params[:requirement_template_sections_attributes].present?
@@ -397,6 +406,27 @@ class Api::RequirementTemplatesController < Api::ApplicationController
     end
 
     permitted_params
+  end
+
+  # Rails permit strips `conditional: null` because it expects a hash.
+  # Re-inject nil so the model clears the column on save.
+  def restore_cleared_block_conditionals(permitted_params)
+    permitted_params[
+      :requirement_template_sections_attributes
+    ]&.each_with_index do |section, si|
+      section[:template_section_blocks_attributes]&.each_with_index do |tsb, bi|
+        raw_tsb =
+          params.dig(
+            :requirement_template,
+            :requirement_template_sections_attributes,
+            si,
+            :template_section_blocks_attributes,
+            bi
+          )
+        tsb[:conditional] = nil if raw_tsb&.key?(:conditional) &&
+          raw_tsb[:conditional].nil?
+      end
+    end
   end
 
   def schedule_params

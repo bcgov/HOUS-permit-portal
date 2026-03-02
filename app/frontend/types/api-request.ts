@@ -1,5 +1,13 @@
 import { IRevisionReason } from "../models/revision-reason"
-import { EDataValidationOperation, ENumberUnit, ERequirementType, ETagType, EVisibility } from "./enums"
+import {
+  EConditionalOperator,
+  EConditionalThen,
+  EDataValidationOperation,
+  ENumberUnit,
+  ERequirementType,
+  ETagType,
+  EVisibility,
+} from "./enums"
 import {
   IHelpLinkItems,
   IOption,
@@ -16,14 +24,15 @@ export interface IUppyAttachmentFile {
   metadata: {
     size: number
     filename: string
-    mimeType: string
+    mimeType?: string
   }
 }
 
 export interface IFormConditional {
   when: string
+  operator: EConditionalOperator
   operand: string
-  then: string
+  then: EConditionalThen
 }
 
 export interface IDataValidation {
@@ -75,6 +84,7 @@ export interface IRequirementBlockParams {
 export interface IBlockConditional {
   whenBlockId: string
   whenRequirementCode: string
+  operator: string
   eq: string
   show?: boolean
   hide?: boolean

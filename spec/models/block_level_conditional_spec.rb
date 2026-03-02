@@ -39,6 +39,7 @@ RSpec.describe "Block-level conditionals", type: :model do
                   "when_block_id" => trigger_block.id,
                   "when_requirement_code" =>
                     trigger_requirement.requirement_code,
+                  "operator" => "isEqual",
                   "eq" => "yes",
                   "show" => true
                 }
@@ -64,6 +65,7 @@ RSpec.describe "Block-level conditionals", type: :model do
                   "when_block_id" => trigger_block.id,
                   "when_requirement_code" =>
                     trigger_requirement.requirement_code,
+                  "operator" => "isEqual",
                   "eq" => "yes",
                   "hide" => true
                 }
@@ -88,6 +90,7 @@ RSpec.describe "Block-level conditionals", type: :model do
                 "conditional" => {
                   "when_requirement_code" =>
                     trigger_requirement.requirement_code,
+                  "operator" => "isEqual",
                   "eq" => "yes",
                   "show" => true
                 }
@@ -99,7 +102,7 @@ RSpec.describe "Block-level conditionals", type: :model do
 
       template.valid?
       expect(template.errors[:base]).to include(
-        "Block conditional must have when_block_id, when_requirement_code, and eq"
+        "Block conditional must have when_block_id, when_requirement_code, and operator (plus eq for value-based operators)"
       )
     end
 
@@ -115,6 +118,7 @@ RSpec.describe "Block-level conditionals", type: :model do
                   "when_block_id" => trigger_block.id,
                   "when_requirement_code" =>
                     trigger_requirement.requirement_code,
+                  "operator" => "isEqual",
                   "show" => true
                 }
               }
@@ -125,7 +129,7 @@ RSpec.describe "Block-level conditionals", type: :model do
 
       template.valid?
       expect(template.errors[:base]).to include(
-        "Block conditional must have when_block_id, when_requirement_code, and eq"
+        "Block conditional must have when_block_id, when_requirement_code, and operator (plus eq for value-based operators)"
       )
     end
 
@@ -141,6 +145,7 @@ RSpec.describe "Block-level conditionals", type: :model do
                   "when_block_id" => trigger_block.id,
                   "when_requirement_code" =>
                     trigger_requirement.requirement_code,
+                  "operator" => "isEqual",
                   "eq" => "yes"
                 }
               }
@@ -167,6 +172,7 @@ RSpec.describe "Block-level conditionals", type: :model do
                   "when_block_id" => trigger_block.id,
                   "when_requirement_code" =>
                     trigger_requirement.requirement_code,
+                  "operator" => "isEqual",
                   "eq" => "yes",
                   "show" => true,
                   "hide" => true
@@ -194,6 +200,7 @@ RSpec.describe "Block-level conditionals", type: :model do
                   "when_block_id" => trigger_block.id,
                   "when_requirement_code" =>
                     trigger_requirement.requirement_code,
+                  "operator" => "isEqual",
                   "eq" => "yes",
                   "show" => true
                 }
@@ -222,6 +229,7 @@ RSpec.describe "Block-level conditionals", type: :model do
                 "conditional" => {
                   "when_block_id" => outside_block.id,
                   "when_requirement_code" => "some_code",
+                  "operator" => "isEqual",
                   "eq" => "yes",
                   "show" => true
                 }
@@ -248,6 +256,7 @@ RSpec.describe "Block-level conditionals", type: :model do
                 "conditional" => {
                   "when_block_id" => trigger_block.id,
                   "when_requirement_code" => "nonexistent_code",
+                  "operator" => "isEqual",
                   "eq" => "yes",
                   "show" => true
                 }
@@ -260,6 +269,59 @@ RSpec.describe "Block-level conditionals", type: :model do
       template.valid?
       expect(template.errors[:base]).to include(
         "Block conditional references a requirement code that does not exist in the target block"
+      )
+    end
+
+    it "accepts a valid block conditional with isEmpty operator (no eq required)" do
+      set_nested_attributes_copy(
+        [
+          {
+            "template_section_blocks_attributes" => [
+              { "requirement_block_id" => trigger_block.id },
+              {
+                "requirement_block_id" => dependent_block.id,
+                "conditional" => {
+                  "when_block_id" => trigger_block.id,
+                  "when_requirement_code" =>
+                    trigger_requirement.requirement_code,
+                  "operator" => "isEmpty",
+                  "show" => true
+                }
+              }
+            ]
+          }
+        ]
+      )
+
+      template.valid?
+      expect(template.errors[:base]).to be_empty
+    end
+
+    it "rejects an unrecognized operator" do
+      set_nested_attributes_copy(
+        [
+          {
+            "template_section_blocks_attributes" => [
+              { "requirement_block_id" => trigger_block.id },
+              {
+                "requirement_block_id" => dependent_block.id,
+                "conditional" => {
+                  "when_block_id" => trigger_block.id,
+                  "when_requirement_code" =>
+                    trigger_requirement.requirement_code,
+                  "operator" => "bogusOperator",
+                  "eq" => "yes",
+                  "show" => true
+                }
+              }
+            ]
+          }
+        ]
+      )
+
+      template.valid?
+      expect(template.errors[:base]).to include(
+        "Block conditional has an unrecognized operator: bogusOperator"
       )
     end
 
@@ -281,6 +343,7 @@ RSpec.describe "Block-level conditionals", type: :model do
                 "conditional" => {
                   "when_block_id" => block_b.id,
                   "when_requirement_code" => req_b.requirement_code,
+                  "operator" => "isEqual",
                   "eq" => "foo",
                   "show" => true
                 }
@@ -290,6 +353,7 @@ RSpec.describe "Block-level conditionals", type: :model do
                 "conditional" => {
                   "when_block_id" => block_a.id,
                   "when_requirement_code" => req_a.requirement_code,
+                  "operator" => "isEqual",
                   "eq" => "bar",
                   "show" => true
                 }
@@ -321,6 +385,7 @@ RSpec.describe "Block-level conditionals", type: :model do
                 "conditional" => {
                   "when_block_id" => block_b.id,
                   "when_requirement_code" => req_b.requirement_code,
+                  "operator" => "isEqual",
                   "eq" => "foo",
                   "show" => true
                 }
@@ -380,6 +445,7 @@ RSpec.describe "Block-level conditionals", type: :model do
         conditional: {
           "when_block_id" => trigger_block.id,
           "when_requirement_code" => "my_trigger_field",
+          "operator" => "isEqual",
           "eq" => "yes",
           "show" => true
         }
@@ -399,11 +465,16 @@ RSpec.describe "Block-level conditionals", type: :model do
         )
 
       expect(form_json[:conditional]).to be_present
-      expect(form_json[:conditional]["when"]).to eq(
+      expect(form_json[:conditional]["show"]).to eq(true)
+      expect(form_json[:conditional]["conjunction"]).to eq("all")
+      expect(form_json[:conditional]["conditions"]).to be_an(Array)
+      expect(form_json[:conditional]["conditions"].length).to eq(1)
+      condition = form_json[:conditional]["conditions"][0]
+      expect(condition["component"]).to eq(
         "#{section.key}.formSubmissionDataRST#{section.key}|RB#{trigger_block.id}|my_trigger_field"
       )
-      expect(form_json[:conditional]["eq"]).to eq("yes")
-      expect(form_json[:conditional]["show"]).to eq(true)
+      expect(condition["operator"]).to eq("isEqual")
+      expect(condition["value"]).to eq("yes")
     end
 
     it "does not include conditional when block_conditional is nil" do
@@ -463,6 +534,7 @@ RSpec.describe "Block-level conditionals", type: :model do
         conditional: {
           "when_block_id" => trigger_block.id,
           "when_requirement_code" => "trigger_field",
+          "operator" => "isEqual",
           "eq" => "true",
           "show" => true
         }
@@ -482,12 +554,13 @@ RSpec.describe "Block-level conditionals", type: :model do
         end
       expect(dependent_panel).to be_present
       expect(dependent_panel["conditional"]).to be_present
-      expect(dependent_panel["conditional"]["eq"]).to eq("true")
       expect(dependent_panel["conditional"]["show"]).to eq(true)
-      expect(dependent_panel["conditional"]["when"]).to include("trigger_field")
-      expect(dependent_panel["conditional"]["when"]).to include(
-        trigger_block.id
-      )
+      expect(dependent_panel["conditional"]["conjunction"]).to eq("all")
+      condition = dependent_panel["conditional"]["conditions"][0]
+      expect(condition["value"]).to eq("true")
+      expect(condition["operator"]).to eq("isEqual")
+      expect(condition["component"]).to include("trigger_field")
+      expect(condition["component"]).to include(trigger_block.id)
 
       trigger_panel =
         section_component["components"].find { |c| c["id"] == trigger_block.id }

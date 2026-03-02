@@ -186,17 +186,22 @@ class RequirementBlock < ApplicationRecord
 
     target_block_key =
       "formSubmissionDataRST#{target_section_key}|RB#{when_block_id}"
-    when_path =
+    component_path =
       "#{target_section_key}.#{target_block_key}|#{when_requirement_code}"
 
-    resolved = { "when" => when_path, "eq" => block_conditional["eq"] }
-    resolved["show"] = block_conditional["show"] if block_conditional[
-      "show"
-    ].present?
-    resolved["hide"] = block_conditional["hide"] if block_conditional[
-      "hide"
-    ].present?
-    resolved
+    operator = block_conditional["operator"] || "isEqual"
+    show = block_conditional["show"].present? ? true : false
+
+    condition_entry = { "component" => component_path, "operator" => operator }
+    condition_entry["value"] = block_conditional["eq"] unless operator.in?(
+      %w[isEmpty isNotEmpty]
+    )
+
+    {
+      "show" => show,
+      "conjunction" => "all",
+      "conditions" => [condition_entry]
+    }
   end
 
   # Escape for single-quoted JS strings
@@ -238,17 +243,49 @@ class RequirementBlock < ApplicationRecord
     RequirementBlock.search_index.refresh
   end
 
+  VALID_FORMIO_OPERATORS = %w[
+    isEqual
+    isNotEqual
+    greaterThan
+    greaterThanOrEqual
+    lessThan
+    lessThanOrEqual
+    isDateEqual
+    isNotDateEqual
+    dateGreaterThan
+    dateGreaterThanOrEqual
+    dateLessThan
+    dateLessThanOrEqual
+    isEmpty
+    isNotEmpty
+  ].freeze
+
+  VALUELESS_OPERATORS = %w[isEmpty isNotEmpty].freeze
+
   def validate_requirements_conditional
     requirements.each do |requirement|
       conditional = requirement.input_options["conditional"]
 
       next unless conditional.present?
 
-      if [conditional["when"], conditional["eq"]].any?(&:blank?) ||
+      operator = conditional["operator"] || "isEqual"
+
+      unless VALID_FORMIO_OPERATORS.include?(operator)
+        errors.add(
+          :input_options,
+          "conditional has an unrecognized operator: #{operator}"
+        )
+        break
+      end
+
+      needs_value = !VALUELESS_OPERATORS.include?(operator)
+
+      if conditional["when"].blank? ||
+           (needs_value && conditional["eq"].blank?) ||
            [conditional["show"], conditional["hide"]].all?(&:blank?)
         errors.add(
           :input_options,
-          "conditional must have when and eq, and one of show or hide"
+          "conditional must have when, operator, and one of show or hide (plus eq for value-based operators)"
         )
         break
       end

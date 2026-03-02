@@ -8,6 +8,7 @@ import Select from "react-select"
 import { IRequirementTemplateForm } from "."
 import { useMst } from "../../../../../setup/root"
 import { IBlockConditional, IRequirementTemplateSectionAttributes } from "../../../../../types/api-request"
+import { EConditionalOperator, EConditionalThen, ERequirementType } from "../../../../../types/enums"
 import { IOption } from "../../../../../types/types"
 
 interface IProps {
@@ -15,21 +16,59 @@ interface IProps {
   blockIndex: number
 }
 
-const SUPPORTED_TRIGGER_INPUT_TYPES = [
-  "text",
-  "textarea",
-  "phone",
-  "email",
-  "address",
-  "bcaddress",
-  "select",
-  "radio",
-  "multi_option_select",
-  "checkbox",
-  "number",
+const SUPPORTED_TRIGGER_INPUT_TYPES: ERequirementType[] = [
+  ERequirementType.text,
+  ERequirementType.textArea,
+  ERequirementType.phone,
+  ERequirementType.email,
+  ERequirementType.address,
+  ERequirementType.bcaddress,
+  ERequirementType.select,
+  ERequirementType.radio,
+  ERequirementType.multiOptionSelect,
+  ERequirementType.checkbox,
+  ERequirementType.number,
+  ERequirementType.date,
+  ERequirementType.file,
 ]
 
-const OPTION_INPUT_TYPES = ["select", "radio", "multi_option_select", "checkbox"]
+const OPTION_INPUT_TYPES: ERequirementType[] = [
+  ERequirementType.select,
+  ERequirementType.radio,
+  ERequirementType.multiOptionSelect,
+  ERequirementType.checkbox,
+]
+
+const VALUELESS_OPERATORS = [EConditionalOperator.isEmpty, EConditionalOperator.isNotEmpty]
+
+const OPERATORS_BY_TYPE: Record<string, EConditionalOperator[]> = {
+  number: [
+    EConditionalOperator.isEqual,
+    EConditionalOperator.isNotEqual,
+    EConditionalOperator.greaterThan,
+    EConditionalOperator.greaterThanOrEqual,
+    EConditionalOperator.lessThan,
+    EConditionalOperator.lessThanOrEqual,
+  ],
+  date: [
+    EConditionalOperator.isDateEqual,
+    EConditionalOperator.isNotDateEqual,
+    EConditionalOperator.dateGreaterThan,
+    EConditionalOperator.dateGreaterThanOrEqual,
+    EConditionalOperator.dateLessThan,
+    EConditionalOperator.dateLessThanOrEqual,
+  ],
+  file: [EConditionalOperator.isEmpty, EConditionalOperator.isNotEmpty],
+  default: [EConditionalOperator.isEqual, EConditionalOperator.isNotEqual],
+}
+
+function getOperatorsForType(inputType: string | undefined): EConditionalOperator[] {
+  if (!inputType) return OPERATORS_BY_TYPE.default
+  if (inputType === ERequirementType.number) return OPERATORS_BY_TYPE.number
+  if (inputType === ERequirementType.date) return OPERATORS_BY_TYPE.date
+  if (inputType === ERequirementType.file) return OPERATORS_BY_TYPE.file
+  return OPERATORS_BY_TYPE.default
+}
 
 export const BlockConditionalConfig = observer(function BlockConditionalConfig({ sectionIndex, blockIndex }: IProps) {
   const { t } = useTranslation()
@@ -81,8 +120,26 @@ export const BlockConditionalConfig = observer(function BlockConditionalConfig({
     return selectedBlock.requirements.find((r) => r.requirementCode === conditional.whenRequirementCode)
   }, [selectedBlock, conditional?.whenRequirementCode])
 
+  const availableOperators = useMemo(
+    () => getOperatorsForType(selectedRequirement?.inputType),
+    [selectedRequirement?.inputType]
+  )
+
+  const operatorOptions: IOption[] = useMemo(
+    () =>
+      availableOperators.map((op) => ({
+        label: t(`requirementsLibrary.modals.conditionalSetup.operators.${op}`),
+        value: op,
+      })),
+    [availableOperators, t]
+  )
+
+  const currentOperator =
+    conditional?.operator || (availableOperators.length > 0 ? availableOperators[0] : EConditionalOperator.isEqual)
+  const isValueless = VALUELESS_OPERATORS.includes(currentOperator as EConditionalOperator)
+
   const valueOptions: IOption[] = useMemo(() => {
-    if (!selectedRequirement) return []
+    if (!selectedRequirement || isValueless) return []
     if (selectedRequirement.inputOptions?.valueOptions) {
       return selectedRequirement.inputOptions.valueOptions
     }
@@ -93,40 +150,65 @@ export const BlockConditionalConfig = observer(function BlockConditionalConfig({
       ]
     }
     return []
-  }, [selectedRequirement])
+  }, [selectedRequirement, isValueless])
 
   const isOptionType = selectedRequirement && OPTION_INPUT_TYPES.includes(selectedRequirement.inputType)
 
   const effectOptions: IOption[] = [
-    { label: t("requirementTemplate.edit.blockConditional.showBlock"), value: "show" },
-    { label: t("requirementTemplate.edit.blockConditional.hideBlock"), value: "hide" },
+    { label: t("requirementTemplate.edit.blockConditional.showBlock"), value: EConditionalThen.show },
+    { label: t("requirementTemplate.edit.blockConditional.hideBlock"), value: EConditionalThen.hide },
   ]
 
-  const currentEffect = conditional?.show ? "show" : conditional?.hide ? "hide" : null
-
-  const setConditionalField = (field: keyof IBlockConditional, value: any) => {
-    const current = (conditional || {}) as Record<string, any>
-    const updated = { ...current, [field]: value }
-    setValue(conditionalPath, updated as IBlockConditional, { shouldDirty: true })
-  }
+  const currentEffect = conditional?.show ? EConditionalThen.show : conditional?.hide ? EConditionalThen.hide : null
 
   const handleBlockChange = (opt: IOption) => {
     setValue(
       conditionalPath,
-      { whenBlockId: opt.value, whenRequirementCode: "", eq: "", show: true } as IBlockConditional,
+      {
+        whenBlockId: opt.value,
+        whenRequirementCode: "",
+        operator: EConditionalOperator.isEqual,
+        eq: "",
+        show: true,
+      } as IBlockConditional,
       { shouldDirty: true }
     )
   }
 
   const handleFieldChange = (opt: IOption) => {
     const current = conditional || ({} as IBlockConditional)
-    setValue(conditionalPath, { ...current, whenRequirementCode: opt.value, eq: "" } as IBlockConditional, {
-      shouldDirty: true,
-    })
+    const targetReq = selectedBlock?.requirements.find((r) => r.requirementCode === opt.value)
+    const ops = getOperatorsForType(targetReq?.inputType)
+    const defaultOp = ops[0] || EConditionalOperator.isEqual
+    setValue(
+      conditionalPath,
+      {
+        ...current,
+        whenRequirementCode: opt.value,
+        operator: defaultOp,
+        eq: "",
+      } as IBlockConditional,
+      { shouldDirty: true }
+    )
+  }
+
+  const handleOperatorChange = (opt: IOption) => {
+    const current = conditional || ({} as IBlockConditional)
+    const newOp = opt.value
+    setValue(
+      conditionalPath,
+      {
+        ...current,
+        operator: newOp,
+        eq: VALUELESS_OPERATORS.includes(newOp as EConditionalOperator) ? "" : current.eq,
+      } as IBlockConditional,
+      { shouldDirty: true }
+    )
   }
 
   const handleValueChange = (val: string) => {
-    setConditionalField("eq", val)
+    const current = (conditional || {}) as Record<string, any>
+    setValue(conditionalPath, { ...current, eq: val } as IBlockConditional, { shouldDirty: true })
   }
 
   const handleEffectChange = (opt: IOption) => {
@@ -134,9 +216,10 @@ export const BlockConditionalConfig = observer(function BlockConditionalConfig({
     const updated: IBlockConditional = {
       whenBlockId: current.whenBlockId,
       whenRequirementCode: current.whenRequirementCode,
+      operator: current.operator,
       eq: current.eq,
     }
-    if (opt.value === "show") {
+    if (opt.value === EConditionalThen.show) {
       updated.show = true
     } else {
       updated.hide = true
@@ -148,7 +231,11 @@ export const BlockConditionalConfig = observer(function BlockConditionalConfig({
     setValue(conditionalPath, null, { shouldDirty: true })
   }
 
-  const hasConditional = conditional?.whenBlockId && conditional?.whenRequirementCode && conditional?.eq
+  const hasConditional =
+    conditional?.whenBlockId &&
+    conditional?.whenRequirementCode &&
+    conditional?.operator &&
+    (isValueless || conditional?.eq)
 
   if (hasConditional && !isOpen) {
     const blockName = selectedBlock?.displayName || selectedBlock?.name || ""
@@ -156,6 +243,7 @@ export const BlockConditionalConfig = observer(function BlockConditionalConfig({
     const effect = conditional.show
       ? t("requirementTemplate.edit.blockConditional.showBlock")
       : t("requirementTemplate.edit.blockConditional.hideBlock")
+    const operatorLabel = t(`requirementsLibrary.modals.conditionalSetup.operators.${conditional.operator}`)
 
     return (
       <HStack
@@ -175,7 +263,8 @@ export const BlockConditionalConfig = observer(function BlockConditionalConfig({
             effect,
             blockName,
             fieldLabel,
-            value: conditional.eq,
+            operatorLabel,
+            value: isValueless ? "" : `"${conditional.eq}"`,
           })}
         </Text>
         <IconButton
@@ -242,7 +331,23 @@ export const BlockConditionalConfig = observer(function BlockConditionalConfig({
             {conditional?.whenRequirementCode && (
               <Flex direction="column" gap={1}>
                 <FormLabel fontSize="xs" fontWeight="bold" mb={0}>
-                  {t("requirementTemplate.edit.blockConditional.equals")}
+                  {t("requirementTemplate.edit.blockConditional.operator")}
+                </FormLabel>
+                <Select
+                  options={operatorOptions}
+                  value={operatorOptions.find((o) => o.value === currentOperator) || operatorOptions[0]}
+                  onChange={handleOperatorChange}
+                  placeholder={t("requirementTemplate.edit.blockConditional.selectOperator")}
+                  menuPortalTarget={document.body}
+                  styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
+                />
+              </Flex>
+            )}
+
+            {conditional?.whenRequirementCode && !isValueless && (
+              <Flex direction="column" gap={1}>
+                <FormLabel fontSize="xs" fontWeight="bold" mb={0}>
+                  {t("requirementTemplate.edit.blockConditional.value")}
                 </FormLabel>
                 {isOptionType ? (
                   <Select
@@ -255,7 +360,7 @@ export const BlockConditionalConfig = observer(function BlockConditionalConfig({
                   />
                 ) : (
                   <input
-                    type="text"
+                    type={selectedRequirement?.inputType === ERequirementType.number ? "number" : "text"}
                     value={conditional?.eq || ""}
                     onChange={(e) => handleValueChange(e.target.value)}
                     style={{
