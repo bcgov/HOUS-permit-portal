@@ -109,6 +109,7 @@ class Requirement < ApplicationRecord
       "input_type" => "energy_step_code",
       "input_options" => {
         "conditional" => {
+          "operator" => "isEqual",
           "eq" => "tool",
           "show" => true,
           "when" => "energy_step_code_method"
@@ -121,6 +122,7 @@ class Requirement < ApplicationRecord
       "input_type" => "file",
       "input_options" => {
         "conditional" => {
+          "operator" => "isEqual",
           "eq" => "file",
           "show" => true,
           "when" => "energy_step_code_method"
@@ -132,6 +134,7 @@ class Requirement < ApplicationRecord
       "input_type" => "file",
       "input_options" => {
         "conditional" => {
+          "operator" => "isEqual",
           "eq" => "file",
           "show" => true,
           "when" => "energy_step_code_method"
@@ -149,6 +152,7 @@ class Requirement < ApplicationRecord
       "input_type" => "energy_step_code_part_3",
       "input_options" => {
         "conditional" => {
+          "operator" => "isEqual",
           "eq" => "tool",
           "show" => true,
           "when" => "energy_step_code_method"
@@ -161,6 +165,7 @@ class Requirement < ApplicationRecord
       "input_type" => "file",
       "input_options" => {
         "conditional" => {
+          "operator" => "isEqual",
           "eq" => "file",
           "show" => true,
           "when" => "energy_step_code_method"
@@ -188,6 +193,7 @@ class Requirement < ApplicationRecord
       "input_type" => "architectural_drawing",
       "input_options" => {
         "conditional" => {
+          "operator" => "isEqual",
           "eq" => "tool",
           "show" => true,
           "when" => ARCHITECTURAL_DRAWING_METHOD_REQUIREMENT_CODE
@@ -199,6 +205,7 @@ class Requirement < ApplicationRecord
       "input_type" => "file",
       "input_options" => {
         "conditional" => {
+          "operator" => "isEqual",
           "eq" => "file",
           "show" => true,
           "when" => ARCHITECTURAL_DRAWING_METHOD_REQUIREMENT_CODE

@@ -815,3 +815,26 @@ export enum EDataValidationOperation {
   maxSelectedCount = "max_selected_count",
   allowedFileTypes = "allowed_file_types",
 }
+
+export enum EConditionalThen {
+  show = "show",
+  hide = "hide",
+  require = "require",
+}
+
+export enum EConditionalOperator {
+  isEqual = "isEqual",
+  isNotEqual = "isNotEqual",
+  greaterThan = "greaterThan",
+  greaterThanOrEqual = "greaterThanOrEqual",
+  lessThan = "lessThan",
+  lessThanOrEqual = "lessThanOrEqual",
+  isDateEqual = "isDateEqual",
+  isNotDateEqual = "isNotDateEqual",
+  dateGreaterThan = "dateGreaterThan",
+  dateGreaterThanOrEqual = "dateGreaterThanOrEqual",
+  dateLessThan = "dateLessThan",
+  dateLessThanOrEqual = "dateLessThanOrEqual",
+  isEmpty = "isEmpty",
+  isNotEmpty = "isNotEmpty",
+}

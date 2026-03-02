@@ -4,6 +4,8 @@ import { withRootStore } from "../lib/with-root-store"
 import { IRequirementAttributes, IRequirementBlockParams } from "../types/api-request"
 import {
   EAutoComplianceModule,
+  EConditionalOperator,
+  EConditionalThen,
   EEnergyStepCodeDependencyRequirementCode,
   ERequirementType,
   EVisibility,
@@ -77,16 +79,15 @@ export const RequirementBlockModel = types
           } as IRequirementAttributes
         }
 
-        const possibleThens = ["show", "hide", "require"]
+        const possibleThens = Object.values(EConditionalThen)
         const when = conditional.when
+        const operator = conditional.operator || EConditionalOperator.isEqual
         const operand = conditional.eq
         const then = possibleThens.find((t) => Object.keys(conditional).includes(t))
         const isEnergyStepCodeDependency = Object.values(EEnergyStepCodeDependencyRequirementCode).includes(
           requirement.requirementCode as EEnergyStepCodeDependencyRequirementCode
         )
 
-        // energy step code dependency conditionals is not possible to edit from the front-end and has default values
-        // which follows a slightly different structure so we make sure not to remove them or alter them
         return {
           ...baseAttributes,
           inputOptions: {
@@ -95,6 +96,7 @@ export const RequirementBlockModel = types
               ? conditional
               : {
                   when,
+                  operator,
                   operand,
                   then,
                 },

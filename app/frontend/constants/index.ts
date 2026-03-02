@@ -3,6 +3,7 @@ import { IRequirementAttributes } from "../types/api-request"
 import {
   EArchitecturalDrawingDependencyRequirementCode,
   EAutoComplianceType,
+  EConditionalOperator,
   EEnabledElectiveFieldReason,
   EEnergyStepCodeDependencyRequirementCode,
   EEnergyStepCodePart3DependencyRequirementCode,
@@ -126,7 +127,7 @@ export function getEnergyStepCodeRequirementRequiredSchema(
       label: t("requirementsLibrary.modals.stepCodeDependencies.energyStepCodeToolPart9.label"),
       inputOptions: {
         conditional: {
-          // @ts-ignore
+          operator: EConditionalOperator.isEqual,
           eq: "tool",
           show: true,
           when: EEnergyStepCodeDependencyRequirementCode.energyStepCodeMethod,
@@ -140,7 +141,7 @@ export function getEnergyStepCodeRequirementRequiredSchema(
       inputType: ERequirementType.file,
       inputOptions: {
         conditional: {
-          // @ts-ignore
+          operator: EConditionalOperator.isEqual,
           eq: "file",
           show: true,
           when: EEnergyStepCodeDependencyRequirementCode.energyStepCodeMethod,
@@ -153,7 +154,7 @@ export function getEnergyStepCodeRequirementRequiredSchema(
       inputType: ERequirementType.file,
       inputOptions: {
         conditional: {
-          // @ts-ignore
+          operator: EConditionalOperator.isEqual,
           eq: "file",
           show: true,
           when: EEnergyStepCodeDependencyRequirementCode.energyStepCodeMethod,
@@ -192,7 +193,7 @@ export function getEnergyStepCodePart3RequirementRequiredSchema(
       label: t("requirementsLibrary.modals.stepCodeDependencies.energyStepCodeToolPart3.label"),
       inputOptions: {
         conditional: {
-          // @ts-ignore
+          operator: EConditionalOperator.isEqual,
           eq: "tool",
           show: true,
           when: EEnergyStepCodePart3DependencyRequirementCode.energyStepCodeMethod,
@@ -206,7 +207,7 @@ export function getEnergyStepCodePart3RequirementRequiredSchema(
       inputType: ERequirementType.file,
       inputOptions: {
         conditional: {
-          // @ts-ignore
+          operator: EConditionalOperator.isEqual,
           eq: "file",
           show: true,
           when: EEnergyStepCodePart3DependencyRequirementCode.energyStepCodeMethod,
@@ -245,6 +246,7 @@ export function getArchitecturalDrawingRequirementRequiredSchema(
       label: t("requirementsLibrary.modals.architecturalDrawing.dependencies.tool.label"),
       inputOptions: {
         conditional: {
+          operator: EConditionalOperator.isEqual,
           when: EArchitecturalDrawingDependencyRequirementCode.architecturalDrawingMethod,
           eq: "tool",
           show: true,
@@ -257,6 +259,7 @@ export function getArchitecturalDrawingRequirementRequiredSchema(
       label: t("requirementsLibrary.modals.architecturalDrawing.dependencies.file.label"),
       inputOptions: {
         conditional: {
+          operator: EConditionalOperator.isEqual,
           when: EArchitecturalDrawingDependencyRequirementCode.architecturalDrawingMethod,
           eq: "file",
           show: true,
