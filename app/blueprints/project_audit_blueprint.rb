@@ -1,4 +1,4 @@
-class ProjectActivityBlueprint < Blueprinter::Base
+class ProjectAuditBlueprint < Blueprinter::Base
   identifier :id
 
   view :base do

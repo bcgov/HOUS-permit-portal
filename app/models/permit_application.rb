@@ -293,7 +293,7 @@ class PermitApplication < ApplicationRecord
   # layer (FormJsonService, SubmissionDataService, blueprint, policy) calls
   # this method to decide what to show or allow.
   #
-  #   Q1: The project activity feed (ProjectActivityPresenter) currently does
+  #   Q1: The project audit feed (ProjectAuditPresenter) currently does
   #       NOT call this method. Should it? If an assignee can only see blocks
   #       ["B1", "B2"], should audits about block "B3" be hidden from them?
   #

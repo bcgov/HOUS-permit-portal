@@ -229,7 +229,7 @@ Rails.application.routes.draw do
         post :pin
         delete :unpin
         get :submission_collaborator_options
-        get :activities, to: "project_activities#index"
+        get :activities, to: "project_audits#index"
       end
     end
 

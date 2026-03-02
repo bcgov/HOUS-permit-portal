@@ -33,7 +33,7 @@
 #       per-record lookups — is there a way to batch this at the controller
 #       level before handing off to the presenter?
 #
-class ProjectActivityPresenter
+class ProjectAuditPresenter
   def self.format(audit, viewer:)
     {
       id: audit.id,

@@ -1,5 +1,5 @@
-class Api::ProjectActivitiesController < Api::ApplicationController
-  include Api::Concerns::Search::ProjectActivities
+class Api::ProjectAuditsController < Api::ApplicationController
+  include Api::Concerns::Search::ProjectAudits
 
   before_action :set_permit_project
   # [AUDITS SUGGESTION] verify_policy_scoped is now satisfied by the
@@ -10,7 +10,7 @@ class Api::ProjectActivitiesController < Api::ApplicationController
 
   def index
     authorize @permit_project, :show?
-    perform_project_activity_search
+    perform_project_audit_search
 
     # [AUDITS SUGGESTION] The presenter already returns hashes in the exact
     # shape the frontend needs — passing them through a Blueprinter blueprint
@@ -33,7 +33,7 @@ class Api::ProjectActivitiesController < Api::ApplicationController
     #
     formatted =
       @search.results.map do |audit|
-        ProjectActivityPresenter.format(audit, viewer: current_user)
+        ProjectAuditPresenter.format(audit, viewer: current_user)
       end
 
     render json: { data: formatted, meta: page_meta(@search) }
