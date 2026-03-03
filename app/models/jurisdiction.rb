@@ -420,19 +420,10 @@ class Jurisdiction < ApplicationRecord
   # Callback method to ensure a default sandbox is created
   def ensure_default_sandboxes
     if sandboxes.published.empty?
-      sandboxes.build(
-        name: "Published",
-        description:
-          "Work with application forms that have already been published",
-        template_version_status_scope: :published
-      )
+      sandboxes.build(template_version_status_scope: :published)
     end
     if sandboxes.scheduled.empty?
-      sandboxes.build(
-        name: "Scheduled",
-        description: "Work with application forms scheduled to be published",
-        template_version_status_scope: :scheduled
-      )
+      sandboxes.build(template_version_status_scope: :scheduled)
     end
   end
 

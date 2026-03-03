@@ -37,6 +37,10 @@ en:
         phone: "Phone no."
       requirement_template:
         first_nations: "First Nations"
+      sandbox:
+        scope_names:
+          published: 'Training mode: "Published"'
+          scheduled: 'Training mode: "Upcoming"'
         available_in_all: "All"
     errors:
       models:
