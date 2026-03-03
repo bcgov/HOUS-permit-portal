@@ -15,9 +15,47 @@ class FileUploader < Shrine
     DestroyJob.perform_async(self.class.name, self.data)
   end
 
+  BLOCKED_EXTENSIONS = %w[
+    exe
+    bat
+    cmd
+    com
+    msi
+    scr
+    pif
+    sh
+    bash
+    csh
+    ksh
+    js
+    jsx
+    ts
+    vbs
+    vbe
+    wsf
+    wsh
+    ps1
+    html
+    htm
+    xhtml
+    php
+    py
+    rb
+    pl
+    asp
+    aspx
+    jsp
+    dll
+    so
+    dylib
+    jar
+    war
+    css
+  ].freeze
+
   Attacher.validate do
-    validate_max_size Constants::Sizes::FILE_UPLOAD_MAX_SIZE * 1024 * 1024 # 200 MB to start
-    # could be images, excel files, bims, we do not have an exhaustive list right now.
+    validate_max_size Constants::Sizes::FILE_UPLOAD_MAX_SIZE * 1024 * 1024
+    validate_extension_exclusion BLOCKED_EXTENSIONS
   end
 
   def generate_location(io, derivative: nil, **options)
