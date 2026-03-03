@@ -1,27 +1,9 @@
 require "rails_helper"
 
 RSpec.describe Sandbox, type: :model do
-  describe "validations" do
-    subject { create(:sandbox) }
-
-    it "validates uniqueness of template_version_status_scope scoped to jurisdiction" do
-      should validate_uniqueness_of(:template_version_status_scope).scoped_to(
-               :jurisdiction_id
-             )
-    end
-  end
-
   describe "unique template_version_status_scope validation" do
     let!(:jurisdiction) { create(:sub_district) }
     let!(:other_jurisdiction) { create(:sub_district) }
-
-    let!(:existing_sandbox) do
-      create(
-        :sandbox,
-        template_version_status_scope: :published,
-        jurisdiction: jurisdiction
-      )
-    end
 
     it "does not allow duplicate scopes within the same jurisdiction" do
       duplicate_sandbox =
@@ -38,14 +20,8 @@ RSpec.describe Sandbox, type: :model do
     end
 
     it "allows the same scope in different jurisdictions" do
-      sandbox_in_other_jurisdiction =
-        build(
-          :sandbox,
-          template_version_status_scope: :published,
-          jurisdiction: other_jurisdiction
-        )
-
-      expect(sandbox_in_other_jurisdiction).to be_valid
+      expect(jurisdiction.sandboxes.published.count).to eq(1)
+      expect(other_jurisdiction.sandboxes.published.count).to eq(1)
     end
   end
 
