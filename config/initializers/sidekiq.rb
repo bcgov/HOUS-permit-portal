@@ -20,7 +20,7 @@ redis_config =
       role: :master
     }
   else
-    { url: ENV.fetch("SIDEKIQ_DEV_REDIS_URL") }
+    { url: ENV.fetch("SIDEKIQ_DEV_REDIS_URL", nil) }
   end
 
 Sidekiq.configure_server do |config|
