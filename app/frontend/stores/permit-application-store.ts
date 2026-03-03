@@ -288,8 +288,7 @@ export const PermitApplicationStoreModel = types
         fullAddress: overrides.fullAddress || null,
         pin: overrides.pin || null,
         pid: overrides.pid || null,
-        permitType: requirementTemplate.permitType || overrides.permitType || {}, // Provide default or empty objects as needed
-        activity: requirementTemplate.activity || overrides.activity || {},
+        tags: overrides.tags || [],
         status: overrides.status || EPermitApplicationStatus.ephemeral,
         submitter: overrides.submitter || self.rootStore.userStore.currentUser?.id || null,
         jurisdiction: overrides.jurisdiction || null,

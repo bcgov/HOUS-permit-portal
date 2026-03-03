@@ -59,7 +59,7 @@ class TemplateVersionPolicy < ApplicationPolicy
     def resolve
       template_versions =
         scope
-          .joins(requirement_template: :activity)
+          .joins(:requirement_template)
           .where(requirement_templates: { discarded_at: nil })
           .where.not(status: "deprecated")
       if sandbox.present?

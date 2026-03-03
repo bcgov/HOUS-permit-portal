@@ -56,7 +56,6 @@ export interface IRequirementAttributes {
 
 export interface IRequirementBlockParams {
   name: string
-  firstNations: boolean
   displayName: string
   visibility: EVisibility
   displayDescription: string
@@ -105,8 +104,6 @@ export interface IRequirementTemplateUpdateParams {
   nickname?: string | null
   public?: boolean | null
   assigneeId?: string | null
-  permitTypeId?: string | null
-  activityId?: string | null
   requirementTemplateSectionsAttributes?: IRequirementTemplateSectionAttributes[]
 }
 

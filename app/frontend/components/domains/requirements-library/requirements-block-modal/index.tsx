@@ -67,7 +67,6 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
     return requirementBlock
       ? {
           name: requirementBlock.name,
-          firstNations: requirementBlock.firstNations,
           description: requirementBlock.description,
           displayName: requirementBlock.displayName,
           visibility: requirementBlock.visibility || EVisibility.any,

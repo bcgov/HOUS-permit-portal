@@ -240,15 +240,9 @@ class Api::JurisdictionsController < Api::ApplicationController
         cell
         email
       ],
-      permit_type_submission_contacts_attributes: %i[
+      submission_contacts_attributes: %i[id email title default _destroy],
+      jurisdiction_step_requirements_attributes: %i[
         id
-        email
-        permit_type_id
-        _destroy
-      ],
-      permit_type_required_steps_attributes: %i[
-        id
-        permit_type_id
         default
         energy_step_required
         zero_carbon_step_required

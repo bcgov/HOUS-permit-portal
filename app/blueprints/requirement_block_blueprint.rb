@@ -1,7 +1,6 @@
 class RequirementBlockBlueprint < Blueprinter::Base
   identifier :id
   fields :name,
-         :first_nations,
          :sku,
          :description,
          :visibility,

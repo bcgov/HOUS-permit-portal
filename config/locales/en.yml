@@ -36,7 +36,7 @@ en:
         cell: "Mobile no."
         phone: "Phone no."
       requirement_template:
-        first_nations: "First Nations"
+        tags: "Tags"
     errors:
       models:
         early_access_preview:
@@ -74,7 +74,7 @@ en:
           step_code_package_required: '"Energy step code" is required to have the Design package energy step code file'
           duplicate_energy_step_code: 'Multiple "Energy step code" requirements found. Please ensure there is only one "Energy step code" requirement in the template'
           duplicate_step_code_package: 'Multiple "Design package energy step code files" found. Please ensure there is only one "Design package energy step code file" when there is an "Energy step code" requirement'
-          nonunique_classification: "There can only be one requirement template per permit type, activity, and First Nations combination"
+          nonunique_nickname: "There can only be one live requirement template with this nickname"
           taken: "must be unique"
           attributes:
             public:
@@ -153,7 +153,7 @@ en:
       notify_application_revisions_requested: "Revisions requested on application %{permit_application_number}"
       remind_reviewer: "Your report on outstanding permit applications"
       remind_resource_update: "Reminder: Review your jurisdiction resources"
-      permit_type_submission_contact_confirm: "Confirm submission inbox email"
+      submission_contact_confirm: "Confirm submission inbox email"
       new_jurisdiction_membership: "New jurisdiction membership"
       notify_permit_collaboration: "Welcome you have been invited to Collaborate in the Building Permit Hub"
       notify_new_or_unconfirmed_permit_collaboration: "You’re Invited to Collaborate on a Building Permit Application"
@@ -220,22 +220,6 @@ en:
       jurisdiction_ltsa_error:
         title: Error
         message: Jurisdiction could not be determined. Please check back later.
-    permit_classification:
-      options_error:
-        title: Error
-        message: Error encountered fetching permit classification options
-      create_error:
-        title: Error
-        message: "%{error_message}"
-      update_error:
-        title: Error
-        message: "There was an error updating the permit classification"
-      destroy_error:
-        title: Error
-        message: "%{error_message}"
-      in_use_error:
-        title: Error
-        message: "This permit classification is in use and cannot be deleted"
     pre_check:
       create_success:
         title: ""

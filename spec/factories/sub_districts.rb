@@ -7,11 +7,17 @@ FactoryBot.define do
     checklist_html { "<p>Some checklist</p>" }
     look_out_html { "<p>Some lookout</p>" }
     contact_summary_html { "<p>Some lookout</p>" }
-    inbox_enabled { true }
-    external_api_state { "g_off" } # Updated from external_api_enabled
+    inbox_enabled { false }
+    external_api_state { "g_off" }
 
     after(:create) do |jurisdiction|
-      create(:permit_type_submission_contact, jurisdiction: jurisdiction)
+      create(
+        :submission_contact,
+        jurisdiction: jurisdiction,
+        confirmed_at: Time.current,
+        default: true
+      )
+      jurisdiction.update_column(:inbox_enabled, true)
     end
   end
 end

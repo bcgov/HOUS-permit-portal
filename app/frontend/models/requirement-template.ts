@@ -6,7 +6,6 @@ import { vancouverTimeZone } from "../constants"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
 import { ERequirementTemplateType, EVisibility } from "../types/enums"
-import { IActivity, IPermitType } from "./permit-classification"
 import { RequirementTemplateSectionModel } from "./requirement-template-section"
 import { TemplateVersionModel } from "./template-version"
 import { UserModel } from "./user"
@@ -54,7 +53,6 @@ export const RequirementTemplateModel = types.snapshotProcessor(
   types
     .model("RequirementTemplateModel", {
       id: types.identifier,
-      label: types.string,
       nickname: types.maybeNull(types.string),
       type: types.enumeration(Object.values(ERequirementTemplateType)),
       visibility: types.enumeration(Object.values(EVisibility)),
@@ -65,11 +63,9 @@ export const RequirementTemplateModel = types.snapshotProcessor(
       scheduledTemplateVersions: types.array(types.safeReference(TemplateVersionModel)),
       deprecatedTemplateVersions: types.array(types.safeReference(TemplateVersionModel)),
       assignee: types.maybeNull(types.safeReference(UserModel)),
-      permitType: types.frozen<IPermitType>(),
-      activity: types.frozen<IActivity>(),
+      tags: types.optional(types.array(types.string), []),
       formJson: types.frozen<IRequirementTemplateFormJson>(),
       discardedAt: types.maybeNull(types.Date),
-      firstNations: types.boolean,
       requirementTemplateSectionMap: types.map(RequirementTemplateSectionModel),
       sortedRequirementTemplateSections: types.array(types.safeReference(RequirementTemplateSectionModel)),
       createdAt: types.Date,
@@ -126,6 +122,9 @@ export const RequirementTemplateModel = types.snapshotProcessor(
       },
       get isEarlyAccess() {
         return self.type === ERequirementTemplateType.EarlyAccessRequirementTemplate
+      },
+      get displayLabel() {
+        return self.nickname ?? "New template"
       },
     }))
     .actions((self) => ({

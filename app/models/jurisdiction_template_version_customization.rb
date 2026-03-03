@@ -14,6 +14,11 @@ class JurisdictionTemplateVersionCustomization < ApplicationRecord
   # enabled
   belongs_to :sandbox, optional: true
   belongs_to :jurisdiction
+  belongs_to :submission_contact, optional: true
+
+  def effective_submission_contact
+    submission_contact || jurisdiction.submission_contacts.default_contact.first
+  end
   belongs_to :template_version
 
   before_save :sanitize_tip

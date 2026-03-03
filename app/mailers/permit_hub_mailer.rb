@@ -191,12 +191,12 @@ class PermitHubMailer < ApplicationMailer
   end
 
   def notify_reviewer_application_received(
-    permit_type_submission_contact,
+    submission_contact,
     permit_application
   )
     @permit_application = permit_application
     send_mail(
-      email: permit_type_submission_contact.email,
+      email: submission_contact.email,
       template_key: "notify_reviewer_application_received",
       subject_i18n_params: {
         permit_application_number: permit_application.number
@@ -248,12 +248,9 @@ class PermitHubMailer < ApplicationMailer
     )
   end
 
-  def remind_reviewer(permit_type_submission_contact, permit_applications)
+  def remind_reviewer(submission_contact, permit_applications)
     @permit_applications = permit_applications
-    send_mail(
-      email: permit_type_submission_contact.email,
-      template_key: "remind_reviewer"
-    )
+    send_mail(email: submission_contact.email, template_key: "remind_reviewer")
   end
 
   def remind_resource_update(user, jurisdiction, resource_ids)
@@ -288,12 +285,11 @@ class PermitHubMailer < ApplicationMailer
     )
   end
 
-  #### PermitTypeSubmission Contact Mailer
-  def permit_type_submission_contact_confirm(permit_type_submission_contact)
-    @permit_type_submission_contact = permit_type_submission_contact
+  def submission_contact_confirm(submission_contact)
+    @submission_contact = submission_contact
     send_mail(
-      email: permit_type_submission_contact.email,
-      template_key: "permit_type_submission_contact_confirm"
+      email: submission_contact.email,
+      template_key: "submission_contact_confirm"
     )
   end
 

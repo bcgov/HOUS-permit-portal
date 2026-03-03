@@ -18,7 +18,7 @@ export const TemplateVersionModel = types
     deprecationReason: types.maybeNull(types.enumeration(Object.values(EDeprecationReason))),
     versionDate: types.Date,
     label: types.string,
-    firstNations: types.boolean,
+    tags: types.optional(types.array(types.string), []),
     updatedAt: types.Date,
     denormalizedTemplateJson: types.maybeNull(types.frozen<IDenormalizedTemplate>()),
     requirementBlocksJson: types.maybeNull(types.frozen<Record<string, IDenormalizedRequirementBlock>>()),
@@ -64,10 +64,6 @@ export const TemplateVersionModel = types
     get templateVersionPreviews() {
       const previewStore = self.rootStore.earlyAccessPreviewStore
       return self.templateVersionPreviewIds.map((id) => previewStore.getPreviewById(id)).filter(Boolean)
-    },
-
-    get nonFirstNationLabel() {
-      return self.label.replace(/\s\(First Nations\)/g, "")
     },
 
     getJurisdictionTemplateVersionCustomization(jurisdictionId: string) {

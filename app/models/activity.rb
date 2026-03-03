@@ -1,2 +1,0 @@
-class Activity < PermitClassification
-end

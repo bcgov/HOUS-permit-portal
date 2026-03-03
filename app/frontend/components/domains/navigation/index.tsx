@@ -285,11 +285,6 @@ const SiteConfigurationManagementScreen = lazy(() =>
     default: module.SiteConfigurationManagementScreen,
   }))
 )
-const PermitClassificationsScreen = lazy(() =>
-  import("../super-admin/site-configuration-management/permit-classifications-screen").then((module) => ({
-    default: module.PermitClassificationsScreen,
-  }))
-)
 const SitewideMessageScreen = lazy(() =>
   import("../super-admin/site-configuration-management/sitewide-message-screen").then((module) => ({
     default: module.SitewideMessageScreen,
@@ -459,7 +454,6 @@ const AppRoutes = observer(() => {
       <Route path="/requirement-templates/:requirementTemplateId/edit" element={<EditRequirementTemplateScreen />} />
       <Route path="/template-versions/:templateVersionId" element={<TemplateVersionScreen />} />
       <Route path="/configuration-management" element={<SiteConfigurationManagementScreen />} />
-      <Route path="/configuration-management/permit-classifications" element={<PermitClassificationsScreen />} />
       <Route path="/configuration-management/sitewide-message" element={<SitewideMessageScreen />} />
       <Route path="/configuration-management/help-drawer-setup" element={<HelpDrawerSetupScreen />} />
       <Route path="/configuration-management/revision-reason-setup" element={<RevisionReasonSetupScreen />} />

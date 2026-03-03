@@ -6,7 +6,6 @@ class TemplateVersionBlueprint < Blueprinter::Base
          :updated_at,
          :version_date,
          :label,
-         :first_nations,
          :requirement_template_id,
          :change_notes,
          :change_significance,

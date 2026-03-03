@@ -1,12 +1,6 @@
 FactoryBot.define do
   factory :live_requirement_template do
     sequence(:nickname) { |n| "Live Template #{n}" }
-    permit_type do
-      PermitType.first || association(:permit_type, code: :low_residential)
-    end
-    activity do
-      Activity.first || association(:activity, code: :new_construction)
-    end
 
     factory :live_requirement_template_with_sections do
       transient { sections_count { 5 } }

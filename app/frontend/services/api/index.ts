@@ -13,7 +13,6 @@ import { IPart3StepCodeChecklist } from "../../models/part-3-step-code-checklist
 import { IPart9StepCode } from "../../models/part-9-step-code"
 import { IPart9StepCodeChecklist } from "../../models/part-9-step-code-checklist"
 import { IPermitApplication } from "../../models/permit-application"
-import { IActivity, IPermitType } from "../../models/permit-classification"
 import { IPermitCollaboration } from "../../models/permit-collaboration"
 import { IPermitProject } from "../../models/permit-project"
 import { IPreCheck } from "../../models/pre-check"
@@ -52,7 +51,6 @@ import {
   EOverheatingToolSortFields,
   EPermitApplicationSortFields,
   EPermitBlockStatus,
-  EPermitClassificationType,
   EPermitProjectSortFields,
   EPreCheckSortFields,
   ERequirementLibrarySortFields,
@@ -173,62 +171,6 @@ export class Api {
     })
   }
 
-  async fetchPermitClassifications(onlyEnabled: boolean = true) {
-    return this.client.get<IOptionResponse<IContact>>(`/permit_classifications`, { onlyEnabled })
-  }
-
-  async createPermitClassification(permitClassification: {
-    name: string
-    code: string
-    description?: string
-    enabled?: boolean
-    type: EPermitClassificationType
-    category?: string | null
-  }) {
-    return this.client.post(`/permit_classifications`, { permitClassification })
-  }
-
-  async updatePermitClassification(
-    id: string,
-    permitClassification: Partial<{
-      name: string
-      code: string
-      description?: string
-      enabled?: boolean
-      type: EPermitClassificationType
-      category?: string | null
-    }>
-  ) {
-    return this.client.put(`/permit_classifications/${id}`, { permitClassification })
-  }
-
-  async destroyPermitClassification(id: string) {
-    return this.client.delete(`/permit_classifications/${id}`)
-  }
-
-  async fetchPermitClassificationOptions(
-    type,
-    published = false,
-    firstNations = false,
-    permitTypeId: string = null,
-    activityId: string = null,
-    pid: string = null,
-    jurisdictionId: string = null
-  ) {
-    return this.client.post<IOptionResponse<IPermitType | IActivity>>(
-      `/permit_classifications/permit_classification_options`,
-      {
-        type,
-        published,
-        firstNations,
-        permitTypeId,
-        activityId,
-        pid,
-        jurisdictionId,
-      }
-    )
-  }
-
   async createJurisdiction(params) {
     return this.client.post<ApiResponse<IJurisdiction>>("/jurisdictions", { jurisdiction: params })
   }
@@ -334,7 +276,7 @@ export class Api {
 
   async createProjectPermitApplications(
     permitProjectId: string,
-    params: Array<{ activityId: string; permitTypeId: string; firstNations: boolean }>
+    params: Array<{ templateVersionId: string; jurisdictionId?: string }>
   ) {
     return this.client.post<ApiResponse<IPermitApplication[]>>(
       `/permit_projects/${permitProjectId}/permit_applications`,
@@ -631,19 +573,11 @@ export class Api {
     return this.client.patch<ApiResponse<IRequirementTemplate>>(`/requirement_templates/${id}/restore`)
   }
 
-  async fetchTemplateVersions(
-    activityId?: string,
-    status?: ETemplateVersionStatus,
-    earlyAccess?: boolean,
-    isPubliclyPreviewable?: boolean,
-    permitTypeId?: string
-  ) {
+  async fetchTemplateVersions(status?: ETemplateVersionStatus, earlyAccess?: boolean, isPubliclyPreviewable?: boolean) {
     return this.client.get<ApiResponse<ITemplateVersion[]>>(`/template_versions`, {
-      activityId,
       status,
       earlyAccess,
       publiclyPreviewable: isPubliclyPreviewable,
-      permitTypeId,
     })
   }
 

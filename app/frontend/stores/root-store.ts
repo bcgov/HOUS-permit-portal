@@ -15,7 +15,6 @@ import { IJurisdictionStore, JurisdictionStoreModel } from "./jurisdiction-store
 import { INotificationStore, NotificationStoreModel } from "./notification-store"
 import { IOverheatingToolStore, OverheatingToolStoreModel } from "./overheating-tool-store"
 import { IPermitApplicationStore, PermitApplicationStoreModel } from "./permit-application-store"
-import { IPermitClassificationStore, PermitClassificationStoreModel } from "./permit-classification-store"
 import { IPermitProjectStore, PermitProjectStoreModel } from "./permit-project-store"
 import { IPreCheckStore, PreCheckStoreModel } from "./pre-check-store"
 import { IRequirementBlockStoreModel, RequirementBlockStoreModel } from "./requirement-block-store"
@@ -36,7 +35,6 @@ export const RootStoreModel = types
     userStore: types.optional(UserStoreModel, {}),
     permitApplicationStore: types.optional(PermitApplicationStoreModel, {}),
     permitProjectStore: types.optional(PermitProjectStoreModel, {}),
-    permitClassificationStore: types.optional(PermitClassificationStoreModel, {}),
     preCheckStore: types.optional(PreCheckStoreModel, {}),
     jurisdictionStore: types.optional(JurisdictionStoreModel, {}),
     requirementBlockStore: types.optional(RequirementBlockStoreModel, {}),
@@ -114,7 +112,6 @@ export interface IRootStore extends IStateTreeNode {
   sessionStore: ISessionStore
   permitApplicationStore: IPermitApplicationStore
   permitProjectStore: IPermitProjectStore
-  permitClassificationStore: IPermitClassificationStore
   preCheckStore: IPreCheckStore
   jurisdictionStore: IJurisdictionStore
   userStore: IUserStore

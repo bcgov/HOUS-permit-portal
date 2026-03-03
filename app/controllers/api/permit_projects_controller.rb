@@ -164,7 +164,7 @@ class Api::PermitProjectsController < Api::ApplicationController
 
   # Bulk create permit applications for a project
   # Expected params:
-  #   permit_applications: [{ activity_id, permit_type_id, first_nations, jurisdiction_id?, sandbox_id? }]
+  #   permit_applications: [{ template_version_id, jurisdiction_id?, sandbox_id? }]
   def create_permit_applications
     authorize @permit_project
 
@@ -177,9 +177,7 @@ class Api::PermitProjectsController < Api::ApplicationController
           submitter: current_user,
           sandbox: current_sandbox,
           permit_project: @permit_project,
-          activity_id: pa_params[:activity_id],
-          permit_type_id: pa_params[:permit_type_id],
-          first_nations: pa_params[:first_nations],
+          template_version_id: pa_params[:template_version_id],
           jurisdiction_id: pa_params[:jurisdiction_id]
         )
 
@@ -213,9 +211,7 @@ class Api::PermitProjectsController < Api::ApplicationController
         permit_applications:
           permit_applications_params.map do |pa_params|
             pa_params.slice(
-              :activity_id,
-              :permit_type_id,
-              :first_nations,
+              :template_version_id,
               :jurisdiction_id,
               :permit_project_id,
               :sandbox_id
@@ -289,14 +285,12 @@ class Api::PermitProjectsController < Api::ApplicationController
       .require(:permit_applications)
       .map do |pa_params|
         pa_params.permit(
-          :activity_id,
-          :permit_type_id,
+          :template_version_id,
           :jurisdiction_id,
           :full_address,
           :nickname,
           :pin,
           :pid,
-          :first_nations,
           :permit_project_id,
           :sandbox_id,
           submission_data: {

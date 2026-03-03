@@ -1,12 +1,5 @@
 FactoryBot.define do
   factory :early_access_requirement_template do
-    permit_type do
-      PermitType.first || association(:permit_type, code: :low_residential)
-    end
-    activity do
-      Activity.first || association(:activity, code: :new_construction)
-    end
-
     factory :early_access_requirement_template_with_sections do
       transient { sections_count { 5 } }
 

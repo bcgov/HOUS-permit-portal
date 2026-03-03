@@ -115,9 +115,7 @@ export const PermitProjectModel = types
     }),
   }))
   .actions((self) => ({
-    bulkCreatePermitApplications: flow(function* (
-      params: Array<{ activityId: string; permitTypeId: string; firstNations: boolean }>
-    ) {
+    bulkCreatePermitApplications: flow(function* (params: Array<Record<string, unknown>>) {
       const response = yield* toGenerator(self.environment.api.createProjectPermitApplications(self.id, params))
       if (response.ok) {
         // Merge created applications into store

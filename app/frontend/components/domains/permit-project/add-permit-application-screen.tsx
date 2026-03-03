@@ -14,18 +14,15 @@ import {
 } from "@chakra-ui/react"
 import { CaretLeft, Info, MagnifyingGlass } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
-import * as R from "ramda"
-import React, { useEffect, useMemo, useState } from "react"
+import React, { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { usePermitProject } from "../../../hooks/resources/use-permit-project"
-import { IActivity, IPermitType } from "../../../models/permit-classification"
-import { useMst } from "../../../setup/root"
-import { EFlashMessageStatus, EPermitClassificationCode } from "../../../types/enums"
-import { IOption } from "../../../types/types"
+import { useTemplateVersions } from "../../../hooks/resources/use-template-versions"
+import { ITemplateVersion } from "../../../models/template-version"
+import { EFlashMessageStatus } from "../../../types/enums"
 import { CustomMessageBox } from "../../shared/base/custom-message-box"
 import { ErrorScreen } from "../../shared/base/error-screen"
-import { SafeTipTapDisplay } from "../../shared/editor/safe-tiptap-display"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import ProjectInfoRow from "../../shared/project/project-info-row"
 import { Can } from "../../shared/user/can"
@@ -35,66 +32,43 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
   const { t } = useTranslation()
   const { currentPermitProject, error } = usePermitProject()
   const navigate = useNavigate()
-  const { permitClassificationStore } = useMst()
+  const {
+    templateVersions,
+    error: templateError,
+    isLoading,
+  } = useTemplateVersions({
+    customErrorMessage: t("errors.fetchBuildingPermits"),
+  })
 
-  const [permitType, setPermitType] = useState<IPermitType | null>(null)
-  const [activityOptions, setActivityOptions] = useState<IOption<IActivity>[]>([])
-  const [selectedActivityIds, setSelectedActivityIds] = useState<string[]>([])
+  const [selectedTemplateVersionIds, setSelectedTemplateVersionIds] = useState<string[]>([])
   const [query, setQuery] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const isFirstNation = currentPermitProject?.jurisdiction?.firstNation
 
-  // Load default permit type (low_residential) and then its activities
-  useEffect(() => {
-    ;(async () => {
-      if (!currentPermitProject) return
-
-      // Default hidden selections
-      const permitTypeOptions = await permitClassificationStore.fetchPermitTypeOptions(true, isFirstNation, null, null)
-      const lowRes = permitTypeOptions.find((o) => o.value.code === EPermitClassificationCode.lowResidential)?.value
-      if (lowRes) {
-        setPermitType(lowRes)
-        const activityOptions = await permitClassificationStore.fetchActivityOptions(true, isFirstNation, lowRes.id)
-        setActivityOptions(activityOptions)
-      }
-    })()
-  }, [permitClassificationStore, currentPermitProject?.id])
-
-  const filteredActivities = useMemo(() => {
+  const filteredTemplates = useMemo(() => {
     const q = query.trim().toLowerCase()
-    if (!q) return activityOptions
-    return activityOptions.filter((opt) => {
-      const name = opt.value.name?.toLowerCase() || ""
-      const desc = opt.value.descriptionHtml?.toLowerCase() || ""
-      return name.includes(q) || desc.includes(q)
+    if (!q) return templateVersions
+    return templateVersions.filter((tv) => {
+      const nickname = tv.denormalizedTemplateJson?.nickname?.toLowerCase() || ""
+      const desc = tv.denormalizedTemplateJson?.description?.toLowerCase() || ""
+      const tags = (tv.denormalizedTemplateJson?.tags || tv.tags || []).join(" ").toLowerCase()
+      return nickname.includes(q) || desc.includes(q) || tags.includes(q)
     })
-  }, [activityOptions, query])
+  }, [templateVersions, query])
 
-  const groupedActivities = useMemo(() => {
-    const groups = R.groupBy<IOption<IActivity>>((opt) => opt.value.category || "", filteredActivities)
-    const order = Object.keys(groups)
-    return order.map((k) => {
-      const options = groups[k]
-      const label = options[0]?.value?.categoryLabel || ""
-      return { key: k, label, options }
-    })
-  }, [filteredActivities])
-
-  const toggleSelection = (activityId: string) => {
-    setSelectedActivityIds((prev) =>
-      prev.includes(activityId) ? prev.filter((id) => id !== activityId) : [...prev, activityId]
+  const toggleSelection = (templateVersionId: string) => {
+    setSelectedTemplateVersionIds((prev) =>
+      prev.includes(templateVersionId) ? prev.filter((id) => id !== templateVersionId) : [...prev, templateVersionId]
     )
   }
 
   const onSubmit = async () => {
-    if (!permitType || !currentPermitProject) return
+    if (!currentPermitProject) return
 
     try {
       setIsSubmitting(true)
-      const params = selectedActivityIds.map((activityId) => ({
-        activityId,
-        permitTypeId: permitType.id,
-        firstNations: isFirstNation,
+      const params = selectedTemplateVersionIds.map((templateVersionId) => ({
+        templateVersionId,
+        jurisdictionId: currentPermitProject.jurisdiction?.id,
       }))
       const response = await (currentPermitProject as any).bulkCreatePermitApplications(params)
       if (response?.ok) {
@@ -107,10 +81,11 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
   }
 
   const clearSelection = () => {
-    setSelectedActivityIds([])
+    setSelectedTemplateVersionIds([])
   }
 
   if (error) return <ErrorScreen error={error} />
+  if (templateError) return <ErrorScreen error={templateError} />
 
   return (
     <Container maxW="container.lg" py={10}>
@@ -224,83 +199,78 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
             <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t("ui.search")} bg="white" />
           </InputGroup>
 
-          {/* Action controls above the activity list */}
+          {/* Action controls above the template list */}
           <Flex w="full" gap={4} mb={4}>
-            <Button variant="secondary" onClick={clearSelection} isDisabled={selectedActivityIds.length === 0}>
+            <Button variant="secondary" onClick={clearSelection} isDisabled={selectedTemplateVersionIds.length === 0}>
               {t("ui.clearSelection")}
             </Button>
             <AddPermitsFAB
               onClick={onSubmit}
-              count={selectedActivityIds.length}
-              disabled={isSubmitting || selectedActivityIds.length === 0 || !permitType}
+              count={selectedTemplateVersionIds.length}
+              disabled={isSubmitting || selectedTemplateVersionIds.length === 0 || isLoading}
               label={t("permitProject.addPermits.title")}
             />
           </Flex>
 
-          {groupedActivities.map((group) => (
-            <Box key={group.key} mb={10}>
-              <Heading as="h3" fontSize="lg" mb={4}>
-                {group.label}
-              </Heading>
-              <Flex gap={6} wrap="wrap">
-                {group.options.map((opt) => {
-                  const checked = selectedActivityIds.includes(opt.value.id)
-                  return (
-                    <Box
-                      key={opt.value.id}
-                      onClick={() => toggleSelection(opt.value.id)}
-                      borderRadius="lg"
-                      p={6}
-                      border="1px solid"
-                      borderColor={checked ? "theme.blueAlt" : "border.light"}
-                      bg="white"
-                      w={{ base: "100%", md: "48%" }}
-                      transition="all 0.2s ease-in-out"
-                      _hover={{ bg: "hover.blue" }}
-                      cursor="pointer"
-                    >
-                      <Flex direction="column" justify="space-between" align="start" gap={4}>
-                        <Box>
-                          <Heading as="h3" fontSize="lg" mb={2}>
-                            {opt.value.name}
-                          </Heading>
-                          <SafeTipTapDisplay htmlContent={opt.value.descriptionHtml} />
-                        </Box>
-                        <Flex
-                          align="center"
-                          gap={2}
-                          border="1px solid"
-                          borderColor={checked ? "theme.blueAlt" : "border.light"}
-                          bg="white"
-                          px={4}
-                          py={2}
-                          borderRadius="md"
-                          alignSelf="flex-end"
-                        >
-                          <Checkbox
-                            isChecked={checked}
-                            onChange={() => toggleSelection(opt.value.id)}
-                            pointerEvents="none"
-                          />
-                          <Text fontWeight="medium">{t("permitProject.addPermits.addToProject")}</Text>
-                        </Flex>
+          {isLoading ? (
+            <Text color="text.secondary">{t("ui.loading")}</Text>
+          ) : (
+            <Flex gap={6} wrap="wrap">
+              {filteredTemplates.map((tv: ITemplateVersion) => {
+                const checked = selectedTemplateVersionIds.includes(tv.id)
+                return (
+                  <Box
+                    key={tv.id}
+                    onClick={() => toggleSelection(tv.id)}
+                    borderRadius="lg"
+                    p={6}
+                    border="1px solid"
+                    borderColor={checked ? "theme.blueAlt" : "border.light"}
+                    bg="white"
+                    w={{ base: "100%", md: "48%" }}
+                    transition="all 0.2s ease-in-out"
+                    _hover={{ bg: "hover.blue" }}
+                    cursor="pointer"
+                  >
+                    <Flex direction="column" justify="space-between" align="start" gap={4}>
+                      <Box>
+                        <Heading as="h3" fontSize="lg" mb={2}>
+                          {tv.denormalizedTemplateJson?.nickname || tv.label}
+                        </Heading>
+                        <Text fontSize="sm" color="text.secondary">
+                          {tv.denormalizedTemplateJson?.description}
+                        </Text>
+                      </Box>
+                      <Flex
+                        align="center"
+                        gap={2}
+                        border="1px solid"
+                        borderColor={checked ? "theme.blueAlt" : "border.light"}
+                        bg="white"
+                        px={4}
+                        py={2}
+                        borderRadius="md"
+                        alignSelf="flex-end"
+                      >
+                        <Checkbox isChecked={checked} onChange={() => toggleSelection(tv.id)} pointerEvents="none" />
+                        <Text fontWeight="medium">{t("permitProject.addPermits.addToProject")}</Text>
                       </Flex>
-                    </Box>
-                  )
-                })}
-              </Flex>
-            </Box>
-          ))}
+                    </Flex>
+                  </Box>
+                )
+              })}
+            </Flex>
+          )}
 
-          {/* Action controls below the activity list */}
+          {/* Action controls below the template list */}
           <Flex w="full" gap={4} mt={2}>
-            <Button variant="secondary" onClick={clearSelection} isDisabled={selectedActivityIds.length === 0}>
+            <Button variant="secondary" onClick={clearSelection} isDisabled={selectedTemplateVersionIds.length === 0}>
               {t("ui.clearSelection")}
             </Button>
             <AddPermitsFAB
               onClick={onSubmit}
-              count={selectedActivityIds.length}
-              disabled={isSubmitting || selectedActivityIds.length === 0 || !permitType}
+              count={selectedTemplateVersionIds.length}
+              disabled={isSubmitting || selectedTemplateVersionIds.length === 0 || isLoading}
               label={t("permitProject.addPermits.title")}
             />
           </Flex>
