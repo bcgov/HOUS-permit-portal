@@ -88,7 +88,7 @@ export const CheckDigitalSealsScreen = observer(() => {
   })
 
   const formatSignerName = (subjectName: string) => {
-    if (!subjectName) return "Unknown Signer"
+    if (!subjectName) return t("projectReadinessTools.digitalSealValidator.unknownSigner") as string
 
     const parts = subjectName.split(/[,+]/).map((p) => p.trim())
     let cn = ""
@@ -171,7 +171,9 @@ export const CheckDigitalSealsScreen = observer(() => {
                 </Heading>
                 <Box mb={4}>
                   <HStack spacing={2} align="center">
-                    <Text>File: {file?.name}</Text>
+                    <Text>
+                      {t("projectReadinessTools.digitalSealValidator.fileLabel") as string} {file?.name}
+                    </Text>
                   </HStack>
                   <Text fontSize="sm" color="gray.600">
                     {t("projectReadinessTools.digitalSealValidator.lastModified") as string}{" "}
@@ -212,7 +214,7 @@ export const CheckDigitalSealsScreen = observer(() => {
                             second: "2-digit",
                             hour12: false,
                           }) + " PST" // Mocking PST for display consistency with requirement
-                        : "Unknown Date"
+                        : (t("projectReadinessTools.digitalSealValidator.unknownDate") as string)
                       const isValid = sig.result === "SUCCESS"
 
                       return (
@@ -257,7 +259,7 @@ export const CheckDigitalSealsScreen = observer(() => {
                 fontWeight="normal"
                 _hover={{ textDecoration: "none" }}
               >
-                Upload another file
+                {t("projectReadinessTools.digitalSealValidator.uploadAnotherFile") as string}
               </Button>
             </HStack>
           </Alert>
@@ -298,6 +300,7 @@ export const CheckDigitalSealsScreen = observer(() => {
             },
             ".uppy-Container": {
               display: result || error ? "none" : "",
+              height: "100%",
             },
             ".uppy-Dashboard-inner": {
               border: "none",
@@ -339,7 +342,7 @@ export const CheckDigitalSealsScreen = observer(() => {
             },
           }}
         >
-          <Dashboard uppy={uppy} width="100%" height={118} proudlyDisplayPoweredByUppy={false} />
+          <Dashboard uppy={uppy} width="100%" height={250} proudlyDisplayPoweredByUppy={false} />
         </Box>
       </VStack>
     </Container>

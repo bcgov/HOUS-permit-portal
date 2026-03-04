@@ -37,6 +37,19 @@ RSpec.describe Api::EarlyAccessPreviewsController,
         )
       end
     end
+
+    context "when revoke fails" do
+      it "returns an error response" do
+        allow(EarlyAccessPreview).to receive(:find).and_return(
+          early_access_preview
+        )
+        allow(early_access_preview).to receive(:discard).and_return(false)
+
+        post :revoke_access, params: { id: early_access_preview.id }
+
+        expect(response).to have_http_status(:bad_request)
+      end
+    end
   end
 
   describe "POST #unrevoke" do
@@ -68,6 +81,20 @@ RSpec.describe Api::EarlyAccessPreviewsController,
         )
       end
     end
+
+    context "when unrevoke fails" do
+      it "returns an error response" do
+        early_access_preview.discard
+        allow(EarlyAccessPreview).to receive(:find).and_return(
+          early_access_preview
+        )
+        allow(early_access_preview).to receive(:undiscard).and_return(false)
+
+        post :unrevoke_access, params: { id: early_access_preview.id }
+
+        expect(response).to have_http_status(:bad_request)
+      end
+    end
   end
 
   describe "POST #extend" do
@@ -81,6 +108,17 @@ RSpec.describe Api::EarlyAccessPreviewsController,
           "arbitrary_message_construct.early_access_preview.extend_success.message"
         )
       )
+    end
+
+    it "returns an error response when extend fails" do
+      allow(EarlyAccessPreview).to receive(:find).and_return(
+        early_access_preview
+      )
+      allow(early_access_preview).to receive(:extend_access).and_return(false)
+
+      post :extend_access, params: { id: early_access_preview.id }
+
+      expect(response).to have_http_status(:bad_request)
     end
   end
 end

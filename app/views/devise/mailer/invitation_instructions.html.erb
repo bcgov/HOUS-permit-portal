@@ -9,7 +9,13 @@
           <p>Hello <%= @resource.email %>!</p>
 
           <p>You have been invited to join the BC Building Permit Hub
-            app.</p>
+            app as a <strong><%= @resource.role_name.titleize %></strong><% if @resource.jurisdictions.any? %>
+            <% newest_membership = @resource.jurisdiction_memberships.order(created_at: :desc).first %>
+            for <strong><%= newest_membership.jurisdiction.name %></strong><% end %>.</p>
+
+          <% expires_at = @resource.invitation_created_at + User.invite_for %>
+          <p>This invitation is valid for <%= distance_of_time_in_words(User.invite_for) %> and will expire on
+            <strong><%= l(expires_at, format: :long) %></strong>.</p>
 
           <p><%= link_to 'Accept invitation', accept_invitation_url(invitation_token: @token), class: "btn btn-primary" %></p>
 

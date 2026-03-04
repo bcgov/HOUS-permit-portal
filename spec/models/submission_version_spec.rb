@@ -5,7 +5,7 @@ RSpec.describe SubmissionVersion, type: :model do
   describe "Scopes" do
     # Create sandboxed and non-sandboxed permit applications
     let!(:jurisdiction) { create(:sub_district) }
-    let!(:sandbox) { create(:sandbox, jurisdiction: jurisdiction) }
+    let!(:sandbox) { jurisdiction.sandboxes.published.first }
     let!(:sandboxed_application) do
       create(:permit_application, sandbox: sandbox, jurisdiction: jurisdiction)
     end
