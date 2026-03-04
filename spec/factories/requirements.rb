@@ -58,51 +58,17 @@ FactoryBot.define do
       end
     end
 
-    factory :architectural_drawing_method_requirement do
-      requirement_code do
-        Requirement::ARCHITECTURAL_DRAWING_METHOD_REQUIREMENT_CODE
-      end
-      input_type { "radio" }
-      input_options do
-        {
-          "value_options" => [
-            {
-              "label" => "Use the architectural drawing tool",
-              "value" => "tool"
-            },
-            { "label" => "Upload a file", "value" => "file" }
-          ]
-        }
-      end
-    end
-
-    factory :architectural_drawing_tool_requirement do
-      requirement_code do
-        Requirement::ARCHITECTURAL_DRAWING_TOOL_REQUIREMENT_CODE
-      end
+    factory :architectural_drawing_file_requirement do
+      requirement_code { Requirement::ARCHITECTURAL_DRAWING_REQUIREMENT_CODE }
       input_type { "architectural_drawing" }
       input_options do
         {
-          "conditional" => {
-            "eq" => "tool",
-            "show" => true,
-            "when" => Requirement::ARCHITECTURAL_DRAWING_METHOD_REQUIREMENT_CODE
+          "multiple" => true,
+          "computed_compliance" => {
+            "module" => "DigitalSealValidator",
+            "trigger" => "on_save",
+            "value_on" => "compliance_data"
           }
-        }
-      end
-    end
-
-    factory :architectural_drawing_file_requirement do
-      requirement_code { Requirement::ARCHITECTURAL_DRAWING_REQUIREMENT_CODE }
-      input_type { "file" }
-      input_options do
-        {
-          "conditional" => {
-            "eq" => "file",
-            "show" => true,
-            "when" => Requirement::ARCHITECTURAL_DRAWING_METHOD_REQUIREMENT_CODE
-          },
-          "multiple" => true
         }
       end
     end

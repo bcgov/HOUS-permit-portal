@@ -91,6 +91,33 @@ class PreCheck < ApplicationRecord
     raise # This will rollback the AASM transition
   end
 
+  def latitude
+    coordinates&.last
+  end
+
+  def longitude
+    coordinates&.first
+  end
+
+  def coordinates
+    return @coordinates if defined?(@coordinates)
+
+    @coordinates =
+      if pid.present?
+        begin
+          result = Wrappers::LtsaParcelMapBc.new.get_coordinates_by_pid(pid)
+          result.is_a?(Hash) ? result[:centroid] : result
+        rescue => e
+          Rails.logger.warn(
+            "Failed to fetch coordinates for PID #{pid}: #{e.message}"
+          )
+          nil
+        end
+      else
+        nil
+      end
+  end
+
   def formatted_address
     return nil if full_address.blank?
 

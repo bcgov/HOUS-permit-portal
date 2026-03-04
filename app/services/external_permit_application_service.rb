@@ -239,11 +239,14 @@ class ExternalPermitApplicationService
 
     submitted_value
       .map do |file_data|
-        file_model_name = file_data["model"]
         file_model_id = file_data["modelId"]
-        next unless file_model_name.present? && file_model_id.present?
+        unless file_data["model"] == "SupportingDocument" &&
+                 file_model_id.present?
+          next
+        end
 
-        file_model = file_model_name.constantize.find_by(id: file_model_id)
+        file_model =
+          permit_application.supporting_documents.find_by(id: file_model_id)
 
         next unless file_model.present?
 
