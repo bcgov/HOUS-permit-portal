@@ -19,11 +19,18 @@ module Api::Concerns::Search::ProjectAudits
               Kaminari.config.default_per_page
           end
         ),
-      # [AUDITS SUGGESTION] Use scope_results with policy_scope instead of
-      # per-record apply_search_authorization in the controller. This runs a
-      # single AR-level scope (see ApplicationAuditPolicy::Scope) instead of
-      # N+1 policy checks, and also satisfies Pundit's verify_policy_scoped.
-      scope_results: ->(relation) { policy_scope(relation) }
+      scope_results: ->(relation) do
+        policy_scope(
+          relation,
+          policy_scope_class: ProjectAuditPolicy::Scope
+        ).includes(
+          :user,
+          :auditable,
+          :associated,
+          auditable: :permit_application,
+          associated: :template_version
+        )
+      end
     }
 
     @search = ApplicationAudit.search(project_audit_query, **search_conditions)
