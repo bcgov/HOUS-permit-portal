@@ -23,6 +23,17 @@ const renderApp = (rootStore) => {
     useLanguageChange()
     const { t } = useTranslation()
 
+    React.useEffect(() => {
+      const _mtm = ((window as any)._mtm = (window as any)._mtm || [])
+      _mtm.push({ "mtm.startTime": new Date().getTime(), event: "mtm.Start" })
+      const d = document
+      const g = d.createElement("script")
+      const s = d.getElementsByTagName("script")[0]
+      g.async = true
+      g.src = import.meta.env.VITE_MATOMO_URL
+      s.parentNode.insertBefore(g, s)
+    }, [])
+
     return (
       <ChakraProvider theme={theme}>
         <Provider value={rootStore}>
