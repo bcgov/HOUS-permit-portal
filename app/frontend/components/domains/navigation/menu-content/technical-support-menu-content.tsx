@@ -11,6 +11,7 @@ import { HomeMenuItem } from "./menu-items/home-menu-item"
 import { MyProfileMenuItem } from "./menu-items/my-profile-menu-item"
 import { MyProjectsMenuItem } from "./menu-items/my-projects-menu-item"
 import { SandboxMenuItem } from "./menu-items/sandbox-menu-item"
+import { WelcomeMenuItem } from "./menu-items/welcome-menu-item"
 import { MenuSection } from "./menu-section"
 import { UserInfoSection } from "./user-info-section"
 
@@ -38,6 +39,7 @@ export const TechnicalSupportMenuContent = observer(() => {
 
       {/* Support section */}
       <MenuSection title={t("site.navMenu.sections.support")}>
+        <WelcomeMenuItem />
         <GiveFeedbackMenuItem />
         <HelpMenuItem />
       </MenuSection>
