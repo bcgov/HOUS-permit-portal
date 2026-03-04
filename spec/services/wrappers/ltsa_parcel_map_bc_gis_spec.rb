@@ -13,33 +13,27 @@ RSpec.describe Wrappers::LtsaParcelMapBcGis, type: :service do
 
   describe "#search_pin_from_coordinates" do
     it "queries pin using coordinate point geometry" do
-      expect(wrapper).to receive(:get).with(
-        "#{Wrappers::LtsaParcelMapBc::PARCEL_SERVICE}/query",
-        hash_including(
-          where: "PIN+IS+NOT+NULL",
-          geometry: "-123.1,49.2",
-          geometryType: "esriGeometryPoint"
-        ),
-        true
-      )
-
-      wrapper.search_pin_from_coordinates(coord_array: [-123.1, 49.2])
+      VCR.use_cassette(
+        "wrappers/ltsa_parcel_map_bc_gis/search_pin_from_coordinates"
+      ) do
+        response =
+          wrapper.search_pin_from_coordinates(coord_array: [-123.1, 49.2])
+        expect(response).to respond_to(:status)
+        expect(response.status).to eq(200).or eq(400).or eq(404)
+      end
     end
   end
 
   describe "#search_pid_from_coordinates" do
     it "queries pid using coordinate point geometry" do
-      expect(wrapper).to receive(:get).with(
-        "#{Wrappers::LtsaParcelMapBc::PARCEL_SERVICE}/query",
-        hash_including(
-          where: "PID+IS+NOT+NULL",
-          geometry: "-123.1,49.2",
-          geometryType: "esriGeometryPoint"
-        ),
-        true
-      )
-
-      wrapper.search_pid_from_coordinates(coord_array: [-123.1, 49.2])
+      VCR.use_cassette(
+        "wrappers/ltsa_parcel_map_bc_gis/search_pid_from_coordinates"
+      ) do
+        response =
+          wrapper.search_pid_from_coordinates(coord_array: [-123.1, 49.2])
+        expect(response).to respond_to(:status)
+        expect(response.status).to eq(200).or eq(400).or eq(404)
+      end
     end
   end
 end

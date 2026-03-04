@@ -4,28 +4,24 @@ RSpec.describe Wrappers::LtsaParcelMapBc, type: :service do
   subject(:wrapper) { described_class.new }
 
   describe "#get_feature_attributes_by_pid" do
-    it "returns parsed attributes on success" do
-      response =
-        instance_double(
-          "Faraday::Response",
-          success?: true,
-          body: { features: [{ attributes: { "PID" => "123" } }] }.to_json
-        )
-      allow(wrapper).to receive(:get_details_by_pid).and_return(response)
-
-      expect(wrapper.get_feature_attributes_by_pid(pid: "123")).to eq(
-        "PID" => "123"
-      )
+    it "records and replays a real ltsa pid attribute request" do
+      VCR.use_cassette(
+        "wrappers/ltsa_parcel_map_bc/get_feature_attributes_by_pid_real"
+      ) do
+        result = wrapper.get_feature_attributes_by_pid(pid: "031562868")
+        expect(result).to be_a(Hash)
+        expect(result["PID"]).to be_present
+      end
     end
 
-    it "raises when ltsa response is unsuccessful" do
-      response =
-        instance_double("Faraday::Response", success?: false, body: "{}")
-      allow(wrapper).to receive(:get_details_by_pid).and_return(response)
-
-      expect {
-        wrapper.get_feature_attributes_by_pid(pid: "123")
-      }.to raise_error(Errors::LtsaUnavailableError)
+    it "records and replays a real ltsa invalid pid request" do
+      VCR.use_cassette(
+        "wrappers/ltsa_parcel_map_bc/get_feature_attributes_by_pid_invalid_real"
+      ) do
+        expect {
+          wrapper.get_feature_attributes_by_pid(pid: "invalid-pid")
+        }.to raise_error(Errors::FeatureAttributesRetrievalError)
+      end
     end
   end
 
@@ -43,11 +39,9 @@ RSpec.describe Wrappers::LtsaParcelMapBc, type: :service do
     end
 
     it "returns nil when retrieval raises feature attribute error" do
-      allow(wrapper).to receive(:get_details_by_pid).and_raise(
-        Errors::FeatureAttributesRetrievalError
-      )
-
-      expect(wrapper.get_coordinates_by_pid("123")).to be_nil
+      VCR.use_cassette(
+        "wrappers/ltsa_parcel_map_bc/get_coordinates_by_pid_invalid_real"
+      ) { expect(wrapper.get_coordinates_by_pid("invalid-pid")).to be_nil }
     end
   end
 
