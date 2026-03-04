@@ -1,4 +1,6 @@
 class PermitCollaboration < ApplicationRecord
+  audited on: %i[create destroy], associated_with: :permit_application
+
   belongs_to :collaborator
   belongs_to :permit_application, touch: true
 
@@ -6,6 +8,7 @@ class PermitCollaboration < ApplicationRecord
   enum :collaborator_type, { delegatee: 0, assignee: 1 }, default: 0
 
   before_validation :set_default_collaboration_type, on: :create
+  before_save :set_audit_comment, on: %i[create destroy]
 
   after_initialize :set_default_collaboration_type
   after_save :reindex_permit_application
@@ -222,5 +225,10 @@ class PermitCollaboration < ApplicationRecord
     end
 
     NotificationService.publish_permit_collaboration_unassignment_event(self)
+  end
+
+  def set_audit_comment
+    self.comment =
+      ProjectAuditPresenter.format_permit_collaboration_description(self)
   end
 end
