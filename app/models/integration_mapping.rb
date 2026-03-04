@@ -19,7 +19,6 @@ class IntegrationMapping < ApplicationRecord
   before_create :initialize_requirements_mapping
 
   after_update :sync_changes_with_other_currently_active_mappings
-  after_create :send_missing_requirements_mapping_communication
 
   attr_accessor :simplified_map_to_sync
 
@@ -61,20 +60,6 @@ class IntegrationMapping < ApplicationRecord
 
   def missing_any_requirements_mapping?
     !missing_requirements_mapping.empty?
-  end
-
-  def template_missing_requirements_mapping_event_notification_data
-    return nil unless can_send_template_missing_requirements_communication?
-
-    {
-      "id" => SecureRandom.uuid,
-      "action_type" => template_missing_requirements_event_type,
-      "action_text" =>
-        "#{I18n.t("notification.integration_mapping.#{template_version.published? ? "published" : "scheduled"}_template_missing_requirements_mapping", template_label: template_version.label, version_date: template_version.version_date)}",
-      "object_data" => {
-        "template_version_id" => template_version_id
-      }
-    }
   end
 
   # Updates the requirements mapping of the current model instance.
@@ -127,78 +112,6 @@ class IntegrationMapping < ApplicationRecord
       requirement_block_sku,
       requirement_code
     )
-  end
-
-  def send_missing_requirements_mapping_communication
-    send_missing_requirements_mapping_notification
-    send_missing_requirements_mapping_email
-  end
-
-  def send_missing_requirements_mapping_notification
-    return unless can_send_template_missing_requirements_communication?
-
-    event_id = requirements_mapping_event_id("notification")
-
-    return false if Rails.cache.exist?(event_id)
-
-    Rails.cache.write(event_id, true, expires_in: 5.minutes)
-
-    NotificationService.publish_missing_requirements_mapping_event(self)
-  end
-
-  def send_missing_requirements_mapping_email
-    return unless can_send_template_missing_requirements_communication?
-
-    event_id = requirements_mapping_event_id("email")
-
-    return false if Rails.cache.exist?(event_id)
-
-    Rails.cache.write(event_id, true, expires_in: 5.minutes)
-
-    users_to_notify =
-      jurisdiction
-        .users
-        .kept
-        .includes(:preference)
-        .where(
-          role: %w[review_manager regional_review_manager],
-          preferences: {
-            enable_email_integration_mapping_notification: true
-          }
-        )
-    users_to_notify.uniq.each do |user|
-      unless user.preference&.enable_email_integration_mapping_notification &&
-               jurisdiction.external_api_enabled? &&
-               (user.review_manager? || user.regional_review_manager?) &&
-               (template_version.published? || template_version.scheduled?)
-        return
-      end
-
-      IntegrationMappingNotification.create(
-        notifiable: user,
-        front_end_path: front_end_edit_path,
-        template_version: template_version # Associate the template version
-      )
-    end
-
-    notifiables = ExternalApiKey.active.where(jurisdiction: jurisdiction)
-
-    # Notify external API key integrations
-    notifiables.uniq.each do |notifiable|
-      next unless notifiable.notification_email.present?
-
-      unless notifiable.notification_email.present? &&
-               notifiable.jurisdiction.external_api_enabled? &&
-               (template_version.published? || template_version.scheduled?)
-        return
-      end
-
-      # Create a notification record instead of sending the email immediately
-      IntegrationMappingNotification.create(
-        notifiable: notifiable,
-        template_version: template_version # Associate the template version
-      )
-    end
   end
 
   def can_send_template_missing_requirements_communication?
@@ -292,17 +205,5 @@ class IntegrationMapping < ApplicationRecord
     active_mappings.each do |mapping|
       mapping.update_requirements_mapping(simplified_map_to_sync, true)
     end
-  end
-
-  def template_missing_requirements_event_type
-    if template_version.published?
-      Constants::NotificationActionTypes::PUBLISHED_TEMPLATE_MISSING_REQUIREMENTS_MAPPING
-    elsif template_version.scheduled?
-      Constants::NotificationActionTypes::SCHEDULED_TEMPLATE_MISSING_REQUIREMENTS_MAPPING
-    end
-  end
-
-  def requirements_mapping_event_id(communication_type)
-    "#{self.class.name.underscore}_#{id}_#{communication_type}_event_#{template_missing_requirements_event_type}"
   end
 end

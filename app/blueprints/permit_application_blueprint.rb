@@ -18,7 +18,8 @@ class PermitApplicationBlueprint < Blueprinter::Base
            :resubmitted_at,
            :revisions_requested_at,
            :missing_pdfs,
-           :template_nickname
+           :template_nickname,
+           :discarded_at
 
     association :permit_type, blueprint: PermitClassificationBlueprint
     association :activity, blueprint: PermitClassificationBlueprint
@@ -30,6 +31,10 @@ class PermitApplicationBlueprint < Blueprinter::Base
 
     field :using_current_template_version do |pa, _options|
       pa.using_current_template_version
+    end
+
+    field :project_id do |pa, _options|
+      pa.permit_project&.id
     end
   end
 
@@ -80,6 +85,10 @@ class PermitApplicationBlueprint < Blueprinter::Base
 
     association :template_version, blueprint: TemplateVersionBlueprint
     association :published_template_version, blueprint: TemplateVersionBlueprint
+
+    field :template_version_disabled_by_jurisdiction do |pa, _options|
+      pa.template_version_disabled_by_jurisdiction?
+    end
 
     association :supporting_documents,
                 blueprint: SupportingDocumentBlueprint do |pa, options|

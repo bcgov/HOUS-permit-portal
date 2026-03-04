@@ -1,10 +1,22 @@
 class PermitApplication < ApplicationRecord
+  searchkick word_middle: %i[
+               nickname
+               full_address
+               permit_classifications
+               submitter
+               status
+               review_delegatee_name
+             ],
+             text_end: %i[number]
+
   include FormSupportingDocuments
   include AutomatedComplianceUtils
   include StepCodeFieldExtraction
   include ZipfileUploader.Attachment(:zipfile)
   include PermitApplicationStatus
   include ProjectItem
+  include Discard::Model
+  include PublicRecordable
   has_parent :permit_project
 
   SEARCH_INCLUDES = [
@@ -16,17 +28,8 @@ class PermitApplication < ApplicationRecord
     { permit_collaborations: :collaborator }
   ]
 
-  searchkick word_middle: %i[
-               nickname
-               full_address
-               permit_classifications
-               submitter
-               status
-               review_delegatee_name
-             ],
-             text_end: %i[number]
-
-  belongs_to :submitter, class_name: "User"
+  belongs_to :submitter, class_name: "User", optional: true
+  public_recordable user_association: :submitter
   belongs_to :permit_type
   belongs_to :activity
   belongs_to :template_version
@@ -88,6 +91,10 @@ class PermitApplication < ApplicationRecord
         end
 
   COMPLETION_SECTION_KEY = "section-completion-key"
+
+  def public_record?
+    !new_draft?
+  end
 
   def inbox_enabled?
     jurisdiction&.inbox_enabled? && SiteConfiguration.inbox_enabled?
@@ -244,7 +251,8 @@ class PermitApplication < ApplicationRecord
       has_collaborator: has_collaborator?,
       sandbox_id: sandbox_id,
       permit_project_id: permit_project_id,
-      submission_delegatee_id: submission_delegatee&.id
+      submission_delegatee_id: submission_delegatee&.id,
+      discarded: discarded?
     }
   end
 

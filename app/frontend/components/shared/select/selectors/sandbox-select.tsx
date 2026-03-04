@@ -40,7 +40,12 @@ export const SandboxSelect = observer(function SandboxSelect({
             borderColor="greys.grey01"
           >
             <Box>
-              <Text fontWeight="bold">{t("sandbox.live")}</Text>
+              <Text fontWeight="bold" mb={1}>
+                {t("sandbox.live")}
+              </Text>
+              <Text color="gray.600" fontSize="sm">
+                {t("sandbox.liveDescription")}
+              </Text>
             </Box>
           </Radio>
         )}

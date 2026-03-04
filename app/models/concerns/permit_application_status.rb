@@ -7,8 +7,9 @@ module PermitApplicationStatus
            new_draft: 0,
            newly_submitted: 1,
            revisions_requested: 3,
-           resubmitted: 4
-           #  approved: 5
+           resubmitted: 4,
+           closed: 5,
+           occupancy_issued: 6
          },
          default: 0
 
@@ -53,6 +54,10 @@ module PermitApplicationStatus
       newly_submitted? || resubmitted?
     end
 
+    def decided?
+      closed? || occupancy_issued?
+    end
+
     def pertinence_score
       {
         "new_draft" => 30,
@@ -66,10 +71,20 @@ module PermitApplicationStatus
 
     def can_submit?
       return false unless inbox_enabled? || sandbox.present?
+      return false if template_version_disabled_by_jurisdiction?
 
       signed =
         submission_data.dig("data", "section-completion-key", "signed").present?
       signed && using_current_template_version
+    end
+
+    def template_version_disabled_by_jurisdiction?
+      return false if sandbox.present? # Sandbox applications not affected
+
+      jurisdiction&.jurisdiction_template_version_customizations&.live&.exists?(
+        template_version: template_version,
+        disabled: true
+      ) || false
     end
 
     def can_finalize_requests?

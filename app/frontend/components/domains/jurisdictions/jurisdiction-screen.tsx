@@ -37,7 +37,7 @@ import { SafeTipTapDisplay } from "../../shared/editor/safe-tiptap-display"
 import { JurisdictionResourcesSection } from "../../shared/jurisdiction/jurisdiction-resources-section"
 import { JurisdictionMap } from "../../shared/module-wrappers/jurisdiction-map"
 import { StepCodeRequirementsTable } from "../../shared/step-code-requirements-table"
-import { Can } from "../../shared/user/can"
+import { Can, can } from "../../shared/user/can"
 import { ContactGrid } from "./contacts/contact-grid"
 export interface Jurisdiction {
   name: string
@@ -109,7 +109,11 @@ export const JurisdictionScreen = observer(() => {
     <Flex as="main" direction="column" w="full" bg="greys.white" pb="24">
       <BlueTitleBar title={qualifiedName} />
       <Show below="md">
-        <JurisdictionMap mapPosition={mapPositionWatch} mapZoom={mapZoomWatch} />
+        <JurisdictionMap
+          mapPosition={mapPositionWatch}
+          mapZoom={mapZoomWatch}
+          linePositions={currentJurisdiction.boundaryPoints}
+        />
       </Show>
       <Container maxW="container.lg" py={{ base: 6, md: 16 }} px={8}>
         {!currentJurisdiction.inboxEnabled && (
@@ -191,7 +195,14 @@ export const JurisdictionScreen = observer(() => {
 
                     <StepCodeRequirementsTable currentJurisdiction={currentJurisdiction} />
                   </Flex>
-                  <JurisdictionResourcesSection jurisdiction={currentJurisdiction} />
+                  <JurisdictionResourcesSection
+                    jurisdiction={currentJurisdiction}
+                    configureResourcesPath={
+                      can("jurisdiction:manage", { jurisdiction: currentJurisdiction })
+                        ? `/jurisdictions/${currentJurisdiction.slug}/configuration-management/resources`
+                        : undefined
+                    }
+                  />
                   <Flex as="section" direction="column" borderRadius="lg" boxShadow="md">
                     <Box py={3} px={6} bg="theme.blueAlt" borderTopRadius="lg">
                       <Heading as="h3" color="greys.white" fontSize="xl">
@@ -414,6 +425,7 @@ const EditableMap = ({ currentJurisdiction }: IEditableMapProps) => {
         <JurisdictionMap
           mapPosition={mapPositionWatch}
           mapZoom={mapZoomWatch}
+          linePositions={currentJurisdiction.boundaryPoints}
           onMapDrag={isEditingMap && ((latLng) => setValue("mapPosition", latLng))}
           onZoomChange={isEditingMap && ((zoom) => setValue("mapZoom", zoom))}
           isEditingMap={isEditingMap}

@@ -4,7 +4,7 @@ RSpec.describe PermitApplication, type: :model do
   describe "associations" do
     subject { build_stubbed(:permit_application) }
 
-    it { should belong_to(:submitter).class_name("User") }
+    it { should belong_to(:submitter).class_name("User").optional }
     it { should belong_to(:permit_project).optional }
   end
 
@@ -16,7 +16,9 @@ RSpec.describe PermitApplication, type: :model do
                new_draft: 0,
                newly_submitted: 1,
                revisions_requested: 3,
-               resubmitted: 4
+               resubmitted: 4,
+               closed: 5,
+               occupancy_issued: 6
              )
     end
   end
@@ -24,7 +26,7 @@ RSpec.describe PermitApplication, type: :model do
   describe "Scopes" do
     # Create sandboxed and non-sandboxed permit applications
     let!(:jurisdiction) { create(:sub_district) }
-    let!(:sandbox) { create(:sandbox, jurisdiction: jurisdiction) }
+    let!(:sandbox) { jurisdiction.sandboxes.published.first }
     let!(:sandboxed_application) do
       create(:permit_application, sandbox: sandbox, jurisdiction: jurisdiction)
     end

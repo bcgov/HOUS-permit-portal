@@ -6,7 +6,7 @@ import { useMst } from "../../../../setup/root"
 import { ToggleArchivedButton } from "../../../shared/buttons/toggle-archived-button"
 import { RouterLinkButton } from "../../../shared/navigation/router-link-button"
 import { RequirementTemplateGrid } from "../../../shared/requirement-template/requirement-template-grid"
-import { TemplateVersionsSidebar } from "../template-versions-sidebar"
+import { RequirementTemplateActions } from "../requirement-template-actions"
 
 export const RequirementTemplatesScreen = observer(function RequirementTemplate() {
   const { requirementTemplateStore } = useMst()
@@ -30,7 +30,7 @@ export const RequirementTemplatesScreen = observer(function RequirementTemplate(
           </RouterLinkButton>
         </Flex>
 
-        <RequirementTemplateGrid renderActions={(rt) => <TemplateVersionsSidebar requirementTemplate={rt} />} />
+        <RequirementTemplateGrid renderActions={(rt) => <RequirementTemplateActions requirementTemplate={rt} />} />
 
         <ToggleArchivedButton searchModel={requirementTemplateStore} mt={3} />
       </VStack>

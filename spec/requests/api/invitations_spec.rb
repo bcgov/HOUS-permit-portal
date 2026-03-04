@@ -94,6 +94,8 @@ RSpec.describe "Api::Invitations", type: :request do
   end
 
   describe "PUT /api/invitation" do
+    before { stub_jwt_auth(user: inviter) }
+
     it "accepts a valid invitation token" do
       invited_user =
         User.invite!(
