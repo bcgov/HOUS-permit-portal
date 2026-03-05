@@ -37,6 +37,10 @@ en:
         phone: "Phone no."
       requirement_template:
         first_nations: "First Nations"
+      sandbox:
+        scope_names:
+          published: 'Training mode: "Published"'
+          scheduled: 'Training mode: "Upcoming"'
         available_in_all: "All"
     errors:
       models:
@@ -96,6 +100,7 @@ en:
           attributes:
             requirement_code:
               incorrect_energy_requirement_code: "must be %{correct_requirement_code} for energy step code requirements, but received %{incorrect_requirement_code}"
+              incorrect_architectural_requirement_code: "must be %{correct_requirement_code} for architectural drawing requirements, but received %{incorrect_requirement_code}"
               incorrect_architectural_drawing_file_attributes: "must have input type file, required true, and elective false for design package file for energy step code"
         supporting_document:
           attributes:
@@ -222,6 +227,10 @@ en:
       ltsa_unavailable_error:
         title: Error
         message: The land title service is currently unavailable
+    step_code:
+      update_archived_error:
+        title: Error
+        message: "Cannot update archived step code. Please restore it first."
       jurisdiction_ltsa_error:
         title: Error
         message: Jurisdiction could not be determined. Please check back later.
@@ -677,6 +686,9 @@ en:
       update_error:
         title: Error
         message: "%{error_message}"
+      update_archived_error:
+        title: Error
+        message: "Cannot update archived step code. Please restore it first."
       restore_success:
         title: ""
         message: "Step code restored successfully!"

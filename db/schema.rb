@@ -790,9 +790,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_02_21_004722) do
     t.integer "template_version_status_scope", default: 0, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "name", null: false
-    t.text "description"
-    t.index ["jurisdiction_id"], name: "index_sandboxes_on_jurisdiction_id"
+    t.index ["jurisdiction_id", "template_version_status_scope"], name: "index_sandboxes_on_jurisdiction_and_scope", unique: true
   end
 
   create_table "site_configurations", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
