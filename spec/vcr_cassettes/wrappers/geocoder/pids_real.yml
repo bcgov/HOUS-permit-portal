@@ -1,0 +1,228 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: "<BCGOV_ADDRESS_GEOCODER_URL>/addresses.json?addressString=757+W+Hastings+St%2C+Vancouver%2C+BC&autoComplete=true&brief=true&locationDescriptor=parcelPoint&maxResults=10&outputSRS=4326"
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Content-Type:
+      - application/json
+      apiKey:
+      - "<BCGOV_ADDRESS_GEOCODER_API_KEY>"
+      User-Agent:
+      - Faraday v2.9.2
+  response:
+    status:
+      code: 200
+      message: ''
+    headers:
+      content-type:
+      - application/json
+      transfer-encoding:
+      - chunked
+      vary:
+      - Origin, Access-Control-Request-Method, Access-Control-Request-Headers,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-xss-protection:
+      - '0'
+      cache-control:
+      - no-cache, no-store, max-age=0, must-revalidate
+      pragma:
+      - no-cache
+      expires:
+      - '0'
+      strict-transport-security:
+      - max-age=31536000 ; includeSubDomains
+      x-frame-options:
+      - DENY
+      date:
+      - Sat, 28 Feb 2026 01:04:27 GMT
+      access-control-allow-origin:
+      - "*"
+      access-control-expose-headers:
+      - Origin,Authorization,Access-Control-Allow-Origin,Access-Control-Allow-Methods,apikey
+      x-kong-upstream-latency:
+      - '70'
+      x-kong-proxy-latency:
+      - '1'
+      content-encoding:
+      - gzip
+    body:
+      encoding: ASCII-8BIT
+      string: '{"type":"FeatureCollection","queryAddress":"757 W Hastings St, Vancouver,
+        BC","searchTimestamp":"2026-02-28T01:04:27","executionTime":68.882,"version":"4.5.3","baseDataDate":"2026-02-05T22:26:20Z","crs":{"type":"EPSG","properties":{"code":4326}},"interpolation":"adaptive","echo":"true","locationDescriptor":"parcelPoint","setBack":0,"minScore":0,"maxResults":10,"disclaimer":"https:\/\/www2.gov.bc.ca\/gov\/content?id=79F93E018712422FBC8E674A67A70535","privacyStatement":"https:\/\/www2.gov.bc.ca\/gov\/content?id=9E890E16955E4FF4BF3B0E07B4722932","copyrightNotice":"Copyright
+        \u00A9 2024 Province of British Columbia","copyrightLicense":"https:\/\/www2.gov.bc.ca\/gov\/content?id=A519A56BC2BF44E4A008B33FCF527F61","features":[{"type":"Feature","geometry":{"type":"Point","crs":{"type":"EPSG","properties":{"code":4326}},"coordinates":[-123.1138751,49.2859682]},"properties":{"fullAddress":"757
+        W Hastings St, Vancouver, BC","score":100,"matchPrecision":"CIVIC_NUMBER","precisionPoints":100,"faults":[],"localityType":"City","electoralArea":"","locationPositionalAccuracy":"high","locationDescriptor":"parcelPoint","siteID":"4e1c3394-9410-4d4b-9cb9-bd91441010fa","blockID":101270,"accessNotes":"\"","siteStatus":"active"}},{"type":"Feature","geometry":{"type":"Point","crs":{"type":"EPSG","properties":{"code":4326}},"coordinates":[-123.0881976,49.2814146]},"properties":{"fullAddress":"757
+        E Hastings St, Vancouver, BC","score":98,"matchPrecision":"CIVIC_NUMBER","precisionPoints":100,"faults":[{"value":"W","element":"STREET_DIRECTION","fault":"notMatched","penalty":2}],"localityType":"City","electoralArea":"","locationPositionalAccuracy":"high","locationDescriptor":"parcelPoint","siteID":"d508c225-d76b-493c-a5a1-70c2a02f05cc","blockID":109271,"accessNotes":"\"","siteStatus":"active"}},{"type":"Feature","geometry":{"type":"Point","crs":{"type":"EPSG","properties":{"code":4326}},"coordinates":[-123.1142951,49.2856883]},"properties":{"fullAddress":"757W
+        W Hastings St, Vancouver, BC","score":96,"matchPrecision":"BLOCK","precisionPoints":99,"faults":[{"value":"","element":"STREET_DIRECTION","fault":"missing","penalty":2},{"value":"","element":"STREET_DIRECTION","fault":"notSuffix","penalty":0},{"value":"W","element":"CIVIC_NUMBER_SUFFIX","fault":"notMatched","penalty":1}],"localityType":"City","electoralArea":"","locationPositionalAccuracy":"low","locationDescriptor":"accessPoint","siteID":"","blockID":101270,"accessNotes":"","siteStatus":""}},{"type":"Feature","geometry":{"type":"Point","crs":{"type":"EPSG","properties":{"code":4326}},"coordinates":[-123.0882122,49.2811827]},"properties":{"fullAddress":"757W
+        E Hastings St, Vancouver, BC","score":96,"matchPrecision":"BLOCK","precisionPoints":99,"faults":[{"value":"","element":"STREET_DIRECTION","fault":"missing","penalty":2},{"value":"","element":"STREET_DIRECTION","fault":"notSuffix","penalty":0},{"value":"W","element":"CIVIC_NUMBER_SUFFIX","fault":"notMatched","penalty":1}],"localityType":"City","electoralArea":"","locationPositionalAccuracy":"low","locationDescriptor":"accessPoint","siteID":"","blockID":109271,"accessNotes":"","siteStatus":""}},{"type":"Feature","geometry":{"type":"Point","crs":{"type":"EPSG","properties":{"code":4326}},"coordinates":[-123.1217919,49.2052552]},"properties":{"fullAddress":"757
+        West Kent Ave N, Vancouver, BC","score":87,"matchPrecision":"BLOCK","precisionPoints":99,"faults":[{"value":"HASTINGS
+        ST","element":"LOCALITY_GARBAGE","fault":"notAllowed","penalty":3},{"value":"W","element":"STREET_NAME","fault":"partialMatch","penalty":1},{"value":"","element":"STREET_DIRECTION","fault":"missing","penalty":2},{"value":"","element":"STREET_TYPE","fault":"missing","penalty":6}],"localityType":"City","electoralArea":"","locationPositionalAccuracy":"low","locationDescriptor":"accessPoint","siteID":"","blockID":476556,"accessNotes":"","siteStatus":""}},{"type":"Feature","geometry":{"type":"Point","crs":{"type":"EPSG","properties":{"code":4326}},"coordinates":[-123.1161639,49.2868271]},"properties":{"fullAddress":"W
+        Hastings St, Vancouver, BC","score":77,"matchPrecision":"STREET","precisionPoints":78,"faults":[{"value":757,"element":"CIVIC_NUMBER","fault":"notInAnyBlock","penalty":1}],"localityType":"City","electoralArea":"","locationPositionalAccuracy":"coarse","locationDescriptor":"streetPoint","siteID":"","blockID":"","accessNotes":"","siteStatus":""}},{"type":"Feature","geometry":{"type":"Point","crs":{"type":"EPSG","properties":{"code":4326}},"coordinates":[-123.0620193,49.281178]},"properties":{"fullAddress":"E
+        Hastings St, Vancouver, BC","score":75,"matchPrecision":"STREET","precisionPoints":78,"faults":[{"value":"W","element":"STREET_DIRECTION","fault":"notMatched","penalty":2},{"value":757,"element":"CIVIC_NUMBER","fault":"notInAnyBlock","penalty":1}],"localityType":"City","electoralArea":"","locationPositionalAccuracy":"coarse","locationDescriptor":"streetPoint","siteID":"","blockID":"","accessNotes":"","siteStatus":""}},{"type":"Feature","geometry":{"type":"Point","crs":{"type":"EPSG","properties":{"code":4326}},"coordinates":[-122.9005149,49.2093065]},"properties":{"fullAddress":"W
+        Hastings St, New Westminster, BC","score":75,"matchPrecision":"STREET","precisionPoints":78,"faults":[{"value":"VANCOUVER","element":"LOCALITY","fault":"isAlias","penalty":1},{"value":757,"element":"CIVIC_NUMBER","fault":"notInAnyBlock","penalty":1},{"value":"W","element":"CIVIC_NUMBER_SUFFIX","fault":"notMatched","penalty":1}],"localityType":"City","electoralArea":"","locationPositionalAccuracy":"coarse","locationDescriptor":"streetPoint","siteID":"","blockID":"","accessNotes":"","siteStatus":""}},{"type":"Feature","geometry":{"type":"Point","crs":{"type":"EPSG","properties":{"code":4326}},"coordinates":[-122.9801264,49.2803355]},"properties":{"fullAddress":"W
+        Hastings St, Burnaby, BC","score":75,"matchPrecision":"STREET","precisionPoints":78,"faults":[{"value":"VANCOUVER","element":"LOCALITY","fault":"isAlias","penalty":1},{"value":757,"element":"CIVIC_NUMBER","fault":"notInAnyBlock","penalty":1},{"value":"W","element":"CIVIC_NUMBER_SUFFIX","fault":"notMatched","penalty":1}],"localityType":"City","electoralArea":"","locationPositionalAccuracy":"coarse","locationDescriptor":"streetPoint","siteID":"","blockID":"","accessNotes":"","siteStatus":""}},{"type":"Feature","geometry":{"type":"Point","crs":{"type":"EPSG","properties":{"code":4326}},"coordinates":[-123.0322441,49.2861863]},"properties":{"fullAddress":"E
+        Hastings St Offramp, Vancouver, BC","score":74,"matchPrecision":"STREET","precisionPoints":78,"faults":[{"value":"W","element":"STREET_DIRECTION","fault":"notMatched","penalty":2},{"value":"","element":"STREET_QUALIFIER","fault":"missing","penalty":1},{"value":757,"element":"CIVIC_NUMBER","fault":"notInAnyBlock","penalty":1}],"localityType":"City","electoralArea":"","locationPositionalAccuracy":"coarse","locationDescriptor":"streetPoint","siteID":"","blockID":"","accessNotes":"","siteStatus":""}}]}'
+  recorded_at: Sat, 28 Feb 2026 01:04:27 GMT
+- request:
+    method: get
+    uri: "<BCGOV_ADDRESS_GEOCODER_URL>/sites/4e1c3394-9410-4d4b-9cb9-bd91441010fa/subsites.json"
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Content-Type:
+      - application/json
+      apiKey:
+      - "<BCGOV_ADDRESS_GEOCODER_API_KEY>"
+      User-Agent:
+      - Faraday v2.9.2
+  response:
+    status:
+      code: 500
+      message: ''
+    headers:
+      content-type:
+      - application/json
+      transfer-encoding:
+      - chunked
+      vary:
+      - Origin, Access-Control-Request-Method, Access-Control-Request-Headers
+      x-content-type-options:
+      - nosniff
+      x-xss-protection:
+      - '0'
+      cache-control:
+      - no-cache, no-store, max-age=0, must-revalidate
+      pragma:
+      - no-cache
+      expires:
+      - '0'
+      strict-transport-security:
+      - max-age=31536000 ; includeSubDomains
+      x-frame-options:
+      - DENY
+      date:
+      - Sat, 28 Feb 2026 01:04:27 GMT
+      access-control-allow-origin:
+      - "*"
+      access-control-expose-headers:
+      - Origin,Authorization,Access-Control-Allow-Origin,Access-Control-Allow-Methods,apikey
+      x-kong-upstream-latency:
+      - '1'
+      x-kong-proxy-latency:
+      - '0'
+    body:
+      encoding: UTF-8
+      string: '{"upstream":{"version":"4.5.3","error":{"message":"Unexpected internal
+        problem: null\njava.lang.NullPointerException\n"}},"message":"Upstream service
+        error - An unexpected error occurred"}'
+  recorded_at: Sat, 28 Feb 2026 01:04:27 GMT
+- request:
+    method: get
+    uri: "<BCGOV_ADDRESS_GEOCODER_URL>/sites/d508c225-d76b-493c-a5a1-70c2a02f05cc/subsites.json"
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Content-Type:
+      - application/json
+      apiKey:
+      - "<BCGOV_ADDRESS_GEOCODER_API_KEY>"
+      User-Agent:
+      - Faraday v2.9.2
+  response:
+    status:
+      code: 500
+      message: ''
+    headers:
+      content-type:
+      - application/json
+      transfer-encoding:
+      - chunked
+      vary:
+      - Origin, Access-Control-Request-Method, Access-Control-Request-Headers
+      x-content-type-options:
+      - nosniff
+      x-xss-protection:
+      - '0'
+      cache-control:
+      - no-cache, no-store, max-age=0, must-revalidate
+      pragma:
+      - no-cache
+      expires:
+      - '0'
+      strict-transport-security:
+      - max-age=31536000 ; includeSubDomains
+      x-frame-options:
+      - DENY
+      date:
+      - Sat, 28 Feb 2026 01:04:27 GMT
+      access-control-allow-origin:
+      - "*"
+      access-control-expose-headers:
+      - Origin,Authorization,Access-Control-Allow-Origin,Access-Control-Allow-Methods,apikey
+      x-kong-upstream-latency:
+      - '1'
+      x-kong-proxy-latency:
+      - '1'
+    body:
+      encoding: UTF-8
+      string: '{"upstream":{"version":"4.5.3","error":{"message":"Unexpected internal
+        problem: null\njava.lang.NullPointerException\n"}},"message":"Upstream service
+        error - An unexpected error occurred"}'
+  recorded_at: Sat, 28 Feb 2026 01:04:27 GMT
+- request:
+    method: get
+    uri: "<BCGOV_ADDRESS_GEOCODER_URL>/parcels/pids/4e1c3394-9410-4d4b-9cb9-bd91441010fa.json"
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Content-Type:
+      - application/json
+      apiKey:
+      - "<BCGOV_ADDRESS_GEOCODER_API_KEY>"
+      User-Agent:
+      - Faraday v2.9.2
+  response:
+    status:
+      code: 200
+      message: ''
+    headers:
+      content-type:
+      - application/json
+      transfer-encoding:
+      - chunked
+      vary:
+      - Origin, Access-Control-Request-Method, Access-Control-Request-Headers,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-xss-protection:
+      - '0'
+      cache-control:
+      - no-cache, no-store, max-age=0, must-revalidate
+      pragma:
+      - no-cache
+      expires:
+      - '0'
+      strict-transport-security:
+      - max-age=31536000 ; includeSubDomains
+      x-frame-options:
+      - DENY
+      date:
+      - Sat, 28 Feb 2026 01:04:27 GMT
+      x-kong-upstream-latency:
+      - '1'
+      x-kong-proxy-latency:
+      - '0'
+      content-encoding:
+      - gzip
+    body:
+      encoding: ASCII-8BIT
+      string: '{"siteID":"4e1c3394-9410-4d4b-9cb9-bd91441010fa","pids":"031562868"}'
+  recorded_at: Sat, 28 Feb 2026 01:04:27 GMT
+recorded_with: VCR 6.2.0
