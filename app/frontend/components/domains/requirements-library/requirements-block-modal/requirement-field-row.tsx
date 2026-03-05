@@ -4,14 +4,9 @@ import React from "react"
 import { useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { IFormConditional, IRequirementAttributes } from "../../../../types/api-request"
+import { EEnergyStepCodeDependencyRequirementCode, ENumberUnit, ERequirementType } from "../../../../types/enums"
 import {
-  EArchitecturalDrawingDependencyRequirementCode,
-  EEnergyStepCodeDependencyRequirementCode,
-  ENumberUnit,
-  ERequirementType,
-} from "../../../../types/enums"
-import {
-  isArchitecturalDrawingDependencyRequirementCode,
+  isArchitecturalDrawingRequirement,
   isContactRequirement,
   isMultiOptionRequirement,
 } from "../../../../utils/utility-functions"
@@ -38,15 +33,15 @@ const fieldContainerSharedProps = {
   mt: 7,
 }
 
-const getRequirementFieldState = (requirementCode: string | undefined) => {
+const getRequirementFieldState = (requirementCode: string | undefined, inputType?: ERequirementType) => {
   // Disables remove and conditional options for all energy_step_code dependency requirements except for the Energy Step Code requirement itself
   const isStepCodeDependency = Object.values(EEnergyStepCodeDependencyRequirementCode).includes(
     requirementCode as EEnergyStepCodeDependencyRequirementCode
   )
-  const isArchitecturalRequirement = isArchitecturalDrawingDependencyRequirementCode(requirementCode)
+  const isArchitectural = isArchitecturalDrawingRequirement(inputType)
 
   const disabledMenuOptions: ("remove" | "conditional")[] =
-    isStepCodeDependency || isArchitecturalRequirement ? ["conditional"] : []
+    isStepCodeDependency || isArchitectural ? ["conditional"] : []
 
   // for step code dependency only the step_code requirement is removable and the other
   // dependencies rely on it for removal
@@ -54,18 +49,11 @@ const getRequirementFieldState = (requirementCode: string | undefined) => {
     disabledMenuOptions.push("remove")
   }
 
-  if (
-    isArchitecturalRequirement &&
-    requirementCode !== EArchitecturalDrawingDependencyRequirementCode.architecturalDrawingMethod
-  ) {
-    disabledMenuOptions.push("remove")
-  }
-
-  const showEditControls =
-    !isStepCodeDependency && !isArchitecturalRequirement
-      ? true
-      : requirementCode === EEnergyStepCodeDependencyRequirementCode.energyStepCodeMethod ||
-        requirementCode === EArchitecturalDrawingDependencyRequirementCode.architecturalDrawingMethod
+  // Architectural drawing is a single standalone requirement that can be edited/removed.
+  // Only step code dependencies restrict edit controls.
+  const showEditControls = !isStepCodeDependency
+    ? true
+    : requirementCode === EEnergyStepCodeDependencyRequirementCode.energyStepCodeMethod
 
   return { disabledMenuOptions, showEditControls }
 }
@@ -88,7 +76,7 @@ export const RequirementFieldRow = ({ index, field, isEditing, toggleEdit, onRem
   const watchedComputedCompliance = watch(`requirementsAttributes.${index}.inputOptions.computedCompliance`)
   const watchedDataValidation = watch(`requirementsAttributes.${index}.inputOptions.dataValidation`)
 
-  const { disabledMenuOptions, showEditControls } = getRequirementFieldState(watchedRequirementCode)
+  const { disabledMenuOptions, showEditControls } = getRequirementFieldState(watchedRequirementCode, requirementType)
 
   return (
     <Box

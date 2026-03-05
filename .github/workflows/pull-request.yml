@@ -34,6 +34,8 @@ jobs:
       PART_3_MIN_ZERO_CARBON_STEP: "1"
       PART_3_MAX_ZERO_CARBON_STEP: "4"
       # The following keys are stub keys
+      DEVISE_JWT_SECRET_KEY: "stubbed-devise-jwt-secret-key"
+      SESSION_TIMEOUT_MINUTES: "30"
       ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY: "stubbed-active-record-encryption-primary-key"
       ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY: "stubbed-active-record-encryption-deterministic-key"
       ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT: "stubbed-active-record-encryption-key-derivation-salt"
