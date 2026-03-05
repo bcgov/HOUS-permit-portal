@@ -76,9 +76,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_02_21_004722) do
     t.index ["contactable_type", "contactable_id"], name: "index_contacts_on_contactable"
   end
 
-  create_table "data_migrations", primary_key: "version", id: :string, force: :cascade do |t|
-  end
-
   create_table "design_documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "pre_check_id", null: false
     t.text "file_data"
@@ -410,19 +407,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_02_21_004722) do
     t.index ["status"], name: "index_part_9_step_code_checklists_on_status"
     t.index ["step_code_id"], name: "index_part_9_step_code_checklists_on_step_code_id"
     t.index ["step_requirement_id"], name: "index_part_9_step_code_checklists_on_step_requirement_id"
-  end
-
-  create_table "pdf_forms", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.uuid "user_id", null: false
-    t.jsonb "form_json", default: {}
-    t.string "form_type"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.jsonb "pdf_file_data"
-    t.integer "pdf_generation_status", default: 0, null: false
-    t.datetime "discarded_at"
-    t.index ["discarded_at"], name: "index_pdf_forms_on_discarded_at"
-    t.index ["user_id"], name: "index_pdf_forms_on_user_id"
   end
 
   create_table "permit_applications", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -790,8 +774,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_02_21_004722) do
     t.integer "template_version_status_scope", default: 0, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "name", null: false
-    t.text "description"
+    t.index ["jurisdiction_id", "template_version_status_scope"], name: "index_sandboxes_on_jurisdiction_and_scope", unique: true
     t.index ["jurisdiction_id"], name: "index_sandboxes_on_jurisdiction_id"
   end
 
@@ -1091,7 +1074,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_02_21_004722) do
   add_foreign_key "part_3_step_code_checklists", "step_codes", on_delete: :cascade
   add_foreign_key "part_9_step_code_checklists", "permit_type_required_steps", column: "step_requirement_id"
   add_foreign_key "part_9_step_code_checklists", "step_codes", on_delete: :cascade
-  add_foreign_key "pdf_forms", "users"
   add_foreign_key "permit_applications", "jurisdictions"
   add_foreign_key "permit_applications", "permit_classifications", column: "activity_id"
   add_foreign_key "permit_applications", "permit_classifications", column: "permit_type_id"

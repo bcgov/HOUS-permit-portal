@@ -33,19 +33,21 @@ class Webhooks::ArchistarController < Webhooks::ApplicationController
   private
 
   def authenticate_webhook
-    # API Key authentication
     api_key = request.headers["X-Archistar-Webhook-Secret"]
     expected_api_key = ENV["ARCHISTAR_WEBHOOK_SECRET"]
 
-    if expected_api_key.present? && api_key != expected_api_key
+    unless expected_api_key.present? &&
+             ActiveSupport::SecurityUtils.secure_compare(
+               api_key.to_s,
+               expected_api_key
+             )
       Rails.logger.warn(
-        "Archistar webhook authentication failed: Invalid API key"
+        "Archistar webhook authentication failed: Invalid or missing API key"
       )
       render json: { error: "Unauthorized" }, status: :unauthorized
       return
     end
 
-    # IP whitelist (optional additional security)
     validate_ip_whitelist if ENV["ARCHISTAR_WEBHOOK_IP_WHITELIST"].present?
   end
 

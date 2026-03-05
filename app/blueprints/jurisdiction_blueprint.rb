@@ -49,6 +49,8 @@ class JurisdictionBlueprint < Blueprinter::Base
                   PermitTypeRequiredStepBlueprint do |jurisdiction, _options|
       jurisdiction.enabled_permit_type_required_steps
     end
+    association :part3_occupancy_required_steps,
+                blueprint: Part3OccupancyRequiredStepBlueprint
     association :service_partner_enrollments,
                 blueprint: JurisdictionServicePartnerEnrollmentBlueprint
   end

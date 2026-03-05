@@ -272,7 +272,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
     currentUser?.id === currentPermitApplication?.designatedSubmitter?.collaborator?.user?.id
 
   const parentProjectPath = currentPermitApplication.projectId
-    ? `/projects/${currentPermitApplication.projectId}/overview`
+    ? `/projects/${currentPermitApplication.projectId}/permits`
     : "/projects"
 
   return (
