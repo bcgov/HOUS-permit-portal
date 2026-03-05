@@ -1,15 +1,18 @@
 import { Box, Button, Collapse, Flex, FormLabel, HStack, IconButton, Text, useDisclosure } from "@chakra-ui/react"
 import { SlidersHorizontal, Trash } from "@phosphor-icons/react"
+import { format, parse } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React, { useMemo } from "react"
 import { useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import Select from "react-select"
 import { IRequirementTemplateForm } from "."
+import { datefnsAppDateFormat } from "../../../../../constants"
 import { useMst } from "../../../../../setup/root"
 import { IBlockConditional, IRequirementTemplateSectionAttributes } from "../../../../../types/api-request"
 import { EConditionalOperator, EConditionalThen, ERequirementType } from "../../../../../types/enums"
 import { IOption } from "../../../../../types/types"
+import { DatePicker } from "../../../../shared/date-picker"
 
 interface IProps {
   sectionIndex: number
@@ -357,6 +360,18 @@ export const BlockConditionalConfig = observer(function BlockConditionalConfig({
                     placeholder={t("requirementTemplate.edit.blockConditional.selectValue")}
                     menuPortalTarget={document.body}
                     styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
+                  />
+                ) : selectedRequirement?.inputType === ERequirementType.date ? (
+                  <DatePicker
+                    selected={conditional?.eq ? parse(conditional.eq, datefnsAppDateFormat, new Date()) : null}
+                    onChange={(date: Date) => handleValueChange(date ? format(date, datefnsAppDateFormat) : "")}
+                    containerProps={{
+                      w: "full",
+                      sx: {
+                        ".react-datepicker-wrapper": { w: "full" },
+                        ".react-datepicker__input-container": { w: "full" },
+                      },
+                    }}
                   />
                 ) : (
                   <input
