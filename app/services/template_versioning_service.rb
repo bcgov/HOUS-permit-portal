@@ -61,6 +61,11 @@ class TemplateVersioningService
             )
     end
 
+    # Notify managers and API partners about the scheduled template version
+    NotificationService.publish_new_template_version_publish_event(
+      template_version
+    )
+
     template_version
   end
 
@@ -325,6 +330,49 @@ class TemplateVersioningService
           before_version.form_json,
           removed_requirement_blueprints
         )
+    }
+  end
+
+  # Determines the type of change for a template version relative to its predecessor.
+  # Returns a symbol: :new_template, :action_required, or :no_action
+  #   :new_template     - No previous published version exists (brand new permit template)
+  #   :action_required  - Requirements were added or removed (API mappings need updating)
+  #   :no_action        - Only requirement field content changed or no requirement changes at all
+  def self.determine_change_type(template_version)
+    previous = previous_published_version(template_version)
+    return :new_template if previous.blank?
+
+    diff = produce_diff_hash(previous, template_version)
+    if diff[:added].any? || diff[:removed].any?
+      :action_required
+    else
+      :no_action
+    end
+  end
+
+  # Returns a summary of the diff suitable for inclusion in notification emails.
+  # Each field entry is a hash with :label, :requirement_code, and :section.
+  def self.diff_summary_for_notification(template_version)
+    previous = previous_published_version(template_version)
+    return nil if previous.blank?
+
+    diff = produce_diff_hash(previous, template_version)
+
+    extract_field_info = ->(req) do
+      {
+        label: req["label"] || req["key"] || req["id"],
+        requirement_code: req["requirement_code"],
+        section: req["diff_section_label"]
+      }
+    end
+
+    {
+      added_count: diff[:added].size,
+      removed_count: diff[:removed].size,
+      changed_count: diff[:changed].size,
+      added_fields: diff[:added].map(&extract_field_info),
+      removed_fields: diff[:removed].map(&extract_field_info),
+      changed_fields: diff[:changed].map(&extract_field_info)
     }
   end
 

@@ -56,6 +56,10 @@ class Jurisdiction < ApplicationRecord
   has_many :jurisdiction_memberships, dependent: :destroy
   has_many :users, through: :jurisdiction_memberships
   has_many :submitters, through: :permit_applications, source: :submitter
+  has_many :jurisdiction_requirement_templates, dependent: :destroy
+  has_many :enabled_requirement_templates,
+           through: :jurisdiction_requirement_templates,
+           source: :requirement_template
   has_many :jurisdiction_template_version_customizations
   has_many :template_versions,
            through: :jurisdiction_template_version_customizations
@@ -420,19 +424,10 @@ class Jurisdiction < ApplicationRecord
   # Callback method to ensure a default sandbox is created
   def ensure_default_sandboxes
     if sandboxes.published.empty?
-      sandboxes.build(
-        name: "Published",
-        description:
-          "Work with application forms that have already been published",
-        template_version_status_scope: :published
-      )
+      sandboxes.build(template_version_status_scope: :published)
     end
     if sandboxes.scheduled.empty?
-      sandboxes.build(
-        name: "Scheduled",
-        description: "Work with application forms scheduled to be published",
-        template_version_status_scope: :scheduled
-      )
+      sandboxes.build(template_version_status_scope: :scheduled)
     end
   end
 

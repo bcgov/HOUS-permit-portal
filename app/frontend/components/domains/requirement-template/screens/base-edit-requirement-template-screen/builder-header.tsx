@@ -70,6 +70,7 @@ export const BuilderHeader = observer(function BuilderHeader({
               {t("requirementTemplate.edit.goToLatest")}
             </RouterLinkButton>
           )}
+
           {status === ETemplateVersionStatus.published && versionDate && <VersionTag versionDate={versionDate} />}
         </HStack>
       </VStack>

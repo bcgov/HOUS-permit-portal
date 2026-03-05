@@ -146,6 +146,7 @@ class PermitCollaboration < ApplicationRecord
 
   def validate_author_not_collaborator
     return unless submission?
+    return if collaborator.blank? || permit_application.blank?
 
     if collaborator.user == permit_application.submitter
       errors.add(:collaborator, :cannot_be_author)
@@ -153,6 +154,8 @@ class PermitCollaboration < ApplicationRecord
   end
 
   def validate_collaboration_type
+    return if permit_application.blank?
+
     if submission?
       unless permit_application.draft?
         errors.add(:base, :must_be_draft_for_submission)
@@ -189,6 +192,7 @@ class PermitCollaboration < ApplicationRecord
 
   def validate_delegatee
     return unless delegatee?
+    return if permit_application.blank? || collaborator_id.blank?
 
     existing_delegatee =
       permit_application.permit_collaborations.find_by(

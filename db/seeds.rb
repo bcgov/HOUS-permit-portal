@@ -201,19 +201,23 @@ if PermitApplication.first.blank?
   # Create LiveRequirementTemplate records
   LiveRequirementTemplate.find_or_create_by!(
     activity: activity1,
-    permit_type: permit_type1
+    permit_type: permit_type1,
+    available_globally: true
   )
   LiveRequirementTemplate.find_or_create_by!(
     activity: activity1,
-    permit_type: permit_type2
+    permit_type: permit_type2,
+    available_globally: true
   )
   LiveRequirementTemplate.find_or_create_by!(
     activity: activity2,
-    permit_type: permit_type1
+    permit_type: permit_type1,
+    available_globally: true
   )
   LiveRequirementTemplate.find_or_create_by!(
     activity: activity2,
-    permit_type: permit_type2
+    permit_type: permit_type2,
+    available_globally: true
   )
 
   RequirementTemplate.reindex
@@ -254,7 +258,10 @@ if PermitApplication.first.blank?
     current_jurisdiction =
       index.even? ? jurisdictions.first(10).sample : north_van
     current_jurisdiction_id = current_jurisdiction.id
-    sandbox = current_jurisdiction.sandboxes.find_by(name: "Published")
+    sandbox =
+      current_jurisdiction.sandboxes.find_by(
+        template_version_status_scope: :published
+      )
 
     permit_project =
       PermitProject.create!(
@@ -329,7 +336,8 @@ if PermitApplication.first.blank?
   # Seed a North Vancouver Example
   4.times do |i| # Added index i for unique titles if needed
     current_review_manager = review_managers.sample
-    sandbox = north_van.sandboxes.find_by(name: "Published")
+    sandbox =
+      north_van.sandboxes.find_by(template_version_status_scope: :published)
     project_pid =
       (
         if (north_van.locality_type == "corporation of the city")

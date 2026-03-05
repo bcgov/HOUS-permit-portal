@@ -87,5 +87,12 @@ export const useJurisdiction = () => {
     })()
   }, [pathname])
 
-  return { currentJurisdiction, error }
+  // Only expose the jurisdiction when it matches the URL param, preventing stale
+  // data from being used by consumers (e.g. useSearch) during navigation transitions.
+  const matchedJurisdiction =
+    currentJurisdiction && (currentJurisdiction.id === jurisdictionId || currentJurisdiction.slug === jurisdictionId)
+      ? currentJurisdiction
+      : null
+
+  return { currentJurisdiction: matchedJurisdiction, error }
 }

@@ -309,130 +309,17 @@ export interface IDesignDocument extends IBaseFileAttachment {
   preCheckId: string
 }
 
-export interface IOverheatingDocument extends IBaseFileAttachment {
-  overheatingToolId: string
-}
-
-export interface IOverheatingToolJson {
-  notes?: string
-  other?: string
-  cooling?: {
-    nominal?: string
-    maximumCoolingCapacity?: string
-    minimumCoolingCapacity?: string
-  }
-  heating?: {
-    building?: string
-  }
-  climateData?: {
-    ase?: string
-    atre?: string
-    hrvErv?: string
-    ventilated?: string
-    windExposure?: string
-    windSheilding?: string
-  }
-  roomByRoom?: Array<{
-    name?: string
-    cooling?: string
-    heating?: string
-  }>
-  doorsStyleA?: string
-  doorsStyleB?: string
-  doorsStyleC?: string
-  projectNumber?: string
-  windowsStyleA?: string
-  windowsStyleB?: string
-  windowsStyleC?: string
-  ceilingsStyleA?: string
-  ceilingsStyleB?: string
-  ceilingsStyleC?: string
-  buildingLocation?: {
-    lot?: string
-    city?: string
-    site?: string
-    model?: string
-    province?: string
-    postalCode?: string
-    address?: string
-  }
-  drawingIssueFor?: string
-  skylightsStyleA?: string
-  skylightsStyleB?: string
-  skylightsStyleC?: string
-  calculationBasedOn?: {
-    assumed?: string
-    stories?: string
-    occupants?: string
-    attachment?: string
-    frontFacing?: string
-    airTightness?: string
-    dimensionalInfo?: string
-    internalShading?: string
-    weatherLocation?: string
-    occupantsAssumed?: string
-    frontFacingAssumed?: string
-    airTightnessAssumed?: string
-  }
-  floorsonsoilStyleA?: string
-  floorsonsoilStyleB?: string
-  floorsonsoilStyleC?: string
-  roomByRoomSummary?: {
-    issued?: string
-    latentGain?: string
-    ventilationLoss?: string
-    totalBuildingLoss?: string
-    nominalCoolingCapacity?: string
-  }
-  exposedfloorsStyleA?: string
-  exposedfloorsStyleB?: string
-  exposedfloorsStyleC?: string
-  "above-gradewallsStyleA"?: string
-  "above-gradewallsStyleB"?: string
-  "above-gradewallsStyleC"?: string
-  "below-gradewallsStyleA"?: string
-  "below-gradewallsStyleB"?: string
-  "below-gradewallsStyleC"?: string
-  calculationPerformedBy?: {
-    fax?: string
-    city?: string
-    name?: string
-    email?: string
-    phone?: string
-    address?: string
-    company?: string
-    province?: string
-    lastName?: string
-    firstName?: string
-    reference1?: string
-    reference2?: string
-    attestation?: boolean
-    postalCode?: string
-    issuedForDate?: string
-    issuedForDate2?: string
-  }
-  coolingDesignConditions?: {
-    range?: string
-    latitude?: string
-    indoorTemp?: string
-    outdoorTemp?: string
-  }
-  heatingDesignConditions?: {
-    indoorTemp?: string
-    outdoorTemp?: string
-    meanSoilTemp?: string
-    slabFluidTemp?: string
-    soilConductivity?: string
-    waterTableDepth?: string
-  }
-}
-
 export interface IJurisdictionServicePartnerEnrollment {
   id: string
   servicePartner: string
   enabled: boolean
   createdAt: Date
   updatedAt: Date
+}
+
+export interface IJurisdictionStub {
+  id: string
+  qualifiedName: string
 }
 
 export interface IReportDocument extends IBaseFileAttachment {
@@ -974,4 +861,46 @@ export interface IPart3OccupancyGroup {
   division: number | null
   classificationDescription: string
   occupancies: IPart3Occupancy[]
+}
+
+export interface IFormIOComponent {
+  type: string
+  key: string
+  id?: string
+  label?: string
+  input: boolean
+  tableView?: boolean
+  components?: IFormIOComponent[]
+  columns?: IFormIOComponent[]
+  // Common optional properties
+  validate?: { required?: boolean; [key: string]: any }
+  conditional?: any
+  customConditional?: string
+  widget?: any
+  customClass?: string
+  disabled?: boolean
+  hidden?: boolean
+  multiple?: boolean
+  persistent?: boolean | string
+  html?: string
+  action?: string
+  custom?: string
+  defaultValue?: any
+  placeholder?: string
+  prefix?: string
+  suffix?: string
+  clearOnHide?: boolean
+  unique?: boolean
+  protected?: boolean
+  [key: string]: any // Allow additional properties for component-specific fields
+}
+
+export interface IRequirementTemplateFormJson {
+  id: string
+  legend: string
+  key: string
+  label: string
+  input: boolean
+  tableView: boolean
+  components: IFormIOComponent[]
 }

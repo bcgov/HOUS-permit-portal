@@ -86,6 +86,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
       isDirty: types.optional(types.boolean, false),
       isLoading: types.optional(types.boolean, false),
       usingCurrentTemplateVersion: types.maybeNull(types.boolean),
+      templateVersionDisabledByJurisdiction: types.optional(types.boolean, false),
       showingCompareAfter: types.optional(types.boolean, false),
       revisionMode: types.optional(types.boolean, false),
       diff: types.maybeNull(types.frozen<ITemplateVersionDiff>()),
@@ -95,6 +96,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
       permitBlockStatusMap: types.map(PermitBlockStatusModel),
       isViewingPastRequests: types.optional(types.boolean, false),
       templateNickname: types.maybeNull(types.string),
+      projectId: types.maybeNull(types.string),
       discardedAt: types.maybeNull(types.Date),
     })
     .extend(withEnvironment())
@@ -804,19 +806,6 @@ export const PermitApplicationModel = types.snapshotProcessor(
         if (response.ok) {
           const { data: stepCode } = response.data
           self.rootStore.stepCodeStore.mergeUpdate(stepCode, "stepCodesMap")
-          // Refresh current permit application from server so associations are consistent
-          yield self.rootStore.permitApplicationStore.fetchPermitApplication(self.id)
-        }
-        return response.ok
-      }),
-      assignExistingPreCheck: flow(function* (preCheckId: string) {
-        // Since PreCheck belongs_to PermitApplication, assign by updating the PreCheck with permitApplicationId
-        const response = yield self.environment.api.updatePreCheck(preCheckId, {
-          permitApplicationId: self.id,
-        })
-        if (response.ok) {
-          const { data: preCheck } = response.data
-          self.rootStore.preCheckStore.mergeUpdate(preCheck, "preChecksMap")
           // Refresh current permit application from server so associations are consistent
           yield self.rootStore.permitApplicationStore.fetchPermitApplication(self.id)
         }

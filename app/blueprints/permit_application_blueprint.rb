@@ -32,6 +32,10 @@ class PermitApplicationBlueprint < Blueprinter::Base
     field :using_current_template_version do |pa, _options|
       pa.using_current_template_version
     end
+
+    field :project_id do |pa, _options|
+      pa.permit_project&.id
+    end
   end
 
   view :project_base do
@@ -81,6 +85,10 @@ class PermitApplicationBlueprint < Blueprinter::Base
 
     association :template_version, blueprint: TemplateVersionBlueprint
     association :published_template_version, blueprint: TemplateVersionBlueprint
+
+    field :template_version_disabled_by_jurisdiction do |pa, _options|
+      pa.template_version_disabled_by_jurisdiction?
+    end
 
     association :supporting_documents,
                 blueprint: SupportingDocumentBlueprint do |pa, options|

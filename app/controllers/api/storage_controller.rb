@@ -20,9 +20,7 @@ class Api::StorageController < Api::ApplicationController
     "ProjectDocument" => ProjectDocument,
     "ResourceDocument" => ResourceDocument,
     "ReportDocument" => ReportDocument,
-    "DesignDocument" => DesignDocument,
-    "OverheatingTool" => OverheatingTool,
-    "OverheatingDocument" => OverheatingDocument
+    "DesignDocument" => DesignDocument
   }.freeze
 
   def download

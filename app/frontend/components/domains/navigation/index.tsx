@@ -196,16 +196,6 @@ const OnboardingChecklistPageForLgAdoptingScreen = lazy(() =>
     default: module.OnboardingChecklistPageForLgAdoptingScreen,
   }))
 )
-const OverheatingToolScreen = lazy(() =>
-  import("../overheating-tool/overheating-tool-screen").then((module) => ({
-    default: module.OverheatingToolScreen,
-  }))
-)
-const OverheatingToolStartScreen = lazy(() =>
-  import("../overheating-tool/overheating-tool-start-screen").then((module) => ({
-    default: module.OverheatingToolStartScreen,
-  }))
-)
 const PermitApplicationIndexScreen = lazy(() =>
   import("../permit-application").then((module) => ({ default: module.PermitApplicationIndexScreen }))
 )
@@ -749,7 +739,6 @@ const AppRoutes = observer(() => {
             element={<ProtectedRoute isAllowed={loggedIn && !mustAcceptEula} redirectPath={mustAcceptEula && "/"} />}
           >
             <Route path="/step-codes" element={<ProjectDashboardScreen />} />
-            <Route path="/overheating" element={<ProjectDashboardScreen />} />
             <Route path="/pre-checks" element={<ProjectDashboardScreen />} />
             <Route path="/pre-checks/new" element={<PreCheckForm />} />
             <Route path="/pre-checks/new/:section" element={<PreCheckForm />} />
@@ -765,11 +754,6 @@ const AppRoutes = observer(() => {
             <Route path="/step-codes/*" element={<ProjectDashboardScreen />} />
             {/* Disabled: New Permit Application screen */}
             <Route path="/permit-applications/:permitApplicationId/edit" element={<EditPermitApplicationScreen />} />
-            <Route path="/permit-applications/:permitApplicationId/edit/pre-check" element={<PreCheckForm />} />
-            <Route
-              path="/permit-applications/:permitApplicationId/edit/pre-check/:section"
-              element={<PreCheckForm />}
-            />
             <Route
               path="/permit-applications/:permitApplicationId/edit/part-9-step-code"
               element={<Part9StepCodeForm />}
@@ -793,10 +777,6 @@ const AppRoutes = observer(() => {
             />
             <Route path="/project-readiness-tools/pre-check" element={<PreCheckInfoScreen />} />
           </Route>
-        </Route>
-
-        <Route element={<ProtectedRoute isAllowed={loggedIn && currentUser?.isSubmitter} />}>
-          <Route path="/overheating-tool/start" element={<OverheatingToolStartScreen />} />
         </Route>
 
         <Route element={<ProtectedRoute isAllowed={loggedIn && !isUnconfirmed} />}>
@@ -871,7 +851,6 @@ const AppRoutes = observer(() => {
         <Route path="/contact" element={<ContactScreen />} />
         <Route path="/standardization-preview" element={<StandardizationPreviewScreen />} />
         <Route path="/project-readiness-tools" element={<ProjectReadinessToolsIndexScreen />} />
-        <Route path="/project-readiness-tools/overheating-tool" element={<OverheatingToolScreen />} />
         <Route path="/privacy-policy" element={<PrivacyPolicyScreen />} />
         <Route
           path="/project-readiness-tools/create-your-letters-of-assurance"
@@ -885,7 +864,6 @@ const AppRoutes = observer(() => {
           path="/project-readiness-tools/look-up-step-codes-requirements-for-your-project"
           element={<LookUpStepCodesRequirementsForYourProjectScreen />}
         />
-        <Route path="/project-readiness-tools/check-digital-seals" element={<CheckDigitalSealsScreen />} />
         <Route path="/project-readiness-tools/pre-check" element={<PreCheckInfoScreen />} />
         <Route
           path="/onboarding-checklist-page-for-lg-adopting"

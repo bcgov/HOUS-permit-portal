@@ -30,8 +30,6 @@ export enum EFileUploadAttachmentType {
   ReportDocument = "ReportDocument",
   ResourceDocument = "ResourceDocument",
   DesignDocument = "DesignDocument",
-  OverheatingTool = "OverheatingTool",
-  OverheatingDocument = "OverheatingDocument",
 }
 
 export enum EResourceCategory {
@@ -117,7 +115,7 @@ export enum ERequirementTemplateSortFields {
   firstNations = "first_nations",
   description = "description",
   currentVersion = "current_version",
-  usedBy = "used_by",
+  availableIn = "available_in",
 }
 
 export enum EPreCheckSortFields {
@@ -414,12 +412,6 @@ export enum EEnergyStepCodePart3DependencyRequirementCode {
   energyStepCodeReportFile = "energy_step_code_report_file",
 }
 
-export enum EArchitecturalDrawingDependencyRequirementCode {
-  architecturalDrawingMethod = "architectural_drawing_method",
-  architecturalDrawingTool = "architectural_drawing_tool",
-  architecturalDrawingFile = "architectural_drawing_file",
-}
-
 export enum EAutoComplianceModule {
   DigitalSealValidator = "DigitalSealValidator",
   ParcelInfoExtractor = "ParcelInfoExtractor",
@@ -682,18 +674,6 @@ export enum EPermitProjectSortFields {
   rollupStatus = "rollup_status",
 }
 
-export enum EOverheatingToolStatusFilter {
-  all = "all",
-  archived = "archived",
-  unarchived = "unarchived",
-}
-
-export enum EOverheatingToolSortFields {
-  projectNumber = "projectNumber",
-  address = "address",
-  createdAt = "createdAt",
-}
-
 export enum EPermitProjectRollupStatus {
   empty = "empty",
   newDraft = "new_draft",
@@ -796,14 +776,6 @@ export enum EFileScanStatus {
   pending = "pending",
   clean = "clean",
   infected = "infected",
-}
-
-export enum EPdfGenerationStatus {
-  notStarted = "not_started",
-  queued = "queued",
-  generating = "generating",
-  completed = "completed",
-  failed = "failed",
 }
 
 export enum EDataValidationOperation {

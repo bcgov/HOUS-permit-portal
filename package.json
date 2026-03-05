@@ -66,6 +66,7 @@
     "@uppy/react": "^4.0.4",
     "@uppy/xhr-upload": "^4.4.2",
     "apisauce": "^3.0.1",
+    "axios": "^1.13.5",
     "date-fns": "^2.30.0",
     "date-fns-tz": "^2.0.1",
     "dompurify": "^3.3.0",
@@ -93,7 +94,7 @@
     "react-router-dom": "^6.30.3",
     "react-select": "^5.8.0",
     "restructure": "^3.0.0",
-    "rollup": "^4.22.4",
+    "rollup": "^4.59.0",
     "uuid": "^9.0.1"
   },
   "overrides": {
