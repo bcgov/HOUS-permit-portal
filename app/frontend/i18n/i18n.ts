@@ -807,9 +807,14 @@ const options = {
             editMapEnd:
               "This process ensures the map accurately represents the center of your jurisdiction and is displayed with the appropriate level of detail.",
             stepCode: {
-              title: "Step code requirements",
+              title: "Step Codes requirements",
               description:
                 "Below are the step code requirements for each permit application type. <1>What does each step code level mean?<2></2></1>",
+              aboutPageDescription:
+                "This page shows the Energy Step Code and Zero Carbon Step Code requirements for buildings in this community. Requirements may vary based on building type, occupancies, permit-processing date, and local bylaws.",
+              aboutPageNotice:
+                "These requirements apply to new buildings only. For existing buildings or renovations, contact your local building officials.",
+              viewStepCodeRequirements: "View full Step Codes requirements",
               permitType: "BCBC Part",
               workType: "Work type",
               energyStepRequired: "Energy step code required",
@@ -3079,7 +3084,21 @@ Thank you,
               generateStepCodesReportDescription:
                 "If you're ready to create a Step Codes report to include in an application package, you can create a report using the separate reporting tool.",
               stepCodeRequirementsDescription:
-                "This page shows which Energy and Zero Carbon Step Codes apply to new buildings in this community. Requirements may vary based on building type, occupancies, and local bylaws.",
+                "This page shows the Energy Step Code and Zero Carbon Step Code requirements for buildings in this community. Requirements may vary based on building type, occupancies, permit-processing date, and local bylaws.",
+              stepCodeRequirementsNotice:
+                "These requirements apply to new buildings only. For existing buildings or renovations, contact your local building officials.",
+              smallSimpleBuildings: "Small, simple buildings",
+              smallSimpleBuildingsDescription:
+                "Energy Step Code and Zero Carbon Step Code requirements for residential buildings included in Part 9 of the BC Building Code. These requirements are organized by building type.",
+              smallSimpleBuildingsCharacteristic1: "3 storeys or less, and",
+              smallSimpleBuildingsCharacteristic2: "600 square metres or smaller in building footprint.",
+              largeComplexBuildings: "Large, complex buildings",
+              largeComplexBuildingsDescription:
+                "Energy Step Code and Zero Carbon Step Code requirements for buildings included in Part 3 of the BC Building Code. These requirements are organized by major occupancy.",
+              largeComplexBuildingsCharacteristic1: "more than 3 storeys, or",
+              largeComplexBuildingsCharacteristic2: "600 square metres or larger in building footprint.",
+              part3BuildingsAreGenerally: "Part 3 buildings are generally:",
+              part9BuildingsAreGenerally: "Part 9 buildings are generally:",
             },
           },
           joinTheBuildingPermitHub: {
@@ -3264,9 +3283,54 @@ Thank you,
               landingDescription:
                 "The Province establishes minimum energy efficiency requirements. Local governments have the authority to require higher steps of the Energy and Zero Carbon Step Codes through bylaw. Configure compliance requirements for your jurisdiction.",
               bcDefinitionsLink: "BC Energy Step Code and Zero Carbon Step Code definitions",
-              climateZonesTitle: "Climate zones and Heating Degree Days (HDD)",
+              climateZonesTitle: "Climate zones and Heating Degree Days",
               climateZonesDescription:
                 "Define climate zones and Heating Degree Days for your jurisdiction. These values are used to determine energy performance targets.",
+              climateZones: {
+                description:
+                  "Climate zones reflect regional climate conditions that affect building energy performance. Select the climate zones that exist within your jurisdiction.",
+                hddDescription:
+                  "For each climate zone, you can set a Heating Degree Days (HDD) value that applicants must use in their energy modelling calculations for Step Code reporting. If you do not set an HDD value for a climate zone, applicants may use any appropriate HDD value for that climate zone when performing their calculations.",
+                addClimateZone: "Add climate zone",
+                bcClimateZone: "BC Climate Zone",
+                heatingDegreeDaysLabel: "Heating degree days (optional)",
+                tableClimateZone: "Climate zone",
+                tableHdd: "Heating Degree Days (HDD)",
+                notConfigured: "Not configured",
+                emptyState: {
+                  title: "No climate zones added",
+                  description:
+                    'At least one climate zone must be added for your jurisdiction. Click "Add climate zone" above to select the climate zones that apply to your area.',
+                },
+                remove: "Remove",
+                removeConfirmationModal: {
+                  title: "Are you sure you want to remove this climate zone?",
+                  body: "This will remove the climate zone and any associated Heating Degree Days value from your jurisdiction's configuration.",
+                },
+                cancel: "Cancel",
+                save: "Save",
+                validation: {
+                  hddMin: "HDD must be greater than 0",
+                  hddMax: "HDD must be less than or equal to 10,000",
+                  zoneRequired: "Please select a climate zone",
+                },
+                zoneLabels: {
+                  zone_4: "Climate Zone 4",
+                  zone_5: "Climate Zone 5",
+                  zone_6: "Climate Zone 6",
+                  zone_7a: "Climate Zone 7A",
+                  zone_7b: "Climate Zone 7B",
+                  zone_8: "Climate Zone 8",
+                },
+                zoneShortLabels: {
+                  zone_4: "4",
+                  zone_5: "5",
+                  zone_6: "6",
+                  zone_7a: "7A",
+                  zone_7b: "7B",
+                  zone_8: "8",
+                },
+              },
               part3Title: "Part 3 (Large, complex buildings)",
               part3Description:
                 "Configure Energy and Zero Carbon Step Codes compliance requirements for each occupancy",
@@ -3280,6 +3344,10 @@ Thank you,
                 alternativePathwaysNotApplicable: "Alternative pathways not applicable",
                 complianceTag: "Energy Step {{energyStep}} + Zero Carbon {{zeroCarbon}}",
                 zeroCarbonNA: "NA",
+              },
+              part3Public: {
+                groupLabel: "Group {{group}}",
+                divisionLabel: "Division {{division}}: {{description}}",
               },
               part9Title: "Part 9 (Small, simple buildings)",
               part9Description:

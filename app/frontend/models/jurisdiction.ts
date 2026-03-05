@@ -8,6 +8,7 @@ import { IExternalApiKeyParams } from "../types/api-request"
 import { EEnergyStep, EJurisdictionExternalApiState, EPreCheckServicePartner, EZeroCarbonStep } from "../types/enums"
 import {
   IContact,
+  IJurisdictionClimateZone,
   IJurisdictionServicePartnerEnrollment,
   IOption,
   IPart3OccupancyRequiredStep,
@@ -65,6 +66,7 @@ export const JurisdictionModel = types
     ltsaMatcher: types.maybeNull(types.string),
     servicePartnerEnrollments: types.array(types.frozen<IJurisdictionServicePartnerEnrollment>()),
     heatingDegreeDays: types.maybeNull(types.number),
+    jurisdictionClimateZones: types.array(types.frozen<IJurisdictionClimateZone>()),
   })
   .extend(withEnvironment())
   .extend(withRootStore())

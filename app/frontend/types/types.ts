@@ -667,6 +667,12 @@ export interface IPart3OccupancyRequiredStep {
   zeroCarbonStepRequired: number | null
 }
 
+export interface IJurisdictionClimateZone {
+  id?: string
+  climateZone: string
+  heatingDegreeDays: number | null
+}
+
 export type TCreateRequirementTemplateFormData = {
   description: string
   firstNations?: boolean
