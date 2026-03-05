@@ -4,12 +4,6 @@ module Api::Concerns::Search::ProjectAudits
   def perform_project_audit_search
     search_conditions = {
       order: project_audit_order,
-      match: :word_start,
-      fields: [
-        { omniauth_username: :word_start },
-        { permit_application_nickname: :word_middle },
-        { jurisdiction_name: :text_start }
-      ],
       where: project_audit_where_clause,
       page: project_audit_search_params[:page],
       per_page:
@@ -20,40 +14,22 @@ module Api::Concerns::Search::ProjectAudits
           end
         ),
       scope_results: ->(relation) do
-        policy_scope(
-          relation,
-          policy_scope_class: ProjectAuditPolicy::Scope
-        ).includes(
-          :user,
-          :auditable,
-          :associated,
-          auditable: :permit_application,
-          associated: :template_version
-        )
+        policy_scope(relation, policy_scope_class: ProjectAuditPolicy::Scope)
       end
     }
 
-    @search = ApplicationAudit.search(project_audit_query, **search_conditions)
+    @search = ApplicationAudit.search("*", **search_conditions)
   end
 
   private
 
   def project_audit_search_params
     params.permit(
-      :query,
       :page,
       :per_page,
-      filters: %i[jurisdiction_name permit_application_name username],
+      filters: %i[to from],
       sort: %i[field direction]
     )
-  end
-
-  def project_audit_query
-    if project_audit_search_params[:query].present?
-      project_audit_search_params[:query]
-    else
-      "*"
-    end
   end
 
   def project_audit_order
@@ -77,19 +53,21 @@ module Api::Concerns::Search::ProjectAudits
 
     and_conditions << { permit_project_id: @permit_project.id }
 
-    search_filters.each do |key, value|
-      condition =
-        case key
-        when :jurisdiction_name
-          { jurisdiction_name: value }
-        when :permit_application_name
-          { permit_application_nickname: value }
-        when :username
-          { omniauth_username: value }
-        end
-      and_conditions << condition if condition
-    end
+    date_range = {}
+    parsed_from = parsed_datetime(search_filters[:from])
+    parsed_to = parsed_datetime(search_filters[:to])
+    date_range[:gte] = parsed_from if parsed_from
+    date_range[:lte] = parsed_to if parsed_to
+    and_conditions << { created_at: date_range } if date_range.present?
 
     { _and: and_conditions }
+  end
+
+  def parsed_datetime(value)
+    return nil if value.blank?
+
+    Time.zone.parse(value.to_s)
+  rescue ArgumentError, TypeError
+    nil
   end
 end

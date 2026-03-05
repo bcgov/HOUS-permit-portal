@@ -34,20 +34,6 @@
 #       level before handing off to the presenter?
 #
 class ProjectAuditPresenter
-  def self.format(audit, viewer:)
-    {
-      id: audit.id,
-      description: format_description(audit, viewer),
-      timestamp: audit.created_at,
-      user_name: resolve_user_display_name(audit, viewer),
-      jurisdiction_name: resolve_jurisdiction_name(audit),
-      permit_application_id: resolve_permit_application_id(audit),
-      permit_application_number: resolve_permit_application_number(audit),
-      permit_name: resolve_permit_name(audit),
-      requirement_block_id: resolve_requirement_block_id(audit)
-    }
-  end
-
   def self.format_description(audit, viewer)
     case audit.auditable_type
     when "PermitProject"
@@ -80,7 +66,7 @@ class ProjectAuditPresenter
     user.name
   end
 
-  def self.resolve_jurisdiction_for_audit(audit)
+  def self.resolve_jurisdiction_via_auditable(audit)
     case audit.auditable_type
     when "PermitProject"
       audit.auditable&.jurisdiction
@@ -90,6 +76,22 @@ class ProjectAuditPresenter
       audit.auditable&.permit_application&.jurisdiction
     when "PermitBlockStatus"
       audit.auditable&.permit_application&.jurisdiction
+    end
+  end
+
+  def self.resolve_jurisdiction_for_audit(audit)
+    jurisdiction = resolve_jurisdiction_via_auditable(audit)
+    return jurisdiction if jurisdiction.present?
+
+    resolve_jurisdiction_via_associated(audit)
+  end
+
+  def self.resolve_jurisdiction_via_associated(audit)
+    case audit.associated_type
+    when "PermitProject"
+      audit.associated&.jurisdiction
+    when "PermitApplication"
+      audit.associated&.jurisdiction
     end
   end
 
@@ -189,32 +191,103 @@ class ProjectAuditPresenter
   def self.format_permit_collaboration_description(audit, viewer)
     user_display = resolve_user_display_name(audit, viewer)
     collab = audit.auditable
-    return "#{user_display} made a change" if collab.blank?
 
-    permit_name = collab.permit_application&.nickname || "permit"
+    # When auditable was deleted, reconstruct from audited_changes so we can still show a useful description
+    data =
+      (
+        if collab.present?
+          collaboration_description_data_from_model(collab)
+        else
+          collaboration_description_data_from_audit(audit)
+        end
+      )
+    return "#{user_display} made a change" if data.blank?
+
+    is_submission = data[:submission?]
+    is_delegatee = data[:delegatee?]
+    collaborator_name = data[:collaborator_name]
+    block_name = data[:block_name].presence || "requirement block"
+
     case audit.action
     when "create"
-      if collab.submission?
-        if collab.delegatee?
-          "#{user_display} set as designated submitter"
+      if is_submission
+        if is_delegatee
+          "#{user_display} set #{collaborator_name} as designated submitter"
         else
-          collaborator_name = collab.collaborator_name
-          "#{user_display} invited #{collaborator_name} to #{permit_name}"
+          "#{user_display} assigned #{collaborator_name} to #{block_name}"
         end
-      elsif collab.review?
-        block_name =
-          collab.assigned_requirement_block_name.presence || "requirement block"
-        "#{user_display} assigned to #{block_name}"
-      else
-        "#{user_display} added a collaborator to #{permit_name}"
+      elsif data[:review?]
+        "#{collaborator_name} assigned to application"
       end
     when "destroy"
-      block_name =
-        collab.assigned_requirement_block_name.presence || "requirement block"
-      "#{user_display} unassigned from #{block_name}"
-    else
-      "#{user_display} made a change to collaboration"
+      if is_submission
+        if is_delegatee
+          "#{user_display} unset #{collaborator_name} as designated submitter"
+        else
+          "#{user_display} unassigned #{collaborator_name} from #{block_name}"
+        end
+      elsif data[:review?]
+        "#{collaborator_name} unassigned from application"
+      end
     end
+  end
+
+  # Data from a live PermitCollaboration (auditable present)
+  def self.collaboration_description_data_from_model(collab)
+    {
+      submission?: collab.submission?,
+      review?: collab.review?,
+      delegatee?: collab.delegatee?,
+      collaborator_name: collab.collaborator_name,
+      block_name: collab.assigned_requirement_block_name.presence
+    }
+  end
+
+  # Reconstruct from audited_changes when auditable was destroyed (create/destroy store record attributes)
+  def self.collaboration_description_data_from_audit(audit)
+    changes = audit.audited_changes.to_h
+    return nil if changes.blank?
+
+    collaboration_type = audit_value(changes, "collaboration_type")
+    collaborator_type = audit_value(changes, "collaborator_type")
+    collaborator_id = audit_value(changes, "collaborator_id")
+    assigned_block_id = audit_value(changes, "assigned_requirement_block_id")
+
+    # PermitCollaboration enums: submission: 0, review: 1; delegatee: 0, assignee: 1
+    is_submission = collaboration_type.to_i == 0
+    is_review = collaboration_type.to_i == 1
+    is_delegatee = collaborator_type.to_i == 0
+
+    permit_application =
+      audit.associated_type == "PermitApplication" ? audit.associated : nil
+    permit_application ||=
+      PermitApplication.find_by(
+        id: audit_value(changes, "permit_application_id")
+      ) if audit_value(changes, "permit_application_id").present?
+
+    collaborator_name = Collaborator.find_by(id: collaborator_id)&.user&.name
+    collaborator_name = "a collaborator" if collaborator_name.blank?
+
+    block_name =
+      permit_application&.template_version&.requirement_blocks_json&.dig(
+        assigned_block_id.to_s,
+        "name"
+      )
+
+    {
+      submission?: is_submission,
+      review?: is_review,
+      delegatee?: is_delegatee,
+      collaborator_name: collaborator_name,
+      block_name: block_name
+    }
+  end
+
+  # Audited may store values as scalar (create/destroy) or [old, new] (update); return a single value
+  def self.audit_value(changes, key)
+    v = changes[key] || changes[key.to_sym]
+    return nil if v.nil?
+    v.is_a?(Array) ? v.last : v
   end
 
   def self.format_permit_block_status_description(audit, viewer)
