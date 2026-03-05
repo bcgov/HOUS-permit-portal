@@ -955,3 +955,23 @@ interface IPart3ComplianceReportPerformance {
 export interface IPart3ComplianceReport {
   performance: IPart3ComplianceReportPerformance
 }
+
+export interface IPart3Occupancy {
+  key: string
+  name: string
+  group: string
+  division: number | null
+  classificationDescription: string
+  allowedEnergySteps: number[]
+  allowedZeroCarbonLevels: number[]
+  provincialBaseline: { energyStep: number; zeroCarbonLevel: number | null }
+  bcbcTable: string | null
+  isConfigurable: boolean
+}
+
+export interface IPart3OccupancyGroup {
+  group: string
+  division: number | null
+  classificationDescription: string
+  occupancies: IPart3Occupancy[]
+}

@@ -1,22 +1,4 @@
-export interface IPart3Occupancy {
-  key: string
-  name: string
-  group: string
-  division: number | null
-  classificationDescription: string
-  allowedEnergySteps: number[]
-  allowedZeroCarbonLevels: number[]
-  provincialBaseline: { energyStep: number; zeroCarbonLevel: number | null }
-  bcbcTable: string | null
-  isConfigurable: boolean
-}
-
-export interface IPart3OccupancyGroup {
-  group: string
-  division: number | null
-  classificationDescription: string
-  occupancies: IPart3Occupancy[]
-}
+import { IPart3Occupancy, IPart3OccupancyGroup } from "../types/types"
 
 /**
  * Canonical reference table of Part 3 occupancies with Energy Step Code
