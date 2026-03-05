@@ -13,6 +13,7 @@ const roleColors: { [key in EUserRoles]: string } = {
   [EUserRoles.reviewManager]: "hover.blue",
   [EUserRoles.reviewer]: "greys.grey20",
   [EUserRoles.superAdmin]: "transparent",
+  [EUserRoles.technicalSupport]: "greys.grey20",
 }
 
 const roleBorderColors: { [key in EUserRoles]: string } = {
@@ -21,6 +22,7 @@ const roleBorderColors: { [key in EUserRoles]: string } = {
   [EUserRoles.reviewManager]: "focus",
   [EUserRoles.reviewer]: "greys.grey90",
   [EUserRoles.superAdmin]: "transparent",
+  [EUserRoles.technicalSupport]: "greys.grey90",
 }
 
 export const RoleTag = ({ role }: IRoleTagProps) => {

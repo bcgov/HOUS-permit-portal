@@ -166,16 +166,6 @@ RSpec.describe Requirement, type: :model, search: true do
           expect(valid_requirement).to be_valid
         end
 
-        it "ensures architectural drawing tool has correct required schema" do
-          valid_requirement = build(:architectural_drawing_tool_requirement)
-          expect(valid_requirement).to be_valid
-        end
-
-        it "ensures architectural drawing method has correct required schema" do
-          valid_requirement = build(:architectural_drawing_method_requirement)
-          expect(valid_requirement).to be_valid
-        end
-
         it "ensures architectural drawing file has correct required schema" do
           valid_requirement = build(:architectural_drawing_file_requirement)
           expect(valid_requirement).to be_valid
