@@ -5,7 +5,8 @@ RSpec.describe StepCode::Part3::V1::Performance::ResultsAsModelled do
       occupancy_classifications: occupancies,
       modelled_energy_outputs: build_list(:energy_output, 3, :modelled),
       generated_electricity: 0,
-      total_annual_thermal_energy_demand: 30_000
+      total_annual_thermal_energy_demand: 30_000,
+      step_code_annual_thermal_energy_demand: 30_000
     )
   end
 
