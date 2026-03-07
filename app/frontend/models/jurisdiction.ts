@@ -8,8 +8,10 @@ import { IExternalApiKeyParams } from "../types/api-request"
 import { EEnergyStep, EJurisdictionExternalApiState, EPreCheckServicePartner, EZeroCarbonStep } from "../types/enums"
 import {
   IContact,
+  IJurisdictionClimateZone,
   IJurisdictionServicePartnerEnrollment,
   IOption,
+  IPart3OccupancyRequiredStep,
   IPermitTypeRequiredStep,
   IPermitTypeSubmissionContact,
   IResource,
@@ -57,12 +59,14 @@ export const JurisdictionModel = types
       EJurisdictionExternalApiState.gOff
     ),
     permitTypeRequiredSteps: types.array(types.frozen<IPermitTypeRequiredStep>()),
+    part3OccupancyRequiredSteps: types.array(types.frozen<IPart3OccupancyRequiredStep>()),
     sandboxes: types.array(types.reference(SandboxModel)),
     resources: types.array(types.frozen<IResource>()),
     firstNation: types.optional(types.boolean, false),
     ltsaMatcher: types.maybeNull(types.string),
     servicePartnerEnrollments: types.array(types.frozen<IJurisdictionServicePartnerEnrollment>()),
     heatingDegreeDays: types.maybeNull(types.number),
+    jurisdictionClimateZones: types.array(types.frozen<IJurisdictionClimateZone>()),
   })
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -131,8 +135,6 @@ export const JurisdictionModel = types
   }))
   .views((self) => ({
     get part9RequiredSteps(): IPermitTypeRequiredStep[] {
-      // This assumes that the permitTypeRequiredSteps are all part 9
-      // Revisit this once adding part 3 required steps
       const nonDefaults = self.permitTypeRequiredSteps.filter((r) => !r.default)
       if (nonDefaults.length > 0) {
         return nonDefaults
@@ -144,6 +146,9 @@ export const JurisdictionModel = types
       }
 
       return []
+    },
+    part3RequiredStepsForOccupancy(occupancyKey: string): IPart3OccupancyRequiredStep[] {
+      return self.part3OccupancyRequiredSteps.filter((s) => s.occupancyKey === occupancyKey)
     },
   }))
   .actions((self) => ({
