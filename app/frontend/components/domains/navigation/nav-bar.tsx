@@ -17,6 +17,7 @@ import { NavBarMenu } from "./nav-bar-menu"
 import { RegionalRMJurisdictionSelect } from "./regional-rm-jurisdiction-select"
 import { SubNavBar } from "./sub-nav-bar"
 
+import { OverheatingCodeNavBar } from "../overheating-code/overheating-code-nav-bar"
 import { PreCheckNavBar } from "../pre-check/pre-check-nav-bar"
 import { StepCodeNavBar } from "../step-code/nav-bar"
 import { Part3NavLinks } from "../step-code/nav-bar/part-3-nav-links"
@@ -107,8 +108,8 @@ function isPreCheckPath(path: string): boolean {
   return regex.test(path)
 }
 
-function isSingleZoneCoolingHeatingToolPath(path: string): boolean {
-  const regex = /^\/overheating-tool\/[a-z\d-]+/
+function isOverheatingCodePath(path: string): boolean {
+  const regex = /^\/overheating-codes\/[a-f\d-]+/
   return regex.test(path)
 }
 
@@ -131,7 +132,7 @@ function shouldHideSubNavbarForPath(path: string): boolean {
     isStepCodePath,
     isAdminPath,
     isPreCheckPath,
-    isSingleZoneCoolingHeatingToolPath,
+    isOverheatingCodePath,
   ]
 
   return matchers.some((matcher) => matcher(path))
@@ -160,13 +161,8 @@ export const NavBar = observer(function NavBar() {
     }
   }
 
-  if (isSingleZoneCoolingHeatingToolPath(path)) {
-    return (
-      <StepCodeNavBar
-        title={t("singleZoneCoolingHeatingTool.title")}
-        NavLinks={null} // Or add custom links if needed
-      />
-    )
+  if (isOverheatingCodePath(path)) {
+    return <OverheatingCodeNavBar />
   }
 
   if (shouldHideFullNavBarForPath(path)) {
@@ -207,7 +203,7 @@ const NavBarContent = observer(function NavBarContent() {
       >
         <Container maxW="container.lg" p={2} px={{ base: 4, md: 8 }}>
           <Flex align="center" gap={2} w="full">
-            <RouterLink to="/welcome">
+            <RouterLink to="/">
               <Box w={120} mr={2}>
                 <Image
                   fit="contain"

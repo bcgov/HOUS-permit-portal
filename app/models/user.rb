@@ -100,7 +100,6 @@ class User < ApplicationRecord
            foreign_key: "deprecated_by_id",
            dependent: :nullify
 
-  has_many :overheating_tools, dependent: :destroy
   has_one :preference, dependent: :destroy
   accepts_nested_attributes_for :preference
 
@@ -251,6 +250,17 @@ class User < ApplicationRecord
     return :archived if discarded?
 
     super
+  end
+
+  def omniauth_provider_label
+    {
+      "bceidbasic" => "BCeID Basic",
+      "bceidbusiness" => "BCeID Business",
+      "digital-building-permit-5120" => "BC Services Card",
+      "idir" => "IDIR"
+    }[
+      omniauth_provider
+    ]
   end
 
   private

@@ -27,7 +27,7 @@ class RequirementTemplateSection < ApplicationRecord
     "section#{id}"
   end
 
-  def to_form_json
+  def to_form_json(block_section_key_map = {})
     {
       id: id,
       key: key,
@@ -38,7 +38,16 @@ class RequirementTemplateSection < ApplicationRecord
       hide_label: false,
       collapsible: false,
       initially_collapsed: false,
-      components: requirement_blocks.map { |rb| rb.to_form_json(key) }
+      components:
+        template_section_blocks
+          .includes(:requirement_block)
+          .map do |tsb|
+            tsb.requirement_block.to_form_json(
+              key,
+              block_conditional: tsb.conditional,
+              block_section_key_map: block_section_key_map
+            )
+          end
     }
   end
 end

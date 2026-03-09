@@ -7,6 +7,7 @@ import { GiveFeedbackMenuItem } from "./menu-items/give-feedback-menu-item"
 import { HelpMenuItem } from "./menu-items/help-menu-item"
 import { MyProfileMenuItem } from "./menu-items/my-profile-menu-item"
 import { MyProjectsMenuItem } from "./menu-items/my-projects-menu-item"
+import { WelcomeMenuItem } from "./menu-items/welcome-menu-item"
 import { MenuSection } from "./menu-section"
 import { UserInfoSection } from "./user-info-section"
 
@@ -25,6 +26,7 @@ export const SubmitterMenuContent = observer(() => {
 
       {/* Support section */}
       <MenuSection title={t("site.navMenu.sections.support")}>
+        <WelcomeMenuItem />
         <GiveFeedbackMenuItem />
         <HelpMenuItem />
       </MenuSection>

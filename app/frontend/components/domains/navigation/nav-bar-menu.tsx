@@ -165,7 +165,7 @@ export const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
       return <LoggedOutMenuContent />
     }
 
-    switch (currentUser.role) {
+    switch (currentUser?.role) {
       case EUserRoles.superAdmin:
         return <SuperAdminMenuContent />
 

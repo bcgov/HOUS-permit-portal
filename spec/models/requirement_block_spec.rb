@@ -114,6 +114,7 @@ RSpec.describe RequirementBlock, type: :model do
                 "input_type" => "energy_step_code",
                 "input_options" => {
                   "conditional" => {
+                    "operator" => "isEqual",
                     "eq" => "tool",
                     "show" => true,
                     "when" => "energy_step_code_method"
@@ -134,6 +135,7 @@ RSpec.describe RequirementBlock, type: :model do
                 "input_type" => "energy_step_code",
                 "input_options" => {
                   "conditional" => {
+                    "operator" => "isEqual",
                     "eq" => "tool",
                     "show" => true,
                     "when" => "energy_step_code_method"
@@ -149,6 +151,7 @@ RSpec.describe RequirementBlock, type: :model do
                 "input_type" => "energy_step_code",
                 "input_options" => {
                   "conditional" => {
+                    "operator" => "isEqual",
                     "eq" => "tool",
                     "show" => true,
                     "when" => "energy_step_code_method"
@@ -169,6 +172,7 @@ RSpec.describe RequirementBlock, type: :model do
                 "input_type" => "energy_step_code",
                 "input_options" => {
                   "conditional" => {
+                    "operator" => "isEqual",
                     "eq" => "tool",
                     "show" => true,
                     "when" => "energy_step_code_method"
@@ -184,6 +188,7 @@ RSpec.describe RequirementBlock, type: :model do
                 "input_type" => "energy_step_code",
                 "input_options" => {
                   "conditional" => {
+                    "operator" => "isEqual",
                     "eq" => "tool",
                     "show" => true,
                     "when" => "energy_step_code_method"
@@ -198,6 +203,7 @@ RSpec.describe RequirementBlock, type: :model do
                 "input_type" => "file",
                 "input_options" => {
                   "conditional" => {
+                    "operator" => "isEqual",
                     "eq" => "file",
                     "show" => true,
                     "when" => "energy_step_code_method"
@@ -217,6 +223,7 @@ RSpec.describe RequirementBlock, type: :model do
                 "input_type" => "energy_step_code",
                 "input_options" => {
                   "conditional" => {
+                    "operator" => "isEqual",
                     "eq" => "tool",
                     "show" => true,
                     "when" => "energy_step_code_method"
@@ -232,6 +239,7 @@ RSpec.describe RequirementBlock, type: :model do
                 "input_type" => "energy_step_code",
                 "input_options" => {
                   "conditional" => {
+                    "operator" => "isEqual",
                     "eq" => "tool",
                     "show" => true,
                     "when" => "energy_step_code_method"
@@ -247,6 +255,7 @@ RSpec.describe RequirementBlock, type: :model do
                 "input_type" => "file",
                 "input_options" => {
                   "conditional" => {
+                    "operator" => "isEqual",
                     "eq" => "file",
                     "show" => true,
                     "when" => "energy_step_code_method"
@@ -285,6 +294,7 @@ RSpec.describe RequirementBlock, type: :model do
                 "input_type" => "energy_step_code",
                 "input_options" => {
                   "conditional" => {
+                    "operator" => "isEqual",
                     "eq" => "tool",
                     "show" => true,
                     "when" => "energy_step_code_method"
@@ -299,6 +309,7 @@ RSpec.describe RequirementBlock, type: :model do
                 "input_type" => "file",
                 "input_options" => {
                   "conditional" => {
+                    "operator" => "isEqual",
                     "eq" => "file",
                     "show" => true,
                     "when" => "energy_step_code_method"
@@ -313,6 +324,7 @@ RSpec.describe RequirementBlock, type: :model do
                 "input_type" => "file",
                 "input_options" => {
                   "conditional" => {
+                    "operator" => "isEqual",
                     "eq" => "file",
                     "show" => true,
                     "when" => "energy_step_code_method"
@@ -327,6 +339,7 @@ RSpec.describe RequirementBlock, type: :model do
                 "input_type" => "file",
                 "input_options" => {
                   "conditional" => {
+                    "operator" => "isEqual",
                     "eq" => "file",
                     "show" => true,
                     "when" => "energy_step_code_method"
