@@ -12,7 +12,7 @@ class AutomatedComplianceConfigurationService
         "trigger" => "on_save",
         "value_on" => "compliance_data"
       },
-      available_on_input_types: ["file"],
+      available_on_input_types: %w[file architectural_drawing],
       type: :file_validator
     },
     ParcelInfoExtractor: {

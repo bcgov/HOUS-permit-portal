@@ -6,7 +6,6 @@ import {
   vancouverTimeZone,
 } from "../constants"
 import {
-  EArchitecturalDrawingDependencyRequirementCode,
   EEnergyStepCodeDependencyRequirementCode,
   EEnergyStepCodePart3DependencyRequirementCode,
   ERequirementType,
@@ -177,17 +176,25 @@ export function startBlobDownload(blobData: BlobPart, mimeType: string, fileName
   window.URL.revokeObjectURL(url)
 }
 
-export function isArchitecturalDrawingDependencyRequirementCode(
-  requirementCode?: string | null,
-  inputType?: ERequirementType
-): requirementCode is EArchitecturalDrawingDependencyRequirementCode {
-  if (inputType === ERequirementType.architecturalDrawing) return true
+export async function downloadFromApi(apiPath: string, fallbackFilename: string): Promise<void> {
+  const response = await fetch(apiPath, {
+    method: "GET",
+    headers: { "X-CSRF-Token": getCsrfToken() || "" },
+  })
 
-  if (!requirementCode) return false
+  if (!response.ok) throw new Error(`Download failed: ${response.statusText}`)
 
-  return Object.values(EArchitecturalDrawingDependencyRequirementCode).includes(
-    requirementCode as EArchitecturalDrawingDependencyRequirementCode
-  )
+  const blob = await response.blob()
+  const disposition = response.headers.get("Content-Disposition")
+  const match = disposition?.match(/filename="?(.+?)"?$/)
+  const filename = match?.[1] || fallbackFilename
+  const mimeType = response.headers.get("Content-Type") || "application/octet-stream"
+
+  startBlobDownload(blob, mimeType, filename)
+}
+
+export function isArchitecturalDrawingRequirement(inputType?: ERequirementType): boolean {
+  return inputType === ERequirementType.architecturalDrawing
 }
 
 export function isEnergyStepCodeDependencyRequirementCode(

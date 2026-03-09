@@ -20,10 +20,10 @@ import { IRequirementBlock } from "../../../../models/requirement-block"
 import { useMst } from "../../../../setup/root"
 import { IFormConditional, IRequirementAttributes, IRequirementBlockParams } from "../../../../types/api-request"
 import {
-  EArchitecturalDrawingDependencyRequirementCode,
   EConditionalOperator,
   EEnergyStepCodeDependencyRequirementCode,
   EEnergyStepCodePart3DependencyRequirementCode,
+  ERequirementType,
   EVisibility,
 } from "../../../../types/enums"
 import { IDenormalizedRequirementBlock, TAutoComplianceModuleConfigurations } from "../../../../types/types"
@@ -124,9 +124,7 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
         Object.values(EEnergyStepCodePart3DependencyRequirementCode).includes(
           ra.requirementCode as EEnergyStepCodePart3DependencyRequirementCode
         ) ||
-        Object.values(EArchitecturalDrawingDependencyRequirementCode).includes(
-          ra.requirementCode as EArchitecturalDrawingDependencyRequirementCode
-        )
+        ra.inputType === ERequirementType.architecturalDrawing
 
       const cond = ra.inputOptions.conditional as IFormConditional
       const isValuelessOp = [EConditionalOperator.isEmpty, EConditionalOperator.isNotEmpty].includes(cond?.operator)
