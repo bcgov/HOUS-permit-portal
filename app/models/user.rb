@@ -252,6 +252,17 @@ class User < ApplicationRecord
     super
   end
 
+  def omniauth_provider_label
+    {
+      "bceidbasic" => "BCeID Basic",
+      "bceidbusiness" => "BCeID Business",
+      "digital-building-permit-5120" => "BC Services Card",
+      "idir" => "IDIR"
+    }[
+      omniauth_provider
+    ]
+  end
+
   private
 
   def should_revoke_jwt_allowlist?
