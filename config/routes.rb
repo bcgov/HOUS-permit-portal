@@ -272,6 +272,11 @@ Rails.application.routes.draw do
       get "pdf_report_url", on: :member
     end
 
+    resources :overheating_codes, only: %i[index show create update destroy] do
+      get "generate_pdf", on: :member
+      patch "restore", on: :member
+    end
+
     resources :report_documents, only: [] do
       post "share_with_jurisdiction",
            on: :member,

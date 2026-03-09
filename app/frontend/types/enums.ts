@@ -735,6 +735,24 @@ export enum EPreCheckAssessmentResult {
   failed = "failed",
 }
 
+export enum EOverheatingCodeStatus {
+  draft = "draft",
+  submitted = "submitted",
+}
+
+export enum EOverheatingCodeSortFields {
+  issuedTo = "issued_to",
+  projectNumber = "project_number",
+  buildingModel = "building_model",
+  fullAddress = "full_address",
+}
+
+// [OVERHEATING TODO] Units field purpose unclear — btuh is already labeled on the capacity input
+export enum EOverheatingCodeCoolingZoneUnits {
+  imperial = "imperial",
+  metric = "metric",
+}
+
 export enum EGeneralContactType {
   adjacentOwner = "adjacentOwner",
   applicant = "applicant",

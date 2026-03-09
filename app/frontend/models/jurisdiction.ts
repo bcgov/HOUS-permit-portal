@@ -66,6 +66,8 @@ export const JurisdictionModel = types
     ltsaMatcher: types.maybeNull(types.string),
     servicePartnerEnrollments: types.array(types.frozen<IJurisdictionServicePartnerEnrollment>()),
     heatingDegreeDays: types.maybeNull(types.number),
+    weatherLocation: types.maybeNull(types.string),
+    designSummerTemp: types.maybeNull(types.number),
     jurisdictionClimateZones: types.array(types.frozen<IJurisdictionClimateZone>()),
   })
   .extend(withEnvironment())

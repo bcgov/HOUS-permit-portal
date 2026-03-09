@@ -17,6 +17,7 @@ import {
 import { GeocoderStoreModel, IGeocoderStore } from "./geocoder-store"
 import { IJurisdictionStore, JurisdictionStoreModel } from "./jurisdiction-store"
 import { INotificationStore, NotificationStoreModel } from "./notification-store"
+import { IOverheatingCodeStore, OverheatingCodeStoreModel } from "./overheating-code-store"
 import { IPermitApplicationStore, PermitApplicationStoreModel } from "./permit-application-store"
 import { IPermitClassificationStore, PermitClassificationStoreModel } from "./permit-classification-store"
 import { IPermitProjectStore, PermitProjectStoreModel } from "./permit-project-store"
@@ -41,6 +42,7 @@ export const RootStoreModel = types
     permitProjectStore: types.optional(PermitProjectStoreModel, {}),
     permitClassificationStore: types.optional(PermitClassificationStoreModel, {}),
     preCheckStore: types.optional(PreCheckStoreModel, {}),
+    overheatingCodeStore: types.optional(OverheatingCodeStoreModel, {}),
     jurisdictionStore: types.optional(JurisdictionStoreModel, {}),
     requirementBlockStore: types.optional(RequirementBlockStoreModel, {}),
     earlyAccessRequirementBlockStore: types.optional(EarlyAccessRequirementBlockStoreModel, {}),
@@ -119,6 +121,7 @@ export interface IRootStore extends IStateTreeNode {
   permitProjectStore: IPermitProjectStore
   permitClassificationStore: IPermitClassificationStore
   preCheckStore: IPreCheckStore
+  overheatingCodeStore: IOverheatingCodeStore
   jurisdictionStore: IJurisdictionStore
   userStore: IUserStore
   earlyAccessRequirementBlockStore: IEarlyAccessRequirementBlockStoreModel
