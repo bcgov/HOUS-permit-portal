@@ -37,8 +37,8 @@ module Infrastructure
 
     def call
       unless ENV["IMPORT_ENABLED"] == "true"
-        puts "IMPORT NOT ENABLED, PLEASE SET IMPORT_ENABLED=true IN ENV" and
-          return
+        puts "IMPORT NOT ENABLED, PLEASE SET IMPORT_ENABLED=true IN ENV"
+        return
       end
 
       # Wrap the entire import process in a transaction
