@@ -6,7 +6,6 @@ import {
   vancouverTimeZone,
 } from "../constants"
 import {
-  EArchitecturalDrawingDependencyRequirementCode,
   EEnergyStepCodeDependencyRequirementCode,
   EEnergyStepCodePart3DependencyRequirementCode,
   ERequirementType,
@@ -194,17 +193,8 @@ export async function downloadFromApi(apiPath: string, fallbackFilename: string)
   startBlobDownload(blob, mimeType, filename)
 }
 
-export function isArchitecturalDrawingDependencyRequirementCode(
-  requirementCode?: string | null,
-  inputType?: ERequirementType
-): requirementCode is EArchitecturalDrawingDependencyRequirementCode {
-  if (inputType === ERequirementType.architecturalDrawing) return true
-
-  if (!requirementCode) return false
-
-  return Object.values(EArchitecturalDrawingDependencyRequirementCode).includes(
-    requirementCode as EArchitecturalDrawingDependencyRequirementCode
-  )
+export function isArchitecturalDrawingRequirement(inputType?: ERequirementType): boolean {
+  return inputType === ERequirementType.architecturalDrawing
 }
 
 export function isEnergyStepCodeDependencyRequirementCode(

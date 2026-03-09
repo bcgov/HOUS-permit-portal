@@ -660,6 +660,19 @@ export interface IPermitTypeRequiredStep {
   activityName?: string
 }
 
+export interface IPart3OccupancyRequiredStep {
+  id?: string
+  occupancyKey: string
+  energyStepRequired: number
+  zeroCarbonStepRequired: number | null
+}
+
+export interface IJurisdictionClimateZone {
+  id?: string
+  climateZone: string
+  heatingDegreeDays: number | null
+}
+
 export type TCreateRequirementTemplateFormData = {
   description: string
   firstNations?: boolean
@@ -836,7 +849,27 @@ export interface IPart3ComplianceReport {
   performance: IPart3ComplianceReportPerformance
 }
 
-interface IFormIOComponent {
+export interface IPart3Occupancy {
+  key: string
+  name: string
+  group: string
+  division: number | null
+  classificationDescription: string
+  allowedEnergySteps: number[]
+  allowedZeroCarbonLevels: number[]
+  provincialBaseline: { energyStep: number; zeroCarbonLevel: number | null }
+  bcbcTable: string | null
+  isConfigurable: boolean
+}
+
+export interface IPart3OccupancyGroup {
+  group: string
+  division: number | null
+  classificationDescription: string
+  occupancies: IPart3Occupancy[]
+}
+
+export interface IFormIOComponent {
   type: string
   key: string
   id?: string

@@ -412,12 +412,6 @@ export enum EEnergyStepCodePart3DependencyRequirementCode {
   energyStepCodeReportFile = "energy_step_code_report_file",
 }
 
-export enum EArchitecturalDrawingDependencyRequirementCode {
-  architecturalDrawingMethod = "architectural_drawing_method",
-  architecturalDrawingTool = "architectural_drawing_tool",
-  architecturalDrawingFile = "architectural_drawing_file",
-}
-
 export enum EAutoComplianceModule {
   DigitalSealValidator = "DigitalSealValidator",
   ParcelInfoExtractor = "ParcelInfoExtractor",

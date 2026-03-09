@@ -49,12 +49,18 @@ class Wrappers::Archistar < Wrappers::Base
       cityKey: "bcbc",
       address: pre_check.formatted_address,
       fileLink:
-        doc.file.url(
-          response_content_disposition:
-            ActionDispatch::Http::ContentDisposition.format(
-              disposition: "attachment",
-              filename: doc.file.original_filename
+        (
+          if Rails.env.development?
+            ENV["PRE_CHECK_FILE_OVERRIDE_URL"]
+          else
+            doc.file.url(
+              response_content_disposition:
+                ActionDispatch::Http::ContentDisposition.format(
+                  disposition: "attachment",
+                  filename: doc.file.original_filename
+                )
             )
+          end
         ),
       additionalFiles: []
     }
