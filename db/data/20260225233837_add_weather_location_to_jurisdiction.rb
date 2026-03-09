@@ -123,6 +123,7 @@ class AddWeatherLocationToJurisdiction < ActiveRecord::Migration[7.2]
         design_summer_temp: design_temp
       )
     end
+    OverheatingCode.reindex
   end
 
   def down

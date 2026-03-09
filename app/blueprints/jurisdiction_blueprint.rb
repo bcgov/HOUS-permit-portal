@@ -29,8 +29,11 @@ class JurisdictionBlueprint < Blueprinter::Base
            :first_nation,
            :ltsa_matcher,
            :heating_degree_days,
-           :weather_location,
-           :design_summer_temp
+           :weather_location
+
+    field :design_summer_temp do |jurisdiction, _options|
+      jurisdiction.design_summer_temp&.to_f
+    end
 
     field :external_api_enabled do |jurisdiction, _options|
       jurisdiction.external_api_enabled?
