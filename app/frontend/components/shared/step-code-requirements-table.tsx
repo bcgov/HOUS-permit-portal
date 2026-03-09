@@ -27,7 +27,7 @@ export const StepCodeRequirementsTable: React.FC<IStepCodeRequirementsTableProps
   if (!part9RequiredSteps) return <SharedSpinner />
 
   return (
-    <Flex direction="column" gap={4}>
+    <Flex direction="column" gap={4} w="50%">
       <Accordion allowToggle defaultIndex={[0]}>
         <AccordionItem borderWidth={1} borderColor="border.light" rounded="sm">
           <AccordionButton bg="greys.grey03" fontWeight="bold">

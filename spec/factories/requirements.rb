@@ -18,6 +18,7 @@ FactoryBot.define do
       input_options do
         {
           "conditional" => {
+            "operator" => "isEqual",
             "eq" => "tool",
             "show" => true,
             "when" => "energy_step_code_method"
@@ -33,6 +34,7 @@ FactoryBot.define do
       input_options do
         {
           "conditional" => {
+            "operator" => "isEqual",
             "eq" => "tool",
             "show" => true,
             "when" => "energy_step_code_method"
@@ -79,6 +81,7 @@ FactoryBot.define do
       input_options do
         {
           "conditional" => {
+            "operator" => "isEqual",
             "eq" => "file",
             "show" => true,
             "when" => "energy_step_code_method"
@@ -93,6 +96,7 @@ FactoryBot.define do
       input_options do
         {
           "conditional" => {
+            "operator" => "isEqual",
             "eq" => "file",
             "show" => true,
             "when" => "energy_step_code_method"

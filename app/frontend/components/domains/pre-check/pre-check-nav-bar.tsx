@@ -20,7 +20,7 @@ export const PreCheckNavBar = observer(function PreCheckNavBar() {
       gap={6}
       zIndex={1500}
     >
-      <RouterLink to="/welcome">
+      <RouterLink to="/">
         <Box w={120} mr={2}>
           <Image fit="contain" htmlHeight="64px" htmlWidth="166px" alt={t("site.linkHome")} src={"/images/logo.svg"} />
         </Box>

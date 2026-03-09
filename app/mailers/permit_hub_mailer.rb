@@ -425,12 +425,8 @@ class PermitHubMailer < ApplicationMailer
   end
 
   def login_type_label(user)
-    provider = user.omniauth_provider.to_s
-    return "BCeID" if provider.start_with?("bceid")
-    return "BC Services Card" if provider == "digital-building-permit-5120"
-    return "IDIR" if provider == "idir"
-
-    provider.titleize
+    user.omniauth_provider_label || user.omniauth_provider.to_s.titleize ||
+      "Unknown"
   end
 
   def login_identifier(user)
