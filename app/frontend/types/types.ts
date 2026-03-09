@@ -492,6 +492,7 @@ export type TConditional = {
   show: boolean
   when: string
   eq: string
+  operator: string
 }
 
 export interface ILinkItem {
