@@ -65,7 +65,7 @@ export const H2KImport = function StepCodeH2kImport() {
       const created = getStepCode(result.data.id) as any
       const targetPath = created?.targetPath
       if (created) {
-        navigate(targetPath)
+        navigate(targetPath, { replace: true })
       }
     }
   }
