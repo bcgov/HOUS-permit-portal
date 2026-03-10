@@ -1,5 +1,4 @@
 import {
-  Button,
   Flex,
   FormControl,
   FormHelperText,
@@ -17,11 +16,10 @@ import { observer } from "mobx-react-lite"
 import React, { useEffect, useMemo, useState } from "react"
 import { useForm } from "react-hook-form"
 import { Trans } from "react-i18next"
-import { useNavigate } from "react-router-dom"
 import { usePart3StepCode } from "../../../../../hooks/resources/use-part-3-step-code"
 import { EFlashMessageStatus } from "../../../../../types/enums"
 import { CustomMessageBox } from "../../../../shared/base/custom-message-box"
-import { usePart3Navigation } from "../use-part-3-navigation"
+import { Part3FormFooter } from "./shared/form-footer"
 import { SectionHeading } from "./shared/section-heading"
 
 export const RenewableEnergy = observer(function Part3StepCodeFormRenewableEnergy() {
@@ -32,9 +30,6 @@ export const RenewableEnergy = observer(function Part3StepCodeFormRenewableEnerg
     !!checklist.generatedElectricity ? "yes" : checklist.isComplete("renewableEnergy") && "no"
   )
 
-  const navigate = useNavigate()
-  const { navigateToNext, goBackPath } = usePart3Navigation()
-
   const { handleSubmit, formState, resetField, reset, register, watch } = useForm({
     mode: "onSubmit",
     defaultValues: {
@@ -44,36 +39,23 @@ export const RenewableEnergy = observer(function Part3StepCodeFormRenewableEnerg
   const watchGeneratedElectricity = watch("generatedElectricity")
   const { isSubmitting, isValid, isSubmitted, errors } = formState
 
-  const onSubmit = async (values, event: React.BaseSyntheticEvent) => {
+  const onSubmit = async (values) => {
     if (!checklist) return
-
-    const saveAndGoBack = (event?.nativeEvent as CustomEvent)?.detail?.saveAndGoBack
-
-    let updateSucceeded = false
     if (!isValid) return
+
     if (isRelevant == "no") {
       const updated =
         !checklist.generatedElectricity ||
         (await checklist.update({
           generatedElectricity: null,
         }))
-      if (!updated) return
-      updateSucceeded = true
+      if (!updated) throw new Error("Save failed")
     } else {
       const updated = await checklist.update(values)
-      if (!updated) return
-      updateSucceeded = true
+      if (!updated) throw new Error("Save failed")
     }
 
-    if (updateSucceeded) {
-      await checklist.completeSection("renewableEnergy")
-
-      if (saveAndGoBack) {
-        navigate(goBackPath)
-      } else {
-        navigateToNext()
-      }
-    }
+    await checklist.completeSection("renewableEnergy")
   }
 
   useEffect(() => {
@@ -106,69 +88,59 @@ export const RenewableEnergy = observer(function Part3StepCodeFormRenewableEnerg
         )}
         <SectionHeading>{t(`${i18nPrefix}.heading`)}</SectionHeading>
       </Flex>
-      <form onSubmit={handleSubmit(onSubmit)} name="part3SectionForm">
-        <Flex direction="column" gap={{ base: 6, xl: 6 }} pb={4}>
-          <FormControl>
-            <FormLabel>{t(`${i18nPrefix}.isRelevant`)}</FormLabel>
-            <RadioGroup onChange={setIsRelevant} value={isRelevant}>
-              <Stack spacing={5} direction="row">
-                <Radio variant="binary" value={"yes"}>
-                  {t("ui.yes")}
-                </Radio>
-                <Radio variant="binary" value={"no"}>
-                  {t("ui.no")}
-                </Radio>
-              </Stack>
-            </RadioGroup>
-          </FormControl>
-          {isRelevant == "yes" ? (
-            <>
-              <FormControl>
-                <FormLabel>{t(`${i18nPrefix}.generatedElectricity.label`)}</FormLabel>
-                <FormHelperText mb={1} mt={0} color="semantic.error">
-                  <ErrorMessage errors={errors} name="generatedElectricity" />
-                </FormHelperText>
-                <InputGroup maxW={"200px"}>
-                  <Input
-                    type="number"
-                    step="any"
-                    {...register("generatedElectricity", { required: t(`${i18nPrefix}.generatedElectricity.error`) })}
-                  />
-                  <InputRightElement>{t(`${i18nPrefix}.generatedElectricity.units`)}</InputRightElement>
-                </InputGroup>
-              </FormControl>
-              <FormControl>
-                <FormLabel>{t(`${i18nPrefix}.percentOfUse.label`)}</FormLabel>
-                <FormHelperText mb={1} mt={0}>
-                  {t(`${i18nPrefix}.percentOfUse.hint`)}
-                </FormHelperText>
-                <InputGroup maxW={"200px"}>
-                  <Input value={percentOfUse || "-"} isDisabled />
-                  <InputRightElement>{t(`${i18nPrefix}.percentOfUse.units`)}</InputRightElement>
-                </InputGroup>
-              </FormControl>
-              <FormControl>
-                <FormLabel>
-                  <Trans i18nKey={`${i18nPrefix}.adjustedEF.label`} components={{ sub: <sub /> }} />
-                </FormLabel>
-                <FormHelperText mb={1} mt={0}>
-                  {t(`${i18nPrefix}.adjustedEF.hint`)}
-                </FormHelperText>
-                <Input maxW={"200px"} value={adjustedElectricityEF || "-"} isDisabled />
-              </FormControl>
-              <FormControl>
-                <Button type="submit" variant="primary" isLoading={isSubmitting} isDisabled={isSubmitting}>
-                  {t("stepCode.part3.cta")}
-                </Button>
-              </FormControl>
-            </>
-          ) : isRelevant == "no" ? (
-            <Button type="submit" variant="primary" isLoading={isSubmitting} isDisabled={isSubmitting}>
-              {t("stepCode.part3.cta")}
-            </Button>
-          ) : null}
-        </Flex>
-      </form>
+      <Flex direction="column" gap={{ base: 6, xl: 6 }} pb={4}>
+        <FormControl>
+          <FormLabel>{t(`${i18nPrefix}.isRelevant`)}</FormLabel>
+          <RadioGroup onChange={setIsRelevant} value={isRelevant}>
+            <Stack spacing={5} direction="row">
+              <Radio variant="binary" value={"yes"}>
+                {t("ui.yes")}
+              </Radio>
+              <Radio variant="binary" value={"no"}>
+                {t("ui.no")}
+              </Radio>
+            </Stack>
+          </RadioGroup>
+        </FormControl>
+        {isRelevant == "yes" ? (
+          <>
+            <FormControl>
+              <FormLabel>{t(`${i18nPrefix}.generatedElectricity.label`)}</FormLabel>
+              <FormHelperText mb={1} mt={0} color="semantic.error">
+                <ErrorMessage errors={errors} name="generatedElectricity" />
+              </FormHelperText>
+              <InputGroup maxW={"200px"}>
+                <Input
+                  type="number"
+                  step="any"
+                  {...register("generatedElectricity", { required: t(`${i18nPrefix}.generatedElectricity.error`) })}
+                />
+                <InputRightElement>{t(`${i18nPrefix}.generatedElectricity.units`)}</InputRightElement>
+              </InputGroup>
+            </FormControl>
+            <FormControl>
+              <FormLabel>{t(`${i18nPrefix}.percentOfUse.label`)}</FormLabel>
+              <FormHelperText mb={1} mt={0}>
+                {t(`${i18nPrefix}.percentOfUse.hint`)}
+              </FormHelperText>
+              <InputGroup maxW={"200px"}>
+                <Input value={percentOfUse || "-"} isDisabled />
+                <InputRightElement>{t(`${i18nPrefix}.percentOfUse.units`)}</InputRightElement>
+              </InputGroup>
+            </FormControl>
+            <FormControl>
+              <FormLabel>
+                <Trans i18nKey={`${i18nPrefix}.adjustedEF.label`} components={{ sub: <sub /> }} />
+              </FormLabel>
+              <FormHelperText mb={1} mt={0}>
+                {t(`${i18nPrefix}.adjustedEF.hint`)}
+              </FormHelperText>
+              <Input maxW={"200px"} value={adjustedElectricityEF || "-"} isDisabled />
+            </FormControl>
+          </>
+        ) : null}
+        {!!isRelevant && <Part3FormFooter handleSubmit={handleSubmit} onSubmit={onSubmit} isLoading={isSubmitting} />}
+      </Flex>
     </>
   )
 })

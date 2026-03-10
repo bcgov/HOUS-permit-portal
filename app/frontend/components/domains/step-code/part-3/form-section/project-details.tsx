@@ -1,5 +1,4 @@
 import {
-  Button,
   Center,
   Flex,
   FormControl,
@@ -20,13 +19,13 @@ import * as R from "ramda"
 import React, { useEffect, useState } from "react"
 import { Controller, FormProvider, useForm } from "react-hook-form"
 import { Trans } from "react-i18next"
-import { useNavigate, useParams } from "react-router-dom"
+import { useParams } from "react-router-dom"
 import { usePart3StepCode } from "../../../../../hooks/resources/use-part-3-step-code"
 import { IOption } from "../../../../../types/types"
 import { SharedSpinner } from "../../../../shared/base/shared-spinner"
 import { DatePickerFormControl } from "../../../../shared/form/input-form-control"
 import { SitesSelect } from "../../../../shared/select/selectors/sites-select"
-import { usePart3Navigation } from "../use-part-3-navigation"
+import { Part3FormFooter } from "./shared/form-footer"
 import { SectionHeading } from "./shared/section-heading"
 
 interface IProjectDetailsForm {
@@ -42,9 +41,6 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
   const i18nPrefix = "stepCode.part3.projectDetails"
   const { permitApplicationId } = useParams()
   const { checklist, currentStepCode } = usePart3StepCode()
-
-  const navigate = useNavigate()
-  const { navigateToNext, goBackPath } = usePart3Navigation()
 
   const getDefaultValues = (): IProjectDetailsForm => {
     return {
@@ -78,10 +74,8 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
     }
   }, [checklist, currentStepCode, reset])
 
-  const onSubmit = async (data: IProjectDetailsForm, event: React.BaseSyntheticEvent) => {
+  const onSubmit = async (data: IProjectDetailsForm) => {
     if (!checklist || !currentStepCode) return
-
-    const saveAndGoBack = (event?.nativeEvent as CustomEvent)?.detail?.saveAndGoBack
 
     if (editable) {
       await (currentStepCode as any).update({
@@ -93,13 +87,7 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
       })
     }
     const sectionCompleteSucceeded = await checklist.completeSection("projectDetails")
-    if (sectionCompleteSucceeded) {
-      if (saveAndGoBack) {
-        navigate(goBackPath)
-      } else {
-        navigateToNext()
-      }
-    }
+    if (!sectionCompleteSucceeded) throw new Error("Save failed")
   }
 
   if (!checklist || !currentStepCode) {
@@ -119,159 +107,155 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
         <Text fontSize="md">{t(`${i18nPrefix}.instructions`)}</Text>
       </Flex>
       <FormProvider {...formMethods}>
-        <form onSubmit={handleSubmit(onSubmit)} name="part3SectionForm">
-          <Flex direction="column" gap={{ base: 6, xl: 6 }} pb={4}>
-            {!editable && <Field label={t(`${i18nPrefix}.name`)} value={currentStepCode.title} />}
+        <Flex direction="column" gap={{ base: 6, xl: 6 }} pb={4}>
+          {!editable && <Field label={t(`${i18nPrefix}.name`)} value={currentStepCode.title} />}
 
-            <Flex gap={{ base: 6, xl: 6 }} direction="column">
-              <Flex gap={2} alignItems="flex-end">
-                <Flex direction="column" gap={4} w="full">
-                  <FormControl isInvalid={editable && !!errors.fullAddress}>
-                    {editable ? (
-                      editingAddress || !currentStepCode.fullAddress ? (
-                        <Controller
-                          name="site"
-                          control={control}
-                          render={({ field: { onChange, value } }) => (
-                            <SitesSelect
-                              onChange={(opt) => {
-                                onChange(opt)
-                                setValue("fullAddress", opt?.label || "")
-                              }}
-                              selectedOption={value}
-                              menuPortalTarget={document.body}
-                            />
-                          )}
-                        />
-                      ) : (
-                        <Flex direction="column" gap={2}>
-                          <FormLabel>{t(`${i18nPrefix}.address`)}</FormLabel>
-                          <Flex gap={2} alignItems="center">
-                            <InputGroup>
-                              <InputLeftElement pointerEvents="none">
-                                <MapPin />
-                              </InputLeftElement>
-                              <Input isDisabled value={currentStepCode.fullAddress || ""} />
-                            </InputGroup>
-                          </Flex>
-                        </Flex>
-                      )
+          <Flex gap={{ base: 6, xl: 6 }} direction="column">
+            <Flex gap={2} alignItems="flex-end">
+              <Flex direction="column" gap={4} w="full">
+                <FormControl isInvalid={editable && !!errors.fullAddress}>
+                  {editable ? (
+                    editingAddress || !currentStepCode.fullAddress ? (
+                      <Controller
+                        name="site"
+                        control={control}
+                        render={({ field: { onChange, value } }) => (
+                          <SitesSelect
+                            onChange={(opt) => {
+                              onChange(opt)
+                              setValue("fullAddress", opt?.label || "")
+                            }}
+                            selectedOption={value}
+                            menuPortalTarget={document.body}
+                          />
+                        )}
+                      />
                     ) : (
                       <Flex direction="column" gap={2}>
                         <FormLabel>{t(`${i18nPrefix}.address`)}</FormLabel>
-                        <InputGroup>
-                          <InputLeftElement pointerEvents="none">
-                            <MapPin />
-                          </InputLeftElement>
-                          <Input isDisabled value={currentStepCode.fullAddress || ""} />
-                        </InputGroup>
+                        <Flex gap={2} alignItems="center">
+                          <InputGroup>
+                            <InputLeftElement pointerEvents="none">
+                              <MapPin />
+                            </InputLeftElement>
+                            <Input isDisabled value={currentStepCode.fullAddress || ""} />
+                          </InputGroup>
+                        </Flex>
                       </Flex>
-                    )}
-                    {editable && <FormErrorMessage>{errors.fullAddress?.message}</FormErrorMessage>}
-                  </FormControl>
-                </Flex>
-              </Flex>
-              {editable && (
-                // keep fullAddress in form state when using the SitesSelect
-                <input type="hidden" {...register("fullAddress")} />
-              )}
-
-              {!editable && (
-                <FormControl flex={1}>
-                  <FormLabel>{t(`${i18nPrefix}.jurisdiction`)}</FormLabel>
-                  <Input
-                    isDisabled
-                    value={currentStepCode.jurisdictionName || currentStepCode.jurisdiction?.qualifiedName || ""}
-                  />
+                    )
+                  ) : (
+                    <Flex direction="column" gap={2}>
+                      <FormLabel>{t(`${i18nPrefix}.address`)}</FormLabel>
+                      <InputGroup>
+                        <InputLeftElement pointerEvents="none">
+                          <MapPin />
+                        </InputLeftElement>
+                        <Input isDisabled value={currentStepCode.fullAddress || ""} />
+                      </InputGroup>
+                    </Flex>
+                  )}
+                  {editable && <FormErrorMessage>{errors.fullAddress?.message}</FormErrorMessage>}
                 </FormControl>
-              )}
-            </Flex>
-
-            <Flex gap={{ base: 6, xl: 6 }} direction={{ base: "column", xl: "row" }}>
-              <Flex
-                gap={{ base: 6, xl: 6 }}
-                width={{ base: "auto", xl: "430px" }}
-                direction={{ base: "column", lg: "row" }}
-              >
-                {editable ? (
-                  <FormControl>
-                    <FormLabel htmlFor="referenceNumber">{t(`${i18nPrefix}.identifier`)}</FormLabel>
-                    <Input
-                      id="referenceNumber"
-                      {...register("referenceNumber")}
-                      defaultValue={currentStepCode.referenceNumber || ""}
-                    />
-                  </FormControl>
-                ) : (
-                  <Field label={t(`${i18nPrefix}.identifier`)} value={currentStepCode.referenceNumber} />
-                )}
-                {editable ? (
-                  <FormControl>
-                    <FormLabel htmlFor="phase">{t(`${i18nPrefix}.stage`)}</FormLabel>
-                    <Select
-                      id="phase"
-                      placeholder="Select stage"
-                      {...register("phase")}
-                      defaultValue={currentStepCode.phase || ""}
-                    >
-                      <option value="pre_construction">
-                        {t("stepCodeChecklist.edit.projectInfo.stages.pre_construction")}
-                      </option>
-                      <option value="mid_construction">
-                        {t("stepCodeChecklist.edit.projectInfo.stages.mid_construction")}
-                      </option>
-                      <option value="as_built">{t("stepCodeChecklist.edit.projectInfo.stages.as_built")}</option>
-                    </Select>
-                  </FormControl>
-                ) : (
-                  <Field label={t(`${i18nPrefix}.stage`)} value={currentStepCode.phase} />
-                )}
               </Flex>
-              {editable ? (
-                <DatePickerFormControl
-                  flex={1}
-                  label={t(`${i18nPrefix}.date`) as string}
-                  fieldName="permitDate"
-                  showOptional={false}
-                />
-              ) : (
-                <DatePickerFormControl
-                  flex={1}
-                  label={t(`${i18nPrefix}.date`) as string}
-                  fieldName="permitDate"
-                  showOptional={false}
-                  inputProps={{
-                    readOnly: true,
-                  }}
-                  isReadOnly
-                />
-              )}
             </Flex>
-            <Field
-              maxWidth={{ base: "none", xl: "430px" }}
-              label={t(`${i18nPrefix}.version`)}
-              value={t(`${i18nPrefix}.buildingCodeVersions.${checklist.buildingCodeVersion}`)}
-            />
-            <Flex direction="column" gap={2}>
-              <Text fontSize="md" fontWeight="bold">
-                {t(`${i18nPrefix}.confirm`)}
-              </Text>
-              <Button type="submit" variant="primary" isLoading={isSubmitting} isDisabled={isSubmitting}>
-                {t("stepCode.part3.cta")}
-              </Button>
-            </Flex>
+            {editable && (
+              // keep fullAddress in form state when using the SitesSelect
+              <input type="hidden" {...register("fullAddress")} />
+            )}
+
             {!editable && (
-              <Text fontSize="md">
-                <Trans
-                  i18nKey={`${i18nPrefix}.modify`}
-                  components={{
-                    1: <Link href={`/permit-applications/${permitApplicationId}/edit`} />,
-                  }}
+              <FormControl flex={1}>
+                <FormLabel>{t(`${i18nPrefix}.jurisdiction`)}</FormLabel>
+                <Input
+                  isDisabled
+                  value={currentStepCode.jurisdictionName || currentStepCode.jurisdiction?.qualifiedName || ""}
                 />
-              </Text>
+              </FormControl>
             )}
           </Flex>
-        </form>
+
+          <Flex gap={{ base: 6, xl: 6 }} direction={{ base: "column", xl: "row" }}>
+            <Flex
+              gap={{ base: 6, xl: 6 }}
+              width={{ base: "auto", xl: "430px" }}
+              direction={{ base: "column", lg: "row" }}
+            >
+              {editable ? (
+                <FormControl>
+                  <FormLabel htmlFor="referenceNumber">{t(`${i18nPrefix}.identifier`)}</FormLabel>
+                  <Input
+                    id="referenceNumber"
+                    {...register("referenceNumber")}
+                    defaultValue={currentStepCode.referenceNumber || ""}
+                  />
+                </FormControl>
+              ) : (
+                <Field label={t(`${i18nPrefix}.identifier`)} value={currentStepCode.referenceNumber} />
+              )}
+              {editable ? (
+                <FormControl>
+                  <FormLabel htmlFor="phase">{t(`${i18nPrefix}.stage`)}</FormLabel>
+                  <Select
+                    id="phase"
+                    placeholder="Select stage"
+                    {...register("phase")}
+                    defaultValue={currentStepCode.phase || ""}
+                  >
+                    <option value="pre_construction">
+                      {t("stepCodeChecklist.edit.projectInfo.stages.pre_construction")}
+                    </option>
+                    <option value="mid_construction">
+                      {t("stepCodeChecklist.edit.projectInfo.stages.mid_construction")}
+                    </option>
+                    <option value="as_built">{t("stepCodeChecklist.edit.projectInfo.stages.as_built")}</option>
+                  </Select>
+                </FormControl>
+              ) : (
+                <Field label={t(`${i18nPrefix}.stage`)} value={currentStepCode.phase} />
+              )}
+            </Flex>
+            {editable ? (
+              <DatePickerFormControl
+                flex={1}
+                label={t(`${i18nPrefix}.date`) as string}
+                fieldName="permitDate"
+                showOptional={false}
+              />
+            ) : (
+              <DatePickerFormControl
+                flex={1}
+                label={t(`${i18nPrefix}.date`) as string}
+                fieldName="permitDate"
+                showOptional={false}
+                inputProps={{
+                  readOnly: true,
+                }}
+                isReadOnly
+              />
+            )}
+          </Flex>
+          <Field
+            maxWidth={{ base: "none", xl: "430px" }}
+            label={t(`${i18nPrefix}.version`)}
+            value={t(`${i18nPrefix}.buildingCodeVersions.${checklist.buildingCodeVersion}`)}
+          />
+          <Flex direction="column" gap={2}>
+            <Text fontSize="md" fontWeight="bold">
+              {t(`${i18nPrefix}.confirm`)}
+            </Text>
+            <Part3FormFooter handleSubmit={handleSubmit} onSubmit={onSubmit} isLoading={isSubmitting} />
+          </Flex>
+          {!editable && (
+            <Text fontSize="md">
+              <Trans
+                i18nKey={`${i18nPrefix}.modify`}
+                components={{
+                  1: <Link href={`/permit-applications/${permitApplicationId}/edit`} />,
+                }}
+              />
+            </Text>
+          )}
+        </Flex>
       </FormProvider>
     </>
   )

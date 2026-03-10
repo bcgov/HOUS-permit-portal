@@ -1,14 +1,14 @@
-import { Button, Flex, FormControl, FormHelperText, FormLabel, Heading, Input, Text } from "@chakra-ui/react"
+import { Flex, FormControl, FormHelperText, FormLabel, Heading, Input, Text } from "@chakra-ui/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useForm } from "react-hook-form"
 import { Trans } from "react-i18next"
-import { useLocation, useNavigate } from "react-router-dom"
+import { useLocation } from "react-router-dom"
 import { usePart3StepCode } from "../../../../../../hooks/resources/use-part-3-step-code"
 import { EPart3BuildingType } from "../../../../../../types/enums"
 import { RouterLink } from "../../../../../shared/navigation/router-link"
-import { usePart3Navigation } from "../../use-part-3-navigation"
+import { Part3FormFooter } from "../shared/form-footer"
 import { SectionHeading } from "../shared/section-heading"
 import { BaselineRequirements } from "./baseline-requirements"
 import { StepCodeRequirements } from "./step-code-requirements"
@@ -17,9 +17,7 @@ import { WholeBuildingRequirements } from "./whole-building-requirements"
 export const RequirementsSummary = observer(function RequirementsSummary() {
   const i18nPrefix = "stepCode.part3.requirementsSummary"
   const { checklist } = usePart3StepCode()
-  const navigate = useNavigate()
   const location = useLocation()
-  const { navigateToNext, goBackPath } = usePart3Navigation()
 
   const { handleSubmit, formState } = useForm()
   const { isSubmitting } = formState
@@ -31,19 +29,10 @@ export const RequirementsSummary = observer(function RequirementsSummary() {
     ? "baseline-details"
     : "baseline-occupancies"
 
-  const onSubmit = async (_values, event: React.BaseSyntheticEvent) => {
+  const onSubmit = async () => {
     if (!checklist) return
-
-    const saveAndGoBack = (event?.nativeEvent as CustomEvent)?.detail?.saveAndGoBack
-    const updateSucceeded = await checklist.completeSection("requirementsSummary")
-
-    if (updateSucceeded) {
-      if (saveAndGoBack) {
-        navigate(goBackPath)
-      } else {
-        navigateToNext()
-      }
-    }
+    const updated = await checklist.completeSection("requirementsSummary")
+    if (!updated) throw new Error("Save failed")
   }
 
   return (
@@ -102,15 +91,11 @@ export const RequirementsSummary = observer(function RequirementsSummary() {
               </>
             )}
 
-            <form onSubmit={handleSubmit(onSubmit)} name="part3SectionForm">
-              <FormControl>
-                <FormLabel>{t(`${i18nPrefix}.confirm.label`)}</FormLabel>
-                <Button type="submit" variant="primary" isLoading={isSubmitting} isDisabled={isSubmitting}>
-                  {t(`${i18nPrefix}.confirm.cta`)}
-                </Button>
-                <FormHelperText mt={6}>{t(`${i18nPrefix}.help`)}</FormHelperText>
-              </FormControl>
-            </form>
+            <FormControl>
+              <FormLabel>{t(`${i18nPrefix}.confirm.label`)}</FormLabel>
+              <Part3FormFooter handleSubmit={handleSubmit} onSubmit={onSubmit} isLoading={isSubmitting} />
+              <FormHelperText mt={6}>{t(`${i18nPrefix}.help`)}</FormHelperText>
+            </FormControl>
           </>
         )}
       </Flex>
