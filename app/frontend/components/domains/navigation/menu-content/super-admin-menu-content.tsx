@@ -14,7 +14,6 @@ import { PermitTemplateCatalogueMenuItem } from "./menu-items/permit-template-ca
 import { ReportingMenuItem } from "./menu-items/reporting-menu-item"
 import { RequirementsLibraryMenuItem } from "./menu-items/requirements-library-menu-item"
 import { SuperAdminConfigurationMenuItem } from "./menu-items/super-admin-configuration-menu-item"
-import { WelcomeMenuItem } from "./menu-items/welcome-menu-item"
 import { MenuSection } from "./menu-section"
 import { UserInfoSection } from "./user-info-section"
 
@@ -48,7 +47,6 @@ export const SuperAdminMenuContent = observer(() => {
 
       {/* Support section */}
       <MenuSection title={t("site.navMenu.sections.support")}>
-        <WelcomeMenuItem />
         <GiveFeedbackMenuItem />
         <HelpMenuItem />
       </MenuSection>
