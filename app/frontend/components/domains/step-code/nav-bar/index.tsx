@@ -10,37 +10,37 @@ interface IProps {
 
 export const StepCodeNavBar = observer(function StepCodeNavBar({ title, NavLinks }: IProps) {
   return (
-    <Box
+    <Flex
       as="nav"
       id="stepCodeNav"
       position="sticky"
-      py={4}
       top={0}
-      left="0"
-      right="0"
       w="full"
-      bg="greys.white"
+      h="var(--app-navbar-height)"
+      bg="white"
       color="theme.blue"
       zIndex={10}
-      borderBottomWidth={2}
+      borderBottom="1px"
       borderColor="border.light"
-      shadow="elevations.elevation01"
+      align="center"
+      px={6}
+      gap={6}
     >
-      <Flex align="center" gap={2} px={8}>
-        <Link href="/">
-          <Image fit="cover" htmlHeight="64px" htmlWidth="166px" alt={t("site.linkHome")} src="/images/logo.svg" />
-        </Link>
-        <Show above="xl">
-          <Text fontSize="md" color="text.primary" fontWeight="bold">
-            {title}
-          </Text>
-          <Text fontSize="sm" textTransform="uppercase" color="theme.yellow" fontWeight="bold" mb={2} ml={1}>
-            {t("site.beta")}
-          </Text>
-        </Show>
-        <Spacer />
-        {NavLinks || null}
-      </Flex>
-    </Box>
+      <Link href="/">
+        <Box w={120} mr={2}>
+          <Image fit="contain" htmlHeight="64px" htmlWidth="166px" alt={t("site.linkHome")} src="/images/logo.svg" />
+        </Box>
+      </Link>
+      <Show above="xl">
+        <Text fontSize="md" color="text.primary" fontWeight="bold">
+          {title}
+        </Text>
+        <Text fontSize="sm" textTransform="uppercase" color="theme.yellow" fontWeight="bold" mb={2} ml={1}>
+          {t("site.beta")}
+        </Text>
+      </Show>
+      <Spacer />
+      {NavLinks || null}
+    </Flex>
   )
 })

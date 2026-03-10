@@ -112,6 +112,11 @@ function isOverheatingCodePath(path: string): boolean {
   return regex.test(path)
 }
 
+function isWelcomePath(path: string): boolean {
+  const regex = /^\/welcome/
+  return regex.test(path)
+}
+
 function shouldHideSubNavbarForPath(path: string): boolean {
   const matchers: Array<(path: string) => boolean> = [
     (path) => path === "/",
@@ -132,6 +137,7 @@ function shouldHideSubNavbarForPath(path: string): boolean {
     isAdminPath,
     isPreCheckPath,
     isOverheatingCodePath,
+    isWelcomePath,
   ]
 
   return matchers.some((matcher) => matcher(path))
