@@ -10,7 +10,6 @@ import { MyProfileMenuItem } from "./menu-items/my-profile-menu-item"
 import { MyProjectsMenuItem } from "./menu-items/my-projects-menu-item"
 import { SandboxMenuItem } from "./menu-items/sandbox-menu-item"
 import { SubmissionInboxMenuItem } from "./menu-items/submission-inbox-menu-item"
-import { WelcomeMenuItem } from "./menu-items/welcome-menu-item"
 import { MenuSection } from "./menu-section"
 import { UserInfoSection } from "./user-info-section"
 
@@ -33,7 +32,6 @@ export const ReviewerMenuContent = observer(() => {
 
       {/* Support section */}
       <MenuSection title={t("site.navMenu.sections.support")}>
-        <WelcomeMenuItem />
         <GiveFeedbackMenuItem />
         <HelpMenuItem />
       </MenuSection>
