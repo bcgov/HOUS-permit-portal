@@ -1971,6 +1971,7 @@ Thank you,
           part3: {
             title: "Energy and Zero Carbon Step Codes for Step 3 Buildings",
             errorTitle: "There is a problem",
+            goToStepCodes: "Go to Step Codes",
             cta: "Save and continue",
             sidebar: {
               responsiveButton: "Sections",

@@ -20,7 +20,6 @@ import { SubNavBar } from "./sub-nav-bar"
 import { OverheatingCodeNavBar } from "../overheating-code/overheating-code-nav-bar"
 import { PreCheckNavBar } from "../pre-check/pre-check-nav-bar"
 import { StepCodeNavBar } from "../step-code/nav-bar"
-import { Part3NavLinks } from "../step-code/nav-bar/part-3-nav-links"
 import { Part9NavLinks } from "../step-code/nav-bar/part-9-nav-links"
 
 function isTemplateEditPath(path: string): boolean {
@@ -157,7 +156,16 @@ export const NavBar = observer(function NavBar() {
     if (path.includes("part-9")) {
       return <StepCodeNavBar title={t("stepCode.title")} NavLinks={<Part9NavLinks />} />
     } else {
-      return <StepCodeNavBar title={t("stepCode.part3.title")} NavLinks={<Part3NavLinks />} />
+      return (
+        <StepCodeNavBar
+          title={t("stepCode.part3.title")}
+          NavLinks={
+            <RouterLinkButton to="/step-codes" variant="link">
+              {t("stepCode.part3.goToStepCodes", "Back to step codes")}
+            </RouterLinkButton>
+          }
+        />
+      )
     }
   }
 

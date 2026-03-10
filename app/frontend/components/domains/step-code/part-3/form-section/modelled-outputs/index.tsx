@@ -1,15 +1,14 @@
-import { Button, Flex, Heading, Stack, Text } from "@chakra-ui/react"
+import { Flex, Heading, Stack, Text } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
 import { FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { useNavigate } from "react-router-dom"
 import { usePart3StepCode } from "../../../../../../hooks/resources/use-part-3-step-code"
 import { IPart3StepCodeChecklist } from "../../../../../../models/part-3-step-code-checklist"
 import { EEnergyOutputUseType } from "../../../../../../types/enums"
 import { IEnergyOutput } from "../../../../../../types/types"
 import { SharedSpinner } from "../../../../../shared/base/shared-spinner"
-import { usePart3Navigation } from "../../use-part-3-navigation"
+import { Part3FormFooter } from "../shared/form-footer"
 import { AnnualEnergyWholeBuildingGrid } from "./annual-energy-whole-building-grid"
 import { ModelledEnergyOutputsGrid } from "./modelled-energy-outputs-grid"
 import { StepCodeBuildingPortionsGrid } from "./step-code-building-portions-grid"
@@ -73,9 +72,7 @@ export const ModelledOutputs = observer(function Part3StepCodeFormModelledOutput
     defaultValues: createFormValues(checklist),
     mode: "onSubmit",
   })
-  const { reset, handleSubmit } = formMethods
-  const navigate = useNavigate()
-  const { navigateToNext, goBackPath } = usePart3Navigation()
+  const { reset, handleSubmit, formState } = formMethods
 
   useEffect(() => {
     reset({
@@ -88,10 +85,8 @@ export const ModelledOutputs = observer(function Part3StepCodeFormModelledOutput
     checklist?.modelledEnergyOutputs,
   ])
 
-  const onSubmit = handleSubmit(async (data, event) => {
+  const onSubmit = async (data: IMpdelledEnergyOutputChecklistForm) => {
     if (!checklist) return
-
-    const saveAndGoBack = (event?.nativeEvent as CustomEvent)?.detail?.saveAndGoBack
 
     const deletedEnergyOutputsAttributes = data.modelledEnergyOutputsAttributes
       .filter((output) => !output.fuelTypeId && output.id)
@@ -113,16 +108,9 @@ export const ModelledOutputs = observer(function Part3StepCodeFormModelledOutput
     ]
     const updated = await checklist?.update({ ...data, modelledEnergyOutputsAttributes: energyOutputs })
 
-    if (updated) {
-      await checklist?.completeSection("modelledOutputs")
-
-      if (saveAndGoBack) {
-        navigate(goBackPath)
-      } else {
-        navigateToNext()
-      }
-    }
-  })
+    if (!updated) throw new Error("Save failed")
+    await checklist?.completeSection("modelledOutputs")
+  }
 
   return (
     <Flex direction="column" w="full">
@@ -134,13 +122,11 @@ export const ModelledOutputs = observer(function Part3StepCodeFormModelledOutput
       </Text>
       <FormProvider {...formMethods}>
         {checklist ? (
-          <Stack as="form" onSubmit={onSubmit} gap={8} name="part3SectionForm">
+          <Stack gap={8}>
             <ModelledEnergyOutputsGrid mt={6} />
             <AnnualEnergyWholeBuildingGrid />
             <StepCodeBuildingPortionsGrid />
-            <Button type="submit" variant="primary">
-              {t("stepCode.part3.cta")}
-            </Button>
+            <Part3FormFooter handleSubmit={handleSubmit} onSubmit={onSubmit} isLoading={formState.isSubmitting} />
           </Stack>
         ) : (
           <SharedSpinner mt={16} />

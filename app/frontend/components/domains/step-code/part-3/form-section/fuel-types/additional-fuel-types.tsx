@@ -1,5 +1,4 @@
 import {
-  Button,
   Flex,
   FormControl,
   FormHelperText,
@@ -19,19 +18,15 @@ import { remove } from "ramda"
 import React, { useEffect, useState } from "react"
 import { FormProvider, useFieldArray, useForm, useFormContext } from "react-hook-form"
 import { Trans } from "react-i18next"
-import { useNavigate } from "react-router-dom"
 import { usePart3StepCode } from "../../../../../../hooks/resources/use-part-3-step-code"
 import { EFlashMessageStatus, EFuelType } from "../../../../../../types/enums"
 import { CustomMessageBox } from "../../../../../shared/base/custom-message-box"
-import { usePart3Navigation } from "../../use-part-3-navigation"
+import { Part3FormFooter } from "../shared/form-footer"
 
 const i18nPrefix = "stepCode.part3.additionalFuelTypes"
 
 export const AdditionalFuelTypes = observer(function Part3StepCodeFormAdditionalFuelTypes() {
   const { checklist } = usePart3StepCode()
-
-  const navigate = useNavigate()
-  const { navigateToNext, goBackPath } = usePart3Navigation()
 
   const formMethods = useForm({
     defaultValues: {
@@ -57,23 +52,11 @@ export const AdditionalFuelTypes = observer(function Part3StepCodeFormAdditional
     append({ id: null, key: EFuelType.other, description: null, emissionsFactor: null, source: null })
   }
 
-  const onSubmit = async (values, event: React.BaseSyntheticEvent) => {
+  const onSubmit = async (values) => {
     if (!checklist) return
-
-    const saveAndGoBack = (event?.nativeEvent as CustomEvent)?.detail?.saveAndGoBack
-
-    if (!isValid) return
     const updated = await checklist.update(values)
-
-    if (updated) {
-      await checklist.completeSection("additionalFuelTypes")
-
-      if (saveAndGoBack) {
-        navigate(goBackPath)
-      } else {
-        navigateToNext()
-      }
-    }
+    if (!updated) throw new Error("Save failed")
+    await checklist.completeSection("additionalFuelTypes")
   }
 
   useEffect(() => {
@@ -109,17 +92,13 @@ export const AdditionalFuelTypes = observer(function Part3StepCodeFormAdditional
         </Flex>
       </Flex>
       <FormProvider {...formMethods}>
-        <form onSubmit={handleSubmit(onSubmit)} name="part3SectionForm">
-          <Flex direction="column" gap={{ base: 6, xl: 6 }} pb={4}>
-            {fields.map((field, idx) => (
-              <OtherFuelTypeFields field={field} idx={idx} onAdd={onAdd} />
-            ))}
+        <Flex direction="column" gap={{ base: 6, xl: 6 }} pb={4}>
+          {fields.map((field, idx) => (
+            <OtherFuelTypeFields field={field} idx={idx} onAdd={onAdd} />
+          ))}
 
-            <Button type="submit" variant="primary" isLoading={isSubmitting} isDisabled={isSubmitting}>
-              {t("stepCode.part3.cta")}
-            </Button>
-          </Flex>
-        </form>
+          <Part3FormFooter handleSubmit={handleSubmit} onSubmit={onSubmit} isLoading={isSubmitting} />
+        </Flex>
       </FormProvider>
     </>
   )
