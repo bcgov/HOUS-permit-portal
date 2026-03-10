@@ -18,10 +18,11 @@ import * as R from "ramda"
 import React, { useEffect, useState } from "react"
 import { Controller, useForm } from "react-hook-form"
 import { Trans } from "react-i18next"
-import { useLocation, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { usePart3StepCode } from "../../../../../../hooks/resources/use-part-3-step-code"
 import { EFlashMessageStatus } from "../../../../../../types/enums"
 import { CustomMessageBox } from "../../../../../shared/base/custom-message-box"
+import { usePart3Navigation } from "../../use-part-3-navigation"
 import { SectionHeading } from "../shared/section-heading"
 
 export const FuelTypes = observer(function Part3StepCodeFormFuelTypes() {
@@ -33,7 +34,7 @@ export const FuelTypes = observer(function Part3StepCodeFormFuelTypes() {
   )
 
   const navigate = useNavigate()
-  const location = useLocation()
+  const { navigateToNext, goBackPath } = usePart3Navigation()
 
   const { handleSubmit, formState, resetField, reset, control } = useForm({
     mode: "onSubmit",
@@ -42,11 +43,10 @@ export const FuelTypes = observer(function Part3StepCodeFormFuelTypes() {
 
   const { isSubmitting, isValid, isSubmitted, errors } = formState
 
-  const onSubmit = async (values) => {
+  const onSubmit = async (values, event: React.BaseSyntheticEvent) => {
     if (!checklist) return
 
-    const alternatePath = checklist.alternateNavigateAfterSavePath
-    checklist.setAlternateNavigateAfterSavePath(null)
+    const saveAndGoBack = (event?.nativeEvent as CustomEvent)?.detail?.saveAndGoBack
 
     let updateSucceeded = false
     if (!isValid) return
@@ -91,15 +91,10 @@ export const FuelTypes = observer(function Part3StepCodeFormFuelTypes() {
     }
 
     if (updateSucceeded) {
-      if (alternatePath) {
-        navigate(alternatePath)
+      if (saveAndGoBack) {
+        navigate(goBackPath)
       } else {
-        const nextSectionPath = !R.isEmpty(checklist.otherFuelTypes)
-          ? "additional-fuel-types"
-          : checklist.isRelevant("baselinePerformance")
-            ? "baseline-performance"
-            : "step-code-occupancies"
-        navigate(location.pathname.replace("fuel-types", nextSectionPath))
+        navigateToNext()
       }
     }
   }

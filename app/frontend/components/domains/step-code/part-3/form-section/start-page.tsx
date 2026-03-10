@@ -5,16 +5,17 @@ import { observer } from "mobx-react-lite"
 import React from "react"
 import { useForm } from "react-hook-form"
 import { Trans } from "react-i18next"
-import { useLocation, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { usePart3StepCode } from "../../../../../hooks/resources/use-part-3-step-code"
 import { SharedSpinner } from "../../../../shared/base/shared-spinner"
+import { usePart3Navigation } from "../use-part-3-navigation"
 import { SectionHeading } from "./shared/section-heading"
 
 export const StartPage = observer(function Part3StepCodeFormStartPage() {
   const i18nPrefix = "stepCode.part3.startPage"
   const { checklist, isLoading } = usePart3StepCode()
   const navigate = useNavigate()
-  const location = useLocation()
+  const { navigateToNext, goBackPath } = usePart3Navigation()
 
   const { handleSubmit, formState } = useForm()
   const { isSubmitting } = formState
@@ -27,19 +28,17 @@ export const StartPage = observer(function Part3StepCodeFormStartPage() {
     )
   }
 
-  const onSubmit = async () => {
+  const onSubmit = async (_values, event: React.BaseSyntheticEvent) => {
     if (!checklist) return
 
-    const alternatePath = checklist.alternateNavigateAfterSavePath
-    checklist.setAlternateNavigateAfterSavePath(null)
-
+    const saveAndGoBack = (event?.nativeEvent as CustomEvent)?.detail?.saveAndGoBack
     const updateSucceeded = await checklist.completeSection("start")
 
     if (updateSucceeded) {
-      if (alternatePath) {
-        navigate(alternatePath)
+      if (saveAndGoBack) {
+        navigate(goBackPath)
       } else {
-        navigate(location.pathname.replace("start", "project-details"))
+        navigateToNext()
       }
     }
   }

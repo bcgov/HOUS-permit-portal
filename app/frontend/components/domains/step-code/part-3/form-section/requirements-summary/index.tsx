@@ -8,6 +8,7 @@ import { useLocation, useNavigate } from "react-router-dom"
 import { usePart3StepCode } from "../../../../../../hooks/resources/use-part-3-step-code"
 import { EPart3BuildingType } from "../../../../../../types/enums"
 import { RouterLink } from "../../../../../shared/navigation/router-link"
+import { usePart3Navigation } from "../../use-part-3-navigation"
 import { SectionHeading } from "../shared/section-heading"
 import { BaselineRequirements } from "./baseline-requirements"
 import { StepCodeRequirements } from "./step-code-requirements"
@@ -18,6 +19,7 @@ export const RequirementsSummary = observer(function RequirementsSummary() {
   const { checklist } = usePart3StepCode()
   const navigate = useNavigate()
   const location = useLocation()
+  const { navigateToNext, goBackPath } = usePart3Navigation()
 
   const { handleSubmit, formState } = useForm()
   const { isSubmitting } = formState
@@ -29,19 +31,17 @@ export const RequirementsSummary = observer(function RequirementsSummary() {
     ? "baseline-details"
     : "baseline-occupancies"
 
-  const onSubmit = async () => {
+  const onSubmit = async (_values, event: React.BaseSyntheticEvent) => {
     if (!checklist) return
 
-    const alternatePath = checklist.alternateNavigateAfterSavePath
-    checklist.setAlternateNavigateAfterSavePath(null)
-
+    const saveAndGoBack = (event?.nativeEvent as CustomEvent)?.detail?.saveAndGoBack
     const updateSucceeded = await checklist.completeSection("requirementsSummary")
 
     if (updateSucceeded) {
-      if (alternatePath) {
-        navigate(alternatePath)
+      if (saveAndGoBack) {
+        navigate(goBackPath)
       } else {
-        navigate(location.pathname.replace("requirements-summary", "step-code-summary"))
+        navigateToNext()
       }
     }
   }

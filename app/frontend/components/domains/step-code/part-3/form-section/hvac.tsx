@@ -4,7 +4,7 @@ import { path } from "ramda"
 import React, { useEffect, useMemo } from "react"
 import { FormProvider, useController, useForm, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { useLocation, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { usePart3StepCode } from "../../../../../hooks/resources/use-part-3-step-code"
 import {
   ECoolingSystemPlant,
@@ -15,6 +15,7 @@ import {
 } from "../../../../../types/enums"
 import { TextFormControl } from "../../../../shared/form/input-form-control"
 import { HStack } from "../../part-9/checklist/pdf-content/shared/h-stack"
+import { usePart3Navigation } from "../use-part-3-navigation"
 
 const i18nPrefix = "stepCode.part3.hvac"
 
@@ -49,7 +50,7 @@ export const HVAC = observer(() => {
   const { t } = useTranslation()
   const { checklist } = usePart3StepCode()
   const navigate = useNavigate()
-  const location = useLocation()
+  const { navigateToNext, goBackPath } = usePart3Navigation()
   const formMethods = useForm<IStepcodeHvacFormProps>({
     mode: "onSubmit",
     defaultValues: initializeFormValues(checklist),
@@ -181,21 +182,20 @@ export const HVAC = observer(() => {
     ]
   )
 
-  const onSubmit = handleSubmit(async (data) => {
+  const onSubmit = handleSubmit(async (data, event) => {
     if (!checklist) return
 
-    const alternatePath = checklist.alternateNavigateAfterSavePath
-    checklist.setAlternateNavigateAfterSavePath(null)
+    const saveAndGoBack = (event?.nativeEvent as CustomEvent)?.detail?.saveAndGoBack
 
     const updated = await checklist.update(data)
 
     if (updated) {
       await checklist.completeSection("hvac")
 
-      if (alternatePath) {
-        navigate(alternatePath)
+      if (saveAndGoBack) {
+        navigate(goBackPath)
       } else {
-        navigate(location.pathname.replace("hvac", "contact"))
+        navigateToNext()
       }
     }
   })

@@ -19,10 +19,11 @@ import { remove } from "ramda"
 import React, { useEffect, useState } from "react"
 import { FormProvider, useFieldArray, useForm, useFormContext } from "react-hook-form"
 import { Trans } from "react-i18next"
-import { useLocation, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { usePart3StepCode } from "../../../../../../hooks/resources/use-part-3-step-code"
 import { EFlashMessageStatus, EFuelType } from "../../../../../../types/enums"
 import { CustomMessageBox } from "../../../../../shared/base/custom-message-box"
+import { usePart3Navigation } from "../../use-part-3-navigation"
 
 const i18nPrefix = "stepCode.part3.additionalFuelTypes"
 
@@ -30,7 +31,7 @@ export const AdditionalFuelTypes = observer(function Part3StepCodeFormAdditional
   const { checklist } = usePart3StepCode()
 
   const navigate = useNavigate()
-  const location = useLocation()
+  const { navigateToNext, goBackPath } = usePart3Navigation()
 
   const formMethods = useForm({
     defaultValues: {
@@ -56,11 +57,10 @@ export const AdditionalFuelTypes = observer(function Part3StepCodeFormAdditional
     append({ id: null, key: EFuelType.other, description: null, emissionsFactor: null, source: null })
   }
 
-  const onSubmit = async (values) => {
+  const onSubmit = async (values, event: React.BaseSyntheticEvent) => {
     if (!checklist) return
 
-    const alternatePath = checklist.alternateNavigateAfterSavePath
-    checklist.setAlternateNavigateAfterSavePath(null)
+    const saveAndGoBack = (event?.nativeEvent as CustomEvent)?.detail?.saveAndGoBack
 
     if (!isValid) return
     const updated = await checklist.update(values)
@@ -68,13 +68,11 @@ export const AdditionalFuelTypes = observer(function Part3StepCodeFormAdditional
     if (updated) {
       await checklist.completeSection("additionalFuelTypes")
 
-      if (alternatePath) {
-        navigate(alternatePath)
+      if (saveAndGoBack) {
+        navigate(goBackPath)
       } else {
-        navigate(location.pathname.replace("additional-fuel-types", "baseline-performance"))
+        navigateToNext()
       }
-    } else {
-      return
     }
   }
 

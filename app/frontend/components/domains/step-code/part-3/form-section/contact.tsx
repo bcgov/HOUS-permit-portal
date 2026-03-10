@@ -3,10 +3,11 @@ import { observer } from "mobx-react-lite"
 import React from "react"
 import { FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { useLocation, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { usePart3StepCode } from "../../../../../hooks/resources/use-part-3-step-code"
 import { IPart3StepCodeChecklist } from "../../../../../models/part-3-step-code-checklist"
 import { TextFormControl } from "../../../../shared/form/input-form-control"
+import { usePart3Navigation } from "../use-part-3-navigation"
 
 interface IStepcodeContactForm {
   completedByName?: string | null
@@ -37,13 +38,12 @@ export const Contact = observer(() => {
   })
   const { handleSubmit } = formMethods
   const navigate = useNavigate()
-  const location = useLocation()
+  const { navigateToNext, goBackPath } = usePart3Navigation()
 
-  const onSubmit = handleSubmit(async (values) => {
+  const onSubmit = handleSubmit(async (values, event) => {
     if (!checklist) return
 
-    const alternatePath = checklist.alternateNavigateAfterSavePath
-    checklist.setAlternateNavigateAfterSavePath(null)
+    const saveAndGoBack = (event?.nativeEvent as CustomEvent)?.detail?.saveAndGoBack
 
     const updated = await checklist.update(values)
     if (!updated) {
@@ -51,10 +51,10 @@ export const Contact = observer(() => {
     }
     await checklist.completeSection("contact")
 
-    if (alternatePath) {
-      navigate(alternatePath)
+    if (saveAndGoBack) {
+      navigate(goBackPath)
     } else {
-      navigate(location.pathname.replace("contact", "requirements-summary"))
+      navigateToNext()
     }
   })
 

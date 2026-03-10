@@ -27,7 +27,7 @@ import { observer } from "mobx-react-lite"
 import React, { useEffect, useMemo } from "react"
 import { Controller, FormProvider, useForm } from "react-hook-form"
 import { Trans } from "react-i18next"
-import { useLocation, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { usePart3StepCode } from "../../../../../hooks/resources/use-part-3-step-code"
 import { EFlashMessageStatus, EPart3StepCodeSoftware } from "../../../../../types/enums"
 import { generateUUID } from "../../../../../utils/utility-functions"
@@ -35,6 +35,7 @@ import { CustomMessageBox } from "../../../../shared/base/custom-message-box"
 import { RowHeader } from "../../part-9/checklist/building-characteristics-summary/row-header"
 import { GridColumnHeader } from "../../part-9/checklist/shared/grid/column-header"
 import { GridData } from "../../part-9/checklist/shared/grid/data"
+import { usePart3Navigation } from "../use-part-3-navigation"
 import { SectionHeading } from "./shared/section-heading"
 
 export const PerformanceCharacteristics = observer(function Part3StepCodeFormPerformanceCharacteristics() {
@@ -42,7 +43,7 @@ export const PerformanceCharacteristics = observer(function Part3StepCodeFormPer
   const i18nPrefix = "stepCode.part3.performanceCharacteristics"
 
   const navigate = useNavigate()
-  const location = useLocation()
+  const { navigateToNext, goBackPath } = usePart3Navigation()
 
   const formMethods = useForm({
     mode: "onSubmit",
@@ -102,21 +103,20 @@ export const PerformanceCharacteristics = observer(function Part3StepCodeFormPer
     return (parseFloat(watchWallClearField) / 5.68).toFixed(1)
   }, [watchWindowEffective])
 
-  const onSubmit = async (values) => {
+  const onSubmit = async (values, event: React.BaseSyntheticEvent) => {
     if (!checklist) return
 
-    const alternatePath = checklist.alternateNavigateAfterSavePath
-    checklist.setAlternateNavigateAfterSavePath(null)
+    const saveAndGoBack = (event?.nativeEvent as CustomEvent)?.detail?.saveAndGoBack
 
     const updated = await checklist.update(values)
 
     if (updated) {
       await checklist.completeSection("performanceCharacteristics")
 
-      if (alternatePath) {
-        navigate(alternatePath)
+      if (saveAndGoBack) {
+        navigate(goBackPath)
       } else {
-        navigate(location.pathname.replace("performance-characteristics", "hvac"))
+        navigateToNext()
       }
     }
   }

@@ -20,12 +20,13 @@ import * as R from "ramda"
 import React, { useEffect, useState } from "react"
 import { Controller, FormProvider, useForm } from "react-hook-form"
 import { Trans } from "react-i18next"
-import { useLocation, useNavigate, useParams } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import { usePart3StepCode } from "../../../../../hooks/resources/use-part-3-step-code"
 import { IOption } from "../../../../../types/types"
 import { SharedSpinner } from "../../../../shared/base/shared-spinner"
 import { DatePickerFormControl } from "../../../../shared/form/input-form-control"
 import { SitesSelect } from "../../../../shared/select/selectors/sites-select"
+import { usePart3Navigation } from "../use-part-3-navigation"
 import { SectionHeading } from "./shared/section-heading"
 
 interface IProjectDetailsForm {
@@ -43,7 +44,7 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
   const { checklist, currentStepCode } = usePart3StepCode()
 
   const navigate = useNavigate()
-  const location = useLocation()
+  const { navigateToNext, goBackPath } = usePart3Navigation()
 
   const getDefaultValues = (): IProjectDetailsForm => {
     return {
@@ -77,11 +78,13 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
     }
   }, [checklist, currentStepCode, reset])
 
-  const onSubmit = async (data: IProjectDetailsForm) => {
+  const onSubmit = async (data: IProjectDetailsForm, event: React.BaseSyntheticEvent) => {
     if (!checklist || !currentStepCode) return
 
+    const saveAndGoBack = (event?.nativeEvent as CustomEvent)?.detail?.saveAndGoBack
+
     if (editable) {
-      const ok = await (currentStepCode as any).update({
+      await (currentStepCode as any).update({
         fullAddress: data.fullAddress,
         referenceNumber: data.referenceNumber,
         permitDate: data.permitDate,
@@ -89,14 +92,12 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
         jurisdictionId: data.jurisdictionId,
       })
     }
-    const alternatePath = checklist.alternateNavigateAfterSavePath
-    checklist.setAlternateNavigateAfterSavePath(null)
     const sectionCompleteSucceeded = await checklist.completeSection("projectDetails")
     if (sectionCompleteSucceeded) {
-      if (alternatePath) {
-        navigate(alternatePath)
+      if (saveAndGoBack) {
+        navigate(goBackPath)
       } else {
-        navigate(location.pathname.replace("project-details", "location-details"))
+        navigateToNext()
       }
     }
   }

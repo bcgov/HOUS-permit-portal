@@ -5,10 +5,11 @@ import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { Trans } from "react-i18next"
-import { useLocation, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { usePart3StepCode } from "../../../../../hooks/resources/use-part-3-step-code"
 import { EFlashMessageStatus, EFuelType } from "../../../../../types/enums"
 import { CustomMessageBox } from "../../../../shared/base/custom-message-box"
+import { usePart3Navigation } from "../use-part-3-navigation"
 import { SectionHeading } from "./shared/section-heading"
 
 export const DistrictEnergy = observer(function Part3StepCodeFormDistrictEnergy() {
@@ -20,7 +21,7 @@ export const DistrictEnergy = observer(function Part3StepCodeFormDistrictEnergy(
   )
 
   const navigate = useNavigate()
-  const location = useLocation()
+  const { navigateToNext, goBackPath } = usePart3Navigation()
 
   const { handleSubmit, formState, resetField, reset, register } = useForm({
     mode: "onSubmit",
@@ -38,11 +39,12 @@ export const DistrictEnergy = observer(function Part3StepCodeFormDistrictEnergy(
 
   const { isSubmitting, isValid, isSubmitted, errors } = formState
 
-  const onSubmit = async (values) => {
+  const onSubmit = async (values, event: React.BaseSyntheticEvent) => {
     if (!isValid) return
 
+    const saveAndGoBack = (event?.nativeEvent as CustomEvent)?.detail?.saveAndGoBack
+
     if (isRelevant == "no") {
-      // update the checklist to remove district fuel type if present
       const updated =
         !checklist.districtEnergyFuelType ||
         (await checklist.update({
@@ -56,7 +58,11 @@ export const DistrictEnergy = observer(function Part3StepCodeFormDistrictEnergy(
 
     await checklist.completeSection("districtEnergy")
 
-    navigate(location.pathname.replace("district-energy", "fuel-types"))
+    if (saveAndGoBack) {
+      navigate(goBackPath)
+    } else {
+      navigateToNext()
+    }
   }
 
   useEffect(() => {

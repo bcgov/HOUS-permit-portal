@@ -19,12 +19,13 @@ import { observer } from "mobx-react-lite"
 import React, { forwardRef, useCallback, useEffect, useMemo, useState } from "react"
 import { FormProvider, useFieldArray, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { useLocation, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { v4 as uuidv4 } from "uuid"
 import { usePart3StepCode } from "../../../../../hooks/resources/use-part-3-step-code"
 import { EDocumentReferenceDocumentType } from "../../../../../types/enums"
 import { IDocumentReference } from "../../../../../types/types"
 import { DatePickerFormControl, TextFormControl } from "../../../../shared/form/input-form-control"
+import { usePart3Navigation } from "../use-part-3-navigation"
 
 const i18nPrefix = "stepCode.part3.documentReferences"
 
@@ -83,7 +84,7 @@ export const DocumentReferences = observer(function DocumentaReferences() {
   const { t } = useTranslation()
   const { checklist } = usePart3StepCode()
   const navigate = useNavigate()
-  const location = useLocation()
+  const { navigateToNext, goBackPath } = usePart3Navigation()
   const [openAccordionIndexes, setOpenAccordionIndexes] = useState<number[]>([])
   const formMethods = useForm<IDocumentReferenceStepCodeForm>({
     mode: "onSubmit",
@@ -119,11 +120,10 @@ export const DocumentReferences = observer(function DocumentaReferences() {
   )
 
   const onSubmit = formMethods.handleSubmit(
-    async ({ defaultDocumentReferencesAttributes, otherDocumentReferencesAttributes }) => {
+    async ({ defaultDocumentReferencesAttributes, otherDocumentReferencesAttributes }, event) => {
       if (!checklist) return
 
-      const alternatePath = checklist.alternateNavigateAfterSavePath
-      checklist.setAlternateNavigateAfterSavePath(null)
+      const saveAndGoBack = (event?.nativeEvent as CustomEvent)?.detail?.saveAndGoBack
 
       const documentReferences = [...defaultDocumentReferencesAttributes, ...otherDocumentReferencesAttributes]
       const deletedDocumentReferences = (checklist?.documentReferences ?? [])
@@ -139,10 +139,10 @@ export const DocumentReferences = observer(function DocumentaReferences() {
       if (updated) {
         await checklist?.completeSection("documentReferences")
 
-        if (alternatePath) {
-          navigate(alternatePath)
+        if (saveAndGoBack) {
+          navigate(goBackPath)
         } else {
-          navigate(location.pathname.replace("document-references", "performance-characteristics"))
+          navigateToNext()
         }
       }
     }

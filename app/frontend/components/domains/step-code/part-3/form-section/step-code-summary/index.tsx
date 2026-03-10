@@ -11,6 +11,7 @@ import { isBaselineChecklist, isMixedUseChecklist } from "../../../../../../util
 import { FileDownloadButton } from "../../../../../shared/base/file-download-button"
 import { SharedSpinner } from "../../../../../shared/base/shared-spinner"
 import { RouterLink } from "../../../../../shared/navigation/router-link"
+import { usePart3Navigation } from "../../use-part-3-navigation"
 import { SectionHeading } from "../shared/section-heading"
 import { MixedUsePerformance } from "./mixed-use"
 import { StepCodePerformance } from "./step-code-performance"
@@ -21,25 +22,22 @@ export const StepCodeSummary = observer(function StepCodeSummary() {
   const { permitApplicationId } = useParams()
   const navigate = useNavigate()
   const location = useLocation()
+  const { goBackPath } = usePart3Navigation()
   const isMixedUse = isMixedUseChecklist(checklist as any)
   const isBaseline = isBaselineChecklist(checklist as any)
 
   const { handleSubmit, formState } = useForm()
   const { isSubmitting } = formState
 
-  const onSubmit = async () => {
+  const onSubmit = async (_values, event: React.BaseSyntheticEvent) => {
     if (!checklist) return
 
-    const alternatePath = checklist.alternateNavigateAfterSavePath
-    checklist.setAlternateNavigateAfterSavePath(null)
-
+    const saveAndGoBack = (event?.nativeEvent as CustomEvent)?.detail?.saveAndGoBack
     const updateSucceeded = await checklist.completeSection("stepCodeSummary")
 
     if (updateSucceeded) {
-      if (alternatePath) {
-        navigate(alternatePath)
-      } else if (permitApplicationId) {
-        permitApplicationId && navigate(`/permit-applications/${permitApplicationId}/edit`)
+      if (saveAndGoBack || permitApplicationId) {
+        navigate(goBackPath)
       }
     } else {
       console.error("Failed to complete stepCodeSummary section")

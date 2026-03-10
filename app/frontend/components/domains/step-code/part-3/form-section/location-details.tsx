@@ -16,10 +16,11 @@ import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
 import { Controller, useForm } from "react-hook-form"
-import { useLocation, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { usePart3StepCode } from "../../../../../hooks/resources/use-part-3-step-code"
 import { EClimateZone, EFlashMessageStatus } from "../../../../../types/enums"
 import { CustomMessageBox } from "../../../../shared/base/custom-message-box"
+import { usePart3Navigation } from "../use-part-3-navigation"
 import { SectionHeading } from "./shared/section-heading"
 
 export const LocationDetails = observer(function Part3StepCodeFormLocationDetails() {
@@ -27,7 +28,7 @@ export const LocationDetails = observer(function Part3StepCodeFormLocationDetail
   const { checklist, currentStepCode } = usePart3StepCode()
 
   const navigate = useNavigate()
-  const location = useLocation()
+  const { navigateToNext, goBackPath } = usePart3Navigation()
 
   const { handleSubmit, formState, register, control, reset } = useForm({
     defaultValues: {
@@ -38,21 +39,19 @@ export const LocationDetails = observer(function Part3StepCodeFormLocationDetail
   })
   const { isSubmitting, isValid, isSubmitted, errors } = formState
 
-  const onSubmit = async (values) => {
+  const onSubmit = async (values, event: React.BaseSyntheticEvent) => {
     if (!checklist) return
 
-    const alternatePath = checklist.alternateNavigateAfterSavePath
-    checklist.setAlternateNavigateAfterSavePath(null)
-
+    const saveAndGoBack = (event?.nativeEvent as CustomEvent)?.detail?.saveAndGoBack
     const updated = await checklist.update(values)
 
     if (updated) {
       await checklist.completeSection("locationDetails")
 
-      if (alternatePath) {
-        navigate(alternatePath)
+      if (saveAndGoBack) {
+        navigate(goBackPath)
       } else {
-        navigate(location.pathname.replace("location-details", "baseline-occupancies"))
+        navigateToNext()
       }
     } else {
       console.error("Update failed for location details")

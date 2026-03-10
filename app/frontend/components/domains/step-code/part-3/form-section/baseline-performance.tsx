@@ -17,12 +17,13 @@ import * as R from "ramda"
 import React, { useEffect, useMemo } from "react"
 import { FormProvider, useFieldArray, useForm, useFormContext } from "react-hook-form"
 import { Trans } from "react-i18next"
-import { useLocation, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { usePart3StepCode } from "../../../../../hooks/resources/use-part-3-step-code"
 import { EFlashMessageStatus } from "../../../../../types/enums"
 import { CustomMessageBox } from "../../../../shared/base/custom-message-box"
 import { GridColumnHeader } from "../../part-9/checklist/shared/grid/column-header"
 import { GridData } from "../../part-9/checklist/shared/grid/data"
+import { usePart3Navigation } from "../use-part-3-navigation"
 import { SectionHeading } from "./shared/section-heading"
 
 export const BaselinePerformance = observer(function Part3StepCodeFormBaselinePerformance() {
@@ -30,18 +31,18 @@ export const BaselinePerformance = observer(function Part3StepCodeFormBaselinePe
   const { checklist } = usePart3StepCode()
 
   const navigate = useNavigate()
-  const location = useLocation()
+  const { navigateToNext, goBackPath } = usePart3Navigation()
 
   const formMethods = useForm({
     defaultValues: {
-      refAnnualThermalEnergyDemand: parseFloat(checklist?.refAnnualThermalEnergyDemand ?? "0"),
+      refAnnualThermalEnergyDemand: checklist?.refAnnualThermalEnergyDemand ?? "",
       referenceEnergyOutputsAttributes:
         checklist?.fuelTypes?.map((ft) => {
           const energyOutput = checklist.referenceEnergyOutputs?.find((o) => o.fuelTypeId === ft.id)
           return {
             id: energyOutput?.id,
             fuelTypeId: ft.id,
-            annualEnergy: energyOutput ? parseFloat(energyOutput.annualEnergy) : 0,
+            annualEnergy: energyOutput?.annualEnergy ?? "",
           }
         }) ?? [],
     },
@@ -57,20 +58,19 @@ export const BaselinePerformance = observer(function Part3StepCodeFormBaselinePe
 
   const watchEnergyOutputs = watch("referenceEnergyOutputsAttributes")
 
-  const onSubmit = async (values) => {
+  const onSubmit = async (values, event: React.BaseSyntheticEvent) => {
     if (!checklist) return
 
-    const alternatePath = checklist.alternateNavigateAfterSavePath
-    checklist.setAlternateNavigateAfterSavePath(null)
+    const saveAndGoBack = (event?.nativeEvent as CustomEvent)?.detail?.saveAndGoBack
 
     const updated = await checklist.update(values)
     if (updated) {
       await checklist.completeSection("baselinePerformance")
 
-      if (alternatePath) {
-        navigate(alternatePath)
+      if (saveAndGoBack) {
+        navigate(goBackPath)
       } else {
-        navigate(location.pathname.replace("baseline-performance", "step-code-occupancies"))
+        navigateToNext()
       }
     }
   }

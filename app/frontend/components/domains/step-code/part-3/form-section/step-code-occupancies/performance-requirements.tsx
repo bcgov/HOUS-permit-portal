@@ -27,6 +27,7 @@ import { EnergyStepSelect } from "../../../../home/review-manager/configuration-
 import { ZeroCarbonStepSelect } from "../../../../home/review-manager/configuration-management-screen/energy-step-requirements-screen/energy-step-editable-block/zero-carbon-step-select"
 import { GridColumnHeader } from "../../../part-9/checklist/shared/grid/column-header"
 import { GridData } from "../../../part-9/checklist/shared/grid/data"
+import { usePart3Navigation } from "../../use-part-3-navigation"
 import { SectionHeading } from "../shared/section-heading"
 
 const i18nPrefix = "stepCode.part3.stepCodePerformanceRequirements"
@@ -38,6 +39,7 @@ export const StepCodeOccupanciesPerformanceRequirements = observer(
 
     const navigate = useNavigate()
     const location = useLocation()
+    const { navigateToNext, goBackPath } = usePart3Navigation()
 
     const formMethods = useForm({
       mode: "onSubmit",
@@ -62,11 +64,10 @@ export const StepCodeOccupanciesPerformanceRequirements = observer(
     const stepCodeOccupanciesPath = "step-code-occupancies"
     const { isSubmitting, isValid, isSubmitted, errors } = formState
 
-    const onSubmit = async (values) => {
+    const onSubmit = async (values, event: React.BaseSyntheticEvent) => {
       if (!checklist) return
 
-      const alternatePath = checklist.alternateNavigateAfterSavePath
-      checklist.setAlternateNavigateAfterSavePath(null)
+      const saveAndGoBack = (event?.nativeEvent as CustomEvent)?.detail?.saveAndGoBack
 
       if (!isValid) return
       const updated = await checklist.update(values)
@@ -74,13 +75,11 @@ export const StepCodeOccupanciesPerformanceRequirements = observer(
       if (updated) {
         await checklist.completeSection("stepCodePerformanceRequirements")
 
-        if (alternatePath) {
-          navigate(alternatePath)
+        if (saveAndGoBack) {
+          navigate(goBackPath)
         } else {
-          navigate(location.pathname.replace("step-code-performance-requirements", "modelled-outputs"))
+          navigateToNext()
         }
-      } else {
-        return
       }
     }
 

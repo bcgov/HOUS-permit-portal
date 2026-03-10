@@ -4,10 +4,11 @@ import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
-import { useLocation, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { usePart3StepCode } from "../../../../../hooks/resources/use-part-3-step-code"
 import { EFlashMessageStatus } from "../../../../../types/enums"
 import { CustomMessageBox } from "../../../../shared/base/custom-message-box"
+import { usePart3Navigation } from "../use-part-3-navigation"
 import { SectionHeading } from "./shared/section-heading"
 
 export const OverheatingRequirements = observer(function Part3StepCodeFormOverheatingRequirements() {
@@ -19,7 +20,7 @@ export const OverheatingRequirements = observer(function Part3StepCodeFormOverhe
   )
 
   const navigate = useNavigate()
-  const location = useLocation()
+  const { navigateToNext, goBackPath } = usePart3Navigation()
 
   const { handleSubmit, formState, resetField, reset, register, watch } = useForm({
     mode: "onSubmit",
@@ -30,11 +31,10 @@ export const OverheatingRequirements = observer(function Part3StepCodeFormOverhe
   const watchOverheatingHours = watch("overheatingHours")
   const { isSubmitting, isValid, isSubmitted, errors } = formState
 
-  const onSubmit = async (values) => {
+  const onSubmit = async (values, event: React.BaseSyntheticEvent) => {
     if (!checklist) return
 
-    const alternatePath = checklist.alternateNavigateAfterSavePath
-    checklist.setAlternateNavigateAfterSavePath(null)
+    const saveAndGoBack = (event?.nativeEvent as CustomEvent)?.detail?.saveAndGoBack
 
     let updateSucceeded = false
     if (!isValid) return
@@ -55,10 +55,10 @@ export const OverheatingRequirements = observer(function Part3StepCodeFormOverhe
     if (updateSucceeded) {
       await checklist.completeSection("overheatingRequirements")
 
-      if (alternatePath) {
-        navigate(alternatePath)
+      if (saveAndGoBack) {
+        navigate(goBackPath)
       } else {
-        navigate(location.pathname.replace("overheating-requirements", "residential-adjustments"))
+        navigateToNext()
       }
     }
   }

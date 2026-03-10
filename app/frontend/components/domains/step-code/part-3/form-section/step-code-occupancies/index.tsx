@@ -21,10 +21,11 @@ import * as R from "ramda"
 import React, { useEffect, useState } from "react"
 import { Controller, useForm } from "react-hook-form"
 import { Trans } from "react-i18next"
-import { useLocation, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { usePart3StepCode } from "../../../../../../hooks/resources/use-part-3-step-code"
 import { EFlashMessageStatus, EStepCodeOccupancyKey } from "../../../../../../types/enums"
 import { CustomMessageBox } from "../../../../../shared/base/custom-message-box"
+import { usePart3Navigation } from "../../use-part-3-navigation"
 import { SectionHeading } from "../shared/section-heading"
 
 export const StepCodeOccupancies = observer(function Part3StepCodeFormStepCodeOccupancies() {
@@ -37,7 +38,7 @@ export const StepCodeOccupancies = observer(function Part3StepCodeFormStepCodeOc
   const [radioError, setRadioError] = useState<string | null>(null)
 
   const navigate = useNavigate()
-  const location = useLocation()
+  const { navigateToNext, goBackPath } = usePart3Navigation()
 
   const { handleSubmit, formState, control, reset, trigger } = useForm({
     mode: "onSubmit",
@@ -52,14 +53,13 @@ export const StepCodeOccupancies = observer(function Part3StepCodeFormStepCodeOc
     }
   }, [])
 
-  const onSubmit = async (values) => {
+  const onSubmit = async (values, event: React.BaseSyntheticEvent) => {
     if (!checklist) return
     if (radioError) {
       return
     }
 
-    const alternatePath = checklist.alternateNavigateAfterSavePath
-    checklist.setAlternateNavigateAfterSavePath(null)
+    const saveAndGoBack = (event?.nativeEvent as CustomEvent)?.detail?.saveAndGoBack
 
     let updateSucceeded = false
     if (!isValid) return
@@ -104,11 +104,10 @@ export const StepCodeOccupancies = observer(function Part3StepCodeFormStepCodeOc
     }
 
     if (updateSucceeded) {
-      if (alternatePath) {
-        navigate(alternatePath)
+      if (saveAndGoBack) {
+        navigate(goBackPath)
       } else {
-        const nextSectionPath = isRelevant == "yes" ? "step-code-performance-requirements" : "modelled-outputs"
-        navigate(location.pathname.replace("step-code-occupancies", nextSectionPath))
+        navigateToNext()
       }
     }
   }
