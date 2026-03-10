@@ -1,0 +1,24 @@
+---
+http_interactions:
+- request:
+    method: post
+    uri: https://archistar.example.test/submissions
+    body:
+      encoding: UTF-8
+      string: '{"complyCertificateId":"cert-1","cityKey":"bcbc","address":"123 Main
+        St","fileLink":"https://example.test/design.pdf","additionalFiles":[],"latitude":49.2,"longitude":-123.1}'
+    headers:
+      User-Agent:
+      - Faraday v2.9.2
+  response:
+    status:
+      code: 200
+      message:
+    headers:
+      Content-Type:
+      - application/json
+    body:
+      encoding: UTF-8
+      string: '{"certificate_no":"C-100"}'
+  recorded_at: Sat, 28 Feb 2026 00:44:03 GMT
+recorded_with: VCR 6.2.0

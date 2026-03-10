@@ -1,0 +1,44 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: https://geocoder.example.test/addresses.json?addressString=123+Main&autoComplete=true&brief=true&locationDescriptor=parcelPoint&maxResults=10&outputSRS=4326
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - Faraday v2.9.2
+  response:
+    status:
+      code: 200
+      message:
+    headers:
+      Content-Type:
+      - application/json
+    body:
+      encoding: UTF-8
+      string: '{"features":[{"properties":{"matchPrecision":"CIVIC_NUMBER","fullAddress":"123
+        Main St","siteID":"site-1"}},{"properties":{"matchPrecision":"STREET","fullAddress":"ignored","siteID":"site-2"}}]}'
+  recorded_at: Sat, 28 Feb 2026 00:44:03 GMT
+- request:
+    method: get
+    uri: https://geocoder.example.test/sites/site-1/subsites.json
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - Faraday v2.9.2
+  response:
+    status:
+      code: 200
+      message:
+    headers:
+      Content-Type:
+      - application/json
+    body:
+      encoding: UTF-8
+      string: '{"features":[{"properties":{"fullAddress":"Unit 101 - 123 Main St","siteID":"site-1-unit-101"}}]}'
+  recorded_at: Sat, 28 Feb 2026 00:44:03 GMT
+recorded_with: VCR 6.2.0
