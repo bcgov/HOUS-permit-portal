@@ -157,7 +157,9 @@ RSpec.describe RequirementFormJsonService do
       allow(requirement).to receive(:key).with("block_key").and_return("x")
 
       json = described_class.new(requirement).to_form_json("block_key")
-      expect(json.dig(:conditional, "when")).to eq("section1.block_key|abc")
+      expect(json.dig(:conditional, :conditions, 0, :component)).to eq(
+        "section1.block_key|abc"
+      )
     end
 
     it "includes the openExistingStepCode action for energy step code" do
