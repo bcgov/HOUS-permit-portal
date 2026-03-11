@@ -88,6 +88,93 @@ RSpec.describe Api::StepCodesController, type: :controller do
       expect(response).to have_http_status(:forbidden)
     end
 
+    context "as a submission collaborator" do
+      let(:collaborator_user) { create(:user, :submitter) }
+      let(:collaborator) do
+        create(
+          :collaborator,
+          user: collaborator_user,
+          collaboratorable: submitter
+        )
+      end
+      let(:step_code_block_id) { SecureRandom.uuid }
+
+      before do
+        permit_application.template_version.update!(
+          requirement_blocks_json: {
+            step_code_block_id => {
+              "name" => "Energy Step Code",
+              "requirements" => [
+                {
+                  "id" => SecureRandom.uuid,
+                  "requirement_code" => "energy_step_code_tool_part_9",
+                  "input_type" => "energy_step_code"
+                }
+              ]
+            }
+          }
+        )
+        sign_in collaborator_user
+      end
+
+      it "allows an assignee collaborator to reassign their step code to the collaborating permit application" do
+        create(
+          :permit_collaboration,
+          permit_application: permit_application,
+          collaborator: collaborator,
+          collaboration_type: :submission,
+          collaborator_type: :assignee,
+          assigned_requirement_block_id: step_code_block_id
+        )
+
+        standalone =
+          create(
+            :part_3_step_code,
+            permit_application: nil,
+            creator: collaborator_user
+          )
+
+        patch :update,
+              params: {
+                id: standalone.id,
+                step_code: {
+                  permit_application_id: permit_application.id
+                }
+              },
+              as: :json
+
+        expect(response).to have_http_status(:success)
+      end
+
+      it "allows a delegatee collaborator to reassign their step code to the collaborating permit application" do
+        create(
+          :permit_collaboration,
+          permit_application: permit_application,
+          collaborator: collaborator,
+          collaboration_type: :submission,
+          collaborator_type: :delegatee
+        )
+
+        standalone =
+          create(
+            :part_3_step_code,
+            permit_application: nil,
+            creator: collaborator_user
+          )
+
+        patch :update,
+              params: {
+                id: standalone.id,
+                step_code: {
+                  permit_application_id: permit_application.id
+                }
+              },
+              as: :json
+
+        expect(response).to have_http_status(:success)
+      end
+    end
+
     it "returns error for invalid input" do
       allow(StepCode).to receive(:find).and_return(step_code)
       allow(step_code).to receive(:update!).and_raise(
