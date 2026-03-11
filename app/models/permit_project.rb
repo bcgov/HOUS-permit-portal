@@ -29,7 +29,6 @@ class PermitProject < ApplicationRecord
   delegate :name, to: :owner, prefix: true
 
   after_commit :reindex
-  after_commit :reindex_audits
 
   scope :with_status_counts,
         -> do
@@ -278,10 +277,5 @@ class PermitProject < ApplicationRecord
     end
 
     self.number = new_number
-  end
-
-  def reindex_audits
-    audits.reindex
-    associated_audits.reindex
   end
 end

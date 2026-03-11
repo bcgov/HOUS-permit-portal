@@ -2,23 +2,18 @@ module Api::Concerns::Search::ProjectAudits
   extend ActiveSupport::Concern
 
   def perform_project_audit_search
-    search_conditions = {
-      order: project_audit_order,
-      where: project_audit_where_clause,
-      page: project_audit_search_params[:page],
-      per_page:
-        (
-          if project_audit_search_params[:page]
-            project_audit_search_params[:per_page] ||
-              Kaminari.config.default_per_page
-          end
-        ),
-      scope_results: ->(relation) do
-        policy_scope(relation, policy_scope_class: ProjectAuditPolicy::Scope)
-      end
-    }
+    relation =
+      ApplicationAudit
+        .for_permit_project(@permit_project.id)
+        .then do |scope|
+          policy_scope(scope, policy_scope_class: ProjectAuditPolicy::Scope)
+        end
 
-    @search = ApplicationAudit.search("*", **search_conditions)
+    relation = apply_project_audit_date_filter(relation)
+    relation = apply_project_audit_order(relation)
+    relation = relation.page(project_audit_page).per(project_audit_per_page)
+
+    @search = relation
   end
 
   private
@@ -32,35 +27,35 @@ module Api::Concerns::Search::ProjectAudits
     )
   end
 
-  def project_audit_order
-    if (sort = project_audit_search_params[:sort])
-      { sort[:field] => { order: sort[:direction], unmapped_type: "long" } }
-    else
-      { created_at: { order: :desc, unmapped_type: "long" } }
-    end
+  def project_audit_page
+    project_audit_search_params[:page].presence || 1
   end
 
-  # Scopes every query to the current project. Unlike the PermitApplications
-  # concern where @jurisdiction is conditional, here @permit_project is always
-  # required — there's no meaningful "unscoped" audit search at this level.
-  def project_audit_where_clause
+  def project_audit_per_page
+    project_audit_search_params[:per_page].presence ||
+      Kaminari.config.default_per_page
+  end
+
+  def apply_project_audit_date_filter(relation)
     search_filters =
       (
         project_audit_search_params[:filters].to_h || {}
       ).deep_symbolize_keys.compact_blank
+    from = parsed_datetime(search_filters[:from])
+    to = parsed_datetime(search_filters[:to])
+    relation = relation.where("created_at >= ?", from) if from.present?
+    relation = relation.where("created_at <= ?", to) if to.present?
+    relation
+  end
 
-    and_conditions = []
-
-    and_conditions << { permit_project_id: @permit_project.id }
-
-    date_range = {}
-    parsed_from = parsed_datetime(search_filters[:from])
-    parsed_to = parsed_datetime(search_filters[:to])
-    date_range[:gte] = parsed_from if parsed_from
-    date_range[:lte] = parsed_to if parsed_to
-    and_conditions << { created_at: date_range } if date_range.present?
-
-    { _and: and_conditions }
+  def apply_project_audit_order(relation)
+    sort = project_audit_search_params[:sort]
+    if sort.present? && sort[:field].to_s == "created_at"
+      direction = sort[:direction].to_s.downcase == "asc" ? :asc : :desc
+      relation.order(created_at: direction)
+    else
+      relation.order(created_at: :desc)
+    end
   end
 
   def parsed_datetime(value)

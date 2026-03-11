@@ -1,7 +1,7 @@
 class Api::ProjectAuditsController < Api::ApplicationController
   include Api::Concerns::Search::ProjectAudits
 
-  # policy_scope is applied inside the search concern via scope_results
+  # policy_scope is applied inside the concern via perform_project_audit_search
   skip_after_action :verify_policy_scoped, only: %i[index]
 
   before_action :set_permit_project
@@ -25,7 +25,7 @@ class Api::ProjectAuditsController < Api::ApplicationController
     # Then the presenter could check: "does the viewer have access to the
     # permit_application and/or requirement_block this audit references?"
     #
-    render_success @search.results,
+    render_success @search,
                    nil,
                    {
                      meta: page_meta(@search),
