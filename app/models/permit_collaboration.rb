@@ -1,5 +1,8 @@
 class PermitCollaboration < ApplicationRecord
-  audited on: %i[create destroy], associated_with: :permit_application
+  include Discard::Model
+
+  # discard is an update (sets discarded_at), so we need :update for unassign to be audited
+  audited on: %i[create update], associated_with: :permit_application
 
   belongs_to :collaborator
   belongs_to :permit_application, touch: true
@@ -11,7 +14,10 @@ class PermitCollaboration < ApplicationRecord
 
   after_initialize :set_default_collaboration_type
   after_save :reindex_permit_application
-  after_destroy :send_unassignment_notification, :reindex_permit_application
+  after_discard do
+    send_unassignment_notification
+    reindex_permit_application
+  end
 
   validates :permit_application_id,
             uniqueness: {
@@ -20,7 +26,8 @@ class PermitCollaboration < ApplicationRecord
                 collaboration_type
                 collaborator_type
                 assigned_requirement_block_id
-              ]
+              ],
+              conditions: -> { where(discarded_at: nil) }
             }
   validates :collaboration_type, presence: true
   validates :collaborator_type, presence: true

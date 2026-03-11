@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_02_27_200000) do
+ActiveRecord::Schema[7.2].define(version: 2026_03_10_000000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -41,7 +41,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_02_27_200000) do
     t.datetime "updated_at", null: false
   end
 
-  create_table "audits", force: :cascade do |t|
+  create_table "audits", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "auditable_id"
     t.string "auditable_type"
     t.uuid "associated_id"
@@ -98,9 +98,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_02_27_200000) do
     t.uuid "contactable_id"
     t.string "contact_type"
     t.index ["contactable_type", "contactable_id"], name: "index_contacts_on_contactable"
-  end
-
-  create_table "data_migrations", primary_key: "version", id: :string, force: :cascade do |t|
   end
 
   create_table "design_documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -207,16 +204,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_02_27_200000) do
     t.datetime "updated_at", null: false
     t.index ["jurisdiction_id"], name: "index_integration_mappings_on_jurisdiction_id"
     t.index ["template_version_id"], name: "index_integration_mappings_on_template_version_id"
-  end
-
-  create_table "jurisdiction_climate_zones", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.uuid "jurisdiction_id", null: false
-    t.string "climate_zone", null: false
-    t.integer "heating_degree_days"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["jurisdiction_id", "climate_zone"], name: "idx_jurisdiction_climate_zones_unique", unique: true
-    t.index ["jurisdiction_id"], name: "index_jurisdiction_climate_zones_on_jurisdiction_id"
   end
 
   create_table "jurisdiction_memberships", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -352,17 +339,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_02_27_200000) do
     t.datetime "updated_at", null: false
     t.index ["discarded_at"], name: "index_overheating_tools_on_discarded_at"
     t.index ["user_id"], name: "index_overheating_tools_on_user_id"
-  end
-
-  create_table "part3_occupancy_required_steps", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.uuid "jurisdiction_id", null: false
-    t.string "occupancy_key", null: false
-    t.integer "energy_step_required", null: false
-    t.integer "zero_carbon_step_required"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["jurisdiction_id", "occupancy_key"], name: "idx_part3_occ_req_steps_jurisdiction_occupancy"
-    t.index ["jurisdiction_id"], name: "index_part3_occupancy_required_steps_on_jurisdiction_id"
   end
 
   create_table "part_3_step_code_checklists", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -542,10 +518,12 @@ ActiveRecord::Schema[7.2].define(version: 2026_02_27_200000) do
     t.string "assigned_requirement_block_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.datetime "discarded_at"
     t.index ["collaboration_type"], name: "index_permit_collaborations_on_collaboration_type"
     t.index ["collaborator_id"], name: "index_permit_collaborations_on_collaborator_id"
     t.index ["collaborator_type"], name: "index_permit_collaborations_on_collaborator_type"
-    t.index ["permit_application_id", "collaborator_id", "collaboration_type", "collaborator_type", "assigned_requirement_block_id"], name: "index_permit_collaborations_on_unique_columns", unique: true
+    t.index ["discarded_at"], name: "index_permit_collaborations_on_discarded_at"
+    t.index ["permit_application_id", "collaborator_id", "collaboration_type", "collaborator_type", "assigned_requirement_block_id"], name: "index_permit_collaborations_on_unique_columns", unique: true, where: "(discarded_at IS NULL)"
     t.index ["permit_application_id"], name: "index_permit_collaborations_on_permit_application_id"
   end
 
@@ -1011,7 +989,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_02_27_200000) do
     t.integer "position"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.jsonb "conditional"
     t.index ["requirement_block_id"], name: "index_template_section_blocks_on_requirement_block_id"
     t.index ["requirement_template_section_id"], name: "idx_on_requirement_template_section_id_5469986497"
   end
@@ -1121,7 +1098,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_02_27_200000) do
   add_foreign_key "integration_mapping_notifications", "template_versions"
   add_foreign_key "integration_mappings", "jurisdictions"
   add_foreign_key "integration_mappings", "template_versions"
-  add_foreign_key "jurisdiction_climate_zones", "jurisdictions", on_delete: :cascade
   add_foreign_key "jurisdiction_memberships", "jurisdictions"
   add_foreign_key "jurisdiction_memberships", "users"
   add_foreign_key "jurisdiction_requirement_templates", "jurisdictions"
@@ -1135,7 +1111,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_02_27_200000) do
   add_foreign_key "occupancy_classifications", "part_3_step_code_checklists", column: "checklist_id", on_delete: :cascade
   add_foreign_key "overheating_documents", "overheating_tools"
   add_foreign_key "overheating_tools", "users"
-  add_foreign_key "part3_occupancy_required_steps", "jurisdictions", on_delete: :cascade
   add_foreign_key "part_3_step_code_checklists", "step_codes", on_delete: :cascade
   add_foreign_key "part_9_step_code_checklists", "permit_type_required_steps", column: "step_requirement_id"
   add_foreign_key "part_9_step_code_checklists", "step_codes", on_delete: :cascade

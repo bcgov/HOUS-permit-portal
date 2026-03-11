@@ -8,8 +8,8 @@ class PermitApplication < ApplicationRecord
                review_delegatee_name
              ],
              text_end: %i[number]
-  audited on: %i[create update discard],
-          only: %i[status reference_number],
+  audited on: %i[create update],
+          only: %i[status reference_number discarded_at],
           associated_with: :permit_project
 
   include FormSupportingDocuments
