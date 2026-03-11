@@ -6,7 +6,6 @@ import { MenuContentWrapper } from "./menu-content-wrapper"
 import { GiveFeedbackMenuItem } from "./menu-items/give-feedback-menu-item"
 import { HelpMenuItem } from "./menu-items/help-menu-item"
 import { LoginMenuItem } from "./menu-items/login-menu-item"
-import { WelcomeMenuItem } from "./menu-items/welcome-menu-item"
 import { MenuSection } from "./menu-section"
 
 export const LoggedOutMenuContent = observer(() => {
@@ -23,7 +22,6 @@ export const LoggedOutMenuContent = observer(() => {
 
       {/* Support section */}
       <MenuSection title={t("site.navMenu.sections.support")}>
-        <WelcomeMenuItem />
         <GiveFeedbackMenuItem />
         <HelpMenuItem />
       </MenuSection>
