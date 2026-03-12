@@ -1,5 +1,4 @@
 import {
-  Button,
   Flex,
   FormControl,
   FormHelperText,
@@ -17,31 +16,28 @@ import * as R from "ramda"
 import React, { useEffect, useMemo } from "react"
 import { FormProvider, useFieldArray, useForm, useFormContext } from "react-hook-form"
 import { Trans } from "react-i18next"
-import { useLocation, useNavigate } from "react-router-dom"
 import { usePart3StepCode } from "../../../../../hooks/resources/use-part-3-step-code"
 import { EFlashMessageStatus } from "../../../../../types/enums"
 import { CustomMessageBox } from "../../../../shared/base/custom-message-box"
 import { GridColumnHeader } from "../../part-9/checklist/shared/grid/column-header"
 import { GridData } from "../../part-9/checklist/shared/grid/data"
+import { Part3FormFooter } from "./shared/form-footer"
 import { SectionHeading } from "./shared/section-heading"
 
 export const BaselinePerformance = observer(function Part3StepCodeFormBaselinePerformance() {
   const i18nPrefix = "stepCode.part3.baselinePerformance"
   const { checklist } = usePart3StepCode()
 
-  const navigate = useNavigate()
-  const location = useLocation()
-
   const formMethods = useForm({
     defaultValues: {
-      refAnnualThermalEnergyDemand: parseFloat(checklist?.refAnnualThermalEnergyDemand ?? "0"),
+      refAnnualThermalEnergyDemand: checklist?.refAnnualThermalEnergyDemand ?? "",
       referenceEnergyOutputsAttributes:
         checklist?.fuelTypes?.map((ft) => {
           const energyOutput = checklist.referenceEnergyOutputs?.find((o) => o.fuelTypeId === ft.id)
           return {
             id: energyOutput?.id,
             fuelTypeId: ft.id,
-            annualEnergy: energyOutput ? parseFloat(energyOutput.annualEnergy) : 0,
+            annualEnergy: energyOutput?.annualEnergy ?? "",
           }
         }) ?? [],
     },
@@ -60,19 +56,10 @@ export const BaselinePerformance = observer(function Part3StepCodeFormBaselinePe
   const onSubmit = async (values) => {
     if (!checklist) return
 
-    const alternatePath = checklist.alternateNavigateAfterSavePath
-    checklist.setAlternateNavigateAfterSavePath(null)
-
     const updated = await checklist.update(values)
-    if (updated) {
-      await checklist.completeSection("baselinePerformance")
+    if (!updated) throw new Error("Save failed")
 
-      if (alternatePath) {
-        navigate(alternatePath)
-      } else {
-        navigate(location.pathname.replace("baseline-performance", "step-code-occupancies"))
-      }
-    }
+    await checklist.completeSection("baselinePerformance")
   }
 
   useEffect(() => {
@@ -108,83 +95,79 @@ export const BaselinePerformance = observer(function Part3StepCodeFormBaselinePe
         {/* <Text fontSize="md">{t(`${i18nPrefix}.instructions`)}</Text> */}
       </Flex>
       <FormProvider {...formMethods}>
-        <form onSubmit={handleSubmit(onSubmit)} name="part3SectionForm">
-          <Flex direction="column" gap={{ base: 6, xl: 6 }} pb={4}>
-            <FormControl>
-              <FormLabel>{t(`${i18nPrefix}.refAnnualThermalEnergyDemand.label`)}</FormLabel>
-              <FormHelperText mb={1} mt={0}>
-                {t(`${i18nPrefix}.refAnnualThermalEnergyDemand.hint`)}
-              </FormHelperText>
-              <FormHelperText mb={1} mt={0} color="semantic.error">
-                <ErrorMessage errors={errors} name="refAnnualThermalEnergyDemand" />
-              </FormHelperText>
-              <InputGroup maxW={"200px"}>
-                <Input
-                  type="number"
-                  step={1}
-                  {...register("refAnnualThermalEnergyDemand", {
-                    required: t(`${i18nPrefix}.refAnnualThermalEnergyDemand.error`),
-                  })}
-                />
-                <InputRightElement>{t(`${i18nPrefix}.refAnnualThermalEnergyDemand.units`)}</InputRightElement>
-              </InputGroup>
-            </FormControl>
+        <Flex direction="column" gap={{ base: 6, xl: 6 }} pb={4}>
+          <FormControl>
+            <FormLabel>{t(`${i18nPrefix}.refAnnualThermalEnergyDemand.label`)}</FormLabel>
+            <FormHelperText mb={1} mt={0}>
+              {t(`${i18nPrefix}.refAnnualThermalEnergyDemand.hint`)}
+            </FormHelperText>
+            <FormHelperText mb={1} mt={0} color="semantic.error">
+              <ErrorMessage errors={errors} name="refAnnualThermalEnergyDemand" />
+            </FormHelperText>
+            <InputGroup maxW={"200px"}>
+              <Input
+                type="number"
+                step={1}
+                {...register("refAnnualThermalEnergyDemand", {
+                  required: t(`${i18nPrefix}.refAnnualThermalEnergyDemand.error`),
+                })}
+              />
+              <InputRightElement>{t(`${i18nPrefix}.refAnnualThermalEnergyDemand.units`)}</InputRightElement>
+            </InputGroup>
+          </FormControl>
 
-            <FormLabel>{t(`${i18nPrefix}.refEnergyOutputs.label`)}</FormLabel>
+          <FormLabel>{t(`${i18nPrefix}.refEnergyOutputs.label`)}</FormLabel>
 
-            <Grid
-              w="full"
-              templateColumns={`auto repeat(3, minmax(auto, 170px))`}
-              borderWidth={1}
-              borderTopWidth={0}
-              borderBottomWidth={0}
-              borderX={0}
-              borderColor="borders.light"
-            >
-              <GridColumnHeader>
-                <Text>{t(`${i18nPrefix}.refEnergyOutputs.fuelType`)}</Text>
-              </GridColumnHeader>
-              <GridColumnHeader>
-                <Text>{t(`${i18nPrefix}.refEnergyOutputs.annualEnergy`)}</Text>
-              </GridColumnHeader>
-              <GridColumnHeader>
-                <Text>
-                  <Trans i18nKey={`${i18nPrefix}.refEnergyOutputs.emissionsFactor`} components={{ sub: <sub /> }} />
-                </Text>
-              </GridColumnHeader>
-              <GridColumnHeader borderRightWidth={1}>
-                <Text>
-                  <Trans i18nKey={`${i18nPrefix}.refEnergyOutputs.emissions`} components={{ sub: <sub /> }} />
-                </Text>
-              </GridColumnHeader>
+          <Grid
+            w="full"
+            templateColumns={`auto repeat(3, minmax(auto, 170px))`}
+            borderWidth={1}
+            borderTopWidth={0}
+            borderBottomWidth={0}
+            borderX={0}
+            borderColor="borders.light"
+          >
+            <GridColumnHeader>
+              <Text>{t(`${i18nPrefix}.refEnergyOutputs.fuelType`)}</Text>
+            </GridColumnHeader>
+            <GridColumnHeader>
+              <Text>{t(`${i18nPrefix}.refEnergyOutputs.annualEnergy`)}</Text>
+            </GridColumnHeader>
+            <GridColumnHeader>
+              <Text>
+                <Trans i18nKey={`${i18nPrefix}.refEnergyOutputs.emissionsFactor`} components={{ sub: <sub /> }} />
+              </Text>
+            </GridColumnHeader>
+            <GridColumnHeader borderRightWidth={1}>
+              <Text>
+                <Trans i18nKey={`${i18nPrefix}.refEnergyOutputs.emissions`} components={{ sub: <sub /> }} />
+              </Text>
+            </GridColumnHeader>
 
-              {fields.map((f, idx) => (
-                <ReferenceEnergyOutputRow field={f} idx={idx} />
-              ))}
+            {fields.map((f, idx) => (
+              <ReferenceEnergyOutputRow key={f.id} field={f} idx={idx} />
+            ))}
 
-              <GridData borderX={0} borderTopWidth={1} justifyContent="center" px={0}>
-                <Text fontSize="sm" fontWeight="bold">
-                  {t(`${i18nPrefix}.refEnergyOutputs.totalAnnualEnergy`)}
-                </Text>
-              </GridData>
-              <GridData borderX={0} borderTopWidth={1}>
-                <Input isDisabled textAlign="center" value={totalAnnualEnergy} />
-              </GridData>
-              <GridData borderX={0} borderTopWidth={1} justifyContent="center" px={0}>
-                <Text fontSize="sm" fontWeight="bold">
-                  {t(`${i18nPrefix}.refEnergyOutputs.totalAnnualEmissions`)}
-                </Text>
-              </GridData>
-              <GridData borderX={0} borderTopWidth={1}>
-                <Input value={totalEmissions} isReadOnly isDisabled textAlign="center" />
-              </GridData>
-            </Grid>
+            <GridData borderX={0} borderTopWidth={1} justifyContent="center" px={0}>
+              <Text fontSize="sm" fontWeight="bold">
+                {t(`${i18nPrefix}.refEnergyOutputs.totalAnnualEnergy`)}
+              </Text>
+            </GridData>
+            <GridData borderX={0} borderTopWidth={1}>
+              <Input isDisabled textAlign="center" value={totalAnnualEnergy} />
+            </GridData>
+            <GridData borderX={0} borderTopWidth={1} justifyContent="center" px={0}>
+              <Text fontSize="sm" fontWeight="bold">
+                {t(`${i18nPrefix}.refEnergyOutputs.totalAnnualEmissions`)}
+              </Text>
+            </GridData>
+            <GridData borderX={0} borderTopWidth={1}>
+              <Input value={totalEmissions} isReadOnly isDisabled textAlign="center" />
+            </GridData>
+          </Grid>
 
-            <Button type="submit" variant="primary" isLoading={isSubmitting} isDisabled={isSubmitting}>
-              {t("stepCode.part3.cta")}
-            </Button>
-          </Flex>
-        </form>
+          <Part3FormFooter handleSubmit={handleSubmit} onSubmit={onSubmit} isLoading={isSubmitting} />
+        </Flex>
       </FormProvider>
     </>
   )

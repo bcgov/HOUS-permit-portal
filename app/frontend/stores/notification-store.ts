@@ -204,9 +204,12 @@ export const NotificationStoreModel = types
       self.notifications = notifications.map((m) => self.convertNotificationToUseDate(m))
     },
     concatToNotifications(notifications) {
-      const newNotifications = R.concat(
-        self.notifications,
-        notifications.map((m) => self.convertNotificationToUseDate(m))
+      const newNotifications = R.uniqBy(
+        (n: INotification) => n.id,
+        R.concat(
+          self.notifications,
+          notifications.map((m) => self.convertNotificationToUseDate(m))
+        )
       )
       self.notifications.replace(newNotifications)
     },
@@ -246,7 +249,10 @@ export const NotificationStoreModel = types
       self.fetchNotifications()
     }),
     processWebsocketChange: flow(function* (payload: IUserPushPayload) {
-      self.notifications.unshift(self.convertNotificationToUseDate(payload.data))
+      const existing = self.notifications.find((n) => n.id === payload.data.id)
+      if (!existing) {
+        self.notifications.unshift(self.convertNotificationToUseDate(payload.data))
+      }
       self.unreadNotificationsCount = self.popoverOpen ? 0 : payload.meta.unreadCount
       self.totalPages = payload.meta.totalPages
 
