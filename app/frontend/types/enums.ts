@@ -682,6 +682,10 @@ export enum EPermitProjectSortFields {
   rollupStatus = "rollup_status",
 }
 
+export enum EProjectAuditSortFields {
+  timestamp = "timestamp",
+}
+
 export enum EOverheatingToolStatusFilter {
   all = "all",
   archived = "archived",
