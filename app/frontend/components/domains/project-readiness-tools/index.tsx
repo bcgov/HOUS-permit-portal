@@ -46,10 +46,14 @@ export const ProjectReadinessToolsIndexScreen = () => {
           description: t("projectReadinessTools.createLoaDescription"),
           href: "/project-readiness-tools/create-your-letters-of-assurance",
         },
+        {
+          linkText: t("projectReadinessTools.overheatingCodesLink"),
+          description: t("projectReadinessTools.overheatingCodesDescription"),
+          href: "/overheating-codes",
+        },
       ],
     },
   ]
-  console.log("projectReadinessPageItems===========>", projectReadinessPageItems)
   return (
     <Container maxW="container.lg" pb="36" px="8">
       <Heading as="h1" mt="16" color="text.primary">

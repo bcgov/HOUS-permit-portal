@@ -108,7 +108,12 @@ function isPreCheckPath(path: string): boolean {
 }
 
 function isOverheatingCodePath(path: string): boolean {
-  const regex = /^\/overheating-codes\/[a-f\d-]+/
+  const regex = /^\/overheating-codes\/?[a-f\d-]*/
+  return regex.test(path)
+}
+
+function isWelcomePath(path: string): boolean {
+  const regex = /^\/welcome/
   return regex.test(path)
 }
 

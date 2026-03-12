@@ -1,0 +1,29 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: "<ARCHISTAR_API_ENDPOINT>/submissions/invalid-external-id"
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Content-Type:
+      - application/json
+      Accept:
+      - application/json
+      x-api-key:
+      - "<ARCHISTAR_API_KEY>"
+      User-Agent:
+      - Faraday v2.9.2
+  response:
+    status:
+      code: 404
+      message: Not Found
+    headers:
+      Content-Type:
+      - application/json
+    body:
+      encoding: UTF-8
+      string: '{"message":"Not found"}'
+  recorded_at: Tue, 03 Mar 2026 00:00:00 GMT
+recorded_with: VCR 6.2.0
