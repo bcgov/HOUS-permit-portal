@@ -102,7 +102,7 @@ function isStepCodePath(path: string): boolean {
 }
 
 function isPreCheckPath(path: string): boolean {
-  // TODO: Update for pre checks that are attached to a permit application
+  // TODO: Update for pre checks that are attached to a permit application.
   const regex = /^\/pre-checks\/[a-f\d-]+/
   return regex.test(path)
 }
