@@ -22,6 +22,7 @@ import { IPermitApplicationStore, PermitApplicationStoreModel } from "./permit-a
 import { IPermitClassificationStore, PermitClassificationStoreModel } from "./permit-classification-store"
 import { IPermitProjectStore, PermitProjectStoreModel } from "./permit-project-store"
 import { IPreCheckStore, PreCheckStoreModel } from "./pre-check-store"
+import { IProjectAuditStore, ProjectAuditStoreModel } from "./project-audit-store"
 import { IRequirementBlockStoreModel, RequirementBlockStoreModel } from "./requirement-block-store"
 import { IRequirementTemplateStoreModel, RequirementTemplateStoreModel } from "./requirement-template-store"
 import { ISandboxStore, SandboxStoreModel } from "./sandbox-store"
@@ -40,6 +41,7 @@ export const RootStoreModel = types
     userStore: types.optional(UserStoreModel, {}),
     permitApplicationStore: types.optional(PermitApplicationStoreModel, {}),
     permitProjectStore: types.optional(PermitProjectStoreModel, {}),
+    projectAuditStore: types.optional(ProjectAuditStoreModel, {}),
     permitClassificationStore: types.optional(PermitClassificationStoreModel, {}),
     preCheckStore: types.optional(PreCheckStoreModel, {}),
     jurisdictionStore: types.optional(JurisdictionStoreModel, {}),
@@ -119,6 +121,7 @@ export interface IRootStore extends IStateTreeNode {
   sessionStore: ISessionStore
   permitApplicationStore: IPermitApplicationStore
   permitProjectStore: IPermitProjectStore
+  projectAuditStore: IProjectAuditStore
   permitClassificationStore: IPermitClassificationStore
   preCheckStore: IPreCheckStore
   jurisdictionStore: IJurisdictionStore
