@@ -3753,6 +3753,9 @@ Thank you,
             "Add secure digital signatures that meet provincial requirements for authenticity and integrity in building permit submissions",
           createLoaDescription:
             "Complete Letters of Assurance to confirm who is professionally responsible for design and field review on your project, as required by the BC Building Code for some building types",
+          overheatingCodesLink: "Verify compliance with BC overheating requirements",
+          overheatingCodesDescription:
+            "Check your project's compliance with overheating requirements before submitting a permit application",
           compliantApplicationLink: "complete and compliant permit application",
           letterOfAssurancePage: {
             createYourLOAsTitle: "Create your Letters of Assurance",

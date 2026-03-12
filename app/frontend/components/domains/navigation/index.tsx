@@ -168,11 +168,13 @@ const LookUpStepCodesRequirementsForYourProjectScreen = lazy(() =>
     default: module.LookUpStepCodesRequirementsForYourProjectScreen,
   }))
 )
+
 const CheckDigitalSealsScreen = lazy(() =>
   import("../project-readiness-tools/check-digital-seals").then((module) => ({
     default: module.CheckDigitalSealsScreen,
   }))
 )
+
 const PreCheckInfoScreen = lazy(() =>
   import("../project-readiness-tools/pre-check-info-screen").then((module) => ({
     default: module.PreCheckInfoScreen,
@@ -872,6 +874,7 @@ const AppRoutes = observer(() => {
           path="/project-readiness-tools/look-up-step-codes-requirements-for-your-project"
           element={<LookUpStepCodesRequirementsForYourProjectScreen />}
         />
+        <Route path="/project-readiness-tools/check-digital-seals" element={<CheckDigitalSealsScreen />} />
         <Route path="/project-readiness-tools/pre-check" element={<PreCheckInfoScreen />} />
         <Route
           path="/onboarding-checklist-page-for-lg-adopting"
