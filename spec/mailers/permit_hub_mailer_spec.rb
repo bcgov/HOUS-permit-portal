@@ -15,6 +15,7 @@ RSpec.describe PermitHubMailer, type: :mailer do
           "Preference",
           enable_email_collaboration_notification: true
         ),
+      omniauth_provider_label: nil,
       omniauth_provider: "idir",
       omniauth_username: nil
     )
