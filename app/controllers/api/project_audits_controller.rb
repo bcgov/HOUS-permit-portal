@@ -41,5 +41,7 @@ class Api::ProjectAuditsController < Api::ApplicationController
 
   def set_permit_project
     @permit_project = PermitProject.find(params[:id])
+  rescue ActiveRecord::RecordNotFound => e
+    render_error("misc.not_found_error", { status: :not_found }, e)
   end
 end
