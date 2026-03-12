@@ -17,9 +17,9 @@ import { NavBarMenu } from "./nav-bar-menu"
 import { RegionalRMJurisdictionSelect } from "./regional-rm-jurisdiction-select"
 import { SubNavBar } from "./sub-nav-bar"
 
+import { OverheatingCodeNavBar } from "../overheating-code/overheating-code-nav-bar"
 import { PreCheckNavBar } from "../pre-check/pre-check-nav-bar"
 import { StepCodeNavBar } from "../step-code/nav-bar"
-import { Part3NavLinks } from "../step-code/nav-bar/part-3-nav-links"
 import { Part9NavLinks } from "../step-code/nav-bar/part-9-nav-links"
 
 function isTemplateEditPath(path: string): boolean {
@@ -107,6 +107,16 @@ function isPreCheckPath(path: string): boolean {
   return regex.test(path)
 }
 
+function isOverheatingCodePath(path: string): boolean {
+  const regex = /^\/overheating-codes\/?[a-f\d-]*/
+  return regex.test(path)
+}
+
+function isWelcomePath(path: string): boolean {
+  const regex = /^\/welcome/
+  return regex.test(path)
+}
+
 function shouldHideSubNavbarForPath(path: string): boolean {
   const matchers: Array<(path: string) => boolean> = [
     (path) => path === "/",
@@ -126,6 +136,8 @@ function shouldHideSubNavbarForPath(path: string): boolean {
     isStepCodePath,
     isAdminPath,
     isPreCheckPath,
+    isOverheatingCodePath,
+    isWelcomePath,
   ]
 
   return matchers.some((matcher) => matcher(path))
@@ -150,8 +162,21 @@ export const NavBar = observer(function NavBar() {
     if (path.includes("part-9")) {
       return <StepCodeNavBar title={t("stepCode.title")} NavLinks={<Part9NavLinks />} />
     } else {
-      return <StepCodeNavBar title={t("stepCode.part3.title")} NavLinks={<Part3NavLinks />} />
+      return (
+        <StepCodeNavBar
+          title={t("stepCode.part3.title")}
+          NavLinks={
+            <RouterLinkButton to="/step-codes" variant="link">
+              {t("stepCode.part3.goToStepCodes", "Back to step codes")}
+            </RouterLinkButton>
+          }
+        />
+      )
     }
+  }
+
+  if (isOverheatingCodePath(path)) {
+    return <OverheatingCodeNavBar />
   }
 
   if (shouldHideFullNavBarForPath(path)) {
@@ -192,7 +217,7 @@ const NavBarContent = observer(function NavBarContent() {
       >
         <Container maxW="container.lg" p={2} px={{ base: 4, md: 8 }}>
           <Flex align="center" gap={2} w="full">
-            <RouterLink to="/welcome">
+            <RouterLink to="/">
               <Box w={120} mr={2}>
                 <Image
                   fit="contain"
@@ -286,14 +311,7 @@ const NavBarContent = observer(function NavBarContent() {
       </Box>
       {!R.isEmpty(criticalNotifications) && <ActionRequiredBox notification={criticalNotifications[0]} />}
       {currentUser?.isReviewStaff && (
-        <SandboxHeader
-          justify="center"
-          align="center"
-          position="static"
-          borderTopRadius={0}
-          color="text.primary"
-          expanded
-        />
+        <SandboxHeader justify="center" align="center" position="static" borderTopRadius={0} color="text.primary" />
       )}
       {!shouldHideSubNavbarForPath(path) && <SubNavBar />}
     </>

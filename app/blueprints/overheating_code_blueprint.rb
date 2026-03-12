@@ -1,0 +1,45 @@
+class OverheatingCodeBlueprint < Blueprinter::Base
+  identifier :id
+
+  fields :status,
+         :issued_to,
+         :project_number,
+         :full_address,
+         :pid,
+         :building_model,
+         :site_name,
+         :lot,
+         :postal_code,
+         :designated_rooms,
+         :cooling_zone_units,
+         :minimum_cooling_capacity,
+         :design_outdoor_temp,
+         :design_indoor_temp,
+         :design_adjacent_temp,
+         :cooling_zone_area,
+         :weather_location,
+         :ventilation_rate,
+         :hrv_erv,
+         :atre_percentage,
+         :components_facing_outside,
+         :components_facing_adjacent,
+         :document_notes,
+         :performer_name,
+         :performer_company,
+         :performer_address,
+         :performer_city_province,
+         :performer_postal_code,
+         :performer_phone,
+         :performer_fax,
+         :performer_email,
+         :accreditation_ref1,
+         :accreditation_ref2,
+         :issued_for1,
+         :issued_for2,
+         :discarded_at,
+         :created_at,
+         :updated_at
+
+  association :creator, blueprint: UserBlueprint
+  association :jurisdiction, blueprint: JurisdictionBlueprint, view: :base
+end

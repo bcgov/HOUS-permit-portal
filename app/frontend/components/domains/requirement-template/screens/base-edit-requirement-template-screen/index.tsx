@@ -476,7 +476,7 @@ function formFormDefaults(requirementTemplate?: IRequirementTemplate): IRequirem
         id: templateSection.id,
         name: templateSection.name,
         templateSectionBlocksAttributes: R.map(
-          (sectionBlocks) => R.pick(["id", "requirementBlockId"], sectionBlocks),
+          (sectionBlocks) => R.pick(["id", "requirementBlockId", "conditional"], sectionBlocks),
           templateSection.sortedTemplateSectionBlocks as ITemplateSectionBlockModel[]
         ),
       }

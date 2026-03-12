@@ -115,7 +115,7 @@ export enum ERequirementTemplateSortFields {
   firstNations = "first_nations",
   description = "description",
   currentVersion = "current_version",
-  usedBy = "used_by",
+  availableIn = "available_in",
 }
 
 export enum EPreCheckSortFields {
@@ -735,6 +735,24 @@ export enum EPreCheckAssessmentResult {
   failed = "failed",
 }
 
+export enum EOverheatingCodeStatus {
+  draft = "draft",
+  submitted = "submitted",
+}
+
+export enum EOverheatingCodeSortFields {
+  issuedTo = "issued_to",
+  projectNumber = "project_number",
+  buildingModel = "building_model",
+  fullAddress = "full_address",
+}
+
+// [OVERHEATING TODO] Units field purpose unclear — btuh is already labeled on the capacity input
+export enum EOverheatingCodeCoolingZoneUnits {
+  imperial = "imperial",
+  metric = "metric",
+}
+
 export enum EGeneralContactType {
   adjacentOwner = "adjacentOwner",
   applicant = "applicant",
@@ -786,4 +804,27 @@ export enum EDataValidationOperation {
   minSelectedCount = "min_selected_count",
   maxSelectedCount = "max_selected_count",
   allowedFileTypes = "allowed_file_types",
+}
+
+export enum EConditionalThen {
+  show = "show",
+  hide = "hide",
+  require = "require",
+}
+
+export enum EConditionalOperator {
+  isEqual = "isEqual",
+  isNotEqual = "isNotEqual",
+  greaterThan = "greaterThan",
+  greaterThanOrEqual = "greaterThanOrEqual",
+  lessThan = "lessThan",
+  lessThanOrEqual = "lessThanOrEqual",
+  isDateEqual = "isDateEqual",
+  isNotDateEqual = "isNotDateEqual",
+  dateGreaterThan = "dateGreaterThan",
+  dateGreaterThanOrEqual = "dateGreaterThanOrEqual",
+  dateLessThan = "dateLessThan",
+  dateLessThanOrEqual = "dateLessThanOrEqual",
+  isEmpty = "isEmpty",
+  isNotEmpty = "isNotEmpty",
 }

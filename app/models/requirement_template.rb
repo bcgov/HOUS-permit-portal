@@ -37,6 +37,10 @@ class RequirementTemplate < ApplicationRecord
              ).limit(3)
            end,
            class_name: "TemplateVersion"
+  has_many :jurisdiction_requirement_templates, dependent: :destroy
+  has_many :enabled_jurisdictions,
+           through: :jurisdiction_requirement_templates,
+           source: :jurisdiction
   has_many :jurisdiction_template_version_customizations
 
   belongs_to :copied_from,
@@ -76,6 +80,7 @@ class RequirementTemplate < ApplicationRecord
 
   validate :validate_uniqueness_of_blocks
   validate :validate_step_code_related_dependencies
+  validate :validate_block_level_conditionals
   validate :public_only_for_early_access_preview
 
   before_validation :set_default_nickname
@@ -116,9 +121,65 @@ class RequirementTemplate < ApplicationRecord
   end
 
   def published_customizations_count
-    # Returns the cached count of unique jurisdictions using the published template version
-    published_template_version&.jurisdiction_template_version_customizations_count ||
-      0
+    # Returns the count of jurisdictions where this template is enabled
+    # (all jurisdictions with access minus those who have explicitly disabled it)
+    return 0 unless published_template_version
+
+    disabled_count =
+      published_template_version
+        .jurisdiction_template_version_customizations
+        .live
+        .where(disabled: true)
+        .distinct
+        .count(:jurisdiction_id)
+
+    if available_globally
+      # All jurisdictions minus those explicitly disabled
+      Jurisdiction.count - disabled_count
+    else
+      # Jurisdictions with access (via JurisdictionRequirementTemplate) minus disabled
+      access_count = jurisdiction_requirement_templates.count
+      # Only count disabled ones that actually have access
+      disabled_with_access_count =
+        published_template_version
+          .jurisdiction_template_version_customizations
+          .live
+          .where(disabled: true)
+          .where(
+            jurisdiction_id:
+              jurisdiction_requirement_templates.select(:jurisdiction_id)
+          )
+          .distinct
+          .count(:jurisdiction_id)
+      access_count - disabled_with_access_count
+    end
+  end
+
+  def explicitly_disabled_jurisdictions
+    # Returns the list of jurisdictions that have explicitly disabled this template
+    return [] unless published_template_version
+
+    disabled_jurisdiction_ids =
+      published_template_version
+        .jurisdiction_template_version_customizations
+        .live
+        .where(disabled: true)
+        .distinct
+        .pluck(:jurisdiction_id)
+
+    return [] if disabled_jurisdiction_ids.empty?
+
+    if available_globally
+      # All disabled jurisdictions
+      Jurisdiction.where(id: disabled_jurisdiction_ids)
+    else
+      # Only disabled ones that actually have access
+      Jurisdiction.where(
+        id:
+          disabled_jurisdiction_ids &
+            jurisdiction_requirement_templates.pluck(:jurisdiction_id)
+      )
+    end
   end
 
   def label
@@ -132,6 +193,8 @@ class RequirementTemplate < ApplicationRecord
   end
 
   def to_form_json
+    block_section_key_map = build_block_section_key_map
+
     JSON.parse(
       {
         id: id,
@@ -139,77 +202,79 @@ class RequirementTemplate < ApplicationRecord
         input: false,
         tableView: false,
         components:
-          requirement_template_sections.map(&:to_form_json).concat(
-            [
-              {
-                id: "section-completion-id",
-                key: "section-completion-key",
-                type: "container",
-                title: I18n.t("formio.requirement_template.completion_title"),
-                label: I18n.t("formio.requirement_template.completion_title"),
-                custom_class: "formio-section-container",
-                hide_label: false,
-                collapsible: false,
-                initially_collapsed: false,
-                components: [
-                  id: "section-signoff-id",
-                  key: "section-signoff-key",
-                  type: "panel",
-                  title:
-                    I18n.t("formio.requirement_template.signoff_panel_title"),
-                  collapsible: true,
-                  collapsed: false,
+          requirement_template_sections
+            .map { |s| s.to_form_json(block_section_key_map) }
+            .concat(
+              [
+                {
+                  id: "section-completion-id",
+                  key: "section-completion-key",
+                  type: "container",
+                  title: I18n.t("formio.requirement_template.completion_title"),
+                  label: I18n.t("formio.requirement_template.completion_title"),
+                  custom_class: "formio-section-container",
+                  hide_label: false,
+                  collapsible: false,
+                  initially_collapsed: false,
                   components: [
-                    {
-                      type: "checkbox",
-                      key: "signed",
-                      title:
-                        I18n.t(
-                          "formio.requirement_template.signoff_checkbox_title"
-                        ),
-                      label:
-                        I18n.t(
-                          "formio.requirement_template.signoff_checkbox_label"
-                        ),
-                      inputType: "checkbox",
-                      validate: {
-                        required: true
+                    id: "section-signoff-id",
+                    key: "section-signoff-key",
+                    type: "panel",
+                    title:
+                      I18n.t("formio.requirement_template.signoff_panel_title"),
+                    collapsible: true,
+                    collapsed: false,
+                    components: [
+                      {
+                        type: "checkbox",
+                        key: "signed",
+                        title:
+                          I18n.t(
+                            "formio.requirement_template.signoff_checkbox_title"
+                          ),
+                        label:
+                          I18n.t(
+                            "formio.requirement_template.signoff_checkbox_label"
+                          ),
+                        inputType: "checkbox",
+                        validate: {
+                          required: true
+                        },
+                        input: true,
+                        defaultValue: false
                       },
-                      input: true,
-                      defaultValue: false
-                    },
-                    {
-                      key: "submit",
-                      size: "md",
-                      type: "button",
-                      block: false,
-                      input: true,
-                      title:
-                        I18n.t(
-                          "formio.requirement_template.signoff_submit_title"
-                        ),
-                      label:
-                        I18n.t(
-                          "formio.requirement_template.signoff_submit_title"
-                        ),
-                      theme: "primary",
-                      action: "submit",
-                      widget: {
-                        type: "input"
-                      },
-                      disabled: false,
-                      show: false,
-                      conditional: {
-                        show: true,
-                        when: "signed",
-                        eq: "true"
+                      {
+                        key: "submit",
+                        size: "md",
+                        type: "button",
+                        block: false,
+                        input: true,
+                        title:
+                          I18n.t(
+                            "formio.requirement_template.signoff_submit_title"
+                          ),
+                        label:
+                          I18n.t(
+                            "formio.requirement_template.signoff_submit_title"
+                          ),
+                        theme: "primary",
+                        action: "submit",
+                        widget: {
+                          type: "input"
+                        },
+                        disabled: false,
+                        show: false,
+                        conditional: {
+                          show: true,
+                          when: "signed",
+                          eq: "true"
+                        }
                       }
-                    }
+                    ]
                   ]
-                ]
-              }
-            ]
-          )
+                }
+              ]
+            )
       }.to_json
     )
   end
@@ -241,11 +306,31 @@ class RequirementTemplate < ApplicationRecord
       visibility: visibility,
       public: public?,
       created_at: created_at,
-      used_by: published_customizations_count
+      used_by: published_customizations_count,
+      available_in:
+        (
+          if available_globally
+            Jurisdiction.count
+          else
+            jurisdiction_requirement_templates.count
+          end
+        )
     }
   end
 
   private
+
+  def build_block_section_key_map
+    map = {}
+    requirement_template_sections
+      .includes(template_section_blocks: :requirement_block)
+      .each do |section|
+        section.template_section_blocks.each do |tsb|
+          map[tsb.requirement_block_id] = section.key
+        end
+      end
+    map
+  end
 
   def public_only_for_early_access_preview
     if public && !early_access?
@@ -329,6 +414,151 @@ class RequirementTemplate < ApplicationRecord
           requirement_block_name: duplicate_block_name
         )
       )
+    end
+  end
+
+  def block_conditionals_from_nested_attributes_copy
+    if requirement_template_sections_attributes_copy.blank? ||
+         !requirement_template_sections_attributes_copy.is_a?(Array)
+      return []
+    end
+
+    conditionals = []
+    requirement_template_sections_attributes_copy.each do |rtsa|
+      next if rtsa["_destroy"] == true
+      next if rtsa["template_section_blocks_attributes"].blank?
+
+      rtsa["template_section_blocks_attributes"].each do |tsba|
+        next if tsba["_destroy"] == true
+        next if tsba["conditional"].blank?
+
+        conditionals << {
+          block_id: tsba["requirement_block_id"],
+          conditional: tsba["conditional"]
+        }
+      end
+    end
+    conditionals
+  end
+
+  VALID_FORMIO_OPERATORS = %w[
+    isEqual
+    isNotEqual
+    greaterThan
+    greaterThanOrEqual
+    lessThan
+    lessThanOrEqual
+    isDateEqual
+    isNotDateEqual
+    dateGreaterThan
+    dateGreaterThanOrEqual
+    dateLessThan
+    dateLessThanOrEqual
+    isEmpty
+    isNotEmpty
+  ].freeze
+
+  VALUELESS_OPERATORS = %w[isEmpty isNotEmpty].freeze
+
+  def validate_block_level_conditionals
+    block_ids = requirement_block_ids_from_nested_attributes_copy
+    return if block_ids.blank?
+
+    block_conditionals = block_conditionals_from_nested_attributes_copy
+    return if block_conditionals.blank?
+
+    dependency_map = {}
+
+    block_conditionals.each do |entry|
+      cond = entry[:conditional]
+      block_id = entry[:block_id]
+
+      when_block_id = cond["when_block_id"]
+      when_requirement_code = cond["when_requirement_code"]
+      operator = cond["operator"] || "isEqual"
+      eq_value = cond["eq"]
+      show = cond["show"]
+      hide = cond["hide"]
+
+      unless VALID_FORMIO_OPERATORS.include?(operator)
+        errors.add(
+          :base,
+          "Block conditional has an unrecognized operator: #{operator}"
+        )
+        next
+      end
+
+      needs_value = !VALUELESS_OPERATORS.include?(operator)
+
+      if when_block_id.blank? || when_requirement_code.blank? ||
+           (needs_value && eq_value.blank?)
+        errors.add(
+          :base,
+          "Block conditional must have when_block_id, when_requirement_code, and operator (plus eq for value-based operators)"
+        )
+        next
+      end
+
+      if show.blank? && hide.blank?
+        errors.add(:base, "Block conditional must specify either show or hide")
+        next
+      end
+
+      if show.present? && hide.present?
+        errors.add(
+          :base,
+          "Block conditional must specify only one of show or hide"
+        )
+        next
+      end
+
+      if when_block_id == block_id
+        errors.add(
+          :base,
+          "Block conditional cannot reference itself; use requirement-level conditionals instead"
+        )
+        next
+      end
+
+      unless block_ids.include?(when_block_id)
+        errors.add(
+          :base,
+          "Block conditional references a block not in this template"
+        )
+        next
+      end
+
+      when_block = RequirementBlock.find_by(id: when_block_id)
+      if when_block.blank? ||
+           when_block.requirements.none? { |r|
+             r.requirement_code == when_requirement_code
+           }
+        errors.add(
+          :base,
+          "Block conditional references a requirement code that does not exist in the target block"
+        )
+        next
+      end
+
+      dependency_map[block_id] = when_block_id
+    end
+
+    detect_circular_block_conditionals(dependency_map)
+  end
+
+  def detect_circular_block_conditionals(dependency_map)
+    dependency_map.each_key do |start_id|
+      visited = Set.new
+      current = start_id
+
+      while dependency_map.key?(current)
+        if visited.include?(current)
+          errors.add(:base, "Block conditionals contain a circular dependency")
+          return
+        end
+        visited << current
+        current = dependency_map[current]
+      end
     end
   end
 

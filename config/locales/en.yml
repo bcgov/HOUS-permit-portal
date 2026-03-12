@@ -28,6 +28,8 @@
 #       enabled: "ON"
 
 en:
+  misc:
+    removed_placeholder: "<Removed>"
   activerecord:
     attributes:
       contact:
@@ -35,6 +37,12 @@ en:
         phone: "Phone no."
       requirement_template:
         first_nations: "First Nations"
+        available_in_all: "All"
+      sandbox:
+        scope_names:
+          published: 'Training mode: "Published"'
+          scheduled: 'Training mode: "Upcoming"'
+        available_in_all: "All"
     errors:
       models:
         early_access_preview:
@@ -43,6 +51,8 @@ en:
         jurisdiction:
           no_sandboxes: "Jurisdiction must have at least one sandbox."
           enabled_inbox_requires_setup: "can only be toggled on once all emails are set up."
+        part3_occupancy_required_step:
+          duplicate_pathway: "A pathway with identical energy step and zero carbon step already exists for this occupancy."
         jurisdiction_template_version_customizations:
           uniqueness: "already exists for this jurisdiction and template version."
         site_configuration:
@@ -140,6 +150,9 @@ en:
       update_password_success: "You have successfully updated your password"
       welcome: "Welcome to the Building Permit Hub"
       onboarding: "Welcome to the Building Permit Hub"
+      account_closed: "Your Building Permit Hub account has been closed"
+      user_archive_warning: "Your account will be archived in %{days} days"
+      user_delete_warning: "Your account will be deleted in %{days} days"
       notify_submitter_application_submitted: "Your Building Permit Hub application has been submitted"
       notify_new_integration_mapping: "New API mappings available"
       notify_missing_integration_mapping: "Missing API mappings"
@@ -158,6 +171,10 @@ en:
       notify_batched_integration_mapping: "New API mappings"
       notify_pre_check_submitted: "Your pre-check has been submitted"
       notify_pre_check_completed: "Your pre-check has been completed"
+      notify_new_template_version_published: "New version published for %{template_label}"
+      notify_template_version_no_action: "Permit template updated - no action required: %{template_label}"
+      notify_template_version_action_required: "ACTION REQUIRED: Permit template updated - API mapping review required: %{template_label}"
+      notify_template_version_new_template: "New permit template scheduled: %{template_label} (%{version_date})"
       notify_api_key_status_change: "API Key for %{jurisdiction_name} is expiring %{interval}"
       send_step_code_report_to_jurisdiction: "Step Code Report Shared: %{step_code_title} for %{jurisdiction_name}"
   arbitrary_message_construct:
@@ -213,6 +230,10 @@ en:
       ltsa_unavailable_error:
         title: Error
         message: The land title service is currently unavailable
+    step_code:
+      update_archived_error:
+        title: Error
+        message: "Cannot update archived step code. Please restore it first."
       jurisdiction_ltsa_error:
         title: Error
         message: Jurisdiction could not be determined. Please check back later.
@@ -232,6 +253,31 @@ en:
       in_use_error:
         title: Error
         message: "This permit classification is in use and cannot be deleted"
+    overheating_code:
+      create_success:
+        title: ""
+        message: "Overheating code check created successfully!"
+      create_error:
+        title: Error
+        message: "Error creating overheating code check"
+      update_success:
+        title: ""
+        message: "Overheating code check updated successfully!"
+      update_error:
+        title: Error
+        message: "Error updating overheating code check"
+      destroy_success:
+        title: ""
+        message: "Overheating code check archived successfully!"
+      destroy_error:
+        title: Error
+        message: "Error archiving overheating code check"
+      restore_success:
+        title: ""
+        message: "Overheating code check restored successfully!"
+      restore_error:
+        title: Error
+        message: "Error restoring overheating code check"
     pre_check:
       create_success:
         title: ""
@@ -445,7 +491,7 @@ en:
         message: "New template created successfully!"
       update_success:
         title: ""
-        message: "This draft has been saved."
+        message: "This template has been saved."
       schedule_success:
         title: ""
         message: "Permit has been scheduled to published."
@@ -559,6 +605,18 @@ en:
       update_version_succes:
         title: ""
         message: "Permit application successfully updated to new version!"
+      destroy_success:
+        title: ""
+        message: "Permit application archived successfully"
+      destroy_error:
+        title: Error
+        message: "There was an error archiving the permit application"
+      restore_success:
+        title: ""
+        message: "Permit application restored successfully"
+      restore_error:
+        title: Error
+        message: "There was an error restoring the permit application"
       save_draft_success:
         title: ""
         message: "Permit application successfully saved as draft!"
@@ -656,6 +714,9 @@ en:
       update_error:
         title: Error
         message: "%{error_message}"
+      update_archived_error:
+        title: Error
+        message: "Cannot update archived step code. Please restore it first."
       restore_success:
         title: ""
         message: "Step code restored successfully!"

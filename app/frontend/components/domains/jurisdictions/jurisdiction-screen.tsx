@@ -15,6 +15,8 @@ import {
   OrderedList,
   Show,
   Text,
+  UnorderedList,
+  VStack,
 } from "@chakra-ui/react"
 
 import { ArrowSquareOut } from "@phosphor-icons/react"
@@ -22,7 +24,7 @@ import i18next from "i18next"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
 import { Control, Controller, FormProvider, useForm, useFormContext } from "react-hook-form"
-import { Trans, useTranslation } from "react-i18next"
+import { useTranslation } from "react-i18next"
 import { useJurisdiction } from "../../../hooks/resources/use-jurisdiction"
 import { IJurisdiction } from "../../../models/jurisdiction"
 import { useMst } from "../../../setup/root"
@@ -36,8 +38,10 @@ import { EditorWithPreview } from "../../shared/editor/custom-extensions/editor-
 import { SafeTipTapDisplay } from "../../shared/editor/safe-tiptap-display"
 import { JurisdictionResourcesSection } from "../../shared/jurisdiction/jurisdiction-resources-section"
 import { JurisdictionMap } from "../../shared/module-wrappers/jurisdiction-map"
+import { RouterLink } from "../../shared/navigation/router-link"
+import { Part3StepCodeRequirements } from "../../shared/part3-step-code-requirements"
 import { StepCodeRequirementsTable } from "../../shared/step-code-requirements-table"
-import { Can } from "../../shared/user/can"
+import { Can, can } from "../../shared/user/can"
 import { ContactGrid } from "./contacts/contact-grid"
 export interface Jurisdiction {
   name: string
@@ -109,7 +113,11 @@ export const JurisdictionScreen = observer(() => {
     <Flex as="main" direction="column" w="full" bg="greys.white" pb="24">
       <BlueTitleBar title={qualifiedName} />
       <Show below="md">
-        <JurisdictionMap mapPosition={mapPositionWatch} mapZoom={mapZoomWatch} />
+        <JurisdictionMap
+          mapPosition={mapPositionWatch}
+          mapZoom={mapZoomWatch}
+          linePositions={currentJurisdiction.boundaryPoints}
+        />
       </Show>
       <Container maxW="container.lg" py={{ base: 6, md: 16 }} px={8}>
         {!currentJurisdiction.inboxEnabled && (
@@ -179,19 +187,94 @@ export const JurisdictionScreen = observer(() => {
                     <Heading as="h2" fontSize="xl" my={0}>
                       {t("jurisdiction.edit.stepCode.title")}
                     </Heading>
-                    <Box>
-                      <Trans
-                        i18nKey={"jurisdiction.edit.stepCode.description"}
-                        components={{
-                          1: <Link href={t("stepCode.helpLink") ?? "#"} isExternal></Link>,
-                          2: <ArrowSquareOut />,
-                        }}
-                      />
-                    </Box>
+                    <Text fontSize="md" color="text.primary">
+                      {t("jurisdiction.edit.stepCode.aboutPageDescription")}
+                    </Text>
+                    <Text fontSize="md" color="text.primary">
+                      {t("jurisdiction.edit.stepCode.aboutPageNotice")}
+                    </Text>
+                    <Link
+                      as={RouterLink}
+                      to={`/jurisdictions/${currentJurisdiction.slug}/step-code-requirements`}
+                      color="text.link"
+                      textDecoration="underline"
+                      _hover={{ textDecoration: "none" }}
+                      fontWeight="bold"
+                    >
+                      {t("jurisdiction.edit.stepCode.viewStepCodeRequirements")}{" "}
+                      <ArrowSquareOut style={{ display: "inline" }} />
+                    </Link>
 
-                    <StepCodeRequirementsTable currentJurisdiction={currentJurisdiction} />
+                    <VStack align="start" spacing={4} mt={4}>
+                      <Heading as="h3" fontSize="lg">
+                        {t(
+                          "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.smallSimpleBuildings"
+                        )}
+                      </Heading>
+                      <Text fontSize="md">
+                        {t(
+                          "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.smallSimpleBuildingsDescription"
+                        )}
+                      </Text>
+                      <Text fontSize="md">
+                        {t(
+                          "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.part9BuildingsAreGenerally"
+                        )}
+                      </Text>
+                      <UnorderedList pl={4}>
+                        <ListItem>
+                          {t(
+                            "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.smallSimpleBuildingsCharacteristic1"
+                          )}
+                        </ListItem>
+                        <ListItem>
+                          {t(
+                            "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.smallSimpleBuildingsCharacteristic2"
+                          )}
+                        </ListItem>
+                      </UnorderedList>
+                      <StepCodeRequirementsTable currentJurisdiction={currentJurisdiction} />
+                    </VStack>
+
+                    <VStack align="start" spacing={4} mt={6}>
+                      <Heading as="h3" fontSize="lg">
+                        {t(
+                          "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.largeComplexBuildings"
+                        )}
+                      </Heading>
+                      <Text fontSize="md">
+                        {t(
+                          "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.largeComplexBuildingsDescription"
+                        )}
+                      </Text>
+                      <Text fontSize="md">
+                        {t(
+                          "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.part3BuildingsAreGenerally"
+                        )}
+                      </Text>
+                      <UnorderedList pl={4}>
+                        <ListItem>
+                          {t(
+                            "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.largeComplexBuildingsCharacteristic1"
+                          )}
+                        </ListItem>
+                        <ListItem>
+                          {t(
+                            "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.largeComplexBuildingsCharacteristic2"
+                          )}
+                        </ListItem>
+                      </UnorderedList>
+                      <Part3StepCodeRequirements currentJurisdiction={currentJurisdiction} />
+                    </VStack>
                   </Flex>
-                  <JurisdictionResourcesSection jurisdiction={currentJurisdiction} />
+                  <JurisdictionResourcesSection
+                    jurisdiction={currentJurisdiction}
+                    configureResourcesPath={
+                      can("jurisdiction:manage", { jurisdiction: currentJurisdiction })
+                        ? `/jurisdictions/${currentJurisdiction.slug}/configuration-management/resources`
+                        : undefined
+                    }
+                  />
                   <Flex as="section" direction="column" borderRadius="lg" boxShadow="md">
                     <Box py={3} px={6} bg="theme.blueAlt" borderTopRadius="lg">
                       <Heading as="h3" color="greys.white" fontSize="xl">
@@ -414,6 +497,7 @@ const EditableMap = ({ currentJurisdiction }: IEditableMapProps) => {
         <JurisdictionMap
           mapPosition={mapPositionWatch}
           mapZoom={mapZoomWatch}
+          linePositions={currentJurisdiction.boundaryPoints}
           onMapDrag={isEditingMap && ((latLng) => setValue("mapPosition", latLng))}
           onZoomChange={isEditingMap && ((zoom) => setValue("mapZoom", zoom))}
           isEditingMap={isEditingMap}

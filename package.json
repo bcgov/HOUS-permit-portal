@@ -35,6 +35,7 @@
   },
   "dependencies": {
     "@anycable/web": "^0.8.0",
+    "@arcgis/core": "^4.34.8",
     "@bcgov/bc-sans": "^2.1.0",
     "@chakra-ui/react": "^2.10.3",
     "@dnd-kit/core": "^6.1.0",

@@ -1,10 +1,22 @@
 class PermitApplication < ApplicationRecord
+  searchkick word_middle: %i[
+               nickname
+               full_address
+               permit_classifications
+               submitter
+               status
+               review_delegatee_name
+             ],
+             text_end: %i[number]
+
   include FormSupportingDocuments
   include AutomatedComplianceUtils
   include StepCodeFieldExtraction
   include ZipfileUploader.Attachment(:zipfile)
   include PermitApplicationStatus
   include ProjectItem
+  include Discard::Model
+  include PublicRecordable
   has_parent :permit_project
 
   SEARCH_INCLUDES = [
@@ -16,17 +28,8 @@ class PermitApplication < ApplicationRecord
     { permit_collaborations: :collaborator }
   ]
 
-  searchkick word_middle: %i[
-               nickname
-               full_address
-               permit_classifications
-               submitter
-               status
-               review_delegatee_name
-             ],
-             text_end: %i[number]
-
-  belongs_to :submitter, class_name: "User"
+  belongs_to :submitter, class_name: "User", optional: true
+  public_recordable user_association: :submitter
   belongs_to :permit_type
   belongs_to :activity
   belongs_to :template_version
@@ -88,6 +91,10 @@ class PermitApplication < ApplicationRecord
         end
 
   COMPLETION_SECTION_KEY = "section-completion-key"
+
+  def public_record?
+    !new_draft?
+  end
 
   def inbox_enabled?
     jurisdiction&.inbox_enabled? && SiteConfiguration.inbox_enabled?
@@ -244,7 +251,8 @@ class PermitApplication < ApplicationRecord
       has_collaborator: has_collaborator?,
       sandbox_id: sandbox_id,
       permit_project_id: permit_project_id,
-      submission_delegatee_id: submission_delegatee&.id
+      submission_delegatee_id: submission_delegatee&.id,
+      discarded: discarded?
     }
   end
 
@@ -288,6 +296,22 @@ class PermitApplication < ApplicationRecord
       .where(collaboration_type: :submission, collaborators: { user_id: })
       .map(&:assigned_requirement_block_id)
       .compact
+  end
+
+  def user_can_edit_block?(user_id:, requirement_block_id:)
+    permissions =
+      submission_requirement_block_edit_permissions(user_id: user_id)
+    return false unless permissions
+    return true if permissions == :all
+
+    permissions.include?(requirement_block_id)
+  end
+
+  def user_can_edit_step_code_block?(user_id:)
+    block_id = energy_step_code_requirement_block_id
+    return false unless block_id
+
+    user_can_edit_block?(user_id: user_id, requirement_block_id: block_id)
   end
 
   def formatted_permit_classifications
@@ -558,6 +582,22 @@ class PermitApplication < ApplicationRecord
 
   def step_code_requirements
     jurisdiction&.permit_type_required_steps&.where(permit_type_id:)
+  end
+
+  def energy_step_code_requirement_block_id
+    blocks = template_version&.requirement_blocks_json
+    return nil unless blocks
+
+    blocks.each do |block_id, block_json|
+      if block_json["requirements"]&.any? { |req|
+           req["input_type"] == "energy_step_code" ||
+             req["input_type"] == "energy_step_code_part_3"
+         }
+        return block_id
+      end
+    end
+
+    nil
   end
 
   def energy_step_code_required?

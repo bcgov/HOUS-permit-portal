@@ -17,8 +17,8 @@ class StepCodePolicy < ApplicationPolicy
     # If creating a standalone step code (no permit application), any logged-in user may create
     return true if record.permit_application.nil?
 
-    # If tied to a permit application, only the submitter of that permit application may create
-    record.permit_application.submitter == user
+    record.permit_application.submitter == user ||
+      collaborator_can_edit_step_code_block?
   end
 
   def destroy?
@@ -36,6 +36,8 @@ class StepCodePolicy < ApplicationPolicy
 
     return true if record.permit_application&.submitter == user
 
+    return true if collaborator_can_edit_step_code_block?
+
     if user.review_staff? &&
          user.member_of?(record.permit_application&.jurisdiction)
       return true
@@ -47,16 +49,28 @@ class StepCodePolicy < ApplicationPolicy
   def update?
     return false unless user
 
-    # Allow general updates by creator or current submitter of the associated permit application
-    (user == record.creator) || (record.permit_application&.submitter == user)
+    (user == record.creator) ||
+      (record.permit_application&.submitter == user) ||
+      collaborator_can_edit_step_code_block?
   end
 
-  # Specific guard used when (re)assigning a StepCode to a PermitApplication.
-  # Only the submitter of the target PermitApplication is allowed to perform this action.
   def reassign_to?(target_permit_application)
     return false unless user
 
-    target_permit_application&.submitter == user
+    target_permit_application&.submitter == user ||
+      collaborator_can_edit_step_code_block_on?(target_permit_application)
+  end
+
+  private
+
+  def collaborator_can_edit_step_code_block?
+    record.permit_application&.user_can_edit_step_code_block?(
+      user_id: user.id
+    ) || false
+  end
+
+  def collaborator_can_edit_step_code_block_on?(pa)
+    pa&.user_can_edit_step_code_block?(user_id: user.id) || false
   end
 
   class Scope < Scope

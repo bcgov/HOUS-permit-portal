@@ -398,6 +398,90 @@ export const traverseFormIORequirements = (
   })
 }
 
+export type TTraverseFormIOComponentsCtx = {
+  section: string
+  panel: string
+  dataPath: (string | number)[]
+}
+
+export type TTraverseFormIOComponentsVisit = {
+  section: string
+  panel: string
+  multi: string
+  component: any
+  value: any
+}
+
+export const traverseFormIOComponents = (
+  components: any[] = [],
+  submissionData: any,
+  getValueAtPath: (submissionData: any, path: (string | number)[]) => any,
+  visit: (args: TTraverseFormIOComponentsVisit) => void,
+  ctx: TTraverseFormIOComponentsCtx = { section: "", panel: "", dataPath: [] }
+) => {
+  for (const component of components) {
+    if (!component) continue
+
+    if (component.columns && Array.isArray(component.columns)) {
+      for (const col of component.columns) {
+        traverseFormIOComponents(col.components || [], submissionData, getValueAtPath, visit, ctx)
+      }
+      continue
+    }
+
+    if (component.key && /^section/.test(component.key)) {
+      const nextCtx = {
+        section: component.title || component.label || ctx.section,
+        panel: "",
+        dataPath: [component.key],
+      }
+      traverseFormIOComponents(component.components || [], submissionData, getValueAtPath, visit, nextCtx)
+      continue
+    }
+
+    if (component.type === "panel" || component.type === "fieldset") {
+      const nextCtx = {
+        section: ctx.section,
+        panel: component.title || component.label || ctx.panel,
+        dataPath: ctx.dataPath,
+      }
+      traverseFormIOComponents(component.components || [], submissionData, getValueAtPath, visit, nextCtx)
+      continue
+    }
+
+    if (component.type === "container") {
+      traverseFormIOComponents(component.components || [], submissionData, getValueAtPath, visit, ctx)
+      continue
+    }
+
+    if (component.type === "datagrid") {
+      const gridPath = [...ctx.dataPath, component.key]
+      const dataRows = getValueAtPath(submissionData, gridPath)
+      const innerComponents = component.components || []
+      if (Array.isArray(dataRows)) {
+        dataRows.forEach((row, idx) => {
+          const multi = `Contact_${idx + 1}`
+          for (const inner of innerComponents) {
+            if (!inner?.input) continue
+            const rowValue = row?.[inner.key]
+            visit({ section: ctx.section, panel: ctx.panel, multi, component: inner, value: rowValue })
+          }
+        })
+      }
+      continue
+    }
+
+    if (component.input) {
+      const value = getValueAtPath(submissionData, [...ctx.dataPath, component.key])
+      visit({ section: ctx.section, panel: ctx.panel, multi: "", component, value })
+    }
+
+    if (component.components) {
+      traverseFormIOComponents(component.components, submissionData, getValueAtPath, visit, ctx)
+    }
+  }
+}
+
 export const processFieldsForEphemeral = (formJson: IFormJson) => {
   traverseFormIORequirements(formJson, (requirement) => {
     if (["simplefile"].includes(requirement.type) || ["submit"].includes(requirement.key)) {

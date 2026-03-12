@@ -124,10 +124,11 @@ group :development do
   gem "rails-erd", "~> 1.5"
   gem "rubocop", "~> 1.67", require: false
   gem "rubocop-rails", "~> 2.26", require: false
-  gem "solargraph", "~> 0.50.0", require: false
+  gem "solargraph", "~> 0.58.0", require: false
 end
 
 gem "faraday-multipart", "~> 1.0"
 
 gem "rack-attack", "~> 6.7"
+gem "hexapdf"
 gem "data_migrate", "~> 11.3"

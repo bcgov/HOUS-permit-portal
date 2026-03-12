@@ -208,7 +208,7 @@ export const ModelledEnergyOutputsGrid = observer(({ ...rest }: IProps) => {
     append({
       useType: EEnergyOutputUseType.other,
       name: "",
-      annualEnergy: 0,
+      annualEnergy: null,
       fuelTypeId: null,
     })
   }
@@ -308,7 +308,7 @@ const ModelledEnergyOutputRow = ({
 
   useEffect(() => {
     if (!fuelTypeId) {
-      onChangeAnnualEnergy(0)
+      onChangeAnnualEnergy(null)
     }
   }, [fuelTypeId])
 

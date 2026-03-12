@@ -97,11 +97,13 @@ const SiteBreadcrumbs = observer(function SiteBreadcrumb({ breadcrumbs }: ISiteB
       {breadcrumbs.map((breadcrumb, index) => {
         const finalSegment = index == breadcrumbs.length - 1
         return (
-          <BreadcrumbItem key={index}>
+          <BreadcrumbItem key={index} maxW="300px">
             {finalSegment ? (
-              <Text fontWeight="bold">{breadcrumb.title}</Text>
+              <Text fontWeight="bold" isTruncated>
+                {breadcrumb.title}
+              </Text>
             ) : (
-              <BreadcrumbLink as={RouterLinkButton} to={breadcrumb.href} variant="link">
+              <BreadcrumbLink as={RouterLinkButton} to={breadcrumb.href} variant="link" isTruncated>
                 {breadcrumb.title}
               </BreadcrumbLink>
             )}

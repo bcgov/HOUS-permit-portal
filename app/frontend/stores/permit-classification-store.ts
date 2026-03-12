@@ -111,7 +111,8 @@ export const PermitClassificationStoreModel = types
       publishedOnly = false,
       firstNations = null,
       pid = null,
-      jurisdictionId = null
+      jurisdictionId = null,
+      hideDisabled = false
     ) {
       self.isPermitTypeLoading = true
       const response = yield* toGenerator(
@@ -122,20 +123,31 @@ export const PermitClassificationStoreModel = types
           null,
           null,
           pid,
-          jurisdictionId
+          jurisdictionId,
+          hideDisabled
         )
       )
       self.isPermitTypeLoading = false
       return (response?.data?.data ?? []) as IOption<IPermitType>[]
     }),
-    fetchActivityOptions: flow(function* (publishedOnly = false, firstNations = null, permitTypeId = null) {
+    fetchActivityOptions: flow(function* (
+      publishedOnly = false,
+      firstNations = null,
+      permitTypeId = null,
+      jurisdictionId = null,
+      hideDisabled = false
+    ) {
       self.isActivityLoading = true
       const response = yield* toGenerator(
         self.environment.api.fetchPermitClassificationOptions(
           EPermitClassificationType.Activity,
           publishedOnly,
           firstNations,
-          permitTypeId
+          permitTypeId,
+          null, // activityId
+          null, // pid
+          jurisdictionId,
+          hideDisabled
         )
       )
       self.isActivityLoading = false
