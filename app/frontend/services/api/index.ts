@@ -17,6 +17,7 @@ import { IActivity, IPermitType } from "../../models/permit-classification"
 import { IPermitCollaboration } from "../../models/permit-collaboration"
 import { IPermitProject } from "../../models/permit-project"
 import { IPreCheck } from "../../models/pre-check"
+import { IProjectAudit } from "../../models/project-audit"
 import { IRequirementTemplate } from "../../models/requirement-template"
 import { ITemplateVersion } from "../../models/template-version"
 import { IUser } from "../../models/user"
@@ -55,6 +56,7 @@ import {
   EPermitClassificationType,
   EPermitProjectSortFields,
   EPreCheckSortFields,
+  EProjectAuditSortFields,
   ERequirementLibrarySortFields,
   ERequirementTemplateSortFields,
   EStepCodeSortFields,
@@ -72,6 +74,7 @@ import {
   IPart9ChecklistSelectOptions,
   IPermitApplicationSearchFilters,
   IPermitProjectSearchFilters,
+  IProjectAuditSearchFilters,
   ITemplateVersionDiff,
   TAutoComplianceModuleConfigurations,
   TCreatePermitApplicationFormData,
@@ -277,6 +280,13 @@ export class Api {
 
   async fetchPermitProject(id: string) {
     return this.client.get<ApiResponse<IPermitProject>>(`/permit_projects/${id}`)
+  }
+
+  async fetchProjectAudits(
+    projectId: string,
+    params?: TSearchParams<EProjectAuditSortFields, IProjectAuditSearchFilters>
+  ) {
+    return this.client.get<ApiResponse<IProjectAudit[]>>(`/permit_projects/${projectId}/activities`, params)
   }
 
   async fetchPinnedProjects() {
