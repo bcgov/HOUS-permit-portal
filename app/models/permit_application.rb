@@ -298,6 +298,22 @@ class PermitApplication < ApplicationRecord
       .compact
   end
 
+  def user_can_edit_block?(user_id:, requirement_block_id:)
+    permissions =
+      submission_requirement_block_edit_permissions(user_id: user_id)
+    return false unless permissions
+    return true if permissions == :all
+
+    permissions.include?(requirement_block_id)
+  end
+
+  def user_can_edit_step_code_block?(user_id:)
+    block_id = energy_step_code_requirement_block_id
+    return false unless block_id
+
+    user_can_edit_block?(user_id: user_id, requirement_block_id: block_id)
+  end
+
   def formatted_permit_classifications
     "#{activity.name} - #{permit_type.name}"
   end
@@ -566,6 +582,22 @@ class PermitApplication < ApplicationRecord
 
   def step_code_requirements
     jurisdiction&.permit_type_required_steps&.where(permit_type_id:)
+  end
+
+  def energy_step_code_requirement_block_id
+    blocks = template_version&.requirement_blocks_json
+    return nil unless blocks
+
+    blocks.each do |block_id, block_json|
+      if block_json["requirements"]&.any? { |req|
+           req["input_type"] == "energy_step_code" ||
+             req["input_type"] == "energy_step_code_part_3"
+         }
+        return block_id
+      end
+    end
+
+    nil
   end
 
   def energy_step_code_required?

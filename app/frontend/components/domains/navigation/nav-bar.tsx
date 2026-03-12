@@ -117,6 +117,11 @@ function isWelcomePath(path: string): boolean {
   return regex.test(path)
 }
 
+function isWelcomePath(path: string): boolean {
+  const regex = /^\/welcome/
+  return regex.test(path)
+}
+
 function shouldHideSubNavbarForPath(path: string): boolean {
   const matchers: Array<(path: string) => boolean> = [
     (path) => path === "/",
