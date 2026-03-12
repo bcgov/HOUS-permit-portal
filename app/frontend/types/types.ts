@@ -710,6 +710,10 @@ export interface IPermitProjectSearchFilters {
   // Add other specific filters if needed, e.g., status, submitterId
 }
 
+export interface IProjectAuditSearchFilters {
+  from?: string
+  to?: string
+}
 export interface ITemplateVersionDiff {
   added: IRequirement[]
   removed: IRequirement[]
