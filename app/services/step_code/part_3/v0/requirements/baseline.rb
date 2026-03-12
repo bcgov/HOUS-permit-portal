@@ -19,7 +19,7 @@ class StepCode::Part3::V0::Requirements::Baseline
   private
 
   def teui
-    return if total_energy == 0.0
+    return if total_energy == 0.0 || total_mfa == 0
 
     adjustment_factor =
       occupancies.inject(0) do |sum, oc|
@@ -32,6 +32,8 @@ class StepCode::Part3::V0::Requirements::Baseline
   end
 
   def tedi
+    return if total_mfa == 0
+
     checklist.ref_annual_thermal_energy_demand / total_mfa
   rescue StandardError
     nil

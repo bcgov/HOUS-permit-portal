@@ -24,6 +24,9 @@ jobs:
       CONSIGNO_URL: https://consignostub.dev-hous-permit-portal.com/stub/api/v1
       GEO_ALR_REST_URL: https://alr_rest_url_stub/arcserver/rest/services
       GEO_LTSA_PARCELMAP_REST_URL: https://ltsa_parcel_map_url_stub/arcserver/rest/services
+      GEO_LTSA_PARCELMAP_GIS_REST_URL: https://ltsa_parcel_map_gis_url_stub/geo/pub
+      ARCHISTAR_API_ENDPOINT: https://archistar_api_endpoint_stub/echeck-uat
+      BCGOV_ADDRESS_GEOCODER_URL: https://address_geocoder_url_stub
       PART_9_MIN_ENERGY_STEP: "3"
       PART_9_MAX_ENERGY_STEP: "5"
       PART_9_MIN_ZERO_CARBON_STEP: "1"
