@@ -171,8 +171,10 @@ export const StepCodeStoreModel = types
         const stepCodeId = self.currentStepCode.id
         const response = yield self.environment.api.deleteStepCode(stepCodeId)
 
-        // WORKAROUND: something is preventing the step code from being deleted from the map without errors, so you must refresh the page to see the changes
-        // use navigate(0)
+        if (response.ok) {
+          self.currentStepCode = null
+        }
+
         return response
       } catch (e) {
         if (import.meta.env.DEV) {

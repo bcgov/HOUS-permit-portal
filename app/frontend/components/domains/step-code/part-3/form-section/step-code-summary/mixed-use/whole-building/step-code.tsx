@@ -4,6 +4,7 @@ import { observer } from "mobx-react-lite"
 import React from "react"
 import { Trans } from "react-i18next"
 import { usePart3StepCode } from "../../../../../../../../hooks/resources/use-part-3-step-code"
+import { roundMetric } from "../../../../../../../../utils/utility-functions"
 import { GridData } from "../../../../../part-9/checklist/shared/grid/data"
 
 const i18nPrefix = "stepCode.part3.stepCodeSummary.mixedUse.wholeBuilding"
@@ -48,38 +49,26 @@ export const StepCodeWholeBuildingSummary = observer(function StepCodeWholeBuild
         <FormLabel>{t(`${i18nPrefix}.requirements`)}</FormLabel>
       </GridData>
       <GridData justifyContent="center">
-        <Input
-          isDisabled
-          value={requirements.wholeBuilding.teui ? parseFloat(requirements.wholeBuilding.teui).toFixed(2) : "-"}
-        />
+        <Input isDisabled value={roundMetric(requirements.wholeBuilding.teui)} />
       </GridData>
       <GridData justifyContent="center">
-        <Input
-          isDisabled
-          value={requirements.wholeBuilding.tedi ? parseFloat(requirements.wholeBuilding.tedi).toFixed(2) : "-"}
-        />
+        <Input isDisabled value={roundMetric(requirements.wholeBuilding.tedi)} />
       </GridData>
       <GridData justifyContent="center">
-        <Input
-          isDisabled
-          value={requirements.wholeBuilding.ghgi ? parseFloat(requirements.wholeBuilding.ghgi).toFixed(2) : "-"}
-        />
+        <Input isDisabled value={roundMetric(requirements.wholeBuilding.ghgi)} />
       </GridData>
 
       <GridData>
         <FormLabel>{t(`${i18nPrefix}.performance`)}</FormLabel>
       </GridData>
       <GridData justifyContent="center">
-        <Input isDisabled value={adjustedResults.teui ? parseFloat(adjustedResults.teui).toFixed(2) : "-"} />
+        <Input isDisabled value={roundMetric(adjustedResults.teui)} />
       </GridData>
       <GridData justifyContent="center">
-        <Input
-          isDisabled
-          value={adjustedResults.tedi?.wholeBuilding ? parseFloat(adjustedResults.tedi?.wholeBuilding).toFixed(2) : "-"}
-        />
+        <Input isDisabled value={roundMetric(adjustedResults.tedi?.wholeBuilding)} />
       </GridData>
       <GridData justifyContent="center">
-        <Input isDisabled value={adjustedResults.ghgi ? parseFloat(adjustedResults.ghgi).toFixed(2) : "-"} />
+        <Input isDisabled value={roundMetric(adjustedResults.ghgi)} />
       </GridData>
 
       <GridData>

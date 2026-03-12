@@ -1,10 +1,9 @@
-import { Button, Heading, Radio, RadioGroup, Stack, StackProps, Text } from "@chakra-ui/react"
+import { Heading, Radio, RadioGroup, Stack, StackProps, Text } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import { path } from "ramda"
 import React, { useEffect, useMemo } from "react"
 import { FormProvider, useController, useForm, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { useLocation, useNavigate } from "react-router-dom"
 import { usePart3StepCode } from "../../../../../hooks/resources/use-part-3-step-code"
 import {
   ECoolingSystemPlant,
@@ -15,6 +14,7 @@ import {
 } from "../../../../../types/enums"
 import { TextFormControl } from "../../../../shared/form/input-form-control"
 import { HStack } from "../../part-9/checklist/pdf-content/shared/h-stack"
+import { Part3FormFooter } from "./shared/form-footer"
 
 const i18nPrefix = "stepCode.part3.hvac"
 
@@ -48,13 +48,14 @@ function initializeFormValues(formValues?: IStepcodeHvacFormProps): IStepcodeHva
 export const HVAC = observer(() => {
   const { t } = useTranslation()
   const { checklist } = usePart3StepCode()
-  const navigate = useNavigate()
-  const location = useLocation()
   const formMethods = useForm<IStepcodeHvacFormProps>({
     mode: "onSubmit",
     defaultValues: initializeFormValues(checklist),
   })
-  const { handleSubmit } = formMethods
+  const {
+    handleSubmit,
+    formState: { isSubmitting },
+  } = formMethods
 
   const orderedHeatingSystemPlantOptions = useMemo(
     () => [
@@ -181,24 +182,14 @@ export const HVAC = observer(() => {
     ]
   )
 
-  const onSubmit = handleSubmit(async (data) => {
+  const onSubmit = async (data) => {
     if (!checklist) return
 
-    const alternatePath = checklist.alternateNavigateAfterSavePath
-    checklist.setAlternateNavigateAfterSavePath(null)
-
     const updated = await checklist.update(data)
+    if (!updated) throw new Error("Save failed")
 
-    if (updated) {
-      await checklist.completeSection("hvac")
-
-      if (alternatePath) {
-        navigate(alternatePath)
-      } else {
-        navigate(location.pathname.replace("hvac", "contact"))
-      }
-    }
-  })
+    await checklist.completeSection("hvac")
+  }
   return (
     <Stack direction="column" w="full">
       <Heading as="h2" fontSize="2xl" variant="yellowline">
@@ -207,7 +198,7 @@ export const HVAC = observer(() => {
       <Text fontSize="md">{t(`${i18nPrefix}.description`)}</Text>
 
       <FormProvider {...formMethods}>
-        <Stack as="form" onSubmit={onSubmit} spacing={7} mt={3} name="part3SectionForm">
+        <Stack spacing={7} mt={3}>
           {optionSections.map((section) => (
             <OptionsSection
               key={section.optionFieldName}
@@ -216,9 +207,7 @@ export const HVAC = observer(() => {
               otherDescriptionFieldName={section.otherDescriptionFieldName as TDescriptionFieldName}
             />
           ))}
-          <Button type="submit" variant="primary" mt={5}>
-            {t("stepCode.part3.cta")}
-          </Button>
+          <Part3FormFooter handleSubmit={handleSubmit} onSubmit={onSubmit} isLoading={isSubmitting} />
         </Stack>
       </FormProvider>
     </Stack>

@@ -4,6 +4,7 @@ import { observer } from "mobx-react-lite"
 import React from "react"
 import { Trans } from "react-i18next"
 import { usePart3StepCode } from "../../../../../../hooks/resources/use-part-3-step-code"
+import { roundMetric } from "../../../../../../utils/utility-functions"
 import { RouterLink } from "../../../../../shared/navigation/router-link"
 import { GridColumnHeader } from "../../../part-9/checklist/shared/grid/column-header"
 import { GridData } from "../../../part-9/checklist/shared/grid/data"
@@ -49,7 +50,7 @@ export const StepCodeRequirements = observer(function StepCodeRequirementsSummar
               <FormHelperText mt={0}>
                 <Trans i18nKey={"stepCode.part3.metrics.teui.units"} components={{ sup: <sup /> }} />
               </FormHelperText>
-              <Input isDisabled value={ocReq.teui || "-"} />
+              <Input isDisabled value={roundMetric(ocReq.teui)} />
             </FormControl>
           </GridData>
           <GridData borderTop="none">
@@ -57,7 +58,7 @@ export const StepCodeRequirements = observer(function StepCodeRequirementsSummar
               <FormHelperText mt={0}>
                 <Trans i18nKey={"stepCode.part3.metrics.tedi.units"} components={{ sup: <sup /> }} />
               </FormHelperText>
-              <Input isDisabled value={ocReq.tedi || "-"} />
+              <Input isDisabled value={roundMetric(ocReq.tedi)} />
             </FormControl>
           </GridData>
           <GridData borderTop="none">
@@ -65,7 +66,7 @@ export const StepCodeRequirements = observer(function StepCodeRequirementsSummar
               <FormHelperText mt={0}>
                 <Trans i18nKey={"stepCode.part3.metrics.ghgi.units"} components={{ sup: <sup />, sub: <sub /> }} />
               </FormHelperText>
-              <Input isDisabled value={ocReq.ghgi || "-"} />
+              <Input isDisabled value={roundMetric(ocReq.ghgi)} />
             </FormControl>
           </GridData>
         </>
