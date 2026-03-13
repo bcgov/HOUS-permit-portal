@@ -10,21 +10,6 @@ class Api::ProjectAuditsController < Api::ApplicationController
     authorize @permit_project, :show?
     perform_project_audit_search
 
-    # ── COLLABORATOR VISIBILITY QUESTION ──
-    #
-    # Right now every audit that passes the policy_scope is formatted and
-    # returned. For assignee collaborators (scoped to specific requirement
-    # blocks), we may need to filter or redact entries here.
-    #
-    # One approach: preload the viewer's permissions once, then pass them
-    # into the presenter so it can skip/redact per-entry without N+1:
-    #
-    #   permissions_by_pa = @permit_project.permit_applications
-    #     .index_with { |pa| pa.submission_requirement_block_edit_permissions(user_id: current_user.id) }
-    #
-    # Then the presenter could check: "does the viewer have access to the
-    # permit_application and/or requirement_block this audit references?"
-    #
     render_success @search,
                    nil,
                    {
