@@ -5,7 +5,8 @@ import { useMst } from "../../setup/root"
 import { isUUID } from "../../utils/utility-functions"
 
 export const usePart9StepCode = () => {
-  const { stepCodeStore } = useMst()
+  const { stepCodeStore, permitApplicationStore } = useMst()
+  const { currentPermitApplication } = permitApplicationStore
   const { fetchPart9StepCode, getStepCode, setCurrentStepCode } = stepCodeStore
   const { stepCodeId, permitApplicationId } = useParams()
   const [isLoading, setIsLoading] = useState(!permitApplicationId)
@@ -31,9 +32,13 @@ export const usePart9StepCode = () => {
     if (!permitApplicationId) {
       loadStepCode()
     } else {
+      const paStepCode = currentPermitApplication?.stepCode
+      if (paStepCode && !paStepCode.isDiscarded) {
+        setCurrentStepCode(paStepCode.id)
+      }
       setIsLoading(false)
     }
-  }, [permitApplicationId, stepCodeId, fetchPart9StepCode, getStepCode, setCurrentStepCode])
+  }, [permitApplicationId, stepCodeId, fetchPart9StepCode, getStepCode, setCurrentStepCode, currentPermitApplication])
 
   const currentStepCode = stepCodeStore.currentStepCode as IPart9StepCode
   return { currentStepCode, isLoading }

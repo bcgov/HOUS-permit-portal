@@ -4,9 +4,9 @@ import { createSearchModel } from "../lib/create-search-model"
 import { withEnvironment } from "../lib/with-environment"
 import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
-import { IPart3StepCode, Part3StepCodeModel } from "../models/part-3-step-code"
+import { IPart3StepCode, IPart3StepCodeChecklist, Part3StepCodeModel } from "../models/part-3-step-code"
 import { IPart9StepCode, Part9StepCodeModel } from "../models/part-9-step-code"
-import { IPart3StepCodeChecklist, IPart9StepCodeChecklist } from "../models/part-9-step-code-checklist"
+import { IPart9StepCodeChecklist } from "../models/part-9-step-code-checklist"
 import { EEnergyStep, EStepCodeSortFields, EStepCodeType, EZeroCarbonStep } from "../types/enums"
 import { IPart3ChecklistSelectOptions, IPart9ChecklistSelectOptions, TSearchParams } from "../types/types"
 import { setQueryParam, startBlobDownload } from "../utils/utility-functions"
@@ -50,11 +50,6 @@ export const StepCodeStoreModel = types
   .extend(withEnvironment())
   .extend(withRootStore())
   .extend(withMerge())
-  .views((self) => ({
-    setCurrentStepCode(stepCodeId) {
-      self.currentStepCode = stepCodeId
-    },
-  }))
   .views((self) => ({
     get stepCodes() {
       return Array.from(self.stepCodesMap.values())
