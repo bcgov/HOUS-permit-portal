@@ -7,6 +7,7 @@ import { withRootStore } from "../lib/with-root-store"
 import { IProjectAudit, ProjectAuditModel } from "../models/project-audit"
 import { EProjectAuditSortFields } from "../types/enums"
 import { IProjectAuditSearchFilters, TSearchParams } from "../types/types"
+import { setQueryParam } from "../utils/utility-functions"
 
 export const ProjectAuditStoreModel = types
   .compose(
@@ -40,6 +41,22 @@ export const ProjectAuditStoreModel = types
     },
     setTableProjectAudits(projects: IProjectAudit[]) {
       self.tableProjectAudits = cast(projects.map((p) => p.id))
+    },
+  }))
+  .actions((self) => ({
+    setFromFilter(value: string | null) {
+      self.fromFilter = value
+      setQueryParam("from", value ?? "")
+    },
+    setToFilter(value: string | null) {
+      self.toFilter = value
+      setQueryParam("to", value ?? "")
+    },
+    clearDateFilters() {
+      self.fromFilter = null
+      self.toFilter = null
+      setQueryParam("from", "")
+      setQueryParam("to", "")
     },
   }))
   .actions((self) => ({
