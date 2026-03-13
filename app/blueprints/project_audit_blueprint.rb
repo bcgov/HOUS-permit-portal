@@ -3,16 +3,16 @@ class ProjectAuditBlueprint < Blueprinter::Base
 
   view :base do
     field :description do |audit, options|
-      ProjectAuditPresenter.format_description(audit, options[:viewer])
+      ProjectAuditPresenter.new(audit, options[:viewer]).format_description
     end
     field :created_at do |audit, _options|
       audit.created_at
     end
     field :permit_application_id do |audit, _options|
-      ProjectAuditPresenter.resolve_permit_application_id(audit)
+      ProjectAuditPresenter.new(audit).resolve_permit_application_id
     end
     field :permit_name do |audit, _options|
-      ProjectAuditPresenter.resolve_permit_name(audit)
+      ProjectAuditPresenter.new(audit).resolve_permit_name
     end
   end
 end
