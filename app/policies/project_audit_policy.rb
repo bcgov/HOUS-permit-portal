@@ -1,6 +1,4 @@
 class ProjectAuditPolicy < ApplicationPolicy
-  delegate :index?, :show?, to: :auditable_policy
-
   class Scope < Scope
     def resolve
       accessible_project_ids =
@@ -70,16 +68,5 @@ class ProjectAuditPolicy < ApplicationPolicy
     def full_audit_access?
       user.super_admin?
     end
-  end
-
-  private
-
-  def auditable_policy
-    @auditable_policy ||=
-      if record.auditable.nil?
-        DenyAllPolicy.new(user_context, nil)
-      else
-        Pundit.policy!(user_context, record.auditable)
-      end
   end
 end
