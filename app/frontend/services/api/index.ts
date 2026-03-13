@@ -286,7 +286,7 @@ export class Api {
     projectId: string,
     params?: TSearchParams<EProjectAuditSortFields, IProjectAuditSearchFilters>
   ) {
-    return this.client.get<ApiResponse<IProjectAudit[]>>(`/permit_projects/${projectId}/activities`, params)
+    return this.client.post<ApiResponse<IProjectAudit[]>>(`/permit_projects/${projectId}/activities`, params)
   }
 
   async fetchPinnedProjects() {
