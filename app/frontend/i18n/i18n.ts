@@ -1037,6 +1037,15 @@ Thank you,
             status: "Status",
             allPermits: "All permits",
           },
+          activity: {
+            title: "Activity",
+            columns: {
+              createdAt: "Created at",
+            },
+            fromFilter: "From date",
+            toFilter: "To date",
+            empty: "No activity found",
+          },
           permits: {
             title: "Permits",
           },
@@ -1094,6 +1103,7 @@ Thank you,
           },
           details: {
             overview: "Overview",
+            activity: "Activity",
             permits: "Permits",
             localResources: "Local Resources",
             notFound: "Permit project not found.",
