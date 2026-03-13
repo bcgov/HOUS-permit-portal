@@ -75,18 +75,6 @@ class PermitApplicationBlueprint < Blueprinter::Base
       true
     end
 
-    # ── COLLABORATOR VISIBILITY QUESTIONS ──
-    #
-    # These two fields are the blueprint's enforcement points — they pass
-    # current_user through to FormJsonService and SubmissionDataService,
-    # which strip blocks the assignee can't access. The activity feed
-    # (ProjectAuditPresenter) renders outside this blueprint pipeline,
-    # so it doesn't get this filtering.
-    #
-    #   Q: If a future audit type tracks field-level changes within
-    #      submission_data, should the presenter apply the same block-level
-    #      filtering that these services do?
-    #
     field :form_json do |pa, options|
       pa.form_json(current_user: options[:current_user])
     end

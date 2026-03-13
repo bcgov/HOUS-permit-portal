@@ -104,17 +104,6 @@ class PermitApplication::FormJsonService
     # If the user is not passed in then we don't remove requirement blocks based on further collaboration permissions.
     return @empty_block_ids if current_user.blank?
 
-    # ── COLLABORATOR VISIBILITY QUESTIONS ──
-    #
-    # This strips entire requirement blocks from the form JSON when the
-    # viewer is an assignee who doesn't have access to them. The activity
-    # feed's PermitBlockStatus audits reference requirement_block_id — but
-    # the feed doesn't consult this service.
-    #
-    #   Q: If we hide block "B3" from the form here, should we also hide
-    #      "Bob changed status of B3" from the activity feed? Currently
-    #      the presenter would still show it.
-    #
     permissions =
       permit_application.submission_requirement_block_edit_permissions(
         user_id: current_user.id
