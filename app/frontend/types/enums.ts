@@ -683,7 +683,7 @@ export enum EPermitProjectSortFields {
 }
 
 export enum EProjectAuditSortFields {
-  timestamp = "timestamp",
+  createdAt = "created_at",
 }
 
 export enum EOverheatingToolStatusFilter {

@@ -5,7 +5,7 @@ class ProjectAuditBlueprint < Blueprinter::Base
     field :description do |audit, options|
       ProjectAuditPresenter.format_description(audit, options[:viewer])
     end
-    field :timestamp do |audit, _options|
+    field :created_at do |audit, _options|
       audit.created_at
     end
     field :permit_application_id do |audit, _options|
