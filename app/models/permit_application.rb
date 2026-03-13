@@ -45,7 +45,9 @@ class PermitApplication < ApplicationRecord
   attr_accessor :front_end_form_update
 
   has_many :submission_versions, dependent: :destroy
-  has_many :permit_collaborations, dependent: :destroy
+  has_many :permit_collaborations,
+           -> { where(discarded_at: nil) },
+           dependent: :destroy
   has_many :collaborators, through: :permit_collaborations
   has_many :permit_block_statuses, dependent: :destroy
 
@@ -144,7 +146,8 @@ class PermitApplication < ApplicationRecord
       collaborations: {
         permit_collaborations: {
           collaboration_type: collaboration_type,
-          permit_application_id: id
+          permit_application_id: id,
+          discarded_at: nil
         }
       }
     }

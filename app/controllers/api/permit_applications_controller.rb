@@ -359,7 +359,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
         collaboration_type: params.require(:collaboration_type)
       )
 
-    if collaborations_to_remove.destroy_all
+    if collaborations_to_remove.discard_all
       render_success nil,
                      "permit_application.remove_collaborator_collaborations_success",
                      {

@@ -43,6 +43,6 @@ class Api::PermitCollaborationsController < Api::ApplicationController
   private
 
   def set_permit_collaboration
-    @permit_collaboration = PermitCollaboration.find(params[:id])
+    @permit_collaboration = PermitCollaboration.kept.find(params[:id])
   end
 end

@@ -168,7 +168,14 @@ class PermitProject < ApplicationRecord
 
     scope
       .joins(permit_collaborations: :collaborator)
-      .where(collaborators: { user_id: user.id })
+      .where(
+        collaborators: {
+          user_id: user.id
+        },
+        permit_collaborations: {
+          discarded_at: nil
+        }
+      )
       .distinct
       .limit(3)
   end
@@ -183,7 +190,8 @@ class PermitProject < ApplicationRecord
           .where(
             permit_collaborations: {
               permit_application_id: permit_applications.kept.select(:id),
-              collaboration_type: :submission
+              collaboration_type: :submission,
+              discarded_at: nil
             }
           )
           .distinct
