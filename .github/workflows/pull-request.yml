@@ -6,10 +6,37 @@ permissions:
 
 on:
   pull_request:
-    branches: ["main", "develop"]
+    branches: ["main", "stable", "develop"]
   workflow_dispatch:
 
 jobs:
+  frontend-build:
+    runs-on: ubuntu-latest
+    name: Frontend Build Check
+    steps:
+      - name: Install System Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libproj-dev libgeos-dev proj-bin
+      - name: Checkout Code
+        uses: actions/checkout@v3
+      - name: Set up Ruby 3.2.5
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.2.5"
+          bundler-cache: true
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+      - name: Install Dependencies
+        run: |
+          bundle install
+          npm ci
+      - name: Build Frontend
+        run: npm run build
+
   test:
     runs-on: ubuntu-latest
     name: Run RSpec Test Suite
