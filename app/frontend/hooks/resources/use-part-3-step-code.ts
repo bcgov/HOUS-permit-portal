@@ -31,6 +31,10 @@ export const usePart3StepCode = () => {
     if (!permitApplicationId) {
       loadStepCode()
     } else {
+      const paStepCode = currentPermitApplication?.stepCode
+      if (paStepCode && !paStepCode.isDiscarded) {
+        setCurrentStepCode(paStepCode.id)
+      }
       setIsLoading(false)
     }
   }, [permitApplicationId, stepCodeId, fetchPart3StepCode, getStepCode, setCurrentStepCode, currentPermitApplication])

@@ -4291,19 +4291,19 @@ Thank you,
         },
         digitalBuildingPermits: {
           index: {
-            title: "Digital Building Permits",
+            title: "Permit application forms",
             permitType: "BCBC part",
-            selectPermit: "Select a digital permit:",
+            selectPermit: "Select a form:",
             workType: "Work type",
             manageButton: "More options",
             lastUpdated: "Last updated",
             requestNewPromptWithLink:
               "Your administrator has made the above permit classifications available for digital submissions. If there is another classification you want please <1>request a new classification</1>.",
             emptyPermitsText:
-              "No available building permits of the selected work type. Please wait for updates from the Ministry of Housing.",
+              "No available forms of the selected work type. Please wait for updates from the Ministry of Housing.",
             noPermitsAvailable: "No permits are available for your jurisdiction",
             noPermitsAvailableDescription:
-              "There are currently no permit templates enabled for your jurisdiction. Contact your administrator for more information.",
+              "There are currently no application forms enabled for your jurisdiction. Contact your administrator for more information.",
           },
           edit: {
             requirementBlockSidebar: {

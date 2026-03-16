@@ -69,7 +69,7 @@ const MenuSection = ({ title, children }: IMenuSectionProps) => {
 export const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
   const { t } = useTranslation()
   const location = useLocation()
-  const { sessionStore, userStore } = useMst()
+  const { sessionStore, userStore, siteConfigurationStore } = useMst()
   const { currentUser } = userStore
   const { loggedIn } = sessionStore
   const { isOpen, onOpen, onClose, onToggle } = useDisclosure()
@@ -127,11 +127,13 @@ export const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
           to="/project-readiness-tools/look-up-step-codes-requirements-for-your-project"
           description={t("site.navMenu.projectReadiness.stepCodes.description")}
         />
-        <StaticLinkItem
-          label={t("site.navMenu.projectReadiness.bcBuildingCode.label")}
-          to="/pre-checks"
-          description={t("site.navMenu.projectReadiness.bcBuildingCode.description")}
-        />
+        {siteConfigurationStore.codeComplianceEnabled && (
+          <StaticLinkItem
+            label={t("site.navMenu.projectReadiness.bcBuildingCode.label")}
+            to="/pre-checks"
+            description={t("site.navMenu.projectReadiness.bcBuildingCode.description")}
+          />
+        )}
       </MenuSection>
     </VStack>
   )

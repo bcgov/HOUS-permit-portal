@@ -112,6 +112,11 @@ function isOverheatingCodePath(path: string): boolean {
   return regex.test(path)
 }
 
+function isOverheatingCodeSubPath(path: string): boolean {
+  const regex = /^\/overheating-codes\/[a-f\d-]+/
+  return regex.test(path)
+}
+
 function isWelcomePath(path: string): boolean {
   const regex = /^\/welcome/
   return regex.test(path)
@@ -143,12 +148,6 @@ function shouldHideSubNavbarForPath(path: string): boolean {
   return matchers.some((matcher) => matcher(path))
 }
 
-function shouldHideFullNavBarForPath(path: string): boolean {
-  const matchers: Array<(path: string) => boolean> = []
-
-  return matchers.some((matcher) => matcher(path))
-}
-
 export const NavBar = observer(function NavBar() {
   const { t } = useTranslation()
   const location = useLocation()
@@ -175,12 +174,8 @@ export const NavBar = observer(function NavBar() {
     }
   }
 
-  if (isOverheatingCodePath(path)) {
+  if (isOverheatingCodeSubPath(path)) {
     return <OverheatingCodeNavBar />
-  }
-
-  if (shouldHideFullNavBarForPath(path)) {
-    return null
   }
 
   return (
