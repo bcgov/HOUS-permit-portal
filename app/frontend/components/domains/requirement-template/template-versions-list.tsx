@@ -61,7 +61,7 @@ export const TemplateVersionsList = observer(function TemplateVersionsList({
     ;(async () => {
       try {
         const options = await permitClassificationStore.fetchActivityOptions(
-          false,
+          !!jurisdictionId,
           null,
           permitTypeId,
           jurisdictionId,
