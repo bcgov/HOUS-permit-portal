@@ -37,7 +37,13 @@ export const JurisdictionResourcesSection = ({
         )}
         <Text color="text.secondary" fontSize="sm" mt={1}>
           {t("jurisdiction.resources.emptyForStaff")}{" "}
-          <Link as={RouterLink} to={configureResourcesPath} color="theme.blueAlt" textDecoration="underline">
+          <Link
+            target="_blank"
+            as={RouterLink}
+            to={configureResourcesPath}
+            color="theme.blueAlt"
+            textDecoration="underline"
+          >
             {t("jurisdiction.resources.configureResourcesLink")}
           </Link>
         </Text>

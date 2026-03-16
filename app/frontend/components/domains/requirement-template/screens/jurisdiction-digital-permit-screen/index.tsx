@@ -83,7 +83,10 @@ export const JurisdictionDigitalPermitScreen = observer(function JurisdictionDig
         >
           {enabledPermitTypeOptions.map((permitTypeOption) => (
             <TabPanel key={permitTypeOption.value.id} w="100%" pt={0}>
-              <TemplateVersionsList permitTypeId={permitTypeOption.value.id} />
+              <TemplateVersionsList
+                permitTypeId={permitTypeOption.value.id}
+                jurisdictionId={currentUser?.jurisdiction?.id}
+              />
               <Center>
                 <Box bg="greys.grey03" p={4} w="75%" mt={24}>
                   <Trans
