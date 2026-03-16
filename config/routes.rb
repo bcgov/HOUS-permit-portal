@@ -139,6 +139,9 @@ Rails.application.routes.draw do
       post "permit_applications/search",
            on: :member,
            to: "jurisdictions#search_permit_applications"
+      post "permit_projects/search",
+           on: :member,
+           to: "jurisdictions#search_permit_projects"
       patch "update_external_api_enabled",
             on: :member,
             to: "jurisdictions#update_external_api_enabled"

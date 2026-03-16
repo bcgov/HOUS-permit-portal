@@ -683,6 +683,53 @@ export enum EPermitProjectRollupStatus {
   approved = "approved",
 }
 
+export enum EProjectStatus {
+  inquiry = "inquiry",
+  intake = "intake",
+  onHold = "on_hold",
+  inReview = "in_review",
+  awaitingPayment = "awaiting_payment",
+  active = "active",
+  inspections = "inspections",
+  occupancy = "occupancy",
+  closed = "closed",
+}
+
+export enum EPermitProjectInboxSortFields {
+  projectNumber = "number",
+  address = "full_address",
+  applications = "permit_applications_size",
+  daysInQueue = "days_in_queue",
+  assigned = "assigned",
+  status = "status",
+}
+
+export enum EPermitApplicationInboxSortFields {
+  status = "status",
+  number = "number",
+  referenceNumber = "reference_number",
+  permitClassification = "permit_classification",
+  submitter = "submitter",
+  viewedAt = "viewed_at",
+  submittedAt = "submitted_at",
+}
+
+export enum EInboxViewMode {
+  projects = "projects",
+  applications = "applications",
+}
+
+export enum EInboxDisplayMode {
+  list = "list",
+  columns = "columns",
+}
+
+export enum ERadioFilterValue {
+  include = "include",
+  hide = "hide",
+  onlyShow = "only_show",
+}
+
 export enum EStepCodeSortFields {
   type = "type",
   permitProjectTitle = "permit_project_title",

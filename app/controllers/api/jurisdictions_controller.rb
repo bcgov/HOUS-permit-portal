@@ -2,6 +2,7 @@ class Api::JurisdictionsController < Api::ApplicationController
   include Api::Concerns::Search::Jurisdictions
   include Api::Concerns::Search::JurisdictionUsers
   include Api::Concerns::Search::PermitApplications
+  include Api::Concerns::Search::JurisdictionPermitProjects
 
   before_action :set_jurisdiction,
                 only: %i[
@@ -9,10 +10,16 @@ class Api::JurisdictionsController < Api::ApplicationController
                   update
                   search_users
                   search_permit_applications
+                  search_permit_projects
                   update_external_api_enabled
                 ]
   skip_after_action :verify_policy_scoped,
-                    only: %i[index search_users search_permit_applications]
+                    only: %i[
+                      index
+                      search_users
+                      search_permit_applications
+                      search_permit_projects
+                    ]
   skip_before_action :authenticate_user!,
                      only: %i[show index jurisdiction_options]
 
@@ -186,6 +193,26 @@ class Api::JurisdictionsController < Api::ApplicationController
                      blueprint_opts: {
                        view: :jurisdiction_review_inbox
                      }
+                   }
+  end
+
+  # POST /api/jurisdictions/:id/permit_projects/search
+  def search_permit_projects
+    authorize @jurisdiction
+    perform_jurisdiction_permit_project_search
+    authorized_results =
+      apply_search_authorization(@jurisdiction_permit_projects)
+    render_success authorized_results,
+                   nil,
+                   {
+                     blueprint: PermitProjectBlueprint,
+                     blueprint_opts: {
+                       view: :base,
+                       current_user: current_user,
+                       pinned_project_ids:
+                         current_user.pinned_permit_project_ids
+                     },
+                     meta: @jurisdiction_permit_project_meta
                    }
   end
 

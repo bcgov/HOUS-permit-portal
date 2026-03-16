@@ -1,175 +1,234 @@
-import { Box, Button, Container, Flex, Heading, HStack, IconButton, Stack, Text, VStack } from "@chakra-ui/react"
-import { ArrowSquareOut, Download } from "@phosphor-icons/react"
-import { format } from "date-fns"
+import { Box, Button, ButtonGroup, Container, Flex, Heading, HStack, Icon, Text, VStack } from "@chakra-ui/react"
+import { CalendarBlank, Columns, List, ListBullets, Stack } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { useJurisdiction } from "../../../../hooks/resources/use-jurisdiction"
 import { usePermitClassificationsLoad } from "../../../../hooks/resources/use-permit-classifications-load"
 import { useSearch } from "../../../../hooks/use-search"
-import { IPermitApplication } from "../../../../models/permit-application"
 import { useMst } from "../../../../setup/root"
-import { ECollaborationType } from "../../../../types/enums"
 import { CalloutBanner } from "../../../shared/base/callout-banner"
 import { ErrorScreen } from "../../../shared/base/error-screen"
-import { Paginator } from "../../../shared/base/inputs/paginator"
-import { PerPageSelect } from "../../../shared/base/inputs/per-page-select"
 import { LoadingScreen } from "../../../shared/base/loading-screen"
-import { SharedSpinner } from "../../../shared/base/shared-spinner"
-import { SearchGrid } from "../../../shared/grid/search-grid"
-import { SearchGridItem } from "../../../shared/grid/search-grid-item"
-import { RouterLink } from "../../../shared/navigation/router-link"
-import { RouterLinkButton } from "../../../shared/navigation/router-link-button"
-import { PermitApplicationStatusTag } from "../../../shared/permit-applications/permit-application-status-tag"
-import { PermitApplicationViewedAtTag } from "../../../shared/permit-applications/permit-application-viewed-at-tag"
-import { Can } from "../../../shared/user/can"
-import { DesignatedCollaboratorAssignmentPopover } from "../../permit-application/collaborator-management/designated-collaborator-assignment-popover"
-import { SubmissionDownloadModal } from "../../permit-application/submission-download-modal"
-import { GridHeaders } from "./grid-header"
+import {
+  AssignedFilter,
+  DaysInQueueFilter,
+  MeetingRequestsFilter,
+  PermitTypeFilter,
+  ProjectStatusFilter,
+  StatusFilter,
+  UnreadFilter,
+} from "./filters"
+import { ProjectInboxTable } from "./project-inbox-table"
 
 export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionSubmissionInbox() {
   const { t } = useTranslation()
-  const { permitApplicationStore, sandboxStore } = useMst()
+  const { submissionInboxStore, sandboxStore } = useMst()
   const { currentJurisdiction, error } = useJurisdiction()
   const { isLoaded: isPermitClassificationsLoaded } = usePermitClassificationsLoad()
 
-  const { currentPage, totalPages, totalCount, countPerPage, handleCountPerPageChange, handlePageChange, isSearching } =
-    permitApplicationStore
-
+  const { viewMode, displayMode, setViewMode, setDisplayMode, permitProjectSearch, permitApplicationSearch } =
+    submissionInboxStore
   const { currentSandboxId } = sandboxStore
-  useSearch(permitApplicationStore, [currentJurisdiction?.id, JSON.stringify(currentSandboxId)])
+
+  const activeSearchStore = viewMode === "projects" ? permitProjectSearch : permitApplicationSearch
+
+  useSearch(activeSearchStore, [currentJurisdiction?.id, JSON.stringify(currentSandboxId), viewMode])
 
   if (error) return <ErrorScreen error={error} />
   if (!currentJurisdiction || !isPermitClassificationsLoaded) return <LoadingScreen />
 
   return (
-    <Container maxW="container.xl" p={8} as={"main"}>
-      <VStack align={"start"} spacing={5} w={"full"} h={"full"}>
-        {!currentJurisdiction.inboxEnabled && (
-          <CalloutBanner type={"error"} title={t("permitApplication.submissionInbox.contactInviteWarning")} />
-        )}
-        <Flex justify={"space-between"} w={"full"}>
-          <Box>
-            <Heading as="h1">{t("permitApplication.submissionInbox.title")}</Heading>
-            <Text fontSize="sm" color="text.secondary">
-              {t("permitApplication.submissionInbox.submissionsSentTo")}
-            </Text>
-          </Box>
-          <Can action="jurisdiction:manage" data={{ jurisdiction: currentJurisdiction }}>
-            <Button
-              as={RouterLink}
-              to={`/jurisdictions/${currentJurisdiction.slug}/configuration-management/feature-access/submissions-inbox-setup`}
-              variant="secondary"
-            >
-              {t("ui.setup")}
-            </Button>
-          </Can>
-        </Flex>
+    <Flex as="main" minH="100vh">
+      {/* Sidebar */}
+      <Box w="200px" minW="200px" bg="greys.grey10" borderRight="1px solid" borderColor="border.light" p={4}>
+        <Text fontSize="xs" fontWeight="bold" color="text.secondary" mb={4} textTransform="uppercase">
+          {t("submissionInbox.workspace")}
+        </Text>
+        <VStack align="stretch" spacing={1}>
+          <Button
+            variant="ghost"
+            justifyContent="flex-start"
+            leftIcon={<ListBullets />}
+            bg="white"
+            fontWeight="bold"
+            size="sm"
+          >
+            {t("submissionInbox.submissions")}
+          </Button>
+          {/* ### SUBMISSION INDEX STUB FEATURE */}
+          <Button
+            variant="ghost"
+            justifyContent="flex-start"
+            leftIcon={<CalendarBlank />}
+            size="sm"
+            color="text.secondary"
+          >
+            {t("submissionInbox.meetings")}
+          </Button>
+        </VStack>
+      </Box>
 
-        <SearchGrid templateColumns="repeat(8, 1fr)">
-          <GridHeaders />
-
-          {isSearching ? (
-            <Flex py={50} gridColumn={"span 7"}>
-              <SharedSpinner />
-            </Flex>
-          ) : (
-            currentJurisdiction.tablePermitApplications.map((pa: IPermitApplication) => {
-              if (!pa.submitter) return <></>
-
-              return (
-                <Box
-                  key={pa.id}
-                  className={"jurisdiction-permit-application-index-grid-row"}
-                  role={"row"}
-                  display={"contents"}
-                >
-                  <SearchGridItem>
-                    <PermitApplicationStatusTag permitApplication={pa} />
-                  </SearchGridItem>
-                  <SearchGridItem>{pa.number}</SearchGridItem>
-                  <SearchGridItem wordBreak={"break-word"}>{pa.referenceNumber}</SearchGridItem>
-                  <SearchGridItem>
-                    <Flex direction="column">
-                      <Text fontWeight={700}>{pa.permitType.name}</Text>
-                      <Text>{pa.activity.name}</Text>
-                    </Flex>
-                  </SearchGridItem>
-                  <SearchGridItem>
-                    <Flex direction="column">
-                      <Text fontWeight={700}>{pa.submitter.name}</Text>
-                      <Text>{pa.submitter.email}</Text>
-                    </Flex>
-                  </SearchGridItem>
-                  <SearchGridItem>
-                    {pa.isViewed ? (
-                      <Flex direction="column">
-                        <Text>{format(pa.viewedAt, "yyyy-MM-dd")}</Text>
-                        <Text>{format(pa.viewedAt, "HH:mm")}</Text>
-                      </Flex>
-                    ) : (
-                      <PermitApplicationViewedAtTag permitApplication={pa} />
-                    )}
-                  </SearchGridItem>
-                  <SearchGridItem>
-                    {pa.isSubmitted && (
-                      <Flex direction="column">
-                        <Text>{format(pa.submittedAt, "yyyy-MM-dd")}</Text>
-                        <Text>{format(pa.submittedAt, "HH:mm")}</Text>
-                      </Flex>
-                    )}
-                  </SearchGridItem>
-                  <SearchGridItem gap={2}>
-                    <Stack>
-                      <HStack>
-                        <DesignatedCollaboratorAssignmentPopover
-                          permitApplication={pa}
-                          collaborationType={ECollaborationType.review}
-                          avatarTrigger
-                        />
-                        <SubmissionDownloadModal
-                          permitApplication={pa}
-                          renderTrigger={(onOpen) => (
-                            <IconButton
-                              variant="secondary"
-                              icon={<Download />}
-                              aria-label={"download"}
-                              onClick={onOpen}
-                            />
-                          )}
-                          review
-                        />
-                      </HStack>
-                      <RouterLinkButton
-                        variant="primary"
-                        rightIcon={<ArrowSquareOut />}
-                        to={`/permit-applications/${pa.id}`}
-                      >
-                        {t("ui.view")}
-                      </RouterLinkButton>
-                    </Stack>
-                  </SearchGridItem>
-                </Box>
-              )
-            })
+      {/* Main content */}
+      <Container maxW="container.xl" p={8} flex={1}>
+        <VStack align="start" spacing={5} w="full" h="full">
+          {!currentJurisdiction.inboxEnabled && (
+            <CalloutBanner type="error" title={t("permitApplication.submissionInbox.contactInviteWarning")} />
           )}
-        </SearchGrid>
-        <Flex w={"full"} justifyContent={"space-between"}>
-          <PerPageSelect
-            handleCountPerPageChange={handleCountPerPageChange}
-            countPerPage={countPerPage}
-            totalCount={totalCount}
-          />
-          <Paginator
-            current={currentPage}
-            total={totalCount}
-            totalPages={totalPages}
-            pageSize={countPerPage}
-            handlePageChange={handlePageChange}
-            showLessItems={true}
-          />
-        </Flex>
-      </VStack>
-    </Container>
+
+          <Heading as="h1">{t("permitApplication.submissionInbox.title")}</Heading>
+
+          {/* Search bar */}
+          <Box w="full">
+            <Box
+              as="input"
+              w="full"
+              p={2}
+              px={4}
+              border="1px solid"
+              borderColor="border.light"
+              borderRadius="md"
+              fontSize="sm"
+              placeholder={t("submissionInbox.searchPlaceholder")}
+              _placeholder={{ color: "text.secondary" }}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                activeSearchStore.setQuery(e.target.value)
+                activeSearchStore.search()
+              }}
+            />
+          </Box>
+
+          {/* Filter bar */}
+          <HStack spacing={2} flexWrap="wrap">
+            <MeetingRequestsFilter
+              value={activeSearchStore.meetingRequestFilter}
+              onChange={(val) => activeSearchStore.setMeetingRequestFilter(val)}
+              onApply={() => activeSearchStore.search()}
+              badgeCount={4}
+            />
+            <UnreadFilter
+              value={activeSearchStore.unreadFilter}
+              onChange={(val) => activeSearchStore.setUnreadFilter(val)}
+              onApply={() => activeSearchStore.search()}
+              badgeCount={2}
+            />
+            <PermitTypeFilter
+              value={[...activeSearchStore.permitTypeFilter]}
+              onChange={(val) => activeSearchStore.setPermitTypeFilter(val)}
+              onApply={() => activeSearchStore.search()}
+              onClear={() => {
+                activeSearchStore.setPermitTypeFilter([])
+                activeSearchStore.search()
+              }}
+            />
+            {viewMode === "projects" ? (
+              <ProjectStatusFilter
+                value={[...activeSearchStore.statusFilter]}
+                onChange={(val) => activeSearchStore.setStatusFilter(val as any)}
+                onApply={() => activeSearchStore.search()}
+                onClear={() => {
+                  activeSearchStore.setStatusFilter([] as any)
+                  activeSearchStore.search()
+                }}
+              />
+            ) : (
+              <StatusFilter
+                value={[...activeSearchStore.statusFilter]}
+                onChange={(val) => activeSearchStore.setStatusFilter(val as any)}
+                onApply={() => activeSearchStore.search()}
+                onClear={() => {
+                  activeSearchStore.setStatusFilter([] as any)
+                  activeSearchStore.search()
+                }}
+              />
+            )}
+            <DaysInQueueFilter
+              value={[...activeSearchStore.daysInQueueFilter]}
+              onChange={(val) => activeSearchStore.setDaysInQueueFilter(val)}
+              onApply={() => activeSearchStore.search()}
+              onClear={() => {
+                activeSearchStore.setDaysInQueueFilter([])
+                activeSearchStore.search()
+              }}
+            />
+            <AssignedFilter
+              value={[...activeSearchStore.assignedFilter]}
+              onChange={(val) => activeSearchStore.setAssignedFilter(val)}
+              onApply={() => activeSearchStore.search()}
+              onClear={() => {
+                activeSearchStore.setAssignedFilter([])
+                activeSearchStore.search()
+              }}
+            />
+            <Button variant="link" size="sm" onClick={() => activeSearchStore.resetFilters()}>
+              {t("submissionInbox.clearAllFilters")}
+            </Button>
+          </HStack>
+
+          {/* View toggles */}
+          <HStack spacing={4}>
+            <ButtonGroup isAttached variant="outline" size="sm">
+              <Button
+                onClick={() => setViewMode("projects")}
+                bg={viewMode === "projects" ? "white" : undefined}
+                fontWeight={viewMode === "projects" ? "bold" : "normal"}
+                borderColor="border.light"
+                leftIcon={<Icon as={Stack} />}
+              >
+                {t("submissionInbox.projects")}
+              </Button>
+              <Button
+                onClick={() => setViewMode("applications")}
+                bg={viewMode === "applications" ? "white" : undefined}
+                fontWeight={viewMode === "applications" ? "bold" : "normal"}
+                borderColor="border.light"
+                leftIcon={<Icon as={ListBullets} />}
+              >
+                {t("submissionInbox.applications")}
+              </Button>
+            </ButtonGroup>
+
+            <ButtonGroup isAttached variant="outline" size="sm">
+              <Button
+                onClick={() => setDisplayMode("list")}
+                bg={displayMode === "list" ? "white" : undefined}
+                fontWeight={displayMode === "list" ? "bold" : "normal"}
+                borderColor="border.light"
+                leftIcon={<Icon as={List} />}
+              >
+                {t("submissionInbox.list")}
+              </Button>
+              <Button
+                onClick={() => setDisplayMode("columns")}
+                bg={displayMode === "columns" ? "white" : undefined}
+                fontWeight={displayMode === "columns" ? "bold" : "normal"}
+                borderColor="border.light"
+                leftIcon={<Icon as={Columns} />}
+              >
+                {t("submissionInbox.columns")}
+              </Button>
+            </ButtonGroup>
+          </HStack>
+
+          {/* Content */}
+          {displayMode === "columns" ? (
+            // ### SUBMISSION INDEX STUB FEATURE
+            <Box w="full" p={8} textAlign="center">
+              <Text color="text.secondary">{t("submissionInbox.columnsViewComingSoon")}</Text>
+            </Box>
+          ) : viewMode === "projects" ? (
+            <ProjectInboxTable
+              searchStore={permitProjectSearch}
+              projects={[...permitProjectSearch.tablePermitProjects]}
+            />
+          ) : (
+            // Applications list view - placeholder until Applications table is built
+            <Box w="full" p={8} textAlign="center">
+              <Text color="text.secondary">{t("submissionInbox.applicationsViewComingSoon")}</Text>
+            </Box>
+          )}
+        </VStack>
+      </Container>
+    </Flex>
   )
 })
