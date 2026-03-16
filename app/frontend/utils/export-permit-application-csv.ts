@@ -127,8 +127,7 @@ export function exportPermitApplicationCsv(permitApplication: IPermitApplication
   )
 
   rows.push({ section: "-", panel: "", multi: "", label: "", value: "" })
-  const requirementTemplateName =
-    (permitApplication as any)?.templateVersion?.label || (permitApplication as any)?.templateNickname || ""
+  const requirementTemplateName = (permitApplication as any)?.templateVersion?.label || ""
   rows.push({
     section: "Requirement template:",
     panel: "",
