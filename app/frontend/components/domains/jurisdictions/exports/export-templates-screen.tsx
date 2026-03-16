@@ -79,6 +79,7 @@ export const ExportTemplatesScreen = observer(function JurisdictionSubmissionInb
             <TabPanel key={permitTypeOption.value.id} w="100%" pt={0}>
               <TemplateVersionsList
                 permitTypeId={permitTypeOption.value.id}
+                jurisdictionId={currentJurisdiction?.id}
                 renderButton={(templateVersion) => (
                   <Menu>
                     <MenuButton as={Button} aria-label="Options" variant="secondary" rightIcon={<Export />} px={2}>
