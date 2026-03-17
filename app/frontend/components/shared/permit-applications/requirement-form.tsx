@@ -64,6 +64,7 @@ export const RequirementForm = observer(
       previousSubmissionVersion,
       selectedSubmissionVersion,
       previousToSelectedSubmissionVersion,
+      isViewingPastRequests,
       inboxEnabled,
       sandbox,
     } = permitApplication
@@ -106,7 +107,7 @@ export const RequirementForm = observer(
     const pastClonedDataCache = useRef(new Map())
 
     const displayedSubmissionData = useMemo(() => {
-      if (selectedSubmissionVersion) {
+      if (selectedSubmissionVersion && isViewingPastRequests) {
         const cacheKey = selectedSubmissionVersion.id
         if (pastClonedDataCache.current.has(cacheKey)) {
           return pastClonedDataCache.current.get(cacheKey)
@@ -118,7 +119,7 @@ export const RequirementForm = observer(
       } else {
         return currentSubmissionData
       }
-    }, [selectedSubmissionVersion, currentSubmissionData])
+    }, [selectedSubmissionVersion, isViewingPastRequests, currentSubmissionData])
 
     const [unsavedSubmissionData, setUnsavedSubmissionData] = useState(() => R.clone(submissionData))
 
