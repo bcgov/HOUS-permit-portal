@@ -5,7 +5,7 @@ class TagPolicy < ApplicationPolicy
 
   class Scope < Scope
     def resolve
-      [] unless user.super_admin?
+      return scope.none unless user.super_admin?
 
       scope.joins(:taggings).all
     end

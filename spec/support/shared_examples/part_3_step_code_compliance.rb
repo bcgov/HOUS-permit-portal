@@ -1,6 +1,38 @@
 require "rails_helper"
 
 PART_3_PASSING_COMPLIANCE_RESULTS = "a compliant part 3 building that"
+PART_3_COMPLIANCE_RESULTS = "part 3 compliance results"
+
+RSpec.shared_examples PART_3_COMPLIANCE_RESULTS do
+  it "returns expected values for applicable metrics" do
+    metrics = checklist.compliance_metrics
+
+    expect(subject.results[:teui]).to be_a(Numeric) if metrics.include?(:teui)
+    expect(subject.results[:ghgi]).to be_a(Numeric) if metrics.include?(:ghgi)
+
+    if metrics.include?(:tedi)
+      expect(subject.results[:tedi]).to include(
+        :whole_building,
+        :step_code_portion
+      )
+    end
+
+    if metrics.include?(:total_energy)
+      expect(subject.results[:total_energy]).to be_a(Numeric)
+    end
+  end
+
+  it "returns nil for non-applicable metrics" do
+    metrics = checklist.compliance_metrics
+
+    expect(subject.results[:teui]).to be_nil unless metrics.include?(:teui)
+    expect(subject.results[:tedi]).to be_nil unless metrics.include?(:tedi)
+    expect(subject.results[:ghgi]).to be_nil unless metrics.include?(:ghgi)
+    unless metrics.include?(:total_energy)
+      expect(subject.results[:total_energy]).to be_nil
+    end
+  end
+end
 
 RSpec.shared_examples PART_3_PASSING_COMPLIANCE_RESULTS do
   it "returns the expected results for each occupancy classification" do

@@ -240,12 +240,8 @@ class RequirementFormJsonService
     energy_step_code_part_3:
       STEP_CODE_ACTIONS_CONTAINER.call("openStepCodePart3", "Part3StepCode"),
     architectural_drawing: {
-      type: "button",
-      action: "custom",
-      title: I18n.t("formio.requirement_template.architectural_drawing"),
-      label: I18n.t("formio.requirement_template.architectural_drawing"),
-      custom:
-        "document.dispatchEvent(new CustomEvent('openArchitecturalDrawingTool', { detail: { requirementCode: component.key } }));"
+      type: "simplefile",
+      storage: "s3custom"
     }
   }
 
@@ -263,8 +259,6 @@ class RequirementFormJsonService
         get_pid_info_components(requirement_block_key, requirement.required)
       elsif requirement.input_type_multiply_sum_grid?
         get_multiply_sum_grid_form_json(requirement_block_key)
-      elsif requirement.input_type_architectural_drawing?
-        get_architectural_drawing_form_json(requirement_block_key)
       else
         {
           id: requirement.id,
@@ -370,15 +364,29 @@ class RequirementFormJsonService
     end
 
     if requirement.input_options["conditional"].present?
-      # assumption that conditional is only within the same requirement block for now
       conditional = requirement.input_options["conditional"].clone
       section = PermitApplication.section_from_key(requirement_block_key)
-      if conditional["when"].present?
-        conditional.merge!(
-          "when" => "#{section}.#{requirement_block_key}|#{conditional["when"]}"
-        )
-      end
-      json.merge!({ conditional: conditional })
+      component_path =
+        if conditional["when"].present?
+          "#{section}.#{requirement_block_key}|#{conditional["when"]}"
+        else
+          conditional["when"]
+        end
+      operator = conditional["operator"] || "isEqual"
+      show = conditional["show"].present? ? true : false
+
+      condition_entry = { component: component_path, operator: operator }
+      condition_entry[:value] = conditional["eq"] unless operator.in?(
+        %w[isEmpty isNotEmpty]
+      )
+
+      json.merge!(
+        conditional: {
+          show: show,
+          conjunction: "all",
+          conditions: [condition_entry]
+        }
+      )
     end
 
     # indicates code-based conditionals.  Always merge elective show = false to end.
@@ -894,25 +902,6 @@ class RequirementFormJsonService
     }
   end
 
-  def get_architectural_drawing_form_json(
-    requirement_block_key = requirement&.requirement_block&.key
-  )
-    return {} unless requirement.input_type_architectural_drawing?
-
-    {
-      id: requirement.id,
-      key: requirement.key(requirement_block_key),
-      type: "button",
-      label: requirement.label,
-      action: "custom",
-      disableOnInvalid: true,
-      input: true,
-      theme: "primary",
-      custom:
-        "document.dispatchEvent(new CustomEvent('openArchitecturalDrawingTool', { detail: { requirementCode: '#{escape_for_js(requirement.key(requirement_block_key))}' } }));"
-    }
-  end
-
   # this is a generic mulitgrid for a single component
   def multi_data_grid_form_json(
     override_key,
@@ -951,7 +940,10 @@ class RequirementFormJsonService
       end
     end
 
-    if (input_type.to_sym == :file)
+    if (
+         input_type.to_sym == :file ||
+           input_type.to_sym == :architectural_drawing
+       )
       return(
         {
           type: "simplefile",

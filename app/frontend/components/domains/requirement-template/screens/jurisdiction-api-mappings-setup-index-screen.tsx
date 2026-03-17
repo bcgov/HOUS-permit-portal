@@ -123,6 +123,7 @@ export const JurisdictionApiMappingsSetupIndexScreen = observer(function Jurisdi
                     <TabPanel key={permitTypeOption.value.id} w="100%" pt={0}>
                       <TemplateVersionsList
                         permitTypeId={permitTypeOption.value.id}
+                        jurisdictionId={currentUser?.jurisdiction?.id}
                         renderButton={(templateVersion) => (
                           <Button
                             as={RouterLink}

@@ -21,6 +21,8 @@ class Jurisdiction::UserInviter
       user = find_existing_invited_user(user_params[:email])
       jurisdiction_id =
         user_params.delete(:jurisdiction_id) || inviter.jurisdictions.pluck(:id)
+
+      next unless inviter_authorized_for_jurisdiction?(jurisdiction_id)
       begin
         if should_promote_to_regional_rm?(user, selected_role, jurisdiction_id)
           promote_to_regional_rm(user, jurisdiction_id)
@@ -37,6 +39,13 @@ class Jurisdiction::UserInviter
   end
 
   private
+
+  def inviter_authorized_for_jurisdiction?(jurisdiction_id)
+    return true if inviter.super_admin?
+
+    inviter_jurisdiction_ids = inviter.jurisdictions.pluck(:id)
+    Array(jurisdiction_id).all? { |jid| inviter_jurisdiction_ids.include?(jid) }
+  end
 
   def find_existing_invited_user(email)
     # Inviting submitters causes a second user to be created with the same email

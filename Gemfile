@@ -58,7 +58,7 @@ gem "pundit", "~> 2.3.1"
 gem "phonelib", "~> 0.8.5"
 gem "roo", "~> 2.10"
 gem "discard", "~> 1.2"
-gem "faraday", "~> 2.9.0"
+gem "faraday", "~> 2.14.1"
 gem "factory_bot", "~> 6.4"
 # The timcop gem mocks Time, it is only used in specs and for seeding a published template version to get around time based validations
 gem "timecop", "~> 0.9.8"
@@ -124,12 +124,13 @@ group :development do
   gem "rails-erd", "~> 1.5"
   gem "rubocop", "~> 1.67", require: false
   gem "rubocop-rails", "~> 2.26", require: false
-  gem "solargraph", "~> 0.50.0", require: false
+  gem "solargraph", "~> 0.58.0", require: false
 end
 
 gem "faraday-multipart", "~> 1.0"
 
 gem "rack-attack", "~> 6.7"
+gem "hexapdf"
 gem "data_migrate", "~> 11.3"
 
 gem "audited", "~> 5.4"

@@ -82,8 +82,7 @@ export const SitesSelect = observer(function ({
     setPidOptions([])
     onChange(option)
     setValue(pidName, null)
-    if (option) {
-      //set the label for the address?
+    if (option && option.value) {
       fetchPids(option.value).then((pids: string[]) => {
         if (pids) {
           setPidOptions(pids.map((pid) => ({ value: pid, label: formatPidLabel(pid) })))

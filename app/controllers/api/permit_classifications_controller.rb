@@ -24,8 +24,7 @@ class Api::PermitClassificationsController < Api::ApplicationController
               .joins(:activity)
               .where(permit_classifications: { enabled: true })
 
-          if classification_option_params[:jurisdiction_id].present? &&
-               current_sandbox.blank?
+          if classification_option_params[:jurisdiction_id].present?
             jurisdiction =
               Jurisdiction.find(classification_option_params[:jurisdiction_id])
             permit_type_ids =

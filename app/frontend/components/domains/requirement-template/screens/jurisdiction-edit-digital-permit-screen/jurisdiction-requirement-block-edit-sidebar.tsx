@@ -50,6 +50,7 @@ import {
 import { getFileTypeInfo } from "../../../../../utils/file-utils"
 import { CustomMessageBox } from "../../../../shared/base/custom-message-box"
 import { Editor } from "../../../../shared/editor/editor"
+import { SafeTipTapDisplay } from "../../../../shared/editor/safe-tiptap-display"
 import { FileRemovedTag } from "../../../../shared/file-removed-tag"
 import { RouterLinkButton } from "../../../../shared/navigation/router-link-button"
 
@@ -286,9 +287,7 @@ const MainView = ({
                             {t("digitalBuildingPermits.edit.requirementBlockSidebar.reason")} {reasonLabel}
                           </Text>
                           {requirementField.hint && (
-                            <Text fontSize="sm" mt={1}>
-                              {requirementField.hint}
-                            </Text>
+                            <SafeTipTapDisplay htmlContent={requirementField.hint} fontSize="sm" mt={1} />
                           )}
                         </Box>
                       )

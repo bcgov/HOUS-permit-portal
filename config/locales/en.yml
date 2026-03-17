@@ -44,6 +44,11 @@ en:
       requirement_template:
         first_nations: "First Nations"
         available_in_all: "All"
+      sandbox:
+        scope_names:
+          published: 'Training mode: "Published"'
+          scheduled: 'Training mode: "Upcoming"'
+        available_in_all: "All"
     errors:
       models:
         early_access_preview:
@@ -52,6 +57,8 @@ en:
         jurisdiction:
           no_sandboxes: "Jurisdiction must have at least one sandbox."
           enabled_inbox_requires_setup: "can only be toggled on once all emails are set up."
+        part3_occupancy_required_step:
+          duplicate_pathway: "A pathway with identical energy step and zero carbon step already exists for this occupancy."
         jurisdiction_template_version_customizations:
           uniqueness: "already exists for this jurisdiction and template version."
         site_configuration:
@@ -102,6 +109,7 @@ en:
           attributes:
             requirement_code:
               incorrect_energy_requirement_code: "must be %{correct_requirement_code} for energy step code requirements, but received %{incorrect_requirement_code}"
+              incorrect_architectural_requirement_code: "must be %{correct_requirement_code} for architectural drawing requirements, but received %{incorrect_requirement_code}"
               incorrect_architectural_drawing_file_attributes: "must have input type file, required true, and elective false for design package file for energy step code"
         supporting_document:
           attributes:
@@ -228,6 +236,10 @@ en:
       ltsa_unavailable_error:
         title: Error
         message: The land title service is currently unavailable
+    step_code:
+      update_archived_error:
+        title: Error
+        message: "Cannot update archived step code. Please restore it first."
       jurisdiction_ltsa_error:
         title: Error
         message: Jurisdiction could not be determined. Please check back later.
@@ -247,6 +259,31 @@ en:
       in_use_error:
         title: Error
         message: "This permit classification is in use and cannot be deleted"
+    overheating_code:
+      create_success:
+        title: ""
+        message: "Overheating code check created successfully!"
+      create_error:
+        title: Error
+        message: "Error creating overheating code check"
+      update_success:
+        title: ""
+        message: "Overheating code check updated successfully!"
+      update_error:
+        title: Error
+        message: "Error updating overheating code check"
+      destroy_success:
+        title: ""
+        message: "Overheating code check archived successfully!"
+      destroy_error:
+        title: Error
+        message: "Error archiving overheating code check"
+      restore_success:
+        title: ""
+        message: "Overheating code check restored successfully!"
+      restore_error:
+        title: Error
+        message: "Error restoring overheating code check"
     pre_check:
       create_success:
         title: ""
@@ -683,6 +720,9 @@ en:
       update_error:
         title: Error
         message: "%{error_message}"
+      update_archived_error:
+        title: Error
+        message: "Cannot update archived step code. Please restore it first."
       restore_success:
         title: ""
         message: "Step code restored successfully!"
@@ -749,25 +789,6 @@ en:
       not_found_error:
         title: "Error"
         message: 404 - The requested resource could not be found
-    overheating_tool:
-      generate_queued:
-        title: ""
-        message: "PDF generation has been queued."
-      create_success:
-        title: ""
-        message: "PDF form saved successfully!"
-      create_error:
-        title: "Oops"
-        message: "%{error_message}"
-      file_not_found:
-        title: "Error"
-        message: "%{error_message}"
-      empty_file:
-        title: "Error"
-        message: "%{error_message}"
-      read_error:
-        title: "Error"
-        message: "%{error_message}"
     s3:
       multipart_init_failed:
         title: "File Upload Error"

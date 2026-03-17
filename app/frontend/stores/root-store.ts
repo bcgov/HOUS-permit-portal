@@ -17,7 +17,7 @@ import {
 import { GeocoderStoreModel, IGeocoderStore } from "./geocoder-store"
 import { IJurisdictionStore, JurisdictionStoreModel } from "./jurisdiction-store"
 import { INotificationStore, NotificationStoreModel } from "./notification-store"
-import { IOverheatingToolStore, OverheatingToolStoreModel } from "./overheating-tool-store"
+import { IOverheatingCodeStore, OverheatingCodeStoreModel } from "./overheating-code-store"
 import { IPermitApplicationStore, PermitApplicationStoreModel } from "./permit-application-store"
 import { IPermitClassificationStore, PermitClassificationStoreModel } from "./permit-classification-store"
 import { IPermitProjectStore, PermitProjectStoreModel } from "./permit-project-store"
@@ -44,6 +44,7 @@ export const RootStoreModel = types
     projectAuditStore: types.optional(ProjectAuditStoreModel, {}),
     permitClassificationStore: types.optional(PermitClassificationStoreModel, {}),
     preCheckStore: types.optional(PreCheckStoreModel, {}),
+    overheatingCodeStore: types.optional(OverheatingCodeStoreModel, {}),
     jurisdictionStore: types.optional(JurisdictionStoreModel, {}),
     requirementBlockStore: types.optional(RequirementBlockStoreModel, {}),
     earlyAccessRequirementBlockStore: types.optional(EarlyAccessRequirementBlockStoreModel, {}),
@@ -59,7 +60,6 @@ export const RootStoreModel = types
     contactStore: types.optional(ContactStoreModel, {}),
     notificationStore: types.optional(NotificationStoreModel, {}),
     sandboxStore: types.optional(SandboxStoreModel, {}),
-    overheatingToolStore: types.optional(OverheatingToolStoreModel, {}),
   })
   .extend(withEnvironment())
   .volatile((self) => ({
@@ -124,6 +124,7 @@ export interface IRootStore extends IStateTreeNode {
   projectAuditStore: IProjectAuditStore
   permitClassificationStore: IPermitClassificationStore
   preCheckStore: IPreCheckStore
+  overheatingCodeStore: IOverheatingCodeStore
   jurisdictionStore: IJurisdictionStore
   userStore: IUserStore
   earlyAccessRequirementBlockStore: IEarlyAccessRequirementBlockStoreModel
@@ -140,7 +141,6 @@ export interface IRootStore extends IStateTreeNode {
   notificationStore: INotificationStore
   collaboratorStore: ICollaboratorStore
   sandboxStore: ISandboxStore
-  overheatingToolStore: IOverheatingToolStore
   subscribeToUserChannel: () => void
   disconnectUserChannel: () => void
   loadLocalPersistedData: () => void

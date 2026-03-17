@@ -19,24 +19,38 @@
           <h1
             style="color: #292929; font-family: 'Open Sans', sans-serif; font-weight: 700; line-height: 1.4; text-align: left; font-size: 28px; margin-top: 0; margin-bottom: 24px;"
           >
-            Your Building Permit Hub account will be archived soon
+            Your Building Permit Hub account will be archived in <%= pluralize(@days_until_archive, "day") %>
           </h1>
 
-          <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
-            Hello <%= @user.first_name.presence || @user.name %>,
+          <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 12px;">
+            Dear <%= @user.first_name.presence || @user.name %>,
           </p>
 
           <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 12px;">
-            Your Building Permit Hub account is scheduled for archiving.
+            Your Building Permit Hub account and associated data will be archived on
+            <strong><%= @scheduled_date.in_time_zone("Pacific Time (US & Canada)").strftime("%B %-d, %Y at %-I:%M %p Pacific Time") %></strong>.
           </p>
+
+          <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 4px;">
+            After this date:
+          </p>
+          <ul style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 12px; padding-left: 24px;">
+            <li style="list-style-position: initial; margin-left: 5px;">
+              You will require assistance from a system administrator to log in.
+            </li>
+            <li style="list-style-position: initial; margin-left: 5px;">
+              Your account will remain stored but inactive.
+            </li>
+          </ul>
+
           <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
-            You can keep your account active by logging in before the scheduled date.
+            To keep your account active, sign in before the archive date.
           </p>
 
           <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: 700; margin: 0; margin-bottom: 12px;">
             Account scheduled for archiving:
           </p>
-          <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; min-width: 100%; width: 100%; margin-bottom: 24px;" width="100%">
+          <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; min-width: 100%; width: 100%; margin-bottom: 24px; background-color: #f2f2f2;" width="100%" bgcolor="#f2f2f2">
             <thead>
               <tr>
                 <th align="left" style="font-family: 'Open Sans', sans-serif; font-size: 12px; letter-spacing: 0.05em; text-transform: uppercase; color: #6e6e6e; padding: 8px 12px; border-bottom: 1px solid #dddddd;">
@@ -52,13 +66,13 @@
             </thead>
             <tbody>
               <tr>
-                <td style="font-family: 'Open Sans', sans-serif; font-size: 16px; padding: 10px 12px; border-bottom: 1px solid #f0f0f0;">
+                <td style="font-family: 'Open Sans', sans-serif; font-size: 16px; padding: 10px 12px; border-bottom: 1px solid #e6e6e6;">
                   <%= @login_type %>
                 </td>
-                <td style="font-family: 'Open Sans', sans-serif; font-size: 16px; padding: 10px 12px; border-bottom: 1px solid #f0f0f0;">
+                <td style="font-family: 'Open Sans', sans-serif; font-size: 16px; padding: 10px 12px; border-bottom: 1px solid #e6e6e6;">
                   <%= @login_identifier %>
                 </td>
-                <td style="font-family: 'Open Sans', sans-serif; font-size: 16px; padding: 10px 12px; border-bottom: 1px solid #f0f0f0;">
+                <td style="font-family: 'Open Sans', sans-serif; font-size: 16px; padding: 10px 12px; border-bottom: 1px solid #e6e6e6;">
                   <%= @scheduled_date.strftime("%Y-%m-%d") %>
                 </td>
               </tr>
@@ -88,24 +102,32 @@
           </p>
           <ul style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px; padding-left: 24px;">
             <li style="list-style-position: initial; margin-left: 5px;">
-              Log in to your account before the scheduled archiving date to keep it active.
+              <strong>Log in to your account</strong> before <%= @scheduled_date.strftime("%B %-d, %Y") %> to keep your account active and retain your projects and related data.
             </li>
             <li style="list-style-position: initial; margin-left: 5px;">
-              If you no longer need your account, no action is required. It will be archived automatically.
+              If you no longer need your account, no action is required. On <%= @scheduled_date.strftime("%B %-d, %Y") %>, your account and associated data will be stored but inactive.
+            </li>
+          </ul>
+
+          <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: 700; margin: 0; margin-bottom: 12px;">
+            Important:
+          </p>
+          <ul style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px; padding-left: 24px;">
+            <li style="list-style-position: initial; margin-left: 5px;">
+              Draft permits are automatically deleted after 6 months of inactivity.
             </li>
             <li style="list-style-position: initial; margin-left: 5px;">
-              Once archived, you will not be able to log in. Your data is kept for <%= pluralize(@retention_days, "day") %> before permanent deletion.
-            </li>
-            <li style="list-style-position: initial; margin-left: 5px;">
-              Contact us at
-              <a href="mailto:digital.codes.permits@gov.bc.ca" style="color: #1a5a96; text-decoration: underline;">
-                digital.codes.permits@gov.bc.ca
-              </a>
-              if you need help signing in.
+              Submitted permit applications are available in your account for 3 years from the date they were submitted. Older permit applications may no longer appear in your account.
             </li>
           </ul>
 
           <hr style="border: 0; border-bottom: 1px solid #dddddd; margin: 24px 0;" />
+
+          <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 12px;">
+            If you have any questions or need assistance, reach out to us at
+            <a href="mailto:digital.codes.permits@gov.bc.ca" style="color: #1a5a96; text-decoration: underline;">
+              digital.codes.permits@gov.bc.ca</a>.
+          </p>
 
           <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0;">
             The Building Permit Hub Team

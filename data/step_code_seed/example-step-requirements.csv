@@ -1,0 +1,8 @@
+Section,Key,Name,Energy Step Required,Zero Carbon Step Required,Notes (do not edit this column)
+Part 9,low_residential,Small-scale/Multi-unit housing (Part 9 BCBC),"","",Energy step: 3-5. Zero carbon: 1-4. Duplicate row for multiple pathways.
+
+Part 3,hotels_and_motels,Hotels and motels (Group C),"","",Energy: 2-4. Zero carbon: 1-4. Duplicate row for multiple pathways.
+Part 3,other_residential_occupancies,Other residential occupancies (Group C),"","",Energy: 2-4. Zero carbon: 1-4. Duplicate row for multiple pathways.
+Part 3,offices,Offices (Group D),"","",Energy: 2-3. Zero carbon: 1-4. Duplicate row for multiple pathways.
+Part 3,other_personal_services,Other personal services (Group D),"","",Energy: 2-3. Zero carbon: 1-4. Duplicate row for multiple pathways.
+Part 3,mercantile_occupancies,Mercantile occupancies (Group E),"","",Energy: 2-3. Zero carbon: 1-4. Duplicate row for multiple pathways.

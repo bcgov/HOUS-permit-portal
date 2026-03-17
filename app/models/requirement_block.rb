@@ -79,8 +79,12 @@ class RequirementBlock < ApplicationRecord
     "formSubmissionDataRST#{section_key}|RB#{id}"
   end
 
-  def to_form_json(section_key = nil)
-    {
+  def to_form_json(
+    section_key = nil,
+    block_conditional: nil,
+    block_section_key_map: {}
+  )
+    json = {
       id: id,
       key: key(section_key),
       type: "panel",
@@ -90,6 +94,14 @@ class RequirementBlock < ApplicationRecord
       collapsed: false,
       components: components_form_json(section_key)
     }
+
+    if block_conditional.present?
+      resolved =
+        resolve_block_conditional(block_conditional, block_section_key_map)
+      json[:conditional] = resolved if resolved
+    end
+
+    json
   end
 
   def components_form_json(section_key)
@@ -164,6 +176,34 @@ class RequirementBlock < ApplicationRecord
 
   private
 
+  def resolve_block_conditional(block_conditional, block_section_key_map)
+    when_block_id = block_conditional["when_block_id"]
+    when_requirement_code = block_conditional["when_requirement_code"]
+    return nil if when_block_id.blank? || when_requirement_code.blank?
+
+    target_section_key = block_section_key_map[when_block_id]
+    return nil if target_section_key.blank?
+
+    target_block_key =
+      "formSubmissionDataRST#{target_section_key}|RB#{when_block_id}"
+    component_path =
+      "#{target_section_key}.#{target_block_key}|#{when_requirement_code}"
+
+    operator = block_conditional["operator"] || "isEqual"
+    show = block_conditional["show"].present? ? true : false
+
+    condition_entry = { "component" => component_path, "operator" => operator }
+    condition_entry["value"] = block_conditional["eq"] unless operator.in?(
+      %w[isEmpty isNotEmpty]
+    )
+
+    {
+      "show" => show,
+      "conjunction" => "all",
+      "conditions" => [condition_entry]
+    }
+  end
+
   # Escape for single-quoted JS strings
   def escape_for_js(str)
     str.to_s.gsub(/['\\]/) { |match| "\\#{match}" }
@@ -203,17 +243,49 @@ class RequirementBlock < ApplicationRecord
     RequirementBlock.search_index.refresh
   end
 
+  VALID_FORMIO_OPERATORS = %w[
+    isEqual
+    isNotEqual
+    greaterThan
+    greaterThanOrEqual
+    lessThan
+    lessThanOrEqual
+    isDateEqual
+    isNotDateEqual
+    dateGreaterThan
+    dateGreaterThanOrEqual
+    dateLessThan
+    dateLessThanOrEqual
+    isEmpty
+    isNotEmpty
+  ].freeze
+
+  VALUELESS_OPERATORS = %w[isEmpty isNotEmpty].freeze
+
   def validate_requirements_conditional
     requirements.each do |requirement|
       conditional = requirement.input_options["conditional"]
 
       next unless conditional.present?
 
-      if [conditional["when"], conditional["eq"]].any?(&:blank?) ||
+      operator = conditional["operator"] || "isEqual"
+
+      unless VALID_FORMIO_OPERATORS.include?(operator)
+        errors.add(
+          :input_options,
+          "conditional has an unrecognized operator: #{operator}"
+        )
+        break
+      end
+
+      needs_value = !VALUELESS_OPERATORS.include?(operator)
+
+      if conditional["when"].blank? ||
+           (needs_value && conditional["eq"].blank?) ||
            [conditional["show"], conditional["hide"]].all?(&:blank?)
         errors.add(
           :input_options,
-          "conditional must have when and eq, and one of show or hide"
+          "conditional must have when, operator, and one of show or hide (plus eq for value-based operators)"
         )
         break
       end

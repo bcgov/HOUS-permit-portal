@@ -23,6 +23,7 @@ import { useMst } from "../../../setup/root"
 import { EUserRoles } from "../../../types/enums"
 import { RouterLink } from "../../shared/navigation/router-link"
 import { LoggedOutMenuContent } from "./menu-content/logged-out-menu-content"
+import { VersionInfoMenuItem } from "./menu-content/menu-items/version-info-menu-item"
 import { MenuCloseProvider } from "./menu-content/menu-link-item"
 import { ReviewManagerMenuContent } from "./menu-content/review-manager-menu-content"
 import { ReviewerMenuContent } from "./menu-content/reviewer-menu-content"
@@ -68,7 +69,7 @@ const MenuSection = ({ title, children }: IMenuSectionProps) => {
 export const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
   const { t } = useTranslation()
   const location = useLocation()
-  const { sessionStore, userStore } = useMst()
+  const { sessionStore, userStore, siteConfigurationStore } = useMst()
   const { currentUser } = userStore
   const { loggedIn } = sessionStore
   const { isOpen, onOpen, onClose, onToggle } = useDisclosure()
@@ -126,11 +127,13 @@ export const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
           to="/project-readiness-tools/look-up-step-codes-requirements-for-your-project"
           description={t("site.navMenu.projectReadiness.stepCodes.description")}
         />
-        <StaticLinkItem
-          label={t("site.navMenu.projectReadiness.bcBuildingCode.label")}
-          to="/pre-checks"
-          description={t("site.navMenu.projectReadiness.bcBuildingCode.description")}
-        />
+        {siteConfigurationStore.codeComplianceEnabled && (
+          <StaticLinkItem
+            label={t("site.navMenu.projectReadiness.bcBuildingCode.label")}
+            to="/pre-checks"
+            description={t("site.navMenu.projectReadiness.bcBuildingCode.description")}
+          />
+        )}
       </MenuSection>
     </VStack>
   )
@@ -139,6 +142,7 @@ export const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
   const aboutColumn = (
     <VStack align="flex-start" spacing={4} w="full">
       <MenuSection title={t("site.navMenu.sections.about")}>
+        <StaticLinkItem label={t("site.navMenu.about.aboutHub.label")} to="/welcome" />
         <StaticLinkItem
           label={t("site.navMenu.about.participatingCommunities.label")}
           to="/jurisdictions"
@@ -164,7 +168,7 @@ export const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
       return <LoggedOutMenuContent />
     }
 
-    switch (currentUser.role) {
+    switch (currentUser?.role) {
       case EUserRoles.superAdmin:
         return <SuperAdminMenuContent />
 
@@ -232,8 +236,11 @@ export const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
                 <Grid templateColumns={{ base: "1fr", md: "3fr 3fr 2fr" }} gap={8} py={5}>
                   <Box order={{ base: 2, md: 1 }}>{projectReadinessColumn}</Box>
                   <Box order={{ base: 3, md: 2 }}>{aboutColumn}</Box>
-                  <Box order={{ base: 1, md: 3 }}>{renderRightColumnContent()}</Box>
+                  <Box order={{ base: 1, md: 3 }} flexDirection="column">
+                    {renderRightColumnContent()}
+                  </Box>
                 </Grid>
+                <VersionInfoMenuItem />
               </Container>
             </MenuCloseProvider>
           </DrawerBody>

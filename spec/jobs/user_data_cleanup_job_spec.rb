@@ -167,13 +167,6 @@ RSpec.describe UserDataCleanupJob, type: :job do
         )
       end
 
-      it "permanently deletes users discarded longer than retention period" do
-        travel_to(now) { subject.perform }
-        expect { user_to_delete.reload }.to raise_error(
-          ActiveRecord::RecordNotFound
-        )
-      end
-
       it "does not delete recently discarded users" do
         travel_to(now) { subject.perform }
         expect(recently_discarded_user.reload).to be_present

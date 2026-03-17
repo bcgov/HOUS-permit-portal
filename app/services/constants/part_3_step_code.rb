@@ -38,7 +38,7 @@ module Constants
       },
       other: {
         type: :step_code,
-        major_occupancy_type: :office
+        major_occupancy_type: :retail
       },
       mercantile: {
         type: :step_code,
