@@ -14,10 +14,6 @@ class Api::PermitProjectsController < Api::ApplicationController
                 ]
   before_action :set_pinned_projects, only: %i[pinned]
 
-  # TODO: If you create a search concern similar to Api::Concerns::Search::PermitApplications,
-  # include it here for more advanced search parameter handling.
-  # e.g., include Api::Concerns::Search::PermitProjects
-
   skip_after_action :verify_policy_scoped,
                     only: %i[index pinned jurisdiction_options]
   skip_after_action :verify_authorized, only: %i[pinned]

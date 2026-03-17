@@ -104,13 +104,13 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
               value={activeSearchStore.meetingRequestFilter}
               onChange={(val) => activeSearchStore.setMeetingRequestFilter(val)}
               onApply={() => activeSearchStore.search()}
-              badgeCount={4}
+              // badgeCount={4}
             />
             <UnreadFilter
               value={activeSearchStore.unreadFilter}
               onChange={(val) => activeSearchStore.setUnreadFilter(val)}
               onApply={() => activeSearchStore.search()}
-              badgeCount={2}
+              // badgeCount={2}
             />
             <PermitTypeFilter
               value={[...activeSearchStore.permitTypeFilter]}
@@ -217,10 +217,7 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
               <Text color="text.secondary">{t("submissionInbox.columnsViewComingSoon")}</Text>
             </Box>
           ) : viewMode === "projects" ? (
-            <ProjectInboxTable
-              searchStore={permitProjectSearch}
-              projects={[...permitProjectSearch.tablePermitProjects]}
-            />
+            <ProjectInboxTable searchStore={permitProjectSearch} projects={permitProjectSearch.tablePermitProjects} />
           ) : (
             // Applications list view - placeholder until Applications table is built
             <Box w="full" p={8} textAlign="center">

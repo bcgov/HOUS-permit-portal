@@ -1,7 +1,7 @@
 class Api::JurisdictionsController < Api::ApplicationController
   include Api::Concerns::Search::Jurisdictions
   include Api::Concerns::Search::JurisdictionUsers
-  include Api::Concerns::Search::PermitApplications
+  include Api::Concerns::Search::JurisdictionPermitApplications
   include Api::Concerns::Search::JurisdictionPermitProjects
 
   before_action :set_jurisdiction,
@@ -182,13 +182,12 @@ class Api::JurisdictionsController < Api::ApplicationController
   # POST /api/jurisdictions/:id/permit_applications/search
   def search_permit_applications
     authorize @jurisdiction
-    perform_permit_application_search
-    # Results are already authorized by the policy_scope in the search concern
-    authorized_results = @permit_application_search.results
+    perform_jurisdiction_permit_application_search
+    authorized_results = @jurisdiction_permit_application_search.results
     render_success authorized_results,
                    nil,
                    {
-                     meta: page_meta(@permit_application_search),
+                     meta: page_meta(@jurisdiction_permit_application_search),
                      blueprint: PermitApplicationBlueprint,
                      blueprint_opts: {
                        view: :jurisdiction_review_inbox
@@ -200,9 +199,7 @@ class Api::JurisdictionsController < Api::ApplicationController
   def search_permit_projects
     authorize @jurisdiction
     perform_jurisdiction_permit_project_search
-    authorized_results =
-      apply_search_authorization(@jurisdiction_permit_projects)
-    render_success authorized_results,
+    render_success @jurisdiction_permit_projects,
                    nil,
                    {
                      blueprint: PermitProjectBlueprint,

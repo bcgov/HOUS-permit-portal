@@ -1,9 +1,9 @@
-module Api::Concerns::Search::PermitApplications
+module Api::Concerns::Search::JurisdictionPermitApplications
   extend ActiveSupport::Concern
 
-  def perform_permit_application_search
+  def perform_jurisdiction_permit_application_search
     search_conditions = {
-      order: permit_application_order,
+      order: jurisdiction_permit_application_order,
       match: :word_start,
       fields: [
         { number: :text_end },
@@ -14,13 +14,13 @@ module Api::Concerns::Search::PermitApplications
         { status: :word_middle },
         { review_delegatee_name: :word_middle }
       ],
-      where: permit_application_where_clause,
-      page: permit_application_search_params[:page],
+      where: jurisdiction_permit_application_where_clause,
+      page: jurisdiction_permit_application_search_params[:page],
       per_page:
         (
-          if permit_application_search_params[:page]
+          if jurisdiction_permit_application_search_params[:page]
             (
-              permit_application_search_params[:per_page] ||
+              jurisdiction_permit_application_search_params[:per_page] ||
                 Kaminari.config.default_per_page
             )
           else
@@ -30,13 +30,16 @@ module Api::Concerns::Search::PermitApplications
       includes: PermitApplication::SEARCH_INCLUDES,
       scope_results: ->(relation) { policy_scope(relation) }
     }
-    @permit_application_search =
-      PermitApplication.search(permit_application_query, **search_conditions)
+    @jurisdiction_permit_application_search =
+      PermitApplication.search(
+        jurisdiction_permit_application_query,
+        **search_conditions
+      )
   end
 
   private
 
-  def permit_application_search_params
+  def jurisdiction_permit_application_search_params
     params.permit(
       :query,
       :show_archived,
@@ -52,26 +55,24 @@ module Api::Concerns::Search::PermitApplications
     )
   end
 
-  def permit_application_query
-    if permit_application_search_params[:query].present?
-      permit_application_search_params[:query]
+  def jurisdiction_permit_application_query
+    if jurisdiction_permit_application_search_params[:query].present?
+      jurisdiction_permit_application_search_params[:query]
     else
       "*"
     end
   end
 
-  def permit_application_order
-    if (sort = permit_application_search_params[:sort])
+  def jurisdiction_permit_application_order
+    if (sort = jurisdiction_permit_application_search_params[:sort])
       { sort[:field] => { order: sort[:direction], unmapped_type: "long" } }
     else
       { number: { order: :desc, unmapped_type: "long" } }
     end
   end
 
-  def permit_application_where_clause
-    filters = permit_application_search_params[:filters] || {}
-    # Add the submitter ID if the user is a submitter. Necessary even with search auth filtering for consisent pagination
-    # Only add the jurisdiction_id condition if @jurisdiction is present
+  def jurisdiction_permit_application_where_clause
+    filters = jurisdiction_permit_application_search_params[:filters] || {}
     filters[:has_collaborator] = (
       if filters[:has_collaborator] == false
         nil
@@ -79,25 +80,20 @@ module Api::Concerns::Search::PermitApplications
         filters[:has_collaborator]
       end
     )
-    where =
-      if @jurisdiction
-        {
-          jurisdiction_id: @jurisdiction.id,
-          # Overrides status filter, reorder the code if necessary
-          status: %i[newly_submitted resubmitted]
-        }
-      else
-        { user_ids_with_submission_edit_permissions: current_user.id }
-      end
+
+    where = {
+      jurisdiction_id: @jurisdiction.id,
+      status: %i[newly_submitted resubmitted]
+    }
     where[:sandbox_id] = current_sandbox&.id unless current_user.super_admin?
-    where[:discarded] = discarded
+    where[:discarded] = jurisdiction_permit_application_discarded
 
     (filters.to_h || {}).deep_symbolize_keys.compact_blank.merge!(where)
   end
 
-  def discarded
+  def jurisdiction_permit_application_discarded
     ActiveModel::Type::Boolean.new.cast(
-      permit_application_search_params[:show_archived] || false
+      jurisdiction_permit_application_search_params[:show_archived] || false
     )
   end
 end

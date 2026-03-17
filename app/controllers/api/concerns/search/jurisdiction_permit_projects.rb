@@ -34,7 +34,7 @@ module Api::Concerns::Search::JurisdictionPermitProjects
 
     ids = @jurisdiction_permit_project_search.hits.map { |h| h["_id"] }
     loaded =
-      PermitProject
+      policy_scope(PermitProject)
         .with_status_counts
         .includes(:owner, :jurisdiction, permit_applications: :collaborators)
         .where(id: ids)
