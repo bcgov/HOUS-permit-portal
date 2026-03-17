@@ -167,6 +167,9 @@ export const StepCodeStoreModel = types
         const response = yield self.environment.api.deleteStepCode(stepCodeId)
 
         if (response.ok) {
+          if (response.data?.data) {
+            self.mergeUpdate(response.data.data, "stepCodesMap")
+          }
           self.currentStepCode = null
         }
 
