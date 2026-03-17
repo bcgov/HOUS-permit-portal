@@ -1,4 +1,4 @@
-import { Box, Circle, Flex, GridItem, HStack, Tag, Text, VStack } from "@chakra-ui/react"
+import { Box, Flex, HStack, Tag, Text, VStack } from "@chakra-ui/react"
 import { Buildings } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -9,7 +9,6 @@ import { EPermitProjectInboxSortFields, EProjectStatus } from "../../../../types
 import { ISort } from "../../../../types/types"
 import { Paginator } from "../../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../../shared/base/inputs/per-page-select"
-import { ModelSearchInput } from "../../../shared/base/model-search-input"
 import { SharedSpinner } from "../../../shared/base/shared-spinner"
 import { GridHeader } from "../../../shared/grid/grid-header"
 import { SearchGrid } from "../../../shared/grid/search-grid"
@@ -62,23 +61,6 @@ export const ProjectInboxTable = observer(function ProjectInboxTable({ searchSto
       <SearchGrid templateColumns="2fr 1.5fr 1fr 1fr 1fr 1fr">
         <Box display="contents" role="rowgroup">
           <Box display="contents" role="row">
-            <GridItem
-              as={Flex}
-              gridColumn="span 6"
-              p={6}
-              bg="greys.grey10"
-              justifyContent="space-between"
-              align="center"
-            >
-              <Text role="heading" fontWeight="bold">
-                {totalCount != null
-                  ? t("submissionInbox.projectCount", { count: totalCount })
-                  : t("submissionInbox.projects")}
-              </Text>
-              <ModelSearchInput searchModel={searchStore} />
-            </GridItem>
-          </Box>
-          <Box display="contents" role="row">
             {SORT_FIELDS.map((field) => (
               <GridHeader key={field} role="columnheader">
                 <Flex
@@ -111,7 +93,8 @@ export const ProjectInboxTable = observer(function ProjectInboxTable({ searchSto
             <Box key={project.id} className="project-inbox-grid-row" role="row" display="contents">
               <SearchGridItem>
                 <HStack spacing={3}>
-                  <Circle size="8px" bg="theme.blue" flexShrink={0} />
+                  {/* ### SUBMISSION INDEX STUB FEATURE - unread */}
+                  {/* <Circle size="8px" bg="theme.blueActive" flexShrink={0} /> */}
                   <Box p={1.5} borderRadius="sm" bg="greys.grey10" flexShrink={0}>
                     <Buildings size={16} />
                   </Box>
@@ -138,6 +121,7 @@ export const ProjectInboxTable = observer(function ProjectInboxTable({ searchSto
               </SearchGridItem>
 
               <SearchGridItem>
+                {/* ### SUBMISSION INDEX STUB FEATURE - applications count text */}
                 <Text fontSize="sm">
                   {project.totalPermitsCount > 0
                     ? `${project.newlySubmittedCount + project.resubmittedCount} of ${project.totalPermitsCount} received`
@@ -164,8 +148,8 @@ export const ProjectInboxTable = observer(function ProjectInboxTable({ searchSto
               <SearchGridItem>
                 <Tag
                   p={1}
-                  bg={statusColorMap[project.rollupStatus]?.bg || "greys.grey04"}
-                  color={statusColorMap[project.rollupStatus]?.color || "text.secondary"}
+                  bg={statusColorMap[project.status]?.bg || "greys.grey04"}
+                  color={statusColorMap[project.status]?.color || "text.secondary"}
                   fontWeight="bold"
                   border="1px solid"
                   borderColor="border.light"
@@ -175,7 +159,7 @@ export const ProjectInboxTable = observer(function ProjectInboxTable({ searchSto
                   fontSize="xs"
                 >
                   {/* @ts-ignore */}
-                  {t(`permitProject.rollupStatus.${project.rollupStatus}`)}
+                  {t(`submissionInbox.projectStatuses.${project.status}`)}
                 </Tag>
               </SearchGridItem>
             </Box>

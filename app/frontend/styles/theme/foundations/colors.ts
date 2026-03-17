@@ -18,6 +18,7 @@ export const colors = {
     green: {
       100: "#F5FFF8",
     },
+    blueActive: "#0D6EFD",
   },
   background: {
     sandboxBase: "#FFC6CB",

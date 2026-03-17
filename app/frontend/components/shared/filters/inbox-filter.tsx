@@ -112,7 +112,7 @@ export const InboxFilter = observer(function InboxFilter({
             <Text>{title}</Text>
             {badgeCount != null && badgeCount > 0 && (
               <Badge
-                bg="theme.blue"
+                bg="theme.blueActive"
                 color="white"
                 borderRadius="full"
                 px={2}

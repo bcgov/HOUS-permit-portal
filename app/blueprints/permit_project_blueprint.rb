@@ -7,6 +7,7 @@ class PermitProjectBlueprint < Blueprinter::Base
            :pid,
            :number,
            :jurisdiction_disambiguated_name,
+           :status,
            :rollup_status,
            :is_pinned,
            :created_at,
