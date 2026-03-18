@@ -98,7 +98,7 @@ export const ExternalApiKeysIndexScreen = observer(function ExternalApiKeysIndex
           />
         )}
 
-        <SearchGrid templateColumns="repeat(7, 1fr) 85px" pos={"relative"}>
+        <SearchGrid templateColumns="1fr 1fr 1fr 1.2fr 1fr 1fr 1fr 85px" pos={"relative"}>
           <GridHeaders />
 
           {isFetching ? (
@@ -115,8 +115,10 @@ export const ExternalApiKeysIndexScreen = observer(function ExternalApiKeysIndex
                     <ExternalApiKeyStatusTag status={externalApiKey.status} />
                   </SearchGridItem>
                   <SearchGridItem>
-                    {externalApiKey.statusScope && (
+                    {externalApiKey.statusScope ? (
                       <ExternalApiKeySandboxTag statusScope={externalApiKey.statusScope} />
+                    ) : (
+                      t("sandbox.live")
                     )}
                   </SearchGridItem>
                   <SearchGridItem>{format(externalApiKey.createdAt, datefnsTableDateFormat)}</SearchGridItem>
