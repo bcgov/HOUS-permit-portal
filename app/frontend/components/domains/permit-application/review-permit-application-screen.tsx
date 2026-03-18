@@ -169,7 +169,7 @@ export const ReviewPermitApplicationScreen = observer(() => {
                       mb: 0,
                     }}
                     editableInputProps={{
-                      "aria-label": "Edit Template Description",
+                      "aria-label": "Edit Reference Number",
                       bg: "white",
                       color: "text.primary",
                       width: "calc(10ch + 1.5em)", // 10 characters plus padding
@@ -178,7 +178,7 @@ export const ReviewPermitApplicationScreen = observer(() => {
                       saveButtonProps: { variant: "primaryInverse", textContent: t("ui.onlySave") },
                       cancelButtonProps: { variant: "secondaryInverse" },
                     }}
-                    aria-label={"Edit Template Description"}
+                    aria-label={"Edit Reference Number"}
                     onCancel={(previousValue) => onReferenceNumberChange(previousValue)}
                   />
                 </HStack>
