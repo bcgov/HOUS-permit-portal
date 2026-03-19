@@ -77,6 +77,7 @@ class OverheatingCodePdfService
 
     handle_unit_radio_buttons(form)
 
+    form.delete(:NeedAppearances)
     form.create_appearances
     form.flatten
 

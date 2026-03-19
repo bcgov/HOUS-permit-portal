@@ -98,6 +98,14 @@ export const Summary = observer(function Summary() {
           <Text fontSize="xs" color="text.secondary" mt={2}>
             {t("overheatingCode.sections.summary.downloadHint" as const as any)}
           </Text>
+          <CustomMessageBox
+            mt={3}
+            status={EFlashMessageStatus.info}
+            description={t(
+              "overheatingCode.sections.summary.pdfViewerHint" as const as any,
+              "For best results, open the downloaded PDF in a web browser such as Chrome. Some desktop PDF viewers like Adobe Acrobat may not display pre-filled fields correctly."
+            )}
+          />
         </Box>
       </VStack>
     </Box>
