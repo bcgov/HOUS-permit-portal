@@ -78,6 +78,7 @@ class OverheatingCodePdfService
     handle_unit_radio_buttons(form)
 
     form.create_appearances
+    form.flatten
 
     io = StringIO.new
     doc.write(io)
