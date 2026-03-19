@@ -859,6 +859,8 @@ const options = {
               downloadReport: "Download Filled Report (PDF)",
               generating: "Generating PDF…",
               downloadHint: "The report will be generated from the BC-SZCG FormSet template with your data filled in.",
+              pdfViewerHint:
+                "For best results, open the downloaded PDF in a web browser such as Chrome. Some desktop PDF viewers like Adobe Acrobat may not display pre-filled fields correctly.",
             },
             buildingLocation: {
               title: "Building Location",
