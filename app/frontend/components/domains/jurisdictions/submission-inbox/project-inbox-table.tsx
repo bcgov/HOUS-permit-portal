@@ -1,8 +1,9 @@
-import { Box, Flex, HStack, Tag, Text, VStack } from "@chakra-ui/react"
+import { Box, Circle, Flex, HStack, Tag, Text, VStack } from "@chakra-ui/react"
 import { Buildings } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
+import { Link } from "react-router-dom"
 import { IPermitProject } from "../../../../models/permit-project"
 import { IPermitProjectInboxStore } from "../../../../stores/submission-inbox-store"
 import { EPermitProjectInboxSortFields, EProjectStatus } from "../../../../types/enums"
@@ -58,7 +59,15 @@ export const ProjectInboxTable = observer(function ProjectInboxTable({ searchSto
 
   return (
     <VStack w="full" spacing={5}>
-      <SearchGrid templateColumns="2fr 1.5fr 1fr 1fr 1fr 1fr">
+      <SearchGrid
+        templateColumns="2fr 1.5fr 1fr 1fr 1fr 1fr"
+        gridRowClassName="project-inbox-grid-row"
+        sx={{
+          ".project-inbox-grid-row:hover > div": {
+            bg: "greys.grey04",
+          },
+        }}
+      >
         <Box display="contents" role="rowgroup">
           <Box display="contents" role="row">
             {SORT_FIELDS.map((field) => (
@@ -90,11 +99,19 @@ export const ProjectInboxTable = observer(function ProjectInboxTable({ searchSto
           </Flex>
         ) : (
           projects.map((project) => (
-            <Box key={project.id} className="project-inbox-grid-row" role="row" display="contents">
+            <Box
+              key={project.id}
+              as={Link}
+              to={`projects/${project.id}/overview`}
+              className="project-inbox-grid-row"
+              role="row"
+              display="contents"
+              cursor="pointer"
+              _hover={{ textDecoration: "none" }}
+            >
               <SearchGridItem>
                 <HStack spacing={3}>
-                  {/* ### SUBMISSION INDEX STUB FEATURE - unread */}
-                  {/* <Circle size="8px" bg="theme.blueActive" flexShrink={0} /> */}
+                  <Circle size="8px" bg={!project.viewedAt ? "theme.blueActive" : "transparent"} flexShrink={0} />
                   <Box p={1.5} borderRadius="sm" bg="greys.grey10" flexShrink={0}>
                     <Buildings size={16} />
                   </Box>

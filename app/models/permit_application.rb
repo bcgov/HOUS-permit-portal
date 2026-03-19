@@ -81,6 +81,8 @@ class PermitApplication < ApplicationRecord
   after_commit :reindex_permit_project, if: :saved_change_to_status?
   after_commit :broadcast_jurisdiction_count_update,
                if: :status_changed_to_submitted?
+  after_commit :mark_permit_project_as_unviewed,
+               if: :status_changed_to_submitted?
 
   scope :with_submitter_role,
         -> { joins(:submitter).where(users: { role: "submitter" }) }
@@ -837,6 +839,10 @@ class PermitApplication < ApplicationRecord
 
   def reindex_permit_project
     permit_project&.reindex
+  end
+
+  def mark_permit_project_as_unviewed
+    permit_project&.mark_as_unviewed
   end
 
   def jurisdiction_or_permit_project_present

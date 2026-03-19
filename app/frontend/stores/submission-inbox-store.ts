@@ -1,9 +1,7 @@
 import { t } from "i18next"
 import { cast, flow, Instance, types } from "mobx-state-tree"
-import * as R from "ramda"
 import { createSearchModel } from "../lib/create-search-model"
 import { withEnvironment } from "../lib/with-environment"
-import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
 import { PermitApplicationModel } from "../models/permit-application"
 import { PermitProjectModel } from "../models/permit-project"
@@ -22,7 +20,6 @@ import { IPermitApplicationInboxSearchFilters, IPermitProjectInboxSearchFilters,
 export const PermitProjectInboxStoreModel = types
   .compose(
     types.model("PermitProjectInboxStore", {
-      permitProjectMap: types.map(PermitProjectModel),
       tablePermitProjects: types.array(types.reference(PermitProjectModel)),
       permitTypeFilter: types.optional(types.array(types.string), []),
       statusFilter: types.optional(types.array(types.string), []),
@@ -44,7 +41,6 @@ export const PermitProjectInboxStoreModel = types
   )
   .extend(withEnvironment())
   .extend(withRootStore())
-  .extend(withMerge())
   .views((self) => ({
     getSortColumnHeader(field: EPermitProjectInboxSortFields) {
       // @ts-ignore
@@ -52,29 +48,6 @@ export const PermitProjectInboxStoreModel = types
     },
   }))
   .actions((self) => ({
-    __beforeMergeUpdate(permitProject) {
-      if (permitProject.owner && typeof permitProject.owner === "object") {
-        self.rootStore.userStore.mergeUpdate(permitProject.owner, "usersMap")
-      }
-      if (permitProject.permitApplications && Array.isArray(permitProject.permitApplications)) {
-        permitProject.permitApplications.forEach((app) => {
-          if (typeof app === "object") {
-            self.rootStore.permitApplicationStore.mergeUpdate(app, "permitApplicationMap")
-          }
-        })
-      }
-      if (permitProject.jurisdiction) {
-        self.rootStore.jurisdictionStore.mergeUpdate(permitProject.jurisdiction, "jurisdictionMap")
-      }
-      return R.mergeRight(permitProject, {
-        owner: permitProject.owner?.id || null,
-        permitApplications:
-          permitProject.permitApplications?.map((app) => (typeof app === "object" ? app.id : app)) || [],
-        recentPermitApplications:
-          permitProject.recentPermitApplications?.map((app) => (typeof app === "object" ? app.id : app)) || [],
-        jurisdiction: permitProject.jurisdiction?.id,
-      })
-    },
     setTablePermitProjects(projects) {
       self.tablePermitProjects = cast(projects.map((p) => p.id))
     },
@@ -135,7 +108,7 @@ export const PermitProjectInboxStoreModel = types
       const response = yield self.environment.api.fetchJurisdictionPermitProjects(currentJurisdictionId, searchParams)
 
       if (response.ok && response.data) {
-        self.mergeUpdateAll(response.data.data, "permitProjectMap")
+        self.rootStore.permitProjectStore.mergeUpdateAll(response.data.data, "permitProjectMap")
         self.setTablePermitProjects(response.data.data)
         self.setPageFields(response.data.meta, opts)
       }
@@ -169,7 +142,6 @@ export const PermitProjectInboxStoreModel = types
 export const PermitApplicationInboxStoreModel = types
   .compose(
     types.model("PermitApplicationInboxStore", {
-      permitApplicationMap: types.map(PermitApplicationModel),
       tablePermitApplications: types.array(types.reference(PermitApplicationModel)),
       permitTypeFilter: types.optional(types.array(types.string), []),
       statusFilter: types.optional(types.array(types.enumeration(Object.values(EPermitApplicationStatus))), []),
@@ -191,7 +163,6 @@ export const PermitApplicationInboxStoreModel = types
   )
   .extend(withEnvironment())
   .extend(withRootStore())
-  .extend(withMerge())
   .views((self) => ({
     getSortColumnHeader(field: EPermitApplicationInboxSortFields) {
       // @ts-ignore
@@ -199,23 +170,6 @@ export const PermitApplicationInboxStoreModel = types
     },
   }))
   .actions((self) => ({
-    __beforeMergeUpdate(permitApplicationData) {
-      const pad = permitApplicationData
-      pad.sandbox && self.rootStore.sandboxStore.mergeUpdate(pad.sandbox, "sandboxMap")
-      pad.jurisdiction && self.rootStore.jurisdictionStore.mergeUpdate(pad.jurisdiction, "jurisdictionMap")
-      pad.submitter && self.rootStore.userStore.mergeUpdate(pad.submitter, "usersMap")
-      pad.templateVersion && self.rootStore.templateVersionStore.mergeUpdate(pad.templateVersion, "templateVersionMap")
-      pad.publishedTemplateVersion &&
-        self.rootStore.templateVersionStore.mergeUpdate(pad.publishedTemplateVersion, "templateVersionMap")
-      return R.mergeRight(pad, {
-        sandbox: pad.sandbox?.id,
-        jurisdiction: pad.jurisdiction?.id,
-        submitter: pad.submitter?.id,
-        templateVersion: pad.templateVersion?.id,
-        publishedTemplateVersion: pad.publishedTemplateVersion?.id,
-        stepCode: pad.stepCode?.id,
-      })
-    },
     setTablePermitApplications(permitApplications) {
       self.tablePermitApplications = cast(permitApplications.map((pa) => pa.id))
     },
@@ -280,7 +234,7 @@ export const PermitApplicationInboxStoreModel = types
       )
 
       if (response.ok) {
-        self.mergeUpdateAll(response.data.data, "permitApplicationMap")
+        self.rootStore.permitApplicationStore.mergeUpdateAll(response.data.data, "permitApplicationMap")
         self.setTablePermitApplications(response.data.data)
         self.setPageFields(response.data.meta, opts)
       }

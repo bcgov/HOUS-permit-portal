@@ -306,6 +306,14 @@ export class Api {
     return this.client.delete<ApiResponse<IPermitProject[]>>(`/permit_projects/${id}/unpin`)
   }
 
+  async viewPermitProject(id: string) {
+    return this.client.post<ApiResponse<IPermitProject>>(`/permit_projects/${id}/mark_as_viewed`)
+  }
+
+  async unviewPermitProject(id: string) {
+    return this.client.post<ApiResponse<IPermitProject>>(`/permit_projects/${id}/mark_as_unviewed`)
+  }
+
   async fetchSubmissionCollaboratorOptions(id: string) {
     return this.client.get<IOptionResponse>(`/permit_projects/${id}/submission_collaborator_options`)
   }

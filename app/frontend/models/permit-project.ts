@@ -36,6 +36,7 @@ export const PermitProjectModel = types
     ownerId: types.maybeNull(types.string),
     latitude: types.maybeNull(types.string), // From decimal in backend
     longitude: types.maybeNull(types.string), // From decimal in backend
+    viewedAt: types.maybeNull(types.Date),
     parcelGeometry: types.maybeNull(types.frozen<IParcelGeometry>()),
   })
   .extend(withEnvironment())
@@ -117,6 +118,20 @@ export const PermitProjectModel = types
         return response.data.data
       }
       return []
+    }),
+    markAsViewed: flow(function* () {
+      const response = yield* toGenerator(self.environment.api.viewPermitProject(self.id))
+      if (response.ok) {
+        self.rootStore.permitProjectStore.mergeUpdate(response.data.data, "permitProjectMap")
+      }
+      return response.ok
+    }),
+    markAsUnviewed: flow(function* () {
+      const response = yield* toGenerator(self.environment.api.unviewPermitProject(self.id))
+      if (response.ok) {
+        self.rootStore.permitProjectStore.mergeUpdate(response.data.data, "permitProjectMap")
+      }
+      return response.ok
     }),
   }))
   .actions((self) => ({

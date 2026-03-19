@@ -11,6 +11,8 @@ class Api::PermitProjectsController < Api::ApplicationController
                   search_permit_applications
                   submission_collaborator_options
                   create_permit_applications
+                  mark_as_viewed
+                  mark_as_unviewed
                 ]
   before_action :set_pinned_projects, only: %i[pinned]
 
@@ -34,11 +36,34 @@ class Api::PermitProjectsController < Api::ApplicationController
 
   def show
     authorize @permit_project
+    view = current_user.review_staff? ? :inbox_extended : :extended
     render_success @permit_project,
                    nil,
                    {
                      blueprint: PermitProjectBlueprint,
-                     blueprint_opts: blueprint_options(view: :extended)
+                     blueprint_opts: blueprint_options(view: view)
+                   }
+  end
+
+  def mark_as_viewed
+    authorize @permit_project
+    @permit_project.update_viewed_at
+    render_success @permit_project,
+                   nil,
+                   {
+                     blueprint: PermitProjectBlueprint,
+                     blueprint_opts: blueprint_options(view: :base)
+                   }
+  end
+
+  def mark_as_unviewed
+    authorize @permit_project
+    @permit_project.mark_as_unviewed
+    render_success @permit_project,
+                   nil,
+                   {
+                     blueprint: PermitProjectBlueprint,
+                     blueprint_opts: blueprint_options(view: :base)
                    }
   end
 
