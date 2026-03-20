@@ -1214,8 +1214,7 @@ Thank you,
             fromFilter: "From date",
             toFilter: "To date",
             empty: "No activity found",
-            description:
-              "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+            description: "What’s happened on your project and its permit applications.",
           },
           permits: {
             title: "Permits",
