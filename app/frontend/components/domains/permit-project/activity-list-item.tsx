@@ -14,21 +14,16 @@ export const ActivityListItem = observer(({ projectAudit }: IActivityListItemPro
   const { createdAt, description, permitName, permitApplicationId } = projectAudit
 
   return (
-    <Flex align="flex-start" justify="space-between" p={3} gap={4} minH={20}>
+    <Flex align="flex-start" justify="space-between" py={3} px={4} gap={4} minH={20}>
       <VStack align="stretch" spacing={3} flex={1} minW={0}>
         <Text>{description}</Text>
         {permitName && (
-          <RouterLink
-            to={permitApplicationId ? `/permit-applications/${permitApplicationId}/edit` : undefined}
-            fontSize="sm"
-          >
+          <RouterLink to={permitApplicationId ? `/permit-applications/${permitApplicationId}/edit` : undefined}>
             {permitName}
           </RouterLink>
         )}
       </VStack>
-      <Text variant="secondary" fontSize="sm">
-        {format(createdAt, datefnsTableDateTimeFormat)}
-      </Text>
+      <Text variant="secondary">{format(createdAt, datefnsTableDateTimeFormat)}</Text>
     </Flex>
   )
 })
