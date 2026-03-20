@@ -120,12 +120,12 @@ class PermitCollaboration < ApplicationRecord
         (
           if delegatee?
             I18n.t(
-              "notification.permit_collaboration.#{collaboration_type.to_s}_delegatee_collaboration_unassignment_notification",
+              "notification.permit_collaboration.#{collaboration_type}_delegatee_collaboration_unassignment_notification",
               number: permit_application.number
             )
           else
             I18n.t(
-              "notification.permit_collaboration.#{collaboration_type.to_s}_assignee_collaboration_unassignment_notification",
+              "notification.permit_collaboration.#{collaboration_type}_assignee_collaboration_unassignment_notification",
               number: permit_application.number,
               requirement_block_name: assigned_requirement_block_name
             )
@@ -215,6 +215,10 @@ class PermitCollaboration < ApplicationRecord
   end
 
   def set_default_collaboration_type
+    # `after_initialize` runs whenever this record is instantiated
+    #  For persisted records we already have `collaboration_type` from the DB
+    return if persisted? && collaboration_type.present?
+
     if collaborator && collaborator.collaboratorable_type == "Jurisdiction"
       self.collaboration_type = :review
     elsif collaborator && collaborator.collaboratorable_type == "User"
