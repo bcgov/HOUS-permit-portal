@@ -12,7 +12,9 @@ RSpec.describe ProjectAuditFormatters::PermitApplicationFormatter do
       PermitApplication,
       nickname: "My Permit",
       submitter: submitter,
-      jurisdiction: jurisdiction
+      jurisdiction: jurisdiction,
+      status: nil,
+      submitted?: false
     )
   end
 
@@ -31,6 +33,24 @@ RSpec.describe ProjectAuditFormatters::PermitApplicationFormatter do
 
       it "returns creation message with permit name" do
         expect(formatter.description).to eq("Alice created permit My Permit")
+      end
+    end
+
+    context 'when action is "create" and audited_changes includes a status of newly_submitted' do
+      let(:audit) do
+        build_audit_double(
+          user: user,
+          auditable: auditable,
+          auditable_type: "PermitApplication",
+          action: "create",
+          audited_changes: {
+            "status" => [0, PermitApplication.statuses["newly_submitted"]]
+          }
+        )
+      end
+
+      it "returns submission message" do
+        expect(formatter.description).to eq("Alice submitted the application")
       end
     end
 

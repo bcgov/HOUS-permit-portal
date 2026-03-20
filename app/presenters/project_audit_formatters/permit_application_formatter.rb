@@ -5,6 +5,14 @@ module ProjectAuditFormatters
 
       case audit.action
       when "create"
+        # Distinguish between a new permit application and a submitted permit application.
+        if changes.key?("status")
+          return format_status_change
+        elsif permit_application&.submitted?
+          # Fallback to the inferred status if the status was not present in the audited changes.
+          return format_status_change_from_inferred_status
+        end
+
         "#{user_display} created permit #{permit_name}"
       when "update"
         if discard?
@@ -34,7 +42,17 @@ module ProjectAuditFormatters
 
     def format_status_change
       new_status = Array(changes["status"]).last
-      case new_status.to_s
+      format_status_change_for(new_status)
+    end
+
+    def format_status_change_from_inferred_status
+      format_status_change_for(permit_application&.status)
+    end
+
+    def format_status_change_for(status_value)
+      status_str = status_value.to_s
+
+      case status_str
       when PermitApplication.statuses["newly_submitted"].to_s
         "#{user_display} submitted the application"
       when PermitApplication.statuses["resubmitted"].to_s
