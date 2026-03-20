@@ -171,16 +171,28 @@ RSpec.describe ProjectAuditPolicy do
             :permit_application,
             permit_project: project,
             submitter: owner,
-            jurisdiction: jurisdiction
+            jurisdiction: jurisdiction,
+            template_version:
+              create(
+                :template_version,
+                requirement_blocks_json: {
+                  "block-1" => {
+                    "name" => "Foundation"
+                  }
+                }
+              )
           )
         collab =
           create(:collaborator, user: create(:user), collaboratorable: owner)
         submission_collab =
           create(
             :permit_collaboration,
+            :assignee,
             permit_application: pa,
             collaborator: collab,
-            collaboration_type: :submission
+            collaborator_type: :assignee,
+            collaboration_type: :submission,
+            assigned_requirement_block_id: "block-1"
           )
         result = resolved_scope_for(user)
         audit =
@@ -190,6 +202,36 @@ RSpec.describe ProjectAuditPolicy do
           )
         expect(audit).to be_present
         expect(result).not_to include(audit)
+      end
+
+      it "includes designated submitter (delegatee) submission collaboration audits" do
+        pa =
+          create(
+            :permit_application,
+            permit_project: project,
+            submitter: owner,
+            jurisdiction: jurisdiction
+          )
+        collab =
+          create(:collaborator, user: create(:user), collaboratorable: owner)
+        submission_collab =
+          create(
+            :permit_collaboration,
+            permit_application: pa,
+            collaborator: collab,
+            collaboration_type: :submission,
+            collaborator_type: :delegatee
+          )
+
+        result = resolved_scope_for(user)
+
+        audit =
+          ApplicationAudit.find_by(
+            auditable_type: "PermitCollaboration",
+            auditable_id: submission_collab.id
+          )
+        expect(audit).to be_present
+        expect(result).to include(audit)
       end
 
       it "excludes permit block status audits" do
@@ -238,7 +280,7 @@ RSpec.describe ProjectAuditPolicy do
     end
 
     context "when user has neither submitter nor review_staff role but has project access" do
-      it "includes only PermitProject and PermitApplication audits (excludes collaborations and block status)" do
+      it "includes designated submitter collaborations (excludes other collaborations and block status)" do
         # Technical support user who owns a project (gives them project access)
         other_role_user = create(:user, role: :technical_support)
         other_project =
@@ -281,14 +323,12 @@ RSpec.describe ProjectAuditPolicy do
 
         # Should see project and permit application audits only
         audit_types = result.map(&:auditable_type).uniq
-        expect(audit_types).to contain_exactly(
+        expect(audit_types).to include(
           "PermitProject",
-          "PermitApplication"
-        )
-        # Should not see PermitCollaboration or PermitBlockStatus
-        expect(result.map(&:auditable_type)).not_to include(
+          "PermitApplication",
           "PermitCollaboration"
         )
+
         expect(result.map(&:auditable_type)).not_to include("PermitBlockStatus")
       end
     end

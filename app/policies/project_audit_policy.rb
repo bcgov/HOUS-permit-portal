@@ -42,26 +42,47 @@ class ProjectAuditPolicy < ApplicationPolicy
       return relation if full_audit_access?
 
       if user.submitter?
-        # Submitters see All + submission collaborations + block status (hide review collaborations)
+        # Hide:
+        # - review collaborations
         relation.where.not(
           auditable_type: "PermitCollaboration",
           auditable_id:
             PermitCollaboration.where(collaboration_type: :review).select(:id)
         )
       elsif user.review_staff?
-        # Review staff see All + review collaborations (hide submission collaborations and block status)
+        # Hide:
+        # - block status audits
+        # - submission collaboration audits for non-delegatees (assignees)
         relation
           .where.not(
             auditable_type: "PermitCollaboration",
             auditable_id:
-              PermitCollaboration.where(collaboration_type: :submission).select(
-                :id
-              )
+              PermitCollaboration
+                .where(collaboration_type: :submission)
+                .where.not(collaborator_type: :delegatee)
+                .select(:id)
           )
           .where.not(auditable_type: "PermitBlockStatus")
       else
-        # Other roles (e.g. no matching role): only All events
-        relation.where(auditable_type: %w[PermitProject PermitApplication])
+        # Hide:
+        # - block status audits
+        # - review collaborations
+        # - submission collaborations for non-delegatees (assignees)
+        relation
+          .where.not(auditable_type: "PermitBlockStatus")
+          .where.not(
+            auditable_type: "PermitCollaboration",
+            auditable_id:
+              PermitCollaboration.where(collaboration_type: :review).select(:id)
+          )
+          .where.not(
+            auditable_type: "PermitCollaboration",
+            auditable_id:
+              PermitCollaboration
+                .where(collaboration_type: :submission)
+                .where.not(collaborator_type: :delegatee)
+                .select(:id)
+          )
       end
     end
 
