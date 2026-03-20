@@ -37,7 +37,7 @@ export const ActivityTabPanelContent = observer(({ permitProject }: IProps) => {
 
   return (
     <Flex direction="column" flex={1} bg="greys.white" p={10}>
-      <Box as="section" mb={5}>
+      <Box as="section" mb={6}>
         <HStack align="center" spacing={4}>
           <TrendUp size={32} />
           <Heading as="h2" size="lg" mb={0}>
@@ -45,9 +45,20 @@ export const ActivityTabPanelContent = observer(({ permitProject }: IProps) => {
           </Heading>
         </HStack>
       </Box>
-      <Flex direction="column" gap={4} w="full">
+      <Text color="text.secondary" mb={8}>
+        {t("permitProject.activity.description")}
+      </Text>
+      <Flex direction="column" w="full">
         <Flex justifyContent="space-between" align="flex-end" flexWrap="wrap" gap={4}>
-          <HStack align="flex-end" spacing={4} flex={1} justifyContent="space-between">
+          <HStack
+            align="flex-end"
+            spacing={4}
+            flex={1}
+            justifyContent="space-between"
+            borderBottom="1px solid"
+            borderColor="border.light"
+            pb={5}
+          >
             <AuditDateRangeFilter searchModel={projectAuditStore} />
             <Flex
               as="button"
