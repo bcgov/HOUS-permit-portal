@@ -5,6 +5,7 @@ module Api::Concerns::Search::ProjectAudits
     relation =
       ApplicationAudit
         .for_permit_project(@permit_project.id)
+        .includes(:user, :auditable)
         .then do |scope|
           policy_scope(scope, policy_scope_class: ProjectAuditPolicy::Scope)
         end
@@ -12,6 +13,9 @@ module Api::Concerns::Search::ProjectAudits
     relation = apply_project_audit_date_filter(relation)
     relation = apply_project_audit_order(relation)
     relation = relation.page(project_audit_page).per(project_audit_per_page)
+
+    audits = relation.to_a
+    ApplicationAudit::ActivityFeedPreloader.call(audits)
 
     @search = relation
   end
