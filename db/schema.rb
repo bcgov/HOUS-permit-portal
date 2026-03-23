@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_03_10_000000) do
+ActiveRecord::Schema[7.2].define(version: 2026_03_17_000000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -597,6 +597,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_03_10_000000) do
     t.string "last_name_snapshot"
     t.datetime "orphaned_at"
     t.jsonb "parcel_geometry"
+    t.integer "status", default: 0, null: false
     t.index ["jurisdiction_id"], name: "index_permit_projects_on_jurisdiction_id"
     t.index ["number"], name: "index_permit_projects_on_number", unique: true
     t.index ["owner_id"], name: "index_permit_projects_on_owner_id"

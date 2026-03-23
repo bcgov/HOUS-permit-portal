@@ -1,5 +1,4 @@
 class Api::PermitApplicationsController < Api::ApplicationController
-  include Api::Concerns::Search::PermitApplications
   include StepCodeParamsConcern
 
   before_action :set_permit_application,

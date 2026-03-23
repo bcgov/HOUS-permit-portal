@@ -2,7 +2,7 @@ import { t } from "i18next"
 import { flow, Instance, toGenerator, types } from "mobx-state-tree"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
-import { EPermitProjectRollupStatus } from "../types/enums"
+import { EPermitProjectRollupStatus, EProjectStatus } from "../types/enums"
 import { IParcelGeometry, IProjectDocument } from "../types/types"
 import { JurisdictionModel } from "./jurisdiction"
 import { IPermitApplication, PermitApplicationModel } from "./permit-application"
@@ -16,6 +16,7 @@ export const PermitProjectModel = types
     number: types.maybeNull(types.string),
     jurisdictionDisambiguatedName: types.string,
     rollupStatus: types.enumeration(Object.values(EPermitProjectRollupStatus)),
+    status: types.enumeration(Object.values(EProjectStatus)),
     tablePermitApplications: types.maybeNull(types.array(types.reference(types.late(() => PermitApplicationModel)))),
     recentPermitApplications: types.maybeNull(types.array(types.reference(types.late(() => PermitApplicationModel)))),
     projectDocuments: types.maybeNull(types.array(types.frozen<IProjectDocument>())), // Changed to IProjectDocument

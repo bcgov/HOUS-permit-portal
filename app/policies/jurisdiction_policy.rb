@@ -44,6 +44,11 @@ class JurisdictionPolicy < ApplicationPolicy
     update?
   end
 
+  def search_permit_projects?
+    # note that this applies to the jurisdiction, not the permit projects
+    update?
+  end
+
   def sandboxes?
     update?
   end

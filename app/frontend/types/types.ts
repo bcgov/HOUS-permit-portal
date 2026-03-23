@@ -590,7 +590,24 @@ export interface IPermitProjectSearchFilters {
   rollupStatus?: EPermitProjectRollupStatus[]
   requirementTemplateIds?: string[]
   jurisdictionId?: string[]
-  // Add other specific filters if needed, e.g., status, submitterId
+}
+
+export interface IPermitProjectInboxSearchFilters {
+  permitType?: string[]
+  status?: string[]
+  unread?: string
+  meetingRequest?: string
+  daysInQueue?: string[]
+  assigned?: string[]
+}
+
+export interface IPermitApplicationInboxSearchFilters {
+  permitType?: string[]
+  status?: EPermitApplicationStatus[]
+  unread?: string
+  meetingRequest?: string
+  daysInQueue?: string[]
+  assigned?: string[]
 }
 
 export interface IProjectAuditSearchFilters {

@@ -1,15 +1,25 @@
 class PermitProjectPolicy < ApplicationPolicy
-  # Scope class for Pundit scopes
   class Scope < Scope
     def resolve
-      # Projects the user owns OR collaborates on
-      scope
-        .left_joins(:collaborators)
-        .where(
-          "permit_projects.owner_id = :uid OR collaborators.user_id = :uid",
-          uid: user.id
+      collaborator_exists_sql = <<-SQL.squish
+        EXISTS (
+          SELECT 1 FROM collaborators c
+          JOIN permit_collaborations pc ON pc.collaborator_id = c.id
+          JOIN permit_applications pa ON pa.id = pc.permit_application_id
+          WHERE pa.permit_project_id = permit_projects.id
+            AND c.user_id = :uid
         )
-        .distinct
+      SQL
+
+      clauses = ["permit_projects.owner_id = :uid", collaborator_exists_sql]
+      values = { uid: user.id }
+
+      if user.review_staff?
+        clauses << "permit_projects.jurisdiction_id IN (:jur_ids)"
+        values[:jur_ids] = user.jurisdictions.pluck(:id)
+      end
+
+      scope.where(clauses.map { |c| "(#{c})" }.join(" OR "), values).distinct
     end
   end
 

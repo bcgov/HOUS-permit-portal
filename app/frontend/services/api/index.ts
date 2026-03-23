@@ -337,6 +337,13 @@ export class Api {
     )
   }
 
+  async fetchJurisdictionPermitProjects(jurisdictionId: string, params?: TSearchParams<any, any>) {
+    return this.client.post<ApiResponse<IPermitProject[]>>(
+      `/jurisdictions/${jurisdictionId}/permit_projects/search`,
+      params
+    )
+  }
+
   async createPermitApplication(params: TCreatePermitApplicationFormData) {
     return this.client.post<ApiResponse<IPermitApplication>>("/permit_applications", { permitApplication: params })
   }

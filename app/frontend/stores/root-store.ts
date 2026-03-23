@@ -29,6 +29,7 @@ import { ISandboxStore, SandboxStoreModel } from "./sandbox-store"
 import { ISessionStore, SessionStoreModel } from "./session-store"
 import { ISiteConfigurationStore, SiteConfigurationStoreModel } from "./site-configuration-store"
 import { IStepCodeStore, StepCodeStoreModel } from "./step-code-store"
+import { ISubmissionInboxStore, SubmissionInboxStoreModel } from "./submission-inbox-store"
 import { ITemplateVersionStoreModel, TemplateVersionStoreModel } from "./template-version-store"
 import { IUIStore, UIStoreModel } from "./ui-store"
 import { IUserStore, UserStoreModel } from "./user-store"
@@ -60,6 +61,7 @@ export const RootStoreModel = types
     contactStore: types.optional(ContactStoreModel, {}),
     notificationStore: types.optional(NotificationStoreModel, {}),
     sandboxStore: types.optional(SandboxStoreModel, {}),
+    submissionInboxStore: types.optional(SubmissionInboxStoreModel, {}),
   })
   .extend(withEnvironment())
   .volatile((self) => ({
@@ -88,6 +90,11 @@ export const RootStoreModel = types
       } else {
         localStorage.removeItem("SandboxStore")
       }
+      yield makePersistable(self.submissionInboxStore, {
+        name: "SubmissionInboxStore",
+        properties: ["viewMode", "displayMode"],
+        storage: localStorage,
+      })
       protect(self)
     }),
     subscribeToUserChannel() {
@@ -141,6 +148,7 @@ export interface IRootStore extends IStateTreeNode {
   notificationStore: INotificationStore
   collaboratorStore: ICollaboratorStore
   sandboxStore: ISandboxStore
+  submissionInboxStore: ISubmissionInboxStore
   subscribeToUserChannel: () => void
   disconnectUserChannel: () => void
   loadLocalPersistedData: () => void

@@ -7,6 +7,18 @@ class PermitProject < ApplicationRecord
   include Discard::Model
   include PublicRecordable
 
+  enum status: {
+         inquiry: 0,
+         intake: 1,
+         on_hold: 2,
+         in_review: 3,
+         awaiting_payment: 4,
+         active: 5,
+         inspections: 6,
+         occupancy: 7,
+         closed: 8
+       }
+
   belongs_to :owner, class_name: "User", optional: true
   public_recordable user_association: :owner
   belongs_to :jurisdiction, optional: false # Direct association to Jurisdiction
@@ -115,6 +127,7 @@ class PermitProject < ApplicationRecord
       created_at: created_at,
       updated_at: updated_at,
       discarded: discarded_at.present?,
+      status: status,
       rollup_status: rollup_status,
       forcasted_completion_date: forcasted_completion_date,
       requirement_template_ids:
