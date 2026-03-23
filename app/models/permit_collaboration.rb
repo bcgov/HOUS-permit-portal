@@ -8,8 +8,8 @@ class PermitCollaboration < ApplicationRecord
   before_validation :set_default_collaboration_type, on: :create
 
   after_initialize :set_default_collaboration_type
-  after_save :reindex_permit_application
-  after_destroy :send_unassignment_notification, :reindex_permit_application
+  after_commit :reindex_permit_project
+  after_destroy :send_unassignment_notification
 
   validates :permit_application_id,
             uniqueness: {
@@ -139,9 +139,8 @@ class PermitCollaboration < ApplicationRecord
 
   private
 
-  def reindex_permit_application
-    # This is now handled by the touch: true option
-    # permit_application.reindex if saved_change_to_collaborator_id?
+  def reindex_permit_project
+    permit_application.permit_project&.reindex
   end
 
   def validate_author_not_collaborator
