@@ -18,6 +18,7 @@ import { observer } from "mobx-react-lite"
 import React, { ReactNode, useEffect, useRef } from "react"
 import { Trans, useTranslation } from "react-i18next"
 import { useMst } from "../../../setup/root"
+import { HighlightedLayout } from "../../shared/base/highlighted-layout"
 import { RouterLink } from "../../shared/navigation/router-link"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { StepCodeLookupTool } from "../project-readiness-tools/step-code-lookup-tool"
@@ -50,17 +51,7 @@ export const LandingScreen = observer(({}: ILandingScreenProps) => {
       >
         <Flex direction="column" justify="center" bgColor="theme.blueShadedLight" w="full" height="full">
           <Container maxW="container.lg" px={8}>
-            <Flex
-              direction="column"
-              p={8}
-              maxW="468px"
-              bg="theme.blueShadedDark"
-              color="greys.white"
-              borderRadius="sm"
-              borderLeft="8px solid"
-              borderColor="theme.yellow"
-              gap={2}
-            >
+            <HighlightedLayout p={8} maxW="468px" gap={2}>
               <Heading as="h1" fontSize="2xl">
                 {t("landing.title")}
               </Heading>
@@ -76,7 +67,7 @@ export const LandingScreen = observer(({}: ILandingScreenProps) => {
                     })
                   : t("landing.permitApp")}
               </RouterLinkButton>
-            </Flex>
+            </HighlightedLayout>
           </Container>
         </Flex>
       </Flex>
