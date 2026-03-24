@@ -15,7 +15,7 @@ module Api::Concerns::Search::ProjectAudits
     relation = relation.page(project_audit_page).per(project_audit_per_page)
 
     audits = relation.to_a
-    ApplicationAudit::ActivityFeedPreloader.call(audits)
+    ApplicationAudit.preload_activity_feed(audits)
 
     @search = relation
   end

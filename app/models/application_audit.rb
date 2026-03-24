@@ -1,4 +1,6 @@
 class ApplicationAudit < Audited::Audit
+  include ActivityFeedPreloader
+
   scope :for_permit_project,
         ->(project_id) do
           pa_subquery =

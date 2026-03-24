@@ -1,24 +1,17 @@
-# Eager loading polymorphic associations for audits
-class ApplicationAudit
-  class ActivityFeedPreloader
-    def self.call(audits)
-      new(audits).call
-    end
+module ActivityFeedPreloader
+  extend ActiveSupport::Concern
 
-    def initialize(audits)
-      @audits = audits
-    end
-
-    def call
-      preload_permit_collaborations
-      preload_permit_block_statuses
+  class_methods do
+    def preload_activity_feed(audits)
+      preload_permit_collaborations(audits)
+      preload_permit_block_statuses(audits)
     end
 
     private
 
-    def preload_permit_collaborations
+    def preload_permit_collaborations(audits)
       records =
-        @audits
+        audits
           .select { |a| a.auditable_type == "PermitCollaboration" }
           .map(&:auditable)
           .compact
@@ -33,9 +26,9 @@ class ApplicationAudit
       ).call
     end
 
-    def preload_permit_block_statuses
+    def preload_permit_block_statuses(audits)
       records =
-        @audits
+        audits
           .select { |a| a.auditable_type == "PermitBlockStatus" }
           .map(&:auditable)
           .compact
