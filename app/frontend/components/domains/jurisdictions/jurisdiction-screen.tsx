@@ -30,9 +30,10 @@ import { IJurisdiction } from "../../../models/jurisdiction"
 import { useMst } from "../../../setup/root"
 import { EFlashMessageStatus } from "../../../types/enums"
 import { IContact, TLatLngTuple } from "../../../types/types"
-import { BlueTitleBar } from "../../shared/base/blue-title-bar"
 import { CustomMessageBox } from "../../shared/base/custom-message-box"
 import { ErrorScreen } from "../../shared/base/error-screen"
+import { HeroBanner } from "../../shared/base/hero-banner"
+import { HighlightedLayout } from "../../shared/base/highlighted-layout"
 import { LoadingScreen } from "../../shared/base/loading-screen"
 import { EditorWithPreview } from "../../shared/editor/custom-extensions/editor-with-preview"
 import { SafeTipTapDisplay } from "../../shared/editor/safe-tiptap-display"
@@ -110,7 +111,15 @@ export const JurisdictionScreen = observer(() => {
 
   return (
     <Flex as="main" direction="column" w="full" bg="greys.white" pb="24">
-      <BlueTitleBar title={qualifiedName} />
+      <HeroBanner containerProps={{ pl: 8, pr: 18, py: 16 }}>
+        <HighlightedLayout p={8} maxW={{ md: "calc((200% - var(--chakra-space-6)) / 3)", base: "full" }}>
+          <Heading as="h1" fontSize="2xl">
+            {qualifiedName}
+          </Heading>
+          <Text fontSize="lg">{t("jurisdiction.heroBannerDescription", { jurisdictionName: qualifiedName })}</Text>
+        </HighlightedLayout>
+        {/* TODO: Add link to LG website */}
+      </HeroBanner>
       <Show below="md">
         <JurisdictionMap
           mapPosition={mapPositionWatch}
