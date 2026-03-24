@@ -49,6 +49,7 @@ import {
   ECollaboratorType,
   EEarlyAccessRequirementTemplateSortFields,
   EJurisdictionSortFields,
+  EPermitApplicationInboxSortFields,
   EPermitApplicationSortFields,
   EPermitBlockStatus,
   EPermitClassificationType,
@@ -67,6 +68,7 @@ import {
   IJurisdictionFilters,
   IJurisdictionSearchFilters,
   IPart9ChecklistSelectOptions,
+  IPermitApplicationInboxSearchFilters,
   IPermitApplicationSearchFilters,
   IPermitProjectSearchFilters,
   ITemplateVersionDiff,
@@ -333,7 +335,7 @@ export class Api {
 
   async fetchJurisdictionPermitApplications(
     jurisdictionId,
-    params?: TSearchParams<EPermitApplicationSortFields, IPermitApplicationSearchFilters>
+    params?: TSearchParams<EPermitApplicationInboxSortFields, IPermitApplicationInboxSearchFilters>
   ) {
     return this.client.post<IJurisdictionPermitApplicationResponse>(
       `/jurisdictions/${jurisdictionId}/permit_applications/search`,

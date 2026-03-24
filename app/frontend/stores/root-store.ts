@@ -90,7 +90,7 @@ export const RootStoreModel = types
       }
       yield makePersistable(self.submissionInboxStore, {
         name: "SubmissionInboxStore",
-        properties: ["viewMode", "displayMode"],
+        properties: ["viewMode", "displayMode", "collapsedColumns"],
         storage: localStorage,
       })
       protect(self)

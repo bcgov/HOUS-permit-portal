@@ -15,7 +15,10 @@ export const PermitProjectModel = types
     pid: types.maybeNull(types.string),
     number: types.maybeNull(types.string),
     jurisdictionDisambiguatedName: types.string,
-    rollupStatus: types.enumeration(Object.values(EPermitProjectRollupStatus)),
+    sortedApplicationStatuses: types.optional(
+      types.array(types.frozen<{ status: string; nickname: string | null }>()),
+      []
+    ),
     state: types.enumeration(Object.values(EProjectState)),
     tablePermitApplications: types.maybeNull(types.array(types.reference(types.late(() => PermitApplicationModel)))),
     recentPermitApplications: types.maybeNull(types.array(types.reference(types.late(() => PermitApplicationModel)))),
@@ -44,6 +47,12 @@ export const PermitProjectModel = types
   })
   .extend(withEnvironment())
   .extend(withRootStore())
+  .views((self) => ({
+    get rollupStatus(): EPermitProjectRollupStatus {
+      const first = self.sortedApplicationStatuses[0]
+      return (first?.status as EPermitProjectRollupStatus) ?? EPermitProjectRollupStatus.empty
+    },
+  }))
   .views((self) => ({
     get shortAddress() {
       return self.fullAddress?.split(",")[0]

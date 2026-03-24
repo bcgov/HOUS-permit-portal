@@ -23,6 +23,7 @@ export const PermitProjectInboxStoreModel = types
   .compose(
     types.model("PermitProjectInboxStore", {
       tablePermitProjects: types.array(types.reference(PermitProjectModel)),
+      stateCounts: types.optional(types.frozen<Record<string, number>>(), {}),
       permitTypeFilter: types.optional(types.array(types.string), []),
       statusFilter: types.optional(types.array(types.string), []),
       unreadFilter: types.optional(types.enumeration(Object.values(ERadioFilterValue)), ERadioFilterValue.include),
@@ -52,6 +53,9 @@ export const PermitProjectInboxStoreModel = types
   .actions((self) => ({
     setTablePermitProjects(projects) {
       self.tablePermitProjects = cast(projects.map((p) => p.id))
+    },
+    setStateCounts(counts: Record<string, number>) {
+      self.stateCounts = counts
     },
     setPermitTypeFilter(value: string[]) {
       self.permitTypeFilter = cast(value)
@@ -113,6 +117,9 @@ export const PermitProjectInboxStoreModel = types
         self.rootStore.permitProjectStore.mergeUpdateAll(response.data.data, "permitProjectMap")
         self.setTablePermitProjects(response.data.data)
         self.setPageFields(response.data.meta, opts)
+        if (response.data.meta?.stateCounts) {
+          self.setStateCounts(response.data.meta.stateCounts)
+        }
       }
       return response.ok
     }),
@@ -271,6 +278,7 @@ export const SubmissionInboxStoreModel = types
   .model("SubmissionInboxStore", {
     viewMode: types.optional(types.enumeration(Object.values(EInboxViewMode)), EInboxViewMode.projects),
     displayMode: types.optional(types.enumeration(Object.values(EInboxDisplayMode)), EInboxDisplayMode.list),
+    collapsedColumns: types.optional(types.array(types.string), []),
     permitProjectSearch: types.optional(PermitProjectInboxStoreModel, {}),
     permitApplicationSearch: types.optional(PermitApplicationInboxStoreModel, {}),
   })
@@ -280,6 +288,14 @@ export const SubmissionInboxStoreModel = types
     },
     setDisplayMode(mode: EInboxDisplayMode) {
       self.displayMode = mode
+    },
+    toggleColumnCollapsed(columnState: string) {
+      const idx = self.collapsedColumns.indexOf(columnState)
+      if (idx >= 0) {
+        self.collapsedColumns.splice(idx, 1)
+      } else {
+        self.collapsedColumns.push(columnState)
+      }
     },
   }))
 
