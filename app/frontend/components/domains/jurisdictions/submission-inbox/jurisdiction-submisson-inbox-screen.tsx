@@ -100,17 +100,17 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
 
           {/* Filter bar */}
           <HStack spacing={2} flexWrap="wrap">
-            <MeetingRequestsFilter
-              value={activeSearchStore.meetingRequestFilter}
-              onChange={(val) => activeSearchStore.setMeetingRequestFilter(val)}
-              onApply={() => activeSearchStore.search()}
-              // badgeCount={4}
-            />
+            {viewMode === "projects" && (
+              <MeetingRequestsFilter
+                value={activeSearchStore.meetingRequestFilter}
+                onChange={(val) => activeSearchStore.setMeetingRequestFilter(val)}
+                onApply={() => activeSearchStore.search()}
+              />
+            )}
             <UnreadFilter
               value={activeSearchStore.unreadFilter}
               onChange={(val) => activeSearchStore.setUnreadFilter(val)}
               onApply={() => activeSearchStore.search()}
-              // badgeCount={2}
             />
             <PermitTypeFilter
               value={[...activeSearchStore.permitTypeFilter]}
@@ -142,24 +142,28 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
                 }}
               />
             )}
-            <DaysInQueueFilter
-              value={[...activeSearchStore.daysInQueueFilter]}
-              onChange={(val) => activeSearchStore.setDaysInQueueFilter(val)}
-              onApply={() => activeSearchStore.search()}
-              onClear={() => {
-                activeSearchStore.setDaysInQueueFilter([])
-                activeSearchStore.search()
-              }}
-            />
-            <AssignedFilter
-              value={[...activeSearchStore.assignedFilter]}
-              onChange={(val) => activeSearchStore.setAssignedFilter(val)}
-              onApply={() => activeSearchStore.search()}
-              onClear={() => {
-                activeSearchStore.setAssignedFilter([])
-                activeSearchStore.search()
-              }}
-            />
+            {viewMode === "projects" && (
+              <>
+                <DaysInQueueFilter
+                  value={[...activeSearchStore.daysInQueueFilter]}
+                  onChange={(val) => activeSearchStore.setDaysInQueueFilter(val)}
+                  onApply={() => activeSearchStore.search()}
+                  onClear={() => {
+                    activeSearchStore.setDaysInQueueFilter([])
+                    activeSearchStore.search()
+                  }}
+                />
+                <AssignedFilter
+                  value={[...activeSearchStore.assignedFilter]}
+                  onChange={(val) => activeSearchStore.setAssignedFilter(val)}
+                  onApply={() => activeSearchStore.search()}
+                  onClear={() => {
+                    activeSearchStore.setAssignedFilter([])
+                    activeSearchStore.search()
+                  }}
+                />
+              </>
+            )}
             <Button variant="link" size="sm" onClick={() => activeSearchStore.resetFilters()}>
               {t("submissionInbox.clearAllFilters")}
             </Button>

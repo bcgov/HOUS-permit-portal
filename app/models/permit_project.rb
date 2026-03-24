@@ -114,6 +114,14 @@ class PermitProject < ApplicationRecord
       )
   end
 
+  def update_viewed_at
+    update(viewed_at: Time.current)
+  end
+
+  def mark_as_unviewed
+    update(viewed_at: nil)
+  end
+
   def search_data
     {
       title: title,
@@ -129,6 +137,7 @@ class PermitProject < ApplicationRecord
       discarded: discarded_at.present?,
       status: status,
       rollup_status: rollup_status,
+      viewed_at: viewed_at,
       forcasted_completion_date: forcasted_completion_date,
       requirement_template_ids:
         permit_applications

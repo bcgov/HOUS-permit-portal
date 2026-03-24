@@ -12,6 +12,7 @@ class PermitProjectBlueprint < Blueprinter::Base
            :is_pinned,
            :created_at,
            :updated_at,
+           :viewed_at,
            :owner_id,
            :latitude,
            :longitude,
@@ -58,6 +59,26 @@ class PermitProjectBlueprint < Blueprinter::Base
     association :project_documents,
                 blueprint: ProjectDocumentBlueprint do |permit_project, options|
       permit_project.project_documents(options[:current_user])
+    end
+    association :jurisdiction, blueprint: JurisdictionBlueprint, view: :base
+  end
+
+  view :inbox_extended do
+    include_view :base
+
+    field :is_fully_loaded do |_permit_project, _options|
+      true
+    end
+
+    association :permit_applications,
+                blueprint: PermitApplicationBlueprint,
+                view: :project_base do |permit_project, _options|
+      permit_project.permit_applications.kept.select(&:submitted?)
+    end
+    association :project_documents,
+                blueprint:
+                  ProjectDocumentBlueprint do |permit_project, _options|
+      permit_project.association(:project_documents).reader
     end
     association :jurisdiction, blueprint: JurisdictionBlueprint, view: :base
   end

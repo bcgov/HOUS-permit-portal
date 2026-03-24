@@ -31,7 +31,7 @@ module Api::Concerns::Search::JurisdictionPermitProjects
         jurisdiction_permit_project_query,
         **search_conditions
       )
-
+    # binding.pry
     ids = @jurisdiction_permit_project_search.hits.map { |h| h["_id"] }
     loaded =
       policy_scope(PermitProject)
@@ -86,9 +86,9 @@ module Api::Concerns::Search::JurisdictionPermitProjects
     and_conditions << { jurisdiction_id: @jurisdiction.id }
     and_conditions << { discarded: false }
 
-    if !current_user.super_admin?
-      and_conditions << { sandbox_id: current_sandbox&.id }
-    end
+    # if !current_user.super_admin?
+    #   and_conditions << { sandbox_id: current_sandbox&.id }
+    # end
 
     # ### SUBMISSION INDEX STUB FEATURE - permit_type filter
     permit_types = search_filters.delete(:permit_type)
@@ -98,7 +98,14 @@ module Api::Concerns::Search::JurisdictionPermitProjects
     statuses = search_filters.delete(:status)
     and_conditions << { rollup_status: statuses } if statuses.present?
 
-    # ### SUBMISSION INDEX STUB FEATURE - unread, meeting_request, days_in_queue, assigned
+    unread = search_filters.delete(:unread)
+    if unread == "only_show"
+      and_conditions << { viewed_at: nil }
+    elsif unread == "hide"
+      and_conditions << { _not: { viewed_at: nil } }
+    end
+
+    # ### SUBMISSION INDEX STUB FEATURE - meeting_request, days_in_queue, assigned
     # These filters are stubs and will be implemented when the spec is finalized.
 
     { _and: and_conditions }

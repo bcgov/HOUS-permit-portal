@@ -34,9 +34,7 @@ class PermitProjectPolicy < ApplicationPolicy
 
   # This is for authorizing a specific project instance (e.g., in a show action).
   def show?
-    # updating to allow collaborators to see projects
-    # user_is_owner?
-    user_is_owner_or_collaborator?
+    user_is_owner_or_collaborator? || user_is_review_staff_for_jurisdiction?
   end
 
   def create?
@@ -61,6 +59,14 @@ class PermitProjectPolicy < ApplicationPolicy
 
   def search_permit_applications?
     user_is_owner_or_collaborator?
+  end
+
+  def mark_as_viewed?
+    user_is_review_staff_for_jurisdiction?
+  end
+
+  def mark_as_unviewed?
+    user_is_review_staff_for_jurisdiction?
   end
 
   # Allow bulk creation of permit applications under a project
@@ -91,6 +97,10 @@ class PermitProjectPolicy < ApplicationPolicy
     record.permit_applications.any? do |app|
       app.collaborators.any? { |collaborator| collaborator.user_id == user.id }
     end
+  end
+
+  def user_is_review_staff_for_jurisdiction?
+    user&.review_staff? && user.member_of?(record.jurisdiction_id)
   end
 
   # user_context is still useful if you need to check policies of associated items for more granular permissions.
