@@ -77,6 +77,10 @@ class OverheatingCodePdfService
 
     handle_unit_radio_buttons(form)
 
+    form.delete(:NeedAppearances)
+    form.create_appearances(force: true)
+    form.flatten
+
     io = StringIO.new
     doc.write(io)
     io.string
