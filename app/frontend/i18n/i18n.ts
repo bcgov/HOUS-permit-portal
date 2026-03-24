@@ -1032,6 +1032,8 @@ const options = {
           lat: "Latitude",
           lng: "Longitude",
           title: "Local housing permits",
+          heroBannerDescription:
+            "Jurisdiction description: {{jurisdictionName}} provides guidance, services, and regulatory oversight for residents and businesses within its municipal boundary.",
           notEnabled: "Permit application submissions are temporarily unavailable for this jurisdiction.",
           checklist: "Checklist",
           lookOut: "Things to look out for",
