@@ -314,6 +314,12 @@ export class Api {
     return this.client.post<ApiResponse<IPermitProject>>(`/permit_projects/${id}/mark_as_unviewed`)
   }
 
+  async transitionPermitProjectState(id: string, targetState: string) {
+    return this.client.post<ApiResponse<IPermitProject>>(`/permit_projects/${id}/transition_state`, {
+      targetState,
+    })
+  }
+
   async fetchSubmissionCollaboratorOptions(id: string) {
     return this.client.get<IOptionResponse>(`/permit_projects/${id}/submission_collaborator_options`)
   }

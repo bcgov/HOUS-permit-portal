@@ -669,6 +669,12 @@ en:
       unpin_error:
         title: Error
         message: "There was an error unpinning the project"
+      transition_success:
+        title: ""
+        message: "Project state updated successfully"
+      invalid_transition:
+        title: Error
+        message: "This state transition is not allowed"
     permit_collaboration:
       destroy_success:
         title: ""

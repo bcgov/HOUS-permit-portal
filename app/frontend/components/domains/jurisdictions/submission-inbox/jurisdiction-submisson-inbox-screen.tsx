@@ -7,6 +7,7 @@ import { useJurisdiction } from "../../../../hooks/resources/use-jurisdiction"
 import { usePermitClassificationsLoad } from "../../../../hooks/resources/use-permit-classifications-load"
 import { useSearch } from "../../../../hooks/use-search"
 import { useMst } from "../../../../setup/root"
+import { EInboxDisplayMode, EInboxViewMode } from "../../../../types/enums"
 import { CalloutBanner } from "../../../shared/base/callout-banner"
 import { ErrorScreen } from "../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../shared/base/loading-screen"
@@ -20,6 +21,7 @@ import {
   UnreadFilter,
 } from "./filters"
 import { ProjectInboxTable } from "./project-inbox-table"
+import { ProjectKanbanBoard } from "./project-kanban-board"
 
 export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionSubmissionInbox() {
   const { t } = useTranslation()
@@ -31,7 +33,7 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
     submissionInboxStore
   const { currentSandboxId } = sandboxStore
 
-  const activeSearchStore = viewMode === "projects" ? permitProjectSearch : permitApplicationSearch
+  const activeSearchStore = viewMode === EInboxViewMode.projects ? permitProjectSearch : permitApplicationSearch
 
   useSearch(activeSearchStore, [currentJurisdiction?.id, JSON.stringify(currentSandboxId), viewMode])
 
@@ -100,7 +102,7 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
 
           {/* Filter bar */}
           <HStack spacing={2} flexWrap="wrap">
-            {viewMode === "projects" && (
+            {viewMode === EInboxViewMode.projects && (
               <MeetingRequestsFilter
                 value={activeSearchStore.meetingRequestFilter}
                 onChange={(val) => activeSearchStore.setMeetingRequestFilter(val)}
@@ -121,7 +123,7 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
                 activeSearchStore.search()
               }}
             />
-            {viewMode === "projects" ? (
+            {viewMode === EInboxViewMode.projects ? (
               <ProjectStatusFilter
                 value={[...activeSearchStore.statusFilter]}
                 onChange={(val) => activeSearchStore.setStatusFilter(val as any)}
@@ -142,7 +144,7 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
                 }}
               />
             )}
-            {viewMode === "projects" && (
+            {viewMode === EInboxViewMode.projects && (
               <>
                 <DaysInQueueFilter
                   value={[...activeSearchStore.daysInQueueFilter]}
@@ -173,18 +175,18 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
           <HStack spacing={4}>
             <ButtonGroup isAttached variant="outline" size="sm">
               <Button
-                onClick={() => setViewMode("projects")}
-                bg={viewMode === "projects" ? "white" : undefined}
-                fontWeight={viewMode === "projects" ? "bold" : "normal"}
+                onClick={() => setViewMode(EInboxViewMode.projects)}
+                bg={viewMode === EInboxViewMode.projects ? "white" : undefined}
+                fontWeight={viewMode === EInboxViewMode.projects ? "bold" : "normal"}
                 borderColor="border.light"
                 leftIcon={<Icon as={Stack} />}
               >
                 {t("submissionInbox.projects")}
               </Button>
               <Button
-                onClick={() => setViewMode("applications")}
-                bg={viewMode === "applications" ? "white" : undefined}
-                fontWeight={viewMode === "applications" ? "bold" : "normal"}
+                onClick={() => setViewMode(EInboxViewMode.applications)}
+                bg={viewMode === EInboxViewMode.applications ? "white" : undefined}
+                fontWeight={viewMode === EInboxViewMode.applications ? "bold" : "normal"}
                 borderColor="border.light"
                 leftIcon={<Icon as={ListBullets} />}
               >
@@ -194,18 +196,18 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
 
             <ButtonGroup isAttached variant="outline" size="sm">
               <Button
-                onClick={() => setDisplayMode("list")}
-                bg={displayMode === "list" ? "white" : undefined}
-                fontWeight={displayMode === "list" ? "bold" : "normal"}
+                onClick={() => setDisplayMode(EInboxDisplayMode.list)}
+                bg={displayMode === EInboxDisplayMode.list ? "white" : undefined}
+                fontWeight={displayMode === EInboxDisplayMode.list ? "bold" : "normal"}
                 borderColor="border.light"
                 leftIcon={<Icon as={List} />}
               >
                 {t("submissionInbox.list")}
               </Button>
               <Button
-                onClick={() => setDisplayMode("columns")}
-                bg={displayMode === "columns" ? "white" : undefined}
-                fontWeight={displayMode === "columns" ? "bold" : "normal"}
+                onClick={() => setDisplayMode(EInboxDisplayMode.columns)}
+                bg={displayMode === EInboxDisplayMode.columns ? "white" : undefined}
+                fontWeight={displayMode === EInboxDisplayMode.columns ? "bold" : "normal"}
                 borderColor="border.light"
                 leftIcon={<Icon as={Columns} />}
               >
@@ -215,12 +217,9 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
           </HStack>
 
           {/* Content */}
-          {displayMode === "columns" ? (
-            // ### SUBMISSION INDEX STUB FEATURE
-            <Box w="full" p={8} textAlign="center">
-              <Text color="text.secondary">{t("submissionInbox.columnsViewComingSoon")}</Text>
-            </Box>
-          ) : viewMode === "projects" ? (
+          {displayMode === EInboxDisplayMode.columns ? (
+            <ProjectKanbanBoard />
+          ) : viewMode === EInboxViewMode.projects ? (
             <ProjectInboxTable searchStore={permitProjectSearch} projects={permitProjectSearch.tablePermitProjects} />
           ) : (
             // Applications list view - placeholder until Applications table is built

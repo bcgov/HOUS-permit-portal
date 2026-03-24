@@ -4,18 +4,7 @@ class PermitProject < ApplicationRecord
 
   include Discard::Model
   include PublicRecordable
-
-  enum status: {
-         inquiry: 0,
-         intake: 1,
-         on_hold: 2,
-         in_review: 3,
-         awaiting_payment: 4,
-         active: 5,
-         inspections: 6,
-         occupancy: 7,
-         closed: 8
-       }
+  include PermitProjectState
 
   belongs_to :owner, class_name: "User", optional: true
   public_recordable user_association: :owner
@@ -47,6 +36,7 @@ class PermitProject < ApplicationRecord
               "(SELECT COUNT(*) FROM permit_applications pa WHERE pa.permit_project_id = permit_projects.id AND pa.discarded_at IS NULL) AS total_permits_count, " +
               "(SELECT COUNT(*) FROM permit_applications pa WHERE pa.permit_project_id = permit_projects.id AND pa.status = 0 AND pa.discarded_at IS NULL) AS new_draft_count, " +
               "(SELECT COUNT(*) FROM permit_applications pa WHERE pa.permit_project_id = permit_projects.id AND pa.status = 1 AND pa.discarded_at IS NULL) AS newly_submitted_count, " +
+              "(SELECT COUNT(*) FROM permit_applications pa WHERE pa.permit_project_id = permit_projects.id AND pa.status = 2 AND pa.discarded_at IS NULL) AS in_review_count, " +
               "(SELECT COUNT(*) FROM permit_applications pa WHERE pa.permit_project_id = permit_projects.id AND pa.status = 3 AND pa.discarded_at IS NULL) AS revisions_requested_count, " +
               "(SELECT COUNT(*) FROM permit_applications pa WHERE pa.permit_project_id = permit_projects.id AND pa.status = 4 AND pa.discarded_at IS NULL) AS resubmitted_count, " +
               "(SELECT COUNT(*) FROM permit_applications pa WHERE pa.permit_project_id = permit_projects.id AND pa.status = 5 AND pa.discarded_at IS NULL) AS approved_count"
@@ -69,6 +59,11 @@ class PermitProject < ApplicationRecord
   def newly_submitted_count
     self[:newly_submitted_count] ||
       permit_applications.kept.where(status: :newly_submitted).count
+  end
+
+  def in_review_count
+    self[:in_review_count] ||
+      permit_applications.kept.where(status: :in_review).count
   end
 
   def revisions_requested_count
@@ -103,13 +98,7 @@ class PermitProject < ApplicationRecord
 
   def approved_count
     self[:approved_count] ||
-      (
-        begin
-          permit_applications.kept.where(status: :approved).count
-        rescue StandardError
-          0
-        end
-      )
+      permit_applications.kept.where(status: :approved).count
   end
 
   def update_viewed_at
@@ -133,7 +122,7 @@ class PermitProject < ApplicationRecord
       created_at: created_at,
       updated_at: updated_at,
       discarded: discarded_at.present?,
-      status: status,
+      state: state,
       rollup_status: rollup_status,
       viewed_at: viewed_at,
       forcasted_completion_date: forcasted_completion_date,
@@ -147,6 +136,7 @@ class PermitProject < ApplicationRecord
       new_draft_count: permit_applications.kept.where(status: :new_draft).count,
       newly_submitted_count:
         permit_applications.kept.where(status: :newly_submitted).count,
+      in_review_count: permit_applications.kept.where(status: :in_review).count,
       revisions_requested_count:
         permit_applications.kept.where(status: :revisions_requested).count,
       resubmitted_count:
@@ -164,12 +154,6 @@ class PermitProject < ApplicationRecord
 
   # TODO: Re-evaluate and re-implement search_data based on primary_project_item
   # and the possibility of multiple items of different types in the future.
-
-  def rollup_status
-    return "empty" if permit_applications.kept.blank?
-
-    permit_applications.kept.max_by(&:pertinence_score).status
-  end
 
   def forcasted_completion_date
     # Example implementation, to be defined by user

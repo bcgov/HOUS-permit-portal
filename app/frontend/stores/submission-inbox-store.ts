@@ -6,6 +6,8 @@ import { withRootStore } from "../lib/with-root-store"
 import { PermitApplicationModel } from "../models/permit-application"
 import { PermitProjectModel } from "../models/permit-project"
 import {
+  EInboxDisplayMode,
+  EInboxViewMode,
   EPermitApplicationInboxSortFields,
   EPermitApplicationStatus,
   EPermitProjectInboxSortFields,
@@ -267,16 +269,16 @@ export const PermitApplicationInboxStoreModel = types
 
 export const SubmissionInboxStoreModel = types
   .model("SubmissionInboxStore", {
-    viewMode: types.optional(types.enumeration(["projects", "applications"]), "projects"),
-    displayMode: types.optional(types.enumeration(["list", "columns"]), "list"),
+    viewMode: types.optional(types.enumeration(Object.values(EInboxViewMode)), EInboxViewMode.projects),
+    displayMode: types.optional(types.enumeration(Object.values(EInboxDisplayMode)), EInboxDisplayMode.list),
     permitProjectSearch: types.optional(PermitProjectInboxStoreModel, {}),
     permitApplicationSearch: types.optional(PermitApplicationInboxStoreModel, {}),
   })
   .actions((self) => ({
-    setViewMode(mode: "projects" | "applications") {
+    setViewMode(mode: EInboxViewMode) {
       self.viewMode = mode
     },
-    setDisplayMode(mode: "list" | "columns") {
+    setDisplayMode(mode: EInboxDisplayMode) {
       self.displayMode = mode
     },
   }))

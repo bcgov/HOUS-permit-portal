@@ -487,4 +487,63 @@ end
 
 puts "Seeding Permit Projects from Permit Applications..."
 PermitProjectSeederService.call
+
+# ── Showcase project states & permit application statuses ──
+puts "Distributing projects across kanban states and setting permit application statuses..."
+
+north_van_projects = PermitProject.where(jurisdiction: north_van).to_a.shuffle
+
+if north_van_projects.size >= 10
+  state_distribution = [
+    # [project_state, [ [pa_index, pa_status], ... ]]
+    [:queued, [[:newly_submitted], [:new_draft]]],
+    [:queued, [[:resubmitted], [:newly_submitted]]],
+    [:queued, [[:revisions_requested]]],
+    [:in_progress, [[:in_review], [:in_review], [:newly_submitted]]],
+    [:in_progress, [[:revisions_requested], [:in_review], [:approved]]],
+    [:ready, [[:approved], [:approved]]],
+    [:permit_issued, [[:issued], [:issued]]],
+    [:permit_issued, [[:approved], [:issued]]],
+    [:active, [[:issued], [:issued], [:issued]]],
+    [:complete, [[:issued]]]
+  ]
+
+  state_distribution.each_with_index do |(target_state, pa_statuses), idx|
+    project = north_van_projects[idx]
+    next unless project
+
+    project.update_column(:state, PermitProject.states[target_state])
+
+    kept_apps = project.permit_applications.kept.to_a
+    pa_statuses.each_with_index do |pa_status, pa_idx|
+      pa = kept_apps[pa_idx]
+      next unless pa
+
+      pa.update_column(:status, PermitApplication.statuses[pa_status.first])
+    end
+  end
+
+  # Put one project on hold (waiting) with mixed statuses
+  if north_van_projects[10]
+    project = north_van_projects[10]
+    project.update_column(:state, PermitProject.states[:waiting])
+    kept_apps = project.permit_applications.kept.to_a
+    kept_apps[0]&.update_column(:status, PermitApplication.statuses[:in_review])
+    kept_apps[1]&.update_column(
+      :status,
+      PermitApplication.statuses[:newly_submitted]
+    )
+  end
+
+  # Close one project with a withdrawn application
+  if north_van_projects[11]
+    project = north_van_projects[11]
+    project.update_column(:state, PermitProject.states[:closed])
+    kept_apps = project.permit_applications.kept.to_a
+    kept_apps[0]&.update_column(:status, PermitApplication.statuses[:withdrawn])
+  end
+
+  puts "  ✓ Distributed #{[state_distribution.size + 2, north_van_projects.size].min} projects across kanban states"
+end
+
 PermitProject.reindex

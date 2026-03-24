@@ -1,7 +1,7 @@
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
-import { EProjectStatus } from "../../../../../types/enums"
+import { EProjectState } from "../../../../../types/enums"
 import { IOption } from "../../../../../types/types"
 import { InboxFilter } from "../../../../shared/filters/inbox-filter"
 
@@ -20,7 +20,7 @@ export const ProjectStatusFilter = observer(function ProjectStatusFilter({
 }: IProps) {
   const { t } = useTranslation()
 
-  const options: IOption[] = Object.values(EProjectStatus).map((status) => ({
+  const options: IOption[] = Object.values(EProjectState).map((status) => ({
     value: status,
     // @ts-ignore
     label: t(`submissionInbox.projectStatuses.${status}`),

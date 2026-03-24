@@ -89,7 +89,9 @@ class PermitApplication < ApplicationRecord
 
   scope :unviewed,
         -> do
-          where(status: :submitted, viewed_at: nil).order(submitted_at: :asc)
+          where(status: submitted_statuses, viewed_at: nil).order(
+            submitted_at: :asc
+          )
         end
 
   COMPLETION_SECTION_KEY = "section-completion-key"
@@ -468,13 +470,11 @@ class PermitApplication < ApplicationRecord
   end
 
   def send_submitted_webhook
-    return unless submitted?
+    return unless intake?
 
     jurisdiction
       .active_external_api_keys
-      .where.not(
-        webhook_url: [nil, ""]
-      ) # Only send webhooks to keys with a webhook URL
+      .where.not(webhook_url: [nil, ""])
       .each do |external_api_key|
         PermitWebhookJob.perform_async(
           external_api_key.id,
@@ -648,7 +648,7 @@ class PermitApplication < ApplicationRecord
           "jurisdictions.name AS jurisdiction_name",
           "requirement_templates.id AS requirement_template_id",
           "COUNT(CASE WHEN permit_applications.status IN (0, 3) THEN 1 END) AS draft_count",
-          "COUNT(CASE WHEN permit_applications.status IN (1, 4) THEN 1 END) AS submitted_count",
+          "COUNT(CASE WHEN permit_applications.status IN (1, 2, 4) THEN 1 END) AS submitted_count",
           "AVG(
                 CASE
                   WHEN sv_min.min_submission_created_at IS NOT NULL THEN EXTRACT(EPOCH FROM (sv_min.min_submission_created_at - permit_applications.created_at))
@@ -825,7 +825,7 @@ class PermitApplication < ApplicationRecord
   end
 
   def status_changed_to_submitted?
-    saved_change_to_status? && (newly_submitted? || resubmitted?)
+    saved_change_to_status? && intake?
   end
 
   def reindex_jurisdiction_permit_application_size

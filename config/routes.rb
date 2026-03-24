@@ -227,6 +227,7 @@ Rails.application.routes.draw do
         get :submission_collaborator_options
         post :mark_as_viewed
         post :mark_as_unviewed
+        post :transition_state
       end
     end
 

@@ -2,7 +2,7 @@ import { t } from "i18next"
 import { flow, Instance, toGenerator, types } from "mobx-state-tree"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
-import { EPermitProjectRollupStatus, EProjectStatus } from "../types/enums"
+import { EPermitProjectRollupStatus, EProjectState } from "../types/enums"
 import { IParcelGeometry, IProjectDocument } from "../types/types"
 import { JurisdictionModel } from "./jurisdiction"
 import { IPermitApplication, PermitApplicationModel } from "./permit-application"
@@ -16,7 +16,7 @@ export const PermitProjectModel = types
     number: types.maybeNull(types.string),
     jurisdictionDisambiguatedName: types.string,
     rollupStatus: types.enumeration(Object.values(EPermitProjectRollupStatus)),
-    status: types.enumeration(Object.values(EProjectStatus)),
+    state: types.enumeration(Object.values(EProjectState)),
     tablePermitApplications: types.maybeNull(types.array(types.reference(types.late(() => PermitApplicationModel)))),
     recentPermitApplications: types.maybeNull(types.array(types.reference(types.late(() => PermitApplicationModel)))),
     projectDocuments: types.maybeNull(types.array(types.frozen<IProjectDocument>())), // Changed to IProjectDocument
@@ -26,10 +26,13 @@ export const PermitProjectModel = types
     totalPermitsCount: types.optional(types.number, 0),
     newDraftCount: types.optional(types.number, 0),
     newlySubmittedCount: types.optional(types.number, 0),
+    inReviewCount: types.optional(types.number, 0),
     resubmittedCount: types.optional(types.number, 0),
     revisionsRequestedCount: types.optional(types.number, 0),
     approvedCount: types.optional(types.number, 0),
     jurisdiction: types.maybeNull(types.reference(types.late(() => JurisdictionModel))),
+    flagList: types.optional(types.array(types.string), []),
+    allowedManualTransitions: types.optional(types.array(types.string), []),
     hasOutdatedDraftApplications: types.maybeNull(types.boolean),
     isFullyLoaded: types.optional(types.boolean, false),
     ownerName: types.maybeNull(types.string),
@@ -132,6 +135,13 @@ export const PermitProjectModel = types
         self.rootStore.permitProjectStore.mergeUpdate(response.data.data, "permitProjectMap")
       }
       return response.ok
+    }),
+    transitionState: flow(function* (targetState: string) {
+      const response = yield* toGenerator(self.environment.api.transitionPermitProjectState(self.id, targetState))
+      if (response.ok) {
+        self.rootStore.permitProjectStore.mergeUpdate(response.data.data, "permitProjectMap")
+      }
+      return response
     }),
   }))
   .actions((self) => ({

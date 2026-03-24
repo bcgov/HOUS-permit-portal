@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next"
 import { Link } from "react-router-dom"
 import { IPermitProject } from "../../../../models/permit-project"
 import { IPermitProjectInboxStore } from "../../../../stores/submission-inbox-store"
-import { EPermitProjectInboxSortFields, EProjectStatus } from "../../../../types/enums"
+import { EPermitProjectInboxSortFields, EProjectState } from "../../../../types/enums"
 import { ISort } from "../../../../types/types"
 import { Paginator } from "../../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../../shared/base/inputs/per-page-select"
@@ -27,19 +27,19 @@ const SORT_FIELDS = [
   EPermitProjectInboxSortFields.applications,
   EPermitProjectInboxSortFields.daysInQueue,
   EPermitProjectInboxSortFields.assigned,
-  EPermitProjectInboxSortFields.status,
+  EPermitProjectInboxSortFields.state,
 ]
 
 const statusColorMap: Record<string, { bg: string; color: string }> = {
-  [EProjectStatus.inquiry]: { bg: "theme.blueLight", color: "text.primary" },
-  [EProjectStatus.intake]: { bg: "theme.blueLight", color: "text.primary" },
-  [EProjectStatus.onHold]: { bg: "theme.yellow", color: "text.primary" },
-  [EProjectStatus.inReview]: { bg: "theme.yellow", color: "text.primary" },
-  [EProjectStatus.awaitingPayment]: { bg: "theme.yellow", color: "text.primary" },
-  [EProjectStatus.active]: { bg: "semantic.successLight", color: "semantic.success" },
-  [EProjectStatus.inspections]: { bg: "semantic.successLight", color: "semantic.success" },
-  [EProjectStatus.occupancy]: { bg: "semantic.successLight", color: "semantic.success" },
-  [EProjectStatus.closed]: { bg: "greys.grey04", color: "text.secondary" },
+  [EProjectState.draft]: { bg: "greys.grey04", color: "text.secondary" },
+  [EProjectState.queued]: { bg: "theme.blueLight", color: "text.primary" },
+  [EProjectState.waiting]: { bg: "theme.yellow", color: "text.primary" },
+  [EProjectState.inProgress]: { bg: "theme.yellow", color: "text.primary" },
+  [EProjectState.ready]: { bg: "semantic.successLight", color: "semantic.success" },
+  [EProjectState.permitIssued]: { bg: "semantic.successLight", color: "semantic.success" },
+  [EProjectState.active]: { bg: "semantic.successLight", color: "semantic.success" },
+  [EProjectState.complete]: { bg: "semantic.successLight", color: "semantic.success" },
+  [EProjectState.closed]: { bg: "greys.grey04", color: "text.secondary" },
 }
 
 export const ProjectInboxTable = observer(function ProjectInboxTable({ searchStore, projects }: IProps) {
@@ -165,8 +165,8 @@ export const ProjectInboxTable = observer(function ProjectInboxTable({ searchSto
               <SearchGridItem>
                 <Tag
                   p={1}
-                  bg={statusColorMap[project.status]?.bg || "greys.grey04"}
-                  color={statusColorMap[project.status]?.color || "text.secondary"}
+                  bg={statusColorMap[project.state]?.bg || "greys.grey04"}
+                  color={statusColorMap[project.state]?.color || "text.secondary"}
                   fontWeight="bold"
                   border="1px solid"
                   borderColor="border.light"
@@ -176,7 +176,7 @@ export const ProjectInboxTable = observer(function ProjectInboxTable({ searchSto
                   fontSize="xs"
                 >
                   {/* @ts-ignore */}
-                  {t(`submissionInbox.projectStatuses.${project.status}`)}
+                  {t(`submissionInbox.projectStatuses.${project.state}`)}
                 </Tag>
               </SearchGridItem>
             </Box>
