@@ -31,7 +31,7 @@ export const ExternalApiKeySandboxTag = ({ statusScope }: IExternalApiKeySandbox
       <HStack>
         <CubeFocus />
         {statusScope}
-        <Text>{t(`requirementTemplate.status.${statusScope}`)}</Text>
+        <Text>{t(`sandbox.scopeLabels.${statusScope}`)}</Text>
       </HStack>
     </Tag>
   )

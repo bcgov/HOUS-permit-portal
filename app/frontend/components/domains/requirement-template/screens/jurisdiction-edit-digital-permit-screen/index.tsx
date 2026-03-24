@@ -263,7 +263,7 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
             )}
             <ButtonGroup>
               <BrowserSearchPrompt color="text.primary" />
-              {currentSandbox && (
+              {currentSandbox && templateVersion.isPublished && (
                 <ConfirmationModal
                   promptHeader={t("sandbox.exportChanges")}
                   promptMessage={

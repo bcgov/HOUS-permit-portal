@@ -98,6 +98,11 @@ const resolveComponentDisplay = (component: any, value: any): string => {
   }
 }
 
+const normalizeMultiLabel = (multi: string) => {
+  if (!multi) return multi
+  return multi.replace(/^Contact_(\d+)$/i, "Row_$1").replace(/^Contact\s+(\d+)$/i, "Row_$1")
+}
+
 export function exportPermitApplicationCsv(permitApplication: IPermitApplication) {
   const formJson = (permitApplication as any)?.formJson
   const submissionData = (permitApplication as any)?.submissionData?.data || {}
@@ -110,14 +115,26 @@ export function exportPermitApplicationCsv(permitApplication: IPermitApplication
     readValue,
     ({ section, panel, multi, component, value }) => {
       const label = component?.label || ""
-      rows.push({ section, panel, multi, label, value: resolveComponentDisplay(component, value) })
+      rows.push({
+        section,
+        panel,
+        multi: normalizeMultiLabel(multi),
+        label,
+        value: resolveComponentDisplay(component, value),
+      })
     },
     { section: "", panel: "", dataPath: [] }
   )
 
   rows.push({ section: "-", panel: "", multi: "", label: "", value: "" })
-  const requirementTemplateId = (permitApplication as any)?.templateVersion?.requirementTemplateId || ""
-  rows.push({ section: "Requirement template:", panel: "", multi: "", label: "", value: String(requirementTemplateId) })
+  const requirementTemplateName = (permitApplication as any)?.templateVersion?.label || ""
+  rows.push({
+    section: "Requirement template:",
+    panel: "",
+    multi: "",
+    label: "",
+    value: String(requirementTemplateName),
+  })
   const permitType = (permitApplication as any)?.permitType?.name || ""
   const workType = (permitApplication as any)?.activity?.name || ""
   rows.push({
@@ -131,13 +148,13 @@ export function exportPermitApplicationCsv(permitApplication: IPermitApplication
     ? `v.${format(new Date((permitApplication as any).templateVersion.versionDate), "yyyy.MM.dd")}`
     : ""
   rows.push({ section: "Template version", panel: "", multi: "", label: "", value: version })
-  rows.push({ section: "ApplicationID:", panel: "", multi: "", label: "", value: String(permitApplication.id) })
+  rows.push({ section: "ApplicationID:", panel: "", multi: "", label: "", value: String(permitApplication.number) })
   const submittedOn = (permitApplication as any)?.submittedAt
     ? format(new Date((permitApplication as any).submittedAt), "yyyy-MM-dd")
     : ""
   rows.push({ section: "Submitted on:", panel: "", multi: "", label: "", value: submittedOn })
 
-  const header = ["Section", "Panel", "MultiContact", "Field / Label", `Value submitted on ${today}`]
+  const header = ["Section", "Requirement Block", "MultiContact", "Field / Label", `Value submitted on ${today}`]
 
   const escape = (val: string) => {
     if (val == null) return ""
