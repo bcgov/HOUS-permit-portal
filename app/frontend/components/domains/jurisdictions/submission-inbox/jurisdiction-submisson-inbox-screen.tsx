@@ -218,7 +218,12 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
 
           {/* Content */}
           {displayMode === EInboxDisplayMode.columns ? (
-            <ProjectKanbanBoard />
+            <ProjectKanbanBoard
+              projects={permitProjectSearch.tablePermitProjects}
+              stateCounts={permitProjectSearch.stateCounts}
+              collapsedColumns={[...submissionInboxStore.collapsedColumns]}
+              onToggleColumn={(state) => submissionInboxStore.toggleColumnCollapsed(state)}
+            />
           ) : viewMode === EInboxViewMode.projects ? (
             <ProjectInboxTable searchStore={permitProjectSearch} projects={permitProjectSearch.tablePermitProjects} />
           ) : (

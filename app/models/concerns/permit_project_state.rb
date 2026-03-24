@@ -106,11 +106,11 @@ module PermitProjectState
     acts_as_taggable_on :flags
 
     def self.kanban_states
-      %w[queued in_progress ready permit_issued active complete]
+      %w[queued waiting in_progress ready permit_issued active complete]
     end
 
     def self.off_board_states
-      %w[draft waiting closed]
+      %w[draft closed]
     end
 
     def self.terminal_states
@@ -129,10 +129,15 @@ module PermitProjectState
       MANUAL_TRANSITIONS[state.to_sym] || []
     end
 
-    def rollup_status
-      return "empty" if permit_applications.kept.blank?
+    def sorted_application_statuses
+      permit_applications
+        .kept
+        .sort_by { |pa| -pa.pertinence_score }
+        .map { |pa| { status: pa.status, nickname: pa.nickname } }
+    end
 
-      permit_applications.kept.max_by(&:pertinence_score).status
+    def rollup_status
+      sorted_application_statuses.first&.dig(:status) || "empty"
     end
 
     def has_submitted_permit?
