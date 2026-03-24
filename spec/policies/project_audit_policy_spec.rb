@@ -254,82 +254,55 @@ RSpec.describe ProjectAuditPolicy do
       end
     end
 
-    context "when user is super_admin" do
-      it "includes all audit types for the project (no role-based filtering)" do
-        super_admin = create(:user, :super_admin)
-        admin_project =
-          create(
-            :permit_project,
-            owner: super_admin,
-            jurisdiction: jurisdiction
-          )
-        create(
-          :permit_application,
-          permit_project: admin_project,
-          submitter: super_admin,
-          jurisdiction: jurisdiction
-        )
-        scope = ApplicationAudit.for_permit_project(admin_project.id)
-        user_context = UserContext.new(super_admin, nil)
-        result = described_class::Scope.new(user_context, scope).resolve
-
-        all_for_project = ApplicationAudit.for_permit_project(admin_project.id)
-        expect(result.count).to eq(all_for_project.count)
-        expect(result.to_a).to match_array(all_for_project.to_a)
-      end
-    end
-
     context "when user has neither submitter nor review_staff role but has project access" do
-      it "includes designated submitter collaborations (excludes other collaborations and block status)" do
-        # Technical support user who owns a project (gives them project access)
-        other_role_user = create(:user, role: :technical_support)
-        other_project =
+      %i[technical_support super_admin].each do |role|
+        it "includes designated submitter collaborations for #{role} (excludes other collaborations and block status)" do
+          other_role_user = create(:user, role: role)
+          other_project =
+            create(
+              :permit_project,
+              owner: other_role_user,
+              jurisdiction: jurisdiction
+            )
+
+          pa =
+            create(
+              :permit_application,
+              permit_project: other_project,
+              submitter: create(:user, :submitter),
+              jurisdiction: jurisdiction
+            )
+
+          submission_collaborator_user = create(:user, :submitter)
+          collab =
+            create(
+              :collaborator,
+              user: submission_collaborator_user,
+              collaboratorable: other_role_user
+            )
           create(
-            :permit_project,
-            owner: other_role_user,
-            jurisdiction: jurisdiction
+            :permit_collaboration,
+            permit_application: pa,
+            collaborator: collab,
+            collaboration_type: :submission
+          )
+          create(:permit_block_status, permit_application: pa)
+
+          scope = ApplicationAudit.for_permit_project(other_project.id)
+          user_context = UserContext.new(other_role_user, nil)
+          result = described_class::Scope.new(user_context, scope).resolve
+
+          audit_types = result.map(&:auditable_type).uniq
+          expect(audit_types).to include(
+            "PermitProject",
+            "PermitApplication",
+            "PermitCollaboration"
           )
 
-        # Create a permit application under that project to generate audits
-        pa =
-          create(
-            :permit_application,
-            permit_project: other_project,
-            submitter: create(:user, :submitter),
-            jurisdiction: jurisdiction
+          expect(result.map(&:auditable_type)).not_to include(
+            "PermitBlockStatus"
           )
-
-        # Also create a submission collaboration and a block status so there are
-        # collaboration/block audits to potentially include or exclude
-        submission_collaborator_user = create(:user, :submitter)
-        collab =
-          create(
-            :collaborator,
-            user: submission_collaborator_user,
-            collaboratorable: other_role_user
-          )
-        create(
-          :permit_collaboration,
-          permit_application: pa,
-          collaborator: collab,
-          collaboration_type: :submission
-        )
-        create(:permit_block_status, permit_application: pa)
-
-        # Build a scope for this user's project and resolve via ProjectAuditPolicy
-        scope = ApplicationAudit.for_permit_project(other_project.id)
-        user_context = UserContext.new(other_role_user, nil)
-        result = described_class::Scope.new(user_context, scope).resolve
-
-        # Should see project and permit application audits only
-        audit_types = result.map(&:auditable_type).uniq
-        expect(audit_types).to include(
-          "PermitProject",
-          "PermitApplication",
-          "PermitCollaboration"
-        )
-
-        expect(result.map(&:auditable_type)).not_to include("PermitBlockStatus")
+        end
       end
     end
   end

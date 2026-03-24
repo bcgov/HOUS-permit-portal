@@ -39,8 +39,6 @@ class ProjectAuditPolicy < ApplicationPolicy
     private
 
     def restrict_by_role(relation)
-      return relation if full_audit_access?
-
       if user.submitter?
         # Hide:
         # - review collaborations
@@ -84,10 +82,6 @@ class ProjectAuditPolicy < ApplicationPolicy
                 .select(:id)
           )
       end
-    end
-
-    def full_audit_access?
-      user.super_admin?
     end
   end
 end

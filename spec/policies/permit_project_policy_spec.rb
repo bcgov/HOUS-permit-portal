@@ -99,19 +99,18 @@ RSpec.describe PermitProjectPolicy, type: :policy do
   end
 
   describe "Scope" do
-    it "builds a left_joins/where/distinct query for owner or collaborator user" do
+    it "builds a where/distinct query for owner or collaborator (EXISTS subquery, no joins)" do
       relation = instance_double("ActiveRecord::Relation")
-      joined = instance_double("ActiveRecord::Relation")
       where_rel = instance_double("ActiveRecord::Relation")
       distinct_rel = instance_double("ActiveRecord::Relation")
 
-      expect(relation).to receive(:left_joins).with(:collaborators).and_return(
-        joined
-      )
-      expect(joined).to receive(:where).with(
-        "permit_projects.owner_id = :uid OR collaborators.user_id = :uid",
-        uid: owner.id
-      ).and_return(where_rel)
+      expect(relation).to receive(:where) do |sql, binds|
+        expect(sql).to include("permit_projects.owner_id = :uid")
+        expect(sql).to include("EXISTS")
+        expect(sql).to include("permit_collaborations")
+        expect(binds).to eq(uid: owner.id)
+        where_rel
+      end
       expect(where_rel).to receive(:distinct).and_return(distinct_rel)
 
       resolved =
