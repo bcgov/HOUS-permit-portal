@@ -39,7 +39,6 @@ import { SafeTipTapDisplay } from "../../shared/editor/safe-tiptap-display"
 import { JurisdictionResourcesSection } from "../../shared/jurisdiction/jurisdiction-resources-section"
 import { JurisdictionMap } from "../../shared/module-wrappers/jurisdiction-map"
 import { RouterLink } from "../../shared/navigation/router-link"
-import { Part3StepCodeRequirements } from "../../shared/part3-step-code-requirements"
 import { StepCodeRequirementsTable } from "../../shared/step-code-requirements-table"
 import { Can, can } from "../../shared/user/can"
 import { ContactGrid } from "./contacts/contact-grid"
@@ -264,7 +263,23 @@ export const JurisdictionScreen = observer(() => {
                           )}
                         </ListItem>
                       </UnorderedList>
-                      <Part3StepCodeRequirements currentJurisdiction={currentJurisdiction} />
+                      <Text fontSize="md">
+                        {t(
+                          "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.largeComplexBuildingsLinkPrefix"
+                        )}{" "}
+                        <Link
+                          as={RouterLink}
+                          to={`/jurisdictions/${currentJurisdiction.slug}/step-code-requirements`}
+                          color="text.link"
+                          textDecoration="underline"
+                          _hover={{ textDecoration: "none" }}
+                        >
+                          {t(
+                            "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.checkStepCodesRequirementsInThisCommunity"
+                          )}
+                        </Link>
+                        .
+                      </Text>
                     </VStack>
                   </Flex>
                   <JurisdictionResourcesSection
