@@ -1,4 +1,4 @@
-import { Box, Divider, FormControl, FormLabel, Heading, Input, SimpleGrid, Text } from "@chakra-ui/react"
+import { Box, Divider, Flex, FormControl, FormLabel, Heading, Input, SimpleGrid, Text } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useMemo } from "react"
 import { useForm } from "react-hook-form"
@@ -42,7 +42,7 @@ export const CalculationsPerformedBy = observer(function CalculationsPerformedBy
 
     return {
       performerName: userName,
-      performerCompany: oc?.performerCompany || currentUser?.organization || "",
+      performerCompany: oc?.performerCompany || "",
       performerAddress: oc?.performerAddress || "",
       performerCityProvince: oc?.performerCityProvince || "",
       performerPostalCode: oc?.performerPostalCode || "",
@@ -170,27 +170,31 @@ export const CalculationsPerformedBy = observer(function CalculationsPerformedBy
         </Text>
       </Box>
 
-      <SimpleGrid columns={{ base: 1, md: 2 }} spacing={5} mb={6}>
-        <FormControl isRequired isInvalid={!!errors.accreditationRef1}>
-          <FormLabel>{t("overheatingCode.sections.calculationsPerformedBy.fields.accreditationRef1")}</FormLabel>
-          <Input {...register("accreditationRef1", { required: true })} />
-        </FormControl>
+      <Flex gap={5} mb={6} direction={{ base: "column", md: "row" }}>
+        <Box flex={1} borderWidth="1px" borderColor="border.light" borderRadius="md" p={4}>
+          <FormControl isRequired isInvalid={!!errors.accreditationRef1} mb={4}>
+            <FormLabel>{t("overheatingCode.sections.calculationsPerformedBy.fields.accreditationRef1")}</FormLabel>
+            <Input {...register("accreditationRef1", { required: true })} />
+          </FormControl>
 
-        <FormControl>
-          <FormLabel>{t("overheatingCode.sections.calculationsPerformedBy.fields.accreditationRef2")}</FormLabel>
-          <Input {...register("accreditationRef2")} />
-        </FormControl>
+          <FormControl isRequired>
+            <FormLabel>{t("overheatingCode.sections.calculationsPerformedBy.fields.issuedFor")}</FormLabel>
+            <Input {...register("issuedFor1", { required: true })} type="date" />
+          </FormControl>
+        </Box>
 
-        <FormControl>
-          <FormLabel>{t("overheatingCode.sections.calculationsPerformedBy.fields.issuedFor1")}</FormLabel>
-          <Input {...register("issuedFor1")} type="date" />
-        </FormControl>
+        <Box flex={1} borderWidth="1px" borderColor="border.light" borderRadius="md" p={4}>
+          <FormControl mb={4}>
+            <FormLabel>{t("overheatingCode.sections.calculationsPerformedBy.fields.accreditationRef2")}</FormLabel>
+            <Input {...register("accreditationRef2")} />
+          </FormControl>
 
-        <FormControl>
-          <FormLabel>{t("overheatingCode.sections.calculationsPerformedBy.fields.issuedFor2")}</FormLabel>
-          <Input {...register("issuedFor2")} type="date" />
-        </FormControl>
-      </SimpleGrid>
+          <FormControl>
+            <FormLabel>{t("overheatingCode.sections.calculationsPerformedBy.fields.issuedFor")}</FormLabel>
+            <Input {...register("issuedFor2")} type="date" />
+          </FormControl>
+        </Box>
+      </Flex>
 
       <FormFooter<ICalculationsPerformedByFormData>
         handleSubmit={handleSubmit}
