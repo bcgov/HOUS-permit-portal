@@ -83,6 +83,8 @@ class PermitApplication < ApplicationRecord
                if: :status_changed_to_submitted?
   after_commit :mark_permit_project_as_unviewed,
                if: :status_changed_to_submitted?
+  after_commit :enqueue_permit_project_if_draft,
+               if: :status_changed_to_submitted?
 
   scope :with_submitter_role,
         -> { joins(:submitter).where(users: { role: "submitter" }) }
@@ -647,8 +649,8 @@ class PermitApplication < ApplicationRecord
           "requirement_templates.id AS requirement_template_id",
           "jurisdictions.name AS jurisdiction_name",
           "requirement_templates.id AS requirement_template_id",
-          "COUNT(CASE WHEN permit_applications.status IN (0, 3) THEN 1 END) AS draft_count",
-          "COUNT(CASE WHEN permit_applications.status IN (1, 2, 4) THEN 1 END) AS submitted_count",
+          "COUNT(CASE WHEN permit_applications.status = 0 THEN 1 END) AS draft_count",
+          "COUNT(CASE WHEN permit_applications.status != 0 THEN 1 END) AS submitted_count",
           "AVG(
                 CASE
                   WHEN sv_min.min_submission_created_at IS NOT NULL THEN EXTRACT(EPOCH FROM (sv_min.min_submission_created_at - permit_applications.created_at))
@@ -843,6 +845,11 @@ class PermitApplication < ApplicationRecord
 
   def mark_permit_project_as_unviewed
     permit_project&.mark_as_unviewed
+  end
+
+  # TODO: Also enqueue project when a meeting request is made
+  def enqueue_permit_project_if_draft
+    permit_project&.enqueue! if permit_project&.draft?
   end
 
   def jurisdiction_or_permit_project_present

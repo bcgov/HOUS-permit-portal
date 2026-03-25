@@ -57,8 +57,8 @@ module Api::Concerns::Search::JurisdictionPermitProjects
         where: {
           jurisdiction_id: @jurisdiction.id,
           discarded: false,
-          rollup_status: {
-            not: %w[new_draft empty]
+          state: {
+            not: "draft"
           }
         },
         aggs: [:state],
@@ -110,7 +110,7 @@ module Api::Concerns::Search::JurisdictionPermitProjects
     and_conditions = []
     and_conditions << { jurisdiction_id: @jurisdiction.id }
     and_conditions << { discarded: false }
-    and_conditions << { rollup_status: { not: %w[new_draft empty] } }
+    and_conditions << { state: { not: "draft" } }
 
     # if !current_user.super_admin?
     #   and_conditions << { sandbox_id: current_sandbox&.id }
