@@ -841,8 +841,7 @@ const options = {
                 email: "E-mail",
                 accreditationRef1: "Accreditation Reference 1",
                 accreditationRef2: "Accreditation Reference 2",
-                issuedFor1: "Issued For (Date 1)",
-                issuedFor2: "Issued For (Date 2)",
+                issuedFor: "Issued For",
               },
               validation: {
                 postalCode: "Enter a valid Canadian postal code (e.g. V7L 1C3)",

@@ -171,25 +171,29 @@ export const CalculationsPerformedBy = observer(function CalculationsPerformedBy
       </Box>
 
       <SimpleGrid columns={{ base: 1, md: 2 }} spacing={5} mb={6}>
-        <FormControl isRequired isInvalid={!!errors.accreditationRef1}>
-          <FormLabel>{t("overheatingCode.sections.calculationsPerformedBy.fields.accreditationRef1")}</FormLabel>
-          <Input {...register("accreditationRef1", { required: true })} />
-        </FormControl>
+        <Box borderWidth="1px" borderColor="border.light" borderRadius="md" p={4}>
+          <FormControl isRequired isInvalid={!!errors.accreditationRef1} mb={4}>
+            <FormLabel>{t("overheatingCode.sections.calculationsPerformedBy.fields.accreditationRef1")}</FormLabel>
+            <Input {...register("accreditationRef1", { required: true })} />
+          </FormControl>
 
-        <FormControl>
-          <FormLabel>{t("overheatingCode.sections.calculationsPerformedBy.fields.accreditationRef2")}</FormLabel>
-          <Input {...register("accreditationRef2")} />
-        </FormControl>
+          <FormControl isRequired>
+            <FormLabel>{t("overheatingCode.sections.calculationsPerformedBy.fields.issuedFor")}</FormLabel>
+            <Input {...register("issuedFor1", { required: true })} type="date" />
+          </FormControl>
+        </Box>
 
-        <FormControl>
-          <FormLabel>{t("overheatingCode.sections.calculationsPerformedBy.fields.issuedFor1")}</FormLabel>
-          <Input {...register("issuedFor1")} type="date" />
-        </FormControl>
+        <Box borderWidth="1px" borderColor="border.light" borderRadius="md" p={4}>
+          <FormControl mb={4}>
+            <FormLabel>{t("overheatingCode.sections.calculationsPerformedBy.fields.accreditationRef2")}</FormLabel>
+            <Input {...register("accreditationRef2")} />
+          </FormControl>
 
-        <FormControl>
-          <FormLabel>{t("overheatingCode.sections.calculationsPerformedBy.fields.issuedFor2")}</FormLabel>
-          <Input {...register("issuedFor2")} type="date" />
-        </FormControl>
+          <FormControl>
+            <FormLabel>{t("overheatingCode.sections.calculationsPerformedBy.fields.issuedFor")}</FormLabel>
+            <Input {...register("issuedFor2")} type="date" />
+          </FormControl>
+        </Box>
       </SimpleGrid>
 
       <FormFooter<ICalculationsPerformedByFormData>
