@@ -42,7 +42,7 @@ export const CalculationsPerformedBy = observer(function CalculationsPerformedBy
 
     return {
       performerName: userName,
-      performerCompany: oc?.performerCompany || currentUser?.organization || "",
+      performerCompany: oc?.performerCompany || "",
       performerAddress: oc?.performerAddress || "",
       performerCityProvince: oc?.performerCityProvince || "",
       performerPostalCode: oc?.performerPostalCode || "",
