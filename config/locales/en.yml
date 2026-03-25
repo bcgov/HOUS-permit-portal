@@ -675,6 +675,9 @@ en:
       invalid_transition:
         title: Error
         message: "This state transition is not allowed"
+      reorder_success:
+        title: ""
+        message: "Project order updated successfully"
     permit_collaboration:
       destroy_success:
         title: ""

@@ -47,7 +47,9 @@ export const PermitProjectModel = types
     latitude: types.maybeNull(types.string), // From decimal in backend
     longitude: types.maybeNull(types.string), // From decimal in backend
     viewedAt: types.maybeNull(types.Date),
+    enqueuedAt: types.maybeNull(types.Date),
     parcelGeometry: types.maybeNull(types.frozen<IParcelGeometry>()),
+    inboxSortOrder: types.maybeNull(types.number),
   })
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -64,6 +66,11 @@ export const PermitProjectModel = types
   .views((self) => ({
     get shortAddress() {
       return self.fullAddress?.split(",")[0]
+    },
+    get daysInQueue(): number | null {
+      if (!self.enqueuedAt) return null
+      const ms = Date.now() - self.enqueuedAt.getTime()
+      return Math.floor(ms / (1000 * 60 * 60 * 24))
     },
     get rollupStatusDescription() {
       const total = self.totalPermitsCount
@@ -108,6 +115,9 @@ export const PermitProjectModel = types
   .actions((self) => ({
     setIsPinned(isPinned: boolean) {
       self.isPinned = isPinned
+    },
+    setInboxSortOrder(order: number) {
+      self.inboxSortOrder = order
     },
     resetIsFullyLoaded() {
       self.isFullyLoaded = false

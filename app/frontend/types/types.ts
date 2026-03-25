@@ -593,20 +593,20 @@ export interface IPermitProjectSearchFilters {
 }
 
 export interface IPermitProjectInboxSearchFilters {
-  permitType?: string[]
+  requirementTemplateIds?: string[]
   status?: string[]
   unread?: string
   meetingRequest?: string
-  daysInQueue?: string[]
+  daysInQueue?: { operator: string; days: number }
   assigned?: string[]
 }
 
 export interface IPermitApplicationInboxSearchFilters {
-  permitType?: string[]
+  requirementTemplateIds?: string[]
   status?: EPermitApplicationStatus[]
   unread?: string
   meetingRequest?: string
-  daysInQueue?: string[]
+  daysInQueue?: { operator: string; days: number }
   assigned?: string[]
 }
 

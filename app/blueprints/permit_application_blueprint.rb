@@ -36,6 +36,8 @@ class PermitApplicationBlueprint < Blueprinter::Base
     field :project_id do |pa, _options|
       pa.permit_project&.id
     end
+
+    field :inbox_sort_order, default: nil
   end
 
   view :project_base do

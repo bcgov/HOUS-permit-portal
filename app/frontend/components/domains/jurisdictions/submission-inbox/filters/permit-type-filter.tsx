@@ -1,8 +1,7 @@
 import { observer } from "mobx-react-lite"
-import React, { useMemo } from "react"
+import React, { useEffect } from "react"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../../../setup/root"
-import { IOption } from "../../../../../types/types"
 import { InboxFilter } from "../../../../shared/filters/inbox-filter"
 
 interface IProps {
@@ -12,16 +11,18 @@ interface IProps {
   onClear: () => void
 }
 
-export const PermitTypeFilter = observer(function PermitTypeFilter({ value, onChange, onApply, onClear }: IProps) {
+export const RequirementTemplateInboxFilter = observer(function RequirementTemplateInboxFilter({
+  value,
+  onChange,
+  onApply,
+  onClear,
+}: IProps) {
   const { t } = useTranslation()
-  const { permitClassificationStore } = useMst()
+  const { requirementTemplateStore } = useMst()
 
-  const options: IOption[] = useMemo(() => {
-    return permitClassificationStore.permitTypes.map((pt) => ({
-      value: pt.id,
-      label: pt.name,
-    }))
-  }, [permitClassificationStore.permitTypes])
+  useEffect(() => {
+    requirementTemplateStore.fetchFilterOptions()
+  }, [])
 
   return (
     <InboxFilter
@@ -29,7 +30,7 @@ export const PermitTypeFilter = observer(function PermitTypeFilter({ value, onCh
       isMulti={true}
       value={value}
       onChange={(val) => onChange(val as string[])}
-      options={options}
+      options={[...requirementTemplateStore.filterOptions]}
       onApply={onApply}
       onClear={onClear}
     />

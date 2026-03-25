@@ -126,6 +126,7 @@ class PermitProject < ApplicationRecord
       rollup_status: rollup_status,
       inbox_rollup_status: inbox_rollup_status,
       viewed_at: viewed_at,
+      enqueued_at: enqueued_at,
       forcasted_completion_date: forcasted_completion_date,
       requirement_template_ids:
         permit_applications

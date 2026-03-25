@@ -31,7 +31,6 @@ module Api::Concerns::Search::JurisdictionPermitProjects
         jurisdiction_permit_project_query,
         **search_conditions
       )
-    # binding.pry
     ids = @jurisdiction_permit_project_search.hits.map { |h| h["_id"] }
     loaded =
       policy_scope(PermitProject)
@@ -80,12 +79,12 @@ module Api::Concerns::Search::JurisdictionPermitProjects
       :page,
       :per_page,
       filters: [
-        { permit_type: [] },
+        { requirement_template_ids: [] },
         { status: [] },
         :unread,
         :meeting_request,
-        { days_in_queue: [] },
-        { assigned: [] }
+        { assigned: [] },
+        { days_in_queue: %i[operator days] }
       ],
       sort: %i[field direction]
     )
@@ -116,11 +115,11 @@ module Api::Concerns::Search::JurisdictionPermitProjects
     #   and_conditions << { sandbox_id: current_sandbox&.id }
     # end
 
-    # ### SUBMISSION INDEX STUB FEATURE - permit_type filter
-    permit_types = search_filters.delete(:permit_type)
-    and_conditions << { permit_type_ids: permit_types } if permit_types.present?
+    requirement_template_ids = search_filters.delete(:requirement_template_ids)
+    if requirement_template_ids.present?
+      and_conditions << { requirement_template_ids: requirement_template_ids }
+    end
 
-    # ### SUBMISSION INDEX STUB FEATURE - status filter
     statuses = search_filters.delete(:status)
     and_conditions << { rollup_status: statuses } if statuses.present?
 
@@ -131,8 +130,18 @@ module Api::Concerns::Search::JurisdictionPermitProjects
       and_conditions << { _not: { viewed_at: nil } }
     end
 
-    # ### SUBMISSION INDEX STUB FEATURE - meeting_request, days_in_queue, assigned
-    # These filters are stubs and will be implemented when the spec is finalized.
+    days_in_queue = search_filters.delete(:days_in_queue)
+    if days_in_queue.present? && days_in_queue[:days].present?
+      days = days_in_queue[:days].to_i
+      cutoff = days.days.ago.beginning_of_day
+      if days_in_queue[:operator] == "gte"
+        and_conditions << { enqueued_at: { lte: cutoff } }
+      elsif days_in_queue[:operator] == "lt"
+        and_conditions << { enqueued_at: { gt: cutoff } }
+      end
+    end
+
+    # ### SUBMISSION INDEX STUB FEATURE - meeting_request, assigned
 
     { _and: and_conditions }
   end

@@ -322,6 +322,10 @@ export class Api {
     })
   }
 
+  async reorderPermitProjects(items: Array<{ id: string; inboxSortOrder: number }>) {
+    return this.client.patch("/permit_projects/reorder", { items })
+  }
+
   async fetchSubmissionCollaboratorOptions(id: string) {
     return this.client.get<IOptionResponse>(`/permit_projects/${id}/submission_collaborator_options`)
   }

@@ -82,6 +82,10 @@ class PermitProjectPolicy < ApplicationPolicy
     user_is_owner?
   end
 
+  def reorder?
+    user&.review_staff?
+  end
+
   def jurisdiction_options?
     # Collection action – rely on policy_scope to restrict data
     true

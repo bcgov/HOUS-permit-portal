@@ -543,6 +543,12 @@ if north_van_projects.size >= 10
     kept_apps[0]&.update_column(:status, PermitApplication.statuses[:withdrawn])
   end
 
+  # Spread enqueued_at across the non-draft projects so the "days in queue" filter has varied data
+  non_draft = north_van_projects.select { |p| p.reload.state != "draft" }
+  non_draft.each_with_index do |project, idx|
+    project.update_column(:enqueued_at, (idx * 3 + 1).days.ago)
+  end
+
   puts "  ✓ Distributed #{[state_distribution.size + 2, north_van_projects.size].min} projects across kanban states"
 end
 

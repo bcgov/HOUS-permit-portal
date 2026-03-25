@@ -30,6 +30,7 @@ interface IInboxFilterProps {
   loadOptions?: () => Promise<IOption[]>
   onApply: () => void
   onClear?: () => void
+  isDisabled?: boolean
 }
 
 export const InboxFilter = observer(function InboxFilter({
@@ -42,6 +43,7 @@ export const InboxFilter = observer(function InboxFilter({
   loadOptions,
   onApply,
   onClear,
+  isDisabled,
 }: IInboxFilterProps) {
   const { t } = useTranslation()
   const { isOpen, onOpen, onClose } = useDisclosure()
@@ -99,7 +101,13 @@ export const InboxFilter = observer(function InboxFilter({
   }
 
   return (
-    <Popover isOpen={isOpen} onOpen={onOpen} onClose={onClose} placement="bottom-start" closeOnBlur>
+    <Popover
+      isOpen={!isDisabled && isOpen}
+      onOpen={isDisabled ? undefined : onOpen}
+      onClose={onClose}
+      placement="bottom-start"
+      closeOnBlur
+    >
       <PopoverTrigger>
         <Button
           variant="outline"
@@ -107,6 +115,8 @@ export const InboxFilter = observer(function InboxFilter({
           bg={hasSelection ? "background.blueLight" : undefined}
           size="sm"
           fontWeight="normal"
+          isDisabled={isDisabled}
+          opacity={isDisabled ? 0.5 : 1}
         >
           <HStack spacing={2}>
             <Text>{title}</Text>
