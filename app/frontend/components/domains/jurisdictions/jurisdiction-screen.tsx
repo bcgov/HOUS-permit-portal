@@ -7,13 +7,14 @@ import {
   Flex,
   FormControl,
   FormLabel,
+  Grid,
+  GridItem,
   HStack,
   Heading,
   Input,
   Link,
   ListItem,
   OrderedList,
-  Show,
   Text,
   UnorderedList,
   VStack,
@@ -35,7 +36,8 @@ import { ErrorScreen } from "../../shared/base/error-screen"
 import { HeroBanner } from "../../shared/base/hero-banner"
 import { HighlightedLayout } from "../../shared/base/highlighted-layout"
 import { LoadingScreen } from "../../shared/base/loading-screen"
-import { EditorWithPreview } from "../../shared/editor/custom-extensions/editor-with-preview"
+import { HighlightedCtaCard } from "../../shared/cta/highlighted-cta-card"
+import { SoftCtaCard } from "../../shared/cta/soft-cta-card"
 import { SafeTipTapDisplay } from "../../shared/editor/safe-tiptap-display"
 import { JurisdictionResourcesSection } from "../../shared/jurisdiction/jurisdiction-resources-section"
 import { JurisdictionMap } from "../../shared/module-wrappers/jurisdiction-map"
@@ -43,6 +45,7 @@ import { RouterLink } from "../../shared/navigation/router-link"
 import { StepCodeRequirementsTable } from "../../shared/step-code-requirements-table"
 import { Can, can } from "../../shared/user/can"
 import { ContactGrid } from "./contacts/contact-grid"
+import { JurisdictionEditorWithPreview } from "./jurisdiction-editor-with-preview"
 export interface Jurisdiction {
   name: string
   contacts: IContact[]
@@ -120,39 +123,63 @@ export const JurisdictionScreen = observer(() => {
         </HighlightedLayout>
         {/* TODO: Add link to LG website */}
       </HeroBanner>
-      <Show below="md">
-        <JurisdictionMap
-          mapPosition={mapPositionWatch}
-          mapZoom={mapZoomWatch}
-          linePositions={currentJurisdiction.boundaryPoints}
-        />
-      </Show>
-      <Container maxW="container.lg" py={{ base: 6, md: 16 }} px={8}>
+      <Container maxW="container.lg" pt={{ base: 6, md: 16 }} px={8}>
         {!currentJurisdiction.inboxEnabled && (
           <Box my={8}>
             <CustomMessageBox status={EFlashMessageStatus.warning} description={t("jurisdiction.notEnabled")} />
           </Box>
         )}
-        {currentUser?.isReviewStaff || showAboutPage ? (
-          <>
-            <FormProvider {...formMethods}>
-              <form onSubmit={formMethods.handleSubmit(onSubmit)} className="space-y-8 divide-y divide-gray-200">
-                <Flex direction="column" gap={16}>
-                  <Flex gap={14}>
-                    <Show above="md">
+      </Container>
+      {currentUser?.isReviewStaff || showAboutPage ? (
+        <>
+          <FormProvider {...formMethods}>
+            <form onSubmit={formMethods.handleSubmit(onSubmit)} className="space-y-8 divide-y divide-gray-200">
+              <Box w="full" bg="greys.grey03">
+                <Container maxW="container.lg" py={10} px={8}>
+                  <Grid w="full" templateColumns={{ base: "1fr", md: "2fr 1fr" }} gap={8}>
+                    <GridItem order={{ base: 2, md: 1 }} p={1} minW={0}>
+                      <Flex as="section" direction="column" gap={2}>
+                        <Heading id="jurisdiction-supported-description-heading" variant="yellowline" my={0}>
+                          {t("jurisdiction.supportedSectionHeading")}
+                        </Heading>
+                        <JurisdictionTipTapFormController
+                          control={control}
+                          headingId="jurisdiction-supported-description-heading"
+                          initialTriggerText={t("jurisdiction.edit.addDescription")}
+                          name={"descriptionHtml"}
+                        />
+                      </Flex>
+                    </GridItem>
+                    <GridItem order={{ base: 1, md: 2 }} minW={0}>
                       <EditableMap currentJurisdiction={currentJurisdiction} />
-                    </Show>
-                    <Flex as="section" flex={1} direction="column" gap={4}>
-                      <Heading>{t("jurisdiction.title")}</Heading>
-                      <JurisdictionTipTapFormController
-                        control={control}
-                        label={t("jurisdiction.edit.displayDescriptionLabel")}
-                        initialTriggerText={t("jurisdiction.edit.addDescription")}
-                        name={"descriptionHtml"}
+                    </GridItem>
+                    <GridItem order={{ base: 3, md: 3 }} minW={0}>
+                      <HighlightedCtaCard
+                        title={t("jurisdiction.cta.apply.title")}
+                        description={t("jurisdiction.cta.apply.description")}
+                        action={
+                          <RouterLinkButton to="/projects" variant="primaryInverse">
+                            {t("jurisdiction.cta.apply.button")}
+                          </RouterLinkButton>
+                        }
                       />
-                      {/* Disabled: start application CTA */}
-                    </Flex>
-                  </Flex>
+                    </GridItem>
+                    <GridItem order={{ base: 4, md: 4 }} minW={0}>
+                      <SoftCtaCard
+                        title={t("jurisdiction.cta.tools.title")}
+                        description={t("jurisdiction.cta.tools.description")}
+                        action={
+                          <RouterLinkButton to="/project-readiness-tools" variant="primaryInverse">
+                            {t("jurisdiction.cta.tools.button")}
+                          </RouterLinkButton>
+                        }
+                      />
+                    </GridItem>
+                  </Grid>
+                </Container>
+              </Box>
+              <Container maxW="container.lg" px={8} pb={{ base: 6, md: 16 }}>
+                <Flex direction="column" gap={16}>
                   <Flex direction={{ base: "column", md: "row" }} gap={6}>
                     <Flex
                       as="section"
@@ -164,11 +191,13 @@ export const JurisdictionScreen = observer(() => {
                       rounded="lg"
                       p={6}
                     >
-                      <Heading mb={0}>{t("jurisdiction.checklist")}</Heading>
+                      <Heading id="jurisdiction-checklist-heading" mb={0}>
+                        {t("jurisdiction.checklist")}
+                      </Heading>
                       <Divider my={0} />
                       <JurisdictionTipTapFormController
                         control={control}
-                        label={t("jurisdiction.edit.displayChecklistLabel")}
+                        headingId="jurisdiction-checklist-heading"
                         initialTriggerText={t("jurisdiction.edit.addChecklist")}
                         name={"checklistHtml"}
                       />
@@ -182,10 +211,12 @@ export const JurisdictionScreen = observer(() => {
                       borderRadius="lg"
                       background="theme.blueLight"
                     >
-                      <Heading as="h3">{t("jurisdiction.lookOut")}</Heading>
+                      <Heading id="jurisdiction-lookout-heading" as="h3">
+                        {t("jurisdiction.lookOut")}
+                      </Heading>
                       <JurisdictionTipTapFormController
                         control={control}
-                        label={t("jurisdiction.edit.displayLookOutLabel")}
+                        headingId="jurisdiction-lookout-heading"
                         initialTriggerText={t("jurisdiction.edit.addLookOut")}
                         name={"lookOutHtml"}
                       />
@@ -301,14 +332,14 @@ export const JurisdictionScreen = observer(() => {
                   />
                   <Flex as="section" direction="column" borderRadius="lg" boxShadow="md">
                     <Box py={3} px={6} bg="theme.blueAlt" borderTopRadius="lg">
-                      <Heading as="h3" color="greys.white" fontSize="xl">
+                      <Heading id="jurisdiction-contact-summary-heading" as="h3" color="greys.white" fontSize="xl">
                         {t("jurisdiction.contactInfo")}
                       </Heading>
                     </Box>
                     <Flex direction="column" p={6} gap={9}>
                       <JurisdictionTipTapFormController
                         control={control}
-                        label={t("jurisdiction.edit.displayContactSummaryLabel")}
+                        headingId="jurisdiction-contact-summary-heading"
                         initialTriggerText={t("jurisdiction.edit.addContactSummary")}
                         name={"contactSummaryHtml"}
                       />
@@ -348,10 +379,12 @@ export const JurisdictionScreen = observer(() => {
                     </Center>
                   </Can>
                 </Flex>
-              </form>
-            </FormProvider>
-          </>
-        ) : (
+              </Container>
+            </form>
+          </FormProvider>
+        </>
+      ) : (
+        <Container maxW="container.lg" py={{ base: 6, md: 16 }} px={8}>
           <Box>
             <Heading as="h2" fontSize="2xl" fontWeight="bold" mb={6}>
               {t("jurisdiction.notUsingBPH.title")}
@@ -385,21 +418,24 @@ export const JurisdictionScreen = observer(() => {
               </Button>
             </Box>
           </Box>
-        )}
-      </Container>
+        </Container>
+      )}
     </Flex>
   )
 })
 
 interface IJurisdictionTipTapFormControllerProps {
   control: Control<TJurisdictionFieldValues>
-  label: string
+  /** Optional; visible section title should use `headingId` + matching `id` on `<Heading>`. */
+  label?: string
   initialTriggerText: string
   name: keyof TJurisdictionFieldValues
+  /** `id` of the section `<Heading>` — sets `aria-labelledby` on the editor wrapper for assistive tech. */
+  headingId?: string
 }
 
 const JurisdictionTipTapFormController = observer(
-  ({ control, label, initialTriggerText, name }: IJurisdictionTipTapFormControllerProps) => {
+  ({ control, label, initialTriggerText, name, headingId }: IJurisdictionTipTapFormControllerProps) => {
     const { jurisdictionStore } = useMst()
     const { currentJurisdiction } = jurisdictionStore
     const { t } = useTranslation()
@@ -422,12 +458,13 @@ const JurisdictionTipTapFormController = observer(
         >
           <Controller
             render={({ field: { value, onChange } }) => (
-              <EditorWithPreview
+              <JurisdictionEditorWithPreview
                 label={label}
                 editText={t("ui.clickToEdit")}
                 htmlValue={value as string}
                 onChange={onChange}
                 initialTriggerText={initialTriggerText}
+                containerProps={headingId ? { "aria-labelledby": headingId } : undefined}
                 onRemove={(setEditMode) => {
                   setEditMode(false)
                   onChange("")
@@ -461,7 +498,7 @@ const EditableMap = ({ currentJurisdiction }: IEditableMapProps) => {
   }
 
   return (
-    <Flex flex={1}>
+    <Flex flex={1} w="full">
       <Flex direction="column" w="full">
         <Can action="jurisdiction:manage" data={{ jurisdiction: currentJurisdiction }}>
           <Button
