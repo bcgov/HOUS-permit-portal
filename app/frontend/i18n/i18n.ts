@@ -1023,6 +1023,20 @@ const options = {
           lat: "Latitude",
           lng: "Longitude",
           title: "Local housing permits",
+          supportedSectionHeading: "How local permits are supported:",
+          cta: {
+            apply: {
+              title: "Ready to start?",
+              description:
+                "In the Building Permit Hub, you'll first create a Project with your property details, then add your specific Permits to it.",
+              button: "Apply for a Permit",
+            },
+            tools: {
+              title: "Only need tools?",
+              description: "Use Step Code, overheating, and other tools without starting an application.",
+              button: "Use tools",
+            },
+          },
           heroBannerDescription:
             "Jurisdiction description: {{jurisdictionName}} provides guidance, services, and regulatory oversight for residents and businesses within its municipal boundary.",
           notEnabled: "Permit application submissions are temporarily unavailable for this jurisdiction.",
