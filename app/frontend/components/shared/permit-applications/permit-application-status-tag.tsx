@@ -31,24 +31,27 @@ interface IPermitApplicationStatusTagProps extends TagProps {
   status: string
 }
 
-export const PermitApplicationStatusTag = ({ status, ...rest }: IPermitApplicationStatusTagProps) => {
-  const { t } = useTranslation()
+export const PermitApplicationStatusTag = React.forwardRef<HTMLSpanElement, IPermitApplicationStatusTagProps>(
+  ({ status, ...rest }, ref) => {
+    const { t } = useTranslation()
 
-  return (
-    <Tag
-      p={1}
-      bg={applicationStatusBgMap[status] || "greys.grey04"}
-      color={applicationStatusColorMap[status] || "text.secondary"}
-      fontWeight="bold"
-      border="1px solid"
-      borderColor="border.light"
-      textTransform="uppercase"
-      minW="fit-content"
-      textAlign="center"
-      {...rest}
-    >
-      {/* @ts-ignore */}
-      {t(`permitApplication.status.${status}`)}
-    </Tag>
-  )
-}
+    return (
+      <Tag
+        ref={ref}
+        p={1}
+        bg={applicationStatusBgMap[status] || "greys.grey04"}
+        color={applicationStatusColorMap[status] || "text.secondary"}
+        fontWeight="bold"
+        border="1px solid"
+        borderColor="border.light"
+        textTransform="uppercase"
+        minW="fit-content"
+        textAlign="center"
+        {...rest}
+      >
+        {/* @ts-ignore */}
+        {t(`permitApplication.status.${status}`)}
+      </Tag>
+    )
+  }
+)

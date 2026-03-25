@@ -15,6 +15,7 @@ import {
   PopoverBody,
   PopoverContent,
   PopoverTrigger,
+  Portal,
   Text,
   VStack,
 } from "@chakra-ui/react"
@@ -340,32 +341,32 @@ const RollupStatusBadge = observer(function RollupStatusBadge({ project }: { pro
     <Popover trigger="hover" placement="bottom-start" isLazy flip={false}>
       <PopoverTrigger>{badge}</PopoverTrigger>
 
-      {/* <Portal> */}
-      <PopoverContent w="auto" minW="220px" maxW="320px" onClick={(e) => e.preventDefault()} top="190px">
-        <PopoverBody p={3}>
-          <Text fontSize="2xs" fontWeight="bold" textTransform="uppercase" color="text.secondary" mb={2}>
-            {t("submissionInbox.permitApplicationStatuses")}
-          </Text>
-          <VStack align="stretch" spacing={1}>
-            {sortedStatuses.map((entry, idx) => (
-              <HStack key={idx} spacing={2}>
-                <PermitApplicationStatusTag
-                  status={entry.status}
-                  size="sm"
-                  px={1.5}
-                  py={0.5}
-                  fontSize="2xs"
-                  flexShrink={0}
-                />
-                <Text fontSize="xs" color="text.secondary" noOfLines={1}>
-                  {entry.nickname || "—"}
-                </Text>
-              </HStack>
-            ))}
-          </VStack>
-        </PopoverBody>
-      </PopoverContent>
-      {/* </Portal> */}
+      <Portal>
+        <PopoverContent w="auto" minW="220px" maxW="320px" onClick={(e) => e.preventDefault()}>
+          <PopoverBody p={3}>
+            <Text fontSize="2xs" fontWeight="bold" textTransform="uppercase" color="text.secondary" mb={2}>
+              {t("submissionInbox.permitApplicationStatuses")}
+            </Text>
+            <VStack align="stretch" spacing={1}>
+              {sortedStatuses.map((entry, idx) => (
+                <HStack key={idx} spacing={2}>
+                  <PermitApplicationStatusTag
+                    status={entry.status}
+                    size="sm"
+                    px={1.5}
+                    py={0.5}
+                    fontSize="2xs"
+                    flexShrink={0}
+                  />
+                  <Text fontSize="xs" color="text.secondary" noOfLines={1}>
+                    {entry.nickname || "—"}
+                  </Text>
+                </HStack>
+              ))}
+            </VStack>
+          </PopoverBody>
+        </PopoverContent>
+      </Portal>
     </Popover>
   )
 })
