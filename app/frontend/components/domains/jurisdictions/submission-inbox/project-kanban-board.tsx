@@ -326,8 +326,8 @@ const ChangeStatusMenu = observer(function ChangeStatusMenu({ project }: { proje
 
 const RollupStatusBadge = observer(function RollupStatusBadge({ project }: { project: IPermitProject }) {
   const { t } = useTranslation()
-  const rollupStatus = project.rollupStatus
-  const sortedStatuses = project.sortedApplicationStatuses
+  const rollupStatus = project.inboxRollupStatus
+  const sortedStatuses = project.inboxSortedApplicationStatuses
 
   if (sortedStatuses.length === 0) return null
 

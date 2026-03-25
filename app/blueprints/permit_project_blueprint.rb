@@ -27,6 +27,7 @@ class PermitProjectBlueprint < Blueprinter::Base
     field :flag_list, default: []
     field :allowed_manual_transitions, default: []
     field :sorted_application_statuses, default: []
+    field :inbox_sorted_application_statuses, default: []
     field :owner_name, default: nil
 
     field :is_fully_loaded do |_permit_project, _options|

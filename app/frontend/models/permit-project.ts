@@ -19,6 +19,10 @@ export const PermitProjectModel = types
       types.array(types.frozen<{ status: string; nickname: string | null }>()),
       []
     ),
+    inboxSortedApplicationStatuses: types.optional(
+      types.array(types.frozen<{ status: string; nickname: string | null }>()),
+      []
+    ),
     state: types.enumeration(Object.values(EProjectState)),
     tablePermitApplications: types.maybeNull(types.array(types.reference(types.late(() => PermitApplicationModel)))),
     recentPermitApplications: types.maybeNull(types.array(types.reference(types.late(() => PermitApplicationModel)))),
@@ -50,6 +54,10 @@ export const PermitProjectModel = types
   .views((self) => ({
     get rollupStatus(): EPermitProjectRollupStatus {
       const first = self.sortedApplicationStatuses[0]
+      return (first?.status as EPermitProjectRollupStatus) ?? EPermitProjectRollupStatus.empty
+    },
+    get inboxRollupStatus(): EPermitProjectRollupStatus {
+      const first = self.inboxSortedApplicationStatuses[0]
       return (first?.status as EPermitProjectRollupStatus) ?? EPermitProjectRollupStatus.empty
     },
   }))

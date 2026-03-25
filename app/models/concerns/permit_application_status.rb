@@ -112,6 +112,21 @@ module PermitApplicationStatus
       ] || -1
     end
 
+    def inbox_pertinence_score
+      {
+        "newly_submitted" => 40,
+        "resubmitted" => 35,
+        "in_review" => 25,
+        "revisions_requested" => 15,
+        "new_draft" => 5,
+        "approved" => 3,
+        "issued" => 1,
+        "withdrawn" => -1
+      }[
+        status
+      ] || -1
+    end
+
     def can_submit?
       return false unless inbox_enabled? || sandbox.present?
       return false if template_version_disabled_by_jurisdiction?

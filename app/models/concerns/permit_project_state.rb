@@ -140,6 +140,17 @@ module PermitProjectState
       sorted_application_statuses.first&.dig(:status) || "empty"
     end
 
+    def inbox_sorted_application_statuses
+      permit_applications
+        .kept
+        .sort_by { |pa| -pa.inbox_pertinence_score }
+        .map { |pa| { status: pa.status, nickname: pa.nickname } }
+    end
+
+    def inbox_rollup_status
+      inbox_sorted_application_statuses.first&.dig(:status) || "empty"
+    end
+
     def has_submitted_permit?
       permit_applications.kept.any?(&:submitted?)
     end

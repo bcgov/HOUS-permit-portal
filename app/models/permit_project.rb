@@ -124,6 +124,7 @@ class PermitProject < ApplicationRecord
       discarded: discarded_at.present?,
       state: state,
       rollup_status: rollup_status,
+      inbox_rollup_status: inbox_rollup_status,
       viewed_at: viewed_at,
       forcasted_completion_date: forcasted_completion_date,
       requirement_template_ids:

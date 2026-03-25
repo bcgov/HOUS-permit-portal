@@ -283,6 +283,7 @@ RSpec.describe PermitProjectState, type: :model do
           instance_double(
             "PermitApplication",
             pertinence_score: 1,
+            inbox_pertinence_score: 40,
             status: "new_draft",
             nickname: "App A"
           )
@@ -290,6 +291,7 @@ RSpec.describe PermitProjectState, type: :model do
           instance_double(
             "PermitApplication",
             pertinence_score: 5,
+            inbox_pertinence_score: 5,
             status: "newly_submitted",
             nickname: "App B"
           )
@@ -299,6 +301,36 @@ RSpec.describe PermitProjectState, type: :model do
         )
 
         expect(project_with_apps.rollup_status).to eq("newly_submitted")
+      end
+    end
+
+    describe "#inbox_rollup_status" do
+      it "returns 'empty' when there are no permit applications" do
+        expect(project.inbox_rollup_status).to eq("empty")
+      end
+
+      it "returns the status of the permit application with highest inbox_pertinence_score" do
+        project_with_apps = build(:permit_project)
+        a =
+          instance_double(
+            "PermitApplication",
+            inbox_pertinence_score: 40,
+            status: "newly_submitted",
+            nickname: "App A"
+          )
+        b =
+          instance_double(
+            "PermitApplication",
+            inbox_pertinence_score: 15,
+            status: "revisions_requested",
+            nickname: "App B"
+          )
+        relation = double("PermitApplicationRelation", kept: [a, b])
+        allow(project_with_apps).to receive(:permit_applications).and_return(
+          relation
+        )
+
+        expect(project_with_apps.inbox_rollup_status).to eq("newly_submitted")
       end
     end
 
