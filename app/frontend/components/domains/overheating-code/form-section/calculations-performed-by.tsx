@@ -1,4 +1,4 @@
-import { Box, Divider, FormControl, FormLabel, Heading, Input, SimpleGrid, Text } from "@chakra-ui/react"
+import { Box, Divider, Flex, FormControl, FormLabel, Heading, Input, SimpleGrid, Text } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useMemo } from "react"
 import { useForm } from "react-hook-form"
@@ -170,8 +170,8 @@ export const CalculationsPerformedBy = observer(function CalculationsPerformedBy
         </Text>
       </Box>
 
-      <SimpleGrid columns={{ base: 1, md: 2 }} spacing={5} mb={6}>
-        <Box borderWidth="1px" borderColor="border.light" borderRadius="md" p={4}>
+      <Flex gap={5} mb={6} direction={{ base: "column", md: "row" }}>
+        <Box flex={1} borderWidth="1px" borderColor="border.light" borderRadius="md" p={4}>
           <FormControl isRequired isInvalid={!!errors.accreditationRef1} mb={4}>
             <FormLabel>{t("overheatingCode.sections.calculationsPerformedBy.fields.accreditationRef1")}</FormLabel>
             <Input {...register("accreditationRef1", { required: true })} />
@@ -183,7 +183,7 @@ export const CalculationsPerformedBy = observer(function CalculationsPerformedBy
           </FormControl>
         </Box>
 
-        <Box borderWidth="1px" borderColor="border.light" borderRadius="md" p={4}>
+        <Box flex={1} borderWidth="1px" borderColor="border.light" borderRadius="md" p={4}>
           <FormControl mb={4}>
             <FormLabel>{t("overheatingCode.sections.calculationsPerformedBy.fields.accreditationRef2")}</FormLabel>
             <Input {...register("accreditationRef2")} />
@@ -194,7 +194,7 @@ export const CalculationsPerformedBy = observer(function CalculationsPerformedBy
             <Input {...register("issuedFor2")} type="date" />
           </FormControl>
         </Box>
-      </SimpleGrid>
+      </Flex>
 
       <FormFooter<ICalculationsPerformedByFormData>
         handleSubmit={handleSubmit}
