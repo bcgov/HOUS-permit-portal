@@ -186,7 +186,7 @@ export async function downloadFromApi(apiPath: string, fallbackFilename: string)
 
   const blob = await response.blob()
   const disposition = response.headers.get("Content-Disposition")
-  const match = disposition?.match(/filename="?(.+?)"?$/)
+  const match = disposition?.match(/filename="(.+?)"/) || disposition?.match(/filename=([^;\s]+)/)
   const filename = match?.[1] || fallbackFilename
   const mimeType = response.headers.get("Content-Type") || "application/octet-stream"
 
