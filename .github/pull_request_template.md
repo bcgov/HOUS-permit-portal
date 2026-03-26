@@ -22,12 +22,12 @@ _Replace this with your description..._
 
 > Link your Jira story/task so it is tracked. Use the `Fixes`, or `Relates to` keywords where applicable.
 
-| Type | Link |
-|------|------|
+| Type                 | Link                                                       |
+| -------------------- | ---------------------------------------------------------- |
 | 🗂️ Jira Story / Task | [HUB-XXXX](https://yourorg.atlassian.net/browse/PROJ-XXXX) |
-| 📄 Related PR(s) | <!-- #PR_NUMBER --> |
-| 📑 Design / Figma | <!-- Paste link --> |
-| 📚 Documentation | <!-- Paste link --> |
+| 📄 Related PR(s)     | <!-- #PR_NUMBER -->                                        |
+| 📑 Design / Figma    | <!-- Paste link -->                                        |
+| 📚 Documentation     | <!-- Paste link -->                                        |
 
 ---
 
@@ -35,9 +35,9 @@ _Replace this with your description..._
 
 > List the key changes, features, or fixes introduced in this PR.
 
-- 
-- 
-- 
+-
+-
+-
 
 ---
 
@@ -51,12 +51,15 @@ _Replace this with your description..._
 4. Verify that `...`
 
 **Expected Behaviour:**
+
 > _Describe what should happen_
 
 **Before this change:**
+
 > _Describe what was happening before (include screenshots if applicable)_
 
 **After this change:**
+
 > _Describe what happens now (include screenshots if applicable)_
 
 ---

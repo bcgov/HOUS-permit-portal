@@ -225,6 +225,7 @@ Rails.application.routes.draw do
         post :pin
         delete :unpin
         get :submission_collaborator_options
+        post :activities, to: "project_audits#index"
         post :mark_as_viewed
         post :mark_as_unviewed
       end

@@ -674,6 +674,10 @@ export enum EPermitProjectSortFields {
   rollupStatus = "rollup_status",
 }
 
+export enum EProjectAuditSortFields {
+  createdAt = "created_at",
+}
+
 export enum EPermitProjectRollupStatus {
   empty = "empty",
   newDraft = "new_draft",

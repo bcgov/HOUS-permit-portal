@@ -175,6 +175,7 @@ class PermitApplicationPolicy < ApplicationPolicy
           JOIN collaborators c ON c.id = pc.collaborator_id
           WHERE pc.permit_application_id = permit_applications.id
             AND pc.collaboration_type = :submission_type
+            AND pc.discarded_at IS NULL
             AND c.user_id = :uid
         )
       SQL
