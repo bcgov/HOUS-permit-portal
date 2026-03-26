@@ -126,6 +126,7 @@ module Api::Concerns::Search::JurisdictionPermitProjects
         }
       )
     agg_search.aggs["state"]["buckets"].each_with_object({}) do |bucket, hash|
+      next if bucket["key"] == "draft"
       hash[bucket["key"]] = bucket["doc_count"]
     end
   rescue => e

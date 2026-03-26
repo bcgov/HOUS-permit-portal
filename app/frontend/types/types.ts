@@ -616,6 +616,15 @@ export interface IProjectAuditSearchFilters {
   from?: string
   to?: string
 }
+
+export interface IProjectAuditSummary {
+  id: string
+  description: string
+  createdAt: number
+  permitApplicationId: string | null
+  permitName: string | null
+}
+
 export interface ITemplateVersionDiff {
   added: IRequirement[]
   removed: IRequirement[]

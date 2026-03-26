@@ -3,7 +3,7 @@ import { flow, Instance, toGenerator, types } from "mobx-state-tree"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
 import { EPermitProjectRollupStatus, EProjectState } from "../types/enums"
-import { IParcelGeometry, IProjectDocument } from "../types/types"
+import { IParcelGeometry, IProjectAuditSummary, IProjectDocument } from "../types/types"
 import { JurisdictionModel } from "./jurisdiction"
 import { IPermitApplication, PermitApplicationModel } from "./permit-application"
 
@@ -50,6 +50,7 @@ export const PermitProjectModel = types
     enqueuedAt: types.maybeNull(types.Date),
     parcelGeometry: types.maybeNull(types.frozen<IParcelGeometry>()),
     inboxSortOrder: types.maybeNull(types.number),
+    recentAudits: types.optional(types.array(types.frozen<IProjectAuditSummary>()), []),
   })
   .extend(withEnvironment())
   .extend(withRootStore())

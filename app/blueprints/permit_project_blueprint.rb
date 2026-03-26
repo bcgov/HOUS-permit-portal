@@ -87,5 +87,10 @@ class PermitProjectBlueprint < Blueprinter::Base
       permit_project.association(:project_documents).reader
     end
     association :jurisdiction, blueprint: JurisdictionBlueprint, view: :base
+    association :recent_audits,
+                blueprint: ProjectAuditBlueprint,
+                view: :base do |permit_project, options|
+      permit_project.recent_audits(options[:current_user])
+    end
   end
 end

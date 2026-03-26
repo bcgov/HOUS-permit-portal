@@ -33,55 +33,7 @@ class ProjectAuditPolicy < ApplicationPolicy
             )
           )
 
-      restrict_by_role(base)
-    end
-
-    private
-
-    def restrict_by_role(relation)
-      if user.submitter?
-        # Hide:
-        # - review collaborations
-        relation.where.not(
-          auditable_type: "PermitCollaboration",
-          auditable_id:
-            PermitCollaboration.where(collaboration_type: :review).select(:id)
-        )
-      elsif user.review_staff?
-        # Hide:
-        # - block status audits
-        # - submission collaboration audits for non-delegatees (assignees)
-        relation
-          .where.not(
-            auditable_type: "PermitCollaboration",
-            auditable_id:
-              PermitCollaboration
-                .where(collaboration_type: :submission)
-                .where.not(collaborator_type: :delegatee)
-                .select(:id)
-          )
-          .where.not(auditable_type: "PermitBlockStatus")
-      else
-        # Hide:
-        # - block status audits
-        # - review collaborations
-        # - submission collaborations for non-delegatees (assignees)
-        relation
-          .where.not(auditable_type: "PermitBlockStatus")
-          .where.not(
-            auditable_type: "PermitCollaboration",
-            auditable_id:
-              PermitCollaboration.where(collaboration_type: :review).select(:id)
-          )
-          .where.not(
-            auditable_type: "PermitCollaboration",
-            auditable_id:
-              PermitCollaboration
-                .where(collaboration_type: :submission)
-                .where.not(collaborator_type: :delegatee)
-                .select(:id)
-          )
-      end
+      ApplicationAudit.visible_to_role(base, user)
     end
   end
 end

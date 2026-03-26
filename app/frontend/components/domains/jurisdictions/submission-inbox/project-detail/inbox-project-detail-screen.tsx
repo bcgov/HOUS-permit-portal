@@ -7,7 +7,6 @@ import { Link as RouterLink, useLocation, useNavigate, useParams } from "react-r
 import { usePermitProject } from "../../../../../hooks/resources/use-permit-project"
 import { ErrorScreen } from "../../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../../shared/base/loading-screen"
-import { RollupStatusBox } from "../../../../shared/permit-projects/rollup-status-box"
 import { ITabItem, ProjectSidebarTabList } from "../../../permit-project/project-sidebar-tab-list"
 import { InboxActivityTab } from "./inbox-activity-tab"
 import { InboxDocumentsTab } from "./inbox-documents-tab"
@@ -72,10 +71,11 @@ export const InboxProjectDetailScreen = observer(() => {
               variant="ghost"
               mr={2}
             />
-            <Heading as="h1" fontWeight={700} fontSize="3xl" flex={1} noOfLines={1}>
+            <Heading as="h1" fontWeight={700} fontSize="3xl" flex={1} noOfLines={1} mb={0}>
               {currentPermitProject.title}
             </Heading>
-            <RollupStatusBox project={currentPermitProject} w="240px" />
+            {/* todo: inbox specific rollup status box? */}
+            {/* <RollupStatusBox project={currentPermitProject} w="240px" /> */}
           </Flex>
         </Container>
       </Flex>

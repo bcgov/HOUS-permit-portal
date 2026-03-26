@@ -224,6 +224,21 @@ class PermitProject < ApplicationRecord
     base.loaded? ? [] : ProjectDocument.none
   end
 
+  def recent_audits(user = nil)
+    return [] if user.nil?
+
+    scope =
+      ApplicationAudit
+        .for_permit_project(id)
+        .includes(:user, :auditable)
+        .order(created_at: :desc)
+
+    scope = ApplicationAudit.visible_to_role(scope, user)
+    audits = scope.limit(3).to_a
+    ApplicationAudit.preload_activity_feed(audits)
+    audits
+  end
+
   private
 
   def fetch_coordinates

@@ -328,6 +328,7 @@ class Api::PermitProjectsController < Api::ApplicationController
     {
       view: view,
       current_user: current_user,
+      viewer: current_user,
       pinned_project_ids: current_user.pinned_permit_project_ids,
       project_ids_with_outdated_drafts: @project_ids_with_outdated_drafts
     }
