@@ -982,6 +982,10 @@ const options = {
               zeroCarbonStepRequired: "Zero carbon step required",
             },
             updateButton: "Update jurisdiction",
+            accordion: {
+              overviewProcess: "Overview & Process",
+              keyInformation: "Key Information",
+            },
           },
           new: {
             title: "Create new jurisdiction",
