@@ -38,15 +38,7 @@ export const KanbanCard = observer(function KanbanCard({ id, onMarkUnread, statu
       _hover={{ shadow: "sm" }}
       position="relative"
     >
-      <HStack
-        position="absolute"
-        top={2}
-        right={2}
-        spacing={0}
-        opacity={0}
-        _groupHover={{ opacity: 1 }}
-        transition="opacity 0.15s"
-      >
+      <HStack position="absolute" top={2} right={2} spacing={0}>
         <IconButton
           aria-label="Move"
           icon={<DotsSixVertical />}

@@ -1,10 +1,11 @@
-import { Badge, Flex, HStack, IconButton, Text } from "@chakra-ui/react"
+import { Badge, Button, Flex, HStack, IconButton, Text } from "@chakra-ui/react"
 import { closestCenter, DndContext, DragEndEvent, PointerSensor, useSensor, useSensors } from "@dnd-kit/core"
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers"
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
 import { CaretDoubleLeft, CaretDoubleRight } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { ReactNode, useCallback, useMemo } from "react"
+import { useTranslation } from "react-i18next"
 
 export interface IKanbanColumn {
   key: string
@@ -29,10 +30,11 @@ interface IProps<T extends IKanbanItem> {
   columns: IKanbanColumn[]
   items: T[]
   stateCounts: Record<string, number>
+  columnTotals?: Record<string, number>
   collapsedColumns: string[]
   onToggleColumn: (columnKey: string) => void
   renderCard: (item: T) => ReactNode
-  overflowBanner?: ReactNode
+  onShowMore?: (columnKey: string) => void
   onReorder?: (event: IReorderEvent) => void
 }
 
@@ -40,12 +42,14 @@ function KanbanBoardInner<T extends IKanbanItem>({
   columns,
   items,
   stateCounts,
+  columnTotals,
   collapsedColumns,
   onToggleColumn,
   renderCard,
-  overflowBanner,
+  onShowMore,
   onReorder,
 }: IProps<T>) {
+  const { t } = useTranslation()
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }))
 
   const groupedItems = useMemo(() => {
@@ -114,6 +118,8 @@ function KanbanBoardInner<T extends IKanbanItem>({
             const isCollapsed = isEmpty || isManuallyCollapsed
             const displayedCount = columnItems.length
             const totalCount = stateCounts[column.key] ?? displayedCount
+            const filteredTotal = columnTotals?.[column.key] ?? totalCount
+            const hasMore = displayedCount < filteredTotal
 
             return (
               <Flex
@@ -197,6 +203,12 @@ function KanbanBoardInner<T extends IKanbanItem>({
                       <SortableContext items={columnItems.map((i) => i.id)} strategy={verticalListSortingStrategy}>
                         {columnItems.map((item) => renderCard(item))}
                       </SortableContext>
+                      {hasMore && onShowMore && (
+                        <Button variant="link" size="sm" flexShrink={0} onClick={() => onShowMore(column.key)}>
+                          {/* @ts-ignore */}
+                          {t("submissionInbox.showMoreInColumn", { count: totalCount - displayedCount })}
+                        </Button>
+                      )}
                     </Flex>
                   </>
                 )}
@@ -205,7 +217,6 @@ function KanbanBoardInner<T extends IKanbanItem>({
           })}
         </Flex>
       </DndContext>
-      {overflowBanner}
     </Flex>
   )
 }

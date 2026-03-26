@@ -109,11 +109,11 @@ module PermitProjectState
     acts_as_taggable_on :flags
 
     def self.kanban_states
-      %w[queued waiting in_progress ready permit_issued active complete]
+      %w[queued waiting in_progress ready permit_issued active complete closed]
     end
 
     def self.off_board_states
-      %w[draft closed]
+      %w[draft]
     end
 
     def self.terminal_states

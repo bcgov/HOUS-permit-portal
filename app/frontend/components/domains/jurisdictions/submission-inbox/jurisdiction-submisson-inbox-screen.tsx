@@ -1,9 +1,10 @@
-import { Box, Button, ButtonGroup, Flex, Heading, HStack, Icon, Text, VStack } from "@chakra-ui/react"
+import { Box, Button, ButtonGroup, Circle, Flex, Heading, HStack, Icon, Text, VStack } from "@chakra-ui/react"
 import { CalendarBlank, Columns, List, ListBullets, Stack } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useRef } from "react"
 import { useTranslation } from "react-i18next"
 import { useJurisdiction } from "../../../../hooks/resources/use-jurisdiction"
+import { usePopStateModeSync } from "../../../../hooks/use-popstate-mode-sync"
 import { useSearch } from "../../../../hooks/use-search"
 import { useMst } from "../../../../setup/root"
 import { EInboxDisplayMode, EInboxViewMode } from "../../../../types/enums"
@@ -25,7 +26,6 @@ import {
 import { ProjectInboxTable } from "./project-inbox-table"
 import { ProjectKanbanBoard } from "./project-kanban-board"
 
-const KANBAN_PER_PAGE = 50
 const LIST_DEFAULT_PER_PAGE = 10
 
 export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionSubmissionInbox() {
@@ -40,6 +40,8 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
   const activeSearchStore = viewMode === EInboxViewMode.projects ? permitProjectSearch : permitApplicationSearch
   const prevDisplayModeRef = useRef(displayMode)
 
+  usePopStateModeSync(submissionInboxStore)
+
   useEffect(() => {
     const switchedToColumns =
       displayMode === EInboxDisplayMode.columns && prevDisplayModeRef.current !== EInboxDisplayMode.columns
@@ -47,8 +49,8 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
       displayMode === EInboxDisplayMode.list && prevDisplayModeRef.current !== EInboxDisplayMode.list
 
     if (switchedToColumns) {
-      activeSearchStore.setCountPerPage(KANBAN_PER_PAGE)
-      activeSearchStore.search({ countPerPage: KANBAN_PER_PAGE })
+      activeSearchStore.setStatusFilter([] as any)
+      activeSearchStore.search()
     } else if (switchedToList) {
       activeSearchStore.setCountPerPage(LIST_DEFAULT_PER_PAGE)
       activeSearchStore.search({ countPerPage: LIST_DEFAULT_PER_PAGE })
@@ -62,20 +64,12 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
   if (error) return <ErrorScreen error={error} />
   if (!currentJurisdiction) return <LoadingScreen />
 
-  const hasKanbanOverflow = displayMode === EInboxDisplayMode.columns && (activeSearchStore.totalPages ?? 0) > 1
-
-  const overflowBanner = hasKanbanOverflow ? (
-    <HStack w="full" justify="center" py={3} spacing={1}>
-      <Text fontSize="sm" color="text.secondary">
-        {/* @ts-ignore */}
-        {t("submissionInbox.kanbanOverflowMessage")}
-      </Text>
-      <Button variant="link" size="sm" onClick={() => setDisplayMode(EInboxDisplayMode.list)}>
-        {/* @ts-ignore */}
-        {t("submissionInbox.seeMore")}
-      </Button>
-    </HStack>
-  ) : undefined
+  const handleShowMore = (columnState: string) => {
+    setDisplayMode(EInboxDisplayMode.list)
+    permitProjectSearch.setStatusFilter([columnState])
+    permitProjectSearch.setCountPerPage(LIST_DEFAULT_PER_PAGE)
+    permitProjectSearch.search({ countPerPage: LIST_DEFAULT_PER_PAGE })
+  }
 
   return (
     <Flex as="main" h="calc(100vh - var(--app-navbar-height, 0px))" overflow="hidden">
@@ -127,11 +121,13 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
 
             <Heading as="h1">{t("permitApplication.submissionInbox.title")}</Heading>
 
-            {/* Search bar */}
-            <Box w="full">
+            {/* Search bar + view toggles */}
+            <HStack w="full" spacing={4}>
               <Box
                 as="input"
-                w="full"
+                flex={1}
+                minW={0}
+                maxW="50%"
                 p={2}
                 px={4}
                 border="1px solid"
@@ -145,7 +141,51 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
                   activeSearchStore.search()
                 }}
               />
-            </Box>
+
+              <HStack spacing={3} flexShrink={0}>
+                <ButtonGroup isAttached variant="outline" size="sm">
+                  <Button
+                    onClick={() => setViewMode(EInboxViewMode.projects)}
+                    fontWeight={viewMode === EInboxViewMode.projects ? "bold" : "normal"}
+                    borderColor={viewMode === EInboxViewMode.projects ? "theme.blueActive" : "border.light"}
+                    leftIcon={<RadioDot active={viewMode === EInboxViewMode.projects} />}
+                    rightIcon={<Icon as={Stack} />}
+                  >
+                    {t("submissionInbox.projects")}
+                  </Button>
+                  <Button
+                    onClick={() => setViewMode(EInboxViewMode.applications)}
+                    fontWeight={viewMode === EInboxViewMode.applications ? "bold" : "normal"}
+                    borderColor={viewMode === EInboxViewMode.applications ? "theme.blueActive" : "border.light"}
+                    leftIcon={<RadioDot active={viewMode === EInboxViewMode.applications} />}
+                    rightIcon={<Icon as={ListBullets} />}
+                  >
+                    {t("submissionInbox.applications")}
+                  </Button>
+                </ButtonGroup>
+
+                <ButtonGroup isAttached variant="outline" size="sm">
+                  <Button
+                    onClick={() => setDisplayMode(EInboxDisplayMode.list)}
+                    fontWeight={displayMode === EInboxDisplayMode.list ? "bold" : "normal"}
+                    borderColor={displayMode === EInboxDisplayMode.list ? "theme.blueActive" : "border.light"}
+                    leftIcon={<RadioDot active={displayMode === EInboxDisplayMode.list} />}
+                    rightIcon={<Icon as={List} />}
+                  >
+                    {t("submissionInbox.list")}
+                  </Button>
+                  <Button
+                    onClick={() => setDisplayMode(EInboxDisplayMode.columns)}
+                    fontWeight={displayMode === EInboxDisplayMode.columns ? "bold" : "normal"}
+                    borderColor={displayMode === EInboxDisplayMode.columns ? "theme.blueActive" : "border.light"}
+                    leftIcon={<RadioDot active={displayMode === EInboxDisplayMode.columns} />}
+                    rightIcon={<Icon as={Columns} />}
+                  >
+                    {t("submissionInbox.columns")}
+                  </Button>
+                </ButtonGroup>
+              </HStack>
+            </HStack>
 
             {/* Filter bar */}
             <HStack spacing={2} flexWrap="wrap">
@@ -217,51 +257,6 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
                 {t("submissionInbox.clearAllFilters")}
               </Button>
             </HStack>
-
-            {/* View toggles */}
-            <HStack spacing={4}>
-              <ButtonGroup isAttached variant="outline" size="sm">
-                <Button
-                  onClick={() => setViewMode(EInboxViewMode.projects)}
-                  bg={viewMode === EInboxViewMode.projects ? "white" : undefined}
-                  fontWeight={viewMode === EInboxViewMode.projects ? "bold" : "normal"}
-                  borderColor="border.light"
-                  leftIcon={<Icon as={Stack} />}
-                >
-                  {t("submissionInbox.projects")}
-                </Button>
-                <Button
-                  onClick={() => setViewMode(EInboxViewMode.applications)}
-                  bg={viewMode === EInboxViewMode.applications ? "white" : undefined}
-                  fontWeight={viewMode === EInboxViewMode.applications ? "bold" : "normal"}
-                  borderColor="border.light"
-                  leftIcon={<Icon as={ListBullets} />}
-                >
-                  {t("submissionInbox.applications")}
-                </Button>
-              </ButtonGroup>
-
-              <ButtonGroup isAttached variant="outline" size="sm">
-                <Button
-                  onClick={() => setDisplayMode(EInboxDisplayMode.list)}
-                  bg={displayMode === EInboxDisplayMode.list ? "white" : undefined}
-                  fontWeight={displayMode === EInboxDisplayMode.list ? "bold" : "normal"}
-                  borderColor="border.light"
-                  leftIcon={<Icon as={List} />}
-                >
-                  {t("submissionInbox.list")}
-                </Button>
-                <Button
-                  onClick={() => setDisplayMode(EInboxDisplayMode.columns)}
-                  bg={displayMode === EInboxDisplayMode.columns ? "white" : undefined}
-                  fontWeight={displayMode === EInboxDisplayMode.columns ? "bold" : "normal"}
-                  borderColor="border.light"
-                  leftIcon={<Icon as={Columns} />}
-                >
-                  {t("submissionInbox.columns")}
-                </Button>
-              </ButtonGroup>
-            </HStack>
           </VStack>
         </Box>
 
@@ -280,7 +275,7 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
             permitProjectSearch={permitProjectSearch}
             permitApplicationSearch={permitApplicationSearch}
             submissionInboxStore={submissionInboxStore}
-            overflowBanner={overflowBanner}
+            onShowMore={handleShowMore}
           />
         </Flex>
       </Flex>
@@ -288,20 +283,35 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
   )
 })
 
+function RadioDot({ active }: { active: boolean }) {
+  return (
+    <Circle
+      size="16px"
+      border="4px solid"
+      borderColor={active ? "theme.blueActive" : "gray.300"}
+      display="flex"
+      alignItems="center"
+      justifyContent="center"
+    >
+      {!active && <Circle size="8px" bg="white" />}
+    </Circle>
+  )
+}
+
 const InboxContent = observer(function InboxContent({
   viewMode,
   displayMode,
   permitProjectSearch,
   permitApplicationSearch,
   submissionInboxStore,
-  overflowBanner,
+  onShowMore,
 }: {
   viewMode: EInboxViewMode
   displayMode: EInboxDisplayMode
   permitProjectSearch: any
   permitApplicationSearch: any
   submissionInboxStore: any
-  overflowBanner?: React.ReactNode
+  onShowMore?: (columnState: string) => void
 }) {
   const activeSearch = viewMode === EInboxViewMode.projects ? permitProjectSearch : permitApplicationSearch
 
@@ -319,9 +329,10 @@ const InboxContent = observer(function InboxContent({
         <ProjectKanbanBoard
           projects={permitProjectSearch.tablePermitProjects}
           stateCounts={permitProjectSearch.stateCounts}
+          columnTotals={permitProjectSearch.columnTotals}
           collapsedColumns={[...submissionInboxStore.collapsedColumns]}
           onToggleColumn={(state) => submissionInboxStore.toggleColumnCollapsed(state)}
-          overflowBanner={overflowBanner}
+          onShowMore={onShowMore}
           onReorder={(event) => permitProjectSearch.reorderProjects(event.orderedIds)}
         />
       )
@@ -332,7 +343,6 @@ const InboxContent = observer(function InboxContent({
         stateCounts={{}}
         collapsedColumns={[...submissionInboxStore.collapsedColumns]}
         onToggleColumn={(state) => submissionInboxStore.toggleColumnCollapsed(state)}
-        overflowBanner={overflowBanner}
       />
     )
   }

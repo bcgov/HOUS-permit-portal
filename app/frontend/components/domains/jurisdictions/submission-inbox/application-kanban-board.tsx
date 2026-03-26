@@ -13,7 +13,6 @@ interface IProps {
   stateCounts: Record<string, number>
   collapsedColumns: string[]
   onToggleColumn: (columnKey: string) => void
-  overflowBanner?: React.ReactNode
 }
 
 const APPLICATION_KANBAN_COLUMNS: EPermitApplicationStatus[] = [
@@ -29,7 +28,6 @@ export const ApplicationKanbanBoard = observer(function ApplicationKanbanBoard({
   stateCounts,
   collapsedColumns,
   onToggleColumn,
-  overflowBanner,
 }: IProps) {
   const { t } = useTranslation()
 
@@ -55,7 +53,6 @@ export const ApplicationKanbanBoard = observer(function ApplicationKanbanBoard({
       stateCounts={stateCounts}
       collapsedColumns={collapsedColumns}
       onToggleColumn={onToggleColumn}
-      overflowBanner={overflowBanner}
       renderCard={(item) => {
         const application = applications.find((a) => a.id === item.id)
         if (!application) return null

@@ -17,7 +17,7 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react"
-import { Buildings, CalendarBlank, Swap } from "@phosphor-icons/react"
+import { CalendarBlank, Swap } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useMemo } from "react"
 import { useTranslation } from "react-i18next"
@@ -31,9 +31,10 @@ import { KanbanCard } from "./kanban-card"
 interface IProps {
   projects: IPermitProject[]
   stateCounts: Record<string, number>
+  columnTotals?: Record<string, number>
   collapsedColumns: string[]
   onToggleColumn: (columnState: string) => void
-  overflowBanner?: React.ReactNode
+  onShowMore?: (columnState: string) => void
   onReorder?: (event: IReorderEvent) => void
 }
 
@@ -45,14 +46,16 @@ const KANBAN_COLUMNS: EProjectState[] = [
   EProjectState.permitIssued,
   EProjectState.active,
   EProjectState.complete,
+  EProjectState.closed,
 ]
 
 export const ProjectKanbanBoard = observer(function ProjectKanbanBoard({
   projects,
   stateCounts,
+  columnTotals,
   collapsedColumns,
   onToggleColumn,
-  overflowBanner,
+  onShowMore,
   onReorder,
 }: IProps) {
   const { t } = useTranslation()
@@ -62,7 +65,7 @@ export const ProjectKanbanBoard = observer(function ProjectKanbanBoard({
       KANBAN_COLUMNS.map((state) => ({
         key: state,
         // @ts-ignore
-        label: t(`submissionInbox.projectStatuses.${state}`),
+        label: t(`submissionInbox.projectStates.${state}`),
       })),
     [t]
   )
@@ -78,9 +81,10 @@ export const ProjectKanbanBoard = observer(function ProjectKanbanBoard({
       columns={columns}
       items={items}
       stateCounts={stateCounts}
+      columnTotals={columnTotals}
       collapsedColumns={collapsedColumns}
       onToggleColumn={onToggleColumn}
-      overflowBanner={overflowBanner}
+      onShowMore={onShowMore}
       onReorder={onReorder}
       renderCard={(item) => {
         const project = projects.find((p) => p.id === item.id)
@@ -101,18 +105,12 @@ const ProjectKanbanCard = observer(function ProjectKanbanCard({ project }: { pro
   return (
     <KanbanCard
       id={project.id}
-      onMarkUnread={() => project.markAsUnviewed()}
+      onMarkUnread={isUnread ? undefined : () => project.markAsUnviewed()}
       statusMenu={<ChangeStatusMenu project={project} />}
     >
       <Box as={Link} to={`projects/${project.id}/overview`} _hover={{ textDecoration: "none" }} display="block">
         <HStack spacing={2} mb={1}>
-          {isUnread ? (
-            <Circle size="8px" bg={"theme.blueActive"} flexShrink={0} />
-          ) : (
-            <Box p={1} borderRadius="sm" bg="greys.grey10" flexShrink={0}>
-              <Buildings size={14} />
-            </Box>
-          )}
+          {isUnread && <Circle size="8px" bg={"theme.blueActive"} flexShrink={0} />}
           {/* ### SUBMISSION INDEX STUB FEATURE */}
           <Icon as={CalendarBlank} color="text.secondary" boxSize={4} display="none" />
           <Text fontWeight={700} fontSize="sm" noOfLines={1}>
@@ -128,7 +126,7 @@ const ProjectKanbanCard = observer(function ProjectKanbanCard({ project }: { pro
           {project.shortAddress}
         </Text>
         {project.pid && (
-          <Text fontSize="xs" color="text.secondary">
+          <Text fontSize="2xs" color="text.secondary">
             PID {project.pid}
           </Text>
         )}
@@ -196,7 +194,7 @@ const ChangeStatusMenu = observer(function ChangeStatusMenu({ project }: { proje
               }}
             >
               {/* @ts-ignore */}
-              {t(`submissionInbox.projectStatuses.${transition}`)}
+              {t(`submissionInbox.projectStates.${transition}`)}
             </MenuItem>
           ))}
         </MenuList>
@@ -230,7 +228,10 @@ const RollupStatusBadge = observer(function RollupStatusBadge({ project }: { pro
             </Text>
             <VStack align="stretch" spacing={1}>
               {sortedStatuses.map((entry, idx) => (
-                <HStack key={idx} spacing={2}>
+                <HStack key={idx} spacing={2} justify="space-between">
+                  <Text fontSize="xs" color="text.secondary" noOfLines={1}>
+                    {entry.nickname || "—"}
+                  </Text>
                   <PermitApplicationStatusTag
                     status={entry.status}
                     size="sm"
@@ -239,9 +240,6 @@ const RollupStatusBadge = observer(function RollupStatusBadge({ project }: { pro
                     fontSize="2xs"
                     flexShrink={0}
                   />
-                  <Text fontSize="xs" color="text.secondary" noOfLines={1}>
-                    {entry.nickname || "—"}
-                  </Text>
                 </HStack>
               ))}
             </VStack>

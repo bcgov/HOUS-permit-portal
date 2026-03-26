@@ -164,9 +164,11 @@ export const PermitProjectModel = types
       return response.ok
     }),
     transitionState: flow(function* (targetState: string) {
+      const oldState = self.state
       const response = yield* toGenerator(self.environment.api.transitionPermitProjectState(self.id, targetState))
       if (response.ok) {
         self.rootStore.permitProjectStore.mergeUpdate(response.data.data, "permitProjectMap")
+        self.rootStore.submissionInboxStore?.permitProjectSearch?.adjustCountsForTransition(oldState, targetState)
       }
       return response
     }),

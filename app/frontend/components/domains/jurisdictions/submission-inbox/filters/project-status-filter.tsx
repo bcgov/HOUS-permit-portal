@@ -25,12 +25,12 @@ export const ProjectStatusFilter = observer(function ProjectStatusFilter({
     .map((status) => ({
       value: status,
       // @ts-ignore
-      label: t(`submissionInbox.projectStatuses.${status}`),
+      label: t(`submissionInbox.projectStates.${status}`),
     }))
 
   return (
     <InboxFilter
-      title={t("submissionInbox.filters.projectStatuses")}
+      title={t("submissionInbox.filters.projectStates")}
       isMulti={true}
       value={value}
       onChange={(val) => onChange(val as string[])}

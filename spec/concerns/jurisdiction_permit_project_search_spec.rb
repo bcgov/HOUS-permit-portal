@@ -229,23 +229,17 @@ RSpec.describe Api::Concerns::Search::JurisdictionPermitProjects,
       end
     end
 
-    context "with status filter" do
+    context "with status filter (project state)" do
       let(:search_params) do
-        {
-          query: "",
-          page: 1,
-          per_page: 50,
-          filters: {
-            status: ["newly_submitted"]
-          }
-        }
+        { query: "", page: 1, per_page: 50, filters: { status: ["queued"] } }
       end
 
-      it "returns only projects matching the rollup status" do
+      it "returns only projects matching the given state" do
         perform_search
         ids = search_result_ids
 
-        expect(ids).to include(project_a.id, project_b.id, project_c.id)
+        expect(ids).to include(project_a.id, project_c.id)
+        expect(ids).not_to include(project_b.id)
       end
     end
 
@@ -362,6 +356,92 @@ RSpec.describe Api::Concerns::Search::JurisdictionPermitProjects,
         ids = search_result_ids
 
         expect(ids).to include(project_a.id, project_b.id, project_c.id)
+      end
+    end
+
+    context "kanban mode" do
+      let(:search_params) { { query: "", mode: "kanban", per_column: 10 } }
+
+      it "returns projects grouped by kanban state" do
+        perform_search
+        ids = search_result_ids
+
+        expect(ids).to include(project_a.id, project_b.id, project_c.id)
+        expect(ids).not_to include(draft_project.id)
+        expect(ids).not_to include(other_jurisdiction_project.id)
+      end
+
+      it "populates meta with column_totals" do
+        perform_search
+        meta =
+          controller.instance_variable_get(:@jurisdiction_permit_project_meta)
+
+        expect(meta).to include(:column_totals, :state_counts)
+        expect(meta[:column_totals]["queued"]).to eq(2)
+        expect(meta[:column_totals]["in_progress"]).to eq(1)
+      end
+
+      it "state_counts remain unfiltered regardless of mode" do
+        perform_search
+        meta =
+          controller.instance_variable_get(:@jurisdiction_permit_project_meta)
+
+        total = meta[:state_counts].values.sum
+        expect(total).to eq(3)
+      end
+
+      context "with per_column limit" do
+        let(:search_params) { { query: "", mode: "kanban", per_column: 1 } }
+
+        it "limits results per column" do
+          perform_search
+          ids = search_result_ids
+          meta =
+            controller.instance_variable_get(:@jurisdiction_permit_project_meta)
+
+          queued_ids =
+            ids.select { |id| [project_a.id, project_c.id].include?(id) }
+          expect(queued_ids.length).to eq(1)
+          expect(meta[:column_totals]["queued"]).to eq(2)
+        end
+      end
+
+      context "with unread filter" do
+        let(:search_params) do
+          {
+            query: "",
+            mode: "kanban",
+            per_column: 10,
+            filters: {
+              unread: "hide"
+            }
+          }
+        end
+
+        it "respects filters within each column" do
+          perform_search
+          ids = search_result_ids
+
+          expect(ids).to include(project_b.id)
+          expect(ids).not_to include(project_a.id, project_c.id)
+        end
+
+        it "column_totals reflect filtered counts" do
+          perform_search
+          meta =
+            controller.instance_variable_get(:@jurisdiction_permit_project_meta)
+
+          expect(meta[:column_totals]["queued"]).to eq(0)
+          expect(meta[:column_totals]["in_progress"]).to eq(1)
+        end
+
+        it "state_counts remain unfiltered" do
+          perform_search
+          meta =
+            controller.instance_variable_get(:@jurisdiction_permit_project_meta)
+
+          expect(meta[:state_counts]["queued"]).to eq(2)
+        end
       end
     end
   end

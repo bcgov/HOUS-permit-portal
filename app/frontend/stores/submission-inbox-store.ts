@@ -1,3 +1,4 @@
+import * as humps from "humps"
 import { t } from "i18next"
 import { cast, flow, Instance, types } from "mobx-state-tree"
 import { createSearchModel } from "../lib/create-search-model"
@@ -11,10 +12,21 @@ import {
   EPermitApplicationInboxSortFields,
   EPermitApplicationStatus,
   EPermitProjectInboxSortFields,
+  EProjectState,
   ERadioFilterValue,
 } from "../types/enums"
 import { IPermitApplicationInboxSearchFilters, IPermitProjectInboxSearchFilters, TSearchParams } from "../types/types"
-import { setQueryParam } from "../utils/utility-functions"
+import { pushQueryParams, setQueryParam } from "../utils/utility-functions"
+
+const KANBAN_PER_COLUMN = 10
+
+function decamelizeHashKeys(hash: Record<string, number>): Record<string, number> {
+  const result: Record<string, number> = {}
+  for (const [key, value] of Object.entries(hash)) {
+    result[humps.decamelize(key)] = value
+  }
+  return result
+}
 
 // ---------------------------------------------------------------------------
 // Sub-store: Permit Project Inbox Search
@@ -25,6 +37,7 @@ export const PermitProjectInboxStoreModel = types
     types.model("PermitProjectInboxStore", {
       tablePermitProjects: types.array(types.reference(PermitProjectModel)),
       stateCounts: types.optional(types.frozen<Record<string, number>>(), {}),
+      columnTotals: types.optional(types.frozen<Record<string, number>>(), {}),
       requirementTemplateIdFilter: types.optional(types.array(types.string), []),
       statusFilter: types.optional(types.array(types.string), []),
       unreadFilter: types.optional(types.enumeration(Object.values(ERadioFilterValue)), ERadioFilterValue.include),
@@ -55,7 +68,10 @@ export const PermitProjectInboxStoreModel = types
       self.tablePermitProjects = cast(projects.map((p) => p.id))
     },
     setStateCounts(counts: Record<string, number>) {
-      self.stateCounts = counts
+      self.stateCounts = decamelizeHashKeys(counts)
+    },
+    setColumnTotals(counts: Record<string, number>) {
+      self.columnTotals = decamelizeHashKeys(counts)
     },
     setRequirementTemplateIdFilter(value: string[]) {
       self.requirementTemplateIdFilter = cast(value)
@@ -82,6 +98,17 @@ export const PermitProjectInboxStoreModel = types
     setAssignedFilter(value: string[]) {
       self.assignedFilter = cast(value)
     },
+    adjustCountsForTransition(oldState: string, newState: string) {
+      const sc = { ...self.stateCounts }
+      if (sc[oldState] != null) sc[oldState] = Math.max(0, sc[oldState] - 1)
+      sc[newState] = (sc[newState] ?? 0) + 1
+      self.stateCounts = sc
+
+      const ct = { ...self.columnTotals }
+      if (ct[oldState] != null) ct[oldState] = Math.max(0, ct[oldState] - 1)
+      ct[newState] = (ct[newState] ?? 0) + 1
+      self.columnTotals = ct
+    },
   }))
   .actions((self) => ({
     searchJurisdictionPermitProjects: flow(function* (opts?: {
@@ -93,11 +120,15 @@ export const PermitProjectInboxStoreModel = types
         self.resetPages()
       }
 
+      const isKanban = self.rootStore?.submissionInboxStore?.displayMode === EInboxDisplayMode.columns
+
       const searchParams: TSearchParams<EPermitProjectInboxSortFields, IPermitProjectInboxSearchFilters> = {
         query: self.query,
         sort: self.sort,
-        page: opts?.page ?? self.currentPage,
-        perPage: opts?.countPerPage ?? self.countPerPage,
+        page: isKanban ? undefined : (opts?.page ?? self.currentPage),
+        perPage: isKanban ? undefined : (opts?.countPerPage ?? self.countPerPage),
+        mode: isKanban ? "kanban" : "list",
+        perColumn: isKanban ? KANBAN_PER_COLUMN : undefined,
         filters: {
           requirementTemplateIds:
             self.requirementTemplateIdFilter.length > 0 ? [...self.requirementTemplateIdFilter] : undefined,
@@ -124,6 +155,9 @@ export const PermitProjectInboxStoreModel = types
         if (response.data.meta?.stateCounts) {
           self.setStateCounts(response.data.meta.stateCounts)
         }
+        if (response.data.meta?.columnTotals) {
+          self.setColumnTotals(response.data.meta.columnTotals)
+        }
       }
       return response.ok
     }),
@@ -143,12 +177,12 @@ export const PermitProjectInboxStoreModel = types
   }))
   .actions((self) => ({
     resetFilters() {
-      self.requirementTemplateIdFilter = cast([])
-      self.statusFilter = cast([])
-      self.unreadFilter = ERadioFilterValue.include
-      self.meetingRequestFilter = ERadioFilterValue.include
-      self.daysInQueueFilter = null
-      self.assignedFilter = cast([])
+      self.setRequirementTemplateIdFilter([])
+      self.setStatusFilter([])
+      self.setUnreadFilter(ERadioFilterValue.include)
+      self.setMeetingRequestFilter(ERadioFilterValue.include)
+      self.setDaysInQueueFilter(null)
+      self.setAssignedFilter([])
       self.searchJurisdictionPermitProjects({ reset: true })
     },
     reorderProjects: flow(function* (orderedIds: string[]) {
@@ -286,12 +320,12 @@ export const PermitApplicationInboxStoreModel = types
   }))
   .actions((self) => ({
     resetFilters() {
-      self.requirementTemplateIdFilter = cast([])
-      self.statusFilter = cast([])
-      self.unreadFilter = ERadioFilterValue.include
-      self.meetingRequestFilter = ERadioFilterValue.include
-      self.daysInQueueFilter = null
-      self.assignedFilter = cast([])
+      self.setRequirementTemplateIdFilter([])
+      self.setStatusFilter([] as any)
+      self.setUnreadFilter(ERadioFilterValue.include)
+      self.setMeetingRequestFilter(ERadioFilterValue.include)
+      self.setDaysInQueueFilter(null)
+      self.setAssignedFilter([])
       self.searchJurisdictionPermitApplications({ reset: true })
     },
   }))
@@ -304,16 +338,29 @@ export const SubmissionInboxStoreModel = types
   .model("SubmissionInboxStore", {
     viewMode: types.optional(types.enumeration(Object.values(EInboxViewMode)), EInboxViewMode.projects),
     displayMode: types.optional(types.enumeration(Object.values(EInboxDisplayMode)), EInboxDisplayMode.list),
-    collapsedColumns: types.optional(types.array(types.string), []),
+    collapsedColumns: types.optional(types.array(types.string), [EProjectState.complete, EProjectState.closed]),
     permitProjectSearch: types.optional(PermitProjectInboxStoreModel, {}),
     permitApplicationSearch: types.optional(PermitApplicationInboxStoreModel, {}),
   })
   .actions((self) => ({
     setViewMode(mode: EInboxViewMode) {
       self.viewMode = mode
+      pushQueryParams({ viewMode: mode, displayMode: self.displayMode })
     },
     setDisplayMode(mode: EInboxDisplayMode) {
       self.displayMode = mode
+      pushQueryParams({ viewMode: self.viewMode, displayMode: mode })
+    },
+    restoreModesFromUrl() {
+      const params = new URLSearchParams(window.location.search)
+      const urlView = params.get("viewMode") as EInboxViewMode | null
+      const urlDisplay = params.get("displayMode") as EInboxDisplayMode | null
+      if (urlView && Object.values(EInboxViewMode).includes(urlView)) {
+        self.viewMode = urlView
+      }
+      if (urlDisplay && Object.values(EInboxDisplayMode).includes(urlDisplay)) {
+        self.displayMode = urlDisplay
+      }
     },
     toggleColumnCollapsed(columnState: string) {
       const idx = self.collapsedColumns.indexOf(columnState)

@@ -110,6 +110,8 @@ export type TSearchParams<IModelSortFields, IModelFilterFields = {}> = {
   showArchived?: boolean
   visibility?: TVisibility
   filters?: IModelFilterFields
+  mode?: "list" | "kanban"
+  perColumn?: number
 }
 
 export type TComputedCompliance = {

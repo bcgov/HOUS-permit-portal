@@ -176,7 +176,7 @@ export const ProjectInboxTable = observer(function ProjectInboxTable({ searchSto
                   fontSize="xs"
                 >
                   {/* @ts-ignore */}
-                  {t(`submissionInbox.projectStatuses.${project.state}`)}
+                  {t(`submissionInbox.projectStates.${project.state}`)}
                 </Tag>
               </SearchGridItem>
             </Box>
