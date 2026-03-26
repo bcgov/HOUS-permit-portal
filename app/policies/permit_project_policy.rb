@@ -69,6 +69,10 @@ class PermitProjectPolicy < ApplicationPolicy
     user_is_review_staff_for_jurisdiction?
   end
 
+  def transition_state?
+    user_is_review_staff_for_jurisdiction? && !record.draft?
+  end
+
   # Allow bulk creation of permit applications under a project
   def create_permit_applications?
     user_is_owner?

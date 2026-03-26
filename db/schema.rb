@@ -100,9 +100,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_03_18_214545) do
     t.index ["contactable_type", "contactable_id"], name: "index_contacts_on_contactable"
   end
 
-  create_table "data_migrations", primary_key: "version", id: :string, force: :cascade do |t|
-  end
-
   create_table "design_documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "pre_check_id", null: false
     t.text "file_data"
@@ -589,6 +586,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_03_18_214545) do
     t.datetime "discarded_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "state", default: 0, null: false
     t.string "number"
     t.decimal "latitude", precision: 10, scale: 6
     t.decimal "longitude", precision: 10, scale: 6
@@ -597,7 +595,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_03_18_214545) do
     t.string "last_name_snapshot"
     t.datetime "orphaned_at"
     t.jsonb "parcel_geometry"
-    t.integer "status", default: 0, null: false
     t.datetime "viewed_at"
     t.index ["jurisdiction_id"], name: "index_permit_projects_on_jurisdiction_id"
     t.index ["number"], name: "index_permit_projects_on_number", unique: true

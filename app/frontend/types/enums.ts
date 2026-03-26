@@ -47,8 +47,12 @@ export enum EResourceType {
 export enum EPermitApplicationStatus {
   newDraft = "new_draft",
   newlySubmitted = "newly_submitted",
+  inReview = "in_review",
   revisionsRequested = "revisions_requested",
   resubmitted = "resubmitted",
+  approved = "approved",
+  issued = "issued",
+  withdrawn = "withdrawn",
   ephemeral = "ephemeral",
 }
 
@@ -682,20 +686,23 @@ export enum EPermitProjectRollupStatus {
   empty = "empty",
   newDraft = "new_draft",
   newlySubmitted = "newly_submitted",
+  inReview = "in_review",
   revisionsRequested = "revisions_requested",
   resubmitted = "resubmitted",
   approved = "approved",
+  issued = "issued",
+  withdrawn = "withdrawn",
 }
 
-export enum EProjectStatus {
-  inquiry = "inquiry",
-  intake = "intake",
-  onHold = "on_hold",
-  inReview = "in_review",
-  awaitingPayment = "awaiting_payment",
+export enum EProjectState {
+  draft = "draft",
+  queued = "queued",
+  waiting = "waiting",
+  inProgress = "in_progress",
+  ready = "ready",
+  permitIssued = "permit_issued",
   active = "active",
-  inspections = "inspections",
-  occupancy = "occupancy",
+  complete = "complete",
   closed = "closed",
 }
 
@@ -705,7 +712,7 @@ export enum EPermitProjectInboxSortFields {
   applications = "permit_applications_size",
   daysInQueue = "days_in_queue",
   assigned = "assigned",
-  status = "status",
+  state = "state",
 }
 
 export enum EPermitApplicationInboxSortFields {

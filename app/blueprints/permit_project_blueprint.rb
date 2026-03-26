@@ -7,8 +7,7 @@ class PermitProjectBlueprint < Blueprinter::Base
            :pid,
            :number,
            :jurisdiction_disambiguated_name,
-           :status,
-           :rollup_status,
+           :state,
            :is_pinned,
            :created_at,
            :updated_at,
@@ -21,9 +20,14 @@ class PermitProjectBlueprint < Blueprinter::Base
     field :total_permits_count, default: 0
     field :new_draft_count, default: 0
     field :newly_submitted_count, default: 0
+    field :in_review_count, default: 0
     field :revisions_requested_count, default: 0
     field :resubmitted_count, default: 0
     field :approved_count, default: 0
+    field :flag_list, default: []
+    field :allowed_manual_transitions, default: []
+    field :sorted_application_statuses, default: []
+    field :inbox_sorted_application_statuses, default: []
     field :owner_name, default: nil
 
     field :is_fully_loaded do |_permit_project, _options|

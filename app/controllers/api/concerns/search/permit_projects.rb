@@ -91,6 +91,7 @@ module Api::Concerns::Search::PermitProjects
     jurisdiction_ids = search_filters.delete(:jurisdiction_id)
     if jurisdiction_ids.present?
       search_filters[:jurisdiction_id] = jurisdiction_ids
+      search_filters[:state] = { not: "draft" }
     end
 
     search_filters[:discarded] = show_archived

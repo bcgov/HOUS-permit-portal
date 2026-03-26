@@ -43,11 +43,36 @@ module Api::Concerns::Search::JurisdictionPermitProjects
     @jurisdiction_permit_project_meta = {
       total_pages: @jurisdiction_permit_project_search.total_pages,
       current_page: @jurisdiction_permit_project_search.current_page,
-      total_count: @jurisdiction_permit_project_search.total_count
+      total_count: @jurisdiction_permit_project_search.total_count,
+      state_counts: jurisdiction_state_counts
     }
   end
 
   private
+
+  def jurisdiction_state_counts
+    agg_search =
+      PermitProject.search(
+        "*",
+        where: {
+          jurisdiction_id: @jurisdiction.id,
+          discarded: false,
+          state: {
+            not: "draft"
+          }
+        },
+        aggs: [:state],
+        body_options: {
+          size: 0
+        }
+      )
+    agg_search.aggs["state"]["buckets"].each_with_object({}) do |bucket, hash|
+      hash[bucket["key"]] = bucket["doc_count"]
+    end
+  rescue => e
+    Rails.logger.warn("Failed to compute state counts: #{e.message}")
+    {}
+  end
 
   def jurisdiction_permit_project_search_params
     params.permit(
@@ -85,6 +110,7 @@ module Api::Concerns::Search::JurisdictionPermitProjects
     and_conditions = []
     and_conditions << { jurisdiction_id: @jurisdiction.id }
     and_conditions << { discarded: false }
+    and_conditions << { state: { not: "draft" } }
 
     # if !current_user.super_admin?
     #   and_conditions << { sandbox_id: current_sandbox&.id }

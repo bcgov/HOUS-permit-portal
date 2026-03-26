@@ -118,8 +118,13 @@ export const PermitApplicationModel = types.snapshotProcessor(
       get isSubmitted() {
         return (
           self.status === EPermitApplicationStatus.newlySubmitted ||
-          self.status === EPermitApplicationStatus.resubmitted
+          self.status === EPermitApplicationStatus.resubmitted ||
+          self.status === EPermitApplicationStatus.inReview ||
+          self.status === EPermitApplicationStatus.approved
         )
+      },
+      get isInReview() {
+        return self.status === EPermitApplicationStatus.inReview
       },
       get isRevisionsRequested() {
         return self.status === EPermitApplicationStatus.revisionsRequested

@@ -87,7 +87,7 @@ export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationC
               bg="semantic.infoLight"
               objectFit="contain"
             />
-            <PermitApplicationStatusTag permitApplication={permitApplication} />
+            <PermitApplicationStatusTag status={permitApplication.status} />
           </Flex>
         </Show>
         <Flex direction="column" gap={2} flex={{ base: 0, md: 5 }} maxW={{ base: "100%", md: "75%" }}>
@@ -199,7 +199,7 @@ export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationC
         </Flex>
         <Flex direction="column" align="flex-end" gap={4} flex={{ base: 0, md: 1 }} maxW={{ base: "100%", md: "25%" }}>
           <Show above="md">
-            <PermitApplicationStatusTag permitApplication={permitApplication} />
+            <PermitApplicationStatusTag status={permitApplication.status} />
             <Box>
               <Text align="right" variant="tiny_uppercase">
                 {t("permitApplication.fields.number")}

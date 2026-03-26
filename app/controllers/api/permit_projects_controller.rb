@@ -13,6 +13,7 @@ class Api::PermitProjectsController < Api::ApplicationController
                   create_permit_applications
                   mark_as_viewed
                   mark_as_unviewed
+                  transition_state
                 ]
   before_action :set_pinned_projects, only: %i[pinned]
 
@@ -65,6 +66,28 @@ class Api::PermitProjectsController < Api::ApplicationController
                      blueprint: PermitProjectBlueprint,
                      blueprint_opts: blueprint_options(view: :base)
                    }
+  end
+
+  def transition_state
+    authorize @permit_project, :transition_state?
+
+    target = params.require(:target_state)
+    event = PermitProjectState::STATE_EVENT_MAP[target]
+
+    unless event &&
+             @permit_project.allowed_manual_transitions.include?(target.to_sym)
+      return render_error("permit_project.invalid_transition", { status: 422 })
+    end
+
+    @permit_project.send(:"#{event}!")
+    render_success @permit_project,
+                   "permit_project.transition_success",
+                   {
+                     blueprint: PermitProjectBlueprint,
+                     blueprint_opts: blueprint_options(view: :base)
+                   }
+  rescue AASM::InvalidTransition
+    render_error("permit_project.invalid_transition", { status: 422 })
   end
 
   def update

@@ -97,7 +97,7 @@ export const PermitApplicationGridRow = observer(
             <Text>{format(updatedAt, datefnsTableDateTimeFormat)}</Text>
           </GridItem>
           <GridItem display="flex" alignItems="center" px={4} py={2}>
-            <PermitApplicationStatusTag permitApplication={permitApplication} />
+            <PermitApplicationStatusTag status={permitApplication.status} />
           </GridItem>
           <GridItem display="flex" alignItems="center" justifyContent="flex-end" px={4} py={2}>
             <Menu>

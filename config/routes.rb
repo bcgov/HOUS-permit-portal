@@ -228,6 +228,7 @@ Rails.application.routes.draw do
         post :activities, to: "project_audits#index"
         post :mark_as_viewed
         post :mark_as_unviewed
+        post :transition_state
       end
     end
 
