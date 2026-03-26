@@ -612,6 +612,10 @@ export interface IPermitApplicationInboxSearchFilters {
   assigned?: string[]
 }
 
+export interface IProjectAuditSearchFilters {
+  from?: string
+  to?: string
+}
 export interface ITemplateVersionDiff {
   added: IRequirement[]
   removed: IRequirement[]

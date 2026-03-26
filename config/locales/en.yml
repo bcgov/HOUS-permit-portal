@@ -30,6 +30,12 @@
 en:
   misc:
     removed_placeholder: "<Removed>"
+  project_audit:
+    fallback:
+      generic_change: "%{user} made a change"
+      collaborator_change: "%{user} made a change to the collaborators"
+      block_change: "%{user} made a change to %{block_name}"
+      application_change: "%{user} made a change to the application"
   activerecord:
     attributes:
       contact:

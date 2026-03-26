@@ -1,6 +1,8 @@
 class PermitProject < ApplicationRecord
   # searchkick must be declared before Discard::Model to ensure auto-callbacks register correctly
   searchkick word_middle: %i[title full_address pid pin number]
+  audited on: %i[create update], only: %i[title full_address]
+  has_associated_audits
 
   include Discard::Model
   include PublicRecordable
@@ -169,12 +171,23 @@ class PermitProject < ApplicationRecord
   def recent_permit_applications(user = nil)
     return PermitApplication.none if user.nil?
 
-    scope = permit_applications.kept.order(updated_at: :desc)
+    scope =
+      permit_applications
+        .kept
+        .includes(:activity, :submission_versions, :permit_collaborations)
+        .order(updated_at: :desc)
     return scope.limit(3) if owner_id == user.id
 
     scope
       .joins(permit_collaborations: :collaborator)
-      .where(collaborators: { user_id: user.id })
+      .where(
+        collaborators: {
+          user_id: user.id
+        },
+        permit_collaborations: {
+          discarded_at: nil
+        }
+      )
       .distinct
       .limit(3)
   end
@@ -189,7 +202,8 @@ class PermitProject < ApplicationRecord
           .where(
             permit_collaborations: {
               permit_application_id: permit_applications.kept.select(:id),
-              collaboration_type: :submission
+              collaboration_type: :submission,
+              discarded_at: nil
             }
           )
           .distinct
