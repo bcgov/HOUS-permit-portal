@@ -7,7 +7,7 @@ import { useJurisdiction } from "../../../../hooks/resources/use-jurisdiction"
 import { usePopStateModeSync } from "../../../../hooks/use-popstate-mode-sync"
 import { useSearch } from "../../../../hooks/use-search"
 import { useMst } from "../../../../setup/root"
-import { EInboxDisplayMode, EInboxViewMode } from "../../../../types/enums"
+import { EInboxDisplayMode, EInboxViewMode, EPermitApplicationStatus } from "../../../../types/enums"
 import { CalloutBanner } from "../../../shared/base/callout-banner"
 import { ErrorScreen } from "../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../shared/base/loading-screen"
@@ -66,9 +66,15 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
 
   const handleShowMore = (columnState: string) => {
     setDisplayMode(EInboxDisplayMode.list)
-    permitProjectSearch.setStatusFilter([columnState])
-    permitProjectSearch.setCountPerPage(LIST_DEFAULT_PER_PAGE)
-    permitProjectSearch.search({ countPerPage: LIST_DEFAULT_PER_PAGE })
+    if (viewMode === EInboxViewMode.projects) {
+      permitProjectSearch.setStatusFilter([columnState])
+      permitProjectSearch.setCountPerPage(LIST_DEFAULT_PER_PAGE)
+      permitProjectSearch.search({ countPerPage: LIST_DEFAULT_PER_PAGE })
+    } else {
+      permitApplicationSearch.setStatusFilter([columnState as EPermitApplicationStatus])
+      permitApplicationSearch.setCountPerPage(LIST_DEFAULT_PER_PAGE)
+      permitApplicationSearch.search({ countPerPage: LIST_DEFAULT_PER_PAGE })
+    }
   }
 
   return (
@@ -340,9 +346,12 @@ const InboxContent = observer(function InboxContent({
     return (
       <ApplicationKanbanBoard
         applications={permitApplicationSearch.tablePermitApplications}
-        stateCounts={{}}
+        stateCounts={permitApplicationSearch.stateCounts}
+        columnTotals={permitApplicationSearch.columnTotals}
         collapsedColumns={[...submissionInboxStore.collapsedColumns]}
         onToggleColumn={(state) => submissionInboxStore.toggleColumnCollapsed(state)}
+        onShowMore={onShowMore}
+        onReorder={(event) => permitApplicationSearch.reorderApplications(event.orderedIds)}
       />
     )
   }

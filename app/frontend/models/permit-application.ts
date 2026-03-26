@@ -99,6 +99,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
       projectId: types.maybeNull(types.string),
       discardedAt: types.maybeNull(types.Date),
       inboxSortOrder: types.maybeNull(types.number),
+      allowedManualTransitions: types.optional(types.array(types.string), []),
     })
     .extend(withEnvironment())
     .extend(withRootStore())
@@ -844,6 +845,14 @@ export const PermitApplicationModel = types.snapshotProcessor(
         }
         return response.ok
       }),
+      markAsUnviewed: flow(function* () {
+        const response = yield self.environment.api.unviewPermitApplication(self.id)
+        if (response.ok) {
+          const { data: permitApplication } = response.data
+          self.rootStore.permitApplicationStore.mergeUpdate(permitApplication, "permitApplicationMap")
+        }
+        return response.ok
+      }),
 
       setSelectedTabIndex: (index: number) => {
         self.selectedTabIndex = index
@@ -899,6 +908,23 @@ export const PermitApplicationModel = types.snapshotProcessor(
           self.discardedAt = null
         }
         return response.ok
+      }),
+
+      setInboxSortOrder(order: number) {
+        self.inboxSortOrder = order
+      },
+
+      transitionStatus: flow(function* (targetStatus: string) {
+        const oldStatus = self.status
+        const response = yield self.environment.api.transitionPermitApplicationStatus(self.id, targetStatus)
+        if (response.ok) {
+          self.rootStore.permitApplicationStore.mergeUpdate(response.data.data, "permitApplicationMap")
+          self.rootStore.submissionInboxStore?.permitApplicationSearch?.adjustCountsForTransition(
+            oldStatus,
+            targetStatus
+          )
+        }
+        return response
       }),
     })),
   {

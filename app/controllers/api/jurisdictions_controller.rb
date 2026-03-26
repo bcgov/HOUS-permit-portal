@@ -183,15 +183,14 @@ class Api::JurisdictionsController < Api::ApplicationController
   def search_permit_applications
     authorize @jurisdiction
     perform_jurisdiction_permit_application_search
-    authorized_results = @jurisdiction_permit_application_search.results
-    render_success authorized_results,
+    render_success @jurisdiction_permit_applications,
                    nil,
                    {
-                     meta: page_meta(@jurisdiction_permit_application_search),
                      blueprint: PermitApplicationBlueprint,
                      blueprint_opts: {
                        view: :jurisdiction_review_inbox
-                     }
+                     },
+                     meta: @jurisdiction_permit_application_meta
                    }
   end
 

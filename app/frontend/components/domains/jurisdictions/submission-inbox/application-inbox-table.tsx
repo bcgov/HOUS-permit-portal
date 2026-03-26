@@ -2,6 +2,7 @@ import { Box, Circle, Flex, HStack, Text, VStack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
+import { Link } from "react-router-dom"
 import { IPermitApplication } from "../../../../models/permit-application"
 import { IPermitApplicationInboxStore } from "../../../../stores/submission-inbox-store"
 import { EPermitApplicationInboxSortFields } from "../../../../types/enums"
@@ -22,9 +23,11 @@ interface IProps {
 
 const SORT_FIELDS = [
   EPermitApplicationInboxSortFields.number,
+  EPermitApplicationInboxSortFields.referenceNumber,
   EPermitApplicationInboxSortFields.permitClassification,
   EPermitApplicationInboxSortFields.submitter,
   EPermitApplicationInboxSortFields.submittedAt,
+  EPermitApplicationInboxSortFields.viewedAt,
   EPermitApplicationInboxSortFields.status,
 ]
 
@@ -46,7 +49,7 @@ export const ApplicationInboxTable = observer(function ApplicationInboxTable({ s
   return (
     <VStack w="full" spacing={5}>
       <SearchGrid
-        templateColumns="2fr 1.5fr 1fr 1fr 1fr"
+        templateColumns="2fr 1fr 1.5fr 1fr 1fr 1fr 1fr"
         gridRowClassName="application-inbox-grid-row"
         sx={{
           ".application-inbox-grid-row:hover > div": {
@@ -80,13 +83,15 @@ export const ApplicationInboxTable = observer(function ApplicationInboxTable({ s
         </Box>
 
         {isSearching ? (
-          <Flex py={50} gridColumn="span 5">
+          <Flex py={50} gridColumn="span 7">
             <SharedSpinner />
           </Flex>
         ) : (
           applications.map((application) => (
             <Box
               key={application.id}
+              as={Link}
+              to={`/permit-applications/${application.id}`}
               className="application-inbox-grid-row"
               role="row"
               display="contents"
@@ -108,6 +113,12 @@ export const ApplicationInboxTable = observer(function ApplicationInboxTable({ s
               </SearchGridItem>
 
               <SearchGridItem>
+                <Text fontSize="sm" color="text.secondary" noOfLines={1}>
+                  {application.referenceNumber || "—"}
+                </Text>
+              </SearchGridItem>
+
+              <SearchGridItem>
                 <Text fontSize="sm" noOfLines={1}>
                   {application.permitType?.name || "—"}
                 </Text>
@@ -115,13 +126,19 @@ export const ApplicationInboxTable = observer(function ApplicationInboxTable({ s
 
               <SearchGridItem>
                 <Text fontSize="sm" color="text.secondary">
-                  {/* ### SUBMISSION INDEX STUB FEATURE - submitter */}—
+                  {application.submitter?.name || "—"}
                 </Text>
               </SearchGridItem>
 
               <SearchGridItem>
                 <Text fontSize="sm" color="text.secondary">
                   {application.submittedAt ? new Date(application.submittedAt).toLocaleDateString() : "—"}
+                </Text>
+              </SearchGridItem>
+
+              <SearchGridItem>
+                <Text fontSize="sm" color="text.secondary">
+                  {application.viewedAt ? new Date(application.viewedAt).toLocaleDateString() : "—"}
                 </Text>
               </SearchGridItem>
 

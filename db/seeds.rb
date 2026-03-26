@@ -249,179 +249,109 @@ if PermitApplication.first.blank?
 
   # Creating Permit Applications
   puts "Seeding permit applications..."
-  review_managers = User.review_manager
   published_template_versions = TemplateVersion.published
-  submitters = User.submitter
+  submitter_user = User.find_by!(omniauth_username: "submitter")
 
-  20.times do |index|
-    current_review_manager = review_managers.sample
+  north_van_streets = [
+    "Lonsdale Ave",
+    "Chesterfield Ave",
+    "St Georges Ave",
+    "St Andrews Ave",
+    "St Patricks Ave",
+    "Ridgeway Ave",
+    "Queensbury Ave",
+    "Moody Ave",
+    "Mahon Ave",
+    "Jones Ave",
+    "Hamilton Ave",
+    "Grand Blvd",
+    "Forbes Ave",
+    "Eastern Ave",
+    "Donaghy Ave",
+    "Bewicke Ave",
+    "Sutherland Ave",
+    "Hendry Ave",
+    "Fell Ave",
+    "Larson Rd",
+    "Westview Dr",
+    "Capilano Rd",
+    "Mountain Hwy",
+    "Lynn Valley Rd",
+    "Keith Rd",
+    "Marine Dr",
+    "3rd St",
+    "15th St",
+    "21st St",
+    "23rd St"
+  ]
+  north_van_postal = %w[V7M V7L V7K V7J V7N V7P V7G V7H V7R]
+  project_types = [
+    "Single family home",
+    "Duplex renovation",
+    "Laneway house",
+    "Garage conversion",
+    "Deck addition",
+    "Kitchen remodel",
+    "Basement suite",
+    "Roof replacement",
+    "Fence & retaining wall",
+    "Commercial tenant improvement",
+    "4+ Unit housing",
+    "Mixed-use development",
+    "Accessory dwelling unit"
+  ]
+
+  60.times do |index|
     current_jurisdiction =
-      index.even? ? jurisdictions.first(10).sample : north_van
-    current_jurisdiction_id = current_jurisdiction.id
-    sandbox =
-      current_jurisdiction.sandboxes.find_by(
-        template_version_status_scope: :published
-      )
+      index < 45 ? north_van : jurisdictions.first(10).sample
+    street = north_van_streets.sample
+    street_num = rand(100..9999)
+    postal =
+      "#{north_van_postal.sample} #{rand(1..9)}#{("A".."Z").to_a.sample}#{rand(1..9)}"
+    project_type = project_types.sample
 
     permit_project =
       PermitProject.create!(
-        owner: current_review_manager,
-        jurisdiction_id: current_jurisdiction_id,
-        title: "Project for Seed Application #{index + 1}",
-        full_address: "123 Seed Street #{index + 1}, Seedville",
-        pid: "SEEDPID#{index + 1}",
-        pin: "SEEDPIN#{index + 1}"
+        owner: submitter_user,
+        jurisdiction: current_jurisdiction,
+        title: "#{project_type} — #{street_num} #{street}",
+        full_address: "#{street_num} #{street}, North Vancouver, BC, #{postal}",
+        pid: format("%09d", rand(1..999_999_999)),
+        pin: format("PIN%06d", index + 1)
       )
 
-    # Create one main permit application
-    template_version = published_template_versions.sample
-    permit_application =
+    num_apps = rand(1..4)
+    num_apps.times do |app_idx|
+      template_version = published_template_versions.sample
+      nickname =
+        (
+          if app_idx == 0
+            "Main permit — #{street_num} #{street}"
+          else
+            "#{project_type} permit ##{app_idx + 1}"
+          end
+        )
       PermitApplication.create!(
-        submitter: current_review_manager,
+        nickname: nickname,
+        submitter: submitter_user,
         permit_project: permit_project,
         activity_id: template_version.activity.id,
         permit_type_id: template_version.permit_type.id,
-        template_version: template_version,
-        sandbox: sandbox
-      )
-
-    # Assign a random collaborator as a submission delegatee to the main application
-    collaborator_user = (submitters.to_a - [current_review_manager]).sample
-    if collaborator_user
-      collaborator =
-        Collaborator.find_or_create_by!(
-          user: collaborator_user,
-          collaboratorable_id: current_review_manager.id,
-          collaboratorable_type: "User"
-        )
-      PermitCollaboration.create!(
-        permit_application: permit_application,
-        collaborator: collaborator,
-        collaboration_type: :submission,
-        collaborator_type: :delegatee
+        template_version: template_version
       )
     end
 
-    # Create additional draft permits
-    rand(2..5).times do
-      draft_template_version = published_template_versions.sample
-      draft_permit_application =
-        PermitApplication.create!(
-          submitter: current_review_manager,
-          permit_project: permit_project,
-          activity_id: draft_template_version.activity.id,
-          permit_type_id: draft_template_version.permit_type.id,
-          template_version: draft_template_version,
-          status: :new_draft,
-          sandbox: sandbox
-        )
-      # Assign a random collaborator as a submission delegatee to the draft application
-      collaborator_user = (submitters.to_a - [current_review_manager]).sample
-      if collaborator_user
-        collaborator =
-          Collaborator.find_or_create_by!(
-            user: collaborator_user,
-            collaboratorable_id: current_review_manager.id,
-            collaboratorable_type: "User"
-          )
-        PermitCollaboration.create!(
-          permit_application: draft_permit_application,
-          collaborator: collaborator,
-          collaboration_type: :submission,
-          collaborator_type: :delegatee
-        )
-      end
-    end
-  end
-  # Seed a North Vancouver Example
-  4.times do |i| # Added index i for unique titles if needed
-    current_review_manager = review_managers.sample
-    sandbox =
-      north_van.sandboxes.find_by(template_version_status_scope: :published)
-    project_pid =
-      (
-        if (north_van.locality_type == "corporation of the city")
-          "013228544"
-        else
-          "008535981"
-        end
-      )
-    project_full_address =
-      (
-        if (north_van.locality_type == "corporation of the city")
-          "323 18th St E, North Vancouver, BC, V7L 2X8"
-        else
-          "5419 Esperanza Dr, North Vancouver, BC, V7R 3W3"
-        end
-      )
-
-    permit_project =
-      PermitProject.create!(
-        owner: current_review_manager,
-        jurisdiction: north_van,
-        full_address: project_full_address,
-        pid: project_pid
-      )
-
-    # Create one main permit application
-    template_version = published_template_versions.sample
-    permit_application =
+    # Also create 1-2 draft applications per project
+    rand(1..2).times do
+      draft_tv = published_template_versions.sample
       PermitApplication.create!(
-        nickname: "Permit application #{i + 1}",
-        submitter: current_review_manager,
+        submitter: submitter_user,
         permit_project: permit_project,
-        activity_id: template_version.activity.id,
-        permit_type_id: template_version.permit_type.id,
-        template_version: template_version,
-        sandbox: sandbox
+        activity_id: draft_tv.activity.id,
+        permit_type_id: draft_tv.permit_type.id,
+        template_version: draft_tv,
+        status: :new_draft
       )
-
-    # Assign a random collaborator as a submission delegatee
-    collaborator_user = (submitters.to_a - [current_review_manager]).sample
-    if collaborator_user
-      collaborator =
-        Collaborator.find_or_create_by!(
-          user: collaborator_user,
-          collaboratorable_id: current_review_manager.id,
-          collaboratorable_type: "User"
-        )
-      PermitCollaboration.create!(
-        permit_application: permit_application,
-        collaborator: collaborator,
-        collaboration_type: :submission,
-        collaborator_type: :delegatee
-      )
-    end
-
-    # Create additional draft permits
-    rand(2..5).times do
-      draft_template_version = published_template_versions.sample
-      draft_permit_application =
-        PermitApplication.create!(
-          submitter: current_review_manager,
-          permit_project: permit_project,
-          activity_id: draft_template_version.activity.id,
-          permit_type_id: draft_template_version.permit_type.id,
-          template_version: draft_template_version,
-          status: :new_draft,
-          sandbox: sandbox
-        )
-      # Assign a random collaborator as a submission delegatee to the draft application
-      collaborator_user = (submitters.to_a - [current_review_manager]).sample
-      if collaborator_user
-        collaborator =
-          Collaborator.find_or_create_by!(
-            user: collaborator_user,
-            collaboratorable_id: current_review_manager.id,
-            collaboratorable_type: "User"
-          )
-        PermitCollaboration.create!(
-          permit_application: draft_permit_application,
-          collaborator: collaborator,
-          collaboration_type: :submission,
-          collaborator_type: :delegatee
-        )
-      end
     end
   end
 end
@@ -491,21 +421,97 @@ PermitProjectSeederService.call
 # ── Showcase project states & permit application statuses ──
 puts "Distributing projects across kanban states and setting permit application statuses..."
 
+reviewer_user = User.find_by(omniauth_username: "reviewer")
+reason_codes = RevisionReason.pluck(:reason_code)
+
+# Build submission versions & revision requests for a PA, then set its status.
+# Rules:
+#   new_draft           → 0 submission versions
+#   newly_submitted     → 1 submission version
+#   revisions_requested → 1+ submission versions, latest has revision request(s)
+#   resubmitted         → 2+ submission versions, earlier one has revision request(s)
+#   in_review / approved / issued / withdrawn → 1 submission version (progressed from submitted)
+seed_pa_status =
+  lambda do |pa, target_status|
+    target = target_status.to_sym
+
+    if target == :new_draft
+      pa.update_column(:status, PermitApplication.statuses[:new_draft])
+      return
+    end
+
+    base_time = pa.created_at + rand(1..72).hours
+
+    # Every non-draft PA needs at least one submission version
+    sv1 =
+      pa.submission_versions.create!(
+        form_json: pa.template_version&.form_json || {},
+        submission_data: {
+        },
+        created_at: base_time,
+        updated_at: base_time
+      )
+
+    case target
+    when :revisions_requested
+      sv1.revision_requests.create!(
+        reason_code: reason_codes.sample || "other",
+        comment: "Please address the highlighted items.",
+        user: reviewer_user
+      )
+      pa.update_columns(
+        status: PermitApplication.statuses[:revisions_requested],
+        revisions_requested_at: base_time + 1.day
+      )
+    when :resubmitted
+      sv1.revision_requests.create!(
+        reason_code: reason_codes.sample || "other",
+        comment: "Initial review comment.",
+        user: reviewer_user
+      )
+      resub_time = base_time + 3.days
+      pa.submission_versions.create!(
+        form_json: pa.template_version&.form_json || {},
+        submission_data: {
+        },
+        created_at: resub_time,
+        updated_at: resub_time
+      )
+      pa.update_columns(status: PermitApplication.statuses[:resubmitted])
+    else
+      pa.update_column(:status, PermitApplication.statuses[target])
+    end
+  end
+
 north_van_projects = PermitProject.where(jurisdiction: north_van).to_a.shuffle
 
 if north_van_projects.size >= 10
   state_distribution = [
-    # [project_state, [ [pa_index, pa_status], ... ]]
     [:queued, [[:newly_submitted], [:new_draft]]],
     [:queued, [[:resubmitted], [:newly_submitted]]],
     [:queued, [[:revisions_requested]]],
+    [:queued, [[:newly_submitted]]],
+    [:queued, [[:newly_submitted], [:resubmitted]]],
     [:in_progress, [[:in_review], [:in_review], [:newly_submitted]]],
     [:in_progress, [[:revisions_requested], [:in_review], [:approved]]],
+    [:in_progress, [[:in_review]]],
+    [:in_progress, [[:in_review], [:newly_submitted]]],
     [:ready, [[:approved], [:approved]]],
+    [:ready, [[:approved]]],
+    [:ready, [[:approved], [:in_review]]],
     [:permit_issued, [[:issued], [:issued]]],
     [:permit_issued, [[:approved], [:issued]]],
+    [:permit_issued, [[:issued]]],
     [:active, [[:issued], [:issued], [:issued]]],
-    [:complete, [[:issued]]]
+    [:active, [[:issued], [:issued]]],
+    [:active, [[:issued]]],
+    [:complete, [[:issued]]],
+    [:complete, [[:issued], [:issued]]],
+    [:waiting, [[:in_review], [:newly_submitted]]],
+    [:waiting, [[:revisions_requested]]],
+    [:waiting, [[:in_review], [:resubmitted]]],
+    [:closed, [[:withdrawn]]],
+    [:closed, [[:withdrawn], [:issued]]]
   ]
 
   state_distribution.each_with_index do |(target_state, pa_statuses), idx|
@@ -519,37 +525,18 @@ if north_van_projects.size >= 10
       pa = kept_apps[pa_idx]
       next unless pa
 
-      pa.update_column(:status, PermitApplication.statuses[pa_status.first])
+      seed_pa_status.call(pa, pa_status.first)
     end
   end
 
-  # Put one project on hold (waiting) with mixed statuses
-  if north_van_projects[10]
-    project = north_van_projects[10]
-    project.update_column(:state, PermitProject.states[:waiting])
-    kept_apps = project.permit_applications.kept.to_a
-    kept_apps[0]&.update_column(:status, PermitApplication.statuses[:in_review])
-    kept_apps[1]&.update_column(
-      :status,
-      PermitApplication.statuses[:newly_submitted]
-    )
-  end
-
-  # Close one project with a withdrawn application
-  if north_van_projects[11]
-    project = north_van_projects[11]
-    project.update_column(:state, PermitProject.states[:closed])
-    kept_apps = project.permit_applications.kept.to_a
-    kept_apps[0]&.update_column(:status, PermitApplication.statuses[:withdrawn])
-  end
-
-  # Spread enqueued_at across the non-draft projects so the "days in queue" filter has varied data
+  # Spread enqueued_at across non-draft projects for varied "days in queue" data
   non_draft = north_van_projects.select { |p| p.reload.state != "draft" }
   non_draft.each_with_index do |project, idx|
-    project.update_column(:enqueued_at, (idx * 3 + 1).days.ago)
+    project.update_column(:enqueued_at, (idx * 2 + 1).days.ago)
   end
 
-  puts "  ✓ Distributed #{[state_distribution.size + 2, north_van_projects.size].min} projects across kanban states"
+  puts "  ✓ Distributed #{[state_distribution.size, north_van_projects.size].min} projects across kanban states"
 end
 
+PermitApplication.reindex
 PermitProject.reindex

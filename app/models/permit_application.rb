@@ -68,6 +68,7 @@ class PermitApplication < ApplicationRecord
   validate :sandbox_belongs_to_jurisdiction
   validate :template_version_of_live_template
   validate :submitter_cannot_be_jurisdiction_staff_without_sandbox
+  validate :submission_versions_match_status
 
   delegate :code, :name, to: :permit_type, prefix: true
   delegate :code, :name, to: :activity, prefix: true
@@ -369,6 +370,13 @@ class PermitApplication < ApplicationRecord
     return unless latest_submission_version.present?
 
     latest_submission_version.update(viewed_at: Time.current)
+    reindex
+  end
+
+  def mark_as_unviewed
+    return unless latest_submission_version.present?
+
+    latest_submission_version.update(viewed_at: nil)
     reindex
   end
 
@@ -936,5 +944,39 @@ class PermitApplication < ApplicationRecord
         "activerecord.errors.models.permit_application.attributes.submitter.review_staff_requires_sandbox"
       )
     )
+  end
+
+  def submission_versions_match_status
+    return if new_record?
+
+    sv_count = submission_versions.size
+
+    if new_draft? && sv_count > 0
+      errors.add(:base, "Draft applications must not have submission versions")
+    elsif (
+          newly_submitted? || in_review? || approved? || issued? || withdrawn?
+        ) && sv_count < 1
+      errors.add(
+        :base,
+        "Non-draft applications must have at least one submission version"
+      )
+    elsif revisions_requested?
+      if sv_count < 1
+        errors.add(
+          :base,
+          "Revisions-requested applications must have at least one submission version"
+        )
+      elsif latest_submission_version.revision_requests.empty?
+        errors.add(
+          :base,
+          "Revisions-requested applications must have at least one revision request"
+        )
+      end
+    elsif resubmitted? && sv_count < 2
+      errors.add(
+        :base,
+        "Resubmitted applications must have at least two submission versions"
+      )
+    end
   end
 end

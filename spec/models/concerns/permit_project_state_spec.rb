@@ -248,14 +248,23 @@ RSpec.describe PermitProjectState, type: :model do
     describe ".kanban_states" do
       it "returns the correct kanban states" do
         expect(PermitProject.kanban_states).to eq(
-          %w[queued waiting in_progress ready permit_issued active complete]
+          %w[
+            queued
+            waiting
+            in_progress
+            ready
+            permit_issued
+            active
+            complete
+            closed
+          ]
         )
       end
     end
 
     describe ".off_board_states" do
       it "returns the correct off-board states" do
-        expect(PermitProject.off_board_states).to eq(%w[draft closed])
+        expect(PermitProject.off_board_states).to eq(%w[draft])
       end
     end
 

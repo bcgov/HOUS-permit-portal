@@ -167,6 +167,7 @@ Rails.application.routes.draw do
     end
 
     resources :permit_applications, only: %i[create update show destroy] do
+      collection { patch :reorder }
       post "restore", on: :member
       post "generate_missing_pdfs",
            on: :member,
@@ -185,6 +186,8 @@ Rails.application.routes.draw do
            to: "permit_applications#invite_new_collaborator"
       post "submit", on: :member
       post "mark_as_viewed", on: :member
+      post "mark_as_unviewed", on: :member
+      post "transition_status", on: :member
       post "retrigger_submission_webhook", on: :member
       patch "upload_supporting_document", on: :member
       patch "update_version", on: :member

@@ -38,6 +38,7 @@ class PermitApplicationBlueprint < Blueprinter::Base
     end
 
     field :inbox_sort_order, default: nil
+    field :allowed_manual_transitions, default: []
   end
 
   view :project_base do

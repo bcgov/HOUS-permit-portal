@@ -1,6 +1,11 @@
 import i18n from "i18next"
 import { initReactI18next } from "react-i18next"
-import { EPermitApplicationInboxSortFields, EPermitProjectInboxSortFields, EProjectState } from "../types/enums"
+import {
+  EPermitApplicationInboxSortFields,
+  EPermitApplicationStatus,
+  EPermitProjectInboxSortFields,
+  EProjectState,
+} from "../types/enums"
 
 export const defaultNS = "translation"
 export const fallbackNS = "translation"
@@ -1184,6 +1189,10 @@ Thank you,
             recentActivity: "Recent activity",
             allActivity: "All activity",
             noRecentActivity: "No recent activity for this project.",
+            permitApplications: "Permit applications",
+            noApplications: "No applications",
+            applicationCount_one: "{{count}} application",
+            applicationCount_other: "{{count}} applications",
           },
           projectCount: "{{count}} projects",
           projectCount_one: "{{count}} project",
@@ -1229,6 +1238,15 @@ Thank you,
             [EPermitApplicationInboxSortFields.submitter]: "Submitter",
             [EPermitApplicationInboxSortFields.viewedAt]: "Viewed at",
             [EPermitApplicationInboxSortFields.submittedAt]: "Submitted at",
+          },
+          applicationStatuses: {
+            [EPermitApplicationStatus.newlySubmitted]: "Submitted",
+            [EPermitApplicationStatus.inReview]: "In review",
+            [EPermitApplicationStatus.revisionsRequested]: "Revisions requested",
+            [EPermitApplicationStatus.resubmitted]: "Resubmitted",
+            [EPermitApplicationStatus.approved]: "Approved",
+            [EPermitApplicationStatus.issued]: "Issued",
+            [EPermitApplicationStatus.withdrawn]: "Withdrawn",
           },
           kanbanOverflowMessage: "Some items are not shown.",
           seeMore: "See more?",

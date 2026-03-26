@@ -16,7 +16,11 @@ class PermitApplicationPolicy < ApplicationPolicy
   end
 
   def mark_as_viewed?
-    user.review_staff?
+    user.review_staff? && user.member_of?(record.jurisdiction_id)
+  end
+
+  def mark_as_unviewed?
+    user.review_staff? && user.member_of?(record.jurisdiction_id)
   end
 
   def update?
@@ -65,6 +69,15 @@ class PermitApplicationPolicy < ApplicationPolicy
     else
       user.review_staff? && user.member_of?(record.jurisdiction_id)
     end
+  end
+
+  def transition_status?
+    user.review_staff? && user.member_of?(record.jurisdiction_id) &&
+      record.submitted?
+  end
+
+  def reorder?
+    user.review_staff? && user.member_of?(record.jurisdiction_id)
   end
 
   def generate_missing_pdfs?
@@ -215,10 +228,10 @@ class PermitApplicationPolicy < ApplicationPolicy
         SQL
 
         # Add the review-staff rule to the OR list, and bind parameters.
-        clauses << "#{review_exists_sql} AND permit_applications.status IN (:submitted_statuses)"
+        clauses << "#{review_exists_sql} AND permit_applications.status IN (:visible_statuses)"
         values[:jur_ids] = user.jurisdictions.pluck(:id)
-        values[:submitted_statuses] = PermitApplication
-          .submitted_statuses
+        values[:visible_statuses] = PermitApplication
+          .kanban_statuses
           .map { |name| PermitApplication.statuses.fetch(name) }
         if sandbox.present?
           # In sandbox mode, restrict to the active sandbox.

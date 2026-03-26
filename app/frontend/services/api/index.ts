@@ -161,6 +161,10 @@ export class Api {
     return this.client.post<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/mark_as_viewed`)
   }
 
+  async unviewPermitApplication(id: string) {
+    return this.client.post<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/mark_as_unviewed`)
+  }
+
   async fetchLocalityTypeOptions() {
     return this.client.get<IOptionResponse>(`/jurisdictions/locality_type_options`)
   }
@@ -332,8 +336,18 @@ export class Api {
     })
   }
 
+  async transitionPermitApplicationStatus(id: string, targetStatus: string) {
+    return this.client.post<IJurisdictionPermitApplicationResponse>(`/permit_applications/${id}/transition_status`, {
+      targetStatus,
+    })
+  }
+
   async reorderPermitProjects(items: Array<{ id: string; inboxSortOrder: number }>) {
     return this.client.patch("/permit_projects/reorder", { items })
+  }
+
+  async reorderPermitApplications(items: Array<{ id: string; inboxSortOrder: number }>) {
+    return this.client.patch("/permit_applications/reorder", { items })
   }
 
   async fetchSubmissionCollaboratorOptions(id: string) {
