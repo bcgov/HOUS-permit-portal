@@ -1,9 +1,9 @@
 import {
+  Accordion,
   Box,
   Button,
   Center,
   Container,
-  Divider,
   Flex,
   FormControl,
   FormLabel,
@@ -31,6 +31,8 @@ import { IJurisdiction } from "../../../models/jurisdiction"
 import { useMst } from "../../../setup/root"
 import { EFlashMessageStatus } from "../../../types/enums"
 import { IContact, TLatLngTuple } from "../../../types/types"
+import { sanitizeTipTapHtml } from "../../../utils/sanitize-tiptap-content"
+import { isTipTapEmpty } from "../../../utils/utility-functions"
 import { CustomMessageBox } from "../../shared/base/custom-message-box"
 import { ErrorScreen } from "../../shared/base/error-screen"
 import { HeroBanner } from "../../shared/base/hero-banner"
@@ -42,9 +44,11 @@ import { SafeTipTapDisplay } from "../../shared/editor/safe-tiptap-display"
 import { JurisdictionResourcesSection } from "../../shared/jurisdiction/jurisdiction-resources-section"
 import { JurisdictionMap } from "../../shared/module-wrappers/jurisdiction-map"
 import { RouterLink } from "../../shared/navigation/router-link"
+import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { StepCodeRequirementsTable } from "../../shared/step-code-requirements-table"
 import { Can, can } from "../../shared/user/can"
 import { ContactGrid } from "./contacts/contact-grid"
+import { JurisdictionAboutAccordionItem } from "./jurisdiction-about-accordion-item"
 import { JurisdictionEditorWithPreview } from "./jurisdiction-editor-with-preview"
 export interface Jurisdiction {
   name: string
@@ -59,6 +63,10 @@ type TJurisdictionFieldValues = {
   mapPosition: TLatLngTuple
   mapZoom: number
   contactsAttributes: IContact[]
+}
+
+function jurisdictionRichTextHasPublicContent(html: string | null | undefined): boolean {
+  return !isTipTapEmpty(sanitizeTipTapHtml(html ?? ""))
 }
 
 export const JurisdictionScreen = observer(() => {
@@ -112,6 +120,11 @@ export const JurisdictionScreen = observer(() => {
     jurisdictionName: qualifiedName,
   })}&body=${encodeURIComponent(emailBody)}`
 
+  const canManageAbout = can("jurisdiction:manage", { jurisdiction: currentJurisdiction })
+  const showOverviewAccordion =
+    canManageAbout || jurisdictionRichTextHasPublicContent(currentJurisdiction.checklistHtml)
+  const showKeyInfoAccordion = canManageAbout || jurisdictionRichTextHasPublicContent(currentJurisdiction.lookOutHtml)
+
   return (
     <Flex as="main" direction="column" w="full" bg="greys.white" pb="24">
       <HeroBanner containerProps={{ pl: 8, pr: 18, py: 16 }}>
@@ -137,7 +150,7 @@ export const JurisdictionScreen = observer(() => {
               <Box w="full" bg="greys.grey03">
                 <Container maxW="container.lg" py={10} px={8}>
                   <Grid w="full" templateColumns={{ base: "1fr", md: "2fr 1fr" }} gap={8}>
-                    <GridItem order={{ base: 2, md: 1 }} p={1} minW={0}>
+                    <GridItem order={{ base: 2, md: 1 }} minW={0}>
                       <Flex as="section" direction="column" gap={2}>
                         <Heading id="jurisdiction-supported-description-heading" variant="yellowline" my={0}>
                           {t("jurisdiction.supportedSectionHeading")}
@@ -178,150 +191,145 @@ export const JurisdictionScreen = observer(() => {
                   </Grid>
                 </Container>
               </Box>
-              <Container maxW="container.lg" px={8} pb={{ base: 6, md: 16 }}>
+              <Container maxW="container.lg" py={16} px={8}>
                 <Flex direction="column" gap={16}>
-                  <Flex direction={{ base: "column", md: "row" }} gap={6}>
-                    <Flex
-                      as="section"
-                      direction="column"
-                      gap={4}
-                      flex={3}
-                      borderWidth={1}
-                      borderColor="border.light"
-                      rounded="lg"
-                      p={6}
+                  <Accordion
+                    allowMultiple
+                    key={canManageAbout ? "jurisdiction-about-accordion-manage" : "jurisdiction-about-accordion-public"}
+                    defaultIndex={canManageAbout ? [0, 1, 2] : [0]}
+                  >
+                    {showOverviewAccordion && (
+                      <JurisdictionAboutAccordionItem
+                        headingId="jurisdiction-accordion-overview-heading"
+                        title={t("jurisdiction.edit.accordion.overviewProcess")}
+                        useYellowlineHeading
+                        showTopSeparator={false}
+                      >
+                        <JurisdictionTipTapFormController
+                          control={control}
+                          headingId="jurisdiction-accordion-overview-heading"
+                          initialTriggerText={t("jurisdiction.edit.addChecklist")}
+                          name={"checklistHtml"}
+                        />
+                      </JurisdictionAboutAccordionItem>
+                    )}
+                    {showKeyInfoAccordion && (
+                      <JurisdictionAboutAccordionItem
+                        headingId="jurisdiction-accordion-keyinfo-heading"
+                        title={t("jurisdiction.edit.accordion.keyInformation")}
+                      >
+                        <JurisdictionTipTapFormController
+                          control={control}
+                          headingId="jurisdiction-accordion-keyinfo-heading"
+                          initialTriggerText={t("jurisdiction.edit.addLookOut")}
+                          name={"lookOutHtml"}
+                        />
+                      </JurisdictionAboutAccordionItem>
+                    )}
+                    {/* TODO: Add Timelines & Deliverables section */}
+                    <JurisdictionAboutAccordionItem
+                      headingId="jurisdiction-accordion-stepcode-heading"
+                      title={t("jurisdiction.edit.stepCode.title")}
                     >
-                      <Heading id="jurisdiction-checklist-heading" mb={0}>
-                        {t("jurisdiction.checklist")}
-                      </Heading>
-                      <Divider my={0} />
-                      <JurisdictionTipTapFormController
-                        control={control}
-                        headingId="jurisdiction-checklist-heading"
-                        initialTriggerText={t("jurisdiction.edit.addChecklist")}
-                        name={"checklistHtml"}
-                      />
-                    </Flex>
-                    <Flex
-                      as="section"
-                      direction="column"
-                      p={6}
-                      flex={2}
-                      gap={4}
-                      borderRadius="lg"
-                      background="theme.blueLight"
-                    >
-                      <Heading id="jurisdiction-lookout-heading" as="h3">
-                        {t("jurisdiction.lookOut")}
-                      </Heading>
-                      <JurisdictionTipTapFormController
-                        control={control}
-                        headingId="jurisdiction-lookout-heading"
-                        initialTriggerText={t("jurisdiction.edit.addLookOut")}
-                        name={"lookOutHtml"}
-                      />
-                    </Flex>
-                  </Flex>
-                  <Flex as="section" direction="column" gap={4}>
-                    <Heading as="h2" fontSize="xl" my={0}>
-                      {t("jurisdiction.edit.stepCode.title")}
-                    </Heading>
-                    <Text fontSize="md" color="text.primary">
-                      {t("jurisdiction.edit.stepCode.aboutPageDescription")}
-                    </Text>
-                    <Text fontSize="md" color="text.primary">
-                      {t("jurisdiction.edit.stepCode.aboutPageNotice")}
-                    </Text>
-                    <Link
-                      as={RouterLink}
-                      to={`/jurisdictions/${currentJurisdiction.slug}/step-code-requirements`}
-                      color="text.link"
-                      textDecoration="underline"
-                      _hover={{ textDecoration: "none" }}
-                      fontWeight="bold"
-                    >
-                      {t("jurisdiction.edit.stepCode.viewStepCodeRequirements")}{" "}
-                      <ArrowSquareOut style={{ display: "inline" }} />
-                    </Link>
-
-                    <VStack align="start" spacing={4} mt={4}>
-                      <Heading as="h3" fontSize="lg">
-                        {t(
-                          "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.smallSimpleBuildings"
-                        )}
-                      </Heading>
-                      <Text fontSize="md">
-                        {t(
-                          "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.smallSimpleBuildingsDescription"
-                        )}
-                      </Text>
-                      <Text fontSize="md">
-                        {t(
-                          "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.part9BuildingsAreGenerally"
-                        )}
-                      </Text>
-                      <UnorderedList pl={4}>
-                        <ListItem>
-                          {t(
-                            "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.smallSimpleBuildingsCharacteristic1"
-                          )}
-                        </ListItem>
-                        <ListItem>
-                          {t(
-                            "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.smallSimpleBuildingsCharacteristic2"
-                          )}
-                        </ListItem>
-                      </UnorderedList>
-                      <StepCodeRequirementsTable currentJurisdiction={currentJurisdiction} />
-                    </VStack>
-
-                    <VStack align="start" spacing={4} mt={6}>
-                      <Heading as="h3" fontSize="lg">
-                        {t(
-                          "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.largeComplexBuildings"
-                        )}
-                      </Heading>
-                      <Text fontSize="md">
-                        {t(
-                          "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.largeComplexBuildingsDescription"
-                        )}
-                      </Text>
-                      <Text fontSize="md">
-                        {t(
-                          "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.part3BuildingsAreGenerally"
-                        )}
-                      </Text>
-                      <UnorderedList pl={4}>
-                        <ListItem>
-                          {t(
-                            "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.largeComplexBuildingsCharacteristic1"
-                          )}
-                        </ListItem>
-                        <ListItem>
-                          {t(
-                            "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.largeComplexBuildingsCharacteristic2"
-                          )}
-                        </ListItem>
-                      </UnorderedList>
-                      <Text fontSize="md">
-                        {t(
-                          "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.largeComplexBuildingsLinkPrefix"
-                        )}{" "}
+                      <Flex as="section" direction="column" gap={4}>
+                        <Text fontSize="md" color="text.primary">
+                          {t("jurisdiction.edit.stepCode.aboutPageDescription")}
+                        </Text>
+                        <Text fontSize="md" color="text.primary">
+                          {t("jurisdiction.edit.stepCode.aboutPageNotice")}
+                        </Text>
                         <Link
                           as={RouterLink}
                           to={`/jurisdictions/${currentJurisdiction.slug}/step-code-requirements`}
                           color="text.link"
                           textDecoration="underline"
                           _hover={{ textDecoration: "none" }}
+                          fontWeight="bold"
                         >
-                          {t(
-                            "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.checkStepCodesRequirementsInThisCommunity"
-                          )}
+                          {t("jurisdiction.edit.stepCode.viewStepCodeRequirements")}{" "}
+                          <ArrowSquareOut style={{ display: "inline" }} />
                         </Link>
-                        .
-                      </Text>
-                    </VStack>
-                  </Flex>
+
+                        <VStack align="start" spacing={4} mt={4}>
+                          <Heading as="h3" fontSize="lg">
+                            {t(
+                              "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.smallSimpleBuildings"
+                            )}
+                          </Heading>
+                          <Text fontSize="md">
+                            {t(
+                              "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.smallSimpleBuildingsDescription"
+                            )}
+                          </Text>
+                          <Text fontSize="md">
+                            {t(
+                              "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.part9BuildingsAreGenerally"
+                            )}
+                          </Text>
+                          <UnorderedList pl={4}>
+                            <ListItem>
+                              {t(
+                                "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.smallSimpleBuildingsCharacteristic1"
+                              )}
+                            </ListItem>
+                            <ListItem>
+                              {t(
+                                "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.smallSimpleBuildingsCharacteristic2"
+                              )}
+                            </ListItem>
+                          </UnorderedList>
+                          <StepCodeRequirementsTable currentJurisdiction={currentJurisdiction} />
+                        </VStack>
+
+                        <VStack align="start" spacing={4} mt={6}>
+                          <Heading as="h3" fontSize="lg">
+                            {t(
+                              "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.largeComplexBuildings"
+                            )}
+                          </Heading>
+                          <Text fontSize="md">
+                            {t(
+                              "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.largeComplexBuildingsDescription"
+                            )}
+                          </Text>
+                          <Text fontSize="md">
+                            {t(
+                              "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.part3BuildingsAreGenerally"
+                            )}
+                          </Text>
+                          <UnorderedList pl={4}>
+                            <ListItem>
+                              {t(
+                                "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.largeComplexBuildingsCharacteristic1"
+                              )}
+                            </ListItem>
+                            <ListItem>
+                              {t(
+                                "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.largeComplexBuildingsCharacteristic2"
+                              )}
+                            </ListItem>
+                          </UnorderedList>
+                          <Text fontSize="md">
+                            {t(
+                              "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.largeComplexBuildingsLinkPrefix"
+                            )}{" "}
+                            <Link
+                              as={RouterLink}
+                              to={`/jurisdictions/${currentJurisdiction.slug}/step-code-requirements`}
+                              color="text.link"
+                              textDecoration="underline"
+                              _hover={{ textDecoration: "none" }}
+                            >
+                              {t(
+                                "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.checkStepCodesRequirementsInThisCommunity"
+                              )}
+                            </Link>
+                            .
+                          </Text>
+                        </VStack>
+                      </Flex>
+                    </JurisdictionAboutAccordionItem>
+                  </Accordion>
                   <JurisdictionResourcesSection
                     jurisdiction={currentJurisdiction}
                     configureResourcesPath={
@@ -442,6 +450,7 @@ const JurisdictionTipTapFormController = observer(
 
     return (
       <Box
+        p={1}
         sx={{
           ".tiptap-editor-readonly": {
             padding: 0,
