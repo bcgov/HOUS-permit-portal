@@ -36,6 +36,7 @@ export const MeetingRequestsFilter = observer(function MeetingRequestsFilter({
       onChange={(val) => onChange(val as ERadioFilterValue)}
       options={options}
       onApply={onApply}
+      isDisabled
     />
   )
 })

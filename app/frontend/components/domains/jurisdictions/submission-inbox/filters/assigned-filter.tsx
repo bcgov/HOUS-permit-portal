@@ -23,6 +23,7 @@ export const AssignedFilter = observer(function AssignedFilter({ value, onChange
       options={[]}
       onApply={onApply}
       onClear={onClear}
+      isDisabled
     />
   )
 })

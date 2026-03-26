@@ -17,16 +17,13 @@ class Api::PermitProjectsController < Api::ApplicationController
                 ]
   before_action :set_pinned_projects, only: %i[pinned]
 
-  skip_after_action :verify_policy_scoped,
-                    only: %i[index pinned jurisdiction_options]
   skip_after_action :verify_authorized, only: %i[pinned]
 
   def index
     perform_permit_project_search
-    authorized_results = apply_search_authorization(@permit_projects)
-    compute_project_ids_with_outdated_drafts(authorized_results)
+    compute_project_ids_with_outdated_drafts(@permit_projects)
 
-    render_success authorized_results,
+    render_success @permit_projects,
                    nil,
                    {
                      blueprint: PermitProjectBlueprint,
@@ -80,6 +77,7 @@ class Api::PermitProjectsController < Api::ApplicationController
     end
 
     @permit_project.send(:"#{event}!")
+    @permit_project.update!(inbox_sort_order: nil)
     render_success @permit_project,
                    "permit_project.transition_success",
                    {
@@ -280,6 +278,18 @@ class Api::PermitProjectsController < Api::ApplicationController
         nil
       )
     end
+  end
+
+  def reorder
+    authorize PermitProject, :reorder?
+
+    items = params.require(:items)
+    items.each do |item|
+      project = PermitProject.find(item[:id])
+      project.update!(inbox_sort_order: item[:inbox_sort_order])
+    end
+
+    render_success nil
   end
 
   def jurisdiction_options

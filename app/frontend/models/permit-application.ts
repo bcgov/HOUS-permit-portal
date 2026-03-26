@@ -98,6 +98,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
       templateNickname: types.maybeNull(types.string),
       projectId: types.maybeNull(types.string),
       discardedAt: types.maybeNull(types.Date),
+      inboxSortOrder: types.maybeNull(types.number),
     })
     .extend(withEnvironment())
     .extend(withRootStore())

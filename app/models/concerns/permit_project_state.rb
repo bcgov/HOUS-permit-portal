@@ -54,7 +54,10 @@ module PermitProjectState
       state :closed
 
       event :enqueue do
-        transitions from: :draft, to: :queued, guard: :has_submitted_permit?
+        transitions from: :draft,
+                    to: :queued,
+                    guard: :has_submitted_permit?,
+                    after: :stamp_enqueued_at
         transitions from: %i[waiting in_progress active complete closed],
                     to: :queued
       end
@@ -106,11 +109,11 @@ module PermitProjectState
     acts_as_taggable_on :flags
 
     def self.kanban_states
-      %w[queued waiting in_progress ready permit_issued active complete]
+      %w[queued waiting in_progress ready permit_issued active complete closed]
     end
 
     def self.off_board_states
-      %w[draft closed]
+      %w[draft]
     end
 
     def self.terminal_states
@@ -149,6 +152,10 @@ module PermitProjectState
 
     def inbox_rollup_status
       inbox_sorted_application_statuses.first&.dig(:status) || "empty"
+    end
+
+    def stamp_enqueued_at
+      update_column(:enqueued_at, Time.current) if enqueued_at.nil?
     end
 
     def has_submitted_permit?

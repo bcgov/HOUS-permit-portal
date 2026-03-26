@@ -12,6 +12,7 @@ class PermitProjectBlueprint < Blueprinter::Base
            :created_at,
            :updated_at,
            :viewed_at,
+           :enqueued_at,
            :owner_id,
            :latitude,
            :longitude,
@@ -29,6 +30,7 @@ class PermitProjectBlueprint < Blueprinter::Base
     field :sorted_application_statuses, default: []
     field :inbox_sorted_application_statuses, default: []
     field :owner_name, default: nil
+    field :inbox_sort_order, default: nil
 
     field :is_fully_loaded do |_permit_project, _options|
       false

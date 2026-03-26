@@ -230,6 +230,7 @@ Rails.application.routes.draw do
         post :mark_as_unviewed
         post :transition_state
       end
+      collection { patch :reorder }
     end
 
     resources :permit_collaborations, only: %i[destroy] do

@@ -20,15 +20,17 @@ export const ProjectStatusFilter = observer(function ProjectStatusFilter({
 }: IProps) {
   const { t } = useTranslation()
 
-  const options: IOption[] = Object.values(EProjectState).map((status) => ({
-    value: status,
-    // @ts-ignore
-    label: t(`submissionInbox.projectStatuses.${status}`),
-  }))
+  const options: IOption[] = Object.values(EProjectState)
+    .filter((status) => status !== EProjectState.closed)
+    .map((status) => ({
+      value: status,
+      // @ts-ignore
+      label: t(`submissionInbox.projectStates.${status}`),
+    }))
 
   return (
     <InboxFilter
-      title={t("submissionInbox.filters.projectStatuses")}
+      title={t("submissionInbox.filters.projectStates")}
       isMulti={true}
       value={value}
       onChange={(val) => onChange(val as string[])}
