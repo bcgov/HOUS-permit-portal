@@ -155,7 +155,10 @@ export const ReviewPermitApplicationScreen = observer(() => {
                   label={t("permitApplication.fields.number")}
                 />
                 <HStack mt={2} sx={{ svg: { fill: "theme.yellow" } }}>
-                  <Text textTransform={"uppercase"}> {t("permitApplication.referenceNumber")}:</Text>
+                  <Text textTransform={"uppercase"} whiteSpace="nowrap" flexShrink={0}>
+                    {" "}
+                    {t("permitApplication.referenceNumber")}:
+                  </Text>
                   <EditableInputWithControls
                     size={"xs"}
                     value={referenceNumber}
@@ -166,16 +169,16 @@ export const ReviewPermitApplicationScreen = observer(() => {
                       mb: 0,
                     }}
                     editableInputProps={{
-                      "aria-label": "Edit Template Description",
+                      "aria-label": "Edit Reference Number",
                       bg: "white",
                       color: "text.primary",
-                      width: "79px",
+                      width: "calc(10ch + 1.5em)", // 10 characters plus padding
                     }}
                     controlsProps={{
                       saveButtonProps: { variant: "primaryInverse", textContent: t("ui.onlySave") },
                       cancelButtonProps: { variant: "secondaryInverse" },
                     }}
-                    aria-label={"Edit Template Description"}
+                    aria-label={"Edit Reference Number"}
                     onCancel={(previousValue) => onReferenceNumberChange(previousValue)}
                   />
                 </HStack>

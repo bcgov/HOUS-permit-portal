@@ -50,17 +50,14 @@ module Infrastructure
           IMPORT_ORDER.each { |config| import_model(zip_file, config) }
         end
 
-        # Post-import: Update orphaned dependents if any were preserved but need remapping
-        # (Though we wiped most things, if we kept any that reference PermitType, we'd fix them here)
-
-        reindex_models
-
         Rails.logger.info "Import completed from #{@input_path}"
       rescue StandardError => e
         Rails.logger.error "Import failed: #{e.message}"
         Rails.logger.error e.backtrace.join("\n")
         raise ActiveRecord::Rollback
       end
+
+      reindex_models
     end
 
     private

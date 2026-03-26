@@ -16,7 +16,6 @@ import { SharedSpinner } from "../../shared/base/shared-spinner"
 import { SearchGrid } from "../../shared/grid/search-grid"
 import { SearchGridItem } from "../../shared/grid/search-grid-item"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
-import { ExternalApiKeySandboxTag } from "./external-api-key-sandbox-tag"
 import { ExternalApiKeyStatusTag } from "./external-api-key-status-tag"
 import { GridHeaders } from "./grid-header"
 
@@ -98,7 +97,7 @@ export const ExternalApiKeysIndexScreen = observer(function ExternalApiKeysIndex
           />
         )}
 
-        <SearchGrid templateColumns="repeat(7, 1fr) 85px" pos={"relative"}>
+        <SearchGrid templateColumns="1fr 1fr 1fr 1.2fr 1fr 1fr 1fr 85px" pos={"relative"}>
           <GridHeaders />
 
           {isFetching ? (
@@ -115,9 +114,9 @@ export const ExternalApiKeysIndexScreen = observer(function ExternalApiKeysIndex
                     <ExternalApiKeyStatusTag status={externalApiKey.status} />
                   </SearchGridItem>
                   <SearchGridItem>
-                    {externalApiKey.statusScope && (
-                      <ExternalApiKeySandboxTag statusScope={externalApiKey.statusScope} />
-                    )}
+                    {externalApiKey.statusScope
+                      ? t(`sandbox.scopeLabels.${externalApiKey.statusScope}`)
+                      : t("sandbox.live")}
                   </SearchGridItem>
                   <SearchGridItem>{format(externalApiKey.createdAt, datefnsTableDateFormat)}</SearchGridItem>
                   <SearchGridItem>
