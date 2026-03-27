@@ -5,6 +5,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogOverlay,
+  Avatar,
   Box,
   Button,
   Circle,
@@ -42,9 +43,9 @@ interface IProps {
 
 const APPLICATION_KANBAN_COLUMNS: EPermitApplicationStatus[] = [
   EPermitApplicationStatus.newlySubmitted,
+  EPermitApplicationStatus.resubmitted,
   EPermitApplicationStatus.inReview,
   EPermitApplicationStatus.revisionsRequested,
-  EPermitApplicationStatus.resubmitted,
   EPermitApplicationStatus.approved,
   EPermitApplicationStatus.issued,
   EPermitApplicationStatus.withdrawn,
@@ -109,6 +110,7 @@ const ApplicationKanbanCard = observer(function ApplicationKanbanCard({
 }: {
   application: IPermitApplication
 }) {
+  const { t } = useTranslation()
   const isSandbox = !!application.sandbox
   const isUnread = !application.isViewed
 
@@ -140,21 +142,68 @@ const ApplicationKanbanCard = observer(function ApplicationKanbanCard({
         _visited={{ color: "inherit" }}
         _active={{ color: "inherit" }}
       >
-        <HStack spacing={2} mb={1}>
-          {isUnread && <Circle size="8px" bg={"theme.blueActive"} flexShrink={0} />}
-        </HStack>
+        <Box pr={10}>
+          <HStack spacing={2} mb={1}>
+            {isUnread && <Circle size="8px" bg={"theme.blueActive"} flexShrink={0} />}
+          </HStack>
 
-        <Text fontWeight={700} fontSize="sm" noOfLines={1}>
-          {application.number}
-        </Text>
-        <Text fontSize="xs" color="text.secondary" noOfLines={1} mb={1}>
-          {application.nickname || application.number}
-        </Text>
+          <Text fontWeight={700} fontSize="sm" noOfLines={2}>
+            {application.nickname}
+          </Text>
+          <Text fontSize="xs" noOfLines={1}>
+            {application.number}
+          </Text>
+        </Box>
 
-        <Text fontSize="xs" noOfLines={1}>
-          {application.fullAddress}
+        <Text fontSize="xs" noOfLines={1} mt={2}>
+          {application.shortAddress}
         </Text>
+        {application.pid && (
+          <Text fontSize="2xs" color="text.secondary">
+            PID {application.pid}
+          </Text>
+        )}
+
+        {application.daysInQueue != null && (
+          <Text fontSize="xs" color="text.secondary" mt={1}>
+            {/* @ts-ignore */}
+            {t("submissionInbox.daysInQueue", { count: application.daysInQueue })}
+          </Text>
+        )}
       </Box>
+
+      {application.projectId && application.projectNumber && (
+        <Text fontSize="xs" mt={1}>
+          {/* @ts-ignore */}
+          {t("submissionInbox.project")}{" "}
+          <Box
+            as={Link}
+            to={`projects/${application.projectId}/overview`}
+            color="text.link"
+            fontWeight={600}
+            _hover={{ textDecoration: "underline" }}
+            onClick={(e: React.MouseEvent) => e.stopPropagation()}
+          >
+            {application.projectNumber}
+          </Box>
+        </Text>
+      )}
+
+      <HStack mt={3} spacing={1}>
+        <Avatar size="xs" name="BB" bg="theme.blueLight" color="text.primary" fontSize="2xs" />
+        <IconButton
+          aria-label="Add"
+          icon={
+            <Text fontSize="xs" fontWeight="bold">
+              +
+            </Text>
+          }
+          size="xs"
+          variant="ghost"
+          borderRadius="full"
+          isDisabled
+        />
+      </HStack>
     </KanbanCard>
   )
 })
@@ -193,8 +242,10 @@ const ChangeStatusMenu = observer(function ChangeStatusMenu({ application }: { a
         <MenuButton
           as={IconButton}
           aria-label={t("submissionInbox.changeStatus")}
-          icon={<Icon as={Swap} />}
-          size="xs"
+          icon={<Icon as={Swap} boxSize={4} />}
+          size="sm"
+          minW={7}
+          h={7}
           variant="ghost"
         />
         <Portal>

@@ -154,7 +154,8 @@ RSpec.describe Api::Concerns::Search::JurisdictionPermitApplications,
             :@jurisdiction_permit_application_search
           ).results
         ).to match_array(
-          submitted_permit_applications + resubmitted_permit_applications
+          submitted_permit_applications + resubmitted_permit_applications +
+            revisions_requested_permit_applications
         )
       end
     end
@@ -174,7 +175,8 @@ RSpec.describe Api::Concerns::Search::JurisdictionPermitApplications,
             :@jurisdiction_permit_application_search
           ).results
         ).to match_array(
-          submitted_permit_applications + resubmitted_permit_applications
+          submitted_permit_applications + resubmitted_permit_applications +
+            revisions_requested_permit_applications
         )
       end
     end

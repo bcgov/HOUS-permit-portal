@@ -71,6 +71,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
       submittedAt: types.maybeNull(types.Date),
       resubmittedAt: types.maybeNull(types.Date),
       revisionsRequestedAt: types.maybeNull(types.Date),
+      enqueuedAt: types.maybeNull(types.Date),
       selectedTabIndex: types.optional(types.number, 0),
       createdAt: types.Date,
       updatedAt: types.Date,
@@ -97,6 +98,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
       isViewingPastRequests: types.optional(types.boolean, false),
       templateNickname: types.maybeNull(types.string),
       projectId: types.maybeNull(types.string),
+      projectNumber: types.maybeNull(types.string),
       discardedAt: types.maybeNull(types.Date),
       inboxSortOrder: types.maybeNull(types.number),
       allowedManualTransitions: types.optional(types.array(types.string), []),
@@ -106,6 +108,14 @@ export const PermitApplicationModel = types.snapshotProcessor(
     .views((self) => ({
       get isDiscarded() {
         return !!self.discardedAt
+      },
+      get shortAddress() {
+        return self.fullAddress?.split(",")[0]
+      },
+      get daysInQueue(): number | null {
+        if (!self.enqueuedAt) return null
+        const ms = Date.now() - self.enqueuedAt.getTime()
+        return Math.floor(ms / (1000 * 60 * 60 * 24))
       },
       get isPart3() {
         // TODO
@@ -127,6 +137,9 @@ export const PermitApplicationModel = types.snapshotProcessor(
       },
       get isInReview() {
         return self.status === EPermitApplicationStatus.inReview
+      },
+      get isReviewReadOnly() {
+        return self.status !== EPermitApplicationStatus.inReview
       },
       get isRevisionsRequested() {
         return self.status === EPermitApplicationStatus.revisionsRequested

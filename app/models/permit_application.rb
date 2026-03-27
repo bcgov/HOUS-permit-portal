@@ -265,7 +265,8 @@ class PermitApplication < ApplicationRecord
       sandbox_id: sandbox_id,
       permit_project_id: permit_project_id,
       submission_delegatee_id: submission_delegatee&.id,
-      discarded: discarded?
+      discarded: discarded?,
+      enqueued_at: enqueued_at
     }
   end
 

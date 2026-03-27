@@ -38,11 +38,13 @@ export const KanbanCard = observer(function KanbanCard({ id, onMarkUnread, statu
       _hover={{ shadow: "sm" }}
       position="relative"
     >
-      <HStack position="absolute" top={2} right={2} spacing={0}>
+      <HStack position="absolute" top={1} right={1} spacing={1}>
         <IconButton
           aria-label="Move"
-          icon={<DotsSixVertical />}
-          size="xs"
+          icon={<DotsSixVertical size={16} />}
+          size="sm"
+          minW={7}
+          h={7}
           variant="ghost"
           cursor="grab"
           {...attributes}
@@ -52,8 +54,10 @@ export const KanbanCard = observer(function KanbanCard({ id, onMarkUnread, statu
         {onMarkUnread && (
           <IconButton
             aria-label={t("submissionInbox.markUnread")}
-            icon={<EyeSlash />}
-            size="xs"
+            icon={<EyeSlash size={16} />}
+            size="sm"
+            minW={7}
+            h={7}
             variant="ghost"
             onClick={(e) => {
               e.preventDefault()

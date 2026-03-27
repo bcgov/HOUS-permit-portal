@@ -283,9 +283,11 @@ class Api::PermitProjectsController < Api::ApplicationController
   def reorder
     authorize PermitProject, :reorder?
 
+    scope = PermitProject.where(jurisdiction_id: current_user.jurisdiction_ids)
+
     items = params.require(:items)
     items.each do |item|
-      project = PermitProject.find(item[:id])
+      project = scope.find(item[:id])
       project.update!(inbox_sort_order: item[:inbox_sort_order])
     end
 

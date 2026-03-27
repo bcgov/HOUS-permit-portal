@@ -18,9 +18,7 @@ import {
   AssignedFilter,
   DaysInQueueFilter,
   MeetingRequestsFilter,
-  ProjectStatusFilter,
   RequirementTemplateInboxFilter,
-  StatusFilter,
   UnreadFilter,
 } from "./filters"
 import { ProjectInboxTable } from "./project-inbox-table"
@@ -216,48 +214,25 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
                   activeSearchStore.search()
                 }}
               />
-              {viewMode === EInboxViewMode.projects ? (
-                <ProjectStatusFilter
-                  value={[...activeSearchStore.statusFilter]}
-                  onChange={(val) => activeSearchStore.setStatusFilter(val as any)}
-                  onApply={() => activeSearchStore.search()}
-                  onClear={() => {
-                    activeSearchStore.setStatusFilter([] as any)
-                    activeSearchStore.search()
-                  }}
-                />
-              ) : (
-                <StatusFilter
-                  value={[...activeSearchStore.statusFilter]}
-                  onChange={(val) => activeSearchStore.setStatusFilter(val as any)}
-                  onApply={() => activeSearchStore.search()}
-                  onClear={() => {
-                    activeSearchStore.setStatusFilter([] as any)
-                    activeSearchStore.search()
-                  }}
-                />
-              )}
+              <DaysInQueueFilter
+                value={activeSearchStore.daysInQueueFilter}
+                onChange={(val) => activeSearchStore.setDaysInQueueFilter(val)}
+                onApply={() => activeSearchStore.search()}
+                onClear={() => {
+                  activeSearchStore.setDaysInQueueFilter(null)
+                  activeSearchStore.search()
+                }}
+              />
               {viewMode === EInboxViewMode.projects && (
-                <>
-                  <DaysInQueueFilter
-                    value={activeSearchStore.daysInQueueFilter}
-                    onChange={(val) => activeSearchStore.setDaysInQueueFilter(val)}
-                    onApply={() => activeSearchStore.search()}
-                    onClear={() => {
-                      activeSearchStore.setDaysInQueueFilter(null)
-                      activeSearchStore.search()
-                    }}
-                  />
-                  <AssignedFilter
-                    value={[...activeSearchStore.assignedFilter]}
-                    onChange={(val) => activeSearchStore.setAssignedFilter(val)}
-                    onApply={() => activeSearchStore.search()}
-                    onClear={() => {
-                      activeSearchStore.setAssignedFilter([])
-                      activeSearchStore.search()
-                    }}
-                  />
-                </>
+                <AssignedFilter
+                  value={[...activeSearchStore.assignedFilter]}
+                  onChange={(val) => activeSearchStore.setAssignedFilter(val)}
+                  onApply={() => activeSearchStore.search()}
+                  onClear={() => {
+                    activeSearchStore.setAssignedFilter([])
+                    activeSearchStore.search()
+                  }}
+                />
               )}
               <Button variant="link" size="sm" onClick={() => activeSearchStore.resetFilters()}>
                 {t("submissionInbox.clearAllFilters")}

@@ -4,7 +4,7 @@ class PermitApplicationPolicy < ApplicationPolicy
          record.collaborator?(user_id: user.id, collaboration_type: :submission)
       true
     elsif user.review_staff?
-      user.member_of?(record.jurisdiction.id) && !record.draft? &&
+      user.member_of?(record.jurisdiction.id) && !record.new_draft? &&
         record.sandbox == sandbox
     end
   end
@@ -77,7 +77,8 @@ class PermitApplicationPolicy < ApplicationPolicy
   end
 
   def reorder?
-    user.review_staff? && user.member_of?(record.jurisdiction_id)
+    # this is actually a collection action and the scope is defiend separately
+    user&.review_staff?
   end
 
   def generate_missing_pdfs?

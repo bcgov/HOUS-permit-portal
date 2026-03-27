@@ -529,10 +529,16 @@ if north_van_projects.size >= 10
     end
   end
 
-  # Spread enqueued_at across non-draft projects for varied "days in queue" data
+  # Spread enqueued_at across non-draft projects and their non-draft permit applications
   non_draft = north_van_projects.select { |p| p.reload.state != "draft" }
   non_draft.each_with_index do |project, idx|
-    project.update_column(:enqueued_at, (idx * 2 + 1).days.ago)
+    enqueued = (idx * 2 + 1).days.ago
+    project.update_column(:enqueued_at, enqueued)
+    project
+      .permit_applications
+      .kept
+      .where.not(status: :new_draft)
+      .update_all(enqueued_at: enqueued)
   end
 
   puts "  ✓ Distributed #{[state_distribution.size, north_van_projects.size].min} projects across kanban states"

@@ -150,7 +150,8 @@ module Api::Concerns::Search::JurisdictionPermitApplications
         { status: [] },
         :has_collaborator,
         :unread,
-        { requirement_template_ids: [] }
+        { requirement_template_ids: [] },
+        { days_in_queue: %i[operator days] }
       ],
       sort: %i[field direction]
     )
@@ -212,6 +213,17 @@ module Api::Concerns::Search::JurisdictionPermitApplications
       and_conditions << { viewed_at: nil }
     elsif unread == "hide"
       and_conditions << { _not: { viewed_at: nil } }
+    end
+
+    days_in_queue = search_filters.delete(:days_in_queue)
+    if days_in_queue.present? && days_in_queue[:days].present?
+      days = days_in_queue[:days].to_i
+      cutoff = days.days.ago.beginning_of_day
+      if days_in_queue[:operator] == "gte"
+        and_conditions << { enqueued_at: { lte: cutoff } }
+      elsif days_in_queue[:operator] == "lt"
+        and_conditions << { enqueued_at: { gt: cutoff } }
+      end
     end
 
     { _and: and_conditions }

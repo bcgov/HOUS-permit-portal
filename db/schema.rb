@@ -526,6 +526,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_03_25_210000) do
     t.string "last_name_snapshot"
     t.datetime "orphaned_at"
     t.integer "inbox_sort_order"
+    t.datetime "enqueued_at"
     t.index ["activity_id"], name: "index_permit_applications_on_activity_id"
     t.index ["discarded_at"], name: "index_permit_applications_on_discarded_at"
     t.index ["jurisdiction_id"], name: "index_permit_applications_on_jurisdiction_id"

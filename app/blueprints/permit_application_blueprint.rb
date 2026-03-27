@@ -19,7 +19,8 @@ class PermitApplicationBlueprint < Blueprinter::Base
            :revisions_requested_at,
            :missing_pdfs,
            :template_nickname,
-           :discarded_at
+           :discarded_at,
+           :enqueued_at
 
     association :permit_type, blueprint: PermitClassificationBlueprint
     association :activity, blueprint: PermitClassificationBlueprint
@@ -35,6 +36,10 @@ class PermitApplicationBlueprint < Blueprinter::Base
 
     field :project_id do |pa, _options|
       pa.permit_project&.id
+    end
+
+    field :project_number do |pa, _options|
+      pa.permit_project&.number
     end
 
     field :inbox_sort_order, default: nil
