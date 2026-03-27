@@ -285,6 +285,16 @@ export class Api {
     return this.client.get<ApiResponse<IPermitProject>>(`/permit_projects/${id}`)
   }
 
+  async assignProjectReviewDelegatee(projectId: string, collaboratorId: string) {
+    return this.client.post<ApiResponse<IPermitProject>>(`/permit_projects/${projectId}/assign_review_delegatee`, {
+      collaboratorId,
+    })
+  }
+
+  async unassignProjectReviewDelegatee(projectId: string) {
+    return this.client.delete<ApiResponse<IPermitProject>>(`/permit_projects/${projectId}/unassign_review_delegatee`)
+  }
+
   async fetchProjectAudits(
     projectId: string,
     params?: TSearchParams<EProjectAuditSortFields, IProjectAuditSearchFilters>

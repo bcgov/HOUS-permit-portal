@@ -4,8 +4,16 @@ import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
 import { EPermitProjectRollupStatus, EProjectState } from "../types/enums"
 import { IParcelGeometry, IProjectAuditSummary, IProjectDocument } from "../types/types"
+import { ICollaborator } from "./collaborator"
 import { JurisdictionModel } from "./jurisdiction"
 import { IPermitApplication, PermitApplicationModel } from "./permit-application"
+
+export interface IAggregatedReviewCollaborator {
+  id: string
+  name: string
+  role: string
+  isDesignated: boolean
+}
 
 export const PermitProjectModel = types
   .model("PermitProjectModel", {
@@ -16,11 +24,11 @@ export const PermitProjectModel = types
     number: types.maybeNull(types.string),
     jurisdictionDisambiguatedName: types.string,
     sortedApplicationStatuses: types.optional(
-      types.array(types.frozen<{ status: string; nickname: string | null }>()),
+      types.array(types.frozen<{ id: string; status: string; nickname: string | null }>()),
       []
     ),
     inboxSortedApplicationStatuses: types.optional(
-      types.array(types.frozen<{ status: string; nickname: string | null }>()),
+      types.array(types.frozen<{ id: string; status: string; nickname: string | null }>()),
       []
     ),
     state: types.enumeration(Object.values(EProjectState)),
@@ -51,6 +59,8 @@ export const PermitProjectModel = types
     parcelGeometry: types.maybeNull(types.frozen<IParcelGeometry>()),
     inboxSortOrder: types.maybeNull(types.number),
     recentAudits: types.optional(types.array(types.frozen<IProjectAuditSummary>()), []),
+    reviewDelegatee: types.maybeNull(types.frozen<ICollaborator>()),
+    aggregatedReviewCollaborators: types.optional(types.array(types.frozen<IAggregatedReviewCollaborator>()), []),
   })
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -170,6 +180,20 @@ export const PermitProjectModel = types
       if (response.ok) {
         self.rootStore.permitProjectStore.mergeUpdate(response.data.data, "permitProjectMap")
         self.rootStore.submissionInboxStore?.permitProjectSearch?.adjustCountsForTransition(oldState, targetState)
+      }
+      return response
+    }),
+    assignReviewDelegatee: flow(function* (collaboratorId: string) {
+      const response = yield* toGenerator(self.environment.api.assignProjectReviewDelegatee(self.id, collaboratorId))
+      if (response.ok) {
+        self.rootStore.permitProjectStore.mergeUpdate(response.data.data, "permitProjectMap")
+      }
+      return response
+    }),
+    unassignReviewDelegatee: flow(function* () {
+      const response = yield* toGenerator(self.environment.api.unassignProjectReviewDelegatee(self.id))
+      if (response.ok) {
+        self.rootStore.permitProjectStore.mergeUpdate(response.data.data, "permitProjectMap")
       }
       return response
     }),

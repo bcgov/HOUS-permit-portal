@@ -121,6 +121,9 @@ export const PermitApplicationModel = types.snapshotProcessor(
         // TODO
         return false
       },
+      get isNewDraft() {
+        return self.status === EPermitApplicationStatus.newDraft
+      },
       get isDraft() {
         return (
           self.status === EPermitApplicationStatus.newDraft ||

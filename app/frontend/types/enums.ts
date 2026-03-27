@@ -717,12 +717,11 @@ export enum EPermitProjectInboxSortFields {
 
 export enum EPermitApplicationInboxSortFields {
   status = "status",
-  number = "number",
-  referenceNumber = "reference_number",
-  permitClassification = "permit_classification",
-  submitter = "submitter",
-  viewedAt = "viewed_at",
-  submittedAt = "submitted_at",
+  permitType = "requirement_template_name",
+  address = "full_address",
+  projectNumber = "project_number",
+  daysInQueue = "enqueued_at",
+  assigned = "review_delegatee_name",
 }
 
 export enum EInboxViewMode {

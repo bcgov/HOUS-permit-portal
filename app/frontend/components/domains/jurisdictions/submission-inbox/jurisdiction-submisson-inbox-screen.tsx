@@ -1,13 +1,14 @@
 import { Box, Button, ButtonGroup, Circle, Flex, Heading, HStack, Icon, Text, VStack } from "@chakra-ui/react"
-import { CalendarBlank, Columns, List, ListBullets, Stack } from "@phosphor-icons/react"
+import { Buildings, CalendarBlank, Columns, FileText, ListBullets, ListDashes } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
-import React, { useEffect, useRef } from "react"
+import React, { useCallback, useEffect, useRef } from "react"
 import { useTranslation } from "react-i18next"
 import { useJurisdiction } from "../../../../hooks/resources/use-jurisdiction"
 import { usePopStateModeSync } from "../../../../hooks/use-popstate-mode-sync"
 import { useSearch } from "../../../../hooks/use-search"
 import { useMst } from "../../../../setup/root"
 import { EInboxDisplayMode, EInboxViewMode, EPermitApplicationStatus } from "../../../../types/enums"
+import { IOption } from "../../../../types/types"
 import { CalloutBanner } from "../../../shared/base/callout-banner"
 import { ErrorScreen } from "../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../shared/base/loading-screen"
@@ -18,7 +19,9 @@ import {
   AssignedFilter,
   DaysInQueueFilter,
   MeetingRequestsFilter,
+  ProjectStatusFilter,
   RequirementTemplateInboxFilter,
+  StatusFilter,
   UnreadFilter,
 } from "./filters"
 import { ProjectInboxTable } from "./project-inbox-table"
@@ -28,7 +31,7 @@ const LIST_DEFAULT_PER_PAGE = 10
 
 export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionSubmissionInbox() {
   const { t } = useTranslation()
-  const { submissionInboxStore, sandboxStore } = useMst()
+  const { submissionInboxStore, sandboxStore, collaboratorStore } = useMst()
   const { currentJurisdiction, error } = useJurisdiction()
 
   const { viewMode, displayMode, setViewMode, setDisplayMode, permitProjectSearch, permitApplicationSearch } =
@@ -58,6 +61,11 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
   }, [displayMode])
 
   useSearch(activeSearchStore, [currentJurisdiction?.id, JSON.stringify(currentSandboxId), viewMode])
+
+  const loadCollaboratorOptions = useCallback(async (): Promise<IOption[]> => {
+    if (!currentJurisdiction?.id) return []
+    return collaboratorStore.fetchCollaboratorOptionsForJurisdiction(currentJurisdiction.id)
+  }, [currentJurisdiction?.id])
 
   if (error) return <ErrorScreen error={error} />
   if (!currentJurisdiction) return <LoadingScreen />
@@ -125,12 +133,12 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
 
             <Heading as="h1">{t("permitApplication.submissionInbox.title")}</Heading>
 
-            {/* Search bar + view toggles */}
-            <HStack w="full" spacing={4}>
+            {/* Search bar + filters */}
+            <HStack w="full" spacing={2} flexWrap="wrap">
               <Box
                 as="input"
                 flex={1}
-                minW={0}
+                minW="200px"
                 maxW="50%"
                 p={2}
                 px={4}
@@ -145,54 +153,6 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
                   activeSearchStore.search()
                 }}
               />
-
-              <HStack spacing={3} flexShrink={0}>
-                <ButtonGroup isAttached variant="outline" size="sm">
-                  <Button
-                    onClick={() => setViewMode(EInboxViewMode.projects)}
-                    fontWeight={viewMode === EInboxViewMode.projects ? "bold" : "normal"}
-                    borderColor={viewMode === EInboxViewMode.projects ? "theme.blueActive" : "border.light"}
-                    leftIcon={<RadioDot active={viewMode === EInboxViewMode.projects} />}
-                    rightIcon={<Icon as={Stack} />}
-                  >
-                    {t("submissionInbox.projects")}
-                  </Button>
-                  <Button
-                    onClick={() => setViewMode(EInboxViewMode.applications)}
-                    fontWeight={viewMode === EInboxViewMode.applications ? "bold" : "normal"}
-                    borderColor={viewMode === EInboxViewMode.applications ? "theme.blueActive" : "border.light"}
-                    leftIcon={<RadioDot active={viewMode === EInboxViewMode.applications} />}
-                    rightIcon={<Icon as={ListBullets} />}
-                  >
-                    {t("submissionInbox.applications")}
-                  </Button>
-                </ButtonGroup>
-
-                <ButtonGroup isAttached variant="outline" size="sm">
-                  <Button
-                    onClick={() => setDisplayMode(EInboxDisplayMode.list)}
-                    fontWeight={displayMode === EInboxDisplayMode.list ? "bold" : "normal"}
-                    borderColor={displayMode === EInboxDisplayMode.list ? "theme.blueActive" : "border.light"}
-                    leftIcon={<RadioDot active={displayMode === EInboxDisplayMode.list} />}
-                    rightIcon={<Icon as={List} />}
-                  >
-                    {t("submissionInbox.list")}
-                  </Button>
-                  <Button
-                    onClick={() => setDisplayMode(EInboxDisplayMode.columns)}
-                    fontWeight={displayMode === EInboxDisplayMode.columns ? "bold" : "normal"}
-                    borderColor={displayMode === EInboxDisplayMode.columns ? "theme.blueActive" : "border.light"}
-                    leftIcon={<RadioDot active={displayMode === EInboxDisplayMode.columns} />}
-                    rightIcon={<Icon as={Columns} />}
-                  >
-                    {t("submissionInbox.columns")}
-                  </Button>
-                </ButtonGroup>
-              </HStack>
-            </HStack>
-
-            {/* Filter bar */}
-            <HStack spacing={2} flexWrap="wrap">
               {viewMode === EInboxViewMode.projects && (
                 <MeetingRequestsFilter
                   value={activeSearchStore.meetingRequestFilter}
@@ -204,6 +164,11 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
                 value={activeSearchStore.unreadFilter}
                 onChange={(val) => activeSearchStore.setUnreadFilter(val)}
                 onApply={() => activeSearchStore.search()}
+                badgeCount={
+                  viewMode === EInboxViewMode.projects
+                    ? permitProjectSearch.tablePermitProjects.filter((p) => !p.viewedAt).length
+                    : permitApplicationSearch.tablePermitApplications.filter((a) => !a.isViewed).length
+                }
               />
               <RequirementTemplateInboxFilter
                 value={[...activeSearchStore.requirementTemplateIdFilter]}
@@ -214,6 +179,28 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
                   activeSearchStore.search()
                 }}
               />
+              {displayMode === EInboxDisplayMode.list && viewMode === EInboxViewMode.applications && (
+                <StatusFilter
+                  value={[...activeSearchStore.statusFilter]}
+                  onChange={(val) => activeSearchStore.setStatusFilter(val as any)}
+                  onApply={() => activeSearchStore.search()}
+                  onClear={() => {
+                    activeSearchStore.setStatusFilter([] as any)
+                    activeSearchStore.search()
+                  }}
+                />
+              )}
+              {displayMode === EInboxDisplayMode.list && viewMode === EInboxViewMode.projects && (
+                <ProjectStatusFilter
+                  value={[...activeSearchStore.statusFilter]}
+                  onChange={(val) => activeSearchStore.setStatusFilter(val as any)}
+                  onApply={() => activeSearchStore.search()}
+                  onClear={() => {
+                    activeSearchStore.setStatusFilter([] as any)
+                    activeSearchStore.search()
+                  }}
+                />
+              )}
               <DaysInQueueFilter
                 value={activeSearchStore.daysInQueueFilter}
                 onChange={(val) => activeSearchStore.setDaysInQueueFilter(val)}
@@ -223,20 +210,68 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
                   activeSearchStore.search()
                 }}
               />
-              {viewMode === EInboxViewMode.projects && (
-                <AssignedFilter
-                  value={[...activeSearchStore.assignedFilter]}
-                  onChange={(val) => activeSearchStore.setAssignedFilter(val)}
-                  onApply={() => activeSearchStore.search()}
-                  onClear={() => {
-                    activeSearchStore.setAssignedFilter([])
-                    activeSearchStore.search()
-                  }}
-                />
-              )}
+              <AssignedFilter
+                value={[...activeSearchStore.assignedFilter]}
+                onChange={(val) => activeSearchStore.setAssignedFilter(val)}
+                onApply={() => activeSearchStore.search()}
+                onClear={() => {
+                  activeSearchStore.setAssignedFilter([])
+                  activeSearchStore.search()
+                }}
+                loadOptions={loadCollaboratorOptions}
+              />
               <Button variant="link" size="sm" onClick={() => activeSearchStore.resetFilters()}>
                 {t("submissionInbox.clearAllFilters")}
               </Button>
+            </HStack>
+
+            {/* View & display toggles */}
+            <HStack spacing={3}>
+              <ButtonGroup isAttached variant="outline" size="sm">
+                <Button
+                  onClick={() => setViewMode(EInboxViewMode.projects)}
+                  fontWeight={viewMode === EInboxViewMode.projects ? "bold" : "normal"}
+                  borderColor={viewMode === EInboxViewMode.projects ? "theme.blueActive" : "border.light"}
+                  bg={viewMode === EInboxViewMode.projects ? "background.blueLight" : undefined}
+                  leftIcon={<RadioDot active={viewMode === EInboxViewMode.projects} />}
+                  rightIcon={<Icon as={Buildings} />}
+                >
+                  {t("submissionInbox.projects")}
+                </Button>
+                <Button
+                  onClick={() => setViewMode(EInboxViewMode.applications)}
+                  fontWeight={viewMode === EInboxViewMode.applications ? "bold" : "normal"}
+                  borderColor={viewMode === EInboxViewMode.applications ? "theme.blueActive" : "border.light"}
+                  bg={viewMode === EInboxViewMode.applications ? "background.blueLight" : undefined}
+                  leftIcon={<RadioDot active={viewMode === EInboxViewMode.applications} />}
+                  rightIcon={<Icon as={FileText} />}
+                >
+                  {t("submissionInbox.applications")}
+                </Button>
+              </ButtonGroup>
+
+              <ButtonGroup isAttached variant="outline" size="sm">
+                <Button
+                  onClick={() => setDisplayMode(EInboxDisplayMode.list)}
+                  fontWeight={displayMode === EInboxDisplayMode.list ? "bold" : "normal"}
+                  borderColor={displayMode === EInboxDisplayMode.list ? "theme.blueActive" : "border.light"}
+                  bg={displayMode === EInboxDisplayMode.list ? "background.blueLight" : undefined}
+                  leftIcon={<RadioDot active={displayMode === EInboxDisplayMode.list} />}
+                  rightIcon={<Icon as={ListDashes} />}
+                >
+                  {t("submissionInbox.list")}
+                </Button>
+                <Button
+                  onClick={() => setDisplayMode(EInboxDisplayMode.columns)}
+                  fontWeight={displayMode === EInboxDisplayMode.columns ? "bold" : "normal"}
+                  borderColor={displayMode === EInboxDisplayMode.columns ? "theme.blueActive" : "border.light"}
+                  bg={displayMode === EInboxDisplayMode.columns ? "background.blueLight" : undefined}
+                  leftIcon={<RadioDot active={displayMode === EInboxDisplayMode.columns} />}
+                  rightIcon={<Icon as={Columns} />}
+                >
+                  {t("submissionInbox.columns")}
+                </Button>
+              </ButtonGroup>
             </HStack>
           </VStack>
         </Box>
@@ -250,6 +285,7 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
           px={8}
           pb={displayMode === EInboxDisplayMode.columns ? 0 : 8}
         >
+          <TotalCountLabel viewMode={viewMode} activeSearchStore={activeSearchStore} />
           <InboxContent
             viewMode={viewMode}
             displayMode={displayMode}
@@ -278,6 +314,36 @@ function RadioDot({ active }: { active: boolean }) {
     </Circle>
   )
 }
+
+const TotalCountLabel = observer(function TotalCountLabel({
+  viewMode,
+  activeSearchStore,
+}: {
+  viewMode: EInboxViewMode
+  activeSearchStore: any
+}) {
+  const { t } = useTranslation()
+
+  const totalFromCounts: number = activeSearchStore.stateCounts
+    ? Object.values(activeSearchStore.stateCounts as Record<string, number>).reduce(
+        (sum: number, n: number) => sum + n,
+        0
+      )
+    : 0
+  const count = activeSearchStore.totalCount ?? totalFromCounts
+
+  if (count == null || count === 0) return null
+
+  // @ts-ignore
+  const label: string =
+    viewMode === EInboxViewMode.projects ? t("submissionInbox.projects") : t("submissionInbox.applications")
+
+  return (
+    <Text fontSize="sm" color="text.secondary" mb={2} flexShrink={0}>
+      {count} {label.toLowerCase()}
+    </Text>
+  )
+})
 
 const InboxContent = observer(function InboxContent({
   viewMode,

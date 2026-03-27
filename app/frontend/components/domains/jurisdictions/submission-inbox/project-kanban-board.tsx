@@ -1,7 +1,6 @@
 import {
   Avatar,
   Box,
-  Circle,
   HStack,
   Icon,
   IconButton,
@@ -14,19 +13,25 @@ import {
   PopoverContent,
   PopoverTrigger,
   Portal,
+  Spinner,
   Text,
+  Tooltip,
+  useDisclosure,
   VStack,
 } from "@chakra-ui/react"
-import { CalendarBlank, Swap } from "@phosphor-icons/react"
+import { CalendarBlank, Swap, UserPlus } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
-import React, { useMemo } from "react"
+import React, { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Link } from "react-router-dom"
 import { IPermitProject } from "../../../../models/permit-project"
+import { useMst } from "../../../../setup/root"
 import { EProjectState } from "../../../../types/enums"
 import { PermitApplicationStatusTag } from "../../../shared/permit-applications/permit-application-status-tag"
+import { SharedAvatar } from "../../../shared/user/shared-avatar"
 import { IKanbanColumn, IReorderEvent, KanbanBoard } from "./kanban-board"
 import { KanbanCard } from "./kanban-card"
+import { ProjectCollaboratorsSidebar } from "./project-collaborators-sidebar"
 
 interface IProps {
   projects: IPermitProject[]
@@ -95,34 +100,69 @@ export const ProjectKanbanBoard = observer(function ProjectKanbanBoard({
   )
 })
 
+const MAX_VISIBLE_AVATARS = 3
+
 const ProjectKanbanCard = observer(function ProjectKanbanCard({ project }: { project: IPermitProject }) {
   const { t } = useTranslation()
+  const { permitProjectStore } = useMst()
+  const { isOpen: isSidebarOpen, onOpen: onSidebarOpen, onClose: onSidebarClose } = useDisclosure()
+  const [isLoadingSidebar, setIsLoadingSidebar] = useState(false)
 
   const received = project.newlySubmittedCount + project.resubmittedCount
   const total = project.totalPermitsCount
   const isUnread = !project.viewedAt
 
+  const collaborators = project.aggregatedReviewCollaborators
+  const designated = collaborators.filter((c) => c.isDesignated)
+  const others = collaborators.filter((c) => !c.isDesignated)
+  const allAvatarUsers = [...designated, ...others]
+  const visibleAvatars = allAvatarUsers.slice(0, MAX_VISIBLE_AVATARS)
+  const overflowCount = allAvatarUsers.length - MAX_VISIBLE_AVATARS
+
+  const handleOpenSidebar = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsLoadingSidebar(true)
+    try {
+      await permitProjectStore.fetchPermitProject(project.id)
+    } finally {
+      setIsLoadingSidebar(false)
+    }
+    onSidebarOpen()
+  }
+
   return (
     <KanbanCard
       id={project.id}
+      isUnread={isUnread}
       onMarkUnread={isUnread ? undefined : () => project.markAsUnviewed()}
       statusMenu={<ChangeStatusMenu project={project} />}
     >
-      <Box as={Link} to={`projects/${project.id}/overview`} _hover={{ textDecoration: "none" }} display="block">
-        <HStack spacing={2} mb={1}>
-          {isUnread && <Circle size="8px" bg={"theme.blueActive"} flexShrink={0} />}
-          {/* ### SUBMISSION INDEX STUB FEATURE */}
-          <Icon as={CalendarBlank} color="text.secondary" boxSize={4} display="none" />
-          <Text fontWeight={700} fontSize="sm" noOfLines={1}>
-            {project.number}
-          </Text>
-        </HStack>
+      <Box
+        as={Link}
+        to={`projects/${project.id}/overview`}
+        display="block"
+        color="inherit"
+        textDecoration="none"
+        _hover={{ textDecoration: "none", color: "inherit" }}
+        _visited={{ color: "inherit" }}
+        _active={{ color: "inherit" }}
+      >
+        <Box pr={4}>
+          <HStack spacing={2}>
+            {/* ### SUBMISSION INDEX STUB FEATURE */}
+            <Icon as={CalendarBlank} color="text.secondary" boxSize={4} display="none" />
+            <Text fontWeight={700} fontSize="sm" noOfLines={1}>
+              {project.number}
+            </Text>
+          </HStack>
+        </Box>
 
-        <Text fontSize="xs" color="text.secondary" noOfLines={1} mb={1}>
+        <Text fontSize="xs" color="text.secondary" noOfLines={1}>
           {project.title}
         </Text>
 
-        <Text fontSize="xs" noOfLines={1}>
+        <Text fontSize="xs" noOfLines={1} mt={1.5}>
           {project.shortAddress}
         </Text>
         {project.pid && (
@@ -143,26 +183,47 @@ const ProjectKanbanCard = observer(function ProjectKanbanCard({ project }: { pro
           </Text>
         )}
 
-        <Box mt={2}>
+        <Box mt={1.5}>
           <RollupStatusBadge project={project} />
         </Box>
       </Box>
 
-      <HStack mt={3} spacing={1}>
-        <Avatar size="xs" name="BB" bg="theme.blueLight" color="text.primary" fontSize="2xs" />
+      <HStack mt={2} spacing={1}>
+        {visibleAvatars.map((user) => (
+          <SharedAvatar
+            key={user.id}
+            size="xs"
+            name={user.name}
+            role={user.role}
+            fontSize="2xs"
+            border={user.isDesignated ? "2px solid" : undefined}
+            borderColor={user.isDesignated ? "theme.blueActive" : undefined}
+          />
+        ))}
+        {overflowCount > 0 && (
+          <Avatar
+            size="xs"
+            name={`+${overflowCount}`}
+            getInitials={(name) => name}
+            bg="gray.200"
+            color="text.primary"
+            fontSize="2xs"
+          />
+        )}
         <IconButton
-          aria-label="Add"
-          icon={
-            <Text fontSize="xs" fontWeight="bold">
-              +
-            </Text>
-          }
+          aria-label={t("permitCollaboration.sidebar.title")}
+          icon={isLoadingSidebar ? <Spinner size="xs" /> : <UserPlus size={14} />}
           size="xs"
           variant="ghost"
           borderRadius="full"
-          isDisabled
+          onClick={handleOpenSidebar}
+          isDisabled={isLoadingSidebar}
         />
       </HStack>
+
+      {isSidebarOpen && (
+        <ProjectCollaboratorsSidebar project={project} isOpen={isSidebarOpen} onClose={onSidebarClose} />
+      )}
     </KanbanCard>
   )
 })
@@ -174,13 +235,17 @@ const ChangeStatusMenu = observer(function ChangeStatusMenu({ project }: { proje
 
   return (
     <Menu>
-      <MenuButton
-        as={IconButton}
-        aria-label={t("submissionInbox.changeStatus")}
-        icon={<Swap />}
-        size="xs"
-        variant="ghost"
-      />
+      <Tooltip label={t("submissionInbox.changeStatus")} hasArrow placement="top">
+        <MenuButton
+          as={IconButton}
+          aria-label={t("submissionInbox.changeStatus")}
+          icon={<Swap size={16} />}
+          size="sm"
+          minW={7}
+          h={7}
+          variant="ghost"
+        />
+      </Tooltip>
       <Portal>
         <MenuList zIndex={10}>
           {project.allowedManualTransitions.map((transition) => (
@@ -229,7 +294,15 @@ const RollupStatusBadge = observer(function RollupStatusBadge({ project }: { pro
             <VStack align="stretch" spacing={1}>
               {sortedStatuses.map((entry, idx) => (
                 <HStack key={idx} spacing={2} justify="space-between">
-                  <Text fontSize="xs" color="text.secondary" noOfLines={1}>
+                  <Text
+                    as={Link}
+                    to={`/permit-applications/${entry.id}`}
+                    fontSize="xs"
+                    color="text.link"
+                    noOfLines={1}
+                    _hover={{ textDecoration: "underline" }}
+                    onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                  >
                     {entry.nickname || "—"}
                   </Text>
                   <PermitApplicationStatusTag

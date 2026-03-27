@@ -151,7 +151,8 @@ module Api::Concerns::Search::JurisdictionPermitApplications
         :has_collaborator,
         :unread,
         { requirement_template_ids: [] },
-        { days_in_queue: %i[operator days] }
+        { days_in_queue: %i[operator days] },
+        { assigned: [] }
       ],
       sort: %i[field direction]
     )
@@ -224,6 +225,11 @@ module Api::Concerns::Search::JurisdictionPermitApplications
       elsif days_in_queue[:operator] == "lt"
         and_conditions << { enqueued_at: { gt: cutoff } }
       end
+    end
+
+    assigned = search_filters.delete(:assigned)
+    if assigned.present?
+      and_conditions << { review_collaborator_user_ids: assigned }
     end
 
     { _and: and_conditions }

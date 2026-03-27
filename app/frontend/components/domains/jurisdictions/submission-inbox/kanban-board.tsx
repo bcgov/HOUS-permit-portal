@@ -1,8 +1,8 @@
-import { Badge, Button, Flex, HStack, IconButton, Text } from "@chakra-ui/react"
+import { Badge, Box, Button, Flex, HStack, Icon, IconButton, Text } from "@chakra-ui/react"
 import { closestCenter, DndContext, DragEndEvent, PointerSensor, useSensor, useSensors } from "@dnd-kit/core"
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers"
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
-import { CaretDoubleLeft, CaretDoubleRight } from "@phosphor-icons/react"
+import { CaretDoubleLeft, CaretDoubleRight, EyeSlash } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { ReactNode, useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
@@ -128,14 +128,14 @@ function KanbanBoardInner<T extends IKanbanItem>({
                 minW={isCollapsed ? "auto" : "260px"}
                 maxW={isCollapsed ? "60px" : "320px"}
                 flex={isCollapsed ? "0 0 auto" : "1 1 0"}
-                bg="greys.grey03"
+                border="1px solid"
+                borderColor="border.light"
                 borderRadius="lg"
-                p={3}
-                gap={3}
                 minH={0}
+                bg="greys.grey04"
               >
                 {isCollapsed ? (
-                  <>
+                  <Flex direction="column" align="center" gap={3} p={3}>
                     {!isEmpty && (
                       <IconButton
                         aria-label="Expand column"
@@ -146,16 +146,7 @@ function KanbanBoardInner<T extends IKanbanItem>({
                         onClick={() => onToggleColumn(column.key)}
                       />
                     )}
-                    <Text
-                      fontSize="xs"
-                      fontWeight="bold"
-                      textTransform="uppercase"
-                      color="text.secondary"
-                      sx={{ writingMode: "vertical-lr" }}
-                      whiteSpace="nowrap"
-                    >
-                      {column.label}
-                    </Text>
+                    <Icon as={EyeSlash} color="text.secondary" boxSize={4} />
                     <Badge
                       borderRadius="full"
                       py={2}
@@ -171,35 +162,45 @@ function KanbanBoardInner<T extends IKanbanItem>({
                     >
                       {displayedCount} of {totalCount}
                     </Badge>
-                  </>
+                  </Flex>
                 ) : (
                   <>
-                    <HStack justify="space-between" flexShrink={0}>
-                      <Text fontSize="xs" fontWeight="bold" textTransform="uppercase" color="text.secondary">
-                        {column.label}
-                      </Text>
-                      <HStack spacing={1}>
-                        <Badge
-                          borderRadius="full"
-                          px={2}
-                          fontSize="xs"
-                          bg="white"
-                          color="text.secondary"
-                          border="1px solid"
-                          borderColor="border.light"
-                        >
-                          {displayedCount} of {totalCount}
-                        </Badge>
-                        <IconButton
-                          aria-label="Collapse column"
-                          icon={<CaretDoubleLeft />}
-                          size="xs"
-                          variant="ghost"
-                          onClick={() => onToggleColumn(column.key)}
-                        />
+                    <Box
+                      bg="greys.grey03"
+                      borderBottom="1px solid"
+                      borderColor="border.light"
+                      borderTopRadius="lg"
+                      px={3}
+                      py={3}
+                      flexShrink={0}
+                    >
+                      <HStack justify="space-between">
+                        <Text fontSize="xs" fontWeight="bold" textTransform="capitalize" color="text.secondary">
+                          {column.label}
+                        </Text>
+                        <HStack spacing={1}>
+                          <Badge
+                            borderRadius="full"
+                            px={2}
+                            fontSize="xs"
+                            bg="white"
+                            color="text.secondary"
+                            border="1px solid"
+                            borderColor="border.light"
+                          >
+                            {displayedCount} of {totalCount}
+                          </Badge>
+                          <IconButton
+                            aria-label="Collapse column"
+                            icon={<CaretDoubleLeft />}
+                            size="xs"
+                            variant="ghost"
+                            onClick={() => onToggleColumn(column.key)}
+                          />
+                        </HStack>
                       </HStack>
-                    </HStack>
-                    <Flex direction="column" flex={1} minH={0} overflowY="auto" gap={3}>
+                    </Box>
+                    <Flex direction="column" flex={1} minH={0} overflowY="auto" gap={3} p={3}>
                       <SortableContext items={columnItems.map((i) => i.id)} strategy={verticalListSortingStrategy}>
                         {columnItems.map((item) => renderCard(item))}
                       </SortableContext>

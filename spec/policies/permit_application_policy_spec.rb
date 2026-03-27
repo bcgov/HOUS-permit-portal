@@ -91,7 +91,7 @@ RSpec.describe PermitApplicationPolicy do
           collaborator?: false,
           jurisdiction: jurisdiction,
           jurisdiction_id: jurisdiction.id,
-          draft?: false,
+          new_draft?: false,
           sandbox: sandbox
         )
       policy = described_class.new(UserContext.new(reviewer, sandbox), record)
@@ -104,7 +104,7 @@ RSpec.describe PermitApplicationPolicy do
           collaborator?: false,
           jurisdiction: jurisdiction,
           jurisdiction_id: jurisdiction.id,
-          draft?: true,
+          new_draft?: true,
           sandbox: sandbox
         )
       policy2 = described_class.new(UserContext.new(reviewer, sandbox), record2)

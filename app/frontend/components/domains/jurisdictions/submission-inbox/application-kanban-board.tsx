@@ -8,7 +8,6 @@ import {
   Avatar,
   Box,
   Button,
-  Circle,
   HStack,
   Icon,
   IconButton,
@@ -19,6 +18,7 @@ import {
   Portal,
   Spinner,
   Text,
+  Tooltip,
   useDisclosure,
 } from "@chakra-ui/react"
 import { Swap, UserPlus } from "@phosphor-icons/react"
@@ -30,6 +30,7 @@ import { IPermitApplication } from "../../../../models/permit-application"
 import { useMst } from "../../../../setup/root"
 import { colors } from "../../../../styles/theme/foundations/colors"
 import { ECollaborationType, EPermitApplicationStatus } from "../../../../types/enums"
+import { SharedAvatar } from "../../../shared/user/shared-avatar"
 import { CollaboratorsSidebarDrawer } from "../../permit-application/collaborator-management/collaborators-sidebar"
 import { IKanbanColumn, IReorderEvent, KanbanBoard } from "./kanban-board"
 import { KanbanCard } from "./kanban-card"
@@ -125,19 +126,26 @@ const ApplicationKanbanCard = observer(function ApplicationKanbanCard({
 
   const blockAssignees = application.getCollaborationAssignees(ECollaborationType.review)
   const seenUserIds = new Set(designatedReviewerUser ? [designatedReviewerUser.id] : [])
-  const uniqueAssigneeUsers: { name: string; id: string }[] = []
+  const uniqueAssigneeUsers: { name: string; id: string; role: string }[] = []
   for (const collab of blockAssignees) {
     const user = collab.collaborator?.user
     if (user && !seenUserIds.has(user.id)) {
       seenUserIds.add(user.id)
-      uniqueAssigneeUsers.push({ name: user.name, id: user.id })
+      uniqueAssigneeUsers.push({ name: user.name, id: user.id, role: user.role })
     }
   }
 
   const MAX_VISIBLE_AVATARS = 3
   const allAvatarUsers = [
     ...(designatedReviewerUser
-      ? [{ name: designatedReviewerUser.name, id: designatedReviewerUser.id, isDesignated: true }]
+      ? [
+          {
+            name: designatedReviewerUser.name,
+            id: designatedReviewerUser.id,
+            role: designatedReviewerUser.role,
+            isDesignated: true,
+          },
+        ]
       : []),
     ...uniqueAssigneeUsers.map((u) => ({ ...u, isDesignated: false })),
   ]
@@ -159,6 +167,7 @@ const ApplicationKanbanCard = observer(function ApplicationKanbanCard({
   return (
     <KanbanCard
       id={application.id}
+      isUnread={isUnread}
       onMarkUnread={isUnread ? undefined : () => application.markAsUnviewed()}
       statusMenu={<ChangeStatusMenu application={application} />}
     >
@@ -184,25 +193,37 @@ const ApplicationKanbanCard = observer(function ApplicationKanbanCard({
         _visited={{ color: "inherit" }}
         _active={{ color: "inherit" }}
       >
-        <Box pr={10}>
-          <HStack spacing={2} mb={1}>
-            {isUnread && <Circle size="8px" bg={"theme.blueActive"} flexShrink={0} />}
-          </HStack>
-
+        <Box pr={4}>
           <Text fontWeight={700} fontSize="sm" noOfLines={2}>
             {application.nickname}
           </Text>
-          <Text fontSize="xs" noOfLines={1}>
+          <Text fontSize="xs" color="text.secondary" noOfLines={1}>
             {application.number}
           </Text>
         </Box>
 
-        <Text fontSize="xs" noOfLines={1} mt={2}>
+        <Text fontSize="xs" noOfLines={1} mt={1.5}>
           {application.shortAddress}
         </Text>
         {application.pid && (
           <Text fontSize="2xs" color="text.secondary">
             PID {application.pid}
+          </Text>
+        )}
+
+        {application.projectId && application.projectNumber && (
+          <Text fontSize="xs" mt={1}>
+            {/* @ts-ignore */}
+            {t("submissionInbox.project")}{" "}
+            <Box
+              as="span"
+              color="text.link"
+              fontWeight={600}
+              _hover={{ textDecoration: "underline" }}
+              onClick={(e: React.MouseEvent) => e.stopPropagation()}
+            >
+              {application.projectNumber}
+            </Box>
           </Text>
         )}
 
@@ -214,31 +235,13 @@ const ApplicationKanbanCard = observer(function ApplicationKanbanCard({
         )}
       </Box>
 
-      {application.projectId && application.projectNumber && (
-        <Text fontSize="xs" mt={1}>
-          {/* @ts-ignore */}
-          {t("submissionInbox.project")}{" "}
-          <Box
-            as={Link}
-            to={`projects/${application.projectId}/overview`}
-            color="text.link"
-            fontWeight={600}
-            _hover={{ textDecoration: "underline" }}
-            onClick={(e: React.MouseEvent) => e.stopPropagation()}
-          >
-            {application.projectNumber}
-          </Box>
-        </Text>
-      )}
-
-      <HStack mt={3} spacing={1}>
+      <HStack mt={2} spacing={1}>
         {visibleAvatars.map((user) => (
-          <Avatar
+          <SharedAvatar
             key={user.id}
             size="xs"
             name={user.name}
-            bg={user.isDesignated ? "theme.blueAlt" : "theme.blueLight"}
-            color={user.isDesignated ? "white" : "text.primary"}
+            role={user.role}
             fontSize="2xs"
             border={user.isDesignated ? "2px solid" : undefined}
             borderColor={user.isDesignated ? "theme.blueActive" : undefined}
@@ -311,15 +314,17 @@ const ChangeStatusMenu = observer(function ChangeStatusMenu({ application }: { a
   return (
     <>
       <Menu>
-        <MenuButton
-          as={IconButton}
-          aria-label={t("submissionInbox.changeStatus")}
-          icon={<Icon as={Swap} boxSize={4} />}
-          size="sm"
-          minW={7}
-          h={7}
-          variant="ghost"
-        />
+        <Tooltip label={t("submissionInbox.changeStatus")} hasArrow placement="top">
+          <MenuButton
+            as={IconButton}
+            aria-label={t("submissionInbox.changeStatus")}
+            icon={<Icon as={Swap} boxSize={4} />}
+            size="sm"
+            minW={7}
+            h={7}
+            variant="ghost"
+          />
+        </Tooltip>
         <Portal>
           <MenuList zIndex={10}>
             {application.allowedManualTransitions.map((transition) => (

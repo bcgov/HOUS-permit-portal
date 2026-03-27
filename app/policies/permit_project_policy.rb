@@ -82,6 +82,14 @@ class PermitProjectPolicy < ApplicationPolicy
     user_is_owner?
   end
 
+  def assign_review_delegatee?
+    user_is_review_staff_for_jurisdiction?
+  end
+
+  def unassign_review_delegatee?
+    user_is_review_staff_for_jurisdiction?
+  end
+
   def reorder?
     user&.review_staff?
   end

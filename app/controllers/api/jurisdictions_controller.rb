@@ -203,7 +203,7 @@ class Api::JurisdictionsController < Api::ApplicationController
                    {
                      blueprint: PermitProjectBlueprint,
                      blueprint_opts: {
-                       view: :base,
+                       view: :jurisdiction_review_inbox,
                        current_user: current_user,
                        pinned_project_ids:
                          current_user.pinned_permit_project_ids

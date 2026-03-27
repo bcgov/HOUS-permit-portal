@@ -110,9 +110,10 @@ export const InboxFilter = observer(function InboxFilter({
     >
       <PopoverTrigger>
         <Button
-          variant="outline"
+          variant="secondary"
           rightIcon={<CaretDown />}
           bg={hasSelection ? "background.blueLight" : undefined}
+          borderColor={hasSelection ? "theme.blueActive" : undefined}
           size="sm"
           fontWeight="normal"
           isDisabled={isDisabled}

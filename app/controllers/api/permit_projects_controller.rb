@@ -14,6 +14,8 @@ class Api::PermitProjectsController < Api::ApplicationController
                   mark_as_viewed
                   mark_as_unviewed
                   transition_state
+                  assign_review_delegatee
+                  unassign_review_delegatee
                 ]
   before_action :set_pinned_projects, only: %i[pinned]
 
@@ -86,6 +88,41 @@ class Api::PermitProjectsController < Api::ApplicationController
                    }
   rescue AASM::InvalidTransition
     render_error("permit_project.invalid_transition", { status: 422 })
+  end
+
+  def assign_review_delegatee
+    authorize @permit_project
+
+    unless @permit_project.designated_reviewer_enabled?
+      return render_error("permit_project.feature_not_enabled", { status: 422 })
+    end
+
+    collaborator_id = params.require(:collaborator_id)
+    @permit_project.assign_review_delegatee!(collaborator_id)
+    render_success @permit_project.reload,
+                   "permit_project.assign_review_delegatee_success",
+                   {
+                     blueprint: PermitProjectBlueprint,
+                     blueprint_opts:
+                       blueprint_options(view: :jurisdiction_review_inbox)
+                   }
+  rescue => e
+    render_error(
+      "permit_project.assign_review_delegatee_error",
+      { message_opts: { error_message: e.message }, status: 422 }
+    )
+  end
+
+  def unassign_review_delegatee
+    authorize @permit_project
+    @permit_project.unassign_review_delegatee!
+    render_success @permit_project.reload,
+                   "permit_project.unassign_review_delegatee_success",
+                   {
+                     blueprint: PermitProjectBlueprint,
+                     blueprint_opts:
+                       blueprint_options(view: :jurisdiction_review_inbox)
+                   }
   end
 
   def update

@@ -86,11 +86,11 @@ class PermitApplication < ApplicationRecord
                if: :saved_change_to_reference_number?
   after_commit :reindex_permit_project, if: :saved_change_to_status?
   after_commit :broadcast_jurisdiction_count_update,
-               if: :status_changed_to_submitted?
-  after_commit :mark_permit_project_as_unviewed,
-               if: :status_changed_to_submitted?
-  after_commit :enqueue_permit_project_if_draft,
-               if: :status_changed_to_submitted?
+               if: :status_changed_to_intake?
+  after_commit :mark_permit_project_as_unviewed, if: :status_changed_to_intake?
+  after_commit :enqueue_permit_project_if_draft, if: :status_changed_to_intake?
+  after_commit :auto_assign_project_review_delegatee,
+               if: :status_changed_to_intake?
 
   scope :with_submitter_role,
         -> { joins(:submitter).where(users: { role: "submitter" }) }
@@ -261,9 +261,16 @@ class PermitApplication < ApplicationRecord
             :id
           ),
       review_delegatee_name: review_delegatee_name,
+      review_collaborator_user_ids:
+        permit_collaborations
+          .review
+          .joins(:collaborator)
+          .pluck("collaborators.user_id")
+          .uniq,
       has_collaborator: has_collaborator?,
       sandbox_id: sandbox_id,
       permit_project_id: permit_project_id,
+      project_number: permit_project&.number,
       submission_delegatee_id: submission_delegatee&.id,
       discarded: discarded?,
       enqueued_at: enqueued_at
@@ -841,7 +848,7 @@ class PermitApplication < ApplicationRecord
     NotificationService.publish_application_view_event(self)
   end
 
-  def status_changed_to_submitted?
+  def status_changed_to_intake?
     saved_change_to_status? && intake?
   end
 
@@ -865,6 +872,29 @@ class PermitApplication < ApplicationRecord
   # TODO: Also enqueue project when a meeting request is made
   def enqueue_permit_project_if_draft
     permit_project&.enqueue! if permit_project&.draft?
+  end
+
+  def auto_assign_project_review_delegatee
+    return unless permit_project&.review_delegatee.present?
+    return unless SiteConfiguration.allow_designated_reviewer?
+    return unless jurisdiction&.allow_designated_reviewer
+
+    permit_collaborations
+      .kept
+      .where(collaborator_type: :delegatee, collaboration_type: :review)
+      .discard_all
+
+    collab =
+      permit_collaborations.create!(
+        collaborator_id: permit_project.review_delegatee_id,
+        collaborator_type: :delegatee,
+        collaboration_type: :review
+      )
+    NotificationService.publish_permit_collaboration_assignment_event(collab)
+  rescue => e
+    Rails.logger.warn(
+      "Failed to auto-assign project review delegatee for PA #{id}: #{e.message}"
+    )
   end
 
   def jurisdiction_or_permit_project_present
