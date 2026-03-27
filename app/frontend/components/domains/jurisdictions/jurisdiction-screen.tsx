@@ -38,17 +38,15 @@ import { ErrorScreen } from "../../shared/base/error-screen"
 import { HeroBanner } from "../../shared/base/hero-banner"
 import { HighlightedLayout } from "../../shared/base/highlighted-layout"
 import { LoadingScreen } from "../../shared/base/loading-screen"
-import { HighlightedCtaCard } from "../../shared/cta/highlighted-cta-card"
-import { SoftCtaCard } from "../../shared/cta/soft-cta-card"
 import { SafeTipTapDisplay } from "../../shared/editor/safe-tiptap-display"
 import { JurisdictionResourcesSection } from "../../shared/jurisdiction/jurisdiction-resources-section"
 import { JurisdictionMap } from "../../shared/module-wrappers/jurisdiction-map"
 import { RouterLink } from "../../shared/navigation/router-link"
-import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { StepCodeRequirementsTable } from "../../shared/step-code-requirements-table"
 import { Can, can } from "../../shared/user/can"
 import { ContactGrid } from "./contacts/contact-grid"
 import { JurisdictionAboutAccordionItem } from "./jurisdiction-about-accordion-item"
+import { JurisdictionAboutCtaCards } from "./jurisdiction-about-cta-cards"
 import { JurisdictionEditorWithPreview } from "./jurisdiction-editor-with-preview"
 export interface Jurisdiction {
   name: string
@@ -166,27 +164,8 @@ export const JurisdictionScreen = observer(() => {
                     <GridItem order={{ base: 1, md: 2 }} minW={0}>
                       <EditableMap currentJurisdiction={currentJurisdiction} />
                     </GridItem>
-                    <GridItem order={{ base: 3, md: 3 }} minW={0}>
-                      <HighlightedCtaCard
-                        title={t("jurisdiction.cta.apply.title")}
-                        description={t("jurisdiction.cta.apply.description")}
-                        action={
-                          <RouterLinkButton to="/projects" variant="primaryInverse">
-                            {t("jurisdiction.cta.apply.button")}
-                          </RouterLinkButton>
-                        }
-                      />
-                    </GridItem>
-                    <GridItem order={{ base: 4, md: 4 }} minW={0}>
-                      <SoftCtaCard
-                        title={t("jurisdiction.cta.tools.title")}
-                        description={t("jurisdiction.cta.tools.description")}
-                        action={
-                          <RouterLinkButton to="/project-readiness-tools" variant="primaryInverse">
-                            {t("jurisdiction.cta.tools.button")}
-                          </RouterLinkButton>
-                        }
-                      />
+                    <GridItem colSpan={{ base: 1, md: 2 }} order={{ base: 3, md: 3 }} minW={0}>
+                      <JurisdictionAboutCtaCards />
                     </GridItem>
                   </Grid>
                 </Container>
@@ -338,6 +317,7 @@ export const JurisdictionScreen = observer(() => {
                         : undefined
                     }
                   />
+                  <JurisdictionAboutCtaCards />
                   <Flex as="section" direction="column" borderRadius="lg" boxShadow="md">
                     <Box py={3} px={6} bg="theme.blueAlt" borderTopRadius="lg">
                       <Heading id="jurisdiction-contact-summary-heading" as="h3" color="greys.white" fontSize="xl">
