@@ -24,7 +24,7 @@ north_van =
   )
 north_van&.update(map_position: [49.319981, -123.072414], map_zoom: 13)
 
-north_van.update(external_api_state: :j_on)
+north_van.update(external_api_state: :j_on, allow_designated_reviewer: true)
 
 van = Jurisdiction.find_by(name: "Vancouver")
 
@@ -412,7 +412,11 @@ end
 if Rails.env.development?
   puts "Ensuring site configuration inbox is enabled for development..."
   site_config = SiteConfiguration.instance
-  site_config.update(inbox_enabled: true, code_compliance_enabled: true)
+  site_config.update(
+    inbox_enabled: true,
+    code_compliance_enabled: true,
+    allow_designated_reviewer: true
+  )
 end
 
 puts "Seeding Permit Projects from Permit Applications..."

@@ -534,7 +534,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
         if (!user) return false
 
         if (collaborationType === ECollaborationType.review) {
-          return !self.isDraft && user.isReviewStaff
+          return !self.isNewDraft && user.isReviewStaff
         }
 
         return self.isDraft && user?.id === self.submitter?.id

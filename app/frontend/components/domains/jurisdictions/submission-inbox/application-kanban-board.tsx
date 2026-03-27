@@ -17,17 +17,20 @@ import {
   MenuItem,
   MenuList,
   Portal,
+  Spinner,
   Text,
   useDisclosure,
 } from "@chakra-ui/react"
-import { Swap } from "@phosphor-icons/react"
+import { Swap, UserPlus } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useCallback, useMemo, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { IPermitApplication } from "../../../../models/permit-application"
+import { useMst } from "../../../../setup/root"
 import { colors } from "../../../../styles/theme/foundations/colors"
-import { EPermitApplicationStatus } from "../../../../types/enums"
+import { ECollaborationType, EPermitApplicationStatus } from "../../../../types/enums"
+import { CollaboratorsSidebarDrawer } from "../../permit-application/collaborator-management/collaborators-sidebar"
 import { IKanbanColumn, IReorderEvent, KanbanBoard } from "./kanban-board"
 import { KanbanCard } from "./kanban-card"
 
@@ -111,8 +114,47 @@ const ApplicationKanbanCard = observer(function ApplicationKanbanCard({
   application: IPermitApplication
 }) {
   const { t } = useTranslation()
+  const { permitApplicationStore } = useMst()
   const isSandbox = !!application.sandbox
   const isUnread = !application.isViewed
+  const { isOpen: isSidebarOpen, onOpen: onSidebarOpen, onClose: onSidebarClose } = useDisclosure()
+  const [isLoadingSidebar, setIsLoadingSidebar] = useState(false)
+
+  const designatedReviewer = application.designatedReviewer
+  const designatedReviewerUser = designatedReviewer?.collaborator?.user
+
+  const blockAssignees = application.getCollaborationAssignees(ECollaborationType.review)
+  const seenUserIds = new Set(designatedReviewerUser ? [designatedReviewerUser.id] : [])
+  const uniqueAssigneeUsers: { name: string; id: string }[] = []
+  for (const collab of blockAssignees) {
+    const user = collab.collaborator?.user
+    if (user && !seenUserIds.has(user.id)) {
+      seenUserIds.add(user.id)
+      uniqueAssigneeUsers.push({ name: user.name, id: user.id })
+    }
+  }
+
+  const MAX_VISIBLE_AVATARS = 3
+  const allAvatarUsers = [
+    ...(designatedReviewerUser
+      ? [{ name: designatedReviewerUser.name, id: designatedReviewerUser.id, isDesignated: true }]
+      : []),
+    ...uniqueAssigneeUsers.map((u) => ({ ...u, isDesignated: false })),
+  ]
+  const visibleAvatars = allAvatarUsers.slice(0, MAX_VISIBLE_AVATARS)
+  const overflowCount = allAvatarUsers.length - MAX_VISIBLE_AVATARS
+
+  const handleOpenSidebar = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsLoadingSidebar(true)
+    try {
+      await permitApplicationStore.fetchPermitApplication(application.id, true)
+    } finally {
+      setIsLoadingSidebar(false)
+    }
+    onSidebarOpen()
+  }
 
   return (
     <KanbanCard
@@ -190,29 +232,59 @@ const ApplicationKanbanCard = observer(function ApplicationKanbanCard({
       )}
 
       <HStack mt={3} spacing={1}>
-        <Avatar size="xs" name="BB" bg="theme.blueLight" color="text.primary" fontSize="2xs" />
+        {visibleAvatars.map((user) => (
+          <Avatar
+            key={user.id}
+            size="xs"
+            name={user.name}
+            bg={user.isDesignated ? "theme.blueAlt" : "theme.blueLight"}
+            color={user.isDesignated ? "white" : "text.primary"}
+            fontSize="2xs"
+            border={user.isDesignated ? "2px solid" : undefined}
+            borderColor={user.isDesignated ? "theme.blueActive" : undefined}
+          />
+        ))}
+        {overflowCount > 0 && (
+          <Avatar
+            size="xs"
+            name={`+${overflowCount}`}
+            getInitials={(name) => name}
+            bg="gray.200"
+            color="text.primary"
+            fontSize="2xs"
+          />
+        )}
         <IconButton
-          aria-label="Add"
-          icon={
-            <Text fontSize="xs" fontWeight="bold">
-              +
-            </Text>
-          }
+          aria-label={t("permitCollaboration.sidebar.title")}
+          icon={isLoadingSidebar ? <Spinner size="xs" /> : <UserPlus size={14} />}
           size="xs"
           variant="ghost"
           borderRadius="full"
-          isDisabled
+          onClick={handleOpenSidebar}
+          isDisabled={isLoadingSidebar}
         />
       </HStack>
+
+      {isSidebarOpen && (
+        <CollaboratorsSidebarDrawer
+          permitApplication={application}
+          collaborationType={ECollaborationType.review}
+          isOpen={isSidebarOpen}
+          onClose={onSidebarClose}
+        />
+      )}
     </KanbanCard>
   )
 })
 
 const ChangeStatusMenu = observer(function ChangeStatusMenu({ application }: { application: IPermitApplication }) {
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const { isOpen: isConfirmOpen, onOpen: onConfirmOpen, onClose: onConfirmClose } = useDisclosure()
   const cancelRef = useRef<HTMLButtonElement>(null)
   const [pendingTransition, setPendingTransition] = useState<string | null>(null)
+
+  const showRevisionsRequestedLink = application.status === EPermitApplicationStatus.inReview
 
   const handleTransition = useCallback(
     (target: string) => {
@@ -234,7 +306,7 @@ const ChangeStatusMenu = observer(function ChangeStatusMenu({ application }: { a
     setPendingTransition(null)
   }, [application, pendingTransition, onConfirmClose])
 
-  if (application.allowedManualTransitions.length === 0) return null
+  if (application.allowedManualTransitions.length === 0 && !showRevisionsRequestedLink) return null
 
   return (
     <>
@@ -264,6 +336,19 @@ const ChangeStatusMenu = observer(function ChangeStatusMenu({ application }: { a
                 {t(`submissionInbox.applicationStatuses.${transition}`)}
               </MenuItem>
             ))}
+            {showRevisionsRequestedLink && (
+              <MenuItem
+                fontSize="sm"
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  navigate(`/permit-applications/${application.id}`)
+                }}
+              >
+                {/* @ts-ignore */}
+                {t(`submissionInbox.applicationStatuses.${EPermitApplicationStatus.revisionsRequested}`)}
+              </MenuItem>
+            )}
           </MenuList>
         </Portal>
       </Menu>
