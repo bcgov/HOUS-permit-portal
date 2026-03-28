@@ -291,6 +291,7 @@ RSpec.describe PermitProjectState, type: :model do
         a =
           instance_double(
             "PermitApplication",
+            id: 1,
             pertinence_score: 1,
             inbox_pertinence_score: 40,
             status: "new_draft",
@@ -299,6 +300,7 @@ RSpec.describe PermitProjectState, type: :model do
         b =
           instance_double(
             "PermitApplication",
+            id: 2,
             pertinence_score: 5,
             inbox_pertinence_score: 5,
             status: "newly_submitted",
@@ -323,6 +325,7 @@ RSpec.describe PermitProjectState, type: :model do
         a =
           instance_double(
             "PermitApplication",
+            id: 1,
             inbox_pertinence_score: 40,
             status: "newly_submitted",
             nickname: "App A"
@@ -330,6 +333,7 @@ RSpec.describe PermitProjectState, type: :model do
         b =
           instance_double(
             "PermitApplication",
+            id: 2,
             inbox_pertinence_score: 15,
             status: "revisions_requested",
             nickname: "App B"
