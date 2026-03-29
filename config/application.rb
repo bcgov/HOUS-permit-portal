@@ -18,6 +18,12 @@ require "action_cable/engine"
 # you've limited to :test, :development, or :production.
 Bundler.require(*Rails.groups)
 
+# Vendored devise-jwt-cookie replacement. Must be required eagerly (not autoloaded)
+# because it defines methods on the Devise module and registers a Warden strategy
+# as side effects at require time. These must be available before the devise
+# initializer runs. See lib/devise/jwt/cookie.rb for full documentation.
+require_relative "../lib/devise/jwt/cookie"
+
 module HousPermitPortal
   class Application < Rails::Application
     # Initialize configuration defaults for originally generated Rails version.
