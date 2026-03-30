@@ -178,12 +178,12 @@ class PermitHubMailer < ApplicationMailer
     )
   end
 
-  def notify_application_viewed(permit_application)
+  def notify_review_started(permit_application)
     @user = permit_application.submitter
     @permit_application = permit_application
     send_user_mail(
       email: @user.email,
-      template_key: "notify_application_viewed",
+      template_key: "notify_review_started",
       subject_i18n_params: {
         permit_application_number: permit_application.number
       }

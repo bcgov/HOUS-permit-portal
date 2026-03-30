@@ -1,5 +1,5 @@
 import { Box, Button, ButtonGroup, Circle, Flex, Heading, HStack, Icon, Text, VStack } from "@chakra-ui/react"
-import { Buildings, Columns, FileText, ListBullets, ListDashes } from "@phosphor-icons/react"
+import { Buildings, Columns, FileText, ListDashes, Tray } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useCallback, useEffect, useRef } from "react"
 import { useTranslation } from "react-i18next"
@@ -91,20 +91,25 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
         bg="greys.grey10"
         borderRight="1px solid"
         borderColor="border.light"
-        p={4}
+        py={4}
         overflowY="auto"
       >
-        <Text fontSize="xs" fontWeight="bold" color="text.secondary" mb={4} textTransform="uppercase">
+        <Text fontSize="xs" fontWeight="bold" color="text.secondary" mb={4} px={4} textTransform="uppercase">
           {t("submissionInbox.workspace")}
         </Text>
         <VStack align="stretch" spacing={1}>
           <Button
+            w="full"
             variant="ghost"
             justifyContent="flex-start"
-            leftIcon={<ListBullets />}
-            bg="white"
+            leftIcon={<Tray />}
+            bg="background.blueLight"
             fontWeight="bold"
             size="sm"
+            borderRadius={0}
+            px={4}
+            _hover={{ shadow: "sm", bg: "gray.50" }}
+            _active={{ bg: "background.blueLight" }}
           >
             {t("submissionInbox.submissions")}
           </Button>
@@ -287,7 +292,7 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
           px={8}
           pb={displayMode === EInboxDisplayMode.columns ? 0 : 8}
         >
-          <TotalCountLabel viewMode={viewMode} activeSearchStore={activeSearchStore} />
+          <TotalCountLabel viewMode={viewMode} displayMode={displayMode} activeSearchStore={activeSearchStore} />
           <InboxContent
             viewMode={viewMode}
             displayMode={displayMode}
@@ -319,22 +324,33 @@ function RadioDot({ active }: { active: boolean }) {
 
 const TotalCountLabel = observer(function TotalCountLabel({
   viewMode,
+  displayMode,
   activeSearchStore,
 }: {
   viewMode: EInboxViewMode
+  displayMode: EInboxDisplayMode
   activeSearchStore: any
 }) {
   const { t } = useTranslation()
 
-  const totalFromCounts: number = activeSearchStore.stateCounts
+  const unfilteredTotal: number = activeSearchStore.stateCounts
     ? Object.values(activeSearchStore.stateCounts as Record<string, number>).reduce(
         (sum: number, n: number) => sum + n,
         0
       )
     : 0
-  const count = activeSearchStore.totalCount ?? totalFromCounts
 
-  if (count == null || count === 0) return null
+  let filteredCount: number
+  if (displayMode === EInboxDisplayMode.columns && activeSearchStore.columnTotals) {
+    filteredCount = Object.values(activeSearchStore.columnTotals as Record<string, number>).reduce(
+      (sum: number, n: number) => sum + n,
+      0
+    )
+  } else {
+    filteredCount = activeSearchStore.totalCount ?? unfilteredTotal
+  }
+
+  if (unfilteredTotal === 0) return null
 
   // @ts-ignore
   const label: string =
@@ -342,7 +358,9 @@ const TotalCountLabel = observer(function TotalCountLabel({
 
   return (
     <Text fontSize="sm" color="text.secondary" mb={2} flexShrink={0}>
-      {count} {label.toLowerCase()}
+      {filteredCount < unfilteredTotal
+        ? `${filteredCount} of ${unfilteredTotal} ${label.toLowerCase()}`
+        : `${unfilteredTotal} ${label.toLowerCase()}`}
     </Text>
   )
 })

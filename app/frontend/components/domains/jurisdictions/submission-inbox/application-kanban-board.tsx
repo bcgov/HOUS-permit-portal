@@ -1,13 +1,6 @@
 import {
-  AlertDialog,
-  AlertDialogBody,
-  AlertDialogContent,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogOverlay,
   Avatar,
   Box,
-  Button,
   Icon,
   IconButton,
   Menu,
@@ -21,7 +14,7 @@ import {
 } from "@chakra-ui/react"
 import { Swap } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
-import React, { useCallback, useMemo, useRef, useState } from "react"
+import React, { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Link, useNavigate } from "react-router-dom"
 import { IPermitApplication } from "../../../../models/permit-application"
@@ -281,104 +274,55 @@ const ApplicationKanbanCard = observer(function ApplicationKanbanCard({
 const ChangeStatusMenu = observer(function ChangeStatusMenu({ application }: { application: IPermitApplication }) {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const { isOpen: isConfirmOpen, onOpen: onConfirmOpen, onClose: onConfirmClose } = useDisclosure()
-  const cancelRef = useRef<HTMLButtonElement>(null)
-  const [pendingTransition, setPendingTransition] = useState<string | null>(null)
 
   const showRevisionsRequestedLink = application.status === EPermitApplicationStatus.inReview
-
-  const handleTransition = useCallback(
-    (target: string) => {
-      if (target === EPermitApplicationStatus.issued) {
-        setPendingTransition(target)
-        onConfirmOpen()
-      } else {
-        application.transitionStatus(target)
-      }
-    },
-    [application, onConfirmOpen]
-  )
-
-  const confirmTransition = useCallback(() => {
-    if (pendingTransition) {
-      application.transitionStatus(pendingTransition)
-    }
-    onConfirmClose()
-    setPendingTransition(null)
-  }, [application, pendingTransition, onConfirmClose])
 
   if (application.allowedManualTransitions.length === 0 && !showRevisionsRequestedLink) return null
 
   return (
-    <>
-      <Menu>
-        <Tooltip label={t("submissionInbox.changeStatus")} hasArrow placement="top">
-          <MenuButton
-            as={IconButton}
-            aria-label={t("submissionInbox.changeStatus")}
-            icon={<Icon as={Swap} boxSize={4} />}
-            size="sm"
-            minW={7}
-            h={7}
-            variant="ghost"
-          />
-        </Tooltip>
-        <Portal>
-          <MenuList zIndex={10}>
-            {application.allowedManualTransitions.map((transition) => (
-              <MenuItem
-                key={transition}
-                fontSize="sm"
-                onClick={(e) => {
-                  e.preventDefault()
-                  e.stopPropagation()
-                  handleTransition(transition)
-                }}
-              >
-                {/* @ts-ignore */}
-                {t(`submissionInbox.applicationStatuses.${transition}`)}
-              </MenuItem>
-            ))}
-            {showRevisionsRequestedLink && (
-              <MenuItem
-                fontSize="sm"
-                onClick={(e) => {
-                  e.preventDefault()
-                  e.stopPropagation()
-                  navigate(`/permit-applications/${application.id}`)
-                }}
-              >
-                {/* @ts-ignore */}
-                {t(`submissionInbox.applicationStatuses.${EPermitApplicationStatus.revisionsRequested}`)}
-              </MenuItem>
-            )}
-          </MenuList>
-        </Portal>
-      </Menu>
-
-      <AlertDialog isOpen={isConfirmOpen} leastDestructiveRef={cancelRef} onClose={onConfirmClose}>
-        <AlertDialogOverlay>
-          <AlertDialogContent>
-            <AlertDialogHeader fontSize="lg" fontWeight="bold">
+    <Menu>
+      <Tooltip label={t("submissionInbox.changeStatus")} hasArrow placement="top">
+        <MenuButton
+          as={IconButton}
+          aria-label={t("submissionInbox.changeStatus")}
+          icon={<Icon as={Swap} boxSize={4} />}
+          size="sm"
+          minW={7}
+          h={7}
+          variant="ghost"
+        />
+      </Tooltip>
+      <Portal>
+        <MenuList zIndex={10}>
+          {application.allowedManualTransitions.map((transition) => (
+            <MenuItem
+              key={transition}
+              fontSize="sm"
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                application.transitionStatus(transition)
+              }}
+            >
               {/* @ts-ignore */}
-              {t("submissionInbox.confirmIssuePermit.title")}
-            </AlertDialogHeader>
-
-            {/* @ts-ignore */}
-            <AlertDialogBody>{t("submissionInbox.confirmIssuePermit.body")}</AlertDialogBody>
-
-            <AlertDialogFooter>
-              <Button ref={cancelRef} onClick={onConfirmClose}>
-                {t("ui.cancel")}
-              </Button>
-              <Button colorScheme="blue" onClick={confirmTransition} ml={3}>
-                {/* @ts-ignore */}
-                {t("submissionInbox.confirmIssuePermit.confirm")}
-              </Button>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialogOverlay>
-      </AlertDialog>
-    </>
+              {t(`submissionInbox.applicationStatuses.${transition}`)}
+            </MenuItem>
+          ))}
+          {showRevisionsRequestedLink && (
+            <MenuItem
+              fontSize="sm"
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                navigate(`/permit-applications/${application.id}`)
+              }}
+            >
+              {/* @ts-ignore */}
+              {t(`submissionInbox.applicationStatuses.${EPermitApplicationStatus.revisionsRequested}`)}
+            </MenuItem>
+          )}
+        </MenuList>
+      </Portal>
+    </Menu>
   )
 })

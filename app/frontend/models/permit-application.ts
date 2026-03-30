@@ -943,7 +943,10 @@ export const PermitApplicationModel = types.snapshotProcessor(
         const oldStatus = self.status
         const response = yield self.environment.api.transitionPermitApplicationStatus(self.id, targetStatus)
         if (response.ok) {
-          self.rootStore.permitApplicationStore.mergeUpdate(response.data.data, "permitApplicationMap")
+          const responseData = response.data.data
+          self.status = responseData.status
+          self.allowedManualTransitions.replace(responseData.allowedManualTransitions || [])
+          self.inboxSortOrder = responseData.inboxSortOrder ?? null
           self.rootStore.submissionInboxStore?.permitApplicationSearch?.adjustCountsForTransition(
             oldStatus,
             targetStatus

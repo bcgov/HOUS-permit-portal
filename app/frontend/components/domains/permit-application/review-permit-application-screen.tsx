@@ -14,7 +14,7 @@ import {
   Text,
   useDisclosure,
 } from "@chakra-ui/react"
-import { ArrowsClockwise, CaretDown, CaretRight, CaretUp, Info, NotePencil } from "@phosphor-icons/react"
+import { ArrowsClockwise, CaretDown, CaretRight, CaretUp, Eye, Info, NotePencil } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useRef, useState } from "react"
 import { useController, useForm } from "react-hook-form"
@@ -28,7 +28,7 @@ import { LoadingScreen } from "../../shared/base/loading-screen"
 import { NotFoundScreen } from "../../shared/base/not-found-screen"
 import { EditableInputWithControls } from "../../shared/editable-input-with-controls"
 import { BrowserSearchPrompt } from "../../shared/permit-applications/browser-search-prompt"
-import { PermitApplicationViewedAtTag } from "../../shared/permit-applications/permit-application-viewed-at-tag"
+import { PermitApplicationStatusTag } from "../../shared/permit-applications/permit-application-status-tag"
 import { RequirementForm } from "../../shared/permit-applications/requirement-form"
 import { ChecklistSideBar } from "./checklist-sidebar"
 import { BlockCollaboratorAssignmentManagement } from "./collaborator-management/block-collaborator-assignment-management"
@@ -67,6 +67,7 @@ export const ReviewPermitApplicationScreen = observer(() => {
 
   const [hideRevisionList, setHideRevisionList] = useState(false)
   const [isRetriggeringWebhook, setIsRetriggeringWebhook] = useState(false)
+  const [isStartingReview, setIsStartingReview] = useState(false)
 
   const sendRevisionContainerRef = useRef<HTMLDivElement | null>(null)
 
@@ -138,13 +139,25 @@ export const ReviewPermitApplicationScreen = observer(() => {
   if (currentPermitApplication.status === EPermitApplicationStatus.newDraft) return <NotFoundScreen />
 
   const isReadOnly = currentPermitApplication.isReviewReadOnly
+  const canStartReview =
+    currentPermitApplication.status === EPermitApplicationStatus.newlySubmitted ||
+    currentPermitApplication.status === EPermitApplicationStatus.resubmitted
+
+  const handleStartReview = async () => {
+    setIsStartingReview(true)
+    try {
+      await currentPermitApplication.transitionStatus("in_review")
+    } finally {
+      setIsStartingReview(false)
+    }
+  }
 
   return (
     <Box as="main" id="reviewing-permit-application">
       <Flex id="permitHeader" direction="column" position="sticky" top={0} zIndex={12} ref={permitHeaderRef}>
         <Flex w="full" px={6} py={3} bg="theme.blue" justify="space-between" color="greys.white">
           <HStack gap={4} flex={1}>
-            <PermitApplicationViewedAtTag permitApplication={currentPermitApplication} />
+            <PermitApplicationStatusTag status={currentPermitApplication.status} />
             <Flex direction="column" w="full">
               <Heading fontSize="xl" as="h3">
                 {currentPermitApplication.nickname}
@@ -288,7 +301,22 @@ export const ReviewPermitApplicationScreen = observer(() => {
               showHelpButton
               readOnly={isReadOnly}
               renderTopButtons={() => {
-                if (isReadOnly) return null
+                if (isReadOnly) {
+                  if (canStartReview) {
+                    return (
+                      <Button
+                        variant="callout"
+                        leftIcon={<Eye />}
+                        onClick={handleStartReview}
+                        isLoading={isStartingReview}
+                        loadingText={t("permitApplication.show.startingReview")}
+                      >
+                        {t("permitApplication.show.readyForReview")}
+                      </Button>
+                    )
+                  }
+                  return null
+                }
                 return (
                   !revisionMode && (
                     <HStack spacing={6}>

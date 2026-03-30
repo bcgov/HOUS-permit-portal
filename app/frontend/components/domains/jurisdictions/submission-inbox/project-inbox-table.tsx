@@ -5,13 +5,18 @@ import {
   Flex,
   HStack,
   IconButton,
+  Menu,
+  MenuButton,
+  MenuDivider,
+  MenuItem,
+  MenuList,
+  Portal,
   Spinner,
-  Tag,
   Text,
   useDisclosure,
   VStack,
 } from "@chakra-ui/react"
-import { Buildings, UserPlus } from "@phosphor-icons/react"
+import { DotsThreeVertical, UserPlus } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -19,7 +24,7 @@ import { Link } from "react-router-dom"
 import { IPermitProject } from "../../../../models/permit-project"
 import { useMst } from "../../../../setup/root"
 import { IPermitProjectInboxStore } from "../../../../stores/submission-inbox-store"
-import { EPermitProjectInboxSortFields, EProjectState } from "../../../../types/enums"
+import { EPermitProjectInboxSortFields } from "../../../../types/enums"
 import { ISort } from "../../../../types/types"
 import { Paginator } from "../../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../../shared/base/inputs/per-page-select"
@@ -27,6 +32,7 @@ import { SharedSpinner } from "../../../shared/base/shared-spinner"
 import { GridHeader } from "../../../shared/grid/grid-header"
 import { SearchGrid } from "../../../shared/grid/search-grid"
 import { SearchGridItem } from "../../../shared/grid/search-grid-item"
+import { ProjectStateTag } from "../../../shared/permit-projects/project-state-tag"
 import { SortIcon } from "../../../shared/sort-icon"
 import { SharedAvatar } from "../../../shared/user/shared-avatar"
 import { ProjectCollaboratorsSidebar } from "./project-collaborators-sidebar"
@@ -47,18 +53,6 @@ const SORT_FIELDS = [
 
 const MAX_VISIBLE_AVATARS = 3
 
-const statusColorMap: Record<string, { bg: string; color: string }> = {
-  [EProjectState.draft]: { bg: "greys.grey04", color: "text.secondary" },
-  [EProjectState.queued]: { bg: "theme.blueLight", color: "text.primary" },
-  [EProjectState.waiting]: { bg: "theme.yellow", color: "text.primary" },
-  [EProjectState.inProgress]: { bg: "theme.yellow", color: "text.primary" },
-  [EProjectState.ready]: { bg: "semantic.successLight", color: "semantic.success" },
-  [EProjectState.permitIssued]: { bg: "semantic.successLight", color: "semantic.success" },
-  [EProjectState.active]: { bg: "semantic.successLight", color: "semantic.success" },
-  [EProjectState.complete]: { bg: "semantic.successLight", color: "semantic.success" },
-  [EProjectState.closed]: { bg: "greys.grey04", color: "text.secondary" },
-}
-
 export const ProjectInboxTable = observer(function ProjectInboxTable({ searchStore, projects }: IProps) {
   const { t } = useTranslation()
   const {
@@ -77,7 +71,7 @@ export const ProjectInboxTable = observer(function ProjectInboxTable({ searchSto
   return (
     <VStack w="full" spacing={5}>
       <SearchGrid
-        templateColumns="2fr 1.5fr 1fr 1fr 1fr 1fr"
+        templateColumns="2fr 1.5fr 1fr 1fr 1fr 1fr 48px"
         gridRowClassName="project-inbox-grid-row"
         sx={{
           ".project-inbox-grid-row:hover > div": {
@@ -110,11 +104,12 @@ export const ProjectInboxTable = observer(function ProjectInboxTable({ searchSto
                 </Flex>
               </GridHeader>
             ))}
+            <GridHeader role="columnheader" />
           </Box>
         </Box>
 
         {isSearching ? (
-          <Flex py={50} gridColumn="span 6">
+          <Flex py={50} gridColumn="span 7">
             <SharedSpinner />
           </Flex>
         ) : (
@@ -132,9 +127,7 @@ export const ProjectInboxTable = observer(function ProjectInboxTable({ searchSto
               <SearchGridItem>
                 <HStack spacing={3}>
                   <Circle size="8px" bg={!project.viewedAt ? "theme.blueActive" : "transparent"} flexShrink={0} />
-                  <Box p={1.5} borderRadius="sm" bg="greys.grey10" flexShrink={0}>
-                    <Buildings size={16} />
-                  </Box>
+
                   <VStack align="start" spacing={0}>
                     <Text fontWeight={700} fontSize="sm">
                       {project.number}
@@ -148,10 +141,16 @@ export const ProjectInboxTable = observer(function ProjectInboxTable({ searchSto
 
               <SearchGridItem>
                 <VStack align="start" spacing={0}>
-                  <Text fontSize="sm">{project.fullAddress}</Text>
-                  {project.pid && (
+                  <Text fontSize="sm" noOfLines={1}>
+                    {project.shortAddress || project.fullAddress || "—"}
+                  </Text>
+                  {project.pid ? (
                     <Text fontSize="xs" color="text.secondary">
                       PID {project.pid}
+                    </Text>
+                  ) : (
+                    <Text fontSize="xs" color="text.secondary">
+                      —
                     </Text>
                   )}
                 </VStack>
@@ -190,21 +189,18 @@ export const ProjectInboxTable = observer(function ProjectInboxTable({ searchSto
               </SearchGridItem>
 
               <SearchGridItem>
-                <Tag
-                  p={1}
-                  bg={statusColorMap[project.state]?.bg || "greys.grey04"}
-                  color={statusColorMap[project.state]?.color || "text.secondary"}
-                  fontWeight="bold"
-                  border="1px solid"
-                  borderColor="border.light"
-                  textTransform="uppercase"
-                  minW="fit-content"
-                  textAlign="center"
-                  fontSize="xs"
-                >
-                  {/* @ts-ignore */}
-                  {t(`submissionInbox.projectStates.${project.state}`)}
-                </Tag>
+                <ProjectStateTag state={project.state} fontSize="xs" />
+              </SearchGridItem>
+
+              <SearchGridItem
+                px={1}
+                justifyContent="center"
+                onClick={(e: React.MouseEvent) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                }}
+              >
+                <ProjectActionsMenu project={project} />
               </SearchGridItem>
             </Box>
           ))
@@ -299,5 +295,56 @@ const ProjectAssignedCell = observer(function ProjectAssignedCell({ project }: {
 
       {isOpen && <ProjectCollaboratorsSidebar project={project} isOpen={isOpen} onClose={onClose} />}
     </>
+  )
+})
+
+const ProjectActionsMenu = observer(function ProjectActionsMenu({ project }: { project: IPermitProject }) {
+  const { t } = useTranslation()
+  const hasTransitions = project.allowedManualTransitions.length > 0
+  const canMarkUnread = !!project.viewedAt
+
+  if (!hasTransitions && !canMarkUnread) return null
+
+  return (
+    <Menu>
+      <MenuButton
+        as={IconButton}
+        aria-label="Actions"
+        icon={<DotsThreeVertical size={16} weight="bold" />}
+        size="sm"
+        variant="ghost"
+      />
+      <Portal>
+        <MenuList zIndex={10}>
+          {project.allowedManualTransitions.map((transition) => (
+            <MenuItem
+              key={transition}
+              fontSize="sm"
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                project.transitionState(transition)
+              }}
+            >
+              {/* @ts-ignore */}
+              {t(`submissionInbox.projectStates.${transition}`)}
+            </MenuItem>
+          ))}
+          {hasTransitions && canMarkUnread && <MenuDivider />}
+          {canMarkUnread && (
+            <MenuItem
+              fontSize="sm"
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                project.markAsUnviewed()
+              }}
+            >
+              {t("submissionInbox.markUnread")}
+            </MenuItem>
+          )}
+        </MenuList>
+      </Portal>
+    </Menu>
   )
 })

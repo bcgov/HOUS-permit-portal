@@ -1,13 +1,34 @@
-import { Avatar, Box, Circle, Flex, HStack, IconButton, Spinner, Text, useDisclosure, VStack } from "@chakra-ui/react"
-import { UserPlus } from "@phosphor-icons/react"
+import {
+  Avatar,
+  Box,
+  Circle,
+  Flex,
+  HStack,
+  IconButton,
+  Menu,
+  MenuButton,
+  MenuDivider,
+  MenuItem,
+  MenuList,
+  Portal,
+  Spinner,
+  Text,
+  useDisclosure,
+  VStack,
+} from "@chakra-ui/react"
+import { DotsThreeVertical, UserPlus } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { IPermitApplication } from "../../../../models/permit-application"
 import { useMst } from "../../../../setup/root"
 import { IPermitApplicationInboxStore } from "../../../../stores/submission-inbox-store"
-import { ECollaborationType, EPermitApplicationInboxSortFields } from "../../../../types/enums"
+import {
+  ECollaborationType,
+  EPermitApplicationInboxSortFields,
+  EPermitApplicationStatus,
+} from "../../../../types/enums"
 import { ISort } from "../../../../types/types"
 import { Paginator } from "../../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../../shared/base/inputs/per-page-select"
@@ -45,7 +66,7 @@ export const ApplicationInboxTable = observer(function ApplicationInboxTable({ s
   return (
     <VStack w="full" spacing={5}>
       <SearchGrid
-        templateColumns="36px minmax(0, 1.5fr) minmax(0, 1.3fr) minmax(0, 1fr) minmax(140px, 1fr) minmax(160px, 1.1fr) auto"
+        templateColumns="36px minmax(0, 1.5fr) minmax(0, 1.3fr) minmax(0, 1fr) minmax(140px, 1fr) minmax(160px, 1.1fr) auto 48px"
         gridRowClassName="application-inbox-grid-row"
         sx={{
           ".application-inbox-grid-row:hover > div": {
@@ -97,11 +118,12 @@ export const ApplicationInboxTable = observer(function ApplicationInboxTable({ s
               sort={sort as ISort<EPermitApplicationInboxSortFields>}
               onToggleSort={toggleSort}
             />
+            <GridHeader role="columnheader" />
           </Box>
         </Box>
 
         {isSearching ? (
-          <Flex py={50} gridColumn="span 7">
+          <Flex py={50} gridColumn="span 8">
             <SharedSpinner />
           </Flex>
         ) : (
@@ -210,7 +232,6 @@ const ApplicationInboxRow = observer(function ApplicationInboxRow({
             as={Link}
             to={`projects/${application.projectId}/overview`}
             color="text.link"
-            fontWeight={600}
             _hover={{ textDecoration: "underline" }}
           >
             {application.projectNumber}
@@ -246,6 +267,17 @@ const ApplicationInboxRow = observer(function ApplicationInboxRow({
 
       <SearchGridItem>
         <PermitApplicationStatusTag status={application.status} size="sm" px={2} py={0.5} fontSize="xs" />
+      </SearchGridItem>
+
+      <SearchGridItem
+        px={1}
+        justifyContent="center"
+        onClick={(e: React.MouseEvent) => {
+          e.preventDefault()
+          e.stopPropagation()
+        }}
+      >
+        <ApplicationActionsMenu application={application} />
       </SearchGridItem>
     </Box>
   )
@@ -353,5 +385,75 @@ const ApplicationAssignedCell = observer(function ApplicationAssignedCell({
         />
       )}
     </>
+  )
+})
+
+const ApplicationActionsMenu = observer(function ApplicationActionsMenu({
+  application,
+}: {
+  application: IPermitApplication
+}) {
+  const { t } = useTranslation()
+  const navigate = useNavigate()
+  const hasTransitions = application.allowedManualTransitions.length > 0
+  const showRevisionsRequestedLink = application.status === EPermitApplicationStatus.inReview
+  const canMarkUnread = application.isViewed
+
+  if (!hasTransitions && !showRevisionsRequestedLink && !canMarkUnread) return null
+
+  return (
+    <Menu>
+      <MenuButton
+        as={IconButton}
+        aria-label="Actions"
+        icon={<DotsThreeVertical size={16} weight="bold" />}
+        size="sm"
+        variant="ghost"
+      />
+      <Portal>
+        <MenuList zIndex={10}>
+          {application.allowedManualTransitions.map((transition) => (
+            <MenuItem
+              key={transition}
+              fontSize="sm"
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                application.transitionStatus(transition)
+              }}
+            >
+              {/* @ts-ignore */}
+              {t(`submissionInbox.applicationStatuses.${transition}`)}
+            </MenuItem>
+          ))}
+          {showRevisionsRequestedLink && (
+            <MenuItem
+              fontSize="sm"
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                navigate(`/permit-applications/${application.id}`)
+              }}
+            >
+              {/* @ts-ignore */}
+              {t(`submissionInbox.applicationStatuses.${EPermitApplicationStatus.revisionsRequested}`)}
+            </MenuItem>
+          )}
+          {(hasTransitions || showRevisionsRequestedLink) && canMarkUnread && <MenuDivider />}
+          {canMarkUnread && (
+            <MenuItem
+              fontSize="sm"
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                application.markAsUnviewed()
+              }}
+            >
+              {t("submissionInbox.markUnread")}
+            </MenuItem>
+          )}
+        </MenuList>
+      </Portal>
+    </Menu>
   )
 })

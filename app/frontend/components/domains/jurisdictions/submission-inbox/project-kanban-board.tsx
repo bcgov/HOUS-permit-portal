@@ -209,7 +209,7 @@ const ProjectKanbanCard = observer(function ProjectKanbanCard({ project }: { pro
           </Text>
         )}
 
-        <Box mt={1.5}>
+        <Box mt={2.5}>
           <RollupStatusBadge project={project} />
         </Box>
       </Box>

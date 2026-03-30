@@ -82,8 +82,6 @@ class PermitApplication < ApplicationRecord
 
   after_commit :reindex_jurisdiction_permit_application_size
   after_commit :send_submitted_webhook, if: :saved_change_to_status?
-  after_commit :notify_user_reference_number_updated,
-               if: :saved_change_to_reference_number?
   after_commit :reindex_permit_project, if: :saved_change_to_status?
   after_commit :broadcast_jurisdiction_count_update,
                if: :status_changed_to_intake?
@@ -581,14 +579,15 @@ class PermitApplication < ApplicationRecord
     }
   end
 
-  def application_view_event_notification_data
+  def review_started_event_notification_data
     {
       "id" => SecureRandom.uuid,
-      "action_type" => Constants::NotificationActionTypes::APPLICATION_VIEW,
+      "action_type" => Constants::NotificationActionTypes::REVIEW_STARTED,
       "action_text" =>
-        "#{I18n.t("notification.permit_application.view_notification", number: number, jurisdiction_name: jurisdiction_name)}",
+        "#{I18n.t("notification.permit_application.review_started_notification", number: number, jurisdiction_name: jurisdiction_name)}",
       "object_data" => {
-        "permit_application_id" => id
+        "permit_application_id" => id,
+        "permit_application_number" => number
       }
     }
   end
@@ -840,12 +839,6 @@ class PermitApplication < ApplicationRecord
     return unless current_customizations.present?
 
     self.form_customizations_snapshot = current_customizations
-  end
-
-  def notify_user_reference_number_updated
-    return if new_record?
-
-    NotificationService.publish_application_view_event(self)
   end
 
   def status_changed_to_intake?
