@@ -858,6 +858,8 @@ const options = {
                 "Some sections are incomplete. You can still download the report, but missing fields will be blank in the PDF.",
               downloadReport: "Download Filled Report (PDF)",
               generating: "Generating PDF…",
+              pdfViewerHint:
+                "Adobe Acrobat may not display pre-filled values correctly. For best results, open the downloaded PDF in a web browser (Chrome, Edge, or Firefox) or another PDF viewer.",
               downloadHint: "The report will be generated from the BC-SZCG FormSet template with your data filled in.",
             },
             buildingLocation: {
