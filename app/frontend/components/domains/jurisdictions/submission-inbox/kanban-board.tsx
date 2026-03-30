@@ -1,4 +1,4 @@
-import { Badge, Box, Button, Flex, HStack, Icon, IconButton, Text } from "@chakra-ui/react"
+import { Badge, Box, Button, Flex, HStack, Icon, IconButton, Text, Tooltip } from "@chakra-ui/react"
 import { closestCenter, DndContext, DragEndEvent, PointerSensor, useSensor, useSensors } from "@dnd-kit/core"
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers"
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
@@ -135,34 +135,36 @@ function KanbanBoardInner<T extends IKanbanItem>({
                 bg="greys.grey04"
               >
                 {isCollapsed ? (
-                  <Flex direction="column" align="center" gap={3} p={3}>
-                    {!isEmpty && (
-                      <IconButton
-                        aria-label="Expand column"
-                        icon={<CaretDoubleRight />}
-                        size="xs"
-                        variant="ghost"
+                  <Tooltip label={column.label} hasArrow placement="right">
+                    <Flex direction="column" align="center" gap={3} p={3}>
+                      {!isEmpty && (
+                        <IconButton
+                          aria-label="Expand column"
+                          icon={<CaretDoubleRight />}
+                          size="xs"
+                          variant="ghost"
+                          alignSelf="center"
+                          onClick={() => onToggleColumn(column.key)}
+                        />
+                      )}
+                      <Icon as={EyeSlash} color="text.secondary" boxSize={4} />
+                      <Badge
+                        borderRadius="full"
+                        py={2}
+                        px={1}
+                        fontSize="2xs"
+                        bg="white"
+                        color="text.secondary"
+                        border="1px solid"
+                        borderColor="border.light"
+                        sx={{ writingMode: "vertical-lr" }}
+                        whiteSpace="nowrap"
                         alignSelf="center"
-                        onClick={() => onToggleColumn(column.key)}
-                      />
-                    )}
-                    <Icon as={EyeSlash} color="text.secondary" boxSize={4} />
-                    <Badge
-                      borderRadius="full"
-                      py={2}
-                      px={1}
-                      fontSize="2xs"
-                      bg="white"
-                      color="text.secondary"
-                      border="1px solid"
-                      borderColor="border.light"
-                      sx={{ writingMode: "vertical-lr" }}
-                      whiteSpace="nowrap"
-                      alignSelf="center"
-                    >
-                      {displayedCount} of {totalCount}
-                    </Badge>
-                  </Flex>
+                      >
+                        {displayedCount} of {totalCount}
+                      </Badge>
+                    </Flex>
+                  </Tooltip>
                 ) : (
                   <>
                     <Box

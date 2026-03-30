@@ -1,5 +1,5 @@
 import { Box, Button, ButtonGroup, Circle, Flex, Heading, HStack, Icon, Text, VStack } from "@chakra-ui/react"
-import { Buildings, CalendarBlank, Columns, FileText, ListBullets, ListDashes } from "@phosphor-icons/react"
+import { Buildings, Columns, FileText, ListBullets, ListDashes } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useCallback, useEffect, useRef } from "react"
 import { useTranslation } from "react-i18next"
@@ -18,7 +18,6 @@ import { ApplicationKanbanBoard } from "./application-kanban-board"
 import {
   AssignedFilter,
   DaysInQueueFilter,
-  MeetingRequestsFilter,
   ProjectStatusFilter,
   RequirementTemplateInboxFilter,
   StatusFilter,
@@ -110,7 +109,7 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
             {t("submissionInbox.submissions")}
           </Button>
           {/* ### SUBMISSION INDEX STUB FEATURE */}
-          <Button
+          {/* <Button
             variant="ghost"
             justifyContent="flex-start"
             leftIcon={<CalendarBlank />}
@@ -118,7 +117,7 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
             color="text.secondary"
           >
             {t("submissionInbox.meetings")}
-          </Button>
+          </Button> */}
         </VStack>
       </Box>
 
@@ -138,7 +137,7 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
               <Box
                 as="input"
                 flex={1}
-                minW="200px"
+                minW="300px"
                 maxW="50%"
                 p={2}
                 px={4}
@@ -148,18 +147,19 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
                 fontSize="sm"
                 placeholder={t("submissionInbox.searchPlaceholder")}
                 _placeholder={{ color: "text.secondary" }}
+                value={activeSearchStore.query ?? ""}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   activeSearchStore.setQuery(e.target.value)
                   activeSearchStore.search()
                 }}
               />
-              {viewMode === EInboxViewMode.projects && (
+              {/* {viewMode === EInboxViewMode.projects && (
                 <MeetingRequestsFilter
                   value={activeSearchStore.meetingRequestFilter}
                   onChange={(val) => activeSearchStore.setMeetingRequestFilter(val)}
                   onApply={() => activeSearchStore.search()}
                 />
-              )}
+              )} */}
               <UnreadFilter
                 value={activeSearchStore.unreadFilter}
                 onChange={(val) => activeSearchStore.setUnreadFilter(val)}
@@ -229,6 +229,7 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
             <HStack spacing={3}>
               <ButtonGroup isAttached variant="outline" size="sm">
                 <Button
+                  borderRightWidth={2}
                   onClick={() => setViewMode(EInboxViewMode.projects)}
                   fontWeight={viewMode === EInboxViewMode.projects ? "bold" : "normal"}
                   borderColor={viewMode === EInboxViewMode.projects ? "theme.blueActive" : "border.light"}

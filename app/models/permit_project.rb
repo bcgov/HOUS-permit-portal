@@ -1,6 +1,6 @@
 class PermitProject < ApplicationRecord
   # searchkick must be declared before Discard::Model to ensure auto-callbacks register correctly
-  searchkick word_middle: %i[title full_address pid pin number]
+  searchkick word_middle: %i[title full_address pid pin number owner_name]
   audited on: %i[create update], only: %i[title full_address]
   has_associated_audits
 
@@ -120,6 +120,7 @@ class PermitProject < ApplicationRecord
       pin: pin,
       number: number,
       owner_id: owner_id,
+      owner_name: owner&.name,
       jurisdiction_id: jurisdiction_id,
       collaborator_ids: collaborators.pluck(:user_id).uniq,
       review_collaborator_user_ids: compute_review_collaborator_user_ids,
