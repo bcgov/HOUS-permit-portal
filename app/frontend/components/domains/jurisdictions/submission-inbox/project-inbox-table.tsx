@@ -81,7 +81,10 @@ export const ProjectInboxTable = observer(function ProjectInboxTable({ searchSto
         gridRowClassName="project-inbox-grid-row"
         sx={{
           ".project-inbox-grid-row:hover > div": {
-            bg: "blue.50",
+            bg: "gray.50",
+          },
+          ".project-inbox-grid-row:active > div": {
+            bg: "background.blueLight",
           },
         }}
       >

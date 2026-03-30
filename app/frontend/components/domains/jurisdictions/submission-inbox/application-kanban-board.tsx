@@ -8,7 +8,6 @@ import {
   Avatar,
   Box,
   Button,
-  HStack,
   Icon,
   IconButton,
   Menu,
@@ -16,12 +15,11 @@ import {
   MenuItem,
   MenuList,
   Portal,
-  Spinner,
   Text,
   Tooltip,
   useDisclosure,
 } from "@chakra-ui/react"
-import { Swap, UserPlus } from "@phosphor-icons/react"
+import { Swap } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useCallback, useMemo, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -115,6 +113,7 @@ const ApplicationKanbanCard = observer(function ApplicationKanbanCard({
   application: IPermitApplication
 }) {
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const { permitApplicationStore } = useMst()
   const isSandbox = !!application.sandbox
   const isUnread = !application.isViewed
@@ -170,6 +169,33 @@ const ApplicationKanbanCard = observer(function ApplicationKanbanCard({
       isUnread={isUnread}
       onMarkUnread={isUnread ? undefined : () => application.markAsUnviewed()}
       statusMenu={<ChangeStatusMenu application={application} />}
+      onAssigneeClick={handleOpenSidebar}
+      isAssigneeLoading={isLoadingSidebar}
+      avatars={
+        <>
+          {visibleAvatars.map((user) => (
+            <SharedAvatar
+              key={user.id}
+              size="xs"
+              name={user.name}
+              role={user.role}
+              fontSize="2xs"
+              border={user.isDesignated ? "2px solid" : undefined}
+              borderColor={user.isDesignated ? "theme.blueActive" : undefined}
+            />
+          ))}
+          {overflowCount > 0 && (
+            <Avatar
+              size="xs"
+              name={`+${overflowCount}`}
+              getInitials={(name) => name}
+              bg="gray.200"
+              color="text.primary"
+              fontSize="2xs"
+            />
+          )}
+        </>
+      }
     >
       {isSandbox && (
         <Box
@@ -219,8 +245,13 @@ const ApplicationKanbanCard = observer(function ApplicationKanbanCard({
               as="span"
               color="text.link"
               fontWeight={600}
+              cursor="pointer"
               _hover={{ textDecoration: "underline" }}
-              onClick={(e: React.MouseEvent) => e.stopPropagation()}
+              onClick={(e: React.MouseEvent) => {
+                e.preventDefault()
+                e.stopPropagation()
+                navigate(`projects/${application.projectId}/overview`)
+              }}
             >
               {application.projectNumber}
             </Box>
@@ -228,45 +259,12 @@ const ApplicationKanbanCard = observer(function ApplicationKanbanCard({
         )}
 
         {application.daysInQueue != null && (
-          <Text fontSize="xs" color="text.secondary" mt={1}>
+          <Text fontSize="xs" color="text.secondary" mt={2.5}>
             {/* @ts-ignore */}
             {t("submissionInbox.daysInQueue", { count: application.daysInQueue })}
           </Text>
         )}
       </Box>
-
-      <HStack mt={2} spacing={1}>
-        {visibleAvatars.map((user) => (
-          <SharedAvatar
-            key={user.id}
-            size="xs"
-            name={user.name}
-            role={user.role}
-            fontSize="2xs"
-            border={user.isDesignated ? "2px solid" : undefined}
-            borderColor={user.isDesignated ? "theme.blueActive" : undefined}
-          />
-        ))}
-        {overflowCount > 0 && (
-          <Avatar
-            size="xs"
-            name={`+${overflowCount}`}
-            getInitials={(name) => name}
-            bg="gray.200"
-            color="text.primary"
-            fontSize="2xs"
-          />
-        )}
-        <IconButton
-          aria-label={t("permitCollaboration.sidebar.title")}
-          icon={isLoadingSidebar ? <Spinner size="xs" /> : <UserPlus size={14} />}
-          size="xs"
-          variant="ghost"
-          borderRadius="full"
-          onClick={handleOpenSidebar}
-          isDisabled={isLoadingSidebar}
-        />
-      </HStack>
 
       {isSidebarOpen && (
         <CollaboratorsSidebarDrawer

@@ -49,7 +49,10 @@ export const ApplicationInboxTable = observer(function ApplicationInboxTable({ s
         gridRowClassName="application-inbox-grid-row"
         sx={{
           ".application-inbox-grid-row:hover > div": {
-            bg: "blue.50",
+            bg: "gray.50",
+          },
+          ".application-inbox-grid-row:active > div": {
+            bg: "background.blueLight",
           },
         }}
       >
