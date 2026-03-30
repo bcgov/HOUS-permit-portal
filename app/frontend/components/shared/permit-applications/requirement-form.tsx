@@ -35,6 +35,7 @@ interface IRequirementFormProps {
   showHelpButton?: boolean
   renderSaveButton?: () => JSX.Element
   isEditing?: boolean
+  readOnly?: boolean
   renderTopButtons?: () => React.ReactNode
   updateCollaborationAssignmentNodes?: () => void
   isEarlyAccess?: boolean
@@ -49,6 +50,7 @@ export const RequirementForm = observer(
     renderTopButtons,
     renderSaveButton,
     isEditing = false,
+    readOnly: readOnlyProp = false,
     updateCollaborationAssignmentNodes,
     isEarlyAccess = false,
   }: IRequirementFormProps) => {
@@ -436,8 +438,7 @@ export const RequirementForm = observer(
 
     let permitAppOptions = {
       ...defaultOptions,
-      ...(isDraft ? { readOnly: shouldShowDiff } : { readOnly: false }),
-      // readonly loggic depends on formattedJson for submitted applications
+      ...(readOnlyProp ? { readOnly: true } : isDraft ? { readOnly: shouldShowDiff } : { readOnly: false }),
     }
     permitAppOptions.componentOptions.simplefile.config["formCustomOptions"] = {
       persistFileUploadAction: "PATCH",
@@ -554,7 +555,7 @@ export const RequirementForm = observer(
               status={EFlashMessageStatus.warning}
             />
           )}
-          {permitApplication?.isSubmitted ? (
+          {permitApplication?.isSubmitted || readOnlyProp ? (
             <CustomMessageBox
               description={t("permitApplication.show.wasSubmitted", {
                 date: format(permitApplication.submittedAt, "MMM d, yyyy h:mm a"),

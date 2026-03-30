@@ -19,7 +19,8 @@ class PermitApplicationBlueprint < Blueprinter::Base
            :revisions_requested_at,
            :missing_pdfs,
            :template_nickname,
-           :discarded_at
+           :discarded_at,
+           :enqueued_at
 
     association :permit_type, blueprint: PermitClassificationBlueprint
     association :activity, blueprint: PermitClassificationBlueprint
@@ -36,6 +37,13 @@ class PermitApplicationBlueprint < Blueprinter::Base
     field :project_id do |pa, _options|
       pa.permit_project&.id
     end
+
+    field :project_number do |pa, _options|
+      pa.permit_project&.number
+    end
+
+    field :inbox_sort_order, default: nil
+    field :allowed_manual_transitions, default: []
   end
 
   view :project_base do
@@ -51,14 +59,10 @@ class PermitApplicationBlueprint < Blueprinter::Base
     include_view :base
 
     association :supporting_documents, blueprint: SupportingDocumentBlueprint
-    # only the delegatee is needed for the inbox screen
     association :permit_collaborations,
                 blueprint: PermitCollaborationBlueprint,
                 view: :base do |pa, _options|
-      pa.permit_collaborations.where(
-        collaboration_type: :review,
-        collaborator_type: :delegatee
-      )
+      pa.permit_collaborations.where(collaboration_type: :review)
     end
     association :submitter, blueprint: UserBlueprint, view: :minimal
   end
@@ -143,6 +147,11 @@ class PermitApplicationBlueprint < Blueprinter::Base
     field :form_json
     field :submission_data do |pa, _options|
       pa.formatted_submission_data
+    end
+    association :permit_collaborations,
+                blueprint: PermitCollaborationBlueprint,
+                view: :base do |pa, _options|
+      pa.permit_collaborations
     end
     association :all_submission_version_completed_supporting_documents,
                 blueprint: SupportingDocumentBlueprint

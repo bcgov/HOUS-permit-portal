@@ -1,13 +1,17 @@
 class PermitProject < ApplicationRecord
   # searchkick must be declared before Discard::Model to ensure auto-callbacks register correctly
-  searchkick word_middle: %i[title full_address pid pin number]
+  searchkick word_middle: %i[title full_address pid pin number owner_name]
+  audited on: %i[create update], only: %i[title full_address]
+  has_associated_audits
 
   include Discard::Model
   include PublicRecordable
+  include PermitProjectState
 
   belongs_to :owner, class_name: "User", optional: true
   public_recordable user_association: :owner
   belongs_to :jurisdiction, optional: false # Direct association to Jurisdiction
+  belongs_to :review_delegatee, class_name: "Collaborator", optional: true
 
   has_many :permit_applications
   has_many :project_documents, dependent: :destroy
@@ -35,6 +39,7 @@ class PermitProject < ApplicationRecord
               "(SELECT COUNT(*) FROM permit_applications pa WHERE pa.permit_project_id = permit_projects.id AND pa.discarded_at IS NULL) AS total_permits_count, " +
               "(SELECT COUNT(*) FROM permit_applications pa WHERE pa.permit_project_id = permit_projects.id AND pa.status = 0 AND pa.discarded_at IS NULL) AS new_draft_count, " +
               "(SELECT COUNT(*) FROM permit_applications pa WHERE pa.permit_project_id = permit_projects.id AND pa.status = 1 AND pa.discarded_at IS NULL) AS newly_submitted_count, " +
+              "(SELECT COUNT(*) FROM permit_applications pa WHERE pa.permit_project_id = permit_projects.id AND pa.status = 2 AND pa.discarded_at IS NULL) AS in_review_count, " +
               "(SELECT COUNT(*) FROM permit_applications pa WHERE pa.permit_project_id = permit_projects.id AND pa.status = 3 AND pa.discarded_at IS NULL) AS revisions_requested_count, " +
               "(SELECT COUNT(*) FROM permit_applications pa WHERE pa.permit_project_id = permit_projects.id AND pa.status = 4 AND pa.discarded_at IS NULL) AS resubmitted_count, " +
               "(SELECT COUNT(*) FROM permit_applications pa WHERE pa.permit_project_id = permit_projects.id AND pa.status = 5 AND pa.discarded_at IS NULL) AS approved_count"
@@ -57,6 +62,11 @@ class PermitProject < ApplicationRecord
   def newly_submitted_count
     self[:newly_submitted_count] ||
       permit_applications.kept.where(status: :newly_submitted).count
+  end
+
+  def in_review_count
+    self[:in_review_count] ||
+      permit_applications.kept.where(status: :in_review).count
   end
 
   def revisions_requested_count
@@ -91,13 +101,15 @@ class PermitProject < ApplicationRecord
 
   def approved_count
     self[:approved_count] ||
-      (
-        begin
-          permit_applications.kept.where(status: :approved).count
-        rescue StandardError
-          0
-        end
-      )
+      permit_applications.kept.where(status: :approved).count
+  end
+
+  def update_viewed_at
+    update(viewed_at: Time.current)
+  end
+
+  def mark_as_unviewed
+    update(viewed_at: nil)
   end
 
   def search_data
@@ -108,12 +120,18 @@ class PermitProject < ApplicationRecord
       pin: pin,
       number: number,
       owner_id: owner_id,
+      owner_name: owner&.name,
       jurisdiction_id: jurisdiction_id,
       collaborator_ids: collaborators.pluck(:user_id).uniq,
+      review_collaborator_user_ids: compute_review_collaborator_user_ids,
       created_at: created_at,
       updated_at: updated_at,
       discarded: discarded_at.present?,
+      state: state,
       rollup_status: rollup_status,
+      inbox_rollup_status: inbox_rollup_status,
+      viewed_at: viewed_at,
+      enqueued_at: enqueued_at,
       forcasted_completion_date: forcasted_completion_date,
       requirement_template_ids:
         permit_applications
@@ -125,6 +143,7 @@ class PermitProject < ApplicationRecord
       new_draft_count: permit_applications.kept.where(status: :new_draft).count,
       newly_submitted_count:
         permit_applications.kept.where(status: :newly_submitted).count,
+      in_review_count: permit_applications.kept.where(status: :in_review).count,
       revisions_requested_count:
         permit_applications.kept.where(status: :revisions_requested).count,
       resubmitted_count:
@@ -143,12 +162,6 @@ class PermitProject < ApplicationRecord
   # TODO: Re-evaluate and re-implement search_data based on primary_project_item
   # and the possibility of multiple items of different types in the future.
 
-  def rollup_status
-    return "empty" if permit_applications.kept.blank?
-
-    permit_applications.kept.max_by(&:pertinence_score).status
-  end
-
   def forcasted_completion_date
     # Example implementation, to be defined by user
     Time.zone.now + 14.days
@@ -161,12 +174,23 @@ class PermitProject < ApplicationRecord
   def recent_permit_applications(user = nil)
     return PermitApplication.none if user.nil?
 
-    scope = permit_applications.kept.order(updated_at: :desc)
+    scope =
+      permit_applications
+        .kept
+        .includes(:activity, :submission_versions, :permit_collaborations)
+        .order(updated_at: :desc)
     return scope.limit(3) if owner_id == user.id
 
     scope
       .joins(permit_collaborations: :collaborator)
-      .where(collaborators: { user_id: user.id })
+      .where(
+        collaborators: {
+          user_id: user.id
+        },
+        permit_collaborations: {
+          discarded_at: nil
+        }
+      )
       .distinct
       .limit(3)
   end
@@ -181,7 +205,8 @@ class PermitProject < ApplicationRecord
           .where(
             permit_collaborations: {
               permit_application_id: permit_applications.kept.select(:id),
-              collaboration_type: :submission
+              collaboration_type: :submission,
+              discarded_at: nil
             }
           )
           .distinct
@@ -202,7 +227,114 @@ class PermitProject < ApplicationRecord
     base.loaded? ? [] : ProjectDocument.none
   end
 
+  def recent_audits(user = nil)
+    return [] if user.nil?
+
+    scope =
+      ApplicationAudit
+        .for_permit_project(id)
+        .includes(:user, :auditable)
+        .order(created_at: :desc)
+
+    scope = ApplicationAudit.visible_to_role(scope, user)
+    audits = scope.limit(3).to_a
+    ApplicationAudit.preload_activity_feed(audits)
+    audits
+  end
+
+  def aggregated_review_collaborators
+    delegatee_user_id = review_delegatee&.user_id
+    users = {}
+
+    permit_applications.each do |pa|
+      next if pa.discarded? || !pa.submitted?
+
+      pa.permit_collaborations.each do |collab|
+        next unless collab.review?
+
+        user = collab.collaborator&.user
+        next unless user
+
+        is_designated = collab.collaborator_type == "delegatee"
+        existing = users[user.id]
+        if existing
+          existing[:is_designated] ||= is_designated
+        else
+          users[user.id] = {
+            id: user.id,
+            name: user.name,
+            role: user.role,
+            is_designated: is_designated
+          }
+        end
+      end
+    end
+
+    if delegatee_user_id && !users.key?(delegatee_user_id)
+      delegatee_user = review_delegatee.user
+      users[delegatee_user_id] = {
+        id: delegatee_user.id,
+        name: delegatee_user.name,
+        role: delegatee_user.role,
+        is_designated: true
+      }
+    end
+
+    users.values
+  end
+
+  def designated_reviewer_enabled?
+    SiteConfiguration.allow_designated_reviewer? &&
+      jurisdiction&.allow_designated_reviewer
+  end
+
+  def assign_review_delegatee!(collaborator_id)
+    unless designated_reviewer_enabled?
+      raise "Designated reviewer feature is not enabled"
+    end
+
+    ActiveRecord::Base.transaction do
+      update!(review_delegatee_id: collaborator_id)
+
+      permit_applications
+        .kept
+        .select(&:submitted?)
+        .each do |pa|
+          pa
+            .permit_collaborations
+            .kept
+            .where(collaborator_type: :delegatee, collaboration_type: :review)
+            .discard_all
+
+          collab =
+            pa.permit_collaborations.create!(
+              collaborator_id: collaborator_id,
+              collaborator_type: :delegatee,
+              collaboration_type: :review
+            )
+          NotificationService.publish_permit_collaboration_assignment_event(
+            collab
+          )
+        end
+    end
+  end
+
+  def unassign_review_delegatee!
+    update!(review_delegatee_id: nil)
+  end
+
   private
+
+  def compute_review_collaborator_user_ids
+    pa_user_ids =
+      PermitCollaboration
+        .joins(:collaborator)
+        .where(permit_application_id: permit_applications.kept.select(:id))
+        .where(collaboration_type: :review, discarded_at: nil)
+        .pluck("collaborators.user_id")
+
+    (pa_user_ids + [review_delegatee&.user_id].compact).uniq
+  end
 
   def fetch_coordinates
     return if pid.blank?

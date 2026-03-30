@@ -1,15 +1,25 @@
 class PermitProjectPolicy < ApplicationPolicy
-  # Scope class for Pundit scopes
   class Scope < Scope
     def resolve
-      # Projects the user owns OR collaborates on
-      scope
-        .left_joins(:collaborators)
-        .where(
-          "permit_projects.owner_id = :uid OR collaborators.user_id = :uid",
-          uid: user.id
+      collaborator_exists_sql = <<-SQL.squish
+        EXISTS (
+          SELECT 1 FROM collaborators c
+          JOIN permit_collaborations pc ON pc.collaborator_id = c.id
+          JOIN permit_applications pa ON pa.id = pc.permit_application_id
+          WHERE pa.permit_project_id = permit_projects.id
+            AND c.user_id = :uid
         )
-        .distinct
+      SQL
+
+      clauses = ["permit_projects.owner_id = :uid", collaborator_exists_sql]
+      values = { uid: user.id }
+
+      if user.review_staff?
+        clauses << "permit_projects.jurisdiction_id IN (:jur_ids)"
+        values[:jur_ids] = user.jurisdictions.pluck(:id)
+      end
+
+      scope.where(clauses.map { |c| "(#{c})" }.join(" OR "), values).distinct
     end
   end
 
@@ -24,9 +34,7 @@ class PermitProjectPolicy < ApplicationPolicy
 
   # This is for authorizing a specific project instance (e.g., in a show action).
   def show?
-    # updating to allow collaborators to see projects
-    # user_is_owner?
-    user_is_owner_or_collaborator?
+    user_is_owner_or_collaborator? || user_is_review_staff_for_jurisdiction?
   end
 
   def create?
@@ -53,6 +61,18 @@ class PermitProjectPolicy < ApplicationPolicy
     user_is_owner_or_collaborator?
   end
 
+  def mark_as_viewed?
+    user_is_review_staff_for_jurisdiction?
+  end
+
+  def mark_as_unviewed?
+    user_is_review_staff_for_jurisdiction?
+  end
+
+  def transition_state?
+    user_is_review_staff_for_jurisdiction? && !record.draft?
+  end
+
   # Allow bulk creation of permit applications under a project
   def create_permit_applications?
     user_is_owner?
@@ -60,6 +80,18 @@ class PermitProjectPolicy < ApplicationPolicy
 
   def submission_collaborator_options?
     user_is_owner?
+  end
+
+  def assign_review_delegatee?
+    user_is_review_staff_for_jurisdiction?
+  end
+
+  def unassign_review_delegatee?
+    user_is_review_staff_for_jurisdiction?
+  end
+
+  def reorder?
+    user&.review_staff?
   end
 
   def jurisdiction_options?
@@ -81,6 +113,10 @@ class PermitProjectPolicy < ApplicationPolicy
     record.permit_applications.any? do |app|
       app.collaborators.any? { |collaborator| collaborator.user_id == user.id }
     end
+  end
+
+  def user_is_review_staff_for_jurisdiction?
+    user&.review_staff? && user.member_of?(record.jurisdiction_id)
   end
 
   # user_context is still useful if you need to check policies of associated items for more granular permissions.

@@ -38,6 +38,7 @@ class Collaborator < ApplicationRecord
 
     permit_applications =
       permit_collaborations
+        .kept
         .includes(:permit_application)
         .map(&:permit_application)
         .uniq

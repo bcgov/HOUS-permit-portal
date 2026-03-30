@@ -4,7 +4,7 @@ class PermitApplicationPolicy < ApplicationPolicy
          record.collaborator?(user_id: user.id, collaboration_type: :submission)
       true
     elsif user.review_staff?
-      user.member_of?(record.jurisdiction.id) && !record.draft? &&
+      user.member_of?(record.jurisdiction.id) && !record.new_draft? &&
         record.sandbox == sandbox
     end
   end
@@ -16,7 +16,11 @@ class PermitApplicationPolicy < ApplicationPolicy
   end
 
   def mark_as_viewed?
-    user.review_staff?
+    user.review_staff? && user.member_of?(record.jurisdiction_id)
+  end
+
+  def mark_as_unviewed?
+    user.review_staff? && user.member_of?(record.jurisdiction_id)
   end
 
   def update?
@@ -65,6 +69,16 @@ class PermitApplicationPolicy < ApplicationPolicy
     else
       user.review_staff? && user.member_of?(record.jurisdiction_id)
     end
+  end
+
+  def transition_status?
+    user.review_staff? && user.member_of?(record.jurisdiction_id) &&
+      record.submitted?
+  end
+
+  def reorder?
+    # this is actually a collection action and the scope is defiend separately
+    user&.review_staff?
   end
 
   def generate_missing_pdfs?
@@ -175,6 +189,7 @@ class PermitApplicationPolicy < ApplicationPolicy
           JOIN collaborators c ON c.id = pc.collaborator_id
           WHERE pc.permit_application_id = permit_applications.id
             AND pc.collaboration_type = :submission_type
+            AND pc.discarded_at IS NULL
             AND c.user_id = :uid
         )
       SQL
@@ -214,10 +229,10 @@ class PermitApplicationPolicy < ApplicationPolicy
         SQL
 
         # Add the review-staff rule to the OR list, and bind parameters.
-        clauses << "#{review_exists_sql} AND permit_applications.status IN (:submitted_statuses)"
+        clauses << "#{review_exists_sql} AND permit_applications.status IN (:visible_statuses)"
         values[:jur_ids] = user.jurisdictions.pluck(:id)
-        values[:submitted_statuses] = PermitApplication
-          .submitted_statuses
+        values[:visible_statuses] = PermitApplication
+          .kanban_statuses
           .map { |name| PermitApplication.statuses.fetch(name) }
         if sandbox.present?
           # In sandbox mode, restrict to the active sandbox.

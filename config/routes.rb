@@ -139,6 +139,9 @@ Rails.application.routes.draw do
       post "permit_applications/search",
            on: :member,
            to: "jurisdictions#search_permit_applications"
+      post "permit_projects/search",
+           on: :member,
+           to: "jurisdictions#search_permit_projects"
       patch "update_external_api_enabled",
             on: :member,
             to: "jurisdictions#update_external_api_enabled"
@@ -164,6 +167,7 @@ Rails.application.routes.draw do
     end
 
     resources :permit_applications, only: %i[create update show destroy] do
+      collection { patch :reorder }
       post "restore", on: :member
       post "generate_missing_pdfs",
            on: :member,
@@ -182,6 +186,8 @@ Rails.application.routes.draw do
            to: "permit_applications#invite_new_collaborator"
       post "submit", on: :member
       post "mark_as_viewed", on: :member
+      post "mark_as_unviewed", on: :member
+      post "transition_status", on: :member
       post "retrigger_submission_webhook", on: :member
       patch "upload_supporting_document", on: :member
       patch "update_version", on: :member
@@ -222,7 +228,14 @@ Rails.application.routes.draw do
         post :pin
         delete :unpin
         get :submission_collaborator_options
+        post :activities, to: "project_audits#index"
+        post :mark_as_viewed
+        post :mark_as_unviewed
+        post :transition_state
+        post :assign_review_delegatee
+        delete :unassign_review_delegatee
       end
+      collection { patch :reorder }
     end
 
     resources :permit_collaborations, only: %i[destroy] do

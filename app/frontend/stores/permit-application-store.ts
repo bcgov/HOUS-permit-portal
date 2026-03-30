@@ -57,7 +57,11 @@ export const PermitApplicationStoreModel = types
       return [EPermitApplicationStatus.newDraft, EPermitApplicationStatus.revisionsRequested]
     },
     get submittedStatuses() {
-      return [EPermitApplicationStatus.newlySubmitted, EPermitApplicationStatus.resubmitted]
+      return [
+        EPermitApplicationStatus.newlySubmitted,
+        EPermitApplicationStatus.resubmitted,
+        EPermitApplicationStatus.inReview,
+      ]
     },
   }))
   .views((self) => ({

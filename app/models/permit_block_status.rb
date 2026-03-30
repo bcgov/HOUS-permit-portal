@@ -1,4 +1,5 @@
 class PermitBlockStatus < ApplicationRecord
+  audited only: %i[status], associated_with: :permit_application
   belongs_to :permit_application
 
   enum :status, { draft: 0, in_progress: 1, ready: 2 }, default: 0

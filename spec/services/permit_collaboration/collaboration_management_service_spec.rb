@@ -21,7 +21,7 @@ RSpec.describe PermitCollaboration::CollaborationManagementService do
 
   describe "#assign_collaborator!" do
     it "removes existing delegatee collaborations before saving a new one" do
-      existing = double("ExistingDelegatees", length: 1, destroy_all: true)
+      existing = double("ExistingDelegatees", length: 1, discard_all: true)
       allow(permit_collaborations_assoc).to receive(:where).with(
         collaborator_type: "delegatee"
       ).and_return(existing)
@@ -49,7 +49,7 @@ RSpec.describe PermitCollaboration::CollaborationManagementService do
           collaborator_type: "delegatee"
         )
 
-      expect(existing).to have_received(:destroy_all)
+      expect(existing).to have_received(:discard_all)
       expect(permit_collaboration).to eq(result)
     end
 
