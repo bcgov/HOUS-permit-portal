@@ -97,6 +97,15 @@ export const SubmissionDownloadModal = observer(
                     <Text fontSize="md" fontWeight="normal">
                       {t("permitApplication.show.downloadPrompt")}
                     </Text>
+                    {/* TODO: Fix and re-enable permit application CSV download */}
+                    {/* <Button
+                      size="sm"
+                      variant="outline"
+                      leftIcon={<FileArrowDown />}
+                      onClick={() => exportPermitApplicationCsv(permitApplication)}
+                    >
+                      {t("permitApplication.show.downloadAsCsv")}
+                    </Button> */}
                   </VStack>
                   <ModalCloseButton fontSize="11px" />
                 </ModalHeader>

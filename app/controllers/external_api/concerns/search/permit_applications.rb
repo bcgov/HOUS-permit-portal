@@ -67,7 +67,8 @@ module ExternalApi::Concerns::Search::PermitApplications
 
     where = {
       jurisdiction_id: current_external_api_key.jurisdiction_id,
-      sandbox_id: current_sandbox&.id
+      sandbox_id: current_sandbox&.id,
+      discarded: false
     }
 
     where[:status] = %i[newly_submitted resubmitted] if constraints.blank? ||

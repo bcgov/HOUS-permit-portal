@@ -129,6 +129,7 @@ RSpec.describe Requirement, type: :model, search: true do
               input_options: {
                 "conditional" => {
                   "eq" => "tool",
+                  "operator" => "isEqual",
                   "show" => true,
                   "when" => "energy_step_code_method_wrong"
                 },
@@ -142,6 +143,7 @@ RSpec.describe Requirement, type: :model, search: true do
               input_options: {
                 "conditional" => {
                   "eq" => "tool",
+                  "operator" => "isEqual",
                   "show" => true,
                   "when" => "energy_step_code_method"
                 }
@@ -259,6 +261,7 @@ RSpec.describe Requirement, type: :model, search: true do
             input_options: {
               "conditional" => {
                 "eq" => "file",
+                "operator" => "isEqual",
                 "show" => true
               }
             }
@@ -698,14 +701,16 @@ types" do
                 "conditional" => {
                   show: true,
                   when: "test",
-                  eq: "customValue"
+                  eq: "customValue",
+                  operator: "isEqual"
                 }
               }
             )
           form_json = requirement.to_form_json.reject { |key| key == :id }
+          block_key = requirement.requirement_block.key
+          section = PermitApplication.section_from_key(block_key)
           expected_form_json = {
-            key:
-              "#{requirement.requirement_block.key}|#{requirement.requirement_code}",
+            key: "#{block_key}|#{requirement.requirement_code}",
             type: "simpletextfield",
             elective: true,
             input: true,
@@ -715,8 +720,14 @@ types" do
             },
             conditional: {
               show: true,
-              when: "test",
-              eq: "customValue"
+              conjunction: "all",
+              conditions: [
+                {
+                  component: "#{section}.#{block_key}|test",
+                  operator: "isEqual",
+                  value: "customValue"
+                }
+              ]
             },
             customConditional: ";show = false"
           }

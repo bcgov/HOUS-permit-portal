@@ -1,5 +1,4 @@
 import {
-  Button,
   Flex,
   FormControl,
   FormHelperText,
@@ -17,7 +16,7 @@ import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
 import { Controller, FormProvider, useFieldArray, useForm, useFormContext } from "react-hook-form"
 import { Trans } from "react-i18next"
-import { useLocation, useNavigate } from "react-router-dom"
+import { useLocation } from "react-router-dom"
 import { usePart3StepCode } from "../../../../../../hooks/resources/use-part-3-step-code"
 import { EFlashMessageStatus } from "../../../../../../types/enums"
 import { IStepCodeOccupancy } from "../../../../../../types/types"
@@ -27,6 +26,7 @@ import { EnergyStepSelect } from "../../../../home/review-manager/configuration-
 import { ZeroCarbonStepSelect } from "../../../../home/review-manager/configuration-management-screen/energy-step-requirements-screen/energy-step-editable-block/zero-carbon-step-select"
 import { GridColumnHeader } from "../../../part-9/checklist/shared/grid/column-header"
 import { GridData } from "../../../part-9/checklist/shared/grid/data"
+import { Part3FormFooter } from "../shared/form-footer"
 import { SectionHeading } from "../shared/section-heading"
 
 const i18nPrefix = "stepCode.part3.stepCodePerformanceRequirements"
@@ -36,7 +36,6 @@ export const StepCodeOccupanciesPerformanceRequirements = observer(
   function Part3StepCodeFormStepCodeOccupanciesStepCodeOccupanciesPerformanceRequirements() {
     const { checklist } = usePart3StepCode()
 
-    const navigate = useNavigate()
     const location = useLocation()
 
     const formMethods = useForm({
@@ -64,24 +63,9 @@ export const StepCodeOccupanciesPerformanceRequirements = observer(
 
     const onSubmit = async (values) => {
       if (!checklist) return
-
-      const alternatePath = checklist.alternateNavigateAfterSavePath
-      checklist.setAlternateNavigateAfterSavePath(null)
-
-      if (!isValid) return
       const updated = await checklist.update(values)
-
-      if (updated) {
-        await checklist.completeSection("stepCodePerformanceRequirements")
-
-        if (alternatePath) {
-          navigate(alternatePath)
-        } else {
-          navigate(location.pathname.replace("step-code-performance-requirements", "modelled-outputs"))
-        }
-      } else {
-        return
-      }
+      if (!updated) throw new Error("Save failed")
+      await checklist.completeSection("stepCodePerformanceRequirements")
     }
 
     useEffect(() => {
@@ -100,56 +84,52 @@ export const StepCodeOccupanciesPerformanceRequirements = observer(
           <Text fontSize="md">{t(`${i18nPrefix}.instructions`)}</Text>
         </Flex>
         <FormProvider {...formMethods}>
-          <form onSubmit={handleSubmit(onSubmit)} name="part3SectionForm">
-            <Flex direction="column" gap={{ base: 6, xl: 6 }} pb={4}>
-              {fields.map((field, idx) => (
-                <OccupancyEnergyStep field={field} idx={idx} />
+          <Flex direction="column" gap={{ base: 6, xl: 6 }} pb={4}>
+            {fields.map((field, idx) => (
+              <OccupancyEnergyStep field={field} idx={idx} />
+            ))}
+
+            <Grid
+              w="full"
+              templateColumns={`auto repeat(2, minmax(auto, 240px))`}
+              borderWidth={1}
+              borderTopWidth={0}
+              borderBottomWidth={0}
+              borderColor="borders.light"
+            >
+              <GridColumnHeader>
+                <Text>{t(`${i18nPrefix}.occupanciesTable.headers.occupancy`)}</Text>
+              </GridColumnHeader>
+              <GridColumnHeader>
+                <Text>
+                  <Trans
+                    i18nKey={`${i18nPrefix}.occupanciesTable.headers.modelledFloorArea`}
+                    components={{ sup: <sup /> }}
+                  />
+                </Text>
+              </GridColumnHeader>
+              <GridColumnHeader>
+                <Text>{t(`${i18nPrefix}.occupanciesTable.headers.ghg`)}</Text>
+              </GridColumnHeader>
+
+              {fields.map((f, idx) => (
+                <OccupancyRow field={f} idx={idx} />
               ))}
-
-              <Grid
-                w="full"
-                templateColumns={`auto repeat(2, minmax(auto, 240px))`}
-                borderWidth={1}
-                borderTopWidth={0}
-                borderBottomWidth={0}
-                borderColor="borders.light"
-              >
-                <GridColumnHeader>
-                  <Text>{t(`${i18nPrefix}.occupanciesTable.headers.occupancy`)}</Text>
-                </GridColumnHeader>
-                <GridColumnHeader>
-                  <Text>
-                    <Trans
-                      i18nKey={`${i18nPrefix}.occupanciesTable.headers.modelledFloorArea`}
-                      components={{ sup: <sup /> }}
+            </Grid>
+            <Text>
+              <Trans
+                i18nKey={`${i18nPrefix}.occupanciesTable.hint`}
+                components={{
+                  stepCodeOccupanciesLink: (
+                    <RouterLink
+                      to={`${location.pathname.replace("step-code-performance-requirements", stepCodeOccupanciesPath)}`}
                     />
-                  </Text>
-                </GridColumnHeader>
-                <GridColumnHeader>
-                  <Text>{t(`${i18nPrefix}.occupanciesTable.headers.ghg`)}</Text>
-                </GridColumnHeader>
-
-                {fields.map((f, idx) => (
-                  <OccupancyRow field={f} idx={idx} />
-                ))}
-              </Grid>
-              <Text>
-                <Trans
-                  i18nKey={`${i18nPrefix}.occupanciesTable.hint`}
-                  components={{
-                    stepCodeOccupanciesLink: (
-                      <RouterLink
-                        to={`${location.pathname.replace("step-code-performance-requirements", stepCodeOccupanciesPath)}`}
-                      />
-                    ),
-                  }}
-                />
-              </Text>
-              <Button type="submit" variant="primary" isLoading={isSubmitting} isDisabled={isSubmitting}>
-                {t("stepCode.part3.cta")}
-              </Button>
-            </Flex>
-          </form>
+                  ),
+                }}
+              />
+            </Text>
+            <Part3FormFooter handleSubmit={handleSubmit} onSubmit={onSubmit} isLoading={isSubmitting} />
+          </Flex>
         </FormProvider>
       </>
     )

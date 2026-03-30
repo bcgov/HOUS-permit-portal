@@ -3,14 +3,10 @@ import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { matchPath, useLocation } from "react-router-dom"
-import { useMst } from "../../../setup/root"
 import { RouterLink } from "../navigation/router-link"
 
 export const Footer = observer(() => {
   const location = useLocation()
-  const {
-    sessionStore: { loggedIn },
-  } = useMst()
   const { t } = useTranslation()
   const onlyShowFooterOnRoutes = [
     "/reset-password",
@@ -45,83 +41,98 @@ export const Footer = observer(() => {
               <Text>{t("site.territorialAcknowledgement")}</Text>
             </Container>
           </Flex>
-          <Box py={14} bg="greys.grey03" w="full">
+          <Box py={14} bg="white" w="full">
             <Container maxW="container.lg">
               <Flex direction="column" gap={8}>
-                <Flex direction={{ base: "column", md: "row" }} gap={12}>
-                  <Box flex={1}>
+                <Flex direction={{ base: "column", md: "row" }} gap={{ base: 8, md: 0 }}>
+                  <Box flex={1} pr={{ md: 12 }}>
                     <Image alt="site logo" src={"/images/logo.svg"} width="200px" />
+                    <Text mt={6} fontSize="sm" color="text.secondary">
+                      {t("site.multiLanguageAccessibility")}{" "}
+                      <Link
+                        href="https://www2.gov.bc.ca/gov/content/home/get-help-with-government-services"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        color="text.primary"
+                      >
+                        {t("site.callEmailOrTextUs")}
+                      </Link>
+                      {", "}
+                      {t("ui.or")}{" "}
+                      <Link
+                        href="https://www2.gov.bc.ca/gov/content/governments/organizational-structure/ministries-organizations/ministries/citizens-services/servicebc"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        color="text.primary"
+                      >
+                        {t("site.findAServiceCentre")}
+                      </Link>
+                    </Text>
                   </Box>
-                  <Flex direction="column" gap={4} flex={3} pt={4}>
-                    <Heading as="h3" size="md">
+                  <VStack align="flex-start" gap={4} flex={1} pt={{ base: 0, md: 4 }} mr={16}>
+                    <Heading as="h3" size="md" pb={2} borderBottom="1px solid" borderColor="text.primary" w="full">
                       {t("site.titleLong")}
                     </Heading>
-                    <Flex direction={{ base: "column", md: "row" }} flex={1} gap={{ base: 8, md: 0 }}>
-                      <VStack align="flex-start" gap={4} w={{ base: "100%", md: "33%" }}>
-                        <RouterLink to="/" color="text.primary">
-                          {t("site.home")}
-                        </RouterLink>
-                        <RouterLink to="/contact" color="text.primary">
-                          {t("site.contact")}
-                        </RouterLink>
-                        <Link
-                          href={"https://www2.gov.bc.ca/gov/content?id=F2AE1595C6044E819A316925F0A74E09"}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          color="text.primary"
-                        >
-                          {t("site.help")}
-                        </Link>
-                        {!loggedIn && (
-                          <RouterLink to="/login" color="text.primary">
-                            {t("auth.login")}
-                          </RouterLink>
-                        )}
-                      </VStack>
-
-                      <VStack align="flex-start" gap={4} w={{ base: "100%", md: "33%" }}>
-                        <Link
-                          href="https://www2.gov.bc.ca/gov/content/home/disclaimer"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          color="text.primary"
-                        >
-                          {t("site.disclaimerTitle")}
-                        </Link>
-                        <RouterLink to="/privacy-policy" color="text.primary">
-                          {t("site.privacyPolicy")}
-                        </RouterLink>
-                        <Link
-                          href="https://www2.gov.bc.ca/gov/content/home/accessible-government"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          color="text.primary"
-                        >
-                          {t("site.accessibility")}
-                        </Link>
-                        <Link
-                          href="https://www2.gov.bc.ca/gov/content/home/copyright"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          color="text.primary"
-                        >
-                          {t("site.copyright")}
-                        </Link>
-                      </VStack>
-                    </Flex>
-                  </Flex>
+                    <RouterLink to="/" color="text.primary">
+                      {t("site.home")}
+                    </RouterLink>
+                    <Link
+                      href="https://www2.gov.bc.ca/gov/content/home"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      color="text.primary"
+                    >
+                      {t("site.aboutGovBcCa")}
+                    </Link>
+                    <RouterLink to="/contact" color="text.primary">
+                      {t("site.contact")}
+                    </RouterLink>
+                    <Link
+                      href="https://www2.gov.bc.ca/gov/content?id=F2AE1595C6044E819A316925F0A74E09"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      color="text.primary"
+                    >
+                      {t("site.help")}
+                    </Link>
+                  </VStack>
+                  <VStack align="flex-start" gap={4} flex={1} pt={{ base: 0, md: 4 }}>
+                    <Heading as="h3" size="md" pb={2} borderBottom="1px solid" borderColor="text.primary" w="full">
+                      {t("site.moreInfo")}
+                    </Heading>
+                    <Link
+                      href="https://www2.gov.bc.ca/gov/content/home/accessible-government"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      color="text.primary"
+                    >
+                      {t("site.accessibility")}
+                    </Link>
+                    <RouterLink to="/privacy-policy" color="text.primary">
+                      {t("site.privacyPolicy")}
+                    </RouterLink>
+                    <Link
+                      href="https://www2.gov.bc.ca/gov/content/home/disclaimer"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      color="text.primary"
+                    >
+                      {t("site.disclaimerTitle")}
+                    </Link>
+                    <Link
+                      href="https://www2.gov.bc.ca/gov/content/home/copyright"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      color="text.primary"
+                    >
+                      {t("site.copyright")}
+                    </Link>
+                  </VStack>
                 </Flex>
                 <Divider borderColor="theme.blue" />
-                <Link
-                  href="https://www2.gov.bc.ca/gov/content/home/copyright"
-                  color="text.secondary"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  textDecoration="none"
-                  fontSize="sm"
-                >
+                <Text color="text.secondary" fontSize="sm">
                   &copy; {new Date().getFullYear()} {t("site.copyrightHolder")}
-                </Link>
+                </Text>
               </Flex>
             </Container>
           </Box>

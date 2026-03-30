@@ -10,7 +10,7 @@ export function applyNotificationSideEffects(payload: IUserPushPayload, rootStor
       const stepCodeType = data?.objectData?.stepCodeType
       if (stepCodeId) {
         try {
-          // Fire-and-forget refresh; underlying MST flow returns a promise
+          // Fire-and-forget refresh; underlying MST flow returns a promise.
           if (stepCodeType === EStepCodeType.part3StepCode) {
             rootStore.stepCodeStore.fetchPart3StepCode(stepCodeId)
           } else if (stepCodeType === EStepCodeType.part9StepCode) {

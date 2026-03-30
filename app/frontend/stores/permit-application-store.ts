@@ -100,8 +100,10 @@ export const PermitApplicationStoreModel = types
   .actions((self) => ({
     setCurrentPermitApplication(permitApplicationId) {
       self.currentPermitApplication = permitApplicationId
-      self.currentPermitApplication?.stepCode &&
-        self.rootStore.stepCodeStore.setCurrentStepCode(self.currentPermitApplication.stepCode.id)
+      const stepCode = self.currentPermitApplication?.stepCode
+      if (stepCode && !stepCode.isDiscarded) {
+        self.rootStore.stepCodeStore.setCurrentStepCode(stepCode.id)
+      }
     },
     setHasCollaboratorFilter(value: boolean) {
       setQueryParam("hasCollaborator", value.toString())
@@ -241,6 +243,7 @@ export const PermitApplicationStoreModel = types
         sort: self.sort,
         page: opts?.page ?? self.currentPage,
         perPage: opts?.countPerPage ?? self.countPerPage,
+        showArchived: self.showArchived,
         filters: {
           status: self.statusFilter,
           templateVersionId: self.templateVersionIdFilter,

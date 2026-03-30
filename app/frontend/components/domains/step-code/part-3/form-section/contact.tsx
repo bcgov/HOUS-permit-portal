@@ -1,12 +1,12 @@
-import { Box, Button, Heading, Stack, Text } from "@chakra-ui/react"
+import { Box, Heading, Stack, Text } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { useLocation, useNavigate } from "react-router-dom"
 import { usePart3StepCode } from "../../../../../hooks/resources/use-part-3-step-code"
 import { IPart3StepCodeChecklist } from "../../../../../models/part-3-step-code-checklist"
 import { TextFormControl } from "../../../../shared/form/input-form-control"
+import { Part3FormFooter } from "./shared/form-footer"
 
 interface IStepcodeContactForm {
   completedByName?: string | null
@@ -35,28 +35,18 @@ export const Contact = observer(() => {
     mode: "onSubmit",
     defaultValues: initializeFormValues(checklist),
   })
-  const { handleSubmit } = formMethods
-  const navigate = useNavigate()
-  const location = useLocation()
+  const {
+    handleSubmit,
+    formState: { isSubmitting },
+  } = formMethods
 
-  const onSubmit = handleSubmit(async (values) => {
+  const onSubmit = async (values) => {
     if (!checklist) return
 
-    const alternatePath = checklist.alternateNavigateAfterSavePath
-    checklist.setAlternateNavigateAfterSavePath(null)
-
     const updated = await checklist.update(values)
-    if (!updated) {
-      return
-    }
+    if (!updated) throw new Error("Save failed")
     await checklist.completeSection("contact")
-
-    if (alternatePath) {
-      navigate(alternatePath)
-    } else {
-      navigate(location.pathname.replace("contact", "requirements-summary"))
-    }
-  })
+  }
 
   return (
     <Box w="full">
@@ -69,7 +59,7 @@ export const Contact = observer(() => {
       </Text>
 
       <FormProvider {...formMethods}>
-        <Box as="form" onSubmit={onSubmit} mt={9} maxW="26.875rem" name="part3SectionForm">
+        <Box mt={9} maxW="26.875rem">
           <Stack direction="column" spacing={7}>
             <TextFormControl fieldName="completedByName" label={t(`${i18nPrefix}.fields.completedByName`)} required />
             <TextFormControl fieldName="completedByTitle" label={t(`${i18nPrefix}.fields.completedByTitle`)} required />
@@ -85,9 +75,7 @@ export const Contact = observer(() => {
               required
             />
           </Stack>
-          <Button type="submit" variant="primary" mt={6}>
-            {t("stepCode.part3.cta")}
-          </Button>
+          <Part3FormFooter handleSubmit={handleSubmit} onSubmit={onSubmit} isLoading={isSubmitting} />
         </Box>
       </FormProvider>
     </Box>

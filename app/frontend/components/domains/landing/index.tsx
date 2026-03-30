@@ -285,7 +285,7 @@ const AvailableJurisdictionsMessageBox: React.FC = observer(() => {
   const { tableJurisdictions, searchEnabledJurisdictions, totalPages } = jurisdictionStore
 
   useEffect(() => {
-    searchEnabledJurisdictions(12)
+    searchEnabledJurisdictions()
   }, [])
 
   return (

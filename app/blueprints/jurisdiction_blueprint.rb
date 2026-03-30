@@ -17,6 +17,7 @@ class JurisdictionBlueprint < Blueprinter::Base
            :reviewers_size,
            :permit_applications_size,
            :map_position,
+           :boundary_points,
            :inbox_enabled,
            :show_about_page,
            :allow_designated_reviewer,
@@ -27,7 +28,12 @@ class JurisdictionBlueprint < Blueprinter::Base
            :external_api_state,
            :first_nation,
            :ltsa_matcher,
-           :heating_degree_days
+           :heating_degree_days,
+           :weather_location
+
+    field :design_summer_temp do |jurisdiction, _options|
+      jurisdiction.design_summer_temp&.to_f
+    end
 
     field :external_api_enabled do |jurisdiction, _options|
       jurisdiction.external_api_enabled?
@@ -48,6 +54,10 @@ class JurisdictionBlueprint < Blueprinter::Base
                   PermitTypeRequiredStepBlueprint do |jurisdiction, _options|
       jurisdiction.enabled_permit_type_required_steps
     end
+    association :part3_occupancy_required_steps,
+                blueprint: Part3OccupancyRequiredStepBlueprint
+    association :jurisdiction_climate_zones,
+                blueprint: JurisdictionClimateZoneBlueprint
     association :service_partner_enrollments,
                 blueprint: JurisdictionServicePartnerEnrollmentBlueprint
   end

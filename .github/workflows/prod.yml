@@ -20,6 +20,12 @@ jobs:
     environment: prod
 
     steps:
+      - name: Enforce branch match
+        if: github.event.inputs.branch != github.ref_name
+        run: |
+          echo "You are trying to deploy '${{ github.event.inputs.branch }}' but running this workflow from '${{ github.ref_name }}'."
+          echo "You must run this workflow from the same branch you are deploying."
+          exit 1
       # Step to check if the user is authorized
       - name: Check if user is authorized
         run: |

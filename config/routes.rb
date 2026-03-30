@@ -86,6 +86,9 @@ Rails.application.routes.draw do
            on: :collection,
            to: "requirement_templates#unschedule_template_version"
       post "copy", on: :collection
+      post "jurisdiction_availabilities",
+           on: :member,
+           to: "requirement_templates#update_jurisdiction_availabilities"
     end
 
     resources :early_access_previews do
@@ -160,7 +163,8 @@ Rails.application.routes.draw do
       get "form_bc_addresses", on: :collection
     end
 
-    resources :permit_applications, only: %i[create update show] do
+    resources :permit_applications, only: %i[create update show destroy] do
+      post "restore", on: :member
       post "generate_missing_pdfs",
            on: :member,
            to: "permit_applications#generate_missing_pdfs"
@@ -266,6 +270,11 @@ Rails.application.routes.draw do
       post "submit", on: :member
       patch "mark_viewed", on: :member
       get "pdf_report_url", on: :member
+    end
+
+    resources :overheating_codes, only: %i[index show create update destroy] do
+      get "generate_pdf", on: :member
+      patch "restore", on: :member
     end
 
     resources :report_documents, only: [] do

@@ -5,6 +5,46 @@ class PermitHubMailer < ApplicationMailer
     send_user_mail(email: user.email, template_key: "welcome")
   end
 
+  # Sent only when a user archives (discards) their own account.
+  # NOTE: This must bypass send_user_mail because the user is discarded at send-time.
+  def account_closed(user)
+    @user = user
+    send_mail(email: user.email, template_key: "account_closed")
+  end
+
+  def notify_user_archive_warning(user, days_until_archive)
+    @user = user
+    @days_until_archive = days_until_archive
+    @retention_days = user_delete_after_days
+    @scheduled_action = "archiving"
+    @scheduled_date = Time.current + days_until_archive.days
+    @login_type = login_type_label(user)
+    @login_identifier = login_identifier(user)
+    send_user_mail(
+      email: user.email,
+      template_key: "user_archive_warning",
+      subject_i18n_params: {
+        days: days_until_archive
+      }
+    )
+  end
+
+  def notify_user_delete_warning(user, days_until_delete)
+    @user = user
+    @days_until_delete = days_until_delete
+    @scheduled_action = "deletion"
+    @scheduled_date = Time.current + days_until_delete.days
+    @login_type = login_type_label(user)
+    @login_identifier = login_identifier(user)
+    send_mail(
+      email: user.email,
+      template_key: "user_delete_warning",
+      subject_i18n_params: {
+        days: days_until_delete
+      }
+    )
+  end
+
   def onboarding(user)
     @user = user
     send_user_mail(email: user.email, template_key: "onboarding")
@@ -124,32 +164,6 @@ class PermitHubMailer < ApplicationMailer
     )
   end
 
-  def send_batched_integration_mapping_notifications(
-    notifiable,
-    notification_ids
-  )
-    # This should be called by the SendBatchedIntegrationMappingNotificationsJob
-
-    @notifications = IntegrationMappingNotification.where(id: notification_ids)
-
-    return unless @notifications.any?
-
-    if notifiable.is_a?(User)
-      @user = notifiable
-      send_user_mail(
-        email: notifiable.email,
-        template_key: "notify_batched_integration_mapping"
-      )
-    elsif notifiable.is_a?(ExternalApiKey)
-      @external_api_key = notifiable
-      @jurisdiction_name = @external_api_key&.jurisdiction.qualified_name
-      send_mail(
-        email: notifiable.notification_email,
-        template_key: "notify_batched_integration_mapping"
-      )
-    end
-  end
-
   def notify_reviewer_application_received(
     permit_type_submission_contact,
     permit_application
@@ -205,6 +219,77 @@ class PermitHubMailer < ApplicationMailer
     send_user_mail(
       email: @user.email,
       template_key: "notify_pre_check_completed"
+    )
+  end
+
+  def notify_new_template_version_published(
+    template_version,
+    user,
+    jurisdiction: nil,
+    change_type: :no_action,
+    diff_summary: nil
+  )
+    @template_version = template_version
+    @user = user
+    @jurisdiction = jurisdiction
+    @change_type = change_type
+    @diff_summary = diff_summary
+    @api_enabled = @jurisdiction.present? && @jurisdiction.external_api_enabled?
+
+    if @api_enabled
+      @api_mapping_url =
+        FrontendUrlHelper.frontend_url(
+          "/jurisdictions/#{@jurisdiction.slug}/api-settings/api-mappings"
+        )
+    end
+
+    set_submission_inbox_action_required
+
+    subject_key = template_version_subject_key(change_type)
+
+    send_user_mail(
+      email: @user.email,
+      template_key: "notify_new_template_version_published",
+      subject_i18n_params: {
+        template_label: template_version.label,
+        version_date: template_version.version_date&.strftime("%B %d, %Y")
+      },
+      subject_key: subject_key
+    )
+  end
+
+  def notify_external_api_key_template_update(
+    template_version,
+    external_api_key,
+    change_type:,
+    diff_summary:
+  )
+    @template_version = template_version
+    @external_api_key = external_api_key
+    @user = nil
+    @jurisdiction = external_api_key.jurisdiction
+    @jurisdiction_name = @jurisdiction.qualified_name
+    @change_type = change_type
+    @diff_summary = diff_summary
+    @api_enabled = true
+    @submission_inbox_action_required = false
+    @api_mapping_url =
+      FrontendUrlHelper.frontend_url(
+        "/jurisdictions/#{@jurisdiction.slug}/api-settings/api-mappings"
+      )
+
+    return unless external_api_key.notification_email.present?
+
+    subject_key = template_version_subject_key(change_type)
+
+    send_mail(
+      email: external_api_key.notification_email,
+      template_key: "notify_new_template_version_published",
+      subject_i18n_params: {
+        template_label: template_version.label,
+        version_date: template_version.version_date&.strftime("%B %d, %Y")
+      },
+      subject_key: subject_key
     )
   end
 
@@ -299,6 +384,54 @@ class PermitHubMailer < ApplicationMailer
   end
 
   private
+
+  def set_submission_inbox_action_required
+    @submission_inbox_action_required = false
+    @inbox_setup_url = nil
+    return unless @jurisdiction.present?
+
+    has_contact =
+      @jurisdiction
+        .permit_type_submission_contacts
+        .where(permit_type_id: @template_version.permit_type.id)
+        .where.not(confirmed_at: nil)
+        .exists?
+
+    unless has_contact
+      @submission_inbox_action_required = true
+      @inbox_setup_url =
+        FrontendUrlHelper.frontend_url(
+          "/jurisdictions/#{@jurisdiction.slug}/configuration-management/feature-access/submissions-inbox-setup"
+        )
+    end
+  end
+
+  def template_version_subject_key(change_type)
+    case change_type
+    when :new_template
+      "notify_template_version_new_template"
+    when :action_required
+      "notify_template_version_action_required"
+    else
+      "notify_template_version_no_action"
+    end
+  end
+
+  def user_delete_after_days
+    default_days = UserDataCleanupJob::DEFAULT_DELETE_AFTER_DAYS
+    Integer(ENV.fetch("USER_DELETE_AFTER_DAYS", default_days), 10)
+  rescue ArgumentError, TypeError
+    default_days
+  end
+
+  def login_type_label(user)
+    user.omniauth_provider_label || user.omniauth_provider.to_s.titleize ||
+      "Unknown"
+  end
+
+  def login_identifier(user)
+    user.omniauth_username.presence || user.email
+  end
 
   # Helper method to attach a file from a FileUploadAttachment subclass instance
   # @param file_upload_attachment [FileUploadAttachment] A FileUploadAttachment subclass instance (e.g., ReportDocument)

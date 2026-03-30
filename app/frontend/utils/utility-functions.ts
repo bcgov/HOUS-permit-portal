@@ -176,6 +176,23 @@ export function startBlobDownload(blobData: BlobPart, mimeType: string, fileName
   window.URL.revokeObjectURL(url)
 }
 
+export async function downloadFromApi(apiPath: string, fallbackFilename: string): Promise<void> {
+  const response = await fetch(apiPath, {
+    method: "GET",
+    headers: { "X-CSRF-Token": getCsrfToken() || "" },
+  })
+
+  if (!response.ok) throw new Error(`Download failed: ${response.statusText}`)
+
+  const blob = await response.blob()
+  const disposition = response.headers.get("Content-Disposition")
+  const match = disposition?.match(/filename="(.+?)"/) || disposition?.match(/filename=([^;\s]+)/)
+  const filename = match?.[1] || fallbackFilename
+  const mimeType = response.headers.get("Content-Type") || "application/octet-stream"
+
+  startBlobDownload(blob, mimeType, filename)
+}
+
 export function isArchitecturalDrawingRequirement(inputType?: ERequirementType): boolean {
   return inputType === ERequirementType.architecturalDrawing
 }
@@ -407,17 +424,27 @@ export function numberToFormattedString(
 }
 
 /**
+ * Rounds a numeric value (number or string) to a fixed number of decimal places.
+ * Returns "-" for null, undefined, or NaN values.
+ */
+export function roundMetric(value: string | number | null | undefined, decimals: number = 5): string {
+  if (!value) return "-"
+  const num = typeof value === "string" ? parseFloat(value) : value
+  return isNaN(num) ? "-" : num.toFixed(decimals)
+}
+
+/**
  * Converts a formatted string back to a number
  * @param value - Formatted string to parse (e.g., "1,234.56")
- * @returns Parsed number or 0 if input is empty/invalid
+ * @returns Parsed number, or null if input is empty/invalid
  */
-export function formattedStringToNumber(value: string): number {
+export function formattedStringToNumber(value: string): number | null {
   const rawValue = value.replace(/,/g, "")?.trim()
 
-  if (!rawValue) return 0
+  if (!rawValue) return null
 
   const parsedValue = Number(rawValue)
-  return !isNaN(parsedValue) ? parsedValue : 0
+  return !isNaN(parsedValue) ? parsedValue : null
 }
 
 // Step Code helpers (shared across PDF and HTML components)

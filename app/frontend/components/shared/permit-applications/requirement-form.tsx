@@ -10,7 +10,7 @@ import { useNavigate } from "react-router-dom"
 import { useMountStatus } from "../../../hooks/use-mount-status"
 import { IPermitApplication } from "../../../models/permit-application"
 import { EFileUploadAttachmentType, EFlashMessageStatus, EStepCodeType } from "../../../types/enums"
-import { IErrorsBoxData } from "../../../types/types"
+import { IErrorsBoxData, IOptionalElectiveFieldInfo } from "../../../types/types"
 import { getOptionalElectivesByPanelId } from "../../../utils/early-access-view-optional-electives"
 import { getCompletedBlocksFromForm, getRequirementByKey } from "../../../utils/formio-component-traversal"
 import { singleRequirementFormJson, singleRequirementSubmissionData } from "../../../utils/formio-helpers"
@@ -64,6 +64,7 @@ export const RequirementForm = observer(
       previousSubmissionVersion,
       selectedSubmissionVersion,
       previousToSelectedSubmissionVersion,
+      isViewingPastRequests,
       inboxEnabled,
       sandbox,
     } = permitApplication
@@ -97,6 +98,7 @@ export const RequirementForm = observer(
     const [optionalElectivesModalData, setOptionalElectivesModalData] = useState<{
       blockTitle?: string
       labels: string[]
+      electives: IOptionalElectiveFieldInfo[]
     } | null>(null)
 
     const currentSubmissionData = useMemo(() => {
@@ -106,7 +108,7 @@ export const RequirementForm = observer(
     const pastClonedDataCache = useRef(new Map())
 
     const displayedSubmissionData = useMemo(() => {
-      if (selectedSubmissionVersion) {
+      if (selectedSubmissionVersion && isViewingPastRequests) {
         const cacheKey = selectedSubmissionVersion.id
         if (pastClonedDataCache.current.has(cacheKey)) {
           return pastClonedDataCache.current.get(cacheKey)
@@ -118,7 +120,7 @@ export const RequirementForm = observer(
       } else {
         return currentSubmissionData
       }
-    }, [selectedSubmissionVersion, currentSubmissionData])
+    }, [selectedSubmissionVersion, isViewingPastRequests, currentSubmissionData])
 
     const [unsavedSubmissionData, setUnsavedSubmissionData] = useState(() => R.clone(submissionData))
 
@@ -275,7 +277,8 @@ export const RequirementForm = observer(
     }
 
     const optionalElectivesByPanelId = useMemo(() => {
-      if (!isEarlyAccess) return new Map<string, { blockTitle?: string; labels: string[] }>()
+      if (!isEarlyAccess)
+        return new Map<string, { blockTitle?: string; labels: string[]; electives: IOptionalElectiveFieldInfo[] }>()
       return getOptionalElectivesByPanelId(formattedFormJson)
     }, [formattedFormJson, isEarlyAccess])
 
@@ -284,7 +287,7 @@ export const RequirementForm = observer(
         const panelId = event?.detail?.panelId as string | undefined
         if (!panelId) return
 
-        const data = optionalElectivesByPanelId.get(panelId) || { labels: [] }
+        const data = optionalElectivesByPanelId.get(panelId) || { labels: [], electives: [] }
         setOptionalElectivesModalData(data)
         onOptionalElectivesOpen()
       },
@@ -514,13 +517,20 @@ export const RequirementForm = observer(
               status={EFlashMessageStatus.error}
             />
           )}
+          {permitApplication.templateVersionDisabledByJurisdiction && !sandbox && (
+            <CustomMessageBox
+              title={t("permitApplication.show.templateDisabledByJurisdictionTitle")}
+              description={t("permitApplication.show.templateDisabledByJurisdiction")}
+              status={EFlashMessageStatus.error}
+            />
+          )}
           {!inboxEnabled && !sandbox && isEarlyAccess && (
             <CustomMessageBox
               title={t("permitApplication.show.inboxDisabledTitleEarlyAccess")}
               description={
                 <Trans
                   t={t}
-                  i18nKey={"permitApplication.show.inboxDisabledEarlyAccess"}
+                  i18nKey={"permitApplication.show.inboxDisabledEarlyAccessInstructions"}
                   components={{
                     1: (
                       <Button

@@ -82,8 +82,7 @@ export const SitesSelect = observer(function ({
     setPidOptions([])
     onChange(option)
     setValue(pidName, null)
-    if (option) {
-      //set the label for the address?
+    if (option && option.value) {
       fetchPids(option.value).then((pids: string[]) => {
         if (pids) {
           setPidOptions(pids.map((pid) => ({ value: pid, label: formatPidLabel(pid) })))
@@ -202,9 +201,7 @@ export const SitesSelect = observer(function ({
               closeMenuOnSelect={true}
               isCreatable={false}
               // Render menu in a portal by default to avoid clipping in overflow contexts
-              menuPortalTarget={
-                (rest as any).menuPortalTarget ?? (typeof document !== "undefined" ? document.body : undefined)
-              }
+              menuPortalTarget={(rest as any).menuPortalTarget ?? document.body}
               {...rest}
             />
           </InputGroup>

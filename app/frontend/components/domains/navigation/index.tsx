@@ -61,6 +61,34 @@ const EnergyStepRequirementsScreen = lazy(() =>
     default: module.EnergyStepRequirementsScreen,
   }))
 )
+const Part9StepCodeConfigScreen = lazy(() =>
+  import(
+    "../home/review-manager/configuration-management-screen/energy-step-requirements-screen/part-9-step-code-config-screen"
+  ).then((module) => ({
+    default: module.Part9StepCodeConfigScreen,
+  }))
+)
+const ClimateZonesScreen = lazy(() =>
+  import(
+    "../home/review-manager/configuration-management-screen/energy-step-requirements-screen/climate-zones-screen"
+  ).then((module) => ({
+    default: module.ClimateZonesScreen,
+  }))
+)
+const Part3OccupancyOverviewScreen = lazy(() =>
+  import(
+    "../home/review-manager/configuration-management-screen/energy-step-requirements-screen/part-3-occupancy-overview-screen"
+  ).then((module) => ({
+    default: module.Part3OccupancyOverviewScreen,
+  }))
+)
+const Part3OccupancyDetailScreen = lazy(() =>
+  import(
+    "../home/review-manager/configuration-management-screen/energy-step-requirements-screen/part-3-occupancy-detail-screen"
+  ).then((module) => ({
+    default: module.Part3OccupancyDetailScreen,
+  }))
+)
 const ReviewManagerFeatureAccessScreen = lazy(() =>
   import("../home/review-manager/configuration-management-screen/feature-access-screen").then((module) => ({
     default: module.ReviewManagerFeatureAccessScreen,
@@ -140,11 +168,13 @@ const LookUpStepCodesRequirementsForYourProjectScreen = lazy(() =>
     default: module.LookUpStepCodesRequirementsForYourProjectScreen,
   }))
 )
+
 const CheckDigitalSealsScreen = lazy(() =>
   import("../project-readiness-tools/check-digital-seals").then((module) => ({
     default: module.CheckDigitalSealsScreen,
   }))
 )
+
 const PreCheckInfoScreen = lazy(() =>
   import("../project-readiness-tools/pre-check-info-screen").then((module) => ({
     default: module.PreCheckInfoScreen,
@@ -263,6 +293,9 @@ const Part3StepCodeForm = lazy(() =>
 const PreCheckForm = lazy(() => import("../pre-check").then((module) => ({ default: module.PreCheckForm })))
 const PreCheckViewer = lazy(() =>
   import("../pre-check/pre-check-viewer").then((module) => ({ default: module.PreCheckViewer }))
+)
+const OverheatingCodeForm = lazy(() =>
+  import("../overheating-code").then((module) => ({ default: module.OverheatingCodeForm }))
 )
 
 const StepCodeChecklistPDFViewer = lazy(() =>
@@ -538,6 +571,22 @@ const AppRoutes = observer(() => {
         path="/jurisdictions/:jurisdictionId/configuration-management/energy-step"
         element={<EnergyStepRequirementsScreen />}
       />
+      <Route
+        path="/jurisdictions/:jurisdictionId/configuration-management/energy-step/part-9"
+        element={<Part9StepCodeConfigScreen />}
+      />
+      <Route
+        path="/jurisdictions/:jurisdictionId/configuration-management/energy-step/part-3"
+        element={<Part3OccupancyOverviewScreen />}
+      />
+      <Route
+        path="/jurisdictions/:jurisdictionId/configuration-management/energy-step/part-3/:occupancyKey"
+        element={<Part3OccupancyDetailScreen />}
+      />
+      <Route
+        path="/jurisdictions/:jurisdictionId/configuration-management/energy-step/climate-zones"
+        element={<ClimateZonesScreen />}
+      />
     </>
   )
 
@@ -568,6 +617,22 @@ const AppRoutes = observer(() => {
       <Route
         path="/jurisdictions/:jurisdictionId/configuration-management/energy-step"
         element={<EnergyStepRequirementsScreen />}
+      />
+      <Route
+        path="/jurisdictions/:jurisdictionId/configuration-management/energy-step/part-9"
+        element={<Part9StepCodeConfigScreen />}
+      />
+      <Route
+        path="/jurisdictions/:jurisdictionId/configuration-management/energy-step/part-3"
+        element={<Part3OccupancyOverviewScreen />}
+      />
+      <Route
+        path="/jurisdictions/:jurisdictionId/configuration-management/energy-step/part-3/:occupancyKey"
+        element={<Part3OccupancyDetailScreen />}
+      />
+      <Route
+        path="/jurisdictions/:jurisdictionId/configuration-management/energy-step/climate-zones"
+        element={<ClimateZonesScreen />}
       />
       <Route path="/permit-applications/:permitApplicationId" element={<ReviewPermitApplicationScreen />} />
       {import.meta.env.DEV && (
@@ -685,6 +750,11 @@ const AppRoutes = observer(() => {
             <Route path="/pre-checks/:preCheckId/edit/" element={<PreCheckForm />} />
             <Route path="/pre-checks/:preCheckId/edit/:section" element={<PreCheckForm />} />
             <Route path="/pre-checks/:preCheckId/viewer" element={<PreCheckViewer />} />
+            <Route path="/overheating-codes" element={<ProjectDashboardScreen />} />
+            <Route path="/overheating-codes/new" element={<OverheatingCodeForm />} />
+            <Route path="/overheating-codes/new/:section" element={<OverheatingCodeForm />} />
+            <Route path="/overheating-codes/:overheatingCodeId/edit/" element={<OverheatingCodeForm />} />
+            <Route path="/overheating-codes/:overheatingCodeId/edit/:section" element={<OverheatingCodeForm />} />
             <Route path="/documents" element={<ProjectDashboardScreen />} />
             {/* Already handled above with path-based tabs */}
             <Route path="/projects" element={<ProjectDashboardScreen />} />
