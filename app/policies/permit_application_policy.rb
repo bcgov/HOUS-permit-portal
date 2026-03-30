@@ -73,7 +73,7 @@ class PermitApplicationPolicy < ApplicationPolicy
 
   def transition_status?
     user.review_staff? && user.member_of?(record.jurisdiction_id) &&
-      record.submitted?
+      record.allowed_manual_transitions.any?
   end
 
   def reorder?

@@ -174,6 +174,7 @@ export const PermitProjectInboxStoreModel = types
   }))
   .actions((self) => ({
     resetFilters() {
+      self.setQuery("")
       self.setRequirementTemplateIdFilter([])
       self.setStatusFilter([])
       self.setUnreadFilter(ERadioFilterValue.include)
@@ -343,6 +344,7 @@ export const PermitApplicationInboxStoreModel = types
   }))
   .actions((self) => ({
     resetFilters() {
+      self.setQuery("")
       self.setRequirementTemplateIdFilter([])
       self.setStatusFilter([] as any)
       self.setUnreadFilter(ERadioFilterValue.include)

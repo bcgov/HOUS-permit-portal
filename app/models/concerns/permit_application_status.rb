@@ -64,8 +64,12 @@ module PermitApplicationStatus
       end
 
       event :start_review do
-        transitions from: :newly_submitted, to: :in_review
-        transitions from: :resubmitted, to: :in_review
+        transitions from: :newly_submitted,
+                    to: :in_review,
+                    after: :handle_review_started
+        transitions from: :resubmitted,
+                    to: :in_review,
+                    after: :handle_review_started
         transitions from: :withdrawn, to: :in_review
         transitions from: :issued, to: :in_review
       end
@@ -188,6 +192,10 @@ module PermitApplicationStatus
 
     def can_finalize_requests?
       latest_submission_version.revision_requests.any?
+    end
+
+    def handle_review_started
+      NotificationService.publish_review_started_event(self)
     end
 
     def handle_finalize_revision_requests
