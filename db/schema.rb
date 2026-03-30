@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_03_25_210000) do
+ActiveRecord::Schema[7.2].define(version: 2026_03_27_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -603,9 +603,11 @@ ActiveRecord::Schema[7.2].define(version: 2026_03_25_210000) do
     t.datetime "viewed_at"
     t.integer "inbox_sort_order"
     t.datetime "enqueued_at"
+    t.uuid "review_delegatee_id"
     t.index ["jurisdiction_id"], name: "index_permit_projects_on_jurisdiction_id"
     t.index ["number"], name: "index_permit_projects_on_number", unique: true
     t.index ["owner_id"], name: "index_permit_projects_on_owner_id"
+    t.index ["review_delegatee_id"], name: "index_permit_projects_on_review_delegatee_id"
   end
 
   create_table "permit_type_required_steps", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -1181,6 +1183,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_03_25_210000) do
   add_foreign_key "permit_block_statuses", "permit_applications"
   add_foreign_key "permit_collaborations", "collaborators"
   add_foreign_key "permit_collaborations", "permit_applications"
+  add_foreign_key "permit_projects", "collaborators", column: "review_delegatee_id"
   add_foreign_key "permit_projects", "jurisdictions"
   add_foreign_key "permit_projects", "users", column: "owner_id"
   add_foreign_key "permit_type_required_steps", "jurisdictions"

@@ -1,8 +1,9 @@
-import { Badge, Button, Flex, HStack, IconButton, Text } from "@chakra-ui/react"
+import { Badge, Box, Button, Flex, HStack, Icon, IconButton, Text, Tooltip } from "@chakra-ui/react"
 import { closestCenter, DndContext, DragEndEvent, PointerSensor, useSensor, useSensors } from "@dnd-kit/core"
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers"
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
-import { CaretDoubleLeft, CaretDoubleRight } from "@phosphor-icons/react"
+import { CaretDoubleLeft, CaretDoubleRight, EyeSlash } from "@phosphor-icons/react"
+import { AnimatePresence, motion } from "framer-motion"
 import { observer } from "mobx-react-lite"
 import React, { ReactNode, useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
@@ -125,93 +126,115 @@ function KanbanBoardInner<T extends IKanbanItem>({
               <Flex
                 key={column.key}
                 direction="column"
-                minW={isCollapsed ? "auto" : "260px"}
+                minW={isCollapsed ? "48px" : "260px"}
                 maxW={isCollapsed ? "60px" : "320px"}
                 flex={isCollapsed ? "0 0 auto" : "1 1 0"}
-                bg="greys.grey03"
+                border="1px solid"
+                borderColor="border.light"
                 borderRadius="lg"
-                p={3}
-                gap={3}
                 minH={0}
+                bg="greys.grey04"
+                overflow="hidden"
+                transition="min-width 0.3s cubic-bezier(0.4,0,0.2,1), max-width 0.3s cubic-bezier(0.4,0,0.2,1), flex 0.3s cubic-bezier(0.4,0,0.2,1)"
               >
-                {isCollapsed ? (
-                  <>
-                    {!isEmpty && (
-                      <IconButton
-                        aria-label="Expand column"
-                        icon={<CaretDoubleRight />}
-                        size="xs"
-                        variant="ghost"
-                        alignSelf="center"
-                        onClick={() => onToggleColumn(column.key)}
-                      />
-                    )}
-                    <Text
-                      fontSize="xs"
-                      fontWeight="bold"
-                      textTransform="uppercase"
-                      color="text.secondary"
-                      sx={{ writingMode: "vertical-lr" }}
-                      whiteSpace="nowrap"
+                <AnimatePresence mode="wait" initial={false}>
+                  {isCollapsed ? (
+                    <motion.div
+                      key={`${column.key}-collapsed`}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.15 }}
                     >
-                      {column.label}
-                    </Text>
-                    <Badge
-                      borderRadius="full"
-                      py={2}
-                      px={1}
-                      fontSize="2xs"
-                      bg="white"
-                      color="text.secondary"
-                      border="1px solid"
-                      borderColor="border.light"
-                      sx={{ writingMode: "vertical-lr" }}
-                      whiteSpace="nowrap"
-                      alignSelf="center"
+                      <Tooltip label={column.label} hasArrow placement="right">
+                        <Flex direction="column" align="center" gap={3} p={3}>
+                          {!isEmpty && (
+                            <IconButton
+                              aria-label="Expand column"
+                              icon={<CaretDoubleRight />}
+                              size="xs"
+                              variant="ghost"
+                              alignSelf="center"
+                              onClick={() => onToggleColumn(column.key)}
+                            />
+                          )}
+                          <Icon as={EyeSlash} color="text.secondary" boxSize={4} />
+                          <Badge
+                            borderRadius="full"
+                            py={2}
+                            px={1}
+                            fontSize="2xs"
+                            bg="white"
+                            color="text.secondary"
+                            border="1px solid"
+                            borderColor="border.light"
+                            sx={{ writingMode: "vertical-lr" }}
+                            whiteSpace="nowrap"
+                            alignSelf="center"
+                          >
+                            {displayedCount} of {totalCount}
+                          </Badge>
+                        </Flex>
+                      </Tooltip>
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key={`${column.key}-expanded`}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.15 }}
+                      style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}
                     >
-                      {displayedCount} of {totalCount}
-                    </Badge>
-                  </>
-                ) : (
-                  <>
-                    <HStack justify="space-between" flexShrink={0}>
-                      <Text fontSize="xs" fontWeight="bold" textTransform="uppercase" color="text.secondary">
-                        {column.label}
-                      </Text>
-                      <HStack spacing={1}>
-                        <Badge
-                          borderRadius="full"
-                          px={2}
-                          fontSize="xs"
-                          bg="white"
-                          color="text.secondary"
-                          border="1px solid"
-                          borderColor="border.light"
-                        >
-                          {displayedCount} of {totalCount}
-                        </Badge>
-                        <IconButton
-                          aria-label="Collapse column"
-                          icon={<CaretDoubleLeft />}
-                          size="xs"
-                          variant="ghost"
-                          onClick={() => onToggleColumn(column.key)}
-                        />
-                      </HStack>
-                    </HStack>
-                    <Flex direction="column" flex={1} minH={0} overflowY="auto" gap={3}>
-                      <SortableContext items={columnItems.map((i) => i.id)} strategy={verticalListSortingStrategy}>
-                        {columnItems.map((item) => renderCard(item))}
-                      </SortableContext>
-                      {hasMore && onShowMore && (
-                        <Button variant="link" size="sm" flexShrink={0} onClick={() => onShowMore(column.key)}>
-                          {/* @ts-ignore */}
-                          {t("submissionInbox.showMoreInColumn", { count: totalCount - displayedCount })}
-                        </Button>
-                      )}
-                    </Flex>
-                  </>
-                )}
+                      <Box
+                        bg="greys.grey03"
+                        borderBottom="1px solid"
+                        borderColor="border.light"
+                        borderTopRadius="lg"
+                        px={3}
+                        py={3}
+                        flexShrink={0}
+                      >
+                        <HStack justify="space-between">
+                          <Text fontSize="xs" fontWeight="bold" textTransform="capitalize" color="text.secondary">
+                            {column.label}
+                          </Text>
+                          <HStack spacing={1}>
+                            <Badge
+                              borderRadius="full"
+                              px={2}
+                              fontSize="xs"
+                              bg="white"
+                              color="text.secondary"
+                              border="1px solid"
+                              borderColor="border.light"
+                            >
+                              {displayedCount} of {totalCount}
+                            </Badge>
+                            <IconButton
+                              aria-label="Collapse column"
+                              icon={<CaretDoubleLeft />}
+                              size="xs"
+                              variant="ghost"
+                              onClick={() => onToggleColumn(column.key)}
+                            />
+                          </HStack>
+                        </HStack>
+                      </Box>
+                      <Flex direction="column" flex={1} minH={0} overflowY="auto" gap={3} p={3}>
+                        <SortableContext items={columnItems.map((i) => i.id)} strategy={verticalListSortingStrategy}>
+                          {columnItems.map((item) => renderCard(item))}
+                        </SortableContext>
+                        {hasMore && onShowMore && (
+                          <Button variant="link" size="sm" flexShrink={0} onClick={() => onShowMore(column.key)}>
+                            {/* @ts-ignore */}
+                            {t("submissionInbox.showMoreInColumn", { count: totalCount - displayedCount })}
+                          </Button>
+                        )}
+                      </Flex>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </Flex>
             )
           })}

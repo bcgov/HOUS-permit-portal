@@ -71,15 +71,25 @@ export const PermitProjectStoreModel = types
         self.rootStore.jurisdictionStore.mergeUpdate(permitProject.jurisdiction, "jurisdictionMap")
       }
 
-      // Return modified data with references instead of full objects
-      return R.mergeRight(permitProject, {
+      if (permitProject.reviewDelegatee?.user && typeof permitProject.reviewDelegatee.user === "object") {
+        self.rootStore.userStore.mergeUpdate(permitProject.reviewDelegatee.user, "usersMap")
+      }
+
+      const overrides: Record<string, any> = {
         owner: permitProject.owner?.id || null,
         permitApplications:
           permitProject.permitApplications?.map((app) => (typeof app === "object" ? app.id : app)) || [],
         recentPermitApplications:
           permitProject.recentPermitApplications?.map((app) => (typeof app === "object" ? app.id : app)) || [],
-        jurisdiction: permitProject.jurisdiction?.id,
-      })
+      }
+
+      if ("jurisdiction" in permitProject && permitProject.jurisdiction) {
+        overrides.jurisdiction = permitProject.jurisdiction.id
+      } else {
+        delete permitProject.jurisdiction
+      }
+
+      return R.mergeRight(permitProject, overrides)
     },
     setJurisdictionFilter(value: string[]) {
       self.jurisdictionFilter = cast(value)

@@ -690,6 +690,18 @@ en:
       reorder_success:
         title: ""
         message: "Project order updated successfully"
+      assign_review_delegatee_success:
+        title: ""
+        message: "Project reviewer assigned successfully"
+      assign_review_delegatee_error:
+        title: Error
+        message: "%{error_message}"
+      unassign_review_delegatee_success:
+        title: ""
+        message: "Project reviewer removed successfully"
+      feature_not_enabled:
+        title: Error
+        message: "Designated reviewer is not enabled for this project"
     permit_collaboration:
       destroy_success:
         title: ""

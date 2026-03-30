@@ -31,6 +31,7 @@ export const ProjectStatusFilter = observer(function ProjectStatusFilter({
   return (
     <InboxFilter
       title={t("submissionInbox.filters.projectStates")}
+      badgeCount={value.length}
       isMulti={true}
       value={value}
       onChange={(val) => onChange(val as string[])}

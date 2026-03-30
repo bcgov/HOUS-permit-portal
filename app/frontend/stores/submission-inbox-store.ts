@@ -47,7 +47,6 @@ export const PermitProjectInboxStoreModel = types
         ERadioFilterValue.include
       ),
       daysInQueueFilter: types.maybeNull(types.frozen<{ operator: string; days: number }>()),
-      // ### SUBMISSION INDEX STUB FEATURE
       assignedFilter: types.optional(types.array(types.string), []),
     }),
     createSearchModel<EPermitProjectInboxSortFields>(
@@ -94,7 +93,6 @@ export const PermitProjectInboxStoreModel = types
       setQueryParam("daysInQueueOp", value?.operator ?? "")
       setQueryParam("daysInQueueDays", value ? value.days.toString() : "")
     },
-    // ### SUBMISSION INDEX STUB FEATURE
     setAssignedFilter(value: string[]) {
       self.assignedFilter = cast(value)
     },
@@ -138,7 +136,6 @@ export const PermitProjectInboxStoreModel = types
           meetingRequest:
             self.meetingRequestFilter !== ERadioFilterValue.include ? self.meetingRequestFilter : undefined,
           daysInQueue: self.daysInQueueFilter ?? undefined,
-          // ### SUBMISSION INDEX STUB FEATURE
           assigned: self.assignedFilter.length > 0 ? [...self.assignedFilter] : undefined,
         },
       }
@@ -215,7 +212,6 @@ export const PermitApplicationInboxStoreModel = types
         ERadioFilterValue.include
       ),
       daysInQueueFilter: types.maybeNull(types.frozen<{ operator: string; days: number }>()),
-      // ### SUBMISSION INDEX STUB FEATURE
       assignedFilter: types.optional(types.array(types.string), []),
     }),
     createSearchModel<EPermitApplicationInboxSortFields>(
@@ -263,7 +259,6 @@ export const PermitApplicationInboxStoreModel = types
       setQueryParam("daysInQueueOp", value?.operator ?? "")
       setQueryParam("daysInQueueDays", value ? value.days.toString() : "")
     },
-    // ### SUBMISSION INDEX STUB FEATURE
     setAssignedFilter(value: string[]) {
       self.assignedFilter = cast(value)
     },
@@ -307,7 +302,6 @@ export const PermitApplicationInboxStoreModel = types
           meetingRequest:
             self.meetingRequestFilter !== ERadioFilterValue.include ? self.meetingRequestFilter : undefined,
           daysInQueue: self.daysInQueueFilter ?? undefined,
-          // ### SUBMISSION INDEX STUB FEATURE
           assigned: self.assignedFilter.length > 0 ? [...self.assignedFilter] : undefined,
         },
       }

@@ -1,10 +1,23 @@
-import { Box, Circle, Flex, HStack, Tag, Text, VStack } from "@chakra-ui/react"
-import { Buildings } from "@phosphor-icons/react"
+import {
+  Avatar,
+  Box,
+  Circle,
+  Flex,
+  HStack,
+  IconButton,
+  Spinner,
+  Tag,
+  Text,
+  useDisclosure,
+  VStack,
+} from "@chakra-ui/react"
+import { Buildings, UserPlus } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
-import React from "react"
+import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Link } from "react-router-dom"
 import { IPermitProject } from "../../../../models/permit-project"
+import { useMst } from "../../../../setup/root"
 import { IPermitProjectInboxStore } from "../../../../stores/submission-inbox-store"
 import { EPermitProjectInboxSortFields, EProjectState } from "../../../../types/enums"
 import { ISort } from "../../../../types/types"
@@ -15,6 +28,8 @@ import { GridHeader } from "../../../shared/grid/grid-header"
 import { SearchGrid } from "../../../shared/grid/search-grid"
 import { SearchGridItem } from "../../../shared/grid/search-grid-item"
 import { SortIcon } from "../../../shared/sort-icon"
+import { SharedAvatar } from "../../../shared/user/shared-avatar"
+import { ProjectCollaboratorsSidebar } from "./project-collaborators-sidebar"
 
 interface IProps {
   searchStore: IPermitProjectInboxStore
@@ -29,6 +44,8 @@ const SORT_FIELDS = [
   EPermitProjectInboxSortFields.assigned,
   EPermitProjectInboxSortFields.state,
 ]
+
+const MAX_VISIBLE_AVATARS = 3
 
 const statusColorMap: Record<string, { bg: string; color: string }> = {
   [EProjectState.draft]: { bg: "greys.grey04", color: "text.secondary" },
@@ -64,7 +81,10 @@ export const ProjectInboxTable = observer(function ProjectInboxTable({ searchSto
         gridRowClassName="project-inbox-grid-row"
         sx={{
           ".project-inbox-grid-row:hover > div": {
-            bg: "greys.grey04",
+            bg: "gray.50",
+          },
+          ".project-inbox-grid-row:active > div": {
+            bg: "background.blueLight",
           },
         }}
       >
@@ -138,7 +158,6 @@ export const ProjectInboxTable = observer(function ProjectInboxTable({ searchSto
               </SearchGridItem>
 
               <SearchGridItem>
-                {/* ### SUBMISSION INDEX STUB FEATURE - applications count text */}
                 <Text fontSize="sm">
                   {project.totalPermitsCount > 0
                     ? `${project.newlySubmittedCount + project.resubmittedCount} of ${project.totalPermitsCount} received`
@@ -147,19 +166,27 @@ export const ProjectInboxTable = observer(function ProjectInboxTable({ searchSto
               </SearchGridItem>
 
               <SearchGridItem>
-                {/* ### SUBMISSION INDEX STUB FEATURE - days in queue */}
-                <VStack align="start" spacing={0}>
-                  <Text fontSize="sm" fontWeight={600}>
-                    --
+                {project.daysInQueue != null ? (
+                  <VStack align="start" spacing={0}>
+                    <Text fontSize="sm" fontWeight={600}>
+                      {project.formattedDaysInQueue}
+                    </Text>
+                    <Text fontSize="xs" color="text.secondary">
+                      {t("submissionInbox.waitingSince")}
+                    </Text>
+                    <Text fontSize="xs" color="text.secondary">
+                      {project.formattedEnqueuedAt}
+                    </Text>
+                  </VStack>
+                ) : (
+                  <Text fontSize="sm" color="text.secondary">
+                    —
                   </Text>
-                </VStack>
+                )}
               </SearchGridItem>
 
               <SearchGridItem>
-                {/* ### SUBMISSION INDEX STUB FEATURE - assigned */}
-                <Text fontSize="sm" color="text.secondary">
-                  Unassigned +
-                </Text>
+                <ProjectAssignedCell project={project} />
               </SearchGridItem>
 
               <SearchGridItem>
@@ -199,5 +226,78 @@ export const ProjectInboxTable = observer(function ProjectInboxTable({ searchSto
         />
       </Flex>
     </VStack>
+  )
+})
+
+const ProjectAssignedCell = observer(function ProjectAssignedCell({ project }: { project: IPermitProject }) {
+  const { t } = useTranslation()
+  const { permitProjectStore } = useMst()
+  const { isOpen, onOpen, onClose } = useDisclosure()
+  const [isLoadingSidebar, setIsLoadingSidebar] = useState(false)
+
+  const collaborators = project.aggregatedReviewCollaborators
+  const designated = collaborators.filter((c) => c.isDesignated)
+  const others = collaborators.filter((c) => !c.isDesignated)
+  const allAvatarUsers = [...designated, ...others]
+  const visibleAvatars = allAvatarUsers.slice(0, MAX_VISIBLE_AVATARS)
+  const overflowCount = allAvatarUsers.length - MAX_VISIBLE_AVATARS
+
+  const handleOpenSidebar = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsLoadingSidebar(true)
+    try {
+      await permitProjectStore.fetchPermitProject(project.id)
+    } finally {
+      setIsLoadingSidebar(false)
+    }
+    onOpen()
+  }
+
+  return (
+    <>
+      <HStack spacing={1}>
+        {visibleAvatars.length > 0 ? (
+          <>
+            {visibleAvatars.map((user) => (
+              <SharedAvatar
+                key={user.id}
+                size="xs"
+                name={user.name}
+                role={user.role}
+                fontSize="2xs"
+                border={user.isDesignated ? "2px solid" : undefined}
+                borderColor={user.isDesignated ? "theme.blueActive" : undefined}
+              />
+            ))}
+            {overflowCount > 0 && (
+              <Avatar
+                size="xs"
+                name={`+${overflowCount}`}
+                getInitials={(name) => name}
+                bg="gray.200"
+                color="text.primary"
+                fontSize="2xs"
+              />
+            )}
+          </>
+        ) : (
+          <Text fontSize="sm" color="text.secondary">
+            {t("ui.unassigned")}
+          </Text>
+        )}
+        <IconButton
+          aria-label={t("permitCollaboration.sidebar.title")}
+          icon={isLoadingSidebar ? <Spinner size="xs" /> : <UserPlus size={14} />}
+          size="xs"
+          variant="ghost"
+          borderRadius="full"
+          onClick={handleOpenSidebar}
+          isDisabled={isLoadingSidebar}
+        />
+      </HStack>
+
+      {isOpen && <ProjectCollaboratorsSidebar project={project} isOpen={isOpen} onClose={onClose} />}
+    </>
   )
 })
