@@ -253,6 +253,7 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
 
               <ButtonGroup isAttached variant="outline" size="sm">
                 <Button
+                  borderRightWidth={2}
                   onClick={() => setDisplayMode(EInboxDisplayMode.list)}
                   fontWeight={displayMode === EInboxDisplayMode.list ? "bold" : "normal"}
                   borderColor={displayMode === EInboxDisplayMode.list ? "theme.blueActive" : "border.light"}
