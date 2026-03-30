@@ -53,15 +53,25 @@ module ProjectAuditFormatters
       status_str = status_value.to_s
 
       case status_str
+      when PermitApplication.statuses["new_draft"].to_s
+        "#{user_display} created the application"
       when PermitApplication.statuses["newly_submitted"].to_s
         "#{user_display} submitted the application"
+      when PermitApplication.statuses["in_review"].to_s
+        "#{user_display} marked the application as in review"
+      when PermitApplication.statuses["revisions_requested"].to_s
+        "Revisions requested — sent to submitter"
       when PermitApplication.statuses["resubmitted"].to_s
         submitter_name = audit.auditable&.submitter&.name || user_display
         "#{submitter_name} resubmitted the application"
-      when PermitApplication.statuses["revisions_requested"].to_s
-        "Revisions requested — sent to submitter"
+      when PermitApplication.statuses["approved"].to_s
+        "#{user_display} approved the application"
+      when PermitApplication.statuses["issued"].to_s
+        "#{user_display} issued the permit"
+      when PermitApplication.statuses["withdrawn"].to_s
+        "#{user_display} withdrew the application"
       else
-        "#{user_display} changed the application status"
+        "#{user_display} changed the application status on the application"
       end
     end
   end

@@ -27,6 +27,7 @@ export const RequirementTemplateInboxFilter = observer(function RequirementTempl
   return (
     <InboxFilter
       title={t("submissionInbox.filters.permitType")}
+      badgeCount={value.length}
       isMulti={true}
       value={value}
       onChange={(val) => onChange(val as string[])}

@@ -161,7 +161,7 @@ RSpec.describe ProjectAuditFormatters::PermitApplicationFormatter do
 
         it "returns generic status change message" do
           expect(formatter.description).to eq(
-            "Alice changed the application status"
+            "Alice changed the application status on the application"
           )
         end
       end

@@ -1,6 +1,6 @@
 class PermitProject < ApplicationRecord
   # searchkick must be declared before Discard::Model to ensure auto-callbacks register correctly
-  searchkick word_middle: %i[title full_address pid pin number]
+  searchkick word_middle: %i[title full_address pid pin number owner_name]
   audited on: %i[create update], only: %i[title full_address]
   has_associated_audits
 
@@ -11,6 +11,7 @@ class PermitProject < ApplicationRecord
   belongs_to :owner, class_name: "User", optional: true
   public_recordable user_association: :owner
   belongs_to :jurisdiction, optional: false # Direct association to Jurisdiction
+  belongs_to :review_delegatee, class_name: "Collaborator", optional: true
 
   has_many :permit_applications
   has_many :project_documents, dependent: :destroy
@@ -119,8 +120,10 @@ class PermitProject < ApplicationRecord
       pin: pin,
       number: number,
       owner_id: owner_id,
+      owner_name: owner&.name,
       jurisdiction_id: jurisdiction_id,
       collaborator_ids: collaborators.pluck(:user_id).uniq,
+      review_collaborator_user_ids: compute_review_collaborator_user_ids,
       created_at: created_at,
       updated_at: updated_at,
       discarded: discarded_at.present?,
@@ -224,7 +227,114 @@ class PermitProject < ApplicationRecord
     base.loaded? ? [] : ProjectDocument.none
   end
 
+  def recent_audits(user = nil)
+    return [] if user.nil?
+
+    scope =
+      ApplicationAudit
+        .for_permit_project(id)
+        .includes(:user, :auditable)
+        .order(created_at: :desc)
+
+    scope = ApplicationAudit.visible_to_role(scope, user)
+    audits = scope.limit(3).to_a
+    ApplicationAudit.preload_activity_feed(audits)
+    audits
+  end
+
+  def aggregated_review_collaborators
+    delegatee_user_id = review_delegatee&.user_id
+    users = {}
+
+    permit_applications.each do |pa|
+      next if pa.discarded? || !pa.submitted?
+
+      pa.permit_collaborations.each do |collab|
+        next unless collab.review?
+
+        user = collab.collaborator&.user
+        next unless user
+
+        is_designated = collab.collaborator_type == "delegatee"
+        existing = users[user.id]
+        if existing
+          existing[:is_designated] ||= is_designated
+        else
+          users[user.id] = {
+            id: user.id,
+            name: user.name,
+            role: user.role,
+            is_designated: is_designated
+          }
+        end
+      end
+    end
+
+    if delegatee_user_id && !users.key?(delegatee_user_id)
+      delegatee_user = review_delegatee.user
+      users[delegatee_user_id] = {
+        id: delegatee_user.id,
+        name: delegatee_user.name,
+        role: delegatee_user.role,
+        is_designated: true
+      }
+    end
+
+    users.values
+  end
+
+  def designated_reviewer_enabled?
+    SiteConfiguration.allow_designated_reviewer? &&
+      jurisdiction&.allow_designated_reviewer
+  end
+
+  def assign_review_delegatee!(collaborator_id)
+    unless designated_reviewer_enabled?
+      raise "Designated reviewer feature is not enabled"
+    end
+
+    ActiveRecord::Base.transaction do
+      update!(review_delegatee_id: collaborator_id)
+
+      permit_applications
+        .kept
+        .select(&:submitted?)
+        .each do |pa|
+          pa
+            .permit_collaborations
+            .kept
+            .where(collaborator_type: :delegatee, collaboration_type: :review)
+            .discard_all
+
+          collab =
+            pa.permit_collaborations.create!(
+              collaborator_id: collaborator_id,
+              collaborator_type: :delegatee,
+              collaboration_type: :review
+            )
+          NotificationService.publish_permit_collaboration_assignment_event(
+            collab
+          )
+        end
+    end
+  end
+
+  def unassign_review_delegatee!
+    update!(review_delegatee_id: nil)
+  end
+
   private
+
+  def compute_review_collaborator_user_ids
+    pa_user_ids =
+      PermitCollaboration
+        .joins(:collaborator)
+        .where(permit_application_id: permit_applications.kept.select(:id))
+        .where(collaboration_type: :review, discarded_at: nil)
+        .pluck("collaborators.user_id")
+
+    (pa_user_ids + [review_delegatee&.user_id].compact).uniq
+  end
 
   def fetch_coordinates
     return if pid.blank?

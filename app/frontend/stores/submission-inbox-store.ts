@@ -47,7 +47,6 @@ export const PermitProjectInboxStoreModel = types
         ERadioFilterValue.include
       ),
       daysInQueueFilter: types.maybeNull(types.frozen<{ operator: string; days: number }>()),
-      // ### SUBMISSION INDEX STUB FEATURE
       assignedFilter: types.optional(types.array(types.string), []),
     }),
     createSearchModel<EPermitProjectInboxSortFields>(
@@ -94,7 +93,6 @@ export const PermitProjectInboxStoreModel = types
       setQueryParam("daysInQueueOp", value?.operator ?? "")
       setQueryParam("daysInQueueDays", value ? value.days.toString() : "")
     },
-    // ### SUBMISSION INDEX STUB FEATURE
     setAssignedFilter(value: string[]) {
       self.assignedFilter = cast(value)
     },
@@ -138,7 +136,6 @@ export const PermitProjectInboxStoreModel = types
           meetingRequest:
             self.meetingRequestFilter !== ERadioFilterValue.include ? self.meetingRequestFilter : undefined,
           daysInQueue: self.daysInQueueFilter ?? undefined,
-          // ### SUBMISSION INDEX STUB FEATURE
           assigned: self.assignedFilter.length > 0 ? [...self.assignedFilter] : undefined,
         },
       }
@@ -204,6 +201,8 @@ export const PermitApplicationInboxStoreModel = types
   .compose(
     types.model("PermitApplicationInboxStore", {
       tablePermitApplications: types.array(types.reference(PermitApplicationModel)),
+      stateCounts: types.optional(types.frozen<Record<string, number>>(), {}),
+      columnTotals: types.optional(types.frozen<Record<string, number>>(), {}),
       requirementTemplateIdFilter: types.optional(types.array(types.string), []),
       statusFilter: types.optional(types.array(types.enumeration(Object.values(EPermitApplicationStatus))), []),
       unreadFilter: types.optional(types.enumeration(Object.values(ERadioFilterValue)), ERadioFilterValue.include),
@@ -213,7 +212,6 @@ export const PermitApplicationInboxStoreModel = types
         ERadioFilterValue.include
       ),
       daysInQueueFilter: types.maybeNull(types.frozen<{ operator: string; days: number }>()),
-      // ### SUBMISSION INDEX STUB FEATURE
       assignedFilter: types.optional(types.array(types.string), []),
     }),
     createSearchModel<EPermitApplicationInboxSortFields>(
@@ -232,6 +230,12 @@ export const PermitApplicationInboxStoreModel = types
   .actions((self) => ({
     setTablePermitApplications(permitApplications) {
       self.tablePermitApplications = cast(permitApplications.map((pa) => pa.id))
+    },
+    setStateCounts(counts: Record<string, number>) {
+      self.stateCounts = decamelizeHashKeys(counts)
+    },
+    setColumnTotals(counts: Record<string, number>) {
+      self.columnTotals = decamelizeHashKeys(counts)
     },
     setRequirementTemplateIdFilter(value: string[]) {
       self.requirementTemplateIdFilter = cast(value)
@@ -255,9 +259,19 @@ export const PermitApplicationInboxStoreModel = types
       setQueryParam("daysInQueueOp", value?.operator ?? "")
       setQueryParam("daysInQueueDays", value ? value.days.toString() : "")
     },
-    // ### SUBMISSION INDEX STUB FEATURE
     setAssignedFilter(value: string[]) {
       self.assignedFilter = cast(value)
+    },
+    adjustCountsForTransition(oldStatus: string, newStatus: string) {
+      const sc = { ...self.stateCounts }
+      if (sc[oldStatus] != null) sc[oldStatus] = Math.max(0, sc[oldStatus] - 1)
+      sc[newStatus] = (sc[newStatus] ?? 0) + 1
+      self.stateCounts = sc
+
+      const ct = { ...self.columnTotals }
+      if (ct[oldStatus] != null) ct[oldStatus] = Math.max(0, ct[oldStatus] - 1)
+      ct[newStatus] = (ct[newStatus] ?? 0) + 1
+      self.columnTotals = ct
     },
   }))
   .actions((self) => ({
@@ -270,11 +284,15 @@ export const PermitApplicationInboxStoreModel = types
         self.resetPages()
       }
 
+      const isKanban = self.rootStore?.submissionInboxStore?.displayMode === EInboxDisplayMode.columns
+
       const searchParams: TSearchParams<EPermitApplicationInboxSortFields, IPermitApplicationInboxSearchFilters> = {
         query: self.query,
         sort: self.sort,
-        page: opts?.page ?? self.currentPage,
-        perPage: opts?.countPerPage ?? self.countPerPage,
+        page: isKanban ? undefined : (opts?.page ?? self.currentPage),
+        perPage: isKanban ? undefined : (opts?.countPerPage ?? self.countPerPage),
+        mode: isKanban ? "kanban" : "list",
+        perColumn: isKanban ? KANBAN_PER_COLUMN : undefined,
         filters: {
           requirementTemplateIds:
             self.requirementTemplateIdFilter.length > 0 ? [...self.requirementTemplateIdFilter] : undefined,
@@ -284,7 +302,6 @@ export const PermitApplicationInboxStoreModel = types
           meetingRequest:
             self.meetingRequestFilter !== ERadioFilterValue.include ? self.meetingRequestFilter : undefined,
           daysInQueue: self.daysInQueueFilter ?? undefined,
-          // ### SUBMISSION INDEX STUB FEATURE
           assigned: self.assignedFilter.length > 0 ? [...self.assignedFilter] : undefined,
         },
       }
@@ -301,6 +318,12 @@ export const PermitApplicationInboxStoreModel = types
         self.rootStore.permitApplicationStore.mergeUpdateAll(response.data.data, "permitApplicationMap")
         self.setTablePermitApplications(response.data.data)
         self.setPageFields(response.data.meta, opts)
+        if (response.data.meta?.statusCounts) {
+          self.setStateCounts(response.data.meta.statusCounts)
+        }
+        if (response.data.meta?.columnTotals) {
+          self.setColumnTotals(response.data.meta.columnTotals)
+        }
       }
       return response.ok
     }),
@@ -328,6 +351,15 @@ export const PermitApplicationInboxStoreModel = types
       self.setAssignedFilter([])
       self.searchJurisdictionPermitApplications({ reset: true })
     },
+    reorderApplications: flow(function* (orderedIds: string[]) {
+      orderedIds.forEach((id, idx) => {
+        const application = self.rootStore.permitApplicationStore.permitApplicationMap.get(id)
+        if (application) application.setInboxSortOrder(idx)
+      })
+
+      const items = orderedIds.map((id, idx) => ({ id, inboxSortOrder: idx }))
+      yield self.environment.api.reorderPermitApplications(items)
+    }),
   }))
 
 // ---------------------------------------------------------------------------

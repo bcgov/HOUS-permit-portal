@@ -136,7 +136,7 @@ module PermitProjectState
       permit_applications
         .kept
         .sort_by { |pa| -pa.pertinence_score }
-        .map { |pa| { status: pa.status, nickname: pa.nickname } }
+        .map { |pa| { id: pa.id, status: pa.status, nickname: pa.nickname } }
     end
 
     def rollup_status
@@ -147,7 +147,7 @@ module PermitProjectState
       permit_applications
         .kept
         .sort_by { |pa| -pa.inbox_pertinence_score }
-        .map { |pa| { status: pa.status, nickname: pa.nickname } }
+        .map { |pa| { id: pa.id, status: pa.status, nickname: pa.nickname } }
     end
 
     def inbox_rollup_status

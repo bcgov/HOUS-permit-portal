@@ -1,5 +1,24 @@
 module PermitApplicationStatus
   extend ActiveSupport::Concern
+
+  MANUAL_TRANSITIONS = {
+    new_draft: [],
+    newly_submitted: %i[in_review],
+    in_review: %i[approved withdrawn],
+    revisions_requested: [],
+    resubmitted: %i[in_review],
+    approved: %i[issued withdrawn],
+    issued: %i[in_review],
+    withdrawn: %i[in_review]
+  }.freeze
+
+  STATUS_EVENT_MAP = {
+    "in_review" => :start_review,
+    "approved" => :approve,
+    "issued" => :issue_permit,
+    "withdrawn" => :withdraw
+  }.freeze
+
   included do
     include AASM
     enum :status,
@@ -47,6 +66,8 @@ module PermitApplicationStatus
       event :start_review do
         transitions from: :newly_submitted, to: :in_review
         transitions from: :resubmitted, to: :in_review
+        transitions from: :withdrawn, to: :in_review
+        transitions from: :issued, to: :in_review
       end
 
       event :finalize_revision_requests do
@@ -95,6 +116,26 @@ module PermitApplicationStatus
 
     def terminal?
       issued? || withdrawn?
+    end
+
+    def self.kanban_statuses
+      %w[
+        newly_submitted
+        in_review
+        revisions_requested
+        resubmitted
+        approved
+        issued
+        withdrawn
+      ]
+    end
+
+    def self.off_board_statuses
+      %w[new_draft]
+    end
+
+    def allowed_manual_transitions
+      MANUAL_TRANSITIONS[status.to_sym] || []
     end
 
     def pertinence_score
@@ -155,7 +196,9 @@ module PermitApplicationStatus
     end
 
     def handle_submission
-      update(signed_off_at: Time.current)
+      attrs = { signed_off_at: Time.current }
+      attrs[:enqueued_at] = Time.current if newly_submitted?
+      update(attrs)
 
       checklist = step_code&.primary_checklist
       submission_versions.create!(

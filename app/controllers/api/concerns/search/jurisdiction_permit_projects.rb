@@ -29,7 +29,14 @@ module Api::Concerns::Search::JurisdictionPermitProjects
       includes: [
         :owner,
         :jurisdiction,
-        { permit_applications: :collaborators }
+        { review_delegatee: :user },
+        {
+          permit_applications: {
+            permit_collaborations: {
+              collaborator: :user
+            }
+          }
+        }
       ],
       load: false
     }
@@ -43,7 +50,16 @@ module Api::Concerns::Search::JurisdictionPermitProjects
     loaded =
       policy_scope(PermitProject)
         .with_status_counts
-        .includes(:owner, :jurisdiction, permit_applications: :collaborators)
+        .includes(
+          :owner,
+          :jurisdiction,
+          { review_delegatee: :user },
+          permit_applications: {
+            permit_collaborations: {
+              collaborator: :user
+            }
+          }
+        )
         .where(id: ids)
 
     @jurisdiction_permit_projects = loaded.sort_by { |p| ids.index(p.id) }
@@ -94,7 +110,16 @@ module Api::Concerns::Search::JurisdictionPermitProjects
     loaded =
       policy_scope(PermitProject)
         .with_status_counts
-        .includes(:owner, :jurisdiction, permit_applications: :collaborators)
+        .includes(
+          :owner,
+          :jurisdiction,
+          { review_delegatee: :user },
+          permit_applications: {
+            permit_collaborations: {
+              collaborator: :user
+            }
+          }
+        )
         .where(id: all_ids)
 
     @jurisdiction_permit_projects = loaded.sort_by { |p| all_ids.index(p.id) }
@@ -126,6 +151,7 @@ module Api::Concerns::Search::JurisdictionPermitProjects
         }
       )
     agg_search.aggs["state"]["buckets"].each_with_object({}) do |bucket, hash|
+      next if bucket["key"] == "draft"
       hash[bucket["key"]] = bucket["doc_count"]
     end
   rescue => e
@@ -209,7 +235,12 @@ module Api::Concerns::Search::JurisdictionPermitProjects
       end
     end
 
-    # ### SUBMISSION INDEX STUB FEATURE - meeting_request, assigned
+    # ### SUBMISSION INDEX STUB FEATURE - meeting_request
+
+    assigned = search_filters.delete(:assigned)
+    if assigned.present?
+      and_conditions << { review_collaborator_user_ids: assigned }
+    end
 
     { _and: and_conditions }
   end

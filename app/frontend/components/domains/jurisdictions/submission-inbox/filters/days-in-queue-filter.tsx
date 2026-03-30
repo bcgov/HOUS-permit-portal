@@ -65,9 +65,10 @@ export const DaysInQueueFilter = observer(function DaysInQueueFilter({ value, on
     <Popover isOpen={isOpen} onOpen={onOpen} onClose={onClose} placement="bottom-start" closeOnBlur>
       <PopoverTrigger>
         <Button
-          variant="outline"
+          variant="secondary"
           rightIcon={<CaretDown />}
           bg={hasSelection ? "background.blueLight" : undefined}
+          borderColor={hasSelection ? "theme.blueActive" : undefined}
           size="sm"
           fontWeight="normal"
         >

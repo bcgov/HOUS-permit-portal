@@ -248,14 +248,23 @@ RSpec.describe PermitProjectState, type: :model do
     describe ".kanban_states" do
       it "returns the correct kanban states" do
         expect(PermitProject.kanban_states).to eq(
-          %w[queued waiting in_progress ready permit_issued active complete]
+          %w[
+            queued
+            waiting
+            in_progress
+            ready
+            permit_issued
+            active
+            complete
+            closed
+          ]
         )
       end
     end
 
     describe ".off_board_states" do
       it "returns the correct off-board states" do
-        expect(PermitProject.off_board_states).to eq(%w[draft closed])
+        expect(PermitProject.off_board_states).to eq(%w[draft])
       end
     end
 
@@ -282,6 +291,7 @@ RSpec.describe PermitProjectState, type: :model do
         a =
           instance_double(
             "PermitApplication",
+            id: 1,
             pertinence_score: 1,
             inbox_pertinence_score: 40,
             status: "new_draft",
@@ -290,6 +300,7 @@ RSpec.describe PermitProjectState, type: :model do
         b =
           instance_double(
             "PermitApplication",
+            id: 2,
             pertinence_score: 5,
             inbox_pertinence_score: 5,
             status: "newly_submitted",
@@ -314,6 +325,7 @@ RSpec.describe PermitProjectState, type: :model do
         a =
           instance_double(
             "PermitApplication",
+            id: 1,
             inbox_pertinence_score: 40,
             status: "newly_submitted",
             nickname: "App A"
@@ -321,6 +333,7 @@ RSpec.describe PermitProjectState, type: :model do
         b =
           instance_double(
             "PermitApplication",
+            id: 2,
             inbox_pertinence_score: 15,
             status: "revisions_requested",
             nickname: "App B"

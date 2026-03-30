@@ -19,6 +19,8 @@ class Api::PermitApplicationsController < Api::ApplicationController
                   retrigger_submission_webhook
                   destroy
                   restore
+                  transition_status
+                  mark_as_unviewed
                 ]
   skip_after_action :verify_policy_scoped, only: [:index]
 
@@ -28,6 +30,62 @@ class Api::PermitApplicationsController < Api::ApplicationController
     render_success @permit_application,
                    nil,
                    { blueprint_opts: { view: :jurisdiction_review_extended } }
+  end
+
+  def mark_as_unviewed
+    authorize @permit_application
+    @permit_application.mark_as_unviewed
+    render_success @permit_application,
+                   nil,
+                   { blueprint_opts: { view: :jurisdiction_review_inbox } }
+  end
+
+  def transition_status
+    authorize @permit_application, :transition_status?
+
+    target = params.require(:target_status)
+    event = PermitApplicationStatus::STATUS_EVENT_MAP[target]
+
+    unless event &&
+             @permit_application.allowed_manual_transitions.include?(
+               target.to_sym
+             )
+      return(
+        render_error("permit_application.invalid_transition", { status: 422 })
+      )
+    end
+
+    @permit_application.send(:"#{event}!")
+    @permit_application.update!(inbox_sort_order: nil)
+    render_success @permit_application,
+                   "permit_application.transition_success",
+                   {
+                     blueprint: PermitApplicationBlueprint,
+                     blueprint_opts: {
+                       view: :jurisdiction_review_inbox
+                     }
+                   }
+  rescue AASM::InvalidTransition
+    render_error("permit_application.invalid_transition", { status: 422 })
+  end
+
+  def reorder
+    authorize PermitApplication, :reorder?
+
+    scope =
+      PermitApplication.joins(:permit_project).where(
+        permit_projects: {
+          jurisdiction_id: current_user.jurisdiction_ids
+        }
+      )
+
+    items = params.require(:items)
+    items.each do |item|
+      application = scope.find(item[:id])
+      application.update!(inbox_sort_order: item[:inbox_sort_order])
+    end
+
+    render_success nil
   end
 
   def show

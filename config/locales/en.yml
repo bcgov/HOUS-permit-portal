@@ -653,6 +653,12 @@ en:
       create_or_update_permit_block_status_error:
         title: Error
         message: "There was an error updating permit block status"
+      transition_success:
+        title: ""
+        message: "Application state updated successfully"
+      invalid_transition:
+        title: Error
+        message: "This state transition is not allowed"
     permit_project:
       update_success:
         title: ""
@@ -684,6 +690,18 @@ en:
       reorder_success:
         title: ""
         message: "Project order updated successfully"
+      assign_review_delegatee_success:
+        title: ""
+        message: "Project reviewer assigned successfully"
+      assign_review_delegatee_error:
+        title: Error
+        message: "%{error_message}"
+      unassign_review_delegatee_success:
+        title: ""
+        message: "Project reviewer removed successfully"
+      feature_not_enabled:
+        title: Error
+        message: "Designated reviewer is not enabled for this project"
     permit_collaboration:
       destroy_success:
         title: ""

@@ -1,5 +1,6 @@
 class ApplicationAudit < Audited::Audit
   include ActivityFeedPreloader
+  include AuditRoleFilter
 
   scope :for_permit_project,
         ->(project_id) do

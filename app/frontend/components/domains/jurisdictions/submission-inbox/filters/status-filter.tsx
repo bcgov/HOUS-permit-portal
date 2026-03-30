@@ -16,19 +16,23 @@ export const StatusFilter = observer(function StatusFilter({ value, onChange, on
   const { t } = useTranslation()
 
   const options: IOption[] = [
-    {
-      value: EPermitApplicationStatus.newlySubmitted,
-      label: t("permitApplication.status.newlySubmitted"),
-    },
-    {
-      value: EPermitApplicationStatus.resubmitted,
-      label: t("permitApplication.status.resubmitted"),
-    },
-  ]
+    EPermitApplicationStatus.newlySubmitted,
+    EPermitApplicationStatus.inReview,
+    EPermitApplicationStatus.revisionsRequested,
+    EPermitApplicationStatus.resubmitted,
+    EPermitApplicationStatus.approved,
+    EPermitApplicationStatus.issued,
+    EPermitApplicationStatus.withdrawn,
+  ].map((status) => ({
+    value: status,
+    // @ts-ignore
+    label: t(`submissionInbox.applicationStatuses.${status}`),
+  }))
 
   return (
     <InboxFilter
       title={t("submissionInbox.filters.status")}
+      badgeCount={value.length}
       isMulti={true}
       value={value}
       onChange={(val) => onChange(val as string[])}

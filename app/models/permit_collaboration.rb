@@ -150,6 +150,10 @@ class PermitCollaboration < ApplicationRecord
 
   private
 
+  def reindex_permit_application
+    permit_application&.reindex
+  end
+
   def reindex_permit_project
     permit_application.permit_project&.reindex
   end
