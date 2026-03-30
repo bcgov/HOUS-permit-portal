@@ -2,7 +2,10 @@
 
 class OverheatingCodePdfService
   TEMPLATE_PATH =
-    Rails.root.join("db", "templates", "BC-SZCG-FormSetFill-Ver1.0a.pdf").freeze
+    Rails
+      .root
+      .join("lib", "assets", "pdf_templates", "BC-SZCG-FormSetFill-Ver1.0a.pdf")
+      .freeze
 
   KW_TO_BTUH = 3412.142
 
