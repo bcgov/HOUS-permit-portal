@@ -155,7 +155,6 @@ export const ProjectInboxTable = observer(function ProjectInboxTable({ searchSto
               </SearchGridItem>
 
               <SearchGridItem>
-                {/* ### SUBMISSION INDEX STUB FEATURE - applications count text */}
                 <Text fontSize="sm">
                   {project.totalPermitsCount > 0
                     ? `${project.newlySubmittedCount + project.resubmittedCount} of ${project.totalPermitsCount} received`
@@ -164,12 +163,23 @@ export const ProjectInboxTable = observer(function ProjectInboxTable({ searchSto
               </SearchGridItem>
 
               <SearchGridItem>
-                {/* ### SUBMISSION INDEX STUB FEATURE - days in queue */}
-                <VStack align="start" spacing={0}>
-                  <Text fontSize="sm" fontWeight={600}>
-                    --
+                {project.daysInQueue != null ? (
+                  <VStack align="start" spacing={0}>
+                    <Text fontSize="sm" fontWeight={600}>
+                      {project.formattedDaysInQueue}
+                    </Text>
+                    <Text fontSize="xs" color="text.secondary">
+                      {t("submissionInbox.waitingSince")}
+                    </Text>
+                    <Text fontSize="xs" color="text.secondary">
+                      {project.formattedEnqueuedAt}
+                    </Text>
+                  </VStack>
+                ) : (
+                  <Text fontSize="sm" color="text.secondary">
+                    —
                   </Text>
-                </VStack>
+                )}
               </SearchGridItem>
 
               <SearchGridItem>

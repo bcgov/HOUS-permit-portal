@@ -27,16 +27,6 @@ interface IProps {
 
 const MAX_VISIBLE_AVATARS = 3
 
-function formatWaitingSince(date: Date | null | undefined) {
-  if (!date) return "—"
-  return new Intl.DateTimeFormat("en-CA").format(date)
-}
-
-function formatQueueAge(days: number | null) {
-  if (days == null) return "—"
-  return `${days} ${days === 1 ? "day" : "days"}`
-}
-
 export const ApplicationInboxTable = observer(function ApplicationInboxTable({ searchStore, applications }: IProps) {
   const { t } = useTranslation()
   const {
@@ -232,12 +222,12 @@ const ApplicationInboxRow = observer(function ApplicationInboxRow({
       <SearchGridItem>
         {application.daysInQueue != null ? (
           <VStack align="start" spacing={0}>
-            <Text fontSize="sm">{formatQueueAge(application.daysInQueue)}</Text>
+            <Text fontSize="sm">{application.formattedDaysInQueue}</Text>
             <Text fontSize="xs" color="text.secondary">
               {t("submissionInbox.waitingSince")}
             </Text>
             <Text fontSize="xs" color="text.secondary">
-              {formatWaitingSince(application.enqueuedAt)}
+              {application.formattedEnqueuedAt}
             </Text>
           </VStack>
         ) : (

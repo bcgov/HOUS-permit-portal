@@ -117,6 +117,15 @@ export const PermitApplicationModel = types.snapshotProcessor(
         const ms = Date.now() - self.enqueuedAt.getTime()
         return Math.floor(ms / (1000 * 60 * 60 * 24))
       },
+      get formattedDaysInQueue(): string {
+        const days = this.daysInQueue
+        if (days == null) return "—"
+        return `${days} ${days === 1 ? "day" : "days"}`
+      },
+      get formattedEnqueuedAt(): string {
+        if (!self.enqueuedAt) return "—"
+        return new Intl.DateTimeFormat("en-CA").format(self.enqueuedAt)
+      },
       get isPart3() {
         // TODO
         return false
