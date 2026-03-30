@@ -66,6 +66,7 @@ export const colors = {
     info: "#38598A",
     infoLight: "#DFECF9",
     warning: "#FCBA19",
+    warningDark: "#946300",
     warningLight: "#FEF2D6",
     special: "#8000FF",
     specialLight: "#F0DCFF",
