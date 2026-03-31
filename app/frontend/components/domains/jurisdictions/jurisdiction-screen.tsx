@@ -39,7 +39,7 @@ import { HeroBanner } from "../../shared/base/hero-banner"
 import { HighlightedLayout } from "../../shared/base/highlighted-layout"
 import { LoadingScreen } from "../../shared/base/loading-screen"
 import { SafeTipTapDisplay } from "../../shared/editor/safe-tiptap-display"
-import { JurisdictionResourcesSection } from "../../shared/jurisdiction/jurisdiction-resources-section"
+import { JurisdictionResourcesGridSection } from "../../shared/jurisdiction/jurisdiction-resources-grid-section"
 import { JurisdictionMap } from "../../shared/module-wrappers/jurisdiction-map"
 import { RouterLink } from "../../shared/navigation/router-link"
 import { StepCodeRequirementsTable } from "../../shared/step-code-requirements-table"
@@ -309,7 +309,7 @@ export const JurisdictionScreen = observer(() => {
                       </Flex>
                     </JurisdictionAboutAccordionItem>
                   </Accordion>
-                  <JurisdictionResourcesSection
+                  <JurisdictionResourcesGridSection
                     jurisdiction={currentJurisdiction}
                     configureResourcesPath={
                       can("jurisdiction:manage", { jurisdiction: currentJurisdiction })
