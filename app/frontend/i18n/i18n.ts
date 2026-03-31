@@ -1048,9 +1048,9 @@ const options = {
           lookOut: "Things to look out for",
           resources: {
             title: "Resources",
-            sectionTitle: "Resources for applicants",
+            sectionTitle: "Local Resources",
             description: "Additional resources and reference materials to help you with your application:",
-            emptyForStaff: "No resources for applicants have been set up yet.",
+            emptyForStaff: "No local resources have been set up yet.",
             configureResourcesLink: "Add resources in Configuration.",
             categories: {
               planning_zoning: "Planning & zoning",
