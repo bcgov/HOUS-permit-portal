@@ -1,8 +1,8 @@
 import {
-  Box,
   Button,
   Container,
   Flex,
+  GridItem,
   Heading,
   Icon,
   IconButton,
@@ -27,7 +27,7 @@ import { SharedSpinner } from "../../shared/base/shared-spinner"
 import { ToggleArchivedButton } from "../../shared/buttons/toggle-archived-button"
 import { ConfirmationModal } from "../../shared/confirmation-modal"
 import { SearchGrid } from "../../shared/grid/search-grid"
-import { SearchGridItem } from "../../shared/grid/search-grid-item"
+import { SearchGridRow } from "../../shared/grid/search-grid-row"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { OverheatingCodeGridHeaders } from "../overheating-code/grid-header"
 
@@ -74,12 +74,20 @@ export const OverheatingCodeTabPanelContent = observer(() => {
               </Flex>
             ) : (
               tableOverheatingCodes.map((oc: IOverheatingCode) => (
-                <Box key={oc.id} role={"row"} display={"contents"}>
-                  <SearchGridItem fontSize="sm">{oc.issuedTo || "—"}</SearchGridItem>
-                  <SearchGridItem fontSize="sm">{oc.projectNumber || "—"}</SearchGridItem>
-                  <SearchGridItem fontSize="sm">{oc.buildingModel || "—"}</SearchGridItem>
-                  <SearchGridItem fontSize="sm">{oc.fullAddress || "—"}</SearchGridItem>
-                  <SearchGridItem>
+                <SearchGridRow key={oc.id} onClick={() => navigate(`/overheating-codes/${oc.id}/edit`)}>
+                  <GridItem display="flex" alignItems="center" px={4} py={2}>
+                    <Text fontSize="sm">{oc.issuedTo || "—"}</Text>
+                  </GridItem>
+                  <GridItem display="flex" alignItems="center" px={4} py={2}>
+                    <Text fontSize="sm">{oc.projectNumber || "—"}</Text>
+                  </GridItem>
+                  <GridItem display="flex" alignItems="center" px={4} py={2}>
+                    <Text fontSize="sm">{oc.buildingModel || "—"}</Text>
+                  </GridItem>
+                  <GridItem display="flex" alignItems="center" px={4} py={2}>
+                    <Text fontSize="sm">{oc.fullAddress || "—"}</Text>
+                  </GridItem>
+                  <GridItem display="flex" alignItems="center" justifyContent="flex-end" px={4} py={2}>
                     <Menu>
                       <MenuButton
                         as={IconButton}
@@ -148,8 +156,8 @@ export const OverheatingCodeTabPanelContent = observer(() => {
                         )}
                       </MenuList>
                     </Menu>
-                  </SearchGridItem>
-                </Box>
+                  </GridItem>
+                </SearchGridRow>
               ))
             )}
           </SearchGrid>

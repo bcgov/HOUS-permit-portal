@@ -382,9 +382,11 @@ LiveRequirementTemplate.find_each do |lrt|
     type: EarlyAccessRequirementTemplate.name,
     nickname: "Early access #{lrt.label}"
   }
-  RequirementTemplateCopyService.new(
-    lrt
-  ).build_requirement_template_from_existing(overrides)
+  ea_template =
+    RequirementTemplateCopyService.new(
+      lrt
+    ).build_requirement_template_from_existing(overrides)
+  ea_template&.update(available_globally: true) if ea_template&.persisted?
 end
 
 # Seed some previewers for EarlyAccessRequirementTemplate instances
