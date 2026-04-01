@@ -331,7 +331,9 @@ export const JurisdictionScreen = observer(() => {
                   <Can
                     action="jurisdiction:manage"
                     data={{ jurisdiction: currentJurisdiction }}
-                    onPermissionDeniedRender={<ContactGrid isEditing={false} />}
+                    onPermissionDeniedRender={
+                      currentJurisdiction.contacts.length > 0 ? <ContactGrid isEditing={false} /> : null
+                    }
                   >
                     <Box
                       display="flex"
