@@ -4,7 +4,7 @@ name: Deploy a branch to DEV
 permissions:
   contents: read
   pull-requests: write
-  
+
 on:
   # push:
   #   branches: ["develop"]
@@ -22,12 +22,6 @@ jobs:
     environment: dev
 
     steps:
-      - name: Enforce branch match
-        if: github.event.inputs.branch != github.ref_name
-        run: |
-          echo "You are trying to deploy '${{ github.event.inputs.branch }}' but running this workflow from '${{ github.ref_name }}'."
-          echo "You must run this workflow from the same branch you are deploying."
-          exit 1          
       - name: Install Git LFS
         run: |
           sudo apt-get update
