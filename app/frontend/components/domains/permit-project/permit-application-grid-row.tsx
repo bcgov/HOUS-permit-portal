@@ -1,7 +1,6 @@
 import {
   Avatar,
   Button,
-  Grid,
   GridItem,
   Icon,
   IconButton,
@@ -25,6 +24,7 @@ import { IPermitApplication } from "../../../models/permit-application"
 import { useMst } from "../../../setup/root"
 import { colors } from "../../../styles/theme/foundations/colors"
 import { ConfirmationModal } from "../../shared/confirmation-modal"
+import { SearchGridRow } from "../../shared/grid/search-grid-row"
 import { OutdatedFormWarning } from "../../shared/outdated-form-warning"
 import { PermitApplicationStatusTag } from "../../shared/permit-applications/permit-application-status-tag"
 
@@ -53,12 +53,8 @@ export const PermitApplicationGridRow = observer(
         placement="top"
         openDelay={200}
       >
-        <Grid
-          gridColumn="1 / -1"
-          templateColumns="subgrid"
-          display="grid"
+        <SearchGridRow
           aria-disabled={isDisabledRow}
-          // bg={isDisabled ? "background.grey03" : undefined}
           bgImage={
             shouldMarkRow
               ? `repeating-linear-gradient(45deg,${colors.background.sandboxStripe} 5px,${colors.background.sandboxStripe} 10px,rgba(0, 0, 0, 0) 10px,rgba(0, 0, 0, 0) 20px)`
@@ -77,9 +73,6 @@ export const PermitApplicationGridRow = observer(
                   cursor: "pointer",
                 }
           }
-          borderBottom="1px"
-          borderColor="border.light"
-          _last={{ borderBottom: "none" }}
         >
           {!usingCurrentTemplateVersion && <OutdatedFormWarning colSpan={6} mx={4} mt={2} />}
           <GridItem display="flex" alignItems="center" px={4} py={2}>
@@ -179,7 +172,7 @@ export const PermitApplicationGridRow = observer(
               </MenuList>
             </Menu>
           </GridItem>
-        </Grid>
+        </SearchGridRow>
       </Tooltip>
     )
   }

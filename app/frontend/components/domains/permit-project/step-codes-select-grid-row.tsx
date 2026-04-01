@@ -1,4 +1,4 @@
-import { Button, Grid, GridItem, Text } from "@chakra-ui/react"
+import { Button, GridItem, Text } from "@chakra-ui/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next"
 import { datefnsTableDateTimeFormat } from "../../../constants"
 import { IStepCode } from "../../../stores/step-code-store"
 import { EStepCodeType } from "../../../types/enums"
+import { SearchGridRow } from "../../shared/grid/search-grid-row"
 
 export const StepCodesSelectGridRow = observer(
   ({ stepCode, onSelect }: { stepCode: IStepCode; onSelect: (stepCodeId: string) => Promise<void> }) => {
@@ -13,7 +14,7 @@ export const StepCodesSelectGridRow = observer(
     const { type, permitProjectTitle, fullAddress, updatedAt } = stepCode as any
 
     return (
-      <Grid gridColumn="1 / -1" templateColumns="subgrid" display="grid" borderBottom="1px" borderColor="border.light">
+      <SearchGridRow>
         <GridItem display="flex" alignItems="center" px={4} py={2}>
           <Text>{t(`stepCode.types.${type as EStepCodeType}`)}</Text>
         </GridItem>
@@ -31,7 +32,7 @@ export const StepCodesSelectGridRow = observer(
             {t("ui.select")}
           </Button>
         </GridItem>
-      </Grid>
+      </SearchGridRow>
     )
   }
 )
