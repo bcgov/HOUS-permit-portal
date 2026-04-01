@@ -20,7 +20,7 @@ import {
   VStack,
 } from "@chakra-ui/react"
 
-import { ArrowSquareOut } from "@phosphor-icons/react"
+import { ArrowSquareOut, Pencil } from "@phosphor-icons/react"
 import i18next from "i18next"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
@@ -318,55 +318,61 @@ export const JurisdictionScreen = observer(() => {
                     }
                   />
                   <JurisdictionAboutCtaCards />
-                  <Flex as="section" direction="column" borderRadius="lg" boxShadow="md">
-                    <Box py={3} px={6} bg="theme.blueAlt" borderTopRadius="lg">
-                      <Heading id="jurisdiction-contact-summary-heading" as="h3" color="greys.white" fontSize="xl">
-                        {t("jurisdiction.contactInfo")}
-                      </Heading>
-                    </Box>
-                    <Flex direction="column" p={6} gap={9}>
-                      <JurisdictionTipTapFormController
-                        control={control}
-                        headingId="jurisdiction-contact-summary-heading"
-                        initialTriggerText={t("jurisdiction.edit.addContactSummary")}
-                        name={"contactSummaryHtml"}
-                      />
+                  <Heading as="h2" variant="yellowline" my={0}>
+                    {t("jurisdiction.contactInfo")}
+                  </Heading>
+                  <JurisdictionTipTapFormController
+                    control={control}
+                    headingId="jurisdiction-contact-summary-heading"
+                    initialTriggerText={t("jurisdiction.edit.addContactSummary")}
+                    name={"contactSummaryHtml"}
+                  />
 
-                      <Can action="jurisdiction:manage" data={{ jurisdiction: currentJurisdiction }}>
-                        <Flex direction="column">
-                          <Button
-                            variant={"link"}
-                            aria-label={"edit contacts"}
-                            onClick={() => {
-                              setIsEditingContacts((current) => !current)
-                            }}
-                          >
-                            {isEditingContacts
-                              ? t("jurisdiction.edit.clickToShowContacts")
-                              : t("jurisdiction.edit.clickToEditContacts")}
-                          </Button>
-                          <Text>{t("jurisdiction.edit.firstContact")}</Text>
-                        </Flex>
-                      </Can>
+                  <Can
+                    action="jurisdiction:manage"
+                    data={{ jurisdiction: currentJurisdiction }}
+                    onPermissionDeniedRender={<ContactGrid isEditing={false} />}
+                  >
+                    <Box
+                      display="flex"
+                      flexDirection="column"
+                      border="1px dashed"
+                      borderColor="border.light"
+                      p={1}
+                      gap={1}
+                    >
+                      <Flex justify="flex-end" w="full">
+                        <Button
+                          variant="primary"
+                          size="xs"
+                          leftIcon={<Pencil size={12} />}
+                          aria-label={isEditingContacts ? t("ui.done") : t("ui.edit")}
+                          onClick={() => {
+                            setIsEditingContacts((current) => !current)
+                          }}
+                        >
+                          {isEditingContacts ? t("ui.done") : t("ui.edit")}
+                        </Button>
+                      </Flex>
                       <ContactGrid isEditing={isEditingContacts} />
-                    </Flex>
-                  </Flex>
-                  <Can action={"jurisdiction:manage"} data={{ jurisdiction: currentJurisdiction }}>
-                    <Center w="full" position="fixed" bottom={0} left={0} right={0}>
-                      <Button
-                        size="lg"
-                        mb={4}
-                        variant="primary"
-                        type="submit"
-                        isDisabled={isSubmitting}
-                        isLoading={isSubmitting}
-                        loadingText={t("ui.loading")}
-                      >
-                        {t("ui.save")}
-                      </Button>
-                    </Center>
+                    </Box>
                   </Can>
                 </Flex>
+                <Can action={"jurisdiction:manage"} data={{ jurisdiction: currentJurisdiction }}>
+                  <Center w="full" position="fixed" bottom={0} left={0} right={0}>
+                    <Button
+                      size="lg"
+                      mb={4}
+                      variant="primary"
+                      type="submit"
+                      isDisabled={isSubmitting}
+                      isLoading={isSubmitting}
+                      loadingText={t("ui.loading")}
+                    >
+                      {t("ui.save")}
+                    </Button>
+                  </Center>
+                </Can>
               </Container>
             </form>
           </FormProvider>
