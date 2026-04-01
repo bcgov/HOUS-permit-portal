@@ -1,7 +1,6 @@
 import {
   Avatar,
   Button,
-  GridItem,
   Icon,
   IconButton,
   Menu,
@@ -24,6 +23,7 @@ import { IPermitApplication } from "../../../models/permit-application"
 import { useMst } from "../../../setup/root"
 import { colors } from "../../../styles/theme/foundations/colors"
 import { ConfirmationModal } from "../../shared/confirmation-modal"
+import { SearchGridItem } from "../../shared/grid/search-grid-item"
 import { SearchGridRow } from "../../shared/grid/search-grid-row"
 import { OutdatedFormWarning } from "../../shared/outdated-form-warning"
 import { PermitApplicationStatusTag } from "../../shared/permit-applications/permit-application-status-tag"
@@ -75,24 +75,20 @@ export const PermitApplicationGridRow = observer(
           }
         >
           {!usingCurrentTemplateVersion && <OutdatedFormWarning colSpan={6} mx={4} mt={2} />}
-          <GridItem display="flex" alignItems="center" px={4} py={2}>
+          <SearchGridItem>
             <VStack align="start" spacing={0}>
               <Text variant="secondary">{permitApplication.templateNickname}</Text>
             </VStack>
-          </GridItem>
-          <GridItem display="flex" alignItems="center" px={4} py={2}>
+          </SearchGridItem>
+          <SearchGridItem>
             <Avatar name={designatedSubmitter?.collaborator?.user?.name} size="sm" />
-          </GridItem>
-          <GridItem display="flex" alignItems="center" px={4} py={2}>
-            <Text>{permitApplication.number}</Text>
-          </GridItem>
-          <GridItem display="flex" alignItems="center" px={4} py={2}>
-            <Text>{format(updatedAt, datefnsTableDateTimeFormat)}</Text>
-          </GridItem>
-          <GridItem display="flex" alignItems="center" px={4} py={2}>
+          </SearchGridItem>
+          <SearchGridItem>{permitApplication.number}</SearchGridItem>
+          <SearchGridItem>{format(updatedAt, datefnsTableDateTimeFormat)}</SearchGridItem>
+          <SearchGridItem>
             <PermitApplicationStatusTag status={permitApplication.status} />
-          </GridItem>
-          <GridItem display="flex" alignItems="center" justifyContent="flex-end" px={4} py={2}>
+          </SearchGridItem>
+          <SearchGridItem justifyContent="flex-end">
             <Menu>
               <MenuButton
                 as={IconButton}
@@ -171,7 +167,7 @@ export const PermitApplicationGridRow = observer(
                 )}
               </MenuList>
             </Menu>
-          </GridItem>
+          </SearchGridItem>
         </SearchGridRow>
       </Tooltip>
     )

@@ -1,4 +1,4 @@
-import { GridItem, IconButton, Menu, MenuButton, MenuItem, MenuList, Text } from "@chakra-ui/react"
+import { IconButton, Menu, MenuButton, MenuItem, MenuList } from "@chakra-ui/react"
 import { ArrowSquareOut, CloudArrowDown, DotsThreeVertical, Warning } from "@phosphor-icons/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom"
 import { datefnsTableDateTimeFormat } from "../../../constants"
 import { IPreCheck } from "../../../models/pre-check"
 import { downloadFileFromUrl } from "../../../utils/utility-functions"
+import { SearchGridItem } from "../../shared/grid/search-grid-item"
 import { SearchGridRow } from "../../shared/grid/search-grid-row"
 
 interface IPreCheckGridRowProps {
@@ -39,19 +40,11 @@ export const PreCheckGridRow = observer(({ preCheck }: IPreCheckGridRowProps) =>
 
   return (
     <SearchGridRow onClick={() => navigate(`/pre-checks/${preCheck.id}/edit`)}>
-      <GridItem display="flex" alignItems="center" px={4} py={2}>
-        <Text>{preCheck.fullAddress || "—"}</Text>
-      </GridItem>
-      <GridItem display="flex" alignItems="center" px={4} py={2}>
-        <Text>{preCheck.title || "—"}</Text>
-      </GridItem>
-      <GridItem display="flex" alignItems="center" px={4} py={2}>
-        {preCheck.updatedAt && format(preCheck.updatedAt, datefnsTableDateTimeFormat)}
-      </GridItem>
-      <GridItem display="flex" alignItems="center" px={4} py={2} textTransform="capitalize">
-        <Text>{preCheck.status || "—"}</Text>
-      </GridItem>
-      <GridItem display="flex" alignItems="center" justifyContent="flex-end" px={4} py={2}>
+      <SearchGridItem>{preCheck.fullAddress || "—"}</SearchGridItem>
+      <SearchGridItem>{preCheck.title || "—"}</SearchGridItem>
+      <SearchGridItem>{preCheck.updatedAt && format(preCheck.updatedAt, datefnsTableDateTimeFormat)}</SearchGridItem>
+      <SearchGridItem textTransform="capitalize">{preCheck.status || "—"}</SearchGridItem>
+      <SearchGridItem justifyContent="flex-end">
         <Menu>
           <MenuButton
             as={IconButton}
@@ -87,7 +80,7 @@ export const PreCheckGridRow = observer(({ preCheck }: IPreCheckGridRowProps) =>
             )}
           </MenuList>
         </Menu>
-      </GridItem>
+      </SearchGridItem>
     </SearchGridRow>
   )
 })
