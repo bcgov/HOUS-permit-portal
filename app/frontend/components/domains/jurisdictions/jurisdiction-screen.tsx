@@ -430,7 +430,6 @@ const JurisdictionTipTapFormController = observer(
 
     return (
       <Box
-        p={1}
         sx={{
           ".tiptap-editor-readonly": {
             padding: 0,
@@ -445,24 +444,26 @@ const JurisdictionTipTapFormController = observer(
             <SafeTipTapDisplay htmlContent={currentJurisdiction[name]} />
           }
         >
-          <Controller
-            render={({ field: { value, onChange } }) => (
-              <JurisdictionEditorWithPreview
-                label={label}
-                editText={t("ui.clickToEdit")}
-                htmlValue={value as string}
-                onChange={onChange}
-                initialTriggerText={initialTriggerText}
-                containerProps={headingId ? { "aria-labelledby": headingId } : undefined}
-                onRemove={(setEditMode) => {
-                  setEditMode(false)
-                  onChange("")
-                }}
-              />
-            )}
-            name={name}
-            control={control}
-          />
+          <Box display="flex" flexDirection="column" border="1px dashed" borderColor="border.light" p={1}>
+            <Controller
+              render={({ field: { value, onChange } }) => (
+                <JurisdictionEditorWithPreview
+                  label={label}
+                  editText={t("ui.clickToEdit")}
+                  htmlValue={value as string}
+                  onChange={onChange}
+                  initialTriggerText={initialTriggerText}
+                  containerProps={headingId ? { "aria-labelledby": headingId } : undefined}
+                  onRemove={(setEditMode) => {
+                    setEditMode(false)
+                    onChange("")
+                  }}
+                />
+              )}
+              name={name}
+              control={control}
+            />
+          </Box>
         </Can>
       </Box>
     )
