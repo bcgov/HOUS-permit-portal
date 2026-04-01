@@ -388,6 +388,7 @@ LiveRequirementTemplate.find_each do |lrt|
 end
 
 # Seed some previewers for EarlyAccessRequirementTemplate instances
+# add comment for test
 puts "Seeding Early Access Invitations..."
 
 # Fetching existing EarlyAccessRequirementTemplate instances
