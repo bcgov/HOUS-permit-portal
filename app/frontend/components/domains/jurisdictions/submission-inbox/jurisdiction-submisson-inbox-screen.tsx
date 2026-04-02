@@ -39,6 +39,7 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
 
   const activeSearchStore = viewMode === EInboxViewMode.projects ? permitProjectSearch : permitApplicationSearch
   const prevDisplayModeRef = useRef(displayMode)
+  const prevViewModeRef = useRef(viewMode)
 
   usePopStateModeSync(submissionInboxStore)
 
@@ -62,6 +63,17 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
 
     prevDisplayModeRef.current = displayMode
   }, [displayMode])
+
+  useEffect(() => {
+    if (viewMode !== prevViewModeRef.current && displayMode === EInboxDisplayMode.columns) {
+      if (viewMode === EInboxViewMode.projects) {
+        permitProjectSearch.setStateFilter([])
+      } else {
+        permitApplicationSearch.setStatusFilter([] as EPermitApplicationStatus[])
+      }
+    }
+    prevViewModeRef.current = viewMode
+  }, [viewMode])
 
   useSearch(activeSearchStore, [currentJurisdiction?.id, JSON.stringify(currentSandboxId), viewMode])
 

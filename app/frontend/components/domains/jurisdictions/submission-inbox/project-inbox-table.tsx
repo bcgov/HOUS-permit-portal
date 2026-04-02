@@ -14,12 +14,11 @@ import {
   Spinner,
   Text,
   Tooltip,
-  useDisclosure,
   VStack,
 } from "@chakra-ui/react"
 import { Swap, UserPlus } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
-import React, { useState } from "react"
+import React from "react"
 import { useTranslation } from "react-i18next"
 import { Link } from "react-router-dom"
 import { IPermitProject } from "../../../../models/permit-project"
@@ -36,7 +35,7 @@ import { SearchGridItem } from "../../../shared/grid/search-grid-item"
 import { ProjectStateTag } from "../../../shared/permit-projects/project-state-tag"
 import { SortIcon } from "../../../shared/sort-icon"
 import { SharedAvatar } from "../../../shared/user/shared-avatar"
-import { ProjectCollaboratorsSidebar } from "./project-collaborators-sidebar"
+import { ProjectDesignatedReviewerPopover } from "./project-designated-reviewer-popover"
 import { ProjectInboxPermitApplicationsPopover } from "./project-inbox-permit-applications-popover"
 import { SubmissionInboxMarkUnreadIconButton } from "./submission-inbox-mark-unread-icon-button"
 
@@ -241,73 +240,70 @@ export const ProjectInboxTable = observer(function ProjectInboxTable({ searchSto
 const ProjectAssignedCell = observer(function ProjectAssignedCell({ project }: { project: IPermitProject }) {
   const { t } = useTranslation()
   const { permitProjectStore } = useMst()
-  const { isOpen, onOpen, onClose } = useDisclosure()
-  const [isLoadingSidebar, setIsLoadingSidebar] = useState(false)
 
   const collaborators = project.aggregatedReviewCollaborators
-  const designated = collaborators.filter((c) => c.isDesignated)
-  const others = collaborators.filter((c) => !c.isDesignated)
-  const allAvatarUsers = [...designated, ...others]
-  const visibleAvatars = allAvatarUsers.slice(0, MAX_VISIBLE_AVATARS)
-  const overflowCount = allAvatarUsers.length - MAX_VISIBLE_AVATARS
-
-  const handleOpenSidebar = async (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setIsLoadingSidebar(true)
-    try {
-      await permitProjectStore.fetchPermitProject(project.id)
-    } finally {
-      setIsLoadingSidebar(false)
-    }
-    onOpen()
-  }
+  const childAppAssignees = collaborators.filter((c) => !c.isDesignated)
+  const visibleAssignees = childAppAssignees.slice(0, MAX_VISIBLE_AVATARS)
+  const overflowCount = childAppAssignees.length - MAX_VISIBLE_AVATARS
+  const hasDesignatedReviewer = !!project.reviewDelegatee
+  const hasAnyAssignees = hasDesignatedReviewer || childAppAssignees.length > 0
 
   return (
-    <>
-      <HStack spacing={1}>
-        {visibleAvatars.length > 0 ? (
-          <>
-            {visibleAvatars.map((user) => (
-              <SharedAvatar
-                key={user.id}
-                size="xs"
-                name={user.name}
-                role={user.role}
-                fontSize="2xs"
-                border={user.isDesignated ? "2px solid" : undefined}
-                borderColor={user.isDesignated ? "theme.blueActive" : undefined}
-              />
-            ))}
-            {overflowCount > 0 && (
-              <Avatar
-                size="xs"
-                name={`+${overflowCount}`}
-                getInitials={(name) => name}
-                bg="gray.200"
-                color="text.primary"
-                fontSize="2xs"
-              />
-            )}
-          </>
-        ) : (
-          <Text fontSize="sm" color="text.secondary">
-            {t("ui.unassigned")}
-          </Text>
+    <HStack spacing={1}>
+      {hasAnyAssignees ? (
+        <>
+          {visibleAssignees.map((user) => (
+            <SharedAvatar key={user.id} size="xs" name={user.name} role={user.role} fontSize="2xs" />
+          ))}
+          {overflowCount > 0 && (
+            <Avatar
+              size="xs"
+              name={`+${overflowCount}`}
+              getInitials={(name) => name}
+              bg="gray.200"
+              color="text.primary"
+              fontSize="2xs"
+            />
+          )}
+        </>
+      ) : (
+        <Text fontSize="sm" color="text.secondary">
+          {t("ui.unassigned")}
+        </Text>
+      )}
+      <ProjectDesignatedReviewerPopover
+        project={project}
+        onBeforeOpen={async () => {
+          await permitProjectStore.fetchPermitProject(project.id)
+        }}
+        renderTrigger={({ isLoading, reviewDelegatee, onClick, isDisabled }) => (
+          <IconButton
+            aria-label={t("permitCollaboration.projectSidebar.projectReviewDelegatee")}
+            icon={
+              isLoading ? (
+                <Spinner size="xs" />
+              ) : reviewDelegatee?.user ? (
+                <SharedAvatar
+                  size="xs"
+                  name={`${reviewDelegatee.user.firstName} ${reviewDelegatee.user.lastName}`}
+                  role={reviewDelegatee.user.role}
+                  fontSize="2xs"
+                  border="2px solid"
+                  borderColor="theme.blueActive"
+                />
+              ) : (
+                <UserPlus size={14} />
+              )
+            }
+            size="xs"
+            variant="ghost"
+            borderRadius="full"
+            onClick={onClick}
+            isDisabled={isDisabled}
+          />
         )}
-        <IconButton
-          aria-label={t("permitCollaboration.sidebar.title")}
-          icon={isLoadingSidebar ? <Spinner size="xs" /> : <UserPlus size={14} />}
-          size="xs"
-          variant="ghost"
-          borderRadius="full"
-          onClick={handleOpenSidebar}
-          isDisabled={isLoadingSidebar}
-        />
-      </HStack>
-
-      {isOpen && <ProjectCollaboratorsSidebar project={project} isOpen={isOpen} onClose={onClose} />}
-    </>
+      />
+    </HStack>
   )
 })
 

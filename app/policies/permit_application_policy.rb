@@ -109,7 +109,8 @@ class PermitApplicationPolicy < ApplicationPolicy
         user
           .jurisdictions
           .find_by(id: permit_collaboration.permit_application.jurisdiction_id)
-          .present? && permit_collaboration.permit_application.submitted?
+          .present? &&
+        permit_collaboration.permit_application.visible_to_reviewers?
     else
       false
     end

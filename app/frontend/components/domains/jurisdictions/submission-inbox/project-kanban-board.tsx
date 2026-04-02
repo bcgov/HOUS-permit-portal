@@ -9,13 +9,13 @@ import {
   MenuItem,
   MenuList,
   Portal,
+  Spinner,
   Text,
   Tooltip,
-  useDisclosure,
 } from "@chakra-ui/react"
-import { CalendarBlank, Swap } from "@phosphor-icons/react"
+import { CalendarBlank, Swap, UserPlus } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
-import React, { useMemo, useState } from "react"
+import React, { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { Link } from "react-router-dom"
 import { IPermitProject } from "../../../../models/permit-project"
@@ -24,7 +24,7 @@ import { EProjectState } from "../../../../types/enums"
 import { SharedAvatar } from "../../../shared/user/shared-avatar"
 import { IKanbanColumn, IReorderEvent, KanbanBoard } from "./kanban-board"
 import { KanbanCard } from "./kanban-card"
-import { ProjectCollaboratorsSidebar } from "./project-collaborators-sidebar"
+import { ProjectDesignatedReviewerPopover } from "./project-designated-reviewer-popover"
 import { ProjectInboxPermitApplicationsPopover } from "./project-inbox-permit-applications-popover"
 
 interface IProps {
@@ -99,31 +99,15 @@ const MAX_VISIBLE_AVATARS = 3
 const ProjectKanbanCard = observer(function ProjectKanbanCard({ project }: { project: IPermitProject }) {
   const { t } = useTranslation()
   const { permitProjectStore } = useMst()
-  const { isOpen: isSidebarOpen, onOpen: onSidebarOpen, onClose: onSidebarClose } = useDisclosure()
-  const [isLoadingSidebar, setIsLoadingSidebar] = useState(false)
 
   const received = project.inQueueCount
   const total = project.totalPermitsCount
   const isUnread = !project.viewedAt
 
   const collaborators = project.aggregatedReviewCollaborators
-  const designated = collaborators.filter((c) => c.isDesignated)
-  const others = collaborators.filter((c) => !c.isDesignated)
-  const allAvatarUsers = [...designated, ...others]
-  const visibleAvatars = allAvatarUsers.slice(0, MAX_VISIBLE_AVATARS)
-  const overflowCount = allAvatarUsers.length - MAX_VISIBLE_AVATARS
-
-  const handleOpenSidebar = async (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setIsLoadingSidebar(true)
-    try {
-      await permitProjectStore.fetchPermitProject(project.id)
-    } finally {
-      setIsLoadingSidebar(false)
-    }
-    onSidebarOpen()
-  }
+  const childAppAssignees = collaborators.filter((c) => !c.isDesignated)
+  const visibleAssignees = childAppAssignees.slice(0, MAX_VISIBLE_AVATARS)
+  const overflowCount = childAppAssignees.length - MAX_VISIBLE_AVATARS
 
   return (
     <KanbanCard
@@ -131,20 +115,10 @@ const ProjectKanbanCard = observer(function ProjectKanbanCard({ project }: { pro
       isUnread={isUnread}
       onMarkUnread={isUnread ? undefined : () => project.markAsUnviewed()}
       statusMenu={<ChangeStatusMenu project={project} />}
-      onAssigneeClick={handleOpenSidebar}
-      isAssigneeLoading={isLoadingSidebar}
       avatars={
         <>
-          {visibleAvatars.map((user) => (
-            <SharedAvatar
-              key={user.id}
-              size="xs"
-              name={user.name}
-              role={user.role}
-              fontSize="2xs"
-              border={user.isDesignated ? "2px solid" : undefined}
-              borderColor={user.isDesignated ? "theme.blueActive" : undefined}
-            />
+          {visibleAssignees.map((user) => (
+            <SharedAvatar key={user.id} size="xs" name={user.name} role={user.role} fontSize="2xs" />
           ))}
           {overflowCount > 0 && (
             <Avatar
@@ -156,6 +130,39 @@ const ProjectKanbanCard = observer(function ProjectKanbanCard({ project }: { pro
               fontSize="2xs"
             />
           )}
+          <ProjectDesignatedReviewerPopover
+            project={project}
+            onBeforeOpen={async () => {
+              await permitProjectStore.fetchPermitProject(project.id)
+            }}
+            renderTrigger={({ isLoading, reviewDelegatee, onClick, isDisabled }) => (
+              <IconButton
+                aria-label={t("permitCollaboration.projectSidebar.projectReviewDelegatee")}
+                icon={
+                  isLoading ? (
+                    <Spinner size="xs" />
+                  ) : reviewDelegatee?.user ? (
+                    <SharedAvatar
+                      size="xs"
+                      name={`${reviewDelegatee.user.firstName} ${reviewDelegatee.user.lastName}`}
+                      role={reviewDelegatee.user.role}
+                      fontSize="2xs"
+                      border="2px solid"
+                      borderColor="theme.blueActive"
+                    />
+                  ) : (
+                    <UserPlus size={16} />
+                  )
+                }
+                size="sm"
+                minW={7}
+                h={7}
+                variant="ghost"
+                onClick={onClick}
+                isDisabled={isDisabled}
+              />
+            )}
+          />
         </>
       }
     >
@@ -208,10 +215,6 @@ const ProjectKanbanCard = observer(function ProjectKanbanCard({ project }: { pro
           <ProjectInboxPermitApplicationsPopover project={project} />
         </Box>
       </Box>
-
-      {isSidebarOpen && (
-        <ProjectCollaboratorsSidebar project={project} isOpen={isSidebarOpen} onClose={onSidebarClose} />
-      )}
     </KanbanCard>
   )
 })

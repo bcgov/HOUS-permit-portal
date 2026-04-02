@@ -111,7 +111,12 @@ module PermitApplicationStatus
     end
 
     def submitted?
-      newly_submitted? || resubmitted? || in_review? || approved?
+      newly_submitted? || resubmitted? || in_review? || approved? || issued? ||
+        withdrawn?
+    end
+
+    def visible_to_reviewers?
+      submitted? || revisions_requested?
     end
 
     def decided?
