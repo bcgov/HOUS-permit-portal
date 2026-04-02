@@ -104,14 +104,14 @@ function KanbanBoardInner<T extends IKanbanItem>({
   )
 
   return (
-    <Flex direction="column" w="full" h="full" minH={0}>
+    <Flex direction="column" w="full" h="full" minH={0} minW={0}>
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
         modifiers={[restrictToVerticalAxis]}
         onDragEnd={handleDragEnd}
       >
-        <Flex w="full" h="full" minH={0} overflowX="auto" gap={4} pb={4} align="stretch">
+        <Flex w="full" h="full" minH={0} minW={0} overflowX="hidden" gap={4} pb={4} align="stretch">
           {columns.map((column) => {
             const columnItems = groupedItems[column.key] || []
             const isEmpty = columnItems.length === 0
@@ -241,7 +241,25 @@ function KanbanBoardInner<T extends IKanbanItem>({
                           </HStack>
                         </HStack>
                       </Box>
-                      <Flex direction="column" flex={1} minH={0} overflowY="auto" gap={3} p={3}>
+                      <Flex
+                        direction="column"
+                        flex={1}
+                        minH={0}
+                        overflowY="auto"
+                        overflowX="hidden"
+                        gap={3}
+                        p={3}
+                        sx={{
+                          touchAction: "pan-y",
+                          overscrollBehaviorX: "none",
+                        }}
+                        onScroll={(e) => {
+                          const el = e.currentTarget
+                          if (el.scrollLeft !== 0) {
+                            el.scrollLeft = 0
+                          }
+                        }}
+                      >
                         <SortableContext items={columnItems.map((i) => i.id)} strategy={verticalListSortingStrategy}>
                           {columnItems.map((item) => renderCard(item))}
                         </SortableContext>

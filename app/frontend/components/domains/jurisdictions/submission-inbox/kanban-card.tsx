@@ -32,8 +32,11 @@ export const KanbanCard = observer(function KanbanCard({
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id })
 
+  // Lock the active drag to the vertical axis only (avoids horizontal jitter next to overflow-x columns).
+  const dragTransform = transform && isDragging ? { ...transform, x: 0 } : transform
+
   const style = {
-    transform: CSS.Transform.toString(transform),
+    transform: CSS.Transform.toString(dragTransform),
     transition,
     opacity: isDragging ? 0.5 : 1,
   }

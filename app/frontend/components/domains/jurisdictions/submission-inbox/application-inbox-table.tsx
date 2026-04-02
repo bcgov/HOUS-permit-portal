@@ -262,7 +262,12 @@ const ApplicationInboxRow = observer(function ApplicationInboxRow({
         )}
       </SearchGridItem>
 
-      <SearchGridItem>
+      <SearchGridItem
+        onClick={(e: React.MouseEvent) => {
+          e.preventDefault()
+          e.stopPropagation()
+        }}
+      >
         <ApplicationBlockLevelAndDesignatedAssigneesCell application={application} />
       </SearchGridItem>
 

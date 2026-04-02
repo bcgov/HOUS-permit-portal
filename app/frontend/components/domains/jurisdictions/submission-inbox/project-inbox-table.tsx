@@ -191,7 +191,12 @@ export const ProjectInboxTable = observer(function ProjectInboxTable({ searchSto
                 )}
               </SearchGridItem>
 
-              <SearchGridItem>
+              <SearchGridItem
+                onClick={(e: React.MouseEvent) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                }}
+              >
                 <ProjectAssignedCell project={project} />
               </SearchGridItem>
 
