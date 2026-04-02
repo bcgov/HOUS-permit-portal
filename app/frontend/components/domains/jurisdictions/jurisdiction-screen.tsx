@@ -124,7 +124,7 @@ export const JurisdictionScreen = observer(() => {
             <CustomMessageBox status={EFlashMessageStatus.warning} description={t("jurisdiction.notEnabled")} />
           </Box>
         )}
-        {currentUser?.isReviewStaff || showAboutPage ? (
+        {currentUser?.isReviewStaff || (showAboutPage && true) ? (
           <>
             <FormProvider {...formMethods}>
               <form onSubmit={formMethods.handleSubmit(onSubmit)} className="space-y-8 divide-y divide-gray-200">
