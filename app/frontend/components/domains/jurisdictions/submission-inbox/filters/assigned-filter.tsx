@@ -24,7 +24,6 @@ export const AssignedFilter = observer(function AssignedFilter({
   return (
     <InboxFilter
       title={t("submissionInbox.filters.assigned")}
-      badgeCount={value.length}
       isMulti={true}
       value={value}
       onChange={(val) => onChange(val as string[])}

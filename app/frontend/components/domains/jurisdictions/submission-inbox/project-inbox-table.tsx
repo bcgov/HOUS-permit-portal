@@ -4,19 +4,20 @@ import {
   Circle,
   Flex,
   HStack,
+  Icon,
   IconButton,
   Menu,
   MenuButton,
-  MenuDivider,
   MenuItem,
   MenuList,
   Portal,
   Spinner,
   Text,
+  Tooltip,
   useDisclosure,
   VStack,
 } from "@chakra-ui/react"
-import { DotsThreeVertical, UserPlus } from "@phosphor-icons/react"
+import { Swap, UserPlus } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -36,6 +37,8 @@ import { ProjectStateTag } from "../../../shared/permit-projects/project-state-t
 import { SortIcon } from "../../../shared/sort-icon"
 import { SharedAvatar } from "../../../shared/user/shared-avatar"
 import { ProjectCollaboratorsSidebar } from "./project-collaborators-sidebar"
+import { ProjectInboxPermitApplicationsPopover } from "./project-inbox-permit-applications-popover"
+import { SubmissionInboxMarkUnreadIconButton } from "./submission-inbox-mark-unread-icon-button"
 
 interface IProps {
   searchStore: IPermitProjectInboxStore
@@ -71,7 +74,7 @@ export const ProjectInboxTable = observer(function ProjectInboxTable({ searchSto
   return (
     <VStack w="full" spacing={5}>
       <SearchGrid
-        templateColumns="2fr 1.5fr 1fr 1fr 1fr 1fr 48px"
+        templateColumns="2fr 1.5fr 1fr 1fr 1fr 1fr 72px"
         gridRowClassName="project-inbox-grid-row"
         sx={{
           ".project-inbox-grid-row:hover > div": {
@@ -157,11 +160,16 @@ export const ProjectInboxTable = observer(function ProjectInboxTable({ searchSto
               </SearchGridItem>
 
               <SearchGridItem>
-                <Text fontSize="sm">
-                  {project.totalPermitsCount > 0
-                    ? `${project.newlySubmittedCount + project.resubmittedCount} of ${project.totalPermitsCount} received`
-                    : "0 of 0 received"}
-                </Text>
+                <ProjectInboxPermitApplicationsPopover
+                  project={project}
+                  renderTrigger={
+                    <Text fontSize="sm">
+                      {project.totalPermitsCount > 0
+                        ? `${project.inQueueCount} of ${project.totalPermitsCount} received`
+                        : "0 of 0 received"}
+                    </Text>
+                  }
+                />
               </SearchGridItem>
 
               <SearchGridItem>
@@ -200,7 +208,12 @@ export const ProjectInboxTable = observer(function ProjectInboxTable({ searchSto
                   e.stopPropagation()
                 }}
               >
-                <ProjectActionsMenu project={project} />
+                <HStack spacing={0}>
+                  <ProjectActionsMenu project={project} />
+                  {!!project.viewedAt && (
+                    <SubmissionInboxMarkUnreadIconButton onMarkUnread={() => project.markAsUnviewed()} />
+                  )}
+                </HStack>
               </SearchGridItem>
             </Box>
           ))
@@ -301,19 +314,22 @@ const ProjectAssignedCell = observer(function ProjectAssignedCell({ project }: {
 const ProjectActionsMenu = observer(function ProjectActionsMenu({ project }: { project: IPermitProject }) {
   const { t } = useTranslation()
   const hasTransitions = project.allowedManualTransitions.length > 0
-  const canMarkUnread = !!project.viewedAt
 
-  if (!hasTransitions && !canMarkUnread) return null
+  if (!hasTransitions) return null
 
   return (
     <Menu>
-      <MenuButton
-        as={IconButton}
-        aria-label="Actions"
-        icon={<DotsThreeVertical size={16} weight="bold" />}
-        size="sm"
-        variant="ghost"
-      />
+      <Tooltip label={t("submissionInbox.changeStatus")} hasArrow placement="top">
+        <MenuButton
+          as={IconButton}
+          aria-label={t("submissionInbox.changeStatus")}
+          icon={<Icon as={Swap} boxSize={4} />}
+          size="sm"
+          minW={7}
+          h={7}
+          variant="ghost"
+        />
+      </Tooltip>
       <Portal>
         <MenuList zIndex={10}>
           {project.allowedManualTransitions.map((transition) => (
@@ -330,19 +346,6 @@ const ProjectActionsMenu = observer(function ProjectActionsMenu({ project }: { p
               {t(`submissionInbox.projectStates.${transition}`)}
             </MenuItem>
           ))}
-          {hasTransitions && canMarkUnread && <MenuDivider />}
-          {canMarkUnread && (
-            <MenuItem
-              fontSize="sm"
-              onClick={(e) => {
-                e.preventDefault()
-                e.stopPropagation()
-                project.markAsUnviewed()
-              }}
-            >
-              {t("submissionInbox.markUnread")}
-            </MenuItem>
-          )}
         </MenuList>
       </Portal>
     </Menu>

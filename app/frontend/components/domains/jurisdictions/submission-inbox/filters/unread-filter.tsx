@@ -16,15 +16,16 @@ export const UnreadFilter = observer(function UnreadFilter({ value, onChange, on
   const { t } = useTranslation()
 
   const options: IOption[] = [
-    { value: ERadioFilterValue.include, label: t("submissionInbox.filters.include") },
-    { value: ERadioFilterValue.hide, label: t("submissionInbox.filters.hide") },
+    { value: ERadioFilterValue.include, label: t("submissionInbox.filters.all") },
     { value: ERadioFilterValue.onlyShow, label: t("submissionInbox.filters.onlyShow") },
+    { value: ERadioFilterValue.hide, label: t("submissionInbox.filters.hide") },
   ]
 
   return (
     <InboxFilter
       title={t("submissionInbox.filters.unread")}
       badgeCount={badgeCount}
+      showResultsBadge
       isMulti={false}
       value={value}
       onChange={(val) => onChange(val as ERadioFilterValue)}

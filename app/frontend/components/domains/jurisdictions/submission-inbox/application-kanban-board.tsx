@@ -38,9 +38,9 @@ interface IProps {
 
 const APPLICATION_KANBAN_COLUMNS: EPermitApplicationStatus[] = [
   EPermitApplicationStatus.newlySubmitted,
+  EPermitApplicationStatus.revisionsRequested,
   EPermitApplicationStatus.resubmitted,
   EPermitApplicationStatus.inReview,
-  EPermitApplicationStatus.revisionsRequested,
   EPermitApplicationStatus.approved,
   EPermitApplicationStatus.issued,
   EPermitApplicationStatus.withdrawn,

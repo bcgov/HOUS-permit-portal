@@ -221,9 +221,9 @@ module Api::Concerns::Search::JurisdictionPermitApplications
       days = days_in_queue[:days].to_i
       cutoff = days.days.ago.beginning_of_day
       if days_in_queue[:operator] == "gte"
-        and_conditions << { enqueued_at: { lte: cutoff } }
+        and_conditions << { submitted_at: { lte: cutoff } }
       elsif days_in_queue[:operator] == "lt"
-        and_conditions << { enqueued_at: { gt: cutoff } }
+        and_conditions << { submitted_at: { gt: cutoff } }
       end
     end
 

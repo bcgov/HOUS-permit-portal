@@ -14,7 +14,7 @@ import {
   Text,
   useDisclosure,
 } from "@chakra-ui/react"
-import { ArrowsClockwise, CaretDown, CaretRight, CaretUp, Eye, Info, NotePencil } from "@phosphor-icons/react"
+import { ArrowsClockwise, CaretDown, CaretRight, CaretUp, Info, NotePencil, Swap } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useRef, useState } from "react"
 import { useController, useForm } from "react-hook-form"
@@ -169,44 +169,34 @@ export const ReviewPermitApplicationScreen = observer(() => {
                   value={number}
                   label={t("permitApplication.fields.number")}
                 />
-                {!isReadOnly && (
-                  <HStack mt={2} sx={{ svg: { fill: "theme.yellow" } }}>
-                    <Text textTransform={"uppercase"} whiteSpace="nowrap" flexShrink={0}>
-                      {" "}
-                      {t("permitApplication.referenceNumber")}:
-                    </Text>
-                    <EditableInputWithControls
-                      size={"xs"}
-                      value={referenceNumber}
-                      onChange={onReferenceNumberChange}
-                      onEdit={() => setReferenceNumberSnapshot(referenceNumber)}
-                      onSubmit={() => onSaveReferenceNumber()}
-                      editablePreviewProps={{
-                        mb: 0,
-                      }}
-                      editableInputProps={{
-                        "aria-label": "Edit Reference Number",
-                        bg: "white",
-                        color: "text.primary",
-                        width: "calc(10ch + 1.5em)",
-                      }}
-                      controlsProps={{
-                        saveButtonProps: { variant: "primaryInverse", textContent: t("ui.onlySave") },
-                        cancelButtonProps: { variant: "secondaryInverse" },
-                      }}
-                      aria-label={"Edit Reference Number"}
-                      onCancel={(previousValue) => onReferenceNumberChange(previousValue)}
-                    />
-                  </HStack>
-                )}
-                {isReadOnly && currentPermitApplication.referenceNumber && (
-                  <HStack mt={2}>
-                    <Text textTransform={"uppercase"} whiteSpace="nowrap" flexShrink={0}>
-                      {t("permitApplication.referenceNumber")}:
-                    </Text>
-                    <Text>{currentPermitApplication.referenceNumber}</Text>
-                  </HStack>
-                )}
+                <HStack mt={2} sx={{ svg: { fill: "theme.yellow" } }}>
+                  <Text textTransform={"uppercase"} whiteSpace="nowrap" flexShrink={0}>
+                    {" "}
+                    {t("permitApplication.referenceNumber")}:
+                  </Text>
+                  <EditableInputWithControls
+                    size={"xs"}
+                    value={referenceNumber}
+                    onChange={onReferenceNumberChange}
+                    onEdit={() => setReferenceNumberSnapshot(referenceNumber)}
+                    onSubmit={() => onSaveReferenceNumber()}
+                    editablePreviewProps={{
+                      mb: 0,
+                    }}
+                    editableInputProps={{
+                      "aria-label": "Edit Reference Number",
+                      bg: "white",
+                      color: "text.primary",
+                      width: "calc(10ch + 1.5em)",
+                    }}
+                    controlsProps={{
+                      saveButtonProps: { variant: "primaryInverse", textContent: t("ui.onlySave") },
+                      cancelButtonProps: { variant: "secondaryInverse" },
+                    }}
+                    aria-label={"Edit Reference Number"}
+                    onCancel={(previousValue) => onReferenceNumberChange(previousValue)}
+                  />
+                </HStack>
               </HStack>
             </Flex>
           </HStack>
@@ -306,7 +296,7 @@ export const ReviewPermitApplicationScreen = observer(() => {
                     return (
                       <Button
                         variant="callout"
-                        leftIcon={<Eye />}
+                        leftIcon={<Swap />}
                         onClick={handleStartReview}
                         isLoading={isStartingReview}
                         loadingText={t("permitApplication.show.startingReview")}

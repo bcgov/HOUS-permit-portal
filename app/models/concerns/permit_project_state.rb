@@ -3,7 +3,7 @@ module PermitProjectState
 
   MANUAL_TRANSITIONS = {
     draft: [],
-    queued: %i[waiting in_progress ready permit_issued active closed],
+    queued: %i[waiting in_progress closed],
     waiting: %i[queued in_progress ready permit_issued active closed],
     in_progress: %i[queued waiting ready permit_issued active closed],
     ready: %i[permit_issued waiting closed],

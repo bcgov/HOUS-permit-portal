@@ -204,9 +204,7 @@ module PermitApplicationStatus
     end
 
     def handle_submission
-      attrs = { signed_off_at: Time.current }
-      attrs[:enqueued_at] = Time.current if newly_submitted?
-      update(attrs)
+      update(signed_off_at: Time.current)
 
       checklist = step_code&.primary_checklist
       submission_versions.create!(

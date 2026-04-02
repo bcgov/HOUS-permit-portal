@@ -1,10 +1,11 @@
 import { Box, Circle, HStack, IconButton, Spinner, Tooltip } from "@chakra-ui/react"
 import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
-import { CaretUpDown, Tray, UserPlus } from "@phosphor-icons/react"
+import { CaretUpDown, UserPlus } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
+import { SubmissionInboxMarkUnreadIconButton } from "./submission-inbox-mark-unread-icon-button"
 
 interface IProps {
   id: string
@@ -91,26 +92,7 @@ export const KanbanCard = observer(function KanbanCard({
             />
           </Tooltip>
           {statusMenu}
-          {onMarkUnread && (
-            <Tooltip label={t("submissionInbox.markUnread")} hasArrow placement="top">
-              <Box position="relative" display="inline-flex">
-                <IconButton
-                  aria-label={t("submissionInbox.markUnread")}
-                  icon={<Tray size={16} />}
-                  size="sm"
-                  minW={7}
-                  h={7}
-                  variant="ghost"
-                  onClick={(e) => {
-                    e.preventDefault()
-                    e.stopPropagation()
-                    onMarkUnread()
-                  }}
-                />
-                <Circle size="6px" bg="theme.blueActive" position="absolute" top={0.5} right={0.5} />
-              </Box>
-            </Tooltip>
-          )}
+          {onMarkUnread && <SubmissionInboxMarkUnreadIconButton onMarkUnread={onMarkUnread} />}
         </HStack>
       </HStack>
     </Box>

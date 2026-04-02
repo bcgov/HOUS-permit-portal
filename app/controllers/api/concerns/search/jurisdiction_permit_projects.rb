@@ -77,16 +77,16 @@ module Api::Concerns::Search::JurisdictionPermitProjects
     query = jurisdiction_permit_project_query
     order = jurisdiction_permit_project_order
 
-    user_statuses =
+    user_states =
       (
-        jurisdiction_permit_project_search_params.dig(:filters, :status) || []
+        jurisdiction_permit_project_search_params.dig(:filters, :state) || []
       ).map(&:to_s)
 
     all_ids = []
     column_totals = {}
 
     PermitProject.kanban_states.each do |state|
-      if user_statuses.present? && user_statuses.exclude?(state)
+      if user_states.present? && user_states.exclude?(state)
         column_totals[state] = 0
         next
       end
@@ -168,7 +168,7 @@ module Api::Concerns::Search::JurisdictionPermitProjects
       :per_column,
       filters: [
         { requirement_template_ids: [] },
-        { status: [] },
+        { state: [] },
         :unread,
         :meeting_request,
         { assigned: [] },
@@ -198,14 +198,12 @@ module Api::Concerns::Search::JurisdictionPermitProjects
     and_conditions << { jurisdiction_id: @jurisdiction.id }
     and_conditions << { discarded: false }
 
-    statuses = search_filters.delete(:status)
+    states = search_filters.delete(:state)
 
     if state_filter
       and_conditions << { state: state_filter }
     else
-      and_conditions << {
-        state: statuses.present? ? statuses : { not: "draft" }
-      }
+      and_conditions << { state: states.present? ? states : { not: "draft" } }
     end
 
     # if !current_user.super_admin?

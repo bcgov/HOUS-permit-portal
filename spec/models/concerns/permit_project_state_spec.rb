@@ -276,7 +276,7 @@ RSpec.describe PermitProjectState, type: :model do
       it "returns valid transitions for queued" do
         project.update_column(:state, PermitProject.states[:queued])
         expect(project.allowed_manual_transitions).to eq(
-          %i[waiting in_progress ready permit_issued active closed]
+          %i[waiting in_progress ready closed]
         )
       end
     end

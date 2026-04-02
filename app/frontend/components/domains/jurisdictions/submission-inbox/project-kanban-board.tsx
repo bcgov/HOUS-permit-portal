@@ -8,15 +8,10 @@ import {
   MenuButton,
   MenuItem,
   MenuList,
-  Popover,
-  PopoverBody,
-  PopoverContent,
-  PopoverTrigger,
   Portal,
   Text,
   Tooltip,
   useDisclosure,
-  VStack,
 } from "@chakra-ui/react"
 import { CalendarBlank, Swap } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
@@ -26,11 +21,11 @@ import { Link } from "react-router-dom"
 import { IPermitProject } from "../../../../models/permit-project"
 import { useMst } from "../../../../setup/root"
 import { EProjectState } from "../../../../types/enums"
-import { PermitApplicationStatusTag } from "../../../shared/permit-applications/permit-application-status-tag"
 import { SharedAvatar } from "../../../shared/user/shared-avatar"
 import { IKanbanColumn, IReorderEvent, KanbanBoard } from "./kanban-board"
 import { KanbanCard } from "./kanban-card"
 import { ProjectCollaboratorsSidebar } from "./project-collaborators-sidebar"
+import { ProjectInboxPermitApplicationsPopover } from "./project-inbox-permit-applications-popover"
 
 interface IProps {
   projects: IPermitProject[]
@@ -107,7 +102,7 @@ const ProjectKanbanCard = observer(function ProjectKanbanCard({ project }: { pro
   const { isOpen: isSidebarOpen, onOpen: onSidebarOpen, onClose: onSidebarClose } = useDisclosure()
   const [isLoadingSidebar, setIsLoadingSidebar] = useState(false)
 
-  const received = project.newlySubmittedCount + project.resubmittedCount
+  const received = project.inQueueCount
   const total = project.totalPermitsCount
   const isUnread = !project.viewedAt
 
@@ -210,7 +205,7 @@ const ProjectKanbanCard = observer(function ProjectKanbanCard({ project }: { pro
         )}
 
         <Box mt={2.5}>
-          <RollupStatusBadge project={project} />
+          <ProjectInboxPermitApplicationsPopover project={project} />
         </Box>
       </Box>
 
@@ -258,60 +253,5 @@ const ChangeStatusMenu = observer(function ChangeStatusMenu({ project }: { proje
         </MenuList>
       </Portal>
     </Menu>
-  )
-})
-
-const RollupStatusBadge = observer(function RollupStatusBadge({ project }: { project: IPermitProject }) {
-  const { t } = useTranslation()
-  const rollupStatus = project.inboxRollupStatus
-  const sortedStatuses = project.inboxSortedApplicationStatuses
-
-  if (sortedStatuses.length === 0) return null
-
-  const badge = (
-    <PermitApplicationStatusTag status={rollupStatus} size="sm" px={2} py={0.5} fontSize="2xs" cursor="default" />
-  )
-
-  if (sortedStatuses.length <= 1) return badge
-
-  return (
-    <Popover trigger="hover" placement="bottom-start" isLazy flip={false}>
-      <PopoverTrigger>{badge}</PopoverTrigger>
-
-      <Portal>
-        <PopoverContent w="auto" minW="220px" maxW="320px" onClick={(e) => e.preventDefault()}>
-          <PopoverBody p={3}>
-            <Text fontSize="2xs" fontWeight="bold" textTransform="uppercase" color="text.secondary" mb={2}>
-              {t("submissionInbox.permitApplicationStatuses")}
-            </Text>
-            <VStack align="stretch" spacing={1}>
-              {sortedStatuses.map((entry, idx) => (
-                <HStack key={idx} spacing={2} justify="space-between">
-                  <Text
-                    as={Link}
-                    to={`/permit-applications/${entry.id}`}
-                    fontSize="xs"
-                    color="text.link"
-                    noOfLines={1}
-                    _hover={{ textDecoration: "underline" }}
-                    onClick={(e: React.MouseEvent) => e.stopPropagation()}
-                  >
-                    {entry.nickname || "—"}
-                  </Text>
-                  <PermitApplicationStatusTag
-                    status={entry.status}
-                    size="sm"
-                    px={1.5}
-                    py={0.5}
-                    fontSize="2xs"
-                    flexShrink={0}
-                  />
-                </HStack>
-              ))}
-            </VStack>
-          </PopoverBody>
-        </PopoverContent>
-      </Portal>
-    </Popover>
   )
 })

@@ -1,8 +1,8 @@
-import { Badge, Box, Button, Flex, HStack, Icon, IconButton, Text, Tooltip } from "@chakra-ui/react"
+import { Badge, Box, Button, Flex, HStack, IconButton, Text, Tooltip } from "@chakra-ui/react"
 import { closestCenter, DndContext, DragEndEvent, PointerSensor, useSensor, useSensors } from "@dnd-kit/core"
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers"
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
-import { CaretDoubleLeft, CaretDoubleRight, EyeSlash } from "@phosphor-icons/react"
+import { CaretDoubleLeft, CaretDoubleRight, Empty } from "@phosphor-icons/react"
 import { AnimatePresence, motion } from "framer-motion"
 import { observer } from "mobx-react-lite"
 import React, { ReactNode, useCallback, useMemo } from "react"
@@ -145,35 +145,55 @@ function KanbanBoardInner<T extends IKanbanItem>({
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
                       transition={{ duration: 0.15 }}
+                      style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}
                     >
                       <Tooltip label={column.label} hasArrow placement="right">
-                        <Flex direction="column" align="center" gap={3} p={3}>
-                          {!isEmpty && (
-                            <IconButton
-                              aria-label="Expand column"
-                              icon={<CaretDoubleRight />}
-                              size="xs"
-                              variant="ghost"
+                        <Flex direction="column" align="center" flex={1} minH={0} h="full" p={3}>
+                          <Flex direction="column" align="center" gap={3} flexShrink={0}>
+                            {isEmpty ? (
+                              <Box py={1}>
+                                <Empty size={14} />
+                              </Box>
+                            ) : (
+                              <IconButton
+                                aria-label="Expand column"
+                                icon={<CaretDoubleRight />}
+                                size="xs"
+                                variant="ghost"
+                                alignSelf="center"
+                                onClick={() => onToggleColumn(column.key)}
+                              />
+                            )}
+
+                            <Badge
+                              borderRadius="full"
+                              py={2}
+                              px={1}
+                              fontSize="2xs"
+                              bg="white"
+                              color="text.secondary"
+                              border="1px solid"
+                              borderColor="border.light"
+                              sx={{ writingMode: "vertical-lr" }}
+                              whiteSpace="nowrap"
                               alignSelf="center"
-                              onClick={() => onToggleColumn(column.key)}
-                            />
-                          )}
-                          <Icon as={EyeSlash} color="text.secondary" boxSize={4} />
-                          <Badge
-                            borderRadius="full"
-                            py={2}
-                            px={1}
-                            fontSize="2xs"
-                            bg="white"
+                            >
+                              {displayedCount} of {totalCount}
+                            </Badge>
+                          </Flex>
+                          <Text
+                            mt="auto"
+                            pt={3}
+                            fontSize="xs"
+                            fontWeight="bold"
+                            textTransform="capitalize"
                             color="text.secondary"
-                            border="1px solid"
-                            borderColor="border.light"
-                            sx={{ writingMode: "vertical-lr" }}
+                            lineHeight={1.2}
+                            sx={{ writingMode: "vertical-lr", textOrientation: "mixed" }}
                             whiteSpace="nowrap"
-                            alignSelf="center"
                           >
-                            {displayedCount} of {totalCount}
-                          </Badge>
+                            {column.label}
+                          </Text>
                         </Flex>
                       </Tooltip>
                     </motion.div>

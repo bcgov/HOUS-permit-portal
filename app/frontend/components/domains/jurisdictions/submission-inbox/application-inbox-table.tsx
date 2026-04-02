@@ -4,19 +4,20 @@ import {
   Circle,
   Flex,
   HStack,
+  Icon,
   IconButton,
   Menu,
   MenuButton,
-  MenuDivider,
   MenuItem,
   MenuList,
   Portal,
   Spinner,
   Text,
+  Tooltip,
   useDisclosure,
   VStack,
 } from "@chakra-ui/react"
-import { DotsThreeVertical, UserPlus } from "@phosphor-icons/react"
+import { Swap, UserPlus } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -40,6 +41,7 @@ import { PermitApplicationStatusTag } from "../../../shared/permit-applications/
 import { SortIcon } from "../../../shared/sort-icon"
 import { SharedAvatar } from "../../../shared/user/shared-avatar"
 import { CollaboratorsSidebarDrawer } from "../../permit-application/collaborator-management/collaborators-sidebar"
+import { SubmissionInboxMarkUnreadIconButton } from "./submission-inbox-mark-unread-icon-button"
 
 interface IProps {
   searchStore: IPermitApplicationInboxStore
@@ -66,7 +68,7 @@ export const ApplicationInboxTable = observer(function ApplicationInboxTable({ s
   return (
     <VStack w="full" spacing={5}>
       <SearchGrid
-        templateColumns="36px minmax(0, 1.5fr) minmax(0, 1.3fr) minmax(0, 1fr) minmax(140px, 1fr) minmax(160px, 1.1fr) auto 48px"
+        templateColumns="36px minmax(0, 1.5fr) minmax(0, 1.3fr) minmax(0, 1fr) minmax(140px, 1fr) minmax(160px, 1.1fr) auto 72px"
         gridRowClassName="application-inbox-grid-row"
         sx={{
           ".application-inbox-grid-row:hover > div": {
@@ -251,7 +253,7 @@ const ApplicationInboxRow = observer(function ApplicationInboxRow({
               {t("submissionInbox.waitingSince")}
             </Text>
             <Text fontSize="xs" color="text.secondary">
-              {application.formattedEnqueuedAt}
+              {application.formattedSubmittedAt}
             </Text>
           </VStack>
         ) : (
@@ -277,7 +279,12 @@ const ApplicationInboxRow = observer(function ApplicationInboxRow({
           e.stopPropagation()
         }}
       >
-        <ApplicationActionsMenu application={application} />
+        <HStack spacing={0}>
+          <ApplicationActionsMenu application={application} />
+          {application.isViewed && (
+            <SubmissionInboxMarkUnreadIconButton onMarkUnread={() => application.markAsUnviewed()} />
+          )}
+        </HStack>
       </SearchGridItem>
     </Box>
   )
@@ -397,19 +404,22 @@ const ApplicationActionsMenu = observer(function ApplicationActionsMenu({
   const navigate = useNavigate()
   const hasTransitions = application.allowedManualTransitions.length > 0
   const showRevisionsRequestedLink = application.status === EPermitApplicationStatus.inReview
-  const canMarkUnread = application.isViewed
 
-  if (!hasTransitions && !showRevisionsRequestedLink && !canMarkUnread) return null
+  if (!hasTransitions && !showRevisionsRequestedLink) return null
 
   return (
     <Menu>
-      <MenuButton
-        as={IconButton}
-        aria-label="Actions"
-        icon={<DotsThreeVertical size={16} weight="bold" />}
-        size="sm"
-        variant="ghost"
-      />
+      <Tooltip label={t("submissionInbox.changeStatus")} hasArrow placement="top">
+        <MenuButton
+          as={IconButton}
+          aria-label={t("submissionInbox.changeStatus")}
+          icon={<Icon as={Swap} boxSize={4} />}
+          size="sm"
+          minW={7}
+          h={7}
+          variant="ghost"
+        />
+      </Tooltip>
       <Portal>
         <MenuList zIndex={10}>
           {application.allowedManualTransitions.map((transition) => (
@@ -437,19 +447,6 @@ const ApplicationActionsMenu = observer(function ApplicationActionsMenu({
             >
               {/* @ts-ignore */}
               {t(`submissionInbox.applicationStatuses.${EPermitApplicationStatus.revisionsRequested}`)}
-            </MenuItem>
-          )}
-          {(hasTransitions || showRevisionsRequestedLink) && canMarkUnread && <MenuDivider />}
-          {canMarkUnread && (
-            <MenuItem
-              fontSize="sm"
-              onClick={(e) => {
-                e.preventDefault()
-                e.stopPropagation()
-                application.markAsUnviewed()
-              }}
-            >
-              {t("submissionInbox.markUnread")}
             </MenuItem>
           )}
         </MenuList>
