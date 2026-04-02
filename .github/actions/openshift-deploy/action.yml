@@ -5,6 +5,12 @@ inputs:
   branch:
     description: Branch to deploy
     required: true
+  github_token:
+    description: GitHub token for deployment status updates
+    required: true
+  deployment_environment:
+    description: Deployment environment name for GitHub/Jira
+    required: true
   environment_label:
     description: Environment label for logs
     required: true
@@ -27,7 +33,18 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Start GitHub deployment
+      id: deployment-start
+      uses: bobheadxi/deployments@v1
+      with:
+        step: start
+        token: ${{ inputs.github_token }}
+        env: ${{ inputs.deployment_environment }}
+        ref: ${{ inputs.branch }}
+        desc: OpenShift deployment to ${{ inputs.environment_label }} for ${{ inputs.branch }}
+
     - name: Install Git LFS
+      id: install-git-lfs
       shell: bash
       run: |
         sudo apt-get update
@@ -35,21 +52,25 @@ runs:
         git lfs install
 
     - name: Checkout Code
+      id: checkout-code
       uses: actions/checkout@v4
       with:
         ref: ${{ inputs.branch }}
         lfs: true
 
     - name: Update GITHUB_SHA with checked-out commit SHA
+      id: capture-git-sha
       shell: bash
       run: echo "GITHUB_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
 
     - name: Confirm branch and SHA to deploy
+      id: confirm-deploy-target
       shell: bash
       run: |
         echo "Deploying branch: ${{ inputs.branch }} @ ${{ env.GITHUB_SHA }} to ${{ inputs.environment_label }}"
 
     - name: Build Docker Image
+      id: build-image
       uses: redhat-actions/buildah-build@v2
       with:
         image: ${{ inputs.image_name }}
@@ -61,9 +82,23 @@ runs:
         build-args: ${{ inputs.build_args }}
 
     - name: Push to Openshift Registry using Service Account
+      id: push-image
       uses: redhat-actions/push-to-registry@v2.7
       with:
         image: ${{ inputs.image_name }}
         registry: ${{ inputs.registry_url }}
         username: ${{ inputs.builder_username }}
         password: ${{ inputs.builder_token }}
+
+    - name: Finish GitHub deployment
+      if: always()
+      uses: bobheadxi/deployments@v1
+      with:
+        step: finish
+        token: ${{ inputs.github_token }}
+        deployment_id: ${{ steps.deployment-start.outputs.deployment_id }}
+        env: ${{ steps.deployment-start.outputs.env }}
+        status: ${{ steps.push-image.outcome == 'success' && 'success' || 'failure' }}
+        logs: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        env_url: ${{ github.server_url }}/${{ github.repository }}/tree/${{ inputs.branch }}
+        desc: OpenShift deployment to ${{ inputs.environment_label }} finished for ${{ inputs.branch }}

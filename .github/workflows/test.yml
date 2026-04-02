@@ -3,6 +3,7 @@ name: Deploy a branch to TEST
 # 🔐 Set least-privilege permissions for the entire workflow
 permissions:
   contents: read
+  deployments: write
   pull-requests: write
 
 on:
@@ -24,6 +25,8 @@ jobs:
         uses: ./.github/actions/openshift-deploy
         with:
           branch: ${{ github.event.inputs.branch }}
+          github_token: ${{ github.token }}
+          deployment_environment: test
           environment_label: Test
           image_name: test-hous-permit-portal
           build_args: |

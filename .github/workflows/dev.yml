@@ -3,6 +3,7 @@ name: Deploy a branch to DEV
 # 🔐 Set least-privilege permissions for the entire workflow
 permissions:
   contents: read
+  deployments: write
   pull-requests: write
 
 on:
@@ -26,6 +27,8 @@ jobs:
         uses: ./.github/actions/openshift-deploy
         with:
           branch: ${{ github.event.inputs.branch }}
+          github_token: ${{ github.token }}
+          deployment_environment: dev
           environment_label: Dev
           image_name: dev-hous-permit-portal
           build_args: |

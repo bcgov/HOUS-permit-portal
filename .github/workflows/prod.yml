@@ -3,6 +3,7 @@ name: Deploy a branch to PRODUCTION
 # 🔐 Set least-privilege permissions for the entire workflow
 permissions:
   contents: read
+  deployments: write
   pull-requests: write
 
 on:
@@ -20,13 +21,6 @@ jobs:
     environment: prod
 
     steps:
-      - name: Enforce branch match
-        if: github.event.inputs.branch != github.ref_name
-        run: |
-          echo "You are trying to deploy '${{ github.event.inputs.branch }}' but running this workflow from '${{ github.ref_name }}'."
-          echo "You must run this workflow from the same branch you are deploying."
-          exit 1
-
       - name: Check if user is authorized
         run: |
           AUTHORIZED_USERS="${{ secrets.AUTHORIZED_USERS }}"
@@ -39,6 +33,8 @@ jobs:
         uses: ./.github/actions/openshift-deploy
         with:
           branch: ${{ github.event.inputs.branch }}
+          github_token: ${{ github.token }}
+          deployment_environment: prod
           environment_label: Production
           image_name: prod-hous-permit-portal
           build_args: |
