@@ -29,6 +29,9 @@ jobs:
             exit 1
           fi
 
+      - name: Checkout Workflow Code
+        uses: actions/checkout@v4
+
       - name: Deploy to OpenShift
         uses: ./.github/actions/openshift-deploy
         with:
