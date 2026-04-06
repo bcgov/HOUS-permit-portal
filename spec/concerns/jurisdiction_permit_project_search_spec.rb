@@ -229,9 +229,9 @@ RSpec.describe Api::Concerns::Search::JurisdictionPermitProjects,
       end
     end
 
-    context "with status filter (project state)" do
+    context "with state filter" do
       let(:search_params) do
-        { query: "", page: 1, per_page: 50, filters: { status: ["queued"] } }
+        { query: "", page: 1, per_page: 50, filters: { state: ["queued"] } }
       end
 
       it "returns only projects matching the given state" do
