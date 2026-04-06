@@ -5,7 +5,7 @@ import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
 import { CaretDoubleLeft, CaretDoubleRight, Empty } from "@phosphor-icons/react"
 import { AnimatePresence, motion } from "framer-motion"
 import { observer } from "mobx-react-lite"
-import React, { ReactNode, useCallback, useMemo } from "react"
+import React, { ReactNode, useCallback, useMemo, useRef } from "react"
 import { useTranslation } from "react-i18next"
 
 export interface IKanbanColumn {
@@ -51,6 +51,7 @@ function KanbanBoardInner<T extends IKanbanItem>({
   onReorder,
 }: IProps<T>) {
   const { t } = useTranslation()
+  const rowScrollRef = useRef<HTMLDivElement | null>(null)
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }))
 
   const groupedItems = useMemo(() => {
@@ -111,7 +112,7 @@ function KanbanBoardInner<T extends IKanbanItem>({
         modifiers={[restrictToVerticalAxis]}
         onDragEnd={handleDragEnd}
       >
-        <Flex w="full" h="full" minH={0} minW={0} overflowX="hidden" gap={4} pb={4} align="stretch">
+        <Flex ref={rowScrollRef} w="full" h="full" minH={0} minW={0} overflowY="hidden" gap={4} pb={4} align="stretch">
           {columns.map((column) => {
             const columnItems = groupedItems[column.key] || []
             const isEmpty = columnItems.length === 0
@@ -128,7 +129,7 @@ function KanbanBoardInner<T extends IKanbanItem>({
                 direction="column"
                 minW={isCollapsed ? "48px" : "260px"}
                 maxW={isCollapsed ? "60px" : "320px"}
-                flex={isCollapsed ? "0 0 auto" : "1 1 0"}
+                flex={isCollapsed ? "0 0 auto" : "1 0 260px"}
                 border="1px solid"
                 borderColor="border.light"
                 borderRadius="lg"
@@ -251,7 +252,6 @@ function KanbanBoardInner<T extends IKanbanItem>({
                         p={3}
                         sx={{
                           touchAction: "pan-y",
-                          overscrollBehaviorX: "none",
                         }}
                         onScroll={(e) => {
                           const el = e.currentTarget

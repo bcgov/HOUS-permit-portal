@@ -1,8 +1,9 @@
-import { Box, Button, ButtonGroup, Circle, Flex, Heading, HStack, Icon, Text, VStack } from "@chakra-ui/react"
+import { Box, Button, ButtonGroup, Circle, Flex, Heading, HStack, Icon, Link, Text, VStack } from "@chakra-ui/react"
 import { Buildings, Columns, FileText, ListDashes, Tray } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useCallback, useEffect, useRef } from "react"
 import { useTranslation } from "react-i18next"
+import { Link as RouterLink, useParams } from "react-router-dom"
 import { useJurisdiction } from "../../../../hooks/resources/use-jurisdiction"
 import { usePopStateModeSync } from "../../../../hooks/use-popstate-mode-sync"
 import { useSearch } from "../../../../hooks/use-search"
@@ -23,6 +24,7 @@ import {
   StatusFilter,
   UnreadFilter,
 } from "./filters"
+import { InboxNoMatchingEmpty } from "./inbox-no-matching-empty"
 import { ProjectInboxTable } from "./project-inbox-table"
 import { ProjectKanbanBoard } from "./project-kanban-board"
 
@@ -30,6 +32,7 @@ const LIST_DEFAULT_PER_PAGE = 10
 
 export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionSubmissionInbox() {
   const { t } = useTranslation()
+  const { jurisdictionId } = useParams()
   const { submissionInboxStore, sandboxStore, collaboratorStore } = useMst()
   const { currentJurisdiction, error } = useJurisdiction()
 
@@ -40,6 +43,7 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
   const activeSearchStore = viewMode === EInboxViewMode.projects ? permitProjectSearch : permitApplicationSearch
   const prevDisplayModeRef = useRef(displayMode)
   const prevViewModeRef = useRef(viewMode)
+  const inboxSearchEnabled = currentJurisdiction?.submissionInboxSetUp === true
 
   usePopStateModeSync(submissionInboxStore)
 
@@ -49,22 +53,28 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
     const switchedToList =
       displayMode === EInboxDisplayMode.list && prevDisplayModeRef.current !== EInboxDisplayMode.list
 
-    if (switchedToColumns) {
-      if (viewMode === EInboxViewMode.projects) {
-        permitProjectSearch.setStateFilter([])
-      } else {
-        permitApplicationSearch.setStatusFilter([] as EPermitApplicationStatus[])
+    if (inboxSearchEnabled) {
+      if (switchedToColumns) {
+        if (viewMode === EInboxViewMode.projects) {
+          permitProjectSearch.setStateFilter([])
+        } else {
+          permitApplicationSearch.setStatusFilter([] as EPermitApplicationStatus[])
+        }
+        activeSearchStore.search()
+      } else if (switchedToList) {
+        activeSearchStore.setCountPerPage(LIST_DEFAULT_PER_PAGE)
+        activeSearchStore.search({ countPerPage: LIST_DEFAULT_PER_PAGE })
       }
-      activeSearchStore.search()
-    } else if (switchedToList) {
-      activeSearchStore.setCountPerPage(LIST_DEFAULT_PER_PAGE)
-      activeSearchStore.search({ countPerPage: LIST_DEFAULT_PER_PAGE })
     }
 
     prevDisplayModeRef.current = displayMode
-  }, [displayMode])
+  }, [displayMode, inboxSearchEnabled, activeSearchStore])
 
   useEffect(() => {
+    if (!inboxSearchEnabled) {
+      prevViewModeRef.current = viewMode
+      return
+    }
     if (viewMode !== prevViewModeRef.current && displayMode === EInboxDisplayMode.columns) {
       if (viewMode === EInboxViewMode.projects) {
         permitProjectSearch.setStateFilter([])
@@ -73,9 +83,12 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
       }
     }
     prevViewModeRef.current = viewMode
-  }, [viewMode])
+  }, [viewMode, displayMode, inboxSearchEnabled, permitProjectSearch, permitApplicationSearch])
 
-  useSearch(activeSearchStore, [currentJurisdiction?.id, JSON.stringify(currentSandboxId), viewMode])
+  useSearch(
+    activeSearchStore,
+    inboxSearchEnabled ? [currentJurisdiction?.id, JSON.stringify(currentSandboxId), viewMode] : [null]
+  )
 
   const loadCollaboratorOptions = useCallback(async (): Promise<IOption[]> => {
     if (!currentJurisdiction?.id) return []
@@ -84,6 +97,8 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
 
   if (error) return <ErrorScreen error={error} />
   if (!currentJurisdiction) return <LoadingScreen />
+
+  const submissionInboxConfigured = currentJurisdiction.submissionInboxSetUp === true
 
   const handleShowMore = (columnState: string) => {
     setDisplayMode(EInboxDisplayMode.list)
@@ -147,177 +162,205 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
         {/* Pinned header: title, search, filters, toggles */}
         <Box flexShrink={0} px={8} pt={8} pb={4}>
           <VStack align="start" spacing={5} w="full">
-            {!currentJurisdiction.inboxEnabled && (
+            {submissionInboxConfigured && !currentJurisdiction.inboxEnabled && (
               <CalloutBanner type="error" title={t("permitApplication.submissionInbox.contactInviteWarning")} />
             )}
 
             <Heading as="h1">{t("permitApplication.submissionInbox.title")}</Heading>
 
+            {!submissionInboxConfigured && (
+              <>
+                <CalloutBanner
+                  type="info"
+                  title={t("submissionInbox.setupEmailNotificationsTitle")}
+                  body={t("submissionInbox.setupEmailNotificationsBody")}
+                />
+                {jurisdictionId && (
+                  <Link
+                    as={RouterLink}
+                    fontSize="sm"
+                    color="text.link"
+                    to={`/jurisdictions/${jurisdictionId}/configuration-management/feature-access/submissions-inbox-setup`}
+                  >
+                    {t("submissionInbox.setupEmailNotificationsLink")}
+                  </Link>
+                )}
+              </>
+            )}
+
             {/* Search bar + filters */}
-            <HStack w="full" spacing={2} flexWrap="wrap">
-              <Box
-                as="input"
-                flex={1}
-                minW="300px"
-                maxW="50%"
-                p={2}
-                px={4}
-                border="1px solid"
-                borderColor="border.light"
-                borderRadius="md"
-                fontSize="sm"
-                placeholder={t("submissionInbox.searchPlaceholder")}
-                _placeholder={{ color: "text.secondary" }}
-                value={activeSearchStore.query ?? ""}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  activeSearchStore.setQuery(e.target.value)
-                  activeSearchStore.search()
-                }}
-              />
-              {/* {viewMode === EInboxViewMode.projects && (
+            {submissionInboxConfigured && (
+              <HStack w="full" spacing={2} flexWrap="wrap">
+                <Box
+                  as="input"
+                  flex={1}
+                  minW="300px"
+                  maxW="50%"
+                  p={2}
+                  px={4}
+                  border="1px solid"
+                  borderColor="border.light"
+                  borderRadius="md"
+                  fontSize="sm"
+                  placeholder={t("submissionInbox.searchPlaceholder")}
+                  _placeholder={{ color: "text.secondary" }}
+                  value={activeSearchStore.query ?? ""}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    activeSearchStore.setQuery(e.target.value)
+                    activeSearchStore.search()
+                  }}
+                />
+                {/* {viewMode === EInboxViewMode.projects && (
                 <MeetingRequestsFilter
                   value={activeSearchStore.meetingRequestFilter}
                   onChange={(val) => activeSearchStore.setMeetingRequestFilter(val)}
                   onApply={() => activeSearchStore.search()}
                 />
               )} */}
-              <UnreadFilter
-                value={activeSearchStore.unreadFilter}
-                onChange={(val) => activeSearchStore.setUnreadFilter(val)}
-                onApply={() => activeSearchStore.search()}
-                badgeCount={
-                  viewMode === EInboxViewMode.projects
-                    ? permitProjectSearch.tablePermitProjects.filter((p) => !p.viewedAt).length
-                    : permitApplicationSearch.tablePermitApplications.filter((a) => !a.isViewed).length
-                }
-              />
-              <RequirementTemplateInboxFilter
-                value={[...activeSearchStore.requirementTemplateIdFilter]}
-                onChange={(val) => activeSearchStore.setRequirementTemplateIdFilter(val)}
-                onApply={() => activeSearchStore.search()}
-                onClear={() => {
-                  activeSearchStore.setRequirementTemplateIdFilter([])
-                  activeSearchStore.search()
-                }}
-              />
-              {displayMode === EInboxDisplayMode.list && viewMode === EInboxViewMode.applications && (
-                <StatusFilter
-                  value={[...permitApplicationSearch.statusFilter]}
-                  onChange={(val) => permitApplicationSearch.setStatusFilter(val as EPermitApplicationStatus[])}
-                  onApply={() => permitApplicationSearch.search()}
+                <UnreadFilter
+                  value={activeSearchStore.unreadFilter}
+                  onChange={(val) => activeSearchStore.setUnreadFilter(val)}
+                  onApply={() => activeSearchStore.search()}
+                  badgeCount={
+                    viewMode === EInboxViewMode.projects
+                      ? permitProjectSearch.tablePermitProjects.filter((p) => !p.viewedAt).length
+                      : permitApplicationSearch.tablePermitApplications.filter((a) => !a.isViewed).length
+                  }
+                />
+                <RequirementTemplateInboxFilter
+                  value={[...activeSearchStore.requirementTemplateIdFilter]}
+                  onChange={(val) => activeSearchStore.setRequirementTemplateIdFilter(val)}
+                  onApply={() => activeSearchStore.search()}
                   onClear={() => {
-                    permitApplicationSearch.setStatusFilter([] as EPermitApplicationStatus[])
-                    permitApplicationSearch.search()
+                    activeSearchStore.setRequirementTemplateIdFilter([])
+                    activeSearchStore.search()
                   }}
                 />
-              )}
-              {displayMode === EInboxDisplayMode.list && viewMode === EInboxViewMode.projects && (
-                <ProjectStateFilter
-                  value={[...permitProjectSearch.stateFilter]}
-                  onChange={(val) => permitProjectSearch.setStateFilter(val as string[])}
-                  onApply={() => permitProjectSearch.search()}
+                {displayMode === EInboxDisplayMode.list && viewMode === EInboxViewMode.applications && (
+                  <StatusFilter
+                    value={[...permitApplicationSearch.statusFilter]}
+                    onChange={(val) => permitApplicationSearch.setStatusFilter(val as EPermitApplicationStatus[])}
+                    onApply={() => permitApplicationSearch.search()}
+                    onClear={() => {
+                      permitApplicationSearch.setStatusFilter([] as EPermitApplicationStatus[])
+                      permitApplicationSearch.search()
+                    }}
+                  />
+                )}
+                {displayMode === EInboxDisplayMode.list && viewMode === EInboxViewMode.projects && (
+                  <ProjectStateFilter
+                    value={[...permitProjectSearch.stateFilter]}
+                    onChange={(val) => permitProjectSearch.setStateFilter(val as string[])}
+                    onApply={() => permitProjectSearch.search()}
+                    onClear={() => {
+                      permitProjectSearch.setStateFilter([])
+                      permitProjectSearch.search()
+                    }}
+                  />
+                )}
+                <DaysInQueueFilter
+                  value={activeSearchStore.daysInQueueFilter}
+                  onChange={(val) => activeSearchStore.setDaysInQueueFilter(val)}
+                  onApply={() => activeSearchStore.search()}
                   onClear={() => {
-                    permitProjectSearch.setStateFilter([])
-                    permitProjectSearch.search()
+                    activeSearchStore.setDaysInQueueFilter(null)
+                    activeSearchStore.search()
                   }}
                 />
-              )}
-              <DaysInQueueFilter
-                value={activeSearchStore.daysInQueueFilter}
-                onChange={(val) => activeSearchStore.setDaysInQueueFilter(val)}
-                onApply={() => activeSearchStore.search()}
-                onClear={() => {
-                  activeSearchStore.setDaysInQueueFilter(null)
-                  activeSearchStore.search()
-                }}
-              />
-              <AssignedFilter
-                value={[...activeSearchStore.assignedFilter]}
-                onChange={(val) => activeSearchStore.setAssignedFilter(val)}
-                onApply={() => activeSearchStore.search()}
-                onClear={() => {
-                  activeSearchStore.setAssignedFilter([])
-                  activeSearchStore.search()
-                }}
-                loadOptions={loadCollaboratorOptions}
-              />
-              <Button variant="link" size="sm" onClick={() => activeSearchStore.resetFilters()}>
-                {t("submissionInbox.clearAllFilters")}
-              </Button>
-            </HStack>
+                <AssignedFilter
+                  value={[...activeSearchStore.assignedFilter]}
+                  onChange={(val) => activeSearchStore.setAssignedFilter(val)}
+                  onApply={() => activeSearchStore.search()}
+                  onClear={() => {
+                    activeSearchStore.setAssignedFilter([])
+                    activeSearchStore.search()
+                  }}
+                  loadOptions={loadCollaboratorOptions}
+                />
+                <Button variant="link" size="sm" onClick={() => activeSearchStore.resetFilters()}>
+                  {t("submissionInbox.clearAllFilters")}
+                </Button>
+              </HStack>
+            )}
 
             {/* View & display toggles */}
-            <HStack spacing={3}>
-              <ButtonGroup isAttached variant="outline" size="sm">
-                <Button
-                  borderRightWidth={2}
-                  onClick={() => setViewMode(EInboxViewMode.projects)}
-                  fontWeight={viewMode === EInboxViewMode.projects ? "bold" : "normal"}
-                  borderColor={viewMode === EInboxViewMode.projects ? "theme.blueActive" : "border.light"}
-                  bg={viewMode === EInboxViewMode.projects ? "background.blueLight" : undefined}
-                  leftIcon={<RadioDot active={viewMode === EInboxViewMode.projects} />}
-                  rightIcon={<Icon as={Buildings} />}
-                >
-                  {t("submissionInbox.projects")}
-                </Button>
-                <Button
-                  onClick={() => setViewMode(EInboxViewMode.applications)}
-                  fontWeight={viewMode === EInboxViewMode.applications ? "bold" : "normal"}
-                  borderColor={viewMode === EInboxViewMode.applications ? "theme.blueActive" : "border.light"}
-                  bg={viewMode === EInboxViewMode.applications ? "background.blueLight" : undefined}
-                  leftIcon={<RadioDot active={viewMode === EInboxViewMode.applications} />}
-                  rightIcon={<Icon as={FileText} />}
-                >
-                  {t("submissionInbox.applications")}
-                </Button>
-              </ButtonGroup>
+            {submissionInboxConfigured && (
+              <HStack spacing={3}>
+                <ButtonGroup isAttached variant="outline" size="sm">
+                  <Button
+                    borderRightWidth={2}
+                    onClick={() => setViewMode(EInboxViewMode.projects)}
+                    fontWeight={viewMode === EInboxViewMode.projects ? "bold" : "normal"}
+                    borderColor={viewMode === EInboxViewMode.projects ? "theme.blueActive" : "border.light"}
+                    bg={viewMode === EInboxViewMode.projects ? "background.blueLight" : undefined}
+                    leftIcon={<RadioDot active={viewMode === EInboxViewMode.projects} />}
+                    rightIcon={<Icon as={Buildings} />}
+                  >
+                    {t("submissionInbox.projects")}
+                  </Button>
+                  <Button
+                    onClick={() => setViewMode(EInboxViewMode.applications)}
+                    fontWeight={viewMode === EInboxViewMode.applications ? "bold" : "normal"}
+                    borderColor={viewMode === EInboxViewMode.applications ? "theme.blueActive" : "border.light"}
+                    bg={viewMode === EInboxViewMode.applications ? "background.blueLight" : undefined}
+                    leftIcon={<RadioDot active={viewMode === EInboxViewMode.applications} />}
+                    rightIcon={<Icon as={FileText} />}
+                  >
+                    {t("submissionInbox.applications")}
+                  </Button>
+                </ButtonGroup>
 
-              <ButtonGroup isAttached variant="outline" size="sm">
-                <Button
-                  borderRightWidth={2}
-                  onClick={() => setDisplayMode(EInboxDisplayMode.list)}
-                  fontWeight={displayMode === EInboxDisplayMode.list ? "bold" : "normal"}
-                  borderColor={displayMode === EInboxDisplayMode.list ? "theme.blueActive" : "border.light"}
-                  bg={displayMode === EInboxDisplayMode.list ? "background.blueLight" : undefined}
-                  leftIcon={<RadioDot active={displayMode === EInboxDisplayMode.list} />}
-                  rightIcon={<Icon as={ListDashes} />}
-                >
-                  {t("submissionInbox.list")}
-                </Button>
-                <Button
-                  onClick={() => setDisplayMode(EInboxDisplayMode.columns)}
-                  fontWeight={displayMode === EInboxDisplayMode.columns ? "bold" : "normal"}
-                  borderColor={displayMode === EInboxDisplayMode.columns ? "theme.blueActive" : "border.light"}
-                  bg={displayMode === EInboxDisplayMode.columns ? "background.blueLight" : undefined}
-                  leftIcon={<RadioDot active={displayMode === EInboxDisplayMode.columns} />}
-                  rightIcon={<Icon as={Columns} />}
-                >
-                  {t("submissionInbox.columns")}
-                </Button>
-              </ButtonGroup>
-            </HStack>
+                <ButtonGroup isAttached variant="outline" size="sm">
+                  <Button
+                    borderRightWidth={2}
+                    onClick={() => setDisplayMode(EInboxDisplayMode.list)}
+                    fontWeight={displayMode === EInboxDisplayMode.list ? "bold" : "normal"}
+                    borderColor={displayMode === EInboxDisplayMode.list ? "theme.blueActive" : "border.light"}
+                    bg={displayMode === EInboxDisplayMode.list ? "background.blueLight" : undefined}
+                    leftIcon={<RadioDot active={displayMode === EInboxDisplayMode.list} />}
+                    rightIcon={<Icon as={ListDashes} />}
+                  >
+                    {t("submissionInbox.list")}
+                  </Button>
+                  <Button
+                    onClick={() => setDisplayMode(EInboxDisplayMode.columns)}
+                    fontWeight={displayMode === EInboxDisplayMode.columns ? "bold" : "normal"}
+                    borderColor={displayMode === EInboxDisplayMode.columns ? "theme.blueActive" : "border.light"}
+                    bg={displayMode === EInboxDisplayMode.columns ? "background.blueLight" : undefined}
+                    leftIcon={<RadioDot active={displayMode === EInboxDisplayMode.columns} />}
+                    rightIcon={<Icon as={Columns} />}
+                  >
+                    {t("submissionInbox.columns")}
+                  </Button>
+                </ButtonGroup>
+              </HStack>
+            )}
           </VStack>
         </Box>
 
         {/* Content area — columns mode fills exactly; list mode scrolls */}
-        <Flex
-          direction="column"
-          flex={1}
-          minH={0}
-          overflow={displayMode === EInboxDisplayMode.columns ? "hidden" : "auto"}
-          px={8}
-          pb={displayMode === EInboxDisplayMode.columns ? 0 : 8}
-        >
-          <TotalCountLabel viewMode={viewMode} displayMode={displayMode} activeSearchStore={activeSearchStore} />
-          <InboxContent
-            viewMode={viewMode}
-            displayMode={displayMode}
-            permitProjectSearch={permitProjectSearch}
-            permitApplicationSearch={permitApplicationSearch}
-            submissionInboxStore={submissionInboxStore}
-            onShowMore={handleShowMore}
-          />
-        </Flex>
+        {submissionInboxConfigured && (
+          <Flex
+            direction="column"
+            flex={1}
+            minH={0}
+            minW={0}
+            overflowX="auto"
+            overflowY={displayMode === EInboxDisplayMode.columns ? "hidden" : "auto"}
+            px={8}
+            pb={displayMode === EInboxDisplayMode.columns ? 0 : 8}
+          >
+            <TotalCountLabel viewMode={viewMode} displayMode={displayMode} activeSearchStore={activeSearchStore} />
+            <InboxContent
+              viewMode={viewMode}
+              displayMode={displayMode}
+              permitProjectSearch={permitProjectSearch}
+              permitApplicationSearch={permitApplicationSearch}
+              submissionInboxStore={submissionInboxStore}
+              onShowMore={handleShowMore}
+            />
+          </Flex>
+        )}
       </Flex>
     </Flex>
   )
@@ -403,6 +446,14 @@ const InboxContent = observer(function InboxContent({
       return (
         <Flex w="full" justify="center" align="center" minH="400px">
           <SharedSpinner />
+        </Flex>
+      )
+    }
+
+    if (submissionInboxStore.inboxShowsNoMatchingEmptyState) {
+      return (
+        <Flex w="full" justify="flex-start" align="flex-start" minH="200px">
+          <InboxNoMatchingEmpty viewMode={viewMode} onClearFilters={() => activeSearch.resetFilters()} />
         </Flex>
       )
     }

@@ -24,7 +24,7 @@ import { Link } from "react-router-dom"
 import { IPermitProject } from "../../../../models/permit-project"
 import { useMst } from "../../../../setup/root"
 import { IPermitProjectInboxStore } from "../../../../stores/submission-inbox-store"
-import { EPermitProjectInboxSortFields } from "../../../../types/enums"
+import { EInboxDisplayMode, EInboxViewMode, EPermitProjectInboxSortFields } from "../../../../types/enums"
 import { ISort } from "../../../../types/types"
 import { Paginator } from "../../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../../shared/base/inputs/per-page-select"
@@ -35,6 +35,7 @@ import { SearchGridItem } from "../../../shared/grid/search-grid-item"
 import { ProjectStateTag } from "../../../shared/permit-projects/project-state-tag"
 import { SortIcon } from "../../../shared/sort-icon"
 import { SharedAvatar } from "../../../shared/user/shared-avatar"
+import { InboxNoMatchingEmpty } from "./inbox-no-matching-empty"
 import { ProjectDesignatedReviewerPopover } from "./project-designated-reviewer-popover"
 import { ProjectInboxPermitApplicationsPopover } from "./project-inbox-permit-applications-popover"
 import { SubmissionInboxMarkUnreadIconButton } from "./submission-inbox-mark-unread-icon-button"
@@ -69,6 +70,8 @@ export const ProjectInboxTable = observer(function ProjectInboxTable({ searchSto
     handlePageChange,
     isSearching,
   } = searchStore
+
+  const showsNoMatching = searchStore.inboxShowsNoMatchingEmptyState(EInboxDisplayMode.list)
 
   return (
     <VStack w="full" spacing={5}>
@@ -113,6 +116,13 @@ export const ProjectInboxTable = observer(function ProjectInboxTable({ searchSto
         {isSearching ? (
           <Flex py={50} gridColumn="span 7">
             <SharedSpinner />
+          </Flex>
+        ) : showsNoMatching ? (
+          <Flex py={4} gridColumn="span 7" w="full" justify="flex-start">
+            <InboxNoMatchingEmpty
+              viewMode={EInboxViewMode.projects}
+              onClearFilters={() => searchStore.resetFilters()}
+            />
           </Flex>
         ) : (
           projects.map((project) => (
@@ -223,21 +233,23 @@ export const ProjectInboxTable = observer(function ProjectInboxTable({ searchSto
           ))
         )}
       </SearchGrid>
-      <Flex w="full" justifyContent="space-between">
-        <PerPageSelect
-          handleCountPerPageChange={handleCountPerPageChange}
-          countPerPage={countPerPage}
-          totalCount={totalCount}
-        />
-        <Paginator
-          current={currentPage}
-          total={totalCount}
-          totalPages={totalPages}
-          pageSize={countPerPage}
-          handlePageChange={handlePageChange}
-          showLessItems
-        />
-      </Flex>
+      {!showsNoMatching && (
+        <Flex w="full" justifyContent="space-between">
+          <PerPageSelect
+            handleCountPerPageChange={handleCountPerPageChange}
+            countPerPage={countPerPage}
+            totalCount={totalCount}
+          />
+          <Paginator
+            current={currentPage}
+            total={totalCount}
+            totalPages={totalPages}
+            pageSize={countPerPage}
+            handlePageChange={handlePageChange}
+            showLessItems
+          />
+        </Flex>
+      )}
     </VStack>
   )
 })

@@ -276,7 +276,7 @@ class Jurisdiction < ApplicationRecord
     permit_applications.kept.unviewed
   end
 
-  def submission_inbox_set_up
+  def submission_inbox_set_up?
     # Preserve legacy behavior: if no permit types are enabled, setup is considered complete
     return true if PermitType.enabled.empty?
 
@@ -445,7 +445,7 @@ class Jurisdiction < ApplicationRecord
   end
 
   def inbox_enabled_requires_inbox_setup
-    if inbox_enabled && !submission_inbox_set_up
+    if inbox_enabled && !submission_inbox_set_up?
       errors.add(
         :inbox_enabled,
         I18n.t(

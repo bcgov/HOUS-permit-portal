@@ -26,6 +26,8 @@ import { useMst } from "../../../../setup/root"
 import { IPermitApplicationInboxStore } from "../../../../stores/submission-inbox-store"
 import {
   ECollaborationType,
+  EInboxDisplayMode,
+  EInboxViewMode,
   EPermitApplicationInboxSortFields,
   EPermitApplicationStatus,
 } from "../../../../types/enums"
@@ -40,6 +42,7 @@ import { PermitApplicationStatusTag } from "../../../shared/permit-applications/
 import { SortIcon } from "../../../shared/sort-icon"
 import { SharedAvatar } from "../../../shared/user/shared-avatar"
 import { DesignatedCollaboratorAssignmentPopover } from "../../permit-application/collaborator-management/designated-collaborator-assignment-popover"
+import { InboxNoMatchingEmpty } from "./inbox-no-matching-empty"
 import { SubmissionInboxMarkUnreadIconButton } from "./submission-inbox-mark-unread-icon-button"
 
 interface IProps {
@@ -63,6 +66,8 @@ export const ApplicationInboxTable = observer(function ApplicationInboxTable({ s
     handlePageChange,
     isSearching,
   } = searchStore
+
+  const showsNoMatching = searchStore.inboxShowsNoMatchingEmptyState(EInboxDisplayMode.list)
 
   return (
     <VStack w="full" spacing={5}>
@@ -127,25 +132,34 @@ export const ApplicationInboxTable = observer(function ApplicationInboxTable({ s
           <Flex py={50} gridColumn="span 8">
             <SharedSpinner />
           </Flex>
+        ) : showsNoMatching ? (
+          <Flex py={4} gridColumn="span 8" w="full" justify="flex-start">
+            <InboxNoMatchingEmpty
+              viewMode={EInboxViewMode.applications}
+              onClearFilters={() => searchStore.resetFilters()}
+            />
+          </Flex>
         ) : (
           applications.map((application) => <ApplicationInboxRow key={application.id} application={application} />)
         )}
       </SearchGrid>
-      <Flex w="full" justifyContent="space-between">
-        <PerPageSelect
-          handleCountPerPageChange={handleCountPerPageChange}
-          countPerPage={countPerPage}
-          totalCount={totalCount}
-        />
-        <Paginator
-          current={currentPage}
-          total={totalCount}
-          totalPages={totalPages}
-          pageSize={countPerPage}
-          handlePageChange={handlePageChange}
-          showLessItems
-        />
-      </Flex>
+      {!showsNoMatching && (
+        <Flex w="full" justifyContent="space-between">
+          <PerPageSelect
+            handleCountPerPageChange={handleCountPerPageChange}
+            countPerPage={countPerPage}
+            totalCount={totalCount}
+          />
+          <Paginator
+            current={currentPage}
+            total={totalCount}
+            totalPages={totalPages}
+            pageSize={countPerPage}
+            handlePageChange={handlePageChange}
+            showLessItems
+          />
+        </Flex>
+      )}
     </VStack>
   )
 })

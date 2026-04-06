@@ -7,7 +7,7 @@ class EnableInboxes < ActiveRecord::Migration[7.1]
       next if jurisdiction.inbox_enabled
 
       # Evaluate the computed method
-      if jurisdiction.submission_inbox_set_up
+      if jurisdiction.submission_inbox_set_up?
         # Update inbox_enabled to true
         if jurisdiction.update(inbox_enabled: true)
           puts "✅ Enabled inbox for Jurisdiction: #{jurisdiction.id} - #{jurisdiction.qualified_name}"

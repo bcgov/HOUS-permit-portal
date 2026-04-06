@@ -28,6 +28,62 @@ function decamelizeHashKeys(hash: Record<string, number>): Record<string, number
   return result
 }
 
+/** Narrowing = search text and/or any non-default filter (shared by project + application inbox search). */
+type InboxSearchNarrowingSelf = {
+  query: string | null
+  requirementTemplateIdFilter?: readonly string[]
+  /** Application inbox (`PermitApplicationInboxStoreModel`) */
+  statusFilter?: readonly unknown[]
+  /** Project inbox (`PermitProjectInboxStoreModel`) */
+  stateFilter?: readonly string[]
+  unreadFilter: ERadioFilterValue
+  daysInQueueFilter: { operator: string; days: number } | null
+  assignedFilter?: readonly string[]
+}
+
+function inboxSearchHasActiveNarrowing(self: InboxSearchNarrowingSelf): boolean {
+  if (self.query?.trim()) return true
+  if ((self.requirementTemplateIdFilter?.length ?? 0) > 0) return true
+  if ((self.statusFilter?.length ?? 0) > 0) return true
+  if ((self.stateFilter?.length ?? 0) > 0) return true
+  if (self.unreadFilter !== ERadioFilterValue.include) return true
+  if (self.daysInQueueFilter != null) return true
+  if ((self.assignedFilter?.length ?? 0) > 0) return true
+  return false
+}
+
+function sumRecordValues(record: Record<string, number>): number {
+  return Object.values(record).reduce((sum, n) => sum + (typeof n === "number" ? n : 0), 0)
+}
+
+type InboxSearchEmptyStateSelf = InboxSearchNarrowingSelf & {
+  isSearching: boolean
+  totalCount: number | null
+  stateCounts: Record<string, number>
+  columnTotals: Record<string, number>
+}
+
+function inboxShowsNoMatchingEmptyStateImpl(self: InboxSearchEmptyStateSelf, displayMode: EInboxDisplayMode): boolean {
+  if (self.isSearching) return false
+  if (!inboxSearchHasActiveNarrowing(self)) return false
+  const unfilteredTotal = sumRecordValues(self.stateCounts)
+  if (unfilteredTotal === 0) return false
+  if (displayMode === EInboxDisplayMode.columns) {
+    return sumRecordValues(self.columnTotals) === 0
+  }
+  return (self.totalCount ?? 0) === 0
+}
+
+/** Composed into project + application inbox search models; `self` in views is the full composed instance. */
+const submissionInboxSearchEmptyStateViews = types.model("SubmissionInboxSearchEmptyStateViews", {}).views((self) => ({
+  get inboxSearchHasActiveNarrowing() {
+    return inboxSearchHasActiveNarrowing(self as unknown as InboxSearchNarrowingSelf)
+  },
+  inboxShowsNoMatchingEmptyState(displayMode: EInboxDisplayMode) {
+    return inboxShowsNoMatchingEmptyStateImpl(self as unknown as InboxSearchEmptyStateSelf, displayMode)
+  },
+}))
+
 // ---------------------------------------------------------------------------
 // Sub-store: Permit Project Inbox Search
 // ---------------------------------------------------------------------------
@@ -52,7 +108,8 @@ export const PermitProjectInboxStoreModel = types
     createSearchModel<EPermitProjectInboxSortFields>(
       "searchJurisdictionPermitProjects",
       "setJurisdictionPermitProjectFilters"
-    )
+    ),
+    submissionInboxSearchEmptyStateViews
   )
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -174,7 +231,6 @@ export const PermitProjectInboxStoreModel = types
   }))
   .actions((self) => ({
     resetFilters() {
-      self.setQuery("")
       self.setRequirementTemplateIdFilter([])
       self.setStateFilter([])
       self.setUnreadFilter(ERadioFilterValue.include)
@@ -218,7 +274,8 @@ export const PermitApplicationInboxStoreModel = types
     createSearchModel<EPermitApplicationInboxSortFields>(
       "searchJurisdictionPermitApplications",
       "setJurisdictionPermitApplicationFilters"
-    )
+    ),
+    submissionInboxSearchEmptyStateViews
   )
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -344,7 +401,6 @@ export const PermitApplicationInboxStoreModel = types
   }))
   .actions((self) => ({
     resetFilters() {
-      self.setQuery("")
       self.setRequirementTemplateIdFilter([])
       self.setStatusFilter([] as any)
       self.setUnreadFilter(ERadioFilterValue.include)
@@ -376,6 +432,15 @@ export const SubmissionInboxStoreModel = types
     permitProjectSearch: types.optional(PermitProjectInboxStoreModel, {}),
     permitApplicationSearch: types.optional(PermitApplicationInboxStoreModel, {}),
   })
+  .views((self) => ({
+    get activeInboxSearch() {
+      return self.viewMode === EInboxViewMode.projects ? self.permitProjectSearch : self.permitApplicationSearch
+    },
+    get inboxShowsNoMatchingEmptyState() {
+      const search = self.viewMode === EInboxViewMode.projects ? self.permitProjectSearch : self.permitApplicationSearch
+      return search.inboxShowsNoMatchingEmptyState(self.displayMode)
+    },
+  }))
   .actions((self) => ({
     setViewMode(mode: EInboxViewMode) {
       self.viewMode = mode
