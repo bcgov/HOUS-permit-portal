@@ -67,7 +67,7 @@ class PermitBlockStatus < ApplicationRecord
         collaborator_type: :delegatee
       )
 
-    # add only assignees who are assigned to same requirement block
+    # add only assignees who are assigned to same requirement block.
 
     users_to_notify +=
       permit_application.users_by_collaboration_options(
