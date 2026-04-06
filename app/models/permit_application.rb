@@ -87,8 +87,10 @@ class PermitApplication < ApplicationRecord
                if: :status_changed_to_intake?
   after_commit :mark_permit_project_as_unviewed, if: :status_changed_to_intake?
   after_commit :enqueue_permit_project_if_draft, if: :status_changed_to_intake?
-  after_commit :auto_assign_project_review_delegatee,
-               if: :status_changed_to_intake?
+  # TODO: Review with product manager — re-enable syncing the project’s review delegatee onto
+  # each permit application when the application enters intake (see #auto_assign_project_review_delegatee).
+  # after_commit :auto_assign_project_review_delegatee,
+  #              if: :status_changed_to_intake?
 
   scope :with_submitter_role,
         -> { joins(:submitter).where(users: { role: "submitter" }) }
@@ -866,27 +868,28 @@ class PermitApplication < ApplicationRecord
     permit_project&.enqueue! if permit_project&.draft?
   end
 
+  # Disabled pending product decision — restore together with the after_commit above.
   def auto_assign_project_review_delegatee
-    return unless permit_project&.review_delegatee.present?
-    return unless SiteConfiguration.allow_designated_reviewer?
-    return unless jurisdiction&.allow_designated_reviewer
-
-    permit_collaborations
-      .kept
-      .where(collaborator_type: :delegatee, collaboration_type: :review)
-      .discard_all
-
-    collab =
-      permit_collaborations.create!(
-        collaborator_id: permit_project.review_delegatee_id,
-        collaborator_type: :delegatee,
-        collaboration_type: :review
-      )
-    NotificationService.publish_permit_collaboration_assignment_event(collab)
-  rescue => e
-    Rails.logger.warn(
-      "Failed to auto-assign project review delegatee for PA #{id}: #{e.message}"
-    )
+    # return unless permit_project&.review_delegatee.present?
+    # return unless SiteConfiguration.allow_designated_reviewer?
+    # return unless jurisdiction&.allow_designated_reviewer
+    #
+    # permit_collaborations
+    #   .kept
+    #   .where(collaborator_type: :delegatee, collaboration_type: :review)
+    #   .discard_all
+    #
+    # collab =
+    #   permit_collaborations.create!(
+    #     collaborator_id: permit_project.review_delegatee_id,
+    #     collaborator_type: :delegatee,
+    #     collaboration_type: :review
+    #   )
+    # NotificationService.publish_permit_collaboration_assignment_event(collab)
+    # rescue => e
+    #   Rails.logger.warn(
+    #     "Failed to auto-assign project review delegatee for PA #{id}: #{e.message}"
+    #   )
   end
 
   def jurisdiction_or_permit_project_present
