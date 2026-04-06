@@ -94,7 +94,7 @@ class PermitBlockStatus < ApplicationRecord
     user_ids_to_send = users_to_notify_status_ready.pluck(:id)
 
     if review?
-      # as all review staff have access to status we send the status update websocket regardless if they are a collaborator
+      # as all review staff have access to status we send the status update websocket regardless if they are a collaborator.
       user_ids_to_send +=
         permit_application
           .jurisdiction
