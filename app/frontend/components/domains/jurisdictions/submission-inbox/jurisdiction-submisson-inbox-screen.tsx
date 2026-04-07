@@ -450,7 +450,7 @@ const InboxContent = observer(function InboxContent({
       )
     }
 
-    if (submissionInboxStore.inboxShowsNoMatchingEmptyState) {
+    if (submissionInboxStore.inboxShowsNoResultsKanban) {
       return (
         <Flex w="full" justify="flex-start" align="flex-start" minH="200px">
           <InboxNoMatchingEmpty viewMode={viewMode} onClearFilters={() => activeSearch.resetFilters()} />

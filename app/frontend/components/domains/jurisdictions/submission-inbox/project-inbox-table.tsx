@@ -24,7 +24,7 @@ import { Link } from "react-router-dom"
 import { IPermitProject } from "../../../../models/permit-project"
 import { useMst } from "../../../../setup/root"
 import { IPermitProjectInboxStore } from "../../../../stores/submission-inbox-store"
-import { EInboxDisplayMode, EInboxViewMode, EPermitProjectInboxSortFields } from "../../../../types/enums"
+import { EInboxViewMode, EPermitProjectInboxSortFields } from "../../../../types/enums"
 import { ISort } from "../../../../types/types"
 import { Paginator } from "../../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../../shared/base/inputs/per-page-select"
@@ -71,7 +71,130 @@ export const ProjectInboxTable = observer(function ProjectInboxTable({ searchSto
     isSearching,
   } = searchStore
 
-  const showsNoMatching = searchStore.inboxShowsNoMatchingEmptyState(EInboxDisplayMode.list)
+  const listShowsNoResults = !isSearching && totalCount !== null && totalCount === 0
+
+  const renderListBody = () => {
+    if (isSearching) {
+      return (
+        <Flex py={50} gridColumn="span 7">
+          <SharedSpinner />
+        </Flex>
+      )
+    }
+    if (listShowsNoResults) {
+      return (
+        <Flex py={4} gridColumn="span 7" w="full" justify="flex-start">
+          <InboxNoMatchingEmpty viewMode={EInboxViewMode.projects} onClearFilters={() => searchStore.resetFilters()} />
+        </Flex>
+      )
+    }
+    return projects.map((project) => (
+      <Box
+        key={project.id}
+        as={Link}
+        to={`projects/${project.id}/overview`}
+        className="project-inbox-grid-row"
+        role="row"
+        display="contents"
+        cursor="pointer"
+        _hover={{ textDecoration: "none" }}
+      >
+        <SearchGridItem>
+          <HStack spacing={3}>
+            <Circle size="8px" bg={!project.viewedAt ? "theme.blueActive" : "transparent"} flexShrink={0} />
+
+            <VStack align="start" spacing={0}>
+              <Text fontWeight={700} fontSize="sm">
+                {project.number}
+              </Text>
+              <Text fontSize="xs" color="text.secondary" noOfLines={1}>
+                {project.title}
+              </Text>
+            </VStack>
+          </HStack>
+        </SearchGridItem>
+
+        <SearchGridItem>
+          <VStack align="start" spacing={0}>
+            <Text fontSize="sm" noOfLines={1}>
+              {project.shortAddress || project.fullAddress || "—"}
+            </Text>
+            {project.pid ? (
+              <Text fontSize="xs" color="text.secondary">
+                PID {project.pid}
+              </Text>
+            ) : (
+              <Text fontSize="xs" color="text.secondary">
+                —
+              </Text>
+            )}
+          </VStack>
+        </SearchGridItem>
+
+        <SearchGridItem>
+          <ProjectInboxPermitApplicationsPopover
+            project={project}
+            renderTrigger={
+              <Text fontSize="sm">
+                {project.totalPermitsCount > 0
+                  ? `${project.inQueueCount} of ${project.totalPermitsCount} received`
+                  : "0 of 0 received"}
+              </Text>
+            }
+          />
+        </SearchGridItem>
+
+        <SearchGridItem>
+          {project.daysInQueue != null ? (
+            <VStack align="start" spacing={0}>
+              <Text fontSize="sm" fontWeight={600}>
+                {project.formattedDaysInQueue}
+              </Text>
+              <Text fontSize="xs" color="text.secondary">
+                {t("submissionInbox.waitingSince")}
+              </Text>
+              <Text fontSize="xs" color="text.secondary">
+                {project.formattedEnqueuedAt}
+              </Text>
+            </VStack>
+          ) : (
+            <Text fontSize="sm" color="text.secondary">
+              —
+            </Text>
+          )}
+        </SearchGridItem>
+
+        <SearchGridItem
+          onClick={(e: React.MouseEvent) => {
+            e.preventDefault()
+            e.stopPropagation()
+          }}
+        >
+          <ProjectAssignedCell project={project} />
+        </SearchGridItem>
+
+        <SearchGridItem>
+          <ProjectStateTag state={project.state} fontSize="xs" />
+        </SearchGridItem>
+
+        <SearchGridItem
+          px={1}
+          justifyContent="center"
+          onClick={(e: React.MouseEvent) => {
+            e.preventDefault()
+            e.stopPropagation()
+          }}
+        >
+          <HStack spacing={0}>
+            <ProjectActionsMenu project={project} />
+            {!!project.viewedAt && (
+              <SubmissionInboxMarkUnreadIconButton onMarkUnread={() => project.markAsUnviewed()} />
+            )}
+          </HStack>
+        </SearchGridItem>
+      </Box>
+    ))
+  }
 
   return (
     <VStack w="full" spacing={5}>
@@ -113,127 +236,9 @@ export const ProjectInboxTable = observer(function ProjectInboxTable({ searchSto
           </Box>
         </Box>
 
-        {isSearching ? (
-          <Flex py={50} gridColumn="span 7">
-            <SharedSpinner />
-          </Flex>
-        ) : showsNoMatching ? (
-          <Flex py={4} gridColumn="span 7" w="full" justify="flex-start">
-            <InboxNoMatchingEmpty
-              viewMode={EInboxViewMode.projects}
-              onClearFilters={() => searchStore.resetFilters()}
-            />
-          </Flex>
-        ) : (
-          projects.map((project) => (
-            <Box
-              key={project.id}
-              as={Link}
-              to={`projects/${project.id}/overview`}
-              className="project-inbox-grid-row"
-              role="row"
-              display="contents"
-              cursor="pointer"
-              _hover={{ textDecoration: "none" }}
-            >
-              <SearchGridItem>
-                <HStack spacing={3}>
-                  <Circle size="8px" bg={!project.viewedAt ? "theme.blueActive" : "transparent"} flexShrink={0} />
-
-                  <VStack align="start" spacing={0}>
-                    <Text fontWeight={700} fontSize="sm">
-                      {project.number}
-                    </Text>
-                    <Text fontSize="xs" color="text.secondary" noOfLines={1}>
-                      {project.title}
-                    </Text>
-                  </VStack>
-                </HStack>
-              </SearchGridItem>
-
-              <SearchGridItem>
-                <VStack align="start" spacing={0}>
-                  <Text fontSize="sm" noOfLines={1}>
-                    {project.shortAddress || project.fullAddress || "—"}
-                  </Text>
-                  {project.pid ? (
-                    <Text fontSize="xs" color="text.secondary">
-                      PID {project.pid}
-                    </Text>
-                  ) : (
-                    <Text fontSize="xs" color="text.secondary">
-                      —
-                    </Text>
-                  )}
-                </VStack>
-              </SearchGridItem>
-
-              <SearchGridItem>
-                <ProjectInboxPermitApplicationsPopover
-                  project={project}
-                  renderTrigger={
-                    <Text fontSize="sm">
-                      {project.totalPermitsCount > 0
-                        ? `${project.inQueueCount} of ${project.totalPermitsCount} received`
-                        : "0 of 0 received"}
-                    </Text>
-                  }
-                />
-              </SearchGridItem>
-
-              <SearchGridItem>
-                {project.daysInQueue != null ? (
-                  <VStack align="start" spacing={0}>
-                    <Text fontSize="sm" fontWeight={600}>
-                      {project.formattedDaysInQueue}
-                    </Text>
-                    <Text fontSize="xs" color="text.secondary">
-                      {t("submissionInbox.waitingSince")}
-                    </Text>
-                    <Text fontSize="xs" color="text.secondary">
-                      {project.formattedEnqueuedAt}
-                    </Text>
-                  </VStack>
-                ) : (
-                  <Text fontSize="sm" color="text.secondary">
-                    —
-                  </Text>
-                )}
-              </SearchGridItem>
-
-              <SearchGridItem
-                onClick={(e: React.MouseEvent) => {
-                  e.preventDefault()
-                  e.stopPropagation()
-                }}
-              >
-                <ProjectAssignedCell project={project} />
-              </SearchGridItem>
-
-              <SearchGridItem>
-                <ProjectStateTag state={project.state} fontSize="xs" />
-              </SearchGridItem>
-
-              <SearchGridItem
-                px={1}
-                justifyContent="center"
-                onClick={(e: React.MouseEvent) => {
-                  e.preventDefault()
-                  e.stopPropagation()
-                }}
-              >
-                <HStack spacing={0}>
-                  <ProjectActionsMenu project={project} />
-                  {!!project.viewedAt && (
-                    <SubmissionInboxMarkUnreadIconButton onMarkUnread={() => project.markAsUnviewed()} />
-                  )}
-                </HStack>
-              </SearchGridItem>
-            </Box>
-          ))
-        )}
+        {renderListBody()}
       </SearchGrid>
-      {!showsNoMatching && (
+      {!listShowsNoResults && (
         <Flex w="full" justifyContent="space-between">
           <PerPageSelect
             handleCountPerPageChange={handleCountPerPageChange}

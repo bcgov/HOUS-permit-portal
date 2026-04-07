@@ -26,7 +26,6 @@ import { useMst } from "../../../../setup/root"
 import { IPermitApplicationInboxStore } from "../../../../stores/submission-inbox-store"
 import {
   ECollaborationType,
-  EInboxDisplayMode,
   EInboxViewMode,
   EPermitApplicationInboxSortFields,
   EPermitApplicationStatus,
@@ -67,7 +66,28 @@ export const ApplicationInboxTable = observer(function ApplicationInboxTable({ s
     isSearching,
   } = searchStore
 
-  const showsNoMatching = searchStore.inboxShowsNoMatchingEmptyState(EInboxDisplayMode.list)
+  const listShowsNoResults = !isSearching && totalCount !== null && totalCount === 0
+
+  const renderListBody = () => {
+    if (isSearching) {
+      return (
+        <Flex py={50} gridColumn="span 8">
+          <SharedSpinner />
+        </Flex>
+      )
+    }
+    if (listShowsNoResults) {
+      return (
+        <Flex py={4} gridColumn="span 8" w="full" justify="flex-start">
+          <InboxNoMatchingEmpty
+            viewMode={EInboxViewMode.applications}
+            onClearFilters={() => searchStore.resetFilters()}
+          />
+        </Flex>
+      )
+    }
+    return applications.map((application) => <ApplicationInboxRow key={application.id} application={application} />)
+  }
 
   return (
     <VStack w="full" spacing={5}>
@@ -128,22 +148,9 @@ export const ApplicationInboxTable = observer(function ApplicationInboxTable({ s
           </Box>
         </Box>
 
-        {isSearching ? (
-          <Flex py={50} gridColumn="span 8">
-            <SharedSpinner />
-          </Flex>
-        ) : showsNoMatching ? (
-          <Flex py={4} gridColumn="span 8" w="full" justify="flex-start">
-            <InboxNoMatchingEmpty
-              viewMode={EInboxViewMode.applications}
-              onClearFilters={() => searchStore.resetFilters()}
-            />
-          </Flex>
-        ) : (
-          applications.map((application) => <ApplicationInboxRow key={application.id} application={application} />)
-        )}
+        {renderListBody()}
       </SearchGrid>
-      {!showsNoMatching && (
+      {!listShowsNoResults && (
         <Flex w="full" justifyContent="space-between">
           <PerPageSelect
             handleCountPerPageChange={handleCountPerPageChange}
