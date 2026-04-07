@@ -3828,7 +3828,7 @@ Thank you,
           superAdminTitle: "Admin home",
           submissionsInboxTitle: "Submissions",
           submissionsInboxDescription: "View all submitted building permit applications.",
-          permitsTitle: "Digital building permits",
+          permitsTitle: "Permit application forms",
           permitsDescription:
             "Set up helpful tips for submitters and select elective questions to customize the permit application process for your local jurisdiction",
           userManagementTitle: "User management",
