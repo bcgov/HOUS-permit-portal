@@ -1,4 +1,4 @@
-import { Flex, Text, VStack } from "@chakra-ui/react"
+import { Flex, HStack, Text } from "@chakra-ui/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -15,14 +15,14 @@ export const ActivityListItem = observer(({ projectAudit }: IActivityListItemPro
 
   return (
     <Flex align="flex-start" justify="space-between" py={3} px={4} gap={4} minH={20}>
-      <VStack align="stretch" spacing={3} flex={1} minW={0}>
+      <HStack align="stretch" spacing={1} flex={1} minW={0}>
         <Text>{description}</Text>
         {permitName && (
           <RouterLink to={permitApplicationId ? `/permit-applications/${permitApplicationId}/edit` : undefined}>
             {permitName}
           </RouterLink>
         )}
-      </VStack>
+      </HStack>
       <Text variant="secondary">{format(createdAt, datefnsTableDateTimeFormat)}</Text>
     </Flex>
   )

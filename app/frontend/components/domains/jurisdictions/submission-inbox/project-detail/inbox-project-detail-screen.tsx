@@ -1,5 +1,5 @@
 import { Box, Container, Flex, Heading, IconButton, TabPanel, TabPanels, Tabs, Text } from "@chakra-ui/react"
-import { CaretLeft, SquaresFour } from "@phosphor-icons/react"
+import { CaretLeft, SquaresFour, TrendUp } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useTransition } from "react"
 import { useTranslation } from "react-i18next"
@@ -7,11 +7,8 @@ import { Link as RouterLink, useLocation, useNavigate, useParams } from "react-r
 import { usePermitProject } from "../../../../../hooks/resources/use-permit-project"
 import { ErrorScreen } from "../../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../../shared/base/loading-screen"
+import { ActivityTabPanelContent } from "../../../permit-project/activity-tab-panel-content"
 import { ITabItem, ProjectSidebarTabList } from "../../../permit-project/project-sidebar-tab-list"
-import { InboxActivityTab } from "./inbox-activity-tab"
-import { InboxDocumentsTab } from "./inbox-documents-tab"
-import { InboxMeetingsTab } from "./inbox-meetings-tab"
-import { InboxNotesTab } from "./inbox-notes-tab"
 import { InboxOverviewTab } from "./inbox-overview-tab"
 
 export const InboxProjectDetailScreen = observer(() => {
@@ -23,11 +20,12 @@ export const InboxProjectDetailScreen = observer(() => {
 
   const TABS_DATA: ITabItem[] = [
     { label: t("submissionInbox.projectDetail.overview"), icon: SquaresFour, to: "overview", tabIndex: 0 },
-    // TODO: panels coming soon
-    // { label: t("submissionInbox.projectDetail.notes"), icon: NoteBlank, to: "notes", tabIndex: 1 },
-    // { label: t("submissionInbox.projectDetail.activity"), icon: ClockCounterClockwise, to: "activity", tabIndex: 2 },
-    // { label: t("submissionInbox.projectDetail.documents"), icon: Folder, to: "documents", tabIndex: 3 },
-    // { label: t("submissionInbox.projectDetail.meetings"), icon: CalendarBlank, to: "meetings", tabIndex: 4 },
+    {
+      label: t("submissionInbox.projectDetail.activity"),
+      icon: TrendUp,
+      to: "activity",
+      tabIndex: 1,
+    },
   ]
 
   useEffect(() => {
@@ -94,12 +92,9 @@ export const InboxProjectDetailScreen = observer(() => {
           <TabPanel>
             {isPending ? <LoadingScreen /> : <InboxOverviewTab permitProject={currentPermitProject} />}
           </TabPanel>
-          <TabPanel>{isPending ? <LoadingScreen /> : <InboxNotesTab />}</TabPanel>
-          <TabPanel>{isPending ? <LoadingScreen /> : <InboxActivityTab />}</TabPanel>
           <TabPanel>
-            {isPending ? <LoadingScreen /> : <InboxDocumentsTab permitProject={currentPermitProject} />}
+            {isPending ? <LoadingScreen /> : <ActivityTabPanelContent permitProject={currentPermitProject} />}
           </TabPanel>
-          <TabPanel>{isPending ? <LoadingScreen /> : <InboxMeetingsTab />}</TabPanel>
         </TabPanels>
       </Tabs>
     </Box>
