@@ -238,7 +238,7 @@ RSpec.describe PermitHubMailer, type: :mailer do
       confirmed_user
     )
     mailer.notify_reviewer_application_received(contact, permit_application)
-    mailer.notify_application_viewed(permit_application)
+    mailer.notify_review_started(permit_application)
     mailer.notify_application_revisions_requested(
       permit_application,
       confirmed_user
@@ -257,7 +257,7 @@ RSpec.describe PermitHubMailer, type: :mailer do
     )
     expect(mailer).to have_received(:send_mail).with(
       email: confirmed_user.email,
-      template_key: "notify_application_viewed",
+      template_key: "notify_review_started",
       subject_i18n_params: {
         permit_application_number: "PA-1"
       }

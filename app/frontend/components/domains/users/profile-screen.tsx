@@ -106,7 +106,7 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
       emailControl: "preferenceAttributes.enableEmailApplicationSubmissionNotification",
     },
     {
-      event: t("user.notifications.applicationViewed"),
+      event: t("user.notifications.reviewStarted"),
       inAppControl: "preferenceAttributes.enableInAppApplicationViewNotification",
       emailControl: "preferenceAttributes.enableEmailApplicationViewNotification",
     },

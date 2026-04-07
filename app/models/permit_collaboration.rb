@@ -1,4 +1,9 @@
 class PermitCollaboration < ApplicationRecord
+  include Discard::Model
+
+  # discard is an update (sets discarded_at), so we need :update for unassign to be audited
+  audited on: %i[create update], associated_with: :permit_application
+
   belongs_to :collaborator
   belongs_to :permit_application, touch: true
 
@@ -8,8 +13,13 @@ class PermitCollaboration < ApplicationRecord
   before_validation :set_default_collaboration_type, on: :create
 
   after_initialize :set_default_collaboration_type
+
+  after_save :reindex_permit_application
   after_commit :reindex_permit_project
-  after_destroy :send_unassignment_notification
+  after_discard do
+    send_unassignment_notification
+    reindex_permit_application
+  end
 
   validates :permit_application_id,
             uniqueness: {
@@ -18,7 +28,8 @@ class PermitCollaboration < ApplicationRecord
                 collaboration_type
                 collaborator_type
                 assigned_requirement_block_id
-              ]
+              ],
+              conditions: -> { where(discarded_at: nil) }
             }
   validates :collaboration_type, presence: true
   validates :collaborator_type, presence: true
@@ -111,12 +122,12 @@ class PermitCollaboration < ApplicationRecord
         (
           if delegatee?
             I18n.t(
-              "notification.permit_collaboration.#{collaboration_type.to_s}_delegatee_collaboration_unassignment_notification",
+              "notification.permit_collaboration.#{collaboration_type}_delegatee_collaboration_unassignment_notification",
               number: permit_application.number
             )
           else
             I18n.t(
-              "notification.permit_collaboration.#{collaboration_type.to_s}_assignee_collaboration_unassignment_notification",
+              "notification.permit_collaboration.#{collaboration_type}_assignee_collaboration_unassignment_notification",
               number: permit_application.number,
               requirement_block_name: assigned_requirement_block_name
             )
@@ -138,6 +149,10 @@ class PermitCollaboration < ApplicationRecord
   end
 
   private
+
+  def reindex_permit_application
+    permit_application&.reindex
+  end
 
   def reindex_permit_project
     permit_application.permit_project&.reindex
@@ -205,6 +220,10 @@ class PermitCollaboration < ApplicationRecord
   end
 
   def set_default_collaboration_type
+    # `after_initialize` runs whenever this record is instantiated
+    #  For persisted records we already have `collaboration_type` from the DB
+    return if persisted? && collaboration_type.present?
+
     if collaborator && collaborator.collaboratorable_type == "Jurisdiction"
       self.collaboration_type = :review
     elsif collaborator && collaborator.collaboratorable_type == "User"

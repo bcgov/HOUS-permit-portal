@@ -276,7 +276,7 @@ const updateFormJsonClasses = (formJson: IFormJson, idsMap: { [key: string]: str
 }
 
 export const combineRevisionAnnotations = (formJson: IFormJson, revisionRequests: IRevisionRequest[]) => {
-  const revisionIds = revisionRequests.map((rr) => rr.requirementJson.id)
+  const revisionIds = revisionRequests.map((rr) => rr.requirementJson?.id).filter(Boolean)
   return updateFormJsonClasses(formJson, { "revision-requested": revisionIds })
 }
 
@@ -334,7 +334,7 @@ export const combineRevisionButtons = (
   isInReview: boolean,
   revisionRequests?: IRevisionRequest[]
 ): IFormJson => {
-  const revisionRequestRequirementKeys = revisionRequests?.map((rr) => rr.requirementJson.key) || []
+  const revisionRequestRequirementKeys = revisionRequests?.map((rr) => rr.requirementJson?.key).filter(Boolean) || []
   formJson.components.forEach((section: IFormIOSection) => {
     section.components.forEach((block: IFormIOBlock) => {
       for (let i = 0; i < block.components.length; i++) {

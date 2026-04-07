@@ -1,4 +1,5 @@
-import { Box, Flex, Heading } from "@chakra-ui/react"
+import { Box, Flex, Heading, HStack } from "@chakra-ui/react"
+import { ClipboardText } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
@@ -39,9 +40,12 @@ export const PermitsTabPanelContent = observer(({ permitProject }: IProps) => {
     <Flex direction="column" flex={1} bg="greys.white" p={10}>
       <Box as="section">
         <Flex justify="space-between" align="center" mb={6}>
-          <Heading as="h3" size="md">
-            {t("permitProject.permits.title")}
-          </Heading>
+          <HStack align="center" spacing={4}>
+            <ClipboardText size={32} />
+            <Heading as="h2" size="lg" mb={0}>
+              {t("permitProject.permits.title")}
+            </Heading>
+          </HStack>
           <AddPermitsButton permitProject={permitProject} />
         </Flex>
         {permitProject.rollupStatus === EPermitProjectRollupStatus.empty ? (

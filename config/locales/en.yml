@@ -30,6 +30,12 @@
 en:
   misc:
     removed_placeholder: "<Removed>"
+  project_audit:
+    fallback:
+      generic_change: "%{user} made a change"
+      collaborator_change: "%{user} made a change to the collaborators"
+      block_change: "%{user} made a change to %{block_name}"
+      application_change: "%{user} made a change to the application"
   activerecord:
     attributes:
       contact:
@@ -158,7 +164,7 @@ en:
       notify_missing_integration_mapping: "Missing API mappings"
       notify_reviewer_application_received: "New application received: %{permit_application_number}"
       notify_block_status_ready: "Requirement block status ready"
-      notify_application_viewed: "Application update: %{permit_application_number}"
+      notify_review_started: "Your application is now under review: %{permit_application_number}"
       notify_application_revisions_requested: "Revisions requested on application %{permit_application_number}"
       remind_reviewer: "Your report on outstanding permit applications"
       remind_resource_update: "Reminder: Review your jurisdiction resources"
@@ -647,6 +653,12 @@ en:
       create_or_update_permit_block_status_error:
         title: Error
         message: "There was an error updating permit block status"
+      transition_success:
+        title: ""
+        message: "Application state updated successfully"
+      invalid_transition:
+        title: Error
+        message: "This state transition is not allowed"
     permit_project:
       update_success:
         title: ""
@@ -669,6 +681,27 @@ en:
       unpin_error:
         title: Error
         message: "There was an error unpinning the project"
+      transition_success:
+        title: ""
+        message: "Project state updated successfully"
+      invalid_transition:
+        title: Error
+        message: "This state transition is not allowed"
+      reorder_success:
+        title: ""
+        message: "Project order updated successfully"
+      assign_review_delegatee_success:
+        title: ""
+        message: "Project reviewer assigned successfully"
+      assign_review_delegatee_error:
+        title: Error
+        message: "%{error_message}"
+      unassign_review_delegatee_success:
+        title: ""
+        message: "Project reviewer removed successfully"
+      feature_not_enabled:
+        title: Error
+        message: "Designated reviewer is not enabled for this project"
     permit_collaboration:
       destroy_success:
         title: ""
@@ -963,7 +996,7 @@ en:
       submission_notification: "Your application %{number} has been received by %{jurisdiction_name} and is pending review."
       resubmission_notification: "Your revised application %{number} has been received by %{jurisdiction_name} and is pending review."
       revisions_request_notification: "%{jurisdiction_name} has reviewed your application %{number} and has requested revisions. Please review and re-submit."
-      view_notification: "%{jurisdiction_name} has viewed your application %{number}."
+      review_started_notification: "%{jurisdiction_name} has started reviewing your application %{number}."
     permit_collaboration:
       submission_delegatee_collaboration_notification: "Collaboration request from %{author_name}. You have been assigned as a designated submitter for permit application %{number}."
       submission_assignee_collaboration_notification: "Collaboration request from %{author_name} on requirement “%{requirement_block_name}” for permit application %{number}"

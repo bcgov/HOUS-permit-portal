@@ -1,11 +1,10 @@
 require "rails_helper"
 
-RSpec.describe Api::Concerns::Search::PermitApplications,
+RSpec.describe Api::Concerns::Search::JurisdictionPermitApplications,
                type: :controller,
                search: true do
-  # This assumes you have a dummy controller for testing the concern
   controller(Api::ApplicationController) do
-    include Api::Concerns::Search::PermitApplications
+    include Api::Concerns::Search::JurisdictionPermitApplications
   end
 
   let(:jurisdiction) { create(:sub_district) }
@@ -129,54 +128,34 @@ RSpec.describe Api::Concerns::Search::PermitApplications,
   before do
     allow(controller).to receive(:current_user).and_return(cur_user)
     allow(controller).to receive(:authorize).and_return(true)
-    allow(controller).to receive(:permit_application_search_params).and_return(
-      permit_application_search_params
-    )
+    allow(controller).to receive(
+      :jurisdiction_permit_application_search_params
+    ).and_return(jurisdiction_permit_application_search_params)
     allow(controller).to receive(:params).and_return(
-      permit_application_search_params
+      jurisdiction_permit_application_search_params
     )
     User.reindex
     PermitApplication.reindex
   end
 
-  describe "perform_permit_application_search" do
-    context "when searching for the users permit applications" do
-      let(:cur_user) { submitter }
-      let(:permit_application_search_params) do
-        { query: "", page: 1, per_page: 20 }
-      end
-
-      it "returns only own permit applications" do
-        expected_pa = draft_permit_applications.first
-        # Then inspect its search_data:
-        puts expected_pa.search_data.to_json
-        controller.perform_permit_application_search
-        expect(
-          controller.instance_variable_get(:@permit_application_search).results
-        ).to match_array(
-          draft_permit_applications + submitted_permit_applications +
-            resubmitted_permit_applications +
-            revisions_requested_permit_applications +
-            submitted_permit_applications_different_jur +
-            resubmitted_permit_applications_different_jur
-        )
-      end
-    end
-
+  describe "perform_jurisdiction_permit_application_search" do
     context "when searching for the jurisdictions permit applications as a reviewer" do
       before { controller.instance_variable_set(:@jurisdiction, jurisdiction) }
 
       let(:cur_user) { reviewer }
-      let(:permit_application_search_params) do
+      let(:jurisdiction_permit_application_search_params) do
         { query: "", page: 1, per_page: 20 }
       end
 
       it "returns only own jurisdictions permit applications" do
-        controller.perform_permit_application_search
+        controller.perform_jurisdiction_permit_application_search
         expect(
-          controller.instance_variable_get(:@permit_application_search).results
+          controller.instance_variable_get(
+            :@jurisdiction_permit_application_search
+          ).results
         ).to match_array(
-          submitted_permit_applications + resubmitted_permit_applications
+          submitted_permit_applications + resubmitted_permit_applications +
+            revisions_requested_permit_applications
         )
       end
     end
@@ -185,20 +164,21 @@ RSpec.describe Api::Concerns::Search::PermitApplications,
       before { controller.instance_variable_set(:@jurisdiction, jurisdiction) }
 
       let(:cur_user) { review_manager }
-      let(:permit_application_search_params) do
+      let(:jurisdiction_permit_application_search_params) do
         { query: "", page: 1, per_page: 20 }
       end
 
       it "returns only own jurisdictions permit applications" do
-        controller.perform_permit_application_search
+        controller.perform_jurisdiction_permit_application_search
         expect(
-          controller.instance_variable_get(:@permit_application_search).results
+          controller.instance_variable_get(
+            :@jurisdiction_permit_application_search
+          ).results
         ).to match_array(
-          submitted_permit_applications + resubmitted_permit_applications
+          submitted_permit_applications + resubmitted_permit_applications +
+            revisions_requested_permit_applications
         )
       end
     end
-
-    # Additional tests for other scenarios: different roles, pagination, ordering...
   end
 end

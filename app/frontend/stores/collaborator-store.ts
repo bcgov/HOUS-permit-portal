@@ -7,7 +7,7 @@ import { withRootStore } from "../lib/with-root-store"
 import { CollaboratorModel, ICollaborator } from "../models/collaborator"
 import { IJurisdiction } from "../models/jurisdiction"
 import { ECollaborationType, ECollaboratorableType } from "../types/enums"
-import { TSearchParams } from "../types/types"
+import { IOption, TSearchParams } from "../types/types"
 
 export const CollaboratorStoreModel = types
   .compose(
@@ -84,6 +84,16 @@ export const CollaboratorStoreModel = types
     },
   }))
   .actions((self) => ({
+    fetchCollaboratorOptionsForJurisdiction: flow(function* (jurisdictionId: string): Generator<any, IOption[], any> {
+      const response = yield self.environment.api.fetchCollaboratorsByCollaboratorable(jurisdictionId)
+      if (response.ok && response.data?.data) {
+        return response.data.data.map((collab: any) => ({
+          value: collab.user.id,
+          label: `${collab.user.firstName} ${collab.user.lastName}`,
+        }))
+      }
+      return []
+    }),
     searchCollaborators: flow(function* (opts?: { reset?: boolean; page?: number; countPerPage?: number }) {
       let currentUser = self.rootStore.userStore?.currentUser
 

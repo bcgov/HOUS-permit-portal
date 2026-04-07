@@ -47,8 +47,12 @@ export enum EResourceType {
 export enum EPermitApplicationStatus {
   newDraft = "new_draft",
   newlySubmitted = "newly_submitted",
+  inReview = "in_review",
   revisionsRequested = "revisions_requested",
   resubmitted = "resubmitted",
+  approved = "approved",
+  issued = "issued",
+  withdrawn = "withdrawn",
   ephemeral = "ephemeral",
 }
 
@@ -453,7 +457,7 @@ export enum ENotificationActionType {
   permitBlockStatusReady = "permit_block_status_ready",
   applicationSubmission = "application_submission",
   applicationRevisionsRequest = "application_revisions_request",
-  applicationView = "application_view",
+  reviewStarted = "review_started",
   stepCodeReportGenerated = "step_code_report_generated",
   preCheckSubmitted = "pre_check_submitted",
   preCheckCompleted = "pre_check_completed",
@@ -674,13 +678,66 @@ export enum EPermitProjectSortFields {
   rollupStatus = "rollup_status",
 }
 
+export enum EProjectAuditSortFields {
+  createdAt = "created_at",
+}
+
 export enum EPermitProjectRollupStatus {
   empty = "empty",
   newDraft = "new_draft",
   newlySubmitted = "newly_submitted",
+  inReview = "in_review",
   revisionsRequested = "revisions_requested",
   resubmitted = "resubmitted",
   approved = "approved",
+  issued = "issued",
+  withdrawn = "withdrawn",
+}
+
+export enum EProjectState {
+  draft = "draft",
+  queued = "queued",
+  waiting = "waiting",
+  inProgress = "in_progress",
+  ready = "ready",
+  permitIssued = "permit_issued",
+  active = "active",
+  complete = "complete",
+  closed = "closed",
+}
+
+export enum EPermitProjectInboxSortFields {
+  projectNumber = "number",
+  address = "full_address",
+  applications = "permit_applications_size",
+  daysInQueue = "days_in_queue",
+  assigned = "assigned",
+  state = "state",
+}
+
+export enum EPermitApplicationInboxSortFields {
+  status = "status",
+  permitType = "requirement_template_name",
+  address = "full_address",
+  projectNumber = "project_number",
+  daysInQueue = "enqueued_at",
+  assigned = "review_delegatee_name",
+}
+
+export enum EInboxViewMode {
+  projects = "projects",
+  applications = "applications",
+}
+
+export enum EInboxDisplayMode {
+  list = "list",
+  columns = "columns",
+}
+
+export enum ERadioFilterValue {
+  include = "include",
+  hide = "hide",
+  onlyShow = "only_show",
 }
 
 export enum EStepCodeSortFields {
