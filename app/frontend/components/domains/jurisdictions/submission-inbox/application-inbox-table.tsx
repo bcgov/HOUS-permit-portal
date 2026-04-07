@@ -26,6 +26,7 @@ import { useMst } from "../../../../setup/root"
 import { IPermitApplicationInboxStore } from "../../../../stores/submission-inbox-store"
 import {
   ECollaborationType,
+  EInboxViewMode,
   EPermitApplicationInboxSortFields,
   EPermitApplicationStatus,
 } from "../../../../types/enums"
@@ -40,6 +41,7 @@ import { PermitApplicationStatusTag } from "../../../shared/permit-applications/
 import { SortIcon } from "../../../shared/sort-icon"
 import { SharedAvatar } from "../../../shared/user/shared-avatar"
 import { DesignatedCollaboratorAssignmentPopover } from "../../permit-application/collaborator-management/designated-collaborator-assignment-popover"
+import { InboxNoMatchingEmpty } from "./inbox-no-matching-empty"
 import { SubmissionInboxMarkUnreadIconButton } from "./submission-inbox-mark-unread-icon-button"
 
 interface IProps {
@@ -63,6 +65,29 @@ export const ApplicationInboxTable = observer(function ApplicationInboxTable({ s
     handlePageChange,
     isSearching,
   } = searchStore
+
+  const listShowsNoResults = !isSearching && totalCount !== null && totalCount === 0
+
+  const renderListBody = () => {
+    if (isSearching) {
+      return (
+        <Flex py={50} gridColumn="span 8">
+          <SharedSpinner />
+        </Flex>
+      )
+    }
+    if (listShowsNoResults) {
+      return (
+        <Flex py={4} gridColumn="span 8" w="full" justify="flex-start">
+          <InboxNoMatchingEmpty
+            viewMode={EInboxViewMode.applications}
+            onClearFilters={() => searchStore.resetFilters()}
+          />
+        </Flex>
+      )
+    }
+    return applications.map((application) => <ApplicationInboxRow key={application.id} application={application} />)
+  }
 
   return (
     <VStack w="full" spacing={5}>
@@ -123,29 +148,25 @@ export const ApplicationInboxTable = observer(function ApplicationInboxTable({ s
           </Box>
         </Box>
 
-        {isSearching ? (
-          <Flex py={50} gridColumn="span 8">
-            <SharedSpinner />
-          </Flex>
-        ) : (
-          applications.map((application) => <ApplicationInboxRow key={application.id} application={application} />)
-        )}
+        {renderListBody()}
       </SearchGrid>
-      <Flex w="full" justifyContent="space-between">
-        <PerPageSelect
-          handleCountPerPageChange={handleCountPerPageChange}
-          countPerPage={countPerPage}
-          totalCount={totalCount}
-        />
-        <Paginator
-          current={currentPage}
-          total={totalCount}
-          totalPages={totalPages}
-          pageSize={countPerPage}
-          handlePageChange={handlePageChange}
-          showLessItems
-        />
-      </Flex>
+      {!listShowsNoResults && (
+        <Flex w="full" justifyContent="space-between">
+          <PerPageSelect
+            handleCountPerPageChange={handleCountPerPageChange}
+            countPerPage={countPerPage}
+            totalCount={totalCount}
+          />
+          <Paginator
+            current={currentPage}
+            total={totalCount}
+            totalPages={totalPages}
+            pageSize={countPerPage}
+            handlePageChange={handlePageChange}
+            showLessItems
+          />
+        </Flex>
+      )}
     </VStack>
   )
 })

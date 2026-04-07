@@ -296,29 +296,33 @@ class PermitProject < ApplicationRecord
     ActiveRecord::Base.transaction do
       update!(review_delegatee_id: collaborator_id)
 
-      permit_applications
-        .kept
-        .select(&:submitted?)
-        .each do |pa|
-          pa
-            .permit_collaborations
-            .kept
-            .where(collaborator_type: :delegatee, collaboration_type: :review)
-            .discard_all
-
-          collab =
-            pa.permit_collaborations.create!(
-              collaborator_id: collaborator_id,
-              collaborator_type: :delegatee,
-              collaboration_type: :review
-            )
-          NotificationService.publish_permit_collaboration_assignment_event(
-            collab
-          )
-        end
+      # TODO: Review with product manager — re-enable pushing the project review delegatee to each
+      # submitted permit application (discard prior review delegatee collaborations, create new, notify).
+      # permit_applications
+      #   .kept
+      #   .select(&:submitted?)
+      #   .each do |pa|
+      #     pa
+      #       .permit_collaborations
+      #       .kept
+      #       .where(collaborator_type: :delegatee, collaboration_type: :review)
+      #       .discard_all
+      #
+      #     collab =
+      #       pa.permit_collaborations.create!(
+      #         collaborator_id: collaborator_id,
+      #         collaborator_type: :delegatee,
+      #         collaboration_type: :review
+      #       )
+      #     NotificationService.publish_permit_collaboration_assignment_event(
+      #       collab
+      #     )
+      #   end
     end
   end
 
+  # TODO: Review with product manager — when re-enabling assign sync above, decide whether clearing
+  # review_delegatee here should also discard review delegatee permit_collaborations on applications.
   def unassign_review_delegatee!
     update!(review_delegatee_id: nil)
   end

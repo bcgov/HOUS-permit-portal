@@ -111,7 +111,7 @@ function KanbanBoardInner<T extends IKanbanItem>({
         modifiers={[restrictToVerticalAxis]}
         onDragEnd={handleDragEnd}
       >
-        <Flex w="full" h="full" minH={0} minW={0} overflowX="hidden" gap={4} pb={4} align="stretch">
+        <Flex w="full" h="full" minH={0} minW={0} overflowY="hidden" gap={4} pb={4} align="stretch">
           {columns.map((column) => {
             const columnItems = groupedItems[column.key] || []
             const isEmpty = columnItems.length === 0
@@ -128,7 +128,7 @@ function KanbanBoardInner<T extends IKanbanItem>({
                 direction="column"
                 minW={isCollapsed ? "48px" : "260px"}
                 maxW={isCollapsed ? "60px" : "320px"}
-                flex={isCollapsed ? "0 0 auto" : "1 1 0"}
+                flex={isCollapsed ? "0 0 auto" : "1 0 260px"}
                 border="1px solid"
                 borderColor="border.light"
                 borderRadius="lg"
@@ -251,7 +251,6 @@ function KanbanBoardInner<T extends IKanbanItem>({
                         p={3}
                         sx={{
                           touchAction: "pan-y",
-                          overscrollBehaviorX: "none",
                         }}
                         onScroll={(e) => {
                           const el = e.currentTarget

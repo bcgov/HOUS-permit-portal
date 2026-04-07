@@ -376,6 +376,17 @@ export const SubmissionInboxStoreModel = types
     permitProjectSearch: types.optional(PermitProjectInboxStoreModel, {}),
     permitApplicationSearch: types.optional(PermitApplicationInboxStoreModel, {}),
   })
+  .views((self) => ({
+    /** Kanban: current search returned no rows (after load completes). */
+    get inboxShowsNoResultsKanban() {
+      if (self.viewMode === EInboxViewMode.projects) {
+        const s = self.permitProjectSearch
+        return !s.isSearching && s.tablePermitProjects.length === 0
+      }
+      const s = self.permitApplicationSearch
+      return !s.isSearching && s.tablePermitApplications.length === 0
+    },
+  }))
   .actions((self) => ({
     setViewMode(mode: EInboxViewMode) {
       self.viewMode = mode
