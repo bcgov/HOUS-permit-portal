@@ -18,6 +18,12 @@ require "action_cable/engine"
 # you've limited to :test, :development, or :production.
 Bundler.require(*Rails.groups)
 
+# Vendored devise-jwt-cookie replacement. Must be required eagerly (not autoloaded)
+# because it defines methods on the Devise module and registers a Warden strategy
+# as side effects at require time. These must be available before the devise
+# initializer runs. See lib/devise/jwt/cookie.rb for full documentation.
+require_relative "../lib/devise/jwt/cookie"
+
 module HousPermitPortal
   class Application < Rails::Application
     # Initialize configuration defaults for originally generated Rails version.
@@ -26,7 +32,8 @@ module HousPermitPortal
     # Please, add to the `ignore` list any other `lib` subdirectories that do
     # not contain `.rb` files, or that should not be reloaded or eager loaded.
     # Common ones are `templates`, `generators`, or `middleware`, for example.
-    config.autoload_lib(ignore: %w[assets tasks])
+
+    config.autoload_lib(ignore: %w[assets tasks devise])
 
     # Configuration for the application, engines, and railties goes here.
     #
