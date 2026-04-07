@@ -175,7 +175,7 @@ class PermitCollaboration < ApplicationRecord
         errors.add(:base, :must_be_draft_for_submission)
       end
     elsif review?
-      unless permit_application.submitted?
+      unless permit_application.visible_to_reviewers?
         errors.add(:base, :must_be_submitted_for_review)
       end
     end

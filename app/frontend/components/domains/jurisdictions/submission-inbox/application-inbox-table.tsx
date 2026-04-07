@@ -4,21 +4,21 @@ import {
   Circle,
   Flex,
   HStack,
+  Icon,
   IconButton,
   Menu,
   MenuButton,
-  MenuDivider,
   MenuItem,
   MenuList,
   Portal,
   Spinner,
   Text,
-  useDisclosure,
+  Tooltip,
   VStack,
 } from "@chakra-ui/react"
-import { DotsThreeVertical, UserPlus } from "@phosphor-icons/react"
+import { Swap, UserPlus } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
-import React, { useMemo, useState } from "react"
+import React, { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { Link, useNavigate } from "react-router-dom"
 import { IPermitApplication } from "../../../../models/permit-application"
@@ -39,14 +39,15 @@ import { SearchGridItem } from "../../../shared/grid/search-grid-item"
 import { PermitApplicationStatusTag } from "../../../shared/permit-applications/permit-application-status-tag"
 import { SortIcon } from "../../../shared/sort-icon"
 import { SharedAvatar } from "../../../shared/user/shared-avatar"
-import { CollaboratorsSidebarDrawer } from "../../permit-application/collaborator-management/collaborators-sidebar"
+import { DesignatedCollaboratorAssignmentPopover } from "../../permit-application/collaborator-management/designated-collaborator-assignment-popover"
+import { SubmissionInboxMarkUnreadIconButton } from "./submission-inbox-mark-unread-icon-button"
 
 interface IProps {
   searchStore: IPermitApplicationInboxStore
   applications: IPermitApplication[]
 }
 
-const MAX_VISIBLE_AVATARS = 3
+const MAX_VISIBLE_BLOCK_LEVEL_REVIEW_ASSIGNEE_AVATARS = 3
 
 export const ApplicationInboxTable = observer(function ApplicationInboxTable({ searchStore, applications }: IProps) {
   const { t } = useTranslation()
@@ -66,7 +67,7 @@ export const ApplicationInboxTable = observer(function ApplicationInboxTable({ s
   return (
     <VStack w="full" spacing={5}>
       <SearchGrid
-        templateColumns="36px minmax(0, 1.5fr) minmax(0, 1.3fr) minmax(0, 1fr) minmax(140px, 1fr) minmax(160px, 1.1fr) auto 48px"
+        templateColumns="36px minmax(0, 1.5fr) minmax(0, 1.3fr) minmax(0, 1fr) minmax(140px, 1fr) minmax(160px, 1.1fr) auto 72px"
         gridRowClassName="application-inbox-grid-row"
         sx={{
           ".application-inbox-grid-row:hover > div": {
@@ -251,7 +252,7 @@ const ApplicationInboxRow = observer(function ApplicationInboxRow({
               {t("submissionInbox.waitingSince")}
             </Text>
             <Text fontSize="xs" color="text.secondary">
-              {application.formattedEnqueuedAt}
+              {application.formattedSubmittedAt}
             </Text>
           </VStack>
         ) : (
@@ -261,8 +262,13 @@ const ApplicationInboxRow = observer(function ApplicationInboxRow({
         )}
       </SearchGridItem>
 
-      <SearchGridItem>
-        <ApplicationAssignedCell application={application} />
+      <SearchGridItem
+        onClick={(e: React.MouseEvent) => {
+          e.preventDefault()
+          e.stopPropagation()
+        }}
+      >
+        <ApplicationBlockLevelAndDesignatedAssigneesCell application={application} />
       </SearchGridItem>
 
       <SearchGridItem>
@@ -277,82 +283,58 @@ const ApplicationInboxRow = observer(function ApplicationInboxRow({
           e.stopPropagation()
         }}
       >
-        <ApplicationActionsMenu application={application} />
+        <HStack spacing={0}>
+          <ApplicationActionsMenu application={application} />
+          {application.isViewed && (
+            <SubmissionInboxMarkUnreadIconButton onMarkUnread={() => application.markAsUnviewed()} />
+          )}
+        </HStack>
       </SearchGridItem>
     </Box>
   )
 })
 
-const ApplicationAssignedCell = observer(function ApplicationAssignedCell({
-  application,
-}: {
-  application: IPermitApplication
-}) {
-  const { t } = useTranslation()
-  const { permitApplicationStore } = useMst()
-  const { isOpen, onOpen, onClose } = useDisclosure()
-  const [isLoadingSidebar, setIsLoadingSidebar] = useState(false)
+const ApplicationBlockLevelAndDesignatedAssigneesCell = observer(
+  function ApplicationBlockLevelAndDesignatedAssigneesCell({ application }: { application: IPermitApplication }) {
+    const { t } = useTranslation()
+    const { permitApplicationStore } = useMst()
 
-  const avatarUsers = useMemo(() => {
-    const designatedReviewerUser = application.designatedReviewer?.collaborator?.user
-    const seenUserIds = new Set(designatedReviewerUser ? [designatedReviewerUser.id] : [])
-    const users = designatedReviewerUser
-      ? [
-          {
-            id: designatedReviewerUser.id,
-            name: designatedReviewerUser.name,
-            role: designatedReviewerUser.role,
-            isDesignated: true,
-          },
-        ]
-      : []
+    const blockLevelReviewAssigneeUsers = useMemo(() => {
+      const designatedReviewerUserId = application.designatedReviewer?.collaborator?.user?.id
+      const seenUserIds = new Set<string>(designatedReviewerUserId ? [designatedReviewerUserId] : [])
+      const users: { id: string; name: string; role: string }[] = []
 
-    application.getCollaborationAssignees(ECollaborationType.review).forEach((collaboration) => {
-      const user = collaboration.collaborator?.user
-      if (user && !seenUserIds.has(user.id)) {
-        seenUserIds.add(user.id)
-        users.push({ id: user.id, name: user.name, role: user.role, isDesignated: false })
-      }
-    })
+      application.getCollaborationAssignees(ECollaborationType.review).forEach((collaboration) => {
+        const user = collaboration.collaborator?.user
+        if (user && !seenUserIds.has(user.id)) {
+          seenUserIds.add(user.id)
+          users.push({ id: user.id, name: user.name, role: user.role })
+        }
+      })
 
-    return users
-  }, [application])
+      return users
+    }, [application])
 
-  const visibleAvatars = avatarUsers.slice(0, MAX_VISIBLE_AVATARS)
-  const overflowCount = avatarUsers.length - MAX_VISIBLE_AVATARS
+    const visibleBlockLevelReviewAssignees = blockLevelReviewAssigneeUsers.slice(
+      0,
+      MAX_VISIBLE_BLOCK_LEVEL_REVIEW_ASSIGNEE_AVATARS
+    )
+    const blockLevelReviewAssigneesOverflowCount =
+      blockLevelReviewAssigneeUsers.length - MAX_VISIBLE_BLOCK_LEVEL_REVIEW_ASSIGNEE_AVATARS
+    const hasDesignatedReviewer = !!application.designatedReviewer
+    const hasDesignatedReviewerOrBlockLevelReviewers = hasDesignatedReviewer || blockLevelReviewAssigneeUsers.length > 0
 
-  const handleOpenSidebar = async (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setIsLoadingSidebar(true)
-    try {
-      await permitApplicationStore.fetchPermitApplication(application.id, true)
-    } finally {
-      setIsLoadingSidebar(false)
-    }
-    onOpen()
-  }
-
-  return (
-    <>
+    return (
       <HStack spacing={1}>
-        {visibleAvatars.length > 0 ? (
+        {hasDesignatedReviewerOrBlockLevelReviewers ? (
           <>
-            {visibleAvatars.map((user) => (
-              <SharedAvatar
-                key={user.id}
-                size="xs"
-                name={user.name}
-                role={user.role}
-                fontSize="2xs"
-                border={user.isDesignated ? "2px solid" : undefined}
-                borderColor={user.isDesignated ? "theme.blueActive" : undefined}
-              />
+            {visibleBlockLevelReviewAssignees.map((user) => (
+              <SharedAvatar key={user.id} size="xs" name={user.name} role={user.role} fontSize="2xs" />
             ))}
-            {overflowCount > 0 && (
+            {blockLevelReviewAssigneesOverflowCount > 0 && (
               <Avatar
                 size="xs"
-                name={`+${overflowCount}`}
+                name={`+${blockLevelReviewAssigneesOverflowCount}`}
                 getInitials={(name) => name}
                 bg="gray.200"
                 color="text.primary"
@@ -365,28 +347,43 @@ const ApplicationAssignedCell = observer(function ApplicationAssignedCell({
             {t("ui.unassigned")}
           </Text>
         )}
-        <IconButton
-          aria-label={t("permitCollaboration.sidebar.title")}
-          icon={isLoadingSidebar ? <Spinner size="xs" /> : <UserPlus size={14} />}
-          size="xs"
-          variant="ghost"
-          borderRadius="full"
-          onClick={handleOpenSidebar}
-          isDisabled={isLoadingSidebar}
-        />
-      </HStack>
-
-      {isOpen && (
-        <CollaboratorsSidebarDrawer
+        <DesignatedCollaboratorAssignmentPopover
           permitApplication={application}
           collaborationType={ECollaborationType.review}
-          isOpen={isOpen}
-          onClose={onClose}
+          onBeforeOpen={async () => {
+            await permitApplicationStore.fetchPermitApplication(application.id, true)
+          }}
+          renderTrigger={({ isLoading, existingDelegateeCollaboration, onClick, isDisabled }) => (
+            <IconButton
+              aria-label={t("permitCollaboration.sidebar.title")}
+              icon={
+                isLoading ? (
+                  <Spinner size="xs" />
+                ) : existingDelegateeCollaboration ? (
+                  <SharedAvatar
+                    size="xs"
+                    name={existingDelegateeCollaboration.collaborator?.user?.name}
+                    role={existingDelegateeCollaboration.collaborator?.user?.role}
+                    fontSize="2xs"
+                    border="2px solid"
+                    borderColor="theme.blueActive"
+                  />
+                ) : (
+                  <UserPlus size={14} />
+                )
+              }
+              size="xs"
+              variant="ghost"
+              borderRadius="full"
+              onClick={onClick}
+              isDisabled={isDisabled}
+            />
+          )}
         />
-      )}
-    </>
-  )
-})
+      </HStack>
+    )
+  }
+)
 
 const ApplicationActionsMenu = observer(function ApplicationActionsMenu({
   application,
@@ -397,19 +394,22 @@ const ApplicationActionsMenu = observer(function ApplicationActionsMenu({
   const navigate = useNavigate()
   const hasTransitions = application.allowedManualTransitions.length > 0
   const showRevisionsRequestedLink = application.status === EPermitApplicationStatus.inReview
-  const canMarkUnread = application.isViewed
 
-  if (!hasTransitions && !showRevisionsRequestedLink && !canMarkUnread) return null
+  if (!hasTransitions && !showRevisionsRequestedLink) return null
 
   return (
     <Menu>
-      <MenuButton
-        as={IconButton}
-        aria-label="Actions"
-        icon={<DotsThreeVertical size={16} weight="bold" />}
-        size="sm"
-        variant="ghost"
-      />
+      <Tooltip label={t("submissionInbox.changeStatus")} hasArrow placement="top">
+        <MenuButton
+          as={IconButton}
+          aria-label={t("submissionInbox.changeStatus")}
+          icon={<Icon as={Swap} boxSize={4} />}
+          size="sm"
+          minW={7}
+          h={7}
+          variant="ghost"
+        />
+      </Tooltip>
       <Portal>
         <MenuList zIndex={10}>
           {application.allowedManualTransitions.map((transition) => (
@@ -437,19 +437,6 @@ const ApplicationActionsMenu = observer(function ApplicationActionsMenu({
             >
               {/* @ts-ignore */}
               {t(`submissionInbox.applicationStatuses.${EPermitApplicationStatus.revisionsRequested}`)}
-            </MenuItem>
-          )}
-          {(hasTransitions || showRevisionsRequestedLink) && canMarkUnread && <MenuDivider />}
-          {canMarkUnread && (
-            <MenuItem
-              fontSize="sm"
-              onClick={(e) => {
-                e.preventDefault()
-                e.stopPropagation()
-                application.markAsUnviewed()
-              }}
-            >
-              {t("submissionInbox.markUnread")}
             </MenuItem>
           )}
         </MenuList>

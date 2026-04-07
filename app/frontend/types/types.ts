@@ -596,7 +596,7 @@ export interface IPermitProjectSearchFilters {
 
 export interface IPermitProjectInboxSearchFilters {
   requirementTemplateIds?: string[]
-  status?: string[]
+  state?: string[]
   unread?: string
   meetingRequest?: string
   daysInQueue?: { operator: string; days: number }

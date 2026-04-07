@@ -270,8 +270,7 @@ class PermitApplication < ApplicationRecord
       permit_project_id: permit_project_id,
       project_number: permit_project&.number,
       submission_delegatee_id: submission_delegatee&.id,
-      discarded: discarded?,
-      enqueued_at: enqueued_at
+      discarded: discarded?
     }
   end
 

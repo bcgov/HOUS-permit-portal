@@ -19,8 +19,7 @@ class PermitApplicationBlueprint < Blueprinter::Base
            :revisions_requested_at,
            :missing_pdfs,
            :template_nickname,
-           :discarded_at,
-           :enqueued_at
+           :discarded_at
 
     association :permit_type, blueprint: PermitClassificationBlueprint
     association :activity, blueprint: PermitClassificationBlueprint

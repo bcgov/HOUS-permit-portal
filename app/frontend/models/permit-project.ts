@@ -73,8 +73,17 @@ export const PermitProjectModel = types
       const first = self.inboxSortedApplicationStatuses[0]
       return (first?.status as EPermitProjectRollupStatus) ?? EPermitProjectRollupStatus.empty
     },
+    get inIntakeCount(): number {
+      return self.newlySubmittedCount + self.resubmittedCount
+    },
+    get inDraftCount(): number {
+      return self.newDraftCount + self.revisionsRequestedCount
+    },
   }))
   .views((self) => ({
+    get inQueueCount(): number {
+      return self.totalPermitsCount - self.inDraftCount
+    },
     get shortAddress() {
       return self.fullAddress?.split(",")[0]
     },

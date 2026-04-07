@@ -39,7 +39,7 @@ export const PermitProjectInboxStoreModel = types
       stateCounts: types.optional(types.frozen<Record<string, number>>(), {}),
       columnTotals: types.optional(types.frozen<Record<string, number>>(), {}),
       requirementTemplateIdFilter: types.optional(types.array(types.string), []),
-      statusFilter: types.optional(types.array(types.string), []),
+      stateFilter: types.optional(types.array(types.string), []),
       unreadFilter: types.optional(types.enumeration(Object.values(ERadioFilterValue)), ERadioFilterValue.include),
       // ### SUBMISSION INDEX STUB FEATURE
       meetingRequestFilter: types.optional(
@@ -76,9 +76,9 @@ export const PermitProjectInboxStoreModel = types
       self.requirementTemplateIdFilter = cast(value)
       setQueryParam("requirementTemplateIds", value)
     },
-    setStatusFilter(value: string[]) {
-      self.statusFilter = cast(value)
-      setQueryParam("status", value)
+    setStateFilter(value: string[]) {
+      self.stateFilter = cast(value)
+      setQueryParam("state", value)
     },
     setUnreadFilter(value: ERadioFilterValue) {
       self.unreadFilter = value
@@ -130,7 +130,7 @@ export const PermitProjectInboxStoreModel = types
         filters: {
           requirementTemplateIds:
             self.requirementTemplateIdFilter.length > 0 ? [...self.requirementTemplateIdFilter] : undefined,
-          status: self.statusFilter.length > 0 ? [...self.statusFilter] : undefined,
+          state: self.stateFilter.length > 0 ? [...self.stateFilter] : undefined,
           unread: self.unreadFilter !== ERadioFilterValue.include ? self.unreadFilter : undefined,
           // ### SUBMISSION INDEX STUB FEATURE
           meetingRequest:
@@ -160,12 +160,12 @@ export const PermitProjectInboxStoreModel = types
     }),
     setJurisdictionPermitProjectFilters(queryParams: URLSearchParams) {
       const requirementTemplateIds = queryParams.get("requirementTemplateIds")?.split(",")
-      const status = queryParams.get("status")?.split(",")
+      const state = queryParams.get("state")?.split(",")
       const unread = queryParams.get("unread") as ERadioFilterValue
       const daysInQueueOp = queryParams.get("daysInQueueOp")
       const daysInQueueDays = queryParams.get("daysInQueueDays")
       if (requirementTemplateIds) self.setRequirementTemplateIdFilter(requirementTemplateIds)
-      if (status) self.setStatusFilter(status)
+      if (state) self.setStateFilter(state)
       if (unread) self.setUnreadFilter(unread)
       if (daysInQueueOp && daysInQueueDays) {
         self.setDaysInQueueFilter({ operator: daysInQueueOp, days: parseInt(daysInQueueDays) })
@@ -176,7 +176,7 @@ export const PermitProjectInboxStoreModel = types
     resetFilters() {
       self.setQuery("")
       self.setRequirementTemplateIdFilter([])
-      self.setStatusFilter([])
+      self.setStateFilter([])
       self.setUnreadFilter(ERadioFilterValue.include)
       self.setMeetingRequestFilter(ERadioFilterValue.include)
       self.setDaysInQueueFilter(null)

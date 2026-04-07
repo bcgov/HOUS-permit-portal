@@ -18,7 +18,7 @@ import { ApplicationKanbanBoard } from "./application-kanban-board"
 import {
   AssignedFilter,
   DaysInQueueFilter,
-  ProjectStatusFilter,
+  ProjectStateFilter,
   RequirementTemplateInboxFilter,
   StatusFilter,
   UnreadFilter,
@@ -39,6 +39,7 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
 
   const activeSearchStore = viewMode === EInboxViewMode.projects ? permitProjectSearch : permitApplicationSearch
   const prevDisplayModeRef = useRef(displayMode)
+  const prevViewModeRef = useRef(viewMode)
 
   usePopStateModeSync(submissionInboxStore)
 
@@ -49,7 +50,11 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
       displayMode === EInboxDisplayMode.list && prevDisplayModeRef.current !== EInboxDisplayMode.list
 
     if (switchedToColumns) {
-      activeSearchStore.setStatusFilter([] as any)
+      if (viewMode === EInboxViewMode.projects) {
+        permitProjectSearch.setStateFilter([])
+      } else {
+        permitApplicationSearch.setStatusFilter([] as EPermitApplicationStatus[])
+      }
       activeSearchStore.search()
     } else if (switchedToList) {
       activeSearchStore.setCountPerPage(LIST_DEFAULT_PER_PAGE)
@@ -58,6 +63,17 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
 
     prevDisplayModeRef.current = displayMode
   }, [displayMode])
+
+  useEffect(() => {
+    if (viewMode !== prevViewModeRef.current && displayMode === EInboxDisplayMode.columns) {
+      if (viewMode === EInboxViewMode.projects) {
+        permitProjectSearch.setStateFilter([])
+      } else {
+        permitApplicationSearch.setStatusFilter([] as EPermitApplicationStatus[])
+      }
+    }
+    prevViewModeRef.current = viewMode
+  }, [viewMode])
 
   useSearch(activeSearchStore, [currentJurisdiction?.id, JSON.stringify(currentSandboxId), viewMode])
 
@@ -72,7 +88,7 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
   const handleShowMore = (columnState: string) => {
     setDisplayMode(EInboxDisplayMode.list)
     if (viewMode === EInboxViewMode.projects) {
-      permitProjectSearch.setStatusFilter([columnState])
+      permitProjectSearch.setStateFilter([columnState])
       permitProjectSearch.setCountPerPage(LIST_DEFAULT_PER_PAGE)
       permitProjectSearch.search({ countPerPage: LIST_DEFAULT_PER_PAGE })
     } else {
@@ -186,23 +202,23 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
               />
               {displayMode === EInboxDisplayMode.list && viewMode === EInboxViewMode.applications && (
                 <StatusFilter
-                  value={[...activeSearchStore.statusFilter]}
-                  onChange={(val) => activeSearchStore.setStatusFilter(val as any)}
-                  onApply={() => activeSearchStore.search()}
+                  value={[...permitApplicationSearch.statusFilter]}
+                  onChange={(val) => permitApplicationSearch.setStatusFilter(val as EPermitApplicationStatus[])}
+                  onApply={() => permitApplicationSearch.search()}
                   onClear={() => {
-                    activeSearchStore.setStatusFilter([] as any)
-                    activeSearchStore.search()
+                    permitApplicationSearch.setStatusFilter([] as EPermitApplicationStatus[])
+                    permitApplicationSearch.search()
                   }}
                 />
               )}
               {displayMode === EInboxDisplayMode.list && viewMode === EInboxViewMode.projects && (
-                <ProjectStatusFilter
-                  value={[...activeSearchStore.statusFilter]}
-                  onChange={(val) => activeSearchStore.setStatusFilter(val as any)}
-                  onApply={() => activeSearchStore.search()}
+                <ProjectStateFilter
+                  value={[...permitProjectSearch.stateFilter]}
+                  onChange={(val) => permitProjectSearch.setStateFilter(val as string[])}
+                  onApply={() => permitProjectSearch.search()}
                   onClear={() => {
-                    activeSearchStore.setStatusFilter([] as any)
-                    activeSearchStore.search()
+                    permitProjectSearch.setStateFilter([])
+                    permitProjectSearch.search()
                   }}
                 />
               )}

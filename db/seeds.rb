@@ -445,7 +445,11 @@ seed_pa_status =
       return
     end
 
-    base_time = pa.created_at + rand(1..72).hours
+    # Simulate first submit 1–30 days ago (not pa.created_at + hours: that pushes brand-new PAs into the future).
+    first_submit_hours_ago = rand(24..720)
+    base_time = Time.current - first_submit_hours_ago.hours
+    base_time = [base_time, pa.created_at + 1.minute].max
+    base_time = [base_time, Time.current].min
 
     # Every non-draft PA needs at least one submission version
     sv1 =
@@ -466,7 +470,7 @@ seed_pa_status =
       )
       pa.update_columns(
         status: PermitApplication.statuses[:revisions_requested],
-        revisions_requested_at: base_time + 1.day
+        revisions_requested_at: [base_time + 1.day, Time.current].min
       )
     when :resubmitted
       sv1.revision_requests.create!(
@@ -474,7 +478,12 @@ seed_pa_status =
         comment: "Initial review comment.",
         user: reviewer_user
       )
-      resub_time = base_time + 3.days
+      resub_time = base_time + rand(72..240).hours
+      resub_time = [resub_time, Time.current].min
+      if resub_time <= base_time
+        resub_time = [base_time + 1.hour, Time.current].min
+      end
+
       pa.submission_versions.create!(
         form_json: pa.template_version&.form_json || {},
         submission_data: {
@@ -534,16 +543,11 @@ if north_van_projects.size >= 10
     end
   end
 
-  # Spread enqueued_at across non-draft projects and their non-draft permit applications
+  # Spread enqueued_at across non-draft projects (permit applications use submitted_at from versions)
   non_draft = north_van_projects.select { |p| p.reload.state != "draft" }
   non_draft.each_with_index do |project, idx|
     enqueued = (idx * 2 + 1).days.ago
     project.update_column(:enqueued_at, enqueued)
-    project
-      .permit_applications
-      .kept
-      .where.not(status: :new_draft)
-      .update_all(enqueued_at: enqueued)
   end
 
   puts "  ✓ Distributed #{[state_distribution.size, north_van_projects.size].min} projects across kanban states"

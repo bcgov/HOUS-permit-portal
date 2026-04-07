@@ -1,5 +1,5 @@
 import { Box, Container, Flex, Heading, IconButton, TabPanel, TabPanels, Tabs, Text } from "@chakra-ui/react"
-import { CalendarBlank, CaretLeft, ClockCounterClockwise, Folder, NoteBlank, SquaresFour } from "@phosphor-icons/react"
+import { CaretLeft, SquaresFour } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useTransition } from "react"
 import { useTranslation } from "react-i18next"
@@ -23,10 +23,11 @@ export const InboxProjectDetailScreen = observer(() => {
 
   const TABS_DATA: ITabItem[] = [
     { label: t("submissionInbox.projectDetail.overview"), icon: SquaresFour, to: "overview", tabIndex: 0 },
-    { label: t("submissionInbox.projectDetail.notes"), icon: NoteBlank, to: "notes", tabIndex: 1 },
-    { label: t("submissionInbox.projectDetail.activity"), icon: ClockCounterClockwise, to: "activity", tabIndex: 2 },
-    { label: t("submissionInbox.projectDetail.documents"), icon: Folder, to: "documents", tabIndex: 3 },
-    { label: t("submissionInbox.projectDetail.meetings"), icon: CalendarBlank, to: "meetings", tabIndex: 4 },
+    // TODO: panels coming soon
+    // { label: t("submissionInbox.projectDetail.notes"), icon: NoteBlank, to: "notes", tabIndex: 1 },
+    // { label: t("submissionInbox.projectDetail.activity"), icon: ClockCounterClockwise, to: "activity", tabIndex: 2 },
+    // { label: t("submissionInbox.projectDetail.documents"), icon: Folder, to: "documents", tabIndex: 3 },
+    // { label: t("submissionInbox.projectDetail.meetings"), icon: CalendarBlank, to: "meetings", tabIndex: 4 },
   ]
 
   useEffect(() => {

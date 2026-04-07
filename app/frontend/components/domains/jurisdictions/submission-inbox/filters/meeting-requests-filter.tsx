@@ -10,15 +10,9 @@ interface IProps {
   value: ERadioFilterValue
   onChange: (value: ERadioFilterValue) => void
   onApply: () => void
-  badgeCount?: number
 }
 
-export const MeetingRequestsFilter = observer(function MeetingRequestsFilter({
-  value,
-  onChange,
-  onApply,
-  badgeCount,
-}: IProps) {
+export const MeetingRequestsFilter = observer(function MeetingRequestsFilter({ value, onChange, onApply }: IProps) {
   const { t } = useTranslation()
 
   const options: IOption[] = [
@@ -30,7 +24,6 @@ export const MeetingRequestsFilter = observer(function MeetingRequestsFilter({
   return (
     <InboxFilter
       title={t("submissionInbox.filters.meetingRequests")}
-      badgeCount={badgeCount}
       isMulti={false}
       value={value}
       onChange={(val) => onChange(val as ERadioFilterValue)}

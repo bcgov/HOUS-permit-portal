@@ -111,7 +111,12 @@ module PermitApplicationStatus
     end
 
     def submitted?
-      newly_submitted? || resubmitted? || in_review? || approved?
+      newly_submitted? || resubmitted? || in_review? || approved? || issued? ||
+        withdrawn?
+    end
+
+    def visible_to_reviewers?
+      submitted? || revisions_requested?
     end
 
     def decided?
@@ -204,9 +209,7 @@ module PermitApplicationStatus
     end
 
     def handle_submission
-      attrs = { signed_off_at: Time.current }
-      attrs[:enqueued_at] = Time.current if newly_submitted?
-      update(attrs)
+      update(signed_off_at: Time.current)
 
       checklist = step_code&.primary_checklist
       submission_versions.create!(

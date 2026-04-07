@@ -1,10 +1,11 @@
 import { Box, Circle, HStack, IconButton, Spinner, Tooltip } from "@chakra-ui/react"
 import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
-import { CaretUpDown, Tray, UserPlus } from "@phosphor-icons/react"
+import { CaretUpDown, UserPlus } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
+import { SubmissionInboxMarkUnreadIconButton } from "./submission-inbox-mark-unread-icon-button"
 
 interface IProps {
   id: string
@@ -31,8 +32,11 @@ export const KanbanCard = observer(function KanbanCard({
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id })
 
+  // Lock the active drag to the vertical axis only (avoids horizontal jitter next to overflow-x columns).
+  const dragTransform = transform && isDragging ? { ...transform, x: 0 } : transform
+
   const style = {
-    transform: CSS.Transform.toString(transform),
+    transform: CSS.Transform.toString(dragTransform),
     transition,
     opacity: isDragging ? 0.5 : 1,
   }
@@ -91,26 +95,7 @@ export const KanbanCard = observer(function KanbanCard({
             />
           </Tooltip>
           {statusMenu}
-          {onMarkUnread && (
-            <Tooltip label={t("submissionInbox.markUnread")} hasArrow placement="top">
-              <Box position="relative" display="inline-flex">
-                <IconButton
-                  aria-label={t("submissionInbox.markUnread")}
-                  icon={<Tray size={16} />}
-                  size="sm"
-                  minW={7}
-                  h={7}
-                  variant="ghost"
-                  onClick={(e) => {
-                    e.preventDefault()
-                    e.stopPropagation()
-                    onMarkUnread()
-                  }}
-                />
-                <Circle size="6px" bg="theme.blueActive" position="absolute" top={0.5} right={0.5} />
-              </Box>
-            </Tooltip>
-          )}
+          {onMarkUnread && <SubmissionInboxMarkUnreadIconButton onMarkUnread={onMarkUnread} />}
         </HStack>
       </HStack>
     </Box>

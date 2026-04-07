@@ -71,7 +71,6 @@ export const PermitApplicationModel = types.snapshotProcessor(
       submittedAt: types.maybeNull(types.Date),
       resubmittedAt: types.maybeNull(types.Date),
       revisionsRequestedAt: types.maybeNull(types.Date),
-      enqueuedAt: types.maybeNull(types.Date),
       selectedTabIndex: types.optional(types.number, 0),
       createdAt: types.Date,
       updatedAt: types.Date,
@@ -113,8 +112,8 @@ export const PermitApplicationModel = types.snapshotProcessor(
         return self.fullAddress?.split(",")[0]
       },
       get daysInQueue(): number | null {
-        if (!self.enqueuedAt) return null
-        const ms = Date.now() - self.enqueuedAt.getTime()
+        if (!self.submittedAt) return null
+        const ms = Date.now() - self.submittedAt.getTime()
         return Math.floor(ms / (1000 * 60 * 60 * 24))
       },
       get formattedDaysInQueue(): string {
@@ -122,9 +121,9 @@ export const PermitApplicationModel = types.snapshotProcessor(
         if (days == null) return "—"
         return `${days} ${days === 1 ? "day" : "days"}`
       },
-      get formattedEnqueuedAt(): string {
-        if (!self.enqueuedAt) return "—"
-        return new Intl.DateTimeFormat("en-CA").format(self.enqueuedAt)
+      get formattedSubmittedAt(): string {
+        if (!self.submittedAt) return "—"
+        return new Intl.DateTimeFormat("en-CA").format(self.submittedAt)
       },
       get isPart3() {
         // TODO
