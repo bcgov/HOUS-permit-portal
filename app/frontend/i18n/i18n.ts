@@ -1344,7 +1344,7 @@ Thank you,
             fromFilter: "From date",
             toFilter: "To date",
             empty: "No activity found",
-            description: "What’s happened on your project and its permit applications.",
+            description: "What’s happened on this project and its permit applications.",
           },
           permits: {
             title: "Permits",
