@@ -896,6 +896,7 @@ const options = {
             title: "Role/Position",
             department: "Department",
             email: "Email",
+            telephone: "Telephone",
             phone: "Phone no.",
             extension: "Extension",
             cell: "Mobile no.",
@@ -960,6 +961,7 @@ const options = {
             displayContactSummaryLabel: "Contact Summary Section (public)",
             addContactSummary: "Click to add a Contact Summary section",
             firstContact: "The first contact will be displayed upon successful permit application submission.",
+            contactsEmptyState: "No contacts have been configured yet.",
             clickToEditContacts: "Click to edit contacts",
             clickToShowContacts: "Click to show contacts as they will be seen",
             clickToEditMap: "Click to edit map",
@@ -1057,9 +1059,9 @@ const options = {
           lookOut: "Things to look out for",
           resources: {
             title: "Resources",
-            sectionTitle: "Resources for applicants",
+            sectionTitle: "Local Resources",
             description: "Additional resources and reference materials to help you with your application:",
-            emptyForStaff: "No resources for applicants have been set up yet.",
+            emptyForStaff: "No local resources have been configured yet.",
             configureResourcesLink: "Add resources in Configuration.",
             categories: {
               planning_zoning: "Planning & zoning",
