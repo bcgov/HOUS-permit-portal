@@ -23,16 +23,16 @@ export function JurisdictionAboutAccordionItem({
       border="none"
       borderTop={showTopSeparator ? "1px solid" : "none"}
       borderColor={showTopSeparator ? "theme.yellow" : undefined}
-      gap={4}
+      gap={2}
     >
       <AccordionButton
         display="flex"
         justifyContent="space-between"
         alignItems={useYellowlineHeading ? "flex-start" : "center"}
         _hover={{ bg: "transparent" }}
-        px={4}
+        px={{ base: 4, md: 0 }}
         pt={4}
-        pb={8}
+        pb={4}
       >
         <Heading
           id={headingId}
@@ -48,9 +48,7 @@ export function JurisdictionAboutAccordionItem({
         </Heading>
         <AccordionIcon alignSelf="center" fontSize="2xl" fontWeight="light" />
       </AccordionButton>
-      <AccordionPanel pb={8} pt={0}>
-        {children}
-      </AccordionPanel>
+      <AccordionPanel px={{ base: 4, md: 0 }}>{children}</AccordionPanel>
     </AccordionItem>
   )
 }
