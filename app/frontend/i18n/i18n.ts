@@ -841,8 +841,7 @@ const options = {
                 email: "E-mail",
                 accreditationRef1: "Accreditation Reference 1",
                 accreditationRef2: "Accreditation Reference 2",
-                issuedFor1: "Issued For (Date 1)",
-                issuedFor2: "Issued For (Date 2)",
+                issuedFor: "Issued For",
               },
               validation: {
                 postalCode: "Enter a valid Canadian postal code (e.g. V7L 1C3)",
@@ -858,6 +857,8 @@ const options = {
                 "Some sections are incomplete. You can still download the report, but missing fields will be blank in the PDF.",
               downloadReport: "Download Filled Report (PDF)",
               generating: "Generating PDF…",
+              pdfViewerHint:
+                "Adobe Acrobat may not display pre-filled values correctly. For best results, open the downloaded PDF in a web browser (Chrome, Edge, or Firefox) or another PDF viewer.",
               downloadHint: "The report will be generated from the BC-SZCG FormSet template with your data filled in.",
             },
             buildingLocation: {
@@ -3273,6 +3274,8 @@ Thank you,
               largeComplexBuildingsCharacteristic2: "600 square metres or larger in building footprint.",
               part3BuildingsAreGenerally: "Part 3 buildings are generally:",
               part9BuildingsAreGenerally: "Part 9 buildings are generally:",
+              largeComplexBuildingsLinkPrefix: "If your building falls under Part 3 of the BC Building Code,",
+              checkStepCodesRequirementsInThisCommunity: "check the Step Codes requirements in this community",
             },
           },
           joinTheBuildingPermitHub: {
