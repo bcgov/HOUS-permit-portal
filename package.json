@@ -100,7 +100,9 @@
   "overrides": {
     "vite": {
       "rollup": "npm:@rollup/wasm-node"
-    }
+    },
+    "dompurify": "$dompurify",
+    "lodash": "4.17.23"
   },
   "scripts": {
     "dev": "bin/vite dev",
