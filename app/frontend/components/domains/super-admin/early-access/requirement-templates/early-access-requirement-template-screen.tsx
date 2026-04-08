@@ -52,7 +52,7 @@ export const EarlyAccessRequirementTemplateScreen = observer(({}: IEarlyAccessRe
           flexDirection={{ base: "column", md: "row" }}
         >
           <HStack gap={4} flex={1}>
-            <PermitApplicationStatusTag permitApplication={ephemeralPermitApplication} />
+            <PermitApplicationStatusTag status={ephemeralPermitApplication.status} />
 
             <Flex direction="column" w="full">
               <Heading fontSize="xl">{requirementTemplate.nickname}</Heading>

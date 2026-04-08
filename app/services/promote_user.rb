@@ -61,9 +61,10 @@ class PromoteUser
       # then update the invited_users permit collaborations with this existing_user
       invited_user_collaborator
         .permit_collaborations
+        .kept
         .each do |invited_user_permit_collaboration|
         existing_user_permit_collaboration =
-          existing_user_collaborator.permit_collaborations.find_by(
+          existing_user_collaborator.permit_collaborations.kept.find_by(
             permit_application:
               invited_user_permit_collaboration.permit_application,
             collaboration_type:

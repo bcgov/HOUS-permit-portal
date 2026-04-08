@@ -1,4 +1,5 @@
 import { Box, BoxProps, Button, Text } from "@chakra-ui/react"
+import type { SystemStyleObject } from "@chakra-ui/styled-system"
 import { CalendarBlank, CaretDown } from "@phosphor-icons/react"
 import * as R from "ramda"
 import React, { forwardRef } from "react"
@@ -7,9 +8,13 @@ import "react-datepicker/dist/react-datepicker.css"
 import { useTranslation } from "react-i18next"
 import { datefnsAppDateFormat } from "../../constants"
 
-export interface IDatePickerProps extends ReactDatePickerProps {
+type IDatePickerPropsBase = {
   containerProps?: Partial<BoxProps>
 }
+
+export type IDatePickerProps =
+  | (ReactDatePickerProps & IDatePickerPropsBase) // single-date
+  | (ReactDatePickerProps<boolean> & IDatePickerPropsBase) // range
 
 const CustomInput = forwardRef<
   HTMLButtonElement,
@@ -70,23 +75,32 @@ export function DatePicker({ containerProps, ...datePickerProps }: IDatePickerPr
     <Box
       w={"200px"}
       {...containerProps}
-      sx={R.mergeDeepRight(
-        {
-          ".react-datepicker__input-container": {
-            w: "200px",
-          },
-          ".react-datepicker__close-icon": {
-            "::after": {
-              color: "var(--chakra-colors-text-secondary)",
-              background: "none",
-              content: `"\\2715"`,
-              fontSize: "var(--chakra-fontSizes-sm)",
+      sx={
+        R.mergeDeepRight(
+          {
+            ".react-datepicker__input-container": {
+              w: "200px",
             },
-            left: "130px",
+            ".react-datepicker__close-icon": {
+              position: "absolute",
+              top: "50%",
+              transform: "translateY(-50%)",
+              right: "32px",
+              left: "auto",
+              width: "24px",
+              height: "24px",
+              padding: 0,
+              "::after": {
+                color: "var(--chakra-colors-text-secondary)",
+                background: "none",
+                content: `"\\2715"`,
+                fontSize: "var(--chakra-fontSizes-sm)",
+              },
+            },
           },
-        },
-        sxStyles
-      )}
+          sxStyles
+        ) as SystemStyleObject
+      }
     >
       <ReactDatePicker
         customInput={<CustomInput />}

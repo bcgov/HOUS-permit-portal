@@ -182,4 +182,12 @@ RSpec.describe Jurisdiction, type: :model do
       end
     end
   end
+
+  describe "#submission_inbox_set_up?" do
+    let(:jurisdiction) { create(:sub_district) }
+
+    it "returns a boolean" do
+      expect([true, false]).to include(jurisdiction.submission_inbox_set_up?)
+    end
+  end
 end

@@ -30,6 +30,7 @@ export const JurisdictionModel = types
     submissionEmail: types.maybeNull(types.string),
     qualifiedName: types.string,
     inboxEnabled: types.optional(types.boolean, false),
+    submissionInboxSetUp: types.optional(types.boolean, false),
     showAboutPage: types.optional(types.boolean, false),
     allowDesignatedReviewer: types.optional(types.boolean, false),
     reverseQualifiedName: types.maybeNull(types.string),

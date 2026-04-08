@@ -443,7 +443,7 @@ RSpec.describe PermitCollaboration, type: :model do
           :publish_permit_collaboration_unassignment_event
         )
 
-        collaboration.destroy!
+        collaboration.discard
         expect(NotificationService).to have_received(
           :publish_permit_collaboration_unassignment_event
         ).with(collaboration)

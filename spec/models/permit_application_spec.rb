@@ -15,10 +15,12 @@ RSpec.describe PermitApplication, type: :model do
       should define_enum_for(:status).with_values(
                new_draft: 0,
                newly_submitted: 1,
+               in_review: 2,
                revisions_requested: 3,
                resubmitted: 4,
-               closed: 5,
-               occupancy_issued: 6
+               approved: 5,
+               issued: 6,
+               withdrawn: 7
              )
     end
   end

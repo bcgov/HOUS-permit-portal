@@ -8,6 +8,9 @@ class PermitApplication < ApplicationRecord
                review_delegatee_name
              ],
              text_end: %i[number]
+  audited on: %i[create update],
+          only: %i[status reference_number discarded_at],
+          associated_with: :permit_project
 
   include FormSupportingDocuments
   include AutomatedComplianceUtils
@@ -42,7 +45,9 @@ class PermitApplication < ApplicationRecord
   attr_accessor :front_end_form_update
 
   has_many :submission_versions, dependent: :destroy
-  has_many :permit_collaborations, dependent: :destroy
+  has_many :permit_collaborations,
+           -> { where(discarded_at: nil) },
+           dependent: :destroy
   has_many :collaborators, through: :permit_collaborations
   has_many :permit_block_statuses, dependent: :destroy
 
@@ -63,6 +68,7 @@ class PermitApplication < ApplicationRecord
   validate :sandbox_belongs_to_jurisdiction
   validate :template_version_of_live_template
   validate :submitter_cannot_be_jurisdiction_staff_without_sandbox
+  validate :submission_versions_match_status
 
   delegate :code, :name, to: :permit_type, prefix: true
   delegate :code, :name, to: :activity, prefix: true
@@ -76,18 +82,24 @@ class PermitApplication < ApplicationRecord
 
   after_commit :reindex_jurisdiction_permit_application_size
   after_commit :send_submitted_webhook, if: :saved_change_to_status?
-  after_commit :notify_user_reference_number_updated,
-               if: :saved_change_to_reference_number?
   after_commit :reindex_permit_project, if: :saved_change_to_status?
   after_commit :broadcast_jurisdiction_count_update,
-               if: :status_changed_to_submitted?
+               if: :status_changed_to_intake?
+  after_commit :mark_permit_project_as_unviewed, if: :status_changed_to_intake?
+  after_commit :enqueue_permit_project_if_draft, if: :status_changed_to_intake?
+  # TODO: Review with product manager — re-enable syncing the project’s review delegatee onto
+  # each permit application when the application enters intake (see #auto_assign_project_review_delegatee).
+  # after_commit :auto_assign_project_review_delegatee,
+  #              if: :status_changed_to_intake?
 
   scope :with_submitter_role,
         -> { joins(:submitter).where(users: { role: "submitter" }) }
 
   scope :unviewed,
         -> do
-          where(status: :submitted, viewed_at: nil).order(submitted_at: :asc)
+          where(status: submitted_statuses, viewed_at: nil).order(
+            submitted_at: :asc
+          )
         end
 
   COMPLETION_SECTION_KEY = "section-completion-key"
@@ -141,7 +153,8 @@ class PermitApplication < ApplicationRecord
       collaborations: {
         permit_collaborations: {
           collaboration_type: collaboration_type,
-          permit_application_id: id
+          permit_application_id: id,
+          discarded_at: nil
         }
       }
     }
@@ -248,9 +261,16 @@ class PermitApplication < ApplicationRecord
             :id
           ),
       review_delegatee_name: review_delegatee_name,
+      review_collaborator_user_ids:
+        permit_collaborations
+          .review
+          .joins(:collaborator)
+          .pluck("collaborators.user_id")
+          .uniq,
       has_collaborator: has_collaborator?,
       sandbox_id: sandbox_id,
       permit_project_id: permit_project_id,
+      project_number: permit_project&.number,
       submission_delegatee_id: submission_delegatee&.id,
       discarded: discarded?
     }
@@ -360,6 +380,13 @@ class PermitApplication < ApplicationRecord
     reindex
   end
 
+  def mark_as_unviewed
+    return unless latest_submission_version.present?
+
+    latest_submission_version.update(viewed_at: nil)
+    reindex
+  end
+
   def number_prefix
     jurisdiction&.prefix
   end
@@ -466,13 +493,11 @@ class PermitApplication < ApplicationRecord
   end
 
   def send_submitted_webhook
-    return unless submitted?
+    return unless intake?
 
     jurisdiction
       .active_external_api_keys
-      .where.not(
-        webhook_url: [nil, ""]
-      ) # Only send webhooks to keys with a webhook URL
+      .where.not(webhook_url: [nil, ""])
       .each do |external_api_key|
         PermitWebhookJob.perform_async(
           external_api_key.id,
@@ -555,14 +580,15 @@ class PermitApplication < ApplicationRecord
     }
   end
 
-  def application_view_event_notification_data
+  def review_started_event_notification_data
     {
       "id" => SecureRandom.uuid,
-      "action_type" => Constants::NotificationActionTypes::APPLICATION_VIEW,
+      "action_type" => Constants::NotificationActionTypes::REVIEW_STARTED,
       "action_text" =>
-        "#{I18n.t("notification.permit_application.view_notification", number: number, jurisdiction_name: jurisdiction_name)}",
+        "#{I18n.t("notification.permit_application.review_started_notification", number: number, jurisdiction_name: jurisdiction_name)}",
       "object_data" => {
-        "permit_application_id" => id
+        "permit_application_id" => id,
+        "permit_application_number" => number
       }
     }
   end
@@ -645,8 +671,8 @@ class PermitApplication < ApplicationRecord
           "requirement_templates.id AS requirement_template_id",
           "jurisdictions.name AS jurisdiction_name",
           "requirement_templates.id AS requirement_template_id",
-          "COUNT(CASE WHEN permit_applications.status IN (0, 3) THEN 1 END) AS draft_count",
-          "COUNT(CASE WHEN permit_applications.status IN (1, 4) THEN 1 END) AS submitted_count",
+          "COUNT(CASE WHEN permit_applications.status = 0 THEN 1 END) AS draft_count",
+          "COUNT(CASE WHEN permit_applications.status != 0 THEN 1 END) AS submitted_count",
           "AVG(
                 CASE
                   WHEN sv_min.min_submission_created_at IS NOT NULL THEN EXTRACT(EPOCH FROM (sv_min.min_submission_created_at - permit_applications.created_at))
@@ -816,14 +842,8 @@ class PermitApplication < ApplicationRecord
     self.form_customizations_snapshot = current_customizations
   end
 
-  def notify_user_reference_number_updated
-    return if new_record?
-
-    NotificationService.publish_application_view_event(self)
-  end
-
-  def status_changed_to_submitted?
-    saved_change_to_status? && (newly_submitted? || resubmitted?)
+  def status_changed_to_intake?
+    saved_change_to_status? && intake?
   end
 
   def reindex_jurisdiction_permit_application_size
@@ -837,6 +857,39 @@ class PermitApplication < ApplicationRecord
 
   def reindex_permit_project
     permit_project&.reindex
+  end
+
+  def mark_permit_project_as_unviewed
+    permit_project&.mark_as_unviewed
+  end
+
+  # TODO: Also enqueue project when a meeting request is made
+  def enqueue_permit_project_if_draft
+    permit_project&.enqueue! if permit_project&.draft?
+  end
+
+  # Disabled pending product decision — restore together with the after_commit above.
+  def auto_assign_project_review_delegatee
+    # return unless permit_project&.review_delegatee.present?
+    # return unless SiteConfiguration.allow_designated_reviewer?
+    # return unless jurisdiction&.allow_designated_reviewer
+    #
+    # permit_collaborations
+    #   .kept
+    #   .where(collaborator_type: :delegatee, collaboration_type: :review)
+    #   .discard_all
+    #
+    # collab =
+    #   permit_collaborations.create!(
+    #     collaborator_id: permit_project.review_delegatee_id,
+    #     collaborator_type: :delegatee,
+    #     collaboration_type: :review
+    #   )
+    # NotificationService.publish_permit_collaboration_assignment_event(collab)
+    # rescue => e
+    #   Rails.logger.warn(
+    #     "Failed to auto-assign project review delegatee for PA #{id}: #{e.message}"
+    #   )
   end
 
   def jurisdiction_or_permit_project_present
@@ -917,5 +970,39 @@ class PermitApplication < ApplicationRecord
         "activerecord.errors.models.permit_application.attributes.submitter.review_staff_requires_sandbox"
       )
     )
+  end
+
+  def submission_versions_match_status
+    return if new_record?
+
+    sv_count = submission_versions.size
+
+    if new_draft? && sv_count > 0
+      errors.add(:base, "Draft applications must not have submission versions")
+    elsif (
+          newly_submitted? || in_review? || approved? || issued? || withdrawn?
+        ) && sv_count < 1
+      errors.add(
+        :base,
+        "Non-draft applications must have at least one submission version"
+      )
+    elsif revisions_requested?
+      if sv_count < 1
+        errors.add(
+          :base,
+          "Revisions-requested applications must have at least one submission version"
+        )
+      elsif latest_submission_version.revision_requests.empty?
+        errors.add(
+          :base,
+          "Revisions-requested applications must have at least one revision request"
+        )
+      end
+    elsif resubmitted? && sv_count < 2
+      errors.add(
+        :base,
+        "Resubmitted applications must have at least two submission versions"
+      )
+    end
   end
 end

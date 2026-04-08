@@ -1,9 +1,10 @@
 import { Avatar, Button, IconButton, Popover, PopoverContent, PopoverTrigger, useDisclosure } from "@chakra-ui/react"
 import { Plus } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
-import React, { useEffect } from "react"
+import React, { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { IPermitApplication } from "../../../../models/permit-application"
+import { IPermitCollaboration } from "../../../../models/permit-collaboration"
 import { useMst } from "../../../../setup/root"
 import { ECollaborationType, ECollaboratorType } from "../../../../types/enums"
 import { CollaborationAssignmentPopoverContent } from "./collaboration-assignment-popover-content"
@@ -14,6 +15,13 @@ interface IProps {
   permitApplication: IPermitApplication
   collaborationType: ECollaborationType
   avatarTrigger?: boolean
+  renderTrigger?: (props: {
+    isLoading: boolean
+    existingDelegateeCollaboration: IPermitCollaboration | undefined
+    onClick: (e: React.MouseEvent) => void
+    isDisabled: boolean
+  }) => React.ReactElement
+  onBeforeOpen?: () => Promise<void>
 }
 
 const INITIAL_SCREEN = EAssignmentPopoverScreen.collaborationAssignment
@@ -26,6 +34,8 @@ export const DesignatedCollaboratorAssignmentPopover = observer(function Designa
   permitApplication,
   collaborationType,
   avatarTrigger,
+  renderTrigger,
+  onBeforeOpen,
 }: IProps) {
   const { userStore } = useMst()
   const { currentUser } = userStore
@@ -39,6 +49,7 @@ export const DesignatedCollaboratorAssignmentPopover = observer(function Designa
   )
   const { isOpen, onOpen, onClose } = useDisclosure()
   const createConfirmationModalDisclosureProps = useDisclosure()
+  const [isBeforeOpenLoading, setIsBeforeOpenLoading] = useState(false)
   const [currentScreen, setCurrentScreen] = React.useState<TDesignatedSubmitterAssignmentPopoverScreen>(INITIAL_SCREEN)
   const [openAssignmentConfirmationModals, setOpenAssignmentConfirmationModals] = React.useState<Set<string>>(new Set())
   const contentRef = React.useRef<HTMLDivElement>(null)
@@ -94,40 +105,74 @@ export const DesignatedCollaboratorAssignmentPopover = observer(function Designa
 
   const isSubmissionCollaboration = collaborationType === ECollaborationType.submission
 
-  const triggerButtonProps = {
-    onClick: (e) => e.stopPropagation(),
-    onKeyDown: (e) => e.stopPropagation(),
-    isDisabled: !canManage,
+  const handleOpen = async () => {
+    if (onBeforeOpen) {
+      setIsBeforeOpenLoading(true)
+      try {
+        await onBeforeOpen()
+      } finally {
+        setIsBeforeOpenLoading(false)
+      }
+    }
+    onOpen()
   }
+
+  const triggerButtonProps = {
+    onClick: (e) => {
+      e.stopPropagation()
+      if (onBeforeOpen) {
+        e.preventDefault()
+        handleOpen()
+      }
+    },
+    onKeyDown: (e) => e.stopPropagation(),
+    isDisabled: !canManage || isBeforeOpenLoading,
+  }
+
+  const renderDefaultTrigger = () =>
+    avatarTrigger ? (
+      <IconButton
+        variant={"ghost"}
+        icon={
+          existingDelegateeCollaboration ? (
+            <Avatar name={existingDelegateeCollaboration?.collaborator?.user?.name} size={"sm"} />
+          ) : (
+            <Plus />
+          )
+        }
+        aria-label={"designated assignee selector"}
+        {...triggerButtonProps}
+      />
+    ) : (
+      <Button variant={"link"} textDecoration={"underline"} fontSize={"sm"} {...triggerButtonProps}>
+        {existingDelegateeCollaboration
+          ? t("permitCollaboration.popover.designatedSubmitterChangeButton")
+          : t("ui.select")}
+      </Button>
+    )
+
   return (
     <Popover
       placement={"bottom-start"}
       isOpen={isOpen}
       onClose={onPopoverClose}
-      onOpen={onOpen}
+      onOpen={onBeforeOpen ? undefined : onOpen}
       strategy={"fixed"}
       isLazy
     >
       <PopoverTrigger>
-        {avatarTrigger ? (
-          <IconButton
-            variant={"ghost"}
-            icon={
-              existingDelegateeCollaboration ? (
-                <Avatar name={existingDelegateeCollaboration?.collaborator?.user?.name} size={"sm"} />
-              ) : (
-                <Plus />
-              )
-            }
-            aria-label={"designated assignee selector"}
-          />
-        ) : (
-          <Button variant={"link"} textDecoration={"underline"} fontSize={"sm"} {...triggerButtonProps}>
-            {existingDelegateeCollaboration
-              ? t("permitCollaboration.popover.designatedSubmitterChangeButton")
-              : t("ui.select")}
-          </Button>
-        )}
+        {renderTrigger
+          ? renderTrigger({
+              isLoading: isBeforeOpenLoading,
+              existingDelegateeCollaboration,
+              onClick: (e: React.MouseEvent) => {
+                e.stopPropagation()
+                e.preventDefault()
+                handleOpen()
+              },
+              isDisabled: !canManage || isBeforeOpenLoading,
+            })
+          : renderDefaultTrigger()}
       </PopoverTrigger>
       <PopoverContent w={"370px"} maxW={"370px"} ref={contentRef}>
         {canManage && currentScreen === EAssignmentPopoverScreen.collaborationAssignment && (

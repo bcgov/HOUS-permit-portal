@@ -97,7 +97,10 @@ export const PermitApplicationModel = types.snapshotProcessor(
       isViewingPastRequests: types.optional(types.boolean, false),
       templateNickname: types.maybeNull(types.string),
       projectId: types.maybeNull(types.string),
+      projectNumber: types.maybeNull(types.string),
       discardedAt: types.maybeNull(types.Date),
+      inboxSortOrder: types.maybeNull(types.number),
+      allowedManualTransitions: types.optional(types.array(types.string), []),
     })
     .extend(withEnvironment())
     .extend(withRootStore())
@@ -105,9 +108,29 @@ export const PermitApplicationModel = types.snapshotProcessor(
       get isDiscarded() {
         return !!self.discardedAt
       },
+      get shortAddress() {
+        return self.fullAddress?.split(",")[0]
+      },
+      get daysInQueue(): number | null {
+        if (!self.submittedAt) return null
+        const ms = Date.now() - self.submittedAt.getTime()
+        return Math.floor(ms / (1000 * 60 * 60 * 24))
+      },
+      get formattedDaysInQueue(): string {
+        const days = this.daysInQueue
+        if (days == null) return "—"
+        return `${days} ${days === 1 ? "day" : "days"}`
+      },
+      get formattedSubmittedAt(): string {
+        if (!self.submittedAt) return "—"
+        return new Intl.DateTimeFormat("en-CA").format(self.submittedAt)
+      },
       get isPart3() {
         // TODO
         return false
+      },
+      get isNewDraft() {
+        return self.status === EPermitApplicationStatus.newDraft
       },
       get isDraft() {
         return (
@@ -118,8 +141,16 @@ export const PermitApplicationModel = types.snapshotProcessor(
       get isSubmitted() {
         return (
           self.status === EPermitApplicationStatus.newlySubmitted ||
-          self.status === EPermitApplicationStatus.resubmitted
+          self.status === EPermitApplicationStatus.resubmitted ||
+          self.status === EPermitApplicationStatus.inReview ||
+          self.status === EPermitApplicationStatus.approved
         )
+      },
+      get isInReview() {
+        return self.status === EPermitApplicationStatus.inReview
+      },
+      get isReviewReadOnly() {
+        return self.status !== EPermitApplicationStatus.inReview
       },
       get isRevisionsRequested() {
         return self.status === EPermitApplicationStatus.revisionsRequested
@@ -514,7 +545,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
         if (!user) return false
 
         if (collaborationType === ECollaborationType.review) {
-          return !self.isDraft && user.isReviewStaff
+          return !self.isNewDraft && user.isReviewStaff
         }
 
         return self.isDraft && user?.id === self.submitter?.id
@@ -838,6 +869,14 @@ export const PermitApplicationModel = types.snapshotProcessor(
         }
         return response.ok
       }),
+      markAsUnviewed: flow(function* () {
+        const response = yield self.environment.api.unviewPermitApplication(self.id)
+        if (response.ok) {
+          const { data: permitApplication } = response.data
+          self.rootStore.permitApplicationStore.mergeUpdate(permitApplication, "permitApplicationMap")
+        }
+        return response.ok
+      }),
 
       setSelectedTabIndex: (index: number) => {
         self.selectedTabIndex = index
@@ -893,6 +932,26 @@ export const PermitApplicationModel = types.snapshotProcessor(
           self.discardedAt = null
         }
         return response.ok
+      }),
+
+      setInboxSortOrder(order: number) {
+        self.inboxSortOrder = order
+      },
+
+      transitionStatus: flow(function* (targetStatus: string) {
+        const oldStatus = self.status
+        const response = yield self.environment.api.transitionPermitApplicationStatus(self.id, targetStatus)
+        if (response.ok) {
+          const responseData = response.data.data
+          self.status = responseData.status
+          self.allowedManualTransitions.replace(responseData.allowedManualTransitions || [])
+          self.inboxSortOrder = responseData.inboxSortOrder ?? null
+          self.rootStore.submissionInboxStore?.permitApplicationSearch?.adjustCountsForTransition(
+            oldStatus,
+            targetStatus
+          )
+        }
+        return response
       }),
     })),
   {
