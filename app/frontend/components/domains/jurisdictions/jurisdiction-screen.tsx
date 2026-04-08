@@ -29,11 +29,9 @@ import { useTranslation } from "react-i18next"
 import { useJurisdiction } from "../../../hooks/resources/use-jurisdiction"
 import { IJurisdiction } from "../../../models/jurisdiction"
 import { useMst } from "../../../setup/root"
-import { EFlashMessageStatus } from "../../../types/enums"
-import { IContact, TLatLngTuple } from "../../../types/types"
+import { IContact, TJurisdictionFieldValues } from "../../../types/types"
 import { sanitizeTipTapHtml } from "../../../utils/sanitize-tiptap-content"
 import { isTipTapEmpty } from "../../../utils/utility-functions"
-import { CustomMessageBox } from "../../shared/base/custom-message-box"
 import { ErrorScreen } from "../../shared/base/error-screen"
 import { HeroBanner } from "../../shared/base/hero-banner"
 import { HighlightedLayout } from "../../shared/base/highlighted-layout"
@@ -47,20 +45,11 @@ import { Can, can } from "../../shared/user/can"
 import { ContactGrid } from "./contacts/contact-grid"
 import { JurisdictionAboutAccordionItem } from "./jurisdiction-about-accordion-item"
 import { JurisdictionAboutCtaCards } from "./jurisdiction-about-cta-cards"
+import { JurisdictionAboutSnippetCards, jurisdictionAboutSnippetHasContent } from "./jurisdiction-about-snippet-cards"
 import { JurisdictionEditorWithPreview } from "./jurisdiction-editor-with-preview"
 export interface Jurisdiction {
   name: string
   contacts: IContact[]
-}
-
-type TJurisdictionFieldValues = {
-  descriptionHtml: string
-  checklistHtml: string
-  lookOutHtml: string
-  contactSummaryHtml: string
-  mapPosition: TLatLngTuple
-  mapZoom: number
-  contactsAttributes: IContact[]
 }
 
 function jurisdictionRichTextHasPublicContent(html: string | null | undefined): boolean {
@@ -73,15 +62,19 @@ export const JurisdictionScreen = observer(() => {
   const { userStore } = useMst()
   const { currentUser } = userStore
 
-  const getDefaultJurisdictionValues = () => {
+  const getDefaultJurisdictionValues = (): TJurisdictionFieldValues => {
     return {
-      descriptionHtml: currentJurisdiction?.descriptionHtml,
-      checklistHtml: currentJurisdiction?.checklistHtml,
-      lookOutHtml: currentJurisdiction?.lookOutHtml,
-      contactSummaryHtml: currentJurisdiction?.contactSummaryHtml,
+      descriptionHtml: currentJurisdiction?.descriptionHtml ?? "",
+      checklistHtml: currentJurisdiction?.checklistHtml ?? "",
+      lookOutHtml: currentJurisdiction?.lookOutHtml ?? "",
+      contactSummaryHtml: currentJurisdiction?.contactSummaryHtml ?? "",
       contactsAttributes: currentJurisdiction?.contacts as IContact[],
       mapPosition: currentJurisdiction?.mapPosition || [0, 0],
       mapZoom: currentJurisdiction?.mapZoom || 13,
+      processingTimeHtml: currentJurisdiction?.processingTimeHtml ?? "",
+      keyStagesHtml: currentJurisdiction?.keyStagesHtml ?? "",
+      officeAddress: currentJurisdiction?.officeAddress ?? "",
+      websiteUrl: currentJurisdiction?.websiteUrl ?? "",
     }
   }
 
@@ -123,6 +116,12 @@ export const JurisdictionScreen = observer(() => {
     canManageAbout || jurisdictionRichTextHasPublicContent(currentJurisdiction.checklistHtml)
   const showKeyInfoAccordion = canManageAbout || jurisdictionRichTextHasPublicContent(currentJurisdiction.lookOutHtml)
 
+  const hasAboutSnippets = jurisdictionAboutSnippetHasContent(
+    currentJurisdiction.processingTimeHtml,
+    currentJurisdiction.keyStagesHtml,
+    currentJurisdiction.officeAddress
+  )
+
   return (
     <Flex as="main" direction="column" w="full" bg="greys.white">
       <HeroBanner containerProps={{ pl: 8, pr: 18, py: 16 }}>
@@ -134,17 +133,15 @@ export const JurisdictionScreen = observer(() => {
         </HighlightedLayout>
         {/* TODO: Add link to LG website */}
       </HeroBanner>
-      <Container maxW="container.lg" pt={{ base: 6, md: 16 }} px={8}>
-        {!currentJurisdiction.inboxEnabled && (
-          <Box my={8}>
-            <CustomMessageBox status={EFlashMessageStatus.warning} description={t("jurisdiction.notEnabled")} />
-          </Box>
-        )}
-      </Container>
       {currentUser?.isReviewStaff || showAboutPage ? (
         <>
           <FormProvider {...formMethods}>
             <form onSubmit={formMethods.handleSubmit(onSubmit)} className="space-y-8 divide-y divide-gray-200">
+              {(hasAboutSnippets || canManageAbout) && (
+                <Container maxW="container.lg" p={8}>
+                  <JurisdictionAboutSnippetCards control={control} canManage={canManageAbout} />
+                </Container>
+              )}
               <Box w="full" bg="greys.grey03">
                 <Container maxW="container.lg" py={10} px={8}>
                   <Grid w="full" templateColumns={{ base: "1fr", md: "2fr 1fr" }} gap={8}>
