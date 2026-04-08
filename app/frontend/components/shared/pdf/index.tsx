@@ -63,3 +63,6 @@ export function PDFDocument({ assetDirectoryPath, children }) {
 
   return <Document style={{ fontFamily: "BC Sans", color: theme.colors.text.primary }}>{children}</Document>
 }
+
+export * from "./atoms"
+export * from "./text"

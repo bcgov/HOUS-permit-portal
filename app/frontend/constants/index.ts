@@ -2,6 +2,7 @@ import { t } from "i18next"
 import { IRequirementAttributes } from "../types/api-request"
 import {
   EAutoComplianceType,
+  EConditionalOperator,
   EEnabledElectiveFieldReason,
   EEnergyStepCodeDependencyRequirementCode,
   EEnergyStepCodePart3DependencyRequirementCode,
@@ -125,7 +126,7 @@ export function getEnergyStepCodeRequirementRequiredSchema(
       label: t("requirementsLibrary.modals.stepCodeDependencies.energyStepCodeToolPart9.label"),
       inputOptions: {
         conditional: {
-          // @ts-ignore
+          operator: EConditionalOperator.isEqual,
           eq: "tool",
           show: true,
           when: EEnergyStepCodeDependencyRequirementCode.energyStepCodeMethod,
@@ -139,7 +140,7 @@ export function getEnergyStepCodeRequirementRequiredSchema(
       inputType: ERequirementType.file,
       inputOptions: {
         conditional: {
-          // @ts-ignore
+          operator: EConditionalOperator.isEqual,
           eq: "file",
           show: true,
           when: EEnergyStepCodeDependencyRequirementCode.energyStepCodeMethod,
@@ -152,7 +153,7 @@ export function getEnergyStepCodeRequirementRequiredSchema(
       inputType: ERequirementType.file,
       inputOptions: {
         conditional: {
-          // @ts-ignore
+          operator: EConditionalOperator.isEqual,
           eq: "file",
           show: true,
           when: EEnergyStepCodeDependencyRequirementCode.energyStepCodeMethod,
@@ -191,7 +192,7 @@ export function getEnergyStepCodePart3RequirementRequiredSchema(
       label: t("requirementsLibrary.modals.stepCodeDependencies.energyStepCodeToolPart3.label"),
       inputOptions: {
         conditional: {
-          // @ts-ignore
+          operator: EConditionalOperator.isEqual,
           eq: "tool",
           show: true,
           when: EEnergyStepCodePart3DependencyRequirementCode.energyStepCodeMethod,
@@ -205,7 +206,7 @@ export function getEnergyStepCodePart3RequirementRequiredSchema(
       inputType: ERequirementType.file,
       inputOptions: {
         conditional: {
-          // @ts-ignore
+          operator: EConditionalOperator.isEqual,
           eq: "file",
           show: true,
           when: EEnergyStepCodePart3DependencyRequirementCode.energyStepCodeMethod,

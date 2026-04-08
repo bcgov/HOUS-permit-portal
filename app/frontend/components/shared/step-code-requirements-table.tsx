@@ -27,7 +27,7 @@ export const StepCodeRequirementsTable: React.FC<IStepCodeRequirementsTableProps
   if (!part9RequiredSteps) return <SharedSpinner />
 
   return (
-    <Flex direction="column" gap={4}>
+    <Flex direction="column" gap={4} w="50%">
       <Accordion allowToggle defaultIndex={[0]}>
         <AccordionItem borderWidth={1} borderColor="border.light" rounded="sm">
           <AccordionButton bg="greys.grey03" fontWeight="bold">
@@ -48,7 +48,7 @@ export const StepCodeRequirementsTable: React.FC<IStepCodeRequirementsTableProps
                     {t("jurisdiction.edit.stepCode.zeroCarbonStepRequired")}
                   </GridItem>
                   {part9RequiredSteps.map((ptrs, i) => (
-                    <>
+                    <React.Fragment key={ptrs.id || i}>
                       <GridItem as={Center}>
                         <Tag bg="semantic.successLight" color="inherit" rounded="xs" fontWeight="bold">
                           {currentJurisdiction.energyStepRequiredTranslation(ptrs.energyStepRequired)}
@@ -76,7 +76,7 @@ export const StepCodeRequirementsTable: React.FC<IStepCodeRequirementsTableProps
                           {t("ui.or")}
                         </GridItem>
                       )}
-                    </>
+                    </React.Fragment>
                   ))}
                 </Grid>
               </Flex>

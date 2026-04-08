@@ -6,7 +6,19 @@ class UpdateSandboxDescriptions < ActiveRecord::Migration[7.1]
   disable_ddl_transaction!
 
   def up
+    unless column_exists?(:sandboxes, :name)
+      say "Skipping: sandboxes.name column does not exist"
+      return
+    end
+
     say_with_time "Updating Sandbox names and descriptions" do
+      columns = Sandbox.column_names
+
+      unless columns.include?("name") && columns.include?("description")
+        say "Skipping: 'name' and/or 'description' columns no longer exist on sandboxes table."
+        next 0
+      end
+
       published_renamed_count =
         Sandbox.where(name: "Published Sandbox").update_all(name: "Published")
       scheduled_renamed_count =

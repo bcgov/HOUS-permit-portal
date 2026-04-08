@@ -1,0 +1,23 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: "<GEO_LTSA_PARCELMAP_GIS_REST_URL>/whse/bcgw_pub_whse_cadastre/MapServer/0/query?f=json&returnIdsOnly=false&returnCountOnly=false&where=PIN+IS+NOT+NULL&geometry=-123.1,49.2&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&returnGeometry=true&outFields=*"
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - Faraday v2.9.2
+  response:
+    status:
+      code: 200
+      message:
+    headers:
+      Content-Type:
+      - application/json
+    body:
+      encoding: UTF-8
+      string: '{"features":[]}'
+  recorded_at: Sat, 28 Feb 2026 00:44:03 GMT
+recorded_with: VCR 6.2.0

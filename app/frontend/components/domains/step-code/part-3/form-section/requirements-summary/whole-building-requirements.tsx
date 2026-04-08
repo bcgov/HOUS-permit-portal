@@ -4,6 +4,7 @@ import { observer } from "mobx-react-lite"
 import React from "react"
 import { Trans } from "react-i18next"
 import { usePart3StepCode } from "../../../../../../hooks/resources/use-part-3-step-code"
+import { roundMetric } from "../../../../../../utils/utility-functions"
 import { RouterLink } from "../../../../../shared/navigation/router-link"
 import { GridColumnHeader } from "../../../part-9/checklist/shared/grid/column-header"
 import { GridData } from "../../../part-9/checklist/shared/grid/data"
@@ -28,10 +29,7 @@ export const WholeBuildingRequirements = observer(function WholeBuildingRequirem
           <FormHelperText>
             <Trans i18nKey={"stepCode.part3.metrics.teui.units"} components={{ sup: <sup /> }} />
           </FormHelperText>
-          <Input
-            isDisabled
-            value={requirements.wholeBuilding.teui ? parseFloat(requirements.wholeBuilding.teui).toFixed(2) : "-"}
-          />
+          <Input isDisabled value={roundMetric(requirements.wholeBuilding.teui)} />
         </FormControl>
       </GridData>
       <GridData>
@@ -40,10 +38,7 @@ export const WholeBuildingRequirements = observer(function WholeBuildingRequirem
           <FormHelperText>
             <Trans i18nKey={"stepCode.part3.metrics.tedi.units"} components={{ sup: <sup /> }} />
           </FormHelperText>
-          <Input
-            isDisabled
-            value={requirements.wholeBuilding.tedi ? parseFloat(requirements.wholeBuilding.tedi).toFixed(2) : "-"}
-          />
+          <Input isDisabled value={roundMetric(requirements.wholeBuilding.tedi)} />
         </FormControl>
       </GridData>
       <GridData>
@@ -52,10 +47,7 @@ export const WholeBuildingRequirements = observer(function WholeBuildingRequirem
           <FormHelperText>
             <Trans i18nKey={"stepCode.part3.metrics.ghgi.units"} components={{ sup: <sup />, sub: <sub /> }} />
           </FormHelperText>
-          <Input
-            isDisabled
-            value={requirements.wholeBuilding.ghgi ? parseFloat(requirements.wholeBuilding.ghgi).toFixed(2) : "-"}
-          />
+          <Input isDisabled value={roundMetric(requirements.wholeBuilding.ghgi)} />
         </FormControl>
       </GridData>
       <GridData colSpan={3}>

@@ -52,6 +52,10 @@ export type DeepPartial<T> = T extends object
 
 export type TLatLngTuple = [number, number]
 
+export interface IParcelGeometry {
+  rings: [number, number][][]
+}
+
 export interface IContact {
   contactType: string
   id: string
@@ -196,6 +200,12 @@ export interface IDenormalizedRequirement {
   requirementCode: string
 }
 
+export interface IOptionalElectiveFieldInfo {
+  label: string
+  tooltip?: string
+  description?: string
+}
+
 export interface IDenormalizedRequirementBlock {
   id: string
   name: string
@@ -305,6 +315,11 @@ export interface IJurisdictionServicePartnerEnrollment {
   enabled: boolean
   createdAt: Date
   updatedAt: Date
+}
+
+export interface IJurisdictionStub {
+  id: string
+  qualifiedName: string
 }
 
 export interface IReportDocument extends IBaseFileAttachment {
@@ -477,6 +492,7 @@ export type TConditional = {
   show: boolean
   when: string
   eq: string
+  operator: string
 }
 
 export interface ILinkItem {
@@ -643,6 +659,19 @@ export interface IPermitTypeRequiredStep {
   energyStepRequired: EEnergyStep
   zeroCarbonStepRequired: EZeroCarbonStep
   activityName?: string
+}
+
+export interface IPart3OccupancyRequiredStep {
+  id?: string
+  occupancyKey: string
+  energyStepRequired: number
+  zeroCarbonStepRequired: number | null
+}
+
+export interface IJurisdictionClimateZone {
+  id?: string
+  climateZone: string
+  heatingDegreeDays: number | null
 }
 
 export type TCreateRequirementTemplateFormData = {
@@ -819,4 +848,66 @@ interface IPart3ComplianceReportPerformance {
 
 export interface IPart3ComplianceReport {
   performance: IPart3ComplianceReportPerformance
+}
+
+export interface IPart3Occupancy {
+  key: string
+  name: string
+  group: string
+  division: number | null
+  classificationDescription: string
+  allowedEnergySteps: number[]
+  allowedZeroCarbonLevels: number[]
+  provincialBaseline: { energyStep: number; zeroCarbonLevel: number | null }
+  bcbcTable: string | null
+  isConfigurable: boolean
+}
+
+export interface IPart3OccupancyGroup {
+  group: string
+  division: number | null
+  classificationDescription: string
+  occupancies: IPart3Occupancy[]
+}
+
+export interface IFormIOComponent {
+  type: string
+  key: string
+  id?: string
+  label?: string
+  input: boolean
+  tableView?: boolean
+  components?: IFormIOComponent[]
+  columns?: IFormIOComponent[]
+  // Common optional properties
+  validate?: { required?: boolean; [key: string]: any }
+  conditional?: any
+  customConditional?: string
+  widget?: any
+  customClass?: string
+  disabled?: boolean
+  hidden?: boolean
+  multiple?: boolean
+  persistent?: boolean | string
+  html?: string
+  action?: string
+  custom?: string
+  defaultValue?: any
+  placeholder?: string
+  prefix?: string
+  suffix?: string
+  clearOnHide?: boolean
+  unique?: boolean
+  protected?: boolean
+  [key: string]: any // Allow additional properties for component-specific fields
+}
+
+export interface IRequirementTemplateFormJson {
+  id: string
+  legend: string
+  key: string
+  label: string
+  input: boolean
+  tableView: boolean
+  components: IFormIOComponent[]
 }

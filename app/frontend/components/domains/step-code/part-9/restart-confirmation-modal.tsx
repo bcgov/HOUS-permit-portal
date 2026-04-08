@@ -23,9 +23,13 @@ export const RestartConfirmationModal = observer(function RestartStepCodeConfirm
   const navigate = useNavigate()
 
   const handleDeleteStepCode = async () => {
+    const permitApplicationId = stepCodeStore.currentStepCode?.permitApplicationId
     const response = await stepCodeStore.deleteStepCode()
     if (response?.ok) {
-      navigate("/part-9-step-code/new")
+      const targetPath = permitApplicationId
+        ? `/permit-applications/${permitApplicationId}/edit/part-9-step-code`
+        : "/part-9-step-code/new"
+      navigate(targetPath, { replace: true })
     }
     onClose()
   }

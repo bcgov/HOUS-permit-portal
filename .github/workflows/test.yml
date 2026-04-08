@@ -4,14 +4,14 @@ name: Deploy a branch to TEST
 permissions:
   contents: read
   pull-requests: write
-  
+
 on:
   workflow_dispatch:
     inputs:
       branch:
         description: "Branch Name"
         required: true
-        default: "main"
+        default: "stable"
 
 jobs:
   build-and-push-image:

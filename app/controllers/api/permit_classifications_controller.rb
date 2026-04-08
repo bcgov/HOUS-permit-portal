@@ -24,8 +24,7 @@ class Api::PermitClassificationsController < Api::ApplicationController
               .joins(:activity)
               .where(permit_classifications: { enabled: true })
 
-          if classification_option_params[:jurisdiction_id].present? &&
-               current_sandbox.blank?
+          if classification_option_params[:jurisdiction_id].present?
             jurisdiction =
               Jurisdiction.find(classification_option_params[:jurisdiction_id])
             permit_type_ids =
@@ -33,6 +32,38 @@ class Api::PermitClassificationsController < Api::ApplicationController
                 :permit_type_id
               )
             query = query.where(permit_type_id: permit_type_ids)
+
+            # Filter by jurisdiction availability (globally available or explicitly enabled)
+
+            query =
+              query.left_joins(:jurisdiction_requirement_templates).where(
+                "requirement_templates.available_globally = ? OR jurisdiction_requirement_templates.jurisdiction_id = ?",
+                true,
+                jurisdiction.id
+              )
+
+            # Exclude templates explicitly disabled by this jurisdiction
+            # (only when hide_disabled param is true, used on submitter-facing screens)
+            if classification_option_params[:hide_disabled].present?
+              disabled_template_ids =
+                RequirementTemplate
+                  .joins(
+                    published_template_version:
+                      :jurisdiction_template_version_customizations
+                  )
+                  .where(
+                    jurisdiction_template_version_customizations: {
+                      jurisdiction_id: jurisdiction.id,
+                      sandbox_id: nil,
+                      disabled: true
+                    }
+                  )
+                  .pluck(:id)
+              query =
+                query.where.not(
+                  id: disabled_template_ids
+                ) if disabled_template_ids.any?
+            end
           end
 
           query =
@@ -143,6 +174,7 @@ class Api::PermitClassificationsController < Api::ApplicationController
         activity_id
         jurisdiction_id
         first_nations
+        hide_disabled
       ]
     )
   end

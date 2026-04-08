@@ -1,5 +1,4 @@
 import {
-  Button,
   Checkbox,
   CheckboxGroup,
   Flex,
@@ -21,10 +20,10 @@ import * as R from "ramda"
 import React, { useEffect, useState } from "react"
 import { Controller, useForm } from "react-hook-form"
 import { Trans } from "react-i18next"
-import { useLocation, useNavigate } from "react-router-dom"
 import { usePart3StepCode } from "../../../../../../hooks/resources/use-part-3-step-code"
 import { EFlashMessageStatus, EStepCodeOccupancyKey } from "../../../../../../types/enums"
 import { CustomMessageBox } from "../../../../../shared/base/custom-message-box"
+import { Part3FormFooter } from "../shared/form-footer"
 import { SectionHeading } from "../shared/section-heading"
 
 export const StepCodeOccupancies = observer(function Part3StepCodeFormStepCodeOccupancies() {
@@ -35,9 +34,6 @@ export const StepCodeOccupancies = observer(function Part3StepCodeFormStepCodeOc
     !R.isEmpty(checklist.stepCodeOccupancies) ? "yes" : checklist.isComplete("stepCodeOccupancies") && "no"
   )
   const [radioError, setRadioError] = useState<string | null>(null)
-
-  const navigate = useNavigate()
-  const location = useLocation()
 
   const { handleSubmit, formState, control, reset, trigger } = useForm({
     mode: "onSubmit",
@@ -54,30 +50,19 @@ export const StepCodeOccupancies = observer(function Part3StepCodeFormStepCodeOc
 
   const onSubmit = async (values) => {
     if (!checklist) return
-    if (radioError) {
-      return
-    }
+    if (radioError) return
 
-    const alternatePath = checklist.alternateNavigateAfterSavePath
-    checklist.setAlternateNavigateAfterSavePath(null)
-
-    let updateSucceeded = false
-    if (!isValid) return
     if (isRelevant == "no") {
       const updated =
         R.isEmpty(checklist.stepCodeOccupancies) ||
         (await checklist.update({
           stepCode_occupancies_attributes: checklist.stepCodeOccupancies.map((oc) => ({ id: oc.id, _destroy: true })),
         }))
-      if (updated) {
-        await checklist.bulkUpdateCompletionStatus({
-          stepCodeOccupancies: { complete: true },
-          stepCodePerformanceRequirements: { relevant: false },
-        })
-        updateSucceeded = true
-      } else {
-        return
-      }
+      if (!updated) throw new Error("Save failed")
+      await checklist.bulkUpdateCompletionStatus({
+        stepCodeOccupancies: { complete: true },
+        stepCodePerformanceRequirements: { relevant: false },
+      })
     } else {
       const newSelections = values.stepCodeOccupancies
         .filter((ocKey) => !checklist.stepCodeOccupancies.map((oc) => oc.key).includes(ocKey))
@@ -92,24 +77,11 @@ export const StepCodeOccupancies = observer(function Part3StepCodeFormStepCodeOc
       delete values.stepCodeOccupancies
 
       const updated = await checklist.update(values)
-      if (updated) {
-        await checklist.bulkUpdateCompletionStatus({
-          stepCodeOccupancies: { complete: true },
-          stepCodePerformanceRequirements: { relevant: true },
-        })
-        updateSucceeded = true
-      } else {
-        return
-      }
-    }
-
-    if (updateSucceeded) {
-      if (alternatePath) {
-        navigate(alternatePath)
-      } else {
-        const nextSectionPath = isRelevant == "yes" ? "step-code-performance-requirements" : "modelled-outputs"
-        navigate(location.pathname.replace("step-code-occupancies", nextSectionPath))
-      }
+      if (!updated) throw new Error("Save failed")
+      await checklist.bulkUpdateCompletionStatus({
+        stepCodeOccupancies: { complete: true },
+        stepCodePerformanceRequirements: { relevant: true },
+      })
     }
   }
 
@@ -145,66 +117,56 @@ export const StepCodeOccupancies = observer(function Part3StepCodeFormStepCodeOc
           components={{ ul: <UnorderedList ml={0} pl={6} />, li: <ListItem mb={0} />, strong: <strong /> }}
         />
       </Flex>
-      <form onSubmit={handleSubmit(onSubmit)} name="part3SectionForm">
-        <Flex direction="column" gap={{ base: 6, xl: 6 }} pb={4}>
-          <FormControl isInvalid={!!radioError}>
-            <FormLabel>{t(`${i18nPrefix}.isRelevant`)}</FormLabel>
-            <RadioGroup onChange={handleIsRelevantChange} value={isRelevant}>
-              <Stack spacing={5} direction="row">
-                <Radio variant="binary" value={"yes"}>
-                  {t("ui.yes")}
-                </Radio>
-                <Radio variant="binary" value={"no"}>
-                  {t("ui.no")}
-                </Radio>
-              </Stack>
-            </RadioGroup>
-            {radioError && <FormErrorMessage>{radioError}</FormErrorMessage>}
+      <Flex direction="column" gap={{ base: 6, xl: 6 }} pb={4}>
+        <FormControl isInvalid={!!radioError}>
+          <FormLabel>{t(`${i18nPrefix}.isRelevant`)}</FormLabel>
+          <RadioGroup onChange={handleIsRelevantChange} value={isRelevant}>
+            <Stack spacing={5} direction="row">
+              <Radio variant="binary" value={"yes"}>
+                {t("ui.yes")}
+              </Radio>
+              <Radio variant="binary" value={"no"}>
+                {t("ui.no")}
+              </Radio>
+            </Stack>
+          </RadioGroup>
+          {radioError && <FormErrorMessage>{radioError}</FormErrorMessage>}
+        </FormControl>
+        {isRelevant == "yes" && (
+          <FormControl>
+            <FormLabel pb={1}>{t(`${i18nPrefix}.occupancies.label`)}</FormLabel>
+            <FormHelperText mb={1} mt={0} color="semantic.error">
+              <ErrorMessage errors={errors} name="stepCodeOccupancies" />
+            </FormHelperText>
+            <Controller
+              name="stepCodeOccupancies"
+              rules={{
+                validate: (value) => {
+                  if (isRelevant === "yes" && (!value || value.length === 0)) {
+                    return t(`${i18nPrefix}.occupancies.error`)
+                  }
+                  return true
+                },
+              }}
+              control={control}
+              render={({ field: { onChange, value } }) => (
+                <CheckboxGroup defaultValue={value} onChange={onChange}>
+                  <SimpleGrid columns={2} spacing={1}>
+                    {Object.values(EStepCodeOccupancyKey).map((key) => (
+                      <Checkbox key={key} value={key}>
+                        <Trans i18nKey={`${i18nPrefix}.occupancyKeys.${key}`} components={{ strong: <strong /> }} />
+                      </Checkbox>
+                    ))}
+                  </SimpleGrid>
+                </CheckboxGroup>
+              )}
+            />
           </FormControl>
-          {isRelevant == "yes" ? (
-            <>
-              <FormControl>
-                <FormLabel pb={1}>{t(`${i18nPrefix}.occupancies.label`)}</FormLabel>
-                <FormHelperText mb={1} mt={0} color="semantic.error">
-                  <ErrorMessage errors={errors} name="stepCodeOccupancies" />
-                </FormHelperText>
-                <Controller
-                  name="stepCodeOccupancies"
-                  rules={{
-                    validate: (value) => {
-                      if (isRelevant === "yes" && (!value || value.length === 0)) {
-                        return t(`${i18nPrefix}.occupancies.error`)
-                      }
-                      return true
-                    },
-                  }}
-                  control={control}
-                  render={({ field: { onChange, value } }) => (
-                    <CheckboxGroup defaultValue={value} onChange={onChange}>
-                      <SimpleGrid columns={2} spacing={1}>
-                        {Object.values(EStepCodeOccupancyKey).map((key) => (
-                          <Checkbox key={key} value={key}>
-                            <Trans i18nKey={`${i18nPrefix}.occupancyKeys.${key}`} components={{ strong: <strong /> }} />
-                          </Checkbox>
-                        ))}
-                      </SimpleGrid>
-                    </CheckboxGroup>
-                  )}
-                />
-              </FormControl>
-              <FormControl>
-                <Button type="submit" variant="primary" isLoading={isSubmitting} isDisabled={isSubmitting}>
-                  {t("stepCode.part3.cta")}
-                </Button>
-              </FormControl>
-            </>
-          ) : isRelevant == "no" ? (
-            <Button type="submit" variant="primary" isLoading={isSubmitting} isDisabled={isSubmitting}>
-              {t("stepCode.part3.cta")}
-            </Button>
-          ) : null}
-        </Flex>
-      </form>
+        )}
+        {(isRelevant == "yes" || isRelevant == "no") && (
+          <Part3FormFooter handleSubmit={handleSubmit} onSubmit={onSubmit} isLoading={isSubmitting} />
+        )}
+      </Flex>
     </>
   )
 })
