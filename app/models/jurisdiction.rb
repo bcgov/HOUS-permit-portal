@@ -89,6 +89,9 @@ class Jurisdiction < ApplicationRecord
 
   validates :name, uniqueness: { scope: :locality_type, case_sensitive: false }
   validates :locality_type, presence: true
+  validates :processing_time_html, length: { maximum: 140 }, allow_blank: true
+  validates :key_stages_html, length: { maximum: 140 }, allow_blank: true
+  validates :office_address, length: { maximum: 500 }, allow_blank: true
   validate :inbox_enabled_requires_inbox_setup
   validate :no_duplicate_part3_occupancy_pathways
 
