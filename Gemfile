@@ -3,7 +3,7 @@ source "https://rubygems.org"
 ruby "3.2.5"
 
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
-gem "rails", "7.2.2.2"
+gem "rails", "7.2.3.1"
 
 # Use postgresql as the database for Active Record
 gem "pg", "~> 1.1"
@@ -65,7 +65,7 @@ gem "sidekiq-cron", "~> 1.12"
 gem "sidekiq-unique-jobs", "~> 8.0"
 gem "rubyzip", "~> 2.3.2"
 gem "anycable-rails", "~> 1.6.0"
-gem "addressable", "~> 2.8"
+gem "addressable", "~> 2.9"
 gem "friendly_id", "~> 5.5.1"
 gem "exception_notification", "~> 4.5.0"
 gem "nokogiri", ">= 1.18.9"

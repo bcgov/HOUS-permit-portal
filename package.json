@@ -30,7 +30,7 @@
     "sass": "^1.70.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.4.3",
-    "vite": "^6.4.1",
+    "vite": "^6.4.2",
     "vite-plugin-ruby": "^5.1.1"
   },
   "dependencies": {
@@ -100,7 +100,9 @@
   "overrides": {
     "vite": {
       "rollup": "npm:@rollup/wasm-node"
-    }
+    },
+    "dompurify": "$dompurify",
+    "lodash": "4.18.1"
   },
   "scripts": {
     "dev": "bin/vite dev",
