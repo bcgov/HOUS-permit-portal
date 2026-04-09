@@ -14,5 +14,8 @@ class ProjectAuditBlueprint < Blueprinter::Base
     field :permit_name do |audit, _options|
       ProjectAuditPresenter.new(audit).resolve_permit_name
     end
+    field :permit_application_status do |audit, _options|
+      ProjectAuditPresenter.new(audit).resolve_permit_application_status
+    end
   end
 end

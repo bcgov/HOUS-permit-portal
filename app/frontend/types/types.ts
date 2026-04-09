@@ -623,6 +623,8 @@ export interface IProjectAuditSummary {
   createdAt: number
   permitApplicationId: string | null
   permitName: string | null
+  /** Present when audit is tied to a permit application; used for inbox UI (e.g. skip review link for drafts). */
+  permitApplicationStatus?: string | null
 }
 
 export interface ITemplateVersionDiff {

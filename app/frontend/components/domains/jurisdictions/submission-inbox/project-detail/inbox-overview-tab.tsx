@@ -20,7 +20,7 @@ import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { datefnsTableDateTimeFormat } from "../../../../../constants"
 import { IPermitProject } from "../../../../../models/permit-project"
-import { EInboxDisplayMode } from "../../../../../types/enums"
+import { EInboxDisplayMode, EPermitApplicationStatus } from "../../../../../types/enums"
 import { FullscreenMapModal } from "../../../../shared/module-wrappers/fullscreen-map-modal"
 import { ProjectMap } from "../../../../shared/module-wrappers/project-map"
 import { RouterLink } from "../../../../shared/navigation/router-link"
@@ -114,17 +114,23 @@ export const InboxOverviewTab = observer(({ permitProject }: IProps) => {
                   <Flex align="center" justify="space-between" py={3} px={4} gap={4} minH={20}>
                     <HStack spacing={1} flex={1} minW={0}>
                       <Text>{audit.description}</Text>
-                      {audit.permitName && (
-                        <RouterLink
-                          to={
-                            audit.permitApplicationId
-                              ? `/permit-applications/${audit.permitApplicationId}/edit`
-                              : undefined
-                          }
-                        >
-                          {audit.permitName}
-                        </RouterLink>
-                      )}
+                      {audit.permitName &&
+                        (audit.permitApplicationId &&
+                        audit.permitApplicationStatus === EPermitApplicationStatus.newDraft ? (
+                          <Text as="span" color="text.secondary">
+                            {audit.permitName}
+                          </Text>
+                        ) : (
+                          <RouterLink
+                            to={
+                              audit.permitApplicationId
+                                ? `/permit-applications/${audit.permitApplicationId}`
+                                : undefined
+                            }
+                          >
+                            {audit.permitName}
+                          </RouterLink>
+                        ))}
                     </HStack>
                     <Text color="text.secondary" whiteSpace="nowrap">
                       {format(new Date(audit.createdAt), datefnsTableDateTimeFormat)}
