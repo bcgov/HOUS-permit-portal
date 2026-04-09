@@ -89,6 +89,7 @@ export type TJurisdictionFieldValues = {
   keyStagesHtml: string
   officeAddress: string
   websiteUrl: string
+  timelineAndDeliverablesHtml: string
 }
 
 export interface IPermitTypeSubmissionContact {
