@@ -2,6 +2,7 @@ class Jurisdiction < ApplicationRecord
   extend FriendlyId
   friendly_id :qualified_name, use: :slugged
   include JurisdictionExternalApiState
+  include ValidateUrlAttributes
 
   BASE_INCLUDES = %i[
     permit_type_submission_contacts
@@ -125,6 +126,8 @@ class Jurisdiction < ApplicationRecord
   accepts_nested_attributes_for :resources, allow_destroy: true
 
   before_create :assign_unique_prefix
+
+  url_validatable :website_url
 
   def customizations
     # Convenience method to prevent carpal tunnel syndrome
