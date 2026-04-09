@@ -76,6 +76,7 @@ export const JurisdictionScreen = observer(() => {
       keyStagesHtml: currentJurisdiction?.keyStagesHtml ?? "",
       officeAddress: currentJurisdiction?.officeAddress ?? "",
       websiteUrl: currentJurisdiction?.websiteUrl ?? "",
+      timelineAndDeliverablesHtml: currentJurisdiction?.timelineAndDeliverablesHtml ?? "",
     }
   }
 
@@ -116,6 +117,8 @@ export const JurisdictionScreen = observer(() => {
   const showOverviewAccordion =
     canManageAbout || jurisdictionRichTextHasPublicContent(currentJurisdiction.checklistHtml)
   const showKeyInfoAccordion = canManageAbout || jurisdictionRichTextHasPublicContent(currentJurisdiction.lookOutHtml)
+  const showTimelinesAndDeliverablesAccordion =
+    canManageAbout || jurisdictionRichTextHasPublicContent(currentJurisdiction.timelineAndDeliverablesHtml)
 
   const hasAboutSnippets = jurisdictionAboutSnippetHasContent(
     currentJurisdiction.processingTimeHtml,
@@ -154,7 +157,6 @@ export const JurisdictionScreen = observer(() => {
                         <JurisdictionTipTapFormController
                           control={control}
                           headingId="jurisdiction-supported-description-heading"
-                          initialTriggerText={t("jurisdiction.edit.addDescription")}
                           name={"descriptionHtml"}
                         />
                       </Flex>
@@ -176,7 +178,7 @@ export const JurisdictionScreen = observer(() => {
                     gap={4}
                     allowMultiple
                     key={canManageAbout ? "jurisdiction-about-accordion-manage" : "jurisdiction-about-accordion-public"}
-                    defaultIndex={canManageAbout ? [0, 1, 2] : [0]}
+                    defaultIndex={canManageAbout ? [0, 1, 2, 3] : [0]}
                   >
                     {showOverviewAccordion && (
                       <JurisdictionAboutAccordionItem
@@ -188,7 +190,6 @@ export const JurisdictionScreen = observer(() => {
                         <JurisdictionTipTapFormController
                           control={control}
                           headingId="jurisdiction-accordion-overview-heading"
-                          initialTriggerText={t("jurisdiction.edit.addChecklist")}
                           name={"checklistHtml"}
                         />
                       </JurisdictionAboutAccordionItem>
@@ -201,12 +202,22 @@ export const JurisdictionScreen = observer(() => {
                         <JurisdictionTipTapFormController
                           control={control}
                           headingId="jurisdiction-accordion-keyinfo-heading"
-                          initialTriggerText={t("jurisdiction.edit.addLookOut")}
                           name={"lookOutHtml"}
                         />
                       </JurisdictionAboutAccordionItem>
                     )}
-                    {/* TODO: Add Timelines & Deliverables section */}
+                    {showTimelinesAndDeliverablesAccordion && (
+                      <JurisdictionAboutAccordionItem
+                        headingId="jurisdiction-accordion-timelines-deliverables-heading"
+                        title={t("jurisdiction.edit.accordion.timelinesAndDeliverables")}
+                      >
+                        <JurisdictionTipTapFormController
+                          control={control}
+                          headingId="jurisdiction-accordion-timelines-deliverables-heading"
+                          name={"timelineAndDeliverablesHtml"}
+                        />
+                      </JurisdictionAboutAccordionItem>
+                    )}
                     <JurisdictionAboutAccordionItem
                       headingId="jurisdiction-accordion-stepcode-heading"
                       title={t("jurisdiction.edit.stepCode.title")}
@@ -326,7 +337,6 @@ export const JurisdictionScreen = observer(() => {
                     <JurisdictionTipTapFormController
                       control={control}
                       headingId="jurisdiction-contact-summary-heading"
-                      initialTriggerText={t("jurisdiction.edit.addContactSummary")}
                       name={"contactSummaryHtml"}
                     />
                     <Can
@@ -426,14 +436,13 @@ interface IJurisdictionTipTapFormControllerProps {
   control: Control<TJurisdictionFieldValues>
   /** Optional; visible section title should use `headingId` + matching `id` on `<Heading>`. */
   label?: string
-  initialTriggerText: string
   name: keyof TJurisdictionFieldValues
   /** `id` of the section `<Heading>` — sets `aria-labelledby` on the editor wrapper for assistive tech. */
   headingId?: string
 }
 
 const JurisdictionTipTapFormController = observer(
-  ({ control, label, initialTriggerText, name, headingId }: IJurisdictionTipTapFormControllerProps) => {
+  ({ control, label, name, headingId }: IJurisdictionTipTapFormControllerProps) => {
     const { jurisdictionStore } = useMst()
     const { currentJurisdiction } = jurisdictionStore
     const { t } = useTranslation()
@@ -462,7 +471,6 @@ const JurisdictionTipTapFormController = observer(
                   editText={t("ui.clickToEdit")}
                   htmlValue={value as string}
                   onChange={onChange}
-                  initialTriggerText={initialTriggerText}
                   containerProps={headingId ? { "aria-labelledby": headingId } : undefined}
                   onRemove={(setEditMode) => {
                     setEditMode(false)
