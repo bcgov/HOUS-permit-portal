@@ -953,13 +953,9 @@ const options = {
           edit: {
             displayDescriptionLabel: "Jurisdiction description (public)",
             title: "Manage jurisdiction name settings",
-            addDescription: "Click to add a description",
             displayChecklistLabel: "Permit application checklist (public)",
-            addChecklist: "Click to add a permit application checklist",
             displayLookOutLabel: '"Look Out" Section (public)',
-            addLookOut: 'Click to add a "Look Out" section',
             displayContactSummaryLabel: "Contact Summary Section (public)",
-            addContactSummary: "Click to add a Contact Summary section",
             firstContact: "The first contact will be displayed upon successful permit application submission.",
             contactsEmptyState: "No contacts have been configured yet.",
             clickToEditContacts: "Click to edit contacts",
