@@ -996,6 +996,7 @@ const options = {
             accordion: {
               overviewProcess: "Overview & Process",
               keyInformation: "Key Information",
+              timelinesAndDeliverables: "Timelines & Deliverables",
             },
           },
           new: {
