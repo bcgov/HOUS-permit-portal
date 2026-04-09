@@ -1054,6 +1054,10 @@ const options = {
           },
           heroBannerDescription:
             "Jurisdiction description: {{jurisdictionName}} provides guidance, services, and regulatory oversight for residents and businesses within its municipal boundary.",
+          lgWebsiteBackLink: "Back to {{jurisdictionName}} website",
+          lgWebsiteUrlLabel: "Local government website URL",
+          lgWebsiteUrlPlaceholder: "https://",
+          lgWebsiteEmptyManagerHint: "No website URL has been configured yet.",
           notEnabled: "Permit application submissions are temporarily unavailable for this jurisdiction.",
           checklist: "Checklist",
           lookOut: "Things to look out for",
