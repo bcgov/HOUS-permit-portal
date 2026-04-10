@@ -5,6 +5,11 @@ RSpec.describe CheckExpiringApiKeysJob, type: :job do
   before { Sidekiq::Testing.fake! }
   include ActiveSupport::Testing::TimeHelpers
 
+  it "disables the unique lock to allow retries" do
+    opts = described_class.get_sidekiq_options
+    expect((opts["lock"] || opts[:lock]).to_s).to eq("none")
+  end
+
   it "sends an email and records a notification for matching interval" do
     travel_to(Time.zone.parse("2026-03-01 12:00:00")) do
       key =

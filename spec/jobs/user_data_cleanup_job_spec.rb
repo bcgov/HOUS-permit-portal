@@ -8,6 +8,11 @@ RSpec.describe UserDataCleanupJob, type: :job do
   # 2. Archives (discards) users who have been inactive for too long.
   # 3. Warns discarded users before they are permanently deleted.
   # 4. Permanently deletes users who have been discarded for too long.
+  it "disables the unique lock to allow retries" do
+    opts = described_class.get_sidekiq_options
+    expect((opts["lock"] || opts[:lock]).to_s).to eq("none")
+  end
+
   describe "#perform" do
     include ActiveJob::TestHelper
 

@@ -4,6 +4,11 @@ require "sidekiq/testing"
 RSpec.describe DestroyJob, type: :job do
   before { Sidekiq::Testing.fake! }
 
+  it "disables the unique lock to allow retries" do
+    opts = described_class.get_sidekiq_options
+    expect((opts["lock"] || opts[:lock]).to_s).to eq("none")
+  end
+
   it "destroys an attachment via the Shrine attacher" do
     attacher = instance_double("Attacher", destroy: true)
     attacher_class = class_double("SomeAttacher", from_data: attacher)

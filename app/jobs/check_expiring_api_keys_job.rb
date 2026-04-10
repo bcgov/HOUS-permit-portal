@@ -1,5 +1,6 @@
 class CheckExpiringApiKeysJob
   include Sidekiq::Worker
+  sidekiq_options lock: :none
 
   # Intervals in days before expiration to send notifications
   NOTIFICATION_INTERVALS = [30, 14, 5, 2, 1].freeze

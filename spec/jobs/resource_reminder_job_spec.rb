@@ -4,6 +4,11 @@ require "sidekiq/testing"
 RSpec.describe ResourceReminderJob, type: :job do
   before { Sidekiq::Testing.fake! }
 
+  it "disables the unique lock to allow retries" do
+    opts = described_class.get_sidekiq_options
+    expect((opts["lock"] || opts[:lock]).to_s).to eq("none")
+  end
+
   it "publishes reminders and updates stale resources" do
     allow(ENV).to receive(:fetch).and_call_original
     allow(ENV).to receive(:fetch).with(

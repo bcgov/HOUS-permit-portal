@@ -7,6 +7,11 @@ require "sidekiq/cron"
 RSpec.describe TemplatePublishJob, type: :job, search: true do
   before { Sidekiq::Testing.fake! }
 
+  it "disables the unique lock to allow retries" do
+    opts = described_class.get_sidekiq_options
+    expect((opts["lock"] || opts[:lock]).to_s).to eq("none")
+  end
+
   describe "#perform" do
     it "calls the TemplateVersioningService methods during execution" do
       # Mock the TemplateVersioningService methods to control behavior during testing

@@ -1,6 +1,7 @@
 class UserDataCleanupJob
   include Sidekiq::Worker
   include EnvHelper
+  sidekiq_options lock: :none
 
   DEFAULT_ARCHIVE_AFTER_DAYS = 1095
   DEFAULT_DELETE_AFTER_DAYS = 1460

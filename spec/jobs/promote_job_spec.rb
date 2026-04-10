@@ -4,6 +4,11 @@ require "sidekiq/testing"
 RSpec.describe PromoteJob, type: :job do
   before { Sidekiq::Testing.fake! }
 
+  it "disables the unique lock to allow retries" do
+    opts = described_class.get_sidekiq_options
+    expect((opts["lock"] || opts[:lock]).to_s).to eq("none")
+  end
+
   it "promotes after a successful virus scan and marks record clean" do
     attacher =
       instance_double("Attacher", atomic_promote: true, file: double("File"))

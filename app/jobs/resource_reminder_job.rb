@@ -1,7 +1,7 @@
 # app/jobs/resource_reminder_job.rb
 class ResourceReminderJob
   include Sidekiq::Worker
-  sidekiq_options queue: :default
+  sidekiq_options queue: :default, lock: :none
 
   def perform
     reminder_days = ENV.fetch("RESOURCE_REMINDER_DAYS", 180).to_i
