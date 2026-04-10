@@ -1163,13 +1163,8 @@ Thank you,
           },
           projectSidebar: {
             title: "Collaborators",
-            projectReviewDelegatee: "Project review delegatee",
-            delegateeDescription:
-              "The project review delegatee is assigned as the designated reviewer for all permit applications in this project. When set, it overrides the designated reviewer on all currently submitted applications. New applications submitted to this project will automatically inherit this reviewer.",
-            overrideConfirmTitle: "Override all permit application reviewers?",
-            overrideConfirmBody:
-              "This will replace the designated reviewer on all submitted permit applications in this project. Individual applications can still have their reviewer changed afterward.",
-            unassignDelegatee: "Remove",
+            projectReviewCollaborators: "Project review collaborators",
+            unassignCollaborator: "Remove",
             noneAssigned: "None assigned",
             permitApplications: "Permit applications",
             noSubmittedApplications: "No submitted applications in this project.",

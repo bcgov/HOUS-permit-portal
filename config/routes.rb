@@ -232,8 +232,8 @@ Rails.application.routes.draw do
         post :mark_as_viewed
         post :mark_as_unviewed
         post :transition_state
-        post :assign_review_delegatee
-        delete :unassign_review_delegatee
+        post :assign_project_review_collaborator
+        delete :unassign_project_review_collaborator
       end
       collection { patch :reorder }
     end

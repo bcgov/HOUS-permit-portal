@@ -49,7 +49,8 @@ class PermitProjectBlueprint < Blueprinter::Base
       options[:project_ids_with_outdated_drafts]&.include?(permit_project.id)
     end
 
-    association :review_delegatee, blueprint: CollaboratorBlueprint
+    association :permit_project_collaborations,
+                blueprint: PermitProjectCollaborationBlueprint
   end
 
   view :jurisdiction_review_inbox do

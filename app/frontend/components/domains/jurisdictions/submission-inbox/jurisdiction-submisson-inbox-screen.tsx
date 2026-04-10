@@ -87,7 +87,7 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
 
   useSearch(
     activeSearchStore,
-    inboxSearchEnabled ? [currentJurisdiction?.id, JSON.stringify(currentSandboxId), viewMode] : [null]
+    inboxSearchEnabled ? [currentJurisdiction?.id, JSON.stringify(currentSandboxId), viewMode] : [null, null, null]
   )
 
   const loadCollaboratorOptions = useCallback(async (): Promise<IOption[]> => {

@@ -71,8 +71,12 @@ export const PermitProjectStoreModel = types
         self.rootStore.jurisdictionStore.mergeUpdate(permitProject.jurisdiction, "jurisdictionMap")
       }
 
-      if (permitProject.reviewDelegatee?.user && typeof permitProject.reviewDelegatee.user === "object") {
-        self.rootStore.userStore.mergeUpdate(permitProject.reviewDelegatee.user, "usersMap")
+      if (permitProject.permitProjectCollaborations) {
+        permitProject.permitProjectCollaborations.forEach((collab: any) => {
+          if (collab?.collaborator?.user && typeof collab.collaborator.user === "object") {
+            self.rootStore.userStore.mergeUpdate(collab.collaborator.user, "usersMap")
+          }
+        })
       }
 
       const overrides: Record<string, any> = {
