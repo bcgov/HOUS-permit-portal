@@ -50,9 +50,9 @@ function OfficeAddressSnippetCard({
 
   return (
     <Box
-      border="1px dashed"
-      borderColor="transparent"
-      p={1}
+      border={canManage ? "1px dashed" : "none"}
+      borderColor={canManage ? "border.light" : undefined}
+      p={canManage ? 1 : 0}
       w="full"
       h="full"
       minW={0}
@@ -60,7 +60,7 @@ function OfficeAddressSnippetCard({
       flexDirection="column"
     >
       <Flex direction="column" gap={1} flex={1} minH={0} minW={0}>
-        <Flex justify="flex-end" align="center" minH={canManage ? EDIT_ROW_MIN_H : undefined} flexShrink={0} />
+        {canManage && <Flex justify="flex-end" align="center" minH={EDIT_ROW_MIN_H} flexShrink={0} />}
         <Box bg="theme.blueLight" borderRadius="md" p={4} minH={SNIPPET_CARD_MIN_H} flex={1} role="group">
           <Flex gap={4} align="flex-start">
             <Icon size={32} color="var(--chakra-colors-theme-blueAlt)" weight="regular" />
@@ -152,9 +152,9 @@ export const JurisdictionAboutSnippetCards = observer(({ control, canManage }: I
 
               return (
                 <Box
-                  border="1px dashed"
-                  borderColor={canManage ? "border.light" : "transparent"}
-                  p={1}
+                  border={canManage ? "1px dashed" : "none"}
+                  borderColor={canManage ? "border.light" : undefined}
+                  p={canManage ? 1 : 0}
                   w="full"
                   h="full"
                   minW={0}
@@ -162,13 +162,8 @@ export const JurisdictionAboutSnippetCards = observer(({ control, canManage }: I
                   flexDirection="column"
                 >
                   <Flex direction="column" gap={1} flex={1} minH={0} minW={0}>
-                    <Flex
-                      justify="flex-end"
-                      align="center"
-                      minH={canManage ? EDIT_ROW_MIN_H : undefined}
-                      flexShrink={0}
-                    >
-                      {canEditHere && (
+                    {canManage && (
+                      <Flex justify="flex-end" align="center" minH={EDIT_ROW_MIN_H} flexShrink={0}>
                         <Button
                           variant="primary"
                           size="xs"
@@ -185,8 +180,8 @@ export const JurisdictionAboutSnippetCards = observer(({ control, canManage }: I
                         >
                           {isEditing ? t("ui.done") : t("ui.edit")}
                         </Button>
-                      )}
-                    </Flex>
+                      </Flex>
+                    )}
                     <Box bg="theme.blueLight" borderRadius="md" p={4} minH={SNIPPET_CARD_MIN_H} flex={1} role="group">
                       <Flex gap={4} align="flex-start">
                         <Icon size={32} color="var(--chakra-colors-theme-blueAlt)" weight="regular" />

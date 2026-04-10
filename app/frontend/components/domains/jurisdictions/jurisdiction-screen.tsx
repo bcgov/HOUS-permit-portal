@@ -133,7 +133,7 @@ export const JurisdictionScreen = observer(() => {
   return (
     <FormProvider {...formMethods}>
       <Flex as="main" direction="column" w="full" bg="greys.white">
-        <HeroBanner containerProps={{ pl: 8, pr: 18, py: 16 }}>
+        <HeroBanner containerProps={{ pl: 8, pr: { base: 18, md: 8 }, py: 16 }}>
           <HighlightedLayout p={8} gap="18px" maxW={{ md: "calc((200% - var(--chakra-space-6)) / 3)", base: "full" }}>
             <Heading as="h1" mb={0} fontSize="2xl">
               {qualifiedName}
