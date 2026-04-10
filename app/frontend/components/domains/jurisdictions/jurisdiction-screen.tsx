@@ -9,8 +9,8 @@ import {
   FormLabel,
   Grid,
   GridItem,
-  HStack,
   Heading,
+  HStack,
   Input,
   Link,
   ListItem,
@@ -46,7 +46,7 @@ import { ContactGrid } from "./contacts/contact-grid"
 import { JurisdictionAboutAccordionItem } from "./jurisdiction-about-accordion-item"
 import { JurisdictionAboutCtaCards } from "./jurisdiction-about-cta-cards"
 import { JurisdictionAboutSnippetCards, jurisdictionAboutSnippetHasContent } from "./jurisdiction-about-snippet-cards"
-import { JurisdictionContactInfoBanner } from "./jurisdiction-contact-info-banner"
+import { contactInfoBannerHasContent, JurisdictionContactInfoBanner } from "./jurisdiction-contact-info-banner"
 import { JurisdictionEditorWithPreview } from "./jurisdiction-editor-with-preview"
 import { JurisdictionHeroLgWebsiteRow } from "./jurisdiction-hero-lg-website-row"
 export interface Jurisdiction {
@@ -112,6 +112,17 @@ export const JurisdictionScreen = observer(() => {
     currentJurisdiction?.keyStagesHtml,
     currentJurisdiction?.officeAddress
   )
+
+  const showContactSection =
+    canManageAbout ||
+    jurisdictionRichTextHasPublicContent(currentJurisdiction?.contactSummaryHtml) ||
+    contactInfoBannerHasContent(
+      currentJurisdiction?.officeAddress,
+      currentJurisdiction?.officeHours,
+      currentJurisdiction?.officeTelephone,
+      currentJurisdiction?.officeEmail
+    ) ||
+    (currentJurisdiction?.contacts?.length ?? 0) > 0
 
   if (error) return <ErrorScreen error={error} />
   if (!currentJurisdiction) return <LoadingScreen />
@@ -334,52 +345,54 @@ export const JurisdictionScreen = observer(() => {
                     }
                   />
                   <JurisdictionAboutCtaCards />
-                  <Flex direction="column" gap={4}>
-                    <Heading as="h2" variant="yellowline" my={0}>
-                      {t("jurisdiction.contactInfo")}
-                    </Heading>
-                    <JurisdictionTipTapFormController
-                      control={control}
-                      headingId="jurisdiction-contact-summary-heading"
-                      name={"contactSummaryHtml"}
-                    />
-                    <JurisdictionContactInfoBanner
-                      control={control}
-                      canManage={canManageAbout}
-                      qualifiedName={qualifiedName}
-                    />
-                    <Can
-                      action="jurisdiction:manage"
-                      data={{ jurisdiction: currentJurisdiction }}
-                      onPermissionDeniedRender={
-                        currentJurisdiction.contacts.length > 0 ? <ContactGrid isEditing={false} /> : null
-                      }
-                    >
-                      <Box
-                        display="flex"
-                        flexDirection="column"
-                        border="1px dashed"
-                        borderColor="border.light"
-                        p={1}
-                        gap={1}
+                  {showContactSection && (
+                    <Flex direction="column" gap={4}>
+                      <Heading as="h2" variant="yellowline" my={0}>
+                        {t("jurisdiction.contactInfo")}
+                      </Heading>
+                      <JurisdictionTipTapFormController
+                        control={control}
+                        headingId="jurisdiction-contact-summary-heading"
+                        name={"contactSummaryHtml"}
+                      />
+                      <JurisdictionContactInfoBanner
+                        control={control}
+                        canManage={canManageAbout}
+                        qualifiedName={qualifiedName}
+                      />
+                      <Can
+                        action="jurisdiction:manage"
+                        data={{ jurisdiction: currentJurisdiction }}
+                        onPermissionDeniedRender={
+                          currentJurisdiction.contacts.length > 0 ? <ContactGrid isEditing={false} /> : null
+                        }
                       >
-                        <Flex justify="flex-end" w="full">
-                          <Button
-                            variant="primary"
-                            size="xs"
-                            leftIcon={<Pencil size={12} />}
-                            aria-label={isEditingContacts ? t("ui.done") : t("ui.edit")}
-                            onClick={() => {
-                              setIsEditingContacts((current) => !current)
-                            }}
-                          >
-                            {isEditingContacts ? t("ui.done") : t("ui.edit")}
-                          </Button>
-                        </Flex>
-                        <ContactGrid isEditing={isEditingContacts} />
-                      </Box>
-                    </Can>
-                  </Flex>
+                        <Box
+                          display="flex"
+                          flexDirection="column"
+                          border="1px dashed"
+                          borderColor="border.light"
+                          p={1}
+                          gap={1}
+                        >
+                          <Flex justify="flex-end" w="full">
+                            <Button
+                              variant="primary"
+                              size="xs"
+                              leftIcon={<Pencil size={12} />}
+                              aria-label={isEditingContacts ? t("ui.done") : t("ui.edit")}
+                              onClick={() => {
+                                setIsEditingContacts((current) => !current)
+                              }}
+                            >
+                              {isEditingContacts ? t("ui.done") : t("ui.edit")}
+                            </Button>
+                          </Flex>
+                          <ContactGrid isEditing={isEditingContacts} />
+                        </Box>
+                      </Can>
+                    </Flex>
+                  )}
                 </Flex>
                 <Can action={"jurisdiction:manage"} data={{ jurisdiction: currentJurisdiction }}>
                   <Center w="full" position="fixed" bottom={0} left={0} right={0}>
