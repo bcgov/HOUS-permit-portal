@@ -36,6 +36,49 @@ function snippetFieldHasVisibleText(value: unknown): boolean {
   return String(value ?? "").trim().length > 0
 }
 
+function OfficeAddressSnippetCard({
+  control,
+  canManage,
+}: {
+  control: Control<TJurisdictionFieldValues>
+  canManage: boolean
+}) {
+  const { t } = useTranslation()
+  const value = useWatch({ control, name: "officeAddress" })
+  const text = typeof value === "string" ? value : ""
+  const Icon = MapPin
+
+  return (
+    <Box
+      border="1px dashed"
+      borderColor="transparent"
+      p={1}
+      w="full"
+      h="full"
+      minW={0}
+      display="flex"
+      flexDirection="column"
+    >
+      <Flex direction="column" gap={1} flex={1} minH={0} minW={0}>
+        <Flex justify="flex-end" align="center" minH={canManage ? EDIT_ROW_MIN_H : undefined} flexShrink={0} />
+        <Box bg="theme.blueLight" borderRadius="md" p={4} minH={SNIPPET_CARD_MIN_H} flex={1} role="group">
+          <Flex gap={4} align="flex-start">
+            <Icon size={32} color="var(--chakra-colors-theme-blueAlt)" weight="regular" />
+            <Flex direction="column" py={1} flex={1} minW={0}>
+              <Text fontWeight="bold" color="theme.blueAlt" fontSize="md">
+                {t("jurisdiction.aboutSnippets.officeAddressTitle")}
+              </Text>
+              <Text fontSize="md" color="theme.blueAlt" whiteSpace="pre-wrap">
+                {text.trim() ? text : ""}
+              </Text>
+            </Flex>
+          </Flex>
+        </Box>
+      </Flex>
+    </Box>
+  )
+}
+
 export const JurisdictionAboutSnippetCards = observer(({ control, canManage }: IJurisdictionAboutSnippetCardsProps) => {
   const { t } = useTranslation()
   const { trigger, getValues } = useFormContext()
@@ -83,40 +126,34 @@ export const JurisdictionAboutSnippetCards = observer(({ control, canManage }: I
   return (
     <SimpleGrid columns={{ base: 1, md: Math.min(visibleFields.length, 3) }} spacing={6} w="full" alignItems="stretch">
       {visibleFields.map((fieldName) => {
+        if (fieldName === "officeAddress") {
+          return <OfficeAddressSnippetCard key={fieldName} control={control} canManage={canManage} />
+        }
+
         const Icon = icons[fieldName]
-        const isOffice = fieldName === "officeAddress"
-        const canEditHere = canManage && !isOffice
+        const canEditHere = canManage
 
         return (
           <Controller
             key={fieldName}
             name={fieldName}
             control={control}
-            rules={
-              isOffice
-                ? {
-                    maxLength: {
-                      value: JURISDICTION_ABOUT_OFFICE_ADDRESS_MAX_CHARS,
-                      message: t("jurisdiction.aboutSnippets.maxLengthOffice"),
-                    },
-                  }
-                : {
-                    maxLength: {
-                      value: JURISDICTION_ABOUT_TWO_LINE_MAX_CHARS,
-                      message: t("jurisdiction.aboutSnippets.maxLengthTwoLines", {
-                        max: JURISDICTION_ABOUT_TWO_LINE_MAX_CHARS,
-                      }),
-                    },
-                  }
-            }
+            rules={{
+              maxLength: {
+                value: JURISDICTION_ABOUT_TWO_LINE_MAX_CHARS,
+                message: t("jurisdiction.aboutSnippets.maxLengthTwoLines", {
+                  max: JURISDICTION_ABOUT_TWO_LINE_MAX_CHARS,
+                }),
+              },
+            }}
             render={({ field: { value, onChange }, fieldState }) => {
               const text = typeof value === "string" ? value : ""
-              const isEditing = !isOffice && editingField === fieldName
+              const isEditing = editingField === fieldName
 
               return (
                 <Box
                   border="1px dashed"
-                  borderColor={canManage && !isOffice ? "border.light" : "transparent"}
+                  borderColor={canManage ? "border.light" : "transparent"}
                   p={1}
                   w="full"
                   h="full"
@@ -186,11 +223,7 @@ export const JurisdictionAboutSnippetCards = observer(({ control, canManage }: I
                               {...(lineClamp[fieldName] != null ? { noOfLines: lineClamp[fieldName] } : {})}
                               whiteSpace="pre-wrap"
                             >
-                              {text.trim()
-                                ? text
-                                : canManage && !isOffice
-                                  ? t("jurisdiction.aboutSnippets.emptyHint")
-                                  : ""}
+                              {text.trim() ? text : canManage ? t("jurisdiction.aboutSnippets.emptyHint") : ""}
                             </Text>
                           )}
                         </Flex>
