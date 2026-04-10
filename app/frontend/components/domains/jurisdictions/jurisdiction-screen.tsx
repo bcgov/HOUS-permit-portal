@@ -46,6 +46,7 @@ import { ContactGrid } from "./contacts/contact-grid"
 import { JurisdictionAboutAccordionItem } from "./jurisdiction-about-accordion-item"
 import { JurisdictionAboutCtaCards } from "./jurisdiction-about-cta-cards"
 import { JurisdictionAboutSnippetCards, jurisdictionAboutSnippetHasContent } from "./jurisdiction-about-snippet-cards"
+import { JurisdictionContactInfoBanner } from "./jurisdiction-contact-info-banner"
 import { JurisdictionEditorWithPreview } from "./jurisdiction-editor-with-preview"
 import { JurisdictionHeroLgWebsiteRow } from "./jurisdiction-hero-lg-website-row"
 export interface Jurisdiction {
@@ -75,6 +76,9 @@ export const JurisdictionScreen = observer(() => {
       processingTimeHtml: currentJurisdiction?.processingTimeHtml ?? "",
       keyStagesHtml: currentJurisdiction?.keyStagesHtml ?? "",
       officeAddress: currentJurisdiction?.officeAddress ?? "",
+      officeHours: currentJurisdiction?.officeHours ?? "",
+      officeTelephone: currentJurisdiction?.officeTelephone ?? "",
+      officeEmail: currentJurisdiction?.officeEmail ?? "",
       websiteUrl: currentJurisdiction?.websiteUrl ?? "",
       timelineAndDeliverablesHtml: currentJurisdiction?.timelineAndDeliverablesHtml ?? "",
     }
@@ -338,6 +342,11 @@ export const JurisdictionScreen = observer(() => {
                       control={control}
                       headingId="jurisdiction-contact-summary-heading"
                       name={"contactSummaryHtml"}
+                    />
+                    <JurisdictionContactInfoBanner
+                      control={control}
+                      canManage={canManageAbout}
+                      qualifiedName={qualifiedName}
                     />
                     <Can
                       action="jurisdiction:manage"
