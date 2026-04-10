@@ -88,6 +88,9 @@ export type TJurisdictionFieldValues = {
   processingTimeHtml: string
   keyStagesHtml: string
   officeAddress: string
+  officeHours: string
+  officeTelephone: string
+  officeEmail: string
   websiteUrl: string
   timelineAndDeliverablesHtml: string
 }
