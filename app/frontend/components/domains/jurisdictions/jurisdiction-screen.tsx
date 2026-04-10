@@ -100,6 +100,19 @@ export const JurisdictionScreen = observer(() => {
     reset(getDefaultJurisdictionValues())
   }, [currentJurisdiction?.id])
 
+  const canManageAbout = can("jurisdiction:manage", { jurisdiction: currentJurisdiction })
+  const showOverviewAccordion =
+    canManageAbout || jurisdictionRichTextHasPublicContent(currentJurisdiction?.checklistHtml)
+  const showKeyInfoAccordion = canManageAbout || jurisdictionRichTextHasPublicContent(currentJurisdiction?.lookOutHtml)
+  const showTimelinesAndDeliverablesAccordion =
+    canManageAbout || jurisdictionRichTextHasPublicContent(currentJurisdiction?.timelineAndDeliverablesHtml)
+
+  const hasAboutSnippets = jurisdictionAboutSnippetHasContent(
+    currentJurisdiction?.processingTimeHtml,
+    currentJurisdiction?.keyStagesHtml,
+    currentJurisdiction?.officeAddress
+  )
+
   if (error) return <ErrorScreen error={error} />
   if (!currentJurisdiction) return <LoadingScreen />
 
@@ -116,19 +129,6 @@ export const JurisdictionScreen = observer(() => {
   const mailtoHref = `mailto:${contactEmail}?subject=${t("jurisdiction.notUsingBPH.wantToUse.emailSubject", {
     jurisdictionName: qualifiedName,
   })}&body=${encodeURIComponent(emailBody)}`
-
-  const canManageAbout = can("jurisdiction:manage", { jurisdiction: currentJurisdiction })
-  const showOverviewAccordion =
-    canManageAbout || jurisdictionRichTextHasPublicContent(currentJurisdiction.checklistHtml)
-  const showKeyInfoAccordion = canManageAbout || jurisdictionRichTextHasPublicContent(currentJurisdiction.lookOutHtml)
-  const showTimelinesAndDeliverablesAccordion =
-    canManageAbout || jurisdictionRichTextHasPublicContent(currentJurisdiction.timelineAndDeliverablesHtml)
-
-  const hasAboutSnippets = jurisdictionAboutSnippetHasContent(
-    currentJurisdiction.processingTimeHtml,
-    currentJurisdiction.keyStagesHtml,
-    currentJurisdiction.officeAddress
-  )
 
   return (
     <FormProvider {...formMethods}>
@@ -328,7 +328,7 @@ export const JurisdictionScreen = observer(() => {
                   <JurisdictionResourcesGridSection
                     jurisdiction={currentJurisdiction}
                     configureResourcesPath={
-                      can("jurisdiction:manage", { jurisdiction: currentJurisdiction })
+                      canManageAbout
                         ? `/jurisdictions/${currentJurisdiction.slug}/configuration-management/resources`
                         : undefined
                     }
