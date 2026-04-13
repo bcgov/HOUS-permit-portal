@@ -272,7 +272,9 @@ class PermitApplication < ApplicationRecord
       permit_project_id: permit_project_id,
       project_number: permit_project&.number,
       submission_delegatee_id: submission_delegatee&.id,
-      discarded: discarded?
+      discarded: discarded?,
+      queue_time_seconds: queue_time_seconds,
+      queue_clock_started_at: queue_clock_started_at&.to_i
     }
   end
 
@@ -445,8 +447,14 @@ class PermitApplication < ApplicationRecord
     FrontendUrlHelper.frontend_url("/permit-applications/#{id}")
   end
 
+  def days_in_queue
+    seconds = queue_time_seconds || 0
+    seconds +=
+      (Time.current - queue_clock_started_at).to_i if queue_clock_started_at
+    (seconds / 86400.0).floor
+  end
+
   def days_ago_submitted
-    # Calculate the difference in days between the current date and the submitted_at date
     (Date.current - submitted_at.to_date).to_i
   end
 

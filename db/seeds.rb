@@ -554,6 +554,60 @@ if north_van_projects.size >= 10
 
   puts "  ✓ Distributed #{[state_distribution.size, north_van_projects.size].min} projects across kanban states"
 
+  # Seed queue clock values for realistic "days in queue" display
+  puts "Seeding queue clock values..."
+  pa_our_court = PermitApplication.our_court_statuses
+  pp_our_court = PermitProject.our_court_states
+
+  non_draft.each_with_index do |project, idx|
+    enqueued = project.enqueued_at || (idx * 2 + 1).days.ago
+    banked_days = rand(0..idx)
+
+    if pp_our_court.include?(project.state)
+      clock_start = enqueued + banked_days.days
+      clock_start = [clock_start, Time.current].min
+      project.update_columns(
+        queue_time_seconds: banked_days * 86_400,
+        queue_clock_started_at: clock_start
+      )
+    else
+      total_days = [(Time.current - enqueued).to_i / 86_400, 1].max
+      project.update_columns(
+        queue_time_seconds: [total_days - rand(0..3), 0].max * 86_400,
+        queue_clock_started_at: nil
+      )
+    end
+  end
+
+  PermitApplication
+    .joins(:permit_project)
+    .where(permit_projects: { jurisdiction_id: north_van.id })
+    .where.not(status: :new_draft)
+    .find_each do |pa|
+      submitted_at = pa.submitted_at
+      next unless submitted_at
+
+      age_seconds = [(Time.current - submitted_at).to_i, 0].max
+
+      if pa_our_court.include?(pa.status)
+        banked = rand(0..(age_seconds / 4))
+        clock_start = submitted_at + banked.seconds
+        clock_start = [clock_start, Time.current].min
+        pa.update_columns(
+          queue_time_seconds: banked,
+          queue_clock_started_at: clock_start
+        )
+      else
+        banked = rand((age_seconds / 4)..(age_seconds * 3 / 4))
+        pa.update_columns(
+          queue_time_seconds: banked,
+          queue_clock_started_at: nil
+        )
+      end
+    end
+
+  puts "  ✓ Seeded queue clock values"
+
   puts "Assigning project review delegatees..."
   reviewer_collab = north_van.collaborators.find_by(user: reviewer_user)
   rm_collab =

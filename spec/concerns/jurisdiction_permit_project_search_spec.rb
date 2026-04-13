@@ -167,6 +167,20 @@ RSpec.describe Api::Concerns::Search::JurisdictionPermitProjects,
     controller.instance_variable_set(:@jurisdiction, jurisdiction)
 
     project_b.update_column(:viewed_at, Time.current)
+
+    project_a.update_columns(
+      queue_time_seconds: 0,
+      queue_clock_started_at: 10.days.ago
+    )
+    project_b.update_columns(
+      queue_time_seconds: 0,
+      queue_clock_started_at: 2.days.ago
+    )
+    project_c.update_columns(
+      queue_time_seconds: 0,
+      queue_clock_started_at: 20.days.ago
+    )
+
     PermitProject.reindex
     PermitApplication.reindex
   end
@@ -274,7 +288,7 @@ RSpec.describe Api::Concerns::Search::JurisdictionPermitProjects,
     end
 
     context "with days_in_queue filter" do
-      context "gte operator (enqueued >= N days ago)" do
+      context "gte operator" do
         let(:search_params) do
           {
             query: "",
@@ -289,7 +303,7 @@ RSpec.describe Api::Concerns::Search::JurisdictionPermitProjects,
           }
         end
 
-        it "returns projects enqueued 5 or more days ago" do
+        it "returns projects with 5 or more days in queue" do
           perform_search
           ids = search_result_ids
 
@@ -298,7 +312,7 @@ RSpec.describe Api::Concerns::Search::JurisdictionPermitProjects,
         end
       end
 
-      context "lt operator (enqueued < N days ago)" do
+      context "lt operator" do
         let(:search_params) do
           {
             query: "",
@@ -313,12 +327,88 @@ RSpec.describe Api::Concerns::Search::JurisdictionPermitProjects,
           }
         end
 
-        it "returns projects enqueued less than 5 days ago" do
+        it "returns projects with less than 5 days in queue" do
           perform_search
           ids = search_result_ids
 
           expect(ids).to include(project_b.id)
           expect(ids).not_to include(project_a.id, project_c.id)
+        end
+      end
+
+      context "with banked time (clock paused)" do
+        before do
+          project_b.update_columns(
+            state: PermitProject.states[:waiting],
+            queue_time_seconds: 12 * 86_400,
+            queue_clock_started_at: nil
+          )
+          PermitProject.reindex
+        end
+
+        let(:search_params) do
+          {
+            query: "",
+            page: 1,
+            per_page: 50,
+            filters: {
+              days_in_queue: {
+                operator: "gte",
+                days: "10"
+              }
+            }
+          }
+        end
+
+        it "includes projects with sufficient banked time even when clock is paused" do
+          perform_search
+          ids = search_result_ids
+
+          expect(ids).to include(project_a.id, project_b.id, project_c.id)
+        end
+      end
+    end
+
+    context "sorting by days_in_queue" do
+      let(:search_params) do
+        {
+          query: "",
+          page: 1,
+          per_page: 50,
+          sort: {
+            field: "days_in_queue",
+            direction: "desc"
+          }
+        }
+      end
+
+      it "sorts by total queue time descending" do
+        perform_search
+        ids = search_result_ids
+
+        expect(ids.index(project_c.id)).to be < ids.index(project_a.id)
+        expect(ids.index(project_a.id)).to be < ids.index(project_b.id)
+      end
+
+      context "ascending" do
+        let(:search_params) do
+          {
+            query: "",
+            page: 1,
+            per_page: 50,
+            sort: {
+              field: "days_in_queue",
+              direction: "asc"
+            }
+          }
+        end
+
+        it "sorts by total queue time ascending" do
+          perform_search
+          ids = search_result_ids
+
+          expect(ids.index(project_b.id)).to be < ids.index(project_a.id)
+          expect(ids.index(project_a.id)).to be < ids.index(project_c.id)
         end
       end
     end

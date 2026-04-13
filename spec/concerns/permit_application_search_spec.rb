@@ -180,5 +180,184 @@ RSpec.describe Api::Concerns::Search::JurisdictionPermitApplications,
         )
       end
     end
+
+    context "days_in_queue filter and sort" do
+      before do
+        controller.instance_variable_set(:@jurisdiction, jurisdiction)
+
+        submitted_permit_applications.each do |pa|
+          pa.update_columns(
+            queue_time_seconds: 0,
+            queue_clock_started_at: 15.days.ago
+          )
+        end
+        resubmitted_permit_applications.each do |pa|
+          pa.update_columns(
+            queue_time_seconds: 0,
+            queue_clock_started_at: 3.days.ago
+          )
+        end
+        revisions_requested_permit_applications.each do |pa|
+          pa.update_columns(
+            queue_time_seconds: 7 * 86_400,
+            queue_clock_started_at: nil
+          )
+        end
+
+        PermitApplication.reindex
+      end
+
+      let(:cur_user) { reviewer }
+
+      context "gte filter" do
+        let(:jurisdiction_permit_application_search_params) do
+          {
+            query: "",
+            page: 1,
+            per_page: 50,
+            filters: {
+              days_in_queue: {
+                operator: "gte",
+                days: "10"
+              }
+            }
+          }
+        end
+
+        it "returns applications with 10 or more days in queue" do
+          controller.perform_jurisdiction_permit_application_search
+          results =
+            controller.instance_variable_get(
+              :@jurisdiction_permit_application_search
+            ).results
+
+          expect(results).to match_array(submitted_permit_applications)
+        end
+      end
+
+      context "lt filter" do
+        let(:jurisdiction_permit_application_search_params) do
+          {
+            query: "",
+            page: 1,
+            per_page: 50,
+            filters: {
+              days_in_queue: {
+                operator: "lt",
+                days: "5"
+              }
+            }
+          }
+        end
+
+        it "returns applications with less than 5 days in queue" do
+          controller.perform_jurisdiction_permit_application_search
+          results =
+            controller.instance_variable_get(
+              :@jurisdiction_permit_application_search
+            ).results
+
+          expect(results).to match_array(resubmitted_permit_applications)
+        end
+      end
+
+      context "banked time filter" do
+        let(:jurisdiction_permit_application_search_params) do
+          {
+            query: "",
+            page: 1,
+            per_page: 50,
+            filters: {
+              days_in_queue: {
+                operator: "gte",
+                days: "5"
+              }
+            }
+          }
+        end
+
+        it "includes applications with banked time even when clock is paused" do
+          controller.perform_jurisdiction_permit_application_search
+          results =
+            controller.instance_variable_get(
+              :@jurisdiction_permit_application_search
+            ).results
+
+          expect(results).to include(*submitted_permit_applications)
+          expect(results).to include(*revisions_requested_permit_applications)
+          expect(results).not_to include(*resubmitted_permit_applications)
+        end
+      end
+
+      context "sort by days_in_queue descending" do
+        let(:jurisdiction_permit_application_search_params) do
+          {
+            query: "",
+            page: 1,
+            per_page: 50,
+            sort: {
+              field: "days_in_queue",
+              direction: "desc"
+            }
+          }
+        end
+
+        it "returns applications sorted by total queue time descending" do
+          controller.perform_jurisdiction_permit_application_search
+          results =
+            controller.instance_variable_get(
+              :@jurisdiction_permit_application_search
+            ).results
+
+          submitted_ids = submitted_permit_applications.map(&:id)
+          revisions_ids = revisions_requested_permit_applications.map(&:id)
+          resubmitted_ids = resubmitted_permit_applications.map(&:id)
+
+          result_ids = results.map(&:id)
+          first_submitted_idx =
+            result_ids.index { |id| submitted_ids.include?(id) }
+          first_revisions_idx =
+            result_ids.index { |id| revisions_ids.include?(id) }
+          first_resubmitted_idx =
+            result_ids.index { |id| resubmitted_ids.include?(id) }
+
+          expect(first_submitted_idx).to be < first_revisions_idx
+          expect(first_revisions_idx).to be < first_resubmitted_idx
+        end
+      end
+
+      context "sort by days_in_queue ascending" do
+        let(:jurisdiction_permit_application_search_params) do
+          {
+            query: "",
+            page: 1,
+            per_page: 50,
+            sort: {
+              field: "days_in_queue",
+              direction: "asc"
+            }
+          }
+        end
+
+        it "returns applications sorted by total queue time ascending" do
+          controller.perform_jurisdiction_permit_application_search
+          results =
+            controller.instance_variable_get(
+              :@jurisdiction_permit_application_search
+            ).results
+
+          submitted_ids = submitted_permit_applications.map(&:id)
+          resubmitted_ids = resubmitted_permit_applications.map(&:id)
+
+          result_ids = results.map(&:id)
+          first_resubmitted_idx =
+            result_ids.index { |id| resubmitted_ids.include?(id) }
+          first_submitted_idx =
+            result_ids.index { |id| submitted_ids.include?(id) }
+
+          expect(first_resubmitted_idx).to be < first_submitted_idx
+        end
+      end
+    end
   end
 end

@@ -18,6 +18,7 @@ class PermitProjectBlueprint < Blueprinter::Base
            :longitude,
            :parcel_geometry
 
+    field :days_in_queue
     field :total_permits_count, default: 0
     field :new_draft_count, default: 0
     field :newly_submitted_count, default: 0

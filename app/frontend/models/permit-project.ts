@@ -58,6 +58,7 @@ export const PermitProjectModel = types
     enqueuedAt: types.maybeNull(types.Date),
     parcelGeometry: types.maybeNull(types.frozen<IParcelGeometry>()),
     inboxSortOrder: types.maybeNull(types.number),
+    daysInQueue: types.maybeNull(types.number),
     recentAudits: types.optional(types.array(types.frozen<IProjectAuditSummary>()), []),
     reviewDelegatee: types.maybeNull(types.frozen<ICollaborator>()),
     aggregatedReviewCollaborators: types.optional(types.array(types.frozen<IAggregatedReviewCollaborator>()), []),
@@ -87,15 +88,9 @@ export const PermitProjectModel = types
     get shortAddress() {
       return self.fullAddress?.split(",")[0]
     },
-    get daysInQueue(): number | null {
-      if (!self.enqueuedAt) return null
-      const ms = Date.now() - self.enqueuedAt.getTime()
-      return Math.floor(ms / (1000 * 60 * 60 * 24))
-    },
     get formattedDaysInQueue(): string {
-      const days = this.daysInQueue
-      if (days == null) return "—"
-      return `${days} ${days === 1 ? "day" : "days"}`
+      if (self.daysInQueue == null) return "—"
+      return t("submissionInbox.daysInQueue", { count: self.daysInQueue })
     },
     get formattedEnqueuedAt(): string {
       if (!self.enqueuedAt) return "—"

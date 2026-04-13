@@ -104,6 +104,13 @@ class PermitProject < ApplicationRecord
       permit_applications.kept.where(status: :approved).count
   end
 
+  def days_in_queue
+    seconds = queue_time_seconds || 0
+    seconds +=
+      (Time.current - queue_clock_started_at).to_i if queue_clock_started_at
+    (seconds / 86400.0).floor
+  end
+
   def update_viewed_at
     update(viewed_at: Time.current)
   end
@@ -148,7 +155,9 @@ class PermitProject < ApplicationRecord
         permit_applications.kept.where(status: :revisions_requested).count,
       resubmitted_count:
         permit_applications.kept.where(status: :resubmitted).count,
-      approved_count: permit_applications.kept.where(status: :approved).count
+      approved_count: permit_applications.kept.where(status: :approved).count,
+      queue_time_seconds: queue_time_seconds,
+      queue_clock_started_at: queue_clock_started_at&.to_i
     }
   end
 
