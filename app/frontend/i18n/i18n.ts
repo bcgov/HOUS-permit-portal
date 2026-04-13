@@ -1575,7 +1575,7 @@ Thank you,
           submissionInbox: {
             contactInviteWarning:
               "Please have a Review Manager setup the Submissions Inbox for all BCBC parts to allow submissions to be received.",
-            title: "Submissions inbox",
+            title: "Submissions",
             tableHeading: "Permit applications",
             submissionsSentTo:
               "A copy of all submitted applications are also sent to one or more email addresses configured by the review manager.",

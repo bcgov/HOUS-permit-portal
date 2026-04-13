@@ -371,7 +371,7 @@ export const PermitApplicationInboxStoreModel = types
 export const SubmissionInboxStoreModel = types
   .model("SubmissionInboxStore", {
     viewMode: types.optional(types.enumeration(Object.values(EInboxViewMode)), EInboxViewMode.projects),
-    displayMode: types.optional(types.enumeration(Object.values(EInboxDisplayMode)), EInboxDisplayMode.list),
+    displayMode: types.optional(types.enumeration(Object.values(EInboxDisplayMode)), EInboxDisplayMode.columns),
     collapsedColumns: types.optional(types.array(types.string), [EProjectState.complete, EProjectState.closed]),
     permitProjectSearch: types.optional(PermitProjectInboxStoreModel, {}),
     permitApplicationSearch: types.optional(PermitApplicationInboxStoreModel, {}),

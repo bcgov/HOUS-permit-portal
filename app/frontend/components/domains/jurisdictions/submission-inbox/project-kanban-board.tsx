@@ -69,9 +69,16 @@ export const ProjectKanbanBoard = observer(function ProjectKanbanBoard({
     [t]
   )
 
-  const itemsKey = projects.map((p) => `${p.id}:${p.state}:${p.inboxSortOrder ?? ""}`).join(",")
+  const itemsKey = projects.map((p) => `${p.id}:${p.state}:${p.inboxSortOrder ?? ""}:${p.viewedAt ?? ""}`).join(",")
   const items = useMemo(
-    () => projects.map((p) => ({ ...p, id: p.id, columnKey: p.state, sortOrder: p.inboxSortOrder })),
+    () =>
+      projects.map((p) => ({
+        ...p,
+        id: p.id,
+        columnKey: p.state,
+        sortOrder: p.inboxSortOrder,
+        isUnread: !p.viewedAt,
+      })),
     [itemsKey]
   )
 
@@ -180,7 +187,7 @@ const ProjectKanbanCard = observer(function ProjectKanbanCard({ project }: { pro
           <HStack spacing={2}>
             {/* ### SUBMISSION INDEX STUB FEATURE */}
             <Icon as={CalendarBlank} color="text.secondary" boxSize={4} display="none" />
-            <Text fontWeight={700} fontSize="sm" noOfLines={1}>
+            <Text fontWeight={700} fontSize="md" noOfLines={1}>
               {project.number}
             </Text>
           </HStack>
@@ -194,7 +201,7 @@ const ProjectKanbanCard = observer(function ProjectKanbanCard({ project }: { pro
           {project.shortAddress}
         </Text>
         {project.pid && (
-          <Text fontSize="2xs" color="text.secondary">
+          <Text fontSize="xs" color="text.secondary">
             PID {project.pid}
           </Text>
         )}
