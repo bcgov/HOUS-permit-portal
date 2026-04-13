@@ -1,7 +1,7 @@
 # app/jobs/promote_job.rb
 class PromoteJob
   include Sidekiq::Worker
-  sidekiq_options queue: :default, lock: :none
+  sidekiq_options queue: :default
 
   # System-generated documents that should skip virus scanning
   # These are generated internally and don't come from user uploads

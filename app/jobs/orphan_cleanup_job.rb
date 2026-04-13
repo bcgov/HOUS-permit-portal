@@ -1,7 +1,6 @@
 class OrphanCleanupJob
   include Sidekiq::Worker
   include EnvHelper
-  sidekiq_options lock: :none
 
   def perform
     # Ensure all models are loaded so PublicRecordable.recordable_models is fully populated.

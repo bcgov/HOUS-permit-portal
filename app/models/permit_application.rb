@@ -493,7 +493,7 @@ class PermitApplication < ApplicationRecord
   end
 
   def send_submitted_webhook
-    return unless intake?
+    return unless submitted?
 
     jurisdiction
       .active_external_api_keys

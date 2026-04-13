@@ -1,6 +1,5 @@
 class RemindReviewerJob
   include Sidekiq::Worker
-  sidekiq_options lock: :none
 
   def perform()
     Jurisdiction.all.each do |jur|

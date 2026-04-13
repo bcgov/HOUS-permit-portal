@@ -143,14 +143,16 @@ export const PermitApplicationModel = types.snapshotProcessor(
           self.status === EPermitApplicationStatus.newlySubmitted ||
           self.status === EPermitApplicationStatus.resubmitted ||
           self.status === EPermitApplicationStatus.inReview ||
-          self.status === EPermitApplicationStatus.approved
+          self.status === EPermitApplicationStatus.approved ||
+          self.status === EPermitApplicationStatus.issued ||
+          self.status === EPermitApplicationStatus.withdrawn
         )
       },
       get isInReview() {
         return self.status === EPermitApplicationStatus.inReview
       },
       get isReviewReadOnly() {
-        return self.status !== EPermitApplicationStatus.inReview
+        return this.isSubmitted && self.status !== EPermitApplicationStatus.inReview
       },
       get isRevisionsRequested() {
         return self.status === EPermitApplicationStatus.revisionsRequested

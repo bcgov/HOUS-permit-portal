@@ -5,9 +5,9 @@ RSpec.describe CheckExpiringApiKeysJob, type: :job do
   before { Sidekiq::Testing.fake! }
   include ActiveSupport::Testing::TimeHelpers
 
-  it "disables the unique lock to allow retries" do
+  it "has no unique lock so retries are not suppressed" do
     opts = described_class.get_sidekiq_options
-    expect((opts["lock"] || opts[:lock]).to_s).to eq("none")
+    expect(opts["lock"] || opts[:lock]).to be_nil
   end
 
   it "sends an email and records a notification for matching interval" do

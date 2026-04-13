@@ -39,7 +39,7 @@ module PermitApplicationStatus
     end
 
     def self.submitted_statuses
-      %w[newly_submitted resubmitted in_review]
+      %w[newly_submitted resubmitted in_review approved issued withdrawn]
     end
 
     aasm column: "status", enum: true, timestamp: true do
@@ -103,7 +103,7 @@ module PermitApplicationStatus
     end
 
     def draft?
-      new_draft? || revisions_requested?
+      self.class.draft_statuses.include?(status)
     end
 
     def intake?
@@ -111,8 +111,7 @@ module PermitApplicationStatus
     end
 
     def submitted?
-      newly_submitted? || resubmitted? || in_review? || approved? || issued? ||
-        withdrawn?
+      self.class.submitted_statuses.include?(status)
     end
 
     def visible_to_reviewers?
