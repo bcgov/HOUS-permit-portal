@@ -78,6 +78,7 @@ export const ExternalApiKeysIndexScreen = observer(function ExternalApiKeysIndex
               to={"create"}
               isDisabled={!externalApiEnabled}
               onClick={disableLinkClick}
+              replace
             >
               {t("externalApiKey.index.createExternalApiKey")}
             </RouterLinkButton>
