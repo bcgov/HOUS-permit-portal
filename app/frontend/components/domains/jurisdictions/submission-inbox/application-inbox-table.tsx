@@ -22,6 +22,7 @@ import React, { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { Link, useNavigate } from "react-router-dom"
 import { IPermitApplication } from "../../../../models/permit-application"
+import { IPermitProject } from "../../../../models/permit-project"
 import { useMst } from "../../../../setup/root"
 import { IPermitApplicationInboxStore } from "../../../../stores/submission-inbox-store"
 import {
@@ -45,7 +46,7 @@ import { InboxNoMatchingEmpty } from "./inbox-no-matching-empty"
 import { SubmissionInboxMarkUnreadIconButton } from "./submission-inbox-mark-unread-icon-button"
 
 interface IProps {
-  searchStore: IPermitApplicationInboxStore
+  searchStore: IPermitApplicationInboxStore | IPermitProject
   applications: IPermitApplication[]
 }
 
