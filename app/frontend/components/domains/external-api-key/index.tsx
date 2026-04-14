@@ -50,7 +50,12 @@ export const ExternalApiKeysIndexScreen = observer(function ExternalApiKeysIndex
 
   return (
     <Container maxW="container.lg" p={8} as={"main"} h={"full"} w={"full"} {...containerProps}>
-      <Button variant="link" onClick={() => navigate(-1)} leftIcon={<CaretLeft size={20} />} textDecoration="none">
+      <Button
+        variant="link"
+        onClick={() => navigate(`/jurisdictions/${currentJurisdiction?.slug}/configuration-management`)}
+        leftIcon={<CaretLeft size={20} />}
+        textDecoration="none"
+      >
         {t("ui.back")}
       </Button>
       {/*This outlet will render the create/edit modal*/}
