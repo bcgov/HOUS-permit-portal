@@ -18,6 +18,7 @@ class PermitProjectCollaboration < ApplicationRecord
             }
 
   validate :validate_review_staff_for_jurisdiction
+  validate :validate_collaborator_is_review_type
 
   def collaboration_assignment_notification_data
     {
@@ -70,6 +71,14 @@ class PermitProjectCollaboration < ApplicationRecord
 
     unless collaborator.user.review_staff_of?(permit_project.jurisdiction_id)
       errors.add(:collaborator, :must_be_review_staff_for_jurisdiction)
+    end
+  end
+
+  def validate_collaborator_is_review_type
+    return if collaborator.blank?
+
+    unless collaborator.collaboratorable_type == "Jurisdiction"
+      errors.add(:collaborator, :must_be_review_collaborator)
     end
   end
 
