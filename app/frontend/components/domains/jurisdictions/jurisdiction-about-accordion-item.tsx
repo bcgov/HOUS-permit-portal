@@ -23,7 +23,7 @@ export function JurisdictionAboutAccordionItem({
       border="none"
       borderTop={showTopSeparator ? "1px solid" : "none"}
       borderColor={showTopSeparator ? "theme.yellow" : undefined}
-      gap={2}
+      gap={4}
     >
       <AccordionButton
         display="flex"
@@ -48,7 +48,9 @@ export function JurisdictionAboutAccordionItem({
         </Heading>
         <AccordionIcon alignSelf="center" fontSize="2xl" fontWeight="light" />
       </AccordionButton>
-      <AccordionPanel px={{ base: 4, md: 0 }}>{children}</AccordionPanel>
+      <AccordionPanel px={{ base: 4, md: 0 }} py="0">
+        {children}
+      </AccordionPanel>
     </AccordionItem>
   )
 }
