@@ -14,7 +14,7 @@ const reviewManagerRules = {
   static: [...sharedStaticRules, "user:invite", "application:download", "user:updateRole"],
   dynamic: {
     ...sharedDynamicRules,
-    "jurisdiction:manage": (currentUser: IUser, data: { jurisdiction?: IJurisdiction | null }) =>
+    "jurisdiction:manage": (currentUser: IUser, data: { jurisdiction: IJurisdiction }) =>
       jurisdictionRule(currentUser, data),
   },
 }
@@ -55,8 +55,7 @@ const userRule = (currentUser: IUser, data: { user: IUser }) => {
   return currentUser ? currentUser.id === user.id : false
 }
 
-const jurisdictionRule = (currentUser: IUser, data: { jurisdiction?: IJurisdiction | null }) => {
+const jurisdictionRule = (currentUser: IUser, data: { jurisdiction: IJurisdiction }) => {
   const { jurisdiction } = data
-  if (!jurisdiction || !currentUser) return false
-  return currentUser.jurisdiction.id === jurisdiction.id
+  return currentUser ? currentUser.jurisdiction.id === jurisdiction.id : false
 }
