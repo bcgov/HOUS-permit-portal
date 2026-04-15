@@ -99,7 +99,7 @@ export const ProjectInboxPermitApplicationsPopover = observer(function ProjectIn
   )
 
   return (
-    <Popover trigger="hover" placement="bottom-start" isLazy flip={false}>
+    <Popover trigger="hover" placement="right-end" isLazy flip={false}>
       <PopoverTrigger>
         <Box as="span" display="inline-block" maxW="100%">
           {trigger}

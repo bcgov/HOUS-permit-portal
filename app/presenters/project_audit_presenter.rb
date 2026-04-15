@@ -26,6 +26,10 @@ class ProjectAuditPresenter
     formatter.permit_application&.nickname
   end
 
+  def resolve_permit_application_status
+    formatter.permit_application&.status
+  end
+
   def resolve_permit_application_number
     formatter.permit_application&.number
   end
