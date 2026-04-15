@@ -24,7 +24,7 @@ import { EProjectState } from "../../../../types/enums"
 import { SharedAvatar } from "../../../shared/user/shared-avatar"
 import { IKanbanColumn, IReorderEvent, KanbanBoard } from "./kanban-board"
 import { KanbanCard } from "./kanban-card"
-import { ProjectDesignatedReviewerPopover } from "./project-designated-reviewer-popover"
+import { ProjectReviewCollaboratorsPopover } from "./project-designated-reviewer-popover"
 import { ProjectInboxPermitApplicationsPopover } from "./project-inbox-permit-applications-popover"
 
 interface IProps {
@@ -104,10 +104,9 @@ const ProjectKanbanCard = observer(function ProjectKanbanCard({ project }: { pro
   const total = project.totalPermitsCount
   const isUnread = !project.viewedAt
 
-  const collaborators = project.aggregatedReviewCollaborators
-  const childAppAssignees = collaborators.filter((c) => !c.isDesignated)
-  const visibleAssignees = childAppAssignees.slice(0, MAX_VISIBLE_AVATARS)
-  const overflowCount = childAppAssignees.length - MAX_VISIBLE_AVATARS
+  const allCollaborators = project.aggregatedReviewCollaborators
+  const visibleAssignees = allCollaborators.slice(0, MAX_VISIBLE_AVATARS)
+  const overflowCount = allCollaborators.length - MAX_VISIBLE_AVATARS
 
   return (
     <KanbanCard
@@ -130,30 +129,15 @@ const ProjectKanbanCard = observer(function ProjectKanbanCard({ project }: { pro
               fontSize="2xs"
             />
           )}
-          <ProjectDesignatedReviewerPopover
+          <ProjectReviewCollaboratorsPopover
             project={project}
             onBeforeOpen={async () => {
               await permitProjectStore.fetchPermitProject(project.id)
             }}
-            renderTrigger={({ isLoading, reviewDelegatee, onClick, isDisabled }) => (
+            renderTrigger={({ isLoading, collaborationCount, onClick, isDisabled }) => (
               <IconButton
-                aria-label={t("permitCollaboration.projectSidebar.projectReviewDelegatee")}
-                icon={
-                  isLoading ? (
-                    <Spinner size="xs" />
-                  ) : reviewDelegatee?.user ? (
-                    <SharedAvatar
-                      size="xs"
-                      name={`${reviewDelegatee.user.firstName} ${reviewDelegatee.user.lastName}`}
-                      role={reviewDelegatee.user.role}
-                      fontSize="2xs"
-                      border="2px solid"
-                      borderColor="theme.blueActive"
-                    />
-                  ) : (
-                    <UserPlus size={16} />
-                  )
-                }
+                aria-label={t("permitCollaboration.projectSidebar.projectReviewCollaborators")}
+                icon={isLoading ? <Spinner size="xs" /> : <UserPlus size={16} />}
                 size="sm"
                 minW={7}
                 h={7}

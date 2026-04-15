@@ -48,16 +48,27 @@ class PermitProjectBlueprint < Blueprinter::Base
     field :has_outdated_draft_applications do |permit_project, options|
       options[:project_ids_with_outdated_drafts]&.include?(permit_project.id)
     end
-
-    association :review_delegatee, blueprint: CollaboratorBlueprint
   end
 
   view :jurisdiction_review_inbox do
     include_view :base
 
-    field :aggregated_review_collaborators do |permit_project, _options|
+    field :aggregated_review_collaborators,
+          if: ->(_field_name, permit_project, options) do
+            options[:current_user]&.review_staff_of?(
+              permit_project.jurisdiction_id
+            )
+          end do |permit_project, _options|
       permit_project.aggregated_review_collaborators
     end
+
+    association :permit_project_collaborations,
+                blueprint: PermitProjectCollaborationBlueprint,
+                if: ->(_field_name, permit_project, options) do
+                  options[:current_user]&.review_staff_of?(
+                    permit_project.jurisdiction_id
+                  )
+                end
   end
 
   view :extended do
@@ -80,7 +91,7 @@ class PermitProjectBlueprint < Blueprinter::Base
   end
 
   view :inbox_extended do
-    include_view :base
+    include_view :jurisdiction_review_inbox
 
     field :is_fully_loaded do |_permit_project, _options|
       true

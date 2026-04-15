@@ -616,7 +616,13 @@ RSpec.describe NotificationService do
 
   describe ".publish_permit_collaboration_assignment_event / .publish_permit_collaboration_unassignment_event" do
     it "pushes assignment/unassignment notification payloads" do
-      collaborator = instance_double("Collaborator", user_id: "u1")
+      preference =
+        instance_double(
+          "Preference",
+          enable_in_app_collaboration_notification: true
+        )
+      user = instance_double("User", id: "u1", preference: preference)
+      collaborator = instance_double("Collaborator", user_id: "u1", user: user)
       permit_collaboration =
         instance_double(
           "PermitCollaboration",

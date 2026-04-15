@@ -36,7 +36,7 @@ import { ProjectStateTag } from "../../../shared/permit-projects/project-state-t
 import { SortIcon } from "../../../shared/sort-icon"
 import { SharedAvatar } from "../../../shared/user/shared-avatar"
 import { InboxNoMatchingEmpty } from "./inbox-no-matching-empty"
-import { ProjectDesignatedReviewerPopover } from "./project-designated-reviewer-popover"
+import { ProjectReviewCollaboratorsPopover } from "./project-designated-reviewer-popover"
 import { ProjectInboxPermitApplicationsPopover } from "./project-inbox-permit-applications-popover"
 import { SubmissionInboxMarkUnreadIconButton } from "./submission-inbox-mark-unread-icon-button"
 
@@ -263,12 +263,10 @@ const ProjectAssignedCell = observer(function ProjectAssignedCell({ project }: {
   const { t } = useTranslation()
   const { permitProjectStore } = useMst()
 
-  const collaborators = project.aggregatedReviewCollaborators
-  const childAppAssignees = collaborators.filter((c) => !c.isDesignated)
-  const visibleAssignees = childAppAssignees.slice(0, MAX_VISIBLE_AVATARS)
-  const overflowCount = childAppAssignees.length - MAX_VISIBLE_AVATARS
-  const hasDesignatedReviewer = !!project.reviewDelegatee
-  const hasAnyAssignees = hasDesignatedReviewer || childAppAssignees.length > 0
+  const allCollaborators = project.aggregatedReviewCollaborators
+  const visibleAssignees = allCollaborators.slice(0, MAX_VISIBLE_AVATARS)
+  const overflowCount = allCollaborators.length - MAX_VISIBLE_AVATARS
+  const hasAnyAssignees = allCollaborators.length > 0
 
   return (
     <HStack spacing={1}>
@@ -293,26 +291,19 @@ const ProjectAssignedCell = observer(function ProjectAssignedCell({ project }: {
           {t("ui.unassigned")}
         </Text>
       )}
-      <ProjectDesignatedReviewerPopover
+      <ProjectReviewCollaboratorsPopover
         project={project}
         onBeforeOpen={async () => {
           await permitProjectStore.fetchPermitProject(project.id)
         }}
-        renderTrigger={({ isLoading, reviewDelegatee, onClick, isDisabled }) => (
+        renderTrigger={({ isLoading, collaborationCount, onClick, isDisabled }) => (
           <IconButton
-            aria-label={t("permitCollaboration.projectSidebar.projectReviewDelegatee")}
+            aria-label={t("permitCollaboration.projectSidebar.projectReviewCollaborators")}
             icon={
               isLoading ? (
                 <Spinner size="xs" />
-              ) : reviewDelegatee?.user ? (
-                <SharedAvatar
-                  size="xs"
-                  name={`${reviewDelegatee.user.firstName} ${reviewDelegatee.user.lastName}`}
-                  role={reviewDelegatee.user.role}
-                  fontSize="2xs"
-                  border="2px solid"
-                  borderColor="theme.blueActive"
-                />
+              ) : collaborationCount > 0 ? (
+                <UserPlus size={14} />
               ) : (
                 <UserPlus size={14} />
               )

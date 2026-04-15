@@ -463,6 +463,8 @@ export enum ENotificationActionType {
   preCheckCompleted = "pre_check_completed",
   fileUploadFailed = "file_upload_failed",
   resourceReminder = "resource_reminder",
+  projectReviewCollaborationAssignment = "project_review_collaboration_assignment",
+  projectReviewCollaborationUnassignment = "project_review_collaboration_unassignment",
 }
 
 export enum ECollaboratorableType {
