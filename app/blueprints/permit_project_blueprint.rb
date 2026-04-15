@@ -18,6 +18,7 @@ class PermitProjectBlueprint < Blueprinter::Base
            :longitude,
            :parcel_geometry
 
+    field :days_in_queue
     field :total_permits_count, default: 0
     field :new_draft_count, default: 0
     field :newly_submitted_count, default: 0
@@ -101,6 +102,11 @@ class PermitProjectBlueprint < Blueprinter::Base
                 blueprint: PermitApplicationBlueprint,
                 view: :jurisdiction_review_inbox do |permit_project, _options|
       permit_project.permit_applications.kept.select(&:visible_to_reviewers?)
+    end
+    association :recent_permit_applications,
+                blueprint: PermitApplicationBlueprint,
+                view: :jurisdiction_review_inbox do |permit_project, _options|
+      permit_project.recent_inbox_permit_applications
     end
     association :project_documents,
                 blueprint:

@@ -1,4 +1,4 @@
-import { Badge, Box, Button, Flex, HStack, IconButton, Text, Tooltip } from "@chakra-ui/react"
+import { Badge, Box, Button, Circle, Flex, HStack, IconButton, Text, Tooltip } from "@chakra-ui/react"
 import { closestCenter, DndContext, DragEndEvent, PointerSensor, useSensor, useSensors } from "@dnd-kit/core"
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers"
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
@@ -17,6 +17,7 @@ export interface IKanbanItem {
   id: string
   columnKey: string
   sortOrder?: number | null
+  isUnread?: boolean
 }
 
 export interface IReorderEvent {
@@ -121,14 +122,15 @@ function KanbanBoardInner<T extends IKanbanItem>({
             const totalCount = stateCounts[column.key] ?? displayedCount
             const filteredTotal = columnTotals?.[column.key] ?? totalCount
             const hasMore = displayedCount < filteredTotal
+            const hasUnreadItems = columnItems.some((item) => item.isUnread)
 
             return (
               <Flex
                 key={column.key}
                 direction="column"
-                minW={isCollapsed ? "48px" : "260px"}
-                maxW={isCollapsed ? "60px" : "320px"}
-                flex={isCollapsed ? "0 0 auto" : "1 0 260px"}
+                minW={isCollapsed ? "68px" : "318px"}
+                maxW={isCollapsed ? "68px" : "480px"}
+                flex={isCollapsed ? "0 0 68px" : "1 0 318px"}
                 border="1px solid"
                 borderColor="border.light"
                 borderRadius="lg"
@@ -148,8 +150,31 @@ function KanbanBoardInner<T extends IKanbanItem>({
                       style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}
                     >
                       <Tooltip label={column.label} hasArrow placement="right">
-                        <Flex direction="column" align="center" flex={1} minH={0} h="full" p={3}>
-                          <Flex direction="column" align="center" gap={3} flexShrink={0}>
+                        <Flex direction="column" flex={1} minH={0} h="full" overflow="hidden">
+                          <Flex
+                            bg="greys.grey03"
+                            borderBottom="1px solid"
+                            borderColor="border.light"
+                            borderTopRadius="lg"
+                            px={1}
+                            py={3}
+                            flexShrink={0}
+                            minH="48px"
+                            align="center"
+                            justify="center"
+                          >
+                            <Text
+                              fontSize="md"
+                              fontWeight="bold"
+                              textTransform="capitalize"
+                              color="text.secondary"
+                              textAlign="center"
+                              isTruncated
+                            >
+                              {column.label}
+                            </Text>
+                          </Flex>
+                          <Flex direction="column" align="center" flex={1} minH={0} py={3} gap={2}>
                             {isEmpty ? (
                               <Box py={1}>
                                 <Empty size={14} />
@@ -157,19 +182,20 @@ function KanbanBoardInner<T extends IKanbanItem>({
                             ) : (
                               <IconButton
                                 aria-label="Expand column"
-                                icon={<CaretDoubleRight />}
+                                icon={<CaretDoubleRight size={14} />}
                                 size="xs"
-                                variant="ghost"
-                                alignSelf="center"
+                                bg="white"
+                                border="1px solid"
+                                borderColor="border.light"
+                                _hover={{ bg: "gray.100" }}
                                 onClick={() => onToggleColumn(column.key)}
                               />
                             )}
-
                             <Badge
                               borderRadius="full"
                               py={2}
                               px={1}
-                              fontSize="2xs"
+                              fontSize="xs"
                               bg="white"
                               color="text.secondary"
                               border="1px solid"
@@ -180,20 +206,8 @@ function KanbanBoardInner<T extends IKanbanItem>({
                             >
                               {displayedCount} of {totalCount}
                             </Badge>
+                            {hasUnreadItems && <Circle size="8px" bg="theme.blueActive" flexShrink={0} />}
                           </Flex>
-                          <Text
-                            mt="auto"
-                            pt={3}
-                            fontSize="xs"
-                            fontWeight="bold"
-                            textTransform="capitalize"
-                            color="text.secondary"
-                            lineHeight={1.2}
-                            sx={{ writingMode: "vertical-lr", textOrientation: "mixed" }}
-                            whiteSpace="nowrap"
-                          >
-                            {column.label}
-                          </Text>
                         </Flex>
                       </Tooltip>
                     </motion.div>
@@ -216,7 +230,7 @@ function KanbanBoardInner<T extends IKanbanItem>({
                         flexShrink={0}
                       >
                         <HStack justify="space-between">
-                          <Text fontSize="xs" fontWeight="bold" textTransform="capitalize" color="text.secondary">
+                          <Text fontSize="md" fontWeight="bold" textTransform="capitalize" color="text.secondary">
                             {column.label}
                           </Text>
                           <HStack spacing={1}>
@@ -233,9 +247,12 @@ function KanbanBoardInner<T extends IKanbanItem>({
                             </Badge>
                             <IconButton
                               aria-label="Collapse column"
-                              icon={<CaretDoubleLeft />}
+                              icon={<CaretDoubleLeft size={14} />}
                               size="xs"
-                              variant="ghost"
+                              bg="white"
+                              border="1px solid"
+                              borderColor="border.light"
+                              _hover={{ bg: "gray.100" }}
                               onClick={() => onToggleColumn(column.key)}
                             />
                           </HStack>

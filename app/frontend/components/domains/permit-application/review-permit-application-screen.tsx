@@ -216,7 +216,7 @@ export const ReviewPermitApplicationScreen = observer(() => {
                 {t("ui.back")}
               </Button>
             </Stack>
-            {!isReadOnly && currentPermitApplication.jurisdiction.externalApiEnabled && (
+            {currentPermitApplication.isSubmitted && currentPermitApplication.jurisdiction.externalApiEnabled && (
               <Menu>
                 <MenuButton as={Button} variant="tertiaryInverse" rightIcon={<CaretDown />}>
                   {t("ui.options")}

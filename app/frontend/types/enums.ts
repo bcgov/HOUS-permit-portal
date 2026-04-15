@@ -722,7 +722,7 @@ export enum EPermitApplicationInboxSortFields {
   permitType = "requirement_template_name",
   address = "full_address",
   projectNumber = "project_number",
-  daysInQueue = "submitted_at",
+  daysInQueue = "days_in_queue",
   assigned = "review_delegatee_name",
 }
 

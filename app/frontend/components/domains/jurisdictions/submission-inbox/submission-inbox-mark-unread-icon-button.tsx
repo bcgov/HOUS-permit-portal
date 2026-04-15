@@ -29,7 +29,7 @@ export const SubmissionInboxMarkUnreadIconButton = observer(function SubmissionI
             onMarkUnread()
           }}
         />
-        <Circle size="6px" bg="theme.blueActive" position="absolute" top={0.5} right={0.5} />
+        <Circle size="6px" bg="gray.400" position="absolute" top={0.5} right={0.5} />
       </Box>
     </Tooltip>
   )

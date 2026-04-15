@@ -41,6 +41,9 @@ module Api::Concerns::Search::JurisdictionPermitProjects
       load: false
     }
 
+    body_opts = jurisdiction_permit_project_body_options
+    search_conditions[:body_options] = body_opts if body_opts.present?
+
     @jurisdiction_permit_project_search =
       PermitProject.search(
         jurisdiction_permit_project_query,
@@ -92,16 +95,19 @@ module Api::Concerns::Search::JurisdictionPermitProjects
       end
 
       where = jurisdiction_permit_project_where_clause(state_filter: state)
-      search =
-        PermitProject.search(
-          query,
-          order: order,
-          match: :word_middle,
-          where: where,
-          per_page: per_column,
-          page: 1,
-          load: false
-        )
+      kanban_conditions = {
+        order: order,
+        match: :word_middle,
+        where: where,
+        per_page: per_column,
+        page: 1,
+        load: false
+      }
+
+      body_opts = jurisdiction_permit_project_body_options
+      kanban_conditions[:body_options] = body_opts if body_opts.present?
+
+      search = PermitProject.search(query, **kanban_conditions)
       ids = search.hits.map { |h| h["_id"] }
       all_ids.concat(ids)
       column_totals[state] = search.total_count
@@ -131,6 +137,12 @@ module Api::Concerns::Search::JurisdictionPermitProjects
       column_totals: column_totals
     }
   end
+
+  QUEUE_CLOCK_SCRIPT =
+    "long total = doc['queue_time_seconds'].value; " \
+      "if (doc['queue_clock_started_at'].size() > 0) { " \
+      "total += params.now_seconds - doc['queue_clock_started_at'].value } " \
+      "return total"
 
   private
 
@@ -183,11 +195,61 @@ module Api::Concerns::Search::JurisdictionPermitProjects
   end
 
   def jurisdiction_permit_project_order
-    if (sort = jurisdiction_permit_project_search_params[:sort])
-      { sort[:field] => { order: sort[:direction], unmapped_type: "long" } }
+    sort = jurisdiction_permit_project_search_params[:sort]
+    return { created_at: { order: :desc, unmapped_type: "long" } } unless sort
+
+    if sort[:field] == "days_in_queue"
+      nil
     else
-      { created_at: { order: :desc, unmapped_type: "long" } }
+      { sort[:field] => { order: sort[:direction], unmapped_type: "long" } }
     end
+  end
+
+  def jurisdiction_permit_project_body_options
+    opts = {}
+    filters =
+      (jurisdiction_permit_project_search_params[:filters] || {}).deep_dup
+
+    days_in_queue = filters[:days_in_queue]
+    if days_in_queue.present? && days_in_queue[:days].present?
+      days = days_in_queue[:days].to_i
+      threshold_seconds = days * 86_400
+      comparator = days_in_queue[:operator] == "gte" ? ">=" : "<"
+
+      opts[:post_filter] = {
+        script: {
+          script: {
+            source: QUEUE_CLOCK_SCRIPT + " #{comparator} params.threshold",
+            params: {
+              now_seconds: Time.current.to_i,
+              threshold: threshold_seconds
+            }
+          }
+        }
+      }
+    end
+
+    sort = jurisdiction_permit_project_search_params[:sort]
+    if sort.present? && sort[:field] == "days_in_queue"
+      direction =
+        %w[asc desc].include?(sort[:direction]) ? sort[:direction] : "desc"
+      opts[:sort] = [
+        {
+          _script: {
+            type: "number",
+            script: {
+              source: QUEUE_CLOCK_SCRIPT,
+              params: {
+                now_seconds: Time.current.to_i
+              }
+            },
+            order: direction
+          }
+        }
+      ]
+    end
+
+    opts
   end
 
   def jurisdiction_permit_project_where_clause(state_filter: nil)
@@ -222,16 +284,7 @@ module Api::Concerns::Search::JurisdictionPermitProjects
       and_conditions << { _not: { viewed_at: nil } }
     end
 
-    days_in_queue = search_filters.delete(:days_in_queue)
-    if days_in_queue.present? && days_in_queue[:days].present?
-      days = days_in_queue[:days].to_i
-      cutoff = days.days.ago.beginning_of_day
-      if days_in_queue[:operator] == "gte"
-        and_conditions << { enqueued_at: { lte: cutoff } }
-      elsif days_in_queue[:operator] == "lt"
-        and_conditions << { enqueued_at: { gt: cutoff } }
-      end
-    end
+    search_filters.delete(:days_in_queue)
 
     # ### SUBMISSION INDEX STUB FEATURE - meeting_request
 
