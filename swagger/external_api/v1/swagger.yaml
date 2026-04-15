@@ -55,6 +55,258 @@ info:
     the API again to retrieve a\nnew file URL.\n\n### Visual aids and examples:\nFor
     a better understanding of how our APIs work, including webhook setups and request
     handling, please refer to the code examples included later\nin this document.\n"
+x-example-permit-application-all-types: &example_permit_application_all_types
+  id: "00000000-0000-4000-8000-000000000001"
+  account_holder:
+    id: "00000000-0000-4000-8000-000000000002"
+    email: applicant@example.com
+    first_name: Sample
+    last_name: Applicant
+  activity_type:
+    id: "00000000-0000-4000-8000-000000000003"
+    category: site_preparation
+    category_label: Site preparation
+    code: demolition
+    description_html: "<p>Example activity type description.</p>"
+    enabled: true
+    image_url: /images/permit_classifications/demolition.png
+    name: Example activity type
+    type: Activity
+  full_address: 100 Example Street, Victoria, BC V8V 0A1
+  number: PER-EXAMPLE-00001
+  permit_classifications: Example permit type - Example activity type
+  permit_type:
+    id: "00000000-0000-4000-8000-000000000004"
+    category: null
+    category_label: null
+    code: low_residential
+    description_html: "<p>Example permit type description.</p>"
+    enabled: true
+    image_url: /images/permit_classifications/low_residential.png
+    name: Example permit type
+    type: PermitType
+  permit_version:
+    id: "00000000-0000-4000-8000-000000000005"
+    early_access: false
+    first_nations: false
+    public: false
+    requirement_template_id: "00000000-0000-4000-8000-000000000006"
+    status: published
+    version_date: 1775545200000
+  pid: "000000000"
+  pin: null
+  raw_h2k_files: null
+  reference_number: null
+  resubmitted_at: null
+  status: newly_submitted
+  submitted_at: 1775604785000
+  submission_data:
+    all_input_types_demo_example:
+      id: "00000000-0000-4000-8000-000000000010"
+      requirement_block_code: all_input_types_demo_example
+      name: All input types (demo)
+      description: null
+      requirements:
+      - id: "00000000-0000-4000-8000-000000000011"
+        name: Date
+        requirement_code: demo_date
+        type: date
+        value: "2026-04-20T00:00:00-07:00"
+      - id: "00000000-0000-4000-8000-000000000012"
+        name: Text
+        requirement_code: demo_text
+        type: text
+        value: Example text value
+      - id: "00000000-0000-4000-8000-000000000013"
+        name: Email
+        requirement_code: demo_email
+        type: email
+        value: contact@example.com
+      - id: "00000000-0000-4000-8000-000000000014"
+        name: Phone
+        requirement_code: demo_phone
+        type: phone
+        value: (250) 555-0100
+      - id: "00000000-0000-4000-8000-000000000015"
+        name: Radio
+        requirement_code: demo_radio
+        type: radio
+        value: optionB
+      - id: "00000000-0000-4000-8000-000000000016"
+        name: Number
+        requirement_code: demo_number
+        type: number
+        value: 3
+      - id: "00000000-0000-4000-8000-000000000017"
+        name: Select
+        requirement_code: demo_select
+        type: select
+        value: optionA
+      - id: "00000000-0000-4000-8000-000000000018"
+        name: Address
+        requirement_code: demo_address
+        type: address
+        value:
+          lat: "48.4284"
+          lon: "-123.3656"
+          name: Victoria
+          type: administrative
+          display_name: Victoria, Capital Regional District, British Columbia, Canada
+          address:
+            city: Victoria
+            state: British Columbia
+            county: Capital Regional District
+            country: Canada
+            country_code: ca
+      - id: "00000000-0000-4000-8000-000000000019"
+        name: Checkbox
+        requirement_code: demo_checkbox
+        type: checkbox
+        value: true
+      - id: "00000000-0000-4000-8000-00000000001a"
+        name: Textarea
+        requirement_code: demo_textarea
+        type: textarea
+        value: Example multi-line text.
+      - id: "00000000-0000-4000-8000-00000000001b"
+        name: Bcaddress
+        requirement_code: demo_bcaddress
+        type: bcaddress
+        value:
+          type: Feature
+          geometry:
+            type: Point
+            coordinates:
+            - -123.3656
+            - 48.4284
+          properties:
+            fullAddress: Victoria, BC
+            matchPrecision: LOCALITY
+            localityType: City
+      - id: "00000000-0000-4000-8000-00000000001c"
+        name: File
+        requirement_code: demo_file_file
+        type: file
+        value:
+        - id: "00000000-0000-4000-8000-0000000000f0"
+          name: example-document.pdf
+          type: application/pdf
+          size: 1024
+          url: https://storage.example.com/example-bucket/example-document.pdf?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=EXAMPLEKEY%2F20260407%2Fregion%2Fs3%2Faws4_request&X-Amz-Date=20260407T120000Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+      - id: "00000000-0000-4000-8000-00000000001d"
+        name: Signature
+        requirement_code: demo_signature
+        type: signature
+        value: data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMB/axp9xkAAAAASUVORK5CYII=
+      - id: "00000000-0000-4000-8000-00000000001e"
+        name: Multi option select
+        requirement_code: demo_multi_option_select
+        type: multi_option_select
+        value:
+          optionA: false
+          optionB: true
+      - id: "00000000-0000-4000-8000-00000000001f"
+        name: Pid info
+        requirement_code: demo_pid_info
+        type: pid_info
+        value:
+        - pid: "000000000"
+          folio_number: "1000"
+          bcaddress:
+            type: Feature
+            geometry:
+              type: Point
+              coordinates:
+              - -123.3656
+              - 48.4284
+            properties:
+              fullAddress: Victoria, BC
+              matchPrecision: LOCALITY
+        - pid: "000000000"
+          folio_number: "1001"
+          bcaddress:
+            type: Feature
+            geometry:
+              type: Point
+              coordinates:
+              - -123.3656
+              - 48.4284
+            properties:
+              fullAddress: Victoria, BC
+              matchPrecision: LOCALITY
+      - id: "00000000-0000-4000-8000-000000000020"
+        name: Professional contact
+        requirement_code: demo_professional_contact
+        type: professional_contact
+        value:
+        - email: professional@example.com
+          phone: (250) 555-0101
+          title: Engineer
+          last_name: Contact
+          first_name: Example
+          contact_type: civilEngineer
+          business_name: Example Engineering Ltd.
+          business_license: BL-00001
+          professional_number: PENG-00001
+          professional_association: EGBC
+          address:
+            lat: "48.4284"
+            lon: "-123.3656"
+            display_name: Victoria, British Columbia, Canada
+            address:
+              city: Victoria
+              state: British Columbia
+              country: Canada
+        - email: crp@example.com
+          phone: (250) 555-0102
+          title: Registered professional
+          last_name: Contact
+          first_name: Another
+          contact_type: coordinatingRegisteredProfessional
+          business_name: Example Professionals Inc.
+          business_license: BL-00002
+          professional_number: PENG-00002
+          professional_association: EGBC
+          address:
+            lat: "48.4284"
+            lon: "-123.3656"
+            display_name: Victoria, British Columbia, Canada
+            address:
+              city: Victoria
+              state: British Columbia
+              country: Canada
+      - id: "00000000-0000-4000-8000-000000000021"
+        name: General contact
+        requirement_code: demo_general_contact
+        type: general_contact
+        value:
+        - email: builder@example.com
+          phone: (250) 555-0103
+          title: Builder
+          last_name: Contact
+          first_name: General
+          contact_type: builder
+          organization: Example Builders Co-op
+          address:
+            lat: "48.4284"
+            lon: "-123.3656"
+            display_name: Victoria, British Columbia, Canada
+            address:
+              city: Victoria
+              state: British Columbia
+              country: Canada
+      - id: "00000000-0000-4000-8000-000000000022"
+        name: Multiply sum grid
+        requirement_code: demo_multiply_sum_grid
+        type: multiply_sum_grid
+        value:
+          rows:
+          - a: 1
+            load: 23
+            name: Example row
+            quantity: 23
+          totalLoad: 23
+          totalQuantity: 23
 webhooks:
   permit_submitted:
     tags:
@@ -161,6 +413,16 @@ paths:
                 required:
                 - data
                 - meta
+              examples:
+                with_submission_data:
+                  summary: Page of results including varied requirement values
+                  value:
+                    data:
+                    - *example_permit_application_all_types
+                    meta:
+                      total_pages: 1
+                      total_count: 1
+                      current_page: 1
         '429':
           description: 'Rate limit exceeded. Note: The rate limit is 100 requests
             per minute per API key and 300 requests per IP in a 3 minute interval'
@@ -263,6 +525,11 @@ paths:
                     "$ref": "#/components/schemas/PermitApplication"
                 required:
                 - data
+              examples:
+                with_submission_data:
+                  summary: Single permit with example values per requirement type
+                  value:
+                    data: *example_permit_application_all_types
         '403':
           description: Accessing a permit application for unauthorized jurisdiction
         '404':
@@ -327,6 +594,13 @@ components:
       type: http
       scheme: bearer
       description: Bearer token
+  examples:
+    PermitApplicationWithAllRequirementTypes:
+      summary: Permit application with example values for supported requirement input types
+      description: |
+        Fictitious sample. Addresses, names, emails, and file URLs are placeholders.
+        File `url` fields represent time-limited signed download URLs as returned by the API.
+      value: *example_permit_application_all_types
   parameters:
     WebhookSignature:
       name: X-Webhook-Signature
@@ -384,7 +658,7 @@ components:
             e.g. '4+ Unit housing - New Construction'
         permit_type:
           "$ref": "#/components/schemas/PermitClassification"
-        activity:
+        activity_type:
           "$ref": "#/components/schemas/PermitClassification"
         account_holder:
           "$ref": "#/components/schemas/AccountHolder"
@@ -423,7 +697,7 @@ components:
             nullable: true
           requirements:
             type: array
-            descriptions: The requirements for this requirement block and their submitted
+            description: The requirements for this requirement block and their submitted
               values.
             items:
               type: object
@@ -456,16 +730,27 @@ components:
                   - bcaddress
                   - signature
                   - energy_step_code
+                  - energy_step_code_part_3
                   - general_contact
                   - professional_contact
                   - pid_info
+                  - multiply_sum_grid
+                  - architectural_drawing
                   description: The input type for this requirement.
                 value:
-                  description: The submitted value for this requirement.
+                  description: The submitted value for this requirement. Shape depends
+                    on `type` (e.g. GeoJSON Feature for bcaddress, structured object
+                    for multiply_sum_grid, array for contacts and pid_info).
                   oneOf:
                   - type: string
                   - type: number
                   - type: boolean
+                  - type: object
+                    additionalProperties: true
+                  - type: array
+                    items:
+                      type: object
+                      additionalProperties: true
                   - "$ref": "#/components/schemas/ContactSubmissionValue"
                   - "$ref": "#/components/schemas/MultiOptionSubmissionValue"
                   - "$ref": "#/components/schemas/FileSubmissionValue"
@@ -489,12 +774,27 @@ components:
           type: string
         name:
           type: string
-        description:
-          type: string
-          nullable: true
         code:
           type: string
           description: The code of the permit classification.
+        description_html:
+          type: string
+          nullable: true
+          description: HTML description of the classification.
+        enabled:
+          type: boolean
+        type:
+          type: string
+          description: Discriminator, e.g. Activity or PermitType.
+        image_url:
+          type: string
+          nullable: true
+        category:
+          type: string
+          nullable: true
+        category_label:
+          type: string
+          nullable: true
     PermitVersion:
       type: object
       description: The object represents the permit version.
@@ -503,6 +803,9 @@ components:
           type: string
           description: The ID of the version. This can be used to retrieve the integration
             mapping of the Jurisdiction for this version.
+        requirement_template_id:
+          type: string
+          description: ID of the requirement template this version belongs to.
         version_date:
           type: integer
           format: int64
@@ -514,6 +817,15 @@ components:
           - published
           - deprecated
           description: The status of the version.
+        early_access:
+          type: boolean
+          description: Whether this template version is early access.
+        first_nations:
+          type: boolean
+          description: Whether this template version is for First Nations.
+        public:
+          type: boolean
+          description: Whether this template version is public.
     IntegrationMapping:
       type: object
       description: The integration mapping of the jurisdiction for a specific permit
@@ -588,14 +900,34 @@ components:
             type: string
             description: The phone number of the contact.
           address:
-            type: string
-            description: The address of the contact.
+            description: The address of the contact; often a structured geocoding object
+              from the form, not a plain string.
+            oneOf:
+            - type: string
+            - type: object
+              additionalProperties: true
           title:
             type: string
             description: The title of the contact.
           organization:
             type: string
-            description: The organization of the contact.
+            description: The organization of the contact (e.g. general_contact).
+          contact_type:
+            type: string
+            description: Contact role/type (e.g. builder, civilEngineer).
+          business_name:
+            type: string
+            description: Business name (professional_contact).
+          business_license:
+            type: string
+            description: Business licence identifier (professional_contact).
+          professional_number:
+            type: string
+            description: Professional registration number (professional_contact).
+          professional_association:
+            type: string
+            description: Professional association (professional_contact).
+        additionalProperties: true
     FileSubmissionValue:
       description: 'The file submission value. It is an array of file objects. Note:
         the urls are signed and will expire after 1 hour.'
