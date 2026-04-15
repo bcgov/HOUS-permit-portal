@@ -70,7 +70,7 @@
     "date-fns": "^2.30.0",
     "date-fns-tz": "^2.0.1",
     "dompurify": "^3.3.2",
-    "follow-redirects": ">=1.15.6",
+    "follow-redirects": ">=1.16.0",
     "formiojs": "^4.17.4",
     "framer-motion": "^10.16.5",
     "fuse.js": "^7.0.0",
