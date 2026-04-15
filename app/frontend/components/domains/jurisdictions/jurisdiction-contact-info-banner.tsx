@@ -1,7 +1,7 @@
 import { Box, Button, Flex, Grid, GridItem, Heading, Input, Link, Text, Textarea } from "@chakra-ui/react"
 import { Envelope, Info, MapPin, Pencil, Phone } from "@phosphor-icons/react"
 import React, { useState } from "react"
-import { Control, Controller, useFormContext, useWatch } from "react-hook-form"
+import { Control, Controller, ControllerFieldState, useFormContext, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { EMAIL_REGEX } from "../../../constants"
 import { TJurisdictionFieldValues } from "../../../types/types"
@@ -33,6 +33,112 @@ function mapsSearchUrl(address: string): string {
 function telHref(phone: string): string {
   const digits = phone.replace(/[^\d+]/g, "")
   return digits ? `tel:${digits}` : `tel:${phone}`
+}
+
+function getValidationRules(key: TContactInfoFieldKey, t: (k: string, opts?: Record<string, unknown>) => string) {
+  const rules: Record<TContactInfoFieldKey, Record<string, unknown>> = {
+    officeAddress: {
+      maxLength: {
+        value: JURISDICTION_ABOUT_OFFICE_ADDRESS_MAX_CHARS,
+        message: t("jurisdiction.aboutSnippets.maxLengthOffice"),
+      },
+    },
+    officeHours: {
+      maxLength: {
+        value: OFFICE_HOURS_MAX,
+        message: t("jurisdiction.contactInfoBanner.maxLengthHours"),
+      },
+    },
+    officeTelephone: {
+      maxLength: {
+        value: OFFICE_TELEPHONE_MAX,
+        message: t("ui.invalidInput"),
+      },
+      validate: {
+        satisfiesLength: (str: string) =>
+          !str || (str.length >= 1 && str.length <= OFFICE_TELEPHONE_MAX) || t("ui.invalidInput"),
+      },
+    },
+    officeEmail: {
+      maxLength: {
+        value: OFFICE_EMAIL_MAX,
+        message: t("jurisdiction.contactInfoBanner.maxLengthEmail"),
+      },
+      validate: {
+        matchesEmailRegex: (str: string) => !str?.trim() || EMAIL_REGEX.test(str) || t("ui.invalidEmail"),
+      },
+    },
+  }
+  return rules[key]
+}
+
+const INPUT_MAX_LENGTH: Partial<Record<TContactInfoFieldKey, number>> = {
+  officeTelephone: OFFICE_TELEPHONE_MAX,
+  officeEmail: OFFICE_EMAIL_MAX,
+}
+
+function EditField({
+  fieldKey,
+  label,
+  text,
+  onChange,
+  fieldState,
+}: {
+  fieldKey: TContactInfoFieldKey
+  label: string
+  text: string
+  onChange: (value: string) => void
+  fieldState: ControllerFieldState
+}) {
+  const errorBorderColor = fieldState.error ? "semantic.error" : "border.light"
+
+  const errorMessage = fieldState.error?.message ? (
+    <Text fontSize="xs" color="semantic.error" role="alert">
+      {fieldState.error.message}
+    </Text>
+  ) : null
+
+  if (fieldKey === "officeAddress") {
+    return (
+      <>
+        <Textarea
+          value={text}
+          onChange={(e) => onChange(e.target.value)}
+          fontSize="sm"
+          bg="greys.white"
+          borderColor={errorBorderColor}
+          h={10}
+          minH={10}
+          maxH={10}
+          py={2}
+          resize="none"
+          overflowY="auto"
+          whiteSpace="pre-wrap"
+          wordBreak="break-word"
+          aria-label={label}
+          aria-invalid={!!fieldState.error}
+        />
+        {errorMessage}
+      </>
+    )
+  }
+
+  return (
+    <>
+      <Input
+        value={text}
+        onChange={(e) => onChange(e.target.value)}
+        type="text"
+        maxLength={INPUT_MAX_LENGTH[fieldKey]}
+        fontSize="sm"
+        bg="greys.white"
+        borderColor={errorBorderColor}
+        aria-label={label}
+        aria-invalid={!!fieldState.error}
+      />
+      {errorMessage}
+    </>
+  )
 }
 
 interface IJurisdictionContactInfoBannerProps {
@@ -137,43 +243,7 @@ export function JurisdictionContactInfoBanner({
               <Controller
                 name={key}
                 control={control}
-                rules={
-                  key === "officeAddress"
-                    ? {
-                        maxLength: {
-                          value: JURISDICTION_ABOUT_OFFICE_ADDRESS_MAX_CHARS,
-                          message: t("jurisdiction.aboutSnippets.maxLengthOffice"),
-                        },
-                      }
-                    : key === "officeHours"
-                      ? {
-                          maxLength: {
-                            value: OFFICE_HOURS_MAX,
-                            message: t("jurisdiction.contactInfoBanner.maxLengthHours"),
-                          },
-                        }
-                      : key === "officeTelephone"
-                        ? {
-                            maxLength: {
-                              value: OFFICE_TELEPHONE_MAX,
-                              message: t("ui.invalidInput"),
-                            },
-                            validate: {
-                              satisfiesLength: (str: string) =>
-                                !str || (str.length >= 1 && str.length <= OFFICE_TELEPHONE_MAX) || t("ui.invalidInput"),
-                            },
-                          }
-                        : {
-                            maxLength: {
-                              value: OFFICE_EMAIL_MAX,
-                              message: t("jurisdiction.contactInfoBanner.maxLengthEmail"),
-                            },
-                            validate: {
-                              matchesEmailRegex: (str: string) =>
-                                !str?.trim() || EMAIL_REGEX.test(str) || t("ui.invalidEmail"),
-                            },
-                          }
-                }
+                rules={getValidationRules(key, t)}
                 render={({ field: { value, onChange }, fieldState }) => {
                   const text = typeof value === "string" ? value : ""
                   const showFields = canManage && isEditing
@@ -196,57 +266,13 @@ export function JurisdictionContactInfoBanner({
                           {label}
                         </Text>
                         {showFields ? (
-                          key === "officeAddress" ? (
-                            <>
-                              <Textarea
-                                value={text}
-                                onChange={(e) => onChange(e.target.value)}
-                                fontSize="sm"
-                                bg="greys.white"
-                                borderColor={fieldState.error ? "semantic.error" : "border.light"}
-                                h={10}
-                                minH={10}
-                                maxH={10}
-                                py={2}
-                                resize="none"
-                                overflowY="auto"
-                                whiteSpace="pre-wrap"
-                                wordBreak="break-word"
-                                aria-label={label}
-                                aria-invalid={!!fieldState.error}
-                              />
-                              {fieldState.error?.message ? (
-                                <Text fontSize="xs" color="semantic.error" role="alert">
-                                  {fieldState.error.message}
-                                </Text>
-                              ) : null}
-                            </>
-                          ) : (
-                            <>
-                              <Input
-                                value={text}
-                                onChange={(e) => onChange(e.target.value)}
-                                type="text"
-                                maxLength={
-                                  key === "officeTelephone"
-                                    ? OFFICE_TELEPHONE_MAX
-                                    : key === "officeEmail"
-                                      ? OFFICE_EMAIL_MAX
-                                      : undefined
-                                }
-                                fontSize="sm"
-                                bg="greys.white"
-                                borderColor={fieldState.error ? "semantic.error" : "border.light"}
-                                aria-label={label}
-                                aria-invalid={!!fieldState.error}
-                              />
-                              {fieldState.error?.message ? (
-                                <Text fontSize="xs" color="semantic.error" role="alert">
-                                  {fieldState.error.message}
-                                </Text>
-                              ) : null}
-                            </>
-                          )
+                          <EditField
+                            fieldKey={key}
+                            label={label}
+                            text={text}
+                            onChange={onChange}
+                            fieldState={fieldState}
+                          />
                         ) : (
                           <DisplayValue
                             fieldKey={key}
