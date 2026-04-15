@@ -100,6 +100,23 @@ export const JurisdictionScreen = observer(() => {
     reset(getDefaultJurisdictionValues())
   }, [currentJurisdiction?.id])
 
+  if (error) return <ErrorScreen error={error} />
+  if (!currentJurisdiction) return <LoadingScreen />
+
+  const { qualifiedName, update, showAboutPage } = currentJurisdiction
+  const onSubmit = async (formData) => {
+    await update(formData)
+    reset(getDefaultJurisdictionValues())
+  }
+
+  const contactEmail = t("site.contactEmail")
+  const emailBody = t("jurisdiction.notUsingBPH.wantToUse.emailBody", {
+    jurisdictionName: qualifiedName,
+  })
+  const mailtoHref = `mailto:${contactEmail}?subject=${t("jurisdiction.notUsingBPH.wantToUse.emailSubject", {
+    jurisdictionName: qualifiedName,
+  })}&body=${encodeURIComponent(emailBody)}`
+
   const canManageAbout = can("jurisdiction:manage", { jurisdiction: currentJurisdiction })
   const showOverviewAccordion =
     canManageAbout || jurisdictionRichTextHasPublicContent(currentJurisdiction?.checklistHtml)
@@ -123,23 +140,6 @@ export const JurisdictionScreen = observer(() => {
       currentJurisdiction?.officeEmail
     ) ||
     (currentJurisdiction?.contacts?.length ?? 0) > 0
-
-  if (error) return <ErrorScreen error={error} />
-  if (!currentJurisdiction) return <LoadingScreen />
-
-  const { qualifiedName, update, showAboutPage } = currentJurisdiction
-  const onSubmit = async (formData) => {
-    await update(formData)
-    reset(getDefaultJurisdictionValues())
-  }
-
-  const contactEmail = t("site.contactEmail")
-  const emailBody = t("jurisdiction.notUsingBPH.wantToUse.emailBody", {
-    jurisdictionName: qualifiedName,
-  })
-  const mailtoHref = `mailto:${contactEmail}?subject=${t("jurisdiction.notUsingBPH.wantToUse.emailSubject", {
-    jurisdictionName: qualifiedName,
-  })}&body=${encodeURIComponent(emailBody)}`
 
   return (
     <FormProvider {...formMethods}>
