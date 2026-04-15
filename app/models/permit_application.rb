@@ -655,7 +655,12 @@ class PermitApplication < ApplicationRecord
       PermitApplication
         .joins(template_version: :requirement_template)
         .joins(:submitter)
-        .joins(:jurisdiction)
+        .joins(
+          "LEFT OUTER JOIN permit_projects ON permit_projects.id = permit_applications.permit_project_id"
+        )
+        .joins(
+          "INNER JOIN jurisdictions ON jurisdictions.id = COALESCE(permit_projects.jurisdiction_id, permit_applications.jurisdiction_id)"
+        )
         .joins(
           "LEFT JOIN (#{sv_min.to_sql}) sv_min ON sv_min.permit_application_id = permit_applications.id"
         )
