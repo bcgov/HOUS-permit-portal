@@ -29,7 +29,7 @@ module Api::Concerns::Search::JurisdictionPermitProjects
       includes: [
         :owner,
         :jurisdiction,
-        { review_delegatee: :user },
+        { permit_project_collaborations: { collaborator: :user } },
         {
           permit_applications: {
             permit_collaborations: {
@@ -56,7 +56,7 @@ module Api::Concerns::Search::JurisdictionPermitProjects
         .includes(
           :owner,
           :jurisdiction,
-          { review_delegatee: :user },
+          { permit_project_collaborations: { collaborator: :user } },
           permit_applications: {
             permit_collaborations: {
               collaborator: :user
@@ -119,7 +119,7 @@ module Api::Concerns::Search::JurisdictionPermitProjects
         .includes(
           :owner,
           :jurisdiction,
-          { review_delegatee: :user },
+          { permit_project_collaborations: { collaborator: :user } },
           permit_applications: {
             permit_collaborations: {
               collaborator: :user

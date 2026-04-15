@@ -608,32 +608,32 @@ if north_van_projects.size >= 10
 
   puts "  ✓ Seeded queue clock values"
 
-  puts "Assigning project review delegatees..."
+  puts "Assigning project review collaborators..."
   reviewer_collab = north_van.collaborators.find_by(user: reviewer_user)
   rm_collab =
     north_van.collaborators.find_by(
       user: User.find_by(omniauth_username: "review_manager")
     )
 
-  delegatee_projects =
+  collab_projects =
     north_van_projects
       .select do |p|
         p.reload.state.in?(%w[in_progress ready permit_issued active])
       end
       .first(8)
 
-  delegatee_projects.each_with_index do |project, idx|
+  collab_projects.each_with_index do |project, idx|
     collab = idx.even? ? reviewer_collab : rm_collab
     next unless collab
 
-    project.assign_review_delegatee!(collab.id)
+    project.assign_project_review_collaborator!(collab.id)
   rescue => e
     Rails.logger.warn(
-      "Seed: failed to assign delegatee for project #{project.id}: #{e.message}"
+      "Seed: failed to assign review collaborator for project #{project.id}: #{e.message}"
     )
   end
 
-  puts "  ✓ Assigned review delegatees to #{delegatee_projects.size} projects"
+  puts "  ✓ Assigned review collaborators to #{collab_projects.size} projects"
 end
 
 PermitApplication.reindex

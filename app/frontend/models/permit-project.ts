@@ -12,7 +12,12 @@ export interface IAggregatedReviewCollaborator {
   id: string
   name: string
   role: string
-  isDesignated: boolean
+  isProjectCollaborator: boolean
+}
+
+export interface IPermitProjectCollaboration {
+  id: string
+  collaborator: ICollaborator
 }
 
 export const PermitProjectModel = types
@@ -60,7 +65,7 @@ export const PermitProjectModel = types
     inboxSortOrder: types.maybeNull(types.number),
     daysInQueue: types.maybeNull(types.number),
     recentAudits: types.optional(types.array(types.frozen<IProjectAuditSummary>()), []),
-    reviewDelegatee: types.maybeNull(types.frozen<ICollaborator>()),
+    permitProjectCollaborations: types.optional(types.array(types.frozen<IPermitProjectCollaboration>()), []),
     aggregatedReviewCollaborators: types.optional(types.array(types.frozen<IAggregatedReviewCollaborator>()), []),
   })
   .extend(withEnvironment())
@@ -196,15 +201,17 @@ export const PermitProjectModel = types
       }
       return response
     }),
-    assignReviewDelegatee: flow(function* (collaboratorId: string) {
-      const response = yield* toGenerator(self.environment.api.assignProjectReviewDelegatee(self.id, collaboratorId))
+    assignProjectReviewCollaborator: flow(function* (collaboratorId: string) {
+      const response = yield* toGenerator(self.environment.api.assignProjectReviewCollaborator(self.id, collaboratorId))
       if (response.ok) {
         self.rootStore.permitProjectStore.mergeUpdate(response.data.data, "permitProjectMap")
       }
       return response
     }),
-    unassignReviewDelegatee: flow(function* () {
-      const response = yield* toGenerator(self.environment.api.unassignProjectReviewDelegatee(self.id))
+    unassignProjectReviewCollaborator: flow(function* (collaboratorId: string) {
+      const response = yield* toGenerator(
+        self.environment.api.unassignProjectReviewCollaborator(self.id, collaboratorId)
+      )
       if (response.ok) {
         self.rootStore.permitProjectStore.mergeUpdate(response.data.data, "permitProjectMap")
       }

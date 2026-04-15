@@ -14,8 +14,8 @@ class Api::PermitProjectsController < Api::ApplicationController
                   mark_as_viewed
                   mark_as_unviewed
                   transition_state
-                  assign_review_delegatee
-                  unassign_review_delegatee
+                  assign_project_review_collaborator
+                  unassign_project_review_collaborator
                 ]
   before_action :set_pinned_projects, only: %i[pinned]
 
@@ -90,7 +90,7 @@ class Api::PermitProjectsController < Api::ApplicationController
     render_error("permit_project.invalid_transition", { status: 422 })
   end
 
-  def assign_review_delegatee
+  def assign_project_review_collaborator
     authorize @permit_project
 
     unless @permit_project.designated_reviewer_enabled?
@@ -98,9 +98,9 @@ class Api::PermitProjectsController < Api::ApplicationController
     end
 
     collaborator_id = params.require(:collaborator_id)
-    @permit_project.assign_review_delegatee!(collaborator_id)
+    @permit_project.assign_project_review_collaborator!(collaborator_id)
     render_success @permit_project.reload,
-                   "permit_project.assign_review_delegatee_success",
+                   "permit_project.assign_project_review_collaborator_success",
                    {
                      blueprint: PermitProjectBlueprint,
                      blueprint_opts:
@@ -108,16 +108,17 @@ class Api::PermitProjectsController < Api::ApplicationController
                    }
   rescue => e
     render_error(
-      "permit_project.assign_review_delegatee_error",
+      "permit_project.assign_project_review_collaborator_error",
       { message_opts: { error_message: e.message }, status: 422 }
     )
   end
 
-  def unassign_review_delegatee
+  def unassign_project_review_collaborator
     authorize @permit_project
-    @permit_project.unassign_review_delegatee!
+    collaborator_id = params.require(:collaborator_id)
+    @permit_project.unassign_project_review_collaborator!(collaborator_id)
     render_success @permit_project.reload,
-                   "permit_project.unassign_review_delegatee_success",
+                   "permit_project.unassign_project_review_collaborator_success",
                    {
                      blueprint: PermitProjectBlueprint,
                      blueprint_opts:

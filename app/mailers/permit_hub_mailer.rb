@@ -74,10 +74,24 @@ class PermitHubMailer < ApplicationMailer
     @user = permit_collaboration.collaborator.user
 
     return unless permit_collaboration.permit_application
+    return unless @user.preference&.enable_email_collaboration_notification
 
     send_user_mail(
       email: @user.email,
       template_key: :notify_permit_collaboration
+    )
+  end
+
+  def notify_project_review_collaboration(permit_project_collaboration:)
+    @permit_project_collaboration = permit_project_collaboration
+    @user = permit_project_collaboration.collaborator.user
+    @permit_project = permit_project_collaboration.permit_project
+
+    return unless @user.preference&.enable_email_collaboration_notification
+
+    send_user_mail(
+      email: @user.email,
+      template_key: :notify_project_review_collaboration
     )
   end
 
