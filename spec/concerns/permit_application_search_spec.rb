@@ -359,5 +359,44 @@ RSpec.describe Api::Concerns::Search::JurisdictionPermitApplications,
         end
       end
     end
+
+    context "when permit_project_id scopes search and status_counts" do
+      before { controller.instance_variable_set(:@jurisdiction, jurisdiction) }
+
+      let(:cur_user) { reviewer }
+      let(:target_project) do
+        submitted_permit_applications.first.permit_project
+      end
+
+      let(:jurisdiction_permit_application_search_params) do
+        {
+          query: "",
+          page: 1,
+          per_page: 50,
+          permit_project_id: target_project.id
+        }
+      end
+
+      it "returns only applications for that permit project" do
+        controller.perform_jurisdiction_permit_application_search
+        results =
+          controller.instance_variable_get(
+            :@jurisdiction_permit_application_search
+          ).results
+        expect(results.map(&:permit_project_id).uniq).to eq([target_project.id])
+        expect(results).to match_array(submitted_permit_applications)
+      end
+
+      it "scopes status_counts in meta to that permit project" do
+        controller.perform_jurisdiction_permit_application_search
+        meta =
+          controller.instance_variable_get(
+            :@jurisdiction_permit_application_meta
+          )
+        # Regression: status_counts must use the same permit_project scope as the
+        # list search (not jurisdiction-wide aggregates).
+        expect(meta[:status_counts].values.sum).to eq(meta[:total_count])
+      end
+    end
   end
 end

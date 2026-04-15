@@ -112,6 +112,8 @@ export type TSearchParams<IModelSortFields, IModelFilterFields = {}> = {
   filters?: IModelFilterFields
   mode?: "list" | "kanban"
   perColumn?: number
+  /** When set, jurisdiction permit application search is limited to this project */
+  permitProjectId?: string
 }
 
 export type TComputedCompliance = {

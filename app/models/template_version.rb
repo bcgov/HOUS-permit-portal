@@ -45,6 +45,15 @@ class TemplateVersion < ApplicationRecord
           end
         end
 
+  # Published versions on kept LiveRequirementTemplate records (excludes early-access copies, etc.).
+  # Matches PermitApplication validation: template_version must be "live".
+  scope :published_for_live_requirement_templates,
+        -> do
+          published.joins(:requirement_template).merge(
+            LiveRequirementTemplate.kept
+          )
+        end
+
   def self.cached_published_ids
     Rails
       .cache

@@ -1,16 +1,21 @@
-import * as humps from "humps"
 import { t } from "i18next"
 import { cast, flow, Instance, types } from "mobx-state-tree"
 import { createSearchModel } from "../lib/create-search-model"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
 import { PermitApplicationModel } from "../models/permit-application"
+import {
+  applyPermitApplicationInboxFiltersFromQueryParams,
+  buildJurisdictionPermitApplicationSearchFilters,
+  decamelizeHashKeys,
+  PermitApplicationInboxSearchSharedFragment,
+  resetPermitApplicationInboxSearchState,
+} from "../models/permit-application-inbox-search-shared"
 import { PermitProjectModel } from "../models/permit-project"
 import {
   EInboxDisplayMode,
   EInboxViewMode,
   EPermitApplicationInboxSortFields,
-  EPermitApplicationStatus,
   EPermitProjectInboxSortFields,
   EProjectState,
   ERadioFilterValue,
@@ -19,14 +24,6 @@ import { IPermitApplicationInboxSearchFilters, IPermitProjectInboxSearchFilters,
 import { pushQueryParams, setQueryParam } from "../utils/utility-functions"
 
 const KANBAN_PER_COLUMN = 10
-
-function decamelizeHashKeys(hash: Record<string, number>): Record<string, number> {
-  const result: Record<string, number> = {}
-  for (const [key, value] of Object.entries(hash)) {
-    result[humps.decamelize(key)] = value
-  }
-  return result
-}
 
 // ---------------------------------------------------------------------------
 // Sub-store: Permit Project Inbox Search
@@ -202,19 +199,8 @@ export const PermitApplicationInboxStoreModel = types
   .compose(
     types.model("PermitApplicationInboxStore", {
       tablePermitApplications: types.array(types.reference(PermitApplicationModel)),
-      stateCounts: types.optional(types.frozen<Record<string, number>>(), {}),
-      columnTotals: types.optional(types.frozen<Record<string, number>>(), {}),
-      requirementTemplateIdFilter: types.optional(types.array(types.string), []),
-      statusFilter: types.optional(types.array(types.enumeration(Object.values(EPermitApplicationStatus))), []),
-      unreadFilter: types.optional(types.enumeration(Object.values(ERadioFilterValue)), ERadioFilterValue.include),
-      // ### SUBMISSION INDEX STUB FEATURE
-      meetingRequestFilter: types.optional(
-        types.enumeration(Object.values(ERadioFilterValue)),
-        ERadioFilterValue.include
-      ),
-      daysInQueueFilter: types.maybeNull(types.frozen<{ operator: string; days: number }>()),
-      assignedFilter: types.optional(types.array(types.string), []),
     }),
+    PermitApplicationInboxSearchSharedFragment,
     createSearchModel<EPermitApplicationInboxSortFields>(
       "searchJurisdictionPermitApplications",
       "setJurisdictionPermitApplicationFilters"
@@ -222,46 +208,9 @@ export const PermitApplicationInboxStoreModel = types
   )
   .extend(withEnvironment())
   .extend(withRootStore())
-  .views((self) => ({
-    getSortColumnHeader(field: EPermitApplicationInboxSortFields) {
-      // @ts-ignore
-      return t(`submissionInbox.applicationColumns.${field}`)
-    },
-  }))
   .actions((self) => ({
     setTablePermitApplications(permitApplications) {
       self.tablePermitApplications = cast(permitApplications.map((pa) => pa.id))
-    },
-    setStateCounts(counts: Record<string, number>) {
-      self.stateCounts = decamelizeHashKeys(counts)
-    },
-    setColumnTotals(counts: Record<string, number>) {
-      self.columnTotals = decamelizeHashKeys(counts)
-    },
-    setRequirementTemplateIdFilter(value: string[]) {
-      self.requirementTemplateIdFilter = cast(value)
-      setQueryParam("requirementTemplateIds", value)
-    },
-    setStatusFilter(value: EPermitApplicationStatus[]) {
-      // @ts-ignore
-      self.statusFilter = cast(value)
-      setQueryParam("status", value as string[])
-    },
-    setUnreadFilter(value: ERadioFilterValue) {
-      self.unreadFilter = value
-      setQueryParam("unread", value === ERadioFilterValue.include ? "" : value)
-    },
-    // ### SUBMISSION INDEX STUB FEATURE
-    setMeetingRequestFilter(value: ERadioFilterValue) {
-      self.meetingRequestFilter = value
-    },
-    setDaysInQueueFilter(value: { operator: string; days: number } | null) {
-      self.daysInQueueFilter = value
-      setQueryParam("daysInQueueOp", value?.operator ?? "")
-      setQueryParam("daysInQueueDays", value ? value.days.toString() : "")
-    },
-    setAssignedFilter(value: string[]) {
-      self.assignedFilter = cast(value)
     },
     adjustCountsForTransition(oldStatus: string, newStatus: string) {
       const sc = { ...self.stateCounts }
@@ -294,17 +243,7 @@ export const PermitApplicationInboxStoreModel = types
         perPage: isKanban ? undefined : (opts?.countPerPage ?? self.countPerPage),
         mode: isKanban ? "kanban" : "list",
         perColumn: isKanban ? KANBAN_PER_COLUMN : undefined,
-        filters: {
-          requirementTemplateIds:
-            self.requirementTemplateIdFilter.length > 0 ? [...self.requirementTemplateIdFilter] : undefined,
-          status: self.statusFilter.length > 0 ? [...self.statusFilter] : undefined,
-          unread: self.unreadFilter !== ERadioFilterValue.include ? self.unreadFilter : undefined,
-          // ### SUBMISSION INDEX STUB FEATURE
-          meetingRequest:
-            self.meetingRequestFilter !== ERadioFilterValue.include ? self.meetingRequestFilter : undefined,
-          daysInQueue: self.daysInQueueFilter ?? undefined,
-          assigned: self.assignedFilter.length > 0 ? [...self.assignedFilter] : undefined,
-        },
+        filters: buildJurisdictionPermitApplicationSearchFilters(self),
       }
 
       const currentJurisdictionId = self.rootStore?.jurisdictionStore?.currentJurisdiction?.id
@@ -329,28 +268,12 @@ export const PermitApplicationInboxStoreModel = types
       return response.ok
     }),
     setJurisdictionPermitApplicationFilters(queryParams: URLSearchParams) {
-      const requirementTemplateIds = queryParams.get("requirementTemplateIds")?.split(",")
-      const statusRaw = queryParams.get("status")?.split(",") as EPermitApplicationStatus[]
-      const unread = queryParams.get("unread") as ERadioFilterValue
-      const daysInQueueOp = queryParams.get("daysInQueueOp")
-      const daysInQueueDays = queryParams.get("daysInQueueDays")
-      if (requirementTemplateIds) self.setRequirementTemplateIdFilter(requirementTemplateIds)
-      if (statusRaw) self.setStatusFilter(statusRaw)
-      if (unread) self.setUnreadFilter(unread)
-      if (daysInQueueOp && daysInQueueDays) {
-        self.setDaysInQueueFilter({ operator: daysInQueueOp, days: parseInt(daysInQueueDays) })
-      }
+      applyPermitApplicationInboxFiltersFromQueryParams(self, queryParams)
     },
   }))
   .actions((self) => ({
     resetFilters() {
-      self.setQuery("")
-      self.setRequirementTemplateIdFilter([])
-      self.setStatusFilter([] as any)
-      self.setUnreadFilter(ERadioFilterValue.include)
-      self.setMeetingRequestFilter(ERadioFilterValue.include)
-      self.setDaysInQueueFilter(null)
-      self.setAssignedFilter([])
+      resetPermitApplicationInboxSearchState(self)
       self.searchJurisdictionPermitApplications({ reset: true })
     },
     reorderApplications: flow(function* (orderedIds: string[]) {
