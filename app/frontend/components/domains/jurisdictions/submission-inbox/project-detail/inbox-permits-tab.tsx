@@ -191,9 +191,9 @@ export const InboxPermitsTab = observer(function InboxPermitsTab({ permitProject
       </Box>
 
       {permitProject.displayMode === EInboxDisplayMode.list ? (
-        <Box flex={1} minH={0} minW={0} overflow="auto">
+        <Flex flex={1} minH={0} minW={0} direction="column" overflow="hidden">
           <ApplicationInboxTable searchStore={permitProject} applications={applications} />
-        </Box>
+        </Flex>
       ) : (
         <Flex direction="column" flex={1} minH={0} minW={0} overflowX="auto" overflowY="hidden">
           <ApplicationKanbanBoard

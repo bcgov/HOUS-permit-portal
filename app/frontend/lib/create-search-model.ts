@@ -176,4 +176,7 @@ export interface ISearch {
   resetAll: () => void
   syncWithUrl: () => void
   isSearching: boolean
+  setFilters: (queryParams: URLSearchParams) => void
+  fetchData: (opts?: any) => Promise<any>
+  setVisibility: (visibility: TVisibility) => void
 }

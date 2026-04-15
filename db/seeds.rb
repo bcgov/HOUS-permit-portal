@@ -287,19 +287,19 @@ if PermitApplication.first.blank?
   ]
   north_van_postal = %w[V7M V7L V7K V7J V7N V7P V7G V7H V7R]
   project_types = [
-    "Single family home",
-    "Duplex renovation",
-    "Laneway house",
-    "Garage conversion",
-    "Deck addition",
-    "Kitchen remodel",
-    "Basement suite",
-    "Roof replacement",
-    "Fence & retaining wall",
-    "Commercial tenant improvement",
-    "4+ Unit housing",
-    "Mixed-use development",
-    "Accessory dwelling unit"
+    "Grandma's attic time capsule",
+    "Castle moat mood lighting",
+    "Random creativity pavilion",
+    "Secret handshake clubhouse",
+    "Zeppelin tie-down station",
+    "Haunted hedge maze annex",
+    "Sourdough observatory",
+    "Disco ball rumpus room",
+    "Portal closet",
+    "Volcano lair HVAC upgrade",
+    "Dolphin whistle testing lab",
+    "Moon garden terrarium palace",
+    "Rubber duck command center"
   ]
 
   60.times do |index|
@@ -315,7 +315,7 @@ if PermitApplication.first.blank?
       PermitProject.create!(
         owner: submitter_user,
         jurisdiction: current_jurisdiction,
-        title: "#{project_type} — #{street_num} #{street}",
+        title: "#{project_type} — #{street_num}",
         full_address: "#{street_num} #{street}, North Vancouver, BC, #{postal}",
         pid: format("%09d", rand(1..999_999_999)),
         pin: format("PIN%06d", index + 1)

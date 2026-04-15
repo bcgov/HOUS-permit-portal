@@ -87,7 +87,7 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
 
   useSearch(
     activeSearchStore,
-    inboxSearchEnabled ? [currentJurisdiction?.id, JSON.stringify(currentSandboxId), viewMode] : [null]
+    inboxSearchEnabled ? [currentJurisdiction?.id, JSON.stringify(currentSandboxId), viewMode] : [null, null, null]
   )
 
   const loadCollaboratorOptions = useCallback(async (): Promise<IOption[]> => {
@@ -359,7 +359,7 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
             minH={0}
             minW={0}
             overflowX="auto"
-            overflowY={displayMode === EInboxDisplayMode.columns ? "hidden" : "auto"}
+            overflowY="hidden"
             px={8}
             pb={displayMode === EInboxDisplayMode.columns ? 0 : 8}
           >
@@ -506,13 +506,19 @@ const InboxContent = observer(function InboxContent({
   }
 
   if (viewMode === EInboxViewMode.projects) {
-    return <ProjectInboxTable searchStore={permitProjectSearch} projects={permitProjectSearch.tablePermitProjects} />
+    return (
+      <Flex flex={1} minH={0} minW={0} direction="column" w="full">
+        <ProjectInboxTable searchStore={permitProjectSearch} projects={permitProjectSearch.tablePermitProjects} />
+      </Flex>
+    )
   }
 
   return (
-    <ApplicationInboxTable
-      searchStore={permitApplicationSearch}
-      applications={permitApplicationSearch.tablePermitApplications}
-    />
+    <Flex flex={1} minH={0} minW={0} direction="column" w="full">
+      <ApplicationInboxTable
+        searchStore={permitApplicationSearch}
+        applications={permitApplicationSearch.tablePermitApplications}
+      />
+    </Flex>
   )
 })

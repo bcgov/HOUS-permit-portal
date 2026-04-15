@@ -1,5 +1,5 @@
 import { Container, Flex, Heading, IconButton, TabPanel, TabPanels, Tabs, Text } from "@chakra-ui/react"
-import { CaretLeft, ClipboardText, SquaresFour } from "@phosphor-icons/react"
+import { CaretLeft, ClipboardText, SquaresFour, TrendUp } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useTransition } from "react"
 import { useTranslation } from "react-i18next"
@@ -7,6 +7,7 @@ import { Link as RouterLink, useLocation, useNavigate, useParams } from "react-r
 import { usePermitProject } from "../../../../../hooks/resources/use-permit-project"
 import { ErrorScreen } from "../../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../../shared/base/loading-screen"
+import { ActivityTabPanelContent } from "../../../permit-project/activity-tab-panel-content"
 import { ITabItem, ProjectSidebarTabList } from "../../../permit-project/project-sidebar-tab-list"
 import { InboxOverviewTab } from "./inbox-overview-tab"
 import { InboxPermitsTab } from "./inbox-permits-tab"
@@ -25,6 +26,12 @@ export const InboxProjectDetailScreen = observer(() => {
       icon: ClipboardText,
       to: "permits",
       tabIndex: 1,
+    },
+    {
+      label: t("submissionInbox.projectDetail.activity"),
+      icon: TrendUp,
+      to: "activity",
+      tabIndex: 2,
     },
   ]
 
@@ -96,6 +103,9 @@ export const InboxProjectDetailScreen = observer(() => {
           </TabPanel>
           <TabPanel flex={1} minH={0} minW={0} display="flex" flexDirection="column" overflow="hidden">
             {isPending ? <LoadingScreen /> : <InboxPermitsTab permitProject={currentPermitProject} />}
+          </TabPanel>
+          <TabPanel flex={1} minH={0} minW={0} display="flex" flexDirection="column" overflow="hidden">
+            {isPending ? <LoadingScreen /> : <ActivityTabPanelContent permitProject={currentPermitProject} />}
           </TabPanel>
         </TabPanels>
       </Tabs>
