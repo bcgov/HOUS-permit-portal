@@ -51,7 +51,7 @@ export const PermitProjectStoreModel = types
         self.rootStore.userStore.mergeUpdate(permitProject.owner, "usersMap")
       }
 
-      // Handle permit applications
+      // Handle permit applications (inbox reviewer payloads use permitApplications for full visible list)
       if (permitProject.permitApplications && Array.isArray(permitProject.permitApplications)) {
         permitProject.permitApplications.forEach((app) => {
           if (typeof app === "object") {
@@ -71,16 +71,27 @@ export const PermitProjectStoreModel = types
         self.rootStore.jurisdictionStore.mergeUpdate(permitProject.jurisdiction, "jurisdictionMap")
       }
 
-      if (permitProject.reviewDelegatee?.user && typeof permitProject.reviewDelegatee.user === "object") {
-        self.rootStore.userStore.mergeUpdate(permitProject.reviewDelegatee.user, "usersMap")
+      if (permitProject.permitProjectCollaborations) {
+        permitProject.permitProjectCollaborations.forEach((collab: any) => {
+          if (collab?.collaborator?.user && typeof collab.collaborator.user === "object") {
+            self.rootStore.userStore.mergeUpdate(collab.collaborator.user, "usersMap")
+          }
+        })
       }
 
       const overrides: Record<string, any> = {
         owner: permitProject.owner?.id || null,
-        permitApplications:
-          permitProject.permitApplications?.map((app) => (typeof app === "object" ? app.id : app)) || [],
-        recentPermitApplications:
-          permitProject.recentPermitApplications?.map((app) => (typeof app === "object" ? app.id : app)) || [],
+      }
+
+      // Inbox extended: permit_applications -> inboxTablePermitApplications (not tablePermitApplications)
+      if (permitProject.permitApplications && Array.isArray(permitProject.permitApplications)) {
+        overrides.inboxTablePermitApplications =
+          permitProject.permitApplications.map((app) => (typeof app === "object" ? app.id : app)) || []
+      }
+
+      if (permitProject.recentPermitApplications && Array.isArray(permitProject.recentPermitApplications)) {
+        overrides.recentPermitApplications =
+          permitProject.recentPermitApplications.map((app) => (typeof app === "object" ? app.id : app)) || []
       }
 
       if ("jurisdiction" in permitProject && permitProject.jurisdiction) {

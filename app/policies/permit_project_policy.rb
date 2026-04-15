@@ -82,11 +82,11 @@ class PermitProjectPolicy < ApplicationPolicy
     user_is_owner?
   end
 
-  def assign_review_delegatee?
+  def assign_project_review_collaborator?
     user_is_review_staff_for_jurisdiction?
   end
 
-  def unassign_review_delegatee?
+  def unassign_project_review_collaborator?
     user_is_review_staff_for_jurisdiction?
   end
 

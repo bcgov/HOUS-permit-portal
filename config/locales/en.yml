@@ -171,6 +171,7 @@ en:
       permit_type_submission_contact_confirm: "Confirm submission inbox email"
       new_jurisdiction_membership: "New jurisdiction membership"
       notify_permit_collaboration: "Welcome you have been invited to Collaborate in the Building Permit Hub"
+      notify_project_review_collaboration: "You have been assigned as a review collaborator on a project"
       notify_new_or_unconfirmed_permit_collaboration: "You’re Invited to Collaborate on a Building Permit Application"
       notify_new_or_unconfirmed_preview: "You’re Invited to Preview a Building Permit Template"
       notify_preview: "You're Invited to Preview a Building Permit Template"
@@ -690,15 +691,15 @@ en:
       reorder_success:
         title: ""
         message: "Project order updated successfully"
-      assign_review_delegatee_success:
+      assign_project_review_collaborator_success:
         title: ""
-        message: "Project reviewer assigned successfully"
-      assign_review_delegatee_error:
+        message: "Project review collaborator assigned successfully"
+      assign_project_review_collaborator_error:
         title: Error
         message: "%{error_message}"
-      unassign_review_delegatee_success:
+      unassign_project_review_collaborator_success:
         title: ""
-        message: "Project reviewer removed successfully"
+        message: "Project review collaborator removed successfully"
       feature_not_enabled:
         title: Error
         message: "Designated reviewer is not enabled for this project"
@@ -1006,6 +1007,9 @@ en:
       submission_assignee_collaboration_unassignment_notification: "You have been removed as a collaborator on requirement “%{requirement_block_name}” for permit application %{number}"
       review_delegatee_collaboration_unassignment_notification: "You have been removed as a designated reviewer for permit application %{number}."
       review_assignee_collaboration_unassignment_notification: "You have been removed as a review collaborator on requirement “%{requirement_block_name}” for permit application %{number}"
+    permit_project_collaboration:
+      assignment_notification: "You have been assigned as a review collaborator on project %{project_number} (%{project_title})."
+      unassignment_notification: "You have been removed as a review collaborator on project %{project_number} (%{project_title})."
     step_code:
       report_generated: "Your step code report is ready to download"
     pre_check:

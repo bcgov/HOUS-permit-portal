@@ -1,7 +1,7 @@
 import { Box, Circle, HStack, IconButton, Spinner, Tooltip } from "@chakra-ui/react"
 import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
-import { CaretUpDown, UserPlus } from "@phosphor-icons/react"
+import { ArrowsDownUp, UserPlus } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
@@ -84,7 +84,7 @@ export const KanbanCard = observer(function KanbanCard({
           <Tooltip label={t("submissionInbox.reorder")} hasArrow placement="top">
             <IconButton
               aria-label={t("submissionInbox.reorder")}
-              icon={<CaretUpDown size={16} />}
+              icon={<ArrowsDownUp size={16} />}
               size="sm"
               minW={7}
               h={7}

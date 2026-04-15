@@ -69,9 +69,16 @@ export const ApplicationKanbanBoard = observer(function ApplicationKanbanBoard({
     [t]
   )
 
-  const itemsKey = applications.map((a) => `${a.id}:${a.status}:${a.inboxSortOrder ?? ""}`).join(",")
+  const itemsKey = applications.map((a) => `${a.id}:${a.status}:${a.inboxSortOrder ?? ""}:${a.isViewed}`).join(",")
   const items = useMemo(
-    () => applications.map((a) => ({ ...a, id: a.id, columnKey: a.status, sortOrder: a.inboxSortOrder })),
+    () =>
+      applications.map((a) => ({
+        ...a,
+        id: a.id,
+        columnKey: a.status,
+        sortOrder: a.inboxSortOrder,
+        isUnread: !a.isViewed,
+      })),
     [itemsKey]
   )
 
@@ -214,7 +221,7 @@ const ApplicationKanbanCard = observer(function ApplicationKanbanCard({
         _active={{ color: "inherit" }}
       >
         <Box pr={4}>
-          <Text fontWeight={700} fontSize="sm" noOfLines={2}>
+          <Text fontWeight={700} fontSize="md" noOfLines={2}>
             {application.nickname}
           </Text>
           <Text fontSize="xs" color="text.secondary" noOfLines={1}>
@@ -226,7 +233,7 @@ const ApplicationKanbanCard = observer(function ApplicationKanbanCard({
           {application.shortAddress}
         </Text>
         {application.pid && (
-          <Text fontSize="2xs" color="text.secondary">
+          <Text fontSize="xs" color="text.secondary">
             PID {application.pid}
           </Text>
         )}

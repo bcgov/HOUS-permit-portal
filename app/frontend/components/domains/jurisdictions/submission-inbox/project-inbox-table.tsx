@@ -36,7 +36,7 @@ import { ProjectStateTag } from "../../../shared/permit-projects/project-state-t
 import { SortIcon } from "../../../shared/sort-icon"
 import { SharedAvatar } from "../../../shared/user/shared-avatar"
 import { InboxNoMatchingEmpty } from "./inbox-no-matching-empty"
-import { ProjectDesignatedReviewerPopover } from "./project-designated-reviewer-popover"
+import { ProjectReviewCollaboratorsPopover } from "./project-designated-reviewer-popover"
 import { ProjectInboxPermitApplicationsPopover } from "./project-inbox-permit-applications-popover"
 import { SubmissionInboxMarkUnreadIconButton } from "./submission-inbox-mark-unread-icon-button"
 
@@ -196,50 +196,72 @@ export const ProjectInboxTable = observer(function ProjectInboxTable({ searchSto
     ))
   }
 
-  return (
-    <VStack w="full" spacing={5}>
-      <SearchGrid
-        templateColumns="2fr 1.5fr 1fr 1fr 1fr 1fr 72px"
-        gridRowClassName="project-inbox-grid-row"
-        sx={{
-          ".project-inbox-grid-row:hover > div": {
-            bg: "gray.50",
-          },
-          ".project-inbox-grid-row:active > div": {
-            bg: "background.blueLight",
-          },
-        }}
-      >
-        <Box display="contents" role="rowgroup">
-          <Box display="contents" role="row">
-            {SORT_FIELDS.map((field) => (
-              <GridHeader key={field} role="columnheader">
-                <Flex
-                  w="full"
-                  as="button"
-                  justifyContent="space-between"
-                  cursor="pointer"
-                  onClick={() => toggleSort(field)}
-                  borderRight="1px solid"
-                  borderColor="border.light"
-                  px={4}
-                >
-                  <Text textAlign="left">{getSortColumnHeader(field)}</Text>
-                  <SortIcon<EPermitProjectInboxSortFields>
-                    field={field}
-                    currentSort={sort as ISort<EPermitProjectInboxSortFields>}
-                  />
-                </Flex>
-              </GridHeader>
-            ))}
-            <GridHeader role="columnheader" />
-          </Box>
-        </Box>
+  const gridStickyHeaderSx = {
+    "[role='columnheader']": {
+      position: "sticky",
+      top: 0,
+      zIndex: 1,
+      bg: "white",
+    },
+  }
 
-        {renderListBody()}
-      </SearchGrid>
+  return (
+    <Flex direction="column" flex={1} minH={0} minW={0} w="full" align="stretch">
+      <Box flex={1} minH={0} overflow="auto">
+        <SearchGrid
+          templateColumns="2fr 1.5fr 1fr 1fr 1fr 1fr 72px"
+          gridRowClassName="project-inbox-grid-row"
+          overflow="visible"
+          sx={{
+            ...gridStickyHeaderSx,
+            ".project-inbox-grid-row:hover > div": {
+              bg: "gray.50",
+            },
+            ".project-inbox-grid-row:active > div": {
+              bg: "background.blueLight",
+            },
+          }}
+        >
+          <Box display="contents" role="rowgroup">
+            <Box display="contents" role="row">
+              {SORT_FIELDS.map((field) => (
+                <GridHeader key={field} role="columnheader">
+                  <Flex
+                    w="full"
+                    as="button"
+                    justifyContent="space-between"
+                    cursor="pointer"
+                    onClick={() => toggleSort(field)}
+                    borderRight="1px solid"
+                    borderColor="border.light"
+                    px={4}
+                  >
+                    <Text textAlign="left">{getSortColumnHeader(field)}</Text>
+                    <SortIcon<EPermitProjectInboxSortFields>
+                      field={field}
+                      currentSort={sort as ISort<EPermitProjectInboxSortFields>}
+                    />
+                  </Flex>
+                </GridHeader>
+              ))}
+              <GridHeader role="columnheader" />
+            </Box>
+          </Box>
+
+          {renderListBody()}
+        </SearchGrid>
+      </Box>
       {!listShowsNoResults && (
-        <Flex w="full" justifyContent="space-between">
+        <Flex
+          w="full"
+          flexShrink={0}
+          justifyContent="space-between"
+          align="center"
+          pt={5}
+          borderTopWidth="1px"
+          borderTopColor="border.light"
+          bg="white"
+        >
           <PerPageSelect
             handleCountPerPageChange={handleCountPerPageChange}
             countPerPage={countPerPage}
@@ -255,7 +277,7 @@ export const ProjectInboxTable = observer(function ProjectInboxTable({ searchSto
           />
         </Flex>
       )}
-    </VStack>
+    </Flex>
   )
 })
 
@@ -263,12 +285,10 @@ const ProjectAssignedCell = observer(function ProjectAssignedCell({ project }: {
   const { t } = useTranslation()
   const { permitProjectStore } = useMst()
 
-  const collaborators = project.aggregatedReviewCollaborators
-  const childAppAssignees = collaborators.filter((c) => !c.isDesignated)
-  const visibleAssignees = childAppAssignees.slice(0, MAX_VISIBLE_AVATARS)
-  const overflowCount = childAppAssignees.length - MAX_VISIBLE_AVATARS
-  const hasDesignatedReviewer = !!project.reviewDelegatee
-  const hasAnyAssignees = hasDesignatedReviewer || childAppAssignees.length > 0
+  const allCollaborators = project.aggregatedReviewCollaborators
+  const visibleAssignees = allCollaborators.slice(0, MAX_VISIBLE_AVATARS)
+  const overflowCount = allCollaborators.length - MAX_VISIBLE_AVATARS
+  const hasAnyAssignees = allCollaborators.length > 0
 
   return (
     <HStack spacing={1}>
@@ -293,26 +313,19 @@ const ProjectAssignedCell = observer(function ProjectAssignedCell({ project }: {
           {t("ui.unassigned")}
         </Text>
       )}
-      <ProjectDesignatedReviewerPopover
+      <ProjectReviewCollaboratorsPopover
         project={project}
         onBeforeOpen={async () => {
           await permitProjectStore.fetchPermitProject(project.id)
         }}
-        renderTrigger={({ isLoading, reviewDelegatee, onClick, isDisabled }) => (
+        renderTrigger={({ isLoading, collaborationCount, onClick, isDisabled }) => (
           <IconButton
-            aria-label={t("permitCollaboration.projectSidebar.projectReviewDelegatee")}
+            aria-label={t("permitCollaboration.projectSidebar.projectReviewCollaborators")}
             icon={
               isLoading ? (
                 <Spinner size="xs" />
-              ) : reviewDelegatee?.user ? (
-                <SharedAvatar
-                  size="xs"
-                  name={`${reviewDelegatee.user.firstName} ${reviewDelegatee.user.lastName}`}
-                  role={reviewDelegatee.user.role}
-                  fontSize="2xs"
-                  border="2px solid"
-                  borderColor="theme.blueActive"
-                />
+              ) : collaborationCount > 0 ? (
+                <UserPlus size={14} />
               ) : (
                 <UserPlus size={14} />
               )

@@ -101,6 +101,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
       discardedAt: types.maybeNull(types.Date),
       inboxSortOrder: types.maybeNull(types.number),
       allowedManualTransitions: types.optional(types.array(types.string), []),
+      daysInQueue: types.maybeNull(types.number),
     })
     .extend(withEnvironment())
     .extend(withRootStore())
@@ -111,15 +112,9 @@ export const PermitApplicationModel = types.snapshotProcessor(
       get shortAddress() {
         return self.fullAddress?.split(",")[0]
       },
-      get daysInQueue(): number | null {
-        if (!self.submittedAt) return null
-        const ms = Date.now() - self.submittedAt.getTime()
-        return Math.floor(ms / (1000 * 60 * 60 * 24))
-      },
       get formattedDaysInQueue(): string {
-        const days = this.daysInQueue
-        if (days == null) return "—"
-        return `${days} ${days === 1 ? "day" : "days"}`
+        if (self.daysInQueue == null) return "—"
+        return t("submissionInbox.daysInQueue", { count: self.daysInQueue })
       },
       get formattedSubmittedAt(): string {
         if (!self.submittedAt) return "—"
@@ -143,14 +138,16 @@ export const PermitApplicationModel = types.snapshotProcessor(
           self.status === EPermitApplicationStatus.newlySubmitted ||
           self.status === EPermitApplicationStatus.resubmitted ||
           self.status === EPermitApplicationStatus.inReview ||
-          self.status === EPermitApplicationStatus.approved
+          self.status === EPermitApplicationStatus.approved ||
+          self.status === EPermitApplicationStatus.issued ||
+          self.status === EPermitApplicationStatus.withdrawn
         )
       },
       get isInReview() {
         return self.status === EPermitApplicationStatus.inReview
       },
       get isReviewReadOnly() {
-        return self.status !== EPermitApplicationStatus.inReview
+        return this.isSubmitted && self.status !== EPermitApplicationStatus.inReview
       },
       get isRevisionsRequested() {
         return self.status === EPermitApplicationStatus.revisionsRequested

@@ -470,6 +470,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
 
     render_success nil, "permit_application.retrigger_webhook_success", {}
   rescue StandardError => e
+    Rails.logger.error "Error retriggering submission webhook: #{e.message}"
     render_error "permit_application.retrigger_webhook_error", {}, e
   end
 

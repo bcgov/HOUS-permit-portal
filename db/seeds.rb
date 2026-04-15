@@ -249,7 +249,8 @@ if PermitApplication.first.blank?
 
   # Creating Permit Applications
   puts "Seeding permit applications..."
-  published_template_versions = TemplateVersion.published
+  published_template_versions =
+    TemplateVersion.published_for_live_requirement_templates
   submitter_user = User.find_by!(omniauth_username: "submitter")
 
   north_van_streets = [
@@ -286,19 +287,19 @@ if PermitApplication.first.blank?
   ]
   north_van_postal = %w[V7M V7L V7K V7J V7N V7P V7G V7H V7R]
   project_types = [
-    "Single family home",
-    "Duplex renovation",
-    "Laneway house",
-    "Garage conversion",
-    "Deck addition",
-    "Kitchen remodel",
-    "Basement suite",
-    "Roof replacement",
-    "Fence & retaining wall",
-    "Commercial tenant improvement",
-    "4+ Unit housing",
-    "Mixed-use development",
-    "Accessory dwelling unit"
+    "Grandma's attic time capsule",
+    "Castle moat mood lighting",
+    "Random creativity pavilion",
+    "Secret handshake clubhouse",
+    "Zeppelin tie-down station",
+    "Haunted hedge maze annex",
+    "Sourdough observatory",
+    "Disco ball rumpus room",
+    "Portal closet",
+    "Volcano lair HVAC upgrade",
+    "Dolphin whistle testing lab",
+    "Moon garden terrarium palace",
+    "Rubber duck command center"
   ]
 
   60.times do |index|
@@ -314,7 +315,7 @@ if PermitApplication.first.blank?
       PermitProject.create!(
         owner: submitter_user,
         jurisdiction: current_jurisdiction,
-        title: "#{project_type} — #{street_num} #{street}",
+        title: "#{project_type} — #{street_num}",
         full_address: "#{street_num} #{street}, North Vancouver, BC, #{postal}",
         pid: format("%09d", rand(1..999_999_999)),
         pin: format("PIN%06d", index + 1)
@@ -499,6 +500,72 @@ seed_pa_status =
     end
   end
 
+# Dedicated North Vancouver project for reviewer submission-inbox / project-detail QA.
+# Idempotent: tops up reviewer-visible applications (not +new_draft+) on every seed.
+puts "Ensuring Inbox test project (North Vancouver) with reviewer-visible permit applications..."
+inbox_test_project_title = "Inbox test project"
+inbox_test_visible_app_target = 28
+inbox_test_visible_statuses = %i[
+  newly_submitted
+  in_review
+  revisions_requested
+  resubmitted
+  approved
+  issued
+  withdrawn
+].freeze
+
+if north_van.present?
+  submitter_for_inbox_test = User.find_by(omniauth_username: "submitter")
+  published_for_inbox_test =
+    TemplateVersion.published_for_live_requirement_templates
+
+  if submitter_for_inbox_test.present? && reviewer_user.present? &&
+       published_for_inbox_test.exists?
+    inbox_test_project =
+      PermitProject.find_or_initialize_by(
+        jurisdiction: north_van,
+        owner: submitter_for_inbox_test,
+        title: inbox_test_project_title
+      )
+    if inbox_test_project.new_record?
+      inbox_test_project.assign_attributes(
+        full_address: "123 Lonsdale Ave, North Vancouver, BC, V7M 2G4",
+        pid: "900INBOX1",
+        pin: "INBOXTEST"
+      )
+      inbox_test_project.save!
+    end
+
+    idx = 0
+    while inbox_test_project.reload.permit_applications.kept.count(
+            &:visible_to_reviewers?
+          ) < inbox_test_visible_app_target
+      break if idx >= 100 # safety: avoid infinite loop if statuses fail to seed
+
+      tv = published_for_inbox_test.sample
+      pa =
+        PermitApplication.create!(
+          nickname: "Inbox test — permit #{idx + 1}",
+          submitter: submitter_for_inbox_test,
+          permit_project: inbox_test_project,
+          activity_id: tv.activity.id,
+          permit_type_id: tv.permit_type.id,
+          template_version: tv
+        )
+      seed_pa_status.call(
+        pa,
+        inbox_test_visible_statuses[idx % inbox_test_visible_statuses.size]
+      )
+      idx += 1
+    end
+
+    puts "  ✓ #{inbox_test_project_title}: #{inbox_test_project.permit_applications.kept.count(&:visible_to_reviewers?)} reviewer-visible permit applications"
+  else
+    puts "  (skipped Inbox test project: need submitter, reviewer, and published template versions)"
+  end
+end
+
 north_van_projects = PermitProject.where(jurisdiction: north_van).to_a.shuffle
 
 if north_van_projects.size >= 10
@@ -554,32 +621,86 @@ if north_van_projects.size >= 10
 
   puts "  ✓ Distributed #{[state_distribution.size, north_van_projects.size].min} projects across kanban states"
 
-  puts "Assigning project review delegatees..."
+  # Seed queue clock values for realistic "days in queue" display
+  puts "Seeding queue clock values..."
+  pa_our_court = PermitApplication.our_court_statuses
+  pp_our_court = PermitProject.our_court_states
+
+  non_draft.each_with_index do |project, idx|
+    enqueued = project.enqueued_at || (idx * 2 + 1).days.ago
+    banked_days = rand(0..idx)
+
+    if pp_our_court.include?(project.state)
+      clock_start = enqueued + banked_days.days
+      clock_start = [clock_start, Time.current].min
+      project.update_columns(
+        queue_time_seconds: banked_days * 86_400,
+        queue_clock_started_at: clock_start
+      )
+    else
+      total_days = [(Time.current - enqueued).to_i / 86_400, 1].max
+      project.update_columns(
+        queue_time_seconds: [total_days - rand(0..3), 0].max * 86_400,
+        queue_clock_started_at: nil
+      )
+    end
+  end
+
+  PermitApplication
+    .joins(:permit_project)
+    .where(permit_projects: { jurisdiction_id: north_van.id })
+    .where.not(status: :new_draft)
+    .find_each do |pa|
+      submitted_at = pa.submitted_at
+      next unless submitted_at
+
+      age_seconds = [(Time.current - submitted_at).to_i, 0].max
+
+      if pa_our_court.include?(pa.status)
+        banked = rand(0..(age_seconds / 4))
+        clock_start = submitted_at + banked.seconds
+        clock_start = [clock_start, Time.current].min
+        pa.update_columns(
+          queue_time_seconds: banked,
+          queue_clock_started_at: clock_start
+        )
+      else
+        banked = rand((age_seconds / 4)..(age_seconds * 3 / 4))
+        pa.update_columns(
+          queue_time_seconds: banked,
+          queue_clock_started_at: nil
+        )
+      end
+    end
+
+  puts "  ✓ Seeded queue clock values"
+
+  puts "Assigning project review collaborators..."
   reviewer_collab = north_van.collaborators.find_by(user: reviewer_user)
   rm_collab =
     north_van.collaborators.find_by(
       user: User.find_by(omniauth_username: "review_manager")
     )
 
-  delegatee_projects =
+  collab_projects =
     north_van_projects
       .select do |p|
         p.reload.state.in?(%w[in_progress ready permit_issued active])
       end
       .first(8)
 
-  delegatee_projects.each_with_index do |project, idx|
+  collab_projects.each_with_index do |project, idx|
     collab = idx.even? ? reviewer_collab : rm_collab
     next unless collab
 
-    project.assign_review_delegatee!(collab.id)
+    project.assign_project_review_collaborator!(collab.id)
   rescue => e
     Rails.logger.warn(
-      "Seed: failed to assign delegatee for project #{project.id}: #{e.message}"
+      "Seed: failed to assign review collaborator for project #{project.id}: #{e.message}"
     )
   end
 
-  puts "  ✓ Assigned review delegatees to #{delegatee_projects.size} projects"
+  puts "  ✓ Assigned review collaborators to #{collab_projects.size} projects"
 end
 
 PermitApplication.reindex

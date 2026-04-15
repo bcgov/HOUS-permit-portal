@@ -11,7 +11,12 @@ class PermitProject < ApplicationRecord
   belongs_to :owner, class_name: "User", optional: true
   public_recordable user_association: :owner
   belongs_to :jurisdiction, optional: false # Direct association to Jurisdiction
-  belongs_to :review_delegatee, class_name: "Collaborator", optional: true
+  has_many :permit_project_collaborations,
+           -> { where(discarded_at: nil) },
+           dependent: :destroy
+  has_many :project_review_collaborators,
+           through: :permit_project_collaborations,
+           source: :collaborator
 
   has_many :permit_applications
   has_many :project_documents, dependent: :destroy
@@ -26,6 +31,7 @@ class PermitProject < ApplicationRecord
   before_validation :set_default_title
 
   before_validation :assign_unique_number, if: -> { number.blank? }
+  before_save :normalize_pid
   before_save :fetch_coordinates, if: -> { pid_changed? }
 
   delegate :name, to: :owner, prefix: true
@@ -104,6 +110,13 @@ class PermitProject < ApplicationRecord
       permit_applications.kept.where(status: :approved).count
   end
 
+  def days_in_queue
+    seconds = queue_time_seconds || 0
+    seconds +=
+      (Time.current - queue_clock_started_at).to_i if queue_clock_started_at
+    (seconds / 86400.0).floor
+  end
+
   def update_viewed_at
     update(viewed_at: Time.current)
   end
@@ -148,7 +161,9 @@ class PermitProject < ApplicationRecord
         permit_applications.kept.where(status: :revisions_requested).count,
       resubmitted_count:
         permit_applications.kept.where(status: :resubmitted).count,
-      approved_count: permit_applications.kept.where(status: :approved).count
+      approved_count: permit_applications.kept.where(status: :approved).count,
+      queue_time_seconds: queue_time_seconds,
+      queue_clock_started_at: queue_clock_started_at&.to_i
     }
   end
 
@@ -169,6 +184,15 @@ class PermitProject < ApplicationRecord
 
   def shortened_address
     full_address.split(",").first
+  end
+
+  # Reviewer inbox preview: newest visible-to-reviewer applications (not owner-scoped).
+  def recent_inbox_permit_applications(limit: 3)
+    permit_applications
+      .kept
+      .select(&:visible_to_reviewers?)
+      .sort_by(&:updated_at)
+      .last(limit)
   end
 
   def recent_permit_applications(user = nil)
@@ -243,9 +267,24 @@ class PermitProject < ApplicationRecord
   end
 
   def aggregated_review_collaborators
-    delegatee_user_id = review_delegatee&.user_id
     users = {}
 
+    # Include project-level review collaborators
+    permit_project_collaborations
+      .includes(collaborator: :user)
+      .each do |ppc|
+        user = ppc.collaborator&.user
+        next unless user
+
+        users[user.id] ||= {
+          id: user.id,
+          name: user.name,
+          role: user.role,
+          is_project_collaborator: true
+        }
+      end
+
+    # Include per-application review collaborators
     permit_applications.each do |pa|
       next if pa.discarded? || !pa.submitted?
 
@@ -255,29 +294,18 @@ class PermitProject < ApplicationRecord
         user = collab.collaborator&.user
         next unless user
 
-        is_designated = collab.collaborator_type == "delegatee"
         existing = users[user.id]
         if existing
-          existing[:is_designated] ||= is_designated
+          existing[:is_project_collaborator] ||= false
         else
           users[user.id] = {
             id: user.id,
             name: user.name,
             role: user.role,
-            is_designated: is_designated
+            is_project_collaborator: false
           }
         end
       end
-    end
-
-    if delegatee_user_id && !users.key?(delegatee_user_id)
-      delegatee_user = review_delegatee.user
-      users[delegatee_user_id] = {
-        id: delegatee_user.id,
-        name: delegatee_user.name,
-        role: delegatee_user.role,
-        is_designated: true
-      }
     end
 
     users.values
@@ -288,43 +316,29 @@ class PermitProject < ApplicationRecord
       jurisdiction&.allow_designated_reviewer
   end
 
-  def assign_review_delegatee!(collaborator_id)
+  def assign_project_review_collaborator!(collaborator_id)
     unless designated_reviewer_enabled?
       raise "Designated reviewer feature is not enabled"
     end
 
-    ActiveRecord::Base.transaction do
-      update!(review_delegatee_id: collaborator_id)
+    collaboration =
+      permit_project_collaborations.create!(collaborator_id: collaborator_id)
 
-      # TODO: Review with product manager — re-enable pushing the project review delegatee to each
-      # submitted permit application (discard prior review delegatee collaborations, create new, notify).
-      # permit_applications
-      #   .kept
-      #   .select(&:submitted?)
-      #   .each do |pa|
-      #     pa
-      #       .permit_collaborations
-      #       .kept
-      #       .where(collaborator_type: :delegatee, collaboration_type: :review)
-      #       .discard_all
-      #
-      #     collab =
-      #       pa.permit_collaborations.create!(
-      #         collaborator_id: collaborator_id,
-      #         collaborator_type: :delegatee,
-      #         collaboration_type: :review
-      #       )
-      #     NotificationService.publish_permit_collaboration_assignment_event(
-      #       collab
-      #     )
-      #   end
-    end
+    PermitHubMailer.notify_project_review_collaboration(
+      permit_project_collaboration: collaboration
+    )&.deliver_later
+
+    NotificationService.publish_project_collaboration_assignment_event(
+      collaboration
+    )
+
+    collaboration
   end
 
-  # TODO: Review with product manager — when re-enabling assign sync above, decide whether clearing
-  # review_delegatee here should also discard review delegatee permit_collaborations on applications.
-  def unassign_review_delegatee!
-    update!(review_delegatee_id: nil)
+  def unassign_project_review_collaborator!(collaborator_id)
+    collaboration =
+      permit_project_collaborations.find_by!(collaborator_id: collaborator_id)
+    collaboration.discard!
   end
 
   private
@@ -337,7 +351,16 @@ class PermitProject < ApplicationRecord
         .where(collaboration_type: :review, discarded_at: nil)
         .pluck("collaborators.user_id")
 
-    (pa_user_ids + [review_delegatee&.user_id].compact).uniq
+    project_user_ids =
+      permit_project_collaborations.joins(:collaborator).pluck(
+        "collaborators.user_id"
+      )
+
+    (pa_user_ids + project_user_ids).uniq
+  end
+
+  def normalize_pid
+    self.pid = pid.delete("-") if pid.present?
   end
 
   def fetch_coordinates

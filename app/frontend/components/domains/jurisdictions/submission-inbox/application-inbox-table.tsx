@@ -22,6 +22,7 @@ import React, { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { Link, useNavigate } from "react-router-dom"
 import { IPermitApplication } from "../../../../models/permit-application"
+import { IPermitProject } from "../../../../models/permit-project"
 import { useMst } from "../../../../setup/root"
 import { IPermitApplicationInboxStore } from "../../../../stores/submission-inbox-store"
 import {
@@ -45,7 +46,7 @@ import { InboxNoMatchingEmpty } from "./inbox-no-matching-empty"
 import { SubmissionInboxMarkUnreadIconButton } from "./submission-inbox-mark-unread-icon-button"
 
 interface IProps {
-  searchStore: IPermitApplicationInboxStore
+  searchStore: IPermitApplicationInboxStore | IPermitProject
   applications: IPermitApplication[]
 }
 
@@ -89,69 +90,91 @@ export const ApplicationInboxTable = observer(function ApplicationInboxTable({ s
     return applications.map((application) => <ApplicationInboxRow key={application.id} application={application} />)
   }
 
-  return (
-    <VStack w="full" spacing={5}>
-      <SearchGrid
-        templateColumns="36px minmax(0, 1.5fr) minmax(0, 1.3fr) minmax(0, 1fr) minmax(140px, 1fr) minmax(160px, 1.1fr) auto 72px"
-        gridRowClassName="application-inbox-grid-row"
-        sx={{
-          ".application-inbox-grid-row:hover > div": {
-            bg: "gray.50",
-          },
-          ".application-inbox-grid-row:active > div": {
-            bg: "background.blueLight",
-          },
-        }}
-      >
-        <Box display="contents" role="rowgroup">
-          <Box display="contents" role="row">
-            <GridHeader role="columnheader">
-              <Flex w="full" justifyContent="center" borderRight="1px solid" borderColor="border.light" />
-            </GridHeader>
-            <SortableHeader
-              field={EPermitApplicationInboxSortFields.permitType}
-              label={getSortColumnHeader(EPermitApplicationInboxSortFields.permitType)}
-              sort={sort as ISort<EPermitApplicationInboxSortFields>}
-              onToggleSort={toggleSort}
-            />
-            <SortableHeader
-              field={EPermitApplicationInboxSortFields.address}
-              label={getSortColumnHeader(EPermitApplicationInboxSortFields.address)}
-              sort={sort as ISort<EPermitApplicationInboxSortFields>}
-              onToggleSort={toggleSort}
-            />
-            <SortableHeader
-              field={EPermitApplicationInboxSortFields.projectNumber}
-              label={getSortColumnHeader(EPermitApplicationInboxSortFields.projectNumber)}
-              sort={sort as ISort<EPermitApplicationInboxSortFields>}
-              onToggleSort={toggleSort}
-            />
-            <SortableHeader
-              field={EPermitApplicationInboxSortFields.daysInQueue}
-              label={getSortColumnHeader(EPermitApplicationInboxSortFields.daysInQueue)}
-              sort={sort as ISort<EPermitApplicationInboxSortFields>}
-              onToggleSort={toggleSort}
-            />
-            <SortableHeader
-              field={EPermitApplicationInboxSortFields.assigned}
-              label={getSortColumnHeader(EPermitApplicationInboxSortFields.assigned)}
-              sort={sort as ISort<EPermitApplicationInboxSortFields>}
-              onToggleSort={toggleSort}
-            />
-            <SortableHeader
-              field={EPermitApplicationInboxSortFields.status}
-              label={getSortColumnHeader(EPermitApplicationInboxSortFields.status)}
-              sort={sort as ISort<EPermitApplicationInboxSortFields>}
-              onToggleSort={toggleSort}
-            />
-            <GridHeader role="columnheader" />
-          </Box>
-        </Box>
+  const gridStickyHeaderSx = {
+    "[role='columnheader']": {
+      position: "sticky",
+      top: 0,
+      zIndex: 1,
+      bg: "white",
+    },
+  }
 
-        {renderListBody()}
-      </SearchGrid>
+  return (
+    <Flex direction="column" flex={1} minH={0} minW={0} w="full" align="stretch">
+      <Box flex={1} minH={0} overflow="auto">
+        <SearchGrid
+          templateColumns="36px minmax(0, 1.5fr) minmax(0, 1.3fr) minmax(0, 1fr) minmax(140px, 1fr) minmax(160px, 1.1fr) auto 72px"
+          gridRowClassName="application-inbox-grid-row"
+          overflow="visible"
+          sx={{
+            ...gridStickyHeaderSx,
+            ".application-inbox-grid-row:hover > div": {
+              bg: "gray.50",
+            },
+            ".application-inbox-grid-row:active > div": {
+              bg: "background.blueLight",
+            },
+          }}
+        >
+          <Box display="contents" role="rowgroup">
+            <Box display="contents" role="row">
+              <GridHeader role="columnheader">
+                <Flex w="full" justifyContent="center" borderRight="1px solid" borderColor="border.light" />
+              </GridHeader>
+              <SortableHeader
+                field={EPermitApplicationInboxSortFields.permitType}
+                label={getSortColumnHeader(EPermitApplicationInboxSortFields.permitType)}
+                sort={sort as ISort<EPermitApplicationInboxSortFields>}
+                onToggleSort={toggleSort}
+              />
+              <SortableHeader
+                field={EPermitApplicationInboxSortFields.address}
+                label={getSortColumnHeader(EPermitApplicationInboxSortFields.address)}
+                sort={sort as ISort<EPermitApplicationInboxSortFields>}
+                onToggleSort={toggleSort}
+              />
+              <SortableHeader
+                field={EPermitApplicationInboxSortFields.projectNumber}
+                label={getSortColumnHeader(EPermitApplicationInboxSortFields.projectNumber)}
+                sort={sort as ISort<EPermitApplicationInboxSortFields>}
+                onToggleSort={toggleSort}
+              />
+              <SortableHeader
+                field={EPermitApplicationInboxSortFields.daysInQueue}
+                label={getSortColumnHeader(EPermitApplicationInboxSortFields.daysInQueue)}
+                sort={sort as ISort<EPermitApplicationInboxSortFields>}
+                onToggleSort={toggleSort}
+              />
+              <SortableHeader
+                field={EPermitApplicationInboxSortFields.assigned}
+                label={getSortColumnHeader(EPermitApplicationInboxSortFields.assigned)}
+                sort={sort as ISort<EPermitApplicationInboxSortFields>}
+                onToggleSort={toggleSort}
+              />
+              <SortableHeader
+                field={EPermitApplicationInboxSortFields.status}
+                label={getSortColumnHeader(EPermitApplicationInboxSortFields.status)}
+                sort={sort as ISort<EPermitApplicationInboxSortFields>}
+                onToggleSort={toggleSort}
+              />
+              <GridHeader role="columnheader" />
+            </Box>
+          </Box>
+
+          {renderListBody()}
+        </SearchGrid>
+      </Box>
       {!listShowsNoResults && (
-        <Flex w="full" justifyContent="space-between">
+        <Flex
+          w="full"
+          flexShrink={0}
+          justifyContent="space-between"
+          align="center"
+          pt={5}
+          borderTopWidth="1px"
+          borderTopColor="border.light"
+          bg="white"
+        >
           <PerPageSelect
             handleCountPerPageChange={handleCountPerPageChange}
             countPerPage={countPerPage}
@@ -167,7 +190,7 @@ export const ApplicationInboxTable = observer(function ApplicationInboxTable({ s
           />
         </Flex>
       )}
-    </VStack>
+    </Flex>
   )
 })
 

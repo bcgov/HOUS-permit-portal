@@ -24,7 +24,7 @@ import { EProjectState } from "../../../../types/enums"
 import { SharedAvatar } from "../../../shared/user/shared-avatar"
 import { IKanbanColumn, IReorderEvent, KanbanBoard } from "./kanban-board"
 import { KanbanCard } from "./kanban-card"
-import { ProjectDesignatedReviewerPopover } from "./project-designated-reviewer-popover"
+import { ProjectReviewCollaboratorsPopover } from "./project-designated-reviewer-popover"
 import { ProjectInboxPermitApplicationsPopover } from "./project-inbox-permit-applications-popover"
 
 interface IProps {
@@ -69,9 +69,16 @@ export const ProjectKanbanBoard = observer(function ProjectKanbanBoard({
     [t]
   )
 
-  const itemsKey = projects.map((p) => `${p.id}:${p.state}:${p.inboxSortOrder ?? ""}`).join(",")
+  const itemsKey = projects.map((p) => `${p.id}:${p.state}:${p.inboxSortOrder ?? ""}:${p.viewedAt ?? ""}`).join(",")
   const items = useMemo(
-    () => projects.map((p) => ({ ...p, id: p.id, columnKey: p.state, sortOrder: p.inboxSortOrder })),
+    () =>
+      projects.map((p) => ({
+        ...p,
+        id: p.id,
+        columnKey: p.state,
+        sortOrder: p.inboxSortOrder,
+        isUnread: !p.viewedAt,
+      })),
     [itemsKey]
   )
 
@@ -104,10 +111,9 @@ const ProjectKanbanCard = observer(function ProjectKanbanCard({ project }: { pro
   const total = project.totalPermitsCount
   const isUnread = !project.viewedAt
 
-  const collaborators = project.aggregatedReviewCollaborators
-  const childAppAssignees = collaborators.filter((c) => !c.isDesignated)
-  const visibleAssignees = childAppAssignees.slice(0, MAX_VISIBLE_AVATARS)
-  const overflowCount = childAppAssignees.length - MAX_VISIBLE_AVATARS
+  const allCollaborators = project.aggregatedReviewCollaborators
+  const visibleAssignees = allCollaborators.slice(0, MAX_VISIBLE_AVATARS)
+  const overflowCount = allCollaborators.length - MAX_VISIBLE_AVATARS
 
   return (
     <KanbanCard
@@ -130,30 +136,15 @@ const ProjectKanbanCard = observer(function ProjectKanbanCard({ project }: { pro
               fontSize="2xs"
             />
           )}
-          <ProjectDesignatedReviewerPopover
+          <ProjectReviewCollaboratorsPopover
             project={project}
             onBeforeOpen={async () => {
               await permitProjectStore.fetchPermitProject(project.id)
             }}
-            renderTrigger={({ isLoading, reviewDelegatee, onClick, isDisabled }) => (
+            renderTrigger={({ isLoading, collaborationCount, onClick, isDisabled }) => (
               <IconButton
-                aria-label={t("permitCollaboration.projectSidebar.projectReviewDelegatee")}
-                icon={
-                  isLoading ? (
-                    <Spinner size="xs" />
-                  ) : reviewDelegatee?.user ? (
-                    <SharedAvatar
-                      size="xs"
-                      name={`${reviewDelegatee.user.firstName} ${reviewDelegatee.user.lastName}`}
-                      role={reviewDelegatee.user.role}
-                      fontSize="2xs"
-                      border="2px solid"
-                      borderColor="theme.blueActive"
-                    />
-                  ) : (
-                    <UserPlus size={16} />
-                  )
-                }
+                aria-label={t("permitCollaboration.projectSidebar.projectReviewCollaborators")}
+                icon={isLoading ? <Spinner size="xs" /> : <UserPlus size={16} />}
                 size="sm"
                 minW={7}
                 h={7}
@@ -180,7 +171,7 @@ const ProjectKanbanCard = observer(function ProjectKanbanCard({ project }: { pro
           <HStack spacing={2}>
             {/* ### SUBMISSION INDEX STUB FEATURE */}
             <Icon as={CalendarBlank} color="text.secondary" boxSize={4} display="none" />
-            <Text fontWeight={700} fontSize="sm" noOfLines={1}>
+            <Text fontWeight={700} fontSize="md" noOfLines={1}>
               {project.number}
             </Text>
           </HStack>
@@ -194,7 +185,7 @@ const ProjectKanbanCard = observer(function ProjectKanbanCard({ project }: { pro
           {project.shortAddress}
         </Text>
         {project.pid && (
-          <Text fontSize="2xs" color="text.secondary">
+          <Text fontSize="xs" color="text.secondary">
             PID {project.pid}
           </Text>
         )}
