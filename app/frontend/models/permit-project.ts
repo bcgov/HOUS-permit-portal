@@ -2,11 +2,12 @@ import { t } from "i18next"
 import { flow, Instance, toGenerator, types } from "mobx-state-tree"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
-import { EPermitProjectRollupStatus, EProjectState } from "../types/enums"
+import { EInboxDisplayMode, EPermitProjectRollupStatus, EProjectState } from "../types/enums"
 import { IParcelGeometry, IProjectAuditSummary, IProjectDocument } from "../types/types"
 import { ICollaborator } from "./collaborator"
 import { JurisdictionModel } from "./jurisdiction"
 import { IPermitApplication, PermitApplicationModel } from "./permit-application"
+import { PermitProjectInboxApplicationSearchSlice } from "./permit-project-inbox-application-search"
 
 export interface IAggregatedReviewCollaborator {
   id: string
@@ -20,54 +21,62 @@ export interface IPermitProjectCollaboration {
   collaborator: ICollaborator
 }
 
+const PermitProjectCoreModel = types.model("PermitProjectCore", {
+  id: types.identifier,
+  title: types.string,
+  fullAddress: types.maybeNull(types.string),
+  pid: types.maybeNull(types.string),
+  number: types.maybeNull(types.string),
+  jurisdictionDisambiguatedName: types.string,
+  sortedApplicationStatuses: types.optional(
+    types.array(types.frozen<{ id: string; status: string; nickname: string | null }>()),
+    []
+  ),
+  inboxSortedApplicationStatuses: types.optional(
+    types.array(types.frozen<{ id: string; status: string; nickname: string | null }>()),
+    []
+  ),
+  state: types.enumeration(Object.values(EProjectState)),
+  tablePermitApplications: types.optional(types.array(types.reference(types.late(() => PermitApplicationModel))), []),
+  inboxTablePermitApplications: types.optional(
+    types.array(types.reference(types.late(() => PermitApplicationModel))),
+    []
+  ),
+  recentPermitApplications: types.maybeNull(types.array(types.reference(types.late(() => PermitApplicationModel)))),
+  projectDocuments: types.maybeNull(types.array(types.frozen<IProjectDocument>())), // Changed to IProjectDocument
+  isPinned: types.optional(types.boolean, false),
+  createdAt: types.Date,
+  updatedAt: types.Date,
+  totalPermitsCount: types.optional(types.number, 0),
+  newDraftCount: types.optional(types.number, 0),
+  newlySubmittedCount: types.optional(types.number, 0),
+  inReviewCount: types.optional(types.number, 0),
+  resubmittedCount: types.optional(types.number, 0),
+  revisionsRequestedCount: types.optional(types.number, 0),
+  approvedCount: types.optional(types.number, 0),
+  jurisdiction: types.maybeNull(types.reference(types.late(() => JurisdictionModel))),
+  flagList: types.optional(types.array(types.string), []),
+  allowedManualTransitions: types.optional(types.array(types.string), []),
+  hasOutdatedDraftApplications: types.maybeNull(types.boolean),
+  isFullyLoaded: types.optional(types.boolean, false),
+  ownerName: types.maybeNull(types.string),
+  ownerId: types.maybeNull(types.string),
+  latitude: types.maybeNull(types.string), // From decimal in backend
+  longitude: types.maybeNull(types.string), // From decimal in backend
+  viewedAt: types.maybeNull(types.Date),
+  enqueuedAt: types.maybeNull(types.Date),
+  parcelGeometry: types.maybeNull(types.frozen<IParcelGeometry>()),
+  inboxSortOrder: types.maybeNull(types.number),
+  daysInQueue: types.maybeNull(types.number),
+  recentAudits: types.optional(types.array(types.frozen<IProjectAuditSummary>()), []),
+  reviewDelegatee: types.maybeNull(types.frozen<ICollaborator>()),
+  permitProjectCollaborations: types.optional(types.array(types.frozen<IPermitProjectCollaboration>()), []),
+  aggregatedReviewCollaborators: types.optional(types.array(types.frozen<IAggregatedReviewCollaborator>()), []),
+  displayMode: types.optional(types.enumeration(Object.values(EInboxDisplayMode)), EInboxDisplayMode.list),
+})
+
 export const PermitProjectModel = types
-  .model("PermitProjectModel", {
-    id: types.identifier,
-    title: types.string,
-    fullAddress: types.maybeNull(types.string),
-    pid: types.maybeNull(types.string),
-    number: types.maybeNull(types.string),
-    jurisdictionDisambiguatedName: types.string,
-    sortedApplicationStatuses: types.optional(
-      types.array(types.frozen<{ id: string; status: string; nickname: string | null }>()),
-      []
-    ),
-    inboxSortedApplicationStatuses: types.optional(
-      types.array(types.frozen<{ id: string; status: string; nickname: string | null }>()),
-      []
-    ),
-    state: types.enumeration(Object.values(EProjectState)),
-    tablePermitApplications: types.maybeNull(types.array(types.reference(types.late(() => PermitApplicationModel)))),
-    recentPermitApplications: types.maybeNull(types.array(types.reference(types.late(() => PermitApplicationModel)))),
-    projectDocuments: types.maybeNull(types.array(types.frozen<IProjectDocument>())), // Changed to IProjectDocument
-    isPinned: types.optional(types.boolean, false),
-    createdAt: types.Date,
-    updatedAt: types.Date,
-    totalPermitsCount: types.optional(types.number, 0),
-    newDraftCount: types.optional(types.number, 0),
-    newlySubmittedCount: types.optional(types.number, 0),
-    inReviewCount: types.optional(types.number, 0),
-    resubmittedCount: types.optional(types.number, 0),
-    revisionsRequestedCount: types.optional(types.number, 0),
-    approvedCount: types.optional(types.number, 0),
-    jurisdiction: types.maybeNull(types.reference(types.late(() => JurisdictionModel))),
-    flagList: types.optional(types.array(types.string), []),
-    allowedManualTransitions: types.optional(types.array(types.string), []),
-    hasOutdatedDraftApplications: types.maybeNull(types.boolean),
-    isFullyLoaded: types.optional(types.boolean, false),
-    ownerName: types.maybeNull(types.string),
-    ownerId: types.maybeNull(types.string),
-    latitude: types.maybeNull(types.string), // From decimal in backend
-    longitude: types.maybeNull(types.string), // From decimal in backend
-    viewedAt: types.maybeNull(types.Date),
-    enqueuedAt: types.maybeNull(types.Date),
-    parcelGeometry: types.maybeNull(types.frozen<IParcelGeometry>()),
-    inboxSortOrder: types.maybeNull(types.number),
-    daysInQueue: types.maybeNull(types.number),
-    recentAudits: types.optional(types.array(types.frozen<IProjectAuditSummary>()), []),
-    permitProjectCollaborations: types.optional(types.array(types.frozen<IPermitProjectCollaboration>()), []),
-    aggregatedReviewCollaborators: types.optional(types.array(types.frozen<IAggregatedReviewCollaborator>()), []),
-  })
+  .compose(PermitProjectCoreModel, PermitProjectInboxApplicationSearchSlice)
   .extend(withEnvironment())
   .extend(withRootStore())
   .views((self) => ({
@@ -150,6 +159,9 @@ export const PermitProjectModel = types
     },
     resetIsFullyLoaded() {
       self.isFullyLoaded = false
+    },
+    setInboxDisplayMode(mode: EInboxDisplayMode) {
+      self.displayMode = mode
     },
   }))
   .actions((self) => ({

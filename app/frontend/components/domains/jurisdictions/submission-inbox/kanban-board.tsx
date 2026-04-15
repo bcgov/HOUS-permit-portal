@@ -128,9 +128,9 @@ function KanbanBoardInner<T extends IKanbanItem>({
               <Flex
                 key={column.key}
                 direction="column"
-                minW={isCollapsed ? "68px" : "260px"}
-                maxW={isCollapsed ? "68px" : "320px"}
-                flex={isCollapsed ? "0 0 68px" : "1 0 260px"}
+                minW={isCollapsed ? "68px" : "318px"}
+                maxW={isCollapsed ? "68px" : "480px"}
+                flex={isCollapsed ? "0 0 68px" : "1 0 318px"}
                 border="1px solid"
                 borderColor="border.light"
                 borderRadius="lg"

@@ -126,6 +126,12 @@ module Api::Concerns::Search::JurisdictionPermitApplications
       and_conditions << { sandbox_id: current_sandbox&.id }
     end
 
+    permit_project_id =
+      jurisdiction_permit_application_search_params[:permit_project_id]
+    if permit_project_id.present?
+      and_conditions << { permit_project_id: permit_project_id }
+    end
+
     agg_search =
       PermitApplication.search(
         "*",
@@ -156,6 +162,7 @@ module Api::Concerns::Search::JurisdictionPermitApplications
       :per_page,
       :mode,
       :per_column,
+      :permit_project_id,
       filters: [
         :requirement_template_id,
         :template_version_id,
@@ -283,6 +290,12 @@ module Api::Concerns::Search::JurisdictionPermitApplications
     assigned = search_filters.delete(:assigned)
     if assigned.present?
       and_conditions << { review_collaborator_user_ids: assigned }
+    end
+
+    permit_project_id =
+      jurisdiction_permit_application_search_params[:permit_project_id]
+    if permit_project_id.present?
+      and_conditions << { permit_project_id: permit_project_id }
     end
 
     { _and: and_conditions }

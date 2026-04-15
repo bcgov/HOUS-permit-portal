@@ -186,6 +186,15 @@ class PermitProject < ApplicationRecord
     full_address.split(",").first
   end
 
+  # Reviewer inbox preview: newest visible-to-reviewer applications (not owner-scoped).
+  def recent_inbox_permit_applications(limit: 3)
+    permit_applications
+      .kept
+      .select(&:visible_to_reviewers?)
+      .sort_by(&:updated_at)
+      .last(limit)
+  end
+
   def recent_permit_applications(user = nil)
     return PermitApplication.none if user.nil?
 

@@ -196,50 +196,72 @@ export const ProjectInboxTable = observer(function ProjectInboxTable({ searchSto
     ))
   }
 
-  return (
-    <VStack w="full" spacing={5}>
-      <SearchGrid
-        templateColumns="2fr 1.5fr 1fr 1fr 1fr 1fr 72px"
-        gridRowClassName="project-inbox-grid-row"
-        sx={{
-          ".project-inbox-grid-row:hover > div": {
-            bg: "gray.50",
-          },
-          ".project-inbox-grid-row:active > div": {
-            bg: "background.blueLight",
-          },
-        }}
-      >
-        <Box display="contents" role="rowgroup">
-          <Box display="contents" role="row">
-            {SORT_FIELDS.map((field) => (
-              <GridHeader key={field} role="columnheader">
-                <Flex
-                  w="full"
-                  as="button"
-                  justifyContent="space-between"
-                  cursor="pointer"
-                  onClick={() => toggleSort(field)}
-                  borderRight="1px solid"
-                  borderColor="border.light"
-                  px={4}
-                >
-                  <Text textAlign="left">{getSortColumnHeader(field)}</Text>
-                  <SortIcon<EPermitProjectInboxSortFields>
-                    field={field}
-                    currentSort={sort as ISort<EPermitProjectInboxSortFields>}
-                  />
-                </Flex>
-              </GridHeader>
-            ))}
-            <GridHeader role="columnheader" />
-          </Box>
-        </Box>
+  const gridStickyHeaderSx = {
+    "[role='columnheader']": {
+      position: "sticky",
+      top: 0,
+      zIndex: 1,
+      bg: "white",
+    },
+  }
 
-        {renderListBody()}
-      </SearchGrid>
+  return (
+    <Flex direction="column" flex={1} minH={0} minW={0} w="full" align="stretch">
+      <Box flex={1} minH={0} overflow="auto">
+        <SearchGrid
+          templateColumns="2fr 1.5fr 1fr 1fr 1fr 1fr 72px"
+          gridRowClassName="project-inbox-grid-row"
+          overflow="visible"
+          sx={{
+            ...gridStickyHeaderSx,
+            ".project-inbox-grid-row:hover > div": {
+              bg: "gray.50",
+            },
+            ".project-inbox-grid-row:active > div": {
+              bg: "background.blueLight",
+            },
+          }}
+        >
+          <Box display="contents" role="rowgroup">
+            <Box display="contents" role="row">
+              {SORT_FIELDS.map((field) => (
+                <GridHeader key={field} role="columnheader">
+                  <Flex
+                    w="full"
+                    as="button"
+                    justifyContent="space-between"
+                    cursor="pointer"
+                    onClick={() => toggleSort(field)}
+                    borderRight="1px solid"
+                    borderColor="border.light"
+                    px={4}
+                  >
+                    <Text textAlign="left">{getSortColumnHeader(field)}</Text>
+                    <SortIcon<EPermitProjectInboxSortFields>
+                      field={field}
+                      currentSort={sort as ISort<EPermitProjectInboxSortFields>}
+                    />
+                  </Flex>
+                </GridHeader>
+              ))}
+              <GridHeader role="columnheader" />
+            </Box>
+          </Box>
+
+          {renderListBody()}
+        </SearchGrid>
+      </Box>
       {!listShowsNoResults && (
-        <Flex w="full" justifyContent="space-between">
+        <Flex
+          w="full"
+          flexShrink={0}
+          justifyContent="space-between"
+          align="center"
+          pt={5}
+          borderTopWidth="1px"
+          borderTopColor="border.light"
+          bg="white"
+        >
           <PerPageSelect
             handleCountPerPageChange={handleCountPerPageChange}
             countPerPage={countPerPage}
@@ -255,7 +277,7 @@ export const ProjectInboxTable = observer(function ProjectInboxTable({ searchSto
           />
         </Flex>
       )}
-    </VStack>
+    </Flex>
   )
 })
 
