@@ -18,6 +18,19 @@ info:
     be included in the Authorization header as a Bearer token like so:\n```\nAuthorization:
     Bearer {Your_API_Key_Here}\n```\nPlease note that a unique API key is required
     for each jurisdiction you wish to access, enhancing security and data integrity.\n\n###
+    Webhook signatures:\nEach webhook delivery is an HTTP POST with `Content-Type:
+    application/json` and an `X-Webhook-Signature` header. The header value is the
+    lowercase hexadecimal HMAC-SHA256 digest of the **raw request body** bytes, using
+    your API key token (the same value you send as the Bearer token for API requests)
+    as the HMAC secret.\nTo verify a request:\n1. Read the raw request body before
+    parsing JSON.\n2. Compute HMAC-SHA256 with your API key token as the key and
+    the raw body as the message; encode the digest as lowercase hex.\n3. Compare that
+    value to `X-Webhook-Signature` using a constant-time comparison to avoid timing
+    attacks.\n\nExample (Node.js):\n```javascript\nconst crypto = require(\"crypto\");\n\nfunction
+    verifyPermitWebhook(rawBody, signatureHeader, apiKeyToken) {\n  const expected
+    = crypto.createHmac(\"sha256\", apiKeyToken)\n    .update(rawBody, \"utf8\")\n
+    \   .digest(\"hex\");\n  return crypto.timingSafeEqual(\n    Buffer.from(signatureHeader.trim(),
+    \"utf8\"),\n    Buffer.from(expected, \"utf8\")\n  );\n}\n```\n\n###
     Rate limits:\nTo ensure fair usage, the API is rate-limited to 100 requests per
     minute per API key and 300 requests per IP in a 3 minute interval. Exceeding these\nlimits
     will result in a 429 response. If this occurs, we recommend spacing out your requests.
@@ -299,6 +312,8 @@ webhooks:
     tags:
     - Webhooks
     post:
+      parameters:
+      - "$ref": "#/components/parameters/WebhookSignature"
       requestBody:
         description: |-
           ### Request body:
@@ -329,6 +344,8 @@ webhooks:
     tags:
     - Webhooks
     post:
+      parameters:
+      - "$ref": "#/components/parameters/WebhookSignature"
       requestBody:
         description: |-
           ### Request body:
@@ -584,7 +601,16 @@ components:
         Fictitious sample. Addresses, names, emails, and file URLs are placeholders.
         File `url` fields represent time-limited signed download URLs as returned by the API.
       value: *example_permit_application_all_types
-
+  parameters:
+    WebhookSignature:
+      name: X-Webhook-Signature
+      in: header
+      required: true
+      schema:
+        type: string
+      description: 'Lowercase hex-encoded HMAC-SHA256 of the raw JSON request body,
+        using the integrator API key token as the secret (same value as the Bearer
+        token for Integration API requests). See **Webhook signatures** in the overview.'
   schemas:
     PermitApplication:
       type: object

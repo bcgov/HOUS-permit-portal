@@ -61,10 +61,10 @@ RSpec.describe CustomDeviseMailer, type: :mailer do
       mailer.devise_mail(record, :confirmation_instructions, {})
 
       expect(built[:to]).to eq("to@example.com")
-      expect(built[:from]).to eq("from@example.com")
       expect(built[:subject]).to eq("Permit Hub - Confirm your account")
       expect(built[:template_path]).to eq("devise/mailer")
       expect(built[:template_name]).to eq("confirmation_instructions")
+      # NOTE: from is no longer set in the mailer as an, so we don't expect it to be set
     end
   end
 end

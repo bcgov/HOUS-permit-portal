@@ -18,11 +18,12 @@ class Jurisdiction::UserInviter
       selected_role = user_params[:role].to_s
       next unless inviter.invitable_roles.include?(selected_role)
 
-      user = find_existing_invited_user(user_params[:email])
+      user = find_existing_invited_user(user_params[:email], selected_role)
       jurisdiction_id =
         user_params.delete(:jurisdiction_id) || inviter.jurisdictions.pluck(:id)
 
       next unless inviter_authorized_for_jurisdiction?(jurisdiction_id)
+
       begin
         if should_promote_to_regional_rm?(user, selected_role, jurisdiction_id)
           promote_to_regional_rm(user, jurisdiction_id)
@@ -47,10 +48,17 @@ class Jurisdiction::UserInviter
     Array(jurisdiction_id).all? { |jid| inviter_jurisdiction_ids.include?(jid) }
   end
 
-  def find_existing_invited_user(email)
+  def find_existing_invited_user(email, selected_role)
     # Inviting submitters causes a second user to be created with the same email
     # After accepting the invite, only the non-submitter User remains
-    User.where.not(role: :submitter).find_by(email: email.strip)
+    users = User.where.not(role: :submitter).where(email: email.strip)
+
+    if selected_role.to_sym == :regional_review_manager
+      users.find_by(role: :review_manager) ||
+        users.find_by(role: :regional_review_manager) || users.first
+    else
+      users.first
+    end
   end
 
   def cannot_take_email?(user)

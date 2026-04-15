@@ -1,4 +1,4 @@
-import { Button, Grid, GridItem, IconButton, Menu, MenuButton, MenuItem, MenuList, Text } from "@chakra-ui/react"
+import { Button, IconButton, Menu, MenuButton, MenuItem, MenuList, Text } from "@chakra-ui/react"
 import { Archive, ArrowSquareOut, ClockClockwise, DotsThreeVertical, ShareNetwork } from "@phosphor-icons/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
@@ -11,6 +11,8 @@ import { IStepCode } from "../../../stores/step-code-store"
 import { EFileUploadAttachmentType, EStepCodeType } from "../../../types/enums"
 import { FileDownloadButton } from "../../shared/base/file-download-button"
 import { ConfirmationModal } from "../../shared/confirmation-modal"
+import { SearchGridItem } from "../../shared/grid/search-grid-item"
+import { SearchGridRow } from "../../shared/grid/search-grid-row"
 
 export const StepCodesGridRow = observer(({ stepCode }: { stepCode: IStepCode }) => {
   const navigate = useNavigate()
@@ -44,37 +46,15 @@ export const StepCodesGridRow = observer(({ stepCode }: { stepCode: IStepCode })
     }
   }
 
+  const isNavigable = !isDiscarded && !!targetPath
+
   return (
-    <Grid
-      gridColumn="1 / -1"
-      templateColumns="subgrid"
-      display="grid"
-      onClick={() => !isDiscarded && targetPath && navigate(targetPath)}
-      _hover={{ bg: "greys.grey03", cursor: !isDiscarded && targetPath ? "pointer" : "default" }}
-      borderBottom="1px"
-      borderColor="border.light"
-      _last={{ borderBottom: "none" }}
-    >
-      <GridItem display="flex" alignItems="center" px={4} py={2}>
-        <Text>{t(`stepCode.types.${type as EStepCodeType}`)}</Text>
-      </GridItem>
-      <GridItem display="flex" alignItems="center" px={4} py={2}>
-        <Text>{permitProjectTitle}</Text>
-      </GridItem>
-      <GridItem display="flex" alignItems="center" px={4} py={2}>
-        <Text>{fullAddress}</Text>
-      </GridItem>
-      <GridItem display="flex" alignItems="center" px={4} py={2}>
-        <Text>{updatedAt ? format(updatedAt, datefnsTableDateTimeFormat) : ""}</Text>
-      </GridItem>
-      <GridItem
-        display="flex"
-        alignItems="center"
-        justifyContent="flex-end"
-        px={2}
-        py={2}
-        onClick={(e) => e.stopPropagation()}
-      >
+    <SearchGridRow isClickable={isNavigable} onClick={() => isNavigable && navigate(targetPath)}>
+      <SearchGridItem>{t(`stepCode.types.${type as EStepCodeType}`)}</SearchGridItem>
+      <SearchGridItem>{permitProjectTitle}</SearchGridItem>
+      <SearchGridItem>{fullAddress}</SearchGridItem>
+      <SearchGridItem>{updatedAt ? format(updatedAt, datefnsTableDateTimeFormat) : ""}</SearchGridItem>
+      <SearchGridItem justifyContent="flex-end" px={2} onClick={(e) => e.stopPropagation()}>
         <Menu>
           <MenuButton
             as={IconButton}
@@ -173,7 +153,7 @@ export const StepCodesGridRow = observer(({ stepCode }: { stepCode: IStepCode })
             )}
           </MenuList>
         </Menu>
-      </GridItem>
-    </Grid>
+      </SearchGridItem>
+    </SearchGridRow>
   )
 })

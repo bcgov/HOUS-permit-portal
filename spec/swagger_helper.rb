@@ -54,6 +54,32 @@ Authorization: Bearer {Your_API_Key_Here}
 ```
 Please note that a unique API key is required for each jurisdiction you wish to access, enhancing security and data integrity.
 
+### Webhook signatures:
+Each webhook delivery is an HTTP POST with `Content-Type: application/json` and an `X-Webhook-Signature` header. The header value is the
+lowercase hexadecimal HMAC-SHA256 digest of the **raw request body** bytes, using your API key token (the same value you send as the Bearer token for API requests)
+as the HMAC secret.
+
+To verify a request:
+1. Read the raw request body before parsing JSON.
+2. Compute HMAC-SHA256 with your API key token as the key and the raw body as the message; encode the digest as lowercase hex.
+3. Compare that value to `X-Webhook-Signature` using a constant-time comparison to avoid timing attacks.
+
+Example (Node.js):
+
+```javascript
+const crypto = require("crypto");
+
+function verifyPermitWebhook(rawBody, signatureHeader, apiKeyToken) {
+  const expected = crypto.createHmac("sha256", apiKeyToken)
+    .update(rawBody, "utf8")
+    .digest("hex");
+  return crypto.timingSafeEqual(
+    Buffer.from(signatureHeader.trim(), "utf8"),
+    Buffer.from(expected, "utf8")
+  );
+}
+```
+
 ### Rate limits:
 To ensure fair usage, the API is rate-limited to 100 requests per minute per API key and 300 requests per IP in a 3 minute interval. Exceeding these
 limits will result in a 429 response. If this occurs, we recommend spacing out your requests. Continued exceeding of rate limits
@@ -85,6 +111,9 @@ in this document.
         permit_submitted: {
           tags: ["Webhooks"],
           post: {
+            parameters: [
+              { "$ref" => "#/components/parameters/WebhookSignature" }
+            ],
             requestBody: {
               description:
                 "### Request body:\nThis webhook sends information about a recently submitted permit
@@ -114,6 +143,9 @@ in this document.
         permit_resubmitted: {
           tags: ["Webhooks"],
           post: {
+            parameters: [
+              { "$ref" => "#/components/parameters/WebhookSignature" }
+            ],
             requestBody: {
               description:
                 "### Request body:\nThis webhook sends information about a recently resubmitted permit
@@ -157,6 +189,18 @@ in this document.
             type: :http,
             scheme: :bearer,
             description: "Bearer token"
+          }
+        },
+        parameters: {
+          WebhookSignature: {
+            name: "X-Webhook-Signature",
+            in: :header,
+            required: true,
+            schema: {
+              type: :string
+            },
+            description:
+              "Lowercase hex-encoded HMAC-SHA256 of the raw JSON request body, using the integrator API key token as the secret (same value as the Bearer token for Integration API requests). See **Webhook signatures** in the overview."
           }
         },
         schemas: {

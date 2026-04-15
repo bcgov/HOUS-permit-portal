@@ -339,7 +339,8 @@ RSpec.describe PermitApplicationPolicy do
             double(
               "PermitApplication",
               jurisdiction_id: jurisdiction.id,
-              submitted?: true
+              submitted?: true,
+              visible_to_reviewers?: true
             )
         )
       expect(

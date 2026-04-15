@@ -11,6 +11,7 @@ import { ISort } from "../../../types/types"
 import { CustomMessageBox } from "../../shared/base/custom-message-box"
 import { Paginator } from "../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../shared/base/inputs/per-page-select"
+import { SharedSpinner } from "../../shared/base/shared-spinner"
 import { SortIcon } from "../../shared/sort-icon"
 import { ActivityListItem } from "./activity-list-item"
 import { AuditDateRangeFilter } from "./audit-date-range-filter"
@@ -82,7 +83,11 @@ export const ActivityTabPanelContent = observer(({ permitProject }: IProps) => {
           </HStack>
         </Flex>
         <Box as="ul" listStyleType="none" p={0} m={0}>
-          {isSearching ? null : tableProjectAudits?.length === 0 ? (
+          {isSearching ? (
+            <Flex py={50} justify="center">
+              <SharedSpinner />
+            </Flex>
+          ) : tableProjectAudits?.length === 0 ? (
             <Box py={8}>
               <CustomMessageBox status={EFlashMessageStatus.info} description={t("permitProject.activity.empty")} />
             </Box>

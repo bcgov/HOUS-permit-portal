@@ -121,6 +121,14 @@ class Wrappers::LtsaParcelMapBc < Wrappers::Base
     end
   end
 
+  def distinct_municipalities
+    fetch_distinct_field_values("MUNICIPALITY")
+  end
+
+  def distinct_regional_districts
+    fetch_distinct_field_values("REGIONAL_DISTRICT")
+  end
+
   def get_coordinates_by_pid(pid)
     return nil if pid.blank?
     begin
@@ -262,6 +270,30 @@ class Wrappers::LtsaParcelMapBc < Wrappers::Base
   end
 
   protected
+
+  def fetch_distinct_field_values(field)
+    response =
+      get(
+        "#{PARCEL_SERVICE}/query",
+        {
+          f: "json",
+          where: "1=1",
+          returnGeometry: false,
+          returnDistinctValues: true,
+          outFields: field
+        },
+        true
+      )
+    return [] unless response.success?
+
+    JSON
+      .parse(response.body)
+      .dig("features")
+      &.map { |f| f.dig("attributes", field) }
+      &.compact
+      &.uniq
+      &.sort || []
+  end
 
   def parse_attributes_from_response(response)
     if response.success?

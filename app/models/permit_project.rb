@@ -26,6 +26,7 @@ class PermitProject < ApplicationRecord
   before_validation :set_default_title
 
   before_validation :assign_unique_number, if: -> { number.blank? }
+  before_save :normalize_pid
   before_save :fetch_coordinates, if: -> { pid_changed? }
 
   delegate :name, to: :owner, prefix: true
@@ -338,6 +339,10 @@ class PermitProject < ApplicationRecord
         .pluck("collaborators.user_id")
 
     (pa_user_ids + [review_delegatee&.user_id].compact).uniq
+  end
+
+  def normalize_pid
+    self.pid = pid.delete("-") if pid.present?
   end
 
   def fetch_coordinates

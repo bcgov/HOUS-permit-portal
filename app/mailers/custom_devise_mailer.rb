@@ -16,7 +16,6 @@ class CustomDeviseMailer < Devise::Mailer
 
     mail(
       to: mail_headers[:to],
-      from: mail_headers[:from],
       subject:
         "#{I18n.t("application_mailer.subject_start")} - #{mail_headers[:subject]}",
       template_path: "devise/mailer",
