@@ -12,7 +12,7 @@ import {
   Text,
   UnorderedList,
 } from "@chakra-ui/react"
-import { CaretLeft, Info, MagnifyingGlass } from "@phosphor-icons/react"
+import { CaretLeft, MagnifyingGlass } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React, { useEffect, useMemo, useState } from "react"
@@ -28,8 +28,6 @@ import { ErrorScreen } from "../../shared/base/error-screen"
 import { SafeTipTapDisplay } from "../../shared/editor/safe-tiptap-display"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import ProjectInfoRow from "../../shared/project/project-info-row"
-import { Can } from "../../shared/user/can"
-import { NewPermitApplicationSandboxSelect } from "../permit-application/new-permit-application-sandbox-select"
 
 export const AddPermitApplicationToProjectScreen = observer(() => {
   const { t } = useTranslation()
@@ -172,29 +170,6 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
           <Text mb={2}>{(t as any)("permitProject.addPermits.about.p1")}</Text>
           <Text>{(t as any)("permitProject.addPermits.about.p2")}</Text>
         </Box>
-
-        {currentPermitProject?.jurisdiction?.sandboxOptions && (
-          <Can action="jurisdiction:create">
-            <Box w={{ base: "full", md: "50%" }}>
-              <Flex
-                gap={4}
-                borderRadius="lg"
-                border="1px solid"
-                borderColor="semantic.special"
-                background="semantic.specialLight"
-                p={6}
-              >
-                <Info />
-                <Flex direction="column">
-                  <Heading>{t("sandbox.switch.superAdminAvailable")}</Heading>
-                  <Text mb={4}>{t("sandbox.switch.testingPurposes")}</Text>
-
-                  <NewPermitApplicationSandboxSelect options={currentPermitProject.jurisdiction?.sandboxOptions} />
-                </Flex>
-              </Flex>
-            </Box>
-          </Can>
-        )}
 
         <Box w={{ base: "full", md: "50%" }}>
           <Heading as="h2" variant="yellowline">

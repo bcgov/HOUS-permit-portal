@@ -151,7 +151,7 @@ class Api::PermitProjectsController < Api::ApplicationController
   def create
     @permit_project = PermitProject.new(permit_project_params)
     @permit_project.owner = current_user
-    @permit_project.sandbox = current_sandbox unless current_user.super_admin?
+    @permit_project.sandbox = current_sandbox
     authorize @permit_project
 
     if @permit_project.save
