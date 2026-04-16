@@ -36,7 +36,6 @@ class PermitApplication < ApplicationRecord
   belongs_to :permit_type
   belongs_to :activity
   belongs_to :template_version
-  belongs_to :sandbox, optional: true
   belongs_to :permit_project, optional: true, touch: true
 
   has_one :requirement_template, through: :template_version
@@ -55,9 +54,22 @@ class PermitApplication < ApplicationRecord
 
   scope :submitted, -> { joins(:submission_versions).distinct }
 
-  scope :sandboxed, -> { where.not(sandbox_id: nil) }
-  scope :live, -> { where(sandbox_id: nil) }
-  scope :for_sandbox, ->(sandbox) { where(sandbox_id: sandbox&.id) }
+  scope :sandboxed,
+        -> do
+          joins(:permit_project).where.not(permit_projects: { sandbox_id: nil })
+        end
+  scope :live,
+        -> do
+          joins(:permit_project).where(permit_projects: { sandbox_id: nil })
+        end
+  scope :for_sandbox,
+        ->(sandbox) do
+          joins(:permit_project).where(
+            permit_projects: {
+              sandbox_id: sandbox&.id
+            }
+          )
+        end
 
   # Custom validation
 
@@ -65,9 +77,7 @@ class PermitApplication < ApplicationRecord
   validate :jurisdiction_has_matching_submission_contact
   validates :number, presence: true
   validates :reference_number, length: { maximum: 300 }, allow_nil: true
-  validate :sandbox_belongs_to_jurisdiction
   validate :template_version_of_live_template
-  validate :submitter_cannot_be_jurisdiction_staff_without_sandbox
   validate :submission_versions_match_status
 
   delegate :code, :name, to: :permit_type, prefix: true
@@ -917,20 +927,6 @@ class PermitApplication < ApplicationRecord
     end
   end
 
-  def sandbox_belongs_to_jurisdiction
-    return unless sandbox
-    return unless jurisdiction
-
-    unless jurisdiction.sandboxes.include?(sandbox)
-      errors.add(
-        :sandbox,
-        I18n.t(
-          "activerecord.errors.models.permit_application.attributes.sandbox.incorrect_jurisdiction"
-        )
-      )
-    end
-  end
-
   def template_version_of_live_template
     return unless template_version.present?
 
@@ -942,18 +938,6 @@ class PermitApplication < ApplicationRecord
         )
       )
     end
-  end
-
-  def submitter_cannot_be_jurisdiction_staff_without_sandbox
-    return unless submitter&.jurisdiction_staff?
-    return if sandbox_id.present?
-
-    errors.add(
-      :submitter,
-      I18n.t(
-        "activerecord.errors.models.permit_application.attributes.submitter.review_staff_requires_sandbox"
-      )
-    )
   end
 
   def submission_versions_match_status

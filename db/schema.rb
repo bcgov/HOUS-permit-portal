@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_04_13_200000) do
+ActiveRecord::Schema[7.2].define(version: 2026_04_16_183037) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -517,7 +517,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_13_200000) do
     t.jsonb "compliance_data", default: {}, null: false
     t.datetime "revisions_requested_at", precision: nil
     t.boolean "first_nations", default: false
-    t.uuid "sandbox_id"
     t.datetime "newly_submitted_at", precision: nil
     t.uuid "permit_project_id"
     t.datetime "discarded_at"
@@ -534,7 +533,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_13_200000) do
     t.index ["number"], name: "index_permit_applications_on_number", unique: true
     t.index ["permit_project_id"], name: "index_permit_applications_on_permit_project_id"
     t.index ["permit_type_id"], name: "index_permit_applications_on_permit_type_id"
-    t.index ["sandbox_id"], name: "index_permit_applications_on_sandbox_id"
     t.index ["submitter_id"], name: "index_permit_applications_on_submitter_id"
     t.index ["template_version_id"], name: "index_permit_applications_on_template_version_id"
   end
@@ -618,9 +616,11 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_13_200000) do
     t.datetime "enqueued_at"
     t.integer "queue_time_seconds", default: 0, null: false
     t.datetime "queue_clock_started_at"
+    t.uuid "sandbox_id"
     t.index ["jurisdiction_id"], name: "index_permit_projects_on_jurisdiction_id"
     t.index ["number"], name: "index_permit_projects_on_number", unique: true
     t.index ["owner_id"], name: "index_permit_projects_on_owner_id"
+    t.index ["sandbox_id"], name: "index_permit_projects_on_sandbox_id"
   end
 
   create_table "permit_type_required_steps", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -1190,7 +1190,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_13_200000) do
   add_foreign_key "permit_applications", "permit_classifications", column: "activity_id"
   add_foreign_key "permit_applications", "permit_classifications", column: "permit_type_id"
   add_foreign_key "permit_applications", "permit_projects"
-  add_foreign_key "permit_applications", "sandboxes"
   add_foreign_key "permit_applications", "template_versions"
   add_foreign_key "permit_applications", "users", column: "submitter_id"
   add_foreign_key "permit_block_statuses", "permit_applications"
@@ -1199,6 +1198,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_13_200000) do
   add_foreign_key "permit_project_collaborations", "collaborators"
   add_foreign_key "permit_project_collaborations", "permit_projects"
   add_foreign_key "permit_projects", "jurisdictions"
+  add_foreign_key "permit_projects", "sandboxes"
   add_foreign_key "permit_projects", "users", column: "owner_id"
   add_foreign_key "permit_type_required_steps", "jurisdictions"
   add_foreign_key "permit_type_required_steps", "permit_classifications", column: "permit_type_id"

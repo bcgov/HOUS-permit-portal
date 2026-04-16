@@ -147,16 +147,19 @@ module Api::Concerns::Search::JurisdictionPermitProjects
   private
 
   def jurisdiction_state_counts
+    where = {
+      jurisdiction_id: @jurisdiction.id,
+      discarded: false,
+      state: {
+        not: "draft"
+      }
+    }
+    where[:sandbox_id] = current_sandbox&.id unless current_user.super_admin?
+
     agg_search =
       PermitProject.search(
         "*",
-        where: {
-          jurisdiction_id: @jurisdiction.id,
-          discarded: false,
-          state: {
-            not: "draft"
-          }
-        },
+        where: where,
         aggs: [:state],
         body_options: {
           size: 0
@@ -268,9 +271,9 @@ module Api::Concerns::Search::JurisdictionPermitProjects
       and_conditions << { state: states.present? ? states : { not: "draft" } }
     end
 
-    # if !current_user.super_admin?
-    #   and_conditions << { sandbox_id: current_sandbox&.id }
-    # end
+    unless current_user.super_admin?
+      and_conditions << { sandbox_id: current_sandbox&.id }
+    end
 
     requirement_template_ids = search_filters.delete(:requirement_template_ids)
     if requirement_template_ids.present?

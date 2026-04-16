@@ -66,11 +66,17 @@ RSpec.describe ExternalApi::PermitApplicationPolicy, type: :policy do
   end
 
   describe "Scope" do
-    it "filters to submitter and sandbox (via stubbed methods)" do
+    it "filters to submitter and project sandbox (via stubbed methods)" do
       relation = instance_double("ActiveRecord::Relation")
-      expect(relation).to receive(:where).with(
+      joined = instance_double("ActiveRecord::Relation")
+      expect(relation).to receive(:joins).with(:permit_project).and_return(
+        joined
+      )
+      expect(joined).to receive(:where).with(
         submitter: :some_submitter,
-        sandbox: sandbox
+        permit_projects: {
+          sandbox_id: sandbox.id
+        }
       ).and_return(:filtered)
 
       scope = described_class::Scope.new(external_api_key, relation)

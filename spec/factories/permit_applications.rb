@@ -6,6 +6,10 @@ FactoryBot.define do
       pid { nil }
       pin { nil }
       full_address { nil }
+      # Sandbox now lives on PermitProject. This transient forwards the value
+      # to the permit_project association so existing callsites that pass
+      # `sandbox:` to this factory keep working.
+      sandbox { nil }
       # When true, stub a fake plan document to satisfy step_code_plan_* helpers
       with_fake_plan_document { false }
     end
@@ -18,6 +22,7 @@ FactoryBot.define do
       attrs[:pid] = pid if pid.present?
       attrs[:pin] = pin if pin.present?
       attrs[:full_address] = full_address if full_address.present?
+      attrs[:sandbox] = sandbox if sandbox.present?
       association(:permit_project, **attrs)
     end
 

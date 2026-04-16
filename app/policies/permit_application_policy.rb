@@ -220,26 +220,27 @@ class PermitApplicationPolicy < ApplicationPolicy
       if user.review_staff?
         # Access rule 3 (review staff only):
         # user can see applications for their jurisdictions, but only once
-        # they have reached a submitted status.
+        # they have reached a submitted status. In sandbox mode, the sandbox
+        # filter lives on the parent project now.
+        pp_clauses = [
+          "pp.id = permit_applications.permit_project_id",
+          "pp.jurisdiction_id IN (:jur_ids)"
+        ]
+        pp_clauses << "pp.sandbox_id = :sandbox_id" if sandbox.present?
+
         review_exists_sql = <<-SQL.squish
           EXISTS (
             SELECT 1 FROM permit_projects pp
-            WHERE pp.id = permit_applications.permit_project_id
-              AND pp.jurisdiction_id IN (:jur_ids)
+            WHERE #{pp_clauses.join(" AND ")}
           )
         SQL
 
-        # Add the review-staff rule to the OR list, and bind parameters.
         clauses << "#{review_exists_sql} AND permit_applications.status IN (:visible_statuses)"
         values[:jur_ids] = user.jurisdictions.pluck(:id)
         values[:visible_statuses] = PermitApplication
           .kanban_statuses
           .map { |name| PermitApplication.statuses.fetch(name) }
-        if sandbox.present?
-          # In sandbox mode, restrict to the active sandbox.
-          clauses.last << " AND permit_applications.sandbox_id = :sandbox_id"
-          values[:sandbox_id] = sandbox.id
-        end
+        values[:sandbox_id] = sandbox.id if sandbox.present?
       end
 
       # Combine all access rules with OR and de-duplicate results.

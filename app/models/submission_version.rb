@@ -9,8 +9,8 @@ class SubmissionVersion < ApplicationRecord
 
   scope :sandboxed,
         -> do
-          joins(:permit_application).where.not(
-            permit_applications: {
+          joins(permit_application: :permit_project).where.not(
+            permit_projects: {
               sandbox_id: nil
             }
           )
@@ -18,8 +18,8 @@ class SubmissionVersion < ApplicationRecord
 
   scope :live,
         -> do
-          joins(:permit_application).where(
-            permit_applications: {
+          joins(permit_application: :permit_project).where(
+            permit_projects: {
               sandbox_id: nil
             }
           )
@@ -27,8 +27,8 @@ class SubmissionVersion < ApplicationRecord
 
   scope :for_sandbox,
         ->(sandbox) do
-          joins(:permit_application).where(
-            permit_applications: {
+          joins(permit_application: :permit_project).where(
+            permit_projects: {
               sandbox_id: sandbox.id
             }
           )
