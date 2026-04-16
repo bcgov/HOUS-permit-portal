@@ -5,27 +5,21 @@ import {
   Center,
   Container,
   Flex,
-  FormControl,
-  FormLabel,
   Grid,
   GridItem,
   Heading,
-  HStack,
-  Input,
   Link,
   ListItem,
-  OrderedList,
   Text,
   UnorderedList,
   VStack,
 } from "@chakra-ui/react"
 
 import { ArrowSquareOut, Pencil } from "@phosphor-icons/react"
-import i18next from "i18next"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
 import type { Control, UseFormReturn } from "react-hook-form"
-import { Controller, FormProvider, useForm, useFormContext } from "react-hook-form"
+import { Controller, FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useJurisdiction } from "../../../hooks/resources/use-jurisdiction"
 import { IJurisdiction } from "../../../models/jurisdiction"
@@ -173,7 +167,11 @@ const JurisdictionScreenBody = observer(
                       </Flex>
                     </GridItem>
                     <GridItem order={{ base: 1, md: 2 }} minW={0}>
-                      <EditableMap currentJurisdiction={currentJurisdiction} />
+                      <JurisdictionMap
+                        mapPosition={currentJurisdiction.mapPosition}
+                        mapZoom={currentJurisdiction.mapZoom}
+                        linePositions={currentJurisdiction.boundaryPoints}
+                      />
                     </GridItem>
                     <GridItem colSpan={{ base: 1, md: 2 }} order={{ base: 3, md: 3 }} minW={0}>
                       <JurisdictionAboutCtaCards />
@@ -546,91 +544,3 @@ const JurisdictionTipTapFormController = observer(
     )
   }
 )
-
-interface IEditableMapProps {
-  currentJurisdiction: IJurisdiction
-}
-
-const EditableMap = ({ currentJurisdiction }: IEditableMapProps) => {
-  const { t } = useTranslation()
-  const [isEditingMap, setIsEditingMap] = useState(false)
-  const { control, watch, setValue } = useFormContext()
-  const mapPositionWatch = watch("mapPosition")
-  const mapZoomWatch = watch("mapZoom")
-
-  const editMapSteps = i18next.t("jurisdiction.edit.editMapSteps", { returnObjects: true }) as string[]
-
-  const handleFocus = (event: React.FocusEvent<HTMLInputElement>) => {
-    event.target.select()
-  }
-
-  return (
-    <Flex flex={1} w="full">
-      <Flex direction="column" w="full">
-        <Can action="jurisdiction:manage" data={{ jurisdiction: currentJurisdiction }}>
-          <Button
-            variant={"link"}
-            aria-label={"edit map position"}
-            onClick={() => {
-              setIsEditingMap((current) => !current)
-            }}
-            mb={1}
-          >
-            {!isEditingMap && t("jurisdiction.edit.clickToEditMap")}
-            {isEditingMap && t("jurisdiction.edit.clickToSeeMap")}
-          </Button>
-        </Can>
-        {isEditingMap && (
-          <>
-            <Box p={4} border="1px solid" borderRadius="md" borderColor="border.light" mb={4}>
-              <Text fontWeight="bold" mb={4}>
-                {t("jurisdiction.edit.editMapStart")}
-              </Text>
-              <OrderedList>
-                {editMapSteps.map((str) => (
-                  <ListItem key={str}>{str}</ListItem>
-                ))}
-              </OrderedList>
-              <Text>{t("jurisdiction.edit.editMapEnd")}</Text>
-            </Box>
-            <FormControl flex={1}>
-              <FormLabel>{t("jurisdiction.fields.mapPosition")}</FormLabel>
-              <Controller
-                name="mapPosition"
-                control={control}
-                render={({ field }) => (
-                  <HStack mb={2}>
-                    <Input
-                      type="number"
-                      onFocus={handleFocus}
-                      aria-label="jurisdiction latitude"
-                      placeholder="Latitude"
-                      value={field.value[0]}
-                      onChange={(e) => field.onChange([parseFloat(e.target.value), field.value[1]])}
-                    />
-                    <Input
-                      type="number"
-                      onFocus={handleFocus}
-                      aria-label="jurisdiction longitude"
-                      placeholder="Longitude"
-                      value={field.value[1]}
-                      onChange={(e) => field.onChange([field.value[0], parseFloat(e.target.value)])}
-                    />
-                  </HStack>
-                )}
-              />
-            </FormControl>
-          </>
-        )}
-        <JurisdictionMap
-          mapPosition={mapPositionWatch}
-          mapZoom={mapZoomWatch}
-          linePositions={currentJurisdiction.boundaryPoints}
-          onMapDrag={isEditingMap && ((latLng) => setValue("mapPosition", latLng))}
-          onZoomChange={isEditingMap && ((zoom) => setValue("mapZoom", zoom))}
-          isEditingMap={isEditingMap}
-        />
-      </Flex>
-    </Flex>
-  )
-}
