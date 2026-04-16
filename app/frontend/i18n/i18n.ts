@@ -958,6 +958,7 @@ const options = {
             displayContactSummaryLabel: "Contact Summary Section (public)",
             firstContact: "The first contact will be displayed upon successful permit application submission.",
             contactsEmptyState: "No contacts have been configured yet.",
+            contactSummaryEmptyState: "No contact summary has been configured yet.",
             clickToEditContacts: "Click to edit contacts",
             clickToShowContacts: "Click to show contacts as they will be seen",
             clickToEditMap: "Click to edit map",
