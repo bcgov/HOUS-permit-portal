@@ -11,9 +11,11 @@ import {
 import { Editor } from "../../shared/editor/editor"
 import { SafeTipTapDisplay } from "../../shared/editor/safe-tiptap-display"
 
-const previewParagraphSx = {
+const jurisdictionTipTapBodyTypography = {
+  fontSize: "md",
+  lineHeight: 1.6,
   "& p": {
-    marginBottom: "0.5em",
+    margin: 0,
   },
 }
 
@@ -40,6 +42,7 @@ const borderedEditorSx = {
     minHeight: "150px",
     px: 4,
     py: 4,
+    ...jurisdictionTipTapBodyTypography,
   },
 }
 
@@ -78,7 +81,7 @@ export const JurisdictionEditorWithPreview = observer(function JurisdictionEdito
       ) : (
         <Flex align="flex-start" gap={1} w="full">
           <Box flex={1} minW={0}>
-            <SafeTipTapDisplay htmlContent={sanitizedHtmlValue} fontSize="sm" sx={previewParagraphSx} />
+            <SafeTipTapDisplay htmlContent={sanitizedHtmlValue} sx={jurisdictionTipTapBodyTypography} />
           </Box>
           {props.isReadOnly ? null : (
             <Button
