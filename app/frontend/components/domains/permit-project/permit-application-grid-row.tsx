@@ -31,10 +31,11 @@ import { PermitApplicationStatusTag } from "../../shared/permit-applications/per
 interface IPermitApplicationGridRowProps {
   permitApplication: IPermitApplication
   searchModel?: ISearch
+  fromInbox?: boolean
 }
 
 export const PermitApplicationGridRow = observer(
-  ({ permitApplication, searchModel }: IPermitApplicationGridRowProps) => {
+  ({ permitApplication, searchModel, fromInbox = false }: IPermitApplicationGridRowProps) => {
     const { t } = useTranslation()
     const navigate = useNavigate()
     const { id, updatedAt, designatedSubmitter, usingCurrentTemplateVersion } = permitApplication
@@ -44,6 +45,7 @@ export const PermitApplicationGridRow = observer(
     const isDisabledRow = currentSandbox?.id !== permitApplication.sandbox?.id && !currentUser?.isSuperAdmin
     const shouldMarkRow = currentSandbox?.id !== permitApplication.sandbox?.id
     const isSubmitter = currentUser?.id === permitApplication.submitter?.id
+    const permitApplicationPath = fromInbox ? `/permit-applications/${id}` : `/permit-applications/${id}/edit`
 
     return (
       <Tooltip
@@ -63,7 +65,7 @@ export const PermitApplicationGridRow = observer(
           bgSize={isDisabledRow ? "100% 100%" : undefined}
           onClick={() => {
             if (isDisabledRow) return
-            navigate(`/permit-applications/${id}/edit`)
+            navigate(permitApplicationPath)
           }}
           _hover={
             isDisabledRow
@@ -103,7 +105,7 @@ export const PermitApplicationGridRow = observer(
                   onClick={(e) => {
                     e.stopPropagation()
                     if (isDisabledRow) return
-                    navigate(`/permit-applications/${id}/edit`)
+                    navigate(permitApplicationPath)
                   }}
                 >
                   {t("ui.view")}

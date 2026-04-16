@@ -111,6 +111,7 @@ export const InboxOverviewTab = observer(({ permitProject }: IProps) => {
                   <PermitApplicationGridRow
                     key={permitApplication.id}
                     permitApplication={permitApplication}
+                    fromInbox
                     searchModel={
                       {
                         search: () => permitProjectStore.fetchPermitProject(permitProject.id),
