@@ -397,6 +397,93 @@ RSpec.describe Api::Concerns::Search::JurisdictionPermitApplications,
         # list search (not jurisdiction-wide aggregates).
         expect(meta[:status_counts].values.sum).to eq(meta[:total_count])
       end
+
+      it "scopes unread_count in meta to that permit project" do
+        controller.perform_jurisdiction_permit_application_search
+        meta =
+          controller.instance_variable_get(
+            :@jurisdiction_permit_application_meta
+          )
+        # All submitted apps belong to the target_project and are unread
+        # (newly_submitted, no viewed_at). The unread count should be scoped
+        # to the project, not jurisdiction-wide.
+        expect(meta[:unread_count]).to eq(submitted_permit_applications.size)
+      end
+    end
+
+    context "unread_count in meta" do
+      before { controller.instance_variable_set(:@jurisdiction, jurisdiction) }
+
+      let(:cur_user) { reviewer }
+
+      context "base jurisdiction-wide query" do
+        let(:jurisdiction_permit_application_search_params) do
+          { query: "", page: 1, per_page: 50 }
+        end
+
+        it "counts unread submitted/resubmitted/revisions_requested apps in the jurisdiction" do
+          controller.perform_jurisdiction_permit_application_search
+          meta =
+            controller.instance_variable_get(
+              :@jurisdiction_permit_application_meta
+            )
+
+          # new_draft apps are excluded; other-jurisdiction apps are excluded.
+          expected_unread =
+            submitted_permit_applications.size +
+              resubmitted_permit_applications.size +
+              revisions_requested_permit_applications.size
+          expect(meta[:unread_count]).to eq(expected_unread)
+        end
+      end
+
+      context "when filters would narrow the list" do
+        let(:jurisdiction_permit_application_search_params) do
+          {
+            query: "",
+            page: 1,
+            per_page: 50,
+            filters: {
+              status: ["newly_submitted"]
+            }
+          }
+        end
+
+        it "remains jurisdiction-wide and ignores current filters" do
+          controller.perform_jurisdiction_permit_application_search
+          meta =
+            controller.instance_variable_get(
+              :@jurisdiction_permit_application_meta
+            )
+
+          expected_unread =
+            submitted_permit_applications.size +
+              resubmitted_permit_applications.size +
+              revisions_requested_permit_applications.size
+          expect(meta[:unread_count]).to eq(expected_unread)
+        end
+      end
+
+      context "kanban mode" do
+        let(:jurisdiction_permit_application_search_params) do
+          { query: "", mode: "kanban", per_column: 10 }
+        end
+
+        it "populates unread_count jurisdiction-wide" do
+          controller.perform_jurisdiction_permit_application_search
+          meta =
+            controller.instance_variable_get(
+              :@jurisdiction_permit_application_meta
+            )
+
+          expected_unread =
+            submitted_permit_applications.size +
+              resubmitted_permit_applications.size +
+              revisions_requested_permit_applications.size
+          expect(meta).to include(:unread_count)
+          expect(meta[:unread_count]).to eq(expected_unread)
+        end
+      end
     end
   end
 end

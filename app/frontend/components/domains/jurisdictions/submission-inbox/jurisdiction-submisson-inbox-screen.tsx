@@ -276,11 +276,7 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
                       value={activeSearchStore.unreadFilter}
                       onChange={(val) => activeSearchStore.setUnreadFilter(val)}
                       onApply={() => activeSearchStore.search()}
-                      badgeCount={
-                        viewMode === EInboxViewMode.projects
-                          ? permitProjectSearch.tablePermitProjects.filter((p) => !p.viewedAt).length
-                          : permitApplicationSearch.tablePermitApplications.filter((a) => !a.isViewed).length
-                      }
+                      badgeCount={activeSearchStore.unreadCount}
                     />
                     <RequirementTemplateInboxFilter
                       value={[...activeSearchStore.requirementTemplateIdFilter]}

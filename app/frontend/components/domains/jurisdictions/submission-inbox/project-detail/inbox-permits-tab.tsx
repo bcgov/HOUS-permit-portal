@@ -120,7 +120,7 @@ export const InboxPermitsTab = observer(function InboxPermitsTab({ permitProject
                 value={permitProject.unreadFilter}
                 onChange={(val) => permitProject.setUnreadFilter(val)}
                 onApply={() => permitProject.search()}
-                badgeCount={applications.filter((a) => !a.isViewed).length}
+                badgeCount={permitProject.unreadCount}
               />
               <RequirementTemplateInboxFilter
                 value={[...permitProject.requirementTemplateIdFilter]}
