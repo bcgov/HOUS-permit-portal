@@ -1051,7 +1051,7 @@ const options = {
             },
           },
           heroBannerDescription:
-            "Jurisdiction description: {{jurisdictionName}} provides guidance, services, and regulatory oversight for residents and businesses within its municipal boundary.",
+            "Jurisdiction description: The {{jurisdictionName}} provides guidance, services, and regulatory oversight for residents and businesses within its municipal boundary.",
           lgWebsiteBackLink: "Back to {{jurisdictionName}} website",
           lgWebsiteUrlLabel: "Local government website URL",
           lgWebsiteUrlPlaceholder: "https://",
