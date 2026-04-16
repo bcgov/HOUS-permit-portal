@@ -31,9 +31,11 @@ import { useJurisdiction } from "../../../hooks/resources/use-jurisdiction"
 import { IJurisdiction } from "../../../models/jurisdiction"
 import { IUser } from "../../../models/user"
 import { useMst } from "../../../setup/root"
+import { EFlashMessageStatus } from "../../../types/enums"
 import { IContact, TJurisdictionFieldValues } from "../../../types/types"
 import { sanitizeTipTapHtml } from "../../../utils/sanitize-tiptap-content"
 import { isTipTapEmpty } from "../../../utils/utility-functions"
+import { CustomMessageBox } from "../../shared/base/custom-message-box"
 import { ErrorScreen } from "../../shared/base/error-screen"
 import { HeroBanner } from "../../shared/base/hero-banner"
 import { HighlightedLayout } from "../../shared/base/highlighted-layout"
@@ -134,7 +136,6 @@ const JurisdictionScreenBody = observer(
         currentJurisdiction?.officeEmail
       ) ||
       (currentJurisdiction?.contacts?.length ?? 0) > 0
-
     return (
       <Flex as="main" direction="column" w="full" bg="greys.white">
         <FormProvider {...formMethods}>
@@ -349,6 +350,13 @@ const JurisdictionScreenBody = observer(
                         control={control}
                         headingId="jurisdiction-contact-summary-heading"
                         name={"contactSummaryHtml"}
+                        editButtonPlacement="top"
+                        editableEmptyFallback={
+                          <CustomMessageBox
+                            status={EFlashMessageStatus.info}
+                            description={t("jurisdiction.edit.contactSummaryEmptyState")}
+                          />
+                        }
                       />
                       <JurisdictionContactInfoBanner
                         control={control}
@@ -484,10 +492,19 @@ interface IJurisdictionTipTapFormControllerProps {
   name: keyof TJurisdictionFieldValues
   /** `id` of the section `<Heading>` — sets `aria-labelledby` on the editor wrapper for assistive tech. */
   headingId?: string
+  editButtonPlacement?: "inline" | "top"
+  editableEmptyFallback?: React.ReactNode
 }
 
 const JurisdictionTipTapFormController = observer(
-  ({ control, label, name, headingId }: IJurisdictionTipTapFormControllerProps) => {
+  ({
+    control,
+    label,
+    name,
+    headingId,
+    editButtonPlacement,
+    editableEmptyFallback,
+  }: IJurisdictionTipTapFormControllerProps) => {
     const { jurisdictionStore } = useMst()
     const { currentJurisdiction } = jurisdictionStore
     const { t } = useTranslation()
@@ -513,14 +530,11 @@ const JurisdictionTipTapFormController = observer(
               render={({ field: { value, onChange } }) => (
                 <JurisdictionEditorWithPreview
                   label={label}
-                  editText={t("ui.clickToEdit")}
                   htmlValue={value as string}
                   onChange={onChange}
                   containerProps={headingId ? { "aria-labelledby": headingId } : undefined}
-                  onRemove={(setEditMode) => {
-                    setEditMode(false)
-                    onChange("")
-                  }}
+                  editButtonPlacement={editButtonPlacement}
+                  editableEmptyFallback={editableEmptyFallback}
                 />
               )}
               name={name}
