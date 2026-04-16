@@ -81,17 +81,18 @@ function getDefaultJurisdictionValuesForJurisdiction(
 interface IJurisdictionScreenBodyProps {
   currentJurisdiction: IJurisdiction
   formMethods: UseFormReturn<TJurisdictionFieldValues>
+  // formMethods is stable; need to pass this so it knows when to re-render
+  isSubmitting: boolean
   currentUser: IUser | undefined
 }
 
 const JurisdictionScreenBody = observer(
-  ({ currentJurisdiction, formMethods, currentUser }: IJurisdictionScreenBodyProps) => {
+  ({ currentJurisdiction, formMethods, isSubmitting, currentUser }: IJurisdictionScreenBodyProps) => {
     const { t } = useTranslation()
     const canManageAbout = can("jurisdiction:manage", { jurisdiction: currentJurisdiction })
     const [isEditingContacts, setIsEditingContacts] = useState(false)
 
-    const { control, reset, formState } = formMethods
-    const { isSubmitting } = formState
+    const { control, reset } = formMethods
 
     const { qualifiedName, update, showAboutPage } = currentJurisdiction
     const onSubmit = async (formData) => {
@@ -139,7 +140,11 @@ const JurisdictionScreenBody = observer(
                 {qualifiedName}
               </Heading>
               <Text fontSize="lg">{t("jurisdiction.heroBannerDescription", { jurisdictionName: qualifiedName })}</Text>
-              <JurisdictionHeroLgWebsiteRow canManageAbout={canManageAbout} jurisdictionName={qualifiedName} />
+              <JurisdictionHeroLgWebsiteRow
+                canManageAbout={canManageAbout}
+                jurisdictionName={qualifiedName}
+                persistedWebsiteUrl={currentJurisdiction.websiteUrl ?? ""}
+              />
             </HighlightedLayout>
           </HeroBanner>
         </FormProvider>
@@ -466,7 +471,10 @@ export const JurisdictionScreen = observer(() => {
     defaultValues: getDefaultJurisdictionValuesForJurisdiction(currentJurisdiction),
   })
 
-  const { reset } = formMethods
+  const {
+    reset,
+    formState: { isSubmitting },
+  } = formMethods
 
   useEffect(() => {
     reset(getDefaultJurisdictionValuesForJurisdiction(currentJurisdiction))
@@ -479,6 +487,7 @@ export const JurisdictionScreen = observer(() => {
     <JurisdictionScreenBody
       currentJurisdiction={currentJurisdiction}
       formMethods={formMethods}
+      isSubmitting={isSubmitting}
       currentUser={currentUser}
     />
   )
