@@ -36,16 +36,21 @@ function HeroLgBackToWebsiteLink({ href, jurisdictionName }: { href: string; jur
 export function JurisdictionHeroLgWebsiteRow({
   canManageAbout,
   jurisdictionName,
+  persistedWebsiteUrl = "",
 }: {
   canManageAbout: boolean
   jurisdictionName: string
+  persistedWebsiteUrl?: string
 }) {
   const { t } = useTranslation()
   const { watch, trigger, formState } = useFormContext<TJurisdictionFieldValues>()
   const { errors } = formState
   const [isEditingWebsite, setIsEditingWebsite] = useState(false)
   const websiteUrlError = errors.websiteUrl
-  const websiteUrl = watch("websiteUrl")
+  const watchedUrl = watch("websiteUrl")
+  const watchedTrimmed = typeof watchedUrl === "string" ? watchedUrl.trim() : ""
+  const persistedTrimmed = (persistedWebsiteUrl ?? "").trim()
+  const websiteUrl = isEditingWebsite ? watchedTrimmed : watchedTrimmed || persistedTrimmed
   const showRow = websiteUrl.length > 0 || canManageAbout
 
   if (!showRow) return null
