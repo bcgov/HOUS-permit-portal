@@ -15,7 +15,7 @@ import {
   VStack,
 } from "@chakra-ui/react"
 
-import { ArrowSquareOut, Pencil } from "@phosphor-icons/react"
+import { ArrowSquareOut, FloppyDisk, Pencil } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
 import type { Control, UseFormReturn } from "react-hook-form"
@@ -405,6 +405,7 @@ const JurisdictionScreenBody = observer(
                       isDisabled={isSubmitting}
                       isLoading={isSubmitting}
                       loadingText={t("ui.loading")}
+                      leftIcon={<FloppyDisk size={24} />}
                     >
                       {t("ui.save")}
                     </Button>
