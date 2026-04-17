@@ -16,7 +16,7 @@ import {
   Tooltip,
   VStack,
 } from "@chakra-ui/react"
-import { Swap, UserPlus } from "@phosphor-icons/react"
+import { Info, Swap, UserPlus } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useMemo } from "react"
 import { useTranslation } from "react-i18next"
@@ -137,6 +137,7 @@ export const ApplicationInboxTable = observer(function ApplicationInboxTable({ s
                 label={getSortColumnHeader(EPermitApplicationInboxSortFields.daysInQueue)}
                 sort={sort as ISort<EPermitApplicationInboxSortFields>}
                 onToggleSort={toggleSort}
+                tooltip={t("submissionInbox.daysWithUsTooltip")}
               />
               <SortableHeader
                 field={EPermitApplicationInboxSortFields.assigned}
@@ -192,11 +193,13 @@ const SortableHeader = ({
   label,
   sort,
   onToggleSort,
+  tooltip,
 }: {
   field: EPermitApplicationInboxSortFields
   label: string
   sort: ISort<EPermitApplicationInboxSortFields>
   onToggleSort: (field: EPermitApplicationInboxSortFields) => void
+  tooltip?: string
 }) => (
   <GridHeader role="columnheader">
     <Flex
@@ -209,7 +212,16 @@ const SortableHeader = ({
       borderColor="border.light"
       px={4}
     >
-      <Text textAlign="left">{label}</Text>
+      <HStack spacing={1}>
+        <Text textAlign="left">{label}</Text>
+        {tooltip && (
+          <Tooltip label={tooltip} hasArrow placement="top">
+            <Flex align="center">
+              <Icon as={Info} boxSize={3.5} color="text.secondary" />
+            </Flex>
+          </Tooltip>
+        )}
+      </HStack>
       <SortIcon<EPermitApplicationInboxSortFields> field={field} currentSort={sort} />
     </Flex>
   </GridHeader>

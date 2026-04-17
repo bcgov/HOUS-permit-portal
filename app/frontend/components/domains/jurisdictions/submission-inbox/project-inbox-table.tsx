@@ -16,7 +16,7 @@ import {
   Tooltip,
   VStack,
 } from "@chakra-ui/react"
-import { Swap, UserPlus } from "@phosphor-icons/react"
+import { Info, Swap, UserPlus } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
@@ -236,7 +236,16 @@ export const ProjectInboxTable = observer(function ProjectInboxTable({ searchSto
                     borderColor="border.light"
                     px={4}
                   >
-                    <Text textAlign="left">{getSortColumnHeader(field)}</Text>
+                    <HStack spacing={1}>
+                      <Text textAlign="left">{getSortColumnHeader(field)}</Text>
+                      {field === EPermitProjectInboxSortFields.daysInQueue && (
+                        <Tooltip label={t("submissionInbox.daysWithUsTooltip")} hasArrow placement="top">
+                          <Flex align="center">
+                            <Icon as={Info} boxSize={3.5} color="text.secondary" />
+                          </Flex>
+                        </Tooltip>
+                      )}
+                    </HStack>
                     <SortIcon<EPermitProjectInboxSortFields>
                       field={field}
                       currentSort={sort as ISort<EPermitProjectInboxSortFields>}
