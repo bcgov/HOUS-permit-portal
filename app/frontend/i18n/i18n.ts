@@ -1184,9 +1184,11 @@ Thank you,
             "This area will show submissions once an email address is set up to receive notifications. Until then, submissions cannot be delivered to this workspace.",
           setupEmailNotificationsLink: "Submissions inbox setup",
           noMatchingProjectsTitle: "No matching projects",
-          noMatchingProjectsDescription: "No projects match your current filter settings or search criteria.",
+          noMatchingProjectsDescription:
+            "No projects match your current filter settings or search criteria. Check spelling or adjust filters.",
           noMatchingApplicationsTitle: "No matching applications",
-          noMatchingApplicationsDescription: "No applications match your current filter settings or search criteria.",
+          noMatchingApplicationsDescription:
+            "No applications match your current filter settings or search criteria. Check spelling or adjust filters.",
           project: "Project",
           projects: "Projects",
           applications: "Applications",
