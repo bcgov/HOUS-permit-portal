@@ -601,7 +601,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
           return false
         }
 
-        return featureEnabled ? !designatedReviewerExists : designatedReviewerExists
+        return featureEnabled && designatedReviewerExists
       },
     }))
     .actions((self) => ({
