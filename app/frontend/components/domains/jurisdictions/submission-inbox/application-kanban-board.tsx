@@ -23,7 +23,7 @@ import { colors } from "../../../../styles/theme/foundations/colors"
 import { ECollaborationType, EPermitApplicationStatus } from "../../../../types/enums"
 import { SharedAvatar } from "../../../shared/user/shared-avatar"
 import { DesignatedCollaboratorAssignmentPopover } from "../../permit-application/collaborator-management/designated-collaborator-assignment-popover"
-import { IKanbanColumn, IReorderEvent, KanbanBoard } from "./kanban-board"
+import { EReorderDirection, IKanbanColumn, IReorderEvent, KanbanBoard } from "./kanban-board"
 import { KanbanCard } from "./kanban-card"
 
 interface IProps {
@@ -92,10 +92,18 @@ export const ApplicationKanbanBoard = observer(function ApplicationKanbanBoard({
       onToggleColumn={onToggleColumn}
       onShowMore={onShowMore}
       onReorder={onReorder}
-      renderCard={(item) => {
+      renderCard={(item, context) => {
         const application = applications.find((a) => a.id === item.id)
         if (!application) return null
-        return <ApplicationKanbanCard key={application.id} application={application} />
+        return (
+          <ApplicationKanbanCard
+            key={application.id}
+            application={application}
+            isFirst={context.isFirst}
+            isLast={context.isLast}
+            onMove={context.onMove}
+          />
+        )
       }}
     />
   )
@@ -111,8 +119,14 @@ const SANDBOX_STRIPE_BG = `repeating-linear-gradient(
 
 const ApplicationKanbanCard = observer(function ApplicationKanbanCard({
   application,
+  isFirst,
+  isLast,
+  onMove,
 }: {
   application: IPermitApplication
+  isFirst?: boolean
+  isLast?: boolean
+  onMove?: (direction: EReorderDirection) => void
 }) {
   const { t } = useTranslation()
   const navigate = useNavigate()
@@ -146,6 +160,9 @@ const ApplicationKanbanCard = observer(function ApplicationKanbanCard({
       isUnread={isUnread}
       onMarkUnread={isUnread ? undefined : () => application.markAsUnviewed()}
       statusMenu={<ChangeStatusMenu application={application} />}
+      isFirst={isFirst}
+      isLast={isLast}
+      onMove={onMove}
       avatars={
         <>
           {visibleBlockLevelReviewAssignees.map((user) => (
@@ -220,7 +237,7 @@ const ApplicationKanbanCard = observer(function ApplicationKanbanCard({
         _visited={{ color: "inherit" }}
         _active={{ color: "inherit" }}
       >
-        <Box pr={4}>
+        <Box pr={8}>
           <Text fontWeight={700} fontSize="md" noOfLines={2}>
             {application.nickname}
           </Text>

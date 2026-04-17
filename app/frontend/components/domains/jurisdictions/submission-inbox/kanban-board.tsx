@@ -28,6 +28,19 @@ export interface IReorderEvent {
   orderedIds: string[]
 }
 
+export enum EReorderDirection {
+  top = "top",
+  up = "up",
+  down = "down",
+  bottom = "bottom",
+}
+
+export interface IKanbanCardContext {
+  isFirst: boolean
+  isLast: boolean
+  onMove?: (direction: EReorderDirection) => void
+}
+
 interface IProps<T extends IKanbanItem> {
   columns: IKanbanColumn[]
   items: T[]
@@ -35,7 +48,7 @@ interface IProps<T extends IKanbanItem> {
   columnTotals?: Record<string, number>
   collapsedColumns: string[]
   onToggleColumn: (columnKey: string) => void
-  renderCard: (item: T) => ReactNode
+  renderCard: (item: T, context: IKanbanCardContext) => ReactNode
   onShowMore?: (columnKey: string) => void
   onReorder?: (event: IReorderEvent) => void
 }
@@ -102,6 +115,43 @@ function KanbanBoardInner<T extends IKanbanItem>({
       })
     },
     [items, groupedItems, onReorder]
+  )
+
+  const buildMoveHandler = useCallback(
+    (columnItems: T[], index: number) => {
+      if (!onReorder) return undefined
+      return (direction: EReorderDirection) => {
+        if (columnItems.length <= 1) return
+        const lastIndex = columnItems.length - 1
+        let newIndex = index
+        switch (direction) {
+          case EReorderDirection.top:
+            newIndex = 0
+            break
+          case EReorderDirection.up:
+            newIndex = Math.max(0, index - 1)
+            break
+          case EReorderDirection.down:
+            newIndex = Math.min(lastIndex, index + 1)
+            break
+          case EReorderDirection.bottom:
+            newIndex = lastIndex
+            break
+        }
+        if (newIndex === index) return
+        const reordered = [...columnItems]
+        const [moved] = reordered.splice(index, 1)
+        reordered.splice(newIndex, 0, moved)
+        onReorder({
+          itemId: columnItems[index].id,
+          columnKey: columnItems[index].columnKey,
+          oldIndex: index,
+          newIndex,
+          orderedIds: reordered.map((i) => i.id),
+        })
+      }
+    },
+    [onReorder]
   )
 
   return (
@@ -277,7 +327,13 @@ function KanbanBoardInner<T extends IKanbanItem>({
                         }}
                       >
                         <SortableContext items={columnItems.map((i) => i.id)} strategy={verticalListSortingStrategy}>
-                          {columnItems.map((item) => renderCard(item))}
+                          {columnItems.map((item, index) =>
+                            renderCard(item, {
+                              isFirst: index === 0,
+                              isLast: index === columnItems.length - 1,
+                              onMove: buildMoveHandler(columnItems, index),
+                            })
+                          )}
                         </SortableContext>
                         {hasMore && onShowMore && (
                           <Button variant="link" size="sm" flexShrink={0} onClick={() => onShowMore(column.key)}>
