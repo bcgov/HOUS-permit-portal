@@ -1,11 +1,31 @@
-import { Box, Circle, HStack, IconButton, Spinner, Tooltip } from "@chakra-ui/react"
+import {
+  Box,
+  Circle,
+  HStack,
+  IconButton,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
+  Portal,
+  Spinner,
+  Tooltip,
+} from "@chakra-ui/react"
 import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
-import { ArrowsDownUp, UserPlus } from "@phosphor-icons/react"
+import { ArrowsDownUp, DotsSixVertical, UserPlus } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
+import { EReorderDirection } from "./kanban-board"
 import { SubmissionInboxMarkUnreadIconButton } from "./submission-inbox-mark-unread-icon-button"
+
+const REORDER_MENU_ITEMS = [
+  { direction: EReorderDirection.top, labelKey: "submissionInbox.moveToTop" as const, needsUp: true },
+  { direction: EReorderDirection.up, labelKey: "submissionInbox.moveUp" as const, needsUp: true },
+  { direction: EReorderDirection.down, labelKey: "submissionInbox.moveDown" as const, needsUp: false },
+  { direction: EReorderDirection.bottom, labelKey: "submissionInbox.moveToBottom" as const, needsUp: false },
+]
 
 interface IProps {
   id: string
@@ -15,6 +35,9 @@ interface IProps {
   avatars?: ReactNode
   onAssigneeClick?: (e: React.MouseEvent) => void
   isAssigneeLoading?: boolean
+  onMove?: (direction: EReorderDirection) => void
+  isFirst?: boolean
+  isLast?: boolean
   children: ReactNode
 }
 
@@ -26,6 +49,9 @@ export const KanbanCard = observer(function KanbanCard({
   avatars,
   onAssigneeClick,
   isAssigneeLoading,
+  onMove,
+  isFirst,
+  isLast,
   children,
 }: IProps) {
   const { t } = useTranslation()
@@ -40,6 +66,10 @@ export const KanbanCard = observer(function KanbanCard({
     transition,
     opacity: isDragging ? 0.5 : 1,
   }
+
+  const canMoveUp = !!onMove && !isFirst
+  const canMoveDown = !!onMove && !isLast
+  const showReorderMenu = canMoveUp || canMoveDown
 
   return (
     <Box
@@ -58,7 +88,24 @@ export const KanbanCard = observer(function KanbanCard({
       _active={{ bg: "background.blueLight" }}
       position="relative"
     >
-      {isUnread && <Circle size="10px" bg="theme.blueActive" position="absolute" top={5} right={4} />}
+      <HStack position="absolute" top={2} right={2} spacing={1} align="center" zIndex={1}>
+        {isUnread && <Circle size="10px" bg="theme.blueActive" flexShrink={0} />}
+        <Tooltip label={t("submissionInbox.reorder")} hasArrow placement="top">
+          <IconButton
+            aria-label={t("submissionInbox.reorder")}
+            icon={<DotsSixVertical size={16} weight="bold" />}
+            size="xs"
+            minW={5}
+            h={5}
+            variant="ghost"
+            color="theme.blueActive"
+            _hover={{ bg: "background.blueLight" }}
+            cursor="grab"
+            {...attributes}
+            {...listeners}
+          />
+        </Tooltip>
+      </HStack>
 
       {children}
 
@@ -81,19 +128,42 @@ export const KanbanCard = observer(function KanbanCard({
           )}
         </HStack>
         <HStack spacing={0}>
-          <Tooltip label={t("submissionInbox.reorder")} hasArrow placement="top">
-            <IconButton
-              aria-label={t("submissionInbox.reorder")}
-              icon={<ArrowsDownUp size={16} />}
-              size="sm"
-              minW={7}
-              h={7}
-              variant="ghost"
-              cursor="grab"
-              {...attributes}
-              {...listeners}
-            />
-          </Tooltip>
+          {showReorderMenu && (
+            <Menu>
+              <Tooltip label={t("submissionInbox.reorder")} hasArrow placement="top">
+                <MenuButton
+                  as={IconButton}
+                  aria-label={t("submissionInbox.reorder")}
+                  icon={<ArrowsDownUp size={16} />}
+                  size="sm"
+                  minW={7}
+                  h={7}
+                  variant="ghost"
+                  onClick={(e: React.MouseEvent) => {
+                    e.stopPropagation()
+                  }}
+                />
+              </Tooltip>
+              <Portal>
+                <MenuList zIndex={10}>
+                  {REORDER_MENU_ITEMS.map(({ direction, labelKey, needsUp }) => (
+                    <MenuItem
+                      key={direction}
+                      fontSize="sm"
+                      isDisabled={needsUp ? !canMoveUp : !canMoveDown}
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        onMove?.(direction)
+                      }}
+                    >
+                      {t(labelKey)}
+                    </MenuItem>
+                  ))}
+                </MenuList>
+              </Portal>
+            </Menu>
+          )}
           {statusMenu}
           {onMarkUnread && <SubmissionInboxMarkUnreadIconButton onMarkUnread={onMarkUnread} />}
         </HStack>

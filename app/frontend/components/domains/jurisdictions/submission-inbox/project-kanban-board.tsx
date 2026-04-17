@@ -22,7 +22,7 @@ import { IPermitProject } from "../../../../models/permit-project"
 import { useMst } from "../../../../setup/root"
 import { EProjectState } from "../../../../types/enums"
 import { SharedAvatar } from "../../../shared/user/shared-avatar"
-import { IKanbanColumn, IReorderEvent, KanbanBoard } from "./kanban-board"
+import { EReorderDirection, IKanbanColumn, IReorderEvent, KanbanBoard } from "./kanban-board"
 import { KanbanCard } from "./kanban-card"
 import { ProjectReviewCollaboratorsPopover } from "./project-designated-reviewer-popover"
 import { ProjectInboxPermitApplicationsPopover } from "./project-inbox-permit-applications-popover"
@@ -92,10 +92,18 @@ export const ProjectKanbanBoard = observer(function ProjectKanbanBoard({
       onToggleColumn={onToggleColumn}
       onShowMore={onShowMore}
       onReorder={onReorder}
-      renderCard={(item) => {
+      renderCard={(item, context) => {
         const project = projects.find((p) => p.id === item.id)
         if (!project) return null
-        return <ProjectKanbanCard key={project.id} project={project} />
+        return (
+          <ProjectKanbanCard
+            key={project.id}
+            project={project}
+            isFirst={context.isFirst}
+            isLast={context.isLast}
+            onMove={context.onMove}
+          />
+        )
       }}
     />
   )
@@ -103,7 +111,17 @@ export const ProjectKanbanBoard = observer(function ProjectKanbanBoard({
 
 const MAX_VISIBLE_AVATARS = 3
 
-const ProjectKanbanCard = observer(function ProjectKanbanCard({ project }: { project: IPermitProject }) {
+const ProjectKanbanCard = observer(function ProjectKanbanCard({
+  project,
+  isFirst,
+  isLast,
+  onMove,
+}: {
+  project: IPermitProject
+  isFirst?: boolean
+  isLast?: boolean
+  onMove?: (direction: EReorderDirection) => void
+}) {
   const { t } = useTranslation()
   const { permitProjectStore } = useMst()
 
@@ -121,6 +139,9 @@ const ProjectKanbanCard = observer(function ProjectKanbanCard({ project }: { pro
       isUnread={isUnread}
       onMarkUnread={isUnread ? undefined : () => project.markAsUnviewed()}
       statusMenu={<ChangeStatusMenu project={project} />}
+      isFirst={isFirst}
+      isLast={isLast}
+      onMove={onMove}
       avatars={
         <>
           {visibleAssignees.map((user) => (
@@ -167,7 +188,7 @@ const ProjectKanbanCard = observer(function ProjectKanbanCard({ project }: { pro
         _visited={{ color: "inherit" }}
         _active={{ color: "inherit" }}
       >
-        <Box pr={4}>
+        <Box pr={12}>
           <HStack spacing={2}>
             {/* ### SUBMISSION INDEX STUB FEATURE */}
             <Icon as={CalendarBlank} color="text.secondary" boxSize={4} display="none" />
