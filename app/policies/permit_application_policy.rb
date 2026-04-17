@@ -95,7 +95,10 @@ class PermitApplicationPolicy < ApplicationPolicy
 
     return true unless feature_enabled
 
-    record.permit_collaborations.review.exists?(collaborator_id: user.id)
+    designated_reviewer = record.permit_collaborations.review.delegatee.first
+    return true if designated_reviewer.nil?
+
+    designated_reviewer.collaborator.user_id == user.id
   end
 
   def create_permit_collaboration?

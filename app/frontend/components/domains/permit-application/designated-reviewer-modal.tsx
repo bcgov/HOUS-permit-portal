@@ -28,6 +28,8 @@ export const DesignatedReviewerModal = observer(({ isOpen, onClose, designatedRe
   const name = user?.name
   const organization = user?.organization
 
+  if (!user) return null
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="lg" isCentered>
       <ModalOverlay />
