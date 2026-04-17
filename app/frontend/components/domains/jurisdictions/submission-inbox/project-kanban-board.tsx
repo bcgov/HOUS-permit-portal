@@ -1,19 +1,5 @@
-import {
-  Avatar,
-  Box,
-  HStack,
-  Icon,
-  IconButton,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
-  Portal,
-  Spinner,
-  Text,
-  Tooltip,
-} from "@chakra-ui/react"
-import { CalendarBlank, Swap, UserPlus } from "@phosphor-icons/react"
+import { Avatar, Box, HStack, Icon, IconButton, Spinner, Text } from "@chakra-ui/react"
+import { CalendarBlank, UserPlus } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useMemo } from "react"
 import { useTranslation } from "react-i18next"
@@ -22,6 +8,7 @@ import { IPermitProject } from "../../../../models/permit-project"
 import { useMst } from "../../../../setup/root"
 import { EProjectState } from "../../../../types/enums"
 import { SharedAvatar } from "../../../shared/user/shared-avatar"
+import { ChangeProjectStateMenu } from "./change-project-state-menu"
 import { IKanbanColumn, IReorderEvent, KanbanBoard } from "./kanban-board"
 import { KanbanCard } from "./kanban-card"
 import { ProjectReviewCollaboratorsPopover } from "./project-designated-reviewer-popover"
@@ -120,7 +107,7 @@ const ProjectKanbanCard = observer(function ProjectKanbanCard({ project }: { pro
       id={project.id}
       isUnread={isUnread}
       onMarkUnread={isUnread ? undefined : () => project.markAsUnviewed()}
-      statusMenu={<ChangeStatusMenu project={project} />}
+      statusMenu={<ChangeProjectStateMenu project={project} compact />}
       avatars={
         <>
           {visibleAssignees.map((user) => (
@@ -207,45 +194,5 @@ const ProjectKanbanCard = observer(function ProjectKanbanCard({ project }: { pro
         </Box>
       </Box>
     </KanbanCard>
-  )
-})
-
-const ChangeStatusMenu = observer(function ChangeStatusMenu({ project }: { project: IPermitProject }) {
-  const { t } = useTranslation()
-
-  if (project.allowedManualTransitions.length === 0) return null
-
-  return (
-    <Menu>
-      <Tooltip label={t("submissionInbox.changeStatus")} hasArrow placement="top">
-        <MenuButton
-          as={IconButton}
-          aria-label={t("submissionInbox.changeStatus")}
-          icon={<Swap size={16} />}
-          size="sm"
-          minW={7}
-          h={7}
-          variant="ghost"
-        />
-      </Tooltip>
-      <Portal>
-        <MenuList zIndex={10}>
-          {project.allowedManualTransitions.map((transition) => (
-            <MenuItem
-              key={transition}
-              fontSize="sm"
-              onClick={(e) => {
-                e.preventDefault()
-                e.stopPropagation()
-                project.transitionState(transition)
-              }}
-            >
-              {/* @ts-ignore */}
-              {t(`submissionInbox.projectStates.${transition}`)}
-            </MenuItem>
-          ))}
-        </MenuList>
-      </Portal>
-    </Menu>
   )
 })

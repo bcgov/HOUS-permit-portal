@@ -98,6 +98,8 @@ class PermitProjectBlueprint < Blueprinter::Base
       true
     end
 
+    field :first_application_received_at
+
     association :permit_applications,
                 blueprint: PermitApplicationBlueprint,
                 view: :jurisdiction_review_inbox do |permit_project, _options|
