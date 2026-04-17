@@ -11,16 +11,26 @@ import { SearchGrid } from "../../../../shared/grid/search-grid"
 import { FullscreenMapModal } from "../../../../shared/module-wrappers/fullscreen-map-modal"
 import { ProjectMap } from "../../../../shared/module-wrappers/project-map"
 import { RouterLinkButton } from "../../../../shared/navigation/router-link-button"
+import { ProjectStateTag } from "../../../../shared/permit-projects/project-state-tag"
 import ProjectInfoRow from "../../../../shared/project/project-info-row"
 import { PermitApplicationGridHeaders } from "../../../permit-project/permit-application-grid-headers"
 import { PermitApplicationGridRow } from "../../../permit-project/permit-application-grid-row"
+import { ChangeProjectStateMenu } from "../change-project-state-menu"
 
 interface IProps {
   permitProject: IPermitProject
 }
 
 export const InboxOverviewTab = observer(({ permitProject }: IProps) => {
-  const { fullAddress, pid, jurisdiction, number } = permitProject
+  const {
+    fullAddress,
+    pid,
+    jurisdiction,
+    number,
+    state,
+    firstApplicationReceivedAt,
+    formattedFirstApplicationReceivedAt,
+  } = permitProject
   const { t } = useTranslation()
   const { permitProjectStore } = useMst()
   const { isOpen: isMapFullscreen, onOpen: onOpenMapFullscreen, onClose: onCloseMapFullscreen } = useDisclosure()
@@ -41,6 +51,15 @@ export const InboxOverviewTab = observer(({ permitProject }: IProps) => {
             </Heading>
 
             <ProjectInfoRow
+              label={t("permitProject.overview.projectState")}
+              value={
+                <HStack spacing={3}>
+                  <ProjectStateTag state={state} />
+                  <ChangeProjectStateMenu project={permitProject} />
+                </HStack>
+              }
+            />
+            <ProjectInfoRow
               label={t("permitProject.overview.address")}
               value={fullAddress || t("permitProject.overview.notAvailable")}
               isBold
@@ -57,6 +76,11 @@ export const InboxOverviewTab = observer(({ permitProject }: IProps) => {
               value={pid || t("permitProject.overview.notAvailable")}
               subLabel={t("permitProject.overview.parcelIdentifier")}
               isCopyable
+            />
+            <ProjectInfoRow
+              label={t("permitProject.overview.firstApplicationReceived")}
+              value={formattedFirstApplicationReceivedAt}
+              isCopyable={!!firstApplicationReceivedAt}
             />
 
             <VStack align="flex-start" spacing={4} mt={8}>
@@ -111,6 +135,7 @@ export const InboxOverviewTab = observer(({ permitProject }: IProps) => {
                   <PermitApplicationGridRow
                     key={permitApplication.id}
                     permitApplication={permitApplication}
+                    fromInbox
                     searchModel={
                       {
                         search: () => permitProjectStore.fetchPermitProject(permitProject.id),

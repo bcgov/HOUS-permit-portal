@@ -11,6 +11,7 @@ class PermitProject < ApplicationRecord
   belongs_to :owner, class_name: "User", optional: true
   public_recordable user_association: :owner
   belongs_to :jurisdiction, optional: false # Direct association to Jurisdiction
+  belongs_to :sandbox, optional: true
   has_many :permit_project_collaborations,
            -> { where(discarded_at: nil) },
            dependent: :destroy
@@ -28,6 +29,8 @@ class PermitProject < ApplicationRecord
 
   validates :title, presence: true
   validates :number, presence: true, on: :update
+  validate :sandbox_belongs_to_jurisdiction
+  validate :owner_cannot_be_jurisdiction_staff_without_sandbox
   before_validation :set_default_title
 
   before_validation :assign_unique_number, if: -> { number.blank? }
@@ -37,6 +40,10 @@ class PermitProject < ApplicationRecord
   delegate :name, to: :owner, prefix: true
 
   after_commit :reindex
+
+  scope :sandboxed, -> { where.not(sandbox_id: nil) }
+  scope :live, -> { where(sandbox_id: nil) }
+  scope :for_sandbox, ->(sandbox) { where(sandbox_id: sandbox&.id) }
 
   scope :with_status_counts,
         -> do
@@ -117,6 +124,12 @@ class PermitProject < ApplicationRecord
     (seconds / 86400.0).floor
   end
 
+  # Earliest submission time across all kept permit applications on this project.
+  # Returns nil if no applications have been submitted yet.
+  def first_application_received_at
+    permit_applications.kept.map(&:submitted_at).compact.min
+  end
+
   def update_viewed_at
     update(viewed_at: Time.current)
   end
@@ -135,6 +148,7 @@ class PermitProject < ApplicationRecord
       owner_id: owner_id,
       owner_name: owner&.name,
       jurisdiction_id: jurisdiction_id,
+      sandbox_id: sandbox_id,
       collaborator_ids: collaborators.pluck(:user_id).uniq,
       review_collaborator_user_ids: compute_review_collaborator_user_ids,
       created_at: created_at,
@@ -342,6 +356,31 @@ class PermitProject < ApplicationRecord
   end
 
   private
+
+  def sandbox_belongs_to_jurisdiction
+    return unless sandbox
+    return unless jurisdiction
+    return if jurisdiction.sandboxes.include?(sandbox)
+
+    errors.add(
+      :sandbox,
+      I18n.t(
+        "activerecord.errors.models.permit_project.attributes.sandbox.incorrect_jurisdiction"
+      )
+    )
+  end
+
+  def owner_cannot_be_jurisdiction_staff_without_sandbox
+    return unless owner&.jurisdiction_staff?
+    return if sandbox_id.present?
+
+    errors.add(
+      :owner,
+      I18n.t(
+        "activerecord.errors.models.permit_project.attributes.owner.review_staff_requires_sandbox"
+      )
+    )
+  end
 
   def compute_review_collaborator_user_ids
     pa_user_ids =

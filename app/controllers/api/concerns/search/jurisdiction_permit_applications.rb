@@ -44,7 +44,8 @@ module Api::Concerns::Search::JurisdictionPermitApplications
       total_pages: @jurisdiction_permit_application_search.total_pages,
       current_page: @jurisdiction_permit_application_search.current_page,
       total_count: @jurisdiction_permit_application_search.total_count,
-      status_counts: jurisdiction_application_status_counts
+      status_counts: jurisdiction_application_status_counts,
+      unread_count: jurisdiction_application_unread_count
     }
 
     @jurisdiction_permit_applications =
@@ -105,7 +106,8 @@ module Api::Concerns::Search::JurisdictionPermitApplications
       current_page: 1,
       total_count: all_ids.length,
       status_counts: jurisdiction_application_status_counts,
-      column_totals: column_totals
+      column_totals: column_totals,
+      unread_count: jurisdiction_application_unread_count
     }
   end
 
@@ -116,6 +118,44 @@ module Api::Concerns::Search::JurisdictionPermitApplications
       "return total"
 
   private
+
+  # Total unread (viewed_at nil) applications for the unread-filter badge.
+  # Scoped jurisdiction-wide (or to permit_project_id when provided, matching
+  # the status_counts scope), independent of current filters/query so the
+  # badge shows the full jurisdiction unread count.
+  def jurisdiction_application_unread_count
+    and_conditions = []
+    and_conditions << { jurisdiction_id: @jurisdiction.id }
+    and_conditions << { discarded: false }
+    and_conditions << { status: { not: "new_draft" } }
+    and_conditions << { viewed_at: nil }
+    unless current_user.super_admin?
+      and_conditions << { sandbox_id: current_sandbox&.id }
+    end
+
+    permit_project_id =
+      jurisdiction_permit_application_search_params[:permit_project_id]
+    if permit_project_id.present?
+      and_conditions << { permit_project_id: permit_project_id }
+    end
+
+    PermitApplication.search(
+      "*",
+      where: {
+        _and: and_conditions
+      },
+      load: false,
+      body_options: {
+        size: 0,
+        track_total_hits: true
+      }
+    ).total_count
+  rescue => e
+    Rails.logger.warn(
+      "Failed to compute application unread count: #{e.message}"
+    )
+    0
+  end
 
   def jurisdiction_application_status_counts
     and_conditions = []

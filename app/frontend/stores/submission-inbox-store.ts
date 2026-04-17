@@ -35,6 +35,8 @@ export const PermitProjectInboxStoreModel = types
       tablePermitProjects: types.array(types.reference(PermitProjectModel)),
       stateCounts: types.optional(types.frozen<Record<string, number>>(), {}),
       columnTotals: types.optional(types.frozen<Record<string, number>>(), {}),
+      /** Jurisdiction-wide count of unread projects (ignores current filters/query). */
+      unreadCount: types.optional(types.number, 0),
       requirementTemplateIdFilter: types.optional(types.array(types.string), []),
       stateFilter: types.optional(types.array(types.string), []),
       unreadFilter: types.optional(types.enumeration(Object.values(ERadioFilterValue)), ERadioFilterValue.include),
@@ -68,6 +70,9 @@ export const PermitProjectInboxStoreModel = types
     },
     setColumnTotals(counts: Record<string, number>) {
       self.columnTotals = decamelizeHashKeys(counts)
+    },
+    setUnreadCount(count: number) {
+      self.unreadCount = count ?? 0
     },
     setRequirementTemplateIdFilter(value: string[]) {
       self.requirementTemplateIdFilter = cast(value)
@@ -151,6 +156,9 @@ export const PermitProjectInboxStoreModel = types
         }
         if (response.data.meta?.columnTotals) {
           self.setColumnTotals(response.data.meta.columnTotals)
+        }
+        if (response.data.meta?.unreadCount != null) {
+          self.setUnreadCount(response.data.meta.unreadCount)
         }
       }
       return response.ok
@@ -263,6 +271,9 @@ export const PermitApplicationInboxStoreModel = types
         }
         if (response.data.meta?.columnTotals) {
           self.setColumnTotals(response.data.meta.columnTotals)
+        }
+        if (response.data.meta?.unreadCount != null) {
+          self.setUnreadCount(response.data.meta.unreadCount)
         }
       }
       return response.ok

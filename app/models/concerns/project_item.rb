@@ -90,6 +90,16 @@ module ProjectItem
       parent&.jurisdiction_id || super
     end
 
+    # Sandbox lives on the parent project. Project items no longer carry
+    # their own sandbox_id column; always defer to the parent.
+    def sandbox
+      parent&.sandbox
+    end
+
+    def sandbox_id
+      parent&.sandbox_id
+    end
+
     # Prefer parent permit_date when present, otherwise use standalone value
     def permit_date
       parent&.permit_date || self[:permit_date]

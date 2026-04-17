@@ -105,6 +105,10 @@ module Api::Concerns::Search::PermitProjects
 
     search_filters.each { |key, value| final_where[:_and] << { key => value } }
 
+    unless current_user.super_admin?
+      final_where[:_and] << { sandbox_id: current_sandbox&.id }
+    end
+
     final_where
   end
 end

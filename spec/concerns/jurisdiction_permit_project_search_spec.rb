@@ -216,9 +216,78 @@ RSpec.describe Api::Concerns::Search::JurisdictionPermitProjects,
           :total_pages,
           :current_page,
           :total_count,
-          :state_counts
+          :state_counts,
+          :unread_count
         )
         expect(meta[:total_count]).to eq(3)
+      end
+
+      it "populates meta with unread_count for all unread projects in the jurisdiction" do
+        perform_search
+        meta =
+          controller.instance_variable_get(:@jurisdiction_permit_project_meta)
+
+        expect(meta[:unread_count]).to eq(2)
+      end
+    end
+
+    context "unread_count in meta" do
+      it "excludes draft projects and other-jurisdiction projects" do
+        perform_search
+        meta =
+          controller.instance_variable_get(:@jurisdiction_permit_project_meta)
+
+        expect(meta[:unread_count]).to eq(2)
+      end
+
+      context "when filters would narrow the list" do
+        let(:search_params) do
+          {
+            query: "",
+            page: 1,
+            per_page: 50,
+            filters: {
+              state: ["in_progress"]
+            }
+          }
+        end
+
+        it "still reflects jurisdiction-wide unread count (ignores current filters)" do
+          perform_search
+          meta =
+            controller.instance_variable_get(:@jurisdiction_permit_project_meta)
+
+          expect(meta[:unread_count]).to eq(2)
+        end
+      end
+
+      context "when unread filter hides unread" do
+        let(:search_params) do
+          { query: "", page: 1, per_page: 50, filters: { unread: "hide" } }
+        end
+
+        it "still reflects jurisdiction-wide unread count (ignores unread filter)" do
+          perform_search
+          meta =
+            controller.instance_variable_get(:@jurisdiction_permit_project_meta)
+
+          expect(meta[:unread_count]).to eq(2)
+        end
+      end
+
+      context "when a project is marked as viewed" do
+        before do
+          project_a.update_column(:viewed_at, Time.current)
+          PermitProject.reindex
+        end
+
+        it "reflects the updated unread count" do
+          perform_search
+          meta =
+            controller.instance_variable_get(:@jurisdiction_permit_project_meta)
+
+          expect(meta[:unread_count]).to eq(1)
+        end
       end
     end
 
@@ -466,9 +535,17 @@ RSpec.describe Api::Concerns::Search::JurisdictionPermitProjects,
         meta =
           controller.instance_variable_get(:@jurisdiction_permit_project_meta)
 
-        expect(meta).to include(:column_totals, :state_counts)
+        expect(meta).to include(:column_totals, :state_counts, :unread_count)
         expect(meta[:column_totals]["queued"]).to eq(2)
         expect(meta[:column_totals]["in_progress"]).to eq(1)
+      end
+
+      it "populates meta with jurisdiction-wide unread_count" do
+        perform_search
+        meta =
+          controller.instance_variable_get(:@jurisdiction_permit_project_meta)
+
+        expect(meta[:unread_count]).to eq(2)
       end
 
       it "state_counts remain unfiltered regardless of mode" do

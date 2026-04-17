@@ -18,6 +18,8 @@ export const PermitApplicationInboxSearchSharedFragment = types
   .model("PermitApplicationInboxSearchShared", {
     stateCounts: types.optional(types.frozen<Record<string, number>>(), {}),
     columnTotals: types.optional(types.frozen<Record<string, number>>(), {}),
+    /** Jurisdiction-wide (or project-scoped) count of unread applications — ignores current filters/query. */
+    unreadCount: types.optional(types.number, 0),
     requirementTemplateIdFilter: types.optional(types.array(types.string), []),
     statusFilter: types.optional(types.array(types.enumeration(Object.values(EPermitApplicationStatus))), []),
     unreadFilter: types.optional(types.enumeration(Object.values(ERadioFilterValue)), ERadioFilterValue.include),
@@ -40,6 +42,9 @@ export const PermitApplicationInboxSearchSharedFragment = types
     },
     setColumnTotals(counts: Record<string, number>) {
       self.columnTotals = decamelizeHashKeys(counts)
+    },
+    setUnreadCount(count: number) {
+      self.unreadCount = count ?? 0
     },
     setRequirementTemplateIdFilter(value: string[]) {
       self.requirementTemplateIdFilter = cast(value)

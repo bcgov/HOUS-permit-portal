@@ -25,7 +25,9 @@ class Api::ProjectAuditsController < Api::ApplicationController
   private
 
   def set_permit_project
-    @permit_project = PermitProject.find(params[:id])
+    scope = PermitProject.all
+    scope = scope.for_sandbox(current_sandbox) unless current_user.super_admin?
+    @permit_project = scope.find(params[:id])
   rescue ActiveRecord::RecordNotFound => e
     render_error("misc.not_found_error", { status: :not_found }, e)
   end

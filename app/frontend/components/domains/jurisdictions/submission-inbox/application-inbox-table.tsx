@@ -16,7 +16,7 @@ import {
   Tooltip,
   VStack,
 } from "@chakra-ui/react"
-import { Swap, UserPlus } from "@phosphor-icons/react"
+import { Info, Swap, UserPlus } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useMemo } from "react"
 import { useTranslation } from "react-i18next"
@@ -38,6 +38,7 @@ import { SharedSpinner } from "../../../shared/base/shared-spinner"
 import { GridHeader } from "../../../shared/grid/grid-header"
 import { SearchGrid } from "../../../shared/grid/search-grid"
 import { SearchGridItem } from "../../../shared/grid/search-grid-item"
+import { SearchGridRow } from "../../../shared/grid/search-grid-row"
 import { PermitApplicationStatusTag } from "../../../shared/permit-applications/permit-application-status-tag"
 import { SortIcon } from "../../../shared/sort-icon"
 import { SharedAvatar } from "../../../shared/user/shared-avatar"
@@ -106,15 +107,7 @@ export const ApplicationInboxTable = observer(function ApplicationInboxTable({ s
           templateColumns="36px minmax(0, 1.5fr) minmax(0, 1.3fr) minmax(0, 1fr) minmax(140px, 1fr) minmax(160px, 1.1fr) auto 72px"
           gridRowClassName="application-inbox-grid-row"
           overflow="visible"
-          sx={{
-            ...gridStickyHeaderSx,
-            ".application-inbox-grid-row:hover > div": {
-              bg: "gray.50",
-            },
-            ".application-inbox-grid-row:active > div": {
-              bg: "background.blueLight",
-            },
-          }}
+          sx={gridStickyHeaderSx}
         >
           <Box display="contents" role="rowgroup">
             <Box display="contents" role="row">
@@ -144,6 +137,7 @@ export const ApplicationInboxTable = observer(function ApplicationInboxTable({ s
                 label={getSortColumnHeader(EPermitApplicationInboxSortFields.daysInQueue)}
                 sort={sort as ISort<EPermitApplicationInboxSortFields>}
                 onToggleSort={toggleSort}
+                tooltip={t("submissionInbox.daysWithUsTooltip")}
               />
               <SortableHeader
                 field={EPermitApplicationInboxSortFields.assigned}
@@ -199,11 +193,13 @@ const SortableHeader = ({
   label,
   sort,
   onToggleSort,
+  tooltip,
 }: {
   field: EPermitApplicationInboxSortFields
   label: string
   sort: ISort<EPermitApplicationInboxSortFields>
   onToggleSort: (field: EPermitApplicationInboxSortFields) => void
+  tooltip?: string
 }) => (
   <GridHeader role="columnheader">
     <Flex
@@ -216,7 +212,16 @@ const SortableHeader = ({
       borderColor="border.light"
       px={4}
     >
-      <Text textAlign="left">{label}</Text>
+      <HStack spacing={1}>
+        <Text textAlign="left">{label}</Text>
+        {tooltip && (
+          <Tooltip label={tooltip} hasArrow placement="top">
+            <Flex align="center">
+              <Icon as={Info} boxSize={3.5} color="text.secondary" />
+            </Flex>
+          </Tooltip>
+        )}
+      </HStack>
       <SortIcon<EPermitApplicationInboxSortFields> field={field} currentSort={sort} />
     </Flex>
   </GridHeader>
@@ -228,30 +233,29 @@ const ApplicationInboxRow = observer(function ApplicationInboxRow({
   application: IPermitApplication
 }) {
   const { t } = useTranslation()
+  const navigate = useNavigate()
 
   return (
-    <Box key={application.id} className="application-inbox-grid-row" role="row" display="contents">
+    <SearchGridRow
+      key={application.id}
+      className="application-inbox-grid-row"
+      onClick={() => navigate(`/permit-applications/${application.id}`)}
+      _hover={{ bg: "gray.50", cursor: "pointer" }}
+      _active={{ bg: "background.blueLight" }}
+    >
       <SearchGridItem justifyContent="center" px={2}>
         <Circle size="8px" bg={!application.isViewed ? "theme.blueActive" : "transparent"} flexShrink={0} />
       </SearchGridItem>
 
       <SearchGridItem>
-        <Box
-          as={Link}
-          to={`/permit-applications/${application.id}`}
-          color="inherit"
-          textDecoration="none"
-          _hover={{ textDecoration: "none", color: "inherit" }}
-        >
-          <VStack align="start" spacing={0}>
-            <Text fontWeight={700} fontSize="sm" noOfLines={1}>
-              {application.nickname || application.permitType?.name || application.permitTypeAndActivity || "—"}
-            </Text>
-            <Text fontSize="xs" color="text.secondary" noOfLines={1}>
-              {application.number}
-            </Text>
-          </VStack>
-        </Box>
+        <VStack align="start" spacing={0}>
+          <Text fontWeight={700} fontSize="sm" noOfLines={1}>
+            {application.nickname || application.permitType?.name || application.permitTypeAndActivity || "—"}
+          </Text>
+          <Text fontSize="xs" color="text.secondary" noOfLines={1}>
+            {application.number}
+          </Text>
+        </VStack>
       </SearchGridItem>
 
       <SearchGridItem>
@@ -278,6 +282,7 @@ const ApplicationInboxRow = observer(function ApplicationInboxRow({
             to={`projects/${application.projectId}/overview`}
             color="text.link"
             _hover={{ textDecoration: "underline" }}
+            onClick={(e: React.MouseEvent) => e.stopPropagation()}
           >
             {application.projectNumber}
           </Box>
@@ -334,7 +339,7 @@ const ApplicationInboxRow = observer(function ApplicationInboxRow({
           )}
         </HStack>
       </SearchGridItem>
-    </Box>
+    </SearchGridRow>
   )
 })
 

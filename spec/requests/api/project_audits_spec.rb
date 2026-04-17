@@ -191,6 +191,44 @@ RSpec.describe "Api::ProjectAudits (project activities)", type: :request do
       end
     end
 
+    context "with sandbox scoping" do
+      let(:review_manager) do
+        create(:user, :review_manager, jurisdiction: jurisdiction)
+      end
+      # Jurisdictions auto-create :published and :scheduled sandboxes on create
+      let(:sandbox) { jurisdiction.sandboxes.published.first }
+      let!(:sandboxed_project) do
+        create(
+          :permit_project,
+          owner: review_manager,
+          jurisdiction: jurisdiction,
+          sandbox: sandbox
+        )
+      end
+
+      before { sign_in review_manager }
+
+      it "returns 404 when the staff user's sandbox does not match the project's sandbox" do
+        post "/api/permit_projects/#{sandboxed_project.id}/activities",
+             params: {
+             },
+             headers: headers,
+             as: :json
+
+        expect(response).to have_http_status(:not_found)
+      end
+
+      it "returns 200 when the staff user's sandbox matches the project's sandbox" do
+        post "/api/permit_projects/#{sandboxed_project.id}/activities",
+             params: {
+             },
+             headers: headers.merge("X-Sandbox-ID" => sandbox.id),
+             as: :json
+
+        expect(response).to have_http_status(:ok)
+      end
+    end
+
     context "when project has no audits" do
       it "returns empty array and meta with zero counts" do
         empty_project =

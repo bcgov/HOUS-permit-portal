@@ -1,3 +1,4 @@
+import { format } from "date-fns"
 import { t } from "i18next"
 import { flow, Instance, toGenerator, types } from "mobx-state-tree"
 import { withEnvironment } from "../lib/with-environment"
@@ -65,6 +66,7 @@ const PermitProjectCoreModel = types.model("PermitProjectCore", {
   longitude: types.maybeNull(types.string), // From decimal in backend
   viewedAt: types.maybeNull(types.Date),
   enqueuedAt: types.maybeNull(types.Date),
+  firstApplicationReceivedAt: types.maybeNull(types.Date),
   parcelGeometry: types.maybeNull(types.frozen<IParcelGeometry>()),
   inboxSortOrder: types.maybeNull(types.number),
   daysInQueue: types.maybeNull(types.number),
@@ -109,6 +111,10 @@ export const PermitProjectModel = types
     get formattedEnqueuedAt(): string {
       if (!self.enqueuedAt) return "—"
       return new Intl.DateTimeFormat("en-CA").format(self.enqueuedAt)
+    },
+    get formattedFirstApplicationReceivedAt(): string {
+      if (!self.firstApplicationReceivedAt) return t("permitProject.overview.notAvailable")
+      return format(self.firstApplicationReceivedAt, "MMM d, yyyy")
     },
     get rollupStatusDescription() {
       const total = self.totalPermitsCount

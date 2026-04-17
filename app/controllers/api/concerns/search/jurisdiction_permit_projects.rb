@@ -70,7 +70,8 @@ module Api::Concerns::Search::JurisdictionPermitProjects
       total_pages: @jurisdiction_permit_project_search.total_pages,
       current_page: @jurisdiction_permit_project_search.current_page,
       total_count: @jurisdiction_permit_project_search.total_count,
-      state_counts: jurisdiction_state_counts
+      state_counts: jurisdiction_state_counts,
+      unread_count: jurisdiction_unread_count
     }
   end
 
@@ -134,7 +135,8 @@ module Api::Concerns::Search::JurisdictionPermitProjects
       current_page: 1,
       total_count: all_ids.length,
       state_counts: jurisdiction_state_counts,
-      column_totals: column_totals
+      column_totals: column_totals,
+      unread_count: jurisdiction_unread_count
     }
   end
 
@@ -146,17 +148,48 @@ module Api::Concerns::Search::JurisdictionPermitProjects
 
   private
 
+  # Total unread (viewed_at nil) projects across the whole jurisdiction,
+  # ignoring current filters/query so the unread-filter badge reflects the
+  # full jurisdiction-wide unread count.
+  def jurisdiction_unread_count
+    where = {
+      jurisdiction_id: @jurisdiction.id,
+      discarded: false,
+      state: {
+        not: "draft"
+      },
+      viewed_at: nil
+    }
+    where[:sandbox_id] = current_sandbox&.id unless current_user.super_admin?
+
+    PermitProject.search(
+      "*",
+      where: where,
+      load: false,
+      body_options: {
+        size: 0,
+        track_total_hits: true
+      }
+    ).total_count
+  rescue => e
+    Rails.logger.warn("Failed to compute unread count: #{e.message}")
+    0
+  end
+
   def jurisdiction_state_counts
+    where = {
+      jurisdiction_id: @jurisdiction.id,
+      discarded: false,
+      state: {
+        not: "draft"
+      }
+    }
+    where[:sandbox_id] = current_sandbox&.id unless current_user.super_admin?
+
     agg_search =
       PermitProject.search(
         "*",
-        where: {
-          jurisdiction_id: @jurisdiction.id,
-          discarded: false,
-          state: {
-            not: "draft"
-          }
-        },
+        where: where,
         aggs: [:state],
         body_options: {
           size: 0
@@ -268,9 +301,9 @@ module Api::Concerns::Search::JurisdictionPermitProjects
       and_conditions << { state: states.present? ? states : { not: "draft" } }
     end
 
-    # if !current_user.super_admin?
-    #   and_conditions << { sandbox_id: current_sandbox&.id }
-    # end
+    unless current_user.super_admin?
+      and_conditions << { sandbox_id: current_sandbox&.id }
+    end
 
     requirement_template_ids = search_filters.delete(:requirement_template_ids)
     if requirement_template_ids.present?
