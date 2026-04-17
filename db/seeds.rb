@@ -705,3 +705,6 @@ end
 
 PermitApplication.reindex
 PermitProject.reindex
+
+puts "Running pending data migrations..."
+DataMigrate::DatabaseTasks.migrate
