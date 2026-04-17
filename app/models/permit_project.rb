@@ -124,6 +124,12 @@ class PermitProject < ApplicationRecord
     (seconds / 86400.0).floor
   end
 
+  # Earliest submission time across all kept permit applications on this project.
+  # Returns nil if no applications have been submitted yet.
+  def first_application_received_at
+    permit_applications.kept.map(&:submitted_at).compact.min
+  end
+
   def update_viewed_at
     update(viewed_at: Time.current)
   end

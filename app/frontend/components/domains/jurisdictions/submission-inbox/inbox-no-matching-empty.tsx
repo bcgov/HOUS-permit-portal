@@ -1,8 +1,9 @@
-import { Button, Text, VStack } from "@chakra-ui/react"
+import { Link, Text } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
-import { EInboxViewMode } from "../../../../types/enums"
+import { EFlashMessageStatus, EInboxViewMode } from "../../../../types/enums"
+import { CustomMessageBox } from "../../../shared/base/custom-message-box"
 
 interface IProps {
   viewMode: EInboxViewMode
@@ -14,18 +15,22 @@ export const InboxNoMatchingEmpty = observer(function InboxNoMatchingEmpty({ vie
   const isProjects = viewMode === EInboxViewMode.projects
 
   return (
-    <VStack align="start" spacing={3} py={10} px={2} w="full">
-      <Text fontWeight="bold" fontSize="md">
-        {isProjects ? t("submissionInbox.noMatchingProjectsTitle") : t("submissionInbox.noMatchingApplicationsTitle")}
-      </Text>
-      <Text color="text.secondary" fontSize="sm">
-        {isProjects
-          ? t("submissionInbox.noMatchingProjectsDescription")
-          : t("submissionInbox.noMatchingApplicationsDescription")}
-      </Text>
-      <Button variant="link" size="sm" onClick={onClearFilters} p={0} h="auto" minH={0}>
-        {t("submissionInbox.clearAllFilters")}
-      </Button>
-    </VStack>
+    <CustomMessageBox
+      w="full"
+      status={EFlashMessageStatus.info}
+      title={
+        isProjects ? t("submissionInbox.noMatchingProjectsTitle") : t("submissionInbox.noMatchingApplicationsTitle")
+      }
+      description={
+        <Text>
+          {isProjects
+            ? t("submissionInbox.noMatchingProjectsDescription")
+            : t("submissionInbox.noMatchingApplicationsDescription")}{" "}
+          <Link as="button" onClick={onClearFilters} textDecoration="underline">
+            {t("submissionInbox.clearAllFilters")}
+          </Link>
+        </Text>
+      }
+    />
   )
 })
