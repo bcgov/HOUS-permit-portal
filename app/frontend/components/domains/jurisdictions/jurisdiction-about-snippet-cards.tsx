@@ -81,16 +81,12 @@ function OfficeAddressSnippetCard({
 
 export const JurisdictionAboutSnippetCards = observer(({ control, canManage }: IJurisdictionAboutSnippetCardsProps) => {
   const { t } = useTranslation()
-  const { trigger, getValues } = useFormContext()
+  const { trigger } = useFormContext()
   const [editingField, setEditingField] = useState<TEditableSnippetFieldName | null>(null)
-  const watchedSnippets = useWatch({
+  const snippetValues = useWatch({
     control,
     name: ["processingTimeHtml", "keyStagesHtml", "officeAddress"],
   })
-
-  const snippetValues = Array.isArray(watchedSnippets)
-    ? watchedSnippets
-    : [getValues("processingTimeHtml"), getValues("keyStagesHtml"), getValues("officeAddress")]
 
   const visibleFields = SNIPPET_FIELD_ORDER.filter((_, i) => {
     if (canManage) return true

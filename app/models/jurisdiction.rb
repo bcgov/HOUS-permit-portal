@@ -93,12 +93,26 @@ class Jurisdiction < ApplicationRecord
   validates :processing_time_html, length: { maximum: 140 }, allow_blank: true
   validates :key_stages_html, length: { maximum: 140 }, allow_blank: true
   validates :office_address, length: { maximum: 500 }, allow_blank: true
+  validates :office_hours, length: { maximum: 500 }, allow_blank: true
   validates :office_email,
             format: {
               with: URI::MailTo::EMAIL_REGEXP
             },
+            length: {
+              maximum: 255
+            },
             allow_blank: true
-  validates :office_telephone, phone: true, allow_blank: true
+  validates :office_telephone,
+            phone: true,
+            length: {
+              maximum: 128
+            },
+            allow_blank: true
+  validates :timeline_and_deliverables_html,
+            length: {
+              maximum: 10_000
+            },
+            allow_blank: true
   validate :inbox_enabled_requires_inbox_setup
   validate :no_duplicate_part3_occupancy_pathways
 
