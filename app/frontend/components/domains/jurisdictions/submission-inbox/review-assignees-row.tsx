@@ -2,26 +2,21 @@ import { Avatar, AvatarProps, HStack, IconButton, Spinner, Text, Tooltip } from 
 import { UserPlus } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
+import { IUser } from "../../../../models/user"
 import { SharedAvatar } from "../../../shared/user/shared-avatar"
-
-export interface IReviewAssigneeUser {
-  id: string
-  name: string
-  role: string
-}
 
 interface IReviewAssigneesRowProps {
   /**
    * The designated / delegatee reviewer. Rendered first with a blue border to
    * distinguish them from block-level reviewers.
    */
-  primaryAssignee?: IReviewAssigneeUser | null
+  primaryAssignee?: IUser | null
   /**
    * Block-level review collaborators. Only relevant for permit applications.
    * Rendered without a border, capped at `maxSecondaryVisible` with an overflow
    * counter when exceeded.
    */
-  secondaryAssignees?: IReviewAssigneeUser[]
+  secondaryAssignees?: IUser[]
   /**
    * Maximum number of secondary avatars to render before collapsing the rest
    * into a "+N" overflow avatar. Defaults to `Infinity` (no cap).

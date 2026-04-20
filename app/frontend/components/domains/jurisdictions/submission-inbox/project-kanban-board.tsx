@@ -114,8 +114,7 @@ const ProjectKanbanCard = observer(function ProjectKanbanCard({
   const total = project.totalPermitsCount
   const isUnread = !project.viewedAt
 
-  const user = project.reviewDelegatee?.user
-  const primaryAssignee = user ? { id: user.id, name: user.name, role: user.role } : null
+  const primaryAssignee = project.reviewDelegatee?.user ?? null
 
   return (
     <KanbanCard

@@ -290,8 +290,7 @@ const ProjectAssignedCell = observer(function ProjectAssignedCell({ project }: {
   const { t } = useTranslation()
   const { permitProjectStore } = useMst()
 
-  const user = project.reviewDelegatee?.user
-  const primaryAssignee = user ? { id: user.id, name: user.name, role: user.role } : null
+  const primaryAssignee = project.reviewDelegatee?.user ?? null
 
   return (
     <ReviewAssigneesRow primaryAssignee={primaryAssignee} emptyText={t("ui.unassigned")}>

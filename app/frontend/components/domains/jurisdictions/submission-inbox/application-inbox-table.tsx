@@ -21,6 +21,7 @@ import { useTranslation } from "react-i18next"
 import { Link, useNavigate } from "react-router-dom"
 import { IPermitApplication } from "../../../../models/permit-application"
 import { IPermitProject } from "../../../../models/permit-project"
+import { IUser } from "../../../../models/user"
 import { useMst } from "../../../../setup/root"
 import { IPermitApplicationInboxStore } from "../../../../stores/submission-inbox-store"
 import {
@@ -346,26 +347,22 @@ const ApplicationBlockLevelAndDesignatedAssigneesCell = observer(
     const { t } = useTranslation()
     const { permitApplicationStore } = useMst()
 
-    const designatedReviewerUser = application.designatedReviewer?.collaborator?.user
-    const primaryAssignee = designatedReviewerUser
-      ? { id: designatedReviewerUser.id, name: designatedReviewerUser.name, role: designatedReviewerUser.role }
-      : null
+    const primaryAssignee = application.designatedReviewer?.collaborator?.user ?? null
 
     const secondaryAssignees = useMemo(() => {
-      const designatedReviewerUserId = application.designatedReviewer?.collaborator?.user?.id
-      const seenUserIds = new Set<string>(designatedReviewerUserId ? [designatedReviewerUserId] : [])
-      const users: { id: string; name: string; role: string }[] = []
+      const seenUserIds = new Set<string>(primaryAssignee ? [primaryAssignee.id] : [])
+      const users: IUser[] = []
 
       application.getCollaborationAssignees(ECollaborationType.review).forEach((collaboration) => {
         const user = collaboration.collaborator?.user
         if (user && !seenUserIds.has(user.id)) {
           seenUserIds.add(user.id)
-          users.push({ id: user.id, name: user.name, role: user.role })
+          users.push(user)
         }
       })
 
       return users
-    }, [application])
+    }, [application, primaryAssignee])
 
     return (
       <ReviewAssigneesRow

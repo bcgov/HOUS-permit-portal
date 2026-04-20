@@ -5,6 +5,7 @@ import React, { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { Link, useNavigate } from "react-router-dom"
 import { IPermitApplication } from "../../../../models/permit-application"
+import { IUser } from "../../../../models/user"
 import { useMst } from "../../../../setup/root"
 import { colors } from "../../../../styles/theme/foundations/colors"
 import { ECollaborationType, EPermitApplicationStatus } from "../../../../types/enums"
@@ -121,18 +122,15 @@ const ApplicationKanbanCard = observer(function ApplicationKanbanCard({
   const isSandbox = !!application.sandbox
   const isUnread = !application.isViewed
 
-  const designatedReviewerUser = application.designatedReviewer?.collaborator?.user
-  const primaryAssignee = designatedReviewerUser
-    ? { id: designatedReviewerUser.id, name: designatedReviewerUser.name, role: designatedReviewerUser.role }
-    : null
+  const primaryAssignee = application.designatedReviewer?.collaborator?.user ?? null
 
-  const secondaryAssignees: { id: string; name: string; role: string }[] = []
-  const seenUserIds = new Set<string>(designatedReviewerUser ? [designatedReviewerUser.id] : [])
+  const secondaryAssignees: IUser[] = []
+  const seenUserIds = new Set<string>(primaryAssignee ? [primaryAssignee.id] : [])
   for (const collab of application.getCollaborationAssignees(ECollaborationType.review)) {
     const user = collab.collaborator?.user
     if (user && !seenUserIds.has(user.id)) {
       seenUserIds.add(user.id)
-      secondaryAssignees.push({ id: user.id, name: user.name, role: user.role })
+      secondaryAssignees.push(user)
     }
   }
 
