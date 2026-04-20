@@ -147,6 +147,8 @@ const JurisdictionScreenBody = observer(
       </HeroBanner>
     )
 
+    const { mapPosition, mapZoom } = getDefaultJurisdictionValuesForJurisdiction(currentJurisdiction)
+
     return (
       <Flex as="main" direction="column" w="full" bg="greys.white">
         <FormProvider {...formMethods}>
@@ -175,8 +177,8 @@ const JurisdictionScreenBody = observer(
                     </GridItem>
                     <GridItem order={{ base: 1, md: 2 }} minW={0}>
                       <JurisdictionMap
-                        mapPosition={currentJurisdiction.mapPosition}
-                        mapZoom={currentJurisdiction.mapZoom}
+                        mapPosition={mapPosition}
+                        mapZoom={mapZoom}
                         linePositions={currentJurisdiction.boundaryPoints}
                       />
                     </GridItem>
