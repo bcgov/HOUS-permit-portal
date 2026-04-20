@@ -131,26 +131,30 @@ const JurisdictionScreenBody = observer(
         currentJurisdiction?.officeEmail
       ) ||
       (currentJurisdiction?.contacts?.length ?? 0) > 0
+    const heroBanner = (
+      <HeroBanner containerProps={{ pl: 8, pr: { base: 18, md: 8 }, py: 16 }}>
+        <HighlightedLayout p={8} gap="18px" maxW={{ md: "calc((200% - var(--chakra-space-6)) / 3)", base: "full" }}>
+          <Heading as="h1" mb={0} fontSize="2xl">
+            {qualifiedName}
+          </Heading>
+          <Text fontSize="lg">{t("jurisdiction.heroBannerDescription", { jurisdictionName: qualifiedName })}</Text>
+          <JurisdictionHeroLgWebsiteRow
+            canManageAbout={canManageAbout}
+            jurisdictionName={qualifiedName}
+            persistedWebsiteUrl={currentJurisdiction.websiteUrl ?? ""}
+          />
+        </HighlightedLayout>
+      </HeroBanner>
+    )
+
+    const { mapPosition, mapZoom } = getDefaultJurisdictionValuesForJurisdiction(currentJurisdiction)
+
     return (
       <Flex as="main" direction="column" w="full" bg="greys.white">
         <FormProvider {...formMethods}>
-          <HeroBanner containerProps={{ pl: 8, pr: { base: 18, md: 8 }, py: 16 }}>
-            <HighlightedLayout p={8} gap="18px" maxW={{ md: "calc((200% - var(--chakra-space-6)) / 3)", base: "full" }}>
-              <Heading as="h1" mb={0} fontSize="2xl">
-                {qualifiedName}
-              </Heading>
-              <Text fontSize="lg">{t("jurisdiction.heroBannerDescription", { jurisdictionName: qualifiedName })}</Text>
-              <JurisdictionHeroLgWebsiteRow
-                canManageAbout={canManageAbout}
-                jurisdictionName={qualifiedName}
-                persistedWebsiteUrl={currentJurisdiction.websiteUrl ?? ""}
-              />
-            </HighlightedLayout>
-          </HeroBanner>
-        </FormProvider>
-        {currentUser?.isReviewStaff || showAboutPage ? (
-          <FormProvider {...formMethods}>
-            <form onSubmit={formMethods.handleSubmit(onSubmit)} className="space-y-8 divide-y divide-gray-200">
+          {currentUser?.isReviewStaff || showAboutPage ? (
+            <form onSubmit={formMethods.handleSubmit(onSubmit)}>
+              {heroBanner}
               {(hasAboutSnippets || canManageAbout) && (
                 <Container maxW="container.lg" p={8}>
                   <JurisdictionAboutSnippetCards control={control} canManage={canManageAbout} />
@@ -173,8 +177,8 @@ const JurisdictionScreenBody = observer(
                     </GridItem>
                     <GridItem order={{ base: 1, md: 2 }} minW={0}>
                       <JurisdictionMap
-                        mapPosition={currentJurisdiction.mapPosition}
-                        mapZoom={currentJurisdiction.mapZoom}
+                        mapPosition={mapPosition}
+                        mapZoom={mapZoom}
                         linePositions={currentJurisdiction.boundaryPoints}
                       />
                     </GridItem>
@@ -418,44 +422,47 @@ const JurisdictionScreenBody = observer(
                 </Can>
               </Container>
             </form>
-          </FormProvider>
-        ) : (
-          <Container maxW="container.lg" py={{ base: 6, md: 16 }} px={8}>
-            <Box>
-              <Heading as="h2" fontSize="2xl" fontWeight="bold" mb={6}>
-                {t("jurisdiction.notUsingBPH.title")}
-              </Heading>
-              <Text fontSize="lg" mb={2}>
-                {t("jurisdiction.notUsingBPH.description")}
-              </Text>
-              <Text fontSize="lg" mb={8}>
-                {t("jurisdiction.notUsingBPH.noInfo", { jurisdictionName: qualifiedName })}
-              </Text>
-              <Box bg="theme.blueLight" borderRadius="lg" p={8} mb={8}>
-                <Heading as="h3" fontSize="xl" fontWeight="bold" mb={4}>
-                  {t("jurisdiction.notUsingBPH.wantToUse.title")}
-                </Heading>
-                <Text fontSize="md" mb={2}>
-                  {t("jurisdiction.notUsingBPH.wantToUse.description")}
-                </Text>
-                <Text fontSize="md" mb={6}>
-                  {t("jurisdiction.notUsingBPH.wantToUse.emailButtonDescription")}
-                </Text>
-                <Button
-                  as="a"
-                  href={mailtoHref}
-                  variant="primary"
-                  size="lg"
-                  rightIcon={<ArrowSquareOut />}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {t("jurisdiction.notUsingBPH.wantToUse.emailButtonText")}
-                </Button>
-              </Box>
-            </Box>
-          </Container>
-        )}
+          ) : (
+            <>
+              {heroBanner}
+              <Container maxW="container.lg" py={{ base: 6, md: 16 }} px={8}>
+                <Box>
+                  <Heading as="h2" fontSize="2xl" fontWeight="bold" mb={6}>
+                    {t("jurisdiction.notUsingBPH.title")}
+                  </Heading>
+                  <Text fontSize="lg" mb={2}>
+                    {t("jurisdiction.notUsingBPH.description")}
+                  </Text>
+                  <Text fontSize="lg" mb={8}>
+                    {t("jurisdiction.notUsingBPH.noInfo", { jurisdictionName: qualifiedName })}
+                  </Text>
+                  <Box bg="theme.blueLight" borderRadius="lg" p={8} mb={8}>
+                    <Heading as="h3" fontSize="xl" fontWeight="bold" mb={4}>
+                      {t("jurisdiction.notUsingBPH.wantToUse.title")}
+                    </Heading>
+                    <Text fontSize="md" mb={2}>
+                      {t("jurisdiction.notUsingBPH.wantToUse.description")}
+                    </Text>
+                    <Text fontSize="md" mb={6}>
+                      {t("jurisdiction.notUsingBPH.wantToUse.emailButtonDescription")}
+                    </Text>
+                    <Button
+                      as="a"
+                      href={mailtoHref}
+                      variant="primary"
+                      size="lg"
+                      rightIcon={<ArrowSquareOut />}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {t("jurisdiction.notUsingBPH.wantToUse.emailButtonText")}
+                    </Button>
+                  </Box>
+                </Box>
+              </Container>
+            </>
+          )}
+        </FormProvider>
       </Flex>
     )
   }
