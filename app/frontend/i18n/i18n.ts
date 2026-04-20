@@ -1346,6 +1346,8 @@ Thank you,
             updatedAt: "Last modified",
             status: "Status",
             allPermits: "View all applications",
+            mapVisualReferenceDisclaimer:
+              "Map is for visual reference only and is not intended for use in GIS analysis, surveying, construction or other activities.",
           },
           activity: {
             title: "Activity",
