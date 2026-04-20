@@ -37,8 +37,8 @@ export const ActivityTabPanelContent = observer(({ permitProject }: IProps) => {
   } = projectAuditStore
 
   return (
-    <Flex direction="column" flex={1} bg="greys.white" p={10}>
-      <Box as="section" mb={6}>
+    <Flex direction="column" flex={1} minH={0} bg="greys.white" p={10}>
+      <Box as="section" mb={6} flexShrink={0}>
         <HStack align="center" spacing={4}>
           <TrendUp size={32} />
           <Heading as="h2" size="lg" mb={0}>
@@ -46,11 +46,11 @@ export const ActivityTabPanelContent = observer(({ permitProject }: IProps) => {
           </Heading>
         </HStack>
       </Box>
-      <Text color="text.secondary" mb={8}>
+      <Text color="text.secondary" mb={8} flexShrink={0}>
         {t("permitProject.activity.description")}
       </Text>
-      <Flex direction="column" w="full">
-        <Flex justifyContent="space-between" align="flex-end" flexWrap="wrap" gap={4}>
+      <Flex direction="column" flex={1} minH={0} w="full">
+        <Flex justifyContent="space-between" align="flex-end" flexWrap="wrap" gap={4} flexShrink={0}>
           <HStack
             align="flex-end"
             spacing={4}
@@ -82,7 +82,7 @@ export const ActivityTabPanelContent = observer(({ permitProject }: IProps) => {
             </Flex>
           </HStack>
         </Flex>
-        <Box as="ul" listStyleType="none" p={0} m={0}>
+        <Box as="ul" listStyleType="none" p={0} m={0} flex={1} minH={0} overflowY="auto">
           {isSearching ? (
             <Flex py={50} justify="center">
               <SharedSpinner />
@@ -99,7 +99,7 @@ export const ActivityTabPanelContent = observer(({ permitProject }: IProps) => {
             ))
           )}
         </Box>
-        <Flex w="full" justifyContent="space-between" mt={4}>
+        <Flex w="full" justifyContent="space-between" mt={4} flexShrink={0}>
           <PerPageSelect
             handleCountPerPageChange={handleCountPerPageChange}
             countPerPage={countPerPage}
