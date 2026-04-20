@@ -288,6 +288,22 @@ class Jurisdiction < ApplicationRecord
       .count
   end
 
+  # Mirrors the semantics of
+  # Api::Concerns::Search::JurisdictionPermitProjects#jurisdiction_unread_count
+  # (the unread-filter badge on the project-inbox search page):
+  #   - kept (not discarded)
+  #   - state != "draft"
+  #   - viewed_at IS NULL
+  #   - optional sandbox scope
+  def unviewed_projects_count(sandbox: nil)
+    permit_projects
+      .kept
+      .for_sandbox(sandbox)
+      .where.not(state: PermitProject.states[:draft])
+      .where(viewed_at: nil)
+      .count
+  end
+
   def unviewed_permit_applications
     permit_applications.kept.unviewed
   end

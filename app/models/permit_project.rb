@@ -40,6 +40,8 @@ class PermitProject < ApplicationRecord
   delegate :name, to: :owner, prefix: true
 
   after_commit :reindex
+  after_commit :broadcast_jurisdiction_projects_count_update,
+               if: :should_broadcast_projects_count_update?
 
   scope :sandboxed, -> { where.not(sandbox_id: nil) }
   scope :live, -> { where(sandbox_id: nil) }
@@ -136,6 +138,27 @@ class PermitProject < ApplicationRecord
 
   def mark_as_unviewed
     update(viewed_at: nil)
+  end
+
+  def broadcast_jurisdiction_projects_count_update
+    return unless jurisdiction.present?
+
+    review_staff_user_ids =
+      jurisdiction.users.kept.select(&:review_staff?).map(&:id)
+    return if review_staff_user_ids.empty?
+
+    WebsocketBroadcaster.push_update_to_relevant_users(
+      review_staff_user_ids,
+      Constants::Websockets::Events::Jurisdiction::DOMAIN,
+      Constants::Websockets::Events::Jurisdiction::TYPES[
+        :unviewed_projects_count_updated
+      ],
+      {
+        jurisdiction_id: jurisdiction.id,
+        sandbox_id: sandbox_id,
+        unviewed_count: jurisdiction.unviewed_projects_count(sandbox: sandbox)
+      }
+    )
   end
 
   def search_data
@@ -334,6 +357,17 @@ class PermitProject < ApplicationRecord
   end
 
   private
+
+  # Recompute the jurisdiction-wide unviewed projects badge whenever a change
+  # could affect membership in the set counted by
+  # Jurisdiction#unviewed_projects_count:
+  #   - viewed_at transitions (mark_as_unviewed / update_viewed_at)
+  #   - state transitions in/out of "draft"
+  #   - discarded/undiscarded transitions
+  def should_broadcast_projects_count_update?
+    saved_change_to_viewed_at? || saved_change_to_state? ||
+      saved_change_to_discarded_at?
+  end
 
   def sandbox_belongs_to_jurisdiction
     return unless sandbox
