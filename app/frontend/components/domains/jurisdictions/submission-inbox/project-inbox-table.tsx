@@ -1,5 +1,4 @@
 import {
-  Avatar,
   Box,
   Circle,
   Flex,
@@ -11,12 +10,11 @@ import {
   MenuItem,
   MenuList,
   Portal,
-  Spinner,
   Text,
   Tooltip,
   VStack,
 } from "@chakra-ui/react"
-import { Info, Swap, UserPlus } from "@phosphor-icons/react"
+import { Info, Swap } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
@@ -34,10 +32,10 @@ import { SearchGrid } from "../../../shared/grid/search-grid"
 import { SearchGridItem } from "../../../shared/grid/search-grid-item"
 import { ProjectStateTag } from "../../../shared/permit-projects/project-state-tag"
 import { SortIcon } from "../../../shared/sort-icon"
-import { SharedAvatar } from "../../../shared/user/shared-avatar"
 import { InboxNoMatchingEmpty } from "./inbox-no-matching-empty"
 import { ProjectReviewCollaboratorsPopover } from "./project-designated-reviewer-popover"
 import { ProjectInboxPermitApplicationsPopover } from "./project-inbox-permit-applications-popover"
+import { renderAssignPlusIconTrigger, ReviewAssigneesRow } from "./review-assignees-row"
 import { SubmissionInboxMarkUnreadIconButton } from "./submission-inbox-mark-unread-icon-button"
 
 interface IProps {
@@ -53,8 +51,6 @@ const SORT_FIELDS = [
   EPermitProjectInboxSortFields.assigned,
   EPermitProjectInboxSortFields.state,
 ]
-
-const MAX_VISIBLE_AVATARS = 3
 
 export const ProjectInboxTable = observer(function ProjectInboxTable({ searchStore, projects }: IProps) {
   const { t } = useTranslation()
@@ -294,60 +290,21 @@ const ProjectAssignedCell = observer(function ProjectAssignedCell({ project }: {
   const { t } = useTranslation()
   const { permitProjectStore } = useMst()
 
-  const allCollaborators = project.aggregatedReviewCollaborators
-  const visibleAssignees = allCollaborators.slice(0, MAX_VISIBLE_AVATARS)
-  const overflowCount = allCollaborators.length - MAX_VISIBLE_AVATARS
-  const hasAnyAssignees = allCollaborators.length > 0
+  const user = project.reviewDelegatee?.user
+  const primaryAssignee = user ? { id: user.id, name: user.name, role: user.role } : null
 
   return (
-    <HStack spacing={1}>
-      {hasAnyAssignees ? (
-        <>
-          {visibleAssignees.map((user) => (
-            <SharedAvatar key={user.id} size="xs" name={user.name} role={user.role} fontSize="2xs" />
-          ))}
-          {overflowCount > 0 && (
-            <Avatar
-              size="xs"
-              name={`+${overflowCount}`}
-              getInitials={(name) => name}
-              bg="gray.200"
-              color="text.primary"
-              fontSize="2xs"
-            />
-          )}
-        </>
-      ) : (
-        <Text fontSize="sm" color="text.secondary">
-          {t("ui.unassigned")}
-        </Text>
-      )}
+    <ReviewAssigneesRow primaryAssignee={primaryAssignee} emptyText={t("ui.unassigned")}>
       <ProjectReviewCollaboratorsPopover
         project={project}
         onBeforeOpen={async () => {
           await permitProjectStore.fetchPermitProject(project.id)
         }}
-        renderTrigger={({ isLoading, collaborationCount, onClick, isDisabled }) => (
-          <IconButton
-            aria-label={t("permitCollaboration.projectSidebar.projectReviewCollaborators")}
-            icon={
-              isLoading ? (
-                <Spinner size="xs" />
-              ) : collaborationCount > 0 ? (
-                <UserPlus size={14} />
-              ) : (
-                <UserPlus size={14} />
-              )
-            }
-            size="xs"
-            variant="ghost"
-            borderRadius="full"
-            onClick={onClick}
-            isDisabled={isDisabled}
-          />
-        )}
+        renderTrigger={renderAssignPlusIconTrigger({
+          ariaLabel: t("permitCollaboration.projectSidebar.projectReviewCollaborators"),
+        })}
       />
-    </HStack>
+    </ReviewAssigneesRow>
   )
 })
 

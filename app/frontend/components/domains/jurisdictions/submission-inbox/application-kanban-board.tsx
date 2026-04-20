@@ -1,18 +1,5 @@
-import {
-  Avatar,
-  Box,
-  Icon,
-  IconButton,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
-  Portal,
-  Spinner,
-  Text,
-  Tooltip,
-} from "@chakra-ui/react"
-import { Swap, UserPlus } from "@phosphor-icons/react"
+import { Box, Icon, IconButton, Menu, MenuButton, MenuItem, MenuList, Portal, Text, Tooltip } from "@chakra-ui/react"
+import { Swap } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useMemo } from "react"
 import { useTranslation } from "react-i18next"
@@ -21,10 +8,10 @@ import { IPermitApplication } from "../../../../models/permit-application"
 import { useMst } from "../../../../setup/root"
 import { colors } from "../../../../styles/theme/foundations/colors"
 import { ECollaborationType, EPermitApplicationStatus } from "../../../../types/enums"
-import { SharedAvatar } from "../../../shared/user/shared-avatar"
 import { DesignatedCollaboratorAssignmentPopover } from "../../permit-application/collaborator-management/designated-collaborator-assignment-popover"
 import { EReorderDirection, IKanbanColumn, IReorderEvent, KanbanBoard } from "./kanban-board"
 import { KanbanCard } from "./kanban-card"
+import { renderAssignPlusIconTrigger, ReviewAssigneesRow } from "./review-assignees-row"
 
 interface IProps {
   applications: IPermitApplication[]
@@ -134,25 +121,20 @@ const ApplicationKanbanCard = observer(function ApplicationKanbanCard({
   const isSandbox = !!application.sandbox
   const isUnread = !application.isViewed
 
-  const designatedReviewerUserId = application.designatedReviewer?.collaborator?.user?.id
+  const designatedReviewerUser = application.designatedReviewer?.collaborator?.user
+  const primaryAssignee = designatedReviewerUser
+    ? { id: designatedReviewerUser.id, name: designatedReviewerUser.name, role: designatedReviewerUser.role }
+    : null
 
-  const blockLevelReviewCollaborations = application.getCollaborationAssignees(ECollaborationType.review)
-  const seenUserIds = new Set<string>(designatedReviewerUserId ? [designatedReviewerUserId] : [])
-  const blockLevelReviewAssigneeUsers: { name: string; id: string; role: string }[] = []
-  for (const collab of blockLevelReviewCollaborations) {
+  const secondaryAssignees: { id: string; name: string; role: string }[] = []
+  const seenUserIds = new Set<string>(designatedReviewerUser ? [designatedReviewerUser.id] : [])
+  for (const collab of application.getCollaborationAssignees(ECollaborationType.review)) {
     const user = collab.collaborator?.user
     if (user && !seenUserIds.has(user.id)) {
       seenUserIds.add(user.id)
-      blockLevelReviewAssigneeUsers.push({ name: user.name, id: user.id, role: user.role })
+      secondaryAssignees.push({ id: user.id, name: user.name, role: user.role })
     }
   }
-
-  const visibleBlockLevelReviewAssignees = blockLevelReviewAssigneeUsers.slice(
-    0,
-    MAX_VISIBLE_BLOCK_LEVEL_REVIEW_ASSIGNEE_AVATARS
-  )
-  const blockLevelReviewAssigneesOverflowCount =
-    blockLevelReviewAssigneeUsers.length - MAX_VISIBLE_BLOCK_LEVEL_REVIEW_ASSIGNEE_AVATARS
 
   return (
     <KanbanCard
@@ -164,55 +146,23 @@ const ApplicationKanbanCard = observer(function ApplicationKanbanCard({
       isLast={isLast}
       onMove={onMove}
       avatars={
-        <>
-          {visibleBlockLevelReviewAssignees.map((user) => (
-            <SharedAvatar key={user.id} size="xs" name={user.name} role={user.role} fontSize="2xs" />
-          ))}
-          {blockLevelReviewAssigneesOverflowCount > 0 && (
-            <Avatar
-              size="xs"
-              name={`+${blockLevelReviewAssigneesOverflowCount}`}
-              getInitials={(name) => name}
-              bg="gray.200"
-              color="text.primary"
-              fontSize="2xs"
-            />
-          )}
+        <ReviewAssigneesRow
+          primaryAssignee={primaryAssignee}
+          secondaryAssignees={secondaryAssignees}
+          maxSecondaryVisible={MAX_VISIBLE_BLOCK_LEVEL_REVIEW_ASSIGNEE_AVATARS}
+        >
           <DesignatedCollaboratorAssignmentPopover
             permitApplication={application}
             collaborationType={ECollaborationType.review}
             onBeforeOpen={async () => {
               await permitApplicationStore.fetchPermitApplication(application.id, true)
             }}
-            renderTrigger={({ isLoading, existingDelegateeCollaboration, onClick, isDisabled }) => (
-              <IconButton
-                aria-label={t("permitCollaboration.sidebar.title")}
-                icon={
-                  isLoading ? (
-                    <Spinner size="xs" />
-                  ) : existingDelegateeCollaboration ? (
-                    <SharedAvatar
-                      size="xs"
-                      name={existingDelegateeCollaboration.collaborator?.user?.name}
-                      role={existingDelegateeCollaboration.collaborator?.user?.role}
-                      fontSize="2xs"
-                      border="2px solid"
-                      borderColor="theme.blueActive"
-                    />
-                  ) : (
-                    <UserPlus size={16} />
-                  )
-                }
-                size="sm"
-                minW={7}
-                h={7}
-                variant="ghost"
-                onClick={onClick}
-                isDisabled={isDisabled}
-              />
-            )}
+            renderTrigger={renderAssignPlusIconTrigger({
+              ariaLabel: t("permitCollaboration.sidebar.title"),
+              size: "sm",
+            })}
           />
-        </>
+        </ReviewAssigneesRow>
       }
     >
       {isSandbox && (

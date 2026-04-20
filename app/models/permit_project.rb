@@ -280,49 +280,12 @@ class PermitProject < ApplicationRecord
     audits
   end
 
-  def aggregated_review_collaborators
-    users = {}
-
-    # Include project-level review collaborators
+  # Exposed in API as +review_delegatee+ (Collaborator JSON). UI treats a single project reviewer.
+  def review_delegatee
     permit_project_collaborations
       .includes(collaborator: :user)
-      .each do |ppc|
-        user = ppc.collaborator&.user
-        next unless user
-
-        users[user.id] ||= {
-          id: user.id,
-          name: user.name,
-          role: user.role,
-          is_project_collaborator: true
-        }
-      end
-
-    # Include per-application review collaborators
-    permit_applications.each do |pa|
-      next if pa.discarded? || !pa.submitted?
-
-      pa.permit_collaborations.each do |collab|
-        next unless collab.review?
-
-        user = collab.collaborator&.user
-        next unless user
-
-        existing = users[user.id]
-        if existing
-          existing[:is_project_collaborator] ||= false
-        else
-          users[user.id] = {
-            id: user.id,
-            name: user.name,
-            role: user.role,
-            is_project_collaborator: false
-          }
-        end
-      end
-    end
-
-    users.values
+      .first
+      &.collaborator
   end
 
   def designated_reviewer_enabled?
@@ -330,23 +293,38 @@ class PermitProject < ApplicationRecord
       jurisdiction&.allow_designated_reviewer
   end
 
+  # Atomically assigns the project's single review collaborator, replacing any
+  # existing assignment. Re-picking the current collaborator is a no-op (no
+  # notification churn). Locks existing kept rows to serialize concurrent calls.
   def assign_project_review_collaborator!(collaborator_id)
     unless designated_reviewer_enabled?
       raise "Designated reviewer feature is not enabled"
     end
 
-    collaboration =
-      permit_project_collaborations.create!(collaborator_id: collaborator_id)
+    transaction do
+      existing = permit_project_collaborations.kept.lock.first
 
-    PermitHubMailer.notify_project_review_collaboration(
-      permit_project_collaboration: collaboration
-    )&.deliver_later
+      if existing&.collaborator_id == collaborator_id
+        existing
+      else
+        existing&.discard!
 
-    NotificationService.publish_project_collaboration_assignment_event(
-      collaboration
-    )
+        collaboration =
+          permit_project_collaborations.create!(
+            collaborator_id: collaborator_id
+          )
 
-    collaboration
+        PermitHubMailer.notify_project_review_collaboration(
+          permit_project_collaboration: collaboration
+        )&.deliver_later
+
+        NotificationService.publish_project_collaboration_assignment_event(
+          collaboration
+        )
+
+        collaboration
+      end
+    end
   end
 
   def unassign_project_review_collaborator!(collaborator_id)

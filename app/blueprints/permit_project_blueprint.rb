@@ -54,13 +54,14 @@ class PermitProjectBlueprint < Blueprinter::Base
   view :jurisdiction_review_inbox do
     include_view :base
 
-    field :aggregated_review_collaborators,
-          if: ->(_field_name, permit_project, options) do
-            options[:current_user]&.review_staff_of?(
-              permit_project.jurisdiction_id
-            )
-          end do |permit_project, _options|
-      permit_project.aggregated_review_collaborators
+    association :review_delegatee,
+                blueprint: CollaboratorBlueprint,
+                if: ->(_field_name, permit_project, options) do
+                  options[:current_user]&.review_staff_of?(
+                    permit_project.jurisdiction_id
+                  )
+                end do |permit_project, _options|
+      permit_project.review_delegatee
     end
 
     association :permit_project_collaborations,

@@ -1,5 +1,5 @@
-import { Avatar, Box, HStack, Icon, IconButton, Spinner, Text } from "@chakra-ui/react"
-import { CalendarBlank, UserPlus } from "@phosphor-icons/react"
+import { Box, HStack, Icon, Text } from "@chakra-ui/react"
+import { CalendarBlank } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useMemo } from "react"
 import { useTranslation } from "react-i18next"
@@ -7,12 +7,12 @@ import { Link } from "react-router-dom"
 import { IPermitProject } from "../../../../models/permit-project"
 import { useMst } from "../../../../setup/root"
 import { EProjectState } from "../../../../types/enums"
-import { SharedAvatar } from "../../../shared/user/shared-avatar"
 import { ChangeProjectStateMenu } from "./change-project-state-menu"
 import { EReorderDirection, IKanbanColumn, IReorderEvent, KanbanBoard } from "./kanban-board"
 import { KanbanCard } from "./kanban-card"
 import { ProjectReviewCollaboratorsPopover } from "./project-designated-reviewer-popover"
 import { ProjectInboxPermitApplicationsPopover } from "./project-inbox-permit-applications-popover"
+import { renderAssignPlusIconTrigger, ReviewAssigneesRow } from "./review-assignees-row"
 
 interface IProps {
   projects: IPermitProject[]
@@ -96,8 +96,6 @@ export const ProjectKanbanBoard = observer(function ProjectKanbanBoard({
   )
 })
 
-const MAX_VISIBLE_AVATARS = 3
-
 const ProjectKanbanCard = observer(function ProjectKanbanCard({
   project,
   isFirst,
@@ -116,9 +114,8 @@ const ProjectKanbanCard = observer(function ProjectKanbanCard({
   const total = project.totalPermitsCount
   const isUnread = !project.viewedAt
 
-  const allCollaborators = project.aggregatedReviewCollaborators
-  const visibleAssignees = allCollaborators.slice(0, MAX_VISIBLE_AVATARS)
-  const overflowCount = allCollaborators.length - MAX_VISIBLE_AVATARS
+  const user = project.reviewDelegatee?.user
+  const primaryAssignee = user ? { id: user.id, name: user.name, role: user.role } : null
 
   return (
     <KanbanCard
@@ -130,39 +127,18 @@ const ProjectKanbanCard = observer(function ProjectKanbanCard({
       isLast={isLast}
       onMove={onMove}
       avatars={
-        <>
-          {visibleAssignees.map((user) => (
-            <SharedAvatar key={user.id} size="xs" name={user.name} role={user.role} fontSize="2xs" />
-          ))}
-          {overflowCount > 0 && (
-            <Avatar
-              size="xs"
-              name={`+${overflowCount}`}
-              getInitials={(name) => name}
-              bg="gray.200"
-              color="text.primary"
-              fontSize="2xs"
-            />
-          )}
+        <ReviewAssigneesRow primaryAssignee={primaryAssignee}>
           <ProjectReviewCollaboratorsPopover
             project={project}
             onBeforeOpen={async () => {
               await permitProjectStore.fetchPermitProject(project.id)
             }}
-            renderTrigger={({ isLoading, collaborationCount, onClick, isDisabled }) => (
-              <IconButton
-                aria-label={t("permitCollaboration.projectSidebar.projectReviewCollaborators")}
-                icon={isLoading ? <Spinner size="xs" /> : <UserPlus size={16} />}
-                size="sm"
-                minW={7}
-                h={7}
-                variant="ghost"
-                onClick={onClick}
-                isDisabled={isDisabled}
-              />
-            )}
+            renderTrigger={renderAssignPlusIconTrigger({
+              ariaLabel: t("permitCollaboration.projectSidebar.projectReviewCollaborators"),
+              size: "sm",
+            })}
           />
-        </>
+        </ReviewAssigneesRow>
       }
     >
       <Box

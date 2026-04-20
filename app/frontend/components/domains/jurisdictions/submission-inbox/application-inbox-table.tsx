@@ -1,5 +1,4 @@
 import {
-  Avatar,
   Box,
   Circle,
   Flex,
@@ -11,12 +10,11 @@ import {
   MenuItem,
   MenuList,
   Portal,
-  Spinner,
   Text,
   Tooltip,
   VStack,
 } from "@chakra-ui/react"
-import { Info, Swap, UserPlus } from "@phosphor-icons/react"
+import { Info, Swap } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useMemo } from "react"
 import { useTranslation } from "react-i18next"
@@ -41,9 +39,9 @@ import { SearchGridItem } from "../../../shared/grid/search-grid-item"
 import { SearchGridRow } from "../../../shared/grid/search-grid-row"
 import { PermitApplicationStatusTag } from "../../../shared/permit-applications/permit-application-status-tag"
 import { SortIcon } from "../../../shared/sort-icon"
-import { SharedAvatar } from "../../../shared/user/shared-avatar"
 import { DesignatedCollaboratorAssignmentPopover } from "../../permit-application/collaborator-management/designated-collaborator-assignment-popover"
 import { InboxNoMatchingEmpty } from "./inbox-no-matching-empty"
+import { renderAssignPlusIconTrigger, ReviewAssigneesRow } from "./review-assignees-row"
 import { SubmissionInboxMarkUnreadIconButton } from "./submission-inbox-mark-unread-icon-button"
 
 interface IProps {
@@ -348,7 +346,12 @@ const ApplicationBlockLevelAndDesignatedAssigneesCell = observer(
     const { t } = useTranslation()
     const { permitApplicationStore } = useMst()
 
-    const blockLevelReviewAssigneeUsers = useMemo(() => {
+    const designatedReviewerUser = application.designatedReviewer?.collaborator?.user
+    const primaryAssignee = designatedReviewerUser
+      ? { id: designatedReviewerUser.id, name: designatedReviewerUser.name, role: designatedReviewerUser.role }
+      : null
+
+    const secondaryAssignees = useMemo(() => {
       const designatedReviewerUserId = application.designatedReviewer?.collaborator?.user?.id
       const seenUserIds = new Set<string>(designatedReviewerUserId ? [designatedReviewerUserId] : [])
       const users: { id: string; name: string; role: string }[] = []
@@ -364,72 +367,22 @@ const ApplicationBlockLevelAndDesignatedAssigneesCell = observer(
       return users
     }, [application])
 
-    const visibleBlockLevelReviewAssignees = blockLevelReviewAssigneeUsers.slice(
-      0,
-      MAX_VISIBLE_BLOCK_LEVEL_REVIEW_ASSIGNEE_AVATARS
-    )
-    const blockLevelReviewAssigneesOverflowCount =
-      blockLevelReviewAssigneeUsers.length - MAX_VISIBLE_BLOCK_LEVEL_REVIEW_ASSIGNEE_AVATARS
-    const hasDesignatedReviewer = !!application.designatedReviewer
-    const hasDesignatedReviewerOrBlockLevelReviewers = hasDesignatedReviewer || blockLevelReviewAssigneeUsers.length > 0
-
     return (
-      <HStack spacing={1}>
-        {hasDesignatedReviewerOrBlockLevelReviewers ? (
-          <>
-            {visibleBlockLevelReviewAssignees.map((user) => (
-              <SharedAvatar key={user.id} size="xs" name={user.name} role={user.role} fontSize="2xs" />
-            ))}
-            {blockLevelReviewAssigneesOverflowCount > 0 && (
-              <Avatar
-                size="xs"
-                name={`+${blockLevelReviewAssigneesOverflowCount}`}
-                getInitials={(name) => name}
-                bg="gray.200"
-                color="text.primary"
-                fontSize="2xs"
-              />
-            )}
-          </>
-        ) : (
-          <Text fontSize="sm" color="text.secondary">
-            {t("ui.unassigned")}
-          </Text>
-        )}
+      <ReviewAssigneesRow
+        primaryAssignee={primaryAssignee}
+        secondaryAssignees={secondaryAssignees}
+        maxSecondaryVisible={MAX_VISIBLE_BLOCK_LEVEL_REVIEW_ASSIGNEE_AVATARS}
+        emptyText={t("ui.unassigned")}
+      >
         <DesignatedCollaboratorAssignmentPopover
           permitApplication={application}
           collaborationType={ECollaborationType.review}
           onBeforeOpen={async () => {
             await permitApplicationStore.fetchPermitApplication(application.id, true)
           }}
-          renderTrigger={({ isLoading, existingDelegateeCollaboration, onClick, isDisabled }) => (
-            <IconButton
-              aria-label={t("permitCollaboration.sidebar.title")}
-              icon={
-                isLoading ? (
-                  <Spinner size="xs" />
-                ) : existingDelegateeCollaboration ? (
-                  <SharedAvatar
-                    size="xs"
-                    name={existingDelegateeCollaboration.collaborator?.user?.name}
-                    role={existingDelegateeCollaboration.collaborator?.user?.role}
-                    fontSize="2xs"
-                    border="2px solid"
-                    borderColor="theme.blueActive"
-                  />
-                ) : (
-                  <UserPlus size={14} />
-                )
-              }
-              size="xs"
-              variant="ghost"
-              borderRadius="full"
-              onClick={onClick}
-              isDisabled={isDisabled}
-            />
-          )}
+          renderTrigger={renderAssignPlusIconTrigger({ ariaLabel: t("permitCollaboration.sidebar.title") })}
         />
-      </HStack>
+      </ReviewAssigneesRow>
     )
   }
 )
