@@ -34,6 +34,10 @@ class ExternalPermitApplicationService
       cloned_submission_data
     )
 
+    process_multiply_sum_grid_submission_data_to_common_format!(
+      cloned_submission_data
+    )
+
     formatted_submission_data = {}
 
     # first level key is the section_key, which we can ignore
@@ -85,8 +89,10 @@ class ExternalPermitApplicationService
         formatted_value =
           if submitted_field_key.to_s.ends_with?("multi_contact")
             get_formatted_multi_contact_submission_value(submitted_value)
-          elsif requirement["input_type"] == "file"
+          elsif requirement["input_type"].in?(%w[file architectural_drawing])
             get_file_urls_from_submission_value(submitted_value)
+          elsif requirement["input_type"] == "pid_info"
+            get_formatted_multi_contact_submission_value(submitted_value)
           else
             submitted_value
           end
@@ -209,6 +215,50 @@ class ExternalPermitApplicationService
     end
   end
 
+  # multiply_sum_grid submissions store their data across multiple sub-component keys:
+  #   {base_key}|grid|v{hash}        -> row data array
+  #   {base_key}|totalLoad|v{hash}   -> computed total (A x B sum)
+  #   {base_key}|totalQuantity|v{hash} -> computed total (B sum)
+  # This method merges them into a single key ({base_key}) with a structured value,
+  # so the main loop's ends_with? matching can find the requirement.
+  def process_multiply_sum_grid_submission_data_to_common_format!(
+    submission_data
+  )
+    submission_data.each do |section_key, section_value|
+      grid_submissions_to_merge = {}
+      keys_to_delete = []
+
+      section_value.each do |submitted_field_key, submitted_value|
+        match =
+          submitted_field_key.match(
+            /\|(grid|totalLoad|totalQuantity)(\|v[0-9a-f]+)?$/
+          )
+        next unless match
+
+        base_key =
+          submitted_field_key.sub(
+            /\|(grid|totalLoad|totalQuantity)(\|v[0-9a-f]+)?$/,
+            ""
+          )
+        sub_component = match[1]
+
+        grid_submissions_to_merge[base_key] ||= {}
+        grid_submissions_to_merge[base_key][sub_component] = submitted_value
+        keys_to_delete << submitted_field_key
+      end
+
+      keys_to_delete.each { |k| submission_data[section_key].delete(k) }
+
+      grid_submissions_to_merge.each do |base_key, grid_data|
+        submission_data[section_key][base_key] = {
+          "rows" => grid_data["grid"],
+          "totalLoad" => grid_data["totalLoad"],
+          "totalQuantity" => grid_data["totalQuantity"]
+        }
+      end
+    end
+  end
+
   # The raw contact_array is an array of contact objects. However, the key of the contact object
   # has a prefix that is not needed and prop is camelized. This method will remove the prefix from
   # the key of each contact object and snake_case them.
@@ -239,11 +289,14 @@ class ExternalPermitApplicationService
 
     submitted_value
       .map do |file_data|
-        file_model_name = file_data["model"]
         file_model_id = file_data["modelId"]
-        next unless file_model_name.present? && file_model_id.present?
+        unless file_data["model"] == "SupportingDocument" &&
+                 file_model_id.present?
+          next
+        end
 
-        file_model = file_model_name.constantize.find_by(id: file_model_id)
+        file_model =
+          permit_application.supporting_documents.find_by(id: file_model_id)
 
         next unless file_model.present?
 
@@ -292,7 +345,7 @@ class ExternalPermitApplicationService
       requirement_block_code: "energy_step_code_tool",
       name: "Energy step code",
       description: "",
-      requirement: [
+      requirements: [
         {
           id: "energy_step_code_documents",
           name: "Energy step code documents",

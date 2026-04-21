@@ -2,10 +2,13 @@ import { Box, Container, Divider, Flex, Heading, Text, VStack } from "@chakra-ui
 import { ArrowRight } from "@phosphor-icons/react/dist/ssr"
 import React from "react"
 import { useTranslation } from "react-i18next"
+import { useMst } from "../../../setup/root"
 import { RouterLink } from "../../shared/navigation/router-link"
 
 export const ProjectReadinessToolsIndexScreen = () => {
   const { t } = useTranslation()
+  const { siteConfigurationStore } = useMst()
+  const codeComplianceEnabled = siteConfigurationStore.codeComplianceEnabled
 
   const projectReadinessPageItems = [
     {
@@ -21,11 +24,15 @@ export const ProjectReadinessToolsIndexScreen = () => {
           description: t("projectReadinessTools.meetStepCodeDescription"),
           href: "/project-readiness-tools/check-step-code-requirements",
         },
-        {
-          linkText: t("projectReadinessTools.preCheckDrawingsLink"),
-          description: t("projectReadinessTools.preCheckDrawingsDescription"),
-          href: "/project-readiness-tools/pre-check",
-        },
+        ...(codeComplianceEnabled
+          ? [
+              {
+                linkText: t("projectReadinessTools.preCheckDrawingsLink"),
+                description: t("projectReadinessTools.preCheckDrawingsDescription"),
+                href: "/project-readiness-tools/pre-check",
+              },
+            ]
+          : []),
         {
           linkText: t("projectReadinessTools.digitalSealValidator.title"),
           description: t("projectReadinessTools.digitalSealValidator.descriptionToolPage"),
@@ -47,14 +54,13 @@ export const ProjectReadinessToolsIndexScreen = () => {
           href: "/project-readiness-tools/create-your-letters-of-assurance",
         },
         {
-          linkText: t("projectReadinessTools.singleZoneCoolingHeatingTool"),
-          description: t("projectReadinessTools.singleZoneCoolingHeatingToolDescription"),
-          href: "/project-readiness-tools/overheating-tool",
+          linkText: t("projectReadinessTools.overheatingCodesLink"),
+          description: t("projectReadinessTools.overheatingCodesDescription"),
+          href: "/overheating-codes",
         },
       ],
     },
   ]
-  console.log("projectReadinessPageItems===========>", projectReadinessPageItems)
   return (
     <Container maxW="container.lg" pb="36" px="8">
       <Heading as="h1" mt="16" color="text.primary">

@@ -17,7 +17,7 @@ interface IAdminInviteScreenProps {}
 type TAdminInviteFormData = {
   users: { firstName?: string; lastName?: string; email?: string; role: EUserRoles }[]
 }
-
+// comment for deploy
 export const AdminInviteScreen = observer(({}: IAdminInviteScreenProps) => {
   const { t } = useTranslation()
   const {

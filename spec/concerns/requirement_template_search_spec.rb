@@ -52,14 +52,6 @@ RSpec.describe Api::RequirementTemplatesController,
     )
   end
 
-  let!(:early_access_template) do
-    create(
-      :early_access_requirement_template,
-      description: "Early Access Template",
-      created_at: 7.days.ago
-    )
-  end
-
   let!(:super_admin) { create(:user, :super_admin) }
   let!(:submitter) { create(:user) }
 
@@ -93,22 +85,6 @@ RSpec.describe Api::RequirementTemplatesController,
           expect(json_response["data"].map { |rt| rt["id"] }).not_to include(
             archived_template.id
           )
-        end
-      end
-
-      context "filtering by visibility 'early_access'" do
-        it "returns only early access requirement templates" do
-          get :index,
-              params: {
-                query: "",
-                visibility: "early_access",
-                page: 1,
-                per_page: 20
-              }
-          expect(response).to have_http_status(:success)
-          expect(
-            json_response["data"].map { |rt| rt["id"] }
-          ).to contain_exactly(early_access_template.id)
         end
       end
 

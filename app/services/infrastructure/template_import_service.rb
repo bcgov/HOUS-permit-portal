@@ -32,8 +32,8 @@ module Infrastructure
 
     def call
       unless ENV["IMPORT_ENABLED"] == "true"
-        puts "IMPORT NOT ENABLED, PLEASE SET IMPORT_ENABLED=true IN ENV" and
-          return
+        puts "IMPORT NOT ENABLED, PLEASE SET IMPORT_ENABLED=true IN ENV"
+        return
       end
 
       # Wrap the entire import process in a transaction
@@ -44,14 +44,14 @@ module Infrastructure
           IMPORT_ORDER.each { |config| import_model(zip_file, config) }
         end
 
-        reindex_models
-
         Rails.logger.info "Import completed from #{@input_path}"
       rescue StandardError => e
         Rails.logger.error "Import failed: #{e.message}"
         Rails.logger.error e.backtrace.join("\n")
         raise ActiveRecord::Rollback
       end
+
+      reindex_models
     end
 
     private

@@ -8,7 +8,16 @@ class Sandbox < ApplicationRecord
        { published: 0, scheduled: 1 },
        default: 0
 
-  validates :name, presence: true, uniqueness: { scope: :jurisdiction_id }
+  validates :template_version_status_scope,
+            uniqueness: {
+              scope: :jurisdiction_id
+            }
+
+  def name
+    I18n.t(
+      "activerecord.attributes.sandbox.scope_names.#{template_version_status_scope}"
+    )
+  end
 
   def customizations
     # Convenience method to prevent carpal tunnel syndrome

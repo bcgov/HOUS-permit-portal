@@ -114,7 +114,7 @@ RSpec.describe JurisdictionTemplateVersionCustomization,
     describe "uniqueness and presence" do
       let(:jurisdiction) { create(:sub_district) }
       let(:template_version) { create(:template_version) }
-      let(:sandbox) { create(:sandbox, jurisdiction: jurisdiction) }
+      let(:sandbox) { jurisdiction.sandboxes.published.first }
       context "when sandboxed is true" do
         it "allows one sandboxed customization per jurisdiction and template version" do
           customization =
@@ -225,7 +225,7 @@ RSpec.describe JurisdictionTemplateVersionCustomization,
     end
 
     describe "Scopes" do
-      let!(:sandbox) { create(:sandbox, jurisdiction: jurisdiction) }
+      let!(:sandbox) { jurisdiction.sandboxes.published.first }
       let!(:sandboxed_customization) do
         create(
           :jurisdiction_template_version_customization,

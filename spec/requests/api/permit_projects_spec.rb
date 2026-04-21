@@ -125,6 +125,56 @@ RSpec.describe "Api::PermitProjects", type: :request, search: true do
     end
   end
 
+  describe "GET /api/permit_projects/:id with sandbox scoping" do
+    let(:review_manager) do
+      create(:user, :review_manager, jurisdiction: jurisdiction)
+    end
+    # Jurisdictions auto-create :published and :scheduled sandboxes on create
+    let(:sandbox) { jurisdiction.sandboxes.published.first }
+    let(:other_sandbox) { jurisdiction.sandboxes.scheduled.first }
+    let!(:sandboxed_project) do
+      create(
+        :permit_project,
+        owner: review_manager,
+        jurisdiction: jurisdiction,
+        sandbox: sandbox
+      )
+    end
+    let!(:live_project) do
+      create(:permit_project, owner: owner, jurisdiction: jurisdiction)
+    end
+
+    before { sign_in review_manager }
+
+    it "returns 404 when the staff user has no sandbox selected but project is sandboxed" do
+      get "/api/permit_projects/#{sandboxed_project.id}", headers: headers
+
+      expect(response).to have_http_status(:not_found)
+    end
+
+    it "returns 404 when the staff user's sandbox does not match the project's sandbox" do
+      get "/api/permit_projects/#{sandboxed_project.id}",
+          headers: headers.merge("X-Sandbox-ID" => other_sandbox.id)
+
+      expect(response).to have_http_status(:not_found)
+    end
+
+    it "returns 200 when the staff user's sandbox matches the project's sandbox" do
+      get "/api/permit_projects/#{sandboxed_project.id}",
+          headers: headers.merge("X-Sandbox-ID" => sandbox.id)
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response.dig("data", "id")).to eq(sandboxed_project.id)
+    end
+
+    it "returns 404 when the staff user has a sandbox selected but project is non-sandboxed" do
+      get "/api/permit_projects/#{live_project.id}",
+          headers: headers.merge("X-Sandbox-ID" => sandbox.id)
+
+      expect(response).to have_http_status(:not_found)
+    end
+  end
+
   describe "GET /api/permit_projects/pinned" do
     it "returns pinned projects for the user" do
       owner.pinned_projects.create(permit_project: permit_project)
@@ -236,8 +286,16 @@ RSpec.describe "Api::PermitProjects", type: :request, search: true do
     end
 
     it "returns errors when any payload is invalid" do
-      allow_any_instance_of(PermitApplication).to receive(
-        :assign_default_nickname
+      errors_double =
+        instance_double(
+          ActiveModel::Errors,
+          full_messages: ["Something went wrong"]
+        )
+      allow_any_instance_of(PermitApplication).to receive(:save).and_return(
+        false
+      )
+      allow_any_instance_of(PermitApplication).to receive(:errors).and_return(
+        errors_double
       )
 
       post "/api/permit_projects/#{permit_project.id}/permit_applications",

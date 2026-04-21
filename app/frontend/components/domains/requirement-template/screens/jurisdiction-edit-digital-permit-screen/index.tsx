@@ -1,8 +1,8 @@
-import { Box, Button, ButtonGroup, Flex, Spacer } from "@chakra-ui/react"
+import { Box, Button, ButtonGroup, Checkbox, Flex, Spacer } from "@chakra-ui/react"
 import { ArrowUp, CaretRight } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
-import { useForm } from "react-hook-form"
+import { Controller, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useNavigate, useSearchParams } from "react-router-dom"
 import { useJurisdictionTemplateVersionCustomization } from "../../../../../hooks/resources/use-jurisdiction-template-version-customization"
@@ -39,6 +39,7 @@ export const formScrollToId = (id: string) => `${scrollToIdPrefix}${id}`
 export interface IJurisdictionTemplateVersionCustomizationForm {
   jurisdictionId?: string
   customizations: ITemplateCustomization
+  disabled?: boolean
 }
 
 function formFormDefaults(
@@ -49,11 +50,13 @@ function formFormDefaults(
       customizations: {
         requirementBlockChanges: {},
       },
+      disabled: false,
     }
   }
 
   return {
     customizations: { requirementBlockChanges: {}, ...jurisdictionTemplateVersionCustomization.customizations },
+    disabled: jurisdictionTemplateVersionCustomization.disabled ?? false,
   }
 }
 
@@ -85,7 +88,7 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
   const formMethods = useForm<IJurisdictionTemplateVersionCustomizationForm>({
     defaultValues: formFormDefaults(jurisdictionTemplateVersionCustomization),
   })
-  const { formState, handleSubmit, setValue, reset, watch } = formMethods
+  const { formState, handleSubmit, setValue, reset, watch, control } = formMethods
 
   const { isSubmitting, isValid } = formState
 
@@ -97,7 +100,7 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
 
   useEffect(() => {
     reset(formFormDefaults(jurisdictionTemplateVersionCustomization))
-  }, [jurisdictionTemplateVersionCustomization?.customizations])
+  }, [jurisdictionTemplateVersionCustomization])
 
   const [searchParams] = useSearchParams()
   const isCompare = searchParams.get("compare") === "true"
@@ -205,10 +208,21 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
             justifyContent="space-between"
             boxShadow="elevations.elevation02"
           >
+            {jurisdictionTemplateVersionCustomization && (
+              <Controller
+                name="disabled"
+                control={control}
+                render={({ field: { value, onChange } }) => (
+                  <Checkbox isChecked={!value} onChange={(e) => onChange(!e.target.checked)} fontWeight="medium">
+                    {t("requirementTemplate.edit.availableToApplicants")}
+                  </Checkbox>
+                )}
+              />
+            )}
             <Spacer />
             <ButtonGroup>
               <BrowserSearchPrompt color="text.primary" />
-              {currentSandbox && (
+              {currentSandbox && templateVersion.isPublished && (
                 <ConfirmationModal
                   promptHeader={t("sandbox.exportChanges")}
                   promptMessage={

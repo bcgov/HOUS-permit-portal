@@ -1,5 +1,13 @@
 import { IRevisionReason } from "../models/revision-reason"
-import { EDataValidationOperation, ENumberUnit, ERequirementType, ETagType, EVisibility } from "./enums"
+import {
+  EConditionalOperator,
+  EConditionalThen,
+  EDataValidationOperation,
+  ENumberUnit,
+  ERequirementType,
+  ETagType,
+  EVisibility,
+} from "./enums"
 import {
   IHelpLinkItems,
   IOption,
@@ -16,14 +24,15 @@ export interface IUppyAttachmentFile {
   metadata: {
     size: number
     filename: string
-    mimeType: string
+    mimeType?: string
   }
 }
 
 export interface IFormConditional {
   when: string
+  operator: EConditionalOperator
   operand: string
-  then: string
+  then: EConditionalThen
 }
 
 export interface IDataValidation {
@@ -71,11 +80,21 @@ export interface IRequirementBlockParams {
   }>
 }
 
+export interface IBlockConditional {
+  whenBlockId: string
+  whenRequirementCode: string
+  operator: string
+  eq: string
+  show?: boolean
+  hide?: boolean
+}
+
 export interface ITemplateSectionBlockAttributes {
   id?: string
   requirementTemplateSectionId?: string
   requirementBlockId?: string
   position?: number
+  conditional?: IBlockConditional | null
   _destroy?: true
 }
 
@@ -102,9 +121,9 @@ export interface IRevisionReasonsAttributes {
 export interface IRequirementTemplateUpdateParams {
   description?: string | null
   nickname?: string | null
-  public?: boolean | null
   assigneeId?: string | null
   requirementTemplateSectionsAttributes?: IRequirementTemplateSectionAttributes[]
+  availableGlobally?: boolean | null
 }
 
 export interface IInvitePreviewersParams {
@@ -120,7 +139,6 @@ export interface ISiteConfigurationUpdateParams {
   sitewideMessage?: string | null
   helpLinkItems?: IHelpLinkItems
   revisionReasonsMap?: { [key: string]: IRevisionReason }
-  standardizationPageEarlyAccessRequirementTemplateIds?: string[] | null
   revisionReasonsAttributes?: IRevisionReasonsAttributes[]
 }
 

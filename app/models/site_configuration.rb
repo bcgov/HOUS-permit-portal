@@ -4,11 +4,10 @@ class SiteConfiguration < ApplicationRecord
   validate :validate_help_link_items
   has_many :revision_reasons
 
-  # Standardization page now uses publicly previewable published template versions
-  has_many :standardization_template_versions,
-           -> { where(publicly_previewable: true, status: :published) },
-           class_name: "TemplateVersion",
-           foreign_key: "site_configuration_id"
+  # NOTE: The standardization page is now powered by
+  # TemplateVersion.publicly_previewable drafts, served via a dedicated
+  # `GET /api/template_versions/publicly_previewable` endpoint. The
+  # previous SiteConfiguration-backed association has been removed.
 
   accepts_nested_attributes_for :revision_reasons, allow_destroy: true
   validate :max_undiscarded_revision_reasons

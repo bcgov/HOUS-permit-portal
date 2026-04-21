@@ -8,6 +8,9 @@ class PermitApplication < ApplicationRecord
                review_delegatee_name
              ],
              text_end: %i[number]
+  audited on: %i[create update],
+          only: %i[status reference_number discarded_at],
+          associated_with: :permit_project
 
   include FormSupportingDocuments
   include AutomatedComplianceUtils
@@ -29,7 +32,6 @@ class PermitApplication < ApplicationRecord
   belongs_to :submitter, class_name: "User", optional: true
   public_recordable user_association: :submitter
   belongs_to :template_version
-  belongs_to :sandbox, optional: true
   belongs_to :permit_project, optional: true, touch: true
 
   has_one :requirement_template, through: :template_version
@@ -42,25 +44,39 @@ class PermitApplication < ApplicationRecord
   attr_accessor :front_end_form_update
 
   has_many :submission_versions, dependent: :destroy
-  has_many :permit_collaborations, dependent: :destroy
+  has_many :permit_collaborations,
+           -> { where(discarded_at: nil) },
+           dependent: :destroy
   has_many :collaborators, through: :permit_collaborations
   has_many :permit_block_statuses, dependent: :destroy
 
-  has_one :step_code, dependent: :nullify
+  has_one :step_code, -> { kept }, dependent: :nullify
 
   scope :submitted, -> { joins(:submission_versions).distinct }
 
-  scope :sandboxed, -> { where.not(sandbox_id: nil) }
-  scope :live, -> { where(sandbox_id: nil) }
-  scope :for_sandbox, ->(sandbox) { where(sandbox_id: sandbox&.id) }
+  scope :sandboxed,
+        -> do
+          joins(:permit_project).where.not(permit_projects: { sandbox_id: nil })
+        end
+  scope :live,
+        -> do
+          joins(:permit_project).where(permit_projects: { sandbox_id: nil })
+        end
+  scope :for_sandbox,
+        ->(sandbox) do
+          joins(:permit_project).where(
+            permit_projects: {
+              sandbox_id: sandbox&.id
+            }
+          )
+        end
 
   validate :jurisdiction_or_permit_project_present
   validate :jurisdiction_has_matching_submission_contact
   validates :number, presence: true
   validates :reference_number, length: { maximum: 300 }, allow_nil: true
-  validate :sandbox_belongs_to_jurisdiction
   validate :template_version_of_live_template
-  validate :submitter_cannot_be_jurisdiction_staff_without_sandbox
+  validate :submission_versions_match_status
 
   delegate :published_template_version, to: :template_version
 
@@ -72,18 +88,19 @@ class PermitApplication < ApplicationRecord
 
   after_commit :reindex_jurisdiction_permit_application_size
   after_commit :send_submitted_webhook, if: :saved_change_to_status?
-  after_commit :notify_user_reference_number_updated,
-               if: :saved_change_to_reference_number?
   after_commit :reindex_permit_project, if: :saved_change_to_status?
   after_commit :broadcast_jurisdiction_count_update,
-               if: :status_changed_to_submitted?
-
+               if: :status_changed_to_intake?
+  after_commit :mark_permit_project_as_unviewed, if: :status_changed_to_intake?
+  after_commit :enqueue_permit_project_if_draft, if: :status_changed_to_intake?
   scope :with_submitter_role,
         -> { joins(:submitter).where(users: { role: "submitter" }) }
 
   scope :unviewed,
         -> do
-          where(status: :submitted, viewed_at: nil).order(submitted_at: :asc)
+          where(status: submitted_statuses, viewed_at: nil).order(
+            submitted_at: :asc
+          )
         end
 
   COMPLETION_SECTION_KEY = "section-completion-key"
@@ -137,7 +154,8 @@ class PermitApplication < ApplicationRecord
       collaborations: {
         permit_collaborations: {
           collaboration_type: collaboration_type,
-          permit_application_id: id
+          permit_application_id: id,
+          discarded_at: nil
         }
       }
     }
@@ -237,11 +255,20 @@ class PermitApplication < ApplicationRecord
             :id
           ),
       review_delegatee_name: review_delegatee_name,
+      review_collaborator_user_ids:
+        permit_collaborations
+          .review
+          .joins(:collaborator)
+          .pluck("collaborators.user_id")
+          .uniq,
       has_collaborator: has_collaborator?,
       sandbox_id: sandbox_id,
       permit_project_id: permit_project_id,
+      project_number: permit_project&.number,
       submission_delegatee_id: submission_delegatee&.id,
-      discarded: discarded?
+      discarded: discarded?,
+      queue_time_seconds: queue_time_seconds,
+      queue_clock_started_at: queue_clock_started_at&.to_i
     }
   end
 
@@ -287,6 +314,22 @@ class PermitApplication < ApplicationRecord
       .compact
   end
 
+  def user_can_edit_block?(user_id:, requirement_block_id:)
+    permissions =
+      submission_requirement_block_edit_permissions(user_id: user_id)
+    return false unless permissions
+    return true if permissions == :all
+
+    permissions.include?(requirement_block_id)
+  end
+
+  def user_can_edit_step_code_block?(user_id:)
+    block_id = energy_step_code_requirement_block_id
+    return false unless block_id
+
+    user_can_edit_block?(user_id: user_id, requirement_block_id: block_id)
+  end
+
   def using_current_template_version
     TemplateVersion.cached_published_ids.include?(template_version_id)
   end
@@ -310,6 +353,13 @@ class PermitApplication < ApplicationRecord
     return unless latest_submission_version.present?
 
     latest_submission_version.update(viewed_at: Time.current)
+    reindex
+  end
+
+  def mark_as_unviewed
+    return unless latest_submission_version.present?
+
+    latest_submission_version.update(viewed_at: nil)
     reindex
   end
 
@@ -364,6 +414,13 @@ class PermitApplication < ApplicationRecord
 
   def reviewer_frontend_url
     FrontendUrlHelper.frontend_url("/permit-applications/#{id}")
+  end
+
+  def days_in_queue
+    seconds = queue_time_seconds || 0
+    seconds +=
+      (Time.current - queue_clock_started_at).to_i if queue_clock_started_at
+    (seconds / 86400.0).floor
   end
 
   def days_ago_submitted
@@ -501,14 +558,15 @@ class PermitApplication < ApplicationRecord
     }
   end
 
-  def application_view_event_notification_data
+  def review_started_event_notification_data
     {
       "id" => SecureRandom.uuid,
-      "action_type" => Constants::NotificationActionTypes::APPLICATION_VIEW,
+      "action_type" => Constants::NotificationActionTypes::REVIEW_STARTED,
       "action_text" =>
-        "#{I18n.t("notification.permit_application.view_notification", number: number, jurisdiction_name: jurisdiction_name)}",
+        "#{I18n.t("notification.permit_application.review_started_notification", number: number, jurisdiction_name: jurisdiction_name)}",
       "object_data" => {
-        "permit_application_id" => id
+        "permit_application_id" => id,
+        "permit_application_number" => number
       }
     }
   end
@@ -528,6 +586,22 @@ class PermitApplication < ApplicationRecord
 
   def step_code_requirements
     jurisdiction&.jurisdiction_step_requirements
+  end
+
+  def energy_step_code_requirement_block_id
+    blocks = template_version&.requirement_blocks_json
+    return nil unless blocks
+
+    blocks.each do |block_id, block_json|
+      if block_json["requirements"]&.any? { |req|
+           req["input_type"] == "energy_step_code" ||
+             req["input_type"] == "energy_step_code_part_3"
+         }
+        return block_id
+      end
+    end
+
+    nil
   end
 
   def energy_step_code_required?
@@ -556,7 +630,12 @@ class PermitApplication < ApplicationRecord
       PermitApplication
         .joins(template_version: :requirement_template)
         .joins(:submitter)
-        .joins(:jurisdiction)
+        .joins(
+          "LEFT OUTER JOIN permit_projects ON permit_projects.id = permit_applications.permit_project_id"
+        )
+        .joins(
+          "INNER JOIN jurisdictions ON jurisdictions.id = COALESCE(permit_projects.jurisdiction_id, permit_applications.jurisdiction_id)"
+        )
         .joins(
           "LEFT JOIN (#{sv_min.to_sql}) sv_min ON sv_min.permit_application_id = permit_applications.id"
         )
@@ -575,8 +654,8 @@ class PermitApplication < ApplicationRecord
           "requirement_templates.id AS requirement_template_id",
           "jurisdictions.name AS jurisdiction_name",
           "requirement_templates.id AS requirement_template_id",
-          "COUNT(CASE WHEN permit_applications.status IN (0, 3) THEN 1 END) AS draft_count",
-          "COUNT(CASE WHEN permit_applications.status IN (1, 4) THEN 1 END) AS submitted_count",
+          "COUNT(CASE WHEN permit_applications.status = 0 THEN 1 END) AS draft_count",
+          "COUNT(CASE WHEN permit_applications.status != 0 THEN 1 END) AS submitted_count",
           "AVG(
                 CASE
                   WHEN sv_min.min_submission_created_at IS NOT NULL THEN EXTRACT(EPOCH FROM (sv_min.min_submission_created_at - permit_applications.created_at))
@@ -722,14 +801,8 @@ class PermitApplication < ApplicationRecord
     self.form_customizations_snapshot = current_customizations
   end
 
-  def notify_user_reference_number_updated
-    return if new_record?
-
-    NotificationService.publish_application_view_event(self)
-  end
-
-  def status_changed_to_submitted?
-    saved_change_to_status? && (newly_submitted? || resubmitted?)
+  def status_changed_to_intake?
+    saved_change_to_status? && intake?
   end
 
   def reindex_jurisdiction_permit_application_size
@@ -743,6 +816,15 @@ class PermitApplication < ApplicationRecord
 
   def reindex_permit_project
     permit_project&.reindex
+  end
+
+  def mark_permit_project_as_unviewed
+    permit_project&.mark_as_unviewed
+  end
+
+  # TODO: Also enqueue project when a meeting request is made
+  def enqueue_permit_project_if_draft
+    permit_project&.enqueue! if permit_project&.draft?
   end
 
   def jurisdiction_or_permit_project_present
@@ -783,20 +865,6 @@ class PermitApplication < ApplicationRecord
     end
   end
 
-  def sandbox_belongs_to_jurisdiction
-    return unless sandbox
-    return unless jurisdiction
-
-    unless jurisdiction.sandboxes.include?(sandbox)
-      errors.add(
-        :sandbox,
-        I18n.t(
-          "activerecord.errors.models.permit_application.attributes.sandbox.incorrect_jurisdiction"
-        )
-      )
-    end
-  end
-
   def template_version_of_live_template
     return unless template_version.present?
 
@@ -810,15 +878,37 @@ class PermitApplication < ApplicationRecord
     end
   end
 
-  def submitter_cannot_be_jurisdiction_staff_without_sandbox
-    return unless submitter&.jurisdiction_staff?
-    return if sandbox_id.present?
+  def submission_versions_match_status
+    return if new_record?
 
-    errors.add(
-      :submitter,
-      I18n.t(
-        "activerecord.errors.models.permit_application.attributes.submitter.review_staff_requires_sandbox"
+    sv_count = submission_versions.size
+
+    if new_draft? && sv_count > 0
+      errors.add(:base, "Draft applications must not have submission versions")
+    elsif (
+          newly_submitted? || in_review? || approved? || issued? || withdrawn?
+        ) && sv_count < 1
+      errors.add(
+        :base,
+        "Non-draft applications must have at least one submission version"
       )
-    )
+    elsif revisions_requested?
+      if sv_count < 1
+        errors.add(
+          :base,
+          "Revisions-requested applications must have at least one submission version"
+        )
+      elsif latest_submission_version.revision_requests.empty?
+        errors.add(
+          :base,
+          "Revisions-requested applications must have at least one revision request"
+        )
+      end
+    elsif resubmitted? && sv_count < 2
+      errors.add(
+        :base,
+        "Resubmitted applications must have at least two submission versions"
+      )
+    end
   end
 end

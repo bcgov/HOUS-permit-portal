@@ -2,6 +2,7 @@ import { Flex, FormLabel, Grid, Input } from "@chakra-ui/react"
 import { t } from "i18next"
 import React from "react"
 import { usePart3StepCode } from "../../../../../../../hooks/resources/use-part-3-step-code"
+import { roundMetric } from "../../../../../../../utils/utility-functions"
 import { GridData } from "../../../../part-9/checklist/shared/grid/data"
 
 const i18nPrefix = "stepCode.part3.stepCodeSummary.mixedUse.stepCode"
@@ -28,7 +29,9 @@ export const StepCodePortionsPerformance = function MixedUseStepCodePortionsPerf
         <GridData justifyContent="center">
           <Input
             isDisabled
-            value={checklist.complianceReport.performance.requirements.stepCodePortions.areaWeightedTotals.tedi || "-"}
+            value={roundMetric(
+              checklist.complianceReport.performance.requirements.stepCodePortions.areaWeightedTotals.tedi
+            )}
           />
         </GridData>
         <GridData justifyContent="center">
@@ -44,7 +47,7 @@ export const StepCodePortionsPerformance = function MixedUseStepCodePortionsPerf
         <GridData justifyContent="center">
           <Input
             isDisabled
-            value={checklist.complianceReport.performance.adjustedResults.tedi?.stepCodePortion ?? "-"}
+            value={roundMetric(checklist.complianceReport.performance.adjustedResults.tedi?.stepCodePortion)}
           />
         </GridData>
         <GridData justifyContent="center">

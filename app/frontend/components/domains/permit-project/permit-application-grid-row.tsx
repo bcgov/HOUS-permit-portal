@@ -1,8 +1,6 @@
 import {
   Avatar,
   Button,
-  Grid,
-  GridItem,
   Icon,
   IconButton,
   Menu,
@@ -25,16 +23,19 @@ import { IPermitApplication } from "../../../models/permit-application"
 import { useMst } from "../../../setup/root"
 import { colors } from "../../../styles/theme/foundations/colors"
 import { ConfirmationModal } from "../../shared/confirmation-modal"
+import { SearchGridItem } from "../../shared/grid/search-grid-item"
+import { SearchGridRow } from "../../shared/grid/search-grid-row"
 import { OutdatedFormWarning } from "../../shared/outdated-form-warning"
 import { PermitApplicationStatusTag } from "../../shared/permit-applications/permit-application-status-tag"
 
 interface IPermitApplicationGridRowProps {
   permitApplication: IPermitApplication
   searchModel?: ISearch
+  fromInbox?: boolean
 }
 
 export const PermitApplicationGridRow = observer(
-  ({ permitApplication, searchModel }: IPermitApplicationGridRowProps) => {
+  ({ permitApplication, searchModel, fromInbox = false }: IPermitApplicationGridRowProps) => {
     const { t } = useTranslation()
     const navigate = useNavigate()
     const { id, updatedAt, designatedSubmitter, usingCurrentTemplateVersion } = permitApplication
@@ -44,6 +45,7 @@ export const PermitApplicationGridRow = observer(
     const isDisabledRow = currentSandbox?.id !== permitApplication.sandbox?.id && !currentUser?.isSuperAdmin
     const shouldMarkRow = currentSandbox?.id !== permitApplication.sandbox?.id
     const isSubmitter = currentUser?.id === permitApplication.submitter?.id
+    const permitApplicationPath = fromInbox ? `/permit-applications/${id}` : `/permit-applications/${id}/edit`
 
     return (
       <Tooltip
@@ -53,12 +55,8 @@ export const PermitApplicationGridRow = observer(
         placement="top"
         openDelay={200}
       >
-        <Grid
-          gridColumn="1 / -1"
-          templateColumns="subgrid"
-          display="grid"
+        <SearchGridRow
           aria-disabled={isDisabledRow}
-          // bg={isDisabled ? "background.grey03" : undefined}
           bgImage={
             shouldMarkRow
               ? `repeating-linear-gradient(45deg,${colors.background.sandboxStripe} 5px,${colors.background.sandboxStripe} 10px,rgba(0, 0, 0, 0) 10px,rgba(0, 0, 0, 0) 20px)`
@@ -67,7 +65,7 @@ export const PermitApplicationGridRow = observer(
           bgSize={isDisabledRow ? "100% 100%" : undefined}
           onClick={() => {
             if (isDisabledRow) return
-            navigate(`/permit-applications/${id}/edit`)
+            navigate(permitApplicationPath)
           }}
           _hover={
             isDisabledRow
@@ -77,29 +75,22 @@ export const PermitApplicationGridRow = observer(
                   cursor: "pointer",
                 }
           }
-          borderBottom="1px"
-          borderColor="border.light"
-          _last={{ borderBottom: "none" }}
         >
           {!usingCurrentTemplateVersion && <OutdatedFormWarning colSpan={6} mx={4} mt={2} />}
-          <GridItem display="flex" alignItems="center" px={4} py={2}>
+          <SearchGridItem>
             <VStack align="start" spacing={0}>
               <Text variant="secondary">{permitApplication.templateNickname}</Text>
             </VStack>
-          </GridItem>
-          <GridItem display="flex" alignItems="center" px={4} py={2}>
+          </SearchGridItem>
+          <SearchGridItem>
             <Avatar name={designatedSubmitter?.collaborator?.user?.name} size="sm" />
-          </GridItem>
-          <GridItem display="flex" alignItems="center" px={4} py={2}>
-            <Text>{permitApplication.number}</Text>
-          </GridItem>
-          <GridItem display="flex" alignItems="center" px={4} py={2}>
-            <Text>{format(updatedAt, datefnsTableDateTimeFormat)}</Text>
-          </GridItem>
-          <GridItem display="flex" alignItems="center" px={4} py={2}>
-            <PermitApplicationStatusTag permitApplication={permitApplication} />
-          </GridItem>
-          <GridItem display="flex" alignItems="center" justifyContent="flex-end" px={4} py={2}>
+          </SearchGridItem>
+          <SearchGridItem>{permitApplication.number}</SearchGridItem>
+          <SearchGridItem>{format(updatedAt, datefnsTableDateTimeFormat)}</SearchGridItem>
+          <SearchGridItem>
+            <PermitApplicationStatusTag status={permitApplication.status} />
+          </SearchGridItem>
+          <SearchGridItem justifyContent="flex-end">
             <Menu>
               <MenuButton
                 as={IconButton}
@@ -114,7 +105,7 @@ export const PermitApplicationGridRow = observer(
                   onClick={(e) => {
                     e.stopPropagation()
                     if (isDisabledRow) return
-                    navigate(`/permit-applications/${id}/edit`)
+                    navigate(permitApplicationPath)
                   }}
                 >
                   {t("ui.view")}
@@ -178,8 +169,8 @@ export const PermitApplicationGridRow = observer(
                 )}
               </MenuList>
             </Menu>
-          </GridItem>
-        </Grid>
+          </SearchGridItem>
+        </SearchGridRow>
       </Tooltip>
     )
   }

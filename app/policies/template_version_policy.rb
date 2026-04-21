@@ -5,6 +5,13 @@ class TemplateVersionPolicy < ApplicationPolicy
   end
 
   def show?
+    # Anonymous visitors (and any signed-in user) can view a draft template
+    # version that has been explicitly marked as publicly previewable. This
+    # powers the public /standardization-preview landing flow.
+    return true if record&.draft? && record&.publicly_previewable?
+
+    return false if user.nil?
+
     if sandbox.nil? || sandbox.published?
       !record.scheduled? || user.super_admin?
     elsif sandbox.scheduled?

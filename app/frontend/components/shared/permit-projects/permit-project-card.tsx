@@ -97,8 +97,7 @@ export const PermitProjectCard = observer(({ permitProject }: IPermitProjectCard
               bg="semantic.infoLight"
               objectFit="contain"
             />
-            {/* Ensure PermitApplicationStatusTag can handle project status or adapt */}
-            {status && <PermitApplicationStatusTag permitApplication={{ status } as any} />}
+            {status && <PermitApplicationStatusTag status={status} />}
           </Flex>
         </Show>
         <Flex direction="column" gap={2} flex={{ base: 0, md: 5 }} maxW={{ base: "100%", md: "75%" }}>
@@ -202,7 +201,7 @@ export const PermitProjectCard = observer(({ permitProject }: IPermitProjectCard
           </Flex>
         </Flex>
         <Flex direction="column" align="flex-end" gap={4} flex={{ base: 0, md: 1 }} maxW={{ base: "100%", md: "25%" }}>
-          <Show above="md">{status && <PermitApplicationStatusTag permitApplication={{ status } as any} />}</Show>
+          <Show above="md">{status && <PermitApplicationStatusTag status={status} />}</Show>
           <RouterLinkButton
             to={`/projects/${permitProject.id}`} // Link to project detail/edit page
             variant="primary"

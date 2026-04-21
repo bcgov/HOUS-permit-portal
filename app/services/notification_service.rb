@@ -65,8 +65,63 @@ class NotificationService
     # Respect notification_scope: silent publishes skip all notifications.
     return if template_version.notification_scope_silent?
 
-    # Determine which managers to notify based on notification_scope.
-    manager_ids = targeted_manager_ids_for_publish(template_version)
+    requirement_template = template_version.requirement_template
+
+    change_type =
+      TemplateVersioningService.determine_change_type(template_version)
+    diff_summary =
+      TemplateVersioningService.diff_summary_for_notification(template_version)
+
+    available_jurisdiction_ids =
+      available_jurisdiction_ids_for(requirement_template)
+
+    disabled_jurisdiction_ids =
+      template_version
+        .jurisdiction_template_version_customizations
+        .live
+        .where(disabled: true)
+        .distinct
+        .pluck(:jurisdiction_id)
+
+    manager_query =
+      User
+        .joins(:preference)
+        .where(role: %i[review_manager regional_review_manager])
+        .where(
+          users: {
+            preferences: {
+              enable_in_app_new_template_version_publish_notification: true
+            }
+          }
+        )
+
+    if available_jurisdiction_ids.present?
+      manager_query =
+        manager_query
+          .joins(:jurisdiction_memberships)
+          .where(
+            jurisdiction_memberships: {
+              jurisdiction_id: available_jurisdiction_ids
+            }
+          )
+          .distinct
+    end
+
+    if disabled_jurisdiction_ids.any?
+      manager_query =
+        manager_query
+          .joins(:jurisdiction_memberships)
+          .where.not(
+            jurisdiction_memberships: {
+              jurisdiction_id: disabled_jurisdiction_ids
+            }
+          )
+          .distinct
+    end
+
+    filtered_manager_ids = manager_query.pluck(:id)
+    scoped_manager_ids = targeted_manager_ids_for_publish(template_version)
+    manager_ids = scoped_manager_ids & filtered_manager_ids
 
     relevant_permit_applications =
       PermitApplication
@@ -106,9 +161,48 @@ class NotificationService
       **notification_manager_hash,
       **notification_submitter_hash
     }
+
     if notification_hash.any?
       NotificationPushJob.perform_async(notification_hash)
     end
+
+    # Send emails to users who have email notifications enabled
+    user_ids = notification_hash.keys
+    users_with_email_enabled =
+      User
+        .includes(:jurisdictions)
+        .joins(:preference)
+        .where(id: user_ids)
+        .where(
+          preferences: {
+            enable_email_new_template_version_publish_notification: true
+          }
+        )
+        .index_by(&:id)
+
+    notification_hash.each do |user_id, notification_data|
+      user = users_with_email_enabled[user_id]
+      next unless user
+
+      jurisdiction = user.manager? ? user.jurisdictions.first : nil
+
+      PermitHubMailer.notify_new_template_version_published(
+        template_version,
+        user,
+        jurisdiction: jurisdiction,
+        change_type: change_type,
+        diff_summary: diff_summary
+      ).deliver_later
+    end
+
+    # Send emails to ExternalApiKey recipients for API-enabled jurisdictions
+    send_external_api_key_notifications(
+      template_version,
+      available_jurisdiction_ids,
+      disabled_jurisdiction_ids,
+      change_type: change_type,
+      diff_summary: diff_summary
+    )
   end
 
   # ── Draft notification methods ────────────────────────────────────────
@@ -171,34 +265,56 @@ class NotificationService
     NotificationPushJob.perform_async(notification_hash)
   end
 
-  def self.publish_missing_requirements_mapping_event(integration_mapping)
-    unless integration_mapping.present? &&
-             integration_mapping.can_send_template_missing_requirements_communication?
-      return
+  # Sends differentiated template update emails to ExternalApiKey contacts
+  # for all API-enabled jurisdictions that have access to this template.
+  def self.send_external_api_key_notifications(
+    template_version,
+    available_jurisdiction_ids,
+    disabled_jurisdiction_ids,
+    change_type:,
+    diff_summary:
+  )
+    api_jurisdictions = Jurisdiction.where(external_api_state: "j_on")
+
+    if available_jurisdiction_ids.present?
+      api_jurisdictions =
+        api_jurisdictions.where(id: available_jurisdiction_ids)
     end
 
-    user_ids_to_notify =
-      integration_mapping
-        .jurisdiction
-        .users
-        .includes(:preference)
-        &.kept
-        &.where(
-          role: %i[review_manager regional_review_manager],
-          preferences: {
-            enable_in_app_integration_mapping_notification: true
-          }
-        )
-        &.pluck(:id) || []
+    if disabled_jurisdiction_ids.any?
+      api_jurisdictions =
+        api_jurisdictions.where.not(id: disabled_jurisdiction_ids)
+    end
 
-    notification_hash =
-      user_ids_to_notify.each_with_object({}) do |user_id, hash|
-        hash[
-          user_id
-        ] = integration_mapping.template_missing_requirements_mapping_event_notification_data if integration_mapping.template_missing_requirements_mapping_event_notification_data.present?
+    api_jurisdictions.find_each do |jurisdiction|
+      active_keys =
+        jurisdiction
+          .external_api_keys
+          .where(revoked_at: nil)
+          .where("expired_at IS NULL OR expired_at > ?", Time.current)
+          .where.not(notification_email: [nil, ""])
+
+      active_keys.each do |api_key|
+        PermitHubMailer.notify_external_api_key_template_update(
+          template_version,
+          api_key,
+          change_type: change_type,
+          diff_summary: diff_summary
+        ).deliver_later
       end
+    end
+  end
 
-    NotificationPushJob.perform_async(notification_hash)
+  # Returns jurisdiction IDs that have access to this template,
+  # or nil if the template is globally available.
+  def self.available_jurisdiction_ids_for(requirement_template)
+    if requirement_template.available_globally
+      nil
+    else
+      requirement_template.jurisdiction_requirement_templates.pluck(
+        :jurisdiction_id
+      )
+    end
   end
 
   def self.publish_customization_update_event(customization)
@@ -231,11 +347,11 @@ class NotificationService
   end
 
   def self.publish_permit_collaboration_assignment_event(permit_collaboration)
-    collaborator_user_id = permit_collaboration.collaborator.user_id
+    user = permit_collaboration.collaborator&.user
+    return unless user&.preference&.enable_in_app_collaboration_notification
 
     notification_user_hash = {
-      collaborator_user_id =>
-        permit_collaboration.collaboration_assignment_notification_data
+      user.id => permit_collaboration.collaboration_assignment_notification_data
     }
 
     NotificationPushJob.perform_async(notification_user_hash)
@@ -247,6 +363,34 @@ class NotificationService
     notification_user_hash = {
       collaborator_user_id =>
         permit_collaboration.collaboration_unassignment_notification_data
+    }
+
+    NotificationPushJob.perform_async(notification_user_hash)
+  end
+
+  def self.publish_project_collaboration_assignment_event(
+    permit_project_collaboration
+  )
+    user = permit_project_collaboration.collaborator&.user
+    return unless user&.preference&.enable_in_app_collaboration_notification
+
+    notification_user_hash = {
+      user.id =>
+        permit_project_collaboration.collaboration_assignment_notification_data
+    }
+
+    NotificationPushJob.perform_async(notification_user_hash)
+  end
+
+  def self.publish_project_collaboration_unassignment_event(
+    permit_project_collaboration
+  )
+    user = permit_project_collaboration.collaborator&.user
+    return unless user&.preference&.enable_in_app_collaboration_notification
+
+    notification_user_hash = {
+      user.id =>
+        permit_project_collaboration.collaboration_unassignment_notification_data
     }
 
     NotificationPushJob.perform_async(notification_user_hash)
@@ -427,16 +571,14 @@ class NotificationService
     end
   end
 
-  def self.publish_application_view_event(permit_application)
+  def self.publish_review_started_event(permit_application)
     notification_user_hash = {}
     notification_user_hash[
       permit_application.submitter_id
-    ] = permit_application.application_view_event_notification_data
+    ] = permit_application.review_started_event_notification_data
     preference = permit_application.submitter.preference
     if preference.enable_email_application_view_notification
-      PermitHubMailer.notify_application_viewed(
-        permit_application
-      ).deliver_later
+      PermitHubMailer.notify_review_started(permit_application).deliver_later
     end
     if preference.enable_in_app_application_view_notification
       NotificationPushJob.perform_async(notification_user_hash)
@@ -521,6 +663,8 @@ class NotificationService
   end
 
   private_class_method :determine_file_owner
+  private_class_method :send_external_api_key_notifications
+  private_class_method :available_jurisdiction_ids_for
 
   # Determines which review managers to notify based on the template version's
   # notification_scope. This is the core targeting logic.

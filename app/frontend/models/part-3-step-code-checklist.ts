@@ -106,9 +106,6 @@ export const Part3StepCodeChecklistModel = types
     updatedAt: types.maybeNull(types.Date),
   })
   .extend(withEnvironment())
-  .volatile((self) => ({
-    alternateNavigateAfterSavePath: types.maybeNull(types.string).create(null),
-  }))
   .views((self) => ({
     get stepCodeType() {
       return EStepCodeType.part3StepCode
@@ -208,9 +205,6 @@ export const Part3StepCodeChecklistModel = types
     },
   }))
   .actions((self) => ({
-    setAlternateNavigateAfterSavePath(value: string | null) {
-      self.alternateNavigateAfterSavePath = value
-    },
     load: flow(function* () {
       const response = yield self.environment.api.fetchPart3Checklist(self.id)
       if (response.ok) {

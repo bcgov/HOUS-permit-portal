@@ -111,6 +111,7 @@ RSpec.configure do |config|
     User.reindex
     Contact.reindex
     PreCheck.reindex
+    OverheatingCode.reindex
 
     # and disable callbacks
     Searchkick.disable_callbacks

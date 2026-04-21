@@ -23,6 +23,10 @@ export const useJurisdiction = () => {
     "/jurisdictions/:jurisdictionId/configuration-management",
     "/jurisdictions/:jurisdictionId/configuration-management/feature-access/submissions-inbox-setup",
     "/jurisdictions/:jurisdictionId/configuration-management/energy-step",
+    "/jurisdictions/:jurisdictionId/configuration-management/energy-step/part-9",
+    "/jurisdictions/:jurisdictionId/configuration-management/energy-step/part-3",
+    "/jurisdictions/:jurisdictionId/configuration-management/energy-step/part-3/:occupancyKey",
+    "/jurisdictions/:jurisdictionId/configuration-management/energy-step/climate-zones",
     "/jurisdictions/:jurisdictionId/users",
     "/jurisdictions/:jurisdictionId/users/invite",
     "/jurisdictions/:jurisdictionId/api-settings",
@@ -83,5 +87,12 @@ export const useJurisdiction = () => {
     })()
   }, [pathname])
 
-  return { currentJurisdiction, error }
+  // Only expose the jurisdiction when it matches the URL param, preventing stale
+  // data from being used by consumers (e.g. useSearch) during navigation transitions.
+  const matchedJurisdiction =
+    currentJurisdiction && (currentJurisdiction.id === jurisdictionId || currentJurisdiction.slug === jurisdictionId)
+      ? currentJurisdiction
+      : null
+
+  return { currentJurisdiction: matchedJurisdiction, error }
 }

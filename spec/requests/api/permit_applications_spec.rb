@@ -472,7 +472,7 @@ RSpec.describe "Api::PermitApplications", type: :request do
              as: :json
 
       expect(response).to have_http_status(:ok)
-      expect(PermitCollaboration.exists?(permit_collaboration.id)).to be(false)
+      expect(permit_collaboration.reload.discarded?).to be(true)
     end
   end
 

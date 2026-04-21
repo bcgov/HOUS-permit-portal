@@ -66,6 +66,9 @@ RSpec.describe Api::Part9Building::StepCodesController, type: :controller do
         }.to change(Part9StepCode, :count).by(1)
 
         expect(response).to have_http_status(:success)
+        expect(
+          JSON.parse(response.body).dig("data", "checklists")
+        ).to be_present
       end
     end
 
@@ -108,6 +111,43 @@ RSpec.describe Api::Part9Building::StepCodesController, type: :controller do
           "file is missing"
         )
       end
+    end
+  end
+
+  describe "GET #show" do
+    let(:step_code) do
+      create(
+        :part_9_step_code,
+        permit_application: permit_application_with_fake_plan_document,
+        creator: submitter
+      )
+    end
+
+    it "returns the step code for the creator" do
+      get :show, params: { id: step_code.id }
+
+      expect(response).to have_http_status(:success)
+      expect(JSON.parse(response.body).dig("data", "id")).to eq(step_code.id)
+    end
+
+    it "returns forbidden for an unauthorized user" do
+      sign_in create(:user, :submitter)
+
+      get :show, params: { id: step_code.id }
+
+      expect(response).to have_http_status(:forbidden)
+    end
+  end
+
+  describe "GET #select_options" do
+    it "returns select options for Part 9 checklists" do
+      get :select_options
+
+      expect(response).to have_http_status(:ok)
+      data = JSON.parse(response.body).dig("data")
+      expect(data["compliance_paths"]).to include("step_code_ers")
+      expect(data["energy_steps"]).to be_present
+      expect(data["zero_carbon_steps"]).to be_present
     end
   end
 end

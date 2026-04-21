@@ -4,7 +4,7 @@ import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
 import { Trans, useTranslation } from "react-i18next"
-import { Outlet, useNavigate } from "react-router-dom"
+import { Outlet, useLocation, useNavigate } from "react-router-dom"
 import { datefnsTableDateFormat } from "../../../constants"
 import { useJurisdiction } from "../../../hooks/resources/use-jurisdiction"
 import { useMst } from "../../../setup/root"
@@ -16,7 +16,6 @@ import { SharedSpinner } from "../../shared/base/shared-spinner"
 import { SearchGrid } from "../../shared/grid/search-grid"
 import { SearchGridItem } from "../../shared/grid/search-grid-item"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
-import { ExternalApiKeySandboxTag } from "./external-api-key-sandbox-tag"
 import { ExternalApiKeyStatusTag } from "./external-api-key-status-tag"
 import { GridHeaders } from "./grid-header"
 
@@ -29,6 +28,7 @@ export const ExternalApiKeysIndexScreen = observer(function ExternalApiKeysIndex
   const [isFetching, setIsFetching] = useState(false)
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const location = useLocation()
 
   useEffect(() => {
     if (currentJurisdiction) {
@@ -45,13 +45,23 @@ export const ExternalApiKeysIndexScreen = observer(function ExternalApiKeysIndex
   if (error) return <ErrorScreen error={error} />
   if (!currentUser || !currentJurisdiction) return <LoadingScreen />
 
+  const configurationManagementPath = `/jurisdictions/${currentJurisdiction.slug}/configuration-management`
+  const handleBack = () => {
+    // Check for a history entry; default is the initial location
+    if (location.key === "default") {
+      navigate(configurationManagementPath)
+    } else {
+      navigate(-1)
+    }
+  }
+
   const externalApiKeys = currentJurisdiction.externalApiKeys
   const externalApiEnabled = currentJurisdiction.externalApiEnabled
   const disableLinkClick = (e) => !externalApiEnabled && e.preventDefault()
 
   return (
     <Container maxW="container.lg" p={8} as={"main"} h={"full"} w={"full"} {...containerProps}>
-      <Button variant="link" onClick={() => navigate(-1)} leftIcon={<CaretLeft size={20} />} textDecoration="none">
+      <Button variant="link" onClick={handleBack} leftIcon={<CaretLeft size={20} />} textDecoration="none">
         {t("ui.back")}
       </Button>
       {/*This outlet will render the create/edit modal*/}
@@ -79,6 +89,7 @@ export const ExternalApiKeysIndexScreen = observer(function ExternalApiKeysIndex
               to={"create"}
               isDisabled={!externalApiEnabled}
               onClick={disableLinkClick}
+              replace
             >
               {t("externalApiKey.index.createExternalApiKey")}
             </RouterLinkButton>
@@ -98,7 +109,7 @@ export const ExternalApiKeysIndexScreen = observer(function ExternalApiKeysIndex
           />
         )}
 
-        <SearchGrid templateColumns="repeat(7, 1fr) 85px" pos={"relative"}>
+        <SearchGrid templateColumns="1fr 1fr 1fr 1.2fr 1fr 1fr 1fr 85px" pos={"relative"}>
           <GridHeaders />
 
           {isFetching ? (
@@ -115,9 +126,9 @@ export const ExternalApiKeysIndexScreen = observer(function ExternalApiKeysIndex
                     <ExternalApiKeyStatusTag status={externalApiKey.status} />
                   </SearchGridItem>
                   <SearchGridItem>
-                    {externalApiKey.statusScope && (
-                      <ExternalApiKeySandboxTag statusScope={externalApiKey.statusScope} />
-                    )}
+                    {externalApiKey.statusScope
+                      ? t(`sandbox.scopeLabels.${externalApiKey.statusScope}`)
+                      : t("sandbox.live")}
                   </SearchGridItem>
                   <SearchGridItem>{format(externalApiKey.createdAt, datefnsTableDateFormat)}</SearchGridItem>
                   <SearchGridItem>

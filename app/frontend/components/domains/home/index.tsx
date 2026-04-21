@@ -25,5 +25,5 @@ export const HomeScreen = observer(({ ...props }: IHomeScreenProps) => {
   const { userStore } = useMst()
   const { currentUser } = userStore
 
-  return roleSpecificScreens(currentUser.role, props)
+  return roleSpecificScreens(currentUser?.role, props)
 })

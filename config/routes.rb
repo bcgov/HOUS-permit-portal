@@ -93,14 +93,9 @@ Rails.application.routes.draw do
         delete "discard_draft", to: "requirement_templates#discard_draft"
         post "promote_draft", to: "requirement_templates#promote_draft"
       end
-    end
-
-    resources :early_access_previews do
-      member do
-        post :revoke_access
-        post :unrevoke_access
-        post :extend_access
-      end
+      post "jurisdiction_availabilities",
+           on: :member,
+           to: "requirement_templates#update_jurisdiction_availabilities"
     end
 
     # Draft version-specific endpoints (feedback, previews, block editing)
@@ -111,6 +106,8 @@ Rails.application.routes.draw do
         post "invite_draft_previewers",
              to: "template_versions#invite_draft_previewers"
         post "share_draft", to: "template_versions#share_draft"
+        patch "toggle_publicly_previewable",
+              to: "template_versions#toggle_publicly_previewable"
       end
 
       resources :template_version_feedbacks,
@@ -124,6 +121,9 @@ Rails.application.routes.draw do
     end
 
     resources :template_versions, only: %i[index show] do
+      get "publicly_previewable",
+          to: "template_versions#publicly_previewable",
+          on: :collection
       get "compare_requirements",
           to: "template_versions#compare_requirements",
           on: :member
@@ -157,19 +157,15 @@ Rails.application.routes.draw do
 
     resources :integration_mappings, only: [:update]
 
-    resources :overheating,
-              controller: "overheating",
-              only: %i[create index update show]
-    post "overheating/:id/generate_pdf", to: "overheating#generate_pdf"
-    get "overheating/:id/download", to: "overheating#download"
-    post "overheating/:id/archive", to: "overheating#archive"
-
     resources :jurisdictions, only: %i[index update show create] do
       post "search", on: :collection, to: "jurisdictions#index"
       post "users/search", on: :member, to: "jurisdictions#search_users"
       post "permit_applications/search",
            on: :member,
            to: "jurisdictions#search_permit_applications"
+      post "permit_projects/search",
+           on: :member,
+           to: "jurisdictions#search_permit_projects"
       patch "update_external_api_enabled",
             on: :member,
             to: "jurisdictions#update_external_api_enabled"
@@ -193,6 +189,7 @@ Rails.application.routes.draw do
     end
 
     resources :permit_applications, only: %i[create update show destroy] do
+      collection { patch :reorder }
       post "restore", on: :member
       post "generate_missing_pdfs",
            on: :member,
@@ -211,6 +208,8 @@ Rails.application.routes.draw do
            to: "permit_applications#invite_new_collaborator"
       post "submit", on: :member
       post "mark_as_viewed", on: :member
+      post "mark_as_unviewed", on: :member
+      post "transition_status", on: :member
       post "retrigger_submission_webhook", on: :member
       patch "upload_supporting_document", on: :member
       patch "update_version", on: :member
@@ -251,7 +250,14 @@ Rails.application.routes.draw do
         post :pin
         delete :unpin
         get :submission_collaborator_options
+        post :activities, to: "project_audits#index"
+        post :mark_as_viewed
+        post :mark_as_unviewed
+        post :transition_state
+        post :assign_project_review_collaborator
+        delete :unassign_project_review_collaborator
       end
+      collection { patch :reorder }
     end
 
     resources :permit_collaborations, only: %i[destroy] do
@@ -299,6 +305,11 @@ Rails.application.routes.draw do
       post "submit", on: :member
       patch "mark_viewed", on: :member
       get "pdf_report_url", on: :member
+    end
+
+    resources :overheating_codes, only: %i[index show create update destroy] do
+      get "generate_pdf", on: :member
+      patch "restore", on: :member
     end
 
     resources :report_documents, only: [] do

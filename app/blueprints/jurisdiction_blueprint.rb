@@ -28,10 +28,19 @@ class JurisdictionBlueprint < Blueprinter::Base
            :external_api_state,
            :first_nation,
            :ltsa_matcher,
-           :heating_degree_days
+           :heating_degree_days,
+           :weather_location
+
+    field :design_summer_temp do |jurisdiction, _options|
+      jurisdiction.design_summer_temp&.to_f
+    end
 
     field :external_api_enabled do |jurisdiction, _options|
       jurisdiction.external_api_enabled?
+    end
+
+    field :submission_inbox_set_up do |jurisdiction, _options|
+      jurisdiction.submission_inbox_set_up?
     end
     association :contacts, blueprint: ContactBlueprint
     association :submission_contacts,
@@ -43,6 +52,10 @@ class JurisdictionBlueprint < Blueprinter::Base
     association :resources, blueprint: ResourceBlueprint
     association :jurisdiction_step_requirements,
                 blueprint: JurisdictionStepRequirementBlueprint
+    association :part3_occupancy_required_steps,
+                blueprint: Part3OccupancyRequiredStepBlueprint
+    association :jurisdiction_climate_zones,
+                blueprint: JurisdictionClimateZoneBlueprint
     association :service_partner_enrollments,
                 blueprint: JurisdictionServicePartnerEnrollmentBlueprint
   end

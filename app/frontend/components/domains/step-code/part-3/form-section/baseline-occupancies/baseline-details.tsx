@@ -5,7 +5,6 @@ import {
   AccordionItem,
   AccordionPanel,
   Box,
-  Button,
   Flex,
   Heading,
   Text,
@@ -14,18 +13,15 @@ import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
 import { FormProvider, useForm } from "react-hook-form"
-import { useLocation, useNavigate } from "react-router-dom"
 import { usePart3StepCode } from "../../../../../../hooks/resources/use-part-3-step-code"
 import { EFlashMessageStatus } from "../../../../../../types/enums"
 import { CustomMessageBox } from "../../../../../shared/base/custom-message-box"
+import { Part3FormFooter } from "../shared/form-footer"
 import { OccupancyPanel } from "./occupancy-panel"
 
 export const BaselineDetails = observer(function Part3StepCodeFormBaselineDetails() {
   const i18nPrefix = "stepCode.part3.baselineDetails"
   const { checklist } = usePart3StepCode()
-
-  const navigate = useNavigate()
-  const location = useLocation()
 
   const formMethods = useForm({
     defaultValues: {
@@ -44,27 +40,9 @@ export const BaselineDetails = observer(function Part3StepCodeFormBaselineDetail
 
   const onSubmit = async (values) => {
     if (!checklist) return
-
-    const alternatePath = checklist.alternateNavigateAfterSavePath
-    checklist.setAlternateNavigateAfterSavePath(null)
-
-    let updateSucceeded = false
-    if (!isValid) return
     const updated = await checklist.update(values)
-    if (updated) {
-      await checklist.completeSection("baselineDetails")
-      updateSucceeded = true
-    } else {
-      return
-    }
-
-    if (updateSucceeded) {
-      if (alternatePath) {
-        navigate(alternatePath)
-      } else {
-        navigate(location.pathname.replace("baseline-details", "district-energy"))
-      }
-    }
+    if (!updated) throw new Error("Save failed")
+    await checklist.completeSection("baselineDetails")
   }
 
   useEffect(() => {
@@ -87,28 +65,24 @@ export const BaselineDetails = observer(function Part3StepCodeFormBaselineDetail
         </Flex>
       </Flex>
       <FormProvider {...formMethods}>
-        <form onSubmit={handleSubmit(onSubmit)} name="part3SectionForm">
-          <Flex direction="column" gap={{ base: 6, xl: 6 }} pb={4}>
-            <Accordion defaultIndex={[...Array(checklist.baselineOccupancies.length).keys()]} allowMultiple>
-              {checklist.baselineOccupancies.map((oc, idx) => (
-                <AccordionItem border="none" key={oc.id}>
-                  <AccordionButton bg="greys.grey04" rounded="lg">
-                    <Box as="span" flex="1" textAlign="left">
-                      {t(`stepCode.part3.baselineOccupancyKeys.${oc.key}`)}
-                    </Box>
-                    <AccordionIcon />
-                  </AccordionButton>
-                  <AccordionPanel pb={4}>
-                    <OccupancyPanel occupancy={oc} idx={idx} />
-                  </AccordionPanel>
-                </AccordionItem>
-              ))}
-            </Accordion>
-            <Button type="submit" variant="primary" isLoading={isSubmitting} isDisabled={isSubmitting}>
-              {t("stepCode.part3.cta")}
-            </Button>
-          </Flex>
-        </form>
+        <Flex direction="column" gap={{ base: 6, xl: 6 }} pb={4}>
+          <Accordion defaultIndex={[...Array(checklist.baselineOccupancies.length).keys()]} allowMultiple>
+            {checklist.baselineOccupancies.map((oc, idx) => (
+              <AccordionItem border="none" key={oc.id}>
+                <AccordionButton bg="greys.grey04" rounded="lg">
+                  <Box as="span" flex="1" textAlign="left">
+                    {t(`stepCode.part3.baselineOccupancyKeys.${oc.key}`)}
+                  </Box>
+                  <AccordionIcon />
+                </AccordionButton>
+                <AccordionPanel pb={4}>
+                  <OccupancyPanel occupancy={oc} idx={idx} />
+                </AccordionPanel>
+              </AccordionItem>
+            ))}
+          </Accordion>
+          <Part3FormFooter handleSubmit={handleSubmit} onSubmit={onSubmit} isLoading={isSubmitting} />
+        </Flex>
       </FormProvider>
     </>
   )

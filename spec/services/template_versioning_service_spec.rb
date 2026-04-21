@@ -109,7 +109,7 @@ RSpec.describe TemplateVersioningService, type: :service, search: true do
             view: :template_snapshot
           )
 
-        template_version.denormalized_template_json.should eq(
+        expect(template_version.denormalized_template_json).to eq(
           expected_denormalized_template_json
         )
       end
@@ -117,7 +117,7 @@ RSpec.describe TemplateVersioningService, type: :service, search: true do
       it "saves the current requirement template form_json to denormalized_template_json" do
         expected_form_json = requirement_template.to_form_json.as_json
 
-        template_version.form_json.should eq(expected_form_json)
+        expect(template_version.form_json).to eq(expected_form_json)
       end
 
       it "saves the current requirement_blocks to requirement_blocks_json" do
@@ -125,14 +125,14 @@ RSpec.describe TemplateVersioningService, type: :service, search: true do
 
         requirement_template.requirement_template_sections.each do |section|
           section.template_section_blocks.each do |section_block|
-            requirement_blocks_json[
-              section_block.requirement_block.id
-            ].should eq(
-                       RequirementBlockBlueprint.render_as_json(
-                         section_block.requirement_block,
-                         parent_key: section.key
-                       )
-                     )
+            expect(
+              requirement_blocks_json[section_block.requirement_block.id]
+            ).to eq(
+              RequirementBlockBlueprint.render_as_json(
+                section_block.requirement_block,
+                parent_key: section.key
+              )
+            )
           end
         end
       end
@@ -248,13 +248,8 @@ RSpec.describe TemplateVersioningService, type: :service, search: true do
           Date.current + 15
         )
 
-        permit_type = create(:permit_type, code: :medium_residential)
         requirement_template_2 =
-          create(
-            :live_full_requirement_template,
-            permit_type: permit_type,
-            sections_count: 1
-          )
+          create(:live_full_requirement_template, sections_count: 1)
 
         TemplateVersioningService.schedule!(
           requirement_template_2,
@@ -311,13 +306,8 @@ RSpec.describe TemplateVersioningService, type: :service, search: true do
           Date.current + 15
         )
 
-        permit_type = create(:permit_type, code: :medium_residential)
         requirement_template_2 =
-          create(
-            :live_full_requirement_template,
-            permit_type: permit_type,
-            sections_count: 1
-          )
+          create(:live_full_requirement_template, sections_count: 1)
 
         expected_deprecated_versions << TemplateVersioningService.schedule!(
           requirement_template_2,
@@ -358,113 +348,6 @@ RSpec.describe TemplateVersioningService, type: :service, search: true do
         expected_scheduled_version.reload
 
         expect(expected_scheduled_version.status).to eq("scheduled")
-      end
-    end
-  end
-
-  describe ".create_or_update_published_version_for_early_access!" do
-    context "when the requirement_template is an EarlyAccessRequirementTemplate" do
-      let(:early_access_template) do
-        create(
-          :early_access_requirement_template_with_sections,
-          sections_count: 3
-        )
-      end
-
-      context "and no published version exists" do
-        it "creates a new published template version" do
-          # The calling of the service should not affect the count because it is already called in model creation
-          expect {
-            TemplateVersioningService.create_or_update_published_version_for_early_access!(
-              early_access_template
-            )
-          }.to change { early_access_template.template_versions.count }.by(0)
-
-          published_version = early_access_template.published_template_version
-          expect(published_version).not_to be_nil
-          expect(published_version.status).to eq("published")
-          expect(published_version.version_date).to eq(Date.current)
-          rendered_hash =
-            RequirementTemplateBlueprint.render_as_hash(
-              early_access_template,
-              view: :template_snapshot
-            )
-          rendered_hash["published_template_version"] = nil
-          expect(published_version.denormalized_template_json).to eq(
-            rendered_hash.deep_stringify_keys
-          )
-          expect(published_version.form_json).to eq(
-            early_access_template.to_form_json
-          )
-          expect(published_version.requirement_blocks_json).to eq(
-            TemplateVersioningService.send(
-              :form_requirement_blocks_hash,
-              early_access_template
-            )
-          )
-        end
-      end
-
-      context "and a published version already exists" do
-        before(:each) { Timecop.freeze(Time.zone.parse("2025-08-27 12:00:06")) }
-
-        after(:each) { Timecop.return }
-
-        let!(:existing_published_version) do
-          TemplateVersioningService.create_or_update_published_version_for_early_access!(
-            early_access_template
-          )
-        end
-
-        it "updates the existing published template version" do
-          # Modify the requirement_template to simulate changes
-          # For example, add a new section or modify existing ones
-          # Here, we'll assume adding a new section
-          new_section =
-            create(
-              :requirement_template_section,
-              requirement_template: early_access_template
-            )
-
-          expect {
-            TemplateVersioningService.create_or_update_published_version_for_early_access!(
-              early_access_template
-            )
-          }.not_to change { early_access_template.template_versions.count }
-
-          existing_published_version =
-            early_access_template.published_template_version
-          expect(existing_published_version.status).to eq("published")
-          expect(existing_published_version.version_date).to eq(Date.current)
-          expect(existing_published_version.denormalized_template_json).to eq(
-            RequirementTemplateBlueprint.render_as_hash(
-              early_access_template,
-              view: :template_snapshot
-            ).deep_stringify_keys
-          )
-          expect(existing_published_version.form_json).to eq(
-            early_access_template.to_form_json
-          )
-          expect(existing_published_version.requirement_blocks_json).to eq(
-            TemplateVersioningService.send(
-              :form_requirement_blocks_hash,
-              early_access_template
-            )
-          )
-        end
-      end
-    end
-
-    context "when the requirement_template is not an EarlyAccessRequirementTemplate" do
-      it "raises a TemplateVersionPublishError" do
-        expect {
-          TemplateVersioningService.create_or_update_published_version_for_early_access!(
-            requirement_template
-          )
-        }.to raise_error(
-          TemplateVersionPublishError,
-          "Cannot create early access version for a non-early access requirement template"
-        )
       end
     end
   end

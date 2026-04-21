@@ -2,21 +2,7 @@ class RequirementTemplatePolicy < ApplicationPolicy
   def show?
     return false unless user.present?
 
-    user.super_admin? ||
-      (
-        record.early_access? &&
-          user
-            .template_version_previews
-            .joins(:template_version)
-            .where(
-              template_versions: {
-                requirement_template_id: record.id
-              },
-              discarded_at: nil
-            )
-            .where("template_version_previews.expires_at > ?", Time.current)
-            .exists?
-      )
+    user.super_admin?
   end
 
   def create?
@@ -60,7 +46,7 @@ class RequirementTemplatePolicy < ApplicationPolicy
   end
 
   def invite_previewers?
-    create? && record.early_access?
+    create?
   end
 
   def create_draft?
@@ -72,6 +58,10 @@ class RequirementTemplatePolicy < ApplicationPolicy
   end
 
   def promote_draft?
+    create?
+  end
+
+  def update_jurisdiction_availabilities?
     create?
   end
 

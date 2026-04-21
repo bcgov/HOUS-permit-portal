@@ -13,6 +13,7 @@ import { EditableInputWithControls } from "../../../../shared/editable-input-wit
 import { RemoveConfirmationModal } from "../../../../shared/modals/remove-confirmation-modal"
 import { RequirementBlockAccordion } from "../../../requirements-library/requirement-block-accordion"
 import { RequirementsLibraryDrawer } from "../../../requirements-library/requirements-library-drawer"
+import { BlockConditionalConfig } from "./block-conditional-config"
 
 interface IProps {
   isCollapsedAll?: boolean
@@ -163,17 +164,19 @@ const SectionDisplay = observer(
             const requirementBlock = requirementBlockStore.getRequirementBlockById(sectionBlock.requirementBlockId)
             return (
               requirementBlock && (
-                <RequirementBlockAccordion
-                  mb="6"
-                  as={"section"}
-                  id={formScrollToId(sectionBlock.requirementBlockId)}
-                  key={sectionBlock.id}
-                  requirementBlock={requirementBlock}
-                  onRemove={() => removeSectionBlock(index)}
-                  isCollapsedAll={isCollapsedAll}
-                  isEditable={getIsRequirementBlockEditable(requirementBlock)}
-                  showEditWarning
-                />
+                <Box key={sectionBlock.id}>
+                  <RequirementBlockAccordion
+                    mb="2"
+                    as={"section"}
+                    id={formScrollToId(sectionBlock.requirementBlockId)}
+                    requirementBlock={requirementBlock}
+                    onRemove={() => removeSectionBlock(index)}
+                    isCollapsedAll={isCollapsedAll}
+                    isEditable={getIsRequirementBlockEditable(requirementBlock)}
+                    showEditWarning
+                  />
+                  <BlockConditionalConfig sectionIndex={sectionIndex} blockIndex={index} />
+                </Box>
               )
             )
           })}

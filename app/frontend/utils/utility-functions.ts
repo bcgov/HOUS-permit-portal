@@ -6,7 +6,6 @@ import {
   vancouverTimeZone,
 } from "../constants"
 import {
-  EArchitecturalDrawingDependencyRequirementCode,
   EEnergyStepCodeDependencyRequirementCode,
   EEnergyStepCodePart3DependencyRequirementCode,
   ERequirementType,
@@ -85,6 +84,30 @@ export function keysToCamelCase(obj) {
 }
 
 export function setQueryParam(key: string, value: string | string[]) {
+  updateQueryParam(key, value, false)
+}
+
+export function pushQueryParam(key: string, value: string | string[]) {
+  updateQueryParam(key, value, true)
+}
+
+export function pushQueryParams(entries: Record<string, string | string[]>) {
+  const searchParams = new URLSearchParams(window.location.search)
+  for (const [key, value] of Object.entries(entries)) {
+    const isEmptyArray = Array.isArray(value) && value.length === 0
+    const isEmptyString = typeof value === "string" && value.trim() === ""
+    if (!value || isEmptyArray || isEmptyString) {
+      searchParams.delete(key)
+    } else {
+      searchParams.set(key, Array.isArray(value) ? value.join(",") : value)
+    }
+  }
+  const stringParams = searchParams.toString()
+  const newUrl = `${window.location.pathname}${stringParams ? "?" + stringParams : ""}`
+  window.history.pushState({}, "", newUrl)
+}
+
+function updateQueryParam(key: string, value: string | string[], push: boolean) {
   const searchParams = new URLSearchParams(window.location.search)
   const isEmptyArray = Array.isArray(value) && value.length === 0
   const isEmptyString = typeof value === "string" && value.trim() === ""
@@ -97,7 +120,11 @@ export function setQueryParam(key: string, value: string | string[]) {
   }
   const stringParams = searchParams.toString()
   const newUrl = `${window.location.pathname}${stringParams ? "?" + stringParams : ""}`
-  window.history.replaceState({}, "", newUrl)
+  if (push) {
+    window.history.pushState({}, "", newUrl)
+  } else {
+    window.history.replaceState({}, "", newUrl)
+  }
 }
 
 export function isMultiOptionRequirement(requirementType: ERequirementType): boolean {
@@ -177,17 +204,25 @@ export function startBlobDownload(blobData: BlobPart, mimeType: string, fileName
   window.URL.revokeObjectURL(url)
 }
 
-export function isArchitecturalDrawingDependencyRequirementCode(
-  requirementCode?: string | null,
-  inputType?: ERequirementType
-): requirementCode is EArchitecturalDrawingDependencyRequirementCode {
-  if (inputType === ERequirementType.architecturalDrawing) return true
+export async function downloadFromApi(apiPath: string, fallbackFilename: string): Promise<void> {
+  const response = await fetch(apiPath, {
+    method: "GET",
+    headers: { "X-CSRF-Token": getCsrfToken() || "" },
+  })
 
-  if (!requirementCode) return false
+  if (!response.ok) throw new Error(`Download failed: ${response.statusText}`)
 
-  return Object.values(EArchitecturalDrawingDependencyRequirementCode).includes(
-    requirementCode as EArchitecturalDrawingDependencyRequirementCode
-  )
+  const blob = await response.blob()
+  const disposition = response.headers.get("Content-Disposition")
+  const match = disposition?.match(/filename="(.+?)"/) || disposition?.match(/filename=([^;\s]+)/)
+  const filename = match?.[1] || fallbackFilename
+  const mimeType = response.headers.get("Content-Type") || "application/octet-stream"
+
+  startBlobDownload(blob, mimeType, filename)
+}
+
+export function isArchitecturalDrawingRequirement(inputType?: ERequirementType): boolean {
+  return inputType === ERequirementType.architecturalDrawing
 }
 
 export function isEnergyStepCodeDependencyRequirementCode(
@@ -417,17 +452,27 @@ export function numberToFormattedString(
 }
 
 /**
+ * Rounds a numeric value (number or string) to a fixed number of decimal places.
+ * Returns "-" for null, undefined, or NaN values.
+ */
+export function roundMetric(value: string | number | null | undefined, decimals: number = 5): string {
+  if (!value) return "-"
+  const num = typeof value === "string" ? parseFloat(value) : value
+  return isNaN(num) ? "-" : num.toFixed(decimals)
+}
+
+/**
  * Converts a formatted string back to a number
  * @param value - Formatted string to parse (e.g., "1,234.56")
- * @returns Parsed number or 0 if input is empty/invalid
+ * @returns Parsed number, or null if input is empty/invalid
  */
-export function formattedStringToNumber(value: string): number {
+export function formattedStringToNumber(value: string): number | null {
   const rawValue = value.replace(/,/g, "")?.trim()
 
-  if (!rawValue) return 0
+  if (!rawValue) return null
 
   const parsedValue = Number(rawValue)
-  return !isNaN(parsedValue) ? parsedValue : 0
+  return !isNaN(parsedValue) ? parsedValue : null
 }
 
 // Step Code helpers (shared across PDF and HTML components)

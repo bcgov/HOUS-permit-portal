@@ -4,7 +4,7 @@ class PermitApplicationPolicy < ApplicationPolicy
          record.collaborator?(user_id: user.id, collaboration_type: :submission)
       true
     elsif user.review_staff?
-      user.member_of?(record.jurisdiction.id) && !record.draft? &&
+      user.member_of?(record.jurisdiction.id) && !record.new_draft? &&
         record.sandbox == sandbox
     end
   end
@@ -16,7 +16,11 @@ class PermitApplicationPolicy < ApplicationPolicy
   end
 
   def mark_as_viewed?
-    user.review_staff?
+    user.review_staff? && user.member_of?(record.jurisdiction_id)
+  end
+
+  def mark_as_unviewed?
+    user.review_staff? && user.member_of?(record.jurisdiction_id)
   end
 
   def update?
@@ -67,6 +71,16 @@ class PermitApplicationPolicy < ApplicationPolicy
     end
   end
 
+  def transition_status?
+    user.review_staff? && user.member_of?(record.jurisdiction_id) &&
+      record.allowed_manual_transitions.any?
+  end
+
+  def reorder?
+    # this is actually a collection action and the scope is defiend separately
+    user&.review_staff?
+  end
+
   def generate_missing_pdfs?
     user.super_admin? || record.submitter == user ||
       ((user.review_staff?) && user.member_of?(record.jurisdiction_id))
@@ -81,7 +95,10 @@ class PermitApplicationPolicy < ApplicationPolicy
 
     return true unless feature_enabled
 
-    record.permit_collaborations.review.exists?(collaborator_id: user.id)
+    designated_reviewer = record.permit_collaborations.review.delegatee.first
+    return true if designated_reviewer.nil?
+
+    designated_reviewer.collaborator.user_id == user.id
   end
 
   def create_permit_collaboration?
@@ -95,7 +112,8 @@ class PermitApplicationPolicy < ApplicationPolicy
         user
           .jurisdictions
           .find_by(id: permit_collaboration.permit_application.jurisdiction_id)
-          .present? && permit_collaboration.permit_application.submitted?
+          .present? &&
+        permit_collaboration.permit_application.visible_to_reviewers?
     else
       false
     end
@@ -175,6 +193,7 @@ class PermitApplicationPolicy < ApplicationPolicy
           JOIN collaborators c ON c.id = pc.collaborator_id
           WHERE pc.permit_application_id = permit_applications.id
             AND pc.collaboration_type = :submission_type
+            AND pc.discarded_at IS NULL
             AND c.user_id = :uid
         )
       SQL
@@ -204,26 +223,27 @@ class PermitApplicationPolicy < ApplicationPolicy
       if user.review_staff?
         # Access rule 3 (review staff only):
         # user can see applications for their jurisdictions, but only once
-        # they have reached a submitted status.
+        # they have reached a submitted status. In sandbox mode, the sandbox
+        # filter lives on the parent project now.
+        pp_clauses = [
+          "pp.id = permit_applications.permit_project_id",
+          "pp.jurisdiction_id IN (:jur_ids)"
+        ]
+        pp_clauses << "pp.sandbox_id = :sandbox_id" if sandbox.present?
+
         review_exists_sql = <<-SQL.squish
           EXISTS (
             SELECT 1 FROM permit_projects pp
-            WHERE pp.id = permit_applications.permit_project_id
-              AND pp.jurisdiction_id IN (:jur_ids)
+            WHERE #{pp_clauses.join(" AND ")}
           )
         SQL
 
-        # Add the review-staff rule to the OR list, and bind parameters.
-        clauses << "#{review_exists_sql} AND permit_applications.status IN (:submitted_statuses)"
+        clauses << "#{review_exists_sql} AND permit_applications.status IN (:visible_statuses)"
         values[:jur_ids] = user.jurisdictions.pluck(:id)
-        values[:submitted_statuses] = PermitApplication
-          .submitted_statuses
+        values[:visible_statuses] = PermitApplication
+          .kanban_statuses
           .map { |name| PermitApplication.statuses.fetch(name) }
-        if sandbox.present?
-          # In sandbox mode, restrict to the active sandbox.
-          clauses.last << " AND permit_applications.sandbox_id = :sandbox_id"
-          values[:sandbox_id] = sandbox.id
-        end
+        values[:sandbox_id] = sandbox.id if sandbox.present?
       end
 
       # Combine all access rules with OR and de-duplicate results.

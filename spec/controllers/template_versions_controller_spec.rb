@@ -11,20 +11,20 @@ RSpec.describe Api::TemplateVersionsController,
   let!(:source_template) do
     create(:live_requirement_template, nickname: "Source Template")
   end
-  let!(:non_first_nations_version) do
+  let!(:source_version) do
     create(:template_version, requirement_template: source_template)
   end
   let!(:target_template) do
     create(:live_requirement_template, nickname: "Target Template")
   end
-  let!(:first_nations_version) do
+  let!(:target_version) do
     create(:template_version, requirement_template: target_template)
   end
 
   let!(:customization) do
     create(
       :jurisdiction_template_version_customization,
-      template_version: non_first_nations_version,
+      template_version: source_version,
       jurisdiction: jurisdiction,
       customizations: {
         "requirement_block_changes" => {
@@ -48,13 +48,13 @@ RSpec.describe Api::TemplateVersionsController,
   before { sign_in review_manager }
 
   describe "POST #copy_jurisdiction_template_version_customization" do
-    context "It copies electives from non-first-nation template version when include_electives is true" do
+    context "when include_electives is true" do
       it "copies the elective fields" do
         post :copy_jurisdiction_template_version_customization,
              params: {
                jurisdiction_id: jurisdiction.id,
-               id: first_nations_version.id,
-               from_non_first_nations: true,
+               id: target_version.id,
+               from_template_version_id: source_version.id,
                include_electives: true
              }
         expect(response).to have_http_status(:success)
@@ -84,14 +84,13 @@ RSpec.describe Api::TemplateVersionsController,
       end
     end
 
-    context "It copies tips from non-first-nation template version when include_tips is true" do
+    context "when include_tips is true" do
       it "copies the tips and not the elective fields" do
-        # JurisdictionTemplateVersionCustomization.last
         post :copy_jurisdiction_template_version_customization,
              params: {
                jurisdiction_id: jurisdiction.id,
-               id: first_nations_version.id,
-               from_non_first_nations: true,
+               id: target_version.id,
+               from_template_version_id: source_version.id,
                include_tips: true
              }
 

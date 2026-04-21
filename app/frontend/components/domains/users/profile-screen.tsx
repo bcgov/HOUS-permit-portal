@@ -93,7 +93,7 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
     {
       event: t("user.notifications.templateChanged"),
       inAppControl: "preferenceAttributes.enableInAppNewTemplateVersionPublishNotification",
-      emailChecked: false,
+      emailControl: "preferenceAttributes.enableEmailNewTemplateVersionPublishNotification",
     },
     {
       event: t("user.notifications.templateCustomized"),
@@ -106,7 +106,7 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
       emailControl: "preferenceAttributes.enableEmailApplicationSubmissionNotification",
     },
     {
-      event: t("user.notifications.applicationViewed"),
+      event: t("user.notifications.reviewStarted"),
       inAppControl: "preferenceAttributes.enableInAppApplicationViewNotification",
       emailControl: "preferenceAttributes.enableEmailApplicationViewNotification",
     },

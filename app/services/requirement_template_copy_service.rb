@@ -3,8 +3,7 @@ class RequirementTemplateCopyService
 
   # Define a whitelist of permitted classes
   ALLOWED_CLASSES = {
-    LiveRequirementTemplate.name => LiveRequirementTemplate,
-    EarlyAccessRequirementTemplate.name => EarlyAccessRequirementTemplate
+    LiveRequirementTemplate.name => LiveRequirementTemplate
   }.freeze
 
   def initialize(requirement_template)

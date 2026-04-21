@@ -1,6 +1,7 @@
 class ExternalApiKeyPolicy < ApplicationPolicy
   def index?
-    user.super_admin? || user.review_manager? || user.regional_review_manager?
+    user.super_admin? || user.review_manager? ||
+      user.regional_review_manager? || user.technical_support?
   end
 
   def show?

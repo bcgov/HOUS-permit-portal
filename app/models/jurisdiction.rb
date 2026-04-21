@@ -7,6 +7,8 @@ class Jurisdiction < ApplicationRecord
     submission_contacts
     contacts
     jurisdiction_step_requirements
+    part3_occupancy_required_steps
+    jurisdiction_climate_zones
   ]
 
   include ActionView::Helpers::SanitizeHelper
@@ -56,6 +58,10 @@ class Jurisdiction < ApplicationRecord
   has_many :jurisdiction_memberships, dependent: :destroy
   has_many :users, through: :jurisdiction_memberships
   has_many :submitters, through: :permit_applications, source: :submitter
+  has_many :jurisdiction_requirement_templates, dependent: :destroy
+  has_many :enabled_requirement_templates,
+           through: :jurisdiction_requirement_templates,
+           source: :requirement_template
   has_many :jurisdiction_template_version_customizations
   has_many :template_versions,
            through: :jurisdiction_template_version_customizations
@@ -64,6 +70,8 @@ class Jurisdiction < ApplicationRecord
   has_many :external_api_keys, dependent: :destroy
   has_many :integration_mappings
   has_many :jurisdiction_step_requirements, dependent: :destroy
+  has_many :part3_occupancy_required_steps, dependent: :destroy
+  has_many :jurisdiction_climate_zones, dependent: :destroy
   has_many :collaborators, as: :collaboratorable, dependent: :destroy
   has_many :sandboxes, dependent: :destroy
   has_many :property_plan_local_jurisdictions, dependent: :destroy
@@ -83,6 +91,7 @@ class Jurisdiction < ApplicationRecord
   validates :name, uniqueness: { scope: :locality_type, case_sensitive: false }
   validates :locality_type, presence: true
   validate :inbox_enabled_requires_inbox_setup
+  validate :no_duplicate_part3_occupancy_pathways
 
   # Validation to ensure at least one sandbox exists
   validate :must_have_one_sandbox
@@ -109,6 +118,9 @@ class Jurisdiction < ApplicationRecord
 
   accepts_nested_attributes_for :jurisdiction_step_requirements,
                                 allow_destroy: true
+  accepts_nested_attributes_for :part3_occupancy_required_steps,
+                                allow_destroy: true
+  accepts_nested_attributes_for :jurisdiction_climate_zones, allow_destroy: true
   accepts_nested_attributes_for :resources, allow_destroy: true
 
   before_create :assign_unique_prefix
@@ -266,7 +278,7 @@ class Jurisdiction < ApplicationRecord
     permit_applications.kept.unviewed
   end
 
-  def submission_inbox_set_up
+  def submission_inbox_set_up?
     submission_contacts.confirmed.exists?
   end
 
@@ -393,19 +405,10 @@ class Jurisdiction < ApplicationRecord
   # Callback method to ensure a default sandbox is created
   def ensure_default_sandboxes
     if sandboxes.published.empty?
-      sandboxes.build(
-        name: "Published",
-        description:
-          "Work with application forms that have already been published",
-        template_version_status_scope: :published
-      )
+      sandboxes.build(template_version_status_scope: :published)
     end
     if sandboxes.scheduled.empty?
-      sandboxes.build(
-        name: "Scheduled",
-        description: "Work with application forms scheduled to be published",
-        template_version_status_scope: :scheduled
-      )
+      sandboxes.build(template_version_status_scope: :scheduled)
     end
   end
 
@@ -420,13 +423,37 @@ class Jurisdiction < ApplicationRecord
   end
 
   def inbox_enabled_requires_inbox_setup
-    if inbox_enabled && !submission_inbox_set_up
+    if inbox_enabled && !submission_inbox_set_up?
       errors.add(
         :inbox_enabled,
         I18n.t(
           "activerecord.errors.models.jurisdiction.enabled_inbox_requires_setup"
         )
       )
+    end
+  end
+
+  def no_duplicate_part3_occupancy_pathways
+    active_steps =
+      part3_occupancy_required_steps.reject(&:marked_for_destruction?)
+
+    seen = Set.new
+    active_steps.each do |step|
+      key = [
+        step.occupancy_key,
+        step.energy_step_required,
+        step.zero_carbon_step_required
+      ]
+      if seen.include?(key)
+        errors.add(
+          :base,
+          I18n.t(
+            "activerecord.errors.models.part3_occupancy_required_step.duplicate_pathway"
+          )
+        )
+        break
+      end
+      seen.add(key)
     end
   end
 

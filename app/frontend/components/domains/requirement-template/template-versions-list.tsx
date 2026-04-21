@@ -21,10 +21,13 @@ interface IProps {
   status?: ETemplateVersionStatus
   earlyAccess?: boolean
   isPubliclyPreviewable?: boolean
+  isPublic?: boolean
   statusDisplayOptions?: {
     showStatus?: boolean
     showVersionDate?: boolean
   }
+  jurisdictionId?: string
+  hideDisabled?: boolean
 }
 
 export const TemplateVersionsList = observer(function TemplateVersionsList({
@@ -33,6 +36,8 @@ export const TemplateVersionsList = observer(function TemplateVersionsList({
   statusDisplayOptions,
   earlyAccess,
   isPubliclyPreviewable,
+  jurisdictionId,
+  hideDisabled,
 }: IProps) {
   const { t } = useTranslation()
   const { sandboxStore } = useMst()

@@ -12,6 +12,7 @@ class Api::RequirementTemplatesController < Api::ApplicationController
                   create_draft
                   discard_draft
                   promote_draft
+                  update_jurisdiction_availabilities
                 ]
   before_action :set_template_version, only: %i[unschedule_template_version]
   skip_after_action :verify_policy_scoped, only: [:index]
@@ -418,6 +419,39 @@ class Api::RequirementTemplatesController < Api::ApplicationController
     end
   end
 
+  def update_jurisdiction_availabilities
+    authorize @requirement_template
+
+    jurisdiction_ids = params[:jurisdiction_ids] || []
+
+    # Remove availabilities not in the list
+    JurisdictionRequirementTemplate
+      .where(requirement_template: @requirement_template)
+      .where.not(jurisdiction_id: jurisdiction_ids)
+      .destroy_all
+
+    # Add new availabilities
+    jurisdiction_ids.each do |jurisdiction_id|
+      JurisdictionRequirementTemplate.find_or_create_by!(
+        jurisdiction_id: jurisdiction_id,
+        requirement_template: @requirement_template
+      )
+    end
+
+    # Reload association
+    @requirement_template.reload
+
+    render_success @requirement_template,
+                   "requirement_template.update_success",
+                   {
+                     blueprint: RequirementTemplateBlueprint,
+                     blueprint_opts: {
+                       view: :extended,
+                       current_user: current_user
+                     }
+                   }
+  end
+
   private
 
   def set_requirement_template
@@ -448,20 +482,31 @@ class Api::RequirementTemplatesController < Api::ApplicationController
         :description,
         :nickname,
         :type,
+        :available_globally,
         tag_list: [],
         requirement_template_sections_attributes: [
           :id,
           :name,
           :position,
           :_destroy,
-          template_section_blocks_attributes: %i[
-            id
-            requirement_block_id
-            position
-            _destroy
+          template_section_blocks_attributes: [
+            :id,
+            :requirement_block_id,
+            :position,
+            :_destroy,
+            conditional: %i[
+              when_block_id
+              when_requirement_code
+              operator
+              eq
+              show
+              hide
+            ]
           ]
         ]
       )
+
+    restore_cleared_block_conditionals(permitted_params)
 
     # This is a workaround needed to validate step code related errors
     if permitted_params[:requirement_template_sections_attributes].present?
@@ -473,6 +518,27 @@ class Api::RequirementTemplatesController < Api::ApplicationController
     end
 
     permitted_params
+  end
+
+  # Rails permit strips `conditional: null` because it expects a hash.
+  # Re-inject nil so the model clears the column on save.
+  def restore_cleared_block_conditionals(permitted_params)
+    permitted_params[
+      :requirement_template_sections_attributes
+    ]&.each_with_index do |section, si|
+      section[:template_section_blocks_attributes]&.each_with_index do |tsb, bi|
+        raw_tsb =
+          params.dig(
+            :requirement_template,
+            :requirement_template_sections_attributes,
+            si,
+            :template_section_blocks_attributes,
+            bi
+          )
+        tsb[:conditional] = nil if raw_tsb&.key?(:conditional) &&
+          raw_tsb[:conditional].nil?
+      end
+    end
   end
 
   def schedule_params

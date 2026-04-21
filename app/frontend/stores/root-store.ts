@@ -13,16 +13,18 @@ import {
 import { GeocoderStoreModel, IGeocoderStore } from "./geocoder-store"
 import { IJurisdictionStore, JurisdictionStoreModel } from "./jurisdiction-store"
 import { INotificationStore, NotificationStoreModel } from "./notification-store"
-import { IOverheatingToolStore, OverheatingToolStoreModel } from "./overheating-tool-store"
+import { IOverheatingCodeStore, OverheatingCodeStoreModel } from "./overheating-code-store"
 import { IPermitApplicationStore, PermitApplicationStoreModel } from "./permit-application-store"
 import { IPermitProjectStore, PermitProjectStoreModel } from "./permit-project-store"
 import { IPreCheckStore, PreCheckStoreModel } from "./pre-check-store"
+import { IProjectAuditStore, ProjectAuditStoreModel } from "./project-audit-store"
 import { IRequirementBlockStoreModel, RequirementBlockStoreModel } from "./requirement-block-store"
 import { IRequirementTemplateStoreModel, RequirementTemplateStoreModel } from "./requirement-template-store"
 import { ISandboxStore, SandboxStoreModel } from "./sandbox-store"
 import { ISessionStore, SessionStoreModel } from "./session-store"
 import { ISiteConfigurationStore, SiteConfigurationStoreModel } from "./site-configuration-store"
 import { IStepCodeStore, StepCodeStoreModel } from "./step-code-store"
+import { ISubmissionInboxStore, SubmissionInboxStoreModel } from "./submission-inbox-store"
 import { ITemplateVersionStoreModel, TemplateVersionStoreModel } from "./template-version-store"
 import { IUIStore, UIStoreModel } from "./ui-store"
 import { IUserStore, UserStoreModel } from "./user-store"
@@ -35,7 +37,9 @@ export const RootStoreModel = types
     userStore: types.optional(UserStoreModel, {}),
     permitApplicationStore: types.optional(PermitApplicationStoreModel, {}),
     permitProjectStore: types.optional(PermitProjectStoreModel, {}),
+    projectAuditStore: types.optional(ProjectAuditStoreModel, {}),
     preCheckStore: types.optional(PreCheckStoreModel, {}),
+    overheatingCodeStore: types.optional(OverheatingCodeStoreModel, {}),
     jurisdictionStore: types.optional(JurisdictionStoreModel, {}),
     requirementBlockStore: types.optional(RequirementBlockStoreModel, {}),
     earlyAccessRequirementBlockStore: types.optional(EarlyAccessRequirementBlockStoreModel, {}),
@@ -50,7 +54,7 @@ export const RootStoreModel = types
     contactStore: types.optional(ContactStoreModel, {}),
     notificationStore: types.optional(NotificationStoreModel, {}),
     sandboxStore: types.optional(SandboxStoreModel, {}),
-    overheatingToolStore: types.optional(OverheatingToolStoreModel, {}),
+    submissionInboxStore: types.optional(SubmissionInboxStoreModel, {}),
   })
   .extend(withEnvironment())
   .volatile((self) => ({
@@ -79,6 +83,11 @@ export const RootStoreModel = types
       } else {
         localStorage.removeItem("SandboxStore")
       }
+      yield makePersistable(self.submissionInboxStore, {
+        name: "SubmissionInboxStore",
+        properties: ["viewMode", "displayMode", "collapsedColumns"],
+        storage: localStorage,
+      })
       protect(self)
     }),
     subscribeToUserChannel() {
@@ -112,7 +121,9 @@ export interface IRootStore extends IStateTreeNode {
   sessionStore: ISessionStore
   permitApplicationStore: IPermitApplicationStore
   permitProjectStore: IPermitProjectStore
+  projectAuditStore: IProjectAuditStore
   preCheckStore: IPreCheckStore
+  overheatingCodeStore: IOverheatingCodeStore
   jurisdictionStore: IJurisdictionStore
   userStore: IUserStore
   earlyAccessRequirementBlockStore: IEarlyAccessRequirementBlockStoreModel
@@ -128,7 +139,7 @@ export interface IRootStore extends IStateTreeNode {
   notificationStore: INotificationStore
   collaboratorStore: ICollaboratorStore
   sandboxStore: ISandboxStore
-  overheatingToolStore: IOverheatingToolStore
+  submissionInboxStore: ISubmissionInboxStore
   subscribeToUserChannel: () => void
   disconnectUserChannel: () => void
   loadLocalPersistedData: () => void

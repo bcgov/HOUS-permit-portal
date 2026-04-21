@@ -8,9 +8,11 @@ import { IExternalApiKeyParams } from "../types/api-request"
 import { EEnergyStep, EJurisdictionExternalApiState, EPreCheckServicePartner, EZeroCarbonStep } from "../types/enums"
 import {
   IContact,
+  IJurisdictionClimateZone,
   IJurisdictionServicePartnerEnrollment,
   IJurisdictionStepRequirement,
   IOption,
+  IPart3OccupancyRequiredStep,
   IResource,
   ISubmissionContact,
   TLatLngTuple,
@@ -28,6 +30,7 @@ export const JurisdictionModel = types
     submissionEmail: types.maybeNull(types.string),
     qualifiedName: types.string,
     inboxEnabled: types.optional(types.boolean, false),
+    submissionInboxSetUp: types.optional(types.boolean, false),
     showAboutPage: types.optional(types.boolean, false),
     allowDesignatedReviewer: types.optional(types.boolean, false),
     reverseQualifiedName: types.maybeNull(types.string),
@@ -57,12 +60,16 @@ export const JurisdictionModel = types
       EJurisdictionExternalApiState.gOff
     ),
     jurisdictionStepRequirements: types.array(types.frozen<IJurisdictionStepRequirement>()),
+    part3OccupancyRequiredSteps: types.array(types.frozen<IPart3OccupancyRequiredStep>()),
     sandboxes: types.array(types.reference(SandboxModel)),
     resources: types.array(types.frozen<IResource>()),
     firstNation: types.optional(types.boolean, false),
     ltsaMatcher: types.maybeNull(types.string),
     servicePartnerEnrollments: types.array(types.frozen<IJurisdictionServicePartnerEnrollment>()),
     heatingDegreeDays: types.maybeNull(types.number),
+    weatherLocation: types.maybeNull(types.string),
+    designSummerTemp: types.maybeNull(types.number),
+    jurisdictionClimateZones: types.array(types.frozen<IJurisdictionClimateZone>()),
   })
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -81,10 +88,6 @@ export const JurisdictionModel = types
     },
     getSubmissionContact(id: string): ISubmissionContact | undefined {
       return self.submissionContacts.find((c) => c.id == id)
-    },
-    /** @deprecated Use getSubmissionContact instead */
-    getPermitTypeSubmissionContact(id: string): ISubmissionContact | undefined {
-      return self.getSubmissionContact(id)
     },
     getRequiredStep(id: string): IJurisdictionStepRequirement | undefined {
       return self.jurisdictionStepRequirements.find((rs) => rs.id == id)
@@ -131,8 +134,6 @@ export const JurisdictionModel = types
   }))
   .views((self) => ({
     get part9RequiredSteps(): IJurisdictionStepRequirement[] {
-      // This assumes that the jurisdictionStepRequirements are all part 9
-      // Revisit this once adding part 3 required steps
       const nonDefaults = self.jurisdictionStepRequirements.filter((r) => !r.default)
       if (nonDefaults.length > 0) {
         return nonDefaults
@@ -144,6 +145,9 @@ export const JurisdictionModel = types
       }
 
       return []
+    },
+    part3RequiredStepsForOccupancy(occupancyKey: string): IPart3OccupancyRequiredStep[] {
+      return self.part3OccupancyRequiredSteps.filter((s) => s.occupancyKey === occupancyKey)
     },
   }))
   .actions((self) => ({

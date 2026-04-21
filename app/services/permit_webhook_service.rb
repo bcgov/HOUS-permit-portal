@@ -1,6 +1,11 @@
 class PermitWebhookService
   attr_accessor :external_api_key, :client
 
+  # HMAC-SHA256 hex digest of +body+ using +secret+ (the integrator's API key token).
+  def self.webhook_signature_hex(secret, body)
+    OpenSSL::HMAC.hexdigest("SHA256", secret.to_s, body.to_s)
+  end
+
   def initialize(external_api_key)
     @external_api_key = external_api_key
 
@@ -54,9 +59,15 @@ and name: #{external_api_key.name}"
   end
 
   def send_webhook(payload)
+    body = payload.to_json
+    signature = self.class.webhook_signature_hex(external_api_key.token, body)
+    headers = {
+      "Content-Type" => "application/json",
+      Constants::Webhooks::WEBHOOK_SIGNATURE_HEADER => signature
+    }
+
     begin
-      response = client.post(external_api_key.webhook_url, payload.to_json) # should automatically throw an error if
-      # 4xx or 5xx
+      response = client.post(external_api_key.webhook_url, body, headers)
 
       response.success?
     rescue Faraday::Error => e

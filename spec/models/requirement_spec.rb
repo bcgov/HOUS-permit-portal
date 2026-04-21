@@ -129,6 +129,7 @@ RSpec.describe Requirement, type: :model, search: true do
               input_options: {
                 "conditional" => {
                   "eq" => "tool",
+                  "operator" => "isEqual",
                   "show" => true,
                   "when" => "energy_step_code_method_wrong"
                 },
@@ -142,6 +143,7 @@ RSpec.describe Requirement, type: :model, search: true do
               input_options: {
                 "conditional" => {
                   "eq" => "tool",
+                  "operator" => "isEqual",
                   "show" => true,
                   "when" => "energy_step_code_method"
                 }
@@ -163,16 +165,6 @@ RSpec.describe Requirement, type: :model, search: true do
 
         it "ensures energy_step_code_tool_part 3 has correct requried schema" do
           valid_requirement = build(:energy_step_code_tool_part_3_requirement)
-          expect(valid_requirement).to be_valid
-        end
-
-        it "ensures architectural drawing tool has correct required schema" do
-          valid_requirement = build(:architectural_drawing_tool_requirement)
-          expect(valid_requirement).to be_valid
-        end
-
-        it "ensures architectural drawing method has correct required schema" do
-          valid_requirement = build(:architectural_drawing_method_requirement)
           expect(valid_requirement).to be_valid
         end
 
@@ -269,6 +261,7 @@ RSpec.describe Requirement, type: :model, search: true do
             input_options: {
               "conditional" => {
                 "eq" => "file",
+                "operator" => "isEqual",
                 "show" => true
               }
             }
@@ -708,14 +701,16 @@ types" do
                 "conditional" => {
                   show: true,
                   when: "test",
-                  eq: "customValue"
+                  eq: "customValue",
+                  operator: "isEqual"
                 }
               }
             )
           form_json = requirement.to_form_json.reject { |key| key == :id }
+          block_key = requirement.requirement_block.key
+          section = PermitApplication.section_from_key(block_key)
           expected_form_json = {
-            key:
-              "#{requirement.requirement_block.key}|#{requirement.requirement_code}",
+            key: "#{block_key}|#{requirement.requirement_code}",
             type: "simpletextfield",
             elective: true,
             input: true,
@@ -725,8 +720,14 @@ types" do
             },
             conditional: {
               show: true,
-              when: "test",
-              eq: "customValue"
+              conjunction: "all",
+              conditions: [
+                {
+                  component: "#{section}.#{block_key}|test",
+                  operator: "isEqual",
+                  value: "customValue"
+                }
+              ]
             },
             customConditional: ";show = false"
           }
