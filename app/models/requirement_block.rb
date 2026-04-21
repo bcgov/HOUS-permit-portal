@@ -26,7 +26,7 @@ class RequirementBlock < ApplicationRecord
 
   enum :sign_off_role, { any: 0 }, prefix: true
   enum :reviewer_role, { any: 0 }, prefix: true
-  enum :visibility, { any: 0, early_access: 1, live: 2 }, default: 0
+  enum :visibility, { any: 0, live: 2 }, default: 0
 
   validates :sku, uniqueness: true, presence: true
   validates :name, presence: true

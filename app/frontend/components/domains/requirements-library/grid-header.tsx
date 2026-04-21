@@ -10,11 +10,7 @@ import { ModelSearchInput } from "../../shared/base/model-search-input"
 import { GridHeader } from "../../shared/grid/grid-header"
 import { SortIcon } from "../../shared/sort-icon"
 
-interface IProps {
-  forEarlyAccess?: boolean
-}
-
-export const GridHeaders = observer(function GridHeaders({ forEarlyAccess }: IProps) {
+export const GridHeaders = observer(function GridHeaders() {
   const { requirementBlockStore } = useMst()
   const searchModel = requirementBlockStore
 
@@ -28,13 +24,11 @@ export const GridHeaders = observer(function GridHeaders({ forEarlyAccess }: IPr
           as={Flex}
           gridColumn={"span 6"}
           p={6}
-          bg={forEarlyAccess ? "semantic.warningLight" : "greys.grey10"}
+          bg={"greys.grey10"}
           justifyContent={"space-between"}
           align="center"
         >
-          <Text role={"heading"}>
-            {t(`${forEarlyAccess ? "earlyAccessRequirementsLibrary" : "requirementsLibrary"}.index.tableHeading`)}
-          </Text>
+          <Text role={"heading"}>{t("requirementsLibrary.index.tableHeading")}</Text>
           <ModelSearchInput
             inputGroupProps={{
               position: "sticky",

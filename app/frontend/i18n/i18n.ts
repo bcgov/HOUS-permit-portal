@@ -153,7 +153,6 @@ const options = {
           enabledCommunitiesDescription: "Communities you can submit Building Permit applications in:",
           moreComingSoon: "(more coming soon)",
           andMore: "...and more",
-          earlyAccessTemplates: "See some of our templates in progress",
           additionalContent: {
             left: "See helpful tips from your local jurisdictions to streamline your digital building permit applications",
             mid: "Preview the Small-scale/Multi-unit housing checklist",
@@ -440,7 +439,6 @@ const options = {
           share: "Share",
           unassigned: "Unassigned",
           unassign: "Unassign",
-          seeEarlyAccessButton: "See Early Access",
           seeLiveButton: "See Live",
           invite: "Invite",
           public: "Public",
@@ -1682,14 +1680,9 @@ Thank you,
             inboxDisabledTitle: "Inbox disabled",
             inboxDisabled:
               "Submissions for this local jurisdictions are currently disabled. You will be able to make edits to this permit application but will not be able to submit until this jurisdiction's is accepting submissions again and inboxes are enabled globally.",
-            inboxDisabledTitleEarlyAccess: "Early Access – Submissions Not Yet Enabled",
-            inboxDisabledEarlyAccess:
-              "This permit is available for early access to help your team become familiar with the application process. You can view the application in this preview, but submission is currently disabled. <p> You are viewing the baseline standardized form. Click 'View optional electives' within any section to explore additional questions that jurisdictions may configure based on local needs.</p><p><1>Go to My projects to submit a permit.</1></p>",
             templateDisabledByJurisdictionTitle: "Permit Type No Longer Accepted",
             templateDisabledByJurisdiction:
               "This jurisdiction is no longer accepting applications for this permit type. You can continue to edit this application, but you will not be able to submit it. Please contact the jurisdiction for more information.",
-            inboxDisabledEarlyAccessInstructions:
-              "<br />This permit is available for early access to help your team become familiar with the application process. You can view the application in this preview, but submission is currently disabled.<br /><br /> You are viewing the base form. Click 'View optional electives' within any group of questions to explore additional questions that jurisdictions may configure based on local needs.<br /><1>Go to My projects to submit a permit.</1>",
             downloadApplication: "Download application",
             fetchingMissingPdf: "Fetching {{missingPdf}}...",
             missingPdfLabels: {
@@ -1797,14 +1790,6 @@ Thank you,
             scheduledFormsDescription: "Preview and test forms scheduled to be published.",
           },
         },
-        earlyAccessRequirementsLibrary: {
-          index: {
-            title: "Early access requirements library",
-            description:
-              "This displays all requirement blocks whose visibility has been set to 'preview only'. These blocks may not be used in any live drafts.",
-            tableHeading: "Early access requirement blocks",
-          },
-        },
         requirementsLibrary: {
           hasDataValidation: "Has data validation",
           addAnother: "Add",
@@ -1817,11 +1802,6 @@ Thank you,
           hasAutomatedCompliance: "Has automated compliance",
           inputNotSupported: "Input type not yet supported",
           associationsInfo: "Sections, tags, etc...",
-          copyToEarlyAccess: {
-            title: "Copy to early access",
-            body: "Do you want to deuplicate this into an early access requirement block? <br /> <br /> <strong>Replace and duplicate with early access:</strong>",
-            replaceButton: "Replace requirement block",
-          },
 
           index: {
             title: "Requirements library",
@@ -1837,13 +1817,10 @@ Thank you,
           visibilityDescriptions: {
             any: "No restrictions on visibility.",
             live: "Can only be used in live templates only. Does not affect published templates.",
-            earlyAccess:
-              "Available to be used in early access preview templates only. Does not affect published templates",
           },
           visibility: {
             any: "Any",
             live: "Preview omitted",
-            earlyAccess: "Preview only",
           },
           modals: {
             unsavedChanges: {
@@ -1862,7 +1839,6 @@ Thank you,
             visibilityLabel: "Visibility",
             cantEditHere: "Not currently editable here",
             changeVisibility: {
-              fromEarlyAccessTitle: "Are you sure you want to promote this?",
               fromLiveTitle: "Are you sure you want to promote this?",
 
               confirmChangeBody1:
@@ -1883,8 +1859,7 @@ Thank you,
               title: "Edit requirement block",
               options: "Options",
               copy: "Copy this block",
-              visibilityTooltip:
-                "Visibility determines if the block is restricted to live, early-access previews, or both",
+              visibilityTooltip: "Visibility determines if the block is restricted to live templates, or any use.",
               removeConfirmationModal: {
                 title: "Confirm you want to archive this requirement block.",
                 body: "Archiving this requirement blocks will remove it from all draft templates. This action cannot be undone.",
@@ -3580,21 +3555,6 @@ Thank you,
           requirementsLibraryTitle: "Requirements library",
           requirementsLibraryDescription:
             "Construct and maintain requirement blocks that form the core structure of permit templates. This library allows you to create, update, and manage the questions that define each requirement block.",
-          earlyAccess: {
-            title: "Early Access",
-            adminDescription:
-              "Access and manage Early access previews and requirement sets before they become publicly available.",
-            previews: {
-              title: "Early access previews",
-              description:
-                "View and manage non-submittable permit templates in Early Access, shared with selected users for service design purposes.",
-            },
-            requirements: {
-              title: "Early access requirements",
-              description:
-                "Explore and manage pre-release requirement blocks sets designed for testing within Early Access projects.",
-            },
-          },
           configurationManagement: {
             title: "Configuration",
             reviewManagerDescription:
@@ -4181,63 +4141,16 @@ Thank you,
           assignTo: "Assign to...",
           department: "Department",
         },
-        earlyAccessRequirementTemplate: {
-          show: {},
-          index: {
-            tableHeading: "Previews",
-            title: "Early access templates catalogue",
-            invitationInfo:
-              "Early access previews are non-submittable and accessible only by registered users who are invited. Access is granted for 60 days and can be extended or revoked at any time.",
-            createButton: "Create new early access template",
+        templateVersionPreview: {
+          sharing: {
             sharePreviewLink: "Share ({{ n }})",
             sharePreviewTitle: "Share preview",
             inviteToPreviewTitle: "Invite to preview",
             inviteToPreviewHint: "Separate each email with a comma ,",
-            revokeButton: "Revoke",
-            unrevokeButton: "Unevoke",
-            extendButton: "Extend",
             inviteToPreviewButton: "Send invites",
             noPreviewersYet: "No previewers yet. Click invite to add previewers to this template",
             inviteToPreviewPartialSuccess: "Some invites failed to send",
-
-            confirmation: {
-              revokeTitle: "Are you sure you want to revoke access for {{ name }}?",
-              revokeBody:
-                "Revoking access will immediately prevent this user from accessing the early access content. This may be undone.",
-              extendTitle: "Extend Access Duration for {{ name }}",
-              extendBody:
-                "Extending access will give the user 60 additional days to interact with the early access content. Do you want to proceed?",
-              unrevokeTitle: "Restore Access for {{ name }}",
-              unrevokeBody:
-                "Restoring access will allow the user to access the early access content again. Are you sure you want to proceed?",
-            },
           },
-          new: {
-            title: "Create new preview",
-            modalTitle: "Create new preview",
-            startingFresh: "Starting fresh?",
-            addFromExisitng: "Add requirements from an exisitng permit?",
-            startWithBlank: "Start with blank permit",
-            copyFromLive: "Copy from live permit",
-            copyFromThis: "Copy from this",
-          },
-          edit: {
-            lastFetched: "Last fetched",
-            fetchLatest: "Fetch latest",
-            auditLog: "Audit log",
-            confirmRemoveModalTitle: "Archive preview?",
-            confirmRemoveModalBody: "This preview will no longer be accessible by invitees",
-            public: "Grant public access?",
-          },
-          fields: {
-            nickname: "Nickname",
-            tags: "Tags",
-            sharedWith: "Shared with",
-            updatedAt: "Updated at",
-            assignee: "Assigned",
-          },
-          viewOptionalElectives: "View electives",
-          noOptionalElectives: "No optional electives in this requirement block.",
         },
         requirementTemplate: {
           compareAction: 'Requirement "{{ requirementName }}" has been {{ action }}',
@@ -4273,8 +4186,6 @@ Thank you,
           },
           edit: {
             requirementsLibraryTab: "Requirements Library",
-            earlyAccessRequirementsLibraryTab: "Early Access Requirements Library",
-            earlyAccessTabDescription: "Early access previews cannot add 'Preview omitted' blocks ",
             availableToApplicants: "Available to applicants",
             options: {
               button: "Options",
@@ -5014,7 +4925,6 @@ Thank you,
             revisionReasonSetup: "Revision reason setup",
             acceptInvitation: "Accept invitation",
             eula: "End user license agreement",
-            earlyAccess: "Early access",
             update: "Update",
             globalFeatureAccess: "Global feature access",
             permitProjects: "Permit projects",
@@ -5028,7 +4938,6 @@ Thank you,
             resources: "Resources",
             preChecks: "Pre-checks",
           },
-          earlyAccessStepCodePreviewNotAvailable: "Early access step code preview not available",
         },
         automatedCompliance: {
           baseMessage: `This field has Auto-Compliance capability`,

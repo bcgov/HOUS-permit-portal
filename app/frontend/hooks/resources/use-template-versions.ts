@@ -7,12 +7,10 @@ import { ETemplateVersionStatus } from "../../types/enums"
 export const useTemplateVersions = ({
   customErrorMessage,
   status,
-  earlyAccess = false,
   isPubliclyPreviewable = false,
 }: {
   customErrorMessage?: string
   status?: ETemplateVersionStatus
-  earlyAccess?: boolean
   isPubliclyPreviewable?: boolean
 }) => {
   const [error, setError] = useState<Error | undefined>(undefined)
@@ -21,14 +19,14 @@ export const useTemplateVersions = ({
   const { getTemplateVersionsByStatus, fetchTemplateVersions, isLoading } = templateVersionStore
   status ??= currentSandbox?.templateVersionStatusScope || ETemplateVersionStatus.published
 
-  const templateVersions = getTemplateVersionsByStatus(status, earlyAccess, isPubliclyPreviewable) as ITemplateVersion[]
+  const templateVersions = getTemplateVersionsByStatus(status, isPubliclyPreviewable) as ITemplateVersion[]
   const { t } = useTranslation()
 
   useEffect(() => {
     ;(async () => {
       const errorMessage = customErrorMessage ?? t("errors.fetchTemplateVersions")
       try {
-        const isSuccess = await fetchTemplateVersions(status, earlyAccess, isPubliclyPreviewable)
+        const isSuccess = await fetchTemplateVersions(status, isPubliclyPreviewable)
 
         if (isSuccess) {
           setError(null)

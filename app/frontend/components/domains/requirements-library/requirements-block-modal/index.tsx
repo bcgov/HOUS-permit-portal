@@ -44,7 +44,6 @@ interface IRequirementsBlockProps {
   triggerButtonProps?: Partial<ButtonProps>
   withOptionsMenu?: boolean
   isEditable?: boolean
-  forEarlyAccess?: boolean
 }
 
 export const RequirementsBlockModal = observer(function RequirementsBlockModal({
@@ -53,13 +52,12 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
   triggerButtonProps,
   withOptionsMenu,
   isEditable,
-  forEarlyAccess,
 }: IRequirementsBlockProps) {
   const { requirementBlockStore } = useMst()
   const searchModel = requirementBlockStore
   const { t } = useTranslation()
   const { fetchData } = searchModel
-  const { createRequirementBlock, isEditingEarlyAccess } = requirementBlockStore
+  const { createRequirementBlock } = requirementBlockStore
   const { isOpen, onOpen, onClose } = useDisclosure()
 
   const { autoComplianceModuleConfigurations, error } = useAutoComplianceModuleConfigurations()
@@ -78,7 +76,7 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
           requirementDocumentsAttributes: (requirementBlock as IRequirementBlock).requirementDocuments,
         }
       : {
-          visibility: forEarlyAccess ? EVisibility.earlyAccess : EVisibility.any,
+          visibility: EVisibility.any,
           associationList: [],
           requirementsAttributes: [],
           requirementDocumentsAttributes: [],
@@ -245,18 +243,10 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
           </ModalHeader>
           <ModalBody px={"2.75rem"}>
             {showEditWarning && (
-              <CalloutBanner
-                type={"warning"}
-                title={
-                  isEditingEarlyAccess
-                    ? t("requirementsLibrary.modals.previewEditWarning")
-                    : t("requirementsLibrary.modals.templateEditWarning")
-                }
-              />
+              <CalloutBanner type={"warning"} title={t("requirementsLibrary.modals.templateEditWarning")} />
             )}
             <HStack spacing={9} w={"full"} h={"full"} alignItems={"flex-start"}>
               <BlockSetup
-                forEarlyAccess={forEarlyAccess}
                 requirementBlock={
                   (requirementBlock as IRequirementBlock)?.restore ? (requirementBlock as IRequirementBlock) : undefined
                 }

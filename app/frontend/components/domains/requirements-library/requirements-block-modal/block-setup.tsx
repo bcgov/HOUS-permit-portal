@@ -7,6 +7,7 @@ import {
   FormHelperText,
   FormLabel,
   HStack,
+  Icon,
   IconButton,
   Input,
   Text,
@@ -16,22 +17,18 @@ import {
   VStack,
 } from "@chakra-ui/react"
 import { ArrowCounterClockwise, Info, Trash, Upload } from "@phosphor-icons/react"
+import { UppyFile } from "@uppy/core"
 import "@uppy/core/dist/style.min.css"
 import "@uppy/dashboard/dist/style.css"
-import { observer } from "mobx-react-lite"
-// import DragDrop from "@uppy/react/lib/DragDrop.js"
-import { Icon } from "@chakra-ui/react"
-import { UppyFile } from "@uppy/core"
 import Dashboard from "@uppy/react/lib/Dashboard.js"
+import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React, { useRef } from "react"
 import { Controller, useFieldArray, useFormContext } from "react-hook-form"
-import { Trans, useTranslation } from "react-i18next"
-import { useParams } from "react-router-dom"
+import { useTranslation } from "react-i18next"
 import useUppyS3 from "../../../../hooks/use-uppy-s3"
 import { IRequirementBlock } from "../../../../models/requirement-block"
 import { useMst } from "../../../../setup/root"
-import { ConfirmationModal } from "../../../shared/confirmation-modal"
 import { BlockVisibilitySelect } from "../../../shared/select/block-visibility-select"
 import { TagsSelect } from "../../../shared/select/selectors/tags-select"
 import { BlockSetupOptionsMenu } from "../block-setup-options-menu"
@@ -44,25 +41,14 @@ const helperTextStyles: Partial<TextProps> = {
 export const BlockSetup = observer(function BlockSetup({
   requirementBlock,
   withOptionsMenu,
-  forEarlyAccess,
 }: {
   requirementBlock?: IRequirementBlock
   withOptionsMenu?: boolean
-  forEarlyAccess?: boolean
 }) {
   const { requirementBlockStore } = useMst()
-  const { isEditingEarlyAccess } = requirementBlockStore
   const { t } = useTranslation()
   const { register, control, watch, setValue } = useFormContext<IRequirementBlockForm>()
   const containerRef = useRef<HTMLDivElement>(null)
-
-  const { requirementTemplateId } = useParams()
-  const { requirementTemplateStore } = useMst()
-  const requirementTemplate = requirementTemplateStore.getRequirementTemplateById(requirementTemplateId)
-
-  const handleCopyToEarlyAccess = async () => {
-    await requirementBlockStore.copyRequirementBlock(requirementBlock, true, requirementTemplate)
-  }
 
   const fetchAssociationOptions = async (query: string) => {
     const associations = await requirementBlockStore.searchAssociations(query)
@@ -71,7 +57,7 @@ export const BlockSetup = observer(function BlockSetup({
 
   const visibilityWatch = watch("visibility")
 
-  const visibilityBgColor = { any: "greys.grey10", live: "semantic.infoLight", early_access: "semantic.warningLight" }
+  const visibilityBgColor = { any: "greys.grey10", live: "semantic.infoLight" }
 
   const requirementDocumentsAttributes = watch("requirementDocumentsAttributes")
 
@@ -145,7 +131,7 @@ export const BlockSetup = observer(function BlockSetup({
             <Info size={15} />
           </Tooltip>
         </HStack>
-        <BlockVisibilitySelect name="visibility" forEarlyAccess={forEarlyAccess} />
+        <BlockVisibilitySelect name="visibility" />
       </FormControl>
       <VStack spacing={4} w={"full"} alignItems={"flex-start"} px={6} pb={6} pt={3}>
         <Text color={"text.secondary"} fontSize={"sm"} fontWeight={700}>
@@ -235,24 +221,7 @@ export const BlockSetup = observer(function BlockSetup({
             )}
           </Box>
         </FormControl>
-        {withOptionsMenu
-          ? requirementBlock && <BlockSetupOptionsMenu requirementBlock={requirementBlock} />
-          : isEditingEarlyAccess && (
-              <ConfirmationModal
-                title={t("requirementsLibrary.copyToEarlyAccess.title")}
-                body={(<Trans i18nKey={"requirementsLibrary.copyToEarlyAccess.body"} />) as unknown as string}
-                triggerText={t("ui.proceed")}
-                renderTriggerButton={({ onClick, ...rest }) => (
-                  <Button variant="primary" onClick={onClick as (e: React.MouseEvent) => Promise<any>} {...rest}>
-                    {t("requirementsLibrary.copyToEarlyAccess.title")}
-                  </Button>
-                )}
-                onConfirm={(_onClose) => {
-                  handleCopyToEarlyAccess()
-                  _onClose()
-                }}
-              />
-            )}
+        {withOptionsMenu && requirementBlock && <BlockSetupOptionsMenu requirementBlock={requirementBlock} />}
       </VStack>
     </Box>
   )

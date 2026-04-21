@@ -32,14 +32,12 @@ import { RequirementsBlockModal } from "./requirements-block-modal"
 
 interface IProps extends Partial<StackProps> {
   renderActionButton?: (props: ButtonProps & { requirementBlock: IRequirementBlock }) => JSX.Element
-  forEarlyAccess?: boolean
 }
 
 const ROW_CLASS_NAME = "requirements-library-grid-row"
 
 export const RequirementBlocksTable = observer(function RequirementBlocksTable({
   renderActionButton,
-  forEarlyAccess,
   ...containerProps
 }: IProps) {
   const { requirementBlockStore } = useMst()
@@ -62,12 +60,12 @@ export const RequirementBlocksTable = observer(function RequirementBlocksTable({
     }
   }, [])
 
-  useSearch(searchModel as ISearch, [showArchived, requirementBlockStore.isEditingEarlyAccess])
+  useSearch(searchModel as ISearch, [showArchived])
 
   return (
     <VStack as={"article"} spacing={5} {...containerProps}>
       <SearchGrid gridRowClassName={ROW_CLASS_NAME} templateColumns="repeat(6, 1fr)" pos={"relative"}>
-        <GridHeaders forEarlyAccess={forEarlyAccess} />
+        <GridHeaders />
 
         {isSearching ? (
           <Flex py={50} gridColumn={"span 6"}>
@@ -129,11 +127,7 @@ export const RequirementBlocksTable = observer(function RequirementBlocksTable({
                   {renderActionButton ? (
                     renderActionButton({ requirementBlock })
                   ) : (
-                    <RequirementsBlockModal
-                      withOptionsMenu
-                      requirementBlock={requirementBlock}
-                      forEarlyAccess={requirementBlock.isEarlyAccess}
-                    />
+                    <RequirementsBlockModal withOptionsMenu requirementBlock={requirementBlock} />
                   )}
                 </SearchGridItem>
               </Box>

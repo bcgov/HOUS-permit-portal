@@ -27,7 +27,6 @@ export const TemplateVersionModel = types
     latestVersionId: types.maybeNull(types.string),
     formJson: types.maybeNull(types.frozen<IFormJson>()),
     isFullyLoaded: types.optional(types.boolean, false),
-    earlyAccess: types.optional(types.boolean, false),
     requirementTemplateId: types.string,
     // Draft workflow fields
     changeNotes: types.maybeNull(types.string),

@@ -114,9 +114,6 @@ export const RequirementBlockModel = types
     get isDiscarded() {
       return self.discardedAt !== null
     },
-    get isEarlyAccess() {
-      return self.visibility === EVisibility.earlyAccess
-    },
   }))
   .actions((self) => ({
     update: flow(function* (requirementParams: IRequirementBlockParams) {

@@ -78,16 +78,14 @@ const chakraStyles = (theme) => ({
 
 interface IBlockVisibilitySelectProps {
   name: string
-  forEarlyAccess?: boolean
 }
 
-export const BlockVisibilitySelect = ({ name, forEarlyAccess }: IBlockVisibilitySelectProps) => {
+export const BlockVisibilitySelect = ({ name }: IBlockVisibilitySelectProps) => {
   const { control, setValue, watch } = useFormContext()
   const theme = useTheme()
   const { t } = useTranslation()
   const visibilityWatch = watch(name)
 
-  // Define your options with title and description
   const options = [
     {
       value: EVisibility.any,
@@ -98,12 +96,6 @@ export const BlockVisibilitySelect = ({ name, forEarlyAccess }: IBlockVisibility
       value: EVisibility.live,
       label: t("requirementsLibrary.visibility.live"),
       description: t("requirementsLibrary.visibilityDescriptions.live"),
-    },
-    {
-      value: EVisibility.earlyAccess,
-      label: t("requirementsLibrary.visibility.earlyAccess"),
-      description: t("requirementsLibrary.visibilityDescriptions.earlyAccess"),
-      isDisabled: !forEarlyAccess,
     },
   ]
 
@@ -139,7 +131,6 @@ export const BlockVisibilitySelect = ({ name, forEarlyAccess }: IBlockVisibility
   }
 
   const titleMap = {
-    [EVisibility.earlyAccess]: t("requirementsLibrary.modals.changeVisibility.fromEarlyAccessTitle"),
     [EVisibility.live]: t("requirementsLibrary.modals.changeVisibility.fromLiveTitle"),
     [EVisibility.any]: t("requirementsLibrary.modals.changeVisibility.fromLiveTitle"),
   }

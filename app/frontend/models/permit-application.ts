@@ -23,7 +23,6 @@ import {
   ITemplateCustomization,
   ITemplateVersionDiff,
 } from "../types/types"
-import { injectOptionalElectivesButtons } from "../utils/early-access-view-optional-electives"
 import {
   combineChangeMarkers,
   combineCustomizations,
@@ -286,13 +285,6 @@ export const PermitApplicationModel = types.snapshotProcessor(
             ? combineRevisionButtons(changedMarkedFormJson, self.isSubmitted, revisionRequestsToUse)
             : changedMarkedFormJson // Use changedMarkedFormJson if not in revision mode
 
-        if (self.templateVersion?.earlyAccess) {
-          return injectOptionalElectivesButtons(
-            revisionModeFormJson,
-            t("earlyAccessRequirementTemplate.viewOptionalElectives")
-          )
-        }
-
         return revisionModeFormJson
       },
       sectionKey(sectionId) {
@@ -347,8 +339,6 @@ export const PermitApplicationModel = types.snapshotProcessor(
         return self.permitCollaborationMap.get(collaborationId)
       },
       shouldShowApplicationDiff(isEditing: boolean) {
-        if (self.templateVersion.earlyAccess) return false
-
         return isEditing && (!self.usingCurrentTemplateVersion || self.showingCompareAfter)
       },
       get contacts() {

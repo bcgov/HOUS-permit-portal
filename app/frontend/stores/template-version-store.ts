@@ -50,24 +50,15 @@ export const TemplateVersionStoreModel = types
     },
     getTemplateVersionsByStatus(
       status: ETemplateVersionStatus = ETemplateVersionStatus.published,
-      earlyAccess: boolean = false,
       isPubliclyPreviewable: boolean = false
     ) {
-      return self.templateVersions.filter(
-        (t) => t.status === status && t.publiclyPreviewable === isPubliclyPreviewable && t.earlyAccess === earlyAccess
-      )
+      return self.templateVersions.filter((t) => t.status === status && t.publiclyPreviewable === isPubliclyPreviewable)
     },
   }))
   .actions((self) => ({
-    fetchTemplateVersions: flow(function* (
-      status?: ETemplateVersionStatus,
-      earlyAccess?: boolean,
-      isPubliclyPreviewable?: boolean
-    ) {
+    fetchTemplateVersions: flow(function* (status?: ETemplateVersionStatus, isPubliclyPreviewable?: boolean) {
       self.isLoading = true
-      const response = yield* toGenerator(
-        self.environment.api.fetchTemplateVersions(status, earlyAccess, isPubliclyPreviewable)
-      )
+      const response = yield* toGenerator(self.environment.api.fetchTemplateVersions(status, isPubliclyPreviewable))
 
       if (response.ok) {
         const templateVersions = response.data.data

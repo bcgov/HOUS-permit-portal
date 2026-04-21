@@ -19,7 +19,7 @@ import * as R from "ramda"
 import React, { useEffect, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../setup/root"
-import { EFileUploadAttachmentType, ERequirementType, EResourceCategory, EVisibility } from "../../../types/enums"
+import { EFileUploadAttachmentType, ERequirementType, EResourceCategory } from "../../../types/enums"
 import {
   IDenormalizedRequirement,
   IDenormalizedRequirementBlock,
@@ -161,7 +161,6 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
               <VisibilityTag visibility={requirementBlock.visibility} />
               {isOpen && !renderEdit && (
                 <RequirementsBlockModal
-                  forEarlyAccess={requirementBlock.visibility === EVisibility.earlyAccess}
                   showEditWarning={showEditWarning}
                   isEditable={isEditable}
                   requirementBlock={requirementBlock}

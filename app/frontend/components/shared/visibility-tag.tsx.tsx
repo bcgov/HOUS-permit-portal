@@ -1,5 +1,5 @@
 import { Tag } from "@chakra-ui/react"
-import { FileLock, Lock } from "@phosphor-icons/react"
+import { Lock } from "@phosphor-icons/react"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { EVisibility } from "../../types/enums"
@@ -14,17 +14,14 @@ export const VisibilityTag = ({ visibility = EVisibility.any }: IVisibilityTagPr
 
   const backgroundColors = {
     [EVisibility.live]: "semantic.infoLight",
-    [EVisibility.earlyAccess]: "semantic.warningLight",
   }
 
   const borderColors = {
     [EVisibility.live]: "semantic.info",
-    [EVisibility.earlyAccess]: "semantic.warning",
   }
 
   const icons = {
     [EVisibility.live]: <Lock size={15} />,
-    [EVisibility.earlyAccess]: <FileLock size={15} />,
   }
 
   if (visibility === EVisibility.any) return <></>

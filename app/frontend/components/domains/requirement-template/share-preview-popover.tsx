@@ -33,7 +33,7 @@ import { useMst } from "../../../setup/root"
 import { EFlashMessageStatus } from "../../../types/enums"
 import { urlForPath } from "../../../utils/utility-functions"
 import { CopyLinkButton } from "../../shared/base/copy-link-button"
-import PreviewStatusTag from "../../shared/early-access/preview-status-tag"
+import PreviewStatusTag from "../../shared/template-version-preview/preview-status-tag"
 import { RoleTag } from "../../shared/user/role-tag"
 
 interface ISharePreviewAccordionProps {
@@ -66,7 +66,7 @@ export const SharePreviewAccordion: React.FC<ISharePreviewAccordionProps> = obse
         const markdownList = response.failedEmails.map((fe: any) => `- ${fe.email} **(${fe.error})**`).join("\n")
         uiStore.flashMessage.show(
           EFlashMessageStatus.warning,
-          t("earlyAccessRequirementTemplate.index.inviteToPreviewPartialSuccess"),
+          t("templateVersionPreview.sharing.inviteToPreviewPartialSuccess"),
           markdownList,
           30000,
           true
@@ -96,7 +96,7 @@ export const SharePreviewAccordion: React.FC<ISharePreviewAccordionProps> = obse
         >
           <HStack spacing={2}>
             <Text fontSize="sm" fontWeight={600}>
-              {t("earlyAccessRequirementTemplate.index.sharePreviewLink", { n: previewerCount.toString() })}
+              {t("templateVersionPreview.sharing.sharePreviewLink", { n: previewerCount.toString() })}
             </Text>
           </HStack>
           {isOpen ? <CaretUp size={16} /> : <CaretDown size={16} />}
@@ -108,7 +108,7 @@ export const SharePreviewAccordion: React.FC<ISharePreviewAccordionProps> = obse
               <Box>
                 <Flex justify="space-between" align="center" mb={2}>
                   <Text fontSize="sm" fontWeight={700}>
-                    {t("earlyAccessRequirementTemplate.index.inviteToPreviewTitle")}
+                    {t("templateVersionPreview.sharing.inviteToPreviewTitle")}
                   </Text>
                   <IconButton
                     aria-label="Cancel"
@@ -135,11 +135,11 @@ export const SharePreviewAccordion: React.FC<ISharePreviewAccordionProps> = obse
                       )}
                     />
                     <FormHelperText fontSize="xs">
-                      {t("earlyAccessRequirementTemplate.index.inviteToPreviewHint")}
+                      {t("templateVersionPreview.sharing.inviteToPreviewHint")}
                     </FormHelperText>
                   </FormControl>
                   <Button mt={3} size="sm" type="submit" variant="primary">
-                    {t("earlyAccessRequirementTemplate.index.inviteToPreviewButton")}
+                    {t("templateVersionPreview.sharing.inviteToPreviewButton")}
                   </Button>
                 </Box>
               </Box>
@@ -147,7 +147,7 @@ export const SharePreviewAccordion: React.FC<ISharePreviewAccordionProps> = obse
               <Box>
                 <Flex justify="space-between" align="center" mb={2}>
                   <Text fontSize="sm" fontWeight={700}>
-                    {t("earlyAccessRequirementTemplate.index.sharePreviewTitle")}
+                    {t("templateVersionPreview.sharing.sharePreviewTitle")}
                   </Text>
                   <HStack spacing={2}>
                     <CopyLinkButton value={shareUrl} />
@@ -170,7 +170,7 @@ export const SharePreviewAccordion: React.FC<ISharePreviewAccordionProps> = obse
                   </VStack>
                 ) : (
                   <Text fontSize="sm" color="greys.grey01" py={1}>
-                    {t("earlyAccessRequirementTemplate.index.noPreviewersYet")}
+                    {t("templateVersionPreview.sharing.noPreviewersYet")}
                   </Text>
                 )}
               </Box>
@@ -249,7 +249,7 @@ export const SharePreviewPopover: React.FC<ISharePreviewPopoverProps> = observer
         const markdownList = response.failedEmails.map((fe: any) => `- ${fe.email} **(${fe.error})**`).join("\n")
         uiStore.flashMessage.show(
           EFlashMessageStatus.warning,
-          t("earlyAccessRequirementTemplate.index.inviteToPreviewPartialSuccess"),
+          t("templateVersionPreview.sharing.inviteToPreviewPartialSuccess"),
           markdownList,
           30000,
           true
@@ -265,7 +265,7 @@ export const SharePreviewPopover: React.FC<ISharePreviewPopoverProps> = observer
         <Popover isOpen={isOpen} onClose={onClose}>
           <PopoverTrigger>
             <Button variant="link" onClick={onOpen} {...rest}>
-              {t("earlyAccessRequirementTemplate.index.sharePreviewLink", { n: previewerCount.toString() })}
+              {t("templateVersionPreview.sharing.sharePreviewLink", { n: previewerCount.toString() })}
             </Button>
           </PopoverTrigger>
           <PopoverContent width="lg">
@@ -275,14 +275,14 @@ export const SharePreviewPopover: React.FC<ISharePreviewPopoverProps> = observer
                 {isInviting ? (
                   <>
                     <Heading h="fit-content" mb={0}>
-                      {t("earlyAccessRequirementTemplate.index.inviteToPreviewTitle")}
+                      {t("templateVersionPreview.sharing.inviteToPreviewTitle")}
                     </Heading>
                     <PopoverCloseButton size="md" onClick={() => setIsInviting(false)} mt={3} mr={3} />
                   </>
                 ) : (
                   <>
                     <Heading h="fit-content" mb={0}>
-                      {t("earlyAccessRequirementTemplate.index.sharePreviewTitle")}
+                      {t("templateVersionPreview.sharing.sharePreviewTitle")}
                     </Heading>
                     <HStack>
                       <CopyLinkButton value={shareUrl} />
@@ -304,16 +304,16 @@ export const SharePreviewPopover: React.FC<ISharePreviewPopoverProps> = observer
                       control={control}
                       render={({ field }) => <Textarea {...field} minH="150px" size="sm" focusBorderColor="teal.500" />}
                     />
-                    <FormHelperText>{t("earlyAccessRequirementTemplate.index.inviteToPreviewHint")}</FormHelperText>
+                    <FormHelperText>{t("templateVersionPreview.sharing.inviteToPreviewHint")}</FormHelperText>
                   </FormControl>
                   <Button my={4} type="submit" variant="primary">
-                    {t("earlyAccessRequirementTemplate.index.inviteToPreviewButton")}
+                    {t("templateVersionPreview.sharing.inviteToPreviewButton")}
                   </Button>
                 </Box>
               ) : !R.isEmpty(previews) ? (
                 previews.map((preview) => <PreviewCard key={preview.id} templateVersionPreview={preview} />)
               ) : (
-                <Box color="greys.grey01">{t("earlyAccessRequirementTemplate.index.noPreviewersYet")}</Box>
+                <Box color="greys.grey01">{t("templateVersionPreview.sharing.noPreviewersYet")}</Box>
               )}
             </PopoverBody>
           </PopoverContent>

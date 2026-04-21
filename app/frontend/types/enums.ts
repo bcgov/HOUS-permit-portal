@@ -461,7 +461,6 @@ export enum ECollaboratorType {
 
 export enum EVisibility {
   live = "live",
-  earlyAccess = "early_access",
   any = "any",
 }
 

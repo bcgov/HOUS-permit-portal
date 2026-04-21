@@ -205,12 +205,6 @@ export interface IDenormalizedRequirement {
   requirementCode: string
 }
 
-export interface IOptionalElectiveFieldInfo {
-  label: string
-  tooltip?: string
-  description?: string
-}
-
 export interface IDenormalizedRequirementBlock {
   id: string
   name: string
@@ -723,7 +717,7 @@ export interface ICopyRequirementTemplateFormData extends Partial<TCreateRequire
   id?: string
 }
 
-type EVisibilityValues = EVisibility.live | EVisibility.earlyAccess | EVisibility.any
+type EVisibilityValues = EVisibility.live | EVisibility.any
 
 export type TVisibility =
   | EVisibilityValues

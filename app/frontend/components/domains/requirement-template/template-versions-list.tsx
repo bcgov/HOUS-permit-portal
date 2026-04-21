@@ -19,7 +19,6 @@ import { SectionBox } from "../home/section-box"
 interface IProps {
   renderButton?: (templateVersion: ITemplateVersion) => React.ReactNode
   status?: ETemplateVersionStatus
-  earlyAccess?: boolean
   isPubliclyPreviewable?: boolean
   isPublic?: boolean
   statusDisplayOptions?: {
@@ -34,7 +33,6 @@ export const TemplateVersionsList = observer(function TemplateVersionsList({
   renderButton,
   status,
   statusDisplayOptions,
-  earlyAccess,
   isPubliclyPreviewable,
   jurisdictionId,
   hideDisabled,
@@ -45,7 +43,6 @@ export const TemplateVersionsList = observer(function TemplateVersionsList({
   const { templateVersions, isLoading, error } = useTemplateVersions({
     customErrorMessage: t("errors.fetchBuildingPermits"),
     status,
-    earlyAccess,
     isPubliclyPreviewable,
   })
 

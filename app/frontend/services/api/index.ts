@@ -618,10 +618,9 @@ export class Api {
     return this.client.patch<ApiResponse<IRequirementTemplate>>(`/requirement_templates/${id}/restore`)
   }
 
-  async fetchTemplateVersions(status?: ETemplateVersionStatus, earlyAccess?: boolean, isPubliclyPreviewable?: boolean) {
+  async fetchTemplateVersions(status?: ETemplateVersionStatus, isPubliclyPreviewable?: boolean) {
     return this.client.get<ApiResponse<ITemplateVersion[]>>(`/template_versions`, {
       status,
-      earlyAccess,
       publiclyPreviewable: isPubliclyPreviewable,
     })
   }
