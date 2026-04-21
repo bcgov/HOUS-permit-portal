@@ -10,7 +10,6 @@ class RequirementTemplateBlueprint < Blueprinter::Base
          :created_at,
          :updated_at,
          :visibility,
-         :public,
          :available_globally
 
   field :used_by do |rt|

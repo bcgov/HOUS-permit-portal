@@ -79,7 +79,6 @@ export const RequirementTemplateModel = types.snapshotProcessor(
       updatedAt: types.Date,
       fetchedAt: types.maybeNull(types.Date),
       isFullyLoaded: types.optional(types.boolean, false),
-      public: types.boolean,
       availableGlobally: types.maybeNull(types.boolean),
       enabledJurisdictions: types.maybe(types.array(types.frozen<IJurisdictionStub>())),
       explicitlyDisabledJurisdictions: types.optional(types.array(types.frozen<IJurisdictionStub>()), []),

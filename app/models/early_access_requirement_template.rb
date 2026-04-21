@@ -8,6 +8,13 @@ class EarlyAccessRequirementTemplate < RequirementTemplate
 
   has_many :template_version_previews, through: :template_versions
 
+  # No dedicated policy ships for this deprecated STI subclass; fall back to the
+  # parent policy so Pundit lookups (e.g. via apply_search_authorization) don't
+  # raise Pundit::NotDefinedError for legacy rows still in the DB.
+  def self.policy_class
+    RequirementTemplatePolicy
+  end
+
   def visibility
     "early_access"
   end

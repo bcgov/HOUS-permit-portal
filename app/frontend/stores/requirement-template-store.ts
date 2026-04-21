@@ -9,7 +9,7 @@ import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
 import { IRequirementTemplate, RequirementTemplateModel } from "../models/requirement-template"
 import { IRequirementTemplateUpdateParams } from "../types/api-request"
-import { ERequirementTemplateSortFields, EVisibility } from "../types/enums"
+import { ERequirementTemplateSortFields } from "../types/enums"
 import { ICopyRequirementTemplateFormData, IOption, TCreateRequirementTemplateFormData } from "../types/types"
 import { toCamelCase } from "../utils/utility-functions"
 
@@ -86,7 +86,6 @@ export const RequirementTemplateStoreModel = types
           page: opts?.page ?? self.currentPage,
           perPage: opts?.countPerPage ?? self.countPerPage,
           showArchived: self.showArchived,
-          visibility: `${EVisibility.live},${EVisibility.any}`,
         })
       )
 

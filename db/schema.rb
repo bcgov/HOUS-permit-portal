@@ -126,17 +126,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_16_183037) do
     t.index ["checklist_id"], name: "index_document_references_on_checklist_id"
   end
 
-  create_table "early_access_previews", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.uuid "early_access_requirement_template_id", null: false
-    t.uuid "previewer_id", null: false
-    t.datetime "expires_at", null: false
-    t.datetime "discarded_at"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["early_access_requirement_template_id", "previewer_id"], name: "index_early_access_previews_on_template_id_and_previewer_id", unique: true
-    t.index ["previewer_id"], name: "index_early_access_previews_on_previewer_id"
-  end
-
   create_table "end_user_license_agreements", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.text "content"
     t.boolean "active"
@@ -791,16 +780,11 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_16_183037) do
     t.string "nickname"
     t.datetime "fetched_at"
     t.uuid "copied_from_id"
-    t.uuid "assignee_id"
-    t.boolean "public", default: false
-    t.uuid "site_configuration_id"
     t.boolean "available_globally"
     t.index ["activity_id"], name: "index_requirement_templates_on_activity_id"
-    t.index ["assignee_id"], name: "index_requirement_templates_on_assignee_id"
     t.index ["copied_from_id"], name: "index_requirement_templates_on_copied_from_id"
     t.index ["discarded_at"], name: "index_requirement_templates_on_discarded_at"
     t.index ["permit_type_id"], name: "index_requirement_templates_on_permit_type_id"
-    t.index ["site_configuration_id"], name: "index_requirement_templates_on_site_configuration_id"
     t.index ["type"], name: "index_requirement_templates_on_type"
   end
 
@@ -1063,6 +1047,33 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_16_183037) do
     t.index ["requirement_template_section_id"], name: "idx_on_requirement_template_section_id_5469986497"
   end
 
+  create_table "template_version_feedbacks", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "template_version_id", null: false
+    t.uuid "user_id", null: false
+    t.integer "sentiment", default: 2, null: false
+    t.text "body", null: false
+    t.boolean "resolved", default: false, null: false
+    t.uuid "resolved_by_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["resolved_by_id"], name: "index_template_version_feedbacks_on_resolved_by_id"
+    t.index ["template_version_id", "created_at"], name: "index_tv_feedbacks_on_tv_id_and_created_at"
+    t.index ["template_version_id"], name: "index_template_version_feedbacks_on_template_version_id"
+    t.index ["user_id"], name: "index_template_version_feedbacks_on_user_id"
+  end
+
+  create_table "template_version_previews", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "previewer_id", null: false
+    t.datetime "expires_at", null: false
+    t.datetime "discarded_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.uuid "template_version_id", null: false
+    t.index ["previewer_id"], name: "index_template_version_previews_on_previewer_id"
+    t.index ["template_version_id", "previewer_id"], name: "index_tv_previews_on_tv_id_and_previewer_id", unique: true
+    t.index ["template_version_id"], name: "index_template_version_previews_on_template_version_id"
+  end
+
   create_table "template_versions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.jsonb "denormalized_template_json", default: {}
     t.jsonb "form_json", default: {}
@@ -1169,7 +1180,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_16_183037) do
   add_foreign_key "collaborators", "users"
   add_foreign_key "design_documents", "pre_checks"
   add_foreign_key "document_references", "part_3_step_code_checklists", column: "checklist_id", on_delete: :cascade
-  add_foreign_key "early_access_previews", "users", column: "previewer_id"
   add_foreign_key "energy_outputs", "part_3_step_code_checklists", column: "checklist_id", on_delete: :cascade
   add_foreign_key "external_api_keys", "jurisdictions"
   add_foreign_key "external_api_keys", "sandboxes"
@@ -1227,8 +1237,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_16_183037) do
   add_foreign_key "requirement_templates", "permit_classifications", column: "activity_id"
   add_foreign_key "requirement_templates", "permit_classifications", column: "permit_type_id"
   add_foreign_key "requirement_templates", "requirement_templates", column: "copied_from_id"
-  add_foreign_key "requirement_templates", "site_configurations"
-  add_foreign_key "requirement_templates", "users", column: "assignee_id"
   add_foreign_key "requirements", "requirement_blocks"
   add_foreign_key "resource_documents", "resources"
   add_foreign_key "resources", "jurisdictions"
@@ -1248,6 +1256,11 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_16_183037) do
   add_foreign_key "taggings", "tags"
   add_foreign_key "template_section_blocks", "requirement_blocks"
   add_foreign_key "template_section_blocks", "requirement_template_sections"
+  add_foreign_key "template_version_feedbacks", "template_versions"
+  add_foreign_key "template_version_feedbacks", "users"
+  add_foreign_key "template_version_feedbacks", "users", column: "resolved_by_id"
+  add_foreign_key "template_version_previews", "template_versions"
+  add_foreign_key "template_version_previews", "users", column: "previewer_id"
   add_foreign_key "template_versions", "requirement_templates"
   add_foreign_key "template_versions", "site_configurations"
   add_foreign_key "template_versions", "users", column: "assignee_id"
