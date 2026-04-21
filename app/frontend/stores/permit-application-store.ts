@@ -57,7 +57,11 @@ export const PermitApplicationStoreModel = types
       return [EPermitApplicationStatus.newDraft, EPermitApplicationStatus.revisionsRequested]
     },
     get submittedStatuses() {
-      return [EPermitApplicationStatus.newlySubmitted, EPermitApplicationStatus.resubmitted]
+      return [
+        EPermitApplicationStatus.newlySubmitted,
+        EPermitApplicationStatus.resubmitted,
+        EPermitApplicationStatus.inReview,
+      ]
     },
   }))
   .views((self) => ({
@@ -100,8 +104,10 @@ export const PermitApplicationStoreModel = types
   .actions((self) => ({
     setCurrentPermitApplication(permitApplicationId) {
       self.currentPermitApplication = permitApplicationId
-      self.currentPermitApplication?.stepCode &&
-        self.rootStore.stepCodeStore.setCurrentStepCode(self.currentPermitApplication.stepCode.id)
+      const stepCode = self.currentPermitApplication?.stepCode
+      if (stepCode && !stepCode.isDiscarded) {
+        self.rootStore.stepCodeStore.setCurrentStepCode(stepCode.id)
+      }
     },
     setHasCollaboratorFilter(value: boolean) {
       setQueryParam("hasCollaborator", value.toString())

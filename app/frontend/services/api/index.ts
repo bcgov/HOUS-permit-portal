@@ -7,7 +7,7 @@ import { IExternalApiKey } from "../../models/external-api-key"
 import { IIntegrationMapping } from "../../models/integration-mapping"
 import { IJurisdiction } from "../../models/jurisdiction"
 import { IJurisdictionTemplateVersionCustomization } from "../../models/jurisdiction-template-version-customization"
-import { IOverheatingTool } from "../../models/overheating-tool"
+import { IOverheatingCode } from "../../models/overheating-code"
 import { IPart3StepCode } from "../../models/part-3-step-code"
 import { IPart3StepCodeChecklist } from "../../models/part-3-step-code-checklist"
 import { IPart9StepCode } from "../../models/part-9-step-code"
@@ -17,6 +17,7 @@ import { IActivity, IPermitType } from "../../models/permit-classification"
 import { IPermitCollaboration } from "../../models/permit-collaboration"
 import { IPermitProject } from "../../models/permit-project"
 import { IPreCheck } from "../../models/pre-check"
+import { IProjectAudit } from "../../models/project-audit"
 import { IRequirementTemplate } from "../../models/requirement-template"
 import { ITemplateVersion } from "../../models/template-version"
 import { IUser } from "../../models/user"
@@ -49,12 +50,13 @@ import {
   ECollaboratorType,
   EEarlyAccessRequirementTemplateSortFields,
   EJurisdictionSortFields,
-  EOverheatingToolSortFields,
+  EPermitApplicationInboxSortFields,
   EPermitApplicationSortFields,
   EPermitBlockStatus,
   EPermitClassificationType,
   EPermitProjectSortFields,
   EPreCheckSortFields,
+  EProjectAuditSortFields,
   ERequirementLibrarySortFields,
   ERequirementTemplateSortFields,
   EStepCodeSortFields,
@@ -67,11 +69,11 @@ import {
   ICopyRequirementTemplateFormData,
   IJurisdictionFilters,
   IJurisdictionSearchFilters,
-  IOverheatingDocument,
-  IOverheatingToolJson,
   IPart9ChecklistSelectOptions,
+  IPermitApplicationInboxSearchFilters,
   IPermitApplicationSearchFilters,
   IPermitProjectSearchFilters,
+  IProjectAuditSearchFilters,
   ITemplateVersionDiff,
   TAutoComplianceModuleConfigurations,
   TCreatePermitApplicationFormData,
@@ -159,6 +161,10 @@ export class Api {
     return this.client.post<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/mark_as_viewed`)
   }
 
+  async unviewPermitApplication(id: string) {
+    return this.client.post<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/mark_as_unviewed`)
+  }
+
   async fetchLocalityTypeOptions() {
     return this.client.get<IOptionResponse>(`/jurisdictions/locality_type_options`)
   }
@@ -213,7 +219,8 @@ export class Api {
     permitTypeId: string = null,
     activityId: string = null,
     pid: string = null,
-    jurisdictionId: string = null
+    jurisdictionId: string = null,
+    hideDisabled = false
   ) {
     return this.client.post<IOptionResponse<IPermitType | IActivity>>(
       `/permit_classifications/permit_classification_options`,
@@ -225,6 +232,7 @@ export class Api {
         activityId,
         pid,
         jurisdictionId,
+        hideDisabled,
       }
     )
   }
@@ -277,6 +285,27 @@ export class Api {
     return this.client.get<ApiResponse<IPermitProject>>(`/permit_projects/${id}`)
   }
 
+  async assignProjectReviewCollaborator(projectId: string, collaboratorId: string) {
+    return this.client.post<ApiResponse<IPermitProject>>(
+      `/permit_projects/${projectId}/assign_project_review_collaborator`,
+      { collaboratorId }
+    )
+  }
+
+  async unassignProjectReviewCollaborator(projectId: string, collaboratorId: string) {
+    return this.client.delete<ApiResponse<IPermitProject>>(
+      `/permit_projects/${projectId}/unassign_project_review_collaborator`,
+      { collaboratorId }
+    )
+  }
+
+  async fetchProjectAudits(
+    projectId: string,
+    params?: TSearchParams<EProjectAuditSortFields, IProjectAuditSearchFilters>
+  ) {
+    return this.client.post<ApiResponse<IProjectAudit[]>>(`/permit_projects/${projectId}/activities`, params)
+  }
+
   async fetchPinnedProjects() {
     return this.client.get<ApiResponse<IPermitProject[]>>(`/permit_projects/pinned`)
   }
@@ -307,6 +336,34 @@ export class Api {
     return this.client.delete<ApiResponse<IPermitProject[]>>(`/permit_projects/${id}/unpin`)
   }
 
+  async viewPermitProject(id: string) {
+    return this.client.post<ApiResponse<IPermitProject>>(`/permit_projects/${id}/mark_as_viewed`)
+  }
+
+  async unviewPermitProject(id: string) {
+    return this.client.post<ApiResponse<IPermitProject>>(`/permit_projects/${id}/mark_as_unviewed`)
+  }
+
+  async transitionPermitProjectState(id: string, targetState: string) {
+    return this.client.post<ApiResponse<IPermitProject>>(`/permit_projects/${id}/transition_state`, {
+      targetState,
+    })
+  }
+
+  async transitionPermitApplicationStatus(id: string, targetStatus: string) {
+    return this.client.post<IJurisdictionPermitApplicationResponse>(`/permit_applications/${id}/transition_status`, {
+      targetStatus,
+    })
+  }
+
+  async reorderPermitProjects(items: Array<{ id: string; inboxSortOrder: number }>) {
+    return this.client.patch("/permit_projects/reorder", { items })
+  }
+
+  async reorderPermitApplications(items: Array<{ id: string; inboxSortOrder: number }>) {
+    return this.client.patch("/permit_applications/reorder", { items })
+  }
+
   async fetchSubmissionCollaboratorOptions(id: string) {
     return this.client.get<IOptionResponse>(`/permit_projects/${id}/submission_collaborator_options`)
   }
@@ -320,10 +377,17 @@ export class Api {
 
   async fetchJurisdictionPermitApplications(
     jurisdictionId,
-    params?: TSearchParams<EPermitApplicationSortFields, IPermitApplicationSearchFilters>
+    params?: TSearchParams<EPermitApplicationInboxSortFields, IPermitApplicationInboxSearchFilters>
   ) {
     return this.client.post<IJurisdictionPermitApplicationResponse>(
       `/jurisdictions/${jurisdictionId}/permit_applications/search`,
+      params
+    )
+  }
+
+  async fetchJurisdictionPermitProjects(jurisdictionId: string, params?: TSearchParams<any, any>) {
+    return this.client.post<ApiResponse<IPermitProject[]>>(
+      `/jurisdictions/${jurisdictionId}/permit_projects/search`,
       params
     )
   }
@@ -539,6 +603,13 @@ export class Api {
     return this.client.post<ApiResponse<IRequirementTemplate>>(`/requirement_templates`, {
       requirementTemplate: params,
     })
+  }
+
+  async updateRequirementTemplateJurisdictionAvailabilities(templateId: string, jurisdictionIds: string[]) {
+    return this.client.post<ApiResponse<IRequirementTemplate>>(
+      `/requirement_templates/${templateId}/jurisdiction_availabilities`,
+      { jurisdictionIds }
+    )
   }
 
   async copyRequirementTemplate(params?: ICopyRequirementTemplateFormData) {
@@ -867,6 +938,32 @@ export class Api {
     return this.client.get<BlobPart>(`/pre_checks/download_pre_check_user_consent_csv`)
   }
 
+  async fetchOverheatingCodes(params?: TSearchParams<any>) {
+    return this.client.get<IApiResponse<IOverheatingCode[], IPageMeta>>(`/overheating_codes`, params)
+  }
+
+  async fetchOverheatingCode(id: string) {
+    return this.client.get<IApiResponse<IOverheatingCode, {}>>(`/overheating_codes/${id}`)
+  }
+
+  async createOverheatingCode(params: Partial<IOverheatingCode>) {
+    return this.client.post<IApiResponse<IOverheatingCode, {}>>(`/overheating_codes`, { overheatingCode: params })
+  }
+
+  async updateOverheatingCode(id: string, params: Partial<IOverheatingCode>) {
+    return this.client.patch<IApiResponse<IOverheatingCode, {}>>(`/overheating_codes/${id}`, {
+      overheatingCode: params,
+    })
+  }
+
+  async archiveOverheatingCode(id: string) {
+    return this.client.delete<IApiResponse<IOverheatingCode, {}>>(`/overheating_codes/${id}`)
+  }
+
+  async restoreOverheatingCode(id: string) {
+    return this.client.patch<IApiResponse<IOverheatingCode, {}>>(`/overheating_codes/${id}/restore`)
+  }
+
   async downloadApplicationMetricsCsv() {
     return this.client.get<BlobPart>(`/permit_applications/download_application_metrics_csv`)
   }
@@ -1036,35 +1133,5 @@ export class Api {
     return this.client.post<ApiResponse<{ message: string }>>(
       `/report_documents/${reportDocumentId}/share_with_jurisdiction`
     )
-  }
-
-  async createOverheatingTool(formData: {
-    formJson: IOverheatingToolJson
-    formType: string
-    overheatingDocumentsAttributes?: Partial<IOverheatingDocument>[]
-  }) {
-    return this.client.post<IApiResponse<IOverheatingTool, {}>>("/overheating", {
-      overheatingTool: {
-        formJson: formData.formJson,
-        formType: formData.formType,
-        overheatingDocumentsAttributes: formData.overheatingDocumentsAttributes,
-      },
-    })
-  }
-
-  async getOverheatingTools(params?: TSearchParams<EOverheatingToolSortFields>) {
-    return this.client.get<IApiResponse<IOverheatingTool[], IPageMeta>>("/overheating", params)
-  }
-
-  async fetchOverheatingTool(id: string) {
-    return this.client.get<IApiResponse<IOverheatingTool, {}>>(`/overheating/${id}`)
-  }
-
-  async generatePdf(id: string) {
-    return this.client.post<IApiResponse<IOverheatingTool, {}>>(`/overheating/${id}/generate_pdf`)
-  }
-
-  async archiveOverheatingTool(id: string) {
-    return this.client.post<IApiResponse<IOverheatingTool, {}>>(`/overheating/${id}/archive`)
   }
 }

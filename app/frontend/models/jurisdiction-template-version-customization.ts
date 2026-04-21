@@ -9,6 +9,7 @@ export const JurisdictionTemplateVersionCustomizationModel = types
     id: types.string,
     jurisdictionId: types.string,
     customizations: types.frozen<ITemplateCustomization>({}),
+    disabled: types.optional(types.boolean, false),
   })
 
 export interface IJurisdictionTemplateVersionCustomization

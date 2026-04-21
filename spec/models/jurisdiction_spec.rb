@@ -104,15 +104,15 @@ RSpec.describe Jurisdiction, type: :model do
         expect(jurisdiction.sandboxes.size).to eq(2)
       end
 
-      it "allows multiple sandboxes with unique names" do
+      it "allows sandboxes with unique scopes within the same jurisdiction" do
         jurisdiction =
           create(:sub_district, name: "Townsville", locality_type: "city")
 
-        # Build 3 sandboxes with unique names for this jurisdiction
-        3.times { jurisdiction.sandboxes.build(attributes_for(:sandbox)) }
-
         expect(jurisdiction).to be_valid
-        expect(jurisdiction.sandboxes.size).to eq(5)
+        expect(jurisdiction.sandboxes.size).to eq(2)
+        expect(
+          jurisdiction.sandboxes.pluck(:template_version_status_scope)
+        ).to match_array(%w[published scheduled])
       end
     end
   end
@@ -124,8 +124,6 @@ RSpec.describe Jurisdiction, type: :model do
     let(:enabled_jurisdiction) do
       create(:sub_district, external_api_state: "j_on")
     end
-    let!(:published_sandbox) { create(:sandbox, :published) }
-    let!(:scheduled_sandbox) { create(:sandbox, :scheduled) }
 
     describe "before validation" do
       it "builds two sandboxes if none exist" do
@@ -182,6 +180,14 @@ RSpec.describe Jurisdiction, type: :model do
           )
         end
       end
+    end
+  end
+
+  describe "#submission_inbox_set_up?" do
+    let(:jurisdiction) { create(:sub_district) }
+
+    it "returns a boolean" do
+      expect([true, false]).to include(jurisdiction.submission_inbox_set_up?)
     end
   end
 end

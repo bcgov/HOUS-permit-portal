@@ -20,7 +20,7 @@ class PermitCollaboration::CollaborationManagementService
           )
 
         if existing_delegatee_collaboration.length.positive?
-          existing_delegatee_collaboration.destroy_all
+          existing_delegatee_collaboration.discard_all
         end
       end
 

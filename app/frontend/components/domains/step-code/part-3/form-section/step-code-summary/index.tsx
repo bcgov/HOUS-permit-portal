@@ -4,13 +4,14 @@ import { observer } from "mobx-react-lite"
 import React from "react"
 import { useForm } from "react-hook-form"
 import { Trans } from "react-i18next"
-import { useLocation, useNavigate, useParams } from "react-router-dom"
+import { useLocation } from "react-router-dom"
 import { usePart3StepCode } from "../../../../../../hooks/resources/use-part-3-step-code"
 import { EFileUploadAttachmentType } from "../../../../../../types/enums"
 import { isBaselineChecklist, isMixedUseChecklist } from "../../../../../../utils/utility-functions"
 import { FileDownloadButton } from "../../../../../shared/base/file-download-button"
 import { SharedSpinner } from "../../../../../shared/base/shared-spinner"
 import { RouterLink } from "../../../../../shared/navigation/router-link"
+import { Part3FormFooter } from "../shared/form-footer"
 import { SectionHeading } from "../shared/section-heading"
 import { MixedUsePerformance } from "./mixed-use"
 import { StepCodePerformance } from "./step-code-performance"
@@ -18,8 +19,6 @@ import { StepCodePerformance } from "./step-code-performance"
 export const StepCodeSummary = observer(function StepCodeSummary() {
   const i18nPrefix = "stepCode.part3.stepCodeSummary"
   const { checklist, currentStepCode } = usePart3StepCode()
-  const { permitApplicationId } = useParams()
-  const navigate = useNavigate()
   const location = useLocation()
   const isMixedUse = isMixedUseChecklist(checklist as any)
   const isBaseline = isBaselineChecklist(checklist as any)
@@ -29,21 +28,8 @@ export const StepCodeSummary = observer(function StepCodeSummary() {
 
   const onSubmit = async () => {
     if (!checklist) return
-
-    const alternatePath = checklist.alternateNavigateAfterSavePath
-    checklist.setAlternateNavigateAfterSavePath(null)
-
     const updateSucceeded = await checklist.completeSection("stepCodeSummary")
-
-    if (updateSucceeded) {
-      if (alternatePath) {
-        navigate(alternatePath)
-      } else if (permitApplicationId) {
-        permitApplicationId && navigate(`/permit-applications/${permitApplicationId}/edit`)
-      }
-    } else {
-      console.error("Failed to complete stepCodeSummary section")
-    }
+    if (!updateSucceeded) throw new Error("Failed to complete stepCodeSummary section")
   }
 
   const stepCodeOccupanciesPath = checklist.isComplete("stepCodeOccupancies")
@@ -52,16 +38,6 @@ export const StepCodeSummary = observer(function StepCodeSummary() {
   const baselineOccupanciesPath = checklist.isComplete("baselineOccupancies")
     ? "baseline-details"
     : "baseline-occupancies"
-
-  // Auto-submit in standalone mode (no permit application id)
-  const hasAutoSubmittedRef = React.useRef(false)
-  const submitNow = handleSubmit(onSubmit)
-  React.useEffect(() => {
-    if (!permitApplicationId && !isSubmitting && !hasAutoSubmittedRef.current) {
-      hasAutoSubmittedRef.current = true
-      submitNow()
-    }
-  }, [permitApplicationId, isSubmitting, submitNow])
 
   return !checklist.canShowResults ? (
     <Flex direction="column" gap={6}>
@@ -95,21 +71,20 @@ export const StepCodeSummary = observer(function StepCodeSummary() {
           <MixedUsePerformance />
         </Flex>
       )}
-      <form onSubmit={handleSubmit(onSubmit)} name="part3SectionForm">
-        <FormControl>
-          <Flex gap={4} align="center">
-            {isSubmitting && <SharedSpinner m={0} />}
-            {!isSubmitting && currentStepCode?.latestReportDocument && (
-              <FileDownloadButton
-                variant="link"
-                modelType={EFileUploadAttachmentType.ReportDocument}
-                document={currentStepCode.latestReportDocument as any}
-                simpleLabel
-              />
-            )}
-          </Flex>
-        </FormControl>
-      </form>
+      <FormControl>
+        <Flex gap={4} align="center">
+          {isSubmitting && <SharedSpinner m={0} />}
+          {!isSubmitting && currentStepCode?.latestReportDocument && (
+            <FileDownloadButton
+              variant="link"
+              modelType={EFileUploadAttachmentType.ReportDocument}
+              document={currentStepCode.latestReportDocument as any}
+              simpleLabel
+            />
+          )}
+        </Flex>
+      </FormControl>
+      <Part3FormFooter handleSubmit={handleSubmit} onSubmit={onSubmit} isLoading={isSubmitting} />
     </Flex>
   )
 })

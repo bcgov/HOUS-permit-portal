@@ -6,6 +6,6 @@ FactoryBot.define do
     full_address { "123 Main St, Anytown, USA" }
     pid { nil }
     pin { nil }
-    # Add other attributes as necessary
+    sandbox { nil }
   end
 end

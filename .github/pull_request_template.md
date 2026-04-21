@@ -1,64 +1,92 @@
-## Description
+## 📋 Description
 
-<!--
-Please do not leave this blank
-This PR [adds/removes/fixes/replaces] the [feature/bug/etc].
--->
+> Provide a clear and concise summary of the changes in this PR. Include the motivation and context behind the change. If this fixes a bug, describe the root cause.
 
-## What type of PR is this? (check all applicable)
+_Replace this with your description..._
+
+---
+
+## 🔖 What type of PR is this? _(check all that apply)_
 
 - [ ] 🍕 Feature
 - [ ] 🐛 Bug Fix
+- [ ] ♻️ Refactor
 - [ ] 📦 Chore (Release)
 - [ ] ✅ Test
+- [ ] 🔥 Hot Fix
+- [ ] 📝 Documentation
 
-## Related Tickets & Documents
+---
 
-<!--
-Please use this format to link: Implements/Fixes Story/Issue [story_id](story_link).
--->
+## 🎫 Related Tickets & Documents
 
-## Steps to QA
+> Link your Jira story/task so it is tracked. Use the `Fixes`, or `Relates to` keywords where applicable.
 
-<!--
-Please provide some steps for the reviewer to test your change. If you have written tests, you can mention that here instead.
-Provide any relevant screenshots here.
+| Type                 | Link                                                       |
+| -------------------- | ---------------------------------------------------------- |
+| 🗂️ Jira Story / Task | [HUB-XXXX](https://yourorg.atlassian.net/browse/PROJ-XXXX) |
+| 📄 Related PR(s)     | <!-- #PR_NUMBER -->                                        |
+| 📑 Design / Figma    | <!-- Paste link -->                                        |
+| 📚 Documentation     | <!-- Paste link -->                                        |
 
-1. Click a link
-2. Do this thing
-3. Validate you see the thing working
--->
+---
 
-## UI Accessibility Checklist
+## ✨ Features / Changes Introduced
 
-<!--
-    If the PR involves UI changes, please use this checklist.
--->
+> List the key changes, features, or fixes introduced in this PR.
 
-_Note the following checklist is not an exhaustive list. Check
-the [WebAIM checklist](https://webaim.org/standards/wcag/checklist) for
-a user-friendly checklist with more details. Aim to meet at least *AA* conformance level where applicable. Check
-the [WCAG guidelines](https://webaim.org/standards/wcag/checklist) for the full guidelines._
+-
+-
+- ***
 
-- [ ] Markup uses semantic HTML?
-- [ ] Additional context added through `aria-roles` and `aria-labels`?
-- [ ] Checked
-      with [Wave Browser Extension](https://chromewebstore.google.com/detail/wave-evaluation-tool/jbbplnpkjmmeebjpijfedlgcdilocofh)
-      for accessibility errors?
-- [ ] Usable with a keyboard and navigable in a logical order?
-- [ ] Usable using a screen reader (e.g. Voiceover for Mac) with enough context for the user?
+## 🧪 Steps to QA
 
-## General Checklist
+> Provide clear, reproducible steps for the reviewer/QA engineer to verify the changes.
 
-- [ ] ✅ Provide tests for your changes where relevant
-- [ ] 📝 Use descriptive commit messages
-- [ ] 📗 Update any related documentation and include any relevant screenshots
-- [ ] 📱 For UI-related tasks, ensure responsive design is implemented across multiple screen size
-- [ ] 🗂️ Move your relevant story/task to the _Ready for Code Review_ state
+1. Check out this branch: `git checkout <branch-name>`
+2. Run the app: `...`
+3. Navigate to `...`
+4. Verify that `...`
 
-## [optional] Are there any post-deployment tasks we need to perform?
+**Expected Behaviour:**
 
-<!--
-  For Work In Progress Pull Requests, please use the Draft PR feature,
-  see https://github.blog/2019-02-14-introducing-draft-pull-requests/ for further details.
--->
+> _Describe what should happen_
+
+**Before this change:**
+
+> _Describe what was happening before (include screenshots if applicable)_
+
+**After this change:**
+
+> _Describe what happens now (include screenshots if applicable)_
+
+---
+
+## ♿ UI Accessibility Checklist
+
+> ⚠️ Skip this section if this PR has no UI changes.
+
+Check the [WebAIM checklist](https://webaim.org/standards/wcag/checklist) for a user-friendly guide and the [WCAG guidelines](https://www.w3.org/WAI/standards-guidelines/wcag/) for the full specification. Aim for at least **AA conformance** level where applicable.
+
+- [ ] Markup uses **semantic HTML** (e.g. `<button>`, `<nav>`, `<main>`, `<section>`)?
+- [ ] Additional context added through `aria-roles` and `aria-labels` where needed?
+- [ ] Checked with the [WAVE Browser Extension](https://wave.webaim.org/extension/) for accessibility errors?
+- [ ] Usable with a **keyboard** and navigable in a **logical order**?
+- [ ] Usable with a **screen reader** (e.g. VoiceOver for Mac, NVDA for Windows) with enough context?
+- [ ] **Colour contrast** meets minimum AA ratio (4.5:1 for text, 3:1 for UI components)?
+- [ ] No content relies on **colour alone** to convey meaning?
+- [ ] All images have meaningful **alt text** (or `alt=""` if decorative)?
+
+---
+
+## ✅ General Checklist
+
+> Complete all relevant items before requesting a review.
+
+- [ ] ✅ Tests written and passing for all changes where relevant
+- [ ] 📝 Commit messages are descriptive and follow the project convention
+- [ ] 📗 Related documentation updated; relevant screenshots included
+- [ ] 📱 For UI changes: responsive design verified across multiple screen sizes
+- [ ] 🔒 No sensitive data (API keys, secrets, credentials) committed
+- [ ] 🗂️ Jira story/task moved to **Ready for Code Review** state
+- [ ] 👀 Self-reviewed this PR before requesting others

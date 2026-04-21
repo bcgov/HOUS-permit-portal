@@ -11,23 +11,21 @@ class Api::PermitProjectsController < Api::ApplicationController
                   search_permit_applications
                   submission_collaborator_options
                   create_permit_applications
+                  mark_as_viewed
+                  mark_as_unviewed
+                  transition_state
+                  assign_project_review_collaborator
+                  unassign_project_review_collaborator
                 ]
   before_action :set_pinned_projects, only: %i[pinned]
 
-  # TODO: If you create a search concern similar to Api::Concerns::Search::PermitApplications,
-  # include it here for more advanced search parameter handling.
-  # e.g., include Api::Concerns::Search::PermitProjects
-
-  skip_after_action :verify_policy_scoped,
-                    only: %i[index pinned jurisdiction_options]
   skip_after_action :verify_authorized, only: %i[pinned]
 
   def index
     perform_permit_project_search
-    authorized_results = apply_search_authorization(@permit_projects)
-    compute_project_ids_with_outdated_drafts(authorized_results)
+    compute_project_ids_with_outdated_drafts(@permit_projects)
 
-    render_success authorized_results,
+    render_success @permit_projects,
                    nil,
                    {
                      blueprint: PermitProjectBlueprint,
@@ -38,11 +36,93 @@ class Api::PermitProjectsController < Api::ApplicationController
 
   def show
     authorize @permit_project
+    view = current_user.review_staff? ? :inbox_extended : :extended
     render_success @permit_project,
                    nil,
                    {
                      blueprint: PermitProjectBlueprint,
-                     blueprint_opts: blueprint_options(view: :extended)
+                     blueprint_opts: blueprint_options(view: view)
+                   }
+  end
+
+  def mark_as_viewed
+    authorize @permit_project
+    @permit_project.update_viewed_at
+    render_success @permit_project,
+                   nil,
+                   {
+                     blueprint: PermitProjectBlueprint,
+                     blueprint_opts: blueprint_options(view: :base)
+                   }
+  end
+
+  def mark_as_unviewed
+    authorize @permit_project
+    @permit_project.mark_as_unviewed
+    render_success @permit_project,
+                   nil,
+                   {
+                     blueprint: PermitProjectBlueprint,
+                     blueprint_opts: blueprint_options(view: :base)
+                   }
+  end
+
+  def transition_state
+    authorize @permit_project, :transition_state?
+
+    target = params.require(:target_state)
+    event = PermitProjectState::STATE_EVENT_MAP[target]
+
+    unless event &&
+             @permit_project.allowed_manual_transitions.include?(target.to_sym)
+      return render_error("permit_project.invalid_transition", { status: 422 })
+    end
+
+    @permit_project.send(:"#{event}!")
+    @permit_project.update!(inbox_sort_order: nil)
+    render_success @permit_project,
+                   "permit_project.transition_success",
+                   {
+                     blueprint: PermitProjectBlueprint,
+                     blueprint_opts: blueprint_options(view: :base)
+                   }
+  rescue AASM::InvalidTransition
+    render_error("permit_project.invalid_transition", { status: 422 })
+  end
+
+  def assign_project_review_collaborator
+    authorize @permit_project
+
+    unless @permit_project.designated_reviewer_enabled?
+      return render_error("permit_project.feature_not_enabled", { status: 422 })
+    end
+
+    collaborator_id = params.require(:collaborator_id)
+    @permit_project.assign_project_review_collaborator!(collaborator_id)
+    render_success @permit_project.reload,
+                   "permit_project.assign_project_review_collaborator_success",
+                   {
+                     blueprint: PermitProjectBlueprint,
+                     blueprint_opts:
+                       blueprint_options(view: :jurisdiction_review_inbox)
+                   }
+  rescue => e
+    render_error(
+      "permit_project.assign_project_review_collaborator_error",
+      { message_opts: { error_message: e.message }, status: 422 }
+    )
+  end
+
+  def unassign_project_review_collaborator
+    authorize @permit_project
+    collaborator_id = params.require(:collaborator_id)
+    @permit_project.unassign_project_review_collaborator!(collaborator_id)
+    render_success @permit_project.reload,
+                   "permit_project.unassign_project_review_collaborator_success",
+                   {
+                     blueprint: PermitProjectBlueprint,
+                     blueprint_opts:
+                       blueprint_options(view: :jurisdiction_review_inbox)
                    }
   end
 
@@ -70,8 +150,9 @@ class Api::PermitProjectsController < Api::ApplicationController
 
   def create
     @permit_project = PermitProject.new(permit_project_params)
-    @permit_project.owner = current_user # Assign the current user as the owner
-    authorize @permit_project # Assuming you have a PermitProjectPolicy with :create?
+    @permit_project.owner = current_user
+    @permit_project.sandbox = current_sandbox
+    authorize @permit_project
 
     if @permit_project.save
       render_success @permit_project,
@@ -162,9 +243,11 @@ class Api::PermitProjectsController < Api::ApplicationController
                    }
   end
 
-  # Bulk create permit applications for a project
+  # Bulk create permit applications for a project.
+  # Sandbox comes from the parent project, not the request, so all PAs in a
+  # project stay in the same sandbox.
   # Expected params:
-  #   permit_applications: [{ activity_id, permit_type_id, first_nations, jurisdiction_id?, sandbox_id? }]
+  #   permit_applications: [{ activity_id, permit_type_id, first_nations, jurisdiction_id? }]
   def create_permit_applications
     authorize @permit_project
 
@@ -175,7 +258,6 @@ class Api::PermitProjectsController < Api::ApplicationController
       permit_application =
         PermitApplication.new(
           submitter: current_user,
-          sandbox: current_sandbox,
           permit_project: @permit_project,
           activity_id: pa_params[:activity_id],
           permit_type_id: pa_params[:permit_type_id],
@@ -217,8 +299,7 @@ class Api::PermitProjectsController < Api::ApplicationController
               :permit_type_id,
               :first_nations,
               :jurisdiction_id,
-              :permit_project_id,
-              :sandbox_id
+              :permit_project_id
             ).to_h
           end
       }
@@ -236,6 +317,20 @@ class Api::PermitProjectsController < Api::ApplicationController
         nil
       )
     end
+  end
+
+  def reorder
+    authorize PermitProject, :reorder?
+
+    scope = PermitProject.where(jurisdiction_id: current_user.jurisdiction_ids)
+
+    items = params.require(:items)
+    items.each do |item|
+      project = scope.find(item[:id])
+      project.update!(inbox_sort_order: item[:inbox_sort_order])
+    end
+
+    render_success nil
   end
 
   def jurisdiction_options
@@ -274,13 +369,16 @@ class Api::PermitProjectsController < Api::ApplicationController
     {
       view: view,
       current_user: current_user,
+      viewer: current_user,
       pinned_project_ids: current_user.pinned_permit_project_ids,
       project_ids_with_outdated_drafts: @project_ids_with_outdated_drafts
     }
   end
 
   def set_permit_project
-    @permit_project = PermitProject.includes(:jurisdiction).find(params[:id])
+    scope = PermitProject.includes(:jurisdiction)
+    scope = scope.for_sandbox(current_sandbox) unless current_user.super_admin?
+    @permit_project = scope.find(params[:id])
     compute_project_ids_with_outdated_drafts([@permit_project])
   end
 
@@ -298,7 +396,6 @@ class Api::PermitProjectsController < Api::ApplicationController
           :pid,
           :first_nations,
           :permit_project_id,
-          :sandbox_id,
           submission_data: {
           }
         )

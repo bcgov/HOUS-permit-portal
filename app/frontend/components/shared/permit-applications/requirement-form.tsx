@@ -25,7 +25,6 @@ import { ContactModal } from "../contact/contact-modal"
 import { PreviousSubmissionModal } from "../revisions/previous-submission-modal"
 import { OptionalElectivesModal } from "./optional-electives-modal"
 import { PermitApplicationSubmitModal } from "./permit-application-submit-modal"
-import { PreCheckSelectModal } from "./pre-check-select-modal"
 import { StepCodeSelectModal } from "./step-code-select-modal"
 
 interface IRequirementFormProps {
@@ -36,6 +35,7 @@ interface IRequirementFormProps {
   showHelpButton?: boolean
   renderSaveButton?: () => JSX.Element
   isEditing?: boolean
+  readOnly?: boolean
   renderTopButtons?: () => React.ReactNode
   updateCollaborationAssignmentNodes?: () => void
   isEarlyAccess?: boolean
@@ -50,6 +50,7 @@ export const RequirementForm = observer(
     renderTopButtons,
     renderSaveButton,
     isEditing = false,
+    readOnly: readOnlyProp = false,
     updateCollaborationAssignmentNodes,
     isEarlyAccess = false,
   }: IRequirementFormProps) => {
@@ -65,6 +66,7 @@ export const RequirementForm = observer(
       previousSubmissionVersion,
       selectedSubmissionVersion,
       previousToSelectedSubmissionVersion,
+      isViewingPastRequests,
       inboxEnabled,
       sandbox,
     } = permitApplication
@@ -108,7 +110,7 @@ export const RequirementForm = observer(
     const pastClonedDataCache = useRef(new Map())
 
     const displayedSubmissionData = useMemo(() => {
-      if (selectedSubmissionVersion) {
+      if (selectedSubmissionVersion && isViewingPastRequests) {
         const cacheKey = selectedSubmissionVersion.id
         if (pastClonedDataCache.current.has(cacheKey)) {
           return pastClonedDataCache.current.get(cacheKey)
@@ -120,7 +122,7 @@ export const RequirementForm = observer(
       } else {
         return currentSubmissionData
       }
-    }, [selectedSubmissionVersion, currentSubmissionData])
+    }, [selectedSubmissionVersion, isViewingPastRequests, currentSubmissionData])
 
     const [unsavedSubmissionData, setUnsavedSubmissionData] = useState(() => R.clone(submissionData))
 
@@ -228,11 +230,6 @@ export const RequirementForm = observer(
       }
     }
 
-    const handleOpenPreCheck = async (_event) => {
-      await triggerSave?.()
-      navigate("pre-check")
-    }
-
     const handleOpenContactAutofill = async (event) => {
       setAutofillContactKey(event.detail.key)
       onContactsOpen()
@@ -259,19 +256,6 @@ export const RequirementForm = observer(
       // @ts-ignore method added on model
       const ok = await permitApplication.assignExistingStepCode(stepCodeId)
       if (ok) setIsStepCodeSelectOpen(false)
-    }
-
-    const [isPreCheckSelectOpen, setIsPreCheckSelectOpen] = useState(false)
-    const handleOpenExistingPreCheck = async (event) => {
-      setIsPreCheckSelectOpen(true)
-    }
-
-    const handleSelectExistingPreCheck = async (preCheckId: string) => {
-      await triggerSave?.()
-      // Assign by updating the PreCheck's permitApplicationId (belongs_to association)
-      // @ts-ignore method added on model
-      const ok = await permitApplication.assignExistingPreCheck(preCheckId)
-      if (ok) setIsPreCheckSelectOpen(false)
     }
 
     const handleDownloadRequirementDocument = async (event) => {
@@ -318,11 +302,9 @@ export const RequirementForm = observer(
 
       document.addEventListener("openStepCode", handleOpenStepCodePart9)
       document.addEventListener("openStepCodePart3", handleOpenStepCodePart3)
-      document.addEventListener("openArchitecturalDrawingTool", handleOpenPreCheck)
       document.addEventListener("openAutofillContact", handleOpenContactAutofill)
       document.addEventListener("openPreviousSubmission", handleOpenPreviousSubmission)
       document.addEventListener("openExistingStepCode", handleOpenExistingStepCode)
-      document.addEventListener("openExistingArchitecturalDrawing", handleOpenExistingPreCheck)
       document.addEventListener("downloadRequirementDocument", handleDownloadRequirementDocument)
       document.addEventListener("openResourceLink", handleOpenResourceLink)
       document.addEventListener("downloadResourceDocument", handleDownloadResourceDocument)
@@ -334,11 +316,9 @@ export const RequirementForm = observer(
       return () => {
         document.removeEventListener("openStepCode", handleOpenStepCodePart9)
         document.removeEventListener("openStepCodePart3", handleOpenStepCodePart3)
-        document.removeEventListener("openArchitecturalDrawingTool", handleOpenPreCheck)
         document.removeEventListener("openAutofillContact", handleOpenContactAutofill)
         document.removeEventListener("openPreviousSubmission", handleOpenPreviousSubmission)
         document.removeEventListener("openExistingStepCode", handleOpenExistingStepCode)
-        document.removeEventListener("openExistingArchitecturalDrawing", handleOpenExistingPreCheck)
         document.removeEventListener("downloadRequirementDocument", handleDownloadRequirementDocument)
         document.removeEventListener("openResourceLink", handleOpenResourceLink)
         document.removeEventListener("downloadResourceDocument", handleDownloadResourceDocument)
@@ -458,8 +438,7 @@ export const RequirementForm = observer(
 
     let permitAppOptions = {
       ...defaultOptions,
-      ...(isDraft ? { readOnly: shouldShowDiff } : { readOnly: false }),
-      // readonly loggic depends on formattedJson for submitted applications
+      ...(readOnlyProp ? { readOnly: true } : isDraft ? { readOnly: shouldShowDiff } : { readOnly: false }),
     }
     permitAppOptions.componentOptions.simplefile.config["formCustomOptions"] = {
       persistFileUploadAction: "PATCH",
@@ -539,6 +518,13 @@ export const RequirementForm = observer(
               status={EFlashMessageStatus.error}
             />
           )}
+          {permitApplication.templateVersionDisabledByJurisdiction && !sandbox && (
+            <CustomMessageBox
+              title={t("permitApplication.show.templateDisabledByJurisdictionTitle")}
+              description={t("permitApplication.show.templateDisabledByJurisdiction")}
+              status={EFlashMessageStatus.error}
+            />
+          )}
           {!inboxEnabled && !sandbox && isEarlyAccess && (
             <CustomMessageBox
               title={t("permitApplication.show.inboxDisabledTitleEarlyAccess")}
@@ -569,7 +555,7 @@ export const RequirementForm = observer(
               status={EFlashMessageStatus.warning}
             />
           )}
-          {permitApplication?.isSubmitted ? (
+          {permitApplication?.isSubmitted || readOnlyProp ? (
             <CustomMessageBox
               description={t("permitApplication.show.wasSubmitted", {
                 date: format(permitApplication.submittedAt, "MMM d, yyyy h:mm a"),
@@ -670,12 +656,6 @@ export const RequirementForm = observer(
           onClose={() => setIsStepCodeSelectOpen(false)}
           stepCodeType={stepCodeSelectType}
           onSelect={handleSelectExistingStepCode}
-        />
-
-        <PreCheckSelectModal
-          isOpen={isPreCheckSelectOpen}
-          onClose={() => setIsPreCheckSelectOpen(false)}
-          onSelect={handleSelectExistingPreCheck}
         />
 
         {isPreviousSubmissionOpen && (

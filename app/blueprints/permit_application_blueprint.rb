@@ -19,7 +19,8 @@ class PermitApplicationBlueprint < Blueprinter::Base
            :revisions_requested_at,
            :missing_pdfs,
            :template_nickname,
-           :discarded_at
+           :discarded_at,
+           :days_in_queue
 
     association :permit_type, blueprint: PermitClassificationBlueprint
     association :activity, blueprint: PermitClassificationBlueprint
@@ -32,6 +33,17 @@ class PermitApplicationBlueprint < Blueprinter::Base
     field :using_current_template_version do |pa, _options|
       pa.using_current_template_version
     end
+
+    field :project_id do |pa, _options|
+      pa.permit_project&.id
+    end
+
+    field :project_number do |pa, _options|
+      pa.permit_project&.number
+    end
+
+    field :inbox_sort_order, default: nil
+    field :allowed_manual_transitions, default: []
   end
 
   view :project_base do
@@ -39,7 +51,12 @@ class PermitApplicationBlueprint < Blueprinter::Base
     association :permit_collaborations,
                 blueprint: PermitCollaborationBlueprint,
                 view: :base do |pa, options|
-      pa.permit_collaborations(options[:current_user])
+      collabs = pa.permit_collaborations(options[:current_user])
+      if options[:current_user]&.review_staff?
+        collabs
+      else
+        collabs.select(&:submission?)
+      end
     end
   end
 
@@ -47,14 +64,10 @@ class PermitApplicationBlueprint < Blueprinter::Base
     include_view :base
 
     association :supporting_documents, blueprint: SupportingDocumentBlueprint
-    # only the delegatee is needed for the inbox screen
     association :permit_collaborations,
                 blueprint: PermitCollaborationBlueprint,
                 view: :base do |pa, _options|
-      pa.permit_collaborations.where(
-        collaboration_type: :review,
-        collaborator_type: :delegatee
-      )
+      pa.permit_collaborations.where(collaboration_type: :review)
     end
     association :submitter, blueprint: UserBlueprint, view: :minimal
   end
@@ -82,6 +95,10 @@ class PermitApplicationBlueprint < Blueprinter::Base
     association :template_version, blueprint: TemplateVersionBlueprint
     association :published_template_version, blueprint: TemplateVersionBlueprint
 
+    field :template_version_disabled_by_jurisdiction do |pa, _options|
+      pa.template_version_disabled_by_jurisdiction?
+    end
+
     association :supporting_documents,
                 blueprint: SupportingDocumentBlueprint do |pa, options|
       pa.supporting_documents_for_submitter_based_on_user_permissions(
@@ -101,7 +118,12 @@ class PermitApplicationBlueprint < Blueprinter::Base
     association :permit_collaborations,
                 blueprint: PermitCollaborationBlueprint,
                 view: :base do |pa, options|
-      pa.permit_collaborations(options[:current_user])
+      collabs = pa.permit_collaborations(options[:current_user])
+      if options[:current_user]&.review_staff?
+        collabs
+      else
+        collabs.select(&:submission?)
+      end
     end
     association :permit_block_statuses, blueprint: PermitBlockStatusBlueprint
     association :submission_versions,
@@ -135,6 +157,11 @@ class PermitApplicationBlueprint < Blueprinter::Base
     field :form_json
     field :submission_data do |pa, _options|
       pa.formatted_submission_data
+    end
+    association :permit_collaborations,
+                blueprint: PermitCollaborationBlueprint,
+                view: :base do |pa, _options|
+      pa.permit_collaborations
     end
     association :all_submission_version_completed_supporting_documents,
                 blueprint: SupportingDocumentBlueprint

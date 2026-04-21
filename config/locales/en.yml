@@ -30,6 +30,12 @@
 en:
   misc:
     removed_placeholder: "<Removed>"
+  project_audit:
+    fallback:
+      generic_change: "%{user} made a change"
+      collaborator_change: "%{user} made a change to the collaborators"
+      block_change: "%{user} made a change to %{block_name}"
+      application_change: "%{user} made a change to the application"
   activerecord:
     attributes:
       contact:
@@ -37,6 +43,12 @@ en:
         phone: "Phone no."
       requirement_template:
         first_nations: "First Nations"
+        available_in_all: "All"
+      sandbox:
+        scope_names:
+          published: 'Training mode: "Published"'
+          scheduled: 'Training mode: "Upcoming"'
+        available_in_all: "All"
     errors:
       models:
         early_access_preview:
@@ -45,6 +57,8 @@ en:
         jurisdiction:
           no_sandboxes: "Jurisdiction must have at least one sandbox."
           enabled_inbox_requires_setup: "can only be toggled on once all emails are set up."
+        part3_occupancy_required_step:
+          duplicate_pathway: "A pathway with identical energy step and zero carbon step already exists for this occupancy."
         jurisdiction_template_version_customizations:
           uniqueness: "already exists for this jurisdiction and template version."
         site_configuration:
@@ -60,16 +74,19 @@ en:
           attributes:
             submitter:
               incorrect_role: "must have the submitter role"
-              review_staff_requires_sandbox: "review staff cannot submit permit applications outside of a sandbox"
             jurisdiction:
               no_contact: "is not ready to accept applications through this tool yet. Please check with your local jurisdiction."
               inbox_not_enabled: "inbox for this permit application is not enabled"
               no_jurisdiction: "must be present if not associated with a project."
             pid_or_pin: "must have a PID or PIN."
-            sandbox:
-              incorrect_jurisdiction: "must belong to the jurisdiction. Please apply to your own jurisdiction to use this sandbox."
             template_version:
               must_be_live: "must be for a live requirement template"
+        permit_project:
+          attributes:
+            owner:
+              review_staff_requires_sandbox: "review staff cannot own permit projects outside of a sandbox"
+            sandbox:
+              incorrect_jurisdiction: "must belong to the jurisdiction. Please apply to your own jurisdiction to use this sandbox."
         requirement_template:
           step_code_package_required: '"Energy step code" is required to have the Design package energy step code file'
           duplicate_energy_step_code: 'Multiple "Energy step code" requirements found. Please ensure there is only one "Energy step code" requirement in the template'
@@ -95,6 +112,7 @@ en:
           attributes:
             requirement_code:
               incorrect_energy_requirement_code: "must be %{correct_requirement_code} for energy step code requirements, but received %{incorrect_requirement_code}"
+              incorrect_architectural_requirement_code: "must be %{correct_requirement_code} for architectural drawing requirements, but received %{incorrect_requirement_code}"
               incorrect_architectural_drawing_file_attributes: "must have input type file, required true, and elective false for design package file for energy step code"
         supporting_document:
           attributes:
@@ -149,19 +167,24 @@ en:
       notify_missing_integration_mapping: "Missing API mappings"
       notify_reviewer_application_received: "New application received: %{permit_application_number}"
       notify_block_status_ready: "Requirement block status ready"
-      notify_application_viewed: "Application update: %{permit_application_number}"
+      notify_review_started: "Your application is now under review: %{permit_application_number}"
       notify_application_revisions_requested: "Revisions requested on application %{permit_application_number}"
       remind_reviewer: "Your report on outstanding permit applications"
       remind_resource_update: "Reminder: Review your jurisdiction resources"
       permit_type_submission_contact_confirm: "Confirm submission inbox email"
       new_jurisdiction_membership: "New jurisdiction membership"
       notify_permit_collaboration: "Welcome you have been invited to Collaborate in the Building Permit Hub"
+      notify_project_review_collaboration: "You have been assigned as a review collaborator on a project"
       notify_new_or_unconfirmed_permit_collaboration: "You’re Invited to Collaborate on a Building Permit Application"
       notify_new_or_unconfirmed_preview: "You’re Invited to Preview a Building Permit Template"
       notify_preview: "You're Invited to Preview a Building Permit Template"
       notify_batched_integration_mapping: "New API mappings"
       notify_pre_check_submitted: "Your pre-check has been submitted"
       notify_pre_check_completed: "Your pre-check has been completed"
+      notify_new_template_version_published: "New version published for %{template_label}"
+      notify_template_version_no_action: "Permit template updated - no action required: %{template_label}"
+      notify_template_version_action_required: "ACTION REQUIRED: Permit template updated - API mapping review required: %{template_label}"
+      notify_template_version_new_template: "New permit template scheduled: %{template_label} (%{version_date})"
       notify_api_key_status_change: "API Key for %{jurisdiction_name} is expiring %{interval}"
       send_step_code_report_to_jurisdiction: "Step Code Report Shared: %{step_code_title} for %{jurisdiction_name}"
   arbitrary_message_construct:
@@ -217,6 +240,10 @@ en:
       ltsa_unavailable_error:
         title: Error
         message: The land title service is currently unavailable
+    step_code:
+      update_archived_error:
+        title: Error
+        message: "Cannot update archived step code. Please restore it first."
       jurisdiction_ltsa_error:
         title: Error
         message: Jurisdiction could not be determined. Please check back later.
@@ -236,6 +263,31 @@ en:
       in_use_error:
         title: Error
         message: "This permit classification is in use and cannot be deleted"
+    overheating_code:
+      create_success:
+        title: ""
+        message: "Overheating code check created successfully!"
+      create_error:
+        title: Error
+        message: "Error creating overheating code check"
+      update_success:
+        title: ""
+        message: "Overheating code check updated successfully!"
+      update_error:
+        title: Error
+        message: "Error updating overheating code check"
+      destroy_success:
+        title: ""
+        message: "Overheating code check archived successfully!"
+      destroy_error:
+        title: Error
+        message: "Error archiving overheating code check"
+      restore_success:
+        title: ""
+        message: "Overheating code check restored successfully!"
+      restore_error:
+        title: Error
+        message: "Error restoring overheating code check"
     pre_check:
       create_success:
         title: ""
@@ -449,7 +501,7 @@ en:
         message: "New template created successfully!"
       update_success:
         title: ""
-        message: "Template has been saved."
+        message: "This template has been saved."
       schedule_success:
         title: ""
         message: "Permit has been scheduled to published."
@@ -626,6 +678,12 @@ en:
       create_or_update_permit_block_status_error:
         title: Error
         message: "There was an error updating permit block status"
+      transition_success:
+        title: ""
+        message: "Application state updated successfully"
+      invalid_transition:
+        title: Error
+        message: "This state transition is not allowed"
     permit_project:
       update_success:
         title: ""
@@ -648,6 +706,27 @@ en:
       unpin_error:
         title: Error
         message: "There was an error unpinning the project"
+      transition_success:
+        title: ""
+        message: "Project state updated successfully"
+      invalid_transition:
+        title: Error
+        message: "This state transition is not allowed"
+      reorder_success:
+        title: ""
+        message: "Project order updated successfully"
+      assign_project_review_collaborator_success:
+        title: ""
+        message: "Project review collaborator assigned successfully"
+      assign_project_review_collaborator_error:
+        title: Error
+        message: "%{error_message}"
+      unassign_project_review_collaborator_success:
+        title: ""
+        message: "Project review collaborator removed successfully"
+      feature_not_enabled:
+        title: Error
+        message: "Designated reviewer is not enabled for this project"
     permit_collaboration:
       destroy_success:
         title: ""
@@ -693,6 +772,9 @@ en:
       update_error:
         title: Error
         message: "%{error_message}"
+      update_archived_error:
+        title: Error
+        message: "Cannot update archived step code. Please restore it first."
       restore_success:
         title: ""
         message: "Step code restored successfully!"
@@ -759,25 +841,6 @@ en:
       not_found_error:
         title: "Error"
         message: 404 - The requested resource could not be found
-    overheating_tool:
-      generate_queued:
-        title: ""
-        message: "PDF generation has been queued."
-      create_success:
-        title: ""
-        message: "PDF form saved successfully!"
-      create_error:
-        title: "Oops"
-        message: "%{error_message}"
-      file_not_found:
-        title: "Error"
-        message: "%{error_message}"
-      empty_file:
-        title: "Error"
-        message: "%{error_message}"
-      read_error:
-        title: "Error"
-        message: "%{error_message}"
     s3:
       multipart_init_failed:
         title: "File Upload Error"
@@ -926,7 +989,6 @@ en:
       signoff_checkbox_label: "I acknowledge that by checking this box and providing my digital signature, I am electronically signing."
       signoff_submit_title: "Review and Submit"
       energy_step_code: "Open or resume tool"
-      architectural_drawing: "Open or resume tool"
       select_energy_step_code: "Find and attach your report instead"
       autofill_contact: "Autofill"
       or_use_existing_html: 'Started a report outside this permit application? <a href="#">use existing step code</a>'
@@ -1003,7 +1065,7 @@ en:
       submission_notification: "Your application %{number} has been received by %{jurisdiction_name} and is pending review."
       resubmission_notification: "Your revised application %{number} has been received by %{jurisdiction_name} and is pending review."
       revisions_request_notification: "%{jurisdiction_name} has reviewed your application %{number} and has requested revisions. Please review and re-submit."
-      view_notification: "%{jurisdiction_name} has viewed your application %{number}."
+      review_started_notification: "%{jurisdiction_name} has started reviewing your application %{number}."
     permit_collaboration:
       submission_delegatee_collaboration_notification: "Collaboration request from %{author_name}. You have been assigned as a designated submitter for permit application %{number}."
       submission_assignee_collaboration_notification: "Collaboration request from %{author_name} on requirement “%{requirement_block_name}” for permit application %{number}"
@@ -1013,6 +1075,9 @@ en:
       submission_assignee_collaboration_unassignment_notification: "You have been removed as a collaborator on requirement “%{requirement_block_name}” for permit application %{number}"
       review_delegatee_collaboration_unassignment_notification: "You have been removed as a designated reviewer for permit application %{number}."
       review_assignee_collaboration_unassignment_notification: "You have been removed as a review collaborator on requirement “%{requirement_block_name}” for permit application %{number}"
+    permit_project_collaboration:
+      assignment_notification: "You have been assigned as a review collaborator on project %{project_number} (%{project_title})."
+      unassignment_notification: "You have been removed as a review collaborator on project %{project_number} (%{project_title})."
     step_code:
       report_generated: "Your step code report is ready to download"
     pre_check:

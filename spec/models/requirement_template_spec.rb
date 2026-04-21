@@ -85,18 +85,53 @@ RSpec.describe RequirementTemplate, type: :model do
   end
 
   describe "#published_customizations_count" do
-    it "returns cached count from published template version" do
+    it "returns jurisdictions with access minus disabled for non-global templates" do
       template = create(:live_requirement_template)
       published =
         create(
           :template_version,
           requirement_template: template,
-          status: :published,
-          jurisdiction_template_version_customizations_count: 4
+          status: :published
         )
+
+      jurisdictions = Array.new(4) { create(:sub_district) }
+      jurisdictions.each do |j|
+        JurisdictionRequirementTemplate.create!(
+          jurisdiction: j,
+          requirement_template: template
+        )
+      end
 
       expect(template.published_template_version).to eq(published)
       expect(template.published_customizations_count).to eq(4)
+    end
+
+    it "subtracts disabled customizations from the count" do
+      template = create(:live_requirement_template)
+      published =
+        create(
+          :template_version,
+          requirement_template: template,
+          status: :published
+        )
+
+      jurisdictions = Array.new(4) { create(:sub_district) }
+      jurisdictions.each do |j|
+        JurisdictionRequirementTemplate.create!(
+          jurisdiction: j,
+          requirement_template: template
+        )
+      end
+
+      JurisdictionTemplateVersionCustomization.create!(
+        jurisdiction: jurisdictions.first,
+        template_version: published,
+        customizations: {
+        },
+        disabled: true
+      )
+
+      expect(template.published_customizations_count).to eq(3)
     end
   end
 

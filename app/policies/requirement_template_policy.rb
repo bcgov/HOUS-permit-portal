@@ -75,6 +75,10 @@ class RequirementTemplatePolicy < ApplicationPolicy
     create?
   end
 
+  def update_jurisdiction_availabilities?
+    create?
+  end
+
   class Scope < Scope
     def resolve
       scope.all

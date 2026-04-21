@@ -1,7 +1,8 @@
 class Api::JurisdictionsController < Api::ApplicationController
   include Api::Concerns::Search::Jurisdictions
   include Api::Concerns::Search::JurisdictionUsers
-  include Api::Concerns::Search::PermitApplications
+  include Api::Concerns::Search::JurisdictionPermitApplications
+  include Api::Concerns::Search::JurisdictionPermitProjects
 
   before_action :set_jurisdiction,
                 only: %i[
@@ -9,10 +10,16 @@ class Api::JurisdictionsController < Api::ApplicationController
                   update
                   search_users
                   search_permit_applications
+                  search_permit_projects
                   update_external_api_enabled
                 ]
   skip_after_action :verify_policy_scoped,
-                    only: %i[index search_users search_permit_applications]
+                    only: %i[
+                      index
+                      search_users
+                      search_permit_applications
+                      search_permit_projects
+                    ]
   skip_before_action :authenticate_user!,
                      only: %i[show index jurisdiction_options]
 
@@ -175,17 +182,33 @@ class Api::JurisdictionsController < Api::ApplicationController
   # POST /api/jurisdictions/:id/permit_applications/search
   def search_permit_applications
     authorize @jurisdiction
-    perform_permit_application_search
-    # Results are already authorized by the policy_scope in the search concern
-    authorized_results = @permit_application_search.results
-    render_success authorized_results,
+    perform_jurisdiction_permit_application_search
+    render_success @jurisdiction_permit_applications,
                    nil,
                    {
-                     meta: page_meta(@permit_application_search),
                      blueprint: PermitApplicationBlueprint,
                      blueprint_opts: {
                        view: :jurisdiction_review_inbox
-                     }
+                     },
+                     meta: @jurisdiction_permit_application_meta
+                   }
+  end
+
+  # POST /api/jurisdictions/:id/permit_projects/search
+  def search_permit_projects
+    authorize @jurisdiction
+    perform_jurisdiction_permit_project_search
+    render_success @jurisdiction_permit_projects,
+                   nil,
+                   {
+                     blueprint: PermitProjectBlueprint,
+                     blueprint_opts: {
+                       view: :jurisdiction_review_inbox,
+                       current_user: current_user,
+                       pinned_project_ids:
+                         current_user.pinned_permit_project_ids
+                     },
+                     meta: @jurisdiction_permit_project_meta
                    }
   end
 
@@ -252,6 +275,19 @@ class Api::JurisdictionsController < Api::ApplicationController
         default
         energy_step_required
         zero_carbon_step_required
+        _destroy
+      ],
+      part3_occupancy_required_steps_attributes: %i[
+        id
+        occupancy_key
+        energy_step_required
+        zero_carbon_step_required
+        _destroy
+      ],
+      jurisdiction_climate_zones_attributes: %i[
+        id
+        climate_zone
+        heating_degree_days
         _destroy
       ],
       resources_attributes: [

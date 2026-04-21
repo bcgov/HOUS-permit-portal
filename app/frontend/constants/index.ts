@@ -1,8 +1,8 @@
 import { t } from "i18next"
 import { IRequirementAttributes } from "../types/api-request"
 import {
-  EArchitecturalDrawingDependencyRequirementCode,
   EAutoComplianceType,
+  EConditionalOperator,
   EEnabledElectiveFieldReason,
   EEnergyStepCodeDependencyRequirementCode,
   EEnergyStepCodePart3DependencyRequirementCode,
@@ -126,7 +126,7 @@ export function getEnergyStepCodeRequirementRequiredSchema(
       label: t("requirementsLibrary.modals.stepCodeDependencies.energyStepCodeToolPart9.label"),
       inputOptions: {
         conditional: {
-          // @ts-ignore
+          operator: EConditionalOperator.isEqual,
           eq: "tool",
           show: true,
           when: EEnergyStepCodeDependencyRequirementCode.energyStepCodeMethod,
@@ -140,7 +140,7 @@ export function getEnergyStepCodeRequirementRequiredSchema(
       inputType: ERequirementType.file,
       inputOptions: {
         conditional: {
-          // @ts-ignore
+          operator: EConditionalOperator.isEqual,
           eq: "file",
           show: true,
           when: EEnergyStepCodeDependencyRequirementCode.energyStepCodeMethod,
@@ -153,7 +153,7 @@ export function getEnergyStepCodeRequirementRequiredSchema(
       inputType: ERequirementType.file,
       inputOptions: {
         conditional: {
-          // @ts-ignore
+          operator: EConditionalOperator.isEqual,
           eq: "file",
           show: true,
           when: EEnergyStepCodeDependencyRequirementCode.energyStepCodeMethod,
@@ -192,7 +192,7 @@ export function getEnergyStepCodePart3RequirementRequiredSchema(
       label: t("requirementsLibrary.modals.stepCodeDependencies.energyStepCodeToolPart3.label"),
       inputOptions: {
         conditional: {
-          // @ts-ignore
+          operator: EConditionalOperator.isEqual,
           eq: "tool",
           show: true,
           when: EEnergyStepCodePart3DependencyRequirementCode.energyStepCodeMethod,
@@ -206,7 +206,7 @@ export function getEnergyStepCodePart3RequirementRequiredSchema(
       inputType: ERequirementType.file,
       inputOptions: {
         conditional: {
-          // @ts-ignore
+          operator: EConditionalOperator.isEqual,
           eq: "file",
           show: true,
           when: EEnergyStepCodePart3DependencyRequirementCode.energyStepCodeMethod,
@@ -216,57 +216,6 @@ export function getEnergyStepCodePart3RequirementRequiredSchema(
   }
 
   return requirementCodeToSchema[energyRequirementCode]
-}
-
-export function getArchitecturalDrawingRequirementRequiredSchema(
-  code: EArchitecturalDrawingDependencyRequirementCode
-): IRequirementAttributes {
-  const requirementCodeToSchema: Record<EArchitecturalDrawingDependencyRequirementCode, IRequirementAttributes> = {
-    [EArchitecturalDrawingDependencyRequirementCode.architecturalDrawingMethod]: {
-      requirementCode: EArchitecturalDrawingDependencyRequirementCode.architecturalDrawingMethod,
-      inputType: ERequirementType.radio,
-      label: t("requirementsLibrary.modals.architecturalDrawing.dependencies.method.label"),
-      inputOptions: {
-        valueOptions: [
-          {
-            label: t("requirementsLibrary.modals.architecturalDrawing.dependencies.method.tool"),
-            value: "tool",
-          },
-          {
-            label: t("requirementsLibrary.modals.architecturalDrawing.dependencies.method.file"),
-            value: "file",
-          },
-        ],
-      },
-    },
-    [EArchitecturalDrawingDependencyRequirementCode.architecturalDrawingTool]: {
-      requirementCode: EArchitecturalDrawingDependencyRequirementCode.architecturalDrawingTool,
-      inputType: ERequirementType.architecturalDrawing,
-      label: t("requirementsLibrary.modals.architecturalDrawing.dependencies.tool.label"),
-      inputOptions: {
-        conditional: {
-          when: EArchitecturalDrawingDependencyRequirementCode.architecturalDrawingMethod,
-          eq: "tool",
-          show: true,
-        },
-      },
-    },
-    [EArchitecturalDrawingDependencyRequirementCode.architecturalDrawingFile]: {
-      requirementCode: EArchitecturalDrawingDependencyRequirementCode.architecturalDrawingFile,
-      inputType: ERequirementType.file,
-      label: t("requirementsLibrary.modals.architecturalDrawing.dependencies.file.label"),
-      inputOptions: {
-        conditional: {
-          when: EArchitecturalDrawingDependencyRequirementCode.architecturalDrawingMethod,
-          eq: "file",
-          show: true,
-        },
-        multiple: true,
-      },
-    },
-  }
-
-  return requirementCodeToSchema[code]
 }
 
 export const VALUE_EXTRACTION_AUTO_COMPLIANCE_TYPES = [

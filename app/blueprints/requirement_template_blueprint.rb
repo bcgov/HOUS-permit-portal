@@ -9,10 +9,26 @@ class RequirementTemplateBlueprint < Blueprinter::Base
          :fetched_at,
          :created_at,
          :updated_at,
-         :visibility
+         :visibility,
+         :public,
+         :available_globally
 
   field :used_by do |rt|
     rt.published_customizations_count
+  end
+
+  field :available_in do |rt|
+    if rt.available_globally
+      I18n.t("activerecord.attributes.requirement_template.available_in_all")
+    else
+      rt.jurisdiction_requirement_templates.count
+    end
+  end
+
+  field :explicitly_disabled_jurisdictions do |rt|
+    rt.explicitly_disabled_jurisdictions.map do |j|
+      { id: j.id, qualified_name: j.qualified_name }
+    end
   end
 
   association :permit_type, blueprint: PermitClassificationBlueprint
@@ -39,9 +55,15 @@ class RequirementTemplateBlueprint < Blueprinter::Base
                 rt.early_access? && options[:current_user]&.super_admin?
               end
 
-  # Draft version association (new draft workflow)
   association :draft_template_version,
               blueprint: TemplateVersionBlueprint,
+              if: ->(_field_name, _rt, options) do
+                options[:current_user]&.super_admin?
+              end
+
+  association :enabled_jurisdictions,
+              blueprint: JurisdictionBlueprint,
+              view: :minimal,
               if: ->(_field_name, _rt, options) do
                 options[:current_user]&.super_admin?
               end

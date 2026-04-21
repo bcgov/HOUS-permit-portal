@@ -20,9 +20,10 @@ import { IRequirementBlock } from "../../../../models/requirement-block"
 import { useMst } from "../../../../setup/root"
 import { IFormConditional, IRequirementAttributes, IRequirementBlockParams } from "../../../../types/api-request"
 import {
-  EArchitecturalDrawingDependencyRequirementCode,
+  EConditionalOperator,
   EEnergyStepCodeDependencyRequirementCode,
   EEnergyStepCodePart3DependencyRequirementCode,
+  ERequirementType,
   EVisibility,
 } from "../../../../types/enums"
 import { IDenormalizedRequirementBlock, TAutoComplianceModuleConfigurations } from "../../../../types/types"
@@ -123,15 +124,15 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
         Object.values(EEnergyStepCodePart3DependencyRequirementCode).includes(
           ra.requirementCode as EEnergyStepCodePart3DependencyRequirementCode
         ) ||
-        Object.values(EArchitecturalDrawingDependencyRequirementCode).includes(
-          ra.requirementCode as EArchitecturalDrawingDependencyRequirementCode
-        )
+        ra.inputType === ERequirementType.architecturalDrawing
 
       const cond = ra.inputOptions.conditional as IFormConditional
-      if (cond?.when && cond?.operand && cond?.then) {
+      const isValuelessOp = [EConditionalOperator.isEmpty, EConditionalOperator.isNotEmpty].includes(cond?.operator)
+      if (cond?.when && cond?.then && cond?.operator && (isValuelessOp || cond?.operand)) {
         processedRequirementAttributes.inputOptions.conditional = {
           when: cond.when,
-          eq: cond.operand,
+          operator: cond.operator,
+          eq: cond.operand || "",
           [cond.then]: true,
         }
       } else if (hasPreconfiguredConditional && cond) {
@@ -223,7 +224,7 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
               </HStack>
             </Tag>
           )}
-          <ModalHeader display={"flex"} justifyContent={"space-between"} p={0} px={"2.75rem"}>
+          <ModalHeader display={"flex"} justifyContent={"space-between"} pt={4} px={"2.75rem"} pb={0}>
             <Text as={"h2"} fontSize={"2xl"}>
               {t(`requirementsLibrary.modals.${requirementBlock ? "edit" : "create"}.title`)}
             </Text>

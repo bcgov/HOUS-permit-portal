@@ -1,4 +1,4 @@
-import { Flex, Text, VStack } from "@chakra-ui/react"
+import { Box, Flex, Text, VStack } from "@chakra-ui/react"
 import React from "react"
 import { CopyLinkButton } from "../base/copy-link-button"
 
@@ -35,7 +35,7 @@ export const ProjectInfoRow = ({
           </Text>
         )}
       </VStack>
-      <Text fontWeight={isBold ? "bold" : "normal"}>{value}</Text>
+      <Box fontWeight={isBold ? "bold" : "normal"}>{value}</Box>
     </Flex>
     {isCopyable && <CopyLinkButton value={String(value)} iconOnly />}
   </Flex>

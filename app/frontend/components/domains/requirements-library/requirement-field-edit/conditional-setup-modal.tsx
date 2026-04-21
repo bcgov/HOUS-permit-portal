@@ -19,12 +19,13 @@ import {
 } from "@chakra-ui/react"
 import { SlidersHorizontal } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useMemo, useState } from "react"
 import { Controller, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import Select from "react-select"
+import { EConditionalOperator, EConditionalThen } from "../../../../types/enums"
 import { IOption } from "../../../../types/types"
-import { NumberFormControl, TextFormControl } from "../../../shared/form/input-form-control"
+import { DatePickerFormControl, NumberFormControl, TextFormControl } from "../../../shared/form/input-form-control"
 import { RequirementSelect } from "../../../shared/select/selectors/requirement-select"
 import { IRequirementBlockForm } from "../requirements-block-modal"
 
@@ -32,6 +33,44 @@ interface IProps {
   triggerButtonProps?: Partial<ButtonProps>
   renderTriggerButton?: (props: ButtonProps) => JSX.Element
   index: number
+}
+
+const textInputTypes = ["text", "textarea", "phone", "email", "address", "bcaddress"]
+const optionInputTypes = ["select", "radio", "multi_option_select", "checkbox"]
+const numberInputType = "number"
+const dateInputType = "date"
+const fileInputType = "file"
+const supportedInputTypes = [...textInputTypes, ...optionInputTypes, numberInputType, dateInputType, fileInputType]
+
+const VALUELESS_OPERATORS = [EConditionalOperator.isEmpty, EConditionalOperator.isNotEmpty]
+
+const OPERATORS_BY_TYPE: Record<string, EConditionalOperator[]> = {
+  number: [
+    EConditionalOperator.isEqual,
+    EConditionalOperator.isNotEqual,
+    EConditionalOperator.greaterThan,
+    EConditionalOperator.greaterThanOrEqual,
+    EConditionalOperator.lessThan,
+    EConditionalOperator.lessThanOrEqual,
+  ],
+  date: [
+    EConditionalOperator.isDateEqual,
+    EConditionalOperator.isNotDateEqual,
+    EConditionalOperator.dateGreaterThan,
+    EConditionalOperator.dateGreaterThanOrEqual,
+    EConditionalOperator.dateLessThan,
+    EConditionalOperator.dateLessThanOrEqual,
+  ],
+  file: [EConditionalOperator.isEmpty, EConditionalOperator.isNotEmpty],
+  default: [EConditionalOperator.isEqual, EConditionalOperator.isNotEqual],
+}
+
+function getOperatorsForInputType(inputType: string | undefined): EConditionalOperator[] {
+  if (!inputType) return OPERATORS_BY_TYPE.default
+  if (inputType === numberInputType) return OPERATORS_BY_TYPE.number
+  if (inputType === dateInputType) return OPERATORS_BY_TYPE.date
+  if (inputType === fileInputType) return OPERATORS_BY_TYPE.file
+  return OPERATORS_BY_TYPE.default
 }
 
 export const ConditionalSetupModal = observer(({ triggerButtonProps, renderTriggerButton, index }: IProps) => {
@@ -45,9 +84,13 @@ export const ConditionalSetupModal = observer(({ triggerButtonProps, renderTrigg
   const watchedLabel = watch(`requirementsAttributes.${index}.label`)
 
   const watchedWhen = watch(`requirementsAttributes.${index}.inputOptions.conditional.when`)
+  const watchedOperator = watch(`requirementsAttributes.${index}.inputOptions.conditional.operator`)
   const watchedOperand = watch(`requirementsAttributes.${index}.inputOptions.conditional.operand`)
   const watchedThen = watch(`requirementsAttributes.${index}.inputOptions.conditional.then`)
-  const allFieldsProvided = watchedWhen && watchedOperand && watchedThen
+
+  const currentOperator = watchedOperator || EConditionalOperator.isEqual
+  const isValueless = VALUELESS_OPERATORS.includes(currentOperator as EConditionalOperator)
+  const allFieldsProvided = watchedWhen && watchedThen && currentOperator && (isValueless || watchedOperand)
 
   const watchedRequirements = watch(`requirementsAttributes`)
   const watchedRequirementCode = watch(`requirementsAttributes.${index}.requirementCode`)
@@ -61,6 +104,7 @@ export const ConditionalSetupModal = observer(({ triggerButtonProps, renderTrigg
 
   const onReset = () => {
     setValue(`requirementsAttributes.${index}.inputOptions.conditional.when`, null)
+    setValue(`requirementsAttributes.${index}.inputOptions.conditional.operator`, null)
     setValue(`requirementsAttributes.${index}.inputOptions.conditional.operand`, null)
     setValue(`requirementsAttributes.${index}.inputOptions.conditional.then`, null)
   }
@@ -78,11 +122,7 @@ export const ConditionalSetupModal = observer(({ triggerButtonProps, renderTrigg
     return []
   }
 
-  const textInputTypes = ["text", "textarea", "phone", "email", "address", "bcaddress"]
-  const optionInputTypes = ["select", "radio", "multi_option_select", "checkbox"]
-  const numberInputType = "number"
-  const supportedInputTypes = [...textInputTypes, ...optionInputTypes, numberInputType]
-  const isSupportedInputType = (type) => {
+  const isSupportedInputType = (type: string) => {
     return supportedInputTypes.includes(type)
   }
 
@@ -102,20 +142,33 @@ export const ConditionalSetupModal = observer(({ triggerButtonProps, renderTrigg
     }
   }, [watchedWhen])
 
-  const effectOptions = (["show", "hide"] as const).map((value) => ({
+  const inputType = watchedRequirements?.find((req) => req.requirementCode === watchedWhen)?.inputType
+
+  const availableOperators = useMemo(() => getOperatorsForInputType(inputType), [inputType])
+
+  const operatorSelectOptions: IOption[] = useMemo(
+    () =>
+      availableOperators.map((op) => ({
+        label: t(`requirementsLibrary.modals.conditionalSetup.operators.${op}`),
+        value: op,
+      })),
+    [availableOperators, t]
+  )
+
+  const effectOptions = ([EConditionalThen.show, EConditionalThen.hide] as const).map((value) => ({
     value,
     label: t(`requirementsLibrary.modals.conditionalSetup.${value}`),
   }))
 
-  const inputType = watchedRequirements?.find((req) => req.requirementCode === watchedWhen)?.inputType
-
   const getOperandSelectFormControl = (fieldName: keyof IRequirementBlockForm) => {
-    if (!watchedWhen) return <></>
+    if (!watchedWhen || isValueless) return <></>
 
     if (textInputTypes.includes(inputType)) {
       return <TextFormControl fieldName={fieldName} />
     } else if (inputType === numberInputType) {
       return <NumberFormControl fieldName={fieldName} />
+    } else if (inputType === dateInputType) {
+      return <DatePickerFormControl fieldName={fieldName} />
     } else if (optionInputTypes.includes(inputType)) {
       return (
         <Controller
@@ -135,6 +188,17 @@ export const ConditionalSetupModal = observer(({ triggerButtonProps, renderTrigg
     } else {
       return <Text>{t("requirementsLibrary.inputNotSupported")}</Text>
     }
+  }
+
+  const handleWhenChange = (opt: IOption, onChange: (val: string) => void) => {
+    setValue(`requirementsAttributes.${index}.inputOptions.conditional.operand`, null)
+    const targetReq = watchedRequirements?.find((r) => r.requirementCode === opt.value)
+    const ops = getOperatorsForInputType(targetReq?.inputType)
+    setValue(
+      `requirementsAttributes.${index}.inputOptions.conditional.operator`,
+      ops[0] || EConditionalOperator.isEqual
+    )
+    onChange(opt.value)
   }
 
   return (
@@ -188,10 +252,7 @@ export const ConditionalSetupModal = observer(({ triggerButtonProps, renderTrigg
                     control={control}
                     render={({ field: { onChange, value } }) => (
                       <RequirementSelect
-                        onChange={(opt) => {
-                          setValue(`requirementsAttributes.${index}.inputOptions.conditional.operand`, null)
-                          onChange(opt.value)
-                        }}
+                        onChange={(opt) => handleWhenChange(opt, onChange)}
                         options={requirementOptions}
                         selectedOption={value && requirementOptions?.find((option) => option.value === value)}
                       />
@@ -201,6 +262,33 @@ export const ConditionalSetupModal = observer(({ triggerButtonProps, renderTrigg
               </Flex>
 
               {watchedWhen && (
+                <Flex direction="column">
+                  <FormLabel fontWeight="bold" size="lg">
+                    {t("requirementsLibrary.modals.conditionalSetup.operator")}
+                  </FormLabel>
+                  <Box px={4}>
+                    <Controller
+                      name={`requirementsAttributes.${index}.inputOptions.conditional.operator`}
+                      control={control}
+                      render={({ field: { onChange, value } }) => (
+                        <Select
+                          options={operatorSelectOptions}
+                          value={operatorSelectOptions.find((o) => o.value === value) || operatorSelectOptions[0]}
+                          onChange={(opt) => {
+                            const newOp = opt?.value
+                            if (VALUELESS_OPERATORS.includes(newOp as EConditionalOperator)) {
+                              setValue(`requirementsAttributes.${index}.inputOptions.conditional.operand`, null)
+                            }
+                            onChange(newOp)
+                          }}
+                        />
+                      )}
+                    />
+                  </Box>
+                </Flex>
+              )}
+
+              {watchedWhen && !isValueless && (
                 <Flex direction="column">
                   <FormLabel fontWeight="bold" size="lg">
                     {t("requirementsLibrary.modals.conditionalSetup.satisfies")}
@@ -272,8 +360,6 @@ interface IOperandSelectProps {
 }
 
 const OperandSelect: React.FC<IOperandSelectProps> = ({ selectedOption, onChange, options }) => {
-  const { t } = useTranslation()
-
   const customStyles = {
     container: (base: any) => ({
       ...base,
@@ -291,7 +377,5 @@ interface IEffectSelectProps {
 }
 
 const EffectSelect: React.FC<IEffectSelectProps> = ({ selectedOption, onChange, options }) => {
-  const { t } = useTranslation()
-
   return <Select options={options} value={selectedOption} onChange={onChange} />
 }

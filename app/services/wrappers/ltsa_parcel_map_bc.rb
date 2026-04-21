@@ -121,6 +121,14 @@ class Wrappers::LtsaParcelMapBc < Wrappers::Base
     end
   end
 
+  def distinct_municipalities
+    fetch_distinct_field_values("MUNICIPALITY")
+  end
+
+  def distinct_regional_districts
+    fetch_distinct_field_values("REGIONAL_DISTRICT")
+  end
+
   def get_coordinates_by_pid(pid)
     return nil if pid.blank?
     begin
@@ -152,8 +160,11 @@ class Wrappers::LtsaParcelMapBc < Wrappers::Base
 
       raise Errors::FeatureAttributesRetrievalError if !known_wkid?(wkid)
 
-      geometry_coords =
-        parsed_response.dig("features", 0, "geometry", "rings", 0)
+      # Get all rings (outer boundary + any holes)
+      all_geometry_rings =
+        parsed_response.dig("features", 0, "geometry", "rings")
+
+      geometry_coords = all_geometry_rings&.first
 
       if (geometry_coords)
         #cartesians system for 102190 OR 3005 #{"wkid"=>, "latestWkid"=>3005}
@@ -183,7 +194,25 @@ class Wrappers::LtsaParcelMapBc < Wrappers::Base
         transformed_centroid =
           RGeo::Feature.cast(centroid, factory: target_factory, project: true)
 
-        [transformed_centroid.x, transformed_centroid.y]
+        # Reproject all rings to WGS84 for frontend map display
+        wgs84_rings =
+          all_geometry_rings.map do |ring|
+            ring.map do |xy|
+              source_point = factory.point(xy[0], xy[1])
+              transformed_point =
+                RGeo::Feature.cast(
+                  source_point,
+                  factory: target_factory,
+                  project: true
+                )
+              [transformed_point.x, transformed_point.y]
+            end
+          end
+
+        {
+          centroid: [transformed_centroid.x, transformed_centroid.y],
+          rings: wgs84_rings
+        }
       else
         raise Errors::FeatureAttributesRetrievalError
       end
@@ -241,6 +270,30 @@ class Wrappers::LtsaParcelMapBc < Wrappers::Base
   end
 
   protected
+
+  def fetch_distinct_field_values(field)
+    response =
+      get(
+        "#{PARCEL_SERVICE}/query",
+        {
+          f: "json",
+          where: "1=1",
+          returnGeometry: false,
+          returnDistinctValues: true,
+          outFields: field
+        },
+        true
+      )
+    return [] unless response.success?
+
+    JSON
+      .parse(response.body)
+      .dig("features")
+      &.map { |f| f.dig("attributes", field) }
+      &.compact
+      &.uniq
+      &.sort || []
+  end
 
   def parse_attributes_from_response(response)
     if response.success?

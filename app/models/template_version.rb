@@ -41,7 +41,6 @@ class TemplateVersion < ApplicationRecord
 
   after_save :reindex_models_if_published, if: :saved_change_to_status?
   after_save :create_integration_mappings
-  after_save :notify_users_of_missing_requirements_mappings
   after_save :clear_published_ids_cache,
              if: -> do
                saved_change_to_status? &&
@@ -58,6 +57,15 @@ class TemplateVersion < ApplicationRecord
           else
             all
           end
+        end
+
+  # Published versions on kept LiveRequirementTemplate records (excludes early-access copies, etc.).
+  # Matches PermitApplication validation: template_version must be "live".
+  scope :published_for_live_requirement_templates,
+        -> do
+          published.joins(:requirement_template).merge(
+            LiveRequirementTemplate.kept
+          )
         end
 
   def self.cached_published_ids
@@ -199,18 +207,6 @@ class TemplateVersion < ApplicationRecord
         id,
         "create_integration_mappings"
       )
-    end
-  end
-
-  def notify_users_of_missing_requirements_mappings
-    return unless saved_change_to_status? && (published? || scheduled?)
-    relevant_integration_mappings =
-      integration_mappings.joins(:jurisdiction).where(
-        { jurisdictions: { external_api_state: "j_on" } }
-      )
-
-    relevant_integration_mappings.each do |im|
-      im.send_missing_requirements_mapping_communication
     end
   end
 

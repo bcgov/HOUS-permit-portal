@@ -4,6 +4,7 @@ import { observer } from "mobx-react-lite"
 import React from "react"
 import { Trans } from "react-i18next"
 import { usePart3StepCode } from "../../../../../../../../hooks/resources/use-part-3-step-code"
+import { roundMetric } from "../../../../../../../../utils/utility-functions"
 import { GridData } from "../../../../../part-9/checklist/shared/grid/data"
 
 export const BaselineWholeBuildingSummary = observer(function BaselineWholeBuildingSummary() {
@@ -30,13 +31,13 @@ export const BaselineWholeBuildingSummary = observer(function BaselineWholeBuild
         <FormLabel>{t(`${i18nPrefix}.requirements`)}</FormLabel>
       </GridData>
       <GridData justifyContent="center">
-        <Input isDisabled value={requirement ? parseFloat(requirement).toFixed(2) : "-"} />
+        <Input isDisabled value={roundMetric(requirement)} />
       </GridData>
       <GridData>
         <FormLabel>{t(`${i18nPrefix}.performance`)}</FormLabel>
       </GridData>
       <GridData justifyContent="center">
-        <Input isDisabled value={performance ? parseFloat(performance).toFixed(2) : "-"} />
+        <Input isDisabled value={roundMetric(performance)} />
       </GridData>
       <GridData>
         <FormLabel>{t(`${i18nPrefix}.compliance`)}</FormLabel>

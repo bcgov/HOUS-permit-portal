@@ -374,14 +374,20 @@ const RevisionRequestListItem = ({ revisionRequest }: IRevisionRequestListItemPr
   const { t } = useTranslation()
 
   const { requirementJson, reasonCode, comment, user } = revisionRequest
+  const requirementKey = requirementJson?.key
 
   const clickHandleView = () => {
-    document.dispatchEvent(new CustomEvent("openRequestRevision", { detail: { key: requirementJson.key } }))
+    if (!requirementKey) return
+    document.dispatchEvent(new CustomEvent("openRequestRevision", { detail: { key: requirementKey } }))
   }
 
   return (
     <ListItem mb={4} w="full">
-      <ScrollLink to={`formio-component-${requirementJson.key}`}>{requirementJson.label}</ScrollLink>
+      {requirementKey ? (
+        <ScrollLink to={`formio-component-${requirementKey}`}>{requirementJson?.label}</ScrollLink>
+      ) : (
+        <Text fontWeight="medium">{t("permitApplication.show.revision.revisionRequest")}</Text>
+      )}
       <Flex fontStyle="italic">
         {t("permitApplication.show.revision.reasonCode")}: {reasonCode}
       </Flex>
@@ -391,7 +397,7 @@ const RevisionRequestListItem = ({ revisionRequest }: IRevisionRequestListItemPr
         </Box>
         <Text noOfLines={1}>{comment}</Text>
         <Spacer />
-        <Button variant="link" onClick={clickHandleView}>
+        <Button variant="link" onClick={clickHandleView} isDisabled={!requirementKey}>
           {t("ui.view")}
         </Button>
       </Flex>

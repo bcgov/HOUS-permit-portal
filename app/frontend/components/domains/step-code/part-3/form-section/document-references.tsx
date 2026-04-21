@@ -6,7 +6,6 @@ import {
   AccordionItemProps,
   AccordionPanel,
   Box,
-  Button,
   Flex,
   FormControl,
   FormLabel,
@@ -19,12 +18,12 @@ import { observer } from "mobx-react-lite"
 import React, { forwardRef, useCallback, useEffect, useMemo, useState } from "react"
 import { FormProvider, useFieldArray, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { useLocation, useNavigate } from "react-router-dom"
 import { v4 as uuidv4 } from "uuid"
 import { usePart3StepCode } from "../../../../../hooks/resources/use-part-3-step-code"
 import { EDocumentReferenceDocumentType } from "../../../../../types/enums"
 import { IDocumentReference } from "../../../../../types/types"
 import { DatePickerFormControl, TextFormControl } from "../../../../shared/form/input-form-control"
+import { Part3FormFooter } from "./shared/form-footer"
 
 const i18nPrefix = "stepCode.part3.documentReferences"
 
@@ -82,8 +81,6 @@ function initializeDocumentReferenceForm(
 export const DocumentReferences = observer(function DocumentaReferences() {
   const { t } = useTranslation()
   const { checklist } = usePart3StepCode()
-  const navigate = useNavigate()
-  const location = useLocation()
   const [openAccordionIndexes, setOpenAccordionIndexes] = useState<number[]>([])
   const formMethods = useForm<IDocumentReferenceStepCodeForm>({
     mode: "onSubmit",
@@ -118,35 +115,26 @@ export const DocumentReferences = observer(function DocumentaReferences() {
     [remove]
   )
 
-  const onSubmit = formMethods.handleSubmit(
-    async ({ defaultDocumentReferencesAttributes, otherDocumentReferencesAttributes }) => {
-      if (!checklist) return
+  const onSubmit = async ({
+    defaultDocumentReferencesAttributes,
+    otherDocumentReferencesAttributes,
+  }: IDocumentReferenceStepCodeForm) => {
+    if (!checklist) return
 
-      const alternatePath = checklist.alternateNavigateAfterSavePath
-      checklist.setAlternateNavigateAfterSavePath(null)
+    const documentReferences = [...defaultDocumentReferencesAttributes, ...otherDocumentReferencesAttributes]
+    const deletedDocumentReferences = (checklist?.documentReferences ?? [])
+      .filter((documentReference) => !documentReferences.some((d) => d.id === documentReference.id))
+      .map((documentReference) => ({ id: documentReference.id, _destroy: true }))
 
-      const documentReferences = [...defaultDocumentReferencesAttributes, ...otherDocumentReferencesAttributes]
-      const deletedDocumentReferences = (checklist?.documentReferences ?? [])
-        .filter((documentReference) => !documentReferences.some((d) => d.id === documentReference.id))
-        .map((documentReference) => ({ id: documentReference.id, _destroy: true }))
+    const updated = await checklist?.update({
+      documentReferencesAttributes: documentReferences.concat(
+        deletedDocumentReferences as IDocumentReferenceStepCodeForm["otherDocumentReferencesAttributes"]
+      ),
+    })
 
-      const updated = await checklist?.update({
-        documentReferencesAttributes: documentReferences.concat(
-          deletedDocumentReferences as IDocumentReferenceStepCodeForm["otherDocumentReferencesAttributes"]
-        ),
-      })
-
-      if (updated) {
-        await checklist?.completeSection("documentReferences")
-
-        if (alternatePath) {
-          navigate(alternatePath)
-        } else {
-          navigate(location.pathname.replace("document-references", "performance-characteristics"))
-        }
-      }
-    }
-  )
+    if (!updated) throw new Error("Save failed")
+    await checklist?.completeSection("documentReferences")
+  }
 
   useEffect(() => {
     formMethods.reset(initializeDocumentReferenceForm(checklist?.documentReferences))
@@ -175,7 +163,7 @@ export const DocumentReferences = observer(function DocumentaReferences() {
       </Heading>
 
       <FormProvider {...formMethods}>
-        <Box as="form" onSubmit={onSubmit} name="part3SectionForm">
+        <Box>
           <Accordion
             index={openAccordionIndexes}
             onChange={(expandedIndex) =>
@@ -199,9 +187,11 @@ export const DocumentReferences = observer(function DocumentaReferences() {
             ))}
             <AdditionalDocumentsQuestion value="no" onChange={handleAddOtherDocumentReferenceAnswer} />
           </Stack>
-          <Button type="submit" variant="primary" mt={6}>
-            {t("stepCode.part3.cta")}
-          </Button>
+          <Part3FormFooter
+            handleSubmit={formMethods.handleSubmit}
+            onSubmit={onSubmit}
+            isLoading={formMethods.formState.isSubmitting}
+          />
         </Box>
       </FormProvider>
     </Stack>

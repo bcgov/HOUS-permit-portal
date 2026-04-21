@@ -30,8 +30,6 @@ export enum EFileUploadAttachmentType {
   ReportDocument = "ReportDocument",
   ResourceDocument = "ResourceDocument",
   DesignDocument = "DesignDocument",
-  OverheatingTool = "OverheatingTool",
-  OverheatingDocument = "OverheatingDocument",
 }
 
 export enum EResourceCategory {
@@ -49,8 +47,12 @@ export enum EResourceType {
 export enum EPermitApplicationStatus {
   newDraft = "new_draft",
   newlySubmitted = "newly_submitted",
+  inReview = "in_review",
   revisionsRequested = "revisions_requested",
   resubmitted = "resubmitted",
+  approved = "approved",
+  issued = "issued",
+  withdrawn = "withdrawn",
   ephemeral = "ephemeral",
 }
 
@@ -117,7 +119,7 @@ export enum ERequirementTemplateSortFields {
   firstNations = "first_nations",
   description = "description",
   currentVersion = "current_version",
-  usedBy = "used_by",
+  availableIn = "available_in",
 }
 
 export enum EPreCheckSortFields {
@@ -414,12 +416,6 @@ export enum EEnergyStepCodePart3DependencyRequirementCode {
   energyStepCodeReportFile = "energy_step_code_report_file",
 }
 
-export enum EArchitecturalDrawingDependencyRequirementCode {
-  architecturalDrawingMethod = "architectural_drawing_method",
-  architecturalDrawingTool = "architectural_drawing_tool",
-  architecturalDrawingFile = "architectural_drawing_file",
-}
-
 export enum EAutoComplianceModule {
   DigitalSealValidator = "DigitalSealValidator",
   ParcelInfoExtractor = "ParcelInfoExtractor",
@@ -461,12 +457,14 @@ export enum ENotificationActionType {
   permitBlockStatusReady = "permit_block_status_ready",
   applicationSubmission = "application_submission",
   applicationRevisionsRequest = "application_revisions_request",
-  applicationView = "application_view",
+  reviewStarted = "review_started",
   stepCodeReportGenerated = "step_code_report_generated",
   preCheckSubmitted = "pre_check_submitted",
   preCheckCompleted = "pre_check_completed",
   fileUploadFailed = "file_upload_failed",
   resourceReminder = "resource_reminder",
+  projectReviewCollaborationAssignment = "project_review_collaboration_assignment",
+  projectReviewCollaborationUnassignment = "project_review_collaboration_unassignment",
 }
 
 export enum ECollaboratorableType {
@@ -682,25 +680,66 @@ export enum EPermitProjectSortFields {
   rollupStatus = "rollup_status",
 }
 
-export enum EOverheatingToolStatusFilter {
-  all = "all",
-  archived = "archived",
-  unarchived = "unarchived",
-}
-
-export enum EOverheatingToolSortFields {
-  projectNumber = "projectNumber",
-  address = "address",
-  createdAt = "createdAt",
+export enum EProjectAuditSortFields {
+  createdAt = "created_at",
 }
 
 export enum EPermitProjectRollupStatus {
   empty = "empty",
   newDraft = "new_draft",
   newlySubmitted = "newly_submitted",
+  inReview = "in_review",
   revisionsRequested = "revisions_requested",
   resubmitted = "resubmitted",
   approved = "approved",
+  issued = "issued",
+  withdrawn = "withdrawn",
+}
+
+export enum EProjectState {
+  draft = "draft",
+  queued = "queued",
+  waiting = "waiting",
+  inProgress = "in_progress",
+  ready = "ready",
+  permitIssued = "permit_issued",
+  active = "active",
+  complete = "complete",
+  closed = "closed",
+}
+
+export enum EPermitProjectInboxSortFields {
+  projectNumber = "number",
+  address = "full_address",
+  applications = "permit_applications_size",
+  daysInQueue = "days_in_queue",
+  assigned = "assigned",
+  state = "state",
+}
+
+export enum EPermitApplicationInboxSortFields {
+  status = "status",
+  permitType = "requirement_template_name",
+  address = "full_address",
+  projectNumber = "project_number",
+  daysInQueue = "days_in_queue",
+  assigned = "review_delegatee_name",
+}
+
+export enum EInboxViewMode {
+  projects = "projects",
+  applications = "applications",
+}
+
+export enum EInboxDisplayMode {
+  list = "list",
+  columns = "columns",
+}
+
+export enum ERadioFilterValue {
+  include = "include",
+  hide = "hide",
+  onlyShow = "only_show",
 }
 
 export enum EStepCodeSortFields {
@@ -755,6 +794,24 @@ export enum EPreCheckAssessmentResult {
   failed = "failed",
 }
 
+export enum EOverheatingCodeStatus {
+  draft = "draft",
+  submitted = "submitted",
+}
+
+export enum EOverheatingCodeSortFields {
+  issuedTo = "issued_to",
+  projectNumber = "project_number",
+  buildingModel = "building_model",
+  fullAddress = "full_address",
+}
+
+// [OVERHEATING TODO] Units field purpose unclear — btuh is already labeled on the capacity input
+export enum EOverheatingCodeCoolingZoneUnits {
+  imperial = "imperial",
+  metric = "metric",
+}
+
 export enum EGeneralContactType {
   adjacentOwner = "adjacentOwner",
   applicant = "applicant",
@@ -798,14 +855,6 @@ export enum EFileScanStatus {
   infected = "infected",
 }
 
-export enum EPdfGenerationStatus {
-  notStarted = "not_started",
-  queued = "queued",
-  generating = "generating",
-  completed = "completed",
-  failed = "failed",
-}
-
 export enum EDataValidationOperation {
   min = "min",
   max = "max",
@@ -814,4 +863,27 @@ export enum EDataValidationOperation {
   minSelectedCount = "min_selected_count",
   maxSelectedCount = "max_selected_count",
   allowedFileTypes = "allowed_file_types",
+}
+
+export enum EConditionalThen {
+  show = "show",
+  hide = "hide",
+  require = "require",
+}
+
+export enum EConditionalOperator {
+  isEqual = "isEqual",
+  isNotEqual = "isNotEqual",
+  greaterThan = "greaterThan",
+  greaterThanOrEqual = "greaterThanOrEqual",
+  lessThan = "lessThan",
+  lessThanOrEqual = "lessThanOrEqual",
+  isDateEqual = "isDateEqual",
+  isNotDateEqual = "isNotDateEqual",
+  dateGreaterThan = "dateGreaterThan",
+  dateGreaterThanOrEqual = "dateGreaterThanOrEqual",
+  dateLessThan = "dateLessThan",
+  dateLessThanOrEqual = "dateLessThanOrEqual",
+  isEmpty = "isEmpty",
+  isNotEmpty = "isNotEmpty",
 }

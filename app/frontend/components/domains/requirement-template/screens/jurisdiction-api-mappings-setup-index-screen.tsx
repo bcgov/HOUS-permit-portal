@@ -18,7 +18,10 @@ export const JurisdictionApiMappingsSetupIndexScreen = observer(function Jurisdi
   const { t } = useTranslation()
   const { userStore } = useMst()
   const { currentUser } = userStore
-  const { permitTypeOptions: allPermitTypeOptions, error: permitTypeOptionsError } = usePermitTypeOptions()
+  const { permitTypeOptions: allPermitTypeOptions, error: permitTypeOptionsError } = usePermitTypeOptions({
+    publishedOnly: true,
+    jurisdictionId: currentUser?.jurisdiction?.id,
+  })
   const [searchParams, setSearchParams] = useSearchParams()
   const enabledPermitTypeOptions = allPermitTypeOptions?.filter((option) => option.value.enabled) ?? null
   const permitTypeId = searchParams.get("permitTypeId")
@@ -120,6 +123,7 @@ export const JurisdictionApiMappingsSetupIndexScreen = observer(function Jurisdi
                     <TabPanel key={permitTypeOption.value.id} w="100%" pt={0}>
                       <TemplateVersionsList
                         permitTypeId={permitTypeOption.value.id}
+                        jurisdictionId={currentUser?.jurisdiction?.id}
                         renderButton={(templateVersion) => (
                           <Button
                             as={RouterLink}
