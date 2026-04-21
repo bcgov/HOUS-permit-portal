@@ -143,7 +143,6 @@ export interface ISiteConfigurationUpdateParams {
   sitewideMessage?: string | null
   helpLinkItems?: IHelpLinkItems
   revisionReasonsMap?: { [key: string]: IRevisionReason }
-  standardizationPageEarlyAccessRequirementTemplateIds?: string[] | null
   revisionReasonsAttributes?: IRevisionReasonsAttributes[]
 }
 

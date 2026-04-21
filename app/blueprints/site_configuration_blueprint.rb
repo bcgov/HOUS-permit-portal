@@ -11,6 +11,4 @@ class SiteConfigurationBlueprint < Blueprinter::Base
   end
 
   association :revision_reasons, blueprint: RevisionReasonBlueprint
-  association :standardization_template_versions,
-              blueprint: TemplateVersionBlueprint
 end

@@ -4255,6 +4255,9 @@ Thank you,
           removed: "removed",
           filter: "Template",
           versions: "Versions",
+          publiclyPreviewable: {
+            toggleLabel: "Show on public standardization preview",
+          },
           access: {
             statusNone: "Not available in any jurisdictions",
             statusNoneDesc: "Please grant access below to allow this template to be used in any jurisdictions.",

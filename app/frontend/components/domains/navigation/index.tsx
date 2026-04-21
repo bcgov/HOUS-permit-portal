@@ -335,11 +335,9 @@ const RevisionReasonSetupScreen = lazy(() =>
   }))
 )
 
-const StandardizationSetupScreen = lazy(() =>
-  import("../super-admin/site-configuration-management/standardization-setup-screen").then((module) => ({
-    default: module.StandardizationSetupScreen,
-  }))
-)
+// DEPRECATED: StandardizationSetupScreen is no longer wired into the router.
+// Super admins now toggle publicly_previewable directly on the
+// TemplateVersionScreen. The file is kept for reference.
 
 const AdminUserIndexScreen = lazy(() =>
   import("../super-admin/site-configuration-management/users-screen").then((module) => ({
@@ -491,7 +489,8 @@ const AppRoutes = observer(() => {
       <Route path="/configuration-management/sitewide-message" element={<SitewideMessageScreen />} />
       <Route path="/configuration-management/help-drawer-setup" element={<HelpDrawerSetupScreen />} />
       <Route path="/configuration-management/revision-reason-setup" element={<RevisionReasonSetupScreen />} />
-      <Route path="/configuration-management/standardization-setup" element={<StandardizationSetupScreen />} />
+      {/* DEPRECATED: /configuration-management/standardization-setup route removed.
+          Super admins toggle publicly_previewable directly on TemplateVersionScreen. */}
       <Route path="/configuration-management/users" element={<AdminUserIndexScreen />} />
       <Route path="/configuration-management/global-feature-access" element={<AdminGlobalFeatureAccessScreen />} />
       <Route

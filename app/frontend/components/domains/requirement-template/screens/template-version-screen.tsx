@@ -1,9 +1,10 @@
-import { Box, Button, Flex, HStack } from "@chakra-ui/react"
+import { Box, Button, Flex, FormControl, FormLabel, HStack, Switch } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { useTemplateVersion } from "../../../../hooks/resources/use-template-version"
+import { useMst } from "../../../../setup/root"
 import { ErrorScreen } from "../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../shared/base/loading-screen"
 import { FloatingHelpDrawer } from "../../../shared/floating-help-drawer"
@@ -21,12 +22,14 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
   const { templateVersion, error } = useTemplateVersion()
   const denormalizedTemplate = templateVersion?.denormalizedTemplateJson
   const { t } = useTranslation()
+  const { userStore, templateVersionStore } = useMst()
   const {
     rootContainerRef: rightContainerRef,
     sectionRefs,
     sectionIdToHighlight: currentSectionId,
   } = useSectionHighlight({ sections: denormalizedTemplate?.requirementTemplateSections })
   const [isCollapsedAll, setIsCollapsedAll] = useState(false)
+  const [isTogglingPubliclyPreviewable, setIsTogglingPubliclyPreviewable] = useState(false)
   const navigate = useNavigate()
 
   if (error) return <ErrorScreen error={error} />
@@ -34,9 +37,20 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
 
   const templateSections = denormalizedTemplate?.requirementTemplateSections ?? []
   const hasNoSections = templateSections.length === 0
+  const isSuperAdmin = !!userStore.currentUser?.isSuperAdmin
 
   const onClose = () => {
     window.history.state && window.history.state.idx > 0 ? navigate(-1) : navigate(`/requirement-templates`)
+  }
+
+  const handleTogglePubliclyPreviewable = async () => {
+    if (!templateVersion) return
+    setIsTogglingPubliclyPreviewable(true)
+    try {
+      await templateVersionStore.togglePubliclyPreviewable(templateVersion.id, !templateVersion.publiclyPreviewable)
+    } finally {
+      setIsTogglingPubliclyPreviewable(false)
+    }
   }
 
   return (
@@ -80,6 +94,19 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
             boxShadow={"elevations.elevation02"}
           >
             <HStack spacing={3}>
+              {templateVersion.isDraft && isSuperAdmin && (
+                <FormControl display="flex" alignItems="center" width="auto" mr={2}>
+                  <FormLabel htmlFor="publicly-previewable-toggle" mb="0" mr={2} fontSize="sm">
+                    {t("requirementTemplate.publiclyPreviewable.toggleLabel")}
+                  </FormLabel>
+                  <Switch
+                    id="publicly-previewable-toggle"
+                    isChecked={templateVersion.publiclyPreviewable}
+                    isDisabled={isTogglingPubliclyPreviewable}
+                    onChange={handleTogglePubliclyPreviewable}
+                  />
+                </FormControl>
+              )}
               {templateVersion.isDraft && (
                 <SharePreviewPopover draftTemplateVersion={templateVersion} variant="primary" />
               )}

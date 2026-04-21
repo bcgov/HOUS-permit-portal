@@ -67,4 +67,18 @@ class TemplateVersionBlueprint < Blueprinter::Base
              :notification_scope,
              :publicly_previewable
   end
+
+  # Minimal public-facing view used by the /standardization-preview landing page.
+  # Delegates a few descriptive fields from the owning RequirementTemplate so the
+  # preview list can render without additional lookups.
+  view :standardization_preview do
+    field(:nickname) { |tv| tv.requirement_template&.nickname }
+    field(:description) { |tv| tv.requirement_template&.description }
+    field(:activity_category) do |tv|
+      tv.requirement_template&.activity&.category
+    end
+    field(:is_available_for_adoption) do |tv|
+      tv.requirement_template&.published_template_version.present?
+    end
+  end
 end

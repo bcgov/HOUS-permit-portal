@@ -94,7 +94,6 @@ class Api::SiteConfigurationController < Api::ApplicationController
       :allow_designated_reviewer,
       :code_compliance_enabled,
       :archistar_enabled_for_all_jurisdictions,
-      standardization_template_version_ids: [],
       help_link_items: [
         get_started_link_item: %i[href title description show],
         best_practices_link_item: %i[href title description show],

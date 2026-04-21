@@ -14,8 +14,9 @@ import {
 import { CaretRight } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
-import React from "react"
+import React, { useEffect } from "react"
 import { useTranslation } from "react-i18next"
+import { ITemplateVersion } from "../../../models/template-version"
 import { useMst } from "../../../setup/root"
 import { EFlashMessageStatus } from "../../../types/enums"
 import { CustomMessageBox } from "../../shared/base/custom-message-box"
@@ -23,16 +24,21 @@ import { RouterLink } from "../../shared/navigation/router-link"
 
 export const StandardizationPreviewScreen = observer(function StandardizationPreviewScreen() {
   const { t } = useTranslation()
-  const { siteConfigurationStore } = useMst()
-  const { standardizationPageEarlyAccessRequirementTemplates } = siteConfigurationStore
+  const { templateVersionStore } = useMst()
+  const { publiclyPreviewableTemplateVersions } = templateVersionStore
 
-  const availableForAdoption = standardizationPageEarlyAccessRequirementTemplates.filter(
-    (t) => t.isAvailableForAdoption
-  )
-  const underDevelopment = standardizationPageEarlyAccessRequirementTemplates.filter((t) => !t.isAvailableForAdoption)
+  useEffect(() => {
+    templateVersionStore.fetchPubliclyPreviewableTemplateVersions()
+  }, [templateVersionStore])
 
-  const renderTemplateGrid = (templates: typeof standardizationPageEarlyAccessRequirementTemplates) => {
-    const groupedTemplates = R.groupBy((t) => t.activityCategory, templates)
+  // safeReference returns undefined entries if the target was removed; filter them out.
+  const templateVersions = publiclyPreviewableTemplateVersions.filter(Boolean) as ITemplateVersion[]
+
+  const availableForAdoption = templateVersions.filter((tv) => tv.isAvailableForAdoption)
+  const underDevelopment = templateVersions.filter((tv) => !tv.isAvailableForAdoption)
+
+  const renderTemplateGrid = (templates: ITemplateVersion[]) => {
+    const groupedTemplates = R.groupBy((tv) => tv.activityCategory ?? "uncategorized", templates)
 
     return (
       <VStack spacing={8} align="start" w="full">

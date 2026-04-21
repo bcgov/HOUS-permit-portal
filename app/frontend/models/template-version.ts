@@ -40,6 +40,14 @@ export const TemplateVersionModel = types
     // Stored as string IDs instead of safeReferences to avoid circular dependency:
     // TemplateVersion -> EarlyAccessPreview -> User -> Jurisdiction -> PermitApplication -> TemplateVersion
     templateVersionPreviewIds: types.optional(types.array(types.string), []),
+    // Fields populated only by the :standardization_preview blueprint view
+    // (delegated from the owning RequirementTemplate). Left undefined for
+    // every other view. Nullable because the owning RequirementTemplate
+    // may have null description/category.
+    nickname: types.maybeNull(types.string),
+    description: types.maybeNull(types.string),
+    activityCategory: types.maybeNull(types.string),
+    isAvailableForAdoption: types.maybeNull(types.boolean),
   })
   .extend(withEnvironment())
   .extend(withRootStore())

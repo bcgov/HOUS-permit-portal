@@ -1,3 +1,7 @@
+// DEPRECATED: kept for reference only. Admins now toggle publicly_previewable
+// directly on the TemplateVersionScreen. Wiring (router entry and menu tile)
+// was removed; this file is intentionally left buildable so the old workflow
+// can still be referenced while we iterate on the new one.
 import { Button, Checkbox, Container, Flex, Heading, TabPanel, Text } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"

@@ -114,6 +114,8 @@ Rails.application.routes.draw do
         post "invite_draft_previewers",
              to: "template_versions#invite_draft_previewers"
         post "share_draft", to: "template_versions#share_draft"
+        patch "toggle_publicly_previewable",
+              to: "template_versions#toggle_publicly_previewable"
       end
 
       resources :template_version_feedbacks,
@@ -127,6 +129,9 @@ Rails.application.routes.draw do
     end
 
     resources :template_versions, only: %i[index show] do
+      get "publicly_previewable",
+          to: "template_versions#publicly_previewable",
+          on: :collection
       get "compare_requirements",
           to: "template_versions#compare_requirements",
           on: :member

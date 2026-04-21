@@ -825,6 +825,17 @@ export class Api {
     )
   }
 
+  async togglePubliclyPreviewable(templateVersionId: string, publiclyPreviewable: boolean) {
+    return this.client.patch<ApiResponse<ITemplateVersion>>(
+      `/template_versions/${templateVersionId}/toggle_publicly_previewable`,
+      { publiclyPreviewable }
+    )
+  }
+
+  async fetchPubliclyPreviewableTemplateVersions() {
+    return this.client.get<ApiResponse<ITemplateVersion[]>>(`/template_versions/publicly_previewable`)
+  }
+
   // ── Draft feedback API methods ──────────────────────────────────────
 
   async fetchDraftFeedbacks(templateVersionId: string) {

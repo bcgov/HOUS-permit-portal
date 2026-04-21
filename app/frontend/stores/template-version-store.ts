@@ -1,4 +1,4 @@
-import { flow, Instance, toGenerator, types } from "mobx-state-tree"
+import { cast, flow, Instance, toGenerator, types } from "mobx-state-tree"
 import * as R from "ramda"
 import { withEnvironment } from "../lib/with-environment"
 import { withMerge } from "../lib/with-merge"
@@ -12,6 +12,7 @@ export const TemplateVersionStoreModel = types
   .props({
     templateVersionMap: types.map(TemplateVersionModel),
     templateVersionsByActivityId: types.map(types.array(types.safeReference(TemplateVersionModel))),
+    publiclyPreviewableTemplateVersions: types.array(types.safeReference(TemplateVersionModel)),
     isLoading: types.optional(types.boolean, false),
   })
   .extend(withEnvironment())
@@ -111,6 +112,40 @@ export const TemplateVersionStoreModel = types
         self.mergeUpdate(templateVersion, "templateVersionMap")
 
         return self.getTemplateVersionById(templateVersion.id)
+      }
+      return response.ok
+    }),
+
+    fetchPubliclyPreviewableTemplateVersions: flow(function* () {
+      self.isLoading = true
+      const response = yield* toGenerator(self.environment.api.fetchPubliclyPreviewableTemplateVersions())
+
+      if (response.ok) {
+        const templateVersions = response.data.data
+        self.mergeUpdateAll(templateVersions, "templateVersionMap")
+        // safeReference resolves these ids into live TemplateVersion instances.
+        self.publiclyPreviewableTemplateVersions = cast(templateVersions.map((tv) => tv.id))
+      }
+      self.isLoading = false
+      return response.ok
+    }),
+
+    togglePubliclyPreviewable: flow(function* (id: string, publiclyPreviewable: boolean) {
+      const response = yield* toGenerator(self.environment.api.togglePubliclyPreviewable(id, publiclyPreviewable))
+
+      if (response.ok) {
+        const templateVersion = response.data.data
+        self.mergeUpdate(templateVersion, "templateVersionMap")
+
+        // Keep the landing-page list in sync without needing a refetch: drop
+        // the id when it's being hidden, and add it if it was just enabled.
+        const existingIndex = self.publiclyPreviewableTemplateVersions.findIndex((tv) => tv?.id === id)
+        if (!publiclyPreviewable && existingIndex !== -1) {
+          self.publiclyPreviewableTemplateVersions.splice(existingIndex, 1)
+        } else if (publiclyPreviewable && existingIndex === -1) {
+          // cast each element so MST resolves the id back to a reference.
+          self.publiclyPreviewableTemplateVersions.push(id as any)
+        }
       }
       return response.ok
     }),

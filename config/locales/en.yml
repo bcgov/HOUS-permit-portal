@@ -910,6 +910,12 @@ en:
       invite_previewers_error:
         title: Error
         message: "Could not invite previewers"
+      toggle_publicly_previewable_success:
+        title: ""
+        message: "Public preview visibility updated"
+      toggle_publicly_previewable_error:
+        title: Error
+        message: "%{error_message}"
     template_version_feedback:
       create_success:
         title: ""
