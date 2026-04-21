@@ -42,8 +42,8 @@ export const RequirementBlocksTable = observer(function RequirementBlocksTable({
   forEarlyAccess,
   ...containerProps
 }: IProps) {
-  const { requirementBlockStore, earlyAccessRequirementBlockStore } = useMst()
-  const searchModel = forEarlyAccess ? earlyAccessRequirementBlockStore : requirementBlockStore
+  const { requirementBlockStore } = useMst()
+  const searchModel = requirementBlockStore
   const {
     tableRequirementBlocks,
     currentPage,

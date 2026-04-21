@@ -16,8 +16,6 @@ class TemplateVersion < ApplicationRecord
 
   delegate :published_template_version, to: :requirement_template
   delegate :tag_list, to: :requirement_template
-  delegate :early_access?, to: :requirement_template
-  delegate :live?, to: :requirement_template
 
   enum :status,
        { scheduled: 0, published: 1, deprecated: 2, draft: 3 },
@@ -56,13 +54,10 @@ class TemplateVersion < ApplicationRecord
           end
         end
 
-  # Published versions on kept LiveRequirementTemplate records (excludes early-access copies, etc.).
-  # Matches PermitApplication validation: template_version must be "live".
-  scope :published_for_live_requirement_templates,
+  # Published versions whose owning RequirementTemplate has not been discarded.
+  scope :published_on_kept_templates,
         -> do
-          published.joins(:requirement_template).merge(
-            LiveRequirementTemplate.kept
-          )
+          published.joins(:requirement_template).merge(RequirementTemplate.kept)
         end
 
   def self.cached_published_ids

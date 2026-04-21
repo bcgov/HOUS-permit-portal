@@ -156,13 +156,13 @@ RSpec.describe RequirementsFromXlsxSeeder do
       allow(tag_list).to receive(:add)
       template =
         double(
-          "LiveRequirementTemplate",
+          "RequirementTemplate",
           tag_list: tag_list,
           save!: true,
           reload: true
         )
       relation = double("Relation")
-      allow(LiveRequirementTemplate).to receive(:where).with(
+      allow(RequirementTemplate).to receive(:where).with(
         nickname: "new_construction - low_residential"
       ).and_return(relation)
       allow(relation).to receive(:first_or_create).with(

@@ -81,6 +81,9 @@ class RequirementTemplate < ApplicationRecord
   validate :validate_uniqueness_of_blocks
   validate :validate_step_code_related_dependencies
   validate :validate_block_level_conditionals
+  validate :validate_nickname_uniqueness
+
+  scope :with_published_version, -> { joins(:published_template_version) }
 
   before_validation :set_default_nickname
 
@@ -94,20 +97,8 @@ class RequirementTemplate < ApplicationRecord
     nil
   end
 
-  def early_access?
-    type == "EarlyAccessRequirementTemplate"
-  end
-
-  def live?
-    type == "LiveRequirementTemplate"
-  end
-
   def visibility
-    if early_access?
-      "early_access"
-    elsif live?
-      "live"
-    end
+    "live"
   end
 
   def sections
@@ -541,6 +532,17 @@ class RequirementTemplate < ApplicationRecord
 
   def refresh_search_index
     RequirementTemplate.search_index.refresh
+  end
+
+  def validate_nickname_uniqueness
+    return if nickname.blank?
+
+    if RequirementTemplate
+         .where.not(id: id)
+         .where(discarded_at: nil)
+         .exists?(nickname: nickname)
+      errors.add(:nickname, :taken)
+    end
   end
 
   def log_creation_in_specs

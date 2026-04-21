@@ -50,9 +50,6 @@ en:
         available_in_all: "All"
     errors:
       models:
-        early_access_preview:
-          already_invited: "User already invited to preview"
-          invalid_email: "Invalid email format"
         jurisdiction:
           no_sandboxes: "Jurisdiction must have at least one sandbox."
           enabled_inbox_requires_setup: "can only be toggled on once all emails are set up."
@@ -78,8 +75,6 @@ en:
               inbox_not_enabled: "inbox for this permit application is not enabled"
               no_jurisdiction: "must be present if not associated with a project."
             pid_or_pin: "must have a PID or PIN."
-            template_version:
-              must_be_live: "must be for a live requirement template"
         permit_project:
           attributes:
             owner:
@@ -92,14 +87,8 @@ en:
           duplicate_step_code_package: 'Multiple "Design package energy step code files" found. Please ensure there is only one "Design package energy step code file" when there is an "Energy step code" requirement'
           nonunique_nickname: "There can only be one live requirement template with this nickname"
           taken: "must be unique"
-          attributes:
-            template_versions:
-              published_required_for_early_access: "requires one or less published template version on early access"
         requirement_block:
           attributes:
-            visibility:
-              associated_requirement_templates_must_be_early_access: "can not be set to 'preview' if the block is present in any live drafts"
-              associated_requirement_templates_must_be_live: "can not be set to 'exclude preview' if the block is present in any early-access previews"
             requirements:
               incorrect_energy_step_code_dependencies: "missing or duplicate energy step code dependencies"
               duplicate_architectural_drawing_file: "must have only one design package file for energy step code per requirement block"
@@ -450,31 +439,6 @@ en:
       revoke_success:
         title: Success
         message: "External api key revoked successfully!"
-    early_access_preview:
-      revoke_success:
-        title: ""
-        message: "Preview revoked successfully!"
-      revoke_error:
-        title: "Error"
-        message: "%{error_message}"
-      unrevoke_success:
-        title: ""
-        message: "Preview unrevoked successfully!"
-      unrevoke_error:
-        title: "Error"
-        message: "%{error_message}"
-      already_revoked:
-        title: "Error"
-        message: "Preview already revoked"
-      not_revoked:
-        title: "Error"
-        message: "Preview not revoked"
-      extend_success:
-        title: ""
-        message: "Preview extended successfully!"
-      extend_error:
-        title: "Error"
-        message: "%{error_message}"
     requirement_template:
       create_success:
         title: ""
@@ -488,12 +452,6 @@ en:
       force_publish_now_success:
         title: ""
         message: "Permit has been published."
-      invite_previewers_success:
-        title: ""
-        message: "Successfully invited previewers"
-      invite_previewers_error:
-        title: Error
-        message: "Previewers could not be invited"
       create_error:
         title: Error
         message: "%{error_message}"
@@ -956,12 +914,7 @@ en:
         assign_collaborator_error: "Failed to assign collaborator: %{error_message}"
         create_user_error: "Failed to invite user to collaborate: %{error_message}"
         submission_collaborator_must_be_submitter: "Ineligible user for submission collaboration"
-    preview:
-      preview_management:
-        create_user_error: "Failed to invite user to preview: %{error_message}"
-        assign_previewer_error: "Failed to assign previewer: %{error_message}"
     template_versioning_service:
-      early_access_version_error: "Cannot create early access version for a non-early access requirement template"
       invalid_schedule_date: "Version date must be in the future and after latest scheduled version date"
       force_publish_disabled: "Force publish is not enabled"
       publish_before_schedule_date: "Version cannot be published before it's scheduled date"

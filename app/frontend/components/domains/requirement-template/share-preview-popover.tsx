@@ -27,13 +27,12 @@ import * as R from "ramda"
 import React, { useRef, useState } from "react"
 import { Controller, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { IEarlyAccessPreview } from "../../../models/early-access-preview"
 import { ITemplateVersion } from "../../../models/template-version"
+import { ITemplateVersionPreview } from "../../../models/template-version-preview"
 import { useMst } from "../../../setup/root"
-import { EFlashMessageStatus, EPreviewStatus } from "../../../types/enums"
+import { EFlashMessageStatus } from "../../../types/enums"
 import { urlForPath } from "../../../utils/utility-functions"
 import { CopyLinkButton } from "../../shared/base/copy-link-button"
-import { ConfirmationModal } from "../../shared/confirmation-modal"
 import PreviewStatusTag from "../../shared/early-access/preview-status-tag"
 import { RoleTag } from "../../shared/user/role-tag"
 
@@ -48,7 +47,7 @@ export const SharePreviewAccordion: React.FC<ISharePreviewAccordionProps> = obse
     const [isInviting, setIsInviting] = useState(false)
     const { uiStore } = useMst()
 
-    const previews: IEarlyAccessPreview[] = (dtv.templateVersionPreviews as IEarlyAccessPreview[]) ?? []
+    const previews: ITemplateVersionPreview[] = (dtv.templateVersionPreviews as ITemplateVersionPreview[]) ?? []
     const previewerCount = previews.length
 
     const shareUrl = urlForPath(`/template-versions/${dtv.id}`)
@@ -80,7 +79,6 @@ export const SharePreviewAccordion: React.FC<ISharePreviewAccordionProps> = obse
 
     return (
       <Box w="full">
-        {/* Toggle button row */}
         <Flex
           as="button"
           onClick={onToggle}
@@ -104,11 +102,9 @@ export const SharePreviewAccordion: React.FC<ISharePreviewAccordionProps> = obse
           {isOpen ? <CaretUp size={16} /> : <CaretDown size={16} />}
         </Flex>
 
-        {/* Expandable content */}
         <Collapse in={isOpen} animateOpacity>
           <Box borderTop="1px solid" borderColor="border.light" bg="greys.grey04" px={4} py={3}>
             {isInviting ? (
-              /* Invite form */
               <Box>
                 <Flex justify="space-between" align="center" mb={2}>
                   <Text fontSize="sm" fontWeight={700}>
@@ -148,7 +144,6 @@ export const SharePreviewAccordion: React.FC<ISharePreviewAccordionProps> = obse
                 </Box>
               </Box>
             ) : (
-              /* Share / previewer list */
               <Box>
                 <Flex justify="space-between" align="center" mb={2}>
                   <Text fontSize="sm" fontWeight={700}>
@@ -169,8 +164,8 @@ export const SharePreviewAccordion: React.FC<ISharePreviewAccordionProps> = obse
 
                 {!R.isEmpty(previews) ? (
                   <VStack spacing={0} align="stretch" maxH="200px" overflowY="auto">
-                    {previews.map((eap) => (
-                      <PreviewCard key={eap.id} earlyAccessPreview={eap} />
+                    {previews.map((preview) => (
+                      <PreviewCard key={preview.id} templateVersionPreview={preview} />
                     ))}
                   </VStack>
                 ) : (
@@ -188,50 +183,14 @@ export const SharePreviewAccordion: React.FC<ISharePreviewAccordionProps> = obse
 )
 
 interface PreviewCardProps {
-  earlyAccessPreview: IEarlyAccessPreview
+  templateVersionPreview: ITemplateVersionPreview
 }
 
-const PreviewCard: React.FC<PreviewCardProps> = observer(({ earlyAccessPreview }) => {
-  const { t } = useTranslation()
-  const previewer = earlyAccessPreview.previewer
-  const status = earlyAccessPreview.status
+const PreviewCard: React.FC<PreviewCardProps> = observer(({ templateVersionPreview }) => {
+  const previewer = templateVersionPreview.previewer
   const { name, role, organization } = previewer
 
   const cardRef = useRef()
-
-  const getModalContent = (status: EPreviewStatus) => {
-    switch (status) {
-      case EPreviewStatus.invited:
-      case EPreviewStatus.access:
-        return {
-          buttonText: t("earlyAccessRequirementTemplate.index.revokeButton"),
-          buttonProps: { variant: "link", color: "semantic.error", size: "xs" },
-          title: (name: string) => t("earlyAccessRequirementTemplate.index.confirmation.revokeTitle", { name }),
-          body: t("earlyAccessRequirementTemplate.index.confirmation.revokeBody"),
-          handler: earlyAccessPreview.revoke,
-        }
-      case EPreviewStatus.expired:
-        return {
-          buttonText: t("earlyAccessRequirementTemplate.index.extendButton"),
-          buttonProps: { variant: "link", size: "xs" },
-          title: (name: string) => t("earlyAccessRequirementTemplate.index.confirmation.extendTitle", { name }),
-          body: t("earlyAccessRequirementTemplate.index.confirmation.extendBody"),
-          handler: earlyAccessPreview.extend,
-        }
-      case EPreviewStatus.revoked:
-        return {
-          buttonText: t("earlyAccessRequirementTemplate.index.unrevokeButton"),
-          buttonProps: { variant: "link", size: "xs" },
-          title: (name: string) => t("earlyAccessRequirementTemplate.index.confirmation.unrevokeTitle", { name }),
-          body: t("earlyAccessRequirementTemplate.index.confirmation.unrevokeBody"),
-          handler: earlyAccessPreview.unrevoke,
-        }
-      default:
-        return null
-    }
-  }
-
-  const modalContent = getModalContent(status)
 
   return (
     <Flex
@@ -243,7 +202,7 @@ const PreviewCard: React.FC<PreviewCardProps> = observer(({ earlyAccessPreview }
       width="full"
       ref={cardRef}
     >
-      <PreviewStatusTag earlyAccessPreview={earlyAccessPreview} />
+      <PreviewStatusTag templateVersionPreview={templateVersionPreview} />
       <VStack spacing={0} align="flex-start" flex="1" ml={3}>
         <Text fontSize="sm" color="text.link" fontWeight="bold">
           {name}
@@ -252,25 +211,6 @@ const PreviewCard: React.FC<PreviewCardProps> = observer(({ earlyAccessPreview }
           <RoleTag role={role} /> {organization}
         </Box>
       </VStack>
-      {modalContent && (
-        <ConfirmationModal
-          title={modalContent.title(name)}
-          body={modalContent.body}
-          triggerText={t("ui.proceed")}
-          renderTriggerButton={({ onClick, ...rest }) => (
-            <Button {...modalContent.buttonProps} onClick={onClick as (e: React.MouseEvent) => Promise<any>} {...rest}>
-              {modalContent.buttonText}
-            </Button>
-          )}
-          onConfirm={(_onClose) => {
-            modalContent.handler()
-            _onClose()
-          }}
-          modalContentProps={{
-            maxW: "700px",
-          }}
-        />
-      )}
     </Flex>
   )
 })
@@ -290,7 +230,7 @@ export const SharePreviewPopover: React.FC<ISharePreviewPopoverProps> = observer
     const [isInviting, setIsInviting] = useState(false)
     const { uiStore } = useMst()
 
-    const previews: IEarlyAccessPreview[] = (dtv.templateVersionPreviews as IEarlyAccessPreview[]) ?? []
+    const previews: ITemplateVersionPreview[] = (dtv.templateVersionPreviews as ITemplateVersionPreview[]) ?? []
     const previewerCount = previews.length
 
     const shareUrl = urlForPath(`/template-versions/${dtv.id}`)
@@ -371,7 +311,7 @@ export const SharePreviewPopover: React.FC<ISharePreviewPopoverProps> = observer
                   </Button>
                 </Box>
               ) : !R.isEmpty(previews) ? (
-                previews.map((eap) => <PreviewCard key={eap.id} earlyAccessPreview={eap} />)
+                previews.map((preview) => <PreviewCard key={preview.id} templateVersionPreview={preview} />)
               ) : (
                 <Box color="greys.grey01">{t("earlyAccessRequirementTemplate.index.noPreviewersYet")}</Box>
               )}

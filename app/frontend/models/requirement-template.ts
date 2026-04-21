@@ -1,12 +1,11 @@
 import { addDays, isAfter, isSameDay, max, startOfDay } from "date-fns"
 import { utcToZonedTime } from "date-fns-tz"
-import { t } from "i18next"
 import { Instance, flow, toGenerator, types } from "mobx-state-tree"
 import pluck from "ramda/src/pluck"
 import { vancouverTimeZone } from "../constants"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
-import { EFlashMessageStatus, ERequirementTemplateType, EVisibility } from "../types/enums"
+import { EVisibility } from "../types/enums"
 import { IJurisdictionStub, IRequirementTemplateFormJson } from "../types/types"
 import { RequirementTemplateSectionModel } from "./requirement-template-section"
 import { TemplateVersionModel } from "./template-version"
@@ -56,7 +55,6 @@ export const RequirementTemplateModel = types.snapshotProcessor(
     .model("RequirementTemplateModel", {
       id: types.identifier,
       nickname: types.maybeNull(types.string),
-      type: types.enumeration(Object.values(ERequirementTemplateType)),
       visibility: types.enumeration(Object.values(EVisibility)),
       description: types.maybeNull(types.string),
       usedBy: types.optional(types.number, 0),
@@ -126,9 +124,6 @@ export const RequirementTemplateModel = types.snapshotProcessor(
         // TODO
         return 0
       },
-      get isEarlyAccess() {
-        return self.type === ERequirementTemplateType.EarlyAccessRequirementTemplate
-      },
       get displayLabel() {
         return self.nickname ?? "New template"
       },
@@ -174,32 +169,6 @@ export const RequirementTemplateModel = types.snapshotProcessor(
       restore: flow(function* () {
         const response = yield self.environment.api.restoreRequirementTemplate(self.id)
         return response.ok
-      }),
-      invitePreviewersByEmail: flow(function* (emails: string[]) {
-        if (!self.isEarlyAccess) return
-
-        const response = yield self.environment.api.invitePreviewers(self.id, { emails })
-
-        if (response.data.meta.failedEmails.length > 0) {
-          const failedEmails = response.data.meta.failedEmails // Assuming this is an array of strings
-          const markdownList = failedEmails.map((email) => `- ${email.email} **(${email.error})**`).join("\n")
-
-          self.rootStore.uiStore.flashMessage.show(
-            EFlashMessageStatus.warning,
-            t("earlyAccessRequirementTemplate.index.inviteToPreviewPartialSuccess"),
-            markdownList, // Pass the markdown-formatted list as description
-            30000,
-            true
-          )
-        }
-        if (response.ok) {
-          const templateData = response.data.data
-          templateData.isFullyLoaded = true
-
-          self.rootStore.requirementTemplateStore.mergeUpdate(templateData, "requirementTemplateMap")
-
-          return self
-        }
       }),
       updateJurisdictionAvailabilities: flow(function* (jurisdictionIds: string[]) {
         const response = yield self.environment.api.updateRequirementTemplateJurisdictionAvailabilities(

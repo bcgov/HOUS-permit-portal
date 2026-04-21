@@ -6,14 +6,6 @@ import { ISiteConfigurationUpdateParams } from "../types/api-request"
 import { EPreCheckServicePartner } from "../types/enums"
 import { IHelpLinkItems } from "../types/types.js"
 
-interface IStandardizationPageTemplate {
-  id: string
-  nickname: string
-  description?: string
-  isAvailableForAdoption: boolean
-  activityCategory: string
-}
-
 // Define the SiteConfiguration model
 export const SiteConfigurationStoreModel = types.snapshotProcessor(
   types
@@ -28,10 +20,6 @@ export const SiteConfigurationStoreModel = types.snapshotProcessor(
       sitewideMessage: types.maybeNull(types.string),
       helpLinkItems: types.frozen<IHelpLinkItems>(),
       revisionReasonsMap: types.map(RevisionReasonModel),
-      standardizationPageEarlyAccessRequirementTemplates: types.optional(
-        types.frozen<IStandardizationPageTemplate[]>(),
-        []
-      ),
     })
     .extend(withRootStore())
     .extend(withEnvironment())
@@ -82,9 +70,6 @@ export const SiteConfigurationStoreModel = types.snapshotProcessor(
       },
       get activeRevisionReasons() {
         return Array.from(self.revisionReasonsMap.values()).filter((reason) => !reason.discardedAt)
-      },
-      get standardizationPageEarlyAccessRequirementTemplateIds() {
-        return self.standardizationPageEarlyAccessRequirementTemplates.map((template) => template.id)
       },
       get revisionReasonOptions() {
         return this.activeRevisionReasons.map((rr) => ({ label: rr.description, value: rr.reasonCode }))

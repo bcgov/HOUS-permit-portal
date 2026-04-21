@@ -55,8 +55,8 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
   isEditable,
   forEarlyAccess,
 }: IRequirementsBlockProps) {
-  const { requirementBlockStore, earlyAccessRequirementBlockStore } = useMst()
-  const searchModel = forEarlyAccess ? earlyAccessRequirementBlockStore : requirementBlockStore
+  const { requirementBlockStore } = useMst()
+  const searchModel = requirementBlockStore
   const { t } = useTranslation()
   const { fetchData } = searchModel
   const { createRequirementBlock, isEditingEarlyAccess } = requirementBlockStore

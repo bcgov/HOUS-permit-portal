@@ -19,8 +19,7 @@ RSpec.describe Api::RequirementTemplatesController,
                  tag_list: ["Part 9", "New Construction"],
                  requirement_template_sections_attributes: [
                    { name: "one section", position: 1 }
-                 ],
-                 type: LiveRequirementTemplate.name
+                 ]
                }
              }
         expect(response).to have_http_status(:success)
@@ -39,7 +38,6 @@ RSpec.describe Api::RequirementTemplatesController,
                  requirement_template: {
                    description: "a new template",
                    nickname: "Existing Template",
-                   type: LiveRequirementTemplate.name,
                    requirement_template_sections_attributes: [
                      { name: "another section", position: 1 }
                    ]

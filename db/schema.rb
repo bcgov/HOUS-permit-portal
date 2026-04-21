@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_04_16_183037) do
+ActiveRecord::Schema[7.2].define(version: 2026_04_21_200000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -755,14 +755,12 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_16_183037) do
     t.datetime "updated_at", null: false
     t.string "description"
     t.datetime "discarded_at"
-    t.string "type"
     t.string "nickname"
     t.datetime "fetched_at"
     t.uuid "copied_from_id"
     t.boolean "available_globally"
     t.index ["copied_from_id"], name: "index_requirement_templates_on_copied_from_id"
     t.index ["discarded_at"], name: "index_requirement_templates_on_discarded_at"
-    t.index ["type"], name: "index_requirement_templates_on_type"
   end
 
   create_table "requirements", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|

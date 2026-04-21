@@ -128,7 +128,7 @@ RSpec.describe Api::RequirementTemplatesController,
               }
           expect(response).to have_http_status(:success)
           sorted_ids =
-            LiveRequirementTemplate
+            RequirementTemplate
               .where(discarded_at: nil)
               .order(:description)
               .pluck(:id)
@@ -139,7 +139,7 @@ RSpec.describe Api::RequirementTemplatesController,
           get :index, params: { query: "", page: 1, per_page: 20 }
           expect(response).to have_http_status(:success)
           sorted_ids =
-            LiveRequirementTemplate
+            RequirementTemplate
               .where(discarded_at: nil)
               .order(created_at: :desc)
               .pluck(:id)

@@ -2,7 +2,6 @@ import { ApiResponse, ApisauceInstance, create, Monitor } from "apisauce"
 import { IRevisionRequestForm } from "../../components/domains/permit-application/revision-sidebar"
 import { IJurisdictionTemplateVersionCustomizationForm } from "../../components/domains/requirement-template/screens/jurisdiction-edit-digital-permit-screen"
 import { TContactFormData } from "../../components/shared/contact/create-edit-contact-modal"
-import { IEarlyAccessPreview } from "../../models/early-access-preview"
 import { IExternalApiKey } from "../../models/external-api-key"
 import { IIntegrationMapping } from "../../models/integration-mapping"
 import { IJurisdiction } from "../../models/jurisdiction"
@@ -25,7 +24,6 @@ import { IStepCode } from "../../stores/step-code-store"
 import {
   IExternalApiKeyParams,
   IIntegrationMappingUpdateParams,
-  IInvitePreviewersParams,
   IPermitProjectUpdateParams,
   IRequirementBlockParams,
   IRequirementTemplateUpdateParams,
@@ -47,7 +45,6 @@ import {
 import {
   ECollaborationType,
   ECollaboratorType,
-  EEarlyAccessRequirementTemplateSortFields,
   EJurisdictionSortFields,
   EPermitApplicationInboxSortFields,
   EPermitApplicationSortFields,
@@ -525,9 +522,7 @@ export class Api {
     return this.client.post<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/revision_requests/finalize`)
   }
 
-  async fetchRequirementTemplates(
-    params?: TSearchParams<ERequirementTemplateSortFields | EEarlyAccessRequirementTemplateSortFields>
-  ) {
+  async fetchRequirementTemplates(params?: TSearchParams<ERequirementTemplateSortFields>) {
     return this.client.post<IRequirementTemplateResponse>(`/requirement_templates/search`, params)
   }
 
@@ -562,25 +557,6 @@ export class Api {
     return this.client.put<ApiResponse<IRequirementTemplate>>(`/requirement_templates/${templateId}`, {
       requirementTemplate: params,
     })
-  }
-
-  async invitePreviewers(templateId: string, params: IInvitePreviewersParams) {
-    return this.client.post<ApiResponse<IRequirementTemplate>>(
-      `/requirement_templates/${templateId}/invite_previewers`,
-      params
-    )
-  }
-
-  async revokeEarlyAccess(previewId: string) {
-    return this.client.post<ApiResponse<IEarlyAccessPreview>>(`/early_access_previews/${previewId}/revoke_access`)
-  }
-
-  async unrevokeEarlyAccess(previewId: string) {
-    return this.client.post<ApiResponse<IEarlyAccessPreview>>(`/early_access_previews/${previewId}/unrevoke_access`)
-  }
-
-  async extendEarlyAccess(previewId: string) {
-    return this.client.post<ApiResponse<IEarlyAccessPreview>>(`/early_access_previews/${previewId}/extend_access`)
   }
 
   // we send the versionDate as string instead of date as we want to strip off timezone info

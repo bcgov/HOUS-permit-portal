@@ -13,11 +13,6 @@ export enum EPreviewStatus {
   revoked = "revoked",
 }
 
-export enum ERequirementTemplateType {
-  EarlyAccessRequirementTemplate = "EarlyAccessRequirementTemplate",
-  LiveRequirementTemplate = "LiveRequirementTemplate",
-}
-
 export enum EFileUploadAttachmentType {
   RequirementDocument = "RequirementDocument",
   SupportingDocument = "SupportingDocument",
@@ -108,7 +103,6 @@ export enum EUserSortFields {
 }
 
 export enum ERequirementTemplateSortFields {
-  nickname = "nickname",
   tags = "tags",
   description = "description",
   currentVersion = "current_version",
@@ -120,14 +114,6 @@ export enum EPreCheckSortFields {
   title = "title",
   updatedAt = "updated_at",
   status = "status",
-}
-
-export enum EEarlyAccessRequirementTemplateSortFields {
-  nickname = "nickname",
-  tags = "tags",
-  sharedWith = "shared_with",
-  updatedAt = "updated_at",
-  assignee = "assignee",
 }
 
 export enum EContactSortFields {

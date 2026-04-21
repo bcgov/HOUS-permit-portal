@@ -31,6 +31,10 @@ class CleanupEarlyAccessLegacyColumns < ActiveRecord::Migration[7.2]
                   :site_configuration_id,
                   :uuid,
                   if_exists: true
+
+    # The STI `type` column drop is handled by the schema migration
+    # 20260421200000_drop_type_from_requirement_templates.rb. Left out here
+    # so this data migration is column-level only.
   end
 
   def down

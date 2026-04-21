@@ -22,20 +22,11 @@ class Api::TemplateVersionsController < Api::ApplicationController
 
   def index
     status = template_version_params[:status] || "published"
-    early_access = template_version_params[:early_access] || false
-    type =
-      (
-        if early_access == "true"
-          "EarlyAccessRequirementTemplate"
-        else
-          "LiveRequirementTemplate"
-        end
-      )
     @template_versions =
       policy_scope(TemplateVersion)
         .order(updated_at: :desc)
         .joins(:requirement_template)
-        .where(status:, requirement_templates: { type: type })
+        .where(status:)
 
     render_success @template_versions,
                    nil,
@@ -54,7 +45,7 @@ class Api::TemplateVersionsController < Api::ApplicationController
       TemplateVersion
         .where(publicly_previewable: true, status: :draft)
         .joins(:requirement_template)
-        .includes(requirement_template: %i[activity permit_type])
+        .includes(:requirement_template)
         .where(requirement_templates: { discarded_at: nil })
         .order(updated_at: :desc)
 
@@ -431,7 +422,7 @@ class Api::TemplateVersionsController < Api::ApplicationController
   private
 
   def template_version_params
-    params.permit(:status, :early_access)
+    params.permit(:status)
   end
 
   def template_version_sandbox_scope

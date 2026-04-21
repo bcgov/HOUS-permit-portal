@@ -19,15 +19,11 @@ module Api::Concerns::Search::RequirementTemplates
               nil
             end
           ),
-        includes: model_klass::SEARCH_INCLUDES
+        includes: RequirementTemplate::SEARCH_INCLUDES
       )
   end
 
   private
-
-  def model_klass
-    LiveRequirementTemplate
-  end
 
   def search_params
     params.permit(

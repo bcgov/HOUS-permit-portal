@@ -27,7 +27,7 @@ export const TemplateVersionModel = types
     latestVersionId: types.maybeNull(types.string),
     formJson: types.maybeNull(types.frozen<IFormJson>()),
     isFullyLoaded: types.optional(types.boolean, false),
-    earlyAccess: types.boolean,
+    earlyAccess: types.optional(types.boolean, false),
     requirementTemplateId: types.string,
     // Draft workflow fields
     changeNotes: types.maybeNull(types.string),
@@ -38,7 +38,7 @@ export const TemplateVersionModel = types
     feedbacksCount: types.optional(types.number, 0),
     // Preview IDs (populated on extended view for drafts).
     // Stored as string IDs instead of safeReferences to avoid circular dependency:
-    // TemplateVersion -> EarlyAccessPreview -> User -> Jurisdiction -> PermitApplication -> TemplateVersion
+    // TemplateVersion -> TemplateVersionPreview -> User -> Jurisdiction -> PermitApplication -> TemplateVersion
     templateVersionPreviewIds: types.optional(types.array(types.string), []),
     // Fields populated only by the :standardization_preview blueprint view
     // (delegated from the owning RequirementTemplate). Left undefined for
@@ -46,7 +46,6 @@ export const TemplateVersionModel = types
     // may have null description/category.
     nickname: types.maybeNull(types.string),
     description: types.maybeNull(types.string),
-    activityCategory: types.maybeNull(types.string),
     isAvailableForAdoption: types.maybeNull(types.boolean),
   })
   .extend(withEnvironment())
@@ -68,9 +67,8 @@ export const TemplateVersionModel = types
       return self.status === ETemplateVersionStatus.draft
     },
 
-    // Resolve preview IDs to actual EarlyAccessPreview models from the store
     get templateVersionPreviews() {
-      const previewStore = self.rootStore.earlyAccessPreviewStore
+      const previewStore = self.rootStore.templateVersionPreviewStore
       return self.templateVersionPreviewIds.map((id) => previewStore.getPreviewById(id)).filter(Boolean)
     },
 

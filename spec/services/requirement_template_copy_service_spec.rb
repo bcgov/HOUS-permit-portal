@@ -25,7 +25,7 @@ RSpec.describe RequirementTemplateCopyService do
 
       new_template =
         instance_double(
-          "LiveRequirementTemplate",
+          "RequirementTemplate",
           valid?: true,
           requirement_template_sections: sections_builder,
           save: true
@@ -33,14 +33,13 @@ RSpec.describe RequirementTemplateCopyService do
 
       original =
         instance_double(
-          "LiveRequirementTemplate",
+          "RequirementTemplate",
           description: "Original",
           tag_list: [],
-          class: LiveRequirementTemplate,
           requirement_template_sections: sections_assoc
         )
 
-      allow(LiveRequirementTemplate).to receive(:new).and_return(new_template)
+      allow(RequirementTemplate).to receive(:new).and_return(new_template)
       allow(ActiveRecord::Base).to receive(:transaction).and_yield
 
       result =

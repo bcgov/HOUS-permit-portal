@@ -12,10 +12,6 @@ class TemplateVersionBlueprint < Blueprinter::Base
          :notification_scope,
          :publicly_previewable
 
-  field :early_access do |template_version|
-    template_version.early_access?
-  end
-
   field :version_date do |template_version|
     # Parse version date in BC time
     template_version.version_date_in_province_time
@@ -73,9 +69,6 @@ class TemplateVersionBlueprint < Blueprinter::Base
   view :standardization_preview do
     field(:nickname) { |tv| tv.requirement_template&.nickname }
     field(:description) { |tv| tv.requirement_template&.description }
-    field(:activity_category) do |tv|
-      tv.requirement_template&.activity&.category
-    end
     field(:is_available_for_adoption) do |tv|
       tv.requirement_template&.published_template_version.present?
     end

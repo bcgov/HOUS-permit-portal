@@ -75,7 +75,6 @@ class PermitApplication < ApplicationRecord
   validate :jurisdiction_has_matching_submission_contact
   validates :number, presence: true
   validates :reference_number, length: { maximum: 300 }, allow_nil: true
-  validate :template_version_of_live_template
   validate :submission_versions_match_status
 
   delegate :published_template_version, to: :template_version
@@ -860,19 +859,6 @@ class PermitApplication < ApplicationRecord
         :jurisdiction_id,
         I18n.t(
           "activerecord.errors.models.permit_application.attributes.jurisdiction.no_contact"
-        )
-      )
-    end
-  end
-
-  def template_version_of_live_template
-    return unless template_version.present?
-
-    unless template_version.live?
-      errors.add(
-        :template_version,
-        I18n.t(
-          "activerecord.errors.models.permit_application.attributes.template_version.must_be_live"
         )
       )
     end

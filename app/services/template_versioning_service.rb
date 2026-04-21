@@ -129,41 +129,9 @@ class TemplateVersioningService
     template_version
   end
 
-  def self.create_or_update_published_version_for_early_access!(
-    requirement_template
-  )
-    unless requirement_template.type == EarlyAccessRequirementTemplate.name
-      raise TemplateVersionPublishError,
-            I18n.t(
-              "services.template_versioning_service.early_access_version_error"
-            )
-    end
-
-    attributes = {
-      denormalized_template_json:
-        RequirementTemplateBlueprint.render_as_hash(
-          requirement_template,
-          view: :template_snapshot
-        ),
-      form_json: requirement_template.to_form_json,
-      requirement_blocks_json:
-        form_requirement_blocks_hash(requirement_template),
-      version_date: Date.current,
-      status: "published"
-    }
-    if requirement_template.id.present?
-      requirement_template.reload_published_template_version
-    end
-    version =
-      requirement_template.published_template_version ||
-        requirement_template.template_versions.build
-    version.assign_attributes(attributes)
-    version.save!
-  end
-
   # ── Draft workflow methods ──────────────────────────────────────────────
 
-  # Creates a new draft TemplateVersion for a LiveRequirementTemplate.
+  # Creates a new draft TemplateVersion for a RequirementTemplate.
   # Snapshots the current template state (sections, blocks, form JSON)
   # into the draft's JSON columns so edits are isolated from canonical records.
   def self.create_draft!(requirement_template, assignee: nil)

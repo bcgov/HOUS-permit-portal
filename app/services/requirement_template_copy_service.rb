@@ -1,24 +1,14 @@
 class RequirementTemplateCopyService
   attr_accessor :requirement_template
 
-  # Define a whitelist of permitted classes
-  ALLOWED_CLASSES = {
-    LiveRequirementTemplate.name => LiveRequirementTemplate
-  }.freeze
-
   def initialize(requirement_template)
     @requirement_template = requirement_template
   end
 
   def build_requirement_template_from_existing(field_overrides = {})
     ActiveRecord::Base.transaction do
-      # Clone the basic attributes of the original template
-      # # Fetch the class from the whitelist or fallback to the existing class
-      template_class =
-        ALLOWED_CLASSES[field_overrides[:type]] || requirement_template.class
-
       new_template =
-        template_class.new(
+        RequirementTemplate.new(
           description:
             field_overrides[:description] ||
               "Copy of #{requirement_template.description}",

@@ -330,10 +330,6 @@ const RevisionReasonSetupScreen = lazy(() =>
   }))
 )
 
-// DEPRECATED: StandardizationSetupScreen is no longer wired into the router.
-// Super admins now toggle publicly_previewable directly on the
-// TemplateVersionScreen. The file is kept for reference.
-
 const AdminUserIndexScreen = lazy(() =>
   import("../super-admin/site-configuration-management/users-screen").then((module) => ({
     default: module.AdminUserIndexScreen,

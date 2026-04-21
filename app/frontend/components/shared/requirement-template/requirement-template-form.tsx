@@ -6,17 +6,15 @@ import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { IRequirementTemplate } from "../../../models/requirement-template"
 import { useMst } from "../../../setup/root"
-import { ERequirementTemplateType } from "../../../types/enums"
 import { TCreateRequirementTemplateFormData } from "../../../types/types"
 import { TextFormControl } from "../form/input-form-control"
 import { TagsSelect } from "../select/selectors/tags-select"
 
 interface IRequirementTemplateFormProps {
-  type: ERequirementTemplateType
   onSuccess: (createdRequirementTemplate: IRequirementTemplate) => void
 }
 
-export const RequirementTemplateForm = observer(({ type, onSuccess }: IRequirementTemplateFormProps) => {
+export const RequirementTemplateForm = observer(({ onSuccess }: IRequirementTemplateFormProps) => {
   const { t } = useTranslation()
   const {
     requirementTemplateStore: { createRequirementTemplate, searchTagOptions },
@@ -41,8 +39,6 @@ export const RequirementTemplateForm = observer(({ type, onSuccess }: IRequireme
   }
 
   const onSubmit = async (formData) => {
-    formData.type = type
-
     const createdRequirementTemplate = await createRequirementTemplate(formData)
 
     if (createdRequirementTemplate) {

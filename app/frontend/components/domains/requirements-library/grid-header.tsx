@@ -15,8 +15,8 @@ interface IProps {
 }
 
 export const GridHeaders = observer(function GridHeaders({ forEarlyAccess }: IProps) {
-  const { requirementBlockStore, earlyAccessRequirementBlockStore } = useMst()
-  const searchModel = forEarlyAccess ? earlyAccessRequirementBlockStore : requirementBlockStore
+  const { requirementBlockStore } = useMst()
+  const searchModel = requirementBlockStore
 
   const { sort, getSortColumnHeader, toggleSort } = searchModel
   const { t } = useTranslation()

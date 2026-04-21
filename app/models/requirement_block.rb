@@ -34,7 +34,6 @@ class RequirementBlock < ApplicationRecord
   validate :validate_step_code_dependencies
   validate :validate_requirements_conditional
   validate :validate_requirements_data_validation
-  validate :early_access_on_appropriate_template
   validate :unique_name_among_non_discarded
 
   before_validation :set_sku, on: :create
@@ -49,12 +48,8 @@ class RequirementBlock < ApplicationRecord
 
   after_discard { template_section_blocks.destroy_all }
 
-  def allowed_in(requirement_template)
-    if requirement_template.early_access?
-      %i[any early_access].include?(visibility.to_sym)
-    else
-      %i[any live].include?(visibility.to_sym)
-    end
+  def allowed_in(_requirement_template)
+    %i[any live].include?(visibility.to_sym)
   end
 
   def sections
@@ -206,36 +201,6 @@ class RequirementBlock < ApplicationRecord
   # Escape for single-quoted JS strings
   def escape_for_js(str)
     str.to_s.gsub(/['\\]/) { |match| "\\#{match}" }
-  end
-
-  def early_access_on_appropriate_template
-    # Determine the required visibility based on the current object's state
-    if early_access?
-      required_visibility = :early_access
-      error_key = "associated_requirement_templates_must_be_early_access"
-    elsif live?
-      required_visibility = :live
-      error_key = "associated_requirement_templates_must_be_live"
-    elsif any?
-      # If any, no validation is needed
-      return
-    end
-
-    # Fetch associated requirement templates through requirement_template_sections
-    associated_templates =
-      requirement_template_sections.map(&:requirement_template)
-
-    method_to_use = :"#{required_visibility}?"
-
-    # Check if all associated templates satisfy the required visibility
-    unless associated_templates.all?(&method_to_use)
-      errors.add(
-        :visibility,
-        I18n.t(
-          "activerecord.errors.models.requirement_block.attributes.visibility.#{error_key}"
-        )
-      )
-    end
   end
 
   def refresh_search_index

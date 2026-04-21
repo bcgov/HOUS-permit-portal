@@ -72,7 +72,7 @@ class RequirementsFromXlsxSeeder
     errors << "#{nickname} loading"
 
     requirement_template =
-      LiveRequirementTemplate.where(nickname: nickname).first_or_create(
+      RequirementTemplate.where(nickname: nickname).first_or_create(
         nickname: nickname
       )
     requirement_template.tag_list.add(activity, permit_type)

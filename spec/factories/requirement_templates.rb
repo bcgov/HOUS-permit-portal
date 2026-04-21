@@ -1,8 +1,9 @@
 FactoryBot.define do
-  factory :live_requirement_template do
-    sequence(:nickname) { |n| "Live Template #{n}" }
+  factory :requirement_template, aliases: [:live_requirement_template] do
+    sequence(:nickname) { |n| "Template #{n}" }
 
-    factory :live_requirement_template_with_sections do
+    factory :requirement_template_with_sections,
+            aliases: [:live_requirement_template_with_sections] do
       transient { sections_count { 5 } }
 
       after(:create) do |template, evaluator|
@@ -14,7 +15,8 @@ FactoryBot.define do
       end
     end
 
-    factory :live_full_requirement_template do
+    factory :full_requirement_template,
+            aliases: [:live_full_requirement_template] do
       transient { sections_count { 5 } }
 
       after(:create) do |template, evaluator|
@@ -27,7 +29,8 @@ FactoryBot.define do
     end
 
     # default a template with some municipality and regional district
-    factory :live_requirement_template_with_compliance do
+    factory :requirement_template_with_compliance,
+            aliases: [:live_requirement_template_with_compliance] do
       after(:create) do |template|
         create_list(
           :requirement_template_section,
@@ -96,7 +99,8 @@ FactoryBot.define do
       end
     end
 
-    factory :live_requirement_template_with_heritage do
+    factory :requirement_template_with_heritage,
+            aliases: [:live_requirement_template_with_heritage] do
       after(:create) do |template|
         create_list(
           :requirement_template_section,

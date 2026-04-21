@@ -1,7 +1,6 @@
 class RequirementTemplateBlueprint < Blueprinter::Base
   identifier :id
   fields :nickname,
-         :type,
          :description,
          :discarded_at,
          :fetched_at,
@@ -45,12 +44,6 @@ class RequirementTemplateBlueprint < Blueprinter::Base
               view: :minimal,
               if: ->(_field_name, _rt, options) do
                 options[:current_user]&.super_admin?
-              end
-
-  association :template_version_previews,
-              blueprint: TemplateVersionPreviewBlueprint,
-              if: ->(_field_name, rt, options) do
-                rt.early_access? && options[:current_user]&.super_admin?
               end
 
   association :draft_template_version,

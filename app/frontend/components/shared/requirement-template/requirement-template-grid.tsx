@@ -36,11 +36,11 @@ export const RequirementTemplateGrid: React.FC<RequirementTemplateGridProps> = o
 
   return (
     <VStack alignItems={"flex-start"} spacing={5} w={"full"} h={"full"}>
-      <SearchGrid templateColumns="1.5fr 2fr 1fr 1fr 1fr">
+      <SearchGrid templateColumns="1.5fr 2fr 1.5fr 1fr 1fr">
         <GridHeaders />
 
         {isSearching ? (
-          <Flex py={50} gridColumn={"span 6"} width="100%" justifyContent="center">
+          <Flex py={50} gridColumn={"1 / -1"} width="100%" justifyContent="center">
             <SharedSpinner />
           </Flex>
         ) : (
@@ -98,7 +98,7 @@ const GridHeaders = observer(function GridHeaders() {
       <Box display={"contents"} role={"row"}>
         <GridItem
           as={Flex}
-          gridColumn={"span 5"}
+          gridColumn={"1 / -1"}
           p={6}
           bg={"greys.grey10"}
           justifyContent={"space-between"}

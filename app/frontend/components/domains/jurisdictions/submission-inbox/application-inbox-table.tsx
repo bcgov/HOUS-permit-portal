@@ -250,7 +250,7 @@ const ApplicationInboxRow = observer(function ApplicationInboxRow({
       <SearchGridItem>
         <VStack align="start" spacing={0}>
           <Text fontWeight={700} fontSize="sm" noOfLines={1}>
-            {application.nickname || application.permitType?.name || application.permitTypeAndActivity || "—"}
+            {application.nickname || "—"}
           </Text>
           <Text fontSize="xs" color="text.secondary" noOfLines={1}>
             {application.number}

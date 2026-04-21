@@ -186,7 +186,7 @@ if PermitApplication.first.blank?
   Contact.reindex
   puts "Seeding requirement templates..."
   t1 =
-    LiveRequirementTemplate.find_or_create_by!(
+    RequirementTemplate.find_or_create_by!(
       nickname: "New Construction - Small Scale"
     )
   t1.tag_list.add(
@@ -197,7 +197,7 @@ if PermitApplication.first.blank?
   t1.save!
 
   t2 =
-    LiveRequirementTemplate.find_or_create_by!(
+    RequirementTemplate.find_or_create_by!(
       nickname: "New Construction - 4+ Unit"
     )
   t2.tag_list.add(
@@ -208,9 +208,7 @@ if PermitApplication.first.blank?
   t2.save!
 
   t3 =
-    LiveRequirementTemplate.find_or_create_by!(
-      nickname: "Demolition - Small Scale"
-    )
+    RequirementTemplate.find_or_create_by!(nickname: "Demolition - Small Scale")
   t3.tag_list.add(
     "Demolition",
     "Small-scale/Multi-unit housing (Part 9 BCBC)",
@@ -218,8 +216,7 @@ if PermitApplication.first.blank?
   )
   t3.save!
 
-  t4 =
-    LiveRequirementTemplate.find_or_create_by!(nickname: "Demolition - 4+ Unit")
+  t4 = RequirementTemplate.find_or_create_by!(nickname: "Demolition - 4+ Unit")
   t4.tag_list.add("Demolition", "4+ Unit housing", "Site Preparation")
   t4.save!
 
@@ -245,8 +242,7 @@ if PermitApplication.first.blank?
 
   # Creating Permit Applications
   puts "Seeding permit applications..."
-  published_template_versions =
-    TemplateVersion.published_for_live_requirement_templates
+  published_template_versions = TemplateVersion.published_on_kept_templates
   submitter_user = User.find_by!(omniauth_username: "submitter")
 
   north_van_streets = [
@@ -368,46 +364,6 @@ EulaUpdater.run
 puts "Seeding default revision reasons..."
 RevisionReasonSeeder.seed
 
-puts "Seeding early access requirement templates..."
-
-LiveRequirementTemplate.find_each do |lrt|
-  overrides = {
-    type: EarlyAccessRequirementTemplate.name,
-    nickname: "Early access #{lrt.label}"
-  }
-  ea_template =
-    RequirementTemplateCopyService.new(
-      lrt
-    ).build_requirement_template_from_existing(overrides)
-  ea_template&.update(available_globally: true) if ea_template&.persisted?
-end
-
-# Seed some previewers for EarlyAccessRequirementTemplate instances
-# add comment for test
-puts "Seeding Early Access Invitations..."
-
-# Fetching existing EarlyAccessRequirementTemplate instances
-early_access_requirement_templates = EarlyAccessRequirementTemplate.limit(3)
-
-# Fetching existing User instances
-users = User.limit(5)
-
-# Associate some users as previewers for each template
-early_access_requirement_templates.each do |eart|
-  # Select a random subset of users to invite (between 1 and 5 users)
-  previewers = users.sample(rand(1..5))
-
-  previewers.each do |user|
-    template_version = eart.published_template_version
-    next unless template_version
-
-    TemplateVersionPreview.create!(
-      template_version: template_version,
-      previewer: user
-    )
-  end
-end
-
 if Rails.env.development?
   puts "Ensuring site configuration inbox is enabled for development..."
   site_config = SiteConfiguration.instance
@@ -512,8 +468,7 @@ inbox_test_visible_statuses = %i[
 
 if north_van.present?
   submitter_for_inbox_test = User.find_by(omniauth_username: "submitter")
-  published_for_inbox_test =
-    TemplateVersion.published_for_live_requirement_templates
+  published_for_inbox_test = TemplateVersion.published_on_kept_templates
 
   if submitter_for_inbox_test.present? && reviewer_user.present? &&
        published_for_inbox_test.exists?

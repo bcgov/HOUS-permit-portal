@@ -19,11 +19,10 @@ export const TemplateVersionStoreModel = types
   .extend(withMerge())
   .actions((self) => ({
     __beforeMergeUpdate(templateVersion) {
-      // Merge template version previews into the earlyAccessPreviewStore (same table/shape)
       if (templateVersion.templateVersionPreviews?.length > 0) {
-        self.rootStore.earlyAccessPreviewStore.mergeUpdateAll(
+        self.rootStore.templateVersionPreviewStore.mergeUpdateAll(
           templateVersion.templateVersionPreviews,
-          "earlyAccessPreviewsMap"
+          "templateVersionPreviewsMap"
         )
       }
 

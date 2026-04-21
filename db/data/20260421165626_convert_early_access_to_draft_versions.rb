@@ -31,7 +31,8 @@ class ConvertEarlyAccessToDraftVersions < ActiveRecord::Migration[7.2]
       column_exists?(
         :template_version_previews,
         :early_access_requirement_template_id
-      ) && column_exists?(:requirement_templates, :assignee_id)
+      ) && column_exists?(:requirement_templates, :assignee_id) &&
+      column_exists?(:requirement_templates, :type)
   end
 
   def migrate_ea_templates_to_drafts

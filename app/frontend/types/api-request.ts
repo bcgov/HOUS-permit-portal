@@ -126,10 +126,6 @@ export interface IRequirementTemplateUpdateParams {
   availableGlobally?: boolean | null
 }
 
-export interface IInvitePreviewersParams {
-  emails: string[]
-}
-
 export interface ISiteConfigurationUpdateParams {
   displaySitewideMessage?: boolean | null
   inboxEnabled?: boolean | null
