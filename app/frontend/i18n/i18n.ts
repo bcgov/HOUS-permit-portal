@@ -3840,7 +3840,7 @@ Thank you,
           },
           superAdminTitle: "Admin home",
           submissionsInboxTitle: "Submissions",
-          submissionsInboxDescription: "View all submitted building permit applications.",
+          submissionsInboxDescription: "Review projects and submitted permit applications",
           permitsTitle: "Permit application forms",
           permitsDescription:
             "Set up helpful tips for submitters and select elective questions to customize the permit application process for your local jurisdiction",
