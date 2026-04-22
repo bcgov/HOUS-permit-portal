@@ -378,6 +378,7 @@ export enum EPermitApplicationSocketEventTypes {
 
 export enum EJurisdictionSocketEventTypes {
   unviewedSubmissionsCountUpdated = "unviewed_submissions_count_updated",
+  unviewedProjectsCountUpdated = "unviewed_projects_count_updated",
 }
 
 export enum EEnabledElectiveFieldReason {

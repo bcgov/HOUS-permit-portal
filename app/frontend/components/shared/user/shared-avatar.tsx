@@ -25,7 +25,10 @@ interface ISharedAvatarProps extends Omit<AvatarProps, "bg" | "color"> {
   role?: string | null
 }
 
-export const SharedAvatar = ({ role, ...rest }: ISharedAvatarProps) => {
+export const SharedAvatar = React.forwardRef<HTMLSpanElement, ISharedAvatarProps>(function SharedAvatar(
+  { role, ...rest },
+  ref
+) {
   const colors = getRoleAvatarColors(role)
-  return <Avatar bg={colors.bg} color={colors.color} {...rest} />
-}
+  return <Avatar ref={ref} bg={colors.bg} color={colors.color} {...rest} />
+})

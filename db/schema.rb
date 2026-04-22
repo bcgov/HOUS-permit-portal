@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_04_16_183037) do
+ActiveRecord::Schema[7.2].define(version: 2026_04_20_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -587,6 +587,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_16_183037) do
     t.index ["discarded_at"], name: "index_permit_project_collaborations_on_discarded_at"
     t.index ["permit_project_id", "collaborator_id"], name: "index_project_collabs_on_project_and_collaborator", unique: true, where: "(discarded_at IS NULL)"
     t.index ["permit_project_id"], name: "index_permit_project_collaborations_on_permit_project_id"
+    t.index ["permit_project_id"], name: "index_project_collabs_unique_kept_per_project", unique: true, where: "(discarded_at IS NULL)"
   end
 
   create_table "permit_projects", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
