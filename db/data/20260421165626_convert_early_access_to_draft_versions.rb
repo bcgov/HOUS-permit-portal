@@ -80,16 +80,18 @@ class ConvertEarlyAccessToDraftVersions < ActiveRecord::Migration[7.2]
     return existing["id"] if existing.present?
     return nil unless allow_create
 
+    # Deliberately do NOT copy description/nickname from the EA template:
+    # EA templates were originally created via RequirementTemplateCopyService
+    # which prepends "Copy of " to the description, and those values are not
+    # meaningful on the container live template being created here.
     execute(<<~SQL)
       INSERT INTO requirement_templates (id, permit_type_id, activity_id, first_nations,
-        description, nickname, type, created_at, updated_at)
+        type, created_at, updated_at)
       VALUES (
         gen_random_uuid(),
         '#{ea["permit_type_id"]}',
         '#{ea["activity_id"]}',
         #{ea["first_nations"]},
-        #{ea["description"] ? "'#{escape_single_quotes(ea["description"])}'" : "NULL"},
-        #{ea["nickname"] ? "'#{escape_single_quotes(ea["nickname"])}'" : "NULL"},
         'LiveRequirementTemplate',
         NOW(), NOW()
       )

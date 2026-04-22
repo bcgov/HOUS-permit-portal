@@ -43,11 +43,11 @@ en:
         phone: "Phone no."
       requirement_template:
         tags: "Tags"
+        available_in_all: "All"
       sandbox:
         scope_names:
           published: 'Training mode: "Published"'
           scheduled: 'Training mode: "Upcoming"'
-        available_in_all: "All"
     errors:
       models:
         jurisdiction:
@@ -81,6 +81,10 @@ en:
               review_staff_requires_sandbox: "review staff cannot own permit projects outside of a sandbox"
             sandbox:
               incorrect_jurisdiction: "must belong to the jurisdiction. Please apply to your own jurisdiction to use this sandbox."
+        permit_project_collaboration:
+          attributes:
+            permit_project:
+              only_one_review_collaborator_allowed: "can only have one review collaborator assigned at a time"
         requirement_template:
           step_code_package_required: '"Energy step code" is required to have the Design package energy step code file'
           duplicate_energy_step_code: 'Multiple "Energy step code" requirements found. Please ensure there is only one "Energy step code" requirement in the template'

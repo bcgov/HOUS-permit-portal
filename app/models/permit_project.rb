@@ -40,6 +40,8 @@ class PermitProject < ApplicationRecord
   delegate :name, to: :owner, prefix: true
 
   after_commit :reindex
+  after_commit :broadcast_jurisdiction_projects_count_update,
+               if: :should_broadcast_projects_count_update?
 
   scope :sandboxed, -> { where.not(sandbox_id: nil) }
   scope :live, -> { where(sandbox_id: nil) }
@@ -131,6 +133,27 @@ class PermitProject < ApplicationRecord
 
   def mark_as_unviewed
     update(viewed_at: nil)
+  end
+
+  def broadcast_jurisdiction_projects_count_update
+    return unless jurisdiction.present?
+
+    review_staff_user_ids =
+      jurisdiction.users.kept.select(&:review_staff?).map(&:id)
+    return if review_staff_user_ids.empty?
+
+    WebsocketBroadcaster.push_update_to_relevant_users(
+      review_staff_user_ids,
+      Constants::Websockets::Events::Jurisdiction::DOMAIN,
+      Constants::Websockets::Events::Jurisdiction::TYPES[
+        :unviewed_projects_count_updated
+      ],
+      {
+        jurisdiction_id: jurisdiction.id,
+        sandbox_id: sandbox_id,
+        unviewed_count: jurisdiction.unviewed_projects_count(sandbox: sandbox)
+      }
+    )
   end
 
   def search_data
@@ -275,49 +298,12 @@ class PermitProject < ApplicationRecord
     audits
   end
 
-  def aggregated_review_collaborators
-    users = {}
-
-    # Include project-level review collaborators
+  # Exposed in API as +review_delegatee+ (Collaborator JSON). UI treats a single project reviewer.
+  def review_delegatee
     permit_project_collaborations
       .includes(collaborator: :user)
-      .each do |ppc|
-        user = ppc.collaborator&.user
-        next unless user
-
-        users[user.id] ||= {
-          id: user.id,
-          name: user.name,
-          role: user.role,
-          is_project_collaborator: true
-        }
-      end
-
-    # Include per-application review collaborators
-    permit_applications.each do |pa|
-      next if pa.discarded? || !pa.submitted?
-
-      pa.permit_collaborations.each do |collab|
-        next unless collab.review?
-
-        user = collab.collaborator&.user
-        next unless user
-
-        existing = users[user.id]
-        if existing
-          existing[:is_project_collaborator] ||= false
-        else
-          users[user.id] = {
-            id: user.id,
-            name: user.name,
-            role: user.role,
-            is_project_collaborator: false
-          }
-        end
-      end
-    end
-
-    users.values
+      .first
+      &.collaborator
   end
 
   def designated_reviewer_enabled?
@@ -325,23 +311,38 @@ class PermitProject < ApplicationRecord
       jurisdiction&.allow_designated_reviewer
   end
 
+  # Atomically assigns the project's single review collaborator, replacing any
+  # existing assignment. Re-picking the current collaborator is a no-op (no
+  # notification churn). Locks existing kept rows to serialize concurrent calls.
   def assign_project_review_collaborator!(collaborator_id)
     unless designated_reviewer_enabled?
       raise "Designated reviewer feature is not enabled"
     end
 
-    collaboration =
-      permit_project_collaborations.create!(collaborator_id: collaborator_id)
+    transaction do
+      existing = permit_project_collaborations.kept.lock.first
 
-    PermitHubMailer.notify_project_review_collaboration(
-      permit_project_collaboration: collaboration
-    )&.deliver_later
+      if existing&.collaborator_id == collaborator_id
+        existing
+      else
+        existing&.discard!
 
-    NotificationService.publish_project_collaboration_assignment_event(
-      collaboration
-    )
+        collaboration =
+          permit_project_collaborations.create!(
+            collaborator_id: collaborator_id
+          )
 
-    collaboration
+        PermitHubMailer.notify_project_review_collaboration(
+          permit_project_collaboration: collaboration
+        )&.deliver_later
+
+        NotificationService.publish_project_collaboration_assignment_event(
+          collaboration
+        )
+
+        collaboration
+      end
+    end
   end
 
   def unassign_project_review_collaborator!(collaborator_id)
@@ -351,6 +352,17 @@ class PermitProject < ApplicationRecord
   end
 
   private
+
+  # Recompute the jurisdiction-wide unviewed projects badge whenever a change
+  # could affect membership in the set counted by
+  # Jurisdiction#unviewed_projects_count:
+  #   - viewed_at transitions (mark_as_unviewed / update_viewed_at)
+  #   - state transitions in/out of "draft"
+  #   - discarded/undiscarded transitions
+  def should_broadcast_projects_count_update?
+    saved_change_to_viewed_at? || saved_change_to_state? ||
+      saved_change_to_discarded_at?
+  end
 
   def sandbox_belongs_to_jurisdiction
     return unless sandbox

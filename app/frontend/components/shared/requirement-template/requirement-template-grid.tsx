@@ -36,7 +36,7 @@ export const RequirementTemplateGrid: React.FC<RequirementTemplateGridProps> = o
 
   return (
     <VStack alignItems={"flex-start"} spacing={5} w={"full"} h={"full"}>
-      <SearchGrid templateColumns="1.5fr 2fr 1.5fr 1fr 1fr">
+      <SearchGrid templateColumns="1.5fr 1.5fr 2fr 1.5fr 1fr 1fr">
         <GridHeaders />
 
         {isSearching ? (
@@ -46,7 +46,8 @@ export const RequirementTemplateGrid: React.FC<RequirementTemplateGridProps> = o
         ) : (
           tableRequirementTemplates.map((rt) => (
             <Box key={rt.id} className={"requirements-template-grid-row"} role={"row"} display={"contents"}>
-              <SearchGridItem fontWeight="bold">
+              <SearchGridItem fontWeight="bold">{rt.nickname}</SearchGridItem>
+              <SearchGridItem>
                 <HStack as="ul" wrap="wrap" spacing={1} gap={1}>
                   {(rt.tags ?? []).map((tag) => (
                     <Tag key={tag} as="li" bg="greys.grey03" color="text.secondary" fontSize="xs">

@@ -103,6 +103,7 @@ export enum EUserSortFields {
 }
 
 export enum ERequirementTemplateSortFields {
+  nickname = "nickname",
   tags = "tags",
   description = "description",
   currentVersion = "current_version",
@@ -355,6 +356,7 @@ export enum EPermitApplicationSocketEventTypes {
 
 export enum EJurisdictionSocketEventTypes {
   unviewedSubmissionsCountUpdated = "unviewed_submissions_count_updated",
+  unviewedProjectsCountUpdated = "unviewed_projects_count_updated",
 }
 
 export enum EEnabledElectiveFieldReason {
@@ -687,7 +689,7 @@ export enum EProjectState {
 export enum EPermitProjectInboxSortFields {
   projectNumber = "number",
   address = "full_address",
-  applications = "permit_applications_size",
+  applications = "total_permits_count",
   daysInQueue = "days_in_queue",
   assigned = "assigned",
   state = "state",

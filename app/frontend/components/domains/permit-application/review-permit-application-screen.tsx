@@ -328,7 +328,7 @@ export const ReviewPermitApplicationScreen = observer(() => {
                   )
                 )
               }}
-              updateCollaborationAssignmentNodes={isReadOnly ? undefined : updateRequirementBlockAssignmentNode}
+              updateCollaborationAssignmentNodes={updateRequirementBlockAssignmentNode}
             />
           </Flex>
         )}
@@ -341,17 +341,16 @@ export const ReviewPermitApplicationScreen = observer(() => {
           permitApplication={currentPermitApplication}
         />
       )}
-      {!isReadOnly &&
-        requirementBlockAssignmentNodes.map((requirementBlockAssignmentNode) => {
-          return (
-            <BlockCollaboratorAssignmentManagement
-              key={requirementBlockAssignmentNode.requirementBlockId}
-              requirementBlockAssignmentNode={requirementBlockAssignmentNode}
-              permitApplication={currentPermitApplication}
-              collaborationType={ECollaborationType.review}
-            />
-          )
-        })}
+      {requirementBlockAssignmentNodes.map((requirementBlockAssignmentNode) => {
+        return (
+          <BlockCollaboratorAssignmentManagement
+            key={requirementBlockAssignmentNode.requirementBlockId}
+            requirementBlockAssignmentNode={requirementBlockAssignmentNode}
+            permitApplication={currentPermitApplication}
+            collaborationType={ECollaborationType.review}
+          />
+        )
+      })}
     </Box>
   )
 })

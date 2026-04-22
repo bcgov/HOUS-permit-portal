@@ -145,7 +145,7 @@ export const InboxOverviewTab = observer(({ permitProject }: IProps) => {
                 ))}
             </SearchGrid>
             <Flex justify="flex-end" mt={4}>
-              <RouterLinkButton variant="tertiary" rightIcon={<CaretRight />} to="permits">
+              <RouterLinkButton variant="link" rightIcon={<CaretRight />} to="permits">
                 {t("submissionInbox.projectDetail.viewAllPermits")}
               </RouterLinkButton>
             </Flex>
