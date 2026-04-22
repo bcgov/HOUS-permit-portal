@@ -5,6 +5,21 @@
 
 class CleanupEarlyAccessLegacyColumns < ActiveRecord::Migration[7.2]
   def up
+    # Defense in depth: ConvertEarlyAccessToDraftVersions should have
+    # populated every template_version_previews.template_version_id, but if
+    # any truly-orphaned rows remain (e.g. their source EA template was
+    # hard-deleted or pre-dates the rename migration), delete them before
+    # enforcing NOT NULL.
+    if column_exists?(:template_version_previews, :template_version_id)
+      orphan_count =
+        execute(
+          "DELETE FROM template_version_previews WHERE template_version_id IS NULL"
+        ).cmd_tuples
+      if orphan_count.positive?
+        say "Deleted #{orphan_count} orphaned template_version_previews with NULL template_version_id"
+      end
+    end
+
     # Remove the old FK column from the renamed table (was early_access_previews)
     if column_exists?(
          :template_version_previews,
