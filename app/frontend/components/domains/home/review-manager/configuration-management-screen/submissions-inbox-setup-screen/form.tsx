@@ -1,4 +1,3 @@
-import { VStack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React, { useEffect } from "react"
@@ -86,18 +85,15 @@ export const Form = observer(function SubmissionInboxSetupForm({ jurisdiction }:
   return (
     <FormProvider {...formMethods}>
       <form onSubmit={handleSubmit(onSubmit)} style={{ width: "100%" }}>
-        <VStack spacing={5}>
-          <EditableBlock
-            heading={t("home.configurationManagement.featureAccess.submissionContacts")}
-            fields={fields}
-            fieldArrayName={fieldArrayName}
-            getIndex={getIndex}
-            append={append}
-            remove={remove}
-            update={update}
-            reset={handleReset}
-          />
-        </VStack>
+        <EditableBlock
+          fields={fields}
+          fieldArrayName={fieldArrayName}
+          getIndex={getIndex}
+          append={append}
+          remove={remove}
+          update={update}
+          reset={handleReset}
+        />
       </form>
     </FormProvider>
   )

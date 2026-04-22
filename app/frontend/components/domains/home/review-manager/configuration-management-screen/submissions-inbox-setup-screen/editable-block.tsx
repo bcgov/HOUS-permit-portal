@@ -87,11 +87,11 @@ export const EditableBlock = observer(function SubmissionsInboxSetupEditableBloc
   ) : (
     <EditableBlockContainer>
       {heading && (
-        <FormControl flexBasis={"280px"} alignSelf="start">
+        <FormControl flexBasis={"280px"} alignSelf="center">
           <EditableBlockHeading>{heading}</EditableBlockHeading>
         </FormControl>
       )}
-      <VStack flex={1} spacing={5} alignSelf="end">
+      <VStack flex={1} spacing={5} alignSelf="center">
         {fields.map((f, index) => {
           const trueIndex = getIndex(f)
           const contactId = getValues(`${fieldArrayName}.${trueIndex}.id`)

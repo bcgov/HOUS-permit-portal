@@ -23,6 +23,7 @@ export const RequirementTemplateForm = observer(({ onSuccess }: IRequirementTemp
   const formMethods = useForm<TCreateRequirementTemplateFormData>({
     mode: "onChange",
     defaultValues: {
+      nickname: "",
       description: "",
       tags: [],
     },
@@ -51,6 +52,10 @@ export const RequirementTemplateForm = observer(({ onSuccess }: IRequirementTemp
       <form onSubmit={handleSubmit(onSubmit)}>
         <VStack alignItems={"flex-start"} spacing={5} gap={8} w={"full"} h={"full"}>
           <Text>{t("requirementTemplate.new.typePrompt")}</Text>
+
+          <Flex direction="column" as="section" w="full">
+            <TextFormControl label={t("requirementTemplate.fields.nickname")} fieldName={"nickname"} required />
+          </Flex>
 
           <Flex direction="column" as="section" w="full">
             <Text fontWeight={700} mb={2}>
