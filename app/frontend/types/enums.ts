@@ -712,7 +712,7 @@ export enum EProjectState {
 export enum EPermitProjectInboxSortFields {
   projectNumber = "number",
   address = "full_address",
-  applications = "permit_applications_size",
+  applications = "total_permits_count",
   daysInQueue = "days_in_queue",
   assigned = "assigned",
   state = "state",
