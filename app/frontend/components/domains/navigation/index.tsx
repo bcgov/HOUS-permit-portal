@@ -279,6 +279,11 @@ const TemplateVersionScreen = lazy(() =>
     default: module.TemplateVersionScreen,
   }))
 )
+const TemplateVersionPreviewScreen = lazy(() =>
+  import("../requirement-template/screens/template-version-preview-screen").then((module) => ({
+    default: module.TemplateVersionPreviewScreen,
+  }))
+)
 
 const ExportTemplatesScreen = lazy(() =>
   import("../jurisdictions/exports/export-templates-screen").then((module) => ({
@@ -808,6 +813,7 @@ const AppRoutes = observer(() => {
         <Route path="/accept-invitation" element={<AcceptInvitationScreen />} />
         <Route path="/contact" element={<ContactScreen />} />
         <Route path="/standardization-preview" element={<StandardizationPreviewScreen />} />
+        <Route path="/template-versions/:templateVersionId/preview" element={<TemplateVersionPreviewScreen />} />
         <Route path="/project-readiness-tools" element={<ProjectReadinessToolsIndexScreen />} />
         <Route path="/privacy-policy" element={<PrivacyPolicyScreen />} />
         <Route

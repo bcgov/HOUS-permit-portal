@@ -18,6 +18,7 @@ import { IPreCheck } from "../../models/pre-check"
 import { IProjectAudit } from "../../models/project-audit"
 import { IRequirementTemplate } from "../../models/requirement-template"
 import { ITemplateVersion } from "../../models/template-version"
+import { ITemplateVersionPreview } from "../../models/template-version-preview"
 import { IUser } from "../../models/user"
 import { ISiteConfigurationStore } from "../../stores/site-configuration-store"
 import { IStepCode } from "../../stores/step-code-store"
@@ -729,6 +730,24 @@ export class Api {
     return this.client.post<ApiResponse<ITemplateVersion>>(
       `/template_versions/${templateVersionId}/invite_draft_previewers`,
       { emails }
+    )
+  }
+
+  async revokeTemplateVersionPreview(previewId: string) {
+    return this.client.post<ApiResponse<ITemplateVersionPreview>>(
+      `/template_version_previews/${previewId}/revoke_access`
+    )
+  }
+
+  async unrevokeTemplateVersionPreview(previewId: string) {
+    return this.client.post<ApiResponse<ITemplateVersionPreview>>(
+      `/template_version_previews/${previewId}/unrevoke_access`
+    )
+  }
+
+  async extendTemplateVersionPreview(previewId: string) {
+    return this.client.post<ApiResponse<ITemplateVersionPreview>>(
+      `/template_version_previews/${previewId}/extend_access`
     )
   }
 

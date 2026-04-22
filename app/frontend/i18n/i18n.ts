@@ -4151,6 +4151,20 @@ Thank you,
             inviteToPreviewButton: "Send invites",
             noPreviewersYet: "No previewers yet. Click invite to add previewers to this template",
             inviteToPreviewPartialSuccess: "Some invites failed to send",
+            revokeButton: "Revoke",
+            unrevokeButton: "Unrevoke",
+            extendButton: "Extend",
+            confirmation: {
+              revokeTitle: "Are you sure you want to revoke access for {{ name }}?",
+              revokeBody:
+                "Revoking access will immediately prevent this user from accessing the draft preview content. This may be undone.",
+              extendTitle: "Extend Access Duration for {{ name }}",
+              extendBody:
+                "Extending access will give the user 60 additional days to interact with the draft preview content. Do you want to proceed?",
+              unrevokeTitle: "Restore Access for {{ name }}",
+              unrevokeBody:
+                "Restoring access will allow the user to access the draft preview content again. Are you sure you want to proceed?",
+            },
           },
         },
         requirementTemplate: {
@@ -4938,6 +4952,7 @@ Thank you,
             select: "Select",
             resources: "Resources",
             preChecks: "Pre-checks",
+            preview: "Preview",
           },
         },
         automatedCompliance: {

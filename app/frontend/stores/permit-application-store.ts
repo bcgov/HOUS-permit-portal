@@ -9,7 +9,7 @@ import { ICollaborator } from "../models/collaborator"
 import { IJurisdiction } from "../models/jurisdiction"
 import { IPermitApplication, PermitApplicationModel } from "../models/permit-application"
 import { IPermitBlockStatus } from "../models/permit-block-status"
-import { IRequirementTemplate } from "../models/requirement-template"
+import { ITemplateVersion } from "../models/template-version"
 import { IUser } from "../models/user"
 import {
   ECustomEvents,
@@ -283,10 +283,7 @@ export const PermitApplicationStoreModel = types
     }),
   }))
   .actions((self) => ({
-    getEphemeralPermitApplication(
-      requirementTemplate: IRequirementTemplate,
-      overrides: Partial<IPermitApplication> = {}
-    ) {
+    getEphemeralPermitApplication(templateVersion: ITemplateVersion, overrides: Partial<IPermitApplication> = {}) {
       const permitApplication = PermitApplicationModel.create({
         id: `ephemeral-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
         nickname: overrides.nickname || "Ephemeral Application",
@@ -298,10 +295,9 @@ export const PermitApplicationStoreModel = types
         status: overrides.status || EPermitApplicationStatus.ephemeral,
         submitter: overrides.submitter || self.rootStore.userStore.currentUser?.id || null,
         jurisdiction: overrides.jurisdiction || null,
-        templateVersion: requirementTemplate.publishedTemplateVersion || overrides.templateVersion || null,
-        publishedTemplateVersion:
-          requirementTemplate.publishedTemplateVersion || overrides.publishedTemplateVersion || null,
-        formJson: overrides.formJson || requirementTemplate.publishedTemplateVersion.formJson,
+        templateVersion: overrides.templateVersion || templateVersion.id,
+        publishedTemplateVersion: overrides.publishedTemplateVersion || templateVersion.id,
+        formJson: overrides.formJson || templateVersion.formJson,
         submissionData: overrides.submissionData || null,
         formattedComplianceData: overrides.formattedComplianceData || null,
         formCustomizations: {},

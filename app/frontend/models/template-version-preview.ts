@@ -1,4 +1,4 @@
-import { Instance, types } from "mobx-state-tree"
+import { Instance, flow, types } from "mobx-state-tree"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
 import { EPreviewStatus } from "../types/enums"
@@ -30,6 +30,32 @@ export const TemplateVersionPreviewModel = types
 
       return EPreviewStatus.access
     },
+  }))
+  .actions((self) => ({
+    revoke: flow(function* () {
+      const response: any = yield self.environment.api.revokeTemplateVersionPreview(self.id)
+      if (response.ok) {
+        self.discardedAt = response.data.data.discardedAt ? new Date(response.data.data.discardedAt) : null
+        return true
+      }
+      return false
+    }),
+    unrevoke: flow(function* () {
+      const response: any = yield self.environment.api.unrevokeTemplateVersionPreview(self.id)
+      if (response.ok) {
+        self.discardedAt = response.data.data.discardedAt ? new Date(response.data.data.discardedAt) : null
+        return true
+      }
+      return false
+    }),
+    extend: flow(function* () {
+      const response: any = yield self.environment.api.extendTemplateVersionPreview(self.id)
+      if (response.ok) {
+        self.expiresAt = new Date(response.data.data.expiresAt)
+        return true
+      }
+      return false
+    }),
   }))
 
 export interface ITemplateVersionPreview extends Instance<typeof TemplateVersionPreviewModel> {}

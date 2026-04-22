@@ -117,6 +117,14 @@ Rails.application.routes.draw do
       end
     end
 
+    resources :template_version_previews, only: [] do
+      member do
+        post :revoke_access
+        post :unrevoke_access
+        post :extend_access
+      end
+    end
+
     resources :template_versions, only: %i[index show] do
       get "publicly_previewable",
           to: "template_versions#publicly_previewable",

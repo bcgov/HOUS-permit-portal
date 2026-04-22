@@ -345,41 +345,8 @@ class Api::TemplateVersionsController < Api::ApplicationController
       render_error "template_version.invite_previewers_error" and return
     end
 
-    results = { previews: [], failed_emails: [] }
-
-    draft_previewer_params[:emails].each do |email|
-      begin
-        email = email.strip
-        user =
-          User.where(omniauth_email: email).or(User.where(email: email)).first
-        unless user
-          # Create a minimal user for previewing
-          username = email.split("@").first
-          name_parts = username.split(".")
-          user =
-            User.create!(
-              first_name: name_parts[0]&.capitalize || "Preview",
-              last_name: (name_parts[1] || "User").capitalize,
-              email: email,
-              role: :submitter
-            )
-        end
-
-        preview =
-          @template_version
-            .template_version_previews
-            .find_or_create_by!(previewer: user) do |p|
-              p.expires_at = 60.days.from_now
-            end
-
-        results[:previews] << preview
-      rescue StandardError => e
-        results[:failed_emails] << {
-          email: email,
-          error: e.message.truncate(80)
-        }
-      end
-    end
+    service = TemplateVersionPreview::ManagementService.new(@template_version)
+    result = service.invite_previewers!(draft_previewer_params[:emails])
 
     render_success @template_version,
                    "template_version.invite_previewers_success",
@@ -388,7 +355,7 @@ class Api::TemplateVersionsController < Api::ApplicationController
                      blueprint_opts: {
                        view: :extended
                      },
-                     meta: results
+                     meta: result
                    }
   end
 

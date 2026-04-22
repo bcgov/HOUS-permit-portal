@@ -30,9 +30,10 @@ import { useTranslation } from "react-i18next"
 import { ITemplateVersion } from "../../../models/template-version"
 import { ITemplateVersionPreview } from "../../../models/template-version-preview"
 import { useMst } from "../../../setup/root"
-import { EFlashMessageStatus } from "../../../types/enums"
+import { EFlashMessageStatus, EPreviewStatus } from "../../../types/enums"
 import { urlForPath } from "../../../utils/utility-functions"
 import { CopyLinkButton } from "../../shared/base/copy-link-button"
+import { ConfirmationModal } from "../../shared/modals/confirmation-modal"
 import PreviewStatusTag from "../../shared/template-version-preview/preview-status-tag"
 import { RoleTag } from "../../shared/user/role-tag"
 
@@ -189,8 +190,39 @@ interface PreviewCardProps {
 const PreviewCard: React.FC<PreviewCardProps> = observer(({ templateVersionPreview }) => {
   const previewer = templateVersionPreview.previewer
   const { name, role, organization } = previewer
+  const { t } = useTranslation()
 
   const cardRef = useRef()
+
+  const getModalContent = () => {
+    switch (templateVersionPreview.status) {
+      case EPreviewStatus.revoked:
+        return {
+          action: () => templateVersionPreview.unrevoke(),
+          buttonLabel: t("templateVersionPreview.sharing.unrevokeButton"),
+          promptHeader: t("templateVersionPreview.sharing.confirmation.unrevokeTitle", { name }),
+          promptMessage: t("templateVersionPreview.sharing.confirmation.unrevokeBody"),
+        }
+      case EPreviewStatus.expired:
+        return {
+          action: () => templateVersionPreview.extend(),
+          buttonLabel: t("templateVersionPreview.sharing.extendButton"),
+          promptHeader: t("templateVersionPreview.sharing.confirmation.extendTitle", { name }),
+          promptMessage: t("templateVersionPreview.sharing.confirmation.extendBody"),
+        }
+      case EPreviewStatus.invited:
+      case EPreviewStatus.access:
+      default:
+        return {
+          action: () => templateVersionPreview.revoke(),
+          buttonLabel: t("templateVersionPreview.sharing.revokeButton"),
+          promptHeader: t("templateVersionPreview.sharing.confirmation.revokeTitle", { name }),
+          promptMessage: t("templateVersionPreview.sharing.confirmation.revokeBody"),
+        }
+    }
+  }
+
+  const { action, buttonLabel, promptHeader, promptMessage } = getModalContent()
 
   return (
     <Flex
@@ -211,6 +243,17 @@ const PreviewCard: React.FC<PreviewCardProps> = observer(({ templateVersionPrevi
           <RoleTag role={role} /> {organization}
         </Box>
       </VStack>
+      <ConfirmationModal
+        onConfirm={action}
+        promptHeader={promptHeader}
+        promptMessage={promptMessage}
+        confirmText={buttonLabel}
+        renderTrigger={(onOpen) => (
+          <Button variant="link" size="sm" onClick={onOpen}>
+            {buttonLabel}
+          </Button>
+        )}
+      />
     </Flex>
   )
 })
