@@ -878,6 +878,12 @@ en:
       create_error:
         title: Error
         message: "%{error_message}"
+      update_success:
+        title: ""
+        message: "Release note updated successfully!"
+      update_error:
+        title: Error
+        message: "%{error_message}"
   services:
     auto_compliance_configuration:
       digital_seal_validator:
