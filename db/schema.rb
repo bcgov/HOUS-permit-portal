@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_04_21_200000) do
+ActiveRecord::Schema[7.2].define(version: 2026_04_23_005953) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -495,19 +495,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_21_200000) do
     t.index ["step_requirement_id"], name: "index_part_9_step_code_checklists_on_step_requirement_id"
   end
 
-  create_table "pdf_forms", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.uuid "user_id", null: false
-    t.jsonb "form_json", default: {}
-    t.string "form_type"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.jsonb "pdf_file_data"
-    t.integer "pdf_generation_status", default: 0, null: false
-    t.datetime "discarded_at"
-    t.index ["discarded_at"], name: "index_pdf_forms_on_discarded_at"
-    t.index ["user_id"], name: "index_pdf_forms_on_user_id"
-  end
-
   create_table "permit_applications", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.integer "status", default: 0
     t.uuid "submitter_id"
@@ -724,7 +711,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_21_200000) do
     t.string "display_name", null: false
     t.string "display_description"
     t.datetime "discarded_at"
-    t.integer "visibility", default: 0, null: false
     t.index ["discarded_at"], name: "index_requirement_blocks_on_discarded_at"
     t.index ["name"], name: "index_requirement_blocks_on_name", unique: true, where: "(discarded_at IS NULL)"
     t.index ["sku"], name: "index_requirement_blocks_on_sku", unique: true
@@ -1197,7 +1183,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_21_200000) do
   add_foreign_key "part_3_step_code_checklists", "step_codes", on_delete: :cascade
   add_foreign_key "part_9_step_code_checklists", "jurisdiction_step_requirements", column: "step_requirement_id"
   add_foreign_key "part_9_step_code_checklists", "step_codes", on_delete: :cascade
-  add_foreign_key "pdf_forms", "users"
   add_foreign_key "permit_applications", "jurisdictions"
   add_foreign_key "permit_applications", "permit_projects"
   add_foreign_key "permit_applications", "template_versions"

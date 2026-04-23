@@ -461,11 +461,6 @@ export enum ECollaboratorType {
   assignee = "assignee",
 }
 
-export enum EVisibility {
-  live = "live",
-  any = "any",
-}
-
 export enum EJurisdictionExternalApiState {
   jOn = "j_on",
   jOff = "j_off",

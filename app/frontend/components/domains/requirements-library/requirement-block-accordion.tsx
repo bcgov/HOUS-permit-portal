@@ -33,7 +33,6 @@ import { SafeTipTapDisplay } from "../../shared/editor/safe-tiptap-display"
 import { ElectiveTag } from "../../shared/elective-tag"
 import { ConfirmationModal } from "../../shared/modals/confirmation-modal"
 import { RichTextTip } from "../../shared/rich-text-tip"
-import { VisibilityTag } from "../../shared/visibility-tag.tsx"
 import { RequirementFieldDisplay } from "./requirement-field-display"
 import { RequirementsBlockModal } from "./requirements-block-modal"
 
@@ -158,7 +157,6 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
             </HStack>
 
             <HStack spacing={2}>
-              <VisibilityTag visibility={requirementBlock.visibility} />
               {isOpen && !renderEdit && (
                 <RequirementsBlockModal
                   showEditWarning={showEditWarning}

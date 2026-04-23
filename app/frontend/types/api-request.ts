@@ -6,7 +6,6 @@ import {
   ENumberUnit,
   ERequirementType,
   ETagType,
-  EVisibility,
 } from "./enums"
 import {
   IHelpLinkItems,
@@ -66,7 +65,6 @@ export interface IRequirementAttributes {
 export interface IRequirementBlockParams {
   name: string
   displayName: string
-  visibility: EVisibility
   displayDescription: string
   description?: string
   associationList?: string[]

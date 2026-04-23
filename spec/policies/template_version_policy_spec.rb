@@ -136,7 +136,9 @@ RSpec.describe TemplateVersionPolicy, type: :policy do
       where1 = double("Where1Relation")
       where2 = double("Where2Relation")
       where_chain = instance_double("ActiveRecord::QueryMethods::WhereChain")
-      published_only = double("PublishedOnlyRelation")
+      published_rel = double("PublishedRelation")
+      draft_rel = double("DraftRelation")
+      union_rel = double("UnionRelation")
 
       allow(scope).to receive(:joins).with(:requirement_template).and_return(
         joined
@@ -150,16 +152,38 @@ RSpec.describe TemplateVersionPolicy, type: :policy do
       allow(where_chain).to receive(:not).with(status: "deprecated").and_return(
         where2
       )
-      allow(where2).to receive(:where).with(status: "published").and_return(
-        published_only
+
+      previews_relation = double("TemplateVersionPreviewRelation")
+      allow(TemplateVersionPreview).to receive(:kept).and_return(
+        previews_relation
       )
+      allow(previews_relation).to receive(:where).with(
+        previewer_id: user.id
+      ).and_return(previews_relation)
+      allow(previews_relation).to receive(:where).with(
+        "expires_at > ?",
+        anything
+      ).and_return(previews_relation)
+      visible_draft_ids = double("VisibleDraftIds")
+      allow(previews_relation).to receive(:select).with(
+        :template_version_id
+      ).and_return(visible_draft_ids)
+
+      allow(where2).to receive(:where).with(status: %w[published]).and_return(
+        published_rel
+      )
+      allow(where2).to receive(:where).with(
+        status: "draft",
+        id: visible_draft_ids
+      ).and_return(draft_rel)
+      allow(published_rel).to receive(:or).with(draft_rel).and_return(union_rel)
 
       resolved =
         described_class::Scope.new(
           UserContext.new(user, sandbox),
           scope
         ).resolve
-      expect(resolved).to eq(published_only)
+      expect(resolved).to eq(union_rel)
     end
 
     it "uses for_sandbox when sandbox is present" do

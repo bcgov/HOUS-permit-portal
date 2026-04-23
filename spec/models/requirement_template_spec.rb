@@ -7,13 +7,6 @@ RSpec.describe RequirementTemplate, type: :model do
     it { should have_one(:published_template_version) }
   end
 
-  describe "visibility" do
-    it "returns live for live templates" do
-      template = build(:live_requirement_template)
-      expect(template.visibility).to eq("live")
-    end
-  end
-
   describe "#set_default_nickname" do
     it "preserves nickname when present" do
       template = build(:live_requirement_template, nickname: "My Template")

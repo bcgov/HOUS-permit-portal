@@ -6,17 +6,15 @@ import {
   FormControl,
   FormHelperText,
   FormLabel,
-  HStack,
   Icon,
   IconButton,
   Input,
   Text,
   Textarea,
   TextProps,
-  Tooltip,
   VStack,
 } from "@chakra-ui/react"
-import { ArrowCounterClockwise, Info, Trash, Upload } from "@phosphor-icons/react"
+import { ArrowCounterClockwise, Trash, Upload } from "@phosphor-icons/react"
 import { UppyFile } from "@uppy/core"
 import "@uppy/core/dist/style.min.css"
 import "@uppy/dashboard/dist/style.css"
@@ -29,7 +27,6 @@ import { useTranslation } from "react-i18next"
 import useUppyS3 from "../../../../hooks/use-uppy-s3"
 import { IRequirementBlock } from "../../../../models/requirement-block"
 import { useMst } from "../../../../setup/root"
-import { BlockVisibilitySelect } from "../../../shared/select/block-visibility-select"
 import { TagsSelect } from "../../../shared/select/selectors/tags-select"
 import { BlockSetupOptionsMenu } from "../block-setup-options-menu"
 import { IRequirementBlockForm } from "./index"
@@ -47,17 +44,13 @@ export const BlockSetup = observer(function BlockSetup({
 }) {
   const { requirementBlockStore } = useMst()
   const { t } = useTranslation()
-  const { register, control, watch, setValue } = useFormContext<IRequirementBlockForm>()
+  const { register, control, watch } = useFormContext<IRequirementBlockForm>()
   const containerRef = useRef<HTMLDivElement>(null)
 
   const fetchAssociationOptions = async (query: string) => {
     const associations = await requirementBlockStore.searchAssociations(query)
     return associations.map((association) => ({ value: association, label: association }))
   }
-
-  const visibilityWatch = watch("visibility")
-
-  const visibilityBgColor = { any: "greys.grey10", live: "semantic.infoLight" }
 
   const requirementDocumentsAttributes = watch("requirementDocumentsAttributes")
 
@@ -106,33 +99,6 @@ export const BlockSetup = observer(function BlockSetup({
           {t("requirementsLibrary.modals.blockSetupTitle")}
         </Text>
       </Box>
-      <FormControl
-        display="flex"
-        alignItems={{ sm: "center" }}
-        bg={visibilityBgColor[visibilityWatch]}
-        px={6}
-        py={2}
-        gap={2}
-        borderBottom="1px solid"
-        borderColor="border.light"
-        w="full"
-        position="relative"
-      >
-        <HStack gap={1}>
-          <FormLabel htmlFor="visibility-selector" fontWeight="bold" m={0} fontSize="sm">
-            {t("requirementsLibrary.modals.visibilityLabel")}
-          </FormLabel>
-          <Tooltip
-            label={t("requirementsLibrary.modals.edit.visibilityTooltip")}
-            aria-label="Visibility tooltip"
-            placement="right"
-            hasArrow
-          >
-            <Info size={15} />
-          </Tooltip>
-        </HStack>
-        <BlockVisibilitySelect name="visibility" />
-      </FormControl>
       <VStack spacing={4} w={"full"} alignItems={"flex-start"} px={6} pb={6} pt={3}>
         <Text color={"text.secondary"} fontSize={"sm"} fontWeight={700}>
           {t("requirementsLibrary.modals.internalUse")}

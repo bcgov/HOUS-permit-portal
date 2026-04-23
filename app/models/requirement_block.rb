@@ -26,7 +26,6 @@ class RequirementBlock < ApplicationRecord
 
   enum :sign_off_role, { any: 0 }, prefix: true
   enum :reviewer_role, { any: 0 }, prefix: true
-  enum :visibility, { any: 0, live: 2 }, default: 0
 
   validates :sku, uniqueness: true, presence: true
   validates :name, presence: true
@@ -39,18 +38,11 @@ class RequirementBlock < ApplicationRecord
   before_validation :set_sku, on: :create
   before_validation :ensure_unique_name, on: :create
 
-  after_commit :refresh_search_index,
-               if: -> do
-                 saved_change_to_discarded_at? || saved_change_to_visibility?
-               end
+  after_commit :refresh_search_index, if: :saved_change_to_discarded_at?
 
   acts_as_taggable_on :associations
 
   after_discard { template_section_blocks.destroy_all }
-
-  def allowed_in(_requirement_template)
-    %i[any live].include?(visibility.to_sym)
-  end
 
   def sections
     requirement_template_sections
@@ -64,7 +56,6 @@ class RequirementBlock < ApplicationRecord
       associations: association_list,
       configurations: configurations_search_list,
       discarded: discarded_at.present?,
-      visibility: visibility,
       created_at: created_at
     }
   end

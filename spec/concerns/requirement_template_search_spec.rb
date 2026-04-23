@@ -64,15 +64,9 @@ RSpec.describe Api::RequirementTemplatesController,
     context "when user is a super admin" do
       before { sign_in super_admin }
 
-      context "filtering by visibility 'live'" do
-        it "returns all live non-archived requirement templates" do
-          get :index,
-              params: {
-                query: "",
-                page: 1,
-                per_page: 20,
-                visibility: "live"
-              }
+      context "without any filters" do
+        it "returns all non-archived requirement templates" do
+          get :index, params: { query: "", page: 1, per_page: 20 }
           expect(response).to have_http_status(:success)
           present = json_response["data"].pluck("id")
           expected = [

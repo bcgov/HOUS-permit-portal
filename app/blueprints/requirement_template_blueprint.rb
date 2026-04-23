@@ -6,7 +6,6 @@ class RequirementTemplateBlueprint < Blueprinter::Base
          :fetched_at,
          :created_at,
          :updated_at,
-         :visibility,
          :available_globally
 
   field :used_by do |rt|

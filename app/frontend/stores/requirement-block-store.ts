@@ -13,7 +13,6 @@ import {
   ERequirementLibrarySortFields,
   ERequirementType,
   ETagType,
-  EVisibility,
 } from "../types/enums"
 import {
   TAutoComplianceModuleConfiguration,
@@ -119,15 +118,12 @@ export const RequirementBlockStoreModel = types
         self.resetPages()
       }
 
-      const visibility = `${EVisibility.live},${EVisibility.any}`
-
       const response = yield* toGenerator(
         self.environment.api.fetchRequirementBlocks({
           query: self.query,
           sort: self.sort,
           page: opts?.page ?? self.currentPage,
           showArchived: self.showArchived,
-          visibility,
           perPage: opts?.countPerPage ?? self.countPerPage,
         })
       )
@@ -192,7 +188,6 @@ export const RequirementBlockStoreModel = types
           return rest
         }),
         name: requirementBlock.name,
-        visibility: requirementBlock.visibility,
         replaceBlockId: requirementBlock.id,
         replaceOnTemplateId: replaceOn?.id,
       }

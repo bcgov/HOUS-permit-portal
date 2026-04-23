@@ -38,7 +38,6 @@ import {
   EStepCodeOccupancyKey,
   ETemplateVersionStatus,
   EUserRoles,
-  EVisibility,
   EWindowsGlazedDoorsPerformanceType,
   EZeroCarbonStep,
 } from "./enums"
@@ -109,7 +108,6 @@ export type TSearchParams<IModelSortFields, IModelFilterFields = {}> = {
   page?: number
   perPage?: number
   showArchived?: boolean
-  visibility?: TVisibility
   filters?: IModelFilterFields
   mode?: "list" | "kanban"
   perColumn?: number
@@ -211,7 +209,6 @@ export interface IDenormalizedRequirementBlock {
   sku: string
   formJson?: IFormIOBlock
   description?: string
-  visibility?: EVisibility
   displayName: string
   displayDescription?: string
   requirements: IDenormalizedRequirement[]
@@ -716,13 +713,6 @@ export type TCreatePermitApplicationFormData = {
 export interface ICopyRequirementTemplateFormData extends Partial<TCreateRequirementTemplateFormData> {
   id?: string
 }
-
-type EVisibilityValues = EVisibility.live | EVisibility.any
-
-export type TVisibility =
-  | EVisibilityValues
-  | `${EVisibilityValues},${EVisibilityValues}`
-  | `${EVisibilityValues},${EVisibilityValues},${EVisibilityValues}`
 
 export interface IBaselineOccupancy {
   id?: string

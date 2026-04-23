@@ -14,7 +14,6 @@ RSpec.describe Api::RequirementBlocksController,
       :requirement_block_with_requirements,
       name: "Block Any 1",
       display_name: "Display Block Any 1",
-      visibility: :any,
       discarded_at: nil,
       created_at: 10.days.ago,
       updated_at: 10.days.ago
@@ -26,7 +25,6 @@ RSpec.describe Api::RequirementBlocksController,
       :requirement_block_with_requirements,
       name: "Block Any 2",
       display_name: "Display Block Any 2",
-      visibility: :any,
       discarded_at: Time.current,
       created_at: 9.days.ago,
       updated_at: 9.days.ago
@@ -38,7 +36,6 @@ RSpec.describe Api::RequirementBlocksController,
       :requirement_block_with_requirements,
       name: "Block Live 1",
       display_name: "Display Block Live 1",
-      visibility: :live,
       discarded_at: nil,
       created_at: 6.days.ago,
       updated_at: 6.days.ago
@@ -50,7 +47,6 @@ RSpec.describe Api::RequirementBlocksController,
       :requirement_block_with_requirements,
       name: "Block Live 2",
       display_name: "Display Block Live 2",
-      visibility: :live,
       discarded_at: Time.current,
       created_at: 5.days.ago,
       updated_at: 5.days.ago
@@ -62,7 +58,6 @@ RSpec.describe Api::RequirementBlocksController,
       :requirement_block_with_requirements,
       name: "Specific Block Name",
       display_name: "Specific Display Name",
-      visibility: :any,
       discarded_at: nil,
       created_at: 4.days.ago,
       updated_at: 4.days.ago
@@ -75,7 +70,6 @@ RSpec.describe Api::RequirementBlocksController,
       5,
       name: "Paginated Block",
       display_name: "Paginated Display",
-      visibility: :any,
       discarded_at: nil,
       created_at: 3.days.ago,
       updated_at: 3.days.ago
@@ -121,30 +115,6 @@ RSpec.describe Api::RequirementBlocksController,
           )
 
           expect(returned_ids).not_to include(
-            requirement_block_any_discarded.id,
-            requirement_block_live_discarded.id
-          )
-        end
-      end
-
-      context "filtering by visibility 'live'" do
-        it "returns only live visible requirement blocks" do
-          get :index,
-              params: {
-                query: "",
-                visibility: "live",
-                page: 1,
-                per_page: 20
-              },
-              format: :json
-          expect(response).to have_http_status(:success)
-
-          returned_ids = json_response["data"].map { |rb| rb["id"] }
-
-          expect(returned_ids).to include(requirement_block_live_visible.id)
-          expect(returned_ids).not_to include(
-            requirement_block_any_visible.id,
-            requirement_block_with_specific_name.id,
             requirement_block_any_discarded.id,
             requirement_block_live_discarded.id
           )
@@ -289,7 +259,6 @@ RSpec.describe Api::RequirementBlocksController,
             5,
             name: "Paginated Block",
             display_name: "Paginated Display",
-            visibility: :any,
             discarded_at: nil
           )
           RequirementBlock.reindex
@@ -344,7 +313,6 @@ RSpec.describe Api::RequirementBlocksController,
           get :index,
               params: {
                 query: "Block",
-                visibility: "any,live",
                 sort: {
                   field: "name",
                   direction: "asc"

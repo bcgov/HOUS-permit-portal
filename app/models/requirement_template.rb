@@ -97,10 +97,6 @@ class RequirementTemplate < ApplicationRecord
     nil
   end
 
-  def visibility
-    "live"
-  end
-
   def sections
     requirement_template_sections
   end
@@ -270,7 +266,6 @@ class RequirementTemplate < ApplicationRecord
       current_version: published_template_version&.version_date,
       discarded: discarded_at.present?,
       assignee: assignee&.name,
-      visibility: visibility,
       created_at: created_at,
       used_by: published_customizations_count,
       available_in:

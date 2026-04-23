@@ -3,7 +3,6 @@ class RequirementBlockBlueprint < Blueprinter::Base
   fields :name,
          :sku,
          :description,
-         :visibility,
          :display_name,
          :display_description,
          :sign_off_role,

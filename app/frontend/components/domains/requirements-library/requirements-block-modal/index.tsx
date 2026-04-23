@@ -24,7 +24,6 @@ import {
   EEnergyStepCodeDependencyRequirementCode,
   EEnergyStepCodePart3DependencyRequirementCode,
   ERequirementType,
-  EVisibility,
 } from "../../../../types/enums"
 import { IDenormalizedRequirementBlock, TAutoComplianceModuleConfigurations } from "../../../../types/types"
 import { AUTO_COMPLIANCE_OPTIONS_MAP_KEY_PREFIX } from "../../../../utils"
@@ -68,7 +67,6 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
           name: requirementBlock.name,
           description: requirementBlock.description,
           displayName: requirementBlock.displayName,
-          visibility: requirementBlock.visibility || EVisibility.any,
           displayDescription: requirementBlock.displayDescription,
           sku: (requirementBlock as IRequirementBlock).sku,
           associationList: (requirementBlock as IRequirementBlock).associations,
@@ -76,7 +74,6 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
           requirementDocumentsAttributes: (requirementBlock as IRequirementBlock).requirementDocuments,
         }
       : {
-          visibility: EVisibility.any,
           associationList: [],
           requirementsAttributes: [],
           requirementDocumentsAttributes: [],

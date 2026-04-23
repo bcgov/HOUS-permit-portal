@@ -5,7 +5,6 @@ import pluck from "ramda/src/pluck"
 import { vancouverTimeZone } from "../constants"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
-import { EVisibility } from "../types/enums"
 import { IJurisdictionStub, IRequirementTemplateFormJson } from "../types/types"
 import { RequirementTemplateSectionModel } from "./requirement-template-section"
 import { TemplateVersionModel } from "./template-version"
@@ -55,7 +54,6 @@ export const RequirementTemplateModel = types.snapshotProcessor(
     .model("RequirementTemplateModel", {
       id: types.identifier,
       nickname: types.maybeNull(types.string),
-      visibility: types.enumeration(Object.values(EVisibility)),
       description: types.maybeNull(types.string),
       usedBy: types.optional(types.number, 0),
       availableIn: types.optional(types.union(types.string, types.number), 0),

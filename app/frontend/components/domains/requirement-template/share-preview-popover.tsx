@@ -276,7 +276,7 @@ export const SharePreviewPopover: React.FC<ISharePreviewPopoverProps> = observer
     const previews: ITemplateVersionPreview[] = (dtv.templateVersionPreviews as ITemplateVersionPreview[]) ?? []
     const previewerCount = previews.length
 
-    const shareUrl = urlForPath(`/template-versions/${dtv.id}`)
+    const shareUrl = urlForPath(`/template-versions/${dtv.id}/preview`)
 
     const { handleSubmit, control, reset } = useForm({
       defaultValues: {

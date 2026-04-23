@@ -104,7 +104,6 @@ class Api::RequirementBlocksController < Api::ApplicationController
     params.require(:requirement_block).permit(
       :name,
       :description,
-      :visibility,
       :display_name,
       :display_description,
       :sign_off_role,
