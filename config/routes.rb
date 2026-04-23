@@ -343,6 +343,8 @@ Rails.application.routes.draw do
     end
 
     resources :digital_seal_validator, only: [:create]
+
+    resources :release_notes, only: %i[index show create update]
   end
 
   scope module: :external_api, path: :external_api do
