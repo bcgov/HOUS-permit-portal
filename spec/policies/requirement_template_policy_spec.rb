@@ -84,4 +84,68 @@ RSpec.describe RequirementTemplatePolicy, type: :policy do
     )
     expect(policy(admin, record).force_publish_now?).to be false
   end
+
+  describe "#promote_draft?" do
+    let(:admin) { create(:user, :super_admin) }
+    let(:non_admin) { create(:user) }
+
+    it "permits super_admin when a draft version exists" do
+      record =
+        double("RequirementTemplate", draft_template_version: double("TV"))
+      expect(policy(admin, record).promote_draft?).to be true
+    end
+
+    it "denies super_admin when no draft version exists" do
+      record = double("RequirementTemplate", draft_template_version: nil)
+      expect(policy(admin, record).promote_draft?).to be false
+    end
+
+    it "denies non-admin regardless of draft presence" do
+      record =
+        double("RequirementTemplate", draft_template_version: double("TV"))
+      expect(policy(non_admin, record).promote_draft?).to be false
+    end
+  end
+
+  describe "#force_publish_draft?" do
+    let(:admin) { create(:user, :super_admin) }
+    let(:non_admin) { create(:user) }
+    let(:record_with_draft) do
+      double("RequirementTemplate", draft_template_version: double("TV"))
+    end
+    let(:record_without_draft) do
+      double("RequirementTemplate", draft_template_version: nil)
+    end
+
+    before { allow(ENV).to receive(:[]).and_call_original }
+
+    it "permits super_admin only when ENV flag is set AND a draft exists" do
+      allow(ENV).to receive(:[]).with(
+        "ENABLE_TEMPLATE_FORCE_PUBLISH"
+      ).and_return("true")
+
+      expect(policy(admin, record_with_draft).force_publish_draft?).to be true
+      expect(
+        policy(admin, record_without_draft).force_publish_draft?
+      ).to be false
+    end
+
+    it "denies super_admin when ENV flag is off" do
+      allow(ENV).to receive(:[]).with(
+        "ENABLE_TEMPLATE_FORCE_PUBLISH"
+      ).and_return("false")
+
+      expect(policy(admin, record_with_draft).force_publish_draft?).to be false
+    end
+
+    it "denies non-admin even when ENV flag is set" do
+      allow(ENV).to receive(:[]).with(
+        "ENABLE_TEMPLATE_FORCE_PUBLISH"
+      ).and_return("true")
+
+      expect(
+        policy(non_admin, record_with_draft).force_publish_draft?
+      ).to be false
+    end
+  end
 end

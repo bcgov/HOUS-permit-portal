@@ -1,15 +1,19 @@
 import { Box, Button, Flex, FormControl, FormLabel, HStack, Switch } from "@chakra-ui/react"
+import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
-import React, { useState } from "react"
+import React, { useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
+import { datefnsAppDateFormat } from "../../../../constants"
 import { useTemplateVersion } from "../../../../hooks/resources/use-template-version"
+import { IRequirementTemplate } from "../../../../models/requirement-template"
 import { useMst } from "../../../../setup/root"
 import { ErrorScreen } from "../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../shared/base/loading-screen"
 import { FloatingHelpDrawer } from "../../../shared/floating-help-drawer"
 import { RouterLinkButton } from "../../../shared/navigation/router-link-button"
 import { BuilderBottomFloatingButtons } from "../builder-bottom-floating-buttons"
+import { PublishScheduleModal } from "../publish-schedule-modal"
 import { SectionsDisplay } from "../sections-display"
 import { SectionsSidebar } from "../sections-sidebar"
 import { SharePreviewPopover } from "../share-preview-popover"
@@ -23,7 +27,7 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
   const { templateVersion, error } = useTemplateVersion()
   const denormalizedTemplate = templateVersion?.denormalizedTemplateJson
   const { t } = useTranslation()
-  const { userStore, templateVersionStore } = useMst()
+  const { userStore, templateVersionStore, requirementTemplateStore } = useMst()
   const {
     rootContainerRef: rightContainerRef,
     sectionRefs,
@@ -33,12 +37,70 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
   const [isTogglingPubliclyPreviewable, setIsTogglingPubliclyPreviewable] = useState(false)
   const navigate = useNavigate()
 
+  const isSuperAdmin = !!userStore.currentUser?.isSuperAdmin
+  const isDraft = !!templateVersion?.isDraft
+  const requirementTemplateId = templateVersion?.requirementTemplateId
+
+  // Load the parent RequirementTemplate when we're viewing a draft as a super
+  // admin so the PublishScheduleModal has scheduledTemplateVersions /
+  // nextAvailableScheduleDate to work with.
+  useEffect(() => {
+    if (!isDraft || !isSuperAdmin || !requirementTemplateId) return
+    const existing = requirementTemplateStore.getRequirementTemplateById(requirementTemplateId)
+    if (!existing?.isFullyLoaded) {
+      requirementTemplateStore.fetchRequirementTemplate(requirementTemplateId).catch(() => {})
+    }
+  }, [isDraft, isSuperAdmin, requirementTemplateId, requirementTemplateStore])
+
+  const requirementTemplate = requirementTemplateId
+    ? (requirementTemplateStore.getRequirementTemplateById(requirementTemplateId) as IRequirementTemplate | undefined)
+    : undefined
+
+  const scheduledConflicts = useMemo(
+    () =>
+      requirementTemplate?.scheduledTemplateVersions?.map((tv) => ({
+        id: tv.id,
+        versionDate: new Date(tv.versionDate),
+      })) ?? [],
+    [requirementTemplate?.scheduledTemplateVersions?.length]
+  )
+
+  const showSchedulePublishControls = isDraft && isSuperAdmin && !!requirementTemplate?.isFullyLoaded
+
+  const onScheduleConfirm = async (scheduleDate: Date) => {
+    if (!requirementTemplate) return
+    const updated = await requirementTemplateStore.promoteDraft(requirementTemplate.id, {
+      versionDate: format(scheduleDate, datefnsAppDateFormat),
+    })
+    if (updated) {
+      const scheduledTemplateVersion = (updated as IRequirementTemplate).scheduledTemplateVersions?.[0]
+      scheduledTemplateVersion
+        ? navigate(`/template-versions/${scheduledTemplateVersion.id}`)
+        : navigate("/requirement-templates")
+    }
+  }
+
+  const onForcePublishNow =
+    import.meta.env.VITE_ENABLE_TEMPLATE_FORCE_PUBLISH === "true"
+      ? async () => {
+          if (!requirementTemplate) return
+          const updated = await requirementTemplateStore.promoteDraft(requirementTemplate.id, {
+            skipDateCheck: true,
+          })
+          if (updated) {
+            const publishedTemplateVersion = (updated as IRequirementTemplate).publishedTemplateVersion
+            publishedTemplateVersion
+              ? navigate(`/template-versions/${publishedTemplateVersion.id}`)
+              : navigate("/requirement-templates")
+          }
+        }
+      : undefined
+
   if (error) return <ErrorScreen error={error} />
   if (!templateVersion?.isFullyLoaded) return <LoadingScreen />
 
   const templateSections = denormalizedTemplate?.requirementTemplateSections ?? []
   const hasNoSections = templateSections.length === 0
-  const isSuperAdmin = !!userStore.currentUser?.isSuperAdmin
 
   const onClose = () => {
     window.history.state && window.history.state.idx > 0 ? navigate(-1) : navigate(`/requirement-templates`)
@@ -110,6 +172,17 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
               )}
               {templateVersion.isDraft && (
                 <SharePreviewPopover draftTemplateVersion={templateVersion} variant="primary" />
+              )}
+              {showSchedulePublishControls && requirementTemplate && (
+                <PublishScheduleModal
+                  requirementTemplate={requirementTemplate}
+                  minDate={requirementTemplate.nextAvailableScheduleDate}
+                  scheduledConflicts={scheduledConflicts}
+                  onScheduleConfirm={onScheduleConfirm}
+                  onForcePublishNow={onForcePublishNow}
+                  translationNamespace="templateVersionPreview.schedulePublish"
+                  hideManageAccessButton
+                />
               )}
               <RouterLinkButton to={`/template-versions/${templateVersion.id}/preview`} variant="secondary">
                 {t("ui.view")}

@@ -237,13 +237,14 @@ export const RequirementTemplateStoreModel = types
     promoteDraft: flow(function* (
       templateId: string,
       params: {
-        versionDate: string
+        versionDate?: string
         changeNotes?: string
         changeSignificance?: string
         notificationScope?: string
         notifiedJurisdictionIds?: string[]
         promoteBlockIds?: string[]
         sendAdvanceNotice?: boolean
+        skipDateCheck?: boolean
       }
     ) {
       const response = yield* toGenerator(self.environment.api.promoteDraft(templateId, params))

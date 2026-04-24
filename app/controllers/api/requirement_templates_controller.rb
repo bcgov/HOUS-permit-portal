@@ -331,7 +331,16 @@ class Api::RequirementTemplatesController < Api::ApplicationController
   end
 
   def promote_draft
-    authorize @requirement_template
+    skip_date_check =
+      ActiveModel::Type::Boolean.new.cast(
+        promote_draft_params[:skip_date_check]
+      )
+
+    if skip_date_check
+      authorize @requirement_template, :force_publish_draft?
+    else
+      authorize @requirement_template, :promote_draft?
+    end
 
     draft_version = @requirement_template.draft_template_version
     if draft_version.blank?
@@ -339,12 +348,17 @@ class Api::RequirementTemplatesController < Api::ApplicationController
     end
 
     begin
+      version_date =
+        (Date.parse(promote_draft_params[:version_date]) unless skip_date_check)
+
       promoted =
         TemplateVersioningService.promote_draft_to_scheduled!(
           draft_version,
-          Date.parse(promote_draft_params[:version_date]),
+          version_date,
           change_notes: promote_draft_params[:change_notes],
-          change_significance: promote_draft_params[:change_significance]
+          change_significance: promote_draft_params[:change_significance],
+          skip_date_check: skip_date_check,
+          current_user: current_user
         )
 
       # Set notification preferences on the version
@@ -364,8 +378,9 @@ class Api::RequirementTemplatesController < Api::ApplicationController
         )
       end
 
-      # Optionally send advance notice to jurisdictions
-      if promote_draft_params[:send_advance_notice]
+      # Optionally send advance notice to jurisdictions. Skipped for inline
+      # force-publish since the version is already published at that point.
+      if !skip_date_check && promote_draft_params[:send_advance_notice]
         NotificationService.publish_version_scheduled_event(promoted)
       end
 
@@ -380,7 +395,9 @@ class Api::RequirementTemplatesController < Api::ApplicationController
                          current_user: current_user
                        }
                      }
-    rescue TemplateVersionDraftError, TemplateVersionScheduleError => e
+    rescue TemplateVersionDraftError,
+           TemplateVersionScheduleError,
+           TemplateVersionForcePublishNowError => e
       render_error "requirement_template.promote_draft_error",
                    message_opts: {
                      error_message: e.message
@@ -520,6 +537,7 @@ class Api::RequirementTemplatesController < Api::ApplicationController
       :change_significance,
       :notification_scope,
       :send_advance_notice,
+      :skip_date_check,
       notified_jurisdiction_ids: [],
       promote_block_ids: []
     )

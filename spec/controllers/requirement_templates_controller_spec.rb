@@ -176,4 +176,125 @@ RSpec.describe Api::RequirementTemplatesController,
       end
     end
   end
+
+  describe "POST #promote_draft" do
+    let(:requirement_template) do
+      create(:live_full_requirement_template, sections_count: 1)
+    end
+    let!(:draft_version) do
+      TemplateVersioningService.create_draft!(requirement_template)
+    end
+
+    context "as a super admin" do
+      before { sign_in super_admin }
+
+      it "promotes the draft to scheduled for a future date" do
+        post :promote_draft,
+             params: {
+               id: requirement_template.id,
+               version_date: Date.tomorrow.to_s
+             }
+
+        expect(response).to have_http_status(:success)
+        draft_version.reload
+        expect(draft_version.status).to eq("scheduled")
+        expect(draft_version.version_date).to eq(Date.tomorrow)
+      end
+
+      it "auto-unschedules sibling scheduled versions with earlier dates" do
+        earlier_scheduled =
+          TemplateVersioningService.schedule!(
+            requirement_template,
+            Date.tomorrow
+          )
+
+        post :promote_draft,
+             params: {
+               id: requirement_template.id,
+               version_date: (Date.tomorrow + 3).to_s
+             }
+
+        expect(response).to have_http_status(:success)
+        earlier_scheduled.reload
+        expect(earlier_scheduled.status).to eq("deprecated")
+        expect(earlier_scheduled.deprecation_reason).to eq("unscheduled")
+      end
+
+      it "renders an error when no draft exists" do
+        other_template =
+          create(:live_full_requirement_template, sections_count: 1)
+
+        post :promote_draft,
+             params: {
+               id: other_template.id,
+               version_date: Date.tomorrow.to_s
+             }
+
+        expect(response).to have_http_status(:forbidden)
+      end
+
+      context "with skip_date_check: true" do
+        around do |example|
+          original = ENV["ENABLE_TEMPLATE_FORCE_PUBLISH"]
+          ENV["ENABLE_TEMPLATE_FORCE_PUBLISH"] = env_flag
+          example.run
+        ensure
+          ENV["ENABLE_TEMPLATE_FORCE_PUBLISH"] = original
+        end
+
+        context "when ENABLE_TEMPLATE_FORCE_PUBLISH is not set" do
+          let(:env_flag) { "false" }
+
+          it "is forbidden by policy" do
+            post :promote_draft,
+                 params: {
+                   id: requirement_template.id,
+                   skip_date_check: true
+                 }
+
+            expect(response).to have_http_status(:forbidden)
+          end
+        end
+
+        context "when ENABLE_TEMPLATE_FORCE_PUBLISH is set" do
+          let(:env_flag) { "true" }
+
+          before do
+            allow(WebsocketBroadcaster).to receive(
+              :push_update_to_relevant_users
+            )
+          end
+
+          it "publishes the draft inline with today's date" do
+            post :promote_draft,
+                 params: {
+                   id: requirement_template.id,
+                   skip_date_check: true
+                 }
+
+            expect(response).to have_http_status(:success)
+            draft_version.reload
+            expect(draft_version.status).to eq("published")
+            expect(draft_version.version_date).to eq(Date.current)
+          end
+        end
+      end
+    end
+
+    context "as a non-admin user" do
+      let(:regular_user) { create(:user, :submitter) }
+
+      before { sign_in regular_user }
+
+      it "denies access" do
+        post :promote_draft,
+             params: {
+               id: requirement_template.id,
+               version_date: Date.tomorrow.to_s
+             }
+
+        expect(response).to have_http_status(:forbidden)
+      end
+    end
+  end
 end

@@ -4123,6 +4123,21 @@ Thank you,
           earlyAccessTitle: "Early Access – Submissions Not Yet Enabled",
           earlyAccessDescription:
             "This permit is available for early access to help your team get familiar with the application process. You can view and edit your application, but submission is currently disabled. Submissions will be enabled once this permit type is officially launched in your jurisdiction.",
+          schedulePublish: {
+            scheduleModalTitle: "Publish draft?",
+            scheduleModalBody:
+              "Publishing this draft will replace the currently-published version. Local jurisdictions and submitters will be able to see and use this new version of the form. <br><br><1>Notifications will only be sent out to those jurisdictions you have set available, which is currently: {{count}}</1>",
+            scheduleModalHelperText: "Schedule to <1>publish</1> (at midnight 00:01 PST)",
+            scheduleModalCancelMessage: "Changes were not scheduled.",
+            forcePublishNow: "Force publish now",
+            conflictWarning:
+              "Another version is already scheduled for <1>{{dates}}</1>. Confirming this date will auto-unschedule that version.",
+            laterScheduledWarning:
+              "A later scheduled version exists on <1>{{dates}}</1>. It will remain scheduled and your version will be deprecated when it publishes.",
+            confirmOverrideTitle: "Override existing scheduled version?",
+            confirmOverrideBody:
+              "A version is already scheduled for <1>{{dates}}</1>. Confirming <1>{{newDate}}</1> will unschedule that version.",
+          },
           sharing: {
             sharePreviewLink: "Share ({{ n }})",
             sharePreviewTitle: "Share preview",

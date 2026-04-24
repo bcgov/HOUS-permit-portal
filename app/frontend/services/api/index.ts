@@ -696,13 +696,14 @@ export class Api {
   async promoteDraft(
     templateId: string,
     params: {
-      versionDate: string
+      versionDate?: string
       changeNotes?: string
       changeSignificance?: string
       notificationScope?: string
       notifiedJurisdictionIds?: string[]
       promoteBlockIds?: string[]
       sendAdvanceNotice?: boolean
+      skipDateCheck?: boolean
     }
   ) {
     return this.client.post<ApiResponse<IRequirementTemplate>>(

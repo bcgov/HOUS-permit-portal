@@ -282,6 +282,187 @@ RSpec.describe TemplateVersioningService, type: :service, search: true do
     end
   end
 
+  describe "promote_draft_to_scheduled!" do
+    let(:super_admin) { create(:user, :super_admin) }
+    let(:draft_version) do
+      TemplateVersioningService.create_draft!(requirement_template)
+    end
+
+    context "when the version date is valid" do
+      it "promotes the draft to a scheduled version" do
+        version_date = Date.tomorrow
+
+        promoted =
+          TemplateVersioningService.promote_draft_to_scheduled!(
+            draft_version,
+            version_date,
+            current_user: super_admin
+          )
+
+        expect(promoted.id).to eq(draft_version.id)
+        expect(promoted.status).to eq("scheduled")
+        expect(promoted.version_date).to eq(version_date)
+      end
+
+      it "unschedules sibling scheduled versions on or before the incoming date" do
+        earlier_scheduled =
+          TemplateVersioningService.schedule!(
+            requirement_template,
+            Date.tomorrow
+          )
+
+        TemplateVersioningService.promote_draft_to_scheduled!(
+          draft_version,
+          Date.tomorrow + 3,
+          current_user: super_admin
+        )
+
+        earlier_scheduled.reload
+        expect(earlier_scheduled.status).to eq("deprecated")
+        expect(earlier_scheduled.deprecation_reason).to eq("unscheduled")
+        expect(earlier_scheduled.deprecated_by_id).to eq(super_admin.id)
+      end
+
+      it "leaves scheduled versions with later dates untouched" do
+        later_scheduled =
+          TemplateVersioningService.schedule!(
+            requirement_template,
+            Date.tomorrow + 10
+          )
+
+        TemplateVersioningService.promote_draft_to_scheduled!(
+          draft_version,
+          Date.tomorrow,
+          current_user: super_admin
+        )
+
+        later_scheduled.reload
+        expect(later_scheduled.status).to eq("scheduled")
+      end
+    end
+
+    context "when the version date is invalid" do
+      it "raises TemplateVersionScheduleError for past dates" do
+        expect {
+          TemplateVersioningService.promote_draft_to_scheduled!(
+            draft_version,
+            Date.yesterday,
+            current_user: super_admin
+          )
+        }.to raise_error(TemplateVersionScheduleError)
+      end
+
+      it "raises TemplateVersionScheduleError for today" do
+        expect {
+          TemplateVersioningService.promote_draft_to_scheduled!(
+            draft_version,
+            Date.current,
+            current_user: super_admin
+          )
+        }.to raise_error(TemplateVersionScheduleError)
+      end
+    end
+
+    context "when the template version is not a draft" do
+      it "raises TemplateVersionDraftError" do
+        scheduled =
+          TemplateVersioningService.schedule!(
+            requirement_template,
+            Date.tomorrow
+          )
+
+        expect {
+          TemplateVersioningService.promote_draft_to_scheduled!(
+            scheduled,
+            Date.tomorrow + 5,
+            current_user: super_admin
+          )
+        }.to raise_error(
+          TemplateVersionDraftError,
+          /Can only promote a draft version/
+        )
+      end
+    end
+
+    context "skip_date_check (force publish)" do
+      around do |example|
+        original = ENV["ENABLE_TEMPLATE_FORCE_PUBLISH"]
+        ENV["ENABLE_TEMPLATE_FORCE_PUBLISH"] = env_flag
+        example.run
+      ensure
+        ENV["ENABLE_TEMPLATE_FORCE_PUBLISH"] = original
+      end
+
+      context "when ENABLE_TEMPLATE_FORCE_PUBLISH is not set" do
+        let(:env_flag) { "false" }
+
+        it "raises TemplateVersionForcePublishNowError" do
+          expect {
+            TemplateVersioningService.promote_draft_to_scheduled!(
+              draft_version,
+              nil,
+              skip_date_check: true,
+              current_user: super_admin
+            )
+          }.to raise_error(TemplateVersionForcePublishNowError)
+        end
+      end
+
+      context "when ENABLE_TEMPLATE_FORCE_PUBLISH is set" do
+        let(:env_flag) { "true" }
+
+        before do
+          allow(WebsocketBroadcaster).to receive(:push_update_to_relevant_users)
+        end
+
+        it "publishes the draft inline with today's version_date" do
+          promoted =
+            TemplateVersioningService.promote_draft_to_scheduled!(
+              draft_version,
+              nil,
+              skip_date_check: true,
+              current_user: super_admin
+            )
+
+          expect(promoted.status).to eq("published")
+          expect(promoted.version_date).to eq(Date.current)
+        end
+
+        it "deprecates any scheduled sibling with version_date on or before today via publish_version!" do
+          earlier_scheduled =
+            TemplateVersioningService.schedule!(
+              requirement_template,
+              Date.tomorrow
+            )
+          earlier_scheduled.update_columns(version_date: Date.current - 5)
+
+          TemplateVersioningService.promote_draft_to_scheduled!(
+            draft_version,
+            nil,
+            skip_date_check: true,
+            current_user: super_admin
+          )
+
+          earlier_scheduled.reload
+          expect(earlier_scheduled.status).to eq("deprecated")
+        end
+
+        it "pushes a websocket update to super admins" do
+          TemplateVersioningService.promote_draft_to_scheduled!(
+            draft_version,
+            nil,
+            skip_date_check: true,
+            current_user: super_admin
+          )
+
+          expect(WebsocketBroadcaster).to have_received(
+            :push_update_to_relevant_users
+          )
+        end
+      end
+    end
+  end
+
   context "publish_versions_publishable_now!" do
     it "publishes latest version publishable now and deprecates all older versions with correct reason" do
       expected_published_versions = []

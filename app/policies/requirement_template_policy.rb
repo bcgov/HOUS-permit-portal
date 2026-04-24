@@ -58,7 +58,12 @@ class RequirementTemplatePolicy < ApplicationPolicy
   end
 
   def promote_draft?
-    create?
+    create? && record.draft_template_version.present?
+  end
+
+  def force_publish_draft?
+    create? && ENV["ENABLE_TEMPLATE_FORCE_PUBLISH"] == "true" &&
+      record.draft_template_version.present?
   end
 
   def update_jurisdiction_availabilities?
