@@ -34,9 +34,40 @@ class Api::PermitProjectsController < Api::ApplicationController
                    }
   end
 
+  # TODO: This endpoint serves two UI surfaces through one route: the submitter
+  # view (`/projects/:id/overview`) and the reviewer inbox view
+  # (`/jurisdictions/:jid/submission-inbox/projects/:id/overview`). We currently
+  # infer which blueprint to use from the caller's relationship to the project,
+  # which is a code smell — the URL already knows the intent.
+  #
+  # The joyful shape is a namespaced inbox API, e.g.
+  #   namespace :submission_inbox do
+  #     resources :permit_projects, only: [:show] do
+  #       member { patch :mark_as_viewed; patch :transition_state; ... }
+  #     end
+  #   end
+  # with its own controller, policy, and blueprint (each `recent_permit_applications`
+  # field then has one unambiguous meaning per endpoint, and Scenario D — a
+  # review_manager who also owns a project — resolves automatically).
+  #
+  # Holding off because the same split should likely apply to other resources,
+  # notably PermitApplication#show, which has a deeper nest of authorization
+  # and view variants. Worth doing as a dedicated refactor rather than piecemeal.
   def show
     authorize @permit_project
-    view = current_user.review_staff? ? :inbox_extended : :extended
+    is_owner_or_collaborator =
+      @permit_project.owner_id == current_user.id ||
+        @permit_project.permit_applications.any? do |app|
+          app.collaborators.any? { |c| c.user_id == current_user.id }
+        end
+    view =
+      if is_owner_or_collaborator
+        :extended
+      elsif current_user.review_staff?
+        :inbox_extended
+      else
+        :extended
+      end
     render_success @permit_project,
                    nil,
                    {
