@@ -8,6 +8,7 @@ import { useMst } from "../../../../setup/root"
 import { ErrorScreen } from "../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../shared/base/loading-screen"
 import { FloatingHelpDrawer } from "../../../shared/floating-help-drawer"
+import { RouterLinkButton } from "../../../shared/navigation/router-link-button"
 import { BuilderBottomFloatingButtons } from "../builder-bottom-floating-buttons"
 import { SectionsDisplay } from "../sections-display"
 import { SectionsSidebar } from "../sections-sidebar"
@@ -110,6 +111,9 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
               {templateVersion.isDraft && (
                 <SharePreviewPopover draftTemplateVersion={templateVersion} variant="primary" />
               )}
+              <RouterLinkButton to={`/template-versions/${templateVersion.id}/preview`} variant="secondary">
+                {t("ui.view")}
+              </RouterLinkButton>
               <Button variant={"secondary"} onClick={onClose}>
                 {t("ui.close")}
               </Button>

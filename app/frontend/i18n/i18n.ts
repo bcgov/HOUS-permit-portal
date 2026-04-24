@@ -1738,11 +1738,11 @@ Thank you,
         },
         sandbox: {
           anyChanges: "Any changes made here will be reflected in training mode.",
-          exportChanges: "Ready to export changes?",
-          exportAndSeeInDraftPermit: "Export and see in draft permit",
+          exportChanges: "Ready to promote changes?",
+          exportAndSeeInDraftPermit: "Promote changes",
           replacementWarning: "Replacement warning",
           replacementWarningMessage:
-            "All tips and electives will **replace** what is currently in the permit application template, but it will not be published until you decide.\n\nYou will be able to see the draft first before deciding to publish it to submitters.",
+            "This will immediately **replace** the live tips and electives for this template with your sandboxed customizations.\n\nThere is no separate publish step — submitters will see these changes right away.",
           disabledRow: "Disabled due to sandbox mismatch",
           formLabel: "Training sandbox",
           live: "Live",
@@ -4120,6 +4120,9 @@ Thank you,
           department: "Department",
         },
         templateVersionPreview: {
+          earlyAccessTitle: "Early Access – Submissions Not Yet Enabled",
+          earlyAccessDescription:
+            "This permit is available for early access to help your team get familiar with the application process. You can view and edit your application, but submission is currently disabled. Submissions will be enabled once this permit type is officially launched in your jurisdiction.",
           sharing: {
             sharePreviewLink: "Share ({{ n }})",
             sharePreviewTitle: "Share preview",
@@ -4184,7 +4187,7 @@ Thank you,
               copyTips: "Import tips from ({{ templateLabel }})",
               copyElectives: "Import electives from ({{ templateLabel }})",
             },
-            promoteElectives: "Export changes",
+            promoteElectives: "Promote changes",
             promoteElectivesMessage:
               "This will publish your training sandboxed customizations and overwrite your non-training sandboxed live electives!",
             clickToWriteDescription: "Click to write description",

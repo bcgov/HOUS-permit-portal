@@ -339,6 +339,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
         return self.permitCollaborationMap.get(collaborationId)
       },
       shouldShowApplicationDiff(isEditing: boolean) {
+        if (self.status === EPermitApplicationStatus.ephemeral) return false
         return isEditing && (!self.usingCurrentTemplateVersion || self.showingCompareAfter)
       },
       get contacts() {
