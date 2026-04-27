@@ -27,6 +27,7 @@ import { SearchGridItem } from "../../shared/grid/search-grid-item"
 import { SearchGridRow } from "../../shared/grid/search-grid-row"
 import { OutdatedFormWarning } from "../../shared/outdated-form-warning"
 import { PermitApplicationStatusTag } from "../../shared/permit-applications/permit-application-status-tag"
+import { ApplicationReviewAssigneesCell } from "../jurisdictions/submission-inbox/application-review-assignees-cell"
 
 interface IPermitApplicationGridRowProps {
   permitApplication: IPermitApplication
@@ -82,8 +83,19 @@ export const PermitApplicationGridRow = observer(
               <Text variant="secondary">{permitApplication.templateNickname}</Text>
             </VStack>
           </SearchGridItem>
-          <SearchGridItem>
-            <Avatar name={designatedSubmitter?.collaborator?.user?.name} size="sm" />
+          <SearchGridItem
+            onClick={(e: React.MouseEvent) => {
+              if (fromInbox) {
+                e.preventDefault()
+                e.stopPropagation()
+              }
+            }}
+          >
+            {fromInbox ? (
+              <ApplicationReviewAssigneesCell application={permitApplication} />
+            ) : (
+              <Avatar name={designatedSubmitter?.collaborator?.user?.name} size="sm" />
+            )}
           </SearchGridItem>
           <SearchGridItem>{permitApplication.number}</SearchGridItem>
           <SearchGridItem>{format(updatedAt, datefnsTableDateTimeFormat)}</SearchGridItem>
