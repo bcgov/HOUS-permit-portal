@@ -286,25 +286,38 @@ export const ReviewPermitApplicationScreen = observer(() => {
               showHelpButton
               readOnly={isReadOnly}
               renderTopButtons={() => {
+                const collaboratorsButton = (
+                  <CollaboratorsSidebar
+                    permitApplication={currentPermitApplication}
+                    collaborationType={ECollaborationType.review}
+                    triggerButtonProps={{
+                      variant: "secondary",
+                    }}
+                  />
+                )
+
                 if (isReadOnly) {
-                  if (canStartReview) {
-                    return (
-                      <Button
-                        variant="callout"
-                        leftIcon={<Swap />}
-                        onClick={handleStartReview}
-                        isLoading={isStartingReview}
-                        loadingText={t("permitApplication.show.startingReview")}
-                      >
-                        {t("permitApplication.show.readyForReview")}
-                      </Button>
-                    )
-                  }
-                  return null
-                }
-                return (
-                  !revisionMode && (
+                  return (
                     <HStack spacing={6}>
+                      {canStartReview && (
+                        <Button
+                          variant="callout"
+                          leftIcon={<Swap />}
+                          onClick={handleStartReview}
+                          isLoading={isStartingReview}
+                          loadingText={t("permitApplication.show.startingReview")}
+                        >
+                          {t("permitApplication.show.readyForReview")}
+                        </Button>
+                      )}
+                      {collaboratorsButton}
+                    </HStack>
+                  )
+                }
+
+                return (
+                  <HStack spacing={6}>
+                    {!revisionMode && (
                       <Button variant="callout" leftIcon={<NotePencil />} onClick={() => setRevisionMode(true)}>
                         {currentPermitApplication.isRevisionsRequested
                           ? t("permitApplication.show.viewRevisionRequests")
@@ -312,15 +325,9 @@ export const ReviewPermitApplicationScreen = observer(() => {
                         {currentPermitApplication?.latestRevisionRequests?.length > 0 &&
                           `(${currentPermitApplication.latestRevisionRequests.length})`}
                       </Button>
-                      <CollaboratorsSidebar
-                        permitApplication={currentPermitApplication}
-                        collaborationType={ECollaborationType.review}
-                        triggerButtonProps={{
-                          variant: "secondary",
-                        }}
-                      />
-                    </HStack>
-                  )
+                    )}
+                    {collaboratorsButton}
+                  </HStack>
                 )
               }}
               updateCollaborationAssignmentNodes={updateRequirementBlockAssignmentNode}
