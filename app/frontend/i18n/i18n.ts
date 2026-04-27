@@ -4471,7 +4471,7 @@ Thank you,
               "No available forms of the selected work type. Please wait for updates from the Ministry of Housing.",
             noPermitsAvailable: "No permits are available for your jurisdiction",
             noPermitsAvailableDescription:
-              "There are currently no application forms enabled for your jurisdiction. Contact your administrator for more information.",
+              "Make sure at least one submission contact is configured and Building Permit Hub administrator has enabled your permits. Contact your Building Permit Hub administrator if you need help with setup.",
           },
           edit: {
             requirementBlockSidebar: {
