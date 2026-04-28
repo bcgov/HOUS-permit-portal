@@ -884,6 +884,12 @@ en:
       update_error:
         title: Error
         message: "%{error_message}"
+      publish_success:
+        title: ""
+        message: "Release note published successfully!"
+      publish_error:
+        title: Error
+        message: "%{error_message}"
   services:
     auto_compliance_configuration:
       digital_seal_validator:
