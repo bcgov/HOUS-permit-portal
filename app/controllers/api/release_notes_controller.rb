@@ -1,5 +1,5 @@
 class Api::ReleaseNotesController < Api::ApplicationController
-  before_action :set_release_note, only: %i[update]
+  before_action :set_release_note, only: %i[update publish]
 
   def create
     @release_note = ReleaseNote.new(release_note_params)
@@ -38,6 +38,28 @@ class Api::ReleaseNotesController < Api::ApplicationController
                      }
     else
       render_error "release_note.update_error",
+                   {
+                     message_opts: {
+                       error_message:
+                         @release_note.errors.full_messages.join(", ")
+                     }
+                   }
+    end
+  end
+
+  def publish
+    authorize @release_note
+    if @release_note.update(release_note_params.merge(status: :published))
+      render_success @release_note,
+                     "release_note.publish_success",
+                     {
+                       blueprint: ReleaseNoteBlueprint,
+                       blueprint_opts: {
+                         view: :extended
+                       }
+                     }
+    else
+      render_error "release_note.publish_error",
                    {
                      message_opts: {
                        error_message:
