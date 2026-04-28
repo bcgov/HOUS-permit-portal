@@ -929,6 +929,25 @@ en:
       not_found_error:
         title: "Error"
         message: 404 - The requested resource could not be found
+    release_note:
+      create_success:
+        title: ""
+        message: "Release note created successfully!"
+      create_error:
+        title: Error
+        message: "%{error_message}"
+      update_success:
+        title: ""
+        message: "Release note updated successfully!"
+      update_error:
+        title: Error
+        message: "%{error_message}"
+      publish_success:
+        title: ""
+        message: "Release note published successfully!"
+      publish_error:
+        title: Error
+        message: "%{error_message}"
   services:
     auto_compliance_configuration:
       digital_seal_validator:
