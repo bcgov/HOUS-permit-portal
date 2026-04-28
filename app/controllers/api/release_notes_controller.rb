@@ -76,7 +76,7 @@ class Api::ReleaseNotesController < Api::ApplicationController
   end
 
   def release_note_params
-    params.require(:release_note).permit(
+    params.fetch(:release_note, {}).permit(
       :version,
       :release_date,
       :content,
