@@ -6,4 +6,8 @@ class ReleaseNotePolicy < ApplicationPolicy
   def update?
     user.super_admin?
   end
+
+  def publish?
+    user.super_admin?
+  end
 end
