@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next"
 import { IPermitApplication } from "../../../../models/permit-application"
 import { useMst } from "../../../../setup/root"
 import { ECollaborationType } from "../../../../types/enums"
-import { DesignatedCollaboratorAssignmentPopover } from "../../permit-application/collaborator-management/designated-collaborator-assignment-popover"
+import { DesignatedCollaboratorAssignmentModal } from "../../permit-application/collaborator-management/designated-collaborator-assignment-modal"
 import { renderAssignPlusIconTrigger, ReviewAssigneesRow } from "./review-assignees-row"
 
 export const ApplicationReviewAssigneesCell = observer(function ApplicationReviewAssigneesCell({
@@ -19,7 +19,7 @@ export const ApplicationReviewAssigneesCell = observer(function ApplicationRevie
 
   return (
     <ReviewAssigneesRow primaryAssignee={primaryAssignee} emptyText={t("ui.unassigned")}>
-      <DesignatedCollaboratorAssignmentPopover
+      <DesignatedCollaboratorAssignmentModal
         permitApplication={application}
         collaborationType={ECollaborationType.review}
         additionalCollaborations={additionalCollaborations}

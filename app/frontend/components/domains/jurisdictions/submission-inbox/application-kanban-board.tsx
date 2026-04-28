@@ -8,7 +8,7 @@ import { IPermitApplication } from "../../../../models/permit-application"
 import { useMst } from "../../../../setup/root"
 import { colors } from "../../../../styles/theme/foundations/colors"
 import { ECollaborationType, EPermitApplicationStatus } from "../../../../types/enums"
-import { DesignatedCollaboratorAssignmentPopover } from "../../permit-application/collaborator-management/designated-collaborator-assignment-popover"
+import { DesignatedCollaboratorAssignmentModal } from "../../permit-application/collaborator-management/designated-collaborator-assignment-modal"
 import { EReorderDirection, IKanbanColumn, IReorderEvent, KanbanBoard } from "./kanban-board"
 import { KanbanCard } from "./kanban-card"
 import { renderAssignPlusIconTrigger, ReviewAssigneesRow } from "./review-assignees-row"
@@ -133,7 +133,7 @@ const ApplicationKanbanCard = observer(function ApplicationKanbanCard({
       onMove={onMove}
       avatars={
         <ReviewAssigneesRow primaryAssignee={primaryAssignee}>
-          <DesignatedCollaboratorAssignmentPopover
+          <DesignatedCollaboratorAssignmentModal
             permitApplication={application}
             collaborationType={ECollaborationType.review}
             additionalCollaborations={additionalCollaborations}

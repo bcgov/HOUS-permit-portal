@@ -1,15 +1,4 @@
-import {
-  Button,
-  Divider,
-  Flex,
-  HStack,
-  IconButton,
-  PopoverBody,
-  PopoverHeader,
-  Stack,
-  Text,
-  useDisclosure,
-} from "@chakra-ui/react"
+import { Button, Flex, HStack, IconButton, ModalBody, ModalHeader, Stack, Text, useDisclosure } from "@chakra-ui/react"
 import { Plus, X } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
@@ -23,7 +12,7 @@ import { RequestLoadingButton } from "../../../shared/request-loading-button"
 import { SharedAvatar } from "../../../shared/user/shared-avatar"
 
 interface ICollaborationDisplayItem {
-  id: string
+  id?: string
   assignedRequirementBlockName?: string | null
   collaborator: {
     id: string
@@ -36,7 +25,7 @@ interface ICollaborationDisplayItem {
   }
 }
 
-export const CollaborationAssignmentPopoverContent = observer(function CollaboratorSearch({
+export const CollaborationAssignmentModalContent = observer(function CollaboratorSearch({
   onSelect,
   onUnselect,
   takenCollaboratorIds = new Set<string>(),
@@ -100,7 +89,7 @@ export const CollaborationAssignmentPopoverContent = observer(function Collabora
 
   return (
     <>
-      <PopoverHeader as={Stack} p={4}>
+      <ModalHeader as={Stack} p={4} flexShrink={0}>
         <Flex justifyContent={"space-between"}>
           <Text fontSize={"lg"} fontFamily={"heading"} fontWeight={"bold"}>
             {t("permitCollaboration.popover.assignment.title")}
@@ -134,8 +123,8 @@ export const CollaborationAssignmentPopoverContent = observer(function Collabora
             )}
           </HStack>
         )}
-      </PopoverHeader>
-      <PopoverBody p={4}>
+      </ModalHeader>
+      <ModalBody p={4} overflowY="auto" flex={1} minH={0}>
         <Stack spacing={4}>
           <SelectedCollaboratorsSection
             collaborations={selectedCollaborations}
@@ -145,7 +134,7 @@ export const CollaborationAssignmentPopoverContent = observer(function Collabora
             renderFooter={renderSelectedFooter}
           />
           {showSearch && (
-            <Stack as={"ul"} w={"full"} listStyleType={"none"} pl={0}>
+            <Stack as={"ul"} w={"full"} listStyleType={"none"} pl={0} m={0}>
               {collaboratorSearchList.length === 0 && (
                 <Text textAlign={"center"} fontSize={"sm"} color={"text.secondary"} fontStyle={"italic"}>
                   {t(
@@ -187,6 +176,8 @@ export const CollaborationAssignmentPopoverContent = observer(function Collabora
                         variant={"ghost"}
                         color={"text.link"}
                         size={"sm"}
+                        ml={3}
+                        flexShrink={0}
                         fontWeight={"semibold"}
                         fontSize={"sm"}
                         onClick={() => onUnselect?.(collaborator.id)}
@@ -203,6 +194,8 @@ export const CollaborationAssignmentPopoverContent = observer(function Collabora
                             variant={"ghost"}
                             color={"text.link"}
                             size={"sm"}
+                            ml={3}
+                            flexShrink={0}
                             fontWeight={"semibold"}
                             fontSize={"sm"}
                             onClick={onClick}
@@ -227,6 +220,8 @@ export const CollaborationAssignmentPopoverContent = observer(function Collabora
                         variant={"ghost"}
                         color={"text.link"}
                         size={"sm"}
+                        ml={3}
+                        flexShrink={0}
                         fontWeight={"semibold"}
                         fontSize={"sm"}
                         onClick={() => onSelectCreator(collaborator.id)()}
@@ -244,7 +239,7 @@ export const CollaborationAssignmentPopoverContent = observer(function Collabora
             title={additionalCollaboratorsTitle ?? t("permitCollaboration.popover.assignment.additionalCollaborators")}
           />
         </Stack>
-      </PopoverBody>
+      </ModalBody>
     </>
   )
 })
@@ -279,7 +274,13 @@ const SelectedCollaboratorsSection = observer(function SelectedCollaboratorsSect
         </Text>
       ) : (
         collaborations.map((collaboration) => (
-          <Stack key={collaboration.id} spacing={2} p={2} bg="gray.50" borderRadius="md">
+          <Stack
+            key={collaboration.id ?? collaboration.collaborator.id}
+            spacing={2}
+            p={2}
+            bg="gray.50"
+            borderRadius="md"
+          >
             <HStack spacing={3} justify="space-between">
               <HStack spacing={2} minW={0}>
                 <SharedAvatar
@@ -303,6 +304,7 @@ const SelectedCollaboratorsSection = observer(function SelectedCollaboratorsSect
                   size="xs"
                   variant="ghost"
                   colorScheme="red"
+                  flexShrink={0}
                   onClick={() => onUnselect(collaboration)}
                 >
                   {t("permitCollaboration.projectSidebar.unassignCollaborator")}
@@ -342,7 +344,6 @@ const AdditionalCollaboratorsSection = observer(function AdditionalCollaborators
 
   return (
     <>
-      <Divider />
       <Stack spacing={2}>
         <Text fontSize="xs" fontWeight={700} color="text.secondary" textTransform="uppercase">
           {title}
@@ -354,7 +355,7 @@ const AdditionalCollaboratorsSection = observer(function AdditionalCollaborators
             .filter(Boolean)
             .join(", ")
           return (
-            <HStack key={firstCollaboration.collaborator.id} spacing={2} p={2} bg="gray.50" borderRadius="md">
+            <HStack key={firstCollaboration.collaborator.id} spacing={2} p={2} bg="gray.50" borderRadius="md" minW={0}>
               <SharedAvatar
                 size="xs"
                 name={firstCollaboration.collaborator.user?.name}

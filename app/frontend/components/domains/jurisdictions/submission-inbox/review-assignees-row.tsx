@@ -79,8 +79,8 @@ interface ITriggerRenderArgs {
 /**
  * Shared `renderTrigger` factory producing the "+" IconButton used by the
  * assign-collaborator popovers across the submission inbox. Consumers pass the
- * result into either `ProjectReviewCollaboratorsPopover` or
- * `DesignatedCollaboratorAssignmentPopover`.
+ * result into either `ProjectReviewCollaboratorsModal` or
+ * `DesignatedCollaboratorAssignmentModal`.
  */
 export const renderAssignPlusIconTrigger =
   ({ ariaLabel, size = "xs" }: IAssignPlusTriggerOpts) =>

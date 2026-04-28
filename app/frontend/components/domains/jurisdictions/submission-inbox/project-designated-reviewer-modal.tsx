@@ -1,4 +1,4 @@
-import { AvatarGroup, IconButton, Popover, PopoverContent, PopoverTrigger, useDisclosure } from "@chakra-ui/react"
+import { AvatarGroup, IconButton, Modal, ModalContent, ModalOverlay, useDisclosure } from "@chakra-ui/react"
 import { UserPlus } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useState } from "react"
@@ -7,7 +7,7 @@ import { IPermitProject } from "../../../../models/permit-project"
 import { useMst } from "../../../../setup/root"
 import { ECollaborationType } from "../../../../types/enums"
 import { SharedAvatar } from "../../../shared/user/shared-avatar"
-import { CollaborationAssignmentPopoverContent } from "../../permit-application/collaborator-management/collaboration-assignment-popover-content"
+import { CollaborationAssignmentModalContent } from "../../permit-application/collaborator-management/collaboration-assignment-modal-content"
 
 interface IProps {
   project: IPermitProject
@@ -20,7 +20,7 @@ interface IProps {
   onBeforeOpen?: () => Promise<void>
 }
 
-export const ProjectReviewCollaboratorsPopover = observer(function ProjectReviewCollaboratorsPopover({
+export const ProjectReviewCollaboratorsModal = observer(function ProjectReviewCollaboratorsModal({
   project,
   renderTrigger,
   onBeforeOpen,
@@ -47,10 +47,12 @@ export const ProjectReviewCollaboratorsPopover = observer(function ProjectReview
 
   const handleSelectCollaborator = async (collaboratorId: string) => {
     await project.assignProjectReviewCollaborator(collaboratorId)
+    onClose()
   }
 
   const handleUnassign = async (collaboratorId: string) => {
     await project.unassignProjectReviewCollaborator(collaboratorId)
+    onClose()
   }
 
   const triggerOnClick = (e: React.MouseEvent) => {
@@ -80,28 +82,36 @@ export const ProjectReviewCollaboratorsPopover = observer(function ProjectReview
   )
 
   return (
-    <Popover placement="bottom-start" isOpen={isOpen} onClose={onClose} strategy="fixed" isLazy>
-      <PopoverTrigger>
-        {renderTrigger
-          ? renderTrigger({
-              isLoading: isBeforeOpenLoading,
-              collaborationCount: collaborations.length,
-              onClick: triggerOnClick,
-              isDisabled: isBeforeOpenLoading,
-            })
-          : renderDefaultTrigger()}
-      </PopoverTrigger>
-      <PopoverContent w="370px" maxW="370px">
-        <CollaborationAssignmentPopoverContent
-          onSelect={handleSelectCollaborator}
-          onClose={onClose}
-          takenCollaboratorIds={takenCollaboratorIds}
-          collaborationType={ECollaborationType.review}
-          selectedCollaborations={collaborations}
-          selectedTitle={t("permitCollaboration.projectSidebar.projectReviewCollaborators")}
-          onUnselectSelected={(collaboration) => handleUnassign(collaboration.collaborator.id)}
-        />
-      </PopoverContent>
-    </Popover>
+    <>
+      {renderTrigger
+        ? renderTrigger({
+            isLoading: isBeforeOpenLoading,
+            collaborationCount: collaborations.length,
+            onClick: triggerOnClick,
+            isDisabled: isBeforeOpenLoading,
+          })
+        : renderDefaultTrigger()}
+      <Modal isOpen={isOpen} onClose={onClose} isCentered>
+        <ModalOverlay />
+        <ModalContent
+          w={{ base: "calc(100vw - 2rem)", md: "370px" }}
+          maxW="calc(100vw - 2rem)"
+          maxH="min(560px, calc(100vh - 2rem))"
+          overflow="hidden"
+          display="flex"
+          flexDirection="column"
+        >
+          <CollaborationAssignmentModalContent
+            onSelect={handleSelectCollaborator}
+            onClose={onClose}
+            takenCollaboratorIds={takenCollaboratorIds}
+            collaborationType={ECollaborationType.review}
+            selectedCollaborations={collaborations}
+            selectedTitle={t("permitCollaboration.projectSidebar.projectReviewCollaborators")}
+            onUnselectSelected={(collaboration) => handleUnassign(collaboration.collaborator.id)}
+          />
+        </ModalContent>
+      </Modal>
+    </>
   )
 })

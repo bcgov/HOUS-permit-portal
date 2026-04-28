@@ -1,4 +1,4 @@
-import { Avatar, Button, IconButton, Popover, PopoverContent, PopoverTrigger, useDisclosure } from "@chakra-ui/react"
+import { Avatar, Button, IconButton, Modal, ModalContent, ModalOverlay, useDisclosure } from "@chakra-ui/react"
 import { Plus } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
@@ -7,9 +7,9 @@ import { IPermitApplication } from "../../../../models/permit-application"
 import { IPermitCollaboration } from "../../../../models/permit-collaboration"
 import { useMst } from "../../../../setup/root"
 import { ECollaborationType, ECollaboratorType } from "../../../../types/enums"
-import { CollaborationAssignmentPopoverContent } from "./collaboration-assignment-popover-content"
-import { CollaboratorInvite } from "./collaborator-invite-popover-content"
-import { EAssignmentPopoverScreen } from "./types"
+import { CollaborationAssignmentModalContent } from "./collaboration-assignment-modal-content"
+import { CollaboratorInviteModalContent } from "./collaborator-invite-modal-content"
+import { EAssignmentModalScreen } from "./types"
 
 interface IProps {
   permitApplication: IPermitApplication
@@ -25,13 +25,13 @@ interface IProps {
   onBeforeOpen?: () => Promise<void>
 }
 
-const INITIAL_SCREEN = EAssignmentPopoverScreen.collaborationAssignment
+const INITIAL_SCREEN = EAssignmentModalScreen.collaborationAssignment
 
-type TDesignatedSubmitterAssignmentPopoverScreen =
-  | EAssignmentPopoverScreen.collaborationAssignment
-  | EAssignmentPopoverScreen.collaboratorInvite
+type TDesignatedSubmitterAssignmentModalScreen =
+  | EAssignmentModalScreen.collaborationAssignment
+  | EAssignmentModalScreen.collaboratorInvite
 
-export const DesignatedCollaboratorAssignmentPopover = observer(function DesignatedSubmitterAssignmentPopover({
+export const DesignatedCollaboratorAssignmentModal = observer(function DesignatedSubmitterAssignmentModal({
   permitApplication,
   collaborationType,
   avatarTrigger,
@@ -40,7 +40,7 @@ export const DesignatedCollaboratorAssignmentPopover = observer(function Designa
   onBeforeOpen,
 }: IProps) {
   const { userStore } = useMst()
-  const { currentUser } = userStore
+  const currentUser = (userStore as any).currentUser
   const { t } = useTranslation()
   const existingDelegateeCollaboration =
     collaborationType === ECollaborationType.submission
@@ -52,21 +52,21 @@ export const DesignatedCollaboratorAssignmentPopover = observer(function Designa
   const { isOpen, onOpen, onClose } = useDisclosure()
   const createConfirmationModalDisclosureProps = useDisclosure()
   const [isBeforeOpenLoading, setIsBeforeOpenLoading] = useState(false)
-  const [currentScreen, setCurrentScreen] = React.useState<TDesignatedSubmitterAssignmentPopoverScreen>(INITIAL_SCREEN)
+  const [currentScreen, setCurrentScreen] = React.useState<TDesignatedSubmitterAssignmentModalScreen>(INITIAL_SCREEN)
   const [openAssignmentConfirmationModals, setOpenAssignmentConfirmationModals] = React.useState<Set<string>>(new Set())
   const contentRef = React.useRef<HTMLDivElement>(null)
 
   const canManage = permitApplication.canUserManageCollaborators(currentUser, collaborationType)
 
-  const changeScreen = (screen: TDesignatedSubmitterAssignmentPopoverScreen) => {
-    if (!canManage || (!isSubmissionCollaboration && screen === EAssignmentPopoverScreen.collaboratorInvite)) {
+  const changeScreen = (screen: TDesignatedSubmitterAssignmentModalScreen) => {
+    if (!canManage || (!isSubmissionCollaboration && screen === EAssignmentModalScreen.collaboratorInvite)) {
       return
     }
 
     setCurrentScreen(screen)
 
-    // This needs to be done as their is a focus loss issue when dynamically
-    // changing the screen in the popover, causing close on blur to not work
+    // This needs to be done as there is a focus loss issue when dynamically
+    // changing the screen in the modal.
     contentRef.current?.focus()
   }
 
@@ -77,7 +77,7 @@ export const DesignatedCollaboratorAssignmentPopover = observer(function Designa
     }
   }, [isOpen])
 
-  const onPopoverClose = () => {
+  const onModalClose = () => {
     if (openAssignmentConfirmationModals.size > 0 || createConfirmationModalDisclosureProps.isOpen) {
       return
     }
@@ -85,10 +85,10 @@ export const DesignatedCollaboratorAssignmentPopover = observer(function Designa
     onClose()
   }
 
-  const openAssignmentPopover = (collaboratorId: string) => {
+  const openAssignmentConfirmationModal = (collaboratorId: string) => {
     setOpenAssignmentConfirmationModals((prev) => new Set([...prev, collaboratorId]))
   }
-  const closeAssignmentPopover = (collaboratorId: string) => {
+  const closeAssignmentConfirmationModal = (collaboratorId: string) => {
     setOpenAssignmentConfirmationModals((prev) => {
       const newSet = new Set([...prev])
       newSet.delete(collaboratorId)
@@ -98,8 +98,8 @@ export const DesignatedCollaboratorAssignmentPopover = observer(function Designa
 
   const createAssignmentConfirmationModalDisclosureProps = (collaboratorId: string) => ({
     isOpen: openAssignmentConfirmationModals.has(collaboratorId),
-    onOpen: () => openAssignmentPopover(collaboratorId),
-    onClose: () => closeAssignmentPopover(collaboratorId),
+    onOpen: () => openAssignmentConfirmationModal(collaboratorId),
+    onClose: () => closeAssignmentConfirmationModal(collaboratorId),
   })
 
   const onInviteCollaborator = (user: { email: string; firstName: string; lastName: string }) =>
@@ -125,10 +125,8 @@ export const DesignatedCollaboratorAssignmentPopover = observer(function Designa
   const triggerButtonProps = {
     onClick: (e) => {
       e.stopPropagation()
-      if (onBeforeOpen) {
-        e.preventDefault()
-        handleOpen()
-      }
+      e.preventDefault()
+      handleOpen()
     },
     onKeyDown: (e) => e.stopPropagation(),
     isDisabled: !canManage || isBeforeOpenLoading,
@@ -157,63 +155,65 @@ export const DesignatedCollaboratorAssignmentPopover = observer(function Designa
     )
 
   return (
-    <Popover
-      placement={"bottom-start"}
-      isOpen={isOpen}
-      onClose={onPopoverClose}
-      onOpen={onBeforeOpen ? undefined : onOpen}
-      strategy={"fixed"}
-      isLazy
-    >
-      <PopoverTrigger>
-        {renderTrigger
-          ? renderTrigger({
-              isLoading: isBeforeOpenLoading,
-              existingDelegateeCollaboration,
-              onClick: (e: React.MouseEvent) => {
-                e.stopPropagation()
-                e.preventDefault()
-                handleOpen()
-              },
-              isDisabled: !canManage || isBeforeOpenLoading,
-            })
-          : renderDefaultTrigger()}
-      </PopoverTrigger>
-      <PopoverContent w={"370px"} maxW={"370px"} ref={contentRef}>
-        {canManage && currentScreen === EAssignmentPopoverScreen.collaborationAssignment && (
-          <CollaborationAssignmentPopoverContent
-            onSelect={async (collaboratorId) => {
-              const response = await permitApplication.assignCollaborator(collaboratorId, ECollaboratorType.delegatee)
-              response && onClose()
-            }}
-            onClose={onClose}
-            takenCollaboratorIds={existingCollaboratorIds}
-            getConfirmationModalDisclosureProps={createAssignmentConfirmationModalDisclosureProps}
-            transitionToInvite={
-              isSubmissionCollaboration ? () => changeScreen(EAssignmentPopoverScreen.collaboratorInvite) : undefined
-            }
-            selectedCollaborations={existingDelegateeCollaboration ? [existingDelegateeCollaboration] : []}
-            selectedTitle={selectedTitle}
-            selectedEmptyText={t("permitCollaboration.popover.assignment.noneAssigned")}
-            onUnselectSelected={async () => {
-              if (!existingDelegateeCollaboration) return
+    <>
+      {renderTrigger
+        ? renderTrigger({
+            isLoading: isBeforeOpenLoading,
+            existingDelegateeCollaboration,
+            onClick: (e: React.MouseEvent) => {
+              e.stopPropagation()
+              e.preventDefault()
+              handleOpen()
+            },
+            isDisabled: !canManage || isBeforeOpenLoading,
+          })
+        : renderDefaultTrigger()}
+      <Modal isOpen={isOpen} onClose={onModalClose} isCentered>
+        <ModalOverlay />
+        <ModalContent
+          w={{ base: "calc(100vw - 2rem)", md: "370px" }}
+          maxW="calc(100vw - 2rem)"
+          maxH="min(560px, calc(100vh - 2rem))"
+          overflow="hidden"
+          display="flex"
+          flexDirection="column"
+          ref={contentRef}
+        >
+          {canManage && currentScreen === EAssignmentModalScreen.collaborationAssignment && (
+            <CollaborationAssignmentModalContent
+              onSelect={async (collaboratorId) => {
+                const response = await permitApplication.assignCollaborator(collaboratorId, ECollaboratorType.delegatee)
+                response && onClose()
+              }}
+              onClose={onClose}
+              takenCollaboratorIds={existingCollaboratorIds}
+              getConfirmationModalDisclosureProps={createAssignmentConfirmationModalDisclosureProps}
+              transitionToInvite={
+                isSubmissionCollaboration ? () => changeScreen(EAssignmentModalScreen.collaboratorInvite) : undefined
+              }
+              selectedCollaborations={existingDelegateeCollaboration ? [existingDelegateeCollaboration] : []}
+              selectedTitle={selectedTitle}
+              selectedEmptyText={t("permitCollaboration.popover.assignment.noneAssigned")}
+              onUnselectSelected={async () => {
+                if (!existingDelegateeCollaboration) return
 
-              const response = await permitApplication.unassignPermitCollaboration(existingDelegateeCollaboration.id)
-              response && onClose()
-            }}
-            additionalCollaborations={additionalCollaborations}
-            collaborationType={collaborationType}
-          />
-        )}
-        {canManage && currentScreen === EAssignmentPopoverScreen.collaboratorInvite && isSubmissionCollaboration && (
-          <CollaboratorInvite
-            onClose={() => changeScreen(INITIAL_SCREEN)}
-            onInviteSuccess={onClose}
-            onInvite={onInviteCollaborator}
-            confirmationModalDisclosureProps={createConfirmationModalDisclosureProps}
-          />
-        )}
-      </PopoverContent>
-    </Popover>
+                const response = await permitApplication.unassignPermitCollaboration(existingDelegateeCollaboration.id)
+                response && onClose()
+              }}
+              additionalCollaborations={additionalCollaborations}
+              collaborationType={collaborationType}
+            />
+          )}
+          {canManage && currentScreen === EAssignmentModalScreen.collaboratorInvite && isSubmissionCollaboration && (
+            <CollaboratorInviteModalContent
+              onClose={() => changeScreen(INITIAL_SCREEN)}
+              onInviteSuccess={onClose}
+              onInvite={onInviteCollaborator}
+              confirmationModalDisclosureProps={createConfirmationModalDisclosureProps}
+            />
+          )}
+        </ModalContent>
+      </Modal>
+    </>
   )
 })
