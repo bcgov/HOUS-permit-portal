@@ -3,6 +3,7 @@ require "rails_helper"
 RSpec.describe "ReleaseNotes", type: :request do
   include Devise::Test::IntegrationHelpers
   subject { json_response.fetch("data") }
+  let(:error_message) { json_response.dig("meta", "message", "message") }
   let(:user) { create(:user, :super_admin) }
   let(:params) do
     {
@@ -30,13 +31,28 @@ RSpec.describe "ReleaseNotes", type: :request do
         params[:release_date]
       )
     end
+
+    it "returns an error if the release note is not valid" do
+      sign_in user
+      post release_notes_path,
+           params: {
+             release_note: params.merge({ version: nil })
+           }
+
+      expect(response).to have_http_status(:bad_request)
+      expect(error_message).to match(/version.*blank/i)
+    end
   end
 
   describe "#update" do
-    it "updates an existing release note" do
+    def setup
       sign_in user
-      release_note = create(:release_note)
-      patch release_note_path(release_note.id),
+      @release_note = create(:release_note)
+    end
+
+    it "updates an existing release note" do
+      setup
+      patch release_note_path(@release_note.id),
             params: {
               release_note: {
                 version: params[:version]
@@ -45,6 +61,17 @@ RSpec.describe "ReleaseNotes", type: :request do
 
       expect(response).to have_http_status(:success)
       expect(subject).to include("version" => params[:version])
+    end
+
+    it "returns an error if the release note is not valid" do
+      setup
+      patch release_note_path(@release_note.id),
+            params: {
+              release_note: params.merge({ version: nil })
+            }
+
+      expect(response).to have_http_status(:bad_request)
+      expect(error_message).to match(/version.*blank/i)
     end
   end
 end
