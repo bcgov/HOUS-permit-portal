@@ -1,4 +1,4 @@
-import { Avatar, AvatarProps, HStack, IconButton, Spinner, Text, Tooltip } from "@chakra-ui/react"
+import { AvatarProps, HStack, IconButton, Spinner, Text, Tooltip } from "@chakra-ui/react"
 import { UserPlus } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -7,21 +7,10 @@ import { SharedAvatar } from "../../../shared/user/shared-avatar"
 
 interface IReviewAssigneesRowProps {
   /**
-   * The designated / delegatee reviewer. Rendered first with a blue border to
-   * distinguish them from block-level reviewers.
+   * The designated / delegatee reviewer. This is the only avatar rendered in
+   * inbox table rows and kanban cards.
    */
   primaryAssignee?: IUser | null
-  /**
-   * Block-level review collaborators. Only relevant for permit applications.
-   * Rendered without a border, capped at `maxSecondaryVisible` with an overflow
-   * counter when exceeded.
-   */
-  secondaryAssignees?: IUser[]
-  /**
-   * Maximum number of secondary avatars to render before collapsing the rest
-   * into a "+N" overflow avatar. Defaults to `Infinity` (no cap).
-   */
-  maxSecondaryVisible?: number
   /**
    * Text to render when there are no assignees. Omit to render nothing in the
    * empty state (useful for kanban cards where the adjacent + icon carries the
@@ -41,57 +30,31 @@ interface IReviewAssigneesRowProps {
 
 /**
  * Shared row component for the submission inbox "assigned reviewer" cells and
- * kanban card avatar strips. Renders the designated reviewer (if any), block
- * level reviewers (for applications), an overflow counter, an optional
- * "unassigned" label, and whatever assign trigger the consumer passes as
- * children. Every avatar exposes the user's name on hover.
+ * kanban card avatar strips. Renders the designated reviewer (if any), an
+ * optional "unassigned" label, and whatever assign trigger the consumer passes
+ * as children. Block-level collaborators are shown inside the popover, not here.
  */
 export const ReviewAssigneesRow = observer(function ReviewAssigneesRow({
   primaryAssignee,
-  secondaryAssignees = [],
-  maxSecondaryVisible = Infinity,
   emptyText,
   avatarSize = "xs",
   spacing = 1,
   children,
 }: IReviewAssigneesRowProps) {
-  const visibleSecondary = secondaryAssignees.slice(0, maxSecondaryVisible)
-  const overflowCount = Math.max(secondaryAssignees.length - maxSecondaryVisible, 0)
-  const hasAnyAssignee = !!primaryAssignee || secondaryAssignees.length > 0
-
   return (
     <HStack spacing={spacing}>
-      {hasAnyAssignee ? (
-        <>
-          {primaryAssignee && (
-            <Tooltip label={primaryAssignee.name} hasArrow placement="top" openDelay={200}>
-              <SharedAvatar
-                key={primaryAssignee.id}
-                size={avatarSize}
-                name={primaryAssignee.name}
-                role={primaryAssignee.role}
-                fontSize="2xs"
-                border="2px solid"
-                borderColor="theme.blueActive"
-              />
-            </Tooltip>
-          )}
-          {visibleSecondary.map((user) => (
-            <Tooltip key={user.id} label={user.name} hasArrow placement="top" openDelay={200}>
-              <SharedAvatar size={avatarSize} name={user.name} role={user.role} fontSize="2xs" />
-            </Tooltip>
-          ))}
-          {overflowCount > 0 && (
-            <Avatar
-              size={avatarSize}
-              name={`+${overflowCount}`}
-              getInitials={(name) => name}
-              bg="gray.200"
-              color="text.primary"
-              fontSize="2xs"
-            />
-          )}
-        </>
+      {primaryAssignee ? (
+        <Tooltip label={primaryAssignee.name} hasArrow placement="top" openDelay={200}>
+          <SharedAvatar
+            key={primaryAssignee.id}
+            size={avatarSize}
+            name={primaryAssignee.name}
+            role={primaryAssignee.role}
+            fontSize="2xs"
+            border="2px solid"
+            borderColor="theme.blueActive"
+          />
+        </Tooltip>
       ) : emptyText ? (
         <Text fontSize="sm" color="text.secondary">
           {emptyText}

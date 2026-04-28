@@ -1,15 +1,4 @@
-import {
-  AvatarGroup,
-  HStack,
-  IconButton,
-  Popover,
-  PopoverBody,
-  PopoverContent,
-  PopoverTrigger,
-  Stack,
-  Text,
-  useDisclosure,
-} from "@chakra-ui/react"
+import { AvatarGroup, IconButton, Popover, PopoverContent, PopoverTrigger, useDisclosure } from "@chakra-ui/react"
 import { UserPlus } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useState } from "react"
@@ -17,7 +6,6 @@ import { useTranslation } from "react-i18next"
 import { IPermitProject } from "../../../../models/permit-project"
 import { useMst } from "../../../../setup/root"
 import { ECollaborationType } from "../../../../types/enums"
-import { RequestLoadingButton } from "../../../shared/request-loading-button"
 import { SharedAvatar } from "../../../shared/user/shared-avatar"
 import { CollaborationAssignmentPopoverContent } from "../../permit-application/collaborator-management/collaboration-assignment-popover-content"
 
@@ -104,41 +92,14 @@ export const ProjectReviewCollaboratorsPopover = observer(function ProjectReview
           : renderDefaultTrigger()}
       </PopoverTrigger>
       <PopoverContent w="370px" maxW="370px">
-        <PopoverBody p={0}>
-          {collaborations.length > 0 && (
-            <Stack px={4} pt={4} spacing={2}>
-              <Text fontSize="xs" fontWeight={700} color="text.secondary" textTransform="uppercase">
-                {/* @ts-ignore */}
-                {t("permitCollaboration.projectSidebar.projectReviewCollaborators")}
-              </Text>
-              {collaborations.map((c) => (
-                <HStack key={c.id} spacing={3} p={2} bg="gray.50" borderRadius="md" justify="space-between">
-                  <HStack spacing={2}>
-                    <SharedAvatar size="xs" name={c.collaborator.user?.name} role={c.collaborator.user?.role} />
-                    <Text fontSize="sm" fontWeight={600}>
-                      {c.collaborator.user?.name}
-                    </Text>
-                  </HStack>
-                  <RequestLoadingButton
-                    size="xs"
-                    variant="ghost"
-                    colorScheme="red"
-                    onClick={() => handleUnassign(c.collaborator.id)}
-                  >
-                    {/* @ts-ignore */}
-                    {t("permitCollaboration.projectSidebar.unassignCollaborator")}
-                  </RequestLoadingButton>
-                </HStack>
-              ))}
-            </Stack>
-          )}
-        </PopoverBody>
-
         <CollaborationAssignmentPopoverContent
           onSelect={handleSelectCollaborator}
           onClose={onClose}
           takenCollaboratorIds={takenCollaboratorIds}
           collaborationType={ECollaborationType.review}
+          selectedCollaborations={collaborations}
+          selectedTitle={t("permitCollaboration.projectSidebar.projectReviewCollaborators")}
+          onUnselectSelected={(collaboration) => handleUnassign(collaboration.collaborator.id)}
         />
       </PopoverContent>
     </Popover>

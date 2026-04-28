@@ -15,6 +15,7 @@ interface IProps {
   permitApplication: IPermitApplication
   collaborationType: ECollaborationType
   avatarTrigger?: boolean
+  additionalCollaborations?: IPermitCollaboration[]
   renderTrigger?: (props: {
     isLoading: boolean
     existingDelegateeCollaboration: IPermitCollaboration | undefined
@@ -34,6 +35,7 @@ export const DesignatedCollaboratorAssignmentPopover = observer(function Designa
   permitApplication,
   collaborationType,
   avatarTrigger,
+  additionalCollaborations = [],
   renderTrigger,
   onBeforeOpen,
 }: IProps) {
@@ -104,6 +106,9 @@ export const DesignatedCollaboratorAssignmentPopover = observer(function Designa
     permitApplication.inviteNewCollaborator(ECollaboratorType.delegatee, user)
 
   const isSubmissionCollaboration = collaborationType === ECollaborationType.submission
+  const selectedTitle = isSubmissionCollaboration
+    ? t("permitCollaboration.sidebar.designatedSubmitters")
+    : t("permitCollaboration.sidebar.designatedReviewers")
 
   const handleOpen = async () => {
     if (onBeforeOpen) {
@@ -187,13 +192,16 @@ export const DesignatedCollaboratorAssignmentPopover = observer(function Designa
             transitionToInvite={
               isSubmissionCollaboration ? () => changeScreen(EAssignmentPopoverScreen.collaboratorInvite) : undefined
             }
-            takenCollaboratorStrategy={"include"}
-            onUnselect={async () => {
+            selectedCollaborations={existingDelegateeCollaboration ? [existingDelegateeCollaboration] : []}
+            selectedTitle={selectedTitle}
+            selectedEmptyText={t("permitCollaboration.popover.assignment.noneAssigned")}
+            onUnselectSelected={async () => {
               if (!existingDelegateeCollaboration) return
 
               const response = await permitApplication.unassignPermitCollaboration(existingDelegateeCollaboration.id)
               response && onClose()
             }}
+            additionalCollaborations={additionalCollaborations}
             collaborationType={collaborationType}
           />
         )}
