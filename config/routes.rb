@@ -344,7 +344,9 @@ Rails.application.routes.draw do
 
     resources :digital_seal_validator, only: [:create]
 
-    resources :release_notes, only: %i[index show create update]
+    resources :release_notes, only: %i[index show create update] do
+      patch "publish", on: :member
+    end
   end
 
   scope module: :external_api, path: :external_api do
