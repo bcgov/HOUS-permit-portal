@@ -696,6 +696,20 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_27_222000) do
     t.index ["scan_status"], name: "index_project_documents_on_scan_status"
   end
 
+  create_table "release_notes", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "version"
+    t.datetime "release_date"
+    t.text "content"
+    t.string "release_notes_url"
+    t.text "issues"
+    t.integer "status", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["release_date"], name: "index_release_notes_on_release_date"
+    t.index ["status"], name: "index_release_notes_on_status"
+    t.index ["updated_at"], name: "index_release_notes_on_updated_at"
+  end
+
   create_table "report_documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "step_code_id", null: false
     t.jsonb "file_data"
