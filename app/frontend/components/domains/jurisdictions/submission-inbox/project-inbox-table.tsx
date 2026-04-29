@@ -33,7 +33,7 @@ import { SearchGridItem } from "../../../shared/grid/search-grid-item"
 import { ProjectStateTag } from "../../../shared/permit-projects/project-state-tag"
 import { SortIcon } from "../../../shared/sort-icon"
 import { InboxNoMatchingEmpty } from "./inbox-no-matching-empty"
-import { ProjectReviewCollaboratorsPopover } from "./project-designated-reviewer-popover"
+import { ProjectReviewCollaboratorsModal } from "./project-designated-reviewer-modal"
 import { ProjectInboxPermitApplicationsPopover } from "./project-inbox-permit-applications-popover"
 import { renderAssignPlusIconTrigger, ReviewAssigneesRow } from "./review-assignees-row"
 import { SubmissionInboxMarkUnreadIconButton } from "./submission-inbox-mark-unread-icon-button"
@@ -294,7 +294,7 @@ const ProjectAssignedCell = observer(function ProjectAssignedCell({ project }: {
 
   return (
     <ReviewAssigneesRow primaryAssignee={primaryAssignee} emptyText={t("ui.unassigned")}>
-      <ProjectReviewCollaboratorsPopover
+      <ProjectReviewCollaboratorsModal
         project={project}
         onBeforeOpen={async () => {
           await permitProjectStore.fetchPermitProject(project.id)

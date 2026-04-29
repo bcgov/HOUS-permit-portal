@@ -254,6 +254,7 @@ export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
             <Flex justify="flex-end" mt={4}>
               <RouterLinkButton
                 variant="tertiary"
+                fontWeight="bold"
                 rightIcon={<CaretRight />}
                 to={`/projects/${permitProject.id}/permits`}
               >
