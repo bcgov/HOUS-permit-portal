@@ -3,6 +3,7 @@ class SupportingDocument < FileUploadAttachment
   belongs_to :submission_version, optional: true
 
   include FileUploader.Attachment(:file)
+  prepend FilenamePreservingFileUrl
 
   def attached_to
     permit_application
@@ -133,16 +134,6 @@ class SupportingDocument < FileUploadAttachment
       I18n.t(
         "activerecord.errors.models.supporting_document.attributes.data_key.submission_version_data_key"
       )
-    )
-  end
-
-  def file_url(disposition: "attachment", **options)
-    return nil unless file_available?
-
-    file.url(
-      response_content_disposition:
-        "#{disposition}; filename=\"#{standardized_filename}\"",
-      **options
     )
   end
 end
