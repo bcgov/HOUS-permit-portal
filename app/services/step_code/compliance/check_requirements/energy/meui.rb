@@ -47,7 +47,8 @@ class StepCode::Compliance::CheckRequirements::Energy::MEUI < StepCode::Complian
   end
 
   def meui_percent_improvement
-    return nil if ref_energy_target == 0 || checklist.step_code?
+    return 0 if ref_energy_target == 0 || checklist.step_code?
+
     @meui_improvement_percentage ||=
       ((ref_energy_target - energy_consumption) / ref_energy_target * 100)
   end
