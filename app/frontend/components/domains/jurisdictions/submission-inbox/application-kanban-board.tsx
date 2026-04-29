@@ -5,11 +5,10 @@ import React, { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { Link, useNavigate } from "react-router-dom"
 import { IPermitApplication } from "../../../../models/permit-application"
-import { IUser } from "../../../../models/user"
 import { useMst } from "../../../../setup/root"
 import { colors } from "../../../../styles/theme/foundations/colors"
 import { ECollaborationType, EPermitApplicationStatus } from "../../../../types/enums"
-import { DesignatedCollaboratorAssignmentPopover } from "../../permit-application/collaborator-management/designated-collaborator-assignment-popover"
+import { DesignatedCollaboratorAssignmentModal } from "../../permit-application/collaborator-management/designated-collaborator-assignment-modal"
 import { EReorderDirection, IKanbanColumn, IReorderEvent, KanbanBoard } from "./kanban-board"
 import { KanbanCard } from "./kanban-card"
 import { renderAssignPlusIconTrigger, ReviewAssigneesRow } from "./review-assignees-row"
@@ -23,8 +22,6 @@ interface IProps {
   onShowMore?: (columnKey: string) => void
   onReorder?: (event: IReorderEvent) => void
 }
-
-const MAX_VISIBLE_BLOCK_LEVEL_REVIEW_ASSIGNEE_AVATARS = 3
 
 const APPLICATION_KANBAN_COLUMNS: EPermitApplicationStatus[] = [
   EPermitApplicationStatus.newlySubmitted,
@@ -123,16 +120,7 @@ const ApplicationKanbanCard = observer(function ApplicationKanbanCard({
   const isUnread = !application.isViewed
 
   const primaryAssignee = application.designatedReviewer?.collaborator?.user ?? null
-
-  const secondaryAssignees: IUser[] = []
-  const seenUserIds = new Set<string>(primaryAssignee ? [primaryAssignee.id] : [])
-  for (const collab of application.getCollaborationAssignees(ECollaborationType.review)) {
-    const user = collab.collaborator?.user
-    if (user && !seenUserIds.has(user.id)) {
-      seenUserIds.add(user.id)
-      secondaryAssignees.push(user)
-    }
-  }
+  const additionalCollaborations = application.getCollaborationAssignees(ECollaborationType.review)
 
   return (
     <KanbanCard
@@ -144,14 +132,11 @@ const ApplicationKanbanCard = observer(function ApplicationKanbanCard({
       isLast={isLast}
       onMove={onMove}
       avatars={
-        <ReviewAssigneesRow
-          primaryAssignee={primaryAssignee}
-          secondaryAssignees={secondaryAssignees}
-          maxSecondaryVisible={MAX_VISIBLE_BLOCK_LEVEL_REVIEW_ASSIGNEE_AVATARS}
-        >
-          <DesignatedCollaboratorAssignmentPopover
+        <ReviewAssigneesRow primaryAssignee={primaryAssignee}>
+          <DesignatedCollaboratorAssignmentModal
             permitApplication={application}
             collaborationType={ECollaborationType.review}
+            additionalCollaborations={additionalCollaborations}
             onBeforeOpen={async () => {
               await permitApplicationStore.fetchPermitApplication(application.id, true)
             }}

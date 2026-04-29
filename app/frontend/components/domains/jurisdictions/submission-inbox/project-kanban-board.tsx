@@ -10,7 +10,7 @@ import { EProjectState } from "../../../../types/enums"
 import { ChangeProjectStateMenu } from "./change-project-state-menu"
 import { EReorderDirection, IKanbanColumn, IReorderEvent, KanbanBoard } from "./kanban-board"
 import { KanbanCard } from "./kanban-card"
-import { ProjectReviewCollaboratorsPopover } from "./project-designated-reviewer-popover"
+import { ProjectReviewCollaboratorsModal } from "./project-designated-reviewer-modal"
 import { ProjectInboxPermitApplicationsPopover } from "./project-inbox-permit-applications-popover"
 import { renderAssignPlusIconTrigger, ReviewAssigneesRow } from "./review-assignees-row"
 
@@ -127,7 +127,7 @@ const ProjectKanbanCard = observer(function ProjectKanbanCard({
       onMove={onMove}
       avatars={
         <ReviewAssigneesRow primaryAssignee={primaryAssignee}>
-          <ProjectReviewCollaboratorsPopover
+          <ProjectReviewCollaboratorsModal
             project={project}
             onBeforeOpen={async () => {
               await permitProjectStore.fetchPermitProject(project.id)

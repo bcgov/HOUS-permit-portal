@@ -39,7 +39,7 @@ import { ECollaborationType, ECollaboratorType } from "../../../../types/enums"
 import { getRequirementBlockAccordionNodes } from "../../../../utils/formio-helpers"
 import { RemoveConfirmationModal } from "../../../shared/modals/remove-confirmation-modal"
 import { RequestLoadingButton } from "../../../shared/request-loading-button"
-import { DesignatedCollaboratorAssignmentPopover } from "./designated-collaborator-assignment-popover"
+import { DesignatedCollaboratorAssignmentModal } from "./designated-collaborator-assignment-modal"
 import { Reinvite } from "./reinvite"
 
 interface IProps {
@@ -164,7 +164,7 @@ const DesignatedCollaborators = observer(function DesignatedCollaborators({
       <CollaborationCard
         rightElement={
           canManage ? (
-            <DesignatedCollaboratorAssignmentPopover
+            <DesignatedCollaboratorAssignmentModal
               permitApplication={permitApplication}
               collaborationType={collaborationType}
             />
