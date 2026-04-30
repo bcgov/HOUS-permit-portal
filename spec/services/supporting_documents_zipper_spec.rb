@@ -45,6 +45,7 @@ RSpec.describe SupportingDocumentsZipper do
     let(:zip_entry_zipfile) { instance_double("Zip::File") }
 
     before do
+      allow(Time.zone).to receive(:today).and_return(Date.new(2026, 4, 29))
       allow(PermitApplication).to receive(:find).and_return(permit_application)
       allow(FileUtils).to receive(:mkdir_p)
       allow(File).to receive(:directory?).and_return(true)
@@ -88,6 +89,10 @@ RSpec.describe SupportingDocumentsZipper do
         "/tmp/f2.pdf"
       )
       expect(zipfile_uploader).to have_received(:upload)
+      expect(File).to have_received(:open).with(
+        end_with("PA-0001_2026-04-29_supporting-documents.zip"),
+        "rb"
+      )
       expect(permit_application).to have_received(:zipfile_data=).with(
         { "id" => "zip-1" }
       )
