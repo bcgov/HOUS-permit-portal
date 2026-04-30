@@ -90,7 +90,7 @@ export const KanbanCard = observer(function KanbanCard({
     >
       <HStack position="absolute" top={2} right={2} spacing={1} align="center" zIndex={1}>
         {isUnread && <Circle size="10px" bg="theme.blueActive" flexShrink={0} />}
-        <Tooltip label={t("submissionInbox.reorder")} hasArrow placement="top">
+        <Tooltip label={t("submissionInbox.dragToReorder")} hasArrow placement="top">
           <IconButton
             aria-label={t("submissionInbox.reorder")}
             icon={<DotsSixVertical size={16} weight="bold" />}
@@ -98,8 +98,8 @@ export const KanbanCard = observer(function KanbanCard({
             minW={5}
             h={5}
             variant="ghost"
-            color="theme.blueActive"
-            _hover={{ bg: "background.blueLight" }}
+            color="gray.500"
+            _hover={{ bg: "gray.100" }}
             cursor="grab"
             {...attributes}
             {...listeners}
