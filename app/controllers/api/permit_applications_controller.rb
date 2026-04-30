@@ -17,6 +17,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
                   remove_collaborator_collaborations
                   create_or_update_permit_block_status
                   retrigger_submission_webhook
+                  download_application_json
                   destroy
                   restore
                   transition_status
@@ -460,6 +461,20 @@ class Api::PermitApplicationsController < Api::ApplicationController
     send_data csv_data, type: "text/csv"
   end
 
+  def download_application_json
+    authorize @permit_application, :download_application_json?
+
+    json_data =
+      PermitApplicationBlueprint.render_as_json(
+        @permit_application,
+        view: :external_api
+      )
+
+    send_data JSON.pretty_generate(json_data),
+              filename: download_application_json_filename,
+              type: "application/json"
+  end
+
   def retrigger_submission_webhook
     authorize @permit_application, :retrigger_submission_webhook?
 
@@ -526,6 +541,12 @@ class Api::PermitApplicationsController < Api::ApplicationController
       else
         PermitApplication.for_sandbox(current_sandbox).find(params[:id])
       end
+  end
+
+  def download_application_json_filename
+    identifier = @permit_application.number.presence || @permit_application.id
+
+    "permit-application-#{identifier.to_s.parameterize}.json"
   end
 
   def permit_application_params # params for submitters

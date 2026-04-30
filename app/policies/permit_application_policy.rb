@@ -39,6 +39,11 @@ class PermitApplicationPolicy < ApplicationPolicy
     record.submitted? && update?
   end
 
+  def download_application_json?
+    user.review_staff? && user.member_of?(record.jurisdiction_id) &&
+      !record.new_draft?
+  end
+
   def update_version?
     permit_application = record
     designated_submitter =
