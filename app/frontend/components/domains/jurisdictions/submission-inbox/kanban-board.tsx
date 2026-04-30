@@ -178,9 +178,9 @@ function KanbanBoardInner<T extends IKanbanItem>({
               <Flex
                 key={column.key}
                 direction="column"
-                minW={isCollapsed ? "84px" : "318px"}
-                maxW={isCollapsed ? "84px" : "480px"}
-                flex={isCollapsed ? "0 0 84px" : "1 0 318px"}
+                minW={isCollapsed ? "64px" : "318px"}
+                maxW={isCollapsed ? "64px" : "480px"}
+                flex={isCollapsed ? "0 0 64px" : "1 0 318px"}
                 border="1px solid"
                 borderColor="border.light"
                 borderRadius="lg"
@@ -223,13 +223,14 @@ function KanbanBoardInner<T extends IKanbanItem>({
                                 leftIcon={<CaretRight size={12} />}
                                 variant="ghost"
                                 size="xs"
-                                minW="52px"
+                                minW="48px"
                                 h={6}
-                                px={1}
+                                px={0.5}
+                                mt={0}
                                 fontSize="xs"
                                 fontWeight="normal"
                                 color="text.secondary"
-                                iconSpacing={0.5}
+                                iconSpacing={0.25}
                                 onClick={() => onToggleColumn(column.key)}
                               >
                                 {t("submissionInbox.showColumn")}
@@ -263,12 +264,6 @@ function KanbanBoardInner<T extends IKanbanItem>({
                             >
                               {displayedCount}/{totalCount}
                             </Badge>
-                            {unreadCount > 0 && (
-                              <Badge borderRadius="full" px={2} fontSize="2xs" bg="theme.blueActive" color="white">
-                                {/* @ts-ignore */}
-                                {t("submissionInbox.unreadCount", { count: unreadCount })}
-                              </Badge>
-                            )}
                           </Flex>
                         </Flex>
                       </Tooltip>
@@ -305,7 +300,7 @@ function KanbanBoardInner<T extends IKanbanItem>({
                               border="1px solid"
                               borderColor="border.light"
                             >
-                              {displayedCount} of {totalCount}
+                              {displayedCount}/{totalCount}
                             </Badge>
                             <Button
                               aria-label="Collapse column"
