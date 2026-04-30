@@ -97,15 +97,15 @@ export const SitesSelect = observer(function ({
 
   useEffect(() => {
     ;(async () => {
-      if (R.isNil(siteWatch?.value) && pidWatch) {
-        //the pid is valid, lets try to fill in the address based on the PID
+      if (pidWatch) {
+        // If PID is provided, resolve and sync the address from PID details.
         const siteDetails = await fetchSiteDetailsFromPid(pidWatch)
-        if (siteDetails) {
+        if (siteDetails && siteDetails.value !== siteWatch?.value) {
           setValue(siteName, siteDetails)
         }
       }
     })()
-  }, [siteWatch?.value, pidWatch])
+  }, [pidWatch])
 
   // Jurisdiction matching logic - integrated from useJurisdictionFromSite hook
   useEffect(() => {
@@ -124,7 +124,7 @@ export const SitesSelect = observer(function ({
     let isActive = true
     ;(async () => {
       try {
-        const response = await fetchGeocodedJurisdiction(siteValue, undefined, Boolean(onLtsaMatcherFound))
+        const response = await fetchGeocodedJurisdiction(siteValue, pidWatch, Boolean(onLtsaMatcherFound))
         const matchedJurisdiction = response?.jurisdiction
         const foundLtsaMatcher = response?.ltsaMatcher ?? null
         if (onLtsaMatcherFound) {
@@ -151,7 +151,7 @@ export const SitesSelect = observer(function ({
     return () => {
       isActive = false
     }
-  }, [siteWatch?.value, manualMode])
+  }, [siteWatch?.value, pidWatch, manualMode])
 
   const debouncedFetchOptions = useCallback(debounce(fetchSiteOptions, 1000), [])
 
