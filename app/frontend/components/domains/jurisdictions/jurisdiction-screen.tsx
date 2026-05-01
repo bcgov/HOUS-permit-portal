@@ -1,25 +1,26 @@
 import {
+  Accordion,
   Box,
   Button,
   Center,
   Container,
-  Divider,
   Flex,
   FormControl,
   FormLabel,
+  Grid,
+  GridItem,
   HStack,
   Heading,
   Input,
   Link,
   ListItem,
   OrderedList,
-  Show,
   Text,
   UnorderedList,
   VStack,
 } from "@chakra-ui/react"
 
-import { ArrowSquareOut } from "@phosphor-icons/react"
+import { ArrowSquareOut, Pencil } from "@phosphor-icons/react"
 import i18next from "i18next"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
@@ -30,18 +31,23 @@ import { IJurisdiction } from "../../../models/jurisdiction"
 import { useMst } from "../../../setup/root"
 import { EFlashMessageStatus } from "../../../types/enums"
 import { IContact, TLatLngTuple } from "../../../types/types"
-import { BlueTitleBar } from "../../shared/base/blue-title-bar"
+import { sanitizeTipTapHtml } from "../../../utils/sanitize-tiptap-content"
+import { isTipTapEmpty } from "../../../utils/utility-functions"
 import { CustomMessageBox } from "../../shared/base/custom-message-box"
 import { ErrorScreen } from "../../shared/base/error-screen"
+import { HeroBanner } from "../../shared/base/hero-banner"
+import { HighlightedLayout } from "../../shared/base/highlighted-layout"
 import { LoadingScreen } from "../../shared/base/loading-screen"
-import { EditorWithPreview } from "../../shared/editor/custom-extensions/editor-with-preview"
 import { SafeTipTapDisplay } from "../../shared/editor/safe-tiptap-display"
-import { JurisdictionResourcesSection } from "../../shared/jurisdiction/jurisdiction-resources-section"
+import { JurisdictionResourcesGridSection } from "../../shared/jurisdiction/jurisdiction-resources-grid-section"
 import { JurisdictionMap } from "../../shared/module-wrappers/jurisdiction-map"
 import { RouterLink } from "../../shared/navigation/router-link"
 import { StepCodeRequirementsTable } from "../../shared/step-code-requirements-table"
 import { Can, can } from "../../shared/user/can"
 import { ContactGrid } from "./contacts/contact-grid"
+import { JurisdictionAboutAccordionItem } from "./jurisdiction-about-accordion-item"
+import { JurisdictionAboutCtaCards } from "./jurisdiction-about-cta-cards"
+import { JurisdictionEditorWithPreview } from "./jurisdiction-editor-with-preview"
 export interface Jurisdiction {
   name: string
   contacts: IContact[]
@@ -55,6 +61,10 @@ type TJurisdictionFieldValues = {
   mapPosition: TLatLngTuple
   mapZoom: number
   contactsAttributes: IContact[]
+}
+
+function jurisdictionRichTextHasPublicContent(html: string | null | undefined): boolean {
+  return !isTipTapEmpty(sanitizeTipTapHtml(html ?? ""))
 }
 
 export const JurisdictionScreen = observer(() => {
@@ -108,181 +118,201 @@ export const JurisdictionScreen = observer(() => {
     jurisdictionName: qualifiedName,
   })}&body=${encodeURIComponent(emailBody)}`
 
+  const canManageAbout = can("jurisdiction:manage", { jurisdiction: currentJurisdiction })
+  const showOverviewAccordion =
+    canManageAbout || jurisdictionRichTextHasPublicContent(currentJurisdiction.checklistHtml)
+  const showKeyInfoAccordion = canManageAbout || jurisdictionRichTextHasPublicContent(currentJurisdiction.lookOutHtml)
+
   return (
-    <Flex as="main" direction="column" w="full" bg="greys.white" pb="24">
-      <BlueTitleBar title={qualifiedName} />
-      <Show below="md">
-        <JurisdictionMap
-          mapPosition={mapPositionWatch}
-          mapZoom={mapZoomWatch}
-          linePositions={currentJurisdiction.boundaryPoints}
-        />
-      </Show>
-      <Container maxW="container.lg" py={{ base: 6, md: 16 }} px={8}>
+    <Flex as="main" direction="column" w="full" bg="greys.white">
+      <HeroBanner containerProps={{ pl: 8, pr: 18, py: 16 }}>
+        <HighlightedLayout p={8} maxW={{ md: "calc((200% - var(--chakra-space-6)) / 3)", base: "full" }}>
+          <Heading as="h1" fontSize="2xl">
+            {qualifiedName}
+          </Heading>
+          <Text fontSize="lg">{t("jurisdiction.heroBannerDescription", { jurisdictionName: qualifiedName })}</Text>
+        </HighlightedLayout>
+        {/* TODO: Add link to LG website */}
+      </HeroBanner>
+      <Container maxW="container.lg" pt={{ base: 6, md: 16 }} px={8}>
         {!currentJurisdiction.inboxEnabled && (
           <Box my={8}>
             <CustomMessageBox status={EFlashMessageStatus.warning} description={t("jurisdiction.notEnabled")} />
           </Box>
         )}
-        {currentUser?.isReviewStaff || showAboutPage ? (
-          <>
-            <FormProvider {...formMethods}>
-              <form onSubmit={formMethods.handleSubmit(onSubmit)} className="space-y-8 divide-y divide-gray-200">
-                <Flex direction="column" gap={16}>
-                  <Flex gap={14}>
-                    <Show above="md">
+      </Container>
+      {currentUser?.isReviewStaff || showAboutPage ? (
+        <>
+          <FormProvider {...formMethods}>
+            <form onSubmit={formMethods.handleSubmit(onSubmit)} className="space-y-8 divide-y divide-gray-200">
+              <Box w="full" bg="greys.grey03">
+                <Container maxW="container.lg" py={10} px={8}>
+                  <Grid w="full" templateColumns={{ base: "1fr", md: "2fr 1fr" }} gap={8}>
+                    <GridItem order={{ base: 2, md: 1 }} minW={0}>
+                      <Flex as="section" direction="column" gap={2}>
+                        <Heading id="jurisdiction-supported-description-heading" variant="yellowline" my={0}>
+                          {t("jurisdiction.supportedSectionHeading")}
+                        </Heading>
+                        <JurisdictionTipTapFormController
+                          control={control}
+                          headingId="jurisdiction-supported-description-heading"
+                          initialTriggerText={t("jurisdiction.edit.addDescription")}
+                          name={"descriptionHtml"}
+                        />
+                      </Flex>
+                    </GridItem>
+                    <GridItem order={{ base: 1, md: 2 }} minW={0}>
                       <EditableMap currentJurisdiction={currentJurisdiction} />
-                    </Show>
-                    <Flex as="section" flex={1} direction="column" gap={4}>
-                      <Heading>{t("jurisdiction.title")}</Heading>
-                      <JurisdictionTipTapFormController
-                        control={control}
-                        label={t("jurisdiction.edit.displayDescriptionLabel")}
-                        initialTriggerText={t("jurisdiction.edit.addDescription")}
-                        name={"descriptionHtml"}
-                      />
-                      {/* Disabled: start application CTA */}
-                    </Flex>
-                  </Flex>
-                  <Flex direction={{ base: "column", md: "row" }} gap={6}>
-                    <Flex
-                      as="section"
-                      direction="column"
-                      gap={4}
-                      flex={3}
-                      borderWidth={1}
-                      borderColor="border.light"
-                      rounded="lg"
-                      p={6}
+                    </GridItem>
+                    <GridItem colSpan={{ base: 1, md: 2 }} order={{ base: 3, md: 3 }} minW={0}>
+                      <JurisdictionAboutCtaCards />
+                    </GridItem>
+                  </Grid>
+                </Container>
+              </Box>
+              <Container maxW="container.lg" py={16} px={8}>
+                <Flex direction="column" gap={12}>
+                  <Accordion
+                    display="flex"
+                    flexDirection="column"
+                    gap={4}
+                    allowMultiple
+                    key={canManageAbout ? "jurisdiction-about-accordion-manage" : "jurisdiction-about-accordion-public"}
+                    defaultIndex={canManageAbout ? [0, 1, 2] : [0]}
+                  >
+                    {showOverviewAccordion && (
+                      <JurisdictionAboutAccordionItem
+                        headingId="jurisdiction-accordion-overview-heading"
+                        title={t("jurisdiction.edit.accordion.overviewProcess")}
+                        useYellowlineHeading
+                        showTopSeparator={false}
+                      >
+                        <JurisdictionTipTapFormController
+                          control={control}
+                          headingId="jurisdiction-accordion-overview-heading"
+                          initialTriggerText={t("jurisdiction.edit.addChecklist")}
+                          name={"checklistHtml"}
+                        />
+                      </JurisdictionAboutAccordionItem>
+                    )}
+                    {showKeyInfoAccordion && (
+                      <JurisdictionAboutAccordionItem
+                        headingId="jurisdiction-accordion-keyinfo-heading"
+                        title={t("jurisdiction.edit.accordion.keyInformation")}
+                      >
+                        <JurisdictionTipTapFormController
+                          control={control}
+                          headingId="jurisdiction-accordion-keyinfo-heading"
+                          initialTriggerText={t("jurisdiction.edit.addLookOut")}
+                          name={"lookOutHtml"}
+                        />
+                      </JurisdictionAboutAccordionItem>
+                    )}
+                    {/* TODO: Add Timelines & Deliverables section */}
+                    <JurisdictionAboutAccordionItem
+                      headingId="jurisdiction-accordion-stepcode-heading"
+                      title={t("jurisdiction.edit.stepCode.title")}
                     >
-                      <Heading mb={0}>{t("jurisdiction.checklist")}</Heading>
-                      <Divider my={0} />
-                      <JurisdictionTipTapFormController
-                        control={control}
-                        label={t("jurisdiction.edit.displayChecklistLabel")}
-                        initialTriggerText={t("jurisdiction.edit.addChecklist")}
-                        name={"checklistHtml"}
-                      />
-                    </Flex>
-                    <Flex
-                      as="section"
-                      direction="column"
-                      p={6}
-                      flex={2}
-                      gap={4}
-                      borderRadius="lg"
-                      background="theme.blueLight"
-                    >
-                      <Heading as="h3">{t("jurisdiction.lookOut")}</Heading>
-                      <JurisdictionTipTapFormController
-                        control={control}
-                        label={t("jurisdiction.edit.displayLookOutLabel")}
-                        initialTriggerText={t("jurisdiction.edit.addLookOut")}
-                        name={"lookOutHtml"}
-                      />
-                    </Flex>
-                  </Flex>
-                  <Flex as="section" direction="column" gap={4}>
-                    <Heading as="h2" fontSize="xl" my={0}>
-                      {t("jurisdiction.edit.stepCode.title")}
-                    </Heading>
-                    <Text fontSize="md" color="text.primary">
-                      {t("jurisdiction.edit.stepCode.aboutPageDescription")}
-                    </Text>
-                    <Text fontSize="md" color="text.primary">
-                      {t("jurisdiction.edit.stepCode.aboutPageNotice")}
-                    </Text>
-                    <Link
-                      as={RouterLink}
-                      to={`/jurisdictions/${currentJurisdiction.slug}/step-code-requirements`}
-                      color="text.link"
-                      textDecoration="underline"
-                      _hover={{ textDecoration: "none" }}
-                      fontWeight="bold"
-                    >
-                      {t("jurisdiction.edit.stepCode.viewStepCodeRequirements")}{" "}
-                      <ArrowSquareOut style={{ display: "inline" }} />
-                    </Link>
-
-                    <VStack align="start" spacing={4} mt={4}>
-                      <Heading as="h3" fontSize="lg">
-                        {t(
-                          "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.smallSimpleBuildings"
-                        )}
-                      </Heading>
-                      <Text fontSize="md">
-                        {t(
-                          "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.smallSimpleBuildingsDescription"
-                        )}
-                      </Text>
-                      <Text fontSize="md">
-                        {t(
-                          "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.part9BuildingsAreGenerally"
-                        )}
-                      </Text>
-                      <UnorderedList pl={4}>
-                        <ListItem>
-                          {t(
-                            "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.smallSimpleBuildingsCharacteristic1"
-                          )}
-                        </ListItem>
-                        <ListItem>
-                          {t(
-                            "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.smallSimpleBuildingsCharacteristic2"
-                          )}
-                        </ListItem>
-                      </UnorderedList>
-                      <StepCodeRequirementsTable currentJurisdiction={currentJurisdiction} />
-                    </VStack>
-
-                    <VStack align="start" spacing={4} mt={6}>
-                      <Heading as="h3" fontSize="lg">
-                        {t(
-                          "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.largeComplexBuildings"
-                        )}
-                      </Heading>
-                      <Text fontSize="md">
-                        {t(
-                          "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.largeComplexBuildingsDescription"
-                        )}
-                      </Text>
-                      <Text fontSize="md">
-                        {t(
-                          "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.part3BuildingsAreGenerally"
-                        )}
-                      </Text>
-                      <UnorderedList pl={4}>
-                        <ListItem>
-                          {t(
-                            "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.largeComplexBuildingsCharacteristic1"
-                          )}
-                        </ListItem>
-                        <ListItem>
-                          {t(
-                            "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.largeComplexBuildingsCharacteristic2"
-                          )}
-                        </ListItem>
-                      </UnorderedList>
-                      <Text fontSize="md">
-                        {t(
-                          "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.largeComplexBuildingsLinkPrefix"
-                        )}{" "}
+                      <Flex as="section" direction="column" gap={4}>
+                        <Text fontSize="md" color="text.primary">
+                          {t("jurisdiction.edit.stepCode.aboutPageDescription")}
+                        </Text>
+                        <Text fontSize="md" color="text.primary">
+                          {t("jurisdiction.edit.stepCode.aboutPageNotice")}
+                        </Text>
                         <Link
                           as={RouterLink}
                           to={`/jurisdictions/${currentJurisdiction.slug}/step-code-requirements`}
                           color="text.link"
                           textDecoration="underline"
                           _hover={{ textDecoration: "none" }}
+                          fontWeight="bold"
                         >
-                          {t(
-                            "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.checkStepCodesRequirementsInThisCommunity"
-                          )}
+                          {t("jurisdiction.edit.stepCode.viewStepCodeRequirements")}{" "}
+                          <ArrowSquareOut style={{ display: "inline" }} />
                         </Link>
-                        .
-                      </Text>
-                    </VStack>
-                  </Flex>
-                  <JurisdictionResourcesSection
+
+                        <VStack align="start" spacing={4} mt={4}>
+                          <Heading as="h3" fontSize="lg">
+                            {t(
+                              "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.smallSimpleBuildings"
+                            )}
+                          </Heading>
+                          <Text fontSize="md">
+                            {t(
+                              "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.smallSimpleBuildingsDescription"
+                            )}
+                          </Text>
+                          <Text fontSize="md">
+                            {t(
+                              "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.part9BuildingsAreGenerally"
+                            )}
+                          </Text>
+                          <UnorderedList pl={4}>
+                            <ListItem>
+                              {t(
+                                "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.smallSimpleBuildingsCharacteristic1"
+                              )}
+                            </ListItem>
+                            <ListItem>
+                              {t(
+                                "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.smallSimpleBuildingsCharacteristic2"
+                              )}
+                            </ListItem>
+                          </UnorderedList>
+                          <StepCodeRequirementsTable currentJurisdiction={currentJurisdiction} />
+                        </VStack>
+
+                        <VStack align="start" spacing={4} mt={6}>
+                          <Heading as="h3" fontSize="lg">
+                            {t(
+                              "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.largeComplexBuildings"
+                            )}
+                          </Heading>
+                          <Text fontSize="md">
+                            {t(
+                              "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.largeComplexBuildingsDescription"
+                            )}
+                          </Text>
+                          <Text fontSize="md">
+                            {t(
+                              "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.part3BuildingsAreGenerally"
+                            )}
+                          </Text>
+                          <UnorderedList pl={4}>
+                            <ListItem>
+                              {t(
+                                "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.largeComplexBuildingsCharacteristic1"
+                              )}
+                            </ListItem>
+                            <ListItem>
+                              {t(
+                                "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.largeComplexBuildingsCharacteristic2"
+                              )}
+                            </ListItem>
+                          </UnorderedList>
+                          <Text fontSize="md">
+                            {t(
+                              "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.largeComplexBuildingsLinkPrefix"
+                            )}{" "}
+                            <Link
+                              as={RouterLink}
+                              to={`/jurisdictions/${currentJurisdiction.slug}/step-code-requirements`}
+                              color="text.link"
+                              textDecoration="underline"
+                              _hover={{ textDecoration: "none" }}
+                            >
+                              {t(
+                                "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.checkStepCodesRequirementsInThisCommunity"
+                              )}
+                            </Link>
+                            .
+                          </Text>
+                        </VStack>
+                      </Flex>
+                    </JurisdictionAboutAccordionItem>
+                  </Accordion>
+                  <JurisdictionResourcesGridSection
                     jurisdiction={currentJurisdiction}
                     configureResourcesPath={
                       can("jurisdiction:manage", { jurisdiction: currentJurisdiction })
@@ -290,59 +320,71 @@ export const JurisdictionScreen = observer(() => {
                         : undefined
                     }
                   />
-                  <Flex as="section" direction="column" borderRadius="lg" boxShadow="md">
-                    <Box py={3} px={6} bg="theme.blueAlt" borderTopRadius="lg">
-                      <Heading as="h3" color="greys.white" fontSize="xl">
-                        {t("jurisdiction.contactInfo")}
-                      </Heading>
-                    </Box>
-                    <Flex direction="column" p={6} gap={9}>
-                      <JurisdictionTipTapFormController
-                        control={control}
-                        label={t("jurisdiction.edit.displayContactSummaryLabel")}
-                        initialTriggerText={t("jurisdiction.edit.addContactSummary")}
-                        name={"contactSummaryHtml"}
-                      />
-
-                      <Can action="jurisdiction:manage" data={{ jurisdiction: currentJurisdiction }}>
-                        <Flex direction="column">
+                  <JurisdictionAboutCtaCards />
+                  <Flex direction="column" gap={4}>
+                    <Heading as="h2" variant="yellowline" my={0}>
+                      {t("jurisdiction.contactInfo")}
+                    </Heading>
+                    <JurisdictionTipTapFormController
+                      control={control}
+                      headingId="jurisdiction-contact-summary-heading"
+                      initialTriggerText={t("jurisdiction.edit.addContactSummary")}
+                      name={"contactSummaryHtml"}
+                    />
+                    <Can
+                      action="jurisdiction:manage"
+                      data={{ jurisdiction: currentJurisdiction }}
+                      onPermissionDeniedRender={
+                        currentJurisdiction.contacts.length > 0 ? <ContactGrid isEditing={false} /> : null
+                      }
+                    >
+                      <Box
+                        display="flex"
+                        flexDirection="column"
+                        border="1px dashed"
+                        borderColor="border.light"
+                        p={1}
+                        gap={1}
+                      >
+                        <Flex justify="flex-end" w="full">
                           <Button
-                            variant={"link"}
-                            aria-label={"edit contacts"}
+                            variant="primary"
+                            size="xs"
+                            leftIcon={<Pencil size={12} />}
+                            aria-label={isEditingContacts ? t("ui.done") : t("ui.edit")}
                             onClick={() => {
                               setIsEditingContacts((current) => !current)
                             }}
                           >
-                            {isEditingContacts
-                              ? t("jurisdiction.edit.clickToShowContacts")
-                              : t("jurisdiction.edit.clickToEditContacts")}
+                            {isEditingContacts ? t("ui.done") : t("ui.edit")}
                           </Button>
-                          <Text>{t("jurisdiction.edit.firstContact")}</Text>
                         </Flex>
-                      </Can>
-                      <ContactGrid isEditing={isEditingContacts} />
-                    </Flex>
+                        <ContactGrid isEditing={isEditingContacts} />
+                      </Box>
+                    </Can>
                   </Flex>
-                  <Can action={"jurisdiction:manage"} data={{ jurisdiction: currentJurisdiction }}>
-                    <Center w="full" position="fixed" bottom={0} left={0} right={0}>
-                      <Button
-                        size="lg"
-                        mb={4}
-                        variant="primary"
-                        type="submit"
-                        isDisabled={isSubmitting}
-                        isLoading={isSubmitting}
-                        loadingText={t("ui.loading")}
-                      >
-                        {t("ui.save")}
-                      </Button>
-                    </Center>
-                  </Can>
                 </Flex>
-              </form>
-            </FormProvider>
-          </>
-        ) : (
+                <Can action={"jurisdiction:manage"} data={{ jurisdiction: currentJurisdiction }}>
+                  <Center w="full" position="fixed" bottom={0} left={0} right={0}>
+                    <Button
+                      size="lg"
+                      mb={4}
+                      variant="primary"
+                      type="submit"
+                      isDisabled={isSubmitting}
+                      isLoading={isSubmitting}
+                      loadingText={t("ui.loading")}
+                    >
+                      {t("ui.save")}
+                    </Button>
+                  </Center>
+                </Can>
+              </Container>
+            </form>
+          </FormProvider>
+        </>
+      ) : (
+        <Container maxW="container.lg" py={{ base: 6, md: 16 }} px={8}>
           <Box>
             <Heading as="h2" fontSize="2xl" fontWeight="bold" mb={6}>
               {t("jurisdiction.notUsingBPH.title")}
@@ -376,27 +418,31 @@ export const JurisdictionScreen = observer(() => {
               </Button>
             </Box>
           </Box>
-        )}
-      </Container>
+        </Container>
+      )}
     </Flex>
   )
 })
 
 interface IJurisdictionTipTapFormControllerProps {
   control: Control<TJurisdictionFieldValues>
-  label: string
+  /** Optional; visible section title should use `headingId` + matching `id` on `<Heading>`. */
+  label?: string
   initialTriggerText: string
   name: keyof TJurisdictionFieldValues
+  /** `id` of the section `<Heading>` — sets `aria-labelledby` on the editor wrapper for assistive tech. */
+  headingId?: string
 }
 
 const JurisdictionTipTapFormController = observer(
-  ({ control, label, initialTriggerText, name }: IJurisdictionTipTapFormControllerProps) => {
+  ({ control, label, initialTriggerText, name, headingId }: IJurisdictionTipTapFormControllerProps) => {
     const { jurisdictionStore } = useMst()
     const { currentJurisdiction } = jurisdictionStore
     const { t } = useTranslation()
 
     return (
       <Box
+        p={1}
         sx={{
           ".tiptap-editor-readonly": {
             padding: 0,
@@ -411,23 +457,26 @@ const JurisdictionTipTapFormController = observer(
             <SafeTipTapDisplay htmlContent={currentJurisdiction[name]} />
           }
         >
-          <Controller
-            render={({ field: { value, onChange } }) => (
-              <EditorWithPreview
-                label={label}
-                editText={t("ui.clickToEdit")}
-                htmlValue={value as string}
-                onChange={onChange}
-                initialTriggerText={initialTriggerText}
-                onRemove={(setEditMode) => {
-                  setEditMode(false)
-                  onChange("")
-                }}
-              />
-            )}
-            name={name}
-            control={control}
-          />
+          <Box display="flex" flexDirection="column" border="1px dashed" borderColor="border.light" p={1}>
+            <Controller
+              render={({ field: { value, onChange } }) => (
+                <JurisdictionEditorWithPreview
+                  label={label}
+                  editText={t("ui.clickToEdit")}
+                  htmlValue={value as string}
+                  onChange={onChange}
+                  initialTriggerText={initialTriggerText}
+                  containerProps={headingId ? { "aria-labelledby": headingId } : undefined}
+                  onRemove={(setEditMode) => {
+                    setEditMode(false)
+                    onChange("")
+                  }}
+                />
+              )}
+              name={name}
+              control={control}
+            />
+          </Box>
         </Can>
       </Box>
     )
@@ -452,7 +501,7 @@ const EditableMap = ({ currentJurisdiction }: IEditableMapProps) => {
   }
 
   return (
-    <Flex flex={1}>
+    <Flex flex={1} w="full">
       <Flex direction="column" w="full">
         <Can action="jurisdiction:manage" data={{ jurisdiction: currentJurisdiction }}>
           <Button
