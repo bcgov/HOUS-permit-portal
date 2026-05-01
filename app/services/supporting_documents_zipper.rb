@@ -13,11 +13,11 @@ class SupportingDocumentsZipper
     unless File.directory?(zipfiles_directory)
       FileUtils.mkdir_p(zipfiles_directory)
     end
-    submitter = @permit_application.submitter
-    @file_path =
-      zipfiles_directory.join(
-        "#{@permit_application.number}.#{submitter.first_name.first}.#{submitter.last_name}.#{Date.today.strftime("%Y.%m.%d")}.zip"
-      )
+    zip_filename =
+      PermitApplicationGeneratedFileNamer.new(
+        @permit_application
+      ).supporting_documents_zip
+    @file_path = zipfiles_directory.join(zip_filename)
   end
 
   def perform
@@ -44,7 +44,7 @@ class SupportingDocumentsZipper
   end
 
   def upload_zip_file
-    File.open(file_path, "rb") do |file|
+    File.open(file_path.to_s, "rb") do |file|
       uploader = ZipfileUploader.new(:store)
       temp_files << file.path
       uploaded_file = uploader.upload(file)
