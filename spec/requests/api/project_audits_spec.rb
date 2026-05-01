@@ -189,6 +189,35 @@ RSpec.describe "Api::ProjectAudits (project activities)", type: :request do
           end
         expect(timestamps).to eq(timestamps.sort)
       end
+
+      it "includes activities on a calendar day when from and to are the same date" do
+        create(
+          :permit_application,
+          permit_project: permit_project,
+          submitter: owner,
+          jurisdiction: jurisdiction
+        )
+        audit =
+          ApplicationAudit
+            .for_permit_project(permit_project.id)
+            .order(:id)
+            .first
+        audit.update_column(:created_at, Time.zone.parse("2026-04-29 14:30:00"))
+
+        post "/api/permit_projects/#{permit_project.id}/activities",
+             params: {
+               filters: {
+                 from: "2026/04/29",
+                 to: "2026/04/29"
+               }
+             },
+             headers: headers,
+             as: :json
+
+        expect(response).to have_http_status(:ok)
+        ids = json_response["data"].map { |row| row["id"] }
+        expect(ids).to include(audit.id)
+      end
     end
 
     context "with sandbox scoping" do

@@ -26,7 +26,8 @@ RSpec.describe PdfGenerationJob, type: :job do
   end
 
   it "generates and attaches PDFs when renderer succeeds" do
-    permit_application = instance_double("PermitApplication", id: "pa1")
+    permit_application =
+      instance_double("PermitApplication", id: "pa1", number: "DSQ-001-000-057")
     allow(PermitApplication).to receive(:find).with("pa1").and_return(
       permit_application
     )
@@ -43,7 +44,7 @@ RSpec.describe PdfGenerationJob, type: :job do
         },
         formatted_submission_data: {
         },
-        created_at: Time.current,
+        created_at: Time.zone.local(2026, 4, 29),
         has_step_code_checklist?: true,
         step_code_checklist_json: {
         },
@@ -73,6 +74,12 @@ RSpec.describe PdfGenerationJob, type: :job do
       # Create the files the job expects to attach.
       data = JSON.parse(File.read(json_filename))
       paths = data.fetch("meta").fetch("generationPaths")
+      expect(paths.fetch("permitApplication")).to end_with(
+        "DSQ-001-000-057_2026-04-29_permit-application_v1.pdf"
+      )
+      expect(paths.fetch("stepCodeChecklist")).to end_with(
+        "DSQ-001-000-057_2026-04-29_step-code-checklist_v1.pdf"
+      )
       paths.values.compact.each do |path|
         FileUtils.mkdir_p(File.dirname(path))
         File.write(path, "%PDF-1.4")
@@ -92,7 +99,8 @@ RSpec.describe PdfGenerationJob, type: :job do
   end
 
   it "raises and cleans up when renderer fails" do
-    permit_application = instance_double("PermitApplication", id: "pa1")
+    permit_application =
+      instance_double("PermitApplication", id: "pa1", number: "DSQ-001-000-057")
     allow(PermitApplication).to receive(:find).with("pa1").and_return(
       permit_application
     )

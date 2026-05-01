@@ -35,11 +35,19 @@ class PdfGenerationJob
 
     submission_versions_data =
       submission_version_with_missing_pdfs.map do |submission_version|
-        # Convert data to JSON string
+        file_namer =
+          PermitApplicationGeneratedFileNamer.new(
+            permit_application,
+            date: submission_version.created_at
+          )
         application_filename =
-          "permit_application_#{permit_application.id}_v#{submission_version.version_number}.pdf"
+          file_namer.permit_application_pdf(
+            version_number: submission_version.version_number
+          )
         step_code_filename =
-          "step_code_checklist_#{permit_application.id}_v#{submission_version.version_number}.pdf"
+          file_namer.step_code_checklist_pdf(
+            version_number: submission_version.version_number
+          )
 
         should_permit_application_pdf_be_generated =
           submission_version.missing_permit_application_pdf?

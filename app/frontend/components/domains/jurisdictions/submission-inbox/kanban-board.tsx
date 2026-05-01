@@ -1,8 +1,8 @@
-import { Badge, Box, Button, Circle, Flex, HStack, IconButton, Text, Tooltip } from "@chakra-ui/react"
+import { Badge, Box, Button, Flex, HStack, Text, Tooltip } from "@chakra-ui/react"
 import { closestCenter, DndContext, DragEndEvent, PointerSensor, useSensor, useSensors } from "@dnd-kit/core"
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers"
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
-import { CaretDoubleLeft, CaretDoubleRight, Empty } from "@phosphor-icons/react"
+import { CaretLeft, CaretRight, Empty } from "@phosphor-icons/react"
 import { AnimatePresence, motion } from "framer-motion"
 import { observer } from "mobx-react-lite"
 import React, { ReactNode, useCallback, useMemo } from "react"
@@ -172,20 +172,20 @@ function KanbanBoardInner<T extends IKanbanItem>({
             const totalCount = stateCounts[column.key] ?? displayedCount
             const filteredTotal = columnTotals?.[column.key] ?? totalCount
             const hasMore = displayedCount < filteredTotal
-            const hasUnreadItems = columnItems.some((item) => item.isUnread)
+            const unreadCount = columnItems.filter((item) => item.isUnread).length
 
             return (
               <Flex
                 key={column.key}
                 direction="column"
-                minW={isCollapsed ? "68px" : "318px"}
-                maxW={isCollapsed ? "68px" : "480px"}
-                flex={isCollapsed ? "0 0 68px" : "1 0 318px"}
+                minW={isCollapsed ? "64px" : "318px"}
+                maxW={isCollapsed ? "64px" : "480px"}
+                flex={isCollapsed ? "0 0 64px" : "1 0 318px"}
                 border="1px solid"
                 borderColor="border.light"
                 borderRadius="lg"
                 minH={0}
-                bg="greys.grey04"
+                bg={isCollapsed ? "greys.grey03" : "greys.grey04"}
                 overflow="hidden"
                 transition="min-width 0.3s cubic-bezier(0.4,0,0.2,1), max-width 0.3s cubic-bezier(0.4,0,0.2,1), flex 0.3s cubic-bezier(0.4,0,0.2,1)"
               >
@@ -199,64 +199,71 @@ function KanbanBoardInner<T extends IKanbanItem>({
                       transition={{ duration: 0.15 }}
                       style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}
                     >
-                      <Tooltip label={column.label} hasArrow placement="right">
-                        <Flex direction="column" flex={1} minH={0} h="full" overflow="hidden">
-                          <Flex
-                            bg="greys.grey03"
-                            borderBottom="1px solid"
-                            borderColor="border.light"
-                            borderTopRadius="lg"
-                            px={1}
-                            py={3}
-                            flexShrink={0}
-                            minH="48px"
-                            align="center"
-                            justify="center"
-                          >
+                      <Tooltip label={column.label} hasArrow placement="top">
+                        <Flex
+                          direction="column"
+                          align="center"
+                          justify="flex-start"
+                          flex={1}
+                          minH={0}
+                          h="full"
+                          overflow="hidden"
+                          px={1}
+                          py={3}
+                          gap={5}
+                        >
+                          <Flex minH="24px" align="center" justify="center" flexShrink={0}>
+                            {isEmpty ? (
+                              <Box py={1}>
+                                <Empty size={14} />
+                              </Box>
+                            ) : (
+                              <Button
+                                aria-label="Show column"
+                                leftIcon={<CaretRight size={12} />}
+                                variant="ghost"
+                                size="xs"
+                                minW="48px"
+                                h={6}
+                                px={0.5}
+                                mt={0}
+                                fontSize="xs"
+                                fontWeight="normal"
+                                color="text.secondary"
+                                iconSpacing={0.25}
+                                onClick={() => onToggleColumn(column.key)}
+                              >
+                                {t("submissionInbox.showColumn")}
+                              </Button>
+                            )}
+                          </Flex>
+                          <Flex justify="center" flexShrink={0} w="full">
                             <Text
                               fontSize="md"
                               fontWeight="bold"
                               textTransform="capitalize"
                               color="text.secondary"
                               textAlign="center"
-                              isTruncated
+                              whiteSpace="nowrap"
+                              sx={{ writingMode: "vertical-rl" }}
                             >
                               {column.label}
                             </Text>
                           </Flex>
-                          <Flex direction="column" align="center" flex={1} minH={0} py={3} gap={2}>
-                            {isEmpty ? (
-                              <Box py={1}>
-                                <Empty size={14} />
-                              </Box>
-                            ) : (
-                              <IconButton
-                                aria-label="Expand column"
-                                icon={<CaretDoubleRight size={14} />}
-                                size="xs"
-                                bg="white"
-                                border="1px solid"
-                                borderColor="border.light"
-                                _hover={{ bg: "gray.100" }}
-                                onClick={() => onToggleColumn(column.key)}
-                              />
-                            )}
+                          <Flex direction="column" align="center" flexShrink={0} gap={2}>
                             <Badge
                               borderRadius="full"
-                              py={2}
-                              px={1}
+                              px={2}
                               fontSize="xs"
                               bg="white"
                               color="text.secondary"
                               border="1px solid"
                               borderColor="border.light"
-                              sx={{ writingMode: "vertical-lr" }}
                               whiteSpace="nowrap"
                               alignSelf="center"
                             >
-                              {displayedCount} of {totalCount}
+                              {displayedCount}/{totalCount}
                             </Badge>
-                            {hasUnreadItems && <Circle size="8px" bg="theme.blueActive" flexShrink={0} />}
                           </Flex>
                         </Flex>
                       </Tooltip>
@@ -293,18 +300,23 @@ function KanbanBoardInner<T extends IKanbanItem>({
                               border="1px solid"
                               borderColor="border.light"
                             >
-                              {displayedCount} of {totalCount}
+                              {displayedCount}/{totalCount}
                             </Badge>
-                            <IconButton
+                            <Button
                               aria-label="Collapse column"
-                              icon={<CaretDoubleLeft size={14} />}
+                              leftIcon={<CaretLeft size={12} />}
+                              variant="ghost"
                               size="xs"
-                              bg="white"
-                              border="1px solid"
-                              borderColor="border.light"
-                              _hover={{ bg: "gray.100" }}
+                              h={6}
+                              px={1}
+                              fontSize="xs"
+                              fontWeight="normal"
+                              color="text.secondary"
+                              iconSpacing={0.5}
                               onClick={() => onToggleColumn(column.key)}
-                            />
+                            >
+                              {t("submissionInbox.hideColumn")}
+                            </Button>
                           </HStack>
                         </HStack>
                       </Box>
