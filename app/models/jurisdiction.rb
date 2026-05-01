@@ -262,7 +262,7 @@ class Jurisdiction < ApplicationRecord
   end
 
   # Mirrors the semantics of
-  # Api::Concerns::Search::JurisdictionPermitApplications#jurisdiction_application_unread_count
+  # Api::Concerns::Search::JurisdictionPermitApplications#jurisdiction_application_unread_status_counts
   # (the unread-filter badge on the submission inbox search page):
   #   - kept (not discarded)
   #   - status != "new_draft"
@@ -289,7 +289,7 @@ class Jurisdiction < ApplicationRecord
   end
 
   # Mirrors the semantics of
-  # Api::Concerns::Search::JurisdictionPermitProjects#jurisdiction_unread_count
+  # Api::Concerns::Search::JurisdictionPermitProjects#jurisdiction_unread_state_counts
   # (the unread-filter badge on the project-inbox search page):
   #   - kept (not discarded)
   #   - state != "draft"

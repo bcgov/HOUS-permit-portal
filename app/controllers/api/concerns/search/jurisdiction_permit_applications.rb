@@ -40,12 +40,14 @@ module Api::Concerns::Search::JurisdictionPermitApplications
         **search_conditions
       )
 
+    unread_status_counts = jurisdiction_application_unread_status_counts
     @jurisdiction_permit_application_meta = {
       total_pages: @jurisdiction_permit_application_search.total_pages,
       current_page: @jurisdiction_permit_application_search.current_page,
       total_count: @jurisdiction_permit_application_search.total_count,
       status_counts: jurisdiction_application_status_counts,
-      unread_count: jurisdiction_application_unread_count
+      unread_count: unread_status_counts.values.sum,
+      unread_status_counts: unread_status_counts
     }
 
     @jurisdiction_permit_applications =
@@ -101,13 +103,15 @@ module Api::Concerns::Search::JurisdictionPermitApplications
 
     @jurisdiction_permit_applications =
       loaded.sort_by { |pa| all_ids.index(pa.id) }
+    unread_status_counts = jurisdiction_application_unread_status_counts
     @jurisdiction_permit_application_meta = {
       total_pages: 1,
       current_page: 1,
       total_count: all_ids.length,
       status_counts: jurisdiction_application_status_counts,
       column_totals: column_totals,
-      unread_count: jurisdiction_application_unread_count
+      unread_count: unread_status_counts.values.sum,
+      unread_status_counts: unread_status_counts
     }
   end
 
@@ -119,11 +123,11 @@ module Api::Concerns::Search::JurisdictionPermitApplications
 
   private
 
-  # Total unread (viewed_at nil) applications for the unread-filter badge.
+  # Unread (viewed_at nil) applications by status for the unread badges.
   # Scoped jurisdiction-wide (or to permit_project_id when provided, matching
   # the status_counts scope), independent of current filters/query so the
   # badge shows the full jurisdiction unread count.
-  def jurisdiction_application_unread_count
+  def jurisdiction_application_unread_status_counts
     and_conditions = []
     and_conditions << { jurisdiction_id: @jurisdiction.id }
     and_conditions << { discarded: false }
@@ -144,17 +148,23 @@ module Api::Concerns::Search::JurisdictionPermitApplications
       where: {
         _and: and_conditions
       },
-      load: false,
+      aggs: [:status],
       body_options: {
-        size: 0,
-        track_total_hits: true
+        size: 0
       }
-    ).total_count
+    ).aggs[
+      "status"
+    ][
+      "buckets"
+    ].each_with_object({}) do |bucket, hash|
+      next if bucket["key"] == "new_draft"
+      hash[bucket["key"]] = bucket["doc_count"]
+    end
   rescue => e
     Rails.logger.warn(
-      "Failed to compute application unread count: #{e.message}"
+      "Failed to compute application unread status counts: #{e.message}"
     )
-    0
+    {}
   end
 
   def jurisdiction_application_status_counts

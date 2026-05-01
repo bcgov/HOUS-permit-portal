@@ -18,6 +18,7 @@ interface IProps {
   projects: IPermitProject[]
   stateCounts: Record<string, number>
   columnTotals?: Record<string, number>
+  unreadCounts?: Record<string, number>
   collapsedColumns: string[]
   onToggleColumn: (columnState: string) => void
   onShowMore?: (columnState: string) => void
@@ -39,6 +40,7 @@ export const ProjectKanbanBoard = observer(function ProjectKanbanBoard({
   projects,
   stateCounts,
   columnTotals,
+  unreadCounts,
   collapsedColumns,
   onToggleColumn,
   onShowMore,
@@ -75,6 +77,8 @@ export const ProjectKanbanBoard = observer(function ProjectKanbanBoard({
       items={items}
       stateCounts={stateCounts}
       columnTotals={columnTotals}
+      unreadCounts={unreadCounts}
+      emptyColumnMessage={t("submissionInbox.noFilteredResultsWithState")}
       collapsedColumns={collapsedColumns}
       onToggleColumn={onToggleColumn}
       onShowMore={onShowMore}

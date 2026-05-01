@@ -36,6 +36,20 @@ interface IInboxFilterProps {
   isDisabled?: boolean
 }
 
+interface IUnreadBadgeProps {
+  count?: number
+}
+
+export function UnreadBadge({ count }: IUnreadBadgeProps) {
+  if (count == null || count <= 0) return null
+
+  return (
+    <Badge bg="theme.blueActive" color="white" borderRadius="full" px={2} fontSize="xs" minW="20px" textAlign="center">
+      {count}
+    </Badge>
+  )
+}
+
 export const InboxFilter = observer(function InboxFilter({
   title,
   badgeCount,
@@ -133,19 +147,7 @@ export const InboxFilter = observer(function InboxFilter({
                 ({selectedCheckboxCount})
               </Text>
             )}
-            {showResultsBadge && badgeCount != null && badgeCount > 0 && (
-              <Badge
-                bg="theme.blueActive"
-                color="white"
-                borderRadius="full"
-                px={2}
-                fontSize="xs"
-                minW="20px"
-                textAlign="center"
-              >
-                {badgeCount}
-              </Badge>
-            )}
+            {showResultsBadge && <UnreadBadge count={badgeCount} />}
           </HStack>
         </Button>
       </PopoverTrigger>
