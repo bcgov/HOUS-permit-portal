@@ -45,8 +45,8 @@ module Api::Concerns::Search::ProjectAudits
       (
         project_audit_search_params[:filters].to_h || {}
       ).deep_symbolize_keys.compact_blank
-    from = parsed_datetime(search_filters[:from])
-    to = parsed_datetime(search_filters[:to])
+    from = parsed_datetime(search_filters[:from])&.beginning_of_day
+    to = parsed_datetime(search_filters[:to])&.end_of_day
     relation = relation.where("created_at >= ?", from) if from.present?
     relation = relation.where("created_at <= ?", to) if to.present?
     relation
