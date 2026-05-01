@@ -1,6 +1,22 @@
 class FileUploadAttachment < ApplicationRecord
   self.abstract_class = true
 
+  module FilenamePreservingFileUrl
+    def file_url(disposition: "attachment", **options)
+      return nil unless file_available?
+
+      file_data["id"] = SecureRandom.uuid if file_data && !file_data["id"]
+
+      file&.url(
+        public: false,
+        expires_in: 3600,
+        response_content_disposition:
+          file_content_disposition(disposition: disposition),
+        **options
+      )
+    end
+  end
+
   # Virus scan status enum
   # Provides scopes: .pending, .clean, .infected
   # Provides methods: .pending?, .clean?, .infected?, .pending!, .clean!, .infected!
@@ -69,17 +85,21 @@ class FileUploadAttachment < ApplicationRecord
     file_data.dig("metadata", "mime_type")
   end
 
-  def file_url
-    # Ensure file_data has an id by generating a temp one if needed
-    file_data["id"] = SecureRandom.uuid if file_data && !file_data["id"]
+  def download_filename
+    file_name.presence || file&.original_filename
+  end
 
-    file&.url(
-      public: false,
-      expires_in: 3600,
-      response_content_disposition:
-        "attachment; filename=\"#{file.original_filename}\""
+  def file_content_disposition(
+    disposition: "attachment",
+    filename: download_filename
+  )
+    ActionDispatch::Http::ContentDisposition.format(
+      disposition: disposition,
+      filename: filename.presence || "download"
     )
   end
+
+  prepend FilenamePreservingFileUrl
 
   # Additional scan status helper
   def scan_complete?

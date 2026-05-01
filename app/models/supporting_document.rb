@@ -3,6 +3,7 @@ class SupportingDocument < FileUploadAttachment
   belongs_to :submission_version, optional: true
 
   include FileUploader.Attachment(:file)
+  prepend FilenamePreservingFileUrl
 
   def attached_to
     permit_application

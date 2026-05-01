@@ -68,6 +68,89 @@ RSpec.describe FileUploadAttachment, type: :model do
     end
   end
 
+  describe "download filenames" do
+    [
+      [:design_document, "sample_drawing.pdf"],
+      [:requirement_document, "requirement.pdf"],
+      [:project_document, "project.pdf"],
+      [:resource_document, "resource.pdf"],
+      [:report_document, "report.pdf"]
+    ].each do |factory_name, expected_filename|
+      it "preserves metadata filename for #{factory_name}" do
+        concrete_document = create(factory_name)
+        concrete_document.update_column(
+          :file_data,
+          {
+            "id" => "#{factory_name}.pdf",
+            "metadata" => {
+              "filename" => expected_filename
+            }
+          }.to_json
+        )
+
+        expect(concrete_document.download_filename).to eq(expected_filename)
+      end
+    end
+
+    it "uses metadata filename before Shrine original_filename" do
+      document.update_column(
+        :file_data,
+        {
+          "id" => "stored-id.pdf",
+          "metadata" => {
+            "filename" => "Original Upload.pdf"
+          }
+        }.to_json
+      )
+      uploaded_file = document.file
+      allow(document).to receive(:file).and_return(uploaded_file)
+      allow(uploaded_file).to receive(:original_filename).and_return(
+        "stored-id.pdf"
+      )
+
+      expect(document.download_filename).to eq("Original Upload.pdf")
+    end
+
+    it "falls back to Shrine original_filename when metadata filename is blank" do
+      document.update_column(
+        :file_data,
+        { "id" => "stored-id.pdf", "metadata" => {} }.to_json
+      )
+      uploaded_file = document.file
+      allow(document).to receive(:file).and_return(uploaded_file)
+      allow(uploaded_file).to receive(:original_filename).and_return(
+        "stored-id.pdf"
+      )
+
+      expect(document.download_filename).to eq("stored-id.pdf")
+    end
+
+    it "formats file_url content disposition with the metadata filename" do
+      document.update_column(
+        :file_data,
+        {
+          "id" => "stored-id.pdf",
+          "metadata" => {
+            "filename" => "Original Upload.pdf"
+          }
+        }.to_json
+      )
+      uploaded_file = document.file
+      allow(document).to receive(:file).and_return(uploaded_file)
+      allow(uploaded_file).to receive(:url).and_return(
+        "https://example.com/file"
+      )
+
+      document.file_url
+
+      expect(uploaded_file).to have_received(:url).with(
+        public: false,
+        expires_in: 3600,
+        response_content_disposition: include("Original Upload.pdf")
+      )
+    end
+  end
+
   describe "availability helpers" do
     it "returns false when id is missing" do
       document.update_columns(
