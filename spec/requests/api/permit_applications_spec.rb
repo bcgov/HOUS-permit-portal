@@ -153,8 +153,12 @@ RSpec.describe "Api::PermitApplications", type: :request do
 
       expect(response).to have_http_status(:ok)
       expect(response.content_type).to include("application/json")
+      expected_filename =
+        PermitApplicationGeneratedFileNamer.new(
+          submitted_application
+        ).permit_application_json
       expect(response.headers["Content-Disposition"]).to include(
-        "permit-application-#{submitted_application.number.parameterize}.json"
+        expected_filename
       )
       expect(body["id"]).to eq(submitted_application.id)
       expect(body).to include("submission_data")

@@ -23,6 +23,9 @@ RSpec.describe PermitApplicationGeneratedFileNamer do
     expect(namer.supporting_documents_zip).to eq(
       "DSQ-001-000-057_2026-04-29_supporting-documents.zip"
     )
+    expect(namer.permit_application_json).to eq(
+      "DSQ-001-000-057_2026-04-29_permit-application.json"
+    )
   end
 
   it "falls back to the permit application id when number is unavailable" do
