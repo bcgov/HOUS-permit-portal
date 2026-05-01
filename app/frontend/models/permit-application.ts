@@ -834,8 +834,8 @@ export const PermitApplicationModel = types.snapshotProcessor(
         if (response.ok) {
           const { data: stepCode } = response.data
           self.rootStore.stepCodeStore.mergeUpdate(stepCode, "stepCodesMap")
-          // Refresh current permit application from server so associations are consistent
-          yield self.rootStore.permitApplicationStore.fetchPermitApplication(self.id)
+          self.stepCode = cast(stepCode.id)
+          self.rootStore.stepCodeStore.setCurrentStepCode(stepCode.id)
         }
         return response.ok
       }),
