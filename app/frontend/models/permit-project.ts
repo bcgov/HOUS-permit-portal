@@ -13,7 +13,7 @@ import { PermitProjectInboxApplicationSearchSlice } from "./permit-project-inbox
 
 const PermitProjectCoreModel = types.model("PermitProjectCore", {
   id: types.identifier,
-  title: types.string,
+  title: types.maybe(types.string),
   fullAddress: types.maybeNull(types.string),
   pid: types.maybeNull(types.string),
   number: types.maybeNull(types.string),

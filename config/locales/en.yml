@@ -1015,8 +1015,8 @@ en:
       review_delegatee_collaboration_unassignment_notification: "You have been removed as a designated reviewer for permit application %{number}."
       review_assignee_collaboration_unassignment_notification: "You have been removed as a review collaborator on requirement “%{requirement_block_name}” for permit application %{number}"
     permit_project_collaboration:
-      assignment_notification: "You have been assigned as a review collaborator on project %{project_number} (%{project_title})."
-      unassignment_notification: "You have been removed as a review collaborator on project %{project_number} (%{project_title})."
+      assignment_notification: "You have been assigned as a review collaborator on project %{project_number}."
+      unassignment_notification: "You have been removed as a review collaborator on project %{project_number}."
     step_code:
       report_generated: "Your step code report is ready to download"
     pre_check:
