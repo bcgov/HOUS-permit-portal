@@ -471,7 +471,10 @@ class Api::PermitApplicationsController < Api::ApplicationController
       )
 
     send_data JSON.pretty_generate(json_data),
-              filename: download_application_json_filename,
+              filename:
+                PermitApplicationGeneratedFileNamer.new(
+                  @permit_application
+                ).permit_application_json,
               type: "application/json"
   end
 
@@ -541,12 +544,6 @@ class Api::PermitApplicationsController < Api::ApplicationController
       else
         PermitApplication.for_sandbox(current_sandbox).find(params[:id])
       end
-  end
-
-  def download_application_json_filename
-    identifier = @permit_application.number.presence || @permit_application.id
-
-    "permit-application-#{identifier.to_s.parameterize}.json"
   end
 
   def permit_application_params # params for submitters

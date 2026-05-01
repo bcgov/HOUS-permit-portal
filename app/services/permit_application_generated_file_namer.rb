@@ -18,6 +18,10 @@ class PermitApplicationGeneratedFileNamer
     "#{base_name}_supporting-documents.zip"
   end
 
+  def permit_application_json
+    "#{base_name}_permit-application.json"
+  end
+
   private
 
   attr_reader :permit_application, :date
