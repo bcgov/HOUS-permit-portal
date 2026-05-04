@@ -2,6 +2,7 @@ class ResourceDocument < FileUploadAttachment
   belongs_to :resource, inverse_of: :resource_document, touch: true
 
   include FileUploader.Attachment(:file)
+  prepend FilenamePreservingFileUrl
 
   validates :resource, presence: true
 

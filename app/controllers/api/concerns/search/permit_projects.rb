@@ -30,7 +30,7 @@ module Api::Concerns::Search::PermitProjects
       PermitProject.search(permit_project_query, **search_conditions)
     ids = @permit_project_search.hits.map { |h| h["_id"] }
     loaded =
-      PermitProject
+      policy_scope(PermitProject)
         .with_status_counts
         .includes(:owner, :jurisdiction, permit_applications: :collaborators)
         .where(id: ids)
@@ -91,6 +91,7 @@ module Api::Concerns::Search::PermitProjects
     jurisdiction_ids = search_filters.delete(:jurisdiction_id)
     if jurisdiction_ids.present?
       search_filters[:jurisdiction_id] = jurisdiction_ids
+      search_filters[:state] = { not: "draft" }
     end
 
     search_filters[:discarded] = show_archived
@@ -103,6 +104,10 @@ module Api::Concerns::Search::PermitProjects
     final_where = { _and: [{ _or: or_conditions }] }
 
     search_filters.each { |key, value| final_where[:_and] << { key => value } }
+
+    unless current_user.super_admin?
+      final_where[:_and] << { sandbox_id: current_sandbox&.id }
+    end
 
     final_where
   end

@@ -1,6 +1,20 @@
 require "rails_helper"
 
 RSpec.describe PermitWebhookService do
+  describe ".webhook_signature_hex" do
+    it "returns lowercase hex HMAC-SHA256 of the body with the given secret" do
+      secret = "live_testsecret"
+      body = '{"event":"permit_submitted","payload":{}}'
+      expected = OpenSSL::HMAC.hexdigest("SHA256", secret, body)
+      expect(described_class.webhook_signature_hex(secret, body)).to eq(
+        expected
+      )
+      expect(described_class.webhook_signature_hex(secret, body)).to match(
+        /\A[a-f0-9]{64}\z/
+      )
+    end
+  end
+
   let(:jurisdiction) { create(:sub_district, external_api_state: "j_on") }
   let(:external_api_key) do
     create(
@@ -57,7 +71,7 @@ RSpec.describe PermitWebhookService do
       ).and_return(permit_application)
       allow(permit_application).to receive(:newly_submitted?).and_return(true)
 
-      expect(service.client).to receive(:post) do |url, body|
+      expect(service.client).to receive(:post) do |url, body, headers|
         expect(url).to eq(external_api_key.webhook_url)
         json = JSON.parse(body)
         expect(json["event"]).to eq(
@@ -67,6 +81,10 @@ RSpec.describe PermitWebhookService do
         expect(json["payload"]["submitted_at"]).to eq(
           permit_application.submitted_at.as_json
         )
+        expect(headers[Constants::Webhooks::WEBHOOK_SIGNATURE_HEADER]).to eq(
+          described_class.webhook_signature_hex(external_api_key.token, body)
+        )
+        expect(headers["Content-Type"]).to eq("application/json")
         instance_double(Faraday::Response, success?: true)
       end
 
@@ -81,11 +99,14 @@ RSpec.describe PermitWebhookService do
         resubmitted_pa.id
       ).and_return(resubmitted_pa)
 
-      expect(service.client).to receive(:post) do |url, body|
+      expect(service.client).to receive(:post) do |url, body, headers|
         expect(url).to eq(external_api_key.webhook_url)
         json = JSON.parse(body)
         expect(json["event"]).to eq(
           Constants::Webhooks::Events::PermitApplication::PERMIT_RESUBMITTED
+        )
+        expect(headers[Constants::Webhooks::WEBHOOK_SIGNATURE_HEADER]).to eq(
+          described_class.webhook_signature_hex(external_api_key.token, body)
         )
         instance_double(Faraday::Response, success?: true)
       end

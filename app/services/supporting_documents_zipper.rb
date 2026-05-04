@@ -13,11 +13,11 @@ class SupportingDocumentsZipper
     unless File.directory?(zipfiles_directory)
       FileUtils.mkdir_p(zipfiles_directory)
     end
-    submitter = @permit_application.submitter
-    @file_path =
-      zipfiles_directory.join(
-        "#{@permit_application.number}.#{submitter.first_name.first}.#{submitter.last_name}.#{Date.today.strftime("%Y.%m.%d")}.zip"
-      )
+    zip_filename =
+      PermitApplicationGeneratedFileNamer.new(
+        @permit_application
+      ).supporting_documents_zip
+    @file_path = zipfiles_directory.join(zip_filename)
   end
 
   def perform
@@ -32,19 +32,42 @@ class SupportingDocumentsZipper
   def create_zip_file
     # Pre-remove any existing zip to avoid reusing stale/partial files
     FileUtils.rm_f(file_path)
+    used_entry_names = Hash.new(0)
 
     Zip::File.open(file_path, Zip::File::CREATE) do |zipfile|
       permit_application
         .all_submission_version_completed_supporting_documents
         .each do |document|
         file_path = download_file(document)
-        zipfile.add(document.standardized_filename, file_path) if file_path
+        if file_path
+          zipfile.add(
+            unique_zip_entry_name(document, used_entry_names),
+            file_path
+          )
+        end
       end
     end
   end
 
+  def unique_zip_entry_name(document, used_entry_names)
+    filename = File.basename(document.download_filename.presence || "download")
+    basename = File.basename(filename, ".*")
+    extension = File.extname(filename)
+    candidate = filename
+    suffix = 1
+
+    while used_entry_names[candidate].positive?
+      suffix += 1
+      candidate = "#{basename} (#{suffix})#{extension}"
+    end
+
+    used_entry_names[candidate] += 1
+
+    candidate
+  end
+
   def upload_zip_file
-    File.open(file_path, "rb") do |file|
+    File.open(file_path.to_s, "rb") do |file|
       uploader = ZipfileUploader.new(:store)
       temp_files << file.path
       uploaded_file = uploader.upload(file)

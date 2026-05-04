@@ -147,6 +147,11 @@ const JurisdictionSubmissionInboxScreen = lazy(() =>
     default: module.JurisdictionSubmissionInboxScreen,
   }))
 )
+const InboxProjectDetailScreen = lazy(() =>
+  import("../jurisdictions/submission-inbox/project-detail/inbox-project-detail-screen").then((module) => ({
+    default: module.InboxProjectDetailScreen,
+  }))
+)
 const JurisdictionUserIndexScreen = lazy(() =>
   import("../jurisdictions/users").then((module) => ({ default: module.JurisdictionUserIndexScreen }))
 )
@@ -603,6 +608,10 @@ const AppRoutes = observer(() => {
 
   const managerOrReviewerRoutes = (
     <>
+      <Route
+        path="/jurisdictions/:jurisdictionId/submission-inbox/projects/:permitProjectId/*"
+        element={<InboxProjectDetailScreen />}
+      />
       <Route path="/jurisdictions/:jurisdictionId/submission-inbox" element={<JurisdictionSubmissionInboxScreen />} />
       <Route
         path="/jurisdictions/:jurisdictionId/configuration-management/feature-access/my-jurisdiction-about-page"

@@ -1,4 +1,16 @@
-import { Box, Button, ButtonGroup, Flex, Grid, Heading, HStack, Text, useDisclosure, VStack } from "@chakra-ui/react"
+import {
+  Box,
+  Button,
+  ButtonGroup,
+  Flex,
+  Grid,
+  Heading,
+  HStack,
+  Text,
+  Tooltip,
+  useDisclosure,
+  VStack,
+} from "@chakra-ui/react"
 import { CaretRight, Info, Pencil, SquaresFour, Steps } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useState } from "react"
@@ -194,14 +206,16 @@ export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
             )}
           </Box>
           <Box>
-            <Box height={{ base: "200px", lg: "250px" }} borderRadius="md" overflow="hidden">
-              <ProjectMap
-                coordinates={permitProject.mapPosition}
-                pid={pid}
-                parcelGeometry={permitProject.parcelGeometry}
-                onOpenFullscreen={onOpenMapFullscreen}
-              />
-            </Box>
+            <Tooltip label={t("permitProject.overview.mapVisualReferenceDisclaimer")} hasArrow>
+              <Box height={{ base: "200px", lg: "250px" }} borderRadius="md" overflow="hidden">
+                <ProjectMap
+                  coordinates={permitProject.mapPosition}
+                  pid={pid}
+                  parcelGeometry={permitProject.parcelGeometry}
+                  onOpenFullscreen={onOpenMapFullscreen}
+                />
+              </Box>
+            </Tooltip>
           </Box>
         </Grid>
       </Box>
@@ -240,6 +254,7 @@ export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
             <Flex justify="flex-end" mt={4}>
               <RouterLinkButton
                 variant="tertiary"
+                fontWeight="bold"
                 rightIcon={<CaretRight />}
                 to={`/projects/${permitProject.id}/permits`}
               >

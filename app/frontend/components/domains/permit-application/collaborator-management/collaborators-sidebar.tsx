@@ -29,7 +29,7 @@ import {
 } from "@chakra-ui/react"
 import { DotsThree, Envelope, Users } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
-import React, { useRef } from "react"
+import React from "react"
 import { Trans, useTranslation } from "react-i18next"
 import { ICollaborator } from "../../../../models/collaborator"
 import { IPermitApplication } from "../../../../models/permit-application"
@@ -39,7 +39,7 @@ import { ECollaborationType, ECollaboratorType } from "../../../../types/enums"
 import { getRequirementBlockAccordionNodes } from "../../../../utils/formio-helpers"
 import { RemoveConfirmationModal } from "../../../shared/modals/remove-confirmation-modal"
 import { RequestLoadingButton } from "../../../shared/request-loading-button"
-import { DesignatedCollaboratorAssignmentPopover } from "./designated-collaborator-assignment-popover"
+import { DesignatedCollaboratorAssignmentModal } from "./designated-collaborator-assignment-modal"
 import { Reinvite } from "./reinvite"
 
 interface IProps {
@@ -48,18 +48,81 @@ interface IProps {
   triggerButtonProps?: Partial<ButtonProps>
 }
 
+interface IDrawerProps {
+  permitApplication: IPermitApplication
+  collaborationType: ECollaborationType
+  isOpen: boolean
+  onClose: () => void
+}
+
+export const CollaboratorsSidebarDrawer = observer(function CollaboratorsSidebarDrawer({
+  permitApplication,
+  collaborationType,
+  isOpen,
+  onClose,
+}: IDrawerProps) {
+  const { t } = useTranslation()
+  const { userStore } = useMst()
+  const currentUser = userStore.currentUser
+  const canManage = permitApplication.canUserManageCollaborators(currentUser, collaborationType)
+
+  return (
+    <Drawer isOpen={isOpen} placement="right" onClose={onClose}>
+      <DrawerOverlay />
+      <DrawerContent maxW={"430px"} pt={"var(--app-navbar-height)"}>
+        <DrawerCloseButton />
+        <DrawerHeader gap={2} alignItems={"center"} display={"flex"} mt={7} px={8} pb={0}>
+          <Users size={23} />
+          <Text as="h2" fontWeight={700} fontSize={"2xl"}>
+            {t("permitCollaboration.sidebar.title")}
+          </Text>
+        </DrawerHeader>
+
+        <DrawerBody as={Stack} spacing={8}>
+          <Text color={"text.secondary"} mt={6}>
+            {t(`permitCollaboration.sidebar.description.${collaborationType}`)}
+          </Text>
+          <Stack borderLeft={"4px solid"} borderColor={"theme.blueAlt"} px={6} py={3} bg={"theme.blueLight"}>
+            <Text fontSize={"lg"} fontWeight={700} color={"theme.blueAlt"}>
+              {t("permitCollaboration.sidebar.howItWorksTitle")}
+            </Text>
+            {/*TODO update copy*/}
+            <Text fontSize={"sm"}>
+              {
+                <Trans
+                  i18nKey={`permitCollaboration.sidebar.howItWorksDescription.${collaborationType}`}
+                  t={t}
+                  components={{
+                    1: <br />,
+                  }}
+                />
+              }
+            </Text>
+          </Stack>
+          <DesignatedCollaborators
+            permitApplication={permitApplication}
+            collaborationType={collaborationType}
+            canManage={canManage}
+          />
+          <Assignees
+            permitApplication={permitApplication}
+            collaborationType={collaborationType}
+            canManage={canManage}
+          />
+        </DrawerBody>
+      </DrawerContent>
+    </Drawer>
+  )
+})
+
 export const CollaboratorsSidebar = observer(function CollaboratorsSidebar({
   collaborationType,
   permitApplication,
   triggerButtonProps,
 }: IProps) {
   const { t } = useTranslation()
-  const { userStore } = useMst()
-  const currentUser = userStore.currentUser
   const { isOpen, onOpen, onClose } = useDisclosure()
-  const btnRef = useRef()
 
-  let canManage = permitApplication.canUserManageCollaborators(currentUser, collaborationType)
   return (
     <>
       <Button leftIcon={<Users />} variant={"primary"} onClick={onOpen} {...triggerButtonProps}>
@@ -67,51 +130,12 @@ export const CollaboratorsSidebar = observer(function CollaboratorsSidebar({
           count: permitApplication.getCollaborationUniqueUserCount(collaborationType),
         })}
       </Button>
-      <Drawer isOpen={isOpen} placement="right" onClose={onClose} finalFocusRef={btnRef}>
-        <DrawerOverlay />
-        <DrawerContent maxW={"430px"} pt={"var(--app-navbar-height)"}>
-          <DrawerCloseButton />
-          <DrawerHeader gap={2} alignItems={"center"} display={"flex"} mt={7} px={8} pb={0}>
-            <Users size={23} />
-            <Text as="h2" fontWeight={700} fontSize={"2xl"}>
-              {t("permitCollaboration.sidebar.title")}
-            </Text>
-          </DrawerHeader>
-
-          <DrawerBody as={Stack} spacing={8}>
-            <Text color={"text.secondary"} mt={6}>
-              {t(`permitCollaboration.sidebar.description.${collaborationType}`)}
-            </Text>
-            <Stack borderLeft={"4px solid"} borderColor={"theme.blueAlt"} px={6} py={3} bg={"theme.blueLight"}>
-              <Text fontSize={"lg"} fontWeight={700} color={"theme.blueAlt"}>
-                {t("permitCollaboration.sidebar.howItWorksTitle")}
-              </Text>
-              {/*TODO update copy*/}
-              <Text fontSize={"sm"}>
-                {
-                  <Trans
-                    i18nKey={`permitCollaboration.sidebar.howItWorksDescription.${collaborationType}`}
-                    t={t}
-                    components={{
-                      1: <br />,
-                    }}
-                  />
-                }
-              </Text>
-            </Stack>
-            <DesignatedCollaborators
-              permitApplication={permitApplication}
-              collaborationType={collaborationType}
-              canManage={permitApplication.canUserManageCollaborators(currentUser, collaborationType)}
-            />
-            <Assignees
-              permitApplication={permitApplication}
-              collaborationType={collaborationType}
-              canManage={canManage}
-            />
-          </DrawerBody>
-        </DrawerContent>
-      </Drawer>
+      <CollaboratorsSidebarDrawer
+        permitApplication={permitApplication}
+        collaborationType={collaborationType}
+        isOpen={isOpen}
+        onClose={onClose}
+      />
     </>
   )
 })
@@ -140,7 +164,7 @@ const DesignatedCollaborators = observer(function DesignatedCollaborators({
       <CollaborationCard
         rightElement={
           canManage ? (
-            <DesignatedCollaboratorAssignmentPopover
+            <DesignatedCollaboratorAssignmentModal
               permitApplication={permitApplication}
               collaborationType={collaborationType}
             />

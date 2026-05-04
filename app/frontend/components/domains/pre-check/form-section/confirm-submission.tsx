@@ -29,8 +29,13 @@ export const ConfirmSubmission = observer(function ConfirmSubmission() {
 
       if (result.ok) {
         closeModal()
-        // Navigate to results
-        navigateToNext()
+        const isStillOnCurrentPreCheckEditFlow = window.location.pathname.startsWith(
+          `/pre-checks/${currentPreCheck.id}/edit`
+        )
+
+        if (isStillOnCurrentPreCheckEditFlow) {
+          navigateToNext()
+        }
       } else {
         // Handle error - could show a toast notification
         console.error("Failed to submit pre-check:", result.error)

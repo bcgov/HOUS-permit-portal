@@ -261,14 +261,46 @@ class Jurisdiction < ApplicationRecord
     permit_applications&.kept&.size || 0
   end
 
+  # Mirrors the semantics of
+  # Api::Concerns::Search::JurisdictionPermitApplications#jurisdiction_application_unread_status_counts
+  # (the unread-filter badge on the submission inbox search page):
+  #   - kept (not discarded)
+  #   - status != "new_draft"
+  #   - latest submission_version.viewed_at IS NULL (same field the
+  #     PermitApplication searchkick index exposes as `viewed_at`)
+  #   - optional sandbox scope
   def unviewed_submissions_count(sandbox: nil)
+    latest_submission_version_viewed_at_sql = <<~SQL.squish
+      (
+        SELECT sv.viewed_at
+        FROM submission_versions sv
+        WHERE sv.permit_application_id = permit_applications.id
+        ORDER BY sv.created_at DESC
+        LIMIT 1
+      )
+    SQL
+
     permit_applications
       .kept
       .for_sandbox(sandbox)
-      .where(status: %i[newly_submitted resubmitted])
-      .joins(:submission_versions)
-      .where(submission_versions: { viewed_at: nil })
-      .distinct
+      .where.not(status: "new_draft")
+      .where("#{latest_submission_version_viewed_at_sql} IS NULL")
+      .count
+  end
+
+  # Mirrors the semantics of
+  # Api::Concerns::Search::JurisdictionPermitProjects#jurisdiction_unread_state_counts
+  # (the unread-filter badge on the project-inbox search page):
+  #   - kept (not discarded)
+  #   - state != "draft"
+  #   - viewed_at IS NULL
+  #   - optional sandbox scope
+  def unviewed_projects_count(sandbox: nil)
+    permit_projects
+      .kept
+      .for_sandbox(sandbox)
+      .where.not(state: PermitProject.states[:draft])
+      .where(viewed_at: nil)
       .count
   end
 
@@ -276,7 +308,7 @@ class Jurisdiction < ApplicationRecord
     permit_applications.kept.unviewed
   end
 
-  def submission_inbox_set_up
+  def submission_inbox_set_up?
     # Preserve legacy behavior: if no permit types are enabled, setup is considered complete
     return true if PermitType.enabled.empty?
 
@@ -445,7 +477,7 @@ class Jurisdiction < ApplicationRecord
   end
 
   def inbox_enabled_requires_inbox_setup
-    if inbox_enabled && !submission_inbox_set_up
+    if inbox_enabled && !submission_inbox_set_up?
       errors.add(
         :inbox_enabled,
         I18n.t(

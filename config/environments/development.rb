@@ -35,8 +35,8 @@ Rails.application.configure do
     config.cache_store = :null_store
   end
 
-  # Don't care if the mailer can't send.
-  config.action_mailer.raise_delivery_errors = false
+  # Raise errors in development for debugging purposes
+  config.action_mailer.raise_delivery_errors = true
 
   # Disable caching for Action Mailer templates even if Action Controller
   # caching is enabled.

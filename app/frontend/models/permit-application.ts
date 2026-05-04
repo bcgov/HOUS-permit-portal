@@ -97,7 +97,11 @@ export const PermitApplicationModel = types.snapshotProcessor(
       isViewingPastRequests: types.optional(types.boolean, false),
       templateNickname: types.maybeNull(types.string),
       projectId: types.maybeNull(types.string),
+      projectNumber: types.maybeNull(types.string),
       discardedAt: types.maybeNull(types.Date),
+      inboxSortOrder: types.maybeNull(types.number),
+      allowedManualTransitions: types.optional(types.array(types.string), []),
+      daysInQueue: types.maybeNull(types.number),
     })
     .extend(withEnvironment())
     .extend(withRootStore())
@@ -105,9 +109,23 @@ export const PermitApplicationModel = types.snapshotProcessor(
       get isDiscarded() {
         return !!self.discardedAt
       },
+      get shortAddress() {
+        return self.fullAddress?.split(",")[0]
+      },
+      get formattedDaysInQueue(): string {
+        if (self.daysInQueue == null) return "—"
+        return t("submissionInbox.daysInQueue", { count: self.daysInQueue })
+      },
+      get formattedSubmittedAt(): string {
+        if (!self.submittedAt) return "—"
+        return new Intl.DateTimeFormat("en-CA").format(self.submittedAt)
+      },
       get isPart3() {
         // TODO
         return false
+      },
+      get isNewDraft() {
+        return self.status === EPermitApplicationStatus.newDraft
       },
       get isDraft() {
         return (
@@ -118,8 +136,18 @@ export const PermitApplicationModel = types.snapshotProcessor(
       get isSubmitted() {
         return (
           self.status === EPermitApplicationStatus.newlySubmitted ||
-          self.status === EPermitApplicationStatus.resubmitted
+          self.status === EPermitApplicationStatus.resubmitted ||
+          self.status === EPermitApplicationStatus.inReview ||
+          self.status === EPermitApplicationStatus.approved ||
+          self.status === EPermitApplicationStatus.issued ||
+          self.status === EPermitApplicationStatus.withdrawn
         )
+      },
+      get isInReview() {
+        return self.status === EPermitApplicationStatus.inReview
+      },
+      get isReviewReadOnly() {
+        return this.isSubmitted && self.status !== EPermitApplicationStatus.inReview
       },
       get isRevisionsRequested() {
         return self.status === EPermitApplicationStatus.revisionsRequested
@@ -514,7 +542,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
         if (!user) return false
 
         if (collaborationType === ECollaborationType.review) {
-          return !self.isDraft && user.isReviewStaff
+          return !self.isNewDraft && user.isReviewStaff
         }
 
         return self.isDraft && user?.id === self.submitter?.id
@@ -573,7 +601,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
           return false
         }
 
-        return featureEnabled ? !designatedReviewerExists : designatedReviewerExists
+        return featureEnabled && designatedReviewerExists
       },
     }))
     .actions((self) => ({
@@ -806,8 +834,8 @@ export const PermitApplicationModel = types.snapshotProcessor(
         if (response.ok) {
           const { data: stepCode } = response.data
           self.rootStore.stepCodeStore.mergeUpdate(stepCode, "stepCodesMap")
-          // Refresh current permit application from server so associations are consistent
-          yield self.rootStore.permitApplicationStore.fetchPermitApplication(self.id)
+          self.stepCode = cast(stepCode.id)
+          self.rootStore.stepCodeStore.setCurrentStepCode(stepCode.id)
         }
         return response.ok
       }),
@@ -831,10 +859,36 @@ export const PermitApplicationModel = types.snapshotProcessor(
         return response.ok
       }),
       markAsViewed: flow(function* () {
+        const wasUnread = !self.isViewed
+        const status = self.status
         const response = yield self.environment.api.viewPermitApplication(self.id)
         if (response.ok) {
           const { data: permitApplication } = response.data
           self.rootStore.permitApplicationStore.mergeUpdate(permitApplication, "permitApplicationMap")
+          if (wasUnread) {
+            self.rootStore.submissionInboxStore?.permitApplicationSearch?.adjustUnreadCountForColumn(status, -1)
+            const currentProject = self.rootStore.permitProjectStore.currentPermitProject
+            if (currentProject?.id === self.projectId) {
+              currentProject.adjustUnreadCountForColumn(status, -1)
+            }
+          }
+        }
+        return response.ok
+      }),
+      markAsUnviewed: flow(function* () {
+        const wasViewed = !!self.isViewed
+        const status = self.status
+        const response = yield self.environment.api.unviewPermitApplication(self.id)
+        if (response.ok) {
+          const { data: permitApplication } = response.data
+          self.rootStore.permitApplicationStore.mergeUpdate(permitApplication, "permitApplicationMap")
+          if (wasViewed) {
+            self.rootStore.submissionInboxStore?.permitApplicationSearch?.adjustUnreadCountForColumn(status, 1)
+            const currentProject = self.rootStore.permitProjectStore.currentPermitProject
+            if (currentProject?.id === self.projectId) {
+              currentProject.adjustUnreadCountForColumn(status, 1)
+            }
+          }
         }
         return response.ok
       }),
@@ -893,6 +947,33 @@ export const PermitApplicationModel = types.snapshotProcessor(
           self.discardedAt = null
         }
         return response.ok
+      }),
+
+      setInboxSortOrder(order: number) {
+        self.inboxSortOrder = order
+      },
+
+      transitionStatus: flow(function* (targetStatus: string) {
+        const oldStatus = self.status
+        const isUnread = !self.isViewed
+        const response = yield self.environment.api.transitionPermitApplicationStatus(self.id, targetStatus)
+        if (response.ok) {
+          const responseData = response.data.data
+          const newStatus = responseData.status
+          self.status = responseData.status
+          self.allowedManualTransitions.replace(responseData.allowedManualTransitions || [])
+          self.inboxSortOrder = responseData.inboxSortOrder ?? null
+          self.rootStore.submissionInboxStore?.permitApplicationSearch?.adjustCountsForTransition(
+            oldStatus,
+            newStatus,
+            isUnread
+          )
+          const currentProject = self.rootStore.permitProjectStore.currentPermitProject
+          if (isUnread && currentProject?.id === self.projectId) {
+            currentProject.moveUnreadCountBetweenColumns(oldStatus, newStatus)
+          }
+        }
+        return response
       }),
     })),
   {

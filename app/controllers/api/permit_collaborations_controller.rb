@@ -4,7 +4,7 @@ class Api::PermitCollaborationsController < Api::ApplicationController
   def destroy
     authorize @permit_collaboration
 
-    if @permit_collaboration.destroy
+    if @permit_collaboration.discard
       render_success @permit_collaboration,
                      "permit_collaboration.destroy_success",
                      { blueprint: PermitCollaborationBlueprint }
@@ -43,6 +43,6 @@ class Api::PermitCollaborationsController < Api::ApplicationController
   private
 
   def set_permit_collaboration
-    @permit_collaboration = PermitCollaboration.find(params[:id])
+    @permit_collaboration = PermitCollaboration.kept.find(params[:id])
   end
 end

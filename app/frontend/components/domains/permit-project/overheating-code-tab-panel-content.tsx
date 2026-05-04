@@ -1,5 +1,4 @@
 import {
-  Box,
   Button,
   Container,
   Flex,
@@ -28,6 +27,7 @@ import { ToggleArchivedButton } from "../../shared/buttons/toggle-archived-butto
 import { ConfirmationModal } from "../../shared/confirmation-modal"
 import { SearchGrid } from "../../shared/grid/search-grid"
 import { SearchGridItem } from "../../shared/grid/search-grid-item"
+import { SearchGridRow } from "../../shared/grid/search-grid-row"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { OverheatingCodeGridHeaders } from "../overheating-code/grid-header"
 
@@ -74,12 +74,12 @@ export const OverheatingCodeTabPanelContent = observer(() => {
               </Flex>
             ) : (
               tableOverheatingCodes.map((oc: IOverheatingCode) => (
-                <Box key={oc.id} role={"row"} display={"contents"}>
-                  <SearchGridItem fontSize="sm">{oc.issuedTo || "—"}</SearchGridItem>
-                  <SearchGridItem fontSize="sm">{oc.projectNumber || "—"}</SearchGridItem>
-                  <SearchGridItem fontSize="sm">{oc.buildingModel || "—"}</SearchGridItem>
-                  <SearchGridItem fontSize="sm">{oc.fullAddress || "—"}</SearchGridItem>
-                  <SearchGridItem>
+                <SearchGridRow key={oc.id} onClick={() => navigate(`/overheating-codes/${oc.id}/edit`)}>
+                  <SearchGridItem>{oc.issuedTo || "—"}</SearchGridItem>
+                  <SearchGridItem>{oc.projectNumber || "—"}</SearchGridItem>
+                  <SearchGridItem>{oc.buildingModel || "—"}</SearchGridItem>
+                  <SearchGridItem>{oc.fullAddress || "—"}</SearchGridItem>
+                  <SearchGridItem justifyContent="flex-end">
                     <Menu>
                       <MenuButton
                         as={IconButton}
@@ -149,7 +149,7 @@ export const OverheatingCodeTabPanelContent = observer(() => {
                       </MenuList>
                     </Menu>
                   </SearchGridItem>
-                </Box>
+                </SearchGridRow>
               ))
             )}
           </SearchGrid>

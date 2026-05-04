@@ -106,7 +106,7 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
       emailControl: "preferenceAttributes.enableEmailApplicationSubmissionNotification",
     },
     {
-      event: t("user.notifications.applicationViewed"),
+      event: t("user.notifications.reviewStarted"),
       inAppControl: "preferenceAttributes.enableInAppApplicationViewNotification",
       emailControl: "preferenceAttributes.enableEmailApplicationViewNotification",
     },
@@ -119,11 +119,6 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
       event: t("user.notifications.collaboration"),
       inAppControl: "preferenceAttributes.enableInAppCollaborationNotification",
       emailControl: "preferenceAttributes.enableEmailCollaborationNotification",
-    },
-    {
-      event: t("user.notifications.integrationMapping"),
-      inAppControl: "preferenceAttributes.enableInAppIntegrationMappingNotification",
-      emailControl: "preferenceAttributes.enableEmailIntegrationMappingNotification",
     },
     {
       event: t("user.notifications.unmappedApiNotification"),

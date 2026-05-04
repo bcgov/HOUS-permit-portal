@@ -1,4 +1,5 @@
 class PermitBlockStatus < ApplicationRecord
+  audited only: %i[status], associated_with: :permit_application
   belongs_to :permit_application
 
   enum :status, { draft: 0, in_progress: 1, ready: 2 }, default: 0
@@ -66,7 +67,7 @@ class PermitBlockStatus < ApplicationRecord
         collaborator_type: :delegatee
       )
 
-    # add only assignees who are assigned to same requirement block
+    # add only assignees who are assigned to same requirement block.
 
     users_to_notify +=
       permit_application.users_by_collaboration_options(
