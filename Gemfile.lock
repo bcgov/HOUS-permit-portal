@@ -205,7 +205,7 @@ GEM
       elasticsearch-api (= 8.11.0)
     elasticsearch-api (8.11.0)
       multi_json
-    erb (5.0.2)
+    erb (6.0.1.1)
     erubi (1.13.1)
     et-orbi (1.2.11)
       tzinfo
@@ -678,7 +678,7 @@ GEM
       base64
       websocket-extensions (>= 0.1.0)
     websocket-extensions (0.1.5)
-    yard (0.9.38)
+    yard (0.9.42)
     yard-activesupport-concern (0.0.1)
       yard (>= 0.8)
     yard-solargraph (0.1.0)
