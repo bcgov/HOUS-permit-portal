@@ -15,7 +15,9 @@ RSpec.describe ReleaseNote, type: :model do
     end
 
     it "is invalid with an invalid version" do
-      expect(build(:release_note, version: "1.0.0.0")).not_to be_valid
+      expect(
+        build(:release_note, version: "#{Faker::App.semantic_version}.0")
+      ).not_to be_valid
     end
 
     it "is invalid with a non-unique version" do
