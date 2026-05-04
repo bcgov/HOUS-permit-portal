@@ -99,14 +99,9 @@ export const ProjectInboxTable = observer(function ProjectInboxTable({ searchSto
           <HStack spacing={3}>
             <Circle size="8px" bg={!project.viewedAt ? "theme.blueActive" : "transparent"} flexShrink={0} />
 
-            <VStack align="start" spacing={0}>
-              <Text fontWeight={700} fontSize="sm">
-                {project.number}
-              </Text>
-              <Text fontSize="xs" color="text.secondary" noOfLines={1}>
-                {project.title}
-              </Text>
-            </VStack>
+            <Text fontWeight={700} fontSize="sm">
+              {project.number}
+            </Text>
           </HStack>
         </SearchGridItem>
 

@@ -164,10 +164,6 @@ const ProjectKanbanCard = observer(function ProjectKanbanCard({
           </HStack>
         </Box>
 
-        <Text fontSize="xs" color="text.secondary" noOfLines={1}>
-          {project.title}
-        </Text>
-
         <Text fontSize="xs" noOfLines={1} mt={1.5}>
           {project.shortAddress}
         </Text>

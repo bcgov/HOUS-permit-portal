@@ -29,13 +29,11 @@ class PermitProjectCollaboration < ApplicationRecord
       "action_text" =>
         I18n.t(
           "notification.permit_project_collaboration.assignment_notification",
-          project_number: permit_project.number,
-          project_title: permit_project.title
+          project_number: permit_project.number
         ),
       "object_data" => {
         "permit_project_id" => permit_project.id,
         "project_number" => permit_project.number,
-        "project_title" => permit_project.title,
         "jurisdiction_slug" => permit_project.jurisdiction&.slug
       }
     }
@@ -49,13 +47,11 @@ class PermitProjectCollaboration < ApplicationRecord
       "action_text" =>
         I18n.t(
           "notification.permit_project_collaboration.unassignment_notification",
-          project_number: permit_project.number,
-          project_title: permit_project.title
+          project_number: permit_project.number
         ),
       "object_data" => {
         "permit_project_id" => permit_project.id,
         "project_number" => permit_project.number,
-        "project_title" => permit_project.title,
         "jurisdiction_slug" => permit_project.jurisdiction&.slug
       }
     }
