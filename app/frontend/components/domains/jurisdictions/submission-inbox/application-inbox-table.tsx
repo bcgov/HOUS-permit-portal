@@ -93,7 +93,7 @@ export const ApplicationInboxTable = observer(function ApplicationInboxTable({ s
     <Flex direction="column" flex={1} minH={0} minW={0} w="full" align="stretch">
       <Box flex={1} minH={0} overflow="auto">
         <SearchGrid
-          templateColumns="36px minmax(0, 1.5fr) minmax(0, 1.3fr) minmax(0, 1fr) minmax(140px, 1fr) minmax(160px, 1.1fr) auto 72px"
+          templateColumns="36px minmax(160px, 1.5fr) minmax(180px, 1.3fr) minmax(140px, 1fr) minmax(140px, 1fr) minmax(160px, 1.1fr) minmax(120px, auto) 72px"
           gridRowClassName="application-inbox-grid-row"
           overflow="visible"
           sx={gridStickyHeaderSx}
@@ -199,7 +199,7 @@ const SortableHeader = ({
       onClick={() => onToggleSort(field)}
       borderRight="1px solid"
       borderColor="border.light"
-      px={4}
+      px={3}
     >
       <HStack spacing={1}>
         <Text textAlign="left">{label}</Text>
