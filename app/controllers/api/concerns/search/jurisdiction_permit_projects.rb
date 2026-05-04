@@ -65,13 +65,15 @@ module Api::Concerns::Search::JurisdictionPermitProjects
         )
         .where(id: ids)
 
+    unread_state_counts = jurisdiction_unread_state_counts
     @jurisdiction_permit_projects = loaded.sort_by { |p| ids.index(p.id) }
     @jurisdiction_permit_project_meta = {
       total_pages: @jurisdiction_permit_project_search.total_pages,
       current_page: @jurisdiction_permit_project_search.current_page,
       total_count: @jurisdiction_permit_project_search.total_count,
       state_counts: jurisdiction_state_counts,
-      unread_count: jurisdiction_unread_count
+      unread_count: unread_state_counts.values.sum,
+      unread_state_counts: unread_state_counts
     }
   end
 
@@ -129,6 +131,7 @@ module Api::Concerns::Search::JurisdictionPermitProjects
         )
         .where(id: all_ids)
 
+    unread_state_counts = jurisdiction_unread_state_counts
     @jurisdiction_permit_projects = loaded.sort_by { |p| all_ids.index(p.id) }
     @jurisdiction_permit_project_meta = {
       total_pages: 1,
@@ -136,7 +139,8 @@ module Api::Concerns::Search::JurisdictionPermitProjects
       total_count: all_ids.length,
       state_counts: jurisdiction_state_counts,
       column_totals: column_totals,
-      unread_count: jurisdiction_unread_count
+      unread_count: unread_state_counts.values.sum,
+      unread_state_counts: unread_state_counts
     }
   end
 
@@ -148,10 +152,10 @@ module Api::Concerns::Search::JurisdictionPermitProjects
 
   private
 
-  # Total unread (viewed_at nil) projects across the whole jurisdiction,
-  # ignoring current filters/query so the unread-filter badge reflects the
-  # full jurisdiction-wide unread count.
-  def jurisdiction_unread_count
+  # Unread (viewed_at nil) projects by state across the whole jurisdiction,
+  # ignoring current filters/query so badges reflect the full jurisdiction-wide
+  # unread count.
+  def jurisdiction_unread_state_counts
     where = {
       jurisdiction_id: @jurisdiction.id,
       discarded: false,
@@ -165,15 +169,21 @@ module Api::Concerns::Search::JurisdictionPermitProjects
     PermitProject.search(
       "*",
       where: where,
-      load: false,
+      aggs: [:state],
       body_options: {
-        size: 0,
-        track_total_hits: true
+        size: 0
       }
-    ).total_count
+    ).aggs[
+      "state"
+    ][
+      "buckets"
+    ].each_with_object({}) do |bucket, hash|
+      next if bucket["key"] == "draft"
+      hash[bucket["key"]] = bucket["doc_count"]
+    end
   rescue => e
-    Rails.logger.warn("Failed to compute unread count: #{e.message}")
-    0
+    Rails.logger.warn("Failed to compute unread state counts: #{e.message}")
+    {}
   end
 
   def jurisdiction_state_counts

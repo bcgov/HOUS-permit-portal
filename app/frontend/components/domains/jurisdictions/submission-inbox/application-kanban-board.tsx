@@ -17,6 +17,7 @@ interface IProps {
   applications: IPermitApplication[]
   stateCounts: Record<string, number>
   columnTotals?: Record<string, number>
+  unreadCounts?: Record<string, number>
   collapsedColumns: string[]
   onToggleColumn: (columnKey: string) => void
   onShowMore?: (columnKey: string) => void
@@ -37,6 +38,7 @@ export const ApplicationKanbanBoard = observer(function ApplicationKanbanBoard({
   applications,
   stateCounts,
   columnTotals,
+  unreadCounts,
   collapsedColumns,
   onToggleColumn,
   onShowMore,
@@ -73,6 +75,8 @@ export const ApplicationKanbanBoard = observer(function ApplicationKanbanBoard({
       items={items}
       stateCounts={stateCounts}
       columnTotals={columnTotals}
+      unreadCounts={unreadCounts}
+      emptyColumnMessage={t("submissionInbox.noFilteredResultsWithStatus")}
       collapsedColumns={collapsedColumns}
       onToggleColumn={onToggleColumn}
       onShowMore={onShowMore}

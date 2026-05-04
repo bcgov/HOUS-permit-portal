@@ -18,6 +18,7 @@ export const PermitApplicationInboxSearchSharedFragment = types
   .model("PermitApplicationInboxSearchShared", {
     stateCounts: types.optional(types.frozen<Record<string, number>>(), {}),
     columnTotals: types.optional(types.frozen<Record<string, number>>(), {}),
+    unreadColumnCounts: types.optional(types.frozen<Record<string, number>>(), {}),
     /** Jurisdiction-wide (or project-scoped) count of unread applications — ignores current filters/query. */
     unreadCount: types.optional(types.number, 0),
     requirementTemplateIdFilter: types.optional(types.array(types.string), []),
@@ -43,8 +44,23 @@ export const PermitApplicationInboxSearchSharedFragment = types
     setColumnTotals(counts: Record<string, number>) {
       self.columnTotals = decamelizeHashKeys(counts)
     },
+    setUnreadColumnCounts(counts: Record<string, number>) {
+      self.unreadColumnCounts = decamelizeHashKeys(counts)
+    },
     setUnreadCount(count: number) {
       self.unreadCount = count ?? 0
+    },
+    adjustUnreadCountForColumn(columnKey: string, delta: number) {
+      const counts = { ...self.unreadColumnCounts }
+      counts[columnKey] = Math.max(0, (counts[columnKey] ?? 0) + delta)
+      self.unreadColumnCounts = counts
+      self.unreadCount = Math.max(0, self.unreadCount + delta)
+    },
+    moveUnreadCountBetweenColumns(oldColumnKey: string, newColumnKey: string) {
+      const counts = { ...self.unreadColumnCounts }
+      if (counts[oldColumnKey] != null) counts[oldColumnKey] = Math.max(0, counts[oldColumnKey] - 1)
+      counts[newColumnKey] = (counts[newColumnKey] ?? 0) + 1
+      self.unreadColumnCounts = counts
     },
     setRequirementTemplateIdFilter(value: string[]) {
       self.requirementTemplateIdFilter = cast(value)
