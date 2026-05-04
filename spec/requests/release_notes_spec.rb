@@ -1,5 +1,7 @@
 require "rails_helper"
 
+A_CLIENT_ERROR = "a client error"
+
 RSpec.describe "ReleaseNotes", type: :request do
   include Devise::Test::IntegrationHelpers
   subject { json_response.fetch("data") }
@@ -21,6 +23,33 @@ RSpec.describe "ReleaseNotes", type: :request do
     @release_note = create(:release_note)
   end
 
+  shared_examples "a client error" do |request|
+    it "returns an error if the user is not authorized" do
+      sign_in submitter
+      instance_exec(
+        { id: create(:release_note).id, params: { release_note: params } },
+        &request
+      )
+
+      expect(response).to have_http_status(:forbidden)
+    end
+    it "returns an error if the release note is not valid" do
+      setup
+      instance_exec(
+        {
+          id: @release_note.id,
+          params: {
+            release_note: params.merge({ version: nil })
+          }
+        },
+        &request
+      )
+
+      expect(response).to have_http_status(:bad_request)
+      expect(error_message).to match(/version.*blank/i)
+    end
+  end
+
   describe "#create" do
     it "creates a release note" do
       sign_in super_admin
@@ -39,23 +68,10 @@ RSpec.describe "ReleaseNotes", type: :request do
       )
     end
 
-    it "returns an error if the user is not authorized" do
-      sign_in submitter
-      post release_notes_path, params: { release_note: params }
-
-      expect(response).to have_http_status(:forbidden)
-    end
-
-    it "returns an error if the release note is not valid" do
-      sign_in super_admin
-      post release_notes_path,
-           params: {
-             release_note: params.merge({ version: nil })
-           }
-
-      expect(response).to have_http_status(:bad_request)
-      expect(error_message).to match(/version.*blank/i)
-    end
+    it_behaves_like A_CLIENT_ERROR,
+                    ->(payload) do
+                      post release_notes_path, params: payload[:params]
+                    end
   end
 
   describe "#update" do
@@ -72,23 +88,11 @@ RSpec.describe "ReleaseNotes", type: :request do
       expect(subject).to include("version" => params[:version])
     end
 
-    it "returns an error if the user is not authorized" do
-      sign_in submitter
-      patch release_note_path(create(:release_note).id)
-
-      expect(response).to have_http_status(:forbidden)
-    end
-
-    it "returns an error if the release note is not valid" do
-      setup
-      patch release_note_path(@release_note.id),
-            params: {
-              release_note: params.merge({ version: nil })
-            }
-
-      expect(response).to have_http_status(:bad_request)
-      expect(error_message).to match(/version.*blank/i)
-    end
+    it_behaves_like A_CLIENT_ERROR,
+                    ->(payload) do
+                      patch release_note_path(payload[:id]),
+                            params: payload[:params]
+                    end
   end
 
   describe "#publish" do
@@ -100,24 +104,10 @@ RSpec.describe "ReleaseNotes", type: :request do
       expect(subject).to include("status" => "published")
     end
 
-    it "returns an error if the user is not authorized" do
-      sign_in submitter
-      patch publish_release_note_path(create(:release_note).id)
-
-      expect(response).to have_http_status(:forbidden)
-    end
-
-    it "returns an error if the release note is not valid" do
-      setup
-      patch publish_release_note_path(@release_note.id),
-            params: {
-              release_note: {
-                version: nil
-              }
-            }
-
-      expect(response).to have_http_status(:bad_request)
-      expect(error_message).to match(/version.*blank/i)
-    end
+    it_behaves_like A_CLIENT_ERROR,
+                    ->(payload) do
+                      patch publish_release_note_path(payload[:id]),
+                            params: payload[:params]
+                    end
   end
 end
