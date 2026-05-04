@@ -1,5 +1,7 @@
 require "rails_helper"
 
+is_required = "is required"
+
 RSpec.describe ReleaseNote, type: :model do
   describe "#status" do
     it "defaults to draft" do
@@ -8,7 +10,7 @@ RSpec.describe ReleaseNote, type: :model do
   end
 
   describe "#version" do
-    it "is required" do
+    it is_required do
       expect(build(:release_note, version: nil)).not_to be_valid
     end
 
@@ -23,7 +25,7 @@ RSpec.describe ReleaseNote, type: :model do
   end
 
   describe "#release_notes_url" do
-    it "is required" do
+    it is_required do
       expect(build(:release_note, release_notes_url: nil)).not_to be_valid
     end
 
@@ -35,13 +37,13 @@ RSpec.describe ReleaseNote, type: :model do
   end
 
   describe "#release_date" do
-    it "is required" do
+    it is_required do
       expect(build(:release_note, release_date: nil)).not_to be_valid
     end
   end
 
   describe "#content" do
-    it "is required" do
+    it is_required do
       expect(build(:release_note, content: nil)).not_to be_valid
     end
   end
