@@ -77,6 +77,24 @@ export interface IContact {
   updatedAt?: number | string // has to allow string to stop errors with useFieldArray
 }
 
+export type TJurisdictionFieldValues = {
+  descriptionHtml: string
+  checklistHtml: string
+  lookOutHtml: string
+  contactSummaryHtml: string
+  contactsAttributes: IContact[]
+  mapPosition: TLatLngTuple
+  mapZoom: number
+  processingTimeHtml: string
+  keyStagesHtml: string
+  officeAddress: string
+  officeHours: string
+  officeTelephone: string
+  officeEmail: string
+  websiteUrl: string
+  timelineAndDeliverablesHtml: string
+}
+
 export interface IPermitTypeSubmissionContact {
   id: string
   email: string

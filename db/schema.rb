@@ -290,6 +290,14 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_27_222000) do
     t.jsonb "boundary_points", default: []
     t.string "weather_location"
     t.decimal "design_summer_temp", precision: 5, scale: 1
+    t.text "processing_time_html"
+    t.text "key_stages_html"
+    t.text "timeline_and_deliverables_html"
+    t.text "office_hours"
+    t.text "office_address"
+    t.string "office_telephone"
+    t.string "office_email"
+    t.string "website_url"
     t.index ["ltsa_matcher"], name: "index_jurisdictions_on_ltsa_matcher"
     t.index ["prefix"], name: "index_jurisdictions_on_prefix", unique: true
     t.index ["regional_district_id"], name: "index_jurisdictions_on_regional_district_id"
@@ -603,7 +611,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_27_222000) do
     t.datetime "discarded_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.integer "state", default: 0, null: false
     t.string "number"
     t.decimal "latitude", precision: 10, scale: 6
     t.decimal "longitude", precision: 10, scale: 6
@@ -612,6 +619,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_27_222000) do
     t.string "last_name_snapshot"
     t.datetime "orphaned_at"
     t.jsonb "parcel_geometry"
+    t.integer "status", default: 0, null: false
+    t.integer "state", default: 0, null: false
     t.datetime "viewed_at"
     t.integer "inbox_sort_order"
     t.datetime "enqueued_at"
