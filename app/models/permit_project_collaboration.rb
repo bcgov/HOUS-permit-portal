@@ -19,6 +19,7 @@ class PermitProjectCollaboration < ApplicationRecord
 
   validate :validate_review_staff_for_jurisdiction
   validate :validate_collaborator_is_review_type
+  validate :validate_only_one_kept_per_project
 
   def collaboration_assignment_notification_data
     {
@@ -28,13 +29,11 @@ class PermitProjectCollaboration < ApplicationRecord
       "action_text" =>
         I18n.t(
           "notification.permit_project_collaboration.assignment_notification",
-          project_number: permit_project.number,
-          project_title: permit_project.title
+          project_number: permit_project.number
         ),
       "object_data" => {
         "permit_project_id" => permit_project.id,
         "project_number" => permit_project.number,
-        "project_title" => permit_project.title,
         "jurisdiction_slug" => permit_project.jurisdiction&.slug
       }
     }
@@ -48,13 +47,11 @@ class PermitProjectCollaboration < ApplicationRecord
       "action_text" =>
         I18n.t(
           "notification.permit_project_collaboration.unassignment_notification",
-          project_number: permit_project.number,
-          project_title: permit_project.title
+          project_number: permit_project.number
         ),
       "object_data" => {
         "permit_project_id" => permit_project.id,
         "project_number" => permit_project.number,
-        "project_title" => permit_project.title,
         "jurisdiction_slug" => permit_project.jurisdiction&.slug
       }
     }
@@ -80,6 +77,17 @@ class PermitProjectCollaboration < ApplicationRecord
     unless collaborator.collaboratorable_type == "Jurisdiction"
       errors.add(:collaborator, :must_be_review_collaborator)
     end
+  end
+
+  def validate_only_one_kept_per_project
+    return unless permit_project_id
+    return if discarded?
+
+    scope = self.class.kept.where(permit_project_id: permit_project_id)
+    scope = scope.where.not(id: id) if persisted?
+    return unless scope.exists?
+
+    errors.add(:permit_project, :only_one_review_collaborator_allowed)
   end
 
   def send_unassignment_notification

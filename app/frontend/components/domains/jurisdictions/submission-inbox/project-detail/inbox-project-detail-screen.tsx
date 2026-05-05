@@ -78,7 +78,7 @@ export const InboxProjectDetailScreen = observer(() => {
               mr={2}
             />
             <Heading as="h1" fontWeight={700} fontSize="3xl" flex={1} noOfLines={1} mb={0}>
-              {currentPermitProject.title}
+              {currentPermitProject.number}
             </Heading>
             {/* todo: inbox specific rollup status box? */}
             {/* <RollupStatusBox project={currentPermitProject} w="240px" /> */}

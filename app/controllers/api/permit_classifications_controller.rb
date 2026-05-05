@@ -152,8 +152,7 @@ class Api::PermitClassificationsController < Api::ApplicationController
     rescue StandardError => e
       render_error(
         "permit_classification.destroy_error",
-        { message_opts: { error_message: e.message } },
-        e
+        { log_args: { errors: e.message } }
       )
     end
   end

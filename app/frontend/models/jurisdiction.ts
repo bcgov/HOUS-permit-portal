@@ -41,6 +41,7 @@ export const JurisdictionModel = types
     reviewersSize: types.maybeNull(types.number),
     permitApplicationsSize: types.maybeNull(types.number),
     unviewedSubmissionsCount: types.maybeNull(types.number),
+    unviewedProjectsCount: types.maybeNull(types.number),
     descriptionHtml: types.maybeNull(types.string),
     checklistHtml: types.maybeNull(types.string),
     lookOutHtml: types.maybeNull(types.string),
@@ -160,6 +161,9 @@ export const JurisdictionModel = types
     },
     setUnviewedSubmissionsCount: (count: number) => {
       self.unviewedSubmissionsCount = count
+    },
+    setUnviewedProjectsCount: (count: number) => {
+      self.unviewedProjectsCount = count
     },
     update: flow(function* (params) {
       const { ok, data: response } = yield* toGenerator(self.environment.api.updateJurisdiction(self.id, params))

@@ -5,26 +5,15 @@ import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
 import { EInboxDisplayMode, EPermitProjectRollupStatus, EProjectState } from "../types/enums"
 import { IParcelGeometry, IProjectAuditSummary, IProjectDocument } from "../types/types"
-import { ICollaborator } from "./collaborator"
+import { CollaboratorModel } from "./collaborator"
 import { JurisdictionModel } from "./jurisdiction"
 import { IPermitApplication, PermitApplicationModel } from "./permit-application"
+import { PermitProjectCollaborationModel } from "./permit-project-collaboration"
 import { PermitProjectInboxApplicationSearchSlice } from "./permit-project-inbox-application-search"
-
-export interface IAggregatedReviewCollaborator {
-  id: string
-  name: string
-  role: string
-  isProjectCollaborator: boolean
-}
-
-export interface IPermitProjectCollaboration {
-  id: string
-  collaborator: ICollaborator
-}
 
 const PermitProjectCoreModel = types.model("PermitProjectCore", {
   id: types.identifier,
-  title: types.string,
+  title: types.optional(types.string, "-"),
   fullAddress: types.maybeNull(types.string),
   pid: types.maybeNull(types.string),
   number: types.maybeNull(types.string),
@@ -71,9 +60,8 @@ const PermitProjectCoreModel = types.model("PermitProjectCore", {
   inboxSortOrder: types.maybeNull(types.number),
   daysInQueue: types.maybeNull(types.number),
   recentAudits: types.optional(types.array(types.frozen<IProjectAuditSummary>()), []),
-  reviewDelegatee: types.maybeNull(types.frozen<ICollaborator>()),
-  permitProjectCollaborations: types.optional(types.array(types.frozen<IPermitProjectCollaboration>()), []),
-  aggregatedReviewCollaborators: types.optional(types.array(types.frozen<IAggregatedReviewCollaborator>()), []),
+  reviewDelegatee: types.maybeNull(types.safeReference(CollaboratorModel)),
+  permitProjectCollaborations: types.optional(types.array(PermitProjectCollaborationModel), []),
   displayMode: types.optional(types.enumeration(Object.values(EInboxDisplayMode)), EInboxDisplayMode.list),
 })
 
@@ -197,25 +185,40 @@ export const PermitProjectModel = types
       return []
     }),
     markAsViewed: flow(function* () {
+      const wasUnread = !self.viewedAt
+      const state = self.state
       const response = yield* toGenerator(self.environment.api.viewPermitProject(self.id))
       if (response.ok) {
         self.rootStore.permitProjectStore.mergeUpdate(response.data.data, "permitProjectMap")
+        if (wasUnread) {
+          self.rootStore.submissionInboxStore?.permitProjectSearch?.adjustUnreadCountForColumn(state, -1)
+        }
       }
       return response.ok
     }),
     markAsUnviewed: flow(function* () {
+      const wasViewed = !!self.viewedAt
+      const state = self.state
       const response = yield* toGenerator(self.environment.api.unviewPermitProject(self.id))
       if (response.ok) {
         self.rootStore.permitProjectStore.mergeUpdate(response.data.data, "permitProjectMap")
+        if (wasViewed) {
+          self.rootStore.submissionInboxStore?.permitProjectSearch?.adjustUnreadCountForColumn(state, 1)
+        }
       }
       return response.ok
     }),
     transitionState: flow(function* (targetState: string) {
       const oldState = self.state
+      const isUnread = !self.viewedAt
       const response = yield* toGenerator(self.environment.api.transitionPermitProjectState(self.id, targetState))
       if (response.ok) {
         self.rootStore.permitProjectStore.mergeUpdate(response.data.data, "permitProjectMap")
-        self.rootStore.submissionInboxStore?.permitProjectSearch?.adjustCountsForTransition(oldState, targetState)
+        self.rootStore.submissionInboxStore?.permitProjectSearch?.adjustCountsForTransition(
+          oldState,
+          targetState,
+          isUnread
+        )
       }
       return response
     }),

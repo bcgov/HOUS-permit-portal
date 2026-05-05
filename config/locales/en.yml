@@ -87,6 +87,10 @@ en:
               review_staff_requires_sandbox: "review staff cannot own permit projects outside of a sandbox"
             sandbox:
               incorrect_jurisdiction: "must belong to the jurisdiction. Please apply to your own jurisdiction to use this sandbox."
+        permit_project_collaboration:
+          attributes:
+            permit_project:
+              only_one_review_collaborator_allowed: "can only have one review collaborator assigned at a time"
         requirement_template:
           step_code_package_required: '"Energy step code" is required to have the Design package energy step code file'
           duplicate_energy_step_code: 'Multiple "Energy step code" requirements found. Please ensure there is only one "Energy step code" requirement in the template'
@@ -259,7 +263,7 @@ en:
         message: "There was an error updating the permit classification"
       destroy_error:
         title: Error
-        message: "%{error_message}"
+        message: "There was an error deleting the permit classification"
       in_use_error:
         title: Error
         message: "This permit classification is in use and cannot be deleted"
@@ -534,10 +538,10 @@ en:
         message: "%{error_message}"
       schedule_error:
         title: Error
-        message: "%{error_message}"
+        message: "There was an error scheduling the template"
       template_unschedule_error:
         title: Error unscheduling template
-        message: "%{error_message}"
+        message: "There was an error unscheduling the template"
       template_unschedule_success:
         title: ""
         message: "Template unscheduled successfully"
@@ -690,13 +694,13 @@ en:
         message: "Project updated successfully"
       update_error:
         title: Error
-        message: "%{error_message}"
+        message: "Project could not be updated"
       create_success:
         title: ""
         message: "Permit project created successfully"
       create_error:
         title: Error
-        message: "%{error_message}"
+        message: "Permit project could not be created"
       pin_success:
         title: ""
         message: "Permit project pinned successfully"
@@ -720,7 +724,7 @@ en:
         message: "Project review collaborator assigned successfully"
       assign_project_review_collaborator_error:
         title: Error
-        message: "%{error_message}"
+        message: "Project review collaborator could not be assigned"
       unassign_project_review_collaborator_success:
         title: ""
         message: "Project review collaborator removed successfully"
@@ -837,7 +841,7 @@ en:
         message: "The external api key is not authorized to do this action"
       external_api_key_unauthorized_error:
         title: "Unauthorized"
-        message: "%{error_message}"
+        message: "The external api key is not authorized to do this action"
       not_found_error:
         title: "Error"
         message: 404 - The requested resource could not be found
@@ -1082,8 +1086,8 @@ en:
       review_delegatee_collaboration_unassignment_notification: "You have been removed as a designated reviewer for permit application %{number}."
       review_assignee_collaboration_unassignment_notification: "You have been removed as a review collaborator on requirement “%{requirement_block_name}” for permit application %{number}"
     permit_project_collaboration:
-      assignment_notification: "You have been assigned as a review collaborator on project %{project_number} (%{project_title})."
-      unassignment_notification: "You have been removed as a review collaborator on project %{project_number} (%{project_title})."
+      assignment_notification: "You have been assigned as a review collaborator on project %{project_number}."
+      unassignment_notification: "You have been removed as a review collaborator on project %{project_number}."
     step_code:
       report_generated: "Your step code report is ready to download"
     pre_check:

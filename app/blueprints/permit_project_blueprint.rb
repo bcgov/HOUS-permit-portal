@@ -2,8 +2,15 @@ class PermitProjectBlueprint < Blueprinter::Base
   identifier :id
 
   view :base do
-    fields :title,
-           :full_address,
+    field :title,
+          if: ->(_field_name, permit_project, options) do
+            PermitProjectBlueprint.show_private_title?(
+              permit_project,
+              options[:current_user]
+            )
+          end
+
+    fields :full_address,
            :pid,
            :number,
            :jurisdiction_disambiguated_name,
@@ -54,13 +61,14 @@ class PermitProjectBlueprint < Blueprinter::Base
   view :jurisdiction_review_inbox do
     include_view :base
 
-    field :aggregated_review_collaborators,
-          if: ->(_field_name, permit_project, options) do
-            options[:current_user]&.review_staff_of?(
-              permit_project.jurisdiction_id
-            )
-          end do |permit_project, _options|
-      permit_project.aggregated_review_collaborators
+    association :review_delegatee,
+                blueprint: CollaboratorBlueprint,
+                if: ->(_field_name, permit_project, options) do
+                  options[:current_user]&.review_staff_of?(
+                    permit_project.jurisdiction_id
+                  )
+                end do |permit_project, _options|
+      permit_project.review_delegatee
     end
 
     association :permit_project_collaborations,
@@ -121,5 +129,11 @@ class PermitProjectBlueprint < Blueprinter::Base
                 view: :base do |permit_project, options|
       permit_project.recent_audits(options[:current_user])
     end
+  end
+
+  def self.show_private_title?(permit_project, current_user)
+    return false unless current_user
+
+    return true if permit_project.owner_id == current_user.id
   end
 end

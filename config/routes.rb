@@ -232,6 +232,9 @@ Rails.application.routes.draw do
       get "download_application_metrics_csv",
           on: :collection,
           to: "permit_applications#download_application_metrics_csv"
+      get "download_application_json",
+          on: :member,
+          to: "permit_applications#download_application_json"
 
       # New route for Part 3 Step Code
       post "part_3_building/step_code",

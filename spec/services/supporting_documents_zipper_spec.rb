@@ -11,6 +11,7 @@ RSpec.describe SupportingDocumentsZipper do
         "SupportingDocument",
         id: "doc-1",
         file_url: "https://example.com/file1.pdf",
+        download_filename: "Original File.pdf",
         standardized_filename: "file1.pdf",
         save: true
       )
@@ -21,6 +22,7 @@ RSpec.describe SupportingDocumentsZipper do
         "SupportingDocument",
         id: "doc-2",
         file_url: "https://example.com/file2.pdf",
+        download_filename: "Other Original.pdf",
         standardized_filename: "file2.pdf",
         save: true
       )
@@ -45,6 +47,7 @@ RSpec.describe SupportingDocumentsZipper do
     let(:zip_entry_zipfile) { instance_double("Zip::File") }
 
     before do
+      allow(Time.zone).to receive(:today).and_return(Date.new(2026, 4, 29))
       allow(PermitApplication).to receive(:find).and_return(permit_application)
       allow(FileUtils).to receive(:mkdir_p)
       allow(File).to receive(:directory?).and_return(true)
@@ -80,14 +83,18 @@ RSpec.describe SupportingDocumentsZipper do
       zipper.perform
 
       expect(zip_entry_zipfile).to have_received(:add).with(
-        "file1.pdf",
+        "Original File.pdf",
         "/tmp/f1.pdf"
       )
       expect(zip_entry_zipfile).to have_received(:add).with(
-        "file2.pdf",
+        "Other Original.pdf",
         "/tmp/f2.pdf"
       )
       expect(zipfile_uploader).to have_received(:upload)
+      expect(File).to have_received(:open).with(
+        end_with("PA-0001_2026-04-29_supporting-documents.zip"),
+        "rb"
+      )
       expect(permit_application).to have_received(:zipfile_data=).with(
         { "id" => "zip-1" }
       )
@@ -106,11 +113,35 @@ RSpec.describe SupportingDocumentsZipper do
       zipper.perform
 
       expect(zip_entry_zipfile).not_to have_received(:add).with(
-        "file1.pdf",
+        "Original File.pdf",
         anything
       )
       expect(zip_entry_zipfile).to have_received(:add).with(
-        "file2.pdf",
+        "Other Original.pdf",
+        "/tmp/f2.pdf"
+      )
+    end
+
+    it "deduplicates original filenames inside the zip" do
+      allow(document1).to receive(:download_filename).and_return("drawing.pdf")
+      allow(document2).to receive(:download_filename).and_return("drawing.pdf")
+      zipper = described_class.new(permit_application.id)
+
+      allow(zipper).to receive(:download_file).with(document1).and_return(
+        "/tmp/f1.pdf"
+      )
+      allow(zipper).to receive(:download_file).with(document2).and_return(
+        "/tmp/f2.pdf"
+      )
+
+      zipper.perform
+
+      expect(zip_entry_zipfile).to have_received(:add).with(
+        "drawing.pdf",
+        "/tmp/f1.pdf"
+      )
+      expect(zip_entry_zipfile).to have_received(:add).with(
+        "drawing (2).pdf",
         "/tmp/f2.pdf"
       )
     end
@@ -155,6 +186,7 @@ RSpec.describe SupportingDocumentsZipper do
         "SupportingDocument",
         id: "doc-1",
         file_url: "https://example.com/file.pdf",
+        download_filename: "file.pdf",
         standardized_filename: "file.pdf",
         save: true
       )

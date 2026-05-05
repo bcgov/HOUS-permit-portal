@@ -59,6 +59,8 @@ RSpec.describe StepCode::Compliance::CheckRequirements::Energy::MEUI do
   end
 
   context "when neither meui nor percent improvement meets energy step requirement" do
+    let(:ref_aec) { 72.92 }
+
     let(:data_entries_attributes) do
       [
         {
@@ -70,11 +72,37 @@ RSpec.describe StepCode::Compliance::CheckRequirements::Energy::MEUI do
           design_cooling_load: 2189.98,
           air_heat_pump_cooling_capacity: 9,
           building_volume: 624.9,
-          ref_aec: 72.92
+          ref_aec:
         }
       ]
     end
 
-    it_behaves_like FAILED_STEP_CODE
+    context "where the reference energy target is specified and compliance path is not 9.36.5" do
+      it_behaves_like FAILED_STEP_CODE
+    end
+
+    context "where the reference energy target is not specified" do
+      let(:ref_aec) { 25.62 }
+
+      it "sets meui_percent_improvement to zero" do
+        expect(subject.meui_percent_improvement).to eq 0
+      end
+
+      it_behaves_like FAILED_STEP_CODE
+    end
+
+    context "where the compliance path is 9.36.5" do
+      before :each do
+        allow(step_code.pre_construction_checklist).to receive(
+          :step_code?
+        ).and_return(true)
+      end
+
+      it "sets meui_percent_improvement to zero" do
+        expect(subject.meui_percent_improvement).to eq 0
+      end
+
+      it_behaves_like FAILED_STEP_CODE
+    end
   end
 end

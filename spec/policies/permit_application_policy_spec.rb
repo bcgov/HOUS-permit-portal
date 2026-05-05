@@ -165,6 +165,24 @@ RSpec.describe PermitApplicationPolicy do
       expect(policy.retrigger_submission_webhook?).to be false
     end
 
+    it "download_application_json? permits review staff for non-draft records in the same sandbox" do
+      reviewer = create(:user, :review_manager, jurisdiction:)
+      record =
+        double(
+          "PermitApplication",
+          jurisdiction_id: jurisdiction.id,
+          new_draft?: false,
+          sandbox: sandbox
+        )
+
+      policy = described_class.new(UserContext.new(reviewer, sandbox), record)
+      expect(policy.download_application_json?).to be true
+
+      submitter_policy =
+        described_class.new(UserContext.new(submitter, sandbox), record)
+      expect(submitter_policy.download_application_json?).to be false
+    end
+
     it "update_version? permits draft submitter or designated submitter" do
       designated = create(:user, :submitter)
       record = double("PermitApplication", draft?: true, submitter: submitter)
@@ -281,7 +299,8 @@ RSpec.describe PermitApplicationPolicy do
 
     it "finalize_revision_requests? respects designated reviewer feature" do
       reviewer = create(:user, :review_manager, jurisdiction:)
-      review_rel = double("ReviewRel", exists?: true)
+      review_rel =
+        double("ReviewRel", delegatee: double("DelegateeRel", first: nil))
       record =
         double(
           "PermitApplication",
