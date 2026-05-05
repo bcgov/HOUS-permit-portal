@@ -48,11 +48,6 @@ class MoveSandboxIdToProjects < ActiveRecord::Migration[7.2]
       remove_foreign_key :permit_applications, :sandboxes
       remove_reference :permit_applications, :sandbox, type: :uuid, index: true
     end
-
-    # Both indexes embed sandbox_id (PermitApplication sources it from the
-    # parent project post-migration), so both need a full reindex.
-    PermitProject.reindex
-    PermitApplication.reindex
   end
 
   def down
