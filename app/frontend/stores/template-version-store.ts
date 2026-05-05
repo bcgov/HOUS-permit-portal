@@ -11,7 +11,6 @@ export const TemplateVersionStoreModel = types
   .model("TemplateVersionStoreModel")
   .props({
     templateVersionMap: types.map(TemplateVersionModel),
-    templateVersionsByActivityId: types.map(types.array(types.safeReference(TemplateVersionModel))),
     publiclyPreviewableTemplateVersions: types.array(types.safeReference(TemplateVersionModel)),
     isLoading: types.optional(types.boolean, false),
   })
@@ -20,11 +19,10 @@ export const TemplateVersionStoreModel = types
   .extend(withMerge())
   .actions((self) => ({
     __beforeMergeUpdate(templateVersion) {
-      // Merge template version previews into the earlyAccessPreviewStore (same table/shape)
       if (templateVersion.templateVersionPreviews?.length > 0) {
-        self.rootStore.earlyAccessPreviewStore.mergeUpdateAll(
+        self.rootStore.templateVersionPreviewStore.mergeUpdateAll(
           templateVersion.templateVersionPreviews,
-          "earlyAccessPreviewsMap"
+          "templateVersionPreviewsMap"
         )
       }
 
@@ -52,36 +50,15 @@ export const TemplateVersionStoreModel = types
     },
     getTemplateVersionsByStatus(
       status: ETemplateVersionStatus = ETemplateVersionStatus.published,
-      earlyAccess: boolean = false,
       isPubliclyPreviewable: boolean = false
     ) {
-      return self.templateVersions.filter(
-        (t) => t.status === status && t.publiclyPreviewable === isPubliclyPreviewable && t.earlyAccess === earlyAccess
-      )
-    },
-    getTemplateVersionsByActivityId: (
-      permitTypeId: string,
-      status: ETemplateVersionStatus = ETemplateVersionStatus.published,
-      earlyAccess: boolean = false,
-      isPubliclyPreviewable: boolean = false
-    ) => {
-      return (self.templateVersionsByActivityId.get(permitTypeId) ?? []).filter(
-        (t) => t.status === status && t.publiclyPreviewable === isPubliclyPreviewable && t.earlyAccess === earlyAccess
-      )
+      return self.templateVersions.filter((t) => t.status === status && t.publiclyPreviewable === isPubliclyPreviewable)
     },
   }))
   .actions((self) => ({
-    fetchTemplateVersions: flow(function* (
-      activityId?: string,
-      status?: ETemplateVersionStatus,
-      earlyAccess?: boolean,
-      isPubliclyPreviewable?: boolean,
-      permitTypeId?: string
-    ) {
+    fetchTemplateVersions: flow(function* (status?: ETemplateVersionStatus, isPubliclyPreviewable?: boolean) {
       self.isLoading = true
-      const response = yield* toGenerator(
-        self.environment.api.fetchTemplateVersions(activityId, status, earlyAccess, isPubliclyPreviewable, permitTypeId)
-      )
+      const response = yield* toGenerator(self.environment.api.fetchTemplateVersions(status, isPubliclyPreviewable))
 
       if (response.ok) {
         const templateVersions = response.data.data
@@ -90,12 +67,6 @@ export const TemplateVersionStoreModel = types
           version.isFullyLoaded = true
         })
         self.mergeUpdateAll(templateVersions, "templateVersionMap")
-
-        !!activityId &&
-          self.templateVersionsByActivityId.set(
-            activityId,
-            templateVersions.map((templateVersion) => templateVersion.id)
-          )
       }
       self.isLoading = false
       return response.ok

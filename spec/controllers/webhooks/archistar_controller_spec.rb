@@ -4,15 +4,13 @@ RSpec.describe Webhooks::ArchistarController, type: :controller do
   describe "POST #receive" do
     let(:creator) { create(:user) }
     let(:jurisdiction) { create(:sub_district) }
-    let(:permit_type) { create(:permit_type) }
     let(:pre_check) do
       create(
         :pre_check,
         :processing,
         external_id: "BCBC_2024_ESS_uat-TEST123",
         creator: creator,
-        jurisdiction: jurisdiction,
-        permit_type: permit_type
+        jurisdiction: jurisdiction
       )
     end
 

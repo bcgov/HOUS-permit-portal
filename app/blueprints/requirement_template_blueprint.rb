@@ -1,19 +1,19 @@
 class RequirementTemplateBlueprint < Blueprinter::Base
   identifier :id
   fields :nickname,
-         :type,
          :description,
-         :first_nations,
-         :label,
          :discarded_at,
          :fetched_at,
          :created_at,
          :updated_at,
-         :visibility,
          :available_globally
 
   field :used_by do |rt|
     rt.published_customizations_count
+  end
+
+  field :tags do |rt, _options|
+    rt.tag_list
   end
 
   field :available_in do |rt|
@@ -29,9 +29,6 @@ class RequirementTemplateBlueprint < Blueprinter::Base
       { id: j.id, qualified_name: j.qualified_name }
     end
   end
-
-  association :permit_type, blueprint: PermitClassificationBlueprint
-  association :activity, blueprint: PermitClassificationBlueprint
   association :last_three_deprecated_template_versions,
               blueprint: TemplateVersionBlueprint,
               name: :deprecated_template_versions
@@ -46,12 +43,6 @@ class RequirementTemplateBlueprint < Blueprinter::Base
               view: :minimal,
               if: ->(_field_name, _rt, options) do
                 options[:current_user]&.super_admin?
-              end
-
-  association :template_version_previews,
-              blueprint: TemplateVersionPreviewBlueprint,
-              if: ->(_field_name, rt, options) do
-                rt.early_access? && options[:current_user]&.super_admin?
               end
 
   association :draft_template_version,

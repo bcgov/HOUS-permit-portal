@@ -29,7 +29,7 @@ const calloutBannerTextProps = {
 }
 
 export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationCardProps) => {
-  const { id, nickname, permitTypeAndActivity, number, createdAt, updatedAt, viewedAt } = permitApplication
+  const { id, nickname, tagsOrNickname, number, createdAt, updatedAt, viewedAt } = permitApplication
   const { userStore } = useMst()
   const currentUser = userStore.currentUser
   const { t } = useTranslation()
@@ -64,7 +64,7 @@ export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationC
           <Flex direction="column" flex={{ base: 0, md: 1 }} maxW={{ base: "100%", md: "20%" }}>
             <Box p={2}>
               <Image
-                src="/images/permit_classifications/low_residential.png"
+                src="/images/permit-thumbnail.png"
                 alt={`thumbnail for ${nickname}`}
                 w="200px"
                 h="110px"
@@ -72,7 +72,7 @@ export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationC
                 objectFit="contain"
               />
               <Text align="center" mt="1" color="text.secondary" fontSize="sm" fontWeight="bold" lineHeight="1.2">
-                {permitTypeAndActivity}
+                {tagsOrNickname}
               </Text>
             </Box>
           </Flex>
@@ -80,7 +80,7 @@ export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationC
         <Show below="md">
           <Flex justify="space-between" alignItems="center">
             <Image
-              src="/images/permit_classifications/low_residential.png"
+              src="/images/permit-thumbnail.png"
               alt={`thumbnail for ${nickname}`}
               w="150px"
               h="80px"

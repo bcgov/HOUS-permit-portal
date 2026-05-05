@@ -20,19 +20,18 @@ export const Part3StepCodeForm = observer(function Part3StepCodeForm() {
   } = useMst()
   const { currentStepCode } = usePart3StepCode()
   const navigate = useNavigate()
-  const isEarlyAccess = !permitApplicationId
+  const isStandaloneStepCode = !permitApplicationId
 
   const { currentPermitApplication } = usePermitApplication()
 
-  // create the step code if needed
   useEffect(() => {
     if (stepCodeId) return // step code was already created in the previous screen
     if (!!currentStepCode) return // step code already exists
-    if (!isEarlyAccess && !currentPermitApplication?.isFullyLoaded) return // wait for permit application to load
+    if (!isStandaloneStepCode && !currentPermitApplication?.isFullyLoaded) return // wait for permit application to load
 
     if (!currentStepCode) {
       createPart3StepCode({
-        permitApplicationId, // nil for early access
+        permitApplicationId, // nil when the step code is not attached to a permit application
         checklistAttributes: { sectionCompletionStatus: defaultSectionCompletionStatus },
       })
     }

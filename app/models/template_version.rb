@@ -14,13 +14,8 @@ class TemplateVersion < ApplicationRecord
   has_many :template_version_feedbacks, dependent: :destroy
   has_many :template_version_previews, dependent: :destroy
 
-  delegate :permit_type, to: :requirement_template
-  delegate :activity, to: :requirement_template
-  delegate :label, to: :requirement_template
   delegate :published_template_version, to: :requirement_template
-  delegate :first_nations, to: :requirement_template
-  delegate :early_access?, to: :requirement_template
-  delegate :live?, to: :requirement_template
+  delegate :tag_list, to: :requirement_template
 
   enum :status,
        { scheduled: 0, published: 1, deprecated: 2, draft: 3 },
@@ -59,13 +54,10 @@ class TemplateVersion < ApplicationRecord
           end
         end
 
-  # Published versions on kept LiveRequirementTemplate records (excludes early-access copies, etc.).
-  # Matches PermitApplication validation: template_version must be "live".
-  scope :published_for_live_requirement_templates,
+  # Published versions whose owning RequirementTemplate has not been discarded.
+  scope :published_on_kept_templates,
         -> do
-          published.joins(:requirement_template).merge(
-            LiveRequirementTemplate.kept
-          )
+          published.joins(:requirement_template).merge(RequirementTemplate.kept)
         end
 
   def self.cached_published_ids
@@ -103,7 +95,7 @@ class TemplateVersion < ApplicationRecord
 
   def label
     prefix = draft? ? "[Draft] " : ""
-    "#{prefix}#{requirement_template.label} (#{version_date.to_s})"
+    "#{prefix}#{requirement_template.nickname} (#{version_date})"
   end
 
   def lookup_props

@@ -5,7 +5,6 @@ import React, { useEffect } from "react"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { useJurisdiction } from "../../../../../../hooks/resources/use-jurisdiction"
-import { usePermitClassificationsLoad } from "../../../../../../hooks/resources/use-permit-classifications-load"
 import { useMst } from "../../../../../../setup/root"
 import { ErrorScreen } from "../../../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../../../shared/base/loading-screen"
@@ -17,10 +16,7 @@ export const Part9StepCodeConfigScreen = observer(function Part9StepCodeConfigSc
   const navigate = useNavigate()
   const {
     stepCodeStore: { isOptionsLoaded, fetchPart9SelectOptions },
-    permitClassificationStore: { part9BuildingPermitType },
   } = useMst()
-
-  const { isLoaded: isClassificationsLoaded } = usePermitClassificationsLoad()
 
   useEffect(() => {
     const fetch = async () => await fetchPart9SelectOptions()
@@ -29,9 +25,9 @@ export const Part9StepCodeConfigScreen = observer(function Part9StepCodeConfigSc
 
   const { currentJurisdiction, error } = useJurisdiction()
 
-  if (!isOptionsLoaded || !part9BuildingPermitType) return <LoadingScreen />
+  if (!isOptionsLoaded) return <LoadingScreen />
   if (error) return <ErrorScreen error={error} />
-  if (!currentJurisdiction || !isClassificationsLoaded) return <LoadingScreen />
+  if (!currentJurisdiction) return <LoadingScreen />
 
   return (
     <Container maxW="container.lg" py={8} px={{ base: 8, xl: 0 }} flexGrow={1}>
@@ -52,12 +48,7 @@ export const Part9StepCodeConfigScreen = observer(function Part9StepCodeConfigSc
           </Link>
         </Text>
 
-        <Part9EnergyStepEditableBlock
-          key={part9BuildingPermitType.id}
-          heading={part9BuildingPermitType.name}
-          permitTypeId={part9BuildingPermitType.id}
-          jurisdiction={currentJurisdiction}
-        />
+        <Part9EnergyStepEditableBlock heading={t(`${i18nPrefix}.part9Title`)} jurisdiction={currentJurisdiction} />
       </VStack>
     </Container>
   )

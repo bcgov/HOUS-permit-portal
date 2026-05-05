@@ -47,9 +47,9 @@ Rails.application.routes.draw do
       get "/logout" => "sessions#destroy"
     end
 
-    get "/permit_type_submission_contacts/confirm",
-        to: "permit_type_submission_contacts#confirm",
-        as: :permit_type_submission_contact_confirmation
+    get "/submission_contacts/confirm",
+        to: "submission_contacts#confirm",
+        as: :submission_contact_confirmation
 
     resources :requirement_blocks, only: %i[create show update destroy] do
       post "restore", on: :member, to: "requirement_blocks#restore"
@@ -78,9 +78,6 @@ Rails.application.routes.draw do
       post "force_publish_now",
            to: "requirement_templates#force_publish_now",
            on: :member
-      post "invite_previewers",
-           to: "requirement_templates#invite_previewers",
-           on: :member
       patch "restore", on: :member
       post "template_versions/:id/unschedule",
            on: :collection,
@@ -96,14 +93,6 @@ Rails.application.routes.draw do
       post "jurisdiction_availabilities",
            on: :member,
            to: "requirement_templates#update_jurisdiction_availabilities"
-    end
-
-    resources :early_access_previews do
-      member do
-        post :revoke_access
-        post :unrevoke_access
-        post :extend_access
-      end
     end
 
     # Draft version-specific endpoints (feedback, previews, block editing)
@@ -125,6 +114,14 @@ Rails.application.routes.draw do
           post "resolve"
           post "unresolve"
         end
+      end
+    end
+
+    resources :template_version_previews, only: [] do
+      member do
+        post :revoke_access
+        post :unrevoke_access
+        post :extend_access
       end
     end
 
@@ -185,9 +182,7 @@ Rails.application.routes.draw do
       get "contact_options", on: :collection
     end
 
-    resources :permit_classifications, only: %i[index create update destroy] do
-      post "permit_classification_options", on: :collection
-    end
+    resources :submission_contacts, only: %i[index create update destroy]
 
     resources :geocoder, only: %i[] do
       get "site_options", on: :collection

@@ -16,9 +16,8 @@ interface IBlockSetupOptionsMenuProps {
 export const BlockSetupOptionsMenu = observer(function BlockSetupOptionsMenu({
   requirementBlock,
 }: IBlockSetupOptionsMenuProps) {
-  const forEarlyAccess = requirementBlock.isEarlyAccess
-  const { requirementBlockStore, earlyAccessRequirementBlockStore } = useMst()
-  const searchModel = forEarlyAccess ? earlyAccessRequirementBlockStore : requirementBlockStore
+  const { requirementBlockStore } = useMst()
+  const searchModel = requirementBlockStore
   const [isLoading, setIsLoading] = useState(false)
 
   const handleRemove = async () => {

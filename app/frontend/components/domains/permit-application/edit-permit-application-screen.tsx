@@ -264,7 +264,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   // @ts-ignore
   const permitHeaderHeight = permitHeaderRef?.current?.offsetHeight ?? 0
 
-  const { permitTypeAndActivity, formJson, number, isSubmitted, isDirty, setIsDirty, isRevisionsRequested } =
+  const { tagsOrNickname, formJson, number, isSubmitted, isDirty, setIsDirty, isRevisionsRequested } =
     currentPermitApplication
 
   const doesUserHaveSubmissionPermission =
@@ -338,7 +338,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
                   </Tooltip>
                 </form>
 
-                <Text noOfLines={1}>{permitTypeAndActivity}</Text>
+                <Text noOfLines={1}>{tagsOrNickname}</Text>
                 <HStack>
                   <CopyableValue value={number} label={t("permitApplication.fields.number")} />
                   {currentPermitApplication.referenceNumber && (

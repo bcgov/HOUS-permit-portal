@@ -2,6 +2,11 @@
 
 class UpdateTemplateVersionPermitTypes < ActiveRecord::Migration[7.1]
   def up
+    unless defined?(PermitType)
+      say "PermitType class removed; skipping update_template_version_permit_types"
+      return
+    end
+
     description_field = description_field_name
 
     PermitType.find_by_code("low_residential")&.update(
@@ -21,6 +26,11 @@ class UpdateTemplateVersionPermitTypes < ActiveRecord::Migration[7.1]
   end
 
   def down
+    unless defined?(PermitType)
+      say "PermitType class removed; skipping update_template_version_permit_types"
+      return
+    end
+
     description_field = description_field_name
 
     PermitType.find_by_code("low_residential")&.update(

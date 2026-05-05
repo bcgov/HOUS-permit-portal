@@ -248,7 +248,7 @@ class NotificationService
       "id" => SecureRandom.uuid,
       "action_type" => "template_version_scheduled",
       "action_text" =>
-        "A new version of #{template_version.requirement_template.label} is scheduled for #{template_version.version_date}.",
+        "A new version of #{template_version.requirement_template.nickname} is scheduled for #{template_version.version_date}.",
       "object_data" => {
         "template_version_id" => template_version.id,
         "requirement_template_id" => template_version.requirement_template_id,
@@ -503,10 +503,10 @@ class NotificationService
       end
 
       permit_application
-        .confirmed_permit_type_submission_contacts
-        .each do |permit_type_submission_contact|
+        .confirmed_submission_contacts
+        .each do |submission_contact|
         PermitHubMailer.notify_reviewer_application_received(
-          permit_type_submission_contact,
+          submission_contact,
           permit_application
         ).deliver_later
       end

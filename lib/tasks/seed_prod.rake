@@ -11,9 +11,6 @@ namespace :db do
     # Rake::Task["db:sensitive_seeder"].invoke
     User.reindex
 
-    puts "Seeding permit classifications..."
-    PermitClassificationSeeder.seed
-
     puts "Seeding EULA..."
     EulaUpdater.run
 

@@ -197,15 +197,7 @@ RSpec.describe IntegrationMapping, type: :model do
         )
       end
 
-      # in test there is only one requirement template created, because of unique permit classification
-      # so we manually create a new one for this tests purposes
-      let!(:different_req_template) do
-        create(
-          :live_requirement_template,
-          activity: create(:activity, code: :addition_alteration_renovation),
-          permit_type: create(:permit_type, code: :demolition)
-        )
-      end
+      let!(:different_req_template) { create(:live_requirement_template) }
 
       # mapping of a deprecated template version
       let!(:existing_mapping_deprecated_ver) do

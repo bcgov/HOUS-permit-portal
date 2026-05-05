@@ -4,7 +4,6 @@ import React from "react"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { IRequirementTemplate } from "../../../models/requirement-template"
-import { ERequirementTemplateType } from "../../../types/enums"
 import { RequirementTemplateForm } from "../../shared/requirement-template/requirement-template-form"
 
 export const NewRequirementTemplateScreen = observer(() => {
@@ -20,7 +19,7 @@ export const NewRequirementTemplateScreen = observer(() => {
       <Heading as="h1" alignSelf="center">
         {t("requirementTemplate.new.title")}
       </Heading>
-      <RequirementTemplateForm type={ERequirementTemplateType.LiveRequirementTemplate} onSuccess={handleSuccess} />
+      <RequirementTemplateForm onSuccess={handleSuccess} />
     </Container>
   )
 })

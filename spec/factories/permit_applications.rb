@@ -16,7 +16,6 @@ FactoryBot.define do
 
     permit_project do
       attrs = {}
-      # Ensure policy "create?" passes by default: make the submitter the owner of the project
       attrs[:owner] = submitter
       attrs[:jurisdiction] = jurisdiction if jurisdiction.present?
       attrs[:pid] = pid if pid.present?
@@ -26,20 +25,6 @@ FactoryBot.define do
       association(:permit_project, **attrs)
     end
 
-    permit_type do
-      PermitType.first ||
-        association(
-          :permit_type,
-          code: "low_residential_#{SecureRandom.alphanumeric(8)}".to_sym
-        )
-    end
-    activity do
-      Activity.first ||
-        association(
-          :activity,
-          code: "new_construction_#{SecureRandom.alphanumeric(8)}".to_sym
-        )
-    end
     status { :new_draft }
     sequence(:nickname) { |n| "Permit Application Nickname #{n}" }
     association :template_version

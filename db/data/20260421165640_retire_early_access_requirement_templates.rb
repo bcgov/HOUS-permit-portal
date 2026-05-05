@@ -12,6 +12,11 @@
 #   RequirementTemplate.reindex
 class RetireEarlyAccessRequirementTemplates < ActiveRecord::Migration[7.2]
   def up
+    unless column_exists?(:requirement_templates, :type)
+      say "Skipping RetireEarlyAccessRequirementTemplates: type column already removed."
+      return
+    end
+
     result = ActiveRecord::Base.connection.execute(<<~SQL)
       UPDATE requirement_templates
       SET discarded_at = NOW(), updated_at = NOW()

@@ -43,21 +43,15 @@ class JurisdictionBlueprint < Blueprinter::Base
       jurisdiction.submission_inbox_set_up?
     end
     association :contacts, blueprint: ContactBlueprint
-    association :permit_type_submission_contacts,
-                blueprint: PermitTypeSubmissionContactBlueprint,
+    association :submission_contacts,
+                blueprint: SubmissionContactBlueprint,
                 if: ->(_field_name, jurisdiction, options) do
                   options[:current_user]&.jurisdictions&.include?(jurisdiction)
                 end
     association :sandboxes, blueprint: SandboxBlueprint
     association :resources, blueprint: ResourceBlueprint
-    association :permit_type_required_steps,
-                blueprint: PermitTypeRequiredStepBlueprint
-
-    association :permit_type_required_steps,
-                blueprint:
-                  PermitTypeRequiredStepBlueprint do |jurisdiction, _options|
-      jurisdiction.enabled_permit_type_required_steps
-    end
+    association :jurisdiction_step_requirements,
+                blueprint: JurisdictionStepRequirementBlueprint
     association :part3_occupancy_required_steps,
                 blueprint: Part3OccupancyRequiredStepBlueprint
     association :jurisdiction_climate_zones,
