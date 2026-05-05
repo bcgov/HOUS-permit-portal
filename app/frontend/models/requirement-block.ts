@@ -8,7 +8,6 @@ import {
   EConditionalThen,
   EEnergyStepCodeDependencyRequirementCode,
   ERequirementType,
-  EVisibility,
 } from "../types/enums"
 import { IRequirementDocument } from "../types/types"
 import { RequirementModel } from "./requirement"
@@ -17,12 +16,10 @@ export const RequirementBlockModel = types
   .model("RequirementBlockModel", {
     id: types.identifier,
     name: types.string,
-    firstNations: types.boolean,
     displayName: types.string,
     requirements: types.array(RequirementModel),
     associations: types.array(types.string),
     description: types.maybeNull(types.string),
-    visibility: types.enumeration(Object.values(EVisibility)),
     displayDescription: types.maybeNull(types.string),
     sku: types.string,
     createdAt: types.Date,
@@ -114,9 +111,6 @@ export const RequirementBlockModel = types
     },
     get isDiscarded() {
       return self.discardedAt !== null
-    },
-    get isEarlyAccess() {
-      return self.visibility === EVisibility.earlyAccess
     },
   }))
   .actions((self) => ({

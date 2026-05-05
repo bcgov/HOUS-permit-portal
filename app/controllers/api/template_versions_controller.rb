@@ -1,5 +1,14 @@
 class Api::TemplateVersionsController < Api::ApplicationController
-  before_action :set_template_version, except: :index
+  # Anonymous access is permitted for the public preview endpoints; the
+  # TemplateVersionPolicy#show? check still enforces that only publicly
+  # previewable drafts are actually visible without a signed-in user.
+  skip_before_action :authenticate_user!, only: %i[publicly_previewable show]
+  # `publicly_previewable` is a collection action that intentionally returns a
+  # hard-coded, non-sensitive filter (draft TVs flagged publicly previewable),
+  # so we bypass Pundit's verify_authorized / verify_policy_scoped hooks.
+  skip_after_action :verify_authorized, only: :publicly_previewable
+  skip_after_action :verify_policy_scoped, only: :publicly_previewable
+  before_action :set_template_version, except: %i[index publicly_previewable]
 
   before_action :set_jurisdiction_template_version_customization,
                 only: %i[
@@ -13,39 +22,11 @@ class Api::TemplateVersionsController < Api::ApplicationController
 
   def index
     status = template_version_params[:status] || "published"
-    early_access = template_version_params[:early_access] || false
-    type =
-      (
-        if early_access == "true"
-          "EarlyAccessRequirementTemplate"
-        else
-          "LiveRequirementTemplate"
-        end
-      )
-    public = template_version_params[:public] == "true" || false
     @template_versions =
-      if params[:activity_id].present?
-        policy_scope(TemplateVersion)
-          .joins(:requirement_template)
-          .includes(requirement_template: %i[permit_type activity])
-          .where(
-            activity: {
-              id: params[:activity_id]
-            },
-            requirement_templates: {
-              public: public,
-              type: type
-            }
-          )
-          .order(updated_at: :desc)
-          .where(status:)
-      else
-        policy_scope(TemplateVersion)
-          .order(updated_at: :desc)
-          .joins(:requirement_template)
-          .includes(requirement_template: %i[permit_type activity])
-          .where(status:, requirement_templates: { public: public, type: type })
-      end
+      policy_scope(TemplateVersion)
+        .order(updated_at: :desc)
+        .joins(:requirement_template)
+        .where(status:)
 
     render_success @template_versions,
                    nil,
@@ -53,6 +34,27 @@ class Api::TemplateVersionsController < Api::ApplicationController
                      blueprint: TemplateVersionBlueprint,
                      blueprint_opts: {
                        view: :extended
+                     }
+                   }
+  end
+
+  # Public landing-page endpoint: returns the set of draft TemplateVersions
+  # marked as publicly previewable, for the /standardization-preview page.
+  def publicly_previewable
+    @template_versions =
+      TemplateVersion
+        .where(publicly_previewable: true, status: :draft)
+        .joins(:requirement_template)
+        .includes(:requirement_template)
+        .where(requirement_templates: { discarded_at: nil })
+        .order(updated_at: :desc)
+
+    render_success @template_versions,
+                   nil,
+                   {
+                     blueprint: TemplateVersionBlueprint,
+                     blueprint_opts: {
+                       view: :standardization_preview
                      }
                    }
   end
@@ -148,18 +150,9 @@ class Api::TemplateVersionsController < Api::ApplicationController
         TemplateVersion.find(
           copy_customization_params[:from_template_version_id]
         )
-    elsif copy_customization_params[:from_non_first_nations] &&
-          @template_version.first_nations
-      requirement_template =
-        RequirementTemplate.find_by(
-          activity: @template_version.activity,
-          permit_type: @template_version.permit_type,
-          first_nations: false
-        )
-      from_template_version = requirement_template&.published_template_version
     end
 
-    if requirement_template.nil? || from_template_version.nil?
+    if from_template_version.nil?
       render_error(
         "jurisdiction_template_version_customization.no_copy_target_error",
         status: :not_found
@@ -264,10 +257,139 @@ class Api::TemplateVersionsController < Api::ApplicationController
     send_data json_data, type: "text/plain"
   end
 
+  # ── Draft-specific actions ────────────────────────────────────────────
+
+  def update_draft_block
+    authorize @template_version, :update?
+
+    begin
+      TemplateVersioningService.update_draft_block!(
+        @template_version,
+        draft_block_params[:block_id],
+        draft_block_params[:block_data].to_unsafe_h
+      )
+
+      render_success @template_version,
+                     "template_version.update_draft_block_success",
+                     {
+                       blueprint: TemplateVersionBlueprint,
+                       blueprint_opts: {
+                         view: :extended
+                       }
+                     }
+    rescue TemplateVersionDraftError => e
+      render_error "template_version.update_draft_block_error",
+                   message_opts: {
+                     error_message: e.message
+                   }
+    end
+  end
+
+  def refresh_draft
+    authorize @template_version, :update?
+
+    begin
+      TemplateVersioningService.refresh_draft_snapshot!(@template_version)
+
+      render_success @template_version,
+                     "template_version.refresh_draft_success",
+                     {
+                       blueprint: TemplateVersionBlueprint,
+                       blueprint_opts: {
+                         view: :extended
+                       }
+                     }
+    rescue TemplateVersionDraftError => e
+      render_error "template_version.refresh_draft_error",
+                   message_opts: {
+                     error_message: e.message
+                   }
+    end
+  end
+
+  def share_draft
+    authorize @template_version, :update?
+
+    unless @template_version.draft?
+      render_error "template_version.not_draft_error" and return
+    end
+
+    previewer_count = @template_version.template_version_previews.kept.count
+    if previewer_count.zero?
+      render_error "template_version.no_previewers_error" and return
+    end
+
+    NotificationService.publish_draft_shared_event(@template_version)
+
+    render_success @template_version,
+                   "template_version.share_draft_success",
+                   {
+                     message_opts: {
+                       count: previewer_count
+                     },
+                     blueprint: TemplateVersionBlueprint,
+                     blueprint_opts: {
+                       view: :extended
+                     }
+                   }
+  end
+
+  def invite_draft_previewers
+    authorize @template_version, :update?
+
+    unless @template_version.draft?
+      render_error "template_version.not_draft_error" and return
+    end
+
+    if draft_previewer_params[:emails].blank?
+      render_error "template_version.invite_previewers_error" and return
+    end
+
+    service = TemplateVersionPreview::ManagementService.new(@template_version)
+    result = service.invite_previewers!(draft_previewer_params[:emails])
+
+    render_success @template_version,
+                   "template_version.invite_previewers_success",
+                   {
+                     blueprint: TemplateVersionBlueprint,
+                     blueprint_opts: {
+                       view: :extended
+                     },
+                     meta: result
+                   }
+  end
+
+  def toggle_publicly_previewable
+    authorize @template_version, :update?
+
+    unless @template_version.draft?
+      render_error "template_version.not_draft_error" and return
+    end
+
+    if @template_version.update(
+         publicly_previewable: toggle_publicly_previewable_params
+       )
+      render_success @template_version,
+                     "template_version.toggle_publicly_previewable_success",
+                     {
+                       blueprint: TemplateVersionBlueprint,
+                       blueprint_opts: {
+                         view: :extended
+                       }
+                     }
+    else
+      render_error "template_version.toggle_publicly_previewable_error",
+                   message_opts: {
+                     error_message:
+                       @template_version.errors.full_messages.join(", ")
+                   }
+    end
+  end
+
   private
 
   def template_version_params
-    params.permit(:activity_id, :status, :early_access, :public)
+    params.permit(:status)
   end
 
   def template_version_sandbox_scope
@@ -290,7 +412,6 @@ class Api::TemplateVersionsController < Api::ApplicationController
         template_version_id
         jurisdiction_id
         from_template_version_id
-        from_non_first_nations
         include_tips
         include_electives
       ]
@@ -325,5 +446,27 @@ class Api::TemplateVersionsController < Api::ApplicationController
         }
       }
     )
+  end
+
+  def draft_block_params
+    params.permit(:block_id, block_data: {})
+  end
+
+  def draft_previewer_params
+    params.permit(emails: [])
+  end
+
+  def toggle_publicly_previewable_params
+    # Accept either { template_version: { publicly_previewable: ... } } or a
+    # bare top-level :publicly_previewable param for flexibility.
+    raw =
+      if params[:template_version].present?
+        params.require(:template_version).permit(:publicly_previewable)[
+          :publicly_previewable
+        ]
+      else
+        params.permit(:publicly_previewable)[:publicly_previewable]
+      end
+    ActiveModel::Type::Boolean.new.cast(raw)
   end
 end

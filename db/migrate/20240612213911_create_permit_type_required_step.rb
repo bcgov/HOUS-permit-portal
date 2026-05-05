@@ -29,6 +29,11 @@ class CreatePermitTypeRequiredStep < ActiveRecord::Migration[7.1]
   end
 
   def data
+    unless defined?(PermitTypeRequiredStepSeeder)
+      say "PermitTypeRequiredStepSeeder removed; skipping"
+      return
+    end
+
     PermitTypeRequiredStepSeeder.seed
   end
 end

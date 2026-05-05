@@ -1,21 +1,8 @@
 class RequirementTemplatePolicy < ApplicationPolicy
   def show?
-    return true if record.public?
-
     return false unless user.present?
 
-    user.super_admin? ||
-      (
-        record.early_access? &&
-          user
-            .early_access_previews
-            .where(
-              early_access_requirement_template_id: record.id,
-              discarded_at: nil
-            )
-            .where("expires_at > ?", Time.current)
-            .exists?
-      )
+    user.super_admin?
   end
 
   def create?
@@ -59,7 +46,24 @@ class RequirementTemplatePolicy < ApplicationPolicy
   end
 
   def invite_previewers?
-    create? && record.early_access?
+    create?
+  end
+
+  def create_draft?
+    create?
+  end
+
+  def discard_draft?
+    create?
+  end
+
+  def promote_draft?
+    create? && record.draft_template_version.present?
+  end
+
+  def force_publish_draft?
+    create? && ENV["ENABLE_TEMPLATE_FORCE_PUBLISH"] == "true" &&
+      record.draft_template_version.present?
   end
 
   def update_jurisdiction_availabilities?

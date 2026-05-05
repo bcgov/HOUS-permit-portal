@@ -12,6 +12,7 @@ import { IEditRequirementActionsProps, IEditRequirementOptionsProps, IRequiremen
 interface IProps {
   onScheduleDate?: (date: Date) => void
   onForcePublishNow?: () => void
+  onCreateDraft?: () => void
   onSaveDraft: () => void
   onAddSection: () => void
   requirementTemplate: IRequirementTemplate
@@ -26,6 +27,7 @@ export const ControlsHeader = observer(function ControlsHeader({
   onSaveDraft,
   onAddSection,
   onForcePublishNow,
+  onCreateDraft,
   hasStepCodeDependencyError,
   renderOptionsMenu,
   renderActions,
@@ -73,12 +75,13 @@ export const ControlsHeader = observer(function ControlsHeader({
             minDate: requirementTemplate.nextAvailableScheduleDate,
             onScheduleConfirm: onScheduleDate,
             onForcePublishNow: onForcePublishNow,
+            onCreateDraft: onCreateDraft,
             triggerButtonProps: {
               isDisabled: isSubmitDisabled,
             },
           })}
         <Button variant={"secondary"} isDisabled={isSubmitDisabled} isLoading={isSubmitting} onClick={onSaveDraft}>
-          {t("requirementTemplate.edit.saveDraft")}
+          {t("requirementTemplate.edit.saveTemplate")}
         </Button>
 
         <Button variant={"secondary"} isDisabled={isSubmitting} onClick={onClose}>

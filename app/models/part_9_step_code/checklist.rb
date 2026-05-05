@@ -12,7 +12,7 @@ class Part9StepCode::Checklist < ActiveRecord::Base
              touch: true
 
   belongs_to :step_requirement,
-             class_name: "PermitTypeRequiredStep",
+             class_name: "JurisdictionStepRequirement",
              optional: true
 
   has_many :data_entries,

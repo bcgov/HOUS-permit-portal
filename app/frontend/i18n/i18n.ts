@@ -153,7 +153,6 @@ const options = {
           enabledCommunitiesDescription: "Communities you can submit Building Permit applications in:",
           moreComingSoon: "(more coming soon)",
           andMore: "...and more",
-          earlyAccessTemplates: "See some of our templates in progress",
           additionalContent: {
             left: "See helpful tips from your local jurisdictions to streamline your digital building permit applications",
             mid: "Preview the Small-scale/Multi-unit housing checklist",
@@ -440,7 +439,6 @@ const options = {
           share: "Share",
           unassigned: "Unassigned",
           unassign: "Unassign",
-          seeEarlyAccessButton: "See Early Access",
           seeLiveButton: "See Live",
           invite: "Invite",
           public: "Public",
@@ -979,18 +977,17 @@ const options = {
             editMapEnd:
               "This process ensures the map accurately represents the center of your jurisdiction and is displayed with the appropriate level of detail.",
             stepCode: {
-              title: "Step Codes requirements",
-              description:
-                "Below are the step code requirements for each permit application type. <1>What does each step code level mean?<2></2></1>",
+              title: "Step code requirements",
+              description: "Below are the step code requirements. <1>What does each step code level mean?<2></2></1>",
+              tags: "Tags",
               aboutPageDescription:
                 "This page shows the Energy Step Code and Zero Carbon Step Code requirements for buildings in this community. Requirements may vary based on building type, occupancies, permit-processing date, and local bylaws.",
               aboutPageNotice:
                 "These requirements apply to new buildings only. For existing buildings or renovations, contact your local building officials.",
               viewStepCodeRequirements: "View full Step Codes requirements",
-              permitType: "BCBC Part",
-              workType: "Work type",
               energyStepRequired: "Energy step code required",
               zeroCarbonStepRequired: "Zero carbon step required",
+              part9Requirements: "Part 9 Requirements",
             },
             updateButton: "Update jurisdiction",
             accordion: {
@@ -1412,7 +1409,7 @@ Thank you,
             fn: "These are First Nations specific permits",
             sandboxWarning: "Training sandbox permits can only be added into your own jurisdiction's training sandbox",
             button: "Add permits",
-            bcbcPartHeading: "BCBC Part",
+            bcbcPartHeading: "Tags",
             bcbcPart:
               "Right now, you can apply for permits for small-scale projects. This includes residential buildings, small structures, trades permits, and site work.",
             noPermitsAvailable: "No permits are available",
@@ -1443,8 +1440,7 @@ Thank you,
             },
             permits: {
               heading: "Permits",
-              title: "BCBC Part",
-              workType: "Work type",
+              title: "Tags",
               energyStepRequired: "Energy step code required",
               zeroCarbonStepRequired: "Zero carbon step required",
             },
@@ -1485,7 +1481,7 @@ Thank you,
             description: "Description",
             number: "Application #",
             reference_number: "Reference #",
-            permit_classification: "Types",
+            tags: "Tags",
             submitter: "Submitter",
             submitted_at: "Submitted at",
             viewed_at: "Viewed at",
@@ -1568,7 +1564,7 @@ Thank you,
             jurisdiction: "Jurisdiction",
             page: "Page {{pageNumber}} / {{totalPages}}",
             fileNotAdded: "Not uploaded",
-            permitType: "BCBC Part",
+            tags: "Tags",
             contactInfo: "Contact information",
             applicantInfo: "Applicant contact details",
           },
@@ -1607,7 +1603,7 @@ Thank you,
           columns: {
             number: "Application #",
             reference_number: "Reference #",
-            permit_classification: "Types",
+            tags: "Tags",
             submitter: "Submitter",
             submitted_at: "Submitted at",
             viewed_at: "Viewed at",
@@ -1617,7 +1613,7 @@ Thank you,
           },
           submissionInbox: {
             contactInviteWarning:
-              "Please have a Review Manager setup the Submissions for all BCBC parts to allow submissions to be received.",
+              "Please have a Review Manager setup the Submissions in Configuration Management to allow submissions to be received.",
             title: "Submissions",
             tableHeading: "Permit applications",
             submissionsSentTo:
@@ -1639,9 +1635,7 @@ Thank you,
             onlyHavePin: "I don't have a PID or address",
             dontHavePin: "Hide",
             selectSandboxLabel: "Select a training sandbox to submit into",
-            firstNationsTitle: "First Nations",
-            permitTypeHeading: "BCBC Part",
-            workTypeHeading: "Work type",
+            tagsHeading: "Tags",
             forFirstNations: "Is this permit application on <1>First Nation Registered Land</1>?",
             applicationDisclaimerInstruction:
               "Before you submit a building permit application, please ensure your proposed building siting and design complies with:",
@@ -1679,9 +1673,9 @@ Thank you,
             confirmation:
               "You confirm that the information you provided was completed to the best of your knowledge and ability",
             yourReference: "For reference, your BC Building Permit Hub Application # is {{ number }}",
-            noContactsAvailableTitle: "No template has been scheduled for this classification",
+            noContactsAvailableTitle: "No template has been scheduled for this permit type",
             noContactsAvailableDescription:
-              "To start an application in Training mode, schedule a template for publishing for this classification.",
+              "To start an application in Training mode, schedule a template for publishing for this permit type.",
             whatsNext:
               "Upon receipt by the local jurisdiction, you will be notified via email or phone of any updates to your application's status or if additional documentation is required.",
             emailed:
@@ -1716,14 +1710,9 @@ Thank you,
             inboxDisabledTitle: "Inbox disabled",
             inboxDisabled:
               "Submissions for this local jurisdictions are currently disabled. You will be able to make edits to this permit application but will not be able to submit until this jurisdiction's is accepting submissions again and inboxes are enabled globally.",
-            inboxDisabledTitleEarlyAccess: "Early Access – Submissions Not Yet Enabled",
-            inboxDisabledEarlyAccess:
-              "This permit is available for early access to help your team become familiar with the application process. You can view the application in this preview, but submission is currently disabled. <p> You are viewing the baseline standardized form. Click 'View optional electives' within any section to explore additional questions that jurisdictions may configure based on local needs.</p><p><1>Go to My projects to submit a permit.</1></p>",
             templateDisabledByJurisdictionTitle: "Permit Type No Longer Accepted",
             templateDisabledByJurisdiction:
               "This jurisdiction is no longer accepting applications for this permit type. You can continue to edit this application, but you will not be able to submit it. Please contact the jurisdiction for more information.",
-            inboxDisabledEarlyAccessInstructions:
-              "<br />This permit is available for early access to help your team become familiar with the application process. You can view the application in this preview, but submission is currently disabled.<br /><br /> You are viewing the base form. Click 'View optional electives' within any group of questions to explore additional questions that jurisdictions may configure based on local needs.<br /><1>Go to My projects to submit a permit.</1>",
             downloadApplication: "Download application",
             fetchingMissingPdf: "Fetching {{missingPdf}}...",
             missingPdfLabels: {
@@ -1780,11 +1769,11 @@ Thank you,
         },
         sandbox: {
           anyChanges: "Any changes made here will be reflected in training mode.",
-          exportChanges: "Ready to export changes?",
-          exportAndSeeInDraftPermit: "Export and see in draft permit",
+          exportChanges: "Ready to promote changes?",
+          exportAndSeeInDraftPermit: "Promote changes",
           replacementWarning: "Replacement warning",
           replacementWarningMessage:
-            "All tips and electives will **replace** what is currently in the permit application template, but it will not be published until you decide.\n\nYou will be able to see the draft first before deciding to publish it to submitters.",
+            "This will immediately **replace** the live tips and electives for this template with your sandboxed customizations.\n\nThere is no separate publish step — submitters will see these changes right away.",
           disabledRow: "Disabled due to sandbox mismatch",
           formLabel: "Training sandbox",
           live: "Live",
@@ -1832,14 +1821,6 @@ Thank you,
             scheduledFormsDescription: "Preview and test forms scheduled to be published.",
           },
         },
-        earlyAccessRequirementsLibrary: {
-          index: {
-            title: "Early access requirements library",
-            description:
-              "This displays all requirement blocks whose visibility has been set to 'preview only'. These blocks may not be used in any live drafts.",
-            tableHeading: "Early access requirement blocks",
-          },
-        },
         requirementsLibrary: {
           hasDataValidation: "Has data validation",
           addAnother: "Add",
@@ -1852,11 +1833,6 @@ Thank you,
           hasAutomatedCompliance: "Has automated compliance",
           inputNotSupported: "Input type not yet supported",
           associationsInfo: "Sections, tags, etc...",
-          copyToEarlyAccess: {
-            title: "Copy to early access",
-            body: "Do you want to deuplicate this into an early access requirement block? <br /> <br /> <strong>Replace and duplicate with early access:</strong>",
-            replaceButton: "Replace requirement block",
-          },
 
           index: {
             title: "Requirements library",
@@ -1868,17 +1844,6 @@ Thank you,
             formFields: "Form fields",
             useButton: "Use",
             dummyOption: "Option",
-          },
-          visibilityDescriptions: {
-            any: "No restrictions on visibility.",
-            live: "Can only be used in live templates only. Does not affect published templates.",
-            earlyAccess:
-              "Available to be used in early access preview templates only. Does not affect published templates",
-          },
-          visibility: {
-            any: "Any",
-            live: "Preview omitted",
-            earlyAccess: "Preview only",
           },
           modals: {
             unsavedChanges: {
@@ -1894,22 +1859,7 @@ Thank you,
             addLabel: "Add label",
             displayDescriptionLabel: "Instruction/Description (public)",
             addDescriptionTrigger: "Add instructions/description for this block",
-            visibilityLabel: "Visibility",
             cantEditHere: "Not currently editable here",
-            changeVisibility: {
-              fromEarlyAccessTitle: "Are you sure you want to promote this?",
-              fromLiveTitle: "Are you sure you want to promote this?",
-
-              confirmChangeBody1:
-                "This is only possible if the block only currently exists in the correct corresponding in-progress template drafts and previews. Once changed, it will be in the corresponding library only",
-              confirmChangeBody2:
-                "Make sure you are ready to promote/demote this, any other previews or templates using this specific block will also reflect this change.",
-              listItem1: "<strong>All</strong>: The requirement block may exist in any preview or template",
-              listItem2:
-                "<strong>Preview omitted</strong>: The requirement block may not exist in previews, and only in templates",
-              listItem3:
-                "<strong>Preview only</strong>: The requirement block may not exist in templates, and only in previews",
-            },
             create: {
               triggerButton: "Create new requirement block",
               title: "New requirement block",
@@ -1918,8 +1868,6 @@ Thank you,
               title: "Edit requirement block",
               options: "Options",
               copy: "Copy this block",
-              visibilityTooltip:
-                "Visibility determines if the block is restricted to live, early-access previews, or both",
               removeConfirmationModal: {
                 title: "Confirm you want to archive this requirement block.",
                 body: "Archiving this requirement blocks will remove it from all draft templates. This action cannot be undone.",
@@ -2033,7 +1981,7 @@ Thank you,
           },
           fields: {
             name: "Name",
-            firstNations: "First Nations",
+            tags: "Tags",
             description: "Description",
             associations: "Associations",
             formFields: "Form Fields",
@@ -3615,21 +3563,6 @@ Thank you,
           requirementsLibraryTitle: "Requirements library",
           requirementsLibraryDescription:
             "Construct and maintain requirement blocks that form the core structure of permit templates. This library allows you to create, update, and manage the questions that define each requirement block.",
-          earlyAccess: {
-            title: "Early Access",
-            adminDescription:
-              "Access and manage Early access previews and requirement sets before they become publicly available.",
-            previews: {
-              title: "Early access previews",
-              description:
-                "View and manage non-submittable permit templates in Early Access, shared with selected users for service design purposes.",
-            },
-            requirements: {
-              title: "Early access requirements",
-              description:
-                "Explore and manage pre-release requirement blocks sets designed for testing within Early Access projects.",
-            },
-          },
           configurationManagement: {
             title: "Configuration",
             reviewManagerDescription:
@@ -3646,9 +3579,10 @@ Thank you,
               title: "Submissions setup",
               description: "Specify email addresses that should receive applications",
               inboxEnabled: "Enable inbox",
-              emailLabel: "to recipient email(s)",
+              emailLabel: "Default recipient email",
               addEmail: "Add another email",
               confirmationRequired: "Action required: please click link in verification email",
+              defaultSubmissionContact: "Default submission contact",
             },
             stepCodeRequirements: {
               title: "Step Code requirements",
@@ -3773,7 +3707,7 @@ Thank you,
               overriddenWarning: "This was overridden by your customized requirements below.",
               notRequired: "Not required",
               stepRequired: {
-                permitTypeHeading: "BCBC part",
+                tagsHeading: "Tags",
                 standardToPass: "Standard Step Code compliance to pass",
                 customizedMinimum: "Customized minimum requirement for submission",
                 energy: {
@@ -4082,11 +4016,8 @@ Thank you,
         errors: {
           fetchJurisdiction: "Something went wrong fetching the jurisdiction",
           fetchPermitApplication: "Something went wrong fetching the permit application",
-          fetchPermitTypeOptions: "Something went wrong fetching the BCBC part options",
+          fetchTagOptions: "Something went wrong fetching the tag options",
           fetchAutoComplianceModuleConfigurations: "Something went wrong fetching the auto compliance module options",
-          fetchActivityOptions: "Something went wrong fetching the activity options",
-          workTypeNotFound: "Work type not found",
-          fetchWorkTypeOptions: "Something went wrong fetching the work type options",
           fetchRequirementTemplate: "Something went wrong fetching the requirement template",
           fetchTemplateVersion: "Something went wrong fetching the template version",
           fetchCurrentUserLicenseAgreements: "Please confirm your account to see license agreement",
@@ -4218,65 +4149,48 @@ Thank you,
           assignTo: "Assign to...",
           department: "Department",
         },
-        earlyAccessRequirementTemplate: {
-          show: {},
-          index: {
-            tableHeading: "Previews",
-            title: "Early access templates catalogue",
-            invitationInfo:
-              "Early access previews are non-submittable and accessible only by registered users who are invited. Access is granted for 60 days and can be extended or revoked at any time.",
-            createButton: "Create new early access template",
+        templateVersionPreview: {
+          earlyAccessTitle: "Early Access – Submissions Not Yet Enabled",
+          earlyAccessDescription:
+            "This permit is available for early access to help your team get familiar with the application process. You can view and edit your application, but submission is currently disabled. Submissions will be enabled once this permit type is officially launched in your jurisdiction.",
+          schedulePublish: {
+            scheduleModalTitle: "Publish draft?",
+            scheduleModalBody:
+              "Publishing this draft will replace the currently-published version. Local jurisdictions and submitters will be able to see and use this new version of the form. <br><br><1>Notifications will only be sent out to those jurisdictions you have set available, which is currently: {{count}}</1>",
+            scheduleModalHelperText: "Schedule to <1>publish</1> (at midnight 00:01 PST)",
+            scheduleModalCancelMessage: "Changes were not scheduled.",
+            forcePublishNow: "Force publish now",
+            conflictWarning:
+              "Another version is already scheduled for <1>{{dates}}</1>. Confirming this date will auto-unschedule that version.",
+            laterScheduledWarning:
+              "A later scheduled version exists on <1>{{dates}}</1>. It will remain scheduled and your version will be deprecated when it publishes.",
+            confirmOverrideTitle: "Override existing scheduled version?",
+            confirmOverrideBody:
+              "A version is already scheduled for <1>{{dates}}</1>. Confirming <1>{{newDate}}</1> will unschedule that version.",
+          },
+          sharing: {
             sharePreviewLink: "Share ({{ n }})",
             sharePreviewTitle: "Share preview",
             inviteToPreviewTitle: "Invite to preview",
             inviteToPreviewHint: "Separate each email with a comma ,",
-            revokeButton: "Revoke",
-            unrevokeButton: "Unevoke",
-            extendButton: "Extend",
             inviteToPreviewButton: "Send invites",
             noPreviewersYet: "No previewers yet. Click invite to add previewers to this template",
             inviteToPreviewPartialSuccess: "Some invites failed to send",
-
+            revokeButton: "Revoke",
+            unrevokeButton: "Unrevoke",
+            extendButton: "Extend",
             confirmation: {
               revokeTitle: "Are you sure you want to revoke access for {{ name }}?",
               revokeBody:
-                "Revoking access will immediately prevent this user from accessing the early access content. This may be undone.",
+                "Revoking access will immediately prevent this user from accessing the draft preview content. This may be undone.",
               extendTitle: "Extend Access Duration for {{ name }}",
               extendBody:
-                "Extending access will give the user 60 additional days to interact with the early access content. Do you want to proceed?",
+                "Extending access will give the user 60 additional days to interact with the draft preview content. Do you want to proceed?",
               unrevokeTitle: "Restore Access for {{ name }}",
               unrevokeBody:
-                "Restoring access will allow the user to access the early access content again. Are you sure you want to proceed?",
+                "Restoring access will allow the user to access the draft preview content again. Are you sure you want to proceed?",
             },
           },
-          new: {
-            title: "Create new preview",
-            modalTitle: "Create new preview",
-            startingFresh: "Starting fresh?",
-            addFromExisitng: "Add requirements from an exisitng permit?",
-            startWithBlank: "Start with blank permit",
-            copyFromLive: "Copy from live permit",
-            copyFromThis: "Copy from this",
-          },
-          edit: {
-            lastFetched: "Last fetched",
-            fetchLatest: "Fetch latest",
-            auditLog: "Audit log",
-            confirmRemoveModalTitle: "Archive preview?",
-            confirmRemoveModalBody: "This preview will no longer be accessible by invitees",
-            public: "Grant public access?",
-          },
-          fields: {
-            nickname: "Nickname",
-            permitType: "BCBC Part",
-            activity: "Work type",
-            firstNations: "First nations?",
-            sharedWith: "Shared with",
-            updatedAt: "Updated at",
-            assignee: "Assigned",
-          },
-          viewOptionalElectives: "View electives",
-          noOptionalElectives: "No optional electives in this requirement block.",
         },
         requirementTemplate: {
           compareAction: 'Requirement "{{ requirementName }}" has been {{ action }}',
@@ -4285,6 +4199,9 @@ Thank you,
           removed: "removed",
           filter: "Template",
           versions: "Versions",
+          publiclyPreviewable: {
+            toggleLabel: "Show on public standardization preview",
+          },
           access: {
             statusNone: "Not available in any jurisdictions",
             statusNoneDesc: "Please grant access below to allow this template to be used in any jurisdictions.",
@@ -4309,15 +4226,13 @@ Thank you,
           },
           edit: {
             requirementsLibraryTab: "Requirements Library",
-            earlyAccessRequirementsLibraryTab: "Early Access Requirements Library",
-            earlyAccessTabDescription: "Early access previews cannot add 'Preview omitted' blocks ",
             availableToApplicants: "Available to applicants",
             options: {
               button: "Options",
               copyTips: "Import tips from ({{ templateLabel }})",
               copyElectives: "Import electives from ({{ templateLabel }})",
             },
-            promoteElectives: "Export changes",
+            promoteElectives: "Promote changes",
             promoteElectivesMessage:
               "This will publish your training sandboxed customizations and overwrite your non-training sandboxed live electives!",
             clickToWriteDescription: "Click to write description",
@@ -4327,7 +4242,7 @@ Thank you,
               "Change the order of requirements by using the menu on the left to drag items up or down. Click the 'Done' button to return to the form.",
             addSectionButton: "Add section",
             addRequirementButton: "Add requirement",
-            saveDraft: "Save as draft",
+            saveTemplate: "Save template",
             closeEditor: "Close editor",
             sectionsSidebarTitle: "Contents",
             reorderButton: "Reorder",
@@ -4396,9 +4311,8 @@ Thank you,
           },
           fields: {
             status: "Status",
-            permitType: "BCBC Part",
-            activity: "Work type",
-            firstNations: "First Nations",
+            tags: "Tags",
+            nickname: "Name",
             description: "Description",
             currentVersion: "Current version",
             availableIn: "Available in",
@@ -4408,6 +4322,7 @@ Thank you,
             scheduled: "Upcoming",
             draft: "Draft",
             deprecated: "Deprecated",
+            builder: "Editing",
           },
 
           index: {
@@ -4423,18 +4338,21 @@ Thank you,
             descriptionHelpText:
               "Provide some context for review managers and administrators on what kinds of buildings this permit is meant for.",
             createButton: "Create template",
-            firstNationsLand: "This permit is intended only for <1>First Nation Registered Land</1>",
-            copyExistingByClassifications: "Copy from existing template of this BCBC part and work type if available",
+
+            copyExistingByClassifications: "Copy from existing template with similar tags if available",
           },
           versionSidebar: {
             triggerButton: "Versions",
             title: "Template versions",
             subtitlePrefix: "For:",
             viewTemplateButton: "View template",
-            resumeDraftButton: "Resume draft",
+            viewDraftButton: "View draft",
+            shareDraftButton: "Share draft",
+            openBuilderButton: "Open builder",
             unscheduleButton: "Unschedule",
             listTitles: {
               published: "Published",
+              templateBuilder: "Template Builder",
               draft: "Drafts",
               scheduled: "Scheduled",
               deprecated: "Deprecated (last 3)",
@@ -4466,7 +4384,7 @@ Thank you,
           edit: {
             permitTemplate: "Permit template",
             seeApiDoc: "See API documentation",
-            heading: "<1>Manage mapping for</1> <2>{{permitClassification}}</2>",
+            heading: "<1>Manage mapping for</1> <2>{{templateLabel}}</2>",
             table: {
               blockAccordionButton: "{{blockName}} <1>requirement block code: {{blockCode}}</1>",
               filter: {
@@ -4489,16 +4407,15 @@ Thank you,
         },
         digitalBuildingPermits: {
           index: {
-            title: "Permit application forms",
-            permitType: "BCBC part",
-            selectPermit: "Select a form:",
-            workType: "Work type",
-            manageButton: "More options",
+            title: "Digital Building Permits",
+            tags: "Tags",
+            selectPermit: "Select a digital permit:",
+            manageButton: "Manage",
             lastUpdated: "Last updated",
             requestNewPromptWithLink:
-              "Your administrator has made the above permit classifications available for digital submissions. If there is another classification you want please <1>request a new classification</1>.",
+              "Your administrator has made the above permit types available for digital submissions. If there is another type you want please <1>request a new permit type</1>.",
             emptyPermitsText:
-              "No available forms of the selected work type. Please wait for updates from the Ministry of Housing.",
+              "No available building permits of the selected type. Please wait for updates from the Ministry of Housing.",
             noPermitsAvailable: "No permits are available for your jurisdiction",
             noPermitsAvailableDescription:
               "Make sure at least one submission contact is configured and Building Permit Hub administrator has enabled your permits. Contact your Building Permit Hub administrator if you need help with setup.",
@@ -4543,21 +4460,6 @@ Thank you,
           adminUserIndex: {
             title: "Users",
             description: "View and manage administrative users",
-          },
-          permitClassifications: {
-            title: "Permit classifications",
-            description: "Manage BCBC parts and work types",
-            descriptionLabel: "Description",
-            permitTypes: "BCBC parts",
-            permitType: "BCBC part",
-            activities: "Work types",
-            activity: "Work type",
-            addPermitType: "Add BCBC part",
-            addActivity: "Add work type",
-            code: "Code",
-            name: "Name",
-            enabled: "Enabled",
-            category: "Category",
           },
           standardizationPageSetup: {
             title: "Standardization preview page setup",
@@ -4918,7 +4820,7 @@ Thank you,
           privacyPolicyWhatInformationWeCollectItem1:
             "Name, contact information, and user credentials (for account creation and secure access)",
           privacyPolicyWhatInformationWeCollectItem2:
-            "Project and permit application details (e.g., property address, BCBC part, uploaded documents)",
+            "Project and permit application details (e.g., property address, tags, uploaded documents)",
           privacyPolicyWhatInformationWeCollectItem3:
             "Jurisdictional or regulatory information (e.g., zoning, bylaw data, step code compliance)",
           privacyPolicyWhatInformationWeCollectItem4:
@@ -5005,6 +4907,7 @@ Thank you,
             checkDigitalSeals: "Check digital seals",
             codeCompliance: "Code compliance",
             permitClassifications: "Permit classifications",
+            overheating: "Overheating",
             checkStepCodeRequirements: "Check step code requirements",
             latest: "Latest",
             profile: "Profile",
@@ -5063,7 +4966,6 @@ Thank you,
             revisionReasonSetup: "Revision reason setup",
             acceptInvitation: "Accept invitation",
             eula: "End user license agreement",
-            earlyAccess: "Early access",
             update: "Update",
             globalFeatureAccess: "Global feature access",
             permitProjects: "Permit projects",
@@ -5076,8 +4978,8 @@ Thank you,
             select: "Select",
             resources: "Resources",
             preChecks: "Pre-checks",
+            preview: "Preview",
           },
-          earlyAccessStepCodePreviewNotAvailable: "Early access step code preview not available",
         },
         automatedCompliance: {
           baseMessage: `This field has Auto-Compliance capability`,

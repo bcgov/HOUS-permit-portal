@@ -104,11 +104,6 @@ class PermitProject < ApplicationRecord
     nil
   end
 
-  def permit_type_id
-    # To be overridden by PermitApplication using ProjectItem
-    nil
-  end
-
   def phase
     # To be implemented later
     nil
@@ -238,7 +233,7 @@ class PermitProject < ApplicationRecord
     scope =
       permit_applications
         .kept
-        .includes(:activity, :submission_versions, :permit_collaborations)
+        .includes(:submission_versions, :permit_collaborations)
         .order(updated_at: :desc)
     return scope.limit(3) if owner_id == user.id
 
