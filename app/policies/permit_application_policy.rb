@@ -36,6 +36,8 @@ class PermitApplicationPolicy < ApplicationPolicy
   end
 
   def qa_autofill?
+    return false unless ENV["VITE_QA_MODE"] == "true"
+
     is_draft = record.draft?
     update_allowed = is_draft && update?
     review_staff_allowed =
