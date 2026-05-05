@@ -2,6 +2,7 @@ class Jurisdiction < ApplicationRecord
   extend FriendlyId
   friendly_id :qualified_name, use: :slugged
   include JurisdictionExternalApiState
+  include ValidateUrlAttributes
 
   BASE_INCLUDES = %i[
     submission_contacts
@@ -90,6 +91,15 @@ class Jurisdiction < ApplicationRecord
 
   validates :name, uniqueness: { scope: :locality_type, case_sensitive: false }
   validates :locality_type, presence: true
+  validates :processing_time_html, length: { maximum: 140 }, allow_blank: true
+  validates :key_stages_html, length: { maximum: 140 }, allow_blank: true
+  validates :office_address, length: { maximum: 500 }, allow_blank: true
+  validates :office_email,
+            format: {
+              with: URI::MailTo::EMAIL_REGEXP
+            },
+            allow_blank: true
+  validates :office_telephone, phone: true, allow_blank: true
   validate :inbox_enabled_requires_inbox_setup
   validate :no_duplicate_part3_occupancy_pathways
 
@@ -101,6 +111,7 @@ class Jurisdiction < ApplicationRecord
 
   before_validation :normalize_locality_type
   before_validation :normalize_name
+  before_validation :normalize_office_telephone
   before_validation :set_type_based_on_locality
   before_validation :set_first_nation_flag, on: :create
 
@@ -124,6 +135,8 @@ class Jurisdiction < ApplicationRecord
   accepts_nested_attributes_for :resources, allow_destroy: true
 
   before_create :assign_unique_prefix
+
+  url_validatable :website_url
 
   def customizations
     # Convenience method to prevent carpal tunnel syndrome
@@ -432,6 +445,13 @@ class Jurisdiction < ApplicationRecord
     normalized.sub!(/\s+(the|of)\z/, "")
 
     self.locality_type = normalized
+  end
+
+  def normalize_office_telephone
+    return if office_telephone.blank?
+
+    parsed = Phonelib.parse(office_telephone)
+    self.office_telephone = parsed.e164 if parsed.valid?
   end
 
   # Callback method to ensure a default sandbox is created

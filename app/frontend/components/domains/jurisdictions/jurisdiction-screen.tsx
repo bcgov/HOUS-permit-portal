@@ -5,32 +5,28 @@ import {
   Center,
   Container,
   Flex,
-  FormControl,
-  FormLabel,
   Grid,
   GridItem,
-  HStack,
   Heading,
-  Input,
   Link,
   ListItem,
-  OrderedList,
   Text,
   UnorderedList,
   VStack,
 } from "@chakra-ui/react"
 
-import { ArrowSquareOut, Pencil } from "@phosphor-icons/react"
-import i18next from "i18next"
+import { ArrowSquareOut, FloppyDisk, Pencil } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
-import { Control, Controller, FormProvider, useForm, useFormContext } from "react-hook-form"
+import type { Control, UseFormReturn } from "react-hook-form"
+import { Controller, FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useJurisdiction } from "../../../hooks/resources/use-jurisdiction"
 import { IJurisdiction } from "../../../models/jurisdiction"
+import { IUser } from "../../../models/user"
 import { useMst } from "../../../setup/root"
 import { EFlashMessageStatus } from "../../../types/enums"
-import { IContact, TLatLngTuple } from "../../../types/types"
+import { IContact, TJurisdictionFieldValues } from "../../../types/types"
 import { sanitizeTipTapHtml } from "../../../utils/sanitize-tiptap-content"
 import { isTipTapEmpty } from "../../../utils/utility-functions"
 import { CustomMessageBox } from "../../shared/base/custom-message-box"
@@ -47,104 +43,119 @@ import { Can, can } from "../../shared/user/can"
 import { ContactGrid } from "./contacts/contact-grid"
 import { JurisdictionAboutAccordionItem } from "./jurisdiction-about-accordion-item"
 import { JurisdictionAboutCtaCards } from "./jurisdiction-about-cta-cards"
+import { JurisdictionAboutSnippetCards, jurisdictionAboutSnippetHasContent } from "./jurisdiction-about-snippet-cards"
+import { contactInfoBannerHasContent, JurisdictionContactInfoBanner } from "./jurisdiction-contact-info-banner"
 import { JurisdictionEditorWithPreview } from "./jurisdiction-editor-with-preview"
+import { JurisdictionHeroLgWebsiteRow } from "./jurisdiction-hero-lg-website-row"
 export interface Jurisdiction {
   name: string
   contacts: IContact[]
-}
-
-type TJurisdictionFieldValues = {
-  descriptionHtml: string
-  checklistHtml: string
-  lookOutHtml: string
-  contactSummaryHtml: string
-  mapPosition: TLatLngTuple
-  mapZoom: number
-  contactsAttributes: IContact[]
 }
 
 function jurisdictionRichTextHasPublicContent(html: string | null | undefined): boolean {
   return !isTipTapEmpty(sanitizeTipTapHtml(html ?? ""))
 }
 
-export const JurisdictionScreen = observer(() => {
-  const { t } = useTranslation()
-  const { currentJurisdiction, error } = useJurisdiction()
-  const { userStore } = useMst()
-  const { currentUser } = userStore
+function getDefaultJurisdictionValuesForJurisdiction(
+  jurisdiction: IJurisdiction | null | undefined
+): TJurisdictionFieldValues {
+  return {
+    descriptionHtml: jurisdiction?.descriptionHtml ?? "",
+    checklistHtml: jurisdiction?.checklistHtml ?? "",
+    lookOutHtml: jurisdiction?.lookOutHtml ?? "",
+    contactSummaryHtml: jurisdiction?.contactSummaryHtml ?? "",
+    contactsAttributes: jurisdiction?.contacts as IContact[],
+    mapPosition: jurisdiction?.mapPosition || [0, 0],
+    mapZoom: jurisdiction?.mapZoom || 13,
+    processingTimeHtml: jurisdiction?.processingTimeHtml ?? "",
+    keyStagesHtml: jurisdiction?.keyStagesHtml ?? "",
+    officeAddress: jurisdiction?.officeAddress ?? "",
+    officeHours: jurisdiction?.officeHours ?? "",
+    officeTelephone: jurisdiction?.officeTelephone ?? "",
+    officeEmail: jurisdiction?.officeEmail ?? "",
+    websiteUrl: jurisdiction?.websiteUrl ?? "",
+    timelineAndDeliverablesHtml: jurisdiction?.timelineAndDeliverablesHtml ?? "",
+  }
+}
 
-  const getDefaultJurisdictionValues = () => {
-    return {
-      descriptionHtml: currentJurisdiction?.descriptionHtml,
-      checklistHtml: currentJurisdiction?.checklistHtml,
-      lookOutHtml: currentJurisdiction?.lookOutHtml,
-      contactSummaryHtml: currentJurisdiction?.contactSummaryHtml,
-      contactsAttributes: currentJurisdiction?.contacts as IContact[],
-      mapPosition: currentJurisdiction?.mapPosition || [0, 0],
-      mapZoom: currentJurisdiction?.mapZoom || 13,
+interface IJurisdictionScreenBodyProps {
+  currentJurisdiction: IJurisdiction
+  formMethods: UseFormReturn<TJurisdictionFieldValues>
+  // formMethods is stable; need to pass this so it knows when to re-render
+  isSubmitting: boolean
+  currentUser: IUser | undefined
+}
+
+const JurisdictionScreenBody = observer(
+  ({ currentJurisdiction, formMethods, isSubmitting, currentUser }: IJurisdictionScreenBodyProps) => {
+    const { t } = useTranslation()
+    const canManageAbout = can("jurisdiction:manage", { jurisdiction: currentJurisdiction })
+    const [isEditingContacts, setIsEditingContacts] = useState(false)
+
+    const { control, reset } = formMethods
+
+    const { qualifiedName, update, showAboutPage } = currentJurisdiction
+    const onSubmit = async (formData) => {
+      await update(formData)
+      reset(getDefaultJurisdictionValuesForJurisdiction(currentJurisdiction))
     }
-  }
 
-  const [isEditingContacts, setIsEditingContacts] = useState(false)
+    const contactEmail = t("site.contactEmail")
+    const emailBody = t("jurisdiction.notUsingBPH.wantToUse.emailBody", {
+      jurisdictionName: qualifiedName,
+    })
+    const mailtoHref = `mailto:${contactEmail}?subject=${t("jurisdiction.notUsingBPH.wantToUse.emailSubject", {
+      jurisdictionName: qualifiedName,
+    })}&body=${encodeURIComponent(emailBody)}`
 
-  const formMethods = useForm<TJurisdictionFieldValues>({
-    mode: "all",
-    defaultValues: getDefaultJurisdictionValues(),
-  })
+    const showOverviewAccordion =
+      canManageAbout || jurisdictionRichTextHasPublicContent(currentJurisdiction?.checklistHtml)
+    const showKeyInfoAccordion =
+      canManageAbout || jurisdictionRichTextHasPublicContent(currentJurisdiction?.lookOutHtml)
+    const showTimelinesAndDeliverablesAccordion =
+      canManageAbout || jurisdictionRichTextHasPublicContent(currentJurisdiction?.timelineAndDeliverablesHtml)
 
-  const { handleSubmit, control, reset, watch, formState } = formMethods
-  const { isSubmitting, isValid } = formState
-  const mapPositionWatch = watch("mapPosition")
-  const mapZoomWatch = watch("mapZoom")
+    const hasAboutSnippets = jurisdictionAboutSnippetHasContent(
+      currentJurisdiction?.processingTimeHtml,
+      currentJurisdiction?.keyStagesHtml,
+      currentJurisdiction?.officeAddress
+    )
 
-  useEffect(() => {
-    reset(getDefaultJurisdictionValues())
-  }, [currentJurisdiction?.id])
-
-  if (error) return <ErrorScreen error={error} />
-  if (!currentJurisdiction) return <LoadingScreen />
-
-  const { qualifiedName, update, showAboutPage } = currentJurisdiction
-  const onSubmit = async (formData) => {
-    await update(formData)
-    reset(getDefaultJurisdictionValues())
-  }
-
-  const contactEmail = t("site.contactEmail")
-  const emailBody = t("jurisdiction.notUsingBPH.wantToUse.emailBody", {
-    jurisdictionName: qualifiedName,
-  })
-  const mailtoHref = `mailto:${contactEmail}?subject=${t("jurisdiction.notUsingBPH.wantToUse.emailSubject", {
-    jurisdictionName: qualifiedName,
-  })}&body=${encodeURIComponent(emailBody)}`
-
-  const canManageAbout = can("jurisdiction:manage", { jurisdiction: currentJurisdiction })
-  const showOverviewAccordion =
-    canManageAbout || jurisdictionRichTextHasPublicContent(currentJurisdiction.checklistHtml)
-  const showKeyInfoAccordion = canManageAbout || jurisdictionRichTextHasPublicContent(currentJurisdiction.lookOutHtml)
-
-  return (
-    <Flex as="main" direction="column" w="full" bg="greys.white">
-      <HeroBanner containerProps={{ pl: 8, pr: 18, py: 16 }}>
-        <HighlightedLayout p={8} maxW={{ md: "calc((200% - var(--chakra-space-6)) / 3)", base: "full" }}>
-          <Heading as="h1" fontSize="2xl">
-            {qualifiedName}
-          </Heading>
-          <Text fontSize="lg">{t("jurisdiction.heroBannerDescription", { jurisdictionName: qualifiedName })}</Text>
-        </HighlightedLayout>
-        {/* TODO: Add link to LG website */}
-      </HeroBanner>
-      <Container maxW="container.lg" pt={{ base: 6, md: 16 }} px={8}>
-        {!currentJurisdiction.inboxEnabled && (
-          <Box my={8}>
-            <CustomMessageBox status={EFlashMessageStatus.warning} description={t("jurisdiction.notEnabled")} />
-          </Box>
-        )}
-      </Container>
-      {currentUser?.isReviewStaff || showAboutPage ? (
-        <>
+    const showContactSection =
+      canManageAbout ||
+      jurisdictionRichTextHasPublicContent(currentJurisdiction?.contactSummaryHtml) ||
+      contactInfoBannerHasContent(
+        currentJurisdiction?.officeAddress,
+        currentJurisdiction?.officeHours,
+        currentJurisdiction?.officeTelephone,
+        currentJurisdiction?.officeEmail
+      ) ||
+      (currentJurisdiction?.contacts?.length ?? 0) > 0
+    return (
+      <Flex as="main" direction="column" w="full" bg="greys.white">
+        <FormProvider {...formMethods}>
+          <HeroBanner containerProps={{ pl: 8, pr: { base: 18, md: 8 }, py: 16 }}>
+            <HighlightedLayout p={8} gap="18px" maxW={{ md: "calc((200% - var(--chakra-space-6)) / 3)", base: "full" }}>
+              <Heading as="h1" mb={0} fontSize="2xl">
+                {qualifiedName}
+              </Heading>
+              <Text fontSize="lg">{t("jurisdiction.heroBannerDescription", { jurisdictionName: qualifiedName })}</Text>
+              <JurisdictionHeroLgWebsiteRow
+                canManageAbout={canManageAbout}
+                jurisdictionName={qualifiedName}
+                persistedWebsiteUrl={currentJurisdiction.websiteUrl ?? ""}
+              />
+            </HighlightedLayout>
+          </HeroBanner>
+        </FormProvider>
+        {currentUser?.isReviewStaff || showAboutPage ? (
           <FormProvider {...formMethods}>
             <form onSubmit={formMethods.handleSubmit(onSubmit)} className="space-y-8 divide-y divide-gray-200">
+              {(hasAboutSnippets || canManageAbout) && (
+                <Container maxW="container.lg" p={8}>
+                  <JurisdictionAboutSnippetCards control={control} canManage={canManageAbout} />
+                </Container>
+              )}
               <Box w="full" bg="greys.grey03">
                 <Container maxW="container.lg" py={10} px={8}>
                   <Grid w="full" templateColumns={{ base: "1fr", md: "2fr 1fr" }} gap={8}>
@@ -156,13 +167,16 @@ export const JurisdictionScreen = observer(() => {
                         <JurisdictionTipTapFormController
                           control={control}
                           headingId="jurisdiction-supported-description-heading"
-                          initialTriggerText={t("jurisdiction.edit.addDescription")}
                           name={"descriptionHtml"}
                         />
                       </Flex>
                     </GridItem>
                     <GridItem order={{ base: 1, md: 2 }} minW={0}>
-                      <EditableMap currentJurisdiction={currentJurisdiction} />
+                      <JurisdictionMap
+                        mapPosition={currentJurisdiction.mapPosition}
+                        mapZoom={currentJurisdiction.mapZoom}
+                        linePositions={currentJurisdiction.boundaryPoints}
+                      />
                     </GridItem>
                     <GridItem colSpan={{ base: 1, md: 2 }} order={{ base: 3, md: 3 }} minW={0}>
                       <JurisdictionAboutCtaCards />
@@ -178,7 +192,7 @@ export const JurisdictionScreen = observer(() => {
                     gap={4}
                     allowMultiple
                     key={canManageAbout ? "jurisdiction-about-accordion-manage" : "jurisdiction-about-accordion-public"}
-                    defaultIndex={canManageAbout ? [0, 1, 2] : [0]}
+                    defaultIndex={canManageAbout ? [0, 1, 2, 3] : [0]}
                   >
                     {showOverviewAccordion && (
                       <JurisdictionAboutAccordionItem
@@ -190,7 +204,6 @@ export const JurisdictionScreen = observer(() => {
                         <JurisdictionTipTapFormController
                           control={control}
                           headingId="jurisdiction-accordion-overview-heading"
-                          initialTriggerText={t("jurisdiction.edit.addChecklist")}
                           name={"checklistHtml"}
                         />
                       </JurisdictionAboutAccordionItem>
@@ -203,12 +216,22 @@ export const JurisdictionScreen = observer(() => {
                         <JurisdictionTipTapFormController
                           control={control}
                           headingId="jurisdiction-accordion-keyinfo-heading"
-                          initialTriggerText={t("jurisdiction.edit.addLookOut")}
                           name={"lookOutHtml"}
                         />
                       </JurisdictionAboutAccordionItem>
                     )}
-                    {/* TODO: Add Timelines & Deliverables section */}
+                    {showTimelinesAndDeliverablesAccordion && (
+                      <JurisdictionAboutAccordionItem
+                        headingId="jurisdiction-accordion-timelines-deliverables-heading"
+                        title={t("jurisdiction.edit.accordion.timelinesAndDeliverables")}
+                      >
+                        <JurisdictionTipTapFormController
+                          control={control}
+                          headingId="jurisdiction-accordion-timelines-deliverables-heading"
+                          name={"timelineAndDeliverablesHtml"}
+                        />
+                      </JurisdictionAboutAccordionItem>
+                    )}
                     <JurisdictionAboutAccordionItem
                       headingId="jurisdiction-accordion-stepcode-heading"
                       title={t("jurisdiction.edit.stepCode.title")}
@@ -315,54 +338,67 @@ export const JurisdictionScreen = observer(() => {
                   <JurisdictionResourcesGridSection
                     jurisdiction={currentJurisdiction}
                     configureResourcesPath={
-                      can("jurisdiction:manage", { jurisdiction: currentJurisdiction })
+                      canManageAbout
                         ? `/jurisdictions/${currentJurisdiction.slug}/configuration-management/resources`
                         : undefined
                     }
                   />
                   <JurisdictionAboutCtaCards />
-                  <Flex direction="column" gap={4}>
-                    <Heading as="h2" variant="yellowline" my={0}>
-                      {t("jurisdiction.contactInfo")}
-                    </Heading>
-                    <JurisdictionTipTapFormController
-                      control={control}
-                      headingId="jurisdiction-contact-summary-heading"
-                      initialTriggerText={t("jurisdiction.edit.addContactSummary")}
-                      name={"contactSummaryHtml"}
-                    />
-                    <Can
-                      action="jurisdiction:manage"
-                      data={{ jurisdiction: currentJurisdiction }}
-                      onPermissionDeniedRender={
-                        currentJurisdiction.contacts.length > 0 ? <ContactGrid isEditing={false} /> : null
-                      }
-                    >
-                      <Box
-                        display="flex"
-                        flexDirection="column"
-                        border="1px dashed"
-                        borderColor="border.light"
-                        p={1}
-                        gap={1}
+                  {showContactSection && (
+                    <Flex direction="column" gap={4}>
+                      <Heading as="h2" variant="yellowline" my={0}>
+                        {t("jurisdiction.contactInfo")}
+                      </Heading>
+                      <JurisdictionTipTapFormController
+                        control={control}
+                        headingId="jurisdiction-contact-summary-heading"
+                        name={"contactSummaryHtml"}
+                        editButtonPlacement="top"
+                        editableEmptyFallback={
+                          <CustomMessageBox
+                            status={EFlashMessageStatus.info}
+                            description={t("jurisdiction.edit.contactSummaryEmptyState")}
+                          />
+                        }
+                      />
+                      <JurisdictionContactInfoBanner
+                        control={control}
+                        canManage={canManageAbout}
+                        qualifiedName={qualifiedName}
+                      />
+                      <Can
+                        action="jurisdiction:manage"
+                        data={{ jurisdiction: currentJurisdiction }}
+                        onPermissionDeniedRender={
+                          currentJurisdiction.contacts.length > 0 ? <ContactGrid isEditing={false} /> : null
+                        }
                       >
-                        <Flex justify="flex-end" w="full">
-                          <Button
-                            variant="primary"
-                            size="xs"
-                            leftIcon={<Pencil size={12} />}
-                            aria-label={isEditingContacts ? t("ui.done") : t("ui.edit")}
-                            onClick={() => {
-                              setIsEditingContacts((current) => !current)
-                            }}
-                          >
-                            {isEditingContacts ? t("ui.done") : t("ui.edit")}
-                          </Button>
-                        </Flex>
-                        <ContactGrid isEditing={isEditingContacts} />
-                      </Box>
-                    </Can>
-                  </Flex>
+                        <Box
+                          display="flex"
+                          flexDirection="column"
+                          border="1px dashed"
+                          borderColor="border.light"
+                          p={1}
+                          gap={1}
+                        >
+                          <Flex justify="flex-end" w="full">
+                            <Button
+                              variant="primary"
+                              size="xs"
+                              leftIcon={<Pencil size={12} />}
+                              aria-label={isEditingContacts ? t("ui.done") : t("ui.edit")}
+                              onClick={() => {
+                                setIsEditingContacts((current) => !current)
+                              }}
+                            >
+                              {isEditingContacts ? t("ui.done") : t("ui.edit")}
+                            </Button>
+                          </Flex>
+                          <ContactGrid isEditing={isEditingContacts} />
+                        </Box>
+                      </Can>
+                    </Flex>
+                  )}
                 </Flex>
                 <Can action={"jurisdiction:manage"} data={{ jurisdiction: currentJurisdiction }}>
                   <Center w="full" position="fixed" bottom={0} left={0} right={0}>
@@ -374,6 +410,7 @@ export const JurisdictionScreen = observer(() => {
                       isDisabled={isSubmitting}
                       isLoading={isSubmitting}
                       loadingText={t("ui.loading")}
+                      leftIcon={<FloppyDisk size={24} />}
                     >
                       {t("ui.save")}
                     </Button>
@@ -382,45 +419,77 @@ export const JurisdictionScreen = observer(() => {
               </Container>
             </form>
           </FormProvider>
-        </>
-      ) : (
-        <Container maxW="container.lg" py={{ base: 6, md: 16 }} px={8}>
-          <Box>
-            <Heading as="h2" fontSize="2xl" fontWeight="bold" mb={6}>
-              {t("jurisdiction.notUsingBPH.title")}
-            </Heading>
-            <Text fontSize="lg" mb={2}>
-              {t("jurisdiction.notUsingBPH.description")}
-            </Text>
-            <Text fontSize="lg" mb={8}>
-              {t("jurisdiction.notUsingBPH.noInfo", { jurisdictionName: qualifiedName })}
-            </Text>
-            <Box bg="theme.blueLight" borderRadius="lg" p={8} mb={8}>
-              <Heading as="h3" fontSize="xl" fontWeight="bold" mb={4}>
-                {t("jurisdiction.notUsingBPH.wantToUse.title")}
+        ) : (
+          <Container maxW="container.lg" py={{ base: 6, md: 16 }} px={8}>
+            <Box>
+              <Heading as="h2" fontSize="2xl" fontWeight="bold" mb={6}>
+                {t("jurisdiction.notUsingBPH.title")}
               </Heading>
-              <Text fontSize="md" mb={2}>
-                {t("jurisdiction.notUsingBPH.wantToUse.description")}
+              <Text fontSize="lg" mb={2}>
+                {t("jurisdiction.notUsingBPH.description")}
               </Text>
-              <Text fontSize="md" mb={6}>
-                {t("jurisdiction.notUsingBPH.wantToUse.emailButtonDescription")}
+              <Text fontSize="lg" mb={8}>
+                {t("jurisdiction.notUsingBPH.noInfo", { jurisdictionName: qualifiedName })}
               </Text>
-              <Button
-                as="a"
-                href={mailtoHref}
-                variant="primary"
-                size="lg"
-                rightIcon={<ArrowSquareOut />}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {t("jurisdiction.notUsingBPH.wantToUse.emailButtonText")}
-              </Button>
+              <Box bg="theme.blueLight" borderRadius="lg" p={8} mb={8}>
+                <Heading as="h3" fontSize="xl" fontWeight="bold" mb={4}>
+                  {t("jurisdiction.notUsingBPH.wantToUse.title")}
+                </Heading>
+                <Text fontSize="md" mb={2}>
+                  {t("jurisdiction.notUsingBPH.wantToUse.description")}
+                </Text>
+                <Text fontSize="md" mb={6}>
+                  {t("jurisdiction.notUsingBPH.wantToUse.emailButtonDescription")}
+                </Text>
+                <Button
+                  as="a"
+                  href={mailtoHref}
+                  variant="primary"
+                  size="lg"
+                  rightIcon={<ArrowSquareOut />}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {t("jurisdiction.notUsingBPH.wantToUse.emailButtonText")}
+                </Button>
+              </Box>
             </Box>
-          </Box>
-        </Container>
-      )}
-    </Flex>
+          </Container>
+        )}
+      </Flex>
+    )
+  }
+)
+
+export const JurisdictionScreen = observer(() => {
+  const { currentJurisdiction, error } = useJurisdiction()
+  const { userStore } = useMst()
+  const { currentUser } = userStore
+
+  const formMethods = useForm<TJurisdictionFieldValues>({
+    mode: "all",
+    defaultValues: getDefaultJurisdictionValuesForJurisdiction(currentJurisdiction),
+  })
+
+  const {
+    reset,
+    formState: { isSubmitting },
+  } = formMethods
+
+  useEffect(() => {
+    reset(getDefaultJurisdictionValuesForJurisdiction(currentJurisdiction))
+  }, [currentJurisdiction?.id])
+
+  if (error) return <ErrorScreen error={error} />
+  if (!currentJurisdiction) return <LoadingScreen />
+
+  return (
+    <JurisdictionScreenBody
+      currentJurisdiction={currentJurisdiction}
+      formMethods={formMethods}
+      isSubmitting={isSubmitting}
+      currentUser={currentUser}
+    />
   )
 })
 
@@ -428,14 +497,22 @@ interface IJurisdictionTipTapFormControllerProps {
   control: Control<TJurisdictionFieldValues>
   /** Optional; visible section title should use `headingId` + matching `id` on `<Heading>`. */
   label?: string
-  initialTriggerText: string
   name: keyof TJurisdictionFieldValues
   /** `id` of the section `<Heading>` — sets `aria-labelledby` on the editor wrapper for assistive tech. */
   headingId?: string
+  editButtonPlacement?: "inline" | "top"
+  editableEmptyFallback?: React.ReactNode
 }
 
 const JurisdictionTipTapFormController = observer(
-  ({ control, label, initialTriggerText, name, headingId }: IJurisdictionTipTapFormControllerProps) => {
+  ({
+    control,
+    label,
+    name,
+    headingId,
+    editButtonPlacement,
+    editableEmptyFallback,
+  }: IJurisdictionTipTapFormControllerProps) => {
     const { jurisdictionStore } = useMst()
     const { currentJurisdiction } = jurisdictionStore
     const { t } = useTranslation()
@@ -462,15 +539,11 @@ const JurisdictionTipTapFormController = observer(
               render={({ field: { value, onChange } }) => (
                 <JurisdictionEditorWithPreview
                   label={label}
-                  editText={t("ui.clickToEdit")}
                   htmlValue={value as string}
                   onChange={onChange}
-                  initialTriggerText={initialTriggerText}
                   containerProps={headingId ? { "aria-labelledby": headingId } : undefined}
-                  onRemove={(setEditMode) => {
-                    setEditMode(false)
-                    onChange("")
-                  }}
+                  editButtonPlacement={editButtonPlacement}
+                  editableEmptyFallback={editableEmptyFallback}
                 />
               )}
               name={name}
@@ -482,91 +555,3 @@ const JurisdictionTipTapFormController = observer(
     )
   }
 )
-
-interface IEditableMapProps {
-  currentJurisdiction: IJurisdiction
-}
-
-const EditableMap = ({ currentJurisdiction }: IEditableMapProps) => {
-  const { t } = useTranslation()
-  const [isEditingMap, setIsEditingMap] = useState(false)
-  const { control, watch, setValue } = useFormContext()
-  const mapPositionWatch = watch("mapPosition")
-  const mapZoomWatch = watch("mapZoom")
-
-  const editMapSteps = i18next.t("jurisdiction.edit.editMapSteps", { returnObjects: true }) as string[]
-
-  const handleFocus = (event: React.FocusEvent<HTMLInputElement>) => {
-    event.target.select()
-  }
-
-  return (
-    <Flex flex={1} w="full">
-      <Flex direction="column" w="full">
-        <Can action="jurisdiction:manage" data={{ jurisdiction: currentJurisdiction }}>
-          <Button
-            variant={"link"}
-            aria-label={"edit map position"}
-            onClick={() => {
-              setIsEditingMap((current) => !current)
-            }}
-            mb={1}
-          >
-            {!isEditingMap && t("jurisdiction.edit.clickToEditMap")}
-            {isEditingMap && t("jurisdiction.edit.clickToSeeMap")}
-          </Button>
-        </Can>
-        {isEditingMap && (
-          <>
-            <Box p={4} border="1px solid" borderRadius="md" borderColor="border.light" mb={4}>
-              <Text fontWeight="bold" mb={4}>
-                {t("jurisdiction.edit.editMapStart")}
-              </Text>
-              <OrderedList>
-                {editMapSteps.map((str) => (
-                  <ListItem key={str}>{str}</ListItem>
-                ))}
-              </OrderedList>
-              <Text>{t("jurisdiction.edit.editMapEnd")}</Text>
-            </Box>
-            <FormControl flex={1}>
-              <FormLabel>{t("jurisdiction.fields.mapPosition")}</FormLabel>
-              <Controller
-                name="mapPosition"
-                control={control}
-                render={({ field }) => (
-                  <HStack mb={2}>
-                    <Input
-                      type="number"
-                      onFocus={handleFocus}
-                      aria-label="jurisdiction latitude"
-                      placeholder="Latitude"
-                      value={field.value[0]}
-                      onChange={(e) => field.onChange([parseFloat(e.target.value), field.value[1]])}
-                    />
-                    <Input
-                      type="number"
-                      onFocus={handleFocus}
-                      aria-label="jurisdiction longitude"
-                      placeholder="Longitude"
-                      value={field.value[1]}
-                      onChange={(e) => field.onChange([field.value[0], parseFloat(e.target.value)])}
-                    />
-                  </HStack>
-                )}
-              />
-            </FormControl>
-          </>
-        )}
-        <JurisdictionMap
-          mapPosition={mapPositionWatch}
-          mapZoom={mapZoomWatch}
-          linePositions={currentJurisdiction.boundaryPoints}
-          onMapDrag={isEditingMap && ((latLng) => setValue("mapPosition", latLng))}
-          onZoomChange={isEditingMap && ((zoom) => setValue("mapZoom", zoom))}
-          isEditingMap={isEditingMap}
-        />
-      </Flex>
-    </Flex>
-  )
-}

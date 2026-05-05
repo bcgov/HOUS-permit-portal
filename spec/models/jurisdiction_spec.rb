@@ -115,6 +115,37 @@ RSpec.describe Jurisdiction, type: :model do
         ).to match_array(%w[published scheduled])
       end
     end
+
+    describe "office_email and office_telephone" do
+      let(:jurisdiction) { create(:sub_district) }
+
+      it "allows blank office_email and office_telephone" do
+        jurisdiction.assign_attributes(office_email: "", office_telephone: "")
+        expect(jurisdiction).to be_valid
+      end
+
+      it "rejects invalid office_email format" do
+        jurisdiction.office_email = "not-an-email"
+        expect(jurisdiction).not_to be_valid
+        expect(jurisdiction.errors[:office_email]).to be_present
+      end
+
+      it "accepts valid office_email" do
+        jurisdiction.office_email = "valid@example.com"
+        expect(jurisdiction).to be_valid
+      end
+
+      it "rejects invalid office_telephone" do
+        jurisdiction.office_telephone = "invalid_phone"
+        expect(jurisdiction).not_to be_valid
+        expect(jurisdiction.errors[:office_telephone]).to be_present
+      end
+
+      it "accepts valid office_telephone" do
+        jurisdiction.office_telephone = "+16045551234"
+        expect(jurisdiction).to be_valid
+      end
+    end
   end
 
   describe "callbacks" do
