@@ -5,22 +5,11 @@ import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
 import { EInboxDisplayMode, EPermitProjectRollupStatus, EProjectState } from "../types/enums"
 import { IParcelGeometry, IProjectAuditSummary, IProjectDocument } from "../types/types"
-import { ICollaborator } from "./collaborator"
+import { CollaboratorModel } from "./collaborator"
 import { JurisdictionModel } from "./jurisdiction"
 import { IPermitApplication, PermitApplicationModel } from "./permit-application"
+import { PermitProjectCollaborationModel } from "./permit-project-collaboration"
 import { PermitProjectInboxApplicationSearchSlice } from "./permit-project-inbox-application-search"
-
-export interface IAggregatedReviewCollaborator {
-  id: string
-  name: string
-  role: string
-  isProjectCollaborator: boolean
-}
-
-export interface IPermitProjectCollaboration {
-  id: string
-  collaborator: ICollaborator
-}
 
 const PermitProjectCoreModel = types.model("PermitProjectCore", {
   id: types.identifier,
@@ -71,9 +60,8 @@ const PermitProjectCoreModel = types.model("PermitProjectCore", {
   inboxSortOrder: types.maybeNull(types.number),
   daysInQueue: types.maybeNull(types.number),
   recentAudits: types.optional(types.array(types.frozen<IProjectAuditSummary>()), []),
-  reviewDelegatee: types.maybeNull(types.frozen<ICollaborator>()),
-  permitProjectCollaborations: types.optional(types.array(types.frozen<IPermitProjectCollaboration>()), []),
-  aggregatedReviewCollaborators: types.optional(types.array(types.frozen<IAggregatedReviewCollaborator>()), []),
+  reviewDelegatee: types.maybeNull(types.safeReference(CollaboratorModel)),
+  permitProjectCollaborations: types.optional(types.array(PermitProjectCollaborationModel), []),
   displayMode: types.optional(types.enumeration(Object.values(EInboxDisplayMode)), EInboxDisplayMode.list),
 })
 
@@ -237,9 +225,7 @@ export const PermitProjectModel = types
     }),
   }))
   .actions((self) => ({
-    bulkCreatePermitApplications: flow(function* (
-      params: Array<{ activityId: string; permitTypeId: string; firstNations: boolean }>
-    ) {
+    bulkCreatePermitApplications: flow(function* (params: Array<Record<string, unknown>>) {
       const response = yield* toGenerator(self.environment.api.createProjectPermitApplications(self.id, params))
       if (response.ok) {
         // Merge created applications into store

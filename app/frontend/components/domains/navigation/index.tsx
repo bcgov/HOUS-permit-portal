@@ -279,6 +279,11 @@ const TemplateVersionScreen = lazy(() =>
     default: module.TemplateVersionScreen,
   }))
 )
+const TemplateVersionPreviewScreen = lazy(() =>
+  import("../requirement-template/screens/template-version-preview-screen").then((module) => ({
+    default: module.TemplateVersionPreviewScreen,
+  }))
+)
 
 const ExportTemplatesScreen = lazy(() =>
   import("../jurisdictions/exports/export-templates-screen").then((module) => ({
@@ -313,11 +318,6 @@ const SiteConfigurationManagementScreen = lazy(() =>
     default: module.SiteConfigurationManagementScreen,
   }))
 )
-const PermitClassificationsScreen = lazy(() =>
-  import("../super-admin/site-configuration-management/permit-classifications-screen").then((module) => ({
-    default: module.PermitClassificationsScreen,
-  }))
-)
 const SitewideMessageScreen = lazy(() =>
   import("../super-admin/site-configuration-management/sitewide-message-screen").then((module) => ({
     default: module.SitewideMessageScreen,
@@ -334,10 +334,6 @@ const RevisionReasonSetupScreen = lazy(() =>
     default: module.RevisionReasonSetupScreen,
   }))
 )
-
-// DEPRECATED: StandardizationSetupScreen is no longer wired into the router.
-// Super admins now toggle publicly_previewable directly on the
-// TemplateVersionScreen. The file is kept for reference.
 
 const AdminUserIndexScreen = lazy(() =>
   import("../super-admin/site-configuration-management/users-screen").then((module) => ({
@@ -485,7 +481,6 @@ const AppRoutes = observer(() => {
       <Route path="/requirement-templates/:requirementTemplateId/edit" element={<EditRequirementTemplateScreen />} />
       <Route path="/template-versions/:templateVersionId" element={<TemplateVersionScreen />} />
       <Route path="/configuration-management" element={<SiteConfigurationManagementScreen />} />
-      <Route path="/configuration-management/permit-classifications" element={<PermitClassificationsScreen />} />
       <Route path="/configuration-management/sitewide-message" element={<SitewideMessageScreen />} />
       <Route path="/configuration-management/help-drawer-setup" element={<HelpDrawerSetupScreen />} />
       <Route path="/configuration-management/revision-reason-setup" element={<RevisionReasonSetupScreen />} />
@@ -818,6 +813,7 @@ const AppRoutes = observer(() => {
         <Route path="/accept-invitation" element={<AcceptInvitationScreen />} />
         <Route path="/contact" element={<ContactScreen />} />
         <Route path="/standardization-preview" element={<StandardizationPreviewScreen />} />
+        <Route path="/template-versions/:templateVersionId/preview" element={<TemplateVersionPreviewScreen />} />
         <Route path="/project-readiness-tools" element={<ProjectReadinessToolsIndexScreen />} />
         <Route path="/privacy-policy" element={<PrivacyPolicyScreen />} />
         <Route

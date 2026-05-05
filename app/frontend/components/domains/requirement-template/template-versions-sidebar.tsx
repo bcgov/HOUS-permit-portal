@@ -72,7 +72,7 @@ export const TemplateVersionsSidebar = observer(function TemplateVersionsSidebar
               fontSize={"md"}
               fontWeight={700}
               mt={2}
-            >{`${t("requirementTemplate.versionSidebar.subtitlePrefix")} ${requirementTemplate.label}`}</Text>
+            >{`${t("requirementTemplate.versionSidebar.subtitlePrefix")} ${requirementTemplate.displayLabel}`}</Text>
           </DrawerHeader>
 
           <DrawerBody py={10} px={8}>

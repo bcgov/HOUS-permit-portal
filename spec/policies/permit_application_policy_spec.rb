@@ -281,7 +281,8 @@ RSpec.describe PermitApplicationPolicy do
 
     it "finalize_revision_requests? respects designated reviewer feature" do
       reviewer = create(:user, :review_manager, jurisdiction:)
-      review_rel = double("ReviewRel", exists?: true)
+      delegatee_rel = double("DelegateeRel", first: nil)
+      review_rel = double("ReviewRel", delegatee: delegatee_rel)
       record =
         double(
           "PermitApplication",

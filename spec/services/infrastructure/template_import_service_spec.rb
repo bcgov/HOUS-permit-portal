@@ -32,7 +32,6 @@ RSpec.describe Infrastructure::TemplateImportService do
       allow(ENV).to receive(:[]).with("IMPORT_ENABLED").and_return("true")
 
       service = described_class.new("/tmp/in.zip")
-      allow(service).to receive(:prepare_classification_map)
       allow(service).to receive(:wipe_data!)
       allow(service).to receive(:import_model)
       allow(service).to receive(:reindex_models)
@@ -41,7 +40,6 @@ RSpec.describe Infrastructure::TemplateImportService do
 
       service.call
 
-      expect(service).to have_received(:prepare_classification_map)
       expect(service).to have_received(:wipe_data!)
       expect(service).to have_received(:reindex_models)
     end
@@ -78,19 +76,6 @@ RSpec.describe Infrastructure::TemplateImportService do
       ).to be_nil
     end
 
-    it "captures old classification map in prepare_classification_map" do
-      allow(PermitClassification).to receive(:pluck).with(
-        :code,
-        :id
-      ).and_return([%w[c1 id1]])
-
-      service.send(:prepare_classification_map)
-
-      expect(service.instance_variable_get(:@old_classification_map)).to eq(
-        { "c1" => "id1" }
-      )
-    end
-
     it "sanitizes RequirementBlock attributes by removing association_list" do
       attrs = { "id" => "rb-1", "association_list" => %w[a b], "name" => "N" }
       fixed = service.send(:apply_fixups, RequirementBlock, attrs)
@@ -98,35 +83,28 @@ RSpec.describe Infrastructure::TemplateImportService do
       expect(fixed["name"]).to eq("N")
     end
 
-    it "applies RequirementTemplate fixups and remaps classification ids" do
+    it "applies RequirementTemplate fixups and strips removed classification columns" do
       service.instance_variable_set(:@site_configuration_id, "sc-9")
-      service.instance_variable_set(
-        :@classification_id_map,
-        { "pt-old" => "pt-new", "act-old" => "act-new" }
-      )
 
       attrs = {
         "id" => "t-1",
         "assignee_id" => "x",
         "site_configuration_id" => "sc-old",
         "permit_type_id" => "pt-old",
-        "activity_id" => "act-old"
+        "activity_id" => "act-old",
+        "first_nations" => true
       }
 
       fixed = service.send(:apply_fixups, RequirementTemplate, attrs)
 
       expect(fixed["assignee_id"]).to be_nil
       expect(fixed["site_configuration_id"]).to eq("sc-9")
-      expect(fixed["permit_type_id"]).to eq("pt-new")
-      expect(fixed["activity_id"]).to eq("act-new")
+      expect(fixed).not_to have_key("permit_type_id")
+      expect(fixed).not_to have_key("activity_id")
+      expect(fixed).not_to have_key("first_nations")
     end
 
-    it "remaps denormalized_template_json permit_type/activity ids for TemplateVersion" do
-      service.instance_variable_set(
-        :@classification_id_map,
-        { "pt-old" => "pt-new", "act-old" => "act-new" }
-      )
-
+    it "strips removed classification keys from denormalized_template_json for TemplateVersion" do
       attrs = {
         "id" => "v-1",
         "deprecated_by_id" => "x",
@@ -134,67 +112,28 @@ RSpec.describe Infrastructure::TemplateImportService do
           "permit_type" => {
             "id" => "pt-old"
           },
+          "permitType" => {
+            "id" => "pt-old"
+          },
           "activity" => {
             "id" => "act-old"
-          }
+          },
+          "first_nations" => true,
+          "firstNations" => true,
+          "other" => "kept"
         }
       }
 
       fixed = service.send(:apply_fixups, TemplateVersion, attrs)
 
       expect(fixed["deprecated_by_id"]).to be_nil
-      expect(
-        fixed.dig("denormalized_template_json", "permit_type", "id")
-      ).to eq("pt-new")
-      expect(fixed.dig("denormalized_template_json", "activity", "id")).to eq(
-        "act-new"
-      )
-    end
-
-    it "tracks classification id changes when export id differs from local id" do
-      service.instance_variable_set(
-        :@old_classification_map,
-        { "c1" => "old-1" }
-      )
-      service.instance_variable_set(:@classification_id_map, {})
-
-      service.send(
-        :track_classification_id_change,
-        { "code" => "c1", "id" => "new-1" }
-      )
-
-      map = service.instance_variable_get(:@classification_id_map)
-      expect(map["new-1"]).to eq("old-1")
-    end
-
-    it "preserves existing PermitClassification ids by code and maps export ids" do
-      service.instance_variable_set(:@classification_id_map, {})
-
-      existing =
-        instance_double("PermitClassification", id: "local-1", update!: true)
-      allow(PermitClassification).to receive(:find_by) do |args|
-        args[:code] == "c1" ? existing : nil
-      end
-      allow(PermitClassification).to receive(:create!)
-
-      records = [
-        {
-          "id" => "export-1",
-          "code" => "c1",
-          "created_at" => "x",
-          "name" => "N"
-        },
-        { "id" => "export-2", "code" => "c2", "name" => "N2" }
-      ]
-
-      service.send(:handle_classification_upsert, records)
-
-      map = service.instance_variable_get(:@classification_id_map)
-      expect(map["export-1"]).to eq("local-1")
-      expect(map["export-2"]).to eq("export-2")
-      expect(PermitClassification).to have_received(:create!).with(
-        hash_including("code" => "c2")
-      )
+      json = fixed["denormalized_template_json"]
+      expect(json).not_to have_key("permit_type")
+      expect(json).not_to have_key("permitType")
+      expect(json).not_to have_key("activity")
+      expect(json).not_to have_key("first_nations")
+      expect(json).not_to have_key("firstNations")
+      expect(json["other"]).to eq("kept")
     end
 
     it "upsert_batch uses upsert_all for non-classification models" do

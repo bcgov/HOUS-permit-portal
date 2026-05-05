@@ -28,7 +28,7 @@ class Part9StepCode < StepCode
   end
 
   def step_requirements
-    all = jurisdiction.permit_type_required_steps
+    all = jurisdiction.jurisdiction_step_requirements
     all.customizations.any? ? all.customizations : all
   end
 

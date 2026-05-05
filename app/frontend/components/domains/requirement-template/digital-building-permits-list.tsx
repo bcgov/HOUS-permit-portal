@@ -8,7 +8,6 @@ import { ITemplateVersion } from "../../../models/template-version"
 import { ETemplateVersionStatus } from "../../../types/enums"
 import { ErrorScreen } from "../../shared/base/error-screen"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
-import { FirstNationsTag } from "../../shared/first-nations-tag"
 import { RouterLink } from "../../shared/navigation/router-link"
 import { TemplateStatusTag } from "../../shared/requirement-template/template-status-tag"
 import { can } from "../../shared/user/can"
@@ -16,10 +15,8 @@ import { VersionTag } from "../../shared/version-tag"
 import { SectionBox } from "../home/section-box"
 
 interface IProps {
-  activityId?: string
   renderButton?: (templateVersion: ITemplateVersion) => React.ReactNode
   status?: ETemplateVersionStatus
-  earlyAccess?: boolean
   isPubliclyPreviewable?: boolean
   statusDisplayOptions?: {
     showStatus?: boolean
@@ -28,19 +25,15 @@ interface IProps {
 }
 
 export const DigitalBuildingPermitsList = observer(function DigitalBuildingPermitsList({
-  activityId,
   renderButton,
   status,
   statusDisplayOptions,
-  earlyAccess,
   isPubliclyPreviewable,
 }: IProps) {
   const { t } = useTranslation()
   const { error, templateVersions, isLoading } = useTemplateVersions({
-    activityId,
     customErrorMessage: t("errors.fetchBuildingPermits"),
     status,
-    earlyAccess,
     isPubliclyPreviewable,
   })
   const { showStatus = false, showVersionDate = true } = statusDisplayOptions || {}
@@ -67,7 +60,7 @@ export const DigitalBuildingPermitsList = observer(function DigitalBuildingPermi
             <Flex w="full" as="section">
               <Stack spacing={3} flex={1}>
                 <Text as="h3" color={"text.link"} fontWeight={700} fontSize="xl">
-                  {templateVersion.denormalizedTemplateJson.label}
+                  {templateVersion.denormalizedTemplateJson.nickname}
                 </Text>
                 <Text fontSize={"sm"} color={"text.secondary"}>
                   {templateVersion.denormalizedTemplateJson?.description}
@@ -80,7 +73,11 @@ export const DigitalBuildingPermitsList = observer(function DigitalBuildingPermi
                 </Text>
                 <HStack gap={4} align="center">
                   <VersionTag versionDate={templateVersion.versionDate} w="fit-content" />
-                  {templateVersion.denormalizedTemplateJson.firstNations && <FirstNationsTag />}
+                  {(templateVersion.denormalizedTemplateJson?.tags ?? []).length > 0 && (
+                    <Text fontSize="sm" color="text.secondary">
+                      {(templateVersion.denormalizedTemplateJson?.tags ?? []).join(", ")}
+                    </Text>
+                  )}
                   {showStatusTag && (
                     <TemplateStatusTag
                       status={templateVersion.status}

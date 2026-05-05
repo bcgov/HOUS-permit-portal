@@ -129,41 +129,9 @@ class TemplateVersioningService
     template_version
   end
 
-  def self.create_or_update_published_version_for_early_access!(
-    requirement_template
-  )
-    unless requirement_template.type == EarlyAccessRequirementTemplate.name
-      raise TemplateVersionPublishError,
-            I18n.t(
-              "services.template_versioning_service.early_access_version_error"
-            )
-    end
-
-    attributes = {
-      denormalized_template_json:
-        RequirementTemplateBlueprint.render_as_hash(
-          requirement_template,
-          view: :template_snapshot
-        ),
-      form_json: requirement_template.to_form_json,
-      requirement_blocks_json:
-        form_requirement_blocks_hash(requirement_template),
-      version_date: Date.current,
-      status: "published"
-    }
-    if requirement_template.id.present?
-      requirement_template.reload_published_template_version
-    end
-    version =
-      requirement_template.published_template_version ||
-        requirement_template.template_versions.build
-    version.assign_attributes(attributes)
-    version.save!
-  end
-
   # ── Draft workflow methods ──────────────────────────────────────────────
 
-  # Creates a new draft TemplateVersion for a LiveRequirementTemplate.
+  # Creates a new draft TemplateVersion for a RequirementTemplate.
   # Snapshots the current template state (sections, blocks, form JSON)
   # into the draft's JSON columns so edits are isolated from canonical records.
   def self.create_draft!(requirement_template, assignee: nil)
@@ -249,45 +217,106 @@ class TemplateVersioningService
     draft_version
   end
 
-  # Promotes a draft to scheduled status with a future version_date.
-  # The draft's JSON snapshot becomes the scheduled version's snapshot.
+  # Promotes a draft to scheduled status with a future version_date. The draft's
+  # JSON snapshot becomes the scheduled version's snapshot. Any sibling scheduled
+  # versions whose version_date is on or before the incoming date are auto-
+  # unscheduled (deprecated with reason :unscheduled) so the newly-scheduled
+  # draft becomes the canonical next version. Pass skip_date_check: true (gated
+  # on ENABLE_TEMPLATE_FORCE_PUBLISH) to force-publish the draft inline with
+  # today's version_date; in that case publish_version! handles deprecation of
+  # existing published/scheduled versions via deprecate_versions_before_template.
   def self.promote_draft_to_scheduled!(
     draft_version,
     version_date,
     change_notes: nil,
-    change_significance: nil
+    change_significance: nil,
+    skip_date_check: false,
+    current_user: nil
   )
     unless draft_version.draft?
       raise TemplateVersionDraftError, "Can only promote a draft version"
     end
 
     requirement_template = draft_version.requirement_template
-    unless is_valid_schedule_version_date?(requirement_template, version_date)
-      raise TemplateVersionScheduleError.new(
-              I18n.t(
-                "services.template_versioning_service.invalid_schedule_date"
+
+    if skip_date_check
+      unless ENV["ENABLE_TEMPLATE_FORCE_PUBLISH"] == "true"
+        raise TemplateVersionForcePublishNowError.new(
+                I18n.t(
+                  "services.template_versioning_service.force_publish_disabled"
+                )
               )
-            )
+      end
+      version_date = Date.current
+    else
+      unless version_date > Date.current
+        raise TemplateVersionScheduleError.new(
+                I18n.t(
+                  "services.template_versioning_service.invalid_schedule_date"
+                )
+              )
+      end
     end
 
-    # Compute the diff against the currently published version
-    version_diff = compute_version_diff(draft_version)
+    ActiveRecord::Base.transaction do
+      unless skip_date_check
+        unschedule_conflicting_scheduled_versions!(
+          requirement_template,
+          version_date,
+          current_user,
+          exclude_id: draft_version.id
+        )
+      end
 
-    draft_version.assign_attributes(
-      status: "scheduled",
-      version_date: version_date,
-      version_diff: version_diff,
-      change_notes: change_notes,
-      change_significance: change_significance
-    )
+      draft_version.assign_attributes(
+        status: "scheduled",
+        version_date: version_date,
+        version_diff: compute_version_diff(draft_version),
+        change_notes: change_notes,
+        change_significance: change_significance
+      )
 
-    unless draft_version.save
-      raise TemplateVersionScheduleError.new(
-              draft_version.errors.full_messages.join(", ")
-            )
+      unless draft_version.save
+        raise TemplateVersionScheduleError.new(
+                draft_version.errors.full_messages.join(", ")
+              )
+      end
+
+      if skip_date_check
+        publish_version!(draft_version, true)
+
+        WebsocketBroadcaster.push_update_to_relevant_users(
+          User.super_admin.kept.all.pluck(:id),
+          Constants::Websockets::Events::TemplateVersion::DOMAIN,
+          Constants::Websockets::Events::TemplateVersion::TYPES[:update],
+          TemplateVersionBlueprint.render_as_hash(draft_version)
+        )
+      end
     end
 
     draft_version
+  end
+
+  # Deprecates sibling scheduled TemplateVersions whose version_date is on or
+  # before the incoming version_date. Uses unschedule! so each row carries
+  # deprecation_reason: :unscheduled and deprecated_by: current_user. Pass
+  # exclude_id to skip a specific TemplateVersion (e.g. the one being promoted
+  # to scheduled in the same transaction).
+  def self.unschedule_conflicting_scheduled_versions!(
+    requirement_template,
+    incoming_version_date,
+    current_user,
+    exclude_id: nil
+  )
+    scope =
+      requirement_template
+        .template_versions
+        .where(status: TemplateVersion.statuses[:scheduled])
+        .where("version_date <= ?", incoming_version_date)
+
+    scope = scope.where.not(id: exclude_id) if exclude_id.present?
+
+    scope.each { |tv| unschedule!(tv, current_user) }
   end
 
   # When a draft is published, optionally write block changes back to the

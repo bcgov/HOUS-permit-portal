@@ -22,37 +22,11 @@ class Api::TemplateVersionsController < Api::ApplicationController
 
   def index
     status = template_version_params[:status] || "published"
-    early_access = template_version_params[:early_access] || false
-    type =
-      (
-        if early_access == "true"
-          "EarlyAccessRequirementTemplate"
-        else
-          "LiveRequirementTemplate"
-        end
-      )
     @template_versions =
-      if params[:activity_id].present?
-        policy_scope(TemplateVersion)
-          .joins(:requirement_template)
-          .includes(requirement_template: %i[permit_type activity])
-          .where(
-            activity: {
-              id: params[:activity_id]
-            },
-            requirement_templates: {
-              type: type
-            }
-          )
-          .order(updated_at: :desc)
-          .where(status:)
-      else
-        policy_scope(TemplateVersion)
-          .order(updated_at: :desc)
-          .joins(:requirement_template)
-          .includes(requirement_template: %i[permit_type activity])
-          .where(status:, requirement_templates: { type: type })
-      end
+      policy_scope(TemplateVersion)
+        .order(updated_at: :desc)
+        .joins(:requirement_template)
+        .where(status:)
 
     render_success @template_versions,
                    nil,
@@ -71,7 +45,7 @@ class Api::TemplateVersionsController < Api::ApplicationController
       TemplateVersion
         .where(publicly_previewable: true, status: :draft)
         .joins(:requirement_template)
-        .includes(requirement_template: %i[activity permit_type])
+        .includes(:requirement_template)
         .where(requirement_templates: { discarded_at: nil })
         .order(updated_at: :desc)
 
@@ -176,18 +150,9 @@ class Api::TemplateVersionsController < Api::ApplicationController
         TemplateVersion.find(
           copy_customization_params[:from_template_version_id]
         )
-    elsif copy_customization_params[:from_non_first_nations] &&
-          @template_version.first_nations
-      requirement_template =
-        RequirementTemplate.find_by(
-          activity: @template_version.activity,
-          permit_type: @template_version.permit_type,
-          first_nations: false
-        )
-      from_template_version = requirement_template&.published_template_version
     end
 
-    if requirement_template.nil? || from_template_version.nil?
+    if from_template_version.nil?
       render_error(
         "jurisdiction_template_version_customization.no_copy_target_error",
         status: :not_found
@@ -380,41 +345,8 @@ class Api::TemplateVersionsController < Api::ApplicationController
       render_error "template_version.invite_previewers_error" and return
     end
 
-    results = { previews: [], failed_emails: [] }
-
-    draft_previewer_params[:emails].each do |email|
-      begin
-        email = email.strip
-        user =
-          User.where(omniauth_email: email).or(User.where(email: email)).first
-        unless user
-          # Create a minimal user for previewing
-          username = email.split("@").first
-          name_parts = username.split(".")
-          user =
-            User.create!(
-              first_name: name_parts[0]&.capitalize || "Preview",
-              last_name: (name_parts[1] || "User").capitalize,
-              email: email,
-              role: :submitter
-            )
-        end
-
-        preview =
-          @template_version
-            .template_version_previews
-            .find_or_create_by!(previewer: user) do |p|
-              p.expires_at = 60.days.from_now
-            end
-
-        results[:previews] << preview
-      rescue StandardError => e
-        results[:failed_emails] << {
-          email: email,
-          error: e.message.truncate(80)
-        }
-      end
-    end
+    service = TemplateVersionPreview::ManagementService.new(@template_version)
+    result = service.invite_previewers!(draft_previewer_params[:emails])
 
     render_success @template_version,
                    "template_version.invite_previewers_success",
@@ -423,7 +355,7 @@ class Api::TemplateVersionsController < Api::ApplicationController
                      blueprint_opts: {
                        view: :extended
                      },
-                     meta: results
+                     meta: result
                    }
   end
 
@@ -457,7 +389,7 @@ class Api::TemplateVersionsController < Api::ApplicationController
   private
 
   def template_version_params
-    params.permit(:activity_id, :status, :early_access)
+    params.permit(:status)
   end
 
   def template_version_sandbox_scope
@@ -480,7 +412,6 @@ class Api::TemplateVersionsController < Api::ApplicationController
         template_version_id
         jurisdiction_id
         from_template_version_id
-        from_non_first_nations
         include_tips
         include_electives
       ]

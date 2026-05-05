@@ -11,8 +11,6 @@ RSpec.describe AutomatedCompliance::ParcelInfoExtractor,
     let!(:permit_application) do
       create(
         :permit_application,
-        permit_type: requirement_template.permit_type,
-        activity: requirement_template.activity,
         pid: "031562868",
         full_address: "757 W Hastings St, Vancouver, BC V6C 1A1",
         template_version: requirement_template.published_template_version
@@ -76,8 +74,6 @@ RSpec.describe AutomatedCompliance::ParcelInfoExtractor,
     let!(:permit_application) do
       create(
         :permit_application,
-        permit_type: requirement_template.permit_type,
-        activity: requirement_template.activity,
         pin: "15304230",
         pid: nil,
         full_address: "3090 Takaya Dr, North Vancouver, BC V7H 3A8",

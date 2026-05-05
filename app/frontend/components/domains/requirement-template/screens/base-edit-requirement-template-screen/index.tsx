@@ -507,8 +507,6 @@ function formFormDefaults(requirementTemplate?: IRequirementTemplate): IRequirem
   return {
     description: requirementTemplate.description,
     nickname: requirementTemplate.nickname,
-    permitTypeId: requirementTemplate.permitType?.id,
-    activityId: requirementTemplate.activity?.id,
     requirementTemplateSectionsAttributes,
   }
 }

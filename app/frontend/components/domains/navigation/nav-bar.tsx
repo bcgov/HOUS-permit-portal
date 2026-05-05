@@ -39,6 +39,11 @@ function isTemplateVersionPath(path: string): boolean {
   return regex.test(path)
 }
 
+function isTemplateVersionPreviewPath(path: string): boolean {
+  const regex = /^\/template-versions\/([a-f\d-]+)\/preview$/
+  return regex.test(path)
+}
+
 function isPermitApplicationPath(path: string): boolean {
   const regex = /^\/permit-applications\/([a-f\d-]+)/
   return regex.test(path)
@@ -120,6 +125,7 @@ function shouldHideSubNavbarForPath(path: string): boolean {
     (path) => path === "/",
     isTemplateEditPath,
     isTemplateVersionPath,
+    isTemplateVersionPreviewPath,
     isPermitApplicationEditPath,
     isPermitApplicationPath,
     isDigitalPermitEditPath,

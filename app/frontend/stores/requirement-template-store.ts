@@ -187,6 +187,11 @@ export const RequirementTemplateStoreModel = types
       }
       return response.ok
     }),
+    searchTagOptions: flow(function* (query: string) {
+      const response = yield* toGenerator(self.environment.api.searchTags({ query }))
+      const tags = (response?.ok ? response.data : []) as string[]
+      return (Array.isArray(tags) ? tags : []).map((tag) => ({ value: tag, label: tag }))
+    }),
   }))
   .actions((self) => ({
     copyRequirementTemplate: flow(function* (requirementTemplateValues?: ICopyRequirementTemplateFormData) {
@@ -232,13 +237,14 @@ export const RequirementTemplateStoreModel = types
     promoteDraft: flow(function* (
       templateId: string,
       params: {
-        versionDate: string
+        versionDate?: string
         changeNotes?: string
         changeSignificance?: string
         notificationScope?: string
         notifiedJurisdictionIds?: string[]
         promoteBlockIds?: string[]
         sendAdvanceNotice?: boolean
+        skipDateCheck?: boolean
       }
     ) {
       const response = yield* toGenerator(self.environment.api.promoteDraft(templateId, params))

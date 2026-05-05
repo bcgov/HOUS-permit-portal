@@ -7,7 +7,7 @@ import React, { useEffect, useState } from "react"
 import { Controller, useFieldArray, useForm } from "react-hook-form"
 import { IJurisdiction } from "../../../../../../../models/jurisdiction"
 import { EFlashMessageStatus } from "../../../../../../../types/enums"
-import { IPermitTypeRequiredStep } from "../../../../../../../types/types"
+import { IJurisdictionStepRequirement } from "../../../../../../../types/types"
 import { generateUUID } from "../../../../../../../utils/utility-functions"
 import { CustomMessageBox } from "../../../../../../shared/base/custom-message-box"
 import { EditableBlockContainer, EditableBlockHeading } from "../../shared/editable-block"
@@ -17,32 +17,31 @@ import { ZeroCarbonStepSelect } from "./zero-carbon-step-select"
 
 interface IProps {
   heading: string
-  permitTypeId: string
   jurisdiction: IJurisdiction
 }
 
+type TJurisdictionStepRequirementField = IJurisdictionStepRequirement & { _destroy?: boolean }
+
 export const Part9EnergyStepEditableBlock = observer(function Part9EnergyStepEditableBlock({
   heading,
-  permitTypeId,
   jurisdiction,
 }: IProps) {
-  type TPermitTypeRequiredStepField = IPermitTypeRequiredStep & { _destroy?: boolean }
   const getDefaultValues = () => {
-    const steps = jurisdiction.part9RequiredSteps as TPermitTypeRequiredStepField[]
+    const steps = jurisdiction.part9RequiredSteps as TJurisdictionStepRequirementField[]
     if (R.isEmpty(steps)) {
       return {
-        permitTypeRequiredStepsAttributes: [
-          { permitTypeId, default: true, energyStepRequired: undefined, zeroCarbonStepRequired: undefined },
+        jurisdictionStepRequirementsAttributes: [
+          { default: true, energyStepRequired: undefined, zeroCarbonStepRequired: undefined },
         ],
       }
     }
     return {
-      permitTypeRequiredStepsAttributes: [...steps],
+      jurisdictionStepRequirementsAttributes: [...steps],
     }
   }
 
   interface IFormValues {
-    permitTypeRequiredStepsAttributes: TPermitTypeRequiredStepField[]
+    jurisdictionStepRequirementsAttributes: TJurisdictionStepRequirementField[]
   }
   const { handleSubmit, reset, formState, watch, register, control } = useForm<IFormValues>({
     mode: "onChange",
@@ -56,7 +55,7 @@ export const Part9EnergyStepEditableBlock = observer(function Part9EnergyStepEdi
   }
 
   const { isSubmitting, isValid } = formState
-  const fieldArrayName = "permitTypeRequiredStepsAttributes"
+  const fieldArrayName = "jurisdictionStepRequirementsAttributes"
   const { fields, append, remove, update } = useFieldArray({
     control,
     name: fieldArrayName,
@@ -65,11 +64,11 @@ export const Part9EnergyStepEditableBlock = observer(function Part9EnergyStepEdi
 
   const watchRequiredSteps = watch(fieldArrayName)
 
-  const permitTypeFields = R.filter((f) => f.permitTypeId == permitTypeId, fields as TPermitTypeRequiredStepField[])
-  const customFields = R.filter((f) => !f.default, permitTypeFields)
+  const defaultFields = R.filter((f) => f.default, fields as TJurisdictionStepRequirementField[])
+  const customFields = R.filter((f) => !f.default && !f._destroy, fields as TJurisdictionStepRequirementField[])
   const getIndex = (field) => R.findIndex((f) => f.key == field?.key, fields)
 
-  const defaultIndex = getIndex(R.find((f) => f.default, permitTypeFields))
+  const defaultIndex = Math.max(0, getIndex(R.find((f) => f.default, defaultFields)))
 
   const [isEditing, setIsEditing] = useState(false)
   const [isCustomizing, setIsCustomizing] = useState(!R.isEmpty(customFields))
@@ -81,10 +80,10 @@ export const Part9EnergyStepEditableBlock = observer(function Part9EnergyStepEdi
   }
 
   const onAdd = () => {
-    append({ permitTypeId, energyStepRequired: undefined, zeroCarbonStepRequired: undefined, default: null })
+    append({ energyStepRequired: undefined, zeroCarbonStepRequired: undefined, default: false })
   }
 
-  const onRemove = (index: number, field?: TPermitTypeRequiredStepField) => {
+  const onRemove = (index: number, field?: TJurisdictionStepRequirementField) => {
     if (field) {
       update(index, R.mergeRight(field, { _destroy: true }))
     } else {
@@ -104,7 +103,7 @@ export const Part9EnergyStepEditableBlock = observer(function Part9EnergyStepEdi
   }
 
   useEffect(() => {
-    if (R.none((f) => !f.default && !f._destroy && f.permitTypeId == permitTypeId, watchRequiredSteps)) {
+    if (R.none((f) => !f.default && !f._destroy, watchRequiredSteps || [])) {
       setIsCustomizing(false)
     } else {
       setIsCustomizing(true)
@@ -120,7 +119,7 @@ export const Part9EnergyStepEditableBlock = observer(function Part9EnergyStepEdi
       <EditableBlockContainer w="full">
         <Flex direction="column" w="20%" alignSelf="flex-start">
           <Text textTransform="uppercase" color="text.secondary" fontSize="sm" mb={4}>
-            {t(`${i18nPrefix}.stepRequired.permitTypeHeading`)}
+            {t(`${i18nPrefix}.stepRequired.tagsHeading`)}
           </Text>
           <EditableBlockHeading>{heading}</EditableBlockHeading>
         </Flex>
@@ -138,7 +137,6 @@ export const Part9EnergyStepEditableBlock = observer(function Part9EnergyStepEdi
             <Text fontWeight="bold">{t(`${i18nPrefix}.stepRequired.standardToPass`)}</Text>
             <Flex gap={14} flex={1}>
               <Input type="hidden" {...register(`${fieldArrayName}.${defaultIndex}.id`)} />
-              <Input type="hidden" {...register(`${fieldArrayName}.${defaultIndex}.permitTypeId`)} />
               <Input type="hidden" {...register(`${fieldArrayName}.${defaultIndex}.default`)} />
               <FormControl>
                 <FormLabel noOfLines={1}>{t(`${i18nPrefix}.stepRequired.energy.title`)}</FormLabel>
@@ -199,8 +197,7 @@ export const Part9EnergyStepEditableBlock = observer(function Part9EnergyStepEdi
                 const trueIndex = getIndex(f)
                 return (
                   <React.Fragment key={f.id || generateUUID()}>
-                    <Input type="hidden" name={`${fieldArrayName}.${trueIndex}.id`} value={f?.id} />
-                    <Input type="hidden" name={`${fieldArrayName}.${trueIndex}.permitTypeId`} value={permitTypeId} />
+                    <Input type="hidden" name={`${fieldArrayName}.${trueIndex}.id`} value={f?.id || ""} />
                     <Flex gap={4}>
                       <Flex gap={4} flex={1}>
                         <FormControl flex={1}>

@@ -2,54 +2,32 @@ require "rails_helper"
 
 RSpec.describe RequirementTemplate, type: :model do
   describe "associations" do
-    it { should belong_to(:activity) }
-    it { should belong_to(:permit_type) }
     it { should have_many(:requirement_template_sections) }
     it { should have_many(:template_versions) }
     it { should have_one(:published_template_version) }
   end
 
-  describe "visibility" do
-    it "returns early_access for early access templates" do
-      template = build(:early_access_requirement_template)
-      expect(template.visibility).to eq("early_access")
+  describe "#set_default_nickname" do
+    it "preserves nickname when present" do
+      template = build(:live_requirement_template, nickname: "My Template")
+      template.valid?
+
+      expect(template.nickname).to eq("My Template")
     end
 
-    it "returns live for live templates" do
-      template = build(:live_requirement_template)
-      expect(template.visibility).to eq("live")
-    end
-  end
+    it "derives nickname from tags when blank" do
+      template = build(:live_requirement_template, nickname: nil)
+      template.tag_list.add("Part 9", "New Construction")
+      template.valid?
 
-  describe "#label" do
-    it "includes permit type and activity names" do
-      permit_type = create(:permit_type, name: "Permit A")
-      activity = create(:activity, name: "Activity B")
-      template =
-        build(
-          :live_requirement_template,
-          permit_type: permit_type,
-          activity: activity,
-          first_nations: false
-        )
-
-      expect(template.label).to eq("Permit A | Activity B")
+      expect(template.nickname).to eq("Part 9 | New Construction")
     end
 
-    it "adds first nations indicator when flagged" do
-      permit_type = create(:permit_type, name: "Permit A")
-      activity = create(:activity, name: "Activity B")
-      template =
-        build(
-          :live_requirement_template,
-          permit_type: permit_type,
-          activity: activity,
-          first_nations: true
-        )
+    it "defaults to 'New template' when nickname and tags are both blank" do
+      template = build(:live_requirement_template, nickname: nil)
+      template.valid?
 
-      expect(template.label).to include(
-        I18n.t("activerecord.attributes.requirement_template.first_nations")
-      )
+      expect(template.nickname).to eq("New template")
     end
   end
 
@@ -269,10 +247,7 @@ RSpec.describe RequirementTemplate, type: :model do
       copied =
         RequirementTemplateCopyService.new(
           template
-        ).build_requirement_template_from_existing(
-          nickname: "Copy",
-          first_nations: !template.first_nations
-        )
+        ).build_requirement_template_from_existing(nickname: "Copy")
 
       expect(copied).to be_valid
       expect(copied.copied_from).to eq(template)

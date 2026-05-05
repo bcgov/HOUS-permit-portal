@@ -152,22 +152,22 @@ RSpec.describe RequirementsFromXlsxSeeder do
       errors = []
       sheet = double("BlocksSheet")
 
-      activity = instance_double("Activity", name: "A")
-      permit_type = instance_double("PermitType", name: "P")
-      allow(Activity).to receive(:find_by_code!).with(
-        "new_construction"
-      ).and_return(activity)
-      allow(PermitType).to receive(:find_by_code!).with(
-        "low_residential"
-      ).and_return(permit_type)
-
-      template = double("LiveRequirementTemplate", reload: true)
+      tag_list = double("TagList")
+      allow(tag_list).to receive(:add)
+      template =
+        double(
+          "RequirementTemplate",
+          tag_list: tag_list,
+          save!: true,
+          reload: true
+        )
       relation = double("Relation")
-      allow(LiveRequirementTemplate).to receive(:where).with(
-        activity: activity,
-        permit_type: permit_type
+      allow(RequirementTemplate).to receive(:where).with(
+        nickname: "new_construction - low_residential"
       ).and_return(relation)
-      allow(relation).to receive(:first_or_create).and_return(template)
+      allow(relation).to receive(:first_or_create).with(
+        nickname: "new_construction - low_residential"
+      ).and_return(template)
 
       allow(described_class).to receive(:setup_sheet)
       allow(described_class).to receive(:force_a_published_template_version)
@@ -181,9 +181,13 @@ RSpec.describe RequirementsFromXlsxSeeder do
         errors
       )
 
+      expect(tag_list).to have_received(:add).with(
+        "new_construction",
+        "low_residential"
+      )
       expect(described_class).to have_received(:setup_sheet).with(
-        activity,
-        permit_type,
+        "new_construction",
+        "low_residential",
         sheet,
         template,
         [],
@@ -247,8 +251,8 @@ RSpec.describe RequirementsFromXlsxSeeder do
 
       described_class.send(
         :setup_sheet,
-        instance_double("Activity", name: "Act"),
-        instance_double("PermitType", name: "PT"),
+        "new_construction",
+        "low_residential",
         sheet,
         requirement_template,
         valid_rows,

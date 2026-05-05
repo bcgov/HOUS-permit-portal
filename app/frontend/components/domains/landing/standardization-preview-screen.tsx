@@ -13,7 +13,6 @@ import {
 } from "@chakra-ui/react"
 import { CaretRight } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
-import * as R from "ramda"
 import React, { useEffect } from "react"
 import { useTranslation } from "react-i18next"
 import { ITemplateVersion } from "../../../models/template-version"
@@ -38,60 +37,49 @@ export const StandardizationPreviewScreen = observer(function StandardizationPre
   const underDevelopment = templateVersions.filter((tv) => !tv.isAvailableForAdoption)
 
   const renderTemplateGrid = (templates: ITemplateVersion[]) => {
-    const groupedTemplates = R.groupBy((tv) => tv.activityCategory ?? "uncategorized", templates)
-
     return (
-      <VStack spacing={8} align="start" w="full">
-        {Object.entries(groupedTemplates).map(([category, categoryTemplates]) => (
-          <VStack key={category} spacing={4} align="start" w="full">
-            <Heading as="h3" size="md" mb={2} pb={1}>
-              {t(`classification.categories.${category}`, { defaultValue: category })}
-            </Heading>
-            <Grid templateColumns={{ base: "minmax(0, 400px)", md: "repeat(2, minmax(0, 400px))" }} gap={6} w="full">
-              {categoryTemplates?.map((template) => (
-                <LinkBox
-                  key={template.id}
-                  border="1px solid"
-                  borderColor="border.light"
-                  borderRadius="md"
-                  p={6}
-                  h="full"
-                  position="relative"
-                  _hover={{ borderColor: "theme.blue", boxShadow: "sm" }}
-                  transition="all 0.2s"
-                  cursor="pointer"
-                >
-                  <VStack align="start" spacing={4} h="full" justify="space-between">
-                    <Box>
-                      <Heading as="h4" size="sm" mb={3}>
-                        {template.nickname}
-                      </Heading>
-                      <Text fontSize="sm" color="text.secondary">
-                        {template.description}
-                      </Text>
-                    </Box>
-                    <LinkOverlay
-                      as={RouterLink}
-                      to={`/template-versions/${template.id}`}
-                      color="text.link"
-                      fontWeight="bold"
-                      display="flex"
-                      alignItems="center"
-                      gap={2}
-                      _hover={{ textDecoration: "underline" }}
-                      alignSelf="flex-end"
-                      width="full"
-                      justifyContent="flex-end"
-                    >
-                      {t("standardizationPreview.previewDraftForm")} <CaretRight />
-                    </LinkOverlay>
-                  </VStack>
-                </LinkBox>
-              ))}
-            </Grid>
-          </VStack>
+      <Grid templateColumns={{ base: "minmax(0, 400px)", md: "repeat(2, minmax(0, 400px))" }} gap={6} w="full">
+        {templates.map((template) => (
+          <LinkBox
+            key={template.id}
+            border="1px solid"
+            borderColor="border.light"
+            borderRadius="md"
+            p={6}
+            h="full"
+            position="relative"
+            _hover={{ borderColor: "theme.blue", boxShadow: "sm" }}
+            transition="all 0.2s"
+            cursor="pointer"
+          >
+            <VStack align="start" spacing={4} h="full" justify="space-between">
+              <Box>
+                <Heading as="h4" size="sm" mb={3}>
+                  {template.nickname}
+                </Heading>
+                <Text fontSize="sm" color="text.secondary">
+                  {template.description}
+                </Text>
+              </Box>
+              <LinkOverlay
+                as={RouterLink}
+                to={`/template-versions/${template.id}`}
+                color="text.link"
+                fontWeight="bold"
+                display="flex"
+                alignItems="center"
+                gap={2}
+                _hover={{ textDecoration: "underline" }}
+                alignSelf="flex-end"
+                width="full"
+                justifyContent="flex-end"
+              >
+                {t("standardizationPreview.previewDraftForm")} <CaretRight />
+              </LinkOverlay>
+            </VStack>
+          </LinkBox>
         ))}
-      </VStack>
+      </Grid>
     )
   }
 

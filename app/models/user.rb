@@ -84,10 +84,6 @@ class User < ApplicationRecord
            class_name: "Collaborator",
            dependent: :destroy
 
-  has_many :early_access_previews,
-           class_name: "EarlyAccessPreview",
-           dependent: :destroy,
-           foreign_key: :previewer_id
   has_many :template_version_previews,
            dependent: :destroy,
            foreign_key: :previewer_id

@@ -6,13 +6,6 @@ RSpec.describe SubmissionDataKeyConverterService,
   describe ".call" do
     # Ensure necessary base data for factories if they rely on `first` records
     let!(:jurisdiction) { FactoryBot.create(:sub_district) }
-    let!(:permit_type) do
-      PermitType.first ||
-        FactoryBot.create(:permit_type, code: :low_residential)
-    end
-    let!(:activity) do
-      Activity.first || FactoryBot.create(:activity, code: :new_construction)
-    end
     let!(:template_version) { FactoryBot.create(:template_version) }
 
     let!(:file_data_snake_case) do
@@ -106,12 +99,6 @@ RSpec.describe SubmissionDataKeyConverterService,
       PermitApplication.destroy_all
       # Ensure base records for factories if they are not created by let!
       FactoryBot.create(:sub_district) unless SubDistrict.exists?
-      unless PermitType.exists?(code: :low_residential)
-        FactoryBot.create(:permit_type, code: :low_residential)
-      end
-      unless Activity.exists?(code: :new_construction)
-        FactoryBot.create(:activity, code: :new_construction)
-      end
       FactoryBot.create(:template_version) unless TemplateVersion.exists?
     end
 
@@ -123,8 +110,6 @@ RSpec.describe SubmissionDataKeyConverterService,
           :permit_application,
           submitter: FactoryBot.create(:user, role: "submitter"),
           jurisdiction: jurisdiction,
-          permit_type: permit_type,
-          activity: activity,
           template_version: template_version
         )
       # Then, update it with the specific data needed for the test.
@@ -139,8 +124,6 @@ RSpec.describe SubmissionDataKeyConverterService,
           :permit_application,
           submitter: FactoryBot.create(:user, role: "submitter"),
           jurisdiction: jurisdiction,
-          permit_type: permit_type,
-          activity: activity,
           template_version: template_version
         )
       pa.update!(submission_data: submission_data_with_mixed)
@@ -153,8 +136,6 @@ RSpec.describe SubmissionDataKeyConverterService,
           :permit_application,
           submitter: FactoryBot.create(:user, role: "submitter"),
           jurisdiction: jurisdiction,
-          permit_type: permit_type,
-          activity: activity,
           template_version: template_version
         )
       pa.update!(submission_data: submission_data_all_camel)
@@ -167,8 +148,6 @@ RSpec.describe SubmissionDataKeyConverterService,
           :permit_application,
           submitter: FactoryBot.create(:user, role: "submitter"),
           jurisdiction: jurisdiction,
-          permit_type: permit_type,
-          activity: activity,
           template_version: template_version
         )
       pa.update!(submission_data: nil)
@@ -181,8 +160,6 @@ RSpec.describe SubmissionDataKeyConverterService,
           :permit_application,
           submitter: FactoryBot.create(:user, role: "submitter"),
           jurisdiction: jurisdiction,
-          permit_type: permit_type,
-          activity: activity,
           template_version: template_version
         )
       pa.update!(submission_data: {})
@@ -355,8 +332,6 @@ RSpec.describe SubmissionDataKeyConverterService,
             :permit_application,
             submitter: FactoryBot.create(:user, role: "submitter"),
             jurisdiction: jurisdiction,
-            permit_type: permit_type,
-            activity: activity,
             template_version: template_version
           )
         @pa_to_update.update!(submission_data: submission_data_with_snake)
@@ -366,8 +341,6 @@ RSpec.describe SubmissionDataKeyConverterService,
             :permit_application,
             submitter: FactoryBot.create(:user, role: "submitter"),
             jurisdiction: jurisdiction,
-            permit_type: permit_type,
-            activity: activity,
             template_version: template_version
           )
         @pa_no_update_needed.update!(submission_data: submission_data_all_camel)
@@ -377,8 +350,6 @@ RSpec.describe SubmissionDataKeyConverterService,
             :permit_application,
             submitter: FactoryBot.create(:user, role: "submitter"),
             jurisdiction: jurisdiction,
-            permit_type: permit_type,
-            activity: activity,
             template_version: template_version
           )
         @pa_nil_data.update!(submission_data: nil)
@@ -400,8 +371,6 @@ RSpec.describe SubmissionDataKeyConverterService,
             :permit_application,
             submitter: FactoryBot.create(:user, role: "submitter"),
             jurisdiction: jurisdiction,
-            permit_type: permit_type,
-            activity: activity,
             template_version: template_version
           )
         pa.update!(submission_data: submission_data_with_snake)
