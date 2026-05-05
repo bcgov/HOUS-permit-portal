@@ -268,6 +268,14 @@ Rails.application.routes.draw do
       collection { patch :reorder }
     end
 
+    resources :qa_tools, only: [] do
+      collection do
+        post "permit_projects/full", to: "qa_tools#create_full_permit_project"
+        post "permit_applications/:id/autofill",
+             to: "qa_tools#autofill_permit_application"
+      end
+    end
+
     resources :permit_collaborations, only: %i[destroy] do
       post "reinvite", on: :member, to: "permit_collaborations#reinvite"
     end

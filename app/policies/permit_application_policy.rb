@@ -35,6 +35,16 @@ class PermitApplicationPolicy < ApplicationPolicy
     end
   end
 
+  def qa_autofill?
+    is_draft = record.draft?
+    update_allowed = is_draft && update?
+    review_staff_allowed =
+      user.review_staff? && sandbox.present? &&
+        user.member_of?(record.jurisdiction_id) && record.sandbox == sandbox
+
+    update_allowed || review_staff_allowed
+  end
+
   def retrigger_submission_webhook?
     record.submitted? && update?
   end
