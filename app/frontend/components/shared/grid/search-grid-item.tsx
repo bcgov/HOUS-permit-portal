@@ -8,7 +8,7 @@ interface ISearchGridItemProps extends GridItemProps {
 export const SearchGridItem = ({ children, ...rest }: ISearchGridItemProps) => {
   return (
     <GridItem
-      p={4}
+      p={3}
       display="flex"
       justifyContent="flex-start"
       alignItems="center"

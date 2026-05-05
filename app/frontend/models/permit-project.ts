@@ -13,7 +13,7 @@ import { PermitProjectInboxApplicationSearchSlice } from "./permit-project-inbox
 
 const PermitProjectCoreModel = types.model("PermitProjectCore", {
   id: types.identifier,
-  title: types.string,
+  title: types.optional(types.string, "-"),
   fullAddress: types.maybeNull(types.string),
   pid: types.maybeNull(types.string),
   number: types.maybeNull(types.string),
@@ -185,25 +185,40 @@ export const PermitProjectModel = types
       return []
     }),
     markAsViewed: flow(function* () {
+      const wasUnread = !self.viewedAt
+      const state = self.state
       const response = yield* toGenerator(self.environment.api.viewPermitProject(self.id))
       if (response.ok) {
         self.rootStore.permitProjectStore.mergeUpdate(response.data.data, "permitProjectMap")
+        if (wasUnread) {
+          self.rootStore.submissionInboxStore?.permitProjectSearch?.adjustUnreadCountForColumn(state, -1)
+        }
       }
       return response.ok
     }),
     markAsUnviewed: flow(function* () {
+      const wasViewed = !!self.viewedAt
+      const state = self.state
       const response = yield* toGenerator(self.environment.api.unviewPermitProject(self.id))
       if (response.ok) {
         self.rootStore.permitProjectStore.mergeUpdate(response.data.data, "permitProjectMap")
+        if (wasViewed) {
+          self.rootStore.submissionInboxStore?.permitProjectSearch?.adjustUnreadCountForColumn(state, 1)
+        }
       }
       return response.ok
     }),
     transitionState: flow(function* (targetState: string) {
       const oldState = self.state
+      const isUnread = !self.viewedAt
       const response = yield* toGenerator(self.environment.api.transitionPermitProjectState(self.id, targetState))
       if (response.ok) {
         self.rootStore.permitProjectStore.mergeUpdate(response.data.data, "permitProjectMap")
-        self.rootStore.submissionInboxStore?.permitProjectSearch?.adjustCountsForTransition(oldState, targetState)
+        self.rootStore.submissionInboxStore?.permitProjectSearch?.adjustCountsForTransition(
+          oldState,
+          targetState,
+          isUnread
+        )
       }
       return response
     }),

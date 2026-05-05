@@ -99,14 +99,9 @@ export const ProjectInboxTable = observer(function ProjectInboxTable({ searchSto
           <HStack spacing={3}>
             <Circle size="8px" bg={!project.viewedAt ? "theme.blueActive" : "transparent"} flexShrink={0} />
 
-            <VStack align="start" spacing={0}>
-              <Text fontWeight={700} fontSize="sm">
-                {project.number}
-              </Text>
-              <Text fontSize="xs" color="text.secondary" noOfLines={1}>
-                {project.title}
-              </Text>
-            </VStack>
+            <Text fontWeight={700} fontSize="sm">
+              {project.number}
+            </Text>
           </HStack>
         </SearchGridItem>
 
@@ -205,7 +200,7 @@ export const ProjectInboxTable = observer(function ProjectInboxTable({ searchSto
     <Flex direction="column" flex={1} minH={0} minW={0} w="full" align="stretch">
       <Box flex={1} minH={0} overflow="auto">
         <SearchGrid
-          templateColumns="2fr 1.5fr 1fr 1fr 1fr 1fr 72px"
+          templateColumns="minmax(160px, 2fr) minmax(180px, 1.5fr) minmax(160px, 1fr) minmax(140px, 1fr) minmax(160px, 1fr) minmax(120px, 1fr) 72px"
           gridRowClassName="project-inbox-grid-row"
           overflow="visible"
           sx={{
@@ -230,7 +225,7 @@ export const ProjectInboxTable = observer(function ProjectInboxTable({ searchSto
                     onClick={() => toggleSort(field)}
                     borderRight="1px solid"
                     borderColor="border.light"
-                    px={4}
+                    px={3}
                   >
                     <HStack spacing={1}>
                       <Text textAlign="left">{getSortColumnHeader(field)}</Text>

@@ -834,8 +834,8 @@ export const PermitApplicationModel = types.snapshotProcessor(
         if (response.ok) {
           const { data: stepCode } = response.data
           self.rootStore.stepCodeStore.mergeUpdate(stepCode, "stepCodesMap")
-          // Refresh current permit application from server so associations are consistent
-          yield self.rootStore.permitApplicationStore.fetchPermitApplication(self.id)
+          self.stepCode = cast(stepCode.id)
+          self.rootStore.stepCodeStore.setCurrentStepCode(stepCode.id)
         }
         return response.ok
       }),
@@ -859,18 +859,36 @@ export const PermitApplicationModel = types.snapshotProcessor(
         return response.ok
       }),
       markAsViewed: flow(function* () {
+        const wasUnread = !self.isViewed
+        const status = self.status
         const response = yield self.environment.api.viewPermitApplication(self.id)
         if (response.ok) {
           const { data: permitApplication } = response.data
           self.rootStore.permitApplicationStore.mergeUpdate(permitApplication, "permitApplicationMap")
+          if (wasUnread) {
+            self.rootStore.submissionInboxStore?.permitApplicationSearch?.adjustUnreadCountForColumn(status, -1)
+            const currentProject = self.rootStore.permitProjectStore.currentPermitProject
+            if (currentProject?.id === self.projectId) {
+              currentProject.adjustUnreadCountForColumn(status, -1)
+            }
+          }
         }
         return response.ok
       }),
       markAsUnviewed: flow(function* () {
+        const wasViewed = !!self.isViewed
+        const status = self.status
         const response = yield self.environment.api.unviewPermitApplication(self.id)
         if (response.ok) {
           const { data: permitApplication } = response.data
           self.rootStore.permitApplicationStore.mergeUpdate(permitApplication, "permitApplicationMap")
+          if (wasViewed) {
+            self.rootStore.submissionInboxStore?.permitApplicationSearch?.adjustUnreadCountForColumn(status, 1)
+            const currentProject = self.rootStore.permitProjectStore.currentPermitProject
+            if (currentProject?.id === self.projectId) {
+              currentProject.adjustUnreadCountForColumn(status, 1)
+            }
+          }
         }
         return response.ok
       }),
@@ -937,16 +955,23 @@ export const PermitApplicationModel = types.snapshotProcessor(
 
       transitionStatus: flow(function* (targetStatus: string) {
         const oldStatus = self.status
+        const isUnread = !self.isViewed
         const response = yield self.environment.api.transitionPermitApplicationStatus(self.id, targetStatus)
         if (response.ok) {
           const responseData = response.data.data
+          const newStatus = responseData.status
           self.status = responseData.status
           self.allowedManualTransitions.replace(responseData.allowedManualTransitions || [])
           self.inboxSortOrder = responseData.inboxSortOrder ?? null
           self.rootStore.submissionInboxStore?.permitApplicationSearch?.adjustCountsForTransition(
             oldStatus,
-            targetStatus
+            newStatus,
+            isUnread
           )
+          const currentProject = self.rootStore.permitProjectStore.currentPermitProject
+          if (isUnread && currentProject?.id === self.projectId) {
+            currentProject.moveUnreadCountBetweenColumns(oldStatus, newStatus)
+          }
         }
         return response
       }),

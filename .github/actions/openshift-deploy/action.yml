@@ -66,8 +66,11 @@ runs:
     - name: Confirm branch and SHA to deploy
       id: confirm-deploy-target
       shell: bash
+      env:
+        DEPLOY_BRANCH: ${{ inputs.branch }}
+        ENVIRONMENT_LABEL: ${{ inputs.environment_label }}
       run: |
-        echo "Deploying branch: ${{ inputs.branch }} @ ${{ env.GITHUB_SHA }} to ${{ inputs.environment_label }}"
+        echo "Deploying branch: ${DEPLOY_BRANCH} @ ${GITHUB_SHA} to ${ENVIRONMENT_LABEL}"
 
     - name: Build Docker Image
       id: build-image

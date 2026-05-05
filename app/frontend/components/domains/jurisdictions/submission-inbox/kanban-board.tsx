@@ -2,11 +2,12 @@ import { Badge, Box, Button, Flex, HStack, Text, Tooltip } from "@chakra-ui/reac
 import { closestCenter, DndContext, DragEndEvent, PointerSensor, useSensor, useSensors } from "@dnd-kit/core"
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers"
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
-import { CaretLeft, CaretRight, Empty } from "@phosphor-icons/react"
+import { CaretLeft, CaretRight } from "@phosphor-icons/react"
 import { AnimatePresence, motion } from "framer-motion"
 import { observer } from "mobx-react-lite"
 import React, { ReactNode, useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
+import { UnreadBadge } from "../../../shared/filters/inbox-filter"
 
 export interface IKanbanColumn {
   key: string
@@ -46,6 +47,8 @@ interface IProps<T extends IKanbanItem> {
   items: T[]
   stateCounts: Record<string, number>
   columnTotals?: Record<string, number>
+  unreadCounts?: Record<string, number>
+  emptyColumnMessage: string
   collapsedColumns: string[]
   onToggleColumn: (columnKey: string) => void
   renderCard: (item: T, context: IKanbanCardContext) => ReactNode
@@ -58,6 +61,8 @@ function KanbanBoardInner<T extends IKanbanItem>({
   items,
   stateCounts,
   columnTotals,
+  unreadCounts,
+  emptyColumnMessage,
   collapsedColumns,
   onToggleColumn,
   renderCard,
@@ -166,13 +171,13 @@ function KanbanBoardInner<T extends IKanbanItem>({
           {columns.map((column) => {
             const columnItems = groupedItems[column.key] || []
             const isEmpty = columnItems.length === 0
-            const isManuallyCollapsed = !isEmpty && collapsedColumns.includes(column.key)
-            const isCollapsed = isEmpty || isManuallyCollapsed
+            const isCollapsed = collapsedColumns.includes(column.key)
             const displayedCount = columnItems.length
             const totalCount = stateCounts[column.key] ?? displayedCount
             const filteredTotal = columnTotals?.[column.key] ?? totalCount
             const hasMore = displayedCount < filteredTotal
-            const unreadCount = columnItems.filter((item) => item.isUnread).length
+            const unreadCount = unreadCounts?.[column.key] ?? columnItems.filter((item) => item.isUnread).length
+            const columnCountLabel = isEmpty ? filteredTotal : `${displayedCount}/${totalCount}`
 
             return (
               <Flex
@@ -213,29 +218,23 @@ function KanbanBoardInner<T extends IKanbanItem>({
                           gap={5}
                         >
                           <Flex minH="24px" align="center" justify="center" flexShrink={0}>
-                            {isEmpty ? (
-                              <Box py={1}>
-                                <Empty size={14} />
-                              </Box>
-                            ) : (
-                              <Button
-                                aria-label="Show column"
-                                leftIcon={<CaretRight size={12} />}
-                                variant="ghost"
-                                size="xs"
-                                minW="48px"
-                                h={6}
-                                px={0.5}
-                                mt={0}
-                                fontSize="xs"
-                                fontWeight="normal"
-                                color="text.secondary"
-                                iconSpacing={0.25}
-                                onClick={() => onToggleColumn(column.key)}
-                              >
-                                {t("submissionInbox.showColumn")}
-                              </Button>
-                            )}
+                            <Button
+                              aria-label="Show column"
+                              leftIcon={<CaretRight size={12} />}
+                              variant="ghost"
+                              size="xs"
+                              minW="48px"
+                              h={6}
+                              px={0.5}
+                              mt={0}
+                              fontSize="xs"
+                              fontWeight="normal"
+                              color="text.secondary"
+                              iconSpacing={0.25}
+                              onClick={() => onToggleColumn(column.key)}
+                            >
+                              {t("submissionInbox.showColumn")}
+                            </Button>
                           </Flex>
                           <Flex justify="center" flexShrink={0} w="full">
                             <Text
@@ -250,21 +249,20 @@ function KanbanBoardInner<T extends IKanbanItem>({
                               {column.label}
                             </Text>
                           </Flex>
-                          <Flex direction="column" align="center" flexShrink={0} gap={2}>
-                            <Badge
-                              borderRadius="full"
-                              px={2}
-                              fontSize="xs"
-                              bg="white"
-                              color="text.secondary"
-                              border="1px solid"
-                              borderColor="border.light"
-                              whiteSpace="nowrap"
-                              alignSelf="center"
-                            >
-                              {displayedCount}/{totalCount}
-                            </Badge>
-                          </Flex>
+                          <Badge
+                            borderRadius="full"
+                            px={2}
+                            fontSize="xs"
+                            bg="white"
+                            color="text.secondary"
+                            border="1px solid"
+                            borderColor="border.light"
+                            whiteSpace="nowrap"
+                            alignSelf="center"
+                          >
+                            {columnCountLabel}
+                          </Badge>
+                          <UnreadBadge count={unreadCount} />
                         </Flex>
                       </Tooltip>
                     </motion.div>
@@ -291,6 +289,7 @@ function KanbanBoardInner<T extends IKanbanItem>({
                             {column.label}
                           </Text>
                           <HStack spacing={1}>
+                            <UnreadBadge count={unreadCount} />
                             <Badge
                               borderRadius="full"
                               px={2}
@@ -300,7 +299,7 @@ function KanbanBoardInner<T extends IKanbanItem>({
                               border="1px solid"
                               borderColor="border.light"
                             >
-                              {displayedCount}/{totalCount}
+                              {columnCountLabel}
                             </Badge>
                             <Button
                               aria-label="Collapse column"
@@ -339,12 +338,20 @@ function KanbanBoardInner<T extends IKanbanItem>({
                         }}
                       >
                         <SortableContext items={columnItems.map((i) => i.id)} strategy={verticalListSortingStrategy}>
-                          {columnItems.map((item, index) =>
-                            renderCard(item, {
-                              isFirst: index === 0,
-                              isLast: index === columnItems.length - 1,
-                              onMove: buildMoveHandler(columnItems, index),
-                            })
+                          {isEmpty ? (
+                            <Flex flex={1} align="center" justify="center" minH="200px">
+                              <Text color="greys.grey01" textAlign="center">
+                                {emptyColumnMessage}
+                              </Text>
+                            </Flex>
+                          ) : (
+                            columnItems.map((item, index) =>
+                              renderCard(item, {
+                                isFirst: index === 0,
+                                isLast: index === columnItems.length - 1,
+                                onMove: buildMoveHandler(columnItems, index),
+                              })
+                            )
                           )}
                         </SortableContext>
                         {hasMore && onShowMore && (

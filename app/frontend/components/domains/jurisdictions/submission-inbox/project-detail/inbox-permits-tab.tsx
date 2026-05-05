@@ -200,6 +200,7 @@ export const InboxPermitsTab = observer(function InboxPermitsTab({ permitProject
             applications={applications}
             stateCounts={permitProject.stateCounts}
             columnTotals={permitProject.columnTotals}
+            unreadCounts={permitProject.unreadColumnCounts}
             collapsedColumns={collapsedColumns}
             onToggleColumn={(key) =>
               setCollapsedColumns((prev) => (prev.includes(key) ? prev.filter((c) => c !== key) : [...prev, key]))
