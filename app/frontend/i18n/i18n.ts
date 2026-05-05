@@ -896,7 +896,6 @@ const options = {
             title: "Role/Position",
             department: "Department",
             email: "Email",
-            telephone: "Telephone",
             phone: "Phone no.",
             extension: "Extension",
             cell: "Mobile no.",
@@ -961,7 +960,6 @@ const options = {
             displayContactSummaryLabel: "Contact Summary Section (public)",
             addContactSummary: "Click to add a Contact Summary section",
             firstContact: "The first contact will be displayed upon successful permit application submission.",
-            contactsEmptyState: "No contacts have been configured yet.",
             clickToEditContacts: "Click to edit contacts",
             clickToShowContacts: "Click to show contacts as they will be seen",
             clickToEditMap: "Click to edit map",
@@ -993,10 +991,6 @@ const options = {
               zeroCarbonStepRequired: "Zero carbon step required",
             },
             updateButton: "Update jurisdiction",
-            accordion: {
-              overviewProcess: "Overview & Process",
-              keyInformation: "Key Information",
-            },
           },
           new: {
             title: "Create new jurisdiction",
@@ -1038,30 +1032,14 @@ const options = {
           lat: "Latitude",
           lng: "Longitude",
           title: "Local housing permits",
-          supportedSectionHeading: "How local permits are supported:",
-          cta: {
-            apply: {
-              title: "Ready to start?",
-              description:
-                "In the Building Permit Hub, you'll first create a Project with your property details, then add your specific Permits to it.",
-              button: "Apply for a Permit",
-            },
-            tools: {
-              title: "Only need tools?",
-              description: "Use Step Code, overheating, and other tools without starting an application.",
-              button: "Use tools",
-            },
-          },
-          heroBannerDescription:
-            "Jurisdiction description: {{jurisdictionName}} provides guidance, services, and regulatory oversight for residents and businesses within its municipal boundary.",
           notEnabled: "Permit application submissions are temporarily unavailable for this jurisdiction.",
           checklist: "Checklist",
           lookOut: "Things to look out for",
           resources: {
             title: "Resources",
-            sectionTitle: "Local Resources",
+            sectionTitle: "Resources for applicants",
             description: "Additional resources and reference materials to help you with your application:",
-            emptyForStaff: "No local resources have been configured yet.",
+            emptyForStaff: "No resources for applicants have been set up yet.",
             configureResourcesLink: "Add resources in Configuration.",
             categories: {
               planning_zoning: "Planning & zoning",
