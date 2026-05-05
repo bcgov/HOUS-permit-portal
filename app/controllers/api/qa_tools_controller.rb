@@ -74,7 +74,9 @@ class Api::QaToolsController < Api::ApplicationController
   private
 
   def require_qa_mode!
-    head :not_found unless ENV["VITE_QA_MODE"] == "true"
+    return if ENV["VITE_QA_MODE"] == "true"
+
+    head :not_found
   end
 
   def require_sandbox_for_review_staff!
