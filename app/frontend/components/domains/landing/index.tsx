@@ -18,8 +18,6 @@ import { observer } from "mobx-react-lite"
 import React, { ReactNode, useEffect, useRef } from "react"
 import { Trans, useTranslation } from "react-i18next"
 import { useMst } from "../../../setup/root"
-import { HeroBanner } from "../../shared/base/hero-banner"
-import { HighlightedLayout } from "../../shared/base/highlighted-layout"
 import { RouterLink } from "../../shared/navigation/router-link"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { StepCodeLookupTool } from "../project-readiness-tools/step-code-lookup-tool"
@@ -41,25 +39,47 @@ export const LandingScreen = observer(({}: ILandingScreenProps) => {
 
   return (
     <Flex direction="column" w="full" bg="greys.white">
-      <HeroBanner h={{ base: "calc(100vh - 200px)", sm: "364px" }} containerProps={{ p: 8 }}>
-        <HighlightedLayout p={8} maxW="468px" gap={2}>
-          <Heading as="h1" fontSize="2xl">
-            {t("landing.title")}
-          </Heading>
-          <Text fontSize="lg">{t("landing.intro")}</Text>
-          <RouterLinkButton
-            to={currentUser ? "/" : "/login"}
-            variant="primaryInverse"
-            rightIcon={<CaretRight size={16} />}
-          >
-            {currentUser
-              ? t("landing.goTo", {
-                  location: currentUser?.isSuperAdmin ? t("landing.adminPanel") : t("landing.projectsPanel"),
-                })
-              : t("landing.permitApp")}
-          </RouterLinkButton>
-        </HighlightedLayout>
-      </HeroBanner>
+      <Flex
+        align="center"
+        h={{ base: "calc(100vh - 200px)", sm: "364px" }}
+        bgImage="/images/header-background.jpeg"
+        bgPosition="center 60%"
+        bgRepeat="no-repeat"
+        bgSize="cover"
+        bgColor="theme.blue"
+      >
+        <Flex direction="column" justify="center" bgColor="theme.blueShadedLight" w="full" height="full">
+          <Container maxW="container.lg" px={8}>
+            <Flex
+              direction="column"
+              p={8}
+              maxW="468px"
+              bg="theme.blueShadedDark"
+              color="greys.white"
+              borderRadius="sm"
+              borderLeft="8px solid"
+              borderColor="theme.yellow"
+              gap={2}
+            >
+              <Heading as="h1" fontSize="2xl">
+                {t("landing.title")}
+              </Heading>
+              <Text fontSize="lg">{t("landing.intro")}</Text>
+              <RouterLinkButton
+                to={currentUser ? "/" : "/login"}
+                variant="primaryInverse"
+                rightIcon={<CaretRight size={16} />}
+              >
+                {currentUser
+                  ? t("landing.goTo", {
+                      location: currentUser?.isSuperAdmin ? t("landing.adminPanel") : t("landing.projectsPanel"),
+                    })
+                  : t("landing.permitApp")}
+              </RouterLinkButton>
+            </Flex>
+          </Container>
+        </Flex>
+      </Flex>
       <Box bg="greys.grey03">
         <Flex as="section" direction="column" gap={20}>
           <VStack spacing={4} py={4} px={8} align="start" w="full" maxW="container.lg" mx="auto">

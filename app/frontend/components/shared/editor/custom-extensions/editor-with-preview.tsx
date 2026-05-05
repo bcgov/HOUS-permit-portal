@@ -1,60 +1,93 @@
-import { Box, Button, ButtonProps, Text } from "@chakra-ui/react"
+import { Box, BoxProps, Button, ButtonProps, Text } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
-import React from "react"
+import React, { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
+import { sanitizeTipTapHtml } from "../../../../utils/sanitize-tiptap-content"
+import { isTipTapEmpty } from "../../../../utils/utility-functions"
 import { Editor } from "../editor"
 import { SafeTipTapDisplay } from "../safe-tiptap-display"
-import { TUseEditorWithPreviewProps, useEditorWithPreview } from "./use-editor-with-preview"
 
-const previewParagraphSx = {
-  "& p": {
-    marginBottom: "0.5em",
-  },
-}
-
-type TEditorWithPreviewPresentationProps = {
+export type TEditorWithPreviewProps = {
   label?: string
+  htmlValue: string
   onChange?: (htmlValue: string) => void
+  containerProps?: BoxProps
   editText?: string
   editTextButtonProps?: ButtonProps
-}
+  onRemove?: (setEditMode: (editMode: boolean) => void) => void
+  isReadOnly?: boolean
+} & (
+  | { initialTriggerText: string; renderInitialTrigger?: never }
+  | {
+      initialTriggerText?: never
+      renderInitialTrigger: (buttonProps: ButtonProps) => JSX.Element
+    }
+  | { initialTriggerText?: never; renderInitialTrigger?: never }
+)
 
-export type TEditorWithPreviewProps = Omit<TUseEditorWithPreviewProps, "htmlValue"> & {
-  htmlValue: string
-} & TEditorWithPreviewPresentationProps
-
-export type {
-  TEditorWithPreviewInitialTriggerProps,
-  TUseEditorWithPreviewProps,
-  TUseEditorWithPreviewResult,
-} from "./use-editor-with-preview"
-
-export const EditorWithPreview = observer(function EditorWithPreview(props: TEditorWithPreviewProps) {
-  const { label, onChange, editText, editTextButtonProps, ...hookInput } = props
+export const EditorWithPreview = observer(function EditorWithPreview({
+  label,
+  htmlValue = "",
+  onChange,
+  containerProps,
+  renderInitialTrigger,
+  initialTriggerText,
+  editText,
+  editTextButtonProps,
+  onRemove,
+  isReadOnly,
+}: TEditorWithPreviewProps) {
+  // Sanitize htmlValue before using it to prevent XSS attacks (CVE-2021-3163)
+  // This protects against malicious content in edit mode (TipTap) and preview mode (SafeTipTapDisplay)
+  const sanitizedHtmlValue = useMemo(() => sanitizeTipTapHtml(htmlValue), [htmlValue])
+  const isEditorEmpty = isTipTapEmpty(sanitizedHtmlValue)
+  const [isEditMode, setIsEditMode] = useState(false)
   const { t } = useTranslation()
-  const removeLabel = t("ui.remove")
-  const doneLabel = t("ui.done")
 
-  const {
-    sanitizedHtmlValue,
-    isEditMode,
-    setIsEditMode,
-    isEditable,
-    mainContainerProps,
-    handleClickDone,
-    handleRemoveClick,
-    showInitialTriggerOnly,
-  } = useEditorWithPreview(hookInput as TUseEditorWithPreviewProps)
+  const isEditable = isEditMode && !isReadOnly
+  const mainContainerProps: BoxProps = {
+    pos: "relative",
+    _hover: {
+      bg: isReadOnly ? undefined : "theme.blueLight",
+    },
+    bg: isEditable ? "theme.blueLight" : undefined,
+    px: 4,
+    py: 3,
+    borderRadius: "sm",
+    sx: {
+      ".tiptap-wrapper": {
+        bg: isEditable ? "white" : undefined,
+      },
+      ".tiptap-editor": {
+        px: isEditable ? undefined : 0,
+      },
+      ".tiptap-editor-readonly": {
+        fontSize: isEditable ? undefined : "sm",
+      },
+    },
+    w: "full",
+    minH: "1rem",
+    cursor: !isEditMode && !isReadOnly ? "pointer" : undefined,
+    fontSize: "sm",
+    onClick: () => !isReadOnly && setIsEditMode(true),
+    ...containerProps,
+    ...containerProps,
+  }
 
-  if (showInitialTriggerOnly) {
+  const handleClickDone = (e) => {
+    e.stopPropagation()
+    setIsEditMode(false)
+  }
+
+  if (!isEditMode && !isReadOnly && isEditorEmpty && (initialTriggerText || renderInitialTrigger)) {
     return (
       <Box {...mainContainerProps}>
-        {props.initialTriggerText ? (
+        {initialTriggerText ? (
           <Button variant={"link"} textDecoration={"underline"}>
-            {props.initialTriggerText}
+            {initialTriggerText}
           </Button>
         ) : (
-          "renderInitialTrigger" in props && props.renderInitialTrigger({ onClick: () => setIsEditMode(true) })
+          renderInitialTrigger({ onClick: () => setIsEditMode(true) })
         )}
       </Box>
     )
@@ -67,9 +100,12 @@ export const EditorWithPreview = observer(function EditorWithPreview(props: TEdi
           {label}
         </Text>
       )}
-      {props.onRemove && !props.isReadOnly && isEditMode && (
+      {onRemove && !isReadOnly && isEditMode && (
         <Button
-          onClick={handleRemoveClick}
+          onClick={(e) => {
+            e.stopPropagation()
+            onRemove(setIsEditMode)
+          }}
           variant={"link"}
           textDecoration={"underline"}
           fontSize={"sm"}
@@ -77,7 +113,7 @@ export const EditorWithPreview = observer(function EditorWithPreview(props: TEdi
           top={"5px"}
           right={"10px"}
         >
-          {removeLabel}
+          {t("ui.remove")}
         </Button>
       )}
       {isEditMode ? (
@@ -85,7 +121,7 @@ export const EditorWithPreview = observer(function EditorWithPreview(props: TEdi
           {/* Sanitize htmlValue before passing to Editor to prevent XSS (CVE-2021-3163) */}
           <Editor key={"edit"} htmlValue={sanitizedHtmlValue} onChange={onChange} />
           <Button variant="primary" mt={4} onClick={handleClickDone}>
-            {doneLabel}
+            {t("ui.done")}
           </Button>
         </>
       ) : (
@@ -96,7 +132,15 @@ export const EditorWithPreview = observer(function EditorWithPreview(props: TEdi
             </Button>
           )}
           {/* SafeTipTapDisplay also sanitizes internally, but sanitizing here adds defense-in-depth */}
-          <SafeTipTapDisplay htmlContent={sanitizedHtmlValue} fontSize="sm" sx={previewParagraphSx} />
+          <SafeTipTapDisplay
+            htmlContent={sanitizedHtmlValue}
+            fontSize="sm"
+            sx={{
+              "& p": {
+                marginBottom: "0.5em",
+              },
+            }}
+          />
         </>
       )}
     </Box>

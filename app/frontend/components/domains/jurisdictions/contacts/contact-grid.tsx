@@ -1,4 +1,4 @@
-import { Box, Flex, IconButton, SimpleGrid, Text } from "@chakra-ui/react"
+import { Flex, Grid, IconButton } from "@chakra-ui/react"
 import { Plus, X } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -8,7 +8,7 @@ import { useMst } from "../../../../setup/root"
 import { IContact } from "../../../../types/types"
 import { EmailFormControl } from "../../../shared/form/email-form-control"
 import { TextFormControl } from "../../../shared/form/input-form-control"
-import { JurisdictionAboutContactCard } from "../../../shared/jurisdiction/jurisdiction-about-contact-card"
+import { ContactCard } from "../../../shared/jurisdiction/contact-card"
 import { Can } from "../../../shared/user/can"
 
 interface IContactGridProps {
@@ -16,7 +16,6 @@ interface IContactGridProps {
 }
 
 export const ContactGrid = observer(({ isEditing }: IContactGridProps) => {
-  const { t } = useTranslation()
   const { jurisdictionStore } = useMst()
   const { currentJurisdiction } = jurisdictionStore
 
@@ -46,25 +45,13 @@ export const ContactGrid = observer(({ isEditing }: IContactGridProps) => {
     append(defaultContactValues)
   }
 
-  const hasNoContacts = fields.length === 0
-
-  if (!isEditing && hasNoContacts) {
-    return (
-      <Box as="section" borderRadius="md" bg="greys.grey10" px={6} py={4}>
-        <Text color="text.secondary" fontSize="sm" w="full">
-          {t("jurisdiction.edit.contactsEmptyState")}
-        </Text>
-      </Box>
-    )
-  }
-
   return (
-    <SimpleGrid columns={{ base: 1, md: 2, xl: 3 }} spacing={4} w="full">
+    <Grid templateColumns={{ base: "1fr", lg: "repeat(2, 1fr)" }} gap={4}>
       {fields.map((contact, index) =>
         isEditing ? (
           <ContactFields key={contact.id} index={index} remove={remove} />
         ) : (
-          <JurisdictionAboutContactCard key={contact.id} contact={contact} />
+          <ContactCard colSpan={{ sm: 1, md: 1 }} key={contact.id} contact={contact} />
         )
       )}
       {isEditing && (
@@ -81,7 +68,7 @@ export const ContactGrid = observer(({ isEditing }: IContactGridProps) => {
           />
         </Can>
       )}
-    </SimpleGrid>
+    </Grid>
   )
 })
 
@@ -104,7 +91,7 @@ const ContactFields = ({ index, remove }: IContactFieldsProps) => {
   const { t } = useTranslation()
 
   return (
-    <Flex direction="column" gap={2} border="1px solid" borderColor="border.light" p={4} bgColor="greys.grey10">
+    <Flex direction="column" gap={2} border="1px solid" borderColor="border.light" p={4}>
       <Flex justify="flex-end">
         <IconButton variant="tertiary" icon={<X />} aria-label={"remove contact"} onClick={() => remove(index)} />
       </Flex>
