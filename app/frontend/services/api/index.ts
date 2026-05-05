@@ -262,6 +262,16 @@ export class Api {
     return this.client.post<ApiResponse<IPermitProject>>("/permit_projects", { permitProject: projectData })
   }
 
+  async createQaFullPermitProject(params: { jurisdictionId: string; title?: string }) {
+    return this.client.post<ApiResponse<IPermitProject>>("/qa_tools/permit_projects/full", {
+      qaFullPermitProject: params,
+    })
+  }
+
+  async autofillQaPermitApplication(id: string) {
+    return this.client.post<ApiResponse<IPermitApplication>>(`/qa_tools/permit_applications/${id}/autofill`)
+  }
+
   async updatePermitProject(id: string, params: IPermitProjectUpdateParams) {
     return this.client.patch<ApiResponse<IPermitProject>>(`/permit_projects/${id}`, { permitProject: params })
   }

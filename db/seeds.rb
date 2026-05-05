@@ -222,14 +222,8 @@ if PermitApplication.first.blank?
 
   RequirementTemplate.reindex
 
-  # Requrements from seeder are idempotent
-  # Requirments block will get created from requiremetms templates
   puts "Seeding requirements..."
-  RequirementsFromXlsxSeeder.seed
-  RequirementsFromXlsxSeeder.seed_medium if Rails.env.development?
-
-  # Remove any invalid records that prevent saving of the template
-  RequirementBlock.find_each { |block| block.destroy unless block.valid? }
+  SeededRequirementTemplateService.seed!
 
   # Energy Step Code Reference Tables
   StepCode::Part9::MEUIReferencesSeeder.seed!
