@@ -94,6 +94,17 @@ const options = {
             "Check your email inbox for a confirmation email to finish activating your new Building Permit Hub account.",
           tokenExpired: "Your session is no longer valid, please log in again",
         },
+        qaTools: {
+          trigger: "QA",
+          title: "QA tools",
+          description: "Sandbox helpers for quickly setting up test data.",
+          jurisdiction: "Jurisdiction",
+          createProject: "Create project with all permits",
+          createProjectSuccess: "QA project created",
+          autofillApplication: "Autofill application",
+          autofillSuccess: "Permit application autofilled",
+          sandboxRequired: "Select a sandbox to use this QA action.",
+        },
         landing: {
           title: "Building Permit Hub",
           intro:

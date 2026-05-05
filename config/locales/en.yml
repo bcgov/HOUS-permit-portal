@@ -673,6 +673,22 @@ en:
       feature_not_enabled:
         title: Error
         message: "Designated reviewer is not enabled for this project"
+    qa_tools:
+      full_permit_project_success:
+        title: ""
+        message: "QA project created successfully"
+      full_permit_project_error:
+        title: Error
+        message: "%{error_message}"
+      autofill_permit_application_success:
+        title: ""
+        message: "Permit application autofilled successfully"
+      autofill_permit_application_error:
+        title: Error
+        message: "%{error_message}"
+      autofill_permit_application_not_draft:
+        title: Error
+        message: "Only draft permit applications can be autofilled"
     permit_collaboration:
       destroy_success:
         title: ""

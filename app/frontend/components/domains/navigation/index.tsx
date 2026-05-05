@@ -11,6 +11,7 @@ import { LoadingScreen } from "../../shared/base/loading-screen"
 import { EULAScreen } from "../onboarding/eula"
 import { NavBar } from "./nav-bar"
 import { ProtectedRoute } from "./protected-route"
+import { QaToolsPopout } from "./qa-tools-popout"
 
 const ExternalApiKeysIndexScreen = lazy(() =>
   import("../external-api-key").then((module) => ({ default: module.ExternalApiKeysIndexScreen }))
@@ -414,6 +415,7 @@ export const Navigation = observer(() => {
         </Center>
       )}
       <NavBar />
+      <QaToolsPopout />
 
       {isValidating ? (
         <LoadingScreen message={t("site.validating")} />
