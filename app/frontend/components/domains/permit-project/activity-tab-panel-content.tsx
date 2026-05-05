@@ -18,9 +18,10 @@ import { AuditDateRangeFilter } from "./audit-date-range-filter"
 
 interface IProps {
   permitProject: IPermitProject
+  fromInbox?: boolean
 }
 
-export const ActivityTabPanelContent = observer(({ permitProject }: IProps) => {
+export const ActivityTabPanelContent = observer(({ permitProject, fromInbox = false }: IProps) => {
   const { projectAuditStore } = useMst()
   useSearch(projectAuditStore, [permitProject.id])
 
@@ -94,7 +95,7 @@ export const ActivityTabPanelContent = observer(({ permitProject }: IProps) => {
           ) : (
             tableProjectAudits?.map((projectAudit) => (
               <Box as="li" key={projectAudit.id} borderBottom="1px solid" borderColor="border.light" mb={0}>
-                <ActivityListItem projectAudit={projectAudit} />
+                <ActivityListItem projectAudit={projectAudit} fromInbox={fromInbox} />
               </Box>
             ))
           )}

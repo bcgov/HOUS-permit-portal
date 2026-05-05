@@ -105,7 +105,7 @@ export const InboxProjectDetailScreen = observer(() => {
             {isPending ? <LoadingScreen /> : <InboxPermitsTab permitProject={currentPermitProject} />}
           </TabPanel>
           <TabPanel flex={1} minH={0} minW={0} display="flex" flexDirection="column" overflow="hidden">
-            {isPending ? <LoadingScreen /> : <ActivityTabPanelContent permitProject={currentPermitProject} />}
+            {isPending ? <LoadingScreen /> : <ActivityTabPanelContent permitProject={currentPermitProject} fromInbox />}
           </TabPanel>
         </TabPanels>
       </Tabs>
