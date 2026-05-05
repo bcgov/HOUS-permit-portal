@@ -20,7 +20,7 @@ class PermitApplicationBlueprint < Blueprinter::Base
            :missing_pdfs,
            :template_nickname,
            :discarded_at,
-           :enqueued_at
+           :days_in_queue
 
     association :permit_type, blueprint: PermitClassificationBlueprint
     association :activity, blueprint: PermitClassificationBlueprint
@@ -51,7 +51,12 @@ class PermitApplicationBlueprint < Blueprinter::Base
     association :permit_collaborations,
                 blueprint: PermitCollaborationBlueprint,
                 view: :base do |pa, options|
-      pa.permit_collaborations(options[:current_user])
+      collabs = pa.permit_collaborations(options[:current_user])
+      if options[:current_user]&.review_staff?
+        collabs
+      else
+        collabs.select(&:submission?)
+      end
     end
   end
 
@@ -113,7 +118,12 @@ class PermitApplicationBlueprint < Blueprinter::Base
     association :permit_collaborations,
                 blueprint: PermitCollaborationBlueprint,
                 view: :base do |pa, options|
-      pa.permit_collaborations(options[:current_user])
+      collabs = pa.permit_collaborations(options[:current_user])
+      if options[:current_user]&.review_staff?
+        collabs
+      else
+        collabs.select(&:submission?)
+      end
     end
     association :permit_block_statuses, blueprint: PermitBlockStatusBlueprint
     association :submission_versions,

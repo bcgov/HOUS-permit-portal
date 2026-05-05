@@ -46,6 +46,10 @@ class JurisdictionBlueprint < Blueprinter::Base
     field :external_api_enabled do |jurisdiction, _options|
       jurisdiction.external_api_enabled?
     end
+
+    field :submission_inbox_set_up do |jurisdiction, _options|
+      jurisdiction.submission_inbox_set_up?
+    end
     association :contacts, blueprint: ContactBlueprint
     association :permit_type_submission_contacts,
                 blueprint: PermitTypeSubmissionContactBlueprint,
@@ -89,6 +93,10 @@ class JurisdictionBlueprint < Blueprinter::Base
       jurisdiction.unviewed_submissions_count(
         sandbox: options[:current_sandbox]
       )
+    end
+
+    field :unviewed_projects_count do |jurisdiction, options|
+      jurisdiction.unviewed_projects_count(sandbox: options[:current_sandbox])
     end
   end
 end

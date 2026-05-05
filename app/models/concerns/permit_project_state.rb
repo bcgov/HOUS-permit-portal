@@ -3,7 +3,7 @@ module PermitProjectState
 
   MANUAL_TRANSITIONS = {
     draft: [],
-    queued: %i[waiting in_progress ready permit_issued active closed],
+    queued: %i[waiting in_progress closed],
     waiting: %i[queued in_progress ready permit_issued active closed],
     in_progress: %i[queued waiting ready permit_issued active closed],
     ready: %i[permit_issued waiting closed],
@@ -27,6 +27,8 @@ module PermitProjectState
 
   included do
     include AASM
+
+    before_save :update_queue_clock, if: :state_changed?
 
     enum :state,
          {
@@ -109,15 +111,28 @@ module PermitProjectState
     acts_as_taggable_on :flags
 
     def self.kanban_states
-      %w[queued waiting in_progress ready permit_issued active complete closed]
+      %w[
+        queued
+        waiting
+        in_progress
+        ready
+        permit_issued
+        active
+        complete
+        closed
+      ].freeze
     end
 
     def self.off_board_states
-      %w[draft]
+      %w[draft].freeze
     end
 
     def self.terminal_states
-      %w[complete closed]
+      %w[complete closed].freeze
+    end
+
+    def self.our_court_states
+      %w[queued in_progress ready].freeze
     end
 
     def on_kanban?
@@ -164,6 +179,18 @@ module PermitProjectState
 
     def no_post_draft_permits?
       permit_applications.kept.none? { |pa| !pa.new_draft? }
+    end
+
+    def update_queue_clock
+      was_our_court = self.class.our_court_states.include?(state_was)
+      is_our_court = self.class.our_court_states.include?(state)
+
+      if was_our_court && queue_clock_started_at.present?
+        self.queue_time_seconds += (Time.current - queue_clock_started_at).to_i
+        self.queue_clock_started_at = nil
+      end
+
+      self.queue_clock_started_at = Time.current if is_our_court
     end
   end
 end

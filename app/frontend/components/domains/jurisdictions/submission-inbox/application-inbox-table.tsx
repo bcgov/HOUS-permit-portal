@@ -1,34 +1,28 @@
 import {
-  Avatar,
   Box,
   Circle,
   Flex,
   HStack,
+  Icon,
   IconButton,
   Menu,
   MenuButton,
-  MenuDivider,
   MenuItem,
   MenuList,
   Portal,
-  Spinner,
   Text,
-  useDisclosure,
+  Tooltip,
   VStack,
 } from "@chakra-ui/react"
-import { DotsThreeVertical, UserPlus } from "@phosphor-icons/react"
+import { Info, Swap } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
-import React, { useMemo, useState } from "react"
+import React from "react"
 import { useTranslation } from "react-i18next"
 import { Link, useNavigate } from "react-router-dom"
 import { IPermitApplication } from "../../../../models/permit-application"
-import { useMst } from "../../../../setup/root"
+import { IPermitProject } from "../../../../models/permit-project"
 import { IPermitApplicationInboxStore } from "../../../../stores/submission-inbox-store"
-import {
-  ECollaborationType,
-  EPermitApplicationInboxSortFields,
-  EPermitApplicationStatus,
-} from "../../../../types/enums"
+import { EInboxViewMode, EPermitApplicationInboxSortFields, EPermitApplicationStatus } from "../../../../types/enums"
 import { ISort } from "../../../../types/types"
 import { Paginator } from "../../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../../shared/base/inputs/per-page-select"
@@ -36,17 +30,17 @@ import { SharedSpinner } from "../../../shared/base/shared-spinner"
 import { GridHeader } from "../../../shared/grid/grid-header"
 import { SearchGrid } from "../../../shared/grid/search-grid"
 import { SearchGridItem } from "../../../shared/grid/search-grid-item"
+import { SearchGridRow } from "../../../shared/grid/search-grid-row"
 import { PermitApplicationStatusTag } from "../../../shared/permit-applications/permit-application-status-tag"
 import { SortIcon } from "../../../shared/sort-icon"
-import { SharedAvatar } from "../../../shared/user/shared-avatar"
-import { CollaboratorsSidebarDrawer } from "../../permit-application/collaborator-management/collaborators-sidebar"
+import { ApplicationReviewAssigneesCell } from "./application-review-assignees-cell"
+import { InboxNoMatchingEmpty } from "./inbox-no-matching-empty"
+import { SubmissionInboxMarkUnreadIconButton } from "./submission-inbox-mark-unread-icon-button"
 
 interface IProps {
-  searchStore: IPermitApplicationInboxStore
+  searchStore: IPermitApplicationInboxStore | IPermitProject
   applications: IPermitApplication[]
 }
-
-const MAX_VISIBLE_AVATARS = 3
 
 export const ApplicationInboxTable = observer(function ApplicationInboxTable({ searchStore, applications }: IProps) {
   const { t } = useTranslation()
@@ -63,89 +57,123 @@ export const ApplicationInboxTable = observer(function ApplicationInboxTable({ s
     isSearching,
   } = searchStore
 
-  return (
-    <VStack w="full" spacing={5}>
-      <SearchGrid
-        templateColumns="36px minmax(0, 1.5fr) minmax(0, 1.3fr) minmax(0, 1fr) minmax(140px, 1fr) minmax(160px, 1.1fr) auto 48px"
-        gridRowClassName="application-inbox-grid-row"
-        sx={{
-          ".application-inbox-grid-row:hover > div": {
-            bg: "gray.50",
-          },
-          ".application-inbox-grid-row:active > div": {
-            bg: "background.blueLight",
-          },
-        }}
-      >
-        <Box display="contents" role="rowgroup">
-          <Box display="contents" role="row">
-            <GridHeader role="columnheader">
-              <Flex w="full" justifyContent="center" borderRight="1px solid" borderColor="border.light" />
-            </GridHeader>
-            <SortableHeader
-              field={EPermitApplicationInboxSortFields.permitType}
-              label={getSortColumnHeader(EPermitApplicationInboxSortFields.permitType)}
-              sort={sort as ISort<EPermitApplicationInboxSortFields>}
-              onToggleSort={toggleSort}
-            />
-            <SortableHeader
-              field={EPermitApplicationInboxSortFields.address}
-              label={getSortColumnHeader(EPermitApplicationInboxSortFields.address)}
-              sort={sort as ISort<EPermitApplicationInboxSortFields>}
-              onToggleSort={toggleSort}
-            />
-            <SortableHeader
-              field={EPermitApplicationInboxSortFields.projectNumber}
-              label={getSortColumnHeader(EPermitApplicationInboxSortFields.projectNumber)}
-              sort={sort as ISort<EPermitApplicationInboxSortFields>}
-              onToggleSort={toggleSort}
-            />
-            <SortableHeader
-              field={EPermitApplicationInboxSortFields.daysInQueue}
-              label={getSortColumnHeader(EPermitApplicationInboxSortFields.daysInQueue)}
-              sort={sort as ISort<EPermitApplicationInboxSortFields>}
-              onToggleSort={toggleSort}
-            />
-            <SortableHeader
-              field={EPermitApplicationInboxSortFields.assigned}
-              label={getSortColumnHeader(EPermitApplicationInboxSortFields.assigned)}
-              sort={sort as ISort<EPermitApplicationInboxSortFields>}
-              onToggleSort={toggleSort}
-            />
-            <SortableHeader
-              field={EPermitApplicationInboxSortFields.status}
-              label={getSortColumnHeader(EPermitApplicationInboxSortFields.status)}
-              sort={sort as ISort<EPermitApplicationInboxSortFields>}
-              onToggleSort={toggleSort}
-            />
-            <GridHeader role="columnheader" />
-          </Box>
-        </Box>
+  const listShowsNoResults = !isSearching && totalCount !== null && totalCount === 0
 
-        {isSearching ? (
-          <Flex py={50} gridColumn="span 8">
-            <SharedSpinner />
-          </Flex>
-        ) : (
-          applications.map((application) => <ApplicationInboxRow key={application.id} application={application} />)
-        )}
-      </SearchGrid>
-      <Flex w="full" justifyContent="space-between">
-        <PerPageSelect
-          handleCountPerPageChange={handleCountPerPageChange}
-          countPerPage={countPerPage}
-          totalCount={totalCount}
-        />
-        <Paginator
-          current={currentPage}
-          total={totalCount}
-          totalPages={totalPages}
-          pageSize={countPerPage}
-          handlePageChange={handlePageChange}
-          showLessItems
-        />
-      </Flex>
-    </VStack>
+  const renderListBody = () => {
+    if (isSearching) {
+      return (
+        <Flex py={50} gridColumn="span 8">
+          <SharedSpinner />
+        </Flex>
+      )
+    }
+    if (listShowsNoResults) {
+      return (
+        <Flex py={4} gridColumn="span 8" w="full" justify="flex-start">
+          <InboxNoMatchingEmpty
+            viewMode={EInboxViewMode.applications}
+            onClearFilters={() => searchStore.resetFilters()}
+          />
+        </Flex>
+      )
+    }
+    return applications.map((application) => <ApplicationInboxRow key={application.id} application={application} />)
+  }
+
+  const gridStickyHeaderSx = {
+    "[role='columnheader']": {
+      position: "sticky",
+      top: 0,
+      zIndex: 1,
+      bg: "white",
+    },
+  }
+
+  return (
+    <Flex direction="column" flex={1} minH={0} minW={0} w="full" align="stretch">
+      <Box flex={1} minH={0} overflow="auto">
+        <SearchGrid
+          templateColumns="36px minmax(160px, 1.5fr) minmax(180px, 1.3fr) minmax(140px, 1fr) minmax(140px, 1fr) minmax(160px, 1.1fr) minmax(120px, auto) 72px"
+          gridRowClassName="application-inbox-grid-row"
+          overflow="visible"
+          sx={gridStickyHeaderSx}
+        >
+          <Box display="contents" role="rowgroup">
+            <Box display="contents" role="row">
+              <GridHeader role="columnheader">
+                <Flex w="full" justifyContent="center" borderRight="1px solid" borderColor="border.light" />
+              </GridHeader>
+              <SortableHeader
+                field={EPermitApplicationInboxSortFields.permitType}
+                label={getSortColumnHeader(EPermitApplicationInboxSortFields.permitType)}
+                sort={sort as ISort<EPermitApplicationInboxSortFields>}
+                onToggleSort={toggleSort}
+              />
+              <SortableHeader
+                field={EPermitApplicationInboxSortFields.address}
+                label={getSortColumnHeader(EPermitApplicationInboxSortFields.address)}
+                sort={sort as ISort<EPermitApplicationInboxSortFields>}
+                onToggleSort={toggleSort}
+              />
+              <SortableHeader
+                field={EPermitApplicationInboxSortFields.projectNumber}
+                label={getSortColumnHeader(EPermitApplicationInboxSortFields.projectNumber)}
+                sort={sort as ISort<EPermitApplicationInboxSortFields>}
+                onToggleSort={toggleSort}
+              />
+              <SortableHeader
+                field={EPermitApplicationInboxSortFields.daysInQueue}
+                label={getSortColumnHeader(EPermitApplicationInboxSortFields.daysInQueue)}
+                sort={sort as ISort<EPermitApplicationInboxSortFields>}
+                onToggleSort={toggleSort}
+                tooltip={t("submissionInbox.daysWithUsTooltip")}
+              />
+              <SortableHeader
+                field={EPermitApplicationInboxSortFields.assigned}
+                label={getSortColumnHeader(EPermitApplicationInboxSortFields.assigned)}
+                sort={sort as ISort<EPermitApplicationInboxSortFields>}
+                onToggleSort={toggleSort}
+              />
+              <SortableHeader
+                field={EPermitApplicationInboxSortFields.status}
+                label={getSortColumnHeader(EPermitApplicationInboxSortFields.status)}
+                sort={sort as ISort<EPermitApplicationInboxSortFields>}
+                onToggleSort={toggleSort}
+              />
+              <GridHeader role="columnheader" />
+            </Box>
+          </Box>
+
+          {renderListBody()}
+        </SearchGrid>
+      </Box>
+      {!listShowsNoResults && (
+        <Flex
+          w="full"
+          flexShrink={0}
+          justifyContent="space-between"
+          align="center"
+          pt={5}
+          borderTopWidth="1px"
+          borderTopColor="border.light"
+          bg="white"
+        >
+          <PerPageSelect
+            handleCountPerPageChange={handleCountPerPageChange}
+            countPerPage={countPerPage}
+            totalCount={totalCount}
+          />
+          <Paginator
+            current={currentPage}
+            total={totalCount}
+            totalPages={totalPages}
+            pageSize={countPerPage}
+            handlePageChange={handlePageChange}
+            showLessItems
+          />
+        </Flex>
+      )}
+    </Flex>
   )
 })
 
@@ -154,11 +182,13 @@ const SortableHeader = ({
   label,
   sort,
   onToggleSort,
+  tooltip,
 }: {
   field: EPermitApplicationInboxSortFields
   label: string
   sort: ISort<EPermitApplicationInboxSortFields>
   onToggleSort: (field: EPermitApplicationInboxSortFields) => void
+  tooltip?: string
 }) => (
   <GridHeader role="columnheader">
     <Flex
@@ -169,9 +199,18 @@ const SortableHeader = ({
       onClick={() => onToggleSort(field)}
       borderRight="1px solid"
       borderColor="border.light"
-      px={4}
+      px={3}
     >
-      <Text textAlign="left">{label}</Text>
+      <HStack spacing={1}>
+        <Text textAlign="left">{label}</Text>
+        {tooltip && (
+          <Tooltip label={tooltip} hasArrow placement="top">
+            <Flex align="center">
+              <Icon as={Info} boxSize={3.5} color="text.secondary" />
+            </Flex>
+          </Tooltip>
+        )}
+      </HStack>
       <SortIcon<EPermitApplicationInboxSortFields> field={field} currentSort={sort} />
     </Flex>
   </GridHeader>
@@ -183,30 +222,29 @@ const ApplicationInboxRow = observer(function ApplicationInboxRow({
   application: IPermitApplication
 }) {
   const { t } = useTranslation()
+  const navigate = useNavigate()
 
   return (
-    <Box key={application.id} className="application-inbox-grid-row" role="row" display="contents">
+    <SearchGridRow
+      key={application.id}
+      className="application-inbox-grid-row"
+      onClick={() => navigate(`/permit-applications/${application.id}`)}
+      _hover={{ bg: "gray.50", cursor: "pointer" }}
+      _active={{ bg: "background.blueLight" }}
+    >
       <SearchGridItem justifyContent="center" px={2}>
         <Circle size="8px" bg={!application.isViewed ? "theme.blueActive" : "transparent"} flexShrink={0} />
       </SearchGridItem>
 
       <SearchGridItem>
-        <Box
-          as={Link}
-          to={`/permit-applications/${application.id}`}
-          color="inherit"
-          textDecoration="none"
-          _hover={{ textDecoration: "none", color: "inherit" }}
-        >
-          <VStack align="start" spacing={0}>
-            <Text fontWeight={700} fontSize="sm" noOfLines={1}>
-              {application.nickname || application.permitType?.name || application.permitTypeAndActivity || "—"}
-            </Text>
-            <Text fontSize="xs" color="text.secondary" noOfLines={1}>
-              {application.number}
-            </Text>
-          </VStack>
-        </Box>
+        <VStack align="start" spacing={0}>
+          <Text fontWeight={700} fontSize="sm" noOfLines={1}>
+            {application.templateNickname || "—"}
+          </Text>
+          <Text fontSize="xs" color="text.secondary" noOfLines={1}>
+            {application.number}
+          </Text>
+        </VStack>
       </SearchGridItem>
 
       <SearchGridItem>
@@ -233,6 +271,7 @@ const ApplicationInboxRow = observer(function ApplicationInboxRow({
             to={`projects/${application.projectId}/overview`}
             color="text.link"
             _hover={{ textDecoration: "underline" }}
+            onClick={(e: React.MouseEvent) => e.stopPropagation()}
           >
             {application.projectNumber}
           </Box>
@@ -251,7 +290,7 @@ const ApplicationInboxRow = observer(function ApplicationInboxRow({
               {t("submissionInbox.waitingSince")}
             </Text>
             <Text fontSize="xs" color="text.secondary">
-              {application.formattedEnqueuedAt}
+              {application.formattedSubmittedAt}
             </Text>
           </VStack>
         ) : (
@@ -261,8 +300,13 @@ const ApplicationInboxRow = observer(function ApplicationInboxRow({
         )}
       </SearchGridItem>
 
-      <SearchGridItem>
-        <ApplicationAssignedCell application={application} />
+      <SearchGridItem
+        onClick={(e: React.MouseEvent) => {
+          e.preventDefault()
+          e.stopPropagation()
+        }}
+      >
+        <ApplicationReviewAssigneesCell application={application} />
       </SearchGridItem>
 
       <SearchGridItem>
@@ -277,114 +321,14 @@ const ApplicationInboxRow = observer(function ApplicationInboxRow({
           e.stopPropagation()
         }}
       >
-        <ApplicationActionsMenu application={application} />
+        <HStack spacing={0}>
+          <ApplicationActionsMenu application={application} />
+          {application.isViewed && (
+            <SubmissionInboxMarkUnreadIconButton onMarkUnread={() => application.markAsUnviewed()} />
+          )}
+        </HStack>
       </SearchGridItem>
-    </Box>
-  )
-})
-
-const ApplicationAssignedCell = observer(function ApplicationAssignedCell({
-  application,
-}: {
-  application: IPermitApplication
-}) {
-  const { t } = useTranslation()
-  const { permitApplicationStore } = useMst()
-  const { isOpen, onOpen, onClose } = useDisclosure()
-  const [isLoadingSidebar, setIsLoadingSidebar] = useState(false)
-
-  const avatarUsers = useMemo(() => {
-    const designatedReviewerUser = application.designatedReviewer?.collaborator?.user
-    const seenUserIds = new Set(designatedReviewerUser ? [designatedReviewerUser.id] : [])
-    const users = designatedReviewerUser
-      ? [
-          {
-            id: designatedReviewerUser.id,
-            name: designatedReviewerUser.name,
-            role: designatedReviewerUser.role,
-            isDesignated: true,
-          },
-        ]
-      : []
-
-    application.getCollaborationAssignees(ECollaborationType.review).forEach((collaboration) => {
-      const user = collaboration.collaborator?.user
-      if (user && !seenUserIds.has(user.id)) {
-        seenUserIds.add(user.id)
-        users.push({ id: user.id, name: user.name, role: user.role, isDesignated: false })
-      }
-    })
-
-    return users
-  }, [application])
-
-  const visibleAvatars = avatarUsers.slice(0, MAX_VISIBLE_AVATARS)
-  const overflowCount = avatarUsers.length - MAX_VISIBLE_AVATARS
-
-  const handleOpenSidebar = async (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setIsLoadingSidebar(true)
-    try {
-      await permitApplicationStore.fetchPermitApplication(application.id, true)
-    } finally {
-      setIsLoadingSidebar(false)
-    }
-    onOpen()
-  }
-
-  return (
-    <>
-      <HStack spacing={1}>
-        {visibleAvatars.length > 0 ? (
-          <>
-            {visibleAvatars.map((user) => (
-              <SharedAvatar
-                key={user.id}
-                size="xs"
-                name={user.name}
-                role={user.role}
-                fontSize="2xs"
-                border={user.isDesignated ? "2px solid" : undefined}
-                borderColor={user.isDesignated ? "theme.blueActive" : undefined}
-              />
-            ))}
-            {overflowCount > 0 && (
-              <Avatar
-                size="xs"
-                name={`+${overflowCount}`}
-                getInitials={(name) => name}
-                bg="gray.200"
-                color="text.primary"
-                fontSize="2xs"
-              />
-            )}
-          </>
-        ) : (
-          <Text fontSize="sm" color="text.secondary">
-            {t("ui.unassigned")}
-          </Text>
-        )}
-        <IconButton
-          aria-label={t("permitCollaboration.sidebar.title")}
-          icon={isLoadingSidebar ? <Spinner size="xs" /> : <UserPlus size={14} />}
-          size="xs"
-          variant="ghost"
-          borderRadius="full"
-          onClick={handleOpenSidebar}
-          isDisabled={isLoadingSidebar}
-        />
-      </HStack>
-
-      {isOpen && (
-        <CollaboratorsSidebarDrawer
-          permitApplication={application}
-          collaborationType={ECollaborationType.review}
-          isOpen={isOpen}
-          onClose={onClose}
-        />
-      )}
-    </>
+    </SearchGridRow>
   )
 })
 
@@ -397,19 +341,22 @@ const ApplicationActionsMenu = observer(function ApplicationActionsMenu({
   const navigate = useNavigate()
   const hasTransitions = application.allowedManualTransitions.length > 0
   const showRevisionsRequestedLink = application.status === EPermitApplicationStatus.inReview
-  const canMarkUnread = application.isViewed
 
-  if (!hasTransitions && !showRevisionsRequestedLink && !canMarkUnread) return null
+  if (!hasTransitions && !showRevisionsRequestedLink) return null
 
   return (
     <Menu>
-      <MenuButton
-        as={IconButton}
-        aria-label="Actions"
-        icon={<DotsThreeVertical size={16} weight="bold" />}
-        size="sm"
-        variant="ghost"
-      />
+      <Tooltip label={t("submissionInbox.changeStatus")} hasArrow placement="top">
+        <MenuButton
+          as={IconButton}
+          aria-label={t("submissionInbox.changeStatus")}
+          icon={<Icon as={Swap} boxSize={4} />}
+          size="sm"
+          minW={7}
+          h={7}
+          variant="ghost"
+        />
+      </Tooltip>
       <Portal>
         <MenuList zIndex={10}>
           {application.allowedManualTransitions.map((transition) => (
@@ -437,19 +384,6 @@ const ApplicationActionsMenu = observer(function ApplicationActionsMenu({
             >
               {/* @ts-ignore */}
               {t(`submissionInbox.applicationStatuses.${EPermitApplicationStatus.revisionsRequested}`)}
-            </MenuItem>
-          )}
-          {(hasTransitions || showRevisionsRequestedLink) && canMarkUnread && <MenuDivider />}
-          {canMarkUnread && (
-            <MenuItem
-              fontSize="sm"
-              onClick={(e) => {
-                e.preventDefault()
-                e.stopPropagation()
-                application.markAsUnviewed()
-              }}
-            >
-              {t("submissionInbox.markUnread")}
             </MenuItem>
           )}
         </MenuList>

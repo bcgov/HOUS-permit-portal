@@ -2,8 +2,15 @@ class PermitProjectBlueprint < Blueprinter::Base
   identifier :id
 
   view :base do
-    fields :title,
-           :full_address,
+    field :title,
+          if: ->(_field_name, permit_project, options) do
+            PermitProjectBlueprint.show_private_title?(
+              permit_project,
+              options[:current_user]
+            )
+          end
+
+    fields :full_address,
            :pid,
            :number,
            :jurisdiction_disambiguated_name,
@@ -18,6 +25,7 @@ class PermitProjectBlueprint < Blueprinter::Base
            :longitude,
            :parcel_geometry
 
+    field :days_in_queue
     field :total_permits_count, default: 0
     field :new_draft_count, default: 0
     field :newly_submitted_count, default: 0
@@ -48,16 +56,28 @@ class PermitProjectBlueprint < Blueprinter::Base
     field :has_outdated_draft_applications do |permit_project, options|
       options[:project_ids_with_outdated_drafts]&.include?(permit_project.id)
     end
-
-    association :review_delegatee, blueprint: CollaboratorBlueprint
   end
 
   view :jurisdiction_review_inbox do
     include_view :base
 
-    field :aggregated_review_collaborators do |permit_project, _options|
-      permit_project.aggregated_review_collaborators
+    association :review_delegatee,
+                blueprint: CollaboratorBlueprint,
+                if: ->(_field_name, permit_project, options) do
+                  options[:current_user]&.review_staff_of?(
+                    permit_project.jurisdiction_id
+                  )
+                end do |permit_project, _options|
+      permit_project.review_delegatee
     end
+
+    association :permit_project_collaborations,
+                blueprint: PermitProjectCollaborationBlueprint,
+                if: ->(_field_name, permit_project, options) do
+                  options[:current_user]&.review_staff_of?(
+                    permit_project.jurisdiction_id
+                  )
+                end
   end
 
   view :extended do
@@ -80,16 +100,23 @@ class PermitProjectBlueprint < Blueprinter::Base
   end
 
   view :inbox_extended do
-    include_view :base
+    include_view :jurisdiction_review_inbox
 
     field :is_fully_loaded do |_permit_project, _options|
       true
     end
 
+    field :first_application_received_at
+
     association :permit_applications,
                 blueprint: PermitApplicationBlueprint,
                 view: :jurisdiction_review_inbox do |permit_project, _options|
-      permit_project.permit_applications.kept.select(&:submitted?)
+      permit_project.permit_applications.kept.select(&:visible_to_reviewers?)
+    end
+    association :recent_permit_applications,
+                blueprint: PermitApplicationBlueprint,
+                view: :jurisdiction_review_inbox do |permit_project, _options|
+      permit_project.recent_inbox_permit_applications
     end
     association :project_documents,
                 blueprint:
@@ -102,5 +129,11 @@ class PermitProjectBlueprint < Blueprinter::Base
                 view: :base do |permit_project, options|
       permit_project.recent_audits(options[:current_user])
     end
+  end
+
+  def self.show_private_title?(permit_project, current_user)
+    return false unless current_user
+
+    return true if permit_project.owner_id == current_user.id
   end
 end

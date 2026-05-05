@@ -22,7 +22,10 @@ import { IOption } from "../../../types/types"
 
 interface IInboxFilterProps {
   title: string
+  /** Unread (or similar) result count — only rendered when `showResultsBadge` is true. */
   badgeCount?: number
+  /** When true, `badgeCount` is shown as the blue results pill (unread filter only). */
+  showResultsBadge?: boolean
   isMulti: boolean
   value: string | string[]
   onChange: (value: string | string[]) => void
@@ -33,9 +36,24 @@ interface IInboxFilterProps {
   isDisabled?: boolean
 }
 
+interface IUnreadBadgeProps {
+  count?: number
+}
+
+export function UnreadBadge({ count }: IUnreadBadgeProps) {
+  if (count == null || count <= 0) return null
+
+  return (
+    <Badge bg="theme.blueActive" color="white" borderRadius="full" px={2} fontSize="xs" minW="20px" textAlign="center">
+      {count}
+    </Badge>
+  )
+}
+
 export const InboxFilter = observer(function InboxFilter({
   title,
   badgeCount,
+  showResultsBadge,
   isMulti,
   value,
   onChange,
@@ -69,6 +87,9 @@ export const InboxFilter = observer(function InboxFilter({
   const hasSelection = isMulti
     ? Array.isArray(localValue) && localValue.length > 0
     : !!localValue && localValue !== options?.[0]?.value
+
+  const selectedCheckboxCount = isMulti && Array.isArray(localValue) ? localValue.length : 0
+  const showSelectionParens = isMulti && selectedCheckboxCount >= 1
 
   const handleApply = () => {
     onChange(localValue)
@@ -121,19 +142,12 @@ export const InboxFilter = observer(function InboxFilter({
         >
           <HStack spacing={2}>
             <Text>{title}</Text>
-            {badgeCount != null && badgeCount > 0 && (
-              <Badge
-                bg="theme.blueActive"
-                color="white"
-                borderRadius="full"
-                px={2}
-                fontSize="xs"
-                minW="20px"
-                textAlign="center"
-              >
-                {badgeCount}
-              </Badge>
+            {showSelectionParens && (
+              <Text as="span" fontSize="sm">
+                ({selectedCheckboxCount})
+              </Text>
             )}
+            {showResultsBadge && <UnreadBadge count={badgeCount} />}
           </HStack>
         </Button>
       </PopoverTrigger>

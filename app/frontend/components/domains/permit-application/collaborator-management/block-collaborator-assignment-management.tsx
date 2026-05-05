@@ -5,7 +5,7 @@ import { createPortal } from "react-dom"
 import { IPermitApplication } from "../../../../models/permit-application"
 import { ECollaborationType, EPermitBlockStatus } from "../../../../types/enums"
 import { BlockStatusSelect } from "../../../shared/select/selectors/block-status-select"
-import { CollaboratorAssignmentPopover } from "./collaborator-assignment-popover"
+import { CollaboratorAssignmentModal } from "./collaborator-assignment-modal"
 
 export interface IRequirementBlockAssignmentNode {
   requirementBlockId: string
@@ -38,7 +38,7 @@ export const BlockCollaboratorAssignmentManagement = observer(function BlockColl
             collaborationType={collaborationType}
             requirementBlockId={requirementBlockId}
           />
-          <CollaboratorAssignmentPopover
+          <CollaboratorAssignmentModal
             permitApplication={permitApplication}
             collaborationType={collaborationType}
             requirementBlockId={requirementBlockId}

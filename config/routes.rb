@@ -200,6 +200,9 @@ Rails.application.routes.draw do
       get "download_application_metrics_csv",
           on: :collection,
           to: "permit_applications#download_application_metrics_csv"
+      get "download_application_json",
+          on: :member,
+          to: "permit_applications#download_application_json"
 
       # New route for Part 3 Step Code
       post "part_3_building/step_code",
@@ -232,8 +235,8 @@ Rails.application.routes.draw do
         post :mark_as_viewed
         post :mark_as_unviewed
         post :transition_state
-        post :assign_review_delegatee
-        delete :unassign_review_delegatee
+        post :assign_project_review_collaborator
+        delete :unassign_project_review_collaborator
       end
       collection { patch :reorder }
     end

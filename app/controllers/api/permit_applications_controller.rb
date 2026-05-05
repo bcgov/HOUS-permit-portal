@@ -17,6 +17,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
                   remove_collaborator_collaborations
                   create_or_update_permit_block_status
                   retrigger_submission_webhook
+                  download_application_json
                   destroy
                   restore
                   transition_status
@@ -282,10 +283,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
   def create
     @permit_application =
       PermitApplication.build(
-        permit_application_params.to_h.merge(
-          submitter: current_user,
-          sandbox: current_sandbox
-        )
+        permit_application_params.to_h.merge(submitter: current_user)
       )
     authorize @permit_application
     if @permit_application.save
@@ -463,6 +461,23 @@ class Api::PermitApplicationsController < Api::ApplicationController
     send_data csv_data, type: "text/csv"
   end
 
+  def download_application_json
+    authorize @permit_application, :download_application_json?
+
+    json_data =
+      PermitApplicationBlueprint.render_as_json(
+        @permit_application,
+        view: :external_api
+      )
+
+    send_data JSON.pretty_generate(json_data),
+              filename:
+                PermitApplicationGeneratedFileNamer.new(
+                  @permit_application
+                ).permit_application_json,
+              type: "application/json"
+  end
+
   def retrigger_submission_webhook
     authorize @permit_application, :retrigger_submission_webhook?
 
@@ -470,6 +485,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
 
     render_success nil, "permit_application.retrigger_webhook_success", {}
   rescue StandardError => e
+    Rails.logger.error "Error retriggering submission webhook: #{e.message}"
     render_error "permit_application.retrigger_webhook_error", {}, e
   end
 

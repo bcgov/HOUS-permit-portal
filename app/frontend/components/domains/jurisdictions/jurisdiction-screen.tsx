@@ -519,6 +519,7 @@ const JurisdictionTipTapFormController = observer(
 
     return (
       <Box
+        p={1}
         sx={{
           ".tiptap-editor-readonly": {
             padding: 0,

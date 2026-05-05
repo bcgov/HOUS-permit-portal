@@ -1,4 +1,4 @@
-import { Box, Button, IconButton, PopoverBody, PopoverHeader, SimpleGrid, useDisclosure } from "@chakra-ui/react"
+import { Box, Button, IconButton, ModalBody, ModalHeader, SimpleGrid, useDisclosure } from "@chakra-ui/react"
 import { X } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -15,7 +15,7 @@ interface ICollaboratorInviteForm {
   lastName: string
 }
 
-export const CollaboratorInvite = observer(function CollaboratorCreate({
+export const CollaboratorInviteModalContent = observer(function CollaboratorCreate({
   onInvite,
   onClose,
   onInviteSuccess,
@@ -49,7 +49,7 @@ export const CollaboratorInvite = observer(function CollaboratorCreate({
 
   return (
     <>
-      <PopoverHeader
+      <ModalHeader
         fontSize={"lg"}
         fontFamily={"heading"}
         fontWeight={"bold"}
@@ -67,8 +67,8 @@ export const CollaboratorInvite = observer(function CollaboratorCreate({
           icon={<X />}
           color={"text.primary"}
         />
-      </PopoverHeader>
-      <PopoverBody px={5} py={4}>
+      </ModalHeader>
+      <ModalBody px={5} py={4}>
         <FormProvider {...formMethods}>
           <SimpleGrid columns={2} spacing={4}>
             <TextFormControl label={t("contact.fields.firstName")} fieldName={`firstName`} required />
@@ -118,7 +118,7 @@ export const CollaboratorInvite = observer(function CollaboratorCreate({
             </Box>
           </SimpleGrid>
         </FormProvider>
-      </PopoverBody>
+      </ModalBody>
     </>
   )
 })

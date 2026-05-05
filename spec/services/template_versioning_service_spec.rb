@@ -109,7 +109,7 @@ RSpec.describe TemplateVersioningService, type: :service, search: true do
             view: :template_snapshot
           )
 
-        template_version.denormalized_template_json.should eq(
+        expect(template_version.denormalized_template_json).to eq(
           expected_denormalized_template_json
         )
       end
@@ -117,7 +117,7 @@ RSpec.describe TemplateVersioningService, type: :service, search: true do
       it "saves the current requirement template form_json to denormalized_template_json" do
         expected_form_json = requirement_template.to_form_json.as_json
 
-        template_version.form_json.should eq(expected_form_json)
+        expect(template_version.form_json).to eq(expected_form_json)
       end
 
       it "saves the current requirement_blocks to requirement_blocks_json" do
@@ -125,14 +125,14 @@ RSpec.describe TemplateVersioningService, type: :service, search: true do
 
         requirement_template.requirement_template_sections.each do |section|
           section.template_section_blocks.each do |section_block|
-            requirement_blocks_json[
-              section_block.requirement_block.id
-            ].should eq(
-                       RequirementBlockBlueprint.render_as_json(
-                         section_block.requirement_block,
-                         parent_key: section.key
-                       )
-                     )
+            expect(
+              requirement_blocks_json[section_block.requirement_block.id]
+            ).to eq(
+              RequirementBlockBlueprint.render_as_json(
+                section_block.requirement_block,
+                parent_key: section.key
+              )
+            )
           end
         end
       end

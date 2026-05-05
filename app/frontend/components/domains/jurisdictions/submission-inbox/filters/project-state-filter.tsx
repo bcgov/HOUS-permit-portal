@@ -12,26 +12,20 @@ interface IProps {
   onClear: () => void
 }
 
-export const ProjectStatusFilter = observer(function ProjectStatusFilter({
-  value,
-  onChange,
-  onApply,
-  onClear,
-}: IProps) {
+export const ProjectStateFilter = observer(function ProjectStateFilter({ value, onChange, onApply, onClear }: IProps) {
   const { t } = useTranslation()
 
   const options: IOption[] = Object.values(EProjectState)
-    .filter((status) => status !== EProjectState.closed)
-    .map((status) => ({
-      value: status,
+    .filter((state) => state !== EProjectState.closed)
+    .map((state) => ({
+      value: state,
       // @ts-ignore
-      label: t(`submissionInbox.projectStates.${status}`),
+      label: t(`submissionInbox.projectStates.${state}`),
     }))
 
   return (
     <InboxFilter
       title={t("submissionInbox.filters.projectStates")}
-      badgeCount={value.length}
       isMulti={true}
       value={value}
       onChange={(val) => onChange(val as string[])}

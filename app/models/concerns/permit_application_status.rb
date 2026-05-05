@@ -21,6 +21,9 @@ module PermitApplicationStatus
 
   included do
     include AASM
+
+    before_save :update_queue_clock, if: :status_changed?
+
     enum :status,
          {
            new_draft: 0,
@@ -35,10 +38,14 @@ module PermitApplicationStatus
          default: 0
 
     def self.draft_statuses
-      %w[new_draft revisions_requested]
+      %w[new_draft revisions_requested].freeze
     end
 
     def self.submitted_statuses
+      %w[newly_submitted resubmitted in_review approved issued withdrawn].freeze
+    end
+
+    def self.our_court_statuses
       %w[newly_submitted resubmitted in_review]
     end
 
@@ -103,7 +110,7 @@ module PermitApplicationStatus
     end
 
     def draft?
-      new_draft? || revisions_requested?
+      self.class.draft_statuses.include?(status)
     end
 
     def intake?
@@ -111,7 +118,11 @@ module PermitApplicationStatus
     end
 
     def submitted?
-      newly_submitted? || resubmitted? || in_review? || approved?
+      self.class.submitted_statuses.include?(status)
+    end
+
+    def visible_to_reviewers?
+      submitted? || revisions_requested?
     end
 
     def decided?
@@ -204,9 +215,7 @@ module PermitApplicationStatus
     end
 
     def handle_submission
-      attrs = { signed_off_at: Time.current }
-      attrs[:enqueued_at] = Time.current if newly_submitted?
-      update(attrs)
+      update(signed_off_at: Time.current)
 
       checklist = step_code&.primary_checklist
       submission_versions.create!(
@@ -228,6 +237,18 @@ module PermitApplicationStatus
       zip_and_upload_supporting_documents
 
       send_submit_notifications
+    end
+
+    def update_queue_clock
+      was_our_court = self.class.our_court_statuses.include?(status_was)
+      is_our_court = self.class.our_court_statuses.include?(status)
+
+      if was_our_court && queue_clock_started_at.present?
+        self.queue_time_seconds += (Time.current - queue_clock_started_at).to_i
+        self.queue_clock_started_at = nil
+      end
+
+      self.queue_clock_started_at = Time.current if is_our_court
     end
   end
 end

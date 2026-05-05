@@ -14,7 +14,7 @@ import {
   Text,
   useDisclosure,
 } from "@chakra-ui/react"
-import { ArrowsClockwise, CaretDown, CaretRight, CaretUp, Eye, Info, NotePencil } from "@phosphor-icons/react"
+import { ArrowsClockwise, CaretDown, CaretRight, CaretUp, Info, NotePencil, Swap } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useRef, useState } from "react"
 import { useController, useForm } from "react-hook-form"
@@ -169,44 +169,34 @@ export const ReviewPermitApplicationScreen = observer(() => {
                   value={number}
                   label={t("permitApplication.fields.number")}
                 />
-                {!isReadOnly && (
-                  <HStack mt={2} sx={{ svg: { fill: "theme.yellow" } }}>
-                    <Text textTransform={"uppercase"} whiteSpace="nowrap" flexShrink={0}>
-                      {" "}
-                      {t("permitApplication.referenceNumber")}:
-                    </Text>
-                    <EditableInputWithControls
-                      size={"xs"}
-                      value={referenceNumber}
-                      onChange={onReferenceNumberChange}
-                      onEdit={() => setReferenceNumberSnapshot(referenceNumber)}
-                      onSubmit={() => onSaveReferenceNumber()}
-                      editablePreviewProps={{
-                        mb: 0,
-                      }}
-                      editableInputProps={{
-                        "aria-label": "Edit Reference Number",
-                        bg: "white",
-                        color: "text.primary",
-                        width: "calc(10ch + 1.5em)",
-                      }}
-                      controlsProps={{
-                        saveButtonProps: { variant: "primaryInverse", textContent: t("ui.onlySave") },
-                        cancelButtonProps: { variant: "secondaryInverse" },
-                      }}
-                      aria-label={"Edit Reference Number"}
-                      onCancel={(previousValue) => onReferenceNumberChange(previousValue)}
-                    />
-                  </HStack>
-                )}
-                {isReadOnly && currentPermitApplication.referenceNumber && (
-                  <HStack mt={2}>
-                    <Text textTransform={"uppercase"} whiteSpace="nowrap" flexShrink={0}>
-                      {t("permitApplication.referenceNumber")}:
-                    </Text>
-                    <Text>{currentPermitApplication.referenceNumber}</Text>
-                  </HStack>
-                )}
+                <HStack mt={2} sx={{ svg: { fill: "theme.yellow" } }}>
+                  <Text textTransform={"uppercase"} whiteSpace="nowrap" flexShrink={0}>
+                    {" "}
+                    {t("permitApplication.referenceNumber")}:
+                  </Text>
+                  <EditableInputWithControls
+                    size={"xs"}
+                    value={referenceNumber}
+                    onChange={onReferenceNumberChange}
+                    onEdit={() => setReferenceNumberSnapshot(referenceNumber)}
+                    onSubmit={() => onSaveReferenceNumber()}
+                    editablePreviewProps={{
+                      mb: 0,
+                    }}
+                    editableInputProps={{
+                      "aria-label": "Edit Reference Number",
+                      bg: "white",
+                      color: "text.primary",
+                      width: "calc(10ch + 1.5em)",
+                    }}
+                    controlsProps={{
+                      saveButtonProps: { variant: "primaryInverse", textContent: t("ui.onlySave") },
+                      cancelButtonProps: { variant: "secondaryInverse" },
+                    }}
+                    aria-label={"Edit Reference Number"}
+                    onCancel={(previousValue) => onReferenceNumberChange(previousValue)}
+                  />
+                </HStack>
               </HStack>
             </Flex>
           </HStack>
@@ -217,16 +207,11 @@ export const ReviewPermitApplicationScreen = observer(() => {
                 {t("permitApplication.show.contactsSummary")}
               </Button>
               <SubmissionDownloadModal permitApplication={currentPermitApplication} review />
-              <Button
-                rightIcon={<CaretRight />}
-                onClick={() =>
-                  navigate(`/jurisdictions/${currentPermitApplication.jurisdiction.slug}/submission-inbox`)
-                }
-              >
+              <Button rightIcon={<CaretRight />} onClick={() => navigate(-1)}>
                 {t("ui.back")}
               </Button>
             </Stack>
-            {!isReadOnly && currentPermitApplication.jurisdiction.externalApiEnabled && (
+            {currentPermitApplication.isSubmitted && currentPermitApplication.jurisdiction.externalApiEnabled && (
               <Menu>
                 <MenuButton as={Button} variant="tertiaryInverse" rightIcon={<CaretDown />}>
                   {t("ui.options")}
@@ -301,25 +286,38 @@ export const ReviewPermitApplicationScreen = observer(() => {
               showHelpButton
               readOnly={isReadOnly}
               renderTopButtons={() => {
+                const collaboratorsButton = (
+                  <CollaboratorsSidebar
+                    permitApplication={currentPermitApplication}
+                    collaborationType={ECollaborationType.review}
+                    triggerButtonProps={{
+                      variant: "secondary",
+                    }}
+                  />
+                )
+
                 if (isReadOnly) {
-                  if (canStartReview) {
-                    return (
-                      <Button
-                        variant="callout"
-                        leftIcon={<Eye />}
-                        onClick={handleStartReview}
-                        isLoading={isStartingReview}
-                        loadingText={t("permitApplication.show.startingReview")}
-                      >
-                        {t("permitApplication.show.readyForReview")}
-                      </Button>
-                    )
-                  }
-                  return null
-                }
-                return (
-                  !revisionMode && (
+                  return (
                     <HStack spacing={6}>
+                      {canStartReview && (
+                        <Button
+                          variant="callout"
+                          leftIcon={<Swap />}
+                          onClick={handleStartReview}
+                          isLoading={isStartingReview}
+                          loadingText={t("permitApplication.show.startingReview")}
+                        >
+                          {t("permitApplication.show.readyForReview")}
+                        </Button>
+                      )}
+                      {collaboratorsButton}
+                    </HStack>
+                  )
+                }
+
+                return (
+                  <HStack spacing={6}>
+                    {!revisionMode && (
                       <Button variant="callout" leftIcon={<NotePencil />} onClick={() => setRevisionMode(true)}>
                         {currentPermitApplication.isRevisionsRequested
                           ? t("permitApplication.show.viewRevisionRequests")
@@ -327,18 +325,12 @@ export const ReviewPermitApplicationScreen = observer(() => {
                         {currentPermitApplication?.latestRevisionRequests?.length > 0 &&
                           `(${currentPermitApplication.latestRevisionRequests.length})`}
                       </Button>
-                      <CollaboratorsSidebar
-                        permitApplication={currentPermitApplication}
-                        collaborationType={ECollaborationType.review}
-                        triggerButtonProps={{
-                          variant: "secondary",
-                        }}
-                      />
-                    </HStack>
-                  )
+                    )}
+                    {collaboratorsButton}
+                  </HStack>
                 )
               }}
-              updateCollaborationAssignmentNodes={isReadOnly ? undefined : updateRequirementBlockAssignmentNode}
+              updateCollaborationAssignmentNodes={updateRequirementBlockAssignmentNode}
             />
           </Flex>
         )}
@@ -351,17 +343,16 @@ export const ReviewPermitApplicationScreen = observer(() => {
           permitApplication={currentPermitApplication}
         />
       )}
-      {!isReadOnly &&
-        requirementBlockAssignmentNodes.map((requirementBlockAssignmentNode) => {
-          return (
-            <BlockCollaboratorAssignmentManagement
-              key={requirementBlockAssignmentNode.requirementBlockId}
-              requirementBlockAssignmentNode={requirementBlockAssignmentNode}
-              permitApplication={currentPermitApplication}
-              collaborationType={ECollaborationType.review}
-            />
-          )
-        })}
+      {requirementBlockAssignmentNodes.map((requirementBlockAssignmentNode) => {
+        return (
+          <BlockCollaboratorAssignmentManagement
+            key={requirementBlockAssignmentNode.requirementBlockId}
+            requirementBlockAssignmentNode={requirementBlockAssignmentNode}
+            permitApplication={currentPermitApplication}
+            collaborationType={ECollaborationType.review}
+          />
+        )
+      })}
     </Box>
   )
 })

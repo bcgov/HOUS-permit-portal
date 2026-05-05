@@ -31,17 +31,23 @@ module Api::Concerns::Search::JurisdictionPermitApplications
       scope_results: ->(relation) { policy_scope(relation) }
     }
 
+    body_opts = jurisdiction_permit_application_body_options
+    search_conditions[:body_options] = body_opts if body_opts.present?
+
     @jurisdiction_permit_application_search =
       PermitApplication.search(
         jurisdiction_permit_application_query,
         **search_conditions
       )
 
+    unread_status_counts = jurisdiction_application_unread_status_counts
     @jurisdiction_permit_application_meta = {
       total_pages: @jurisdiction_permit_application_search.total_pages,
       current_page: @jurisdiction_permit_application_search.current_page,
       total_count: @jurisdiction_permit_application_search.total_count,
-      status_counts: jurisdiction_application_status_counts
+      status_counts: jurisdiction_application_status_counts,
+      unread_count: unread_status_counts.values.sum,
+      unread_status_counts: unread_status_counts
     }
 
     @jurisdiction_permit_applications =
@@ -71,17 +77,20 @@ module Api::Concerns::Search::JurisdictionPermitApplications
 
       where =
         jurisdiction_permit_application_where_clause(status_filter: status)
-      search =
-        PermitApplication.search(
-          query,
-          order: order,
-          match: :word_start,
-          fields: jurisdiction_permit_application_search_fields,
-          where: where,
-          per_page: per_column,
-          page: 1,
-          load: false
-        )
+      kanban_conditions = {
+        order: order,
+        match: :word_start,
+        fields: jurisdiction_permit_application_search_fields,
+        where: where,
+        per_page: per_column,
+        page: 1,
+        load: false
+      }
+
+      body_opts = jurisdiction_permit_application_body_options
+      kanban_conditions[:body_options] = body_opts if body_opts.present?
+
+      search = PermitApplication.search(query, **kanban_conditions)
       ids = search.hits.map { |h| h["_id"] }
       all_ids.concat(ids)
       column_totals[status] = search.total_count
@@ -94,16 +103,69 @@ module Api::Concerns::Search::JurisdictionPermitApplications
 
     @jurisdiction_permit_applications =
       loaded.sort_by { |pa| all_ids.index(pa.id) }
+    unread_status_counts = jurisdiction_application_unread_status_counts
     @jurisdiction_permit_application_meta = {
       total_pages: 1,
       current_page: 1,
       total_count: all_ids.length,
       status_counts: jurisdiction_application_status_counts,
-      column_totals: column_totals
+      column_totals: column_totals,
+      unread_count: unread_status_counts.values.sum,
+      unread_status_counts: unread_status_counts
     }
   end
 
+  QUEUE_CLOCK_SCRIPT =
+    "long total = doc['queue_time_seconds'].value; " \
+      "if (doc['queue_clock_started_at'].size() > 0) { " \
+      "total += params.now_seconds - doc['queue_clock_started_at'].value } " \
+      "return total"
+
   private
+
+  # Unread (viewed_at nil) applications by status for the unread badges.
+  # Scoped jurisdiction-wide (or to permit_project_id when provided, matching
+  # the status_counts scope), independent of current filters/query so the
+  # badge shows the full jurisdiction unread count.
+  def jurisdiction_application_unread_status_counts
+    and_conditions = []
+    and_conditions << { jurisdiction_id: @jurisdiction.id }
+    and_conditions << { discarded: false }
+    and_conditions << { status: { not: "new_draft" } }
+    and_conditions << { viewed_at: nil }
+    unless current_user.super_admin?
+      and_conditions << { sandbox_id: current_sandbox&.id }
+    end
+
+    permit_project_id =
+      jurisdiction_permit_application_search_params[:permit_project_id]
+    if permit_project_id.present?
+      and_conditions << { permit_project_id: permit_project_id }
+    end
+
+    PermitApplication.search(
+      "*",
+      where: {
+        _and: and_conditions
+      },
+      aggs: [:status],
+      body_options: {
+        size: 0
+      }
+    ).aggs[
+      "status"
+    ][
+      "buckets"
+    ].each_with_object({}) do |bucket, hash|
+      next if bucket["key"] == "new_draft"
+      hash[bucket["key"]] = bucket["doc_count"]
+    end
+  rescue => e
+    Rails.logger.warn(
+      "Failed to compute application unread status counts: #{e.message}"
+    )
+    {}
+  end
 
   def jurisdiction_application_status_counts
     and_conditions = []
@@ -112,6 +174,12 @@ module Api::Concerns::Search::JurisdictionPermitApplications
     and_conditions << { status: { not: "new_draft" } }
     unless current_user.super_admin?
       and_conditions << { sandbox_id: current_sandbox&.id }
+    end
+
+    permit_project_id =
+      jurisdiction_permit_application_search_params[:permit_project_id]
+    if permit_project_id.present?
+      and_conditions << { permit_project_id: permit_project_id }
     end
 
     agg_search =
@@ -144,6 +212,7 @@ module Api::Concerns::Search::JurisdictionPermitApplications
       :per_page,
       :mode,
       :per_column,
+      :permit_project_id,
       filters: [
         :requirement_template_id,
         :template_version_id,
@@ -175,11 +244,61 @@ module Api::Concerns::Search::JurisdictionPermitApplications
   end
 
   def jurisdiction_permit_application_order
-    if (sort = jurisdiction_permit_application_search_params[:sort])
-      { sort[:field] => { order: sort[:direction], unmapped_type: "long" } }
+    sort = jurisdiction_permit_application_search_params[:sort]
+    return { number: { order: :desc, unmapped_type: "long" } } unless sort
+
+    if sort[:field] == "days_in_queue"
+      nil
     else
-      { number: { order: :desc, unmapped_type: "long" } }
+      { sort[:field] => { order: sort[:direction], unmapped_type: "long" } }
     end
+  end
+
+  def jurisdiction_permit_application_body_options
+    opts = {}
+    filters =
+      (jurisdiction_permit_application_search_params[:filters] || {}).deep_dup
+
+    days_in_queue = filters[:days_in_queue]
+    if days_in_queue.present? && days_in_queue[:days].present?
+      days = days_in_queue[:days].to_i
+      threshold_seconds = days * 86_400
+      comparator = days_in_queue[:operator] == "gte" ? ">=" : "<"
+
+      opts[:post_filter] = {
+        script: {
+          script: {
+            source: QUEUE_CLOCK_SCRIPT + " #{comparator} params.threshold",
+            params: {
+              now_seconds: Time.current.to_i,
+              threshold: threshold_seconds
+            }
+          }
+        }
+      }
+    end
+
+    sort = jurisdiction_permit_application_search_params[:sort]
+    if sort.present? && sort[:field] == "days_in_queue"
+      direction =
+        %w[asc desc].include?(sort[:direction]) ? sort[:direction] : "desc"
+      opts[:sort] = [
+        {
+          _script: {
+            type: "number",
+            script: {
+              source: QUEUE_CLOCK_SCRIPT,
+              params: {
+                now_seconds: Time.current.to_i
+              }
+            },
+            order: direction
+          }
+        }
+      ]
+    end
+
+    opts
   end
 
   def jurisdiction_permit_application_where_clause(status_filter: nil)
@@ -216,20 +335,17 @@ module Api::Concerns::Search::JurisdictionPermitApplications
       and_conditions << { _not: { viewed_at: nil } }
     end
 
-    days_in_queue = search_filters.delete(:days_in_queue)
-    if days_in_queue.present? && days_in_queue[:days].present?
-      days = days_in_queue[:days].to_i
-      cutoff = days.days.ago.beginning_of_day
-      if days_in_queue[:operator] == "gte"
-        and_conditions << { enqueued_at: { lte: cutoff } }
-      elsif days_in_queue[:operator] == "lt"
-        and_conditions << { enqueued_at: { gt: cutoff } }
-      end
-    end
+    search_filters.delete(:days_in_queue)
 
     assigned = search_filters.delete(:assigned)
     if assigned.present?
       and_conditions << { review_collaborator_user_ids: assigned }
+    end
+
+    permit_project_id =
+      jurisdiction_permit_application_search_params[:permit_project_id]
+    if permit_project_id.present?
+      and_conditions << { permit_project_id: permit_project_id }
     end
 
     { _and: and_conditions }

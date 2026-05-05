@@ -130,6 +130,8 @@ export type TSearchParams<IModelSortFields, IModelFilterFields = {}> = {
   filters?: IModelFilterFields
   mode?: "list" | "kanban"
   perColumn?: number
+  /** When set, jurisdiction permit application search is limited to this project */
+  permitProjectId?: string
 }
 
 export type TComputedCompliance = {
@@ -614,7 +616,7 @@ export interface IPermitProjectSearchFilters {
 
 export interface IPermitProjectInboxSearchFilters {
   requirementTemplateIds?: string[]
-  status?: string[]
+  state?: string[]
   unread?: string
   meetingRequest?: string
   daysInQueue?: { operator: string; days: number }
@@ -641,6 +643,8 @@ export interface IProjectAuditSummary {
   createdAt: number
   permitApplicationId: string | null
   permitName: string | null
+  /** Present when audit is tied to a permit application; used for inbox UI (e.g. skip review link for drafts). */
+  permitApplicationStatus?: string | null
 }
 
 export interface ITemplateVersionDiff {

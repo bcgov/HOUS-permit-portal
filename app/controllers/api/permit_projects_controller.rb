@@ -14,8 +14,8 @@ class Api::PermitProjectsController < Api::ApplicationController
                   mark_as_viewed
                   mark_as_unviewed
                   transition_state
-                  assign_review_delegatee
-                  unassign_review_delegatee
+                  assign_project_review_collaborator
+                  unassign_project_review_collaborator
                 ]
   before_action :set_pinned_projects, only: %i[pinned]
 
@@ -90,7 +90,7 @@ class Api::PermitProjectsController < Api::ApplicationController
     render_error("permit_project.invalid_transition", { status: 422 })
   end
 
-  def assign_review_delegatee
+  def assign_project_review_collaborator
     authorize @permit_project
 
     unless @permit_project.designated_reviewer_enabled?
@@ -98,9 +98,9 @@ class Api::PermitProjectsController < Api::ApplicationController
     end
 
     collaborator_id = params.require(:collaborator_id)
-    @permit_project.assign_review_delegatee!(collaborator_id)
+    @permit_project.assign_project_review_collaborator!(collaborator_id)
     render_success @permit_project.reload,
-                   "permit_project.assign_review_delegatee_success",
+                   "permit_project.assign_project_review_collaborator_success",
                    {
                      blueprint: PermitProjectBlueprint,
                      blueprint_opts:
@@ -108,16 +108,17 @@ class Api::PermitProjectsController < Api::ApplicationController
                    }
   rescue => e
     render_error(
-      "permit_project.assign_review_delegatee_error",
-      { message_opts: { error_message: e.message }, status: 422 }
+      "permit_project.assign_project_review_collaborator_error",
+      { status: 422, log_args: { errors: e.message } }
     )
   end
 
-  def unassign_review_delegatee
+  def unassign_project_review_collaborator
     authorize @permit_project
-    @permit_project.unassign_review_delegatee!
+    collaborator_id = params.require(:collaborator_id)
+    @permit_project.unassign_project_review_collaborator!(collaborator_id)
     render_success @permit_project.reload,
-                   "permit_project.unassign_review_delegatee_success",
+                   "permit_project.unassign_project_review_collaborator_success",
                    {
                      blueprint: PermitProjectBlueprint,
                      blueprint_opts:
@@ -138,10 +139,11 @@ class Api::PermitProjectsController < Api::ApplicationController
       render_error(
         "permit_project.update_error",
         {
-          message_opts: {
-            errors: @permit_project.errors.full_messages
-          },
-          status: :unprocessable_entity
+          status: :unprocessable_entity,
+          log_args: {
+            errors: @permit_project.errors.full_messages,
+            params: permit_project_params.to_h
+          }
         }
       )
     end
@@ -149,8 +151,9 @@ class Api::PermitProjectsController < Api::ApplicationController
 
   def create
     @permit_project = PermitProject.new(permit_project_params)
-    @permit_project.owner = current_user # Assign the current user as the owner
-    authorize @permit_project # Assuming you have a PermitProjectPolicy with :create?
+    @permit_project.owner = current_user
+    @permit_project.sandbox = current_sandbox
+    authorize @permit_project
 
     if @permit_project.save
       render_success @permit_project,
@@ -162,12 +165,13 @@ class Api::PermitProjectsController < Api::ApplicationController
                      }
     else
       render_error(
-        "permit_project.create_error", # Add this translation key
+        "permit_project.create_error",
         {
-          message_opts: {
-            errors: @permit_project.errors.full_messages
-          },
-          status: :unprocessable_entity
+          status: :unprocessable_entity,
+          log_args: {
+            errors: @permit_project.errors.full_messages,
+            params: permit_project_params.to_h
+          }
         }
       )
     end
@@ -241,9 +245,11 @@ class Api::PermitProjectsController < Api::ApplicationController
                    }
   end
 
-  # Bulk create permit applications for a project
+  # Bulk create permit applications for a project.
+  # Sandbox comes from the parent project, not the request, so all PAs in a
+  # project stay in the same sandbox.
   # Expected params:
-  #   permit_applications: [{ activity_id, permit_type_id, first_nations, jurisdiction_id?, sandbox_id? }]
+  #   permit_applications: [{ activity_id, permit_type_id, first_nations, jurisdiction_id? }]
   def create_permit_applications
     authorize @permit_project
 
@@ -254,7 +260,6 @@ class Api::PermitProjectsController < Api::ApplicationController
       permit_application =
         PermitApplication.new(
           submitter: current_user,
-          sandbox: current_sandbox,
           permit_project: @permit_project,
           activity_id: pa_params[:activity_id],
           permit_type_id: pa_params[:permit_type_id],
@@ -296,8 +301,7 @@ class Api::PermitProjectsController < Api::ApplicationController
               :permit_type_id,
               :first_nations,
               :jurisdiction_id,
-              :permit_project_id,
-              :sandbox_id
+              :permit_project_id
             ).to_h
           end
       }
@@ -374,7 +378,9 @@ class Api::PermitProjectsController < Api::ApplicationController
   end
 
   def set_permit_project
-    @permit_project = PermitProject.includes(:jurisdiction).find(params[:id])
+    scope = PermitProject.includes(:jurisdiction)
+    scope = scope.for_sandbox(current_sandbox) unless current_user.super_admin?
+    @permit_project = scope.find(params[:id])
     compute_project_ids_with_outdated_drafts([@permit_project])
   end
 
@@ -392,7 +398,6 @@ class Api::PermitProjectsController < Api::ApplicationController
           :pid,
           :first_nations,
           :permit_project_id,
-          :sandbox_id,
           submission_data: {
           }
         )

@@ -11,7 +11,6 @@ import {
   Select,
   Stack,
   Text,
-  useDisclosure,
 } from "@chakra-ui/react"
 import { ArrowSquareOut, Users } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
@@ -21,7 +20,6 @@ import { Link } from "react-router-dom"
 import { IPermitProject } from "../../../../models/permit-project"
 import { useMst } from "../../../../setup/root"
 import { ECollaborationType } from "../../../../types/enums"
-import { ConfirmationModal } from "../../../shared/confirmation-modal"
 import { SharedAvatar } from "../../../shared/user/shared-avatar"
 
 interface IProps {
@@ -54,8 +52,6 @@ export const ProjectCollaboratorsSidebar = observer(function ProjectCollaborator
   const designatedReviewerEnabled =
     siteConfigurationStore.allowDesignatedReviewer && project.jurisdiction?.allowDesignatedReviewer
 
-  const reviewDelegatee = project.reviewDelegatee
-
   return (
     <Drawer isOpen={isOpen} placement="right" onClose={onClose}>
       <DrawerOverlay />
@@ -70,7 +66,7 @@ export const ProjectCollaboratorsSidebar = observer(function ProjectCollaborator
         </DrawerHeader>
 
         <DrawerBody as={Stack} spacing={8}>
-          {designatedReviewerEnabled && <ProjectDelegateeSection project={project} reviewDelegatee={reviewDelegatee} />}
+          {designatedReviewerEnabled && <ProjectReviewCollaboratorsSection project={project} />}
 
           <Stack spacing={4}>
             <Text as="h3" fontSize="md" fontWeight={700}>
@@ -149,109 +145,16 @@ export const ProjectCollaboratorsSidebar = observer(function ProjectCollaborator
   )
 })
 
-const ProjectDelegateeSection = observer(function ProjectDelegateeSection({
+const ProjectReviewCollaboratorsSection = observer(function ProjectReviewCollaboratorsSection({
   project,
-  reviewDelegatee,
 }: {
   project: IPermitProject
-  reviewDelegatee: any
 }) {
   const { t } = useTranslation()
-  const [pendingCollaboratorId, setPendingCollaboratorId] = useState<string | null>(null)
-  const { isOpen: isConfirmOpen, onOpen: onConfirmOpen, onClose: onConfirmClose } = useDisclosure()
-
-  const handleDelegateeSelected = (collaboratorId: string) => {
-    setPendingCollaboratorId(collaboratorId)
-    onConfirmOpen()
-  }
-
-  const handleConfirmAssign = async (closeModal: () => void) => {
-    if (!pendingCollaboratorId) return
-    await project.assignReviewDelegatee(pendingCollaboratorId)
-    setPendingCollaboratorId(null)
-    closeModal()
-  }
-
-  const handleUnassign = async () => {
-    await project.unassignReviewDelegatee()
-  }
-
-  return (
-    <Stack spacing={4} mt={6}>
-      <Text as="h3" fontSize="md" fontWeight={700}>
-        {/* @ts-ignore */}
-        {t("permitCollaboration.projectSidebar.projectReviewDelegatee")}
-      </Text>
-
-      <Stack borderLeft="4px solid" borderColor="theme.blueAlt" px={6} py={3} bg="theme.blueLight">
-        <Text fontSize="sm">
-          {/* @ts-ignore */}
-          {t("permitCollaboration.projectSidebar.delegateeDescription")}
-        </Text>
-      </Stack>
-
-      <Stack spacing={2}>
-        {reviewDelegatee?.user ? (
-          <HStack spacing={3} p={3} bg="gray.50" borderRadius="md" justify="space-between">
-            <HStack spacing={3}>
-              <SharedAvatar
-                size="sm"
-                name={`${reviewDelegatee.user.firstName} ${reviewDelegatee.user.lastName}`}
-                role={reviewDelegatee.user.role}
-              />
-              <Stack spacing={0}>
-                <Text fontSize="sm" fontWeight={600}>
-                  {`${reviewDelegatee.user.firstName} ${reviewDelegatee.user.lastName}`}
-                </Text>
-                {reviewDelegatee.user.email && (
-                  <Text fontSize="xs" color="text.secondary">
-                    {reviewDelegatee.user.email}
-                  </Text>
-                )}
-              </Stack>
-            </HStack>
-            <Button size="xs" variant="ghost" colorScheme="red" onClick={handleUnassign}>
-              {/* @ts-ignore */}
-              {t("permitCollaboration.projectSidebar.unassignDelegatee")}
-            </Button>
-          </HStack>
-        ) : (
-          <Text fontSize="sm" color="text.secondary">
-            {/* @ts-ignore */}
-            {t("permitCollaboration.projectSidebar.noneAssigned")}
-          </Text>
-        )}
-
-        <ProjectDelegateeAssignment
-          project={project}
-          onSelect={handleDelegateeSelected}
-          existingDelegateeCollaboratorId={reviewDelegatee?.id}
-        />
-      </Stack>
-
-      <ConfirmationModal
-        modalControlProps={{ isOpen: isConfirmOpen, onOpen: onConfirmOpen, onClose: onConfirmClose }}
-        renderTriggerButton={() => <></>}
-        // @ts-ignore
-        title={t("permitCollaboration.projectSidebar.overrideConfirmTitle")}
-        // @ts-ignore
-        body={t("permitCollaboration.projectSidebar.overrideConfirmBody")}
-        onConfirm={handleConfirmAssign}
-      />
-    </Stack>
-  )
-})
-
-const ProjectDelegateeAssignment = observer(function ProjectDelegateeAssignment({
-  project,
-  onSelect,
-  existingDelegateeCollaboratorId,
-}: {
-  project: IPermitProject
-  onSelect: (collaboratorId: string) => void
-  existingDelegateeCollaboratorId?: string
-}) {
   const { collaboratorStore } = useMst()
+
+  const collaborations = project.permitProjectCollaborations
+  const takenIds = new Set(collaborations.map((c) => c.collaborator.id))
 
   useEffect(() => {
     collaboratorStore.setSearchContext(ECollaborationType.review)
@@ -263,34 +166,77 @@ const ProjectDelegateeAssignment = observer(function ProjectDelegateeAssignment(
     }
   }, [])
 
-  const takenIds = new Set(existingDelegateeCollaboratorId ? [existingDelegateeCollaboratorId] : [])
-  const collaborators = collaboratorStore.getFilteredCollaborationSearchList(takenIds)
+  const availableCollaborators = collaboratorStore.getFilteredCollaborationSearchList(takenIds)
+
+  const handleAssign = async (collaboratorId: string) => {
+    await project.assignProjectReviewCollaborator(collaboratorId)
+  }
+
+  const handleUnassign = async (collaboratorId: string) => {
+    await project.unassignProjectReviewCollaborator(collaboratorId)
+  }
 
   return (
-    <Stack spacing={2}>
-      {collaborators.length > 0 && (
-        <Stack spacing={1} maxH="200px" overflowY="auto">
-          {collaborators.map((collaborator) => (
-            <HStack
-              key={collaborator.id}
-              spacing={3}
-              p={2}
-              borderRadius="md"
-              cursor="pointer"
-              _hover={{ bg: "gray.100" }}
-              onClick={() => onSelect(collaborator.id)}
-            >
-              <SharedAvatar size="xs" name={collaborator.user?.name} role={collaborator.user?.role} />
-              <Stack spacing={0}>
-                <Text fontSize="sm">{collaborator.user?.name}</Text>
-                <Text fontSize="xs" color="text.secondary">
-                  {collaborator.user?.email}
-                </Text>
-              </Stack>
+    <Stack spacing={4} mt={6}>
+      <Text as="h3" fontSize="md" fontWeight={700}>
+        {/* @ts-ignore */}
+        {t("permitCollaboration.projectSidebar.projectReviewCollaborators")}
+      </Text>
+
+      <Stack spacing={2}>
+        {collaborations.length > 0 ? (
+          collaborations.map((c) => (
+            <HStack key={c.id} spacing={3} p={3} bg="gray.50" borderRadius="md" justify="space-between">
+              <HStack spacing={3}>
+                <SharedAvatar size="sm" name={c.collaborator.user?.name} role={c.collaborator.user?.role} />
+                <Stack spacing={0}>
+                  <Text fontSize="sm" fontWeight={600}>
+                    {c.collaborator.user?.name}
+                  </Text>
+                  {c.collaborator.user?.email && (
+                    <Text fontSize="xs" color="text.secondary">
+                      {c.collaborator.user?.email}
+                    </Text>
+                  )}
+                </Stack>
+              </HStack>
+              <Button size="xs" variant="ghost" colorScheme="red" onClick={() => handleUnassign(c.collaborator.id)}>
+                {/* @ts-ignore */}
+                {t("permitCollaboration.projectSidebar.unassignCollaborator")}
+              </Button>
             </HStack>
-          ))}
-        </Stack>
-      )}
+          ))
+        ) : (
+          <Text fontSize="sm" color="text.secondary">
+            {/* @ts-ignore */}
+            {t("permitCollaboration.projectSidebar.noneAssigned")}
+          </Text>
+        )}
+
+        {availableCollaborators.length > 0 && (
+          <Stack spacing={1} maxH="200px" overflowY="auto">
+            {availableCollaborators.map((collaborator) => (
+              <HStack
+                key={collaborator.id}
+                spacing={3}
+                p={2}
+                borderRadius="md"
+                cursor="pointer"
+                _hover={{ bg: "gray.100" }}
+                onClick={() => handleAssign(collaborator.id)}
+              >
+                <SharedAvatar size="xs" name={collaborator.user?.name} role={collaborator.user?.role} />
+                <Stack spacing={0}>
+                  <Text fontSize="sm">{collaborator.user?.name}</Text>
+                  <Text fontSize="xs" color="text.secondary">
+                    {collaborator.user?.email}
+                  </Text>
+                </Stack>
+              </HStack>
+            ))}
+          </Stack>
+        )}
+      </Stack>
     </Stack>
   )
 })

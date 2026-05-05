@@ -258,11 +258,19 @@ RSpec.describe ProjectAuditPolicy do
       %i[technical_support super_admin].each do |role|
         it "includes designated submitter collaborations for #{role} (excludes other collaborations and block status)" do
           other_role_user = create(:user, role: role)
+          # jurisdiction_staff owners must be scoped to a sandbox; super_admin is not jurisdiction_staff.
+          project_sandbox =
+            (
+              if other_role_user.jurisdiction_staff?
+                jurisdiction.sandboxes.published.first
+              end
+            )
           other_project =
             create(
               :permit_project,
               owner: other_role_user,
-              jurisdiction: jurisdiction
+              jurisdiction: jurisdiction,
+              sandbox: project_sandbox
             )
 
           pa =

@@ -1,21 +1,19 @@
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
-import { useTranslation } from "react-i18next"
 import { useMst } from "../../../setup/root"
 import { IOption } from "../../../types/types"
 import { SandboxSelect } from "../../shared/select/selectors/sandbox-select"
 
-interface INewPermitApplicationSandboxSelectProps {
+interface INewPermitProjectSandboxSelectProps {
   options: IOption[]
 }
 
-export const NewPermitApplicationSandboxSelect = observer(function NavSandboxSelect({
+export const NewPermitProjectSandboxSelect = observer(function NewPermitProjectSandboxSelect({
   options,
-}: INewPermitApplicationSandboxSelectProps) {
+}: INewPermitProjectSandboxSelectProps) {
   const { sandboxStore } = useMst()
   const { currentSandboxId, setCurrentSandboxId, temporarilyPersistSandboxId, resetTemporarilyPersistSandboxId } =
     sandboxStore
-  const { t } = useTranslation()
 
   useEffect(() => {
     temporarilyPersistSandboxId()

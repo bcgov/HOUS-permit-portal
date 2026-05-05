@@ -1,26 +1,25 @@
 import { useEffect, useState } from "react"
-import { useTranslation } from "react-i18next"
-import { useLocation, useParams } from "react-router-dom"
+import { useParams } from "react-router-dom"
 import { useMst } from "../../setup/root"
 import { isUUID } from "../../utils/utility-functions"
 
 export const usePermitProject = () => {
   const { permitProjectId } = useParams<{ permitProjectId: string }>()
-  const { pathname } = useLocation()
   const { permitProjectStore, sandboxStore } = useMst()
   const { currentSandbox } = sandboxStore
 
   const { currentPermitProject, setCurrentPermitProject, fetchPermitProject } = permitProjectStore
 
   const [error, setError] = useState<Error | undefined>(undefined)
-  const { t } = useTranslation()
 
   useEffect(() => {
     const loadPermitProject = async () => {
       if (currentPermitProject?.id === permitProjectId && currentPermitProject.isFullyLoaded) return
 
       try {
-        setCurrentPermitProject(null)
+        if (currentPermitProject?.id !== permitProjectId) {
+          setCurrentPermitProject(null)
+        }
         if (isUUID(permitProjectId)) {
           const project = await fetchPermitProject(permitProjectId)
           if (project) {
@@ -37,13 +36,9 @@ export const usePermitProject = () => {
     }
 
     loadPermitProject()
-
-    // Cleanup function to clear the current project when the component unmounts or dependencies change
-    return () => {
-      // Assuming you have a method like clearCurrentPermitProject in your store
-      // permitProjectStore.clearCurrentPermitProject();
-    }
-  }, [permitProjectId, pathname, currentSandbox?.id, fetchPermitProject, setCurrentPermitProject, t])
+    // Intentionally omit currentPermitProject from deps: including it would re-run on every MST field update.
+    // permitProjectId + sandbox identify which project to load; tab/query path changes do not.
+  }, [permitProjectId, currentSandbox?.id, fetchPermitProject, setCurrentPermitProject])
 
   return { currentPermitProject, error }
 }

@@ -25,7 +25,6 @@ class SetProjectStates < ActiveRecord::Migration[7.2]
     end
 
     PermitProject.reindex
-    PermitApplication.reindex
   end
 
   def down

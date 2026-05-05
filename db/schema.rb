@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_04_02_180000) do
+ActiveRecord::Schema[7.2].define(version: 2026_04_27_222000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -525,7 +525,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_02_180000) do
     t.jsonb "compliance_data", default: {}, null: false
     t.datetime "revisions_requested_at", precision: nil
     t.boolean "first_nations", default: false
-    t.uuid "sandbox_id"
     t.datetime "newly_submitted_at", precision: nil
     t.uuid "permit_project_id"
     t.datetime "discarded_at"
@@ -534,13 +533,14 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_02_180000) do
     t.string "last_name_snapshot"
     t.datetime "orphaned_at"
     t.integer "inbox_sort_order"
+    t.integer "queue_time_seconds", default: 0, null: false
+    t.datetime "queue_clock_started_at"
     t.index ["activity_id"], name: "index_permit_applications_on_activity_id"
     t.index ["discarded_at"], name: "index_permit_applications_on_discarded_at"
     t.index ["jurisdiction_id"], name: "index_permit_applications_on_jurisdiction_id"
     t.index ["number"], name: "index_permit_applications_on_number", unique: true
     t.index ["permit_project_id"], name: "index_permit_applications_on_permit_project_id"
     t.index ["permit_type_id"], name: "index_permit_applications_on_permit_type_id"
-    t.index ["sandbox_id"], name: "index_permit_applications_on_sandbox_id"
     t.index ["submitter_id"], name: "index_permit_applications_on_submitter_id"
     t.index ["template_version_id"], name: "index_permit_applications_on_template_version_id"
   end
@@ -585,6 +585,19 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_02_180000) do
     t.index ["permit_application_id"], name: "index_permit_collaborations_on_permit_application_id"
   end
 
+  create_table "permit_project_collaborations", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "permit_project_id", null: false
+    t.uuid "collaborator_id", null: false
+    t.datetime "discarded_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["collaborator_id"], name: "index_permit_project_collaborations_on_collaborator_id"
+    t.index ["discarded_at"], name: "index_permit_project_collaborations_on_discarded_at"
+    t.index ["permit_project_id", "collaborator_id"], name: "index_project_collabs_on_project_and_collaborator", unique: true, where: "(discarded_at IS NULL)"
+    t.index ["permit_project_id"], name: "index_permit_project_collaborations_on_permit_project_id"
+    t.index ["permit_project_id"], name: "index_project_collabs_unique_kept_per_project", unique: true, where: "(discarded_at IS NULL)"
+  end
+
   create_table "permit_projects", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "owner_id"
     t.uuid "jurisdiction_id", null: false
@@ -611,11 +624,13 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_02_180000) do
     t.datetime "viewed_at"
     t.integer "inbox_sort_order"
     t.datetime "enqueued_at"
-    t.uuid "review_delegatee_id"
+    t.integer "queue_time_seconds", default: 0, null: false
+    t.datetime "queue_clock_started_at"
+    t.uuid "sandbox_id"
     t.index ["jurisdiction_id"], name: "index_permit_projects_on_jurisdiction_id"
     t.index ["number"], name: "index_permit_projects_on_number", unique: true
     t.index ["owner_id"], name: "index_permit_projects_on_owner_id"
-    t.index ["review_delegatee_id"], name: "index_permit_projects_on_review_delegatee_id"
+    t.index ["sandbox_id"], name: "index_permit_projects_on_sandbox_id"
   end
 
   create_table "permit_type_required_steps", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -705,8 +720,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_02_180000) do
     t.boolean "enable_in_app_application_revisions_request_notification", default: true
     t.boolean "enable_in_app_collaboration_notification", default: true
     t.boolean "enable_email_collaboration_notification", default: true
-    t.boolean "enable_in_app_integration_mapping_notification", default: true
-    t.boolean "enable_email_integration_mapping_notification", default: true
     t.boolean "enable_in_app_unmapped_api_notification", default: true
     t.boolean "enable_email_unmapped_api_notification", default: true
     t.boolean "enable_in_app_resource_reminder_notification", default: true
@@ -1185,14 +1198,15 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_02_180000) do
   add_foreign_key "permit_applications", "permit_classifications", column: "activity_id"
   add_foreign_key "permit_applications", "permit_classifications", column: "permit_type_id"
   add_foreign_key "permit_applications", "permit_projects"
-  add_foreign_key "permit_applications", "sandboxes"
   add_foreign_key "permit_applications", "template_versions"
   add_foreign_key "permit_applications", "users", column: "submitter_id"
   add_foreign_key "permit_block_statuses", "permit_applications"
   add_foreign_key "permit_collaborations", "collaborators"
   add_foreign_key "permit_collaborations", "permit_applications"
-  add_foreign_key "permit_projects", "collaborators", column: "review_delegatee_id"
+  add_foreign_key "permit_project_collaborations", "collaborators"
+  add_foreign_key "permit_project_collaborations", "permit_projects"
   add_foreign_key "permit_projects", "jurisdictions"
+  add_foreign_key "permit_projects", "sandboxes"
   add_foreign_key "permit_projects", "users", column: "owner_id"
   add_foreign_key "permit_type_required_steps", "jurisdictions"
   add_foreign_key "permit_type_required_steps", "permit_classifications", column: "permit_type_id"

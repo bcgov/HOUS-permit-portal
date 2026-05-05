@@ -1,8 +1,8 @@
 import { Box, Button, Container, Flex, Heading, HStack, Text, VStack } from "@chakra-ui/react"
-import { CaretLeft } from "@phosphor-icons/react"
+import { CaretLeft, Info } from "@phosphor-icons/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
-import React from "react"
+import React, { useEffect } from "react"
 import { Controller, FormProvider, useForm } from "react-hook-form"
 import { useNavigate } from "react-router-dom"
 import { useMst } from "../../../setup/root"
@@ -11,6 +11,8 @@ import { BackButton } from "../../shared/buttons/back-button"
 import { TextFormControl } from "../../shared/form/input-form-control"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { SitesSelect } from "../../shared/select/selectors/sites-select"
+import { Can } from "../../shared/user/can"
+import { NewPermitProjectSandboxSelect } from "./new-permit-project-sandbox-select"
 
 type TCreatePermitProjectFormData = {
   title: string
@@ -31,10 +33,20 @@ export const NewPermitProjectScreen = observer(() => {
     },
   })
 
-  const { handleSubmit, formState, control, register } = formMethods
+  const { handleSubmit, formState, control, register, watch } = formMethods
   const { isSubmitting, errors, isValid } = formState
   const navigate = useNavigate()
-  const { permitProjectStore } = useMst()
+  const { permitProjectStore, jurisdictionStore } = useMst()
+
+  const jurisdictionId = watch("jurisdictionId")
+  const selectedJurisdiction = jurisdictionId ? jurisdictionStore.getJurisdictionById(jurisdictionId) : null
+  const sandboxOptions = selectedJurisdiction?.sandboxOptions ?? []
+
+  useEffect(() => {
+    if (jurisdictionId) {
+      jurisdictionStore.fetchJurisdiction(jurisdictionId)
+    }
+  }, [jurisdictionId])
 
   const onSubmit = async (values: TCreatePermitProjectFormData) => {
     const params = {
@@ -96,6 +108,29 @@ export const NewPermitProjectScreen = observer(() => {
                 )}
               />
             </Flex>
+
+            {sandboxOptions.length > 0 && (
+              <Can action="jurisdiction:create">
+                <Box w={{ base: "full", md: "50%" }}>
+                  <Flex
+                    gap={4}
+                    borderRadius="lg"
+                    border="1px solid"
+                    borderColor="semantic.special"
+                    background="semantic.specialLight"
+                    p={6}
+                  >
+                    <Info />
+                    <Flex direction="column">
+                      <Heading>{t("sandbox.switch.superAdminAvailable")}</Heading>
+                      <Text mb={4}>{t("sandbox.switch.testingPurposes")}</Text>
+
+                      <NewPermitProjectSandboxSelect options={sandboxOptions} />
+                    </Flex>
+                  </Flex>
+                </Box>
+              </Can>
+            )}
 
             <HStack>
               <BackButton>{t("ui.back")}</BackButton>

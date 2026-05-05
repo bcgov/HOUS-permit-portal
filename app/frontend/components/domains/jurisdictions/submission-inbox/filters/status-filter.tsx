@@ -32,7 +32,6 @@ export const StatusFilter = observer(function StatusFilter({ value, onChange, on
   return (
     <InboxFilter
       title={t("submissionInbox.filters.status")}
-      badgeCount={value.length}
       isMulti={true}
       value={value}
       onChange={(val) => onChange(val as string[])}

@@ -1,35 +1,23 @@
-import {
-  Avatar,
-  Box,
-  Icon,
-  IconButton,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
-  Portal,
-  Text,
-  Tooltip,
-  useDisclosure,
-} from "@chakra-ui/react"
+import { Box, Icon, IconButton, Menu, MenuButton, MenuItem, MenuList, Portal, Text, Tooltip } from "@chakra-ui/react"
 import { Swap } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
-import React, { useMemo, useState } from "react"
+import React, { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { Link, useNavigate } from "react-router-dom"
 import { IPermitApplication } from "../../../../models/permit-application"
 import { useMst } from "../../../../setup/root"
 import { colors } from "../../../../styles/theme/foundations/colors"
 import { ECollaborationType, EPermitApplicationStatus } from "../../../../types/enums"
-import { SharedAvatar } from "../../../shared/user/shared-avatar"
-import { CollaboratorsSidebarDrawer } from "../../permit-application/collaborator-management/collaborators-sidebar"
-import { IKanbanColumn, IReorderEvent, KanbanBoard } from "./kanban-board"
+import { DesignatedCollaboratorAssignmentModal } from "../../permit-application/collaborator-management/designated-collaborator-assignment-modal"
+import { EReorderDirection, IKanbanColumn, IReorderEvent, KanbanBoard } from "./kanban-board"
 import { KanbanCard } from "./kanban-card"
+import { renderAssignPlusIconTrigger, ReviewAssigneesRow } from "./review-assignees-row"
 
 interface IProps {
   applications: IPermitApplication[]
   stateCounts: Record<string, number>
   columnTotals?: Record<string, number>
+  unreadCounts?: Record<string, number>
   collapsedColumns: string[]
   onToggleColumn: (columnKey: string) => void
   onShowMore?: (columnKey: string) => void
@@ -38,9 +26,9 @@ interface IProps {
 
 const APPLICATION_KANBAN_COLUMNS: EPermitApplicationStatus[] = [
   EPermitApplicationStatus.newlySubmitted,
+  EPermitApplicationStatus.revisionsRequested,
   EPermitApplicationStatus.resubmitted,
   EPermitApplicationStatus.inReview,
-  EPermitApplicationStatus.revisionsRequested,
   EPermitApplicationStatus.approved,
   EPermitApplicationStatus.issued,
   EPermitApplicationStatus.withdrawn,
@@ -50,6 +38,7 @@ export const ApplicationKanbanBoard = observer(function ApplicationKanbanBoard({
   applications,
   stateCounts,
   columnTotals,
+  unreadCounts,
   collapsedColumns,
   onToggleColumn,
   onShowMore,
@@ -67,9 +56,16 @@ export const ApplicationKanbanBoard = observer(function ApplicationKanbanBoard({
     [t]
   )
 
-  const itemsKey = applications.map((a) => `${a.id}:${a.status}:${a.inboxSortOrder ?? ""}`).join(",")
+  const itemsKey = applications.map((a) => `${a.id}:${a.status}:${a.inboxSortOrder ?? ""}:${a.isViewed}`).join(",")
   const items = useMemo(
-    () => applications.map((a) => ({ ...a, id: a.id, columnKey: a.status, sortOrder: a.inboxSortOrder })),
+    () =>
+      applications.map((a) => ({
+        ...a,
+        id: a.id,
+        columnKey: a.status,
+        sortOrder: a.inboxSortOrder,
+        isUnread: !a.isViewed,
+      })),
     [itemsKey]
   )
 
@@ -79,14 +75,24 @@ export const ApplicationKanbanBoard = observer(function ApplicationKanbanBoard({
       items={items}
       stateCounts={stateCounts}
       columnTotals={columnTotals}
+      unreadCounts={unreadCounts}
+      emptyColumnMessage={t("submissionInbox.noFilteredResultsWithStatus")}
       collapsedColumns={collapsedColumns}
       onToggleColumn={onToggleColumn}
       onShowMore={onShowMore}
       onReorder={onReorder}
-      renderCard={(item) => {
+      renderCard={(item, context) => {
         const application = applications.find((a) => a.id === item.id)
         if (!application) return null
-        return <ApplicationKanbanCard key={application.id} application={application} />
+        return (
+          <ApplicationKanbanCard
+            key={application.id}
+            application={application}
+            isFirst={context.isFirst}
+            isLast={context.isLast}
+            onMove={context.onMove}
+          />
+        )
       }}
     />
   )
@@ -102,59 +108,23 @@ const SANDBOX_STRIPE_BG = `repeating-linear-gradient(
 
 const ApplicationKanbanCard = observer(function ApplicationKanbanCard({
   application,
+  isFirst,
+  isLast,
+  onMove,
 }: {
   application: IPermitApplication
+  isFirst?: boolean
+  isLast?: boolean
+  onMove?: (direction: EReorderDirection) => void
 }) {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { permitApplicationStore } = useMst()
   const isSandbox = !!application.sandbox
   const isUnread = !application.isViewed
-  const { isOpen: isSidebarOpen, onOpen: onSidebarOpen, onClose: onSidebarClose } = useDisclosure()
-  const [isLoadingSidebar, setIsLoadingSidebar] = useState(false)
 
-  const designatedReviewer = application.designatedReviewer
-  const designatedReviewerUser = designatedReviewer?.collaborator?.user
-
-  const blockAssignees = application.getCollaborationAssignees(ECollaborationType.review)
-  const seenUserIds = new Set(designatedReviewerUser ? [designatedReviewerUser.id] : [])
-  const uniqueAssigneeUsers: { name: string; id: string; role: string }[] = []
-  for (const collab of blockAssignees) {
-    const user = collab.collaborator?.user
-    if (user && !seenUserIds.has(user.id)) {
-      seenUserIds.add(user.id)
-      uniqueAssigneeUsers.push({ name: user.name, id: user.id, role: user.role })
-    }
-  }
-
-  const MAX_VISIBLE_AVATARS = 3
-  const allAvatarUsers = [
-    ...(designatedReviewerUser
-      ? [
-          {
-            name: designatedReviewerUser.name,
-            id: designatedReviewerUser.id,
-            role: designatedReviewerUser.role,
-            isDesignated: true,
-          },
-        ]
-      : []),
-    ...uniqueAssigneeUsers.map((u) => ({ ...u, isDesignated: false })),
-  ]
-  const visibleAvatars = allAvatarUsers.slice(0, MAX_VISIBLE_AVATARS)
-  const overflowCount = allAvatarUsers.length - MAX_VISIBLE_AVATARS
-
-  const handleOpenSidebar = async (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setIsLoadingSidebar(true)
-    try {
-      await permitApplicationStore.fetchPermitApplication(application.id, true)
-    } finally {
-      setIsLoadingSidebar(false)
-    }
-    onSidebarOpen()
-  }
+  const primaryAssignee = application.designatedReviewer?.collaborator?.user ?? null
+  const additionalCollaborations = application.getCollaborationAssignees(ECollaborationType.review)
 
   return (
     <KanbanCard
@@ -162,32 +132,24 @@ const ApplicationKanbanCard = observer(function ApplicationKanbanCard({
       isUnread={isUnread}
       onMarkUnread={isUnread ? undefined : () => application.markAsUnviewed()}
       statusMenu={<ChangeStatusMenu application={application} />}
-      onAssigneeClick={handleOpenSidebar}
-      isAssigneeLoading={isLoadingSidebar}
+      isFirst={isFirst}
+      isLast={isLast}
+      onMove={onMove}
       avatars={
-        <>
-          {visibleAvatars.map((user) => (
-            <SharedAvatar
-              key={user.id}
-              size="xs"
-              name={user.name}
-              role={user.role}
-              fontSize="2xs"
-              border={user.isDesignated ? "2px solid" : undefined}
-              borderColor={user.isDesignated ? "theme.blueActive" : undefined}
-            />
-          ))}
-          {overflowCount > 0 && (
-            <Avatar
-              size="xs"
-              name={`+${overflowCount}`}
-              getInitials={(name) => name}
-              bg="gray.200"
-              color="text.primary"
-              fontSize="2xs"
-            />
-          )}
-        </>
+        <ReviewAssigneesRow primaryAssignee={primaryAssignee}>
+          <DesignatedCollaboratorAssignmentModal
+            permitApplication={application}
+            collaborationType={ECollaborationType.review}
+            additionalCollaborations={additionalCollaborations}
+            onBeforeOpen={async () => {
+              await permitApplicationStore.fetchPermitApplication(application.id, true)
+            }}
+            renderTrigger={renderAssignPlusIconTrigger({
+              ariaLabel: t("permitCollaboration.sidebar.title"),
+              size: "sm",
+            })}
+          />
+        </ReviewAssigneesRow>
       }
     >
       {isSandbox && (
@@ -212,8 +174,8 @@ const ApplicationKanbanCard = observer(function ApplicationKanbanCard({
         _visited={{ color: "inherit" }}
         _active={{ color: "inherit" }}
       >
-        <Box pr={4}>
-          <Text fontWeight={700} fontSize="sm" noOfLines={2}>
+        <Box pr={8}>
+          <Text fontWeight={700} fontSize="md" noOfLines={2}>
             {application.nickname}
           </Text>
           <Text fontSize="xs" color="text.secondary" noOfLines={1}>
@@ -225,7 +187,7 @@ const ApplicationKanbanCard = observer(function ApplicationKanbanCard({
           {application.shortAddress}
         </Text>
         {application.pid && (
-          <Text fontSize="2xs" color="text.secondary">
+          <Text fontSize="xs" color="text.secondary">
             PID {application.pid}
           </Text>
         )}
@@ -258,15 +220,6 @@ const ApplicationKanbanCard = observer(function ApplicationKanbanCard({
           </Text>
         )}
       </Box>
-
-      {isSidebarOpen && (
-        <CollaboratorsSidebarDrawer
-          permitApplication={application}
-          collaborationType={ECollaborationType.review}
-          isOpen={isSidebarOpen}
-          onClose={onSidebarClose}
-        />
-      )}
     </KanbanCard>
   )
 })

@@ -378,6 +378,7 @@ export enum EPermitApplicationSocketEventTypes {
 
 export enum EJurisdictionSocketEventTypes {
   unviewedSubmissionsCountUpdated = "unviewed_submissions_count_updated",
+  unviewedProjectsCountUpdated = "unviewed_projects_count_updated",
 }
 
 export enum EEnabledElectiveFieldReason {
@@ -463,6 +464,8 @@ export enum ENotificationActionType {
   preCheckCompleted = "pre_check_completed",
   fileUploadFailed = "file_upload_failed",
   resourceReminder = "resource_reminder",
+  projectReviewCollaborationAssignment = "project_review_collaboration_assignment",
+  projectReviewCollaborationUnassignment = "project_review_collaboration_unassignment",
 }
 
 export enum ECollaboratorableType {
@@ -709,7 +712,7 @@ export enum EProjectState {
 export enum EPermitProjectInboxSortFields {
   projectNumber = "number",
   address = "full_address",
-  applications = "permit_applications_size",
+  applications = "total_permits_count",
   daysInQueue = "days_in_queue",
   assigned = "assigned",
   state = "state",
@@ -720,7 +723,7 @@ export enum EPermitApplicationInboxSortFields {
   permitType = "requirement_template_name",
   address = "full_address",
   projectNumber = "project_number",
-  daysInQueue = "enqueued_at",
+  daysInQueue = "days_in_queue",
   assigned = "review_delegatee_name",
 }
 

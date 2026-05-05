@@ -4,6 +4,11 @@ require "sidekiq/testing"
 RSpec.describe RemindReviewerJob, type: :job do
   before { Sidekiq::Testing.fake! }
 
+  it "has no unique lock so retries are not suppressed" do
+    opts = described_class.get_sidekiq_options
+    expect(opts["lock"] || opts[:lock]).to be_nil
+  end
+
   it "emails submission contacts for unviewed applications matching permit type" do
     apps_relation = double("AppsRelation")
     allow(apps_relation).to receive(:any?).and_return(true)

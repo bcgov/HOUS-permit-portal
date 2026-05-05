@@ -286,11 +286,11 @@ class NotificationService
   end
 
   def self.publish_permit_collaboration_assignment_event(permit_collaboration)
-    collaborator_user_id = permit_collaboration.collaborator.user_id
+    user = permit_collaboration.collaborator&.user
+    return unless user&.preference&.enable_in_app_collaboration_notification
 
     notification_user_hash = {
-      collaborator_user_id =>
-        permit_collaboration.collaboration_assignment_notification_data
+      user.id => permit_collaboration.collaboration_assignment_notification_data
     }
 
     NotificationPushJob.perform_async(notification_user_hash)
@@ -302,6 +302,34 @@ class NotificationService
     notification_user_hash = {
       collaborator_user_id =>
         permit_collaboration.collaboration_unassignment_notification_data
+    }
+
+    NotificationPushJob.perform_async(notification_user_hash)
+  end
+
+  def self.publish_project_collaboration_assignment_event(
+    permit_project_collaboration
+  )
+    user = permit_project_collaboration.collaborator&.user
+    return unless user&.preference&.enable_in_app_collaboration_notification
+
+    notification_user_hash = {
+      user.id =>
+        permit_project_collaboration.collaboration_assignment_notification_data
+    }
+
+    NotificationPushJob.perform_async(notification_user_hash)
+  end
+
+  def self.publish_project_collaboration_unassignment_event(
+    permit_project_collaboration
+  )
+    user = permit_project_collaboration.collaborator&.user
+    return unless user&.preference&.enable_in_app_collaboration_notification
+
+    notification_user_hash = {
+      user.id =>
+        permit_project_collaboration.collaboration_unassignment_notification_data
     }
 
     NotificationPushJob.perform_async(notification_user_hash)

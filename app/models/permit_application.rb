@@ -36,7 +36,6 @@ class PermitApplication < ApplicationRecord
   belongs_to :permit_type
   belongs_to :activity
   belongs_to :template_version
-  belongs_to :sandbox, optional: true
   belongs_to :permit_project, optional: true, touch: true
 
   has_one :requirement_template, through: :template_version
@@ -55,9 +54,22 @@ class PermitApplication < ApplicationRecord
 
   scope :submitted, -> { joins(:submission_versions).distinct }
 
-  scope :sandboxed, -> { where.not(sandbox_id: nil) }
-  scope :live, -> { where(sandbox_id: nil) }
-  scope :for_sandbox, ->(sandbox) { where(sandbox_id: sandbox&.id) }
+  scope :sandboxed,
+        -> do
+          joins(:permit_project).where.not(permit_projects: { sandbox_id: nil })
+        end
+  scope :live,
+        -> do
+          joins(:permit_project).where(permit_projects: { sandbox_id: nil })
+        end
+  scope :for_sandbox,
+        ->(sandbox) do
+          joins(:permit_project).where(
+            permit_projects: {
+              sandbox_id: sandbox&.id
+            }
+          )
+        end
 
   # Custom validation
 
@@ -65,9 +77,7 @@ class PermitApplication < ApplicationRecord
   validate :jurisdiction_has_matching_submission_contact
   validates :number, presence: true
   validates :reference_number, length: { maximum: 300 }, allow_nil: true
-  validate :sandbox_belongs_to_jurisdiction
   validate :template_version_of_live_template
-  validate :submitter_cannot_be_jurisdiction_staff_without_sandbox
   validate :submission_versions_match_status
 
   delegate :code, :name, to: :permit_type, prefix: true
@@ -87,9 +97,6 @@ class PermitApplication < ApplicationRecord
                if: :status_changed_to_intake?
   after_commit :mark_permit_project_as_unviewed, if: :status_changed_to_intake?
   after_commit :enqueue_permit_project_if_draft, if: :status_changed_to_intake?
-  after_commit :auto_assign_project_review_delegatee,
-               if: :status_changed_to_intake?
-
   scope :with_submitter_role,
         -> { joins(:submitter).where(users: { role: "submitter" }) }
 
@@ -271,7 +278,8 @@ class PermitApplication < ApplicationRecord
       project_number: permit_project&.number,
       submission_delegatee_id: submission_delegatee&.id,
       discarded: discarded?,
-      enqueued_at: enqueued_at
+      queue_time_seconds: queue_time_seconds,
+      queue_clock_started_at: queue_clock_started_at&.to_i
     }
   end
 
@@ -444,8 +452,14 @@ class PermitApplication < ApplicationRecord
     FrontendUrlHelper.frontend_url("/permit-applications/#{id}")
   end
 
+  def days_in_queue
+    seconds = queue_time_seconds || 0
+    seconds +=
+      (Time.current - queue_clock_started_at).to_i if queue_clock_started_at
+    (seconds / 86400.0).floor
+  end
+
   def days_ago_submitted
-    # Calculate the difference in days between the current date and the submitted_at date
     (Date.current - submitted_at.to_date).to_i
   end
 
@@ -492,7 +506,7 @@ class PermitApplication < ApplicationRecord
   end
 
   def send_submitted_webhook
-    return unless intake?
+    return unless submitted?
 
     jurisdiction
       .active_external_api_keys
@@ -651,7 +665,12 @@ class PermitApplication < ApplicationRecord
       PermitApplication
         .joins(template_version: :requirement_template)
         .joins(:submitter)
-        .joins(:jurisdiction)
+        .joins(
+          "LEFT OUTER JOIN permit_projects ON permit_projects.id = permit_applications.permit_project_id"
+        )
+        .joins(
+          "INNER JOIN jurisdictions ON jurisdictions.id = COALESCE(permit_projects.jurisdiction_id, permit_applications.jurisdiction_id)"
+        )
         .joins(
           "LEFT JOIN (#{sv_min.to_sql}) sv_min ON sv_min.permit_application_id = permit_applications.id"
         )
@@ -867,29 +886,6 @@ class PermitApplication < ApplicationRecord
     permit_project&.enqueue! if permit_project&.draft?
   end
 
-  def auto_assign_project_review_delegatee
-    return unless permit_project&.review_delegatee.present?
-    return unless SiteConfiguration.allow_designated_reviewer?
-    return unless jurisdiction&.allow_designated_reviewer
-
-    permit_collaborations
-      .kept
-      .where(collaborator_type: :delegatee, collaboration_type: :review)
-      .discard_all
-
-    collab =
-      permit_collaborations.create!(
-        collaborator_id: permit_project.review_delegatee_id,
-        collaborator_type: :delegatee,
-        collaboration_type: :review
-      )
-    NotificationService.publish_permit_collaboration_assignment_event(collab)
-  rescue => e
-    Rails.logger.warn(
-      "Failed to auto-assign project review delegatee for PA #{id}: #{e.message}"
-    )
-  end
-
   def jurisdiction_or_permit_project_present
     if jurisdiction.nil? && permit_project.nil?
       errors.add(
@@ -931,20 +927,6 @@ class PermitApplication < ApplicationRecord
     end
   end
 
-  def sandbox_belongs_to_jurisdiction
-    return unless sandbox
-    return unless jurisdiction
-
-    unless jurisdiction.sandboxes.include?(sandbox)
-      errors.add(
-        :sandbox,
-        I18n.t(
-          "activerecord.errors.models.permit_application.attributes.sandbox.incorrect_jurisdiction"
-        )
-      )
-    end
-  end
-
   def template_version_of_live_template
     return unless template_version.present?
 
@@ -956,18 +938,6 @@ class PermitApplication < ApplicationRecord
         )
       )
     end
-  end
-
-  def submitter_cannot_be_jurisdiction_staff_without_sandbox
-    return unless submitter&.jurisdiction_staff?
-    return if sandbox_id.present?
-
-    errors.add(
-      :submitter,
-      I18n.t(
-        "activerecord.errors.models.permit_application.attributes.submitter.review_staff_requires_sandbox"
-      )
-    )
   end
 
   def submission_versions_match_status

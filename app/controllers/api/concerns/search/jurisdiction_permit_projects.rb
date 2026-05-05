@@ -29,7 +29,7 @@ module Api::Concerns::Search::JurisdictionPermitProjects
       includes: [
         :owner,
         :jurisdiction,
-        { review_delegatee: :user },
+        { permit_project_collaborations: { collaborator: :user } },
         {
           permit_applications: {
             permit_collaborations: {
@@ -40,6 +40,9 @@ module Api::Concerns::Search::JurisdictionPermitProjects
       ],
       load: false
     }
+
+    body_opts = jurisdiction_permit_project_body_options
+    search_conditions[:body_options] = body_opts if body_opts.present?
 
     @jurisdiction_permit_project_search =
       PermitProject.search(
@@ -53,7 +56,7 @@ module Api::Concerns::Search::JurisdictionPermitProjects
         .includes(
           :owner,
           :jurisdiction,
-          { review_delegatee: :user },
+          { permit_project_collaborations: { collaborator: :user } },
           permit_applications: {
             permit_collaborations: {
               collaborator: :user
@@ -62,12 +65,15 @@ module Api::Concerns::Search::JurisdictionPermitProjects
         )
         .where(id: ids)
 
+    unread_state_counts = jurisdiction_unread_state_counts
     @jurisdiction_permit_projects = loaded.sort_by { |p| ids.index(p.id) }
     @jurisdiction_permit_project_meta = {
       total_pages: @jurisdiction_permit_project_search.total_pages,
       current_page: @jurisdiction_permit_project_search.current_page,
       total_count: @jurisdiction_permit_project_search.total_count,
-      state_counts: jurisdiction_state_counts
+      state_counts: jurisdiction_state_counts,
+      unread_count: unread_state_counts.values.sum,
+      unread_state_counts: unread_state_counts
     }
   end
 
@@ -77,31 +83,34 @@ module Api::Concerns::Search::JurisdictionPermitProjects
     query = jurisdiction_permit_project_query
     order = jurisdiction_permit_project_order
 
-    user_statuses =
+    user_states =
       (
-        jurisdiction_permit_project_search_params.dig(:filters, :status) || []
+        jurisdiction_permit_project_search_params.dig(:filters, :state) || []
       ).map(&:to_s)
 
     all_ids = []
     column_totals = {}
 
     PermitProject.kanban_states.each do |state|
-      if user_statuses.present? && user_statuses.exclude?(state)
+      if user_states.present? && user_states.exclude?(state)
         column_totals[state] = 0
         next
       end
 
       where = jurisdiction_permit_project_where_clause(state_filter: state)
-      search =
-        PermitProject.search(
-          query,
-          order: order,
-          match: :word_middle,
-          where: where,
-          per_page: per_column,
-          page: 1,
-          load: false
-        )
+      kanban_conditions = {
+        order: order,
+        match: :word_middle,
+        where: where,
+        per_page: per_column,
+        page: 1,
+        load: false
+      }
+
+      body_opts = jurisdiction_permit_project_body_options
+      kanban_conditions[:body_options] = body_opts if body_opts.present?
+
+      search = PermitProject.search(query, **kanban_conditions)
       ids = search.hits.map { |h| h["_id"] }
       all_ids.concat(ids)
       column_totals[state] = search.total_count
@@ -113,7 +122,7 @@ module Api::Concerns::Search::JurisdictionPermitProjects
         .includes(
           :owner,
           :jurisdiction,
-          { review_delegatee: :user },
+          { permit_project_collaborations: { collaborator: :user } },
           permit_applications: {
             permit_collaborations: {
               collaborator: :user
@@ -122,29 +131,75 @@ module Api::Concerns::Search::JurisdictionPermitProjects
         )
         .where(id: all_ids)
 
+    unread_state_counts = jurisdiction_unread_state_counts
     @jurisdiction_permit_projects = loaded.sort_by { |p| all_ids.index(p.id) }
     @jurisdiction_permit_project_meta = {
       total_pages: 1,
       current_page: 1,
       total_count: all_ids.length,
       state_counts: jurisdiction_state_counts,
-      column_totals: column_totals
+      column_totals: column_totals,
+      unread_count: unread_state_counts.values.sum,
+      unread_state_counts: unread_state_counts
     }
   end
 
+  QUEUE_CLOCK_SCRIPT =
+    "long total = doc['queue_time_seconds'].value; " \
+      "if (doc['queue_clock_started_at'].size() > 0) { " \
+      "total += params.now_seconds - doc['queue_clock_started_at'].value } " \
+      "return total"
+
   private
 
+  # Unread (viewed_at nil) projects by state across the whole jurisdiction,
+  # ignoring current filters/query so badges reflect the full jurisdiction-wide
+  # unread count.
+  def jurisdiction_unread_state_counts
+    where = {
+      jurisdiction_id: @jurisdiction.id,
+      discarded: false,
+      state: {
+        not: "draft"
+      },
+      viewed_at: nil
+    }
+    where[:sandbox_id] = current_sandbox&.id unless current_user.super_admin?
+
+    PermitProject.search(
+      "*",
+      where: where,
+      aggs: [:state],
+      body_options: {
+        size: 0
+      }
+    ).aggs[
+      "state"
+    ][
+      "buckets"
+    ].each_with_object({}) do |bucket, hash|
+      next if bucket["key"] == "draft"
+      hash[bucket["key"]] = bucket["doc_count"]
+    end
+  rescue => e
+    Rails.logger.warn("Failed to compute unread state counts: #{e.message}")
+    {}
+  end
+
   def jurisdiction_state_counts
+    where = {
+      jurisdiction_id: @jurisdiction.id,
+      discarded: false,
+      state: {
+        not: "draft"
+      }
+    }
+    where[:sandbox_id] = current_sandbox&.id unless current_user.super_admin?
+
     agg_search =
       PermitProject.search(
         "*",
-        where: {
-          jurisdiction_id: @jurisdiction.id,
-          discarded: false,
-          state: {
-            not: "draft"
-          }
-        },
+        where: where,
         aggs: [:state],
         body_options: {
           size: 0
@@ -168,7 +223,7 @@ module Api::Concerns::Search::JurisdictionPermitProjects
       :per_column,
       filters: [
         { requirement_template_ids: [] },
-        { status: [] },
+        { state: [] },
         :unread,
         :meeting_request,
         { assigned: [] },
@@ -183,11 +238,61 @@ module Api::Concerns::Search::JurisdictionPermitProjects
   end
 
   def jurisdiction_permit_project_order
-    if (sort = jurisdiction_permit_project_search_params[:sort])
-      { sort[:field] => { order: sort[:direction], unmapped_type: "long" } }
+    sort = jurisdiction_permit_project_search_params[:sort]
+    return { created_at: { order: :desc, unmapped_type: "long" } } unless sort
+
+    if sort[:field] == "days_in_queue"
+      nil
     else
-      { created_at: { order: :desc, unmapped_type: "long" } }
+      { sort[:field] => { order: sort[:direction], unmapped_type: "long" } }
     end
+  end
+
+  def jurisdiction_permit_project_body_options
+    opts = {}
+    filters =
+      (jurisdiction_permit_project_search_params[:filters] || {}).deep_dup
+
+    days_in_queue = filters[:days_in_queue]
+    if days_in_queue.present? && days_in_queue[:days].present?
+      days = days_in_queue[:days].to_i
+      threshold_seconds = days * 86_400
+      comparator = days_in_queue[:operator] == "gte" ? ">=" : "<"
+
+      opts[:post_filter] = {
+        script: {
+          script: {
+            source: QUEUE_CLOCK_SCRIPT + " #{comparator} params.threshold",
+            params: {
+              now_seconds: Time.current.to_i,
+              threshold: threshold_seconds
+            }
+          }
+        }
+      }
+    end
+
+    sort = jurisdiction_permit_project_search_params[:sort]
+    if sort.present? && sort[:field] == "days_in_queue"
+      direction =
+        %w[asc desc].include?(sort[:direction]) ? sort[:direction] : "desc"
+      opts[:sort] = [
+        {
+          _script: {
+            type: "number",
+            script: {
+              source: QUEUE_CLOCK_SCRIPT,
+              params: {
+                now_seconds: Time.current.to_i
+              }
+            },
+            order: direction
+          }
+        }
+      ]
+    end
+
+    opts
   end
 
   def jurisdiction_permit_project_where_clause(state_filter: nil)
@@ -198,19 +303,17 @@ module Api::Concerns::Search::JurisdictionPermitProjects
     and_conditions << { jurisdiction_id: @jurisdiction.id }
     and_conditions << { discarded: false }
 
-    statuses = search_filters.delete(:status)
+    states = search_filters.delete(:state)
 
     if state_filter
       and_conditions << { state: state_filter }
     else
-      and_conditions << {
-        state: statuses.present? ? statuses : { not: "draft" }
-      }
+      and_conditions << { state: states.present? ? states : { not: "draft" } }
     end
 
-    # if !current_user.super_admin?
-    #   and_conditions << { sandbox_id: current_sandbox&.id }
-    # end
+    unless current_user.super_admin?
+      and_conditions << { sandbox_id: current_sandbox&.id }
+    end
 
     requirement_template_ids = search_filters.delete(:requirement_template_ids)
     if requirement_template_ids.present?
@@ -224,16 +327,7 @@ module Api::Concerns::Search::JurisdictionPermitProjects
       and_conditions << { _not: { viewed_at: nil } }
     end
 
-    days_in_queue = search_filters.delete(:days_in_queue)
-    if days_in_queue.present? && days_in_queue[:days].present?
-      days = days_in_queue[:days].to_i
-      cutoff = days.days.ago.beginning_of_day
-      if days_in_queue[:operator] == "gte"
-        and_conditions << { enqueued_at: { lte: cutoff } }
-      elsif days_in_queue[:operator] == "lt"
-        and_conditions << { enqueued_at: { gt: cutoff } }
-      end
-    end
+    search_filters.delete(:days_in_queue)
 
     # ### SUBMISSION INDEX STUB FEATURE - meeting_request
 

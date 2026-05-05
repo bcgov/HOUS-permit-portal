@@ -3,6 +3,7 @@ class SupportingDocument < FileUploadAttachment
   belongs_to :submission_version, optional: true
 
   include FileUploader.Attachment(:file)
+  prepend FilenamePreservingFileUrl
 
   def attached_to
     permit_application
@@ -71,6 +72,10 @@ class SupportingDocument < FileUploadAttachment
     end
   end
 
+  def file_name
+    generated_document_filename || super
+  end
+
   def parse_signature(signer)
     {
       name:
@@ -94,6 +99,8 @@ class SupportingDocument < FileUploadAttachment
 
   def standardized_filename
     return "FILE REMOVED" unless file_available?
+
+    return generated_document_filename if generated_document_filename.present?
 
     name =
       "#{permit_application.number}_#{data_key.split("|").last.gsub("_file", "")}"
@@ -144,5 +151,35 @@ class SupportingDocument < FileUploadAttachment
         "#{disposition}; filename=\"#{standardized_filename}\"",
       **options
     )
+  end
+
+  private
+
+  def generated_document_filename
+    return unless STATIC_DOCUMENT_DATA_KEYS.include?(data_key)
+
+    file_namer =
+      PermitApplicationGeneratedFileNamer.new(
+        permit_application,
+        date: generated_document_date
+      )
+
+    if data_key == APPLICATION_PDF_DATA_KEY
+      file_namer.permit_application_pdf(
+        version_number: generated_document_version_number
+      )
+    elsif data_key == CHECKLIST_PDF_DATA_KEY
+      file_namer.step_code_checklist_pdf(
+        version_number: generated_document_version_number
+      )
+    end
+  end
+
+  def generated_document_date
+    submission_version&.created_at || created_at || Time.zone.today
+  end
+
+  def generated_document_version_number
+    submission_version&.version_number || 1
   end
 end
