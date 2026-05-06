@@ -549,7 +549,7 @@ export const RequirementForm = observer(
           setIsCollapsedAll={setIsCollapsedAll}
           renderSaveButton={renderSaveButton}
         />
-        {isOpen && (
+        {open && (
           <PermitApplicationSubmitModal
             permitApplication={permitApplication}
             open={open}

@@ -87,7 +87,7 @@ export const NotificationsPopover: React.FC<INotificationsPopoverProps> = observ
 
   return (
     <Popover.Root
-      open={open}
+      open={isOpen}
       onOpenChange={(e) => {
         if (e.open) {
           handleOpen()
@@ -102,12 +102,12 @@ export const NotificationsPopover: React.FC<INotificationsPopoverProps> = observ
             {anyUnread ? <BellRinging size={24} /> : <Bell size={24} />}
           </IconButton>
           {anyUnread && (
-            <Badge
+            <Box
               position="absolute"
               top={0}
               right={0}
               bg="error"
-              borderRadius="50%"
+              borderRadius="full"
               h={3}
               w={3}
               border="1px solid"
@@ -118,10 +118,10 @@ export const NotificationsPopover: React.FC<INotificationsPopoverProps> = observ
       </Popover.Trigger>
       <Portal>
         <Popover.Positioner>
-          <Popover.Content color="black" w={500}>
+          <Popover.Content color="black" w={500} p={4}>
             <Popover.Arrow />
             <Popover.CloseTrigger mt={1} />
-            <Popover.Title>
+            <Popover.Title mb={4}>
               <Flex gap={4}>
                 <Heading as="h3" fontSize="lg" mb={0}>
                   {t("notification.title")}
@@ -133,7 +133,7 @@ export const NotificationsPopover: React.FC<INotificationsPopoverProps> = observ
                 )}
               </Flex>
             </Popover.Title>
-            <Popover.Body p={4} maxH="50vh" overflow="auto">
+            <Popover.Body p={0} maxH="50vh" overflow="auto">
               <Flex direction="column" gap={4}>
                 {R.isEmpty(notificationsToShow) ? (
                   <Text color="greys.grey01">{t("notification.noUnread")}</Text>
@@ -146,7 +146,7 @@ export const NotificationsPopover: React.FC<INotificationsPopoverProps> = observ
                 )}
               </Flex>
             </Popover.Body>
-            <Popover.Footer border={0} padding={2}>
+            <Popover.Footer border={0} p={0} pt={2}>
               <Button variant="ghost" onClick={showRead ? fetchNotifications : () => setShowRead(true)}>
                 <CaretDown />
                 {t("ui.seeMore")}

@@ -1,4 +1,4 @@
-import { Heading, HStack, Link, Separator, Text, VStack } from "@chakra-ui/react"
+import { Heading, HStack, Separator, Text, VStack } from "@chakra-ui/react"
 import { Files, Info, Steps } from "@phosphor-icons/react"
 import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -34,11 +34,9 @@ export const StepCodeLookupTool = ({ showJurisdictionOnPage = false }: IStepCode
       />
       <Text fontSize="lg" mb={10}>
         {t("home.projectReadinessTools.stepCodeLookupTool.cantFindAddress")}{" "}
-        <Link color="text.link" textDecoration="underline" asChild>
-          <RouterLink to="/jurisdictions">
-            {t("home.projectReadinessTools.stepCodeLookupTool.browseJurisdictions")}
-          </RouterLink>
-        </Link>
+        <RouterLink color="text.link" textDecoration="underline" to="/jurisdictions">
+          {t("home.projectReadinessTools.stepCodeLookupTool.browseJurisdictions")}
+        </RouterLink>
       </Text>
       {showJurisdictionOnPage && jurisdiction && !showError && (
         <VStack w="full" bg="white" p={6} borderRadius="md" align="start" gap={4}>

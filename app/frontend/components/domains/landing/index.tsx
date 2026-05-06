@@ -81,12 +81,16 @@ export const LandingScreen = observer(({}: ILandingScreenProps) => {
               {t("landing.toolsSectionTitle")}
             </Heading>
             <Text fontSize="lg">{t("landing.toolsSectionDesc1")}</Text>
-            <Button variant="primary" size="lg" alignSelf="flex-start" mt={2} asChild>
-              <RouterLink to="/project-readiness-tools">
-                {t("landing.goToTools")}
-                <CaretRight size={20} />
-              </RouterLink>
-            </Button>
+            <RouterLinkButton
+              to="/project-readiness-tools"
+              variant="primary"
+              size="lg"
+              alignSelf="flex-start"
+              mt={2}
+              rightIcon={<CaretRight size={20} />}
+            >
+              {t("landing.goToTools")}
+            </RouterLinkButton>
           </Flex>
           <Flex gap={10} alignItems="flex-start" direction={{ base: "column", md: "row" }}>
             <VStack as="section" align="flex-start" gap={4}>
@@ -178,12 +182,9 @@ export const LandingScreen = observer(({}: ILandingScreenProps) => {
             </Heading>
             <Text mb={4}>{t("landing.helpShapeBody")}</Text>
             <Flex justifyContent="space-between" alignItems="center">
-              <Button variant="primary" asChild>
-                <RouterLink to="/standardization-preview">
-                  {t("landing.reviewMaterials")}
-                  <CaretRight size={20} />
-                </RouterLink>
-              </Button>
+              <RouterLinkButton to="/standardization-preview" variant="primary" rightIcon={<CaretRight size={20} />}>
+                {t("landing.reviewMaterials")}
+              </RouterLinkButton>
             </Flex>
           </Box>
         </Container>

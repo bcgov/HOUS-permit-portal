@@ -111,7 +111,7 @@
     "build": "bundle exec vite build",
     "lint": "eslint app/frontend/**/*.ts[x]",
     "prepare": "husky install",
-    "gen:theme-typings": "chakra-ui typegen app/frontend/styles/theme/index.ts",
+    "gen:theme-typings": "chakra typegen app/frontend/styles/theme/index.ts",
     "postinstall": "npm run gen:theme-typings",
     "build:ssr": "bundle exec vite build --ssr",
     "generate-pdf": "node public/vite-ssr/ssr.js",

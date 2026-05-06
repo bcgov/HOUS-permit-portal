@@ -1,25 +1,39 @@
 "use client"
 
-import { Toaster as ChakraToaster, Portal, Spinner, Stack, Toast, createToaster } from "@chakra-ui/react"
+import { Toaster as ChakraToaster, Portal, Toast, createToaster } from "@chakra-ui/react"
+import { EFlashMessageStatus } from "../../types/enums"
+import { CustomMessageBox } from "../shared/base/custom-message-box"
 
 export const toaster = createToaster({
-  placement: "bottom-end",
+  placement: "top",
   pauseOnPageIdle: true,
 })
+
+const toastStatus = (type: string | undefined) => {
+  if (type === EFlashMessageStatus.success) return EFlashMessageStatus.success
+  if (type === EFlashMessageStatus.warning) return EFlashMessageStatus.warning
+  if (type === EFlashMessageStatus.error) return EFlashMessageStatus.error
+
+  return EFlashMessageStatus.info
+}
 
 export const Toaster = () => {
   return (
     <Portal>
       <ChakraToaster toaster={toaster} insetInline={{ mdDown: "4" }}>
         {(toast) => (
-          <Toast.Root width={{ md: "sm" }}>
-            {toast.type === "loading" ? <Spinner size="sm" color="blue.solid" /> : <Toast.Indicator />}
-            <Stack gap="1" flex="1" maxWidth="100%">
-              {toast.title && <Toast.Title>{toast.title}</Toast.Title>}
-              {toast.description && <Toast.Description>{toast.description}</Toast.Description>}
-            </Stack>
-            {toast.action && <Toast.ActionTrigger>{toast.action.label}</Toast.ActionTrigger>}
-            {toast.closable && <Toast.CloseTrigger />}
+          <Toast.Root width={{ md: "sm" }} unstyled>
+            <CustomMessageBox
+              width="full"
+              position="relative"
+              pr={toast.closable ? 10 : undefined}
+              title={toast.title}
+              description={toast.description}
+              status={toastStatus(toast.type)}
+            >
+              {toast.action && <Toast.ActionTrigger>{toast.action.label}</Toast.ActionTrigger>}
+              {toast.closable && <Toast.CloseTrigger position="absolute" top={3} right={3} />}
+            </CustomMessageBox>
           </Toast.Root>
         )}
       </ChakraToaster>

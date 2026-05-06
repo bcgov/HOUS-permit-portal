@@ -65,10 +65,10 @@ export const InboxFilter = observer(function InboxFilter({
   }, [staticOptions])
 
   useEffect(() => {
-    if (loadOptions && isOpen) {
+    if (loadOptions && open) {
       loadOptions().then((loaded) => setOptions(loaded))
     }
-  }, [isOpen])
+  }, [open])
 
   const hasSelection = isMulti
     ? Array.isArray(localValue) && localValue.length > 0
@@ -109,7 +109,7 @@ export const InboxFilter = observer(function InboxFilter({
 
   return (
     <Popover.Root
-      open={!isDisabled && isOpen}
+      open={!isDisabled && open}
       closeOnInteractOutside
       onOpenChange={(e) => {
         if (e.open) {

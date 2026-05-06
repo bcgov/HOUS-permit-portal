@@ -1,5 +1,7 @@
-import { styled } from "@chakra-ui/react"
+import { GridItemProps } from "@chakra-ui/react"
+import React from "react"
 import { GridRowHeader } from "../shared/grid/row-header"
 
-export const RowHeader = styled(GridRowHeader)
-RowHeader.defaultProps = { fontWeight: "bold", justifyContent: "start" }
+export const RowHeader = (props: GridItemProps) => {
+  return React.createElement(GridRowHeader, { fontWeight: "bold", justifyContent: "start", ...props })
+}

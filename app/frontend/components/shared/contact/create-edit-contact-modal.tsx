@@ -31,7 +31,9 @@ export type TContactFormData = {
 
 type UseDisclosureReturnType = ReturnType<typeof useDisclosure>
 
-export interface ICreateEditContactModalProps extends Pick<UseDisclosureReturnType, "isOpen" | "onClose"> {
+export interface ICreateEditContactModalProps extends Pick<UseDisclosureReturnType, "onClose"> {
+  isOpen?: boolean
+  open?: boolean
   contact?: IContact
   onCreateOrUpdate: (contact: TContactFormData) => void
   onDestroy: () => void
@@ -39,6 +41,7 @@ export interface ICreateEditContactModalProps extends Pick<UseDisclosureReturnTy
 
 export const CreateEditContactModal = ({
   isOpen,
+  open,
   onClose,
   contact,
   onCreateOrUpdate,
@@ -114,7 +117,7 @@ export const CreateEditContactModal = ({
 
   return (
     <Dialog.Root
-      open={open}
+      open={open ?? isOpen ?? false}
       size="xl"
       onOpenChange={(e) => {
         if (!e.open) {

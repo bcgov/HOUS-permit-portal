@@ -5,6 +5,7 @@ import React from "react"
 import { createRoot } from "react-dom/client"
 import { Helmet } from "react-helmet"
 import { Navigation } from "../components/domains/navigation"
+import { Toaster } from "../components/ui/toaster"
 import "../i18n/i18n"
 import { useLanguageChange } from "../i18n/use-language-change"
 import { setupReactotron } from "../setup/reactotron"
@@ -38,6 +39,7 @@ const renderApp = (rootStore) => {
           <Flex direction="column" minH="100vh">
             <Navigation />
           </Flex>
+          <Toaster />
         </Provider>
       </ChakraProvider>
     )

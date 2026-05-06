@@ -13,7 +13,7 @@ import {
 } from "@chakra-ui/react"
 import { List, X } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { LinkProps, useLocation } from "react-router-dom"
 import { useMst } from "../../../setup/root"
@@ -71,6 +71,7 @@ export const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
   const { loggedIn } = sessionStore
   const { open, onOpen, onClose, onToggle } = useDisclosure()
   const [menuOffset, setMenuOffset] = useState<string>("var(--app-navbar-height)")
+  const drawerContentRef = useRef<HTMLDivElement>(null)
 
   const handleToggle = () => {
     if (!open) {
@@ -93,7 +94,7 @@ export const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
       if (open) {
         const target = event.target as HTMLElement
         const isButton = target.closest('[aria-label="menu dropdown button"]')
-        const isDrawer = target.closest(".chakra-modal__content")
+        const isDrawer = drawerContentRef.current?.contains(target)
 
         if (!isButton && !isDrawer) {
           onClose()
@@ -230,6 +231,7 @@ export const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
           <Drawer.Backdrop mt={menuOffset} zIndex={1400} />
           <Drawer.Positioner>
             <Drawer.Content
+              ref={drawerContentRef}
               mt={menuOffset}
               maxH={`calc(100vh - ${menuOffset})`}
               zIndex={1400}

@@ -24,7 +24,7 @@ export const ContactSelect = observer(({ onChange, selectedOption, stylesToMerge
 
   const { t } = useTranslation()
   const disclosureMethods = useDisclosure()
-  const { isOpen, onOpen, onClose } = disclosureMethods
+  const { open, onOpen, onClose } = disclosureMethods
 
   const handleCreate = () => {
     onOpen()

@@ -1,27 +1,23 @@
-import { ToastPosition, useToast } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
-import React, { useEffect } from "react"
+import { useEffect } from "react"
 import { useMst } from "../../../setup/root"
-import { CustomMessageBox } from "./custom-message-box"
+import { toaster } from "../../ui/toaster"
 
 export const FlashMessage = observer(() => {
   const { uiStore } = useMst()
-  const { isVisible, status, title, description, duration, isClosable, position } = uiStore.flashMessage
-  const toast = useToast()
+  const { isVisible, status, title, description, duration, isClosable } = uiStore.flashMessage
 
   useEffect(() => {
     if (isVisible) {
-      toast({
-        title,
-        description,
-        status,
-        isClosable,
-        duration,
-        position: position as ToastPosition,
-        render: ({ description, ...rest }) => <CustomMessageBox description={description as string} {...rest} />,
+      toaster.create({
+        title: title ?? undefined,
+        description: description ?? undefined,
+        type: status === "special" ? "info" : status,
+        closable: isClosable ?? true,
+        duration: duration ?? undefined,
       })
     }
-  }, [isVisible, status, title, description])
+  }, [isVisible, status, title, description, duration, isClosable])
 
   return null
 })

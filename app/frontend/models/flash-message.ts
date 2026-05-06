@@ -1,10 +1,10 @@
-import { ToastPositionWithLogical } from "@chakra-ui/react"
 import { applySnapshot, Instance, types } from "mobx-state-tree"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
 import { EFlashMessageStatus } from "../types/enums"
 
 const DEFAULT_STATE = {}
+type FlashMessagePosition = string
 
 export const FlashMessageModel = types
   .model("FlashMessageModel")
@@ -32,7 +32,7 @@ export const FlashMessageModel = types
       description: string | null,
       duration: number = 5000,
       isClosable: boolean = true,
-      position: ToastPositionWithLogical = "top"
+      position: FlashMessagePosition = "top"
     ) {
       self.isVisible = !!description
 

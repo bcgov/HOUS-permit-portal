@@ -1,4 +1,4 @@
-import { Box, Field, HStack, Heading, Link, Separator, Text, VStack, styled } from "@chakra-ui/react"
+import { Box, BoxProps, Field, HStack, Heading, Link, Separator, Text, VStack } from "@chakra-ui/react"
 import { ArrowSquareOut } from "@phosphor-icons/react"
 import { CalendarBlank } from "@phosphor-icons/react/dist/ssr"
 import { t } from "i18next"
@@ -160,13 +160,17 @@ export const ComplianceSummary = observer(function ComplianceSummary({
   )
 })
 
-const StepBox = styled(Box)
-StepBox.defaultProps = {
-  textAlign: "center",
-  rounded: "md",
-  bg: "semantic.infoLight",
-  px: 3,
-  py: 1.5,
-  fontWeight: "bold",
-  fontSize: "lg",
+const StepBox = (props: BoxProps) => {
+  return (
+    <Box
+      textAlign="center"
+      rounded="md"
+      bg="semantic.infoLight"
+      px={3}
+      py={1.5}
+      fontWeight="bold"
+      fontSize="lg"
+      {...props}
+    />
+  )
 }

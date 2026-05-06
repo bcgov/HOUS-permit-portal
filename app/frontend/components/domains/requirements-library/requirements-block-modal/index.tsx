@@ -155,10 +155,10 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
   }
 
   useEffect(() => {
-    if (isOpen) {
+    if (open) {
       reset(getDefaultValues())
     }
-  }, [isOpen, requirementBlock])
+  }, [open, requirementBlock])
 
   return (
     <>
@@ -176,7 +176,7 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
         </Text>
       </Button>
       {/*this is so that the modal children unmount on close to reset their states*/}
-      {isOpen && (
+      {open && (
         <FormModal
           onClose={onClose}
           isOpen
