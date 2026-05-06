@@ -32,11 +32,11 @@ export const useJurisdiction = () => {
     "/jurisdictions/:jurisdictionId/api-settings",
   ]
 
-  const findMatchingPathTemplate = (pathname) => {
+  const findMatchingPathMatch = (pathname) => {
     for (let route of jursidictionRoutes) {
       const match = matchPath(route, pathname)
       if (match) {
-        return route
+        return { route, params: match.params }
       }
     }
     return null
@@ -45,15 +45,22 @@ export const useJurisdiction = () => {
   // check if this is a jurisdiction specific route
   // if it is and if the user's jurisdiction changes, navigate to the same route for the new jurisdiction
   useEffect(() => {
-    if (currentUser?.isRegionalReviewManager && currentUser?.jurisdiction?.id != jurisdictionId) {
-      const originalPath = findMatchingPathTemplate(pathname)
-      if (!originalPath) return
+    const currentUserJurisdiction = currentUser?.jurisdiction
+    const isCurrentUserJurisdiction =
+      currentUserJurisdiction?.id === jurisdictionId || currentUserJurisdiction?.slug === jurisdictionId
+
+    if (currentUser?.isRegionalReviewManager && currentUserJurisdiction && !isCurrentUserJurisdiction) {
+      const pathMatch = findMatchingPathMatch(pathname)
+      if (!pathMatch) return
 
       // Get the existing query params
       const existingQuery = window.location.search
 
       // Generate the new path
-      const path = generatePath(originalPath, { jurisdictionId: currentUser.jurisdiction.slug })
+      const path = generatePath(pathMatch.route, {
+        ...pathMatch.params,
+        jurisdictionId: currentUserJurisdiction.slug,
+      })
 
       // Append the existing query params to the new path
       const newPathWithQuery = `${path}${existingQuery}`
