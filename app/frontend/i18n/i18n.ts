@@ -1366,6 +1366,7 @@ Thank you,
             toFilter: "To date",
             empty: "No activity found",
             description: "What’s happened on this project and its permit applications.",
+            unsubmittedPermitApplication: "This application has not been submitted yet.",
           },
           permits: {
             title: "Applications",
