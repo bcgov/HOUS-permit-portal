@@ -11,8 +11,6 @@ RSpec.describe AutomatedCompliance::HistoricSite,
     let!(:permit_application) do
       create(
         :permit_application,
-        permit_type: requirement_template.permit_type,
-        activity: requirement_template.activity,
         pid: "000561444",
         full_address: "1275 ST. DAVID ST, VICTORIA, BC, V8S 4Z1",
         template_version: requirement_template.published_template_version
@@ -35,8 +33,6 @@ RSpec.describe AutomatedCompliance::HistoricSite,
     let!(:permit_application) do
       create(
         :permit_application,
-        permit_type: requirement_template.permit_type,
-        activity: requirement_template.activity,
         pid: "005706297",
         full_address: "770 BERNARD AVE, KELOWNA, BC, V1Y 6P5",
         template_version: requirement_template.published_template_version
@@ -61,8 +57,6 @@ RSpec.describe AutomatedCompliance::HistoricSite,
     let!(:permit_application) do
       create(
         :permit_application,
-        permit_type: requirement_template.permit_type,
-        activity: requirement_template.activity,
         pid: "004920414",
         full_address: "595 BURRARD ST, VANCOUVER, BC, V7X 1M4",
         template_version: requirement_template.published_template_version

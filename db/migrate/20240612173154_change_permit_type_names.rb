@@ -1,5 +1,10 @@
 class ChangePermitTypeNames < ActiveRecord::Migration[7.1]
   def change
+    unless defined?(PermitType)
+      say "PermitType class removed; skipping permit type rename"
+      return
+    end
+
     PermitType.find_by_code("low_residential")&.update(
       name: "1-4 Unit detached housing",
       description: "1-4 units: Detatched dwellings, duplexes"

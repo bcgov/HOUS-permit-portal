@@ -8,8 +8,7 @@
 #     MovieGenre.find_or_create_by!(name: genre_name)
 #   end
 
-puts "Seeding permit classifications..."
-PermitClassificationSeeder.seed
+puts "Seeding tags..."
 
 puts "Seeding jurisdictions..."
 
@@ -126,28 +125,16 @@ end
 
 User.reindex
 
-activity1 = Activity.find_by_code("new_construction")
-activity2 = Activity.find_by_code("demolition")
-
-# Create PermitType records
-permit_type1 = PermitType.find_by_code("low_residential")
-permit_type2 = PermitType.find_by_code("medium_residential")
-
 puts "Seeding contacts..."
 Jurisdiction.all.each do |j|
-  PermitType.find_each do |permit_type|
-    j
-      .permit_type_submission_contacts
-      .where(
-        email: "#{j.name.parameterize}@laterolabs.com",
-        permit_type: permit_type
-      )
-      .first_or_create!(
-        email: "#{j.name.parameterize}@laterolabs.com",
-        confirmed_at: Time.now,
-        permit_type: permit_type
-      )
-  end
+  j
+    .submission_contacts
+    .where(email: "#{j.name.parameterize}@laterolabs.com")
+    .first_or_create!(
+      email: "#{j.name.parameterize}@laterolabs.com",
+      confirmed_at: Time.now,
+      default: true
+    )
   j.update(inbox_enabled: true, show_about_page: true)
 end
 if PermitApplication.first.blank?
@@ -167,11 +154,11 @@ if PermitApplication.first.blank?
           )
         end
         jurisdiction.reload
-        if jurisdiction.permit_type_submission_contacts.blank?
-          jurisdiction.permit_type_submission_contacts.create!(
+        if jurisdiction.submission_contacts.blank?
+          jurisdiction.submission_contacts.create!(
             email: jurisdiction.contacts.first.email,
             confirmed_at: Time.now,
-            permit_type: permit_type1
+            default: true
           )
         end
       end
@@ -198,45 +185,45 @@ if PermitApplication.first.blank?
     end
   Contact.reindex
   puts "Seeding requirement templates..."
-  # Create LiveRequirementTemplate records
-  LiveRequirementTemplate.find_or_create_by!(
-    activity: activity1,
-    permit_type: permit_type1,
-    available_globally: true
+  t1 =
+    RequirementTemplate.find_or_create_by!(
+      nickname: "New Construction - Small Scale"
+    )
+  t1.tag_list.add(
+    "New construction",
+    "Small-scale/Multi-unit housing (Part 9 BCBC)",
+    "Buildings And Structures"
   )
-  LiveRequirementTemplate.find_or_create_by!(
-    activity: activity1,
-    permit_type: permit_type2,
-    available_globally: true
+  t1.save!
+
+  t2 =
+    RequirementTemplate.find_or_create_by!(
+      nickname: "New Construction - 4+ Unit"
+    )
+  t2.tag_list.add(
+    "New construction",
+    "4+ Unit housing",
+    "Buildings And Structures"
   )
-  LiveRequirementTemplate.find_or_create_by!(
-    activity: activity2,
-    permit_type: permit_type1,
-    available_globally: true
+  t2.save!
+
+  t3 =
+    RequirementTemplate.find_or_create_by!(nickname: "Demolition - Small Scale")
+  t3.tag_list.add(
+    "Demolition",
+    "Small-scale/Multi-unit housing (Part 9 BCBC)",
+    "Site Preparation"
   )
-  LiveRequirementTemplate.find_or_create_by!(
-    activity: activity2,
-    permit_type: permit_type2,
-    available_globally: true
-  )
+  t3.save!
+
+  t4 = RequirementTemplate.find_or_create_by!(nickname: "Demolition - 4+ Unit")
+  t4.tag_list.add("Demolition", "4+ Unit housing", "Site Preparation")
+  t4.save!
 
   RequirementTemplate.reindex
 
-  PermitTypeRequiredStepSeeder.seed
-
-  # Requrements from seeder are idempotent
-  # Requirments block will get created from requiremetms templates
   puts "Seeding requirements..."
-  RequirementsFromXlsxSeeder.seed
-  if Rails.env.development?
-    PermitClassification.find_by_code("medium_residential").update(
-      enabled: true
-    )
-    RequirementsFromXlsxSeeder.seed_medium
-  end
-
-  # Remove any invalid records that prevent saving of the template
-  RequirementBlock.find_each { |block| block.destroy unless block.valid? }
+  SeededRequirementTemplateService.seed!
 
   # Energy Step Code Reference Tables
   StepCode::Part9::MEUIReferencesSeeder.seed!
@@ -249,8 +236,7 @@ if PermitApplication.first.blank?
 
   # Creating Permit Applications
   puts "Seeding permit applications..."
-  published_template_versions =
-    TemplateVersion.published_for_live_requirement_templates
+  published_template_versions = TemplateVersion.published_on_kept_templates
   submitter_user = User.find_by!(omniauth_username: "submitter")
 
   north_van_streets = [
@@ -336,8 +322,6 @@ if PermitApplication.first.blank?
         nickname: nickname,
         submitter: submitter_user,
         permit_project: permit_project,
-        activity_id: template_version.activity.id,
-        permit_type_id: template_version.permit_type.id,
         template_version: template_version
       )
     end
@@ -348,8 +332,6 @@ if PermitApplication.first.blank?
       PermitApplication.create!(
         submitter: submitter_user,
         permit_project: permit_project,
-        activity_id: draft_tv.activity.id,
-        permit_type_id: draft_tv.permit_type.id,
         template_version: draft_tv,
         status: :new_draft
       )
@@ -375,43 +357,6 @@ EulaUpdater.run
 
 puts "Seeding default revision reasons..."
 RevisionReasonSeeder.seed
-
-puts "Seeding early access requirement templates..."
-
-LiveRequirementTemplate.find_each do |lrt|
-  overrides = {
-    type: EarlyAccessRequirementTemplate.name,
-    nickname: "Early access #{lrt.label}"
-  }
-  ea_template =
-    RequirementTemplateCopyService.new(
-      lrt
-    ).build_requirement_template_from_existing(overrides)
-  ea_template&.update(available_globally: true) if ea_template&.persisted?
-end
-
-# Seed some previewers for EarlyAccessRequirementTemplate instances
-# add comment for test
-puts "Seeding Early Access Invitations..."
-
-# Fetching existing EarlyAccessRequirementTemplate instances
-early_access_requirement_templates = EarlyAccessRequirementTemplate.limit(3)
-
-# Fetching existing User instances
-users = User.limit(5)
-
-# Associate some users as previewers for each template
-early_access_requirement_templates.each do |eart|
-  # Select a random subset of users to invite (between 1 and 5 users)
-  previewers = users.sample(rand(1..5))
-
-  previewers.each do |user|
-    EarlyAccessPreview.create!(
-      early_access_requirement_template: eart,
-      previewer: user
-    )
-  end
-end
 
 if Rails.env.development?
   puts "Ensuring site configuration inbox is enabled for development..."
@@ -517,8 +462,7 @@ inbox_test_visible_statuses = %i[
 
 if north_van.present?
   submitter_for_inbox_test = User.find_by(omniauth_username: "submitter")
-  published_for_inbox_test =
-    TemplateVersion.published_for_live_requirement_templates
+  published_for_inbox_test = TemplateVersion.published_on_kept_templates
 
   if submitter_for_inbox_test.present? && reviewer_user.present? &&
        published_for_inbox_test.exists?
@@ -549,8 +493,6 @@ if north_van.present?
           nickname: "Inbox test — permit #{idx + 1}",
           submitter: submitter_for_inbox_test,
           permit_project: inbox_test_project,
-          activity_id: tv.activity.id,
-          permit_type_id: tv.permit_type.id,
           template_version: tv
         )
       seed_pa_status.call(

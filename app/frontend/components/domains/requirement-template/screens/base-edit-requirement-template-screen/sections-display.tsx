@@ -68,7 +68,6 @@ const SectionDisplay = observer(
     disabledUseForBlockIds?: string[]
   }) => {
     const { requirementBlockStore } = useMst()
-    const { getIsRequirementBlockEditable } = requirementBlockStore
     const { control, watch, register, setValue } = useFormContext<IRequirementTemplateForm>()
     const { t } = useTranslation()
 
@@ -172,7 +171,7 @@ const SectionDisplay = observer(
                     requirementBlock={requirementBlock}
                     onRemove={() => removeSectionBlock(index)}
                     isCollapsedAll={isCollapsedAll}
-                    isEditable={getIsRequirementBlockEditable(requirementBlock)}
+                    isEditable={true}
                     showEditWarning
                   />
                   <BlockConditionalConfig sectionIndex={sectionIndex} blockIndex={index} />

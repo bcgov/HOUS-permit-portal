@@ -5,9 +5,10 @@ class Jurisdiction < ApplicationRecord
   include ValidateUrlAttributes
 
   BASE_INCLUDES = %i[
-    permit_type_submission_contacts
+    submission_contacts
     contacts
-    permit_type_required_steps
+    jurisdiction_step_requirements
+    part3_occupancy_required_steps
     jurisdiction_climate_zones
   ]
 
@@ -66,10 +67,10 @@ class Jurisdiction < ApplicationRecord
   has_many :template_versions,
            through: :jurisdiction_template_version_customizations
   has_many :requirement_templates, through: :template_versions
-  has_many :permit_type_submission_contacts
+  has_many :submission_contacts, dependent: :destroy
   has_many :external_api_keys, dependent: :destroy
   has_many :integration_mappings
-  has_many :permit_type_required_steps, dependent: :destroy
+  has_many :jurisdiction_step_requirements, dependent: :destroy
   has_many :part3_occupancy_required_steps, dependent: :destroy
   has_many :jurisdiction_climate_zones, dependent: :destroy
   has_many :collaborators, as: :collaboratorable, dependent: :destroy
@@ -83,8 +84,8 @@ class Jurisdiction < ApplicationRecord
   # Scopes
   scope :with_confirmed_submission_contacts,
         lambda {
-          joins(:permit_type_submission_contacts)
-            .where.not(permit_type_submission_contacts: { confirmed_at: nil })
+          joins(:submission_contacts)
+            .where.not(submission_contacts: { confirmed_at: nil })
             .distinct
         }
 
@@ -116,17 +117,18 @@ class Jurisdiction < ApplicationRecord
 
   before_save :sanitize_html_fields
 
-  after_create :create_permit_type_required_steps
+  after_create :create_default_step_requirements
 
   accepts_nested_attributes_for :contacts
-  accepts_nested_attributes_for :permit_type_submission_contacts,
+  accepts_nested_attributes_for :submission_contacts,
                                 allow_destroy: true,
                                 reject_if:
                                   proc { |attributes|
                                     attributes["email"].blank?
                                   }
 
-  accepts_nested_attributes_for :permit_type_required_steps, allow_destroy: true
+  accepts_nested_attributes_for :jurisdiction_step_requirements,
+                                allow_destroy: true
   accepts_nested_attributes_for :part3_occupancy_required_steps,
                                 allow_destroy: true
   accepts_nested_attributes_for :jurisdiction_climate_zones, allow_destroy: true
@@ -322,26 +324,15 @@ class Jurisdiction < ApplicationRecord
   end
 
   def submission_inbox_set_up?
-    # Preserve legacy behavior: if no permit types are enabled, setup is considered complete
-    return true if PermitType.enabled.empty?
-
-    permit_type_submission_contacts
-      .where.not(email: nil)
-      .where.not(confirmed_at: nil)
-      .exists?
+    submission_contacts.confirmed.exists?
   end
 
-  # Get confirmed submission contact emails for step code report sharing
   def confirmed_submission_emails
-    permit_type_submission_contacts
-      .where.not(confirmed_at: nil)
-      .pluck(:email)
-      .uniq
+    submission_contacts.confirmed.pluck(:email).uniq
   end
 
-  # Check if jurisdiction has any confirmed submission contacts
   def has_confirmed_submission_contacts?
-    permit_type_submission_contacts.where.not(confirmed_at: nil).exists?
+    submission_contacts.confirmed.exists?
   end
 
   def self.class_for_locality_type(locality_type)
@@ -356,18 +347,8 @@ class Jurisdiction < ApplicationRecord
     external_api_keys.active
   end
 
-  def enabled_permit_type_required_steps()
-    permit_type_required_steps.joins(:permit_type).where(
-      permit_classifications: {
-        enabled: true
-      }
-    )
-  end
-
-  def permit_type_required_steps_by_classification(permit_type = nil)
-    return PermitTypeRequiredStep.none unless permit_type
-
-    permit_type_required_steps.where(permit_type: permit_type)
+  def active_step_requirements
+    jurisdiction_step_requirements
   end
 
   def create_integration_mappings
@@ -402,15 +383,12 @@ class Jurisdiction < ApplicationRecord
 
   private
 
-  def create_permit_type_required_steps
-    PermitType.all.each do |permit_type|
-      permit_type_required_steps.create(
-        permit_type:,
-        energy_step_required: ENV["PART_9_MIN_ENERGY_STEP"],
-        zero_carbon_step_required: ENV["PART_9_MIN_ZERO_CARBON_STEP"],
-        default: true
-      )
-    end
+  def create_default_step_requirements
+    jurisdiction_step_requirements.create(
+      energy_step_required: ENV["PART_9_MIN_ENERGY_STEP"],
+      zero_carbon_step_required: ENV["PART_9_MIN_ZERO_CARBON_STEP"],
+      default: true
+    )
   end
 
   def sanitize_html_fields

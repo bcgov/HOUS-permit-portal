@@ -548,14 +548,12 @@ class Api::PermitApplicationsController < Api::ApplicationController
 
   def permit_application_params # params for submitters
     params.require(:permit_application).permit(
-      :activity_id,
-      :permit_type_id,
+      :template_version_id,
       :jurisdiction_id,
       :full_address,
       :nickname,
       :pin,
       :pid,
-      :first_nations,
       :permit_project_id,
       submission_data: {
       }

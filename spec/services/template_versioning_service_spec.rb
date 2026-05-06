@@ -248,13 +248,8 @@ RSpec.describe TemplateVersioningService, type: :service, search: true do
           Date.current + 15
         )
 
-        permit_type = create(:permit_type, code: :medium_residential)
         requirement_template_2 =
-          create(
-            :live_full_requirement_template,
-            permit_type: permit_type,
-            sections_count: 1
-          )
+          create(:live_full_requirement_template, sections_count: 1)
 
         TemplateVersioningService.schedule!(
           requirement_template_2,
@@ -287,6 +282,187 @@ RSpec.describe TemplateVersioningService, type: :service, search: true do
     end
   end
 
+  describe "promote_draft_to_scheduled!" do
+    let(:super_admin) { create(:user, :super_admin) }
+    let(:draft_version) do
+      TemplateVersioningService.create_draft!(requirement_template)
+    end
+
+    context "when the version date is valid" do
+      it "promotes the draft to a scheduled version" do
+        version_date = Date.tomorrow
+
+        promoted =
+          TemplateVersioningService.promote_draft_to_scheduled!(
+            draft_version,
+            version_date,
+            current_user: super_admin
+          )
+
+        expect(promoted.id).to eq(draft_version.id)
+        expect(promoted.status).to eq("scheduled")
+        expect(promoted.version_date).to eq(version_date)
+      end
+
+      it "unschedules sibling scheduled versions on or before the incoming date" do
+        earlier_scheduled =
+          TemplateVersioningService.schedule!(
+            requirement_template,
+            Date.tomorrow
+          )
+
+        TemplateVersioningService.promote_draft_to_scheduled!(
+          draft_version,
+          Date.tomorrow + 3,
+          current_user: super_admin
+        )
+
+        earlier_scheduled.reload
+        expect(earlier_scheduled.status).to eq("deprecated")
+        expect(earlier_scheduled.deprecation_reason).to eq("unscheduled")
+        expect(earlier_scheduled.deprecated_by_id).to eq(super_admin.id)
+      end
+
+      it "leaves scheduled versions with later dates untouched" do
+        later_scheduled =
+          TemplateVersioningService.schedule!(
+            requirement_template,
+            Date.tomorrow + 10
+          )
+
+        TemplateVersioningService.promote_draft_to_scheduled!(
+          draft_version,
+          Date.tomorrow,
+          current_user: super_admin
+        )
+
+        later_scheduled.reload
+        expect(later_scheduled.status).to eq("scheduled")
+      end
+    end
+
+    context "when the version date is invalid" do
+      it "raises TemplateVersionScheduleError for past dates" do
+        expect {
+          TemplateVersioningService.promote_draft_to_scheduled!(
+            draft_version,
+            Date.yesterday,
+            current_user: super_admin
+          )
+        }.to raise_error(TemplateVersionScheduleError)
+      end
+
+      it "raises TemplateVersionScheduleError for today" do
+        expect {
+          TemplateVersioningService.promote_draft_to_scheduled!(
+            draft_version,
+            Date.current,
+            current_user: super_admin
+          )
+        }.to raise_error(TemplateVersionScheduleError)
+      end
+    end
+
+    context "when the template version is not a draft" do
+      it "raises TemplateVersionDraftError" do
+        scheduled =
+          TemplateVersioningService.schedule!(
+            requirement_template,
+            Date.tomorrow
+          )
+
+        expect {
+          TemplateVersioningService.promote_draft_to_scheduled!(
+            scheduled,
+            Date.tomorrow + 5,
+            current_user: super_admin
+          )
+        }.to raise_error(
+          TemplateVersionDraftError,
+          /Can only promote a draft version/
+        )
+      end
+    end
+
+    context "skip_date_check (force publish)" do
+      around do |example|
+        original = ENV["ENABLE_TEMPLATE_FORCE_PUBLISH"]
+        ENV["ENABLE_TEMPLATE_FORCE_PUBLISH"] = env_flag
+        example.run
+      ensure
+        ENV["ENABLE_TEMPLATE_FORCE_PUBLISH"] = original
+      end
+
+      context "when ENABLE_TEMPLATE_FORCE_PUBLISH is not set" do
+        let(:env_flag) { "false" }
+
+        it "raises TemplateVersionForcePublishNowError" do
+          expect {
+            TemplateVersioningService.promote_draft_to_scheduled!(
+              draft_version,
+              nil,
+              skip_date_check: true,
+              current_user: super_admin
+            )
+          }.to raise_error(TemplateVersionForcePublishNowError)
+        end
+      end
+
+      context "when ENABLE_TEMPLATE_FORCE_PUBLISH is set" do
+        let(:env_flag) { "true" }
+
+        before do
+          allow(WebsocketBroadcaster).to receive(:push_update_to_relevant_users)
+        end
+
+        it "publishes the draft inline with today's version_date" do
+          promoted =
+            TemplateVersioningService.promote_draft_to_scheduled!(
+              draft_version,
+              nil,
+              skip_date_check: true,
+              current_user: super_admin
+            )
+
+          expect(promoted.status).to eq("published")
+          expect(promoted.version_date).to eq(Date.current)
+        end
+
+        it "deprecates any scheduled sibling with version_date on or before today via publish_version!" do
+          earlier_scheduled =
+            TemplateVersioningService.schedule!(
+              requirement_template,
+              Date.tomorrow
+            )
+          earlier_scheduled.update_columns(version_date: Date.current - 5)
+
+          TemplateVersioningService.promote_draft_to_scheduled!(
+            draft_version,
+            nil,
+            skip_date_check: true,
+            current_user: super_admin
+          )
+
+          earlier_scheduled.reload
+          expect(earlier_scheduled.status).to eq("deprecated")
+        end
+
+        it "pushes a websocket update to super admins" do
+          TemplateVersioningService.promote_draft_to_scheduled!(
+            draft_version,
+            nil,
+            skip_date_check: true,
+            current_user: super_admin
+          )
+
+          expect(WebsocketBroadcaster).to have_received(
+            :push_update_to_relevant_users
+          )
+        end
+      end
+    end
+  end
+
   context "publish_versions_publishable_now!" do
     it "publishes latest version publishable now and deprecates all older versions with correct reason" do
       expected_published_versions = []
@@ -311,13 +487,8 @@ RSpec.describe TemplateVersioningService, type: :service, search: true do
           Date.current + 15
         )
 
-        permit_type = create(:permit_type, code: :medium_residential)
         requirement_template_2 =
-          create(
-            :live_full_requirement_template,
-            permit_type: permit_type,
-            sections_count: 1
-          )
+          create(:live_full_requirement_template, sections_count: 1)
 
         expected_deprecated_versions << TemplateVersioningService.schedule!(
           requirement_template_2,
@@ -358,113 +529,6 @@ RSpec.describe TemplateVersioningService, type: :service, search: true do
         expected_scheduled_version.reload
 
         expect(expected_scheduled_version.status).to eq("scheduled")
-      end
-    end
-  end
-
-  describe ".create_or_update_published_version_for_early_access!" do
-    context "when the requirement_template is an EarlyAccessRequirementTemplate" do
-      let(:early_access_template) do
-        create(
-          :early_access_requirement_template_with_sections,
-          sections_count: 3
-        )
-      end
-
-      context "and no published version exists" do
-        it "creates a new published template version" do
-          # The calling of the service should not affect the count because it is already called in model creation
-          expect {
-            TemplateVersioningService.create_or_update_published_version_for_early_access!(
-              early_access_template
-            )
-          }.to change { early_access_template.template_versions.count }.by(0)
-
-          published_version = early_access_template.published_template_version
-          expect(published_version).not_to be_nil
-          expect(published_version.status).to eq("published")
-          expect(published_version.version_date).to eq(Date.current)
-          rendered_hash =
-            RequirementTemplateBlueprint.render_as_hash(
-              early_access_template,
-              view: :template_snapshot
-            )
-          rendered_hash["published_template_version"] = nil
-          expect(published_version.denormalized_template_json).to eq(
-            rendered_hash.deep_stringify_keys
-          )
-          expect(published_version.form_json).to eq(
-            early_access_template.to_form_json
-          )
-          expect(published_version.requirement_blocks_json).to eq(
-            TemplateVersioningService.send(
-              :form_requirement_blocks_hash,
-              early_access_template
-            )
-          )
-        end
-      end
-
-      context "and a published version already exists" do
-        before(:each) { Timecop.freeze(Time.zone.parse("2025-08-27 12:00:06")) }
-
-        after(:each) { Timecop.return }
-
-        let!(:existing_published_version) do
-          TemplateVersioningService.create_or_update_published_version_for_early_access!(
-            early_access_template
-          )
-        end
-
-        it "updates the existing published template version" do
-          # Modify the requirement_template to simulate changes
-          # For example, add a new section or modify existing ones
-          # Here, we'll assume adding a new section
-          new_section =
-            create(
-              :requirement_template_section,
-              requirement_template: early_access_template
-            )
-
-          expect {
-            TemplateVersioningService.create_or_update_published_version_for_early_access!(
-              early_access_template
-            )
-          }.not_to change { early_access_template.template_versions.count }
-
-          existing_published_version =
-            early_access_template.published_template_version
-          expect(existing_published_version.status).to eq("published")
-          expect(existing_published_version.version_date).to eq(Date.current)
-          expect(existing_published_version.denormalized_template_json).to eq(
-            RequirementTemplateBlueprint.render_as_hash(
-              early_access_template,
-              view: :template_snapshot
-            ).deep_stringify_keys
-          )
-          expect(existing_published_version.form_json).to eq(
-            early_access_template.to_form_json
-          )
-          expect(existing_published_version.requirement_blocks_json).to eq(
-            TemplateVersioningService.send(
-              :form_requirement_blocks_hash,
-              early_access_template
-            )
-          )
-        end
-      end
-    end
-
-    context "when the requirement_template is not an EarlyAccessRequirementTemplate" do
-      it "raises a TemplateVersionPublishError" do
-        expect {
-          TemplateVersioningService.create_or_update_published_version_for_early_access!(
-            requirement_template
-          )
-        }.to raise_error(
-          TemplateVersionPublishError,
-          "Cannot create early access version for a non-early access requirement template"
-        )
       end
     end
   end
