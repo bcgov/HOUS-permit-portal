@@ -5,14 +5,12 @@ class SubmissionVersion < ApplicationRecord
 
   accepts_nested_attributes_for :revision_requests, allow_destroy: true
 
-  after_commit :notify_user_application_viewed
-
   delegate :sandbox, to: :permit_application
 
   scope :sandboxed,
         -> do
-          joins(:permit_application).where.not(
-            permit_applications: {
+          joins(permit_application: :permit_project).where.not(
+            permit_projects: {
               sandbox_id: nil
             }
           )
@@ -20,8 +18,8 @@ class SubmissionVersion < ApplicationRecord
 
   scope :live,
         -> do
-          joins(:permit_application).where(
-            permit_applications: {
+          joins(permit_application: :permit_project).where(
+            permit_projects: {
               sandbox_id: nil
             }
           )
@@ -29,8 +27,8 @@ class SubmissionVersion < ApplicationRecord
 
   scope :for_sandbox,
         ->(sandbox) do
-          joins(:permit_application).where(
-            permit_applications: {
+          joins(permit_application: :permit_project).where(
+            permit_projects: {
               sandbox_id: sandbox.id
             }
           )
@@ -123,17 +121,6 @@ class SubmissionVersion < ApplicationRecord
 
       rb_id = r.requirement_json["key"][/RB([a-zA-Z0-9\-]+)/, 1]
       permissions.include?(rb_id)
-    end
-  end
-
-  def notify_user_application_viewed
-    return if new_record?
-    viewed_at_change = previous_changes.dig("viewed_at")
-    # Check if the `viewed_at` was `nil` before the change and is now not `nil`.
-    if (viewed_at_change&.first.nil? && viewed_at_change&.last.present?)
-      NotificationService.publish_application_view_event(permit_application)
-      # broadcast jurisdiction count update to review staff
-      permit_application.broadcast_jurisdiction_count_update
     end
   end
 end

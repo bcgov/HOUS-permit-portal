@@ -18,11 +18,13 @@ export const colors = {
     green: {
       100: "#F5FFF8",
     },
+    blueActive: "#0D6EFD",
   },
   background: {
     sandboxBase: "#FFC6CB",
     sandboxStripe: "rgba(0, 0, 0, 0.1)",
     blueLight: "#D8EAFD",
+    blueLightest: "#EBF8FF",
   },
   greys: {
     overlay: "rgba(150, 150, 150, 0.35)",
@@ -64,6 +66,7 @@ export const colors = {
     info: "#38598A",
     infoLight: "#DFECF9",
     warning: "#FCBA19",
+    warningDark: "#946300",
     warningLight: "#FEF2D6",
     special: "#8000FF",
     specialLight: "#F0DCFF",

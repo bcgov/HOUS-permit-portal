@@ -84,6 +84,30 @@ export function keysToCamelCase(obj) {
 }
 
 export function setQueryParam(key: string, value: string | string[]) {
+  updateQueryParam(key, value, false)
+}
+
+export function pushQueryParam(key: string, value: string | string[]) {
+  updateQueryParam(key, value, true)
+}
+
+export function pushQueryParams(entries: Record<string, string | string[]>) {
+  const searchParams = new URLSearchParams(window.location.search)
+  for (const [key, value] of Object.entries(entries)) {
+    const isEmptyArray = Array.isArray(value) && value.length === 0
+    const isEmptyString = typeof value === "string" && value.trim() === ""
+    if (!value || isEmptyArray || isEmptyString) {
+      searchParams.delete(key)
+    } else {
+      searchParams.set(key, Array.isArray(value) ? value.join(",") : value)
+    }
+  }
+  const stringParams = searchParams.toString()
+  const newUrl = `${window.location.pathname}${stringParams ? "?" + stringParams : ""}`
+  window.history.pushState({}, "", newUrl)
+}
+
+function updateQueryParam(key: string, value: string | string[], push: boolean) {
   const searchParams = new URLSearchParams(window.location.search)
   const isEmptyArray = Array.isArray(value) && value.length === 0
   const isEmptyString = typeof value === "string" && value.trim() === ""
@@ -96,7 +120,11 @@ export function setQueryParam(key: string, value: string | string[]) {
   }
   const stringParams = searchParams.toString()
   const newUrl = `${window.location.pathname}${stringParams ? "?" + stringParams : ""}`
-  window.history.replaceState({}, "", newUrl)
+  if (push) {
+    window.history.pushState({}, "", newUrl)
+  } else {
+    window.history.replaceState({}, "", newUrl)
+  }
 }
 
 export function isMultiOptionRequirement(requirementType: ERequirementType): boolean {

@@ -286,11 +286,11 @@ class NotificationService
   end
 
   def self.publish_permit_collaboration_assignment_event(permit_collaboration)
-    collaborator_user_id = permit_collaboration.collaborator.user_id
+    user = permit_collaboration.collaborator&.user
+    return unless user&.preference&.enable_in_app_collaboration_notification
 
     notification_user_hash = {
-      collaborator_user_id =>
-        permit_collaboration.collaboration_assignment_notification_data
+      user.id => permit_collaboration.collaboration_assignment_notification_data
     }
 
     NotificationPushJob.perform_async(notification_user_hash)
@@ -302,6 +302,34 @@ class NotificationService
     notification_user_hash = {
       collaborator_user_id =>
         permit_collaboration.collaboration_unassignment_notification_data
+    }
+
+    NotificationPushJob.perform_async(notification_user_hash)
+  end
+
+  def self.publish_project_collaboration_assignment_event(
+    permit_project_collaboration
+  )
+    user = permit_project_collaboration.collaborator&.user
+    return unless user&.preference&.enable_in_app_collaboration_notification
+
+    notification_user_hash = {
+      user.id =>
+        permit_project_collaboration.collaboration_assignment_notification_data
+    }
+
+    NotificationPushJob.perform_async(notification_user_hash)
+  end
+
+  def self.publish_project_collaboration_unassignment_event(
+    permit_project_collaboration
+  )
+    user = permit_project_collaboration.collaborator&.user
+    return unless user&.preference&.enable_in_app_collaboration_notification
+
+    notification_user_hash = {
+      user.id =>
+        permit_project_collaboration.collaboration_unassignment_notification_data
     }
 
     NotificationPushJob.perform_async(notification_user_hash)
@@ -482,16 +510,14 @@ class NotificationService
     end
   end
 
-  def self.publish_application_view_event(permit_application)
+  def self.publish_review_started_event(permit_application)
     notification_user_hash = {}
     notification_user_hash[
       permit_application.submitter_id
-    ] = permit_application.application_view_event_notification_data
+    ] = permit_application.review_started_event_notification_data
     preference = permit_application.submitter.preference
     if preference.enable_email_application_view_notification
-      PermitHubMailer.notify_application_viewed(
-        permit_application
-      ).deliver_later
+      PermitHubMailer.notify_review_started(permit_application).deliver_later
     end
     if preference.enable_in_app_application_view_notification
       NotificationPushJob.perform_async(notification_user_hash)

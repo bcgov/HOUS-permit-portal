@@ -131,6 +131,47 @@ RSpec.describe "Api::PermitApplications", type: :request do
     end
   end
 
+  describe "GET /api/permit_applications/:id/download_application_json" do
+    let(:reviewer) { create(:user, :reviewer, jurisdiction: jurisdiction) }
+    let(:submitted_application) do
+      create(
+        :permit_application,
+        :newly_submitted,
+        submitter: submitter,
+        template_version: template_version,
+        jurisdiction: jurisdiction
+      )
+    end
+
+    it "returns external API JSON for review staff" do
+      sign_in reviewer
+
+      get "/api/permit_applications/#{submitted_application.id}/download_application_json",
+          headers: headers
+
+      body = JSON.parse(response.body)
+
+      expect(response).to have_http_status(:ok)
+      expect(response.content_type).to include("application/json")
+      expected_filename =
+        PermitApplicationGeneratedFileNamer.new(
+          submitted_application
+        ).permit_application_json
+      expect(response.headers["Content-Disposition"]).to include(
+        expected_filename
+      )
+      expect(body["id"]).to eq(submitted_application.id)
+      expect(body).to include("submission_data")
+    end
+
+    it "forbids submitters from downloading reviewer JSON" do
+      get "/api/permit_applications/#{submitted_application.id}/download_application_json",
+          headers: headers
+
+      expect(response).to have_http_status(:forbidden)
+    end
+  end
+
   describe "PATCH /api/permit_applications/:id" do
     it "updates a draft permit application" do
       patch "/api/permit_applications/#{permit_application.id}",
@@ -474,7 +515,7 @@ RSpec.describe "Api::PermitApplications", type: :request do
              as: :json
 
       expect(response).to have_http_status(:ok)
-      expect(PermitCollaboration.exists?(permit_collaboration.id)).to be(false)
+      expect(permit_collaboration.reload.discarded?).to be(true)
     end
   end
 

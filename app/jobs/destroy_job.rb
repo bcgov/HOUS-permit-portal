@@ -1,7 +1,7 @@
 # app/jobs/destroy_job.rb
 class DestroyJob
   include Sidekiq::Worker
-  sidekiq_options queue: :default # You can change :default to a specific queue like :shrine
+  sidekiq_options queue: :default
 
   def perform(attacher_class_name, data)
     attacher_class = Object.const_get(attacher_class_name)

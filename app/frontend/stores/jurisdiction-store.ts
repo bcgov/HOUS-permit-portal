@@ -146,20 +146,29 @@ export const JurisdictionStoreModel = types
       return result
     }),
     processWebsocketChange(payload: IUserPushPayload) {
-      if (payload?.eventType === EJurisdictionSocketEventTypes.unviewedSubmissionsCountUpdated) {
-        const { jurisdictionId, sandboxId, unviewedCount } = payload.data as any
-        const currentUser = self.rootStore.userStore.currentUser
-        const currentJurisdiction = currentUser?.jurisdiction
-        const currentSandboxId = self.rootStore.sandboxStore.currentSandboxId
+      const isSubmissionsEvent = payload?.eventType === EJurisdictionSocketEventTypes.unviewedSubmissionsCountUpdated
+      const isProjectsEvent = payload?.eventType === EJurisdictionSocketEventTypes.unviewedProjectsCountUpdated
 
-        // Only update if it's for the current jurisdiction and sandbox matches
-        if (
-          currentJurisdiction?.id === jurisdictionId &&
-          sandboxId === currentSandboxId &&
-          typeof unviewedCount === "number"
-        ) {
-          currentJurisdiction.setUnviewedSubmissionsCount(unviewedCount)
-        }
+      if (!isSubmissionsEvent && !isProjectsEvent) return
+
+      const { jurisdictionId, sandboxId, unviewedCount } = payload.data as any
+      const currentUser = self.rootStore.userStore.currentUser
+      const currentJurisdiction = currentUser?.jurisdiction
+      const currentSandboxId = self.rootStore.sandboxStore.currentSandboxId
+
+      // Only update if it's for the current jurisdiction and sandbox matches
+      if (
+        currentJurisdiction?.id !== jurisdictionId ||
+        sandboxId !== currentSandboxId ||
+        typeof unviewedCount !== "number"
+      ) {
+        return
+      }
+
+      if (isSubmissionsEvent) {
+        currentJurisdiction.setUnviewedSubmissionsCount(unviewedCount)
+      } else {
+        currentJurisdiction.setUnviewedProjectsCount(unviewedCount)
       }
     },
   }))

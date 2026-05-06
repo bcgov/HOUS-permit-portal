@@ -30,6 +30,12 @@
 en:
   misc:
     removed_placeholder: "<Removed>"
+  project_audit:
+    fallback:
+      generic_change: "%{user} made a change"
+      collaborator_change: "%{user} made a change to the collaborators"
+      block_change: "%{user} made a change to %{block_name}"
+      application_change: "%{user} made a change to the application"
   activerecord:
     attributes:
       contact:
@@ -68,16 +74,23 @@ en:
           attributes:
             submitter:
               incorrect_role: "must have the submitter role"
-              review_staff_requires_sandbox: "review staff cannot submit permit applications outside of a sandbox"
             jurisdiction:
               no_contact: "is not ready to accept applications through this tool yet. Please check with your local jurisdiction."
               inbox_not_enabled: "inbox for this permit application is not enabled"
               no_jurisdiction: "must be present if not associated with a project."
             pid_or_pin: "must have a PID or PIN."
-            sandbox:
-              incorrect_jurisdiction: "must belong to the jurisdiction. Please apply to your own jurisdiction to use this sandbox."
             template_version:
               must_be_live: "must be for a live requirement template"
+        permit_project:
+          attributes:
+            owner:
+              review_staff_requires_sandbox: "review staff cannot own permit projects outside of a sandbox"
+            sandbox:
+              incorrect_jurisdiction: "must belong to the jurisdiction. Please apply to your own jurisdiction to use this sandbox."
+        permit_project_collaboration:
+          attributes:
+            permit_project:
+              only_one_review_collaborator_allowed: "can only have one review collaborator assigned at a time"
         requirement_template:
           step_code_package_required: '"Energy step code" is required to have the Design package energy step code file'
           duplicate_energy_step_code: 'Multiple "Energy step code" requirements found. Please ensure there is only one "Energy step code" requirement in the template'
@@ -158,13 +171,14 @@ en:
       notify_missing_integration_mapping: "Missing API mappings"
       notify_reviewer_application_received: "New application received: %{permit_application_number}"
       notify_block_status_ready: "Requirement block status ready"
-      notify_application_viewed: "Application update: %{permit_application_number}"
+      notify_review_started: "Your application is now under review: %{permit_application_number}"
       notify_application_revisions_requested: "Revisions requested on application %{permit_application_number}"
       remind_reviewer: "Your report on outstanding permit applications"
       remind_resource_update: "Reminder: Review your jurisdiction resources"
       permit_type_submission_contact_confirm: "Confirm submission inbox email"
       new_jurisdiction_membership: "New jurisdiction membership"
       notify_permit_collaboration: "Welcome you have been invited to Collaborate in the Building Permit Hub"
+      notify_project_review_collaboration: "You have been assigned as a review collaborator on a project"
       notify_new_or_unconfirmed_permit_collaboration: "You’re Invited to Collaborate on a Building Permit Application"
       notify_new_or_unconfirmed_preview: "You’re Invited to Preview a Building Permit Template"
       notify_preview: "You're Invited to Preview a Building Permit Template"
@@ -249,7 +263,7 @@ en:
         message: "There was an error updating the permit classification"
       destroy_error:
         title: Error
-        message: "%{error_message}"
+        message: "There was an error deleting the permit classification"
       in_use_error:
         title: Error
         message: "This permit classification is in use and cannot be deleted"
@@ -524,16 +538,16 @@ en:
         message: "%{error_message}"
       schedule_error:
         title: Error
-        message: "%{error_message}"
+        message: "There was an error scheduling the template"
       template_unschedule_error:
         title: Error unscheduling template
-        message: "%{error_message}"
+        message: "There was an error unscheduling the template"
       template_unschedule_success:
         title: ""
         message: "Template unscheduled successfully"
       force_publish_now_error:
         title: Error force publishing template
-        message: "%{error_message}"
+        message: "There was an error publishing the template"
       delete_error:
         title: Error
         message: "%{error_message}"
@@ -647,19 +661,25 @@ en:
       create_or_update_permit_block_status_error:
         title: Error
         message: "There was an error updating permit block status"
+      transition_success:
+        title: ""
+        message: "Application state updated successfully"
+      invalid_transition:
+        title: Error
+        message: "This state transition is not allowed"
     permit_project:
       update_success:
         title: ""
         message: "Project updated successfully"
       update_error:
         title: Error
-        message: "%{error_message}"
+        message: "Project could not be updated"
       create_success:
         title: ""
         message: "Permit project created successfully"
       create_error:
         title: Error
-        message: "%{error_message}"
+        message: "Permit project could not be created"
       pin_success:
         title: ""
         message: "Permit project pinned successfully"
@@ -669,6 +689,27 @@ en:
       unpin_error:
         title: Error
         message: "There was an error unpinning the project"
+      transition_success:
+        title: ""
+        message: "Project state updated successfully"
+      invalid_transition:
+        title: Error
+        message: "This state transition is not allowed"
+      reorder_success:
+        title: ""
+        message: "Project order updated successfully"
+      assign_project_review_collaborator_success:
+        title: ""
+        message: "Project review collaborator assigned successfully"
+      assign_project_review_collaborator_error:
+        title: Error
+        message: "Project review collaborator could not be assigned"
+      unassign_project_review_collaborator_success:
+        title: ""
+        message: "Project review collaborator removed successfully"
+      feature_not_enabled:
+        title: Error
+        message: "Designated reviewer is not enabled for this project"
     permit_collaboration:
       destroy_success:
         title: ""
@@ -779,7 +820,7 @@ en:
         message: "The external api key is not authorized to do this action"
       external_api_key_unauthorized_error:
         title: "Unauthorized"
-        message: "%{error_message}"
+        message: "The external api key is not authorized to do this action"
       not_found_error:
         title: "Error"
         message: 404 - The requested resource could not be found
@@ -963,7 +1004,7 @@ en:
       submission_notification: "Your application %{number} has been received by %{jurisdiction_name} and is pending review."
       resubmission_notification: "Your revised application %{number} has been received by %{jurisdiction_name} and is pending review."
       revisions_request_notification: "%{jurisdiction_name} has reviewed your application %{number} and has requested revisions. Please review and re-submit."
-      view_notification: "%{jurisdiction_name} has viewed your application %{number}."
+      review_started_notification: "%{jurisdiction_name} has started reviewing your application %{number}."
     permit_collaboration:
       submission_delegatee_collaboration_notification: "Collaboration request from %{author_name}. You have been assigned as a designated submitter for permit application %{number}."
       submission_assignee_collaboration_notification: "Collaboration request from %{author_name} on requirement “%{requirement_block_name}” for permit application %{number}"
@@ -973,6 +1014,9 @@ en:
       submission_assignee_collaboration_unassignment_notification: "You have been removed as a collaborator on requirement “%{requirement_block_name}” for permit application %{number}"
       review_delegatee_collaboration_unassignment_notification: "You have been removed as a designated reviewer for permit application %{number}."
       review_assignee_collaboration_unassignment_notification: "You have been removed as a review collaborator on requirement “%{requirement_block_name}” for permit application %{number}"
+    permit_project_collaboration:
+      assignment_notification: "You have been assigned as a review collaborator on project %{project_number}."
+      unassignment_notification: "You have been removed as a review collaborator on project %{project_number}."
     step_code:
       report_generated: "Your step code report is ready to download"
     pre_check:

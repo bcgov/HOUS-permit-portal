@@ -18,11 +18,12 @@ class Jurisdiction::UserInviter
       selected_role = user_params[:role].to_s
       next unless inviter.invitable_roles.include?(selected_role)
 
-      user = find_existing_invited_user(user_params[:email])
+      user = find_existing_invited_user(user_params[:email], selected_role)
       jurisdiction_id =
         user_params.delete(:jurisdiction_id) || inviter.jurisdictions.pluck(:id)
 
       next unless inviter_authorized_for_jurisdiction?(jurisdiction_id)
+
       begin
         if should_promote_to_regional_rm?(user, selected_role, jurisdiction_id)
           promote_to_regional_rm(user, jurisdiction_id)
@@ -32,8 +33,12 @@ class Jurisdiction::UserInviter
         else
           handle_reinvitation_or_invitation(user, user_params, jurisdiction_id)
         end
-      rescue StandardError
-        results[:failed] << { email: user_params[:email] }
+      rescue StandardError => e
+        Rails.logger.error(
+          "UserInviter failed for #{user_params[:email]}: #{e.class}: #{e.message}"
+        )
+        Rails.logger.error(e.backtrace.first(10).join("\n")) if e.backtrace
+        results[:failed] << { email: user_params[:email], error: e.message }
       end
     end
   end
@@ -47,10 +52,35 @@ class Jurisdiction::UserInviter
     Array(jurisdiction_id).all? { |jid| inviter_jurisdiction_ids.include?(jid) }
   end
 
-  def find_existing_invited_user(email)
+  def find_existing_invited_user(email, selected_role)
     # Inviting submitters causes a second user to be created with the same email
     # After accepting the invite, only the non-submitter User remains
-    User.where.not(role: :submitter).find_by(email: email.strip)
+    #
+    # Devise downcases email on save (case_insensitive_keys default), so we
+    # must normalize the search term to match.
+    normalized = email.to_s.strip.downcase
+    base =
+      User.where.not(role: :submitter).where("LOWER(email) = ?", normalized)
+
+    if selected_role.to_sym == :regional_review_manager
+      # Prefer a kept RM, then a kept RRM, then any discarded RM/RRM
+      # (promote_to_regional_rm will un-discard). Do NOT fall back to a
+      # non-manager row so that "create alongside" can happen when only
+      # non-managers share this email.
+      base.kept.where(role: :review_manager).order(:created_at).first ||
+        base
+          .kept
+          .where(role: :regional_review_manager)
+          .order(:created_at)
+          .first ||
+        base
+          .discarded
+          .where(role: %i[review_manager regional_review_manager])
+          .order(:created_at)
+          .first
+    else
+      base.kept.order(:created_at).first || base.order(:created_at).first
+    end
   end
 
   def cannot_take_email?(user)
@@ -59,28 +89,31 @@ class Jurisdiction::UserInviter
 
   def should_promote_to_regional_rm?(user, selected_role, jurisdiction_id)
     selected_role.to_sym == :regional_review_manager && user.present? &&
-      !user.discarded? && user.promotable_to_regional_rm? &&
-      jurisdiction_id.present?
+      user.promotable_to_regional_rm? && jurisdiction_id.present?
   end
 
   def promote_to_regional_rm(user, jurisdiction_id)
-    # May already be RRM, in which case this method just adds new jurisdiction memberships
-    user.update(role: :regional_review_manager)
+    # May already be RRM, in which case this method just adds new jurisdiction
+    # memberships. If the user was discarded, we revive them as part of the
+    # promotion (the caller has already decided they should be promoted).
+    ActiveRecord::Base.transaction do
+      user.undiscard if user.discarded?
+      user.update!(role: :regional_review_manager)
 
-    membership =
-      user
-        .jurisdiction_memberships
-        .find_or_create_by(jurisdiction_id: jurisdiction_id) do |_|
-          if user.confirmed?
-            PermitHubMailer.new_jurisdiction_membership(
-              user,
-              jurisdiction_id
-            ).deliver_later
-          end
+      Array(jurisdiction_id).each do |jid|
+        created = false
+        membership =
+          user
+            .jurisdiction_memberships
+            .find_or_create_by!(jurisdiction_id: jid) { created = true }
+        membership.touch
+        if created && user.confirmed?
+          PermitHubMailer.new_jurisdiction_membership(user, jid).deliver_later
         end
+      end
 
-    membership.touch
-    user.invite!(inviter) unless user.confirmed?
+      user.invite!(inviter) unless user.confirmed?
+    end
   end
 
   def handle_reinvitation_or_invitation(user, user_params, jurisdiction_id)

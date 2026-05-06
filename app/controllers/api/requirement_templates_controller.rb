@@ -150,23 +150,21 @@ class Api::RequirementTemplatesController < Api::ApplicationController
     ActiveRecord::Base.transaction do
       unless @requirement_template.update(requirement_template_params)
         render_error "requirement_template.schedule_error",
-                     message_opts: {
-                       error_message:
-                         @requirement_template.errors.full_messages.join(", ")
+                     log_args: {
+                       errors: @requirement_template.errors.full_messages
                      }
       end
       @requirement_template.touch
       begin
-        scheduled_template_version =
-          TemplateVersioningService.schedule!(
-            @requirement_template,
-            Date.parse(schedule_params)
-          )
+        TemplateVersioningService.schedule!(
+          @requirement_template,
+          Date.parse(schedule_params)
+        )
       rescue StandardError => e
         # If there is an error in TemplateVersioningService.schedule!, rollback the transaction
         render_error "requirement_template.schedule_error",
-                     message_opts: {
-                       error_message: e.message
+                     log_args: {
+                       errors: e.message
                      }
         raise ActiveRecord::Rollback
       end
@@ -226,8 +224,8 @@ class Api::RequirementTemplatesController < Api::ApplicationController
                      }
     else
       render_error "requirement_template.force_publish_now_error",
-                   message_opts: {
-                     error_message: error_message
+                   log_args: {
+                     errors: [error_message]
                    }
     end
   end
@@ -236,12 +234,11 @@ class Api::RequirementTemplatesController < Api::ApplicationController
     authorize @template_version, policy_class: RequirementTemplatePolicy
 
     begin
-      template_version =
-        TemplateVersioningService.unschedule!(@template_version, current_user)
+      TemplateVersioningService.unschedule!(@template_version, current_user)
     rescue StandardError => e
       render_error "requirement_template.template_unschedule_error",
-                   message_opts: {
-                     error_message: e.message
+                   log_args: {
+                     errors: e.message
                    }
     end
 

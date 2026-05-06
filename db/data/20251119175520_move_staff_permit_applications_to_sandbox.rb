@@ -2,6 +2,11 @@
 
 class MoveStaffPermitApplicationsToSandbox < ActiveRecord::Migration[7.2]
   def up
+    unless column_exists?(:permit_applications, :sandbox_id)
+      say "Skipping #{self.class.name}: permit_applications.sandbox_id is not present (already migrated or superseded by project-level sandbox)"
+      return
+    end
+
     # Find all permit applications where submitter role is not "submitter" (role != 0)
     # Join with users table to check role
     PermitApplication

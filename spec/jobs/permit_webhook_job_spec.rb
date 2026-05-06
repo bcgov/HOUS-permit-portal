@@ -4,10 +4,11 @@ require "sidekiq/testing"
 RSpec.describe PermitWebhookJob, type: :job do
   before { Sidekiq::Testing.fake! }
 
-  it "configures retry and queue" do
+  it "configures retry, queue, and has no unique lock" do
     opts = described_class.get_sidekiq_options
     expect((opts["queue"] || opts[:queue]).to_s).to eq("webhooks")
     expect(opts["retry"] || opts[:retry]).to eq(8)
+    expect(opts["lock"] || opts[:lock]).to be_nil
   end
 
   it "sends submitted/resubmitted events via PermitWebhookService" do

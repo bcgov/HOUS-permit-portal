@@ -101,6 +101,21 @@ export const NotificationStoreModel = types
               },
             ]
           : []
+      } else if (
+        [
+          ENotificationActionType.projectReviewCollaborationAssignment,
+          ENotificationActionType.projectReviewCollaborationUnassignment,
+        ].includes(notification.actionType)
+      ) {
+        const projectData = objectData as { permitProjectId: string; jurisdictionSlug: string }
+        return notification.actionType === ENotificationActionType.projectReviewCollaborationAssignment
+          ? [
+              {
+                text: t("ui.show"),
+                href: `/jurisdictions/${projectData.jurisdictionSlug}/submission-inbox/projects/${projectData.permitProjectId}/overview`,
+              },
+            ]
+          : []
       } else if (notification.actionType === ENotificationActionType.permitBlockStatusReady) {
         const collaborationData = objectData as IPermitBlockStatusReadyNotificationObjectData
         return [
@@ -127,7 +142,7 @@ export const NotificationStoreModel = types
       } else if (
         notification.actionType === ENotificationActionType.applicationSubmission ||
         notification.actionType === ENotificationActionType.applicationRevisionsRequest ||
-        notification.actionType === ENotificationActionType.applicationView
+        notification.actionType === ENotificationActionType.reviewStarted
       ) {
         return [
           {

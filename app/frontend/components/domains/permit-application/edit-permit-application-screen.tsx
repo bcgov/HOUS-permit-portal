@@ -292,7 +292,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
             flexDirection={{ base: "column", md: "row" }}
           >
             <HStack gap={4} flex={1}>
-              <PermitApplicationStatusTag permitApplication={currentPermitApplication} />
+              <PermitApplicationStatusTag status={currentPermitApplication.status} />
               <Flex direction="column" w="full">
                 <form>
                   <Tooltip label={t("permitApplication.edit.clickToWriteNickname")} placement="top-start">

@@ -40,6 +40,8 @@ export const SubmissionDownloadModal = observer(
     const { permitApplicationStore } = useMst()
     const { allSubmissionVersionCompletedSupportingDocuments, zipfileUrl, zipfileName, stepCode } = permitApplication
     const checklist = stepCode?.primaryChecklist
+    const applicationJsonUrl = `/api/permit_applications/${permitApplication.id}/download_application_json`
+    const applicationJsonName = `permit-application-${permitApplication.id}.json`
 
     const { isOpen, onOpen, onClose } = useDisclosure()
 
@@ -78,9 +80,9 @@ export const SubmissionDownloadModal = observer(
           </Button>
         )}
 
-        <Modal onClose={onClose} isOpen={isOpen} size="md" scrollBehavior="inside">
+        <Modal onClose={onClose} isOpen={isOpen} size="lg" scrollBehavior="inside">
           <ModalOverlay />
-          <ModalContent maxW={"container.md"}>
+          <ModalContent maxW={"container.lg"}>
             {!permitApplication?.isFullyLoaded ? (
               <SharedSpinner />
             ) : (
@@ -142,6 +144,20 @@ export const SubmissionDownloadModal = observer(
                     >
                       {t("permitApplication.show.downloadZip")}
                     </Button>
+                    {review && (
+                      <Button
+                        variant="secondary"
+                        as={Link}
+                        flex={1}
+                        href={applicationJsonUrl}
+                        download={applicationJsonName}
+                        textDecoration="none"
+                        leftIcon={<FileArrowDown />}
+                        _hover={{ textDecoration: "none" }}
+                      >
+                        {t("permitApplication.show.downloadJson")}
+                      </Button>
+                    )}
                     <Button variant="secondary" onClick={onClose}>
                       {t("ui.neverMind")}
                     </Button>

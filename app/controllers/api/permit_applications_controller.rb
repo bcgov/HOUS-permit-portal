@@ -1,5 +1,4 @@
 class Api::PermitApplicationsController < Api::ApplicationController
-  include Api::Concerns::Search::PermitApplications
   include StepCodeParamsConcern
 
   before_action :set_permit_application,
@@ -18,8 +17,11 @@ class Api::PermitApplicationsController < Api::ApplicationController
                   remove_collaborator_collaborations
                   create_or_update_permit_block_status
                   retrigger_submission_webhook
+                  download_application_json
                   destroy
                   restore
+                  transition_status
+                  mark_as_unviewed
                 ]
   skip_after_action :verify_policy_scoped, only: [:index]
 
@@ -29,6 +31,62 @@ class Api::PermitApplicationsController < Api::ApplicationController
     render_success @permit_application,
                    nil,
                    { blueprint_opts: { view: :jurisdiction_review_extended } }
+  end
+
+  def mark_as_unviewed
+    authorize @permit_application
+    @permit_application.mark_as_unviewed
+    render_success @permit_application,
+                   nil,
+                   { blueprint_opts: { view: :jurisdiction_review_inbox } }
+  end
+
+  def transition_status
+    authorize @permit_application, :transition_status?
+
+    target = params.require(:target_status)
+    event = PermitApplicationStatus::STATUS_EVENT_MAP[target]
+
+    unless event &&
+             @permit_application.allowed_manual_transitions.include?(
+               target.to_sym
+             )
+      return(
+        render_error("permit_application.invalid_transition", { status: 422 })
+      )
+    end
+
+    @permit_application.send(:"#{event}!")
+    @permit_application.update!(inbox_sort_order: nil)
+    render_success @permit_application,
+                   "permit_application.transition_success",
+                   {
+                     blueprint: PermitApplicationBlueprint,
+                     blueprint_opts: {
+                       view: :jurisdiction_review_inbox
+                     }
+                   }
+  rescue AASM::InvalidTransition
+    render_error("permit_application.invalid_transition", { status: 422 })
+  end
+
+  def reorder
+    authorize PermitApplication, :reorder?
+
+    scope =
+      PermitApplication.joins(:permit_project).where(
+        permit_projects: {
+          jurisdiction_id: current_user.jurisdiction_ids
+        }
+      )
+
+    items = params.require(:items)
+    items.each do |item|
+      application = scope.find(item[:id])
+      application.update!(inbox_sort_order: item[:inbox_sort_order])
+    end
+
+    render_success nil
   end
 
   def show
@@ -225,10 +283,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
   def create
     @permit_application =
       PermitApplication.build(
-        permit_application_params.to_h.merge(
-          submitter: current_user,
-          sandbox: current_sandbox
-        )
+        permit_application_params.to_h.merge(submitter: current_user)
       )
     authorize @permit_application
     if @permit_application.save
@@ -359,7 +414,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
         collaboration_type: params.require(:collaboration_type)
       )
 
-    if collaborations_to_remove.destroy_all
+    if collaborations_to_remove.discard_all
       render_success nil,
                      "permit_application.remove_collaborator_collaborations_success",
                      {
@@ -406,6 +461,23 @@ class Api::PermitApplicationsController < Api::ApplicationController
     send_data csv_data, type: "text/csv"
   end
 
+  def download_application_json
+    authorize @permit_application, :download_application_json?
+
+    json_data =
+      PermitApplicationBlueprint.render_as_json(
+        @permit_application,
+        view: :external_api
+      )
+
+    send_data JSON.pretty_generate(json_data),
+              filename:
+                PermitApplicationGeneratedFileNamer.new(
+                  @permit_application
+                ).permit_application_json,
+              type: "application/json"
+  end
+
   def retrigger_submission_webhook
     authorize @permit_application, :retrigger_submission_webhook?
 
@@ -413,6 +485,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
 
     render_success nil, "permit_application.retrigger_webhook_success", {}
   rescue StandardError => e
+    Rails.logger.error "Error retriggering submission webhook: #{e.message}"
     render_error "permit_application.retrigger_webhook_error", {}, e
   end
 

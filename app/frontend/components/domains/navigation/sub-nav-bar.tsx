@@ -9,6 +9,10 @@ import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 
 export type TBreadcrumbSegment = { href: string; title: string }
 
+/** Non-final crumbs: wider than the current page label so paths read clearly; ellipsis via inner Text. */
+const BREADCRUMB_LINK_MAX_W = "min(520px, 48vw)"
+const BREADCRUMB_CURRENT_MAX_W = "300px"
+
 interface ISubNavBar extends FlexProps {
   breadCrumbContainerProps?: FlexProps
   staticBreadCrumbs?: TBreadcrumbSegment[]
@@ -88,8 +92,15 @@ const SiteBreadcrumbs = observer(function SiteBreadcrumb({ breadcrumbs }: ISiteB
   const { t } = useTranslation()
   return (
     <Breadcrumb spacing={2} separator="/">
-      <BreadcrumbItem>
-        <BreadcrumbLink as={RouterLinkButton} to="/" textTransform="capitalize" variant="link">
+      <BreadcrumbItem minW={0}>
+        <BreadcrumbLink
+          as={RouterLinkButton}
+          to="/"
+          textTransform="capitalize"
+          variant="link"
+          justifyContent="flex-start"
+          textAlign="left"
+        >
           {t("site.home")}
         </BreadcrumbLink>
       </BreadcrumbItem>
@@ -97,14 +108,26 @@ const SiteBreadcrumbs = observer(function SiteBreadcrumb({ breadcrumbs }: ISiteB
       {breadcrumbs.map((breadcrumb, index) => {
         const finalSegment = index == breadcrumbs.length - 1
         return (
-          <BreadcrumbItem key={index} maxW="300px">
+          <BreadcrumbItem key={index} maxW={"600px"} minW={0} flexShrink={1} overflow="hidden">
             {finalSegment ? (
-              <Text fontWeight="bold" isTruncated>
+              <Text fontWeight="bold" isTruncated w="100%">
                 {breadcrumb.title}
               </Text>
             ) : (
-              <BreadcrumbLink as={RouterLinkButton} to={breadcrumb.href} variant="link" isTruncated>
-                {breadcrumb.title}
+              <BreadcrumbLink
+                as={RouterLinkButton}
+                to={breadcrumb.href}
+                variant="link"
+                justifyContent="flex-start"
+                textAlign="left"
+                minW={0}
+                maxW="100%"
+                w="100%"
+                overflow="hidden"
+              >
+                <Text as="span" display="block" w="100%" isTruncated>
+                  {breadcrumb.title}
+                </Text>
               </BreadcrumbLink>
             )}
           </BreadcrumbItem>

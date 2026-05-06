@@ -17,6 +17,7 @@ import { IActivity, IPermitType } from "../../models/permit-classification"
 import { IPermitCollaboration } from "../../models/permit-collaboration"
 import { IPermitProject } from "../../models/permit-project"
 import { IPreCheck } from "../../models/pre-check"
+import { IProjectAudit } from "../../models/project-audit"
 import { IRequirementTemplate } from "../../models/requirement-template"
 import { ITemplateVersion } from "../../models/template-version"
 import { IUser } from "../../models/user"
@@ -49,11 +50,13 @@ import {
   ECollaboratorType,
   EEarlyAccessRequirementTemplateSortFields,
   EJurisdictionSortFields,
+  EPermitApplicationInboxSortFields,
   EPermitApplicationSortFields,
   EPermitBlockStatus,
   EPermitClassificationType,
   EPermitProjectSortFields,
   EPreCheckSortFields,
+  EProjectAuditSortFields,
   ERequirementLibrarySortFields,
   ERequirementTemplateSortFields,
   EStepCodeSortFields,
@@ -67,8 +70,10 @@ import {
   IJurisdictionFilters,
   IJurisdictionSearchFilters,
   IPart9ChecklistSelectOptions,
+  IPermitApplicationInboxSearchFilters,
   IPermitApplicationSearchFilters,
   IPermitProjectSearchFilters,
+  IProjectAuditSearchFilters,
   ITemplateVersionDiff,
   TAutoComplianceModuleConfigurations,
   TCreatePermitApplicationFormData,
@@ -154,6 +159,10 @@ export class Api {
 
   async viewPermitApplication(id) {
     return this.client.post<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/mark_as_viewed`)
+  }
+
+  async unviewPermitApplication(id: string) {
+    return this.client.post<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/mark_as_unviewed`)
   }
 
   async fetchLocalityTypeOptions() {
@@ -276,6 +285,27 @@ export class Api {
     return this.client.get<ApiResponse<IPermitProject>>(`/permit_projects/${id}`)
   }
 
+  async assignProjectReviewCollaborator(projectId: string, collaboratorId: string) {
+    return this.client.post<ApiResponse<IPermitProject>>(
+      `/permit_projects/${projectId}/assign_project_review_collaborator`,
+      { collaboratorId }
+    )
+  }
+
+  async unassignProjectReviewCollaborator(projectId: string, collaboratorId: string) {
+    return this.client.delete<ApiResponse<IPermitProject>>(
+      `/permit_projects/${projectId}/unassign_project_review_collaborator`,
+      { collaboratorId }
+    )
+  }
+
+  async fetchProjectAudits(
+    projectId: string,
+    params?: TSearchParams<EProjectAuditSortFields, IProjectAuditSearchFilters>
+  ) {
+    return this.client.post<ApiResponse<IProjectAudit[]>>(`/permit_projects/${projectId}/activities`, params)
+  }
+
   async fetchPinnedProjects() {
     return this.client.get<ApiResponse<IPermitProject[]>>(`/permit_projects/pinned`)
   }
@@ -306,6 +336,34 @@ export class Api {
     return this.client.delete<ApiResponse<IPermitProject[]>>(`/permit_projects/${id}/unpin`)
   }
 
+  async viewPermitProject(id: string) {
+    return this.client.post<ApiResponse<IPermitProject>>(`/permit_projects/${id}/mark_as_viewed`)
+  }
+
+  async unviewPermitProject(id: string) {
+    return this.client.post<ApiResponse<IPermitProject>>(`/permit_projects/${id}/mark_as_unviewed`)
+  }
+
+  async transitionPermitProjectState(id: string, targetState: string) {
+    return this.client.post<ApiResponse<IPermitProject>>(`/permit_projects/${id}/transition_state`, {
+      targetState,
+    })
+  }
+
+  async transitionPermitApplicationStatus(id: string, targetStatus: string) {
+    return this.client.post<IJurisdictionPermitApplicationResponse>(`/permit_applications/${id}/transition_status`, {
+      targetStatus,
+    })
+  }
+
+  async reorderPermitProjects(items: Array<{ id: string; inboxSortOrder: number }>) {
+    return this.client.patch("/permit_projects/reorder", { items })
+  }
+
+  async reorderPermitApplications(items: Array<{ id: string; inboxSortOrder: number }>) {
+    return this.client.patch("/permit_applications/reorder", { items })
+  }
+
   async fetchSubmissionCollaboratorOptions(id: string) {
     return this.client.get<IOptionResponse>(`/permit_projects/${id}/submission_collaborator_options`)
   }
@@ -319,10 +377,17 @@ export class Api {
 
   async fetchJurisdictionPermitApplications(
     jurisdictionId,
-    params?: TSearchParams<EPermitApplicationSortFields, IPermitApplicationSearchFilters>
+    params?: TSearchParams<EPermitApplicationInboxSortFields, IPermitApplicationInboxSearchFilters>
   ) {
     return this.client.post<IJurisdictionPermitApplicationResponse>(
       `/jurisdictions/${jurisdictionId}/permit_applications/search`,
+      params
+    )
+  }
+
+  async fetchJurisdictionPermitProjects(jurisdictionId: string, params?: TSearchParams<any, any>) {
+    return this.client.post<ApiResponse<IPermitProject[]>>(
+      `/jurisdictions/${jurisdictionId}/permit_projects/search`,
       params
     )
   }
